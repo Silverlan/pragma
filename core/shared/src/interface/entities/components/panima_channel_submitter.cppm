@@ -4,6 +4,7 @@
 module;
 
 #include <cinttypes>
+#include <cassert>
 
 export module pragma.shared:entities.components.panima_channel_submitter;
 

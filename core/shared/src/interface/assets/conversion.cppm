@@ -11,10 +11,9 @@ module;
 
 export module pragma.shared:assets.conversion;
 
+export import :types;
 export import pragma.filesystem;
 
-export class Model;
-export class NetworkState;
 export namespace util {
 	const std::string IMPORT_PATH = "addons/imported/";
 	const std::string CONVERT_PATH = "addons/converted/";
@@ -28,7 +27,7 @@ export namespace util {
 	DLLNETWORK void set_mounted_game_priority(const std::string &game, int32_t priority);
 
 	DLLNETWORK bool port_nif_model(NetworkState *nw, const std::string &path, std::string mdlName);
-	DLLNETWORK bool port_hl2_smd(NetworkState &nw, Model &mdl, VFilePtr &f, const std::string &animName, bool isCollisionMesh, std::vector<std::string> &outTextures);
+	DLLNETWORK bool port_hl2_smd(NetworkState &nw, pragma::Model &mdl, VFilePtr &f, const std::string &animName, bool isCollisionMesh, std::vector<std::string> &outTextures);
 	DLLNETWORK bool port_hl2_model(NetworkState *nw, const std::string &path, std::string mdlName);
 	DLLNETWORK bool port_source2_model(NetworkState *nw, const std::string &path, std::string mdlName);
 	DLLNETWORK bool port_hl2_particle(NetworkState *nw, const std::string &path);

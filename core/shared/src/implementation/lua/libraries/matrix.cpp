@@ -3,10 +3,6 @@
 
 module;
 
-
-
-#include <glm/gtx/matrix_decompose.hpp>
-#include <glm/gtx/quaternion.hpp>
 #include <Eigen/Eigenvalues>
 
 module pragma.shared;

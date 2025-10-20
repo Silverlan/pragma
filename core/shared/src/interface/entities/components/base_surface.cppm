@@ -5,16 +5,19 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <string>
+
 
 
 export module pragma.shared:entities.components.base_surface;
 
 export import :entities.components.base;
+export import pragma.materialsystem;
 
 export {
 	class ModelMesh;
-	class ModelSubMesh;
 	namespace pragma {
+		class ModelSubMesh;
 		class DLLNETWORK BaseSurfaceComponent : public BaseEntityComponent {
 		public:
 			static pragma::ComponentEventId EVENT_ON_SURFACE_PLANE_CHANGED;
@@ -40,15 +43,15 @@ export {
 			void Clear();
 
 			Vector3 ProjectToSurface(const Vector3 &pos) const;
-			ModelSubMesh *GetMesh();
-			const ModelSubMesh *GetMesh() const { return const_cast<BaseSurfaceComponent *>(this)->GetMesh(); }
+			pragma::ModelSubMesh *GetMesh();
+			const pragma::ModelSubMesh *GetMesh() const { return const_cast<BaseSurfaceComponent *>(this)->GetMesh(); }
 
 			struct DLLNETWORK MeshInfo {
 				ModelMesh *mesh;
-				ModelSubMesh *subMesh;
+				pragma::ModelSubMesh *subMesh;
 				msys::Material *material;
 			};
-			std::optional<MeshInfo> FindAndAssignMesh(const std::function<int32_t(ModelMesh &, ModelSubMesh &, msys::Material &, const std::string &)> &filter = nullptr);
+			std::optional<MeshInfo> FindAndAssignMesh(const std::function<int32_t(ModelMesh &, pragma::ModelSubMesh &, msys::Material &, const std::string &)> &filter = nullptr);
 			bool CalcLineSurfaceIntersection(const Vector3 &lineOrigin, const Vector3 &lineDir, double *outT = nullptr) const;
 
 			bool IsPointBelowSurface(const Vector3 &p) const;
@@ -57,9 +60,9 @@ export {
 			virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		protected:
 			virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
-			BaseSurfaceComponent(BaseEntity &ent);
+			BaseSurfaceComponent(pragma::ecs::BaseEntity &ent);
 			umath::Plane m_plane = {{0.f, 1.f, 0.f}, 0.f};
-			std::weak_ptr<ModelSubMesh> m_mesh = {};
+			std::weak_ptr<pragma::ModelSubMesh> m_mesh = {};
 			pragma::NetEventId m_netEvSetPlane = pragma::INVALID_NET_EVENT;
 			std::string m_kvSurfaceMaterial;
 		};

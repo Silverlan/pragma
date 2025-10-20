@@ -32,7 +32,7 @@ export namespace pragma {
 
 		bool CalcLineSurfaceIntersection(const Vector3 &lineOrigin, const Vector3 &lineDir, double *outT = nullptr, double *outU = nullptr, double *outV = nullptr, bool bCull = false) const;
 	  protected:
-		BaseLiquidSurfaceSimulationComponent(BaseEntity &ent);
+		BaseLiquidSurfaceSimulationComponent(pragma::ecs::BaseEntity &ent);
 		BaseSurfaceComponent *GetSurfaceComponent() const;
 
 		virtual std::shared_ptr<PhysWaterSurfaceSimulator> InitializeSurfaceSimulator(const Vector2 &min, const Vector2 &max, float originY);

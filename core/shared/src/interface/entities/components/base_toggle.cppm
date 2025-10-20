@@ -19,7 +19,7 @@ export namespace pragma {
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		enum class SpawnFlags : uint32_t { StartOn = SF_STARTON };
 
-		BaseToggleComponent(BaseEntity &ent);
+		BaseToggleComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		bool IsTurnedOn() const;
 		virtual void TurnOn();
@@ -35,6 +35,6 @@ export namespace pragma {
 		::util::PBoolProperty m_bTurnedOn = nullptr;
 		bool m_bStartDisabled = false;
 		pragma::NetEventId m_netEvToggleState = pragma::INVALID_NET_EVENT;
-		bool ToggleInput(std::string input, BaseEntity *activator, BaseEntity *caller, std::string data);
+		bool ToggleInput(std::string input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, std::string data);
 	};
 };

@@ -11,13 +11,12 @@ module;
 export module pragma.shared:util.resource_watcher;
 
 export import :networking.util;
+export import :types;
 export import pragma.materialsystem;
 
 #define RESOURCE_WATCHER_VERBOSE 0
 
 export {
-	class Model;
-	class NetworkState;
 	class DLLNETWORK EResourceWatcherCallbackType : public util::ExtensibleEnum {
 	public:
 		using util::ExtensibleEnum::ExtensibleEnum;
@@ -65,7 +64,7 @@ export {
 		std::recursive_mutex m_watcherMutex;
 		void OnResourceChanged(const util::Path &rootPath, const util::Path &path);
 		void ReloadMaterial(const std::string &path);
-		virtual void OnMaterialReloaded(const std::string &path, const std::unordered_set<Model *> &modelMap) {}
+		virtual void OnMaterialReloaded(const std::string &path, const std::unordered_set<pragma::Model *> &modelMap) {}
 		virtual void OnResourceChanged(const util::Path &rootPath, const util::Path &path, const std::string &ext);
 		virtual void GetWatchPaths(std::vector<std::string> &paths);
 		virtual void ReloadTexture(const std::string &path);

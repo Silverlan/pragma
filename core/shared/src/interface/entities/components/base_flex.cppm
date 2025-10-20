@@ -12,7 +12,7 @@ export import :entities.components.base;
 export import :model.animation.enums;
 
 export {
-	class Model;
+	class pragma::Model;
 	namespace pragma {
 		class DLLNETWORK BaseFlexComponent : public BaseEntityComponent, public DynamicMemberRegister {
 		public:
@@ -49,9 +49,9 @@ export {
 
 			virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 		protected:
-			void OnModelChanged(const std::shared_ptr<Model> &model);
+			void OnModelChanged(const std::shared_ptr<pragma::Model> &model);
 			virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
-			BaseFlexComponent(BaseEntity &ent);
+			BaseFlexComponent(pragma::ecs::BaseEntity &ent);
 			float m_flexControllerScale = 1.f;
 			StateFlags m_stateFlags = StateFlags::EnableFlexControllerLimits;
 		};
@@ -61,6 +61,10 @@ export {
 			pragma::animation::FlexControllerId flexControllerId;
 			float value;
 		};
+        using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseFlexComponent::StateFlags)
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::BaseFlexComponent::StateFlags> : std::true_type {};
+    }
 };

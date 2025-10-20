@@ -23,7 +23,7 @@ namespace pragma {
 	using ::operator<<;
 };
 
-IKComponent::IKComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+IKComponent::IKComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void IKComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

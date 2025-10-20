@@ -32,7 +32,7 @@ export namespace pragma {
 
 		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 	  protected:
-		BaseHealthComponent(BaseEntity &ent);
+		BaseHealthComponent(pragma::ecs::BaseEntity &ent);
 		virtual void OnTakeDamage(DamageInfo &info);
 
 		util::PUInt16Property m_health;

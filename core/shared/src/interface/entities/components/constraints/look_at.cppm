@@ -15,7 +15,7 @@ export namespace pragma {
 		enum class TrackAxis : uint8_t { X, Y, Z, NegX, NegY, NegZ, Count };
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		ConstraintLookAtComponent(BaseEntity &ent);
+		ConstraintLookAtComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		void SetTrackAxis(TrackAxis axis);

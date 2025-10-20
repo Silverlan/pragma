@@ -19,7 +19,6 @@ module;
 
 #include "pragma/logging.hpp"
 #include "pragma/lua/types/nil_type.hpp"
-#include "pragma/lua/types/udm.hpp"
 
 #include <any>
 
@@ -70,7 +69,7 @@ static std::string get_member_variable_name(const std::string &funcName)
 		return "";
 	return "m_" + get_member_name(funcName);
 }
-static std::any string_to_any(Game &game, const std::string &value, util::VarType type)
+static std::any string_to_any(pragma::Game &game, const std::string &value, util::VarType type)
 {
 	static_assert(umath::to_integral(util::VarType::Count) == 23);
 	switch(type) {
@@ -677,7 +676,7 @@ void BaseLuaBaseEntityComponent::SetupLua(const luabind::object &o) { SetLuaObje
 
 ////////////////
 
-BaseLuaBaseEntityComponent::BaseLuaBaseEntityComponent(BaseEntity &ent) : pragma::BaseEntityComponent(ent) {}
+BaseLuaBaseEntityComponent::BaseLuaBaseEntityComponent(pragma::ecs::BaseEntity &ent) : pragma::BaseEntityComponent(ent) {}
 
 void BaseLuaBaseEntityComponent::InitializeLuaObject(lua_State *l) {}
 
@@ -790,7 +789,7 @@ void BaseLuaBaseEntityComponent::InitializeMembers(const std::vector<BaseLuaBase
 	Lua::Pop(l, 1); /* 0 */
 
 	if((totalMemberFlags & MemberFlags::KeyValueBit) != MemberFlags::None) {
-		BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](const std::reference_wrapper<pragma::ComponentEvent> &evData) -> util::EventReply {
+		BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](const std::reference_wrapper<pragma::ComponentEvent> &evData) -> util::EventReply {
 			auto &kvData = static_cast<pragma::CEKeyValueData &>(evData.get());
 			auto it = m_memberNameToIndex.find(kvData.key);
 			if(it == m_memberNameToIndex.end())
@@ -1003,12 +1002,12 @@ util::EventReply BaseLuaBaseEntityComponent::HandleEvent(ComponentEventId eventI
 	return util::EventReply::Unhandled;
 }
 
-void BaseLuaBaseEntityComponent::OnAttached(BaseEntity &ent)
+void BaseLuaBaseEntityComponent::OnAttached(pragma::ecs::BaseEntity &ent)
 {
 	pragma::BaseEntityComponent::OnAttached(ent);
 	CallLuaMethod("OnAttachedToEntity");
 }
-void BaseLuaBaseEntityComponent::OnDetached(BaseEntity &ent)
+void BaseLuaBaseEntityComponent::OnDetached(pragma::ecs::BaseEntity &ent)
 {
 	pragma::BaseEntityComponent::OnDetached(ent);
 	CallLuaMethod("OnDetachedToEntity");
@@ -1120,7 +1119,7 @@ static void write_value(udm::LinkedPropertyWrapperArg udm, const std::any &value
 			if(!ident)
 				udm = "";
 			else
-				udm = std::visit([&udm](auto &val) { return BaseEntity::GetUri(val); }, *ident);
+				udm = std::visit([&udm](auto &val) { return pragma::ecs::BaseEntity::GetUri(val); }, *ident);
 			break;
 		}
 	case util::VarType::Quaternion:
@@ -1129,7 +1128,7 @@ static void write_value(udm::LinkedPropertyWrapperArg udm, const std::any &value
 	}
 }
 
-static void read_value(Game &game, udm::LinkedPropertyWrapperArg udm, std::any &value, util::VarType type)
+static void read_value(pragma::Game &game, udm::LinkedPropertyWrapperArg udm, std::any &value, util::VarType type)
 {
 	switch(type) {
 	case util::VarType::Bool:
@@ -1263,7 +1262,7 @@ static void read_value(Game &game, udm::LinkedPropertyWrapperArg udm, std::any &
 			auto val = udm.ToValue<udm::String>();
 			if(val.has_value()) {
 				pragma::EntityUComponentMemberRef ref;
-				if(BaseEntity::ParseUri(std::move(*val), ref))
+				if(pragma::ecs::BaseEntity::ParseUri(std::move(*val), ref))
 					value = pragma::EntityURef {std::move(ref)};
 			}
 			break;
@@ -1650,7 +1649,7 @@ void Lua::register_base_entity_component(luabind::module_ &modEnts)
 		  auto anyInitialValue = Lua::GetAnyValue(l, detail::member_type_to_util_type(memberType), 4);
 		  pragma::BaseLuaBaseEntityComponent::RegisterMember(o, memberName, memberType, anyInitialValue, pragma::BaseLuaBaseEntityComponent::MemberFlags::Default, luabind::newtable(l));
 	  })];
-	classDef.scope[luabind::def("RegisterNetEvent", &Game::SetupNetEvent)];
+	classDef.scope[luabind::def("RegisterNetEvent", &pragma::Game::SetupNetEvent)];
 
 	classDef.add_static_constant("MEMBER_FLAG_NONE", umath::to_integral(pragma::BaseLuaBaseEntityComponent::MemberFlags::None));
 	classDef.add_static_constant("MEMBER_FLAG_BIT_PROPERTY", umath::to_integral(pragma::BaseLuaBaseEntityComponent::MemberFlags::PropertyBit));

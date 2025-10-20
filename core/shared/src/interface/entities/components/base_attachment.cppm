@@ -5,6 +5,8 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <string>
+
 
 
 
@@ -28,17 +30,17 @@ export {
 			virtual void OnRemove() override;
 			void UpdateAttachmentOffset(bool invokeUpdateEvents = true);
 
-			AttachmentData *AttachToEntity(BaseEntity *ent, const AttachmentInfo &attInfo = {});
-			AttachmentData *AttachToBone(BaseEntity *ent, uint32_t boneID, const AttachmentInfo &attInfo = {});
-			AttachmentData *AttachToBone(BaseEntity *ent, std::string bone, const AttachmentInfo &attInfo = {});
-			AttachmentData *AttachToAttachment(BaseEntity *ent, uint32_t attachmentID, const AttachmentInfo &attInfo = {});
-			AttachmentData *AttachToAttachment(BaseEntity *ent, std::string attachment, const AttachmentInfo &attInfo = {});
+			AttachmentData *AttachToEntity(pragma::ecs::BaseEntity *ent, const AttachmentInfo &attInfo = {});
+			AttachmentData *AttachToBone(pragma::ecs::BaseEntity *ent, uint32_t boneID, const AttachmentInfo &attInfo = {});
+			AttachmentData *AttachToBone(pragma::ecs::BaseEntity *ent, std::string bone, const AttachmentInfo &attInfo = {});
+			AttachmentData *AttachToAttachment(pragma::ecs::BaseEntity *ent, uint32_t attachmentID, const AttachmentInfo &attInfo = {});
+			AttachmentData *AttachToAttachment(pragma::ecs::BaseEntity *ent, std::string attachment, const AttachmentInfo &attInfo = {});
 			virtual void SetAttachmentFlags(pragma::FAttachmentMode flags);
 			void AddAttachmentFlags(pragma::FAttachmentMode flags);
 			void RemoveAttachmentFlags(pragma::FAttachmentMode flags);
 			pragma::FAttachmentMode GetAttachmentFlags() const;
 			bool HasAttachmentFlag(pragma::FAttachmentMode flag) const;
-			BaseEntity *GetParent() const;
+			pragma::ecs::BaseEntity *GetParent() const;
 			AttachmentData *GetAttachmentData() const;
 			void UpdateAttachmentData(bool bForceReload = false);
 			void ClearAttachment();
@@ -48,10 +50,10 @@ export {
 
 			virtual void OnTick(double dt) override;
 		protected:
-			BaseAttachmentComponent(BaseEntity &ent);
+			BaseAttachmentComponent(pragma::ecs::BaseEntity &ent);
 			virtual void OnAttachmentChanged() {}
-			virtual AttachmentData *SetupAttachment(BaseEntity *ent, const AttachmentInfo &attInfo);
-			virtual void UpdateViewAttachmentOffset(BaseEntity *ent, pragma::BaseCharacterComponent &pl, Vector3 &pos, Quat &rot, Bool bYawOnly = false) const;
+			virtual AttachmentData *SetupAttachment(pragma::ecs::BaseEntity *ent, const AttachmentInfo &attInfo);
+			virtual void UpdateViewAttachmentOffset(pragma::ecs::BaseEntity *ent, pragma::BaseCharacterComponent &pl, Vector3 &pos, Quat &rot, Bool bYawOnly = false) const;
 			virtual void OnEntitySpawn() override;
 			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 			std::optional<umath::Transform> GetParentPose() const;
@@ -63,6 +65,10 @@ export {
 			CallbackHandle m_parentModelChanged {};
 			std::string m_kvParent;
 		};
+        using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseAttachmentComponent::StateFlags)
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::BaseAttachmentComponent::StateFlags> : std::true_type {};
+    }
 };

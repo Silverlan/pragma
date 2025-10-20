@@ -34,7 +34,7 @@ export namespace pragma {
 		void DestroyDynamicBvhSubstitute();
 		bool IsActive() const;
 	  protected:
-		BaseStaticBvhUserComponent(BaseEntity &ent);
+		BaseStaticBvhUserComponent(pragma::ecs::BaseEntity &ent);
 		friend BaseStaticBvhCacheComponent;
 		void UpdateBvhStatus();
 		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;

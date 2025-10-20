@@ -9,7 +9,7 @@ module pragma.shared;
 
 import :physics.raycast_filter;
 
-pragma::physics::EntityRayCastFilterCallback::EntityRayCastFilterCallback(BaseEntity &ent) : m_hEnt {ent.GetHandle()} {}
+pragma::physics::EntityRayCastFilterCallback::EntityRayCastFilterCallback(pragma::ecs::BaseEntity &ent) : m_hEnt {ent.GetHandle()} {}
 RayCastHitType pragma::physics::EntityRayCastFilterCallback::PreFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const
 {
 	auto *physObj = rigidBody.GetPhysObj();
@@ -35,7 +35,7 @@ bool pragma::physics::MultiEntityRayCastFilterCallback::HasPostFilter() const { 
 
 //////////////////
 
-pragma::physics::PhysObjRayCastFilterCallback::PhysObjRayCastFilterCallback(PhysObj &physObj) : m_hPhys {physObj.GetHandle()} {}
+pragma::physics::PhysObjRayCastFilterCallback::PhysObjRayCastFilterCallback(pragma::physics::PhysObj &physObj) : m_hPhys {physObj.GetHandle()} {}
 RayCastHitType pragma::physics::PhysObjRayCastFilterCallback::PreFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const
 {
 	auto *physObj = rigidBody.GetPhysObj();

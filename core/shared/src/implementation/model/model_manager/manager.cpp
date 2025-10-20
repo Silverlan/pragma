@@ -48,7 +48,7 @@ bool pragma::asset::PmdlFormatHandler::LoadData(ModelProcessor &processor, Model
 		m_error = err;
 		return false;
 	}
-	if(!Model::Load(*mdl, nw, udm->GetAssetData(), err)) {
+	if(!pragma::Model::Load(*mdl, nw, udm->GetAssetData(), err)) {
 		m_error = err;
 		return false;
 	}
@@ -116,7 +116,7 @@ static const std::vector<std::string> &get_model_extensions()
 	static std::vector<std::string> extensions {};
 	if(extensions.empty()) {
 		extensions = pragma::asset::get_supported_extensions(pragma::asset::Type::Model, pragma::asset::FormatType::All);
-		auto &assetManager = Engine::Get()->GetAssetManager();
+		auto &assetManager = pragma::Engine::Get()->GetAssetManager();
 		auto numImporters = assetManager.GetImporterCount(pragma::asset::Type::Model);
 		for(auto i = decltype(numImporters) {0u}; i < numImporters; ++i) {
 			auto *importerInfo = assetManager.GetImporterInfo(pragma::asset::Type::Model, i);
@@ -188,10 +188,10 @@ pragma::asset::ModelManager::ModelManager(NetworkState &nw) : m_nw {nw}
 		}
 	}
 }
-std::shared_ptr<Model> pragma::asset::ModelManager::CreateModel(uint32_t numBones, const std::string &mdlName) { return Model::Create<Model>(&m_nw, numBones, mdlName); }
+std::shared_ptr<pragma::Model> pragma::asset::ModelManager::CreateModel(uint32_t numBones, const std::string &mdlName) { return pragma::Model::Create<pragma::Model>(&m_nw, numBones, mdlName); }
 std::shared_ptr<ModelMesh> pragma::asset::ModelManager::CreateMesh() { return m_nw.GetGameState()->CreateModelMesh(); }
-std::shared_ptr<ModelSubMesh> pragma::asset::ModelManager::CreateSubMesh() { return m_nw.GetGameState()->CreateModelSubMesh(); }
-std::shared_ptr<Model> pragma::asset::ModelManager::CreateModel(const std::string &name, bool bAddReference, bool addToCache)
+std::shared_ptr<pragma::ModelSubMesh> pragma::asset::ModelManager::CreateSubMesh() { return m_nw.GetGameState()->CreateModelSubMesh(); }
+std::shared_ptr<pragma::Model> pragma::asset::ModelManager::CreateModel(const std::string &name, bool bAddReference, bool addToCache)
 {
 	uint32_t boneCount = (bAddReference == true) ? 1 : 0;
 	auto mdl = CreateModel(boneCount, name);
@@ -250,12 +250,12 @@ bool pragma::asset::ModelManager::PrecacheModel(const std::string &mdlName) cons
 	auto jobId = m_loader->AddJob(m_nw,mdlName,ext,std::move(fp));
 	return jobId.has_value();
 }
-std::shared_ptr<Model> pragma::asset::ModelManager::LoadModel(FWMD &wmd,const std::string &mdlName) const
+std::shared_ptr<pragma::Model> pragma::asset::ModelManager::LoadModel(FWMD &wmd,const std::string &mdlName) const
 {
 
 
 }
-std::shared_ptr<Model> pragma::asset::ModelManager::LoadModel(const std::string &cacheName,const std::shared_ptr<ufile::IFile> &file,const std::string &ext)
+std::shared_ptr<pragma::Model> pragma::asset::ModelManager::LoadModel(const std::string &cacheName,const std::shared_ptr<ufile::IFile> &file,const std::string &ext)
 {
 	auto *asset = FindCachedAsset(cacheName);
 	if(asset)
@@ -271,7 +271,7 @@ std::shared_ptr<Model> pragma::asset::ModelManager::LoadModel(const std::string 
 		*outIsNewModel = true;
 	return mdl;
 }
-std::shared_ptr<Model> pragma::asset::ModelManager::LoadModel(const std::string &mdlName,bool bReload,bool *outIsNewModel)
+std::shared_ptr<pragma::Model> pragma::asset::ModelManager::LoadModel(const std::string &mdlName,bool bReload,bool *outIsNewModel)
 {
 	if(outIsNewModel)
 		*outIsNewModel = false;
@@ -319,7 +319,7 @@ std::shared_ptr<Model> pragma::asset::ModelManager::LoadModel(const std::string 
 	return mdl;
 }
 #endif
-void pragma::asset::ModelManager::FlagForRemoval(const Model &mdl, bool flag)
+void pragma::asset::ModelManager::FlagForRemoval(const pragma::Model &mdl, bool flag)
 {
 	auto *asset = FindCachedAsset(mdl.GetName());
 	if(asset) {

@@ -14,7 +14,7 @@ export namespace pragma {
 	// Note: 'GlobalComponent' cannot be used as name, otherwise there are conflicts with 'GlobalHandle' class of winbase.h
 	class DLLNETWORK GlobalNameComponent final : public BaseEntityComponent {
 	  public:
-		GlobalNameComponent(BaseEntity &ent);
+		GlobalNameComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;

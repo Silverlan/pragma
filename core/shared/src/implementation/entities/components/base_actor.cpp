@@ -27,7 +27,7 @@ void BaseActorComponent::RegisterEvents(pragma::EntityComponentManager &componen
 	EVENT_ON_RESPAWN = registerEvent("ON_RESPAWN", ComponentEventInfo::Type::Broadcast);
 	EVENT_ON_DEATH = registerEvent("ON_DEATH", ComponentEventInfo::Type::Broadcast);
 }
-BaseActorComponent::BaseActorComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_bAlive(true), m_bFrozen(util::BoolProperty::Create(false)) {}
+BaseActorComponent::BaseActorComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_bAlive(true), m_bFrozen(util::BoolProperty::Create(false)) {}
 
 void BaseActorComponent::Initialize()
 {
@@ -279,7 +279,7 @@ void BaseActorComponent::OnPhysicsInitialized()
 		auto offset = max - extents; // Offset between bone origin and physics object origin
 		m_hitboxData.push_back({it.first, offset});
 	}
-	m_physHitboxes = PhysObj::Create<PhysObj>(*this, physHitboxes);
+	m_physHitboxes = pragma::physics::PhysObj::Create<pragma::physics::PhysObj>(*this, physHitboxes);
 	auto collisionMask = ent.IsPlayer() ? pragma::physics::CollisionMask::PlayerHitbox : pragma::physics::CollisionMask::NPCHitbox;
 	m_physHitboxes->SetCollisionFilter(collisionMask, collisionMask); // Required for raytraces
 	m_physHitboxes->Spawn();

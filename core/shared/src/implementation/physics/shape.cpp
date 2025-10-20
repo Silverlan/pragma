@@ -63,10 +63,10 @@ void pragma::physics::IConvexShape::InitializeLuaObject(lua_State *lua) { IBase:
 bool pragma::physics::IConvexShape::IsConvex() const { return true; }
 pragma::physics::IConvexShape *pragma::physics::IConvexShape::GetConvexShape() { return this; }
 
-void pragma::physics::IConvexShape::SetCollisionMesh(CollisionMesh &collisionMesh) { m_collisionMesh = collisionMesh.shared_from_this(); }
+void pragma::physics::IConvexShape::SetCollisionMesh(pragma::physics::CollisionMesh &collisionMesh) { m_collisionMesh = collisionMesh.shared_from_this(); }
 void pragma::physics::IConvexShape::SetCollisionMesh() { m_collisionMesh = nullptr; }
-const CollisionMesh *pragma::physics::IConvexShape::GetCollisionMesh() const { return const_cast<IConvexShape *>(this)->GetCollisionMesh(); }
-CollisionMesh *pragma::physics::IConvexShape::GetCollisionMesh() { return m_collisionMesh.get(); }
+const pragma::physics::CollisionMesh *pragma::physics::IConvexShape::GetCollisionMesh() const { return const_cast<IConvexShape *>(this)->GetCollisionMesh(); }
+pragma::physics::CollisionMesh *pragma::physics::IConvexShape::GetCollisionMesh() { return m_collisionMesh.get(); }
 
 /////////////
 

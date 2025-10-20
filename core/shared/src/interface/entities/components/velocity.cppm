@@ -15,7 +15,7 @@ export namespace pragma {
 	  public:
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		VelocityComponent(BaseEntity &ent);
+		VelocityComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		void SetVelocity(const Vector3 &vel);

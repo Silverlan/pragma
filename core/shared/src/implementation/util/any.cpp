@@ -83,7 +83,7 @@ struct IAnyHandler {
 
 	virtual void Write(DataStream &ds, const std::any &value, uint32_t *pos = nullptr) const = 0;
 	virtual void Write(NetPacket &ds, const std::any &value, uint32_t *pos = nullptr) const = 0;
-	virtual void Read(Game &game, DataStream &ds, std::any &outValue) const = 0;
+	virtual void Read(pragma::Game &game, DataStream &ds, std::any &outValue) const = 0;
 	virtual void Read(NetPacket &ds, std::any &outValue) const = 0;
 	template<typename T>
 	const T &Get(const std::any &value) const
@@ -104,7 +104,7 @@ struct TGenericHandler : public IAnyHandler {
 	virtual void PushNewProperty(lua_State *l, const std::any &value) const override { Lua::Property::push(l, *TProperty::Create(Get<T>(value))); }
 	virtual void Write(DataStream &ds, const std::any &value, uint32_t *pos = nullptr) const override { ds->Write<T>(Get<T>(value), pos); }
 	virtual void Write(NetPacket &ds, const std::any &value, uint32_t *pos = nullptr) const override { ds->Write<T>(Get<T>(value), pos); }
-	virtual void Read(Game &game, DataStream &ds, std::any &outValue) const override { outValue = ds->Read<T>(); }
+	virtual void Read(pragma::Game &game, DataStream &ds, std::any &outValue) const override { outValue = ds->Read<T>(); }
 	virtual void Read(NetPacket &ds, std::any &outValue) const override { outValue = ds->Read<T>(); }
 };
 
@@ -247,7 +247,7 @@ struct EntityHandler : public IAnyHandler {
 		  },
 		  *identifier);
 	}
-	virtual void Read(Game &game, DataStream &ds, std::any &outValue) const override
+	virtual void Read(pragma::Game &game, DataStream &ds, std::any &outValue) const override
 	{
 		outValue = pragma::EntityURef {};
 		// auto idx = ds->Read<uint32_t>();
@@ -292,7 +292,7 @@ struct NilHandler : public IAnyHandler {
 	virtual std::any GetPropertyValue(lua_State *l, int32_t indexProperty) const override { return {}; }
 	virtual void Write(DataStream &ds, const std::any &value, uint32_t *pos = nullptr) const override {}
 	virtual void Write(NetPacket &ds, const std::any &value, uint32_t *pos = nullptr) const override {}
-	virtual void Read(Game &game, DataStream &ds, std::any &outValue) const override { outValue = {}; }
+	virtual void Read(pragma::Game &game, DataStream &ds, std::any &outValue) const override { outValue = {}; }
 	virtual void Read(NetPacket &ds, std::any &outValue) const override { outValue = {}; }
 } static s_nilHandler;
 
@@ -356,5 +356,5 @@ void Lua::PushAny(lua_State *l, ::util::VarType varType, const std::any &value) 
 void Lua::PushNewAnyProperty(lua_State *l, ::util::VarType varType, const std::any &value) { get_any_handler(varType).PushNewProperty(l, value); }
 void Lua::WriteAny(::DataStream &ds, ::util::VarType varType, const std::any &value, uint32_t *pos) { get_any_handler(varType).Write(ds, value, pos); }
 void Lua::WriteAny(::NetPacket &ds, ::util::VarType varType, const std::any &value, uint32_t *pos) { get_any_handler(varType).Write(ds, value, pos); }
-void Lua::ReadAny(Game &game, ::DataStream &ds, ::util::VarType varType, std::any &outValue) { get_any_handler(varType).Read(game, ds, outValue); }
+void Lua::ReadAny(pragma::Game &game, ::DataStream &ds, ::util::VarType varType, std::any &outValue) { get_any_handler(varType).Read(game, ds, outValue); }
 void Lua::ReadAny(::NetPacket &ds, ::util::VarType varType, std::any &outValue) { get_any_handler(varType).Read(ds, outValue); }

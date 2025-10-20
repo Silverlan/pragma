@@ -20,7 +20,7 @@ void VelocityComponent::RegisterMembers(pragma::EntityComponentManager &componen
 	using TVelocity = Vector3;
 	registerMember(create_component_member_info<T, TVelocity, static_cast<void (T::*)(const TVelocity &)>(&T::SetVelocity), static_cast<const TVelocity &(T::*)() const>(&T::GetVelocity)>("velocity", TVelocity {}));
 }
-VelocityComponent::VelocityComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_velocity(util::Vector3Property::Create()), m_angVelocity(util::Vector3Property::Create()) {}
+VelocityComponent::VelocityComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_velocity(util::Vector3Property::Create()), m_angVelocity(util::Vector3Property::Create()) {}
 void VelocityComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

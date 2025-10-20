@@ -4,6 +4,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include <vector>
+
+#include <iostream>
 
 export module pragma.shared:model.animation.pose;
 

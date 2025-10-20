@@ -13,7 +13,7 @@ import :entities.components.triggers.base_gravity;
 
 using namespace pragma;
 
-void pragma::Entity::TriggerGravity::apply_gravity(BaseEntity *ent, uint32_t flags, const Vector3 &gravityDir, const Vector3 &dirUp, bool bUseForce, float gravityForce, std::shared_ptr<Vector3> *upDir)
+void pragma::Entity::TriggerGravity::apply_gravity(pragma::ecs::BaseEntity *ent, uint32_t flags, const Vector3 &gravityDir, const Vector3 &dirUp, bool bUseForce, float gravityForce, std::shared_ptr<Vector3> *upDir)
 {
 	if(flags & umath::to_integral(SpawnFlags::ChangeOrientation)) {
 		auto charComponent = ent->GetCharacterComponent();
@@ -41,7 +41,7 @@ void BaseEntityTriggerGravityComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	GetEntity().AddComponent("touch");
 }
-void BaseEntityTriggerGravityComponent::OnStartTouch(BaseEntity *ent)
+void BaseEntityTriggerGravityComponent::OnStartTouch(pragma::ecs::BaseEntity *ent)
 {
 	auto &settings = m_gravityReset.insert(std::make_pair(std::make_shared<EntityHandle>(ent->GetHandle()), GravitySettings {})).first->second;
 	auto pEntGravityComponent = ent->GetComponent<pragma::GravityComponent>();
@@ -56,7 +56,7 @@ void BaseEntityTriggerGravityComponent::OnStartTouch(BaseEntity *ent)
 	auto &entThis = GetEntity();
 	pragma::Entity::TriggerGravity::apply_gravity(ent, entThis.GetSpawnFlags(), -m_kvGravityDir, m_kvGravityDir, m_kvUseForce, m_kvGravityForce, &settings.dirMove);
 }
-void BaseEntityTriggerGravityComponent::OnEndTouch(BaseEntity *ent)
+void BaseEntityTriggerGravityComponent::OnEndTouch(pragma::ecs::BaseEntity *ent)
 {
 	auto &entThis = GetEntity();
 	for(auto it = m_gravityReset.begin(); it != m_gravityReset.end();) {
@@ -76,7 +76,7 @@ void BaseEntityTriggerGravityComponent::OnEndTouch(BaseEntity *ent)
 		}
 	}
 }
-void BaseEntityTriggerGravityComponent::OnResetGravity(BaseEntity *ent, GravitySettings &settings) {}
+void BaseEntityTriggerGravityComponent::OnResetGravity(pragma::ecs::BaseEntity *ent, GravitySettings &settings) {}
 util::EventReply BaseEntityTriggerGravityComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
 	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)

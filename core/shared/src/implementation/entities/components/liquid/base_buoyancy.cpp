@@ -13,7 +13,7 @@ using namespace pragma;
 void BaseBuoyancyComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) {}
 
 void BaseBuoyancyComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
-BaseBuoyancyComponent::BaseBuoyancyComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseBuoyancyComponent::BaseBuoyancyComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void BaseBuoyancyComponent::Initialize()
 {
@@ -72,7 +72,7 @@ util::EventReply BaseBuoyancyComponent::HandleEvent(ComponentEventId eventId, Co
 	return util::EventReply::Unhandled;
 }
 
-void BaseBuoyancyComponent::OnEndTouch(BaseEntity *ent, PhysObj *phys)
+void BaseBuoyancyComponent::OnEndTouch(pragma::ecs::BaseEntity *ent, pragma::physics::PhysObj *phys)
 {
 	auto pSubmergibleComponent = ent->GetComponent<pragma::SubmergibleComponent>();
 	if(pSubmergibleComponent.valid())
@@ -102,7 +102,7 @@ void BaseBuoyancyComponent::SimulateBuoyancy() const
 		for(auto &touchInfo : touchComponent->GetTouchingInfo()) {
 			if(touchInfo.touch.entity.valid() == false || touchInfo.triggered == false)
 				continue;
-			buoyancySim.Simulate(const_cast<BaseEntity &>(ent), m_liquidControl->GetLiquidDescription(), const_cast<BaseEntity &>(*touchInfo.touch.entity.get()), n, d, m_liquidControl->GetLiquidVelocity(), sim);
+			buoyancySim.Simulate(const_cast<pragma::ecs::BaseEntity &>(ent), m_liquidControl->GetLiquidDescription(), const_cast<pragma::ecs::BaseEntity &>(*touchInfo.touch.entity.get()), n, d, m_liquidControl->GetLiquidVelocity(), sim);
 		} // TODO: Trigger has to be higher than max surface height
 	}
 	if(sim)

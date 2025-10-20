@@ -10,7 +10,7 @@ module pragma.shared;
 import :util.font_set;
 
 bool FontSet::HasFeature(const std::string_view &feature) const { return std::find(features.begin(), features.end(), feature) != features.end(); }
-static uint32_t get_number_of_bits_set(FontSetFlag flags)
+static uint32_t get_number_of_bits_set(pragma::FontSetFlag flags)
 {
 	auto numBytes = umath::to_integral(flags);
 	auto numBits = numBytes * 8;
@@ -20,7 +20,7 @@ static uint32_t get_number_of_bits_set(FontSetFlag flags)
 	}
 	return numBits;
 }
-FontSetFileData *FontSet::FindFontFileCandidate(FontSetFlag flags)
+FontSetFileData *FontSet::FindFontFileCandidate(pragma::FontSetFlag flags)
 {
 	FontSetFileData *bestCandidate = nullptr;
 	uint32_t bestCandidateSetBits = 0;
@@ -36,4 +36,4 @@ FontSetFileData *FontSet::FindFontFileCandidate(FontSetFlag flags)
 	}
 	return bestCandidate;
 }
-const FontSetFileData *FontSet::FindFontFileCandidate(FontSetFlag flags) const { return const_cast<FontSet *>(this)->FindFontFileCandidate(flags); }
+const FontSetFileData *FontSet::FindFontFileCandidate(pragma::FontSetFlag flags) const { return const_cast<FontSet *>(this)->FindFontFileCandidate(flags); }

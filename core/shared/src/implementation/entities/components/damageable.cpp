@@ -11,7 +11,7 @@ using namespace pragma;
 
 ComponentEventId DamageableComponent::EVENT_ON_TAKE_DAMAGE = pragma::INVALID_COMPONENT_ID;
 void DamageableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_TAKE_DAMAGE = registerEvent("ON_TAKE_DAMAGE", ComponentEventInfo::Type::Broadcast); }
-DamageableComponent::DamageableComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+DamageableComponent::DamageableComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void DamageableComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -28,7 +28,7 @@ void DamageableComponent::TakeDamage(DamageInfo &info)
 	auto &ent = GetEntity();
 	auto *state = ent.GetNetworkState();
 	auto *game = state->GetGameState();
-	game->CallCallbacks<void, BaseEntity *, std::reference_wrapper<DamageInfo>>("OnEntityTakeDamage", &ent, std::ref<DamageInfo>(info));
+	game->CallCallbacks<void, pragma::ecs::BaseEntity *, std::reference_wrapper<DamageInfo>>("OnEntityTakeDamage", &ent, std::ref<DamageInfo>(info));
 	OnTakeDamage(info);
 
 	CEOnTakeDamage takeDmgInfo {info};

@@ -4,13 +4,14 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/types/udm.hpp"
+#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.classes.entity_components;
 
 export import :entities.components.base;
 export import :entities.components.base_sound_emitter;
 export import :entities.universal_reference;
+export import :scripting.lua.types;
 
 export {
 	namespace pragma::lua {

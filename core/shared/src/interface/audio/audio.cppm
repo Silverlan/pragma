@@ -3,6 +3,8 @@
 
 module;
 
+#include <string>
+
 export module pragma.shared:audio;
 
 export import :audio.effect_params;

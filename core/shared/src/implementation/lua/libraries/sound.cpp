@@ -101,7 +101,7 @@ std::shared_ptr<::ALSound> Lua::sound::create(lua_State *l, const std::string &s
 
 {
 
-	auto *state = Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 
 	auto pAl = state->CreateSound(snd, type, flags);
 
@@ -131,7 +131,7 @@ std::shared_ptr<::ALSound> Lua::sound::play(lua_State *l, const std::string &snd
 
 {
 
-	auto *state = Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 
 	auto snd = state->CreateSound(sndName, type, playInfo.flags);
 
@@ -171,7 +171,7 @@ bool Lua::sound::is_music_playing(lua_State *l)
 
 {
 
-	auto *state = Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 
 	auto &sounds = state->GetSounds();
 
@@ -193,7 +193,7 @@ float Lua::sound::get_duration(lua_State *l, const std::string &snd)
 
 {
 
-	NetworkState *state = Engine::Get()->GetNetworkState(l);
+	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 
 	return state->GetSoundDuration(snd);
 
@@ -205,7 +205,7 @@ std::vector<std::shared_ptr<::ALSound>> Lua::sound::get_all(lua_State *l)
 
 {
 
-	NetworkState *state = Engine::Get()->GetNetworkState(l);
+	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 
 	auto &sounds = state->GetSounds();
 
@@ -235,7 +235,7 @@ std::vector<std::shared_ptr<::ALSound>> Lua::sound::find_by_type(lua_State *l, p
 
 		return get_all(l);
 
-	auto *state = Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 
 	auto &sounds = state->GetSounds();
 
@@ -273,7 +273,7 @@ bool Lua::sound::precache(lua_State *l, const std::string &snd, ALChannel mode)
 
 {
 
-	NetworkState *state = Engine::Get()->GetNetworkState(l);
+	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 
 	return state->PrecacheSound(snd.c_str(), mode);
 
@@ -293,7 +293,7 @@ void Lua::sound::stop_all(lua_State *l)
 
 {
 
-	NetworkState *state = Engine::Get()->GetNetworkState(l);
+	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 
 	state->StopSounds();
 
@@ -305,7 +305,7 @@ void Lua::sound::load_scripts(lua_State *l, const std::string &file)
 
 {
 
-	NetworkState *state = Engine::Get()->GetNetworkState(l);
+	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 
 	state->LoadSoundScripts(file.c_str());
 

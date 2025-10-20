@@ -50,7 +50,7 @@ Vector3 BaseGravity::GetGravityDirection(NetworkState *state) const
 		return *m_gravityDir;
 	if(state == nullptr)
 		return uvec::ORIGIN;
-	Game *game = state->GetGameState();
+	pragma::Game *game = state->GetGameState();
 	return glm::normalize(game->GetGravity());
 }
 float BaseGravity::GetGravity(NetworkState *state) const
@@ -59,14 +59,14 @@ float BaseGravity::GetGravity(NetworkState *state) const
 		return *m_gravity;
 	if(state == nullptr)
 		return 0.f;
-	Game *game = state->GetGameState();
+	pragma::Game *game = state->GetGameState();
 	return glm::length(game->GetGravity());
 }
 Vector3 BaseGravity::GetGravityForce(NetworkState *state) const
 {
 	if(state == nullptr)
 		return Vector3(0, 0, 0);
-	Game *game = state->GetGameState();
+	pragma::Game *game = state->GetGameState();
 	Vector3 force(0, 0, 0);
 	if(m_gravityDir != nullptr) {
 		force.x = m_gravityDir->x;
@@ -102,7 +102,7 @@ Vector3 BaseGravity::GetGravityForce(NetworkState *state) const
 
 /////////////////////
 
-GravityComponent::GravityComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+GravityComponent::GravityComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void GravityComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

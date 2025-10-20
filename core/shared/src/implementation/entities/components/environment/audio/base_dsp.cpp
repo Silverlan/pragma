@@ -16,7 +16,7 @@ void BaseEnvSoundDspComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(OnSetKeyValue(kvData.key, kvData.value) == true)
 			return util::EventReply::Handled;
@@ -57,7 +57,7 @@ void BaseEnvSoundDspComponent::SetOuterRadius(float radius) { m_kvOuterRadius = 
 float BaseEnvSoundDspComponent::GetGain() const { return m_kvDspGain; }
 void BaseEnvSoundDspComponent::SetGain(float gain) { m_kvDspGain = gain; }
 
-bool BaseEnvSoundDspComponent::Input(const std::string &input, BaseEntity *activator, BaseEntity *caller, std::string data)
+bool BaseEnvSoundDspComponent::Input(const std::string &input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, std::string data)
 {
 	if(input == "setgain")
 		SetGain(ustring::to_int(data));

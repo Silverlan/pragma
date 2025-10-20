@@ -64,8 +64,8 @@ std::pair<float, float> ALSound::GetRangeOffsets() const
 bool ALSound::IsSoundScript() const { return false; }
 NetworkState *ALSound::GetNetworkState() const { return m_networkState; }
 
-void ALSound::SetSource(BaseEntity *ent) { m_hSourceEntity = (ent != nullptr) ? ent->GetHandle() : EntityHandle {}; }
-BaseEntity *ALSound::GetSource() const { return const_cast<BaseEntity *>(m_hSourceEntity.get()); }
+void ALSound::SetSource(pragma::ecs::BaseEntity *ent) { m_hSourceEntity = (ent != nullptr) ? ent->GetHandle() : EntityHandle {}; }
+pragma::ecs::BaseEntity *ALSound::GetSource() const { return const_cast<pragma::ecs::BaseEntity *>(m_hSourceEntity.get()); }
 
 float ALSound::GetSoundIntensity(const Vector3 &pos) const
 {

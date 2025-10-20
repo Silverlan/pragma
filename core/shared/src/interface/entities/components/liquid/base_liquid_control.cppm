@@ -6,6 +6,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <queue>
 
+#include <string>
+
 export module pragma.shared:entities.components.liquid.base_control;
 
 export import :entities.components.base;
@@ -15,7 +17,6 @@ export import :physics.raycast;
 export import :physics.surface_material;
 
 export {
-	class PhysObj;
 	namespace pragma {
 		namespace physics {class ICollisionObject;};
 		class DLLNETWORK BaseLiquidControlComponent : public BaseEntityComponent {
@@ -55,13 +56,13 @@ export {
 
 			virtual void CreateSplash(const Vector3 &origin, float radius, float force);
 		  protected:
-			BaseLiquidControlComponent(BaseEntity &ent);
+			BaseLiquidControlComponent(pragma::ecs::BaseEntity &ent);
 			struct LocalRayResult {
 				float fraction;
 				float friction;
 				Vector3 hitNormalLocal;
 			};
-			virtual bool OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, PhysObj *phys, pragma::physics::ICollisionObject *col, const LocalRayResult &result);
+			virtual bool OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, pragma::physics::PhysObj *phys, pragma::physics::ICollisionObject *col, const LocalRayResult &result);
 			void SetSurfaceMaterial(const std::string &mat);
 			void SetSurfaceMaterial(const SurfaceMaterial *mat);
 			Vector3 m_liquidVelocity;

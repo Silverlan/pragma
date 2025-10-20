@@ -17,6 +17,6 @@ export namespace pragma {
 		static ComponentEventId EVENT_ON_ENTITY_COMPONENT_REMOVED;
 		static ComponentEventId EVENT_ON_MEMBERS_CHANGED;
 	  protected:
-		BaseGenericComponent(BaseEntity &ent);
+		BaseGenericComponent(pragma::ecs::BaseEntity &ent);
 	};
 };

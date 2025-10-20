@@ -43,7 +43,7 @@ void OriginComponent::RegisterMembers(pragma::EntityComponentManager &componentM
 	memberInfoRot.AddTypeMetaData(poseComponentMetaData);
 	registerMember(std::move(memberInfoRot));
 }
-OriginComponent::OriginComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+OriginComponent::OriginComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void OriginComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void OriginComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 

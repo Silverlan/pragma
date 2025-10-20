@@ -34,7 +34,7 @@ void BaseFlexComponent::RegisterMembers(pragma::EntityComponentManager &componen
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseFlexComponent::BaseFlexComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseFlexComponent::BaseFlexComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseFlexComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -50,7 +50,7 @@ void BaseFlexComponent::Initialize()
 }
 void BaseFlexComponent::SetFlexControllerUpdateListenersEnabled(bool enabled) { umath::set_flag(m_stateFlags, StateFlags::EnableFlexControllerUpdateListeners, enabled); }
 bool BaseFlexComponent::AreFlexControllerUpdateListenersEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::EnableFlexControllerUpdateListeners); }
-void BaseFlexComponent::OnModelChanged(const std::shared_ptr<Model> &model)
+void BaseFlexComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &model)
 {
 	util::ScopeGuard sg {[this]() { OnMembersChanged(); }};
 	ClearMembers();

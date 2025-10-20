@@ -27,6 +27,8 @@ module;
 
 #include <unordered_set>
 
+#include <string>
+
 
 
 
@@ -72,7 +74,7 @@ export import :input.enums;
 export import :map.map_info;
 
 
-
+export import :types;
 export import :util.resource_watcher;
 
 
@@ -82,40 +84,6 @@ export import :util.resource_watcher;
 
 
 export {
-
-
-
-	class Game;
-
-
-
-	class ALSound;
-
-
-
-	class ModelMesh;
-
-
-
-	class ModelSubMesh;
-
-
-
-	namespace pragma::asset {
-
-
-
-		class ModelManager;
-
-
-
-	}
-
-
-
-
-
-
 
 	class DLLNETWORK NetworkState : public CallbackHandler, public CVarHandler {
 
@@ -405,7 +373,7 @@ export {
 
 
 
-		virtual ModelSubMesh *CreateSubMesh() const = 0;
+		virtual pragma::ModelSubMesh *CreateSubMesh() const = 0;
 
 
 
@@ -453,7 +421,7 @@ export {
 
 
 
-		Game *GetGameState();
+		pragma::Game *GetGameState();
 
 
 
@@ -645,7 +613,7 @@ export {
 
 
 
-		std::unique_ptr<Game, void (*)(Game *)> m_game = std::unique_ptr<Game, void (*)(Game *)> {nullptr, [](Game *) {}};
+		std::unique_ptr<pragma::Game, void (*)(pragma::Game *)> m_game = std::unique_ptr<pragma::Game, void (*)(pragma::Game *)> {nullptr, [](pragma::Game *) {}};
 
 
 

@@ -61,7 +61,7 @@ export namespace pragma {
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 	  protected:
-		BaseObservableComponent(BaseEntity &ent);
+		BaseObservableComponent(pragma::ecs::BaseEntity &ent);
 
 		friend BaseObserverComponent;
 		void ClearObserver();

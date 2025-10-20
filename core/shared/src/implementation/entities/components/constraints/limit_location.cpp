@@ -117,7 +117,7 @@ void ConstraintLimitLocationComponent::RegisterMembers(pragma::EntityComponentMa
 	}
 }
 
-ConstraintLimitLocationComponent::ConstraintLimitLocationComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+ConstraintLimitLocationComponent::ConstraintLimitLocationComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintLimitLocationComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

@@ -31,20 +31,20 @@ bool LuaBaseEntityIterator::operator!=(const LuaBaseEntityIterator &other) { ret
 
 ////////////
 
-LuaEntityIterator::LuaEntityIterator(lua_State *l, EntityIterator::FilterFlags filterFlags) : m_iterator(std::make_shared<EntityIterator>(*Engine::Get()->GetNetworkState(l)->GetGameState(), filterFlags)) {}
-LuaEntityIterator::LuaEntityIterator(lua_State *l, pragma::ComponentId componentId, EntityIterator::FilterFlags filterFlags) : m_iterator(std::make_shared<EntityIterator>(*Engine::Get()->GetNetworkState(l)->GetGameState(), componentId, filterFlags)) {}
-LuaEntityIterator::LuaEntityIterator(lua_State *l, const std::string &componentName, EntityIterator::FilterFlags filterFlags) : m_iterator(std::make_shared<EntityIterator>(*Engine::Get()->GetNetworkState(l)->GetGameState(), componentName, filterFlags)) {}
+LuaEntityIterator::LuaEntityIterator(lua_State *l, pragma::ecs::EntityIterator::FilterFlags filterFlags) : m_iterator(std::make_shared<pragma::ecs::EntityIterator>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), filterFlags)) {}
+LuaEntityIterator::LuaEntityIterator(lua_State *l, pragma::ComponentId componentId, pragma::ecs::EntityIterator::FilterFlags filterFlags) : m_iterator(std::make_shared<pragma::ecs::EntityIterator>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), componentId, filterFlags)) {}
+LuaEntityIterator::LuaEntityIterator(lua_State *l, const std::string &componentName, pragma::ecs::EntityIterator::FilterFlags filterFlags) : m_iterator(std::make_shared<pragma::ecs::EntityIterator>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), componentName, filterFlags)) {}
 LuaBaseEntityIterator LuaEntityIterator::begin() const { return LuaBaseEntityIterator(m_iterator->begin()); }
 LuaBaseEntityIterator LuaEntityIterator::end() const { return LuaBaseEntityIterator(m_iterator->end()); }
 void LuaEntityIterator::AttachFilter(LuaEntityIteratorFilterBase &filter) { filter.Attach(*m_iterator); }
-EntityIterator &LuaEntityIterator::GetIterator() { return *m_iterator; }
+pragma::ecs::EntityIterator &LuaEntityIterator::GetIterator() { return *m_iterator; }
 
 ////////////
 
-CEntityComponentIterator::CEntityComponentIterator(Game &game, FilterFlags filterFlags) : EntityIterator {game, filterFlags} {}
-CEntityComponentIterator::CEntityComponentIterator(Game &game, pragma::ComponentId componentId, FilterFlags filterFlags) : EntityIterator {game, componentId, filterFlags} {}
-CEntityComponentIterator::CEntityComponentIterator(Game &game, const std::string &componentName, FilterFlags filterFlags) : EntityIterator {game, componentName, filterFlags} {}
-CEntityComponentIterator::CEntityComponentIterator(std::vector<BaseEntity *> &ents) : m_ents(&ents) {}
+CEntityComponentIterator::CEntityComponentIterator(pragma::Game &game, FilterFlags filterFlags) : pragma::ecs::EntityIterator {game, filterFlags} {}
+CEntityComponentIterator::CEntityComponentIterator(pragma::Game &game, pragma::ComponentId componentId, FilterFlags filterFlags) : pragma::ecs::EntityIterator {game, componentId, filterFlags} {}
+CEntityComponentIterator::CEntityComponentIterator(pragma::Game &game, const std::string &componentName, FilterFlags filterFlags) : pragma::ecs::EntityIterator {game, componentName, filterFlags} {}
+CEntityComponentIterator::CEntityComponentIterator(std::vector<pragma::ecs::BaseEntity *> &ents) : m_ents(&ents) {}
 CEntityComponentIterator &CEntityComponentIterator::operator++()
 {
 	while(++m_currentIndex < m_ents->size()) {
@@ -68,54 +68,54 @@ bool CEntityComponentIterator::operator!=(const CEntityComponentIterator &other)
 ////////////
 
 LuaEntityIteratorFilterName::LuaEntityIteratorFilterName(const std::string &name, bool caseSensitive, bool exactMatch) : m_name(name), m_bCaseSensitive(caseSensitive), m_bExactMatch(exactMatch) {}
-void LuaEntityIteratorFilterName::Attach(EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterName>(m_name, m_bCaseSensitive, m_bExactMatch); }
+void LuaEntityIteratorFilterName::Attach(pragma::ecs::EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterName>(m_name, m_bCaseSensitive, m_bExactMatch); }
 
 ////////////
 
 LuaEntityIteratorFilterModel::LuaEntityIteratorFilterModel(const std::string &mdlName) : m_modelName {mdlName} {}
-void LuaEntityIteratorFilterModel::Attach(EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterModel>(m_modelName); }
+void LuaEntityIteratorFilterModel::Attach(pragma::ecs::EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterModel>(m_modelName); }
 
 ////////////
 
 LuaEntityIteratorFilterUuid::LuaEntityIteratorFilterUuid(const std::string &uuid) : m_uuid {uuid} {}
-void LuaEntityIteratorFilterUuid::Attach(EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterUuid>(util::uuid_string_to_bytes(m_uuid)); }
+void LuaEntityIteratorFilterUuid::Attach(pragma::ecs::EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterUuid>(util::uuid_string_to_bytes(m_uuid)); }
 
 ////////////
 
 LuaEntityIteratorFilterClass::LuaEntityIteratorFilterClass(const std::string &className, bool caseSensitive, bool exactMatch) : m_className(className), m_bCaseSensitive(caseSensitive), m_bExactMatch(exactMatch) {}
-void LuaEntityIteratorFilterClass::Attach(EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterClass>(m_className, m_bCaseSensitive, m_bExactMatch); }
+void LuaEntityIteratorFilterClass::Attach(pragma::ecs::EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterClass>(m_className, m_bCaseSensitive, m_bExactMatch); }
 
 ////////////
 
 LuaEntityIteratorFilterNameOrClass::LuaEntityIteratorFilterNameOrClass(const std::string &name, bool caseSensitive, bool exactMatch) : m_name(name), m_bCaseSensitive(caseSensitive), m_bExactMatch(exactMatch) {}
-void LuaEntityIteratorFilterNameOrClass::Attach(EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterNameOrClass>(m_name, m_bCaseSensitive, m_bExactMatch); }
+void LuaEntityIteratorFilterNameOrClass::Attach(pragma::ecs::EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterNameOrClass>(m_name, m_bCaseSensitive, m_bExactMatch); }
 
 ////////////
 
 LuaEntityIteratorFilterEntity::LuaEntityIteratorFilterEntity(const std::string &name) : m_name(name) {}
-void LuaEntityIteratorFilterEntity::Attach(EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterEntity>(m_name); }
+void LuaEntityIteratorFilterEntity::Attach(pragma::ecs::EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterEntity>(m_name); }
 
 ////////////
 
 LuaEntityIteratorFilterSphere::LuaEntityIteratorFilterSphere(const Vector3 &origin, float radius) : m_origin(origin), m_radius(radius) {}
-void LuaEntityIteratorFilterSphere::Attach(EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterSphere>(m_origin, m_radius); }
+void LuaEntityIteratorFilterSphere::Attach(pragma::ecs::EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterSphere>(m_origin, m_radius); }
 
 ////////////
 
 LuaEntityIteratorFilterBox::LuaEntityIteratorFilterBox(const Vector3 &min, const Vector3 &max) : m_min(min), m_max(max) {}
-void LuaEntityIteratorFilterBox::Attach(EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterBox>(m_min, m_max); }
+void LuaEntityIteratorFilterBox::Attach(pragma::ecs::EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterBox>(m_min, m_max); }
 
 ////////////
 
 LuaEntityIteratorFilterCone::LuaEntityIteratorFilterCone(const Vector3 &origin, const Vector3 &dir, float radius, float angle) : m_origin(origin), m_direction(dir), m_radius(radius), m_angle(angle) {}
-void LuaEntityIteratorFilterCone::Attach(EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterCone>(m_origin, m_direction, m_radius, m_angle); }
+void LuaEntityIteratorFilterCone::Attach(pragma::ecs::EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterCone>(m_origin, m_direction, m_radius, m_angle); }
 
 ////////////
 
 LuaEntityIteratorFilterComponent::LuaEntityIteratorFilterComponent(luabind::object) : m_componentId(pragma::INVALID_COMPONENT_ID) {}
 LuaEntityIteratorFilterComponent::LuaEntityIteratorFilterComponent(pragma::ComponentId componentId) : m_componentId(componentId) {}
-LuaEntityIteratorFilterComponent::LuaEntityIteratorFilterComponent(lua_State *l, const std::string &componentName) { Engine::Get()->GetNetworkState(l)->GetGameState()->GetEntityComponentManager().GetComponentTypeId(componentName, m_componentId); }
-void LuaEntityIteratorFilterComponent::Attach(EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterComponent>(m_componentId); }
+LuaEntityIteratorFilterComponent::LuaEntityIteratorFilterComponent(lua_State *l, const std::string &componentName) { pragma::Engine::Get()->GetNetworkState(l)->GetGameState()->GetEntityComponentManager().GetComponentTypeId(componentName, m_componentId); }
+void LuaEntityIteratorFilterComponent::Attach(pragma::ecs::EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterComponent>(m_componentId); }
 
 ////////////
 
@@ -127,7 +127,7 @@ LuaBaseEntityComponentIterator &LuaBaseEntityComponentIterator::operator++()
 	return *this;
 }
 LuaBaseEntityComponentIterator LuaBaseEntityComponentIterator::operator++(int) { return LuaBaseEntityComponentIterator(m_iterator++); }
-std::pair<BaseEntity *, pragma::BaseEntityComponent *> LuaBaseEntityComponentIterator::operator*()
+std::pair<pragma::ecs::BaseEntity *, pragma::BaseEntityComponent *> LuaBaseEntityComponentIterator::operator*()
 {
 	auto *data = m_iterator.GetIteratorData();
 	if(!data)
@@ -137,15 +137,15 @@ std::pair<BaseEntity *, pragma::BaseEntityComponent *> LuaBaseEntityComponentIte
 		return {nullptr, nullptr};
 	return {&c->GetEntity(), c};
 }
-std::pair<BaseEntity *, pragma::BaseEntityComponent *> LuaBaseEntityComponentIterator::operator->() { return operator*(); }
+std::pair<pragma::ecs::BaseEntity *, pragma::BaseEntityComponent *> LuaBaseEntityComponentIterator::operator->() { return operator*(); }
 bool LuaBaseEntityComponentIterator::operator==(const LuaBaseEntityComponentIterator &other) { return m_iterator == other.m_iterator; }
 bool LuaBaseEntityComponentIterator::operator!=(const LuaBaseEntityComponentIterator &other) { return m_iterator != other.m_iterator; }
 
 ////////////
 
-LuaEntityComponentIterator::LuaEntityComponentIterator(lua_State *l, pragma::ComponentId componentId, EntityIterator::FilterFlags filterFlags) : m_iterator(std::make_shared<CEntityComponentIterator>(*Engine::Get()->GetNetworkState(l)->GetGameState(), componentId, filterFlags)) {}
-LuaEntityComponentIterator::LuaEntityComponentIterator(lua_State *l, const std::string &componentName, EntityIterator::FilterFlags filterFlags) : m_iterator(std::make_shared<CEntityComponentIterator>(*Engine::Get()->GetNetworkState(l)->GetGameState(), componentName, filterFlags)) {}
+LuaEntityComponentIterator::LuaEntityComponentIterator(lua_State *l, pragma::ComponentId componentId, pragma::ecs::EntityIterator::FilterFlags filterFlags) : m_iterator(std::make_shared<CEntityComponentIterator>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), componentId, filterFlags)) {}
+LuaEntityComponentIterator::LuaEntityComponentIterator(lua_State *l, const std::string &componentName, pragma::ecs::EntityIterator::FilterFlags filterFlags) : m_iterator(std::make_shared<CEntityComponentIterator>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), componentName, filterFlags)) {}
 LuaBaseEntityComponentIterator LuaEntityComponentIterator::begin() const { return LuaBaseEntityComponentIterator(m_iterator->begin()); }
 LuaBaseEntityComponentIterator LuaEntityComponentIterator::end() const { return LuaBaseEntityComponentIterator(m_iterator->end()); }
 void LuaEntityComponentIterator::AttachFilter(LuaEntityIteratorFilterBase &filter) { filter.Attach(*m_iterator); }
-EntityIterator &LuaEntityComponentIterator::GetIterator() { return *m_iterator; }
+pragma::ecs::EntityIterator &LuaEntityComponentIterator::GetIterator() { return *m_iterator; }

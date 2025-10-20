@@ -11,7 +11,7 @@ import :entities.components.bone_merge;
 
 using namespace pragma;
 
-bool BoneMergeComponent::can_merge(const Model &mdl, const Model &mdlParent, bool includeRootBones)
+bool BoneMergeComponent::can_merge(const pragma::Model &mdl, const pragma::Model &mdlParent, bool includeRootBones)
 {
 	auto &skeleton = mdl.GetSkeleton();
 	auto &skeletonParent = mdlParent.GetSkeleton();
@@ -36,7 +36,7 @@ void BoneMergeComponent::RegisterMembers(pragma::EntityComponentManager &compone
 		registerMember(std::move(memberInfo));
 	}
 }
-BoneMergeComponent::BoneMergeComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+BoneMergeComponent::BoneMergeComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BoneMergeComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

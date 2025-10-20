@@ -40,7 +40,7 @@ static void add_frame(Frame &frame, const Frame &frameToAdd)
 	}
 }
 
-void Model::Merge(const Model &other, MergeFlags flags)
+void pragma::Model::Merge(const pragma::Model &other, MergeFlags flags)
 {
 	spdlog::info("Merging model '{}' into '{}'...", other.GetName(), GetName());
 	std::vector<std::size_t> boneTranslations; // 'other' bone Id to 'this' bone Id
@@ -101,7 +101,7 @@ void Model::Merge(const Model &other, MergeFlags flags)
 
 			// Do the same for the reference animation
 			auto animReference = GetAnimation(LookupAnimation("reference"));
-			auto animReferenceOther = const_cast<Model &>(other).GetAnimation(other.LookupAnimation("reference"));
+			auto animReferenceOther = const_cast<pragma::Model &>(other).GetAnimation(other.LookupAnimation("reference"));
 			if(animReference && animReference->GetFrameCount() == 1 && animReferenceOther && animReferenceOther->GetFrameCount() == 1) {
 				auto frameRef = animReference->GetFrame(0);
 				auto frameRefOther = animReferenceOther->GetFrame(0);
@@ -171,8 +171,8 @@ void Model::Merge(const Model &other, MergeFlags flags)
 			for(auto idx = decltype(boneList.size()) {0}; idx < boneList.size(); ++idx)
 				anim->SetBoneId(idx, boneTranslations.at(boneList.at(idx)));
 
-			if(anim->HasFlag(FAnim::Autoplay))
-				anim->SetFlags(anim->GetFlags() & ~FAnim::Autoplay); // TODO: Autoplay gesture animations cause issues in some cases (e.g. gman.wmd). Re-enable this once the issues have been taken care of!
+			if(anim->HasFlag(pragma::FAnim::Autoplay))
+				anim->SetFlags(anim->GetFlags() & ~pragma::FAnim::Autoplay); // TODO: Autoplay gesture animations cause issues in some cases (e.g. gman.wmd). Re-enable this once the issues have been taken care of!
 			auto it = m_animationIDs.find(animName);
 			if(it != m_animationIDs.end())
 				; //anims.at(it->second) = anim;
@@ -180,7 +180,7 @@ void Model::Merge(const Model &other, MergeFlags flags)
 				anims.push_back(anim);
 				m_animationIDs.insert(decltype(m_animationIDs)::value_type(animName, anims.size() - 1));
 
-				if(refFrame != nullptr && anim->HasFlag(FAnim::Gesture) == false) {
+				if(refFrame != nullptr && anim->HasFlag(pragma::FAnim::Gesture) == false) {
 					auto boneList = anim->GetBoneList();
 					auto numBones = skeleton.GetBoneCount();
 					boneList.reserve(numBones);
@@ -295,7 +295,7 @@ void Model::Merge(const Model &other, MergeFlags flags)
 		auto &collisionMeshes = GetCollisionMeshes();
 		collisionMeshes.reserve(collisionMeshes.size() + collisionMeshesOther.size());
 		for(auto &colMeshOther : collisionMeshesOther) {
-			auto colMesh = CollisionMesh::Create(*colMeshOther);
+			auto colMesh = pragma::physics::CollisionMesh::Create(*colMeshOther);
 			auto boneParent = colMesh->GetBoneParent();
 			if(boneParent >= 0)
 				boneParent = boneTranslations.at(boneParent);
@@ -332,7 +332,7 @@ void Model::Merge(const Model &other, MergeFlags flags)
 		auto &baseMeshes = GetBaseMeshes();
 		for(auto i = decltype(meshGroupsOther.size()) {0}; i < meshGroupsOther.size(); ++i) {
 			auto &groupOther = meshGroupsOther.at(i);
-			std::shared_ptr<ModelMeshGroup> group = nullptr;
+			std::shared_ptr<pragma::ModelMeshGroup> group = nullptr;
 			if(i >= meshGroups.size())
 				group = AddMeshGroup(groupOther->GetName());
 			else

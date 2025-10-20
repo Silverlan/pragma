@@ -14,7 +14,7 @@ void BaseFuncKinematicComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "first_node", false))
 			m_kvFirstNode = kvData.value;
@@ -60,8 +60,8 @@ void BaseFuncKinematicComponent::OnEntitySpawn()
 	}
 	NetworkState *state = ent.GetNetworkState();
 	if(m_kvFirstNode.empty() == false) {
-		Game *game = state->GetGameState();
-		EntityIterator entIt {*game};
+		pragma::Game *game = state->GetGameState();
+		pragma::ecs::EntityIterator entIt {*game};
 		//entIt.AttachFilter<EntityIteratorFilterComponent>("path_node");
 		entIt.AttachFilter<EntityIteratorFilterEntity>(m_kvFirstNode);
 		auto it = entIt.begin();
@@ -88,7 +88,7 @@ void BaseFuncKinematicComponent::OnTick(double tDelta)
 
 void BaseFuncKinematicComponent::UpdateTickPolicy() { SetTickPolicy((m_bMoving && m_nextNode.valid()) ? TickPolicy::Always : TickPolicy::Never); }
 
-void BaseFuncKinematicComponent::MoveToTarget(BaseEntity *node, float speed)
+void BaseFuncKinematicComponent::MoveToTarget(pragma::ecs::BaseEntity *node, float speed)
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();

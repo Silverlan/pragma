@@ -11,8 +11,8 @@ module;
 export module pragma.shared:assets.manager;
 
 import :assets.common;
+export import :types;
 
-export class Game;
 export namespace pragma::asset {
 	class DLLNETWORK AssetManager {
 	  public:
@@ -22,12 +22,12 @@ export namespace pragma::asset {
 			std::vector<std::pair<std::string, bool /* binary */>> fileExtensions;
 		};
 		using ExporterInfo = ImporterInfo;
-		using ImportHandler = std::function<std::unique_ptr<IAssetWrapper>(Game &, ufile::IFile &, const std::optional<std::string> &, std::string &)>;
-		using ExportHandler = std::function<bool(Game &, ufile::IFile &, const IAssetWrapper &, std::string &)>;
+		using ImportHandler = std::function<std::unique_ptr<IAssetWrapper>(pragma::Game &, ufile::IFile &, const std::optional<std::string> &, std::string &)>;
+		using ExportHandler = std::function<bool(pragma::Game &, ufile::IFile &, const IAssetWrapper &, std::string &)>;
 		void RegisterImporter(const ImporterInfo &importerInfo, Type type, const ImportHandler &importHandler);
 		void RegisterExporter(const ExporterInfo &importerInfo, Type type, const ExportHandler &exportHandler);
-		std::unique_ptr<IAssetWrapper> ImportAsset(Game &game, Type type, ufile::IFile *f, const std::optional<std::string> &filePath = {}, std::string *optOutErr = nullptr) const;
-		bool ExportAsset(Game &game, Type type, ufile::IFile &f, const IAssetWrapper &assetWrapper, std::string *optOutErr = nullptr) const;
+		std::unique_ptr<IAssetWrapper> ImportAsset(pragma::Game &game, Type type, ufile::IFile *f, const std::optional<std::string> &filePath = {}, std::string *optOutErr = nullptr) const;
+		bool ExportAsset(pragma::Game &game, Type type, ufile::IFile &f, const IAssetWrapper &assetWrapper, std::string *optOutErr = nullptr) const;
 
 		uint32_t GetImporterCount(Type type) const { return m_importers[umath::to_integral(type)].size(); }
 		uint32_t GetExporterCount(Type type) const { return m_exporters[umath::to_integral(type)].size(); }

@@ -36,12 +36,12 @@ void BaseHealthComponent::RegisterMembers(pragma::EntityComponentManager &compon
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseHealthComponent::BaseHealthComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_health(util::UInt16Property::Create(0)), m_maxHealth(util::UInt16Property::Create(0)) {}
+BaseHealthComponent::BaseHealthComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_health(util::UInt16Property::Create(0)), m_maxHealth(util::UInt16Property::Create(0)) {}
 void BaseHealthComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "health", false))
 			*m_health = util::to_int(kvData.value);
@@ -103,7 +103,7 @@ void BaseHealthComponent::SetHealth(uint16_t health)
 	auto &ent = GetEntity();
 	auto *state = ent.GetNetworkState();
 	auto *game = state->GetGameState();
-	game->CallCallbacks<void, BaseEntity *, uint16_t, uint16_t>("OnEntityHealthChanged", &ent, old, *m_health);
+	game->CallCallbacks<void, pragma::ecs::BaseEntity *, uint16_t, uint16_t>("OnEntityHealthChanged", &ent, old, *m_health);
 
 	CEOnHealthChanged evData {old, *m_health};
 	BroadcastEvent(EVENT_ON_HEALTH_CHANGED, evData);

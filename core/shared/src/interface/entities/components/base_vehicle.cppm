@@ -21,17 +21,17 @@ export {
 
 			virtual void Initialize() override;
 			virtual void OnRemove() override;
-			BaseEntity *GetDriver();
+			pragma::ecs::BaseEntity *GetDriver();
 			bool HasDriver() const;
 			virtual void ClearDriver();
-			virtual void SetDriver(BaseEntity *ent);
+			virtual void SetDriver(pragma::ecs::BaseEntity *ent);
 			uint8_t GetWheelCount() const;
 
 			virtual void OnTick(double tDelta) override;
 
 			void SetupVehicle(const pragma::physics::VehicleCreateInfo &createInfo, const std::vector<std::string> &wheelModels);
 
-			BaseEntity *GetSteeringWheel();
+			pragma::ecs::BaseEntity *GetSteeringWheel();
 			float GetSpeedKmh() const;
 			float GetSteeringFactor() const;
 
@@ -40,7 +40,7 @@ export {
 			physics::IVehicle *GetPhysicsVehicle();
 			const physics::IVehicle *GetPhysicsVehicle() const;
 		protected:
-			BaseVehicleComponent(BaseEntity &ent);
+			BaseVehicleComponent(pragma::ecs::BaseEntity &ent);
 			struct DLLNETWORK WheelData {
 				WheelData() = default;
 				ComponentHandle<pragma::BaseWheelComponent> hWheel = {};
@@ -57,12 +57,16 @@ export {
 			EntityHandle m_driver = {};
 			StateFlags m_stateFlags = StateFlags::None;
 			float m_maxSteeringWheelAngle = 0.f;
-			void InitializeVehiclePhysics(PHYSICSTYPE type, BasePhysicsComponent::PhysFlags flags);
+			void InitializeVehiclePhysics(pragma::physics::PHYSICSTYPE type, BasePhysicsComponent::PhysFlags flags);
 			void DestroyVehiclePhysics();
 			virtual BaseWheelComponent *CreateWheelEntity(uint8_t wheelIndex);
 			void InitializeWheelEntities();
 			void InitializeSteeringWheel();
 		};
+        using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseVehicleComponent::StateFlags)
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::BaseVehicleComponent::StateFlags> : std::true_type {};
+    }
 };

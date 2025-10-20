@@ -72,7 +72,7 @@ void ConstraintChildOfComponent::RegisterMembers(pragma::EntityComponentManager 
 	}
 }
 
-ConstraintChildOfComponent::ConstraintChildOfComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_locationEnabled {true, true, true}, m_rotationEnabled {true, true, true}, m_scaleEnabled {true, true, true} {}
+ConstraintChildOfComponent::ConstraintChildOfComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_locationEnabled {true, true, true}, m_rotationEnabled {true, true, true}, m_scaleEnabled {true, true, true} {}
 
 void ConstraintChildOfComponent::Initialize()
 {

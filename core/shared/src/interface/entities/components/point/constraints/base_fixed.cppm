@@ -14,6 +14,6 @@ export namespace pragma {
 	  public:
 		using BasePointConstraintComponent::BasePointConstraintComponent;
 	  protected:
-		virtual void InitializeConstraint(BaseEntity *src, BaseEntity *tgt) override;
+		virtual void InitializeConstraint(pragma::ecs::BaseEntity *src, pragma::ecs::BaseEntity *tgt) override;
 	};
 };

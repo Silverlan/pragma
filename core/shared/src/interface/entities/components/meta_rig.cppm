@@ -6,6 +6,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <memory>
 
+#include <string>
+
 
 
 export module pragma.shared:entities.components.meta_rig;
@@ -18,7 +20,7 @@ export namespace pragma {
 	  public:
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		MetaRigComponent(BaseEntity &ent);
+		MetaRigComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 
@@ -151,7 +153,7 @@ void pragma::MetaRigComponent::RegisterMembers(pragma::EntityComponentManager &c
 		registerMember(std::move(memberInfoScale));
 	}
 }
-pragma::MetaRigComponent::MetaRigComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+pragma::MetaRigComponent::MetaRigComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void pragma::MetaRigComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

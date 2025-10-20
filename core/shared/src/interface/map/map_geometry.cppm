@@ -5,14 +5,16 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <cinttypes>
+
 export module pragma.shared:map.map_geometry;
 
 export import :physics.surface_material;
 export import pragma.materialsystem;
 
 export {
-	class Game;
-	class BaseEntity;
+	namespace pragma {class Game;}
+	namespace pragma::ecs {class BaseEntity;}
 	DLLNETWORK void BuildDisplacementTriangles(std::vector<Vector3> &sideVerts, unsigned int start, Vector3 &nu, Vector3 &nv, float sw, float sh, float ou, float ov, float su, float sv, unsigned char power, std::vector<std::vector<Vector3>> &normals, std::vector<std::vector<Vector3>> &offsets,
 	std::vector<std::vector<float>> &distances, unsigned char numAlpha, std::vector<std::vector<Vector2>> &alphas, std::vector<Vector3> &outVertices, std::vector<Vector3> &outNormals, std::vector<Vector2> &outUvs, std::vector<unsigned int> &outTriangles,
 	std::vector<Vector2> *outAlphas = nullptr);
@@ -22,8 +24,8 @@ export {
 
 	namespace pragma {
 		namespace level {
-			DLLNETWORK void load_map_brushes(Game &game, uint32_t version, VFilePtr f, BaseEntity *ent, std::vector<msys::Material *> &materials, std::vector<SurfaceMaterial> &surfaceMaterials, const Vector3 &origin);
-			DLLNETWORK void load_optimized_map_geometry(Game &game, uint32_t version, VFilePtr f, BaseEntity *ent, std::vector<msys::Material *> &materials, std::vector<SurfaceMaterial> &surfaceMaterials);
+			DLLNETWORK void load_map_brushes(pragma::Game &game, uint32_t version, VFilePtr f, pragma::ecs::BaseEntity *ent, std::vector<msys::Material *> &materials, std::vector<SurfaceMaterial> &surfaceMaterials, const Vector3 &origin);
+			DLLNETWORK void load_optimized_map_geometry(pragma::Game &game, uint32_t version, VFilePtr f, pragma::ecs::BaseEntity *ent, std::vector<msys::Material *> &materials, std::vector<SurfaceMaterial> &surfaceMaterials);
 		};
 	};
 };

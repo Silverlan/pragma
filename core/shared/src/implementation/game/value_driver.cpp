@@ -100,7 +100,7 @@ ValueDriver::ValueDriver(pragma::ComponentId componentId, ComponentMemberReferen
 }
 void pragma::ValueDriver::ResetFailureState() { umath::set_flag(m_stateFlags, StateFlags::MemberRefFailed | StateFlags::ComponentRefFailed | StateFlags::EntityRefFailed, false); }
 bool pragma::ValueDriver::IsFailureFlagSet() const { return umath::is_flag_set(m_stateFlags, StateFlags::MemberRefFailed | StateFlags::ComponentRefFailed | StateFlags::EntityRefFailed); }
-pragma::ValueDriver::Result pragma::ValueDriver::Apply(BaseEntity &ent)
+pragma::ValueDriver::Result pragma::ValueDriver::Apply(pragma::ecs::BaseEntity &ent)
 {
 	auto &luaExpression = m_descriptor.GetLuaExpression();
 	auto &expression = m_descriptor.GetExpression();
@@ -256,11 +256,11 @@ pragma::ValueDriver::Result pragma::ValueDriver::Apply(BaseEntity &ent)
 ////////////
 
 ValueDriverVariable::ValueDriverVariable(EntityUComponentMemberRef memberRef) : memberRef {std::move(memberRef)} {}
-ValueDriverVariable::ValueDriverVariable(util::Uuid entUuid, std::string var) { BaseEntity::CreateMemberReference(entUuid, std::move(var), memberRef); }
+ValueDriverVariable::ValueDriverVariable(util::Uuid entUuid, std::string var) { pragma::ecs::BaseEntity::CreateMemberReference(entUuid, std::move(var), memberRef); }
 std::optional<ValueDriverVariable> ValueDriverVariable::Create(std::string uriPath, const util::Uuid &self)
 {
 	EntityUComponentMemberRef ref;
-	if(BaseEntity::ParseUri(std::move(uriPath), ref, &self) == false)
+	if(pragma::ecs::BaseEntity::ParseUri(std::move(uriPath), ref, &self) == false)
 		return {};
 	return ValueDriverVariable {std::move(ref)};
 }

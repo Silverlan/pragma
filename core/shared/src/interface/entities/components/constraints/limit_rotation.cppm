@@ -15,7 +15,7 @@ export namespace pragma {
 	  public:
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		ConstraintLimitRotationComponent(BaseEntity &ent);
+		ConstraintLimitRotationComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		void SetLimit(pragma::Axis axis, const Vector2 &limit);

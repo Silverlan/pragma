@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/raw_object.hpp"
 
 #include "pragma/lua/lua_call.hpp"
 

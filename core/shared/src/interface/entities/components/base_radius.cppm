@@ -23,7 +23,7 @@ export namespace pragma {
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 	  protected:
-		BaseRadiusComponent(BaseEntity &ent);
+		BaseRadiusComponent(pragma::ecs::BaseEntity &ent);
 		pragma::NetEventId m_netEvSetRadius = pragma::INVALID_NET_EVENT;
 		util::PFloatProperty m_radius;
 	};

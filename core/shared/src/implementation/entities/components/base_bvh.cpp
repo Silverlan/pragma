@@ -168,9 +168,9 @@ bool BaseBvhComponent::SetVertexData(const std::vector<pragma::bvh::Primitive> &
 	return SetVertexData(*m_bvhData, data);
 }
 
-bool BaseBvhComponent::ShouldConsiderMesh(const ModelSubMesh &mesh) { return mesh.GetGeometryType() == ModelSubMesh::GeometryType::Triangles; }
+bool BaseBvhComponent::ShouldConsiderMesh(const pragma::ModelSubMesh &mesh) { return mesh.GetGeometryType() == pragma::ModelSubMesh::GeometryType::Triangles; }
 
-std::shared_ptr<pragma::bvh::MeshBvhTree> BaseBvhComponent::RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo, std::vector<size_t> *optOutMeshIndices, BaseEntity *ent)
+std::shared_ptr<pragma::bvh::MeshBvhTree> BaseBvhComponent::RebuildBvh(const std::vector<std::shared_ptr<pragma::ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo, std::vector<size_t> *optOutMeshIndices, pragma::ecs::BaseEntity *ent)
 {
 	auto bvhData = std::make_unique<pragma::bvh::MeshBvhTree>();
 
@@ -347,7 +347,7 @@ bool BaseBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &di
 
 const pragma::bvh::MeshRange *BaseBvhComponent::FindPrimitiveMeshInfo(size_t primIdx) const { return m_bvhData->FindMeshRange(primIdx); }
 
-BaseBvhComponent::BaseBvhComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseBvhComponent::BaseBvhComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 BaseBvhComponent::~BaseBvhComponent() {}
 void BaseBvhComponent::Initialize()
 {

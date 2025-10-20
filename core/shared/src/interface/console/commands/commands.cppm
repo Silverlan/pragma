@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "mathutil/glmutil.h"
 #include <string>
 #include <vector>
 

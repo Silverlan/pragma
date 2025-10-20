@@ -16,7 +16,7 @@ export namespace pragma {
 	  public:
 		static Candela CalcIntensityAtPoint(Candela intensity, const Vector3 &point);
 
-		BaseEnvLightDirectionalComponent(BaseEntity &ent);
+		BaseEnvLightDirectionalComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void SetAmbientColor(const Color &color);
 		const Color &GetAmbientColor() const;

@@ -10,7 +10,7 @@ module pragma.shared;
 
 import :math.intersection;
 
-bool Intersection::LineMesh(const Vector3 &_start, const Vector3 &_dir, Model &mdl, LineMeshResult &r, bool precise, const std::vector<uint32_t> *bodyGroups, uint32_t lod, const Vector3 &origin, const Quat &rot)
+bool Intersection::LineMesh(const Vector3 &_start, const Vector3 &_dir, pragma::Model &mdl, LineMeshResult &r, bool precise, const std::vector<uint32_t> *bodyGroups, uint32_t lod, const Vector3 &origin, const Quat &rot)
 {
 	auto start = _start;
 	auto dir = _dir;
@@ -55,9 +55,9 @@ bool Intersection::LineMesh(const Vector3 &_start, const Vector3 &_dir, Model &m
 	}
 	return hasFoundBetterCandidate;
 }
-bool Intersection::LineMesh(const Vector3 &start, const Vector3 &dir, Model &mdl, LineMeshResult &r, bool precise, uint32_t lod, const Vector3 &origin, const Quat &rot) { return LineMesh(start, dir, mdl, r, precise, nullptr, lod, origin, rot); }
-bool Intersection::LineMesh(const Vector3 &start, const Vector3 &dir, Model &mdl, LineMeshResult &r, bool precise, const std::vector<uint32_t> &bodyGroups, const Vector3 &origin, const Quat &rot) { return LineMesh(start, dir, mdl, r, precise, &bodyGroups, 0, origin, rot); }
-bool Intersection::LineMesh(const Vector3 &start, const Vector3 &dir, Model &mdl, LineMeshResult &r, bool precise, const Vector3 &origin, const Quat &rot) { return LineMesh(start, dir, mdl, r, precise, 0, origin, rot); }
+bool Intersection::LineMesh(const Vector3 &start, const Vector3 &dir, pragma::Model &mdl, LineMeshResult &r, bool precise, uint32_t lod, const Vector3 &origin, const Quat &rot) { return LineMesh(start, dir, mdl, r, precise, nullptr, lod, origin, rot); }
+bool Intersection::LineMesh(const Vector3 &start, const Vector3 &dir, pragma::Model &mdl, LineMeshResult &r, bool precise, const std::vector<uint32_t> &bodyGroups, const Vector3 &origin, const Quat &rot) { return LineMesh(start, dir, mdl, r, precise, &bodyGroups, 0, origin, rot); }
+bool Intersection::LineMesh(const Vector3 &start, const Vector3 &dir, pragma::Model &mdl, LineMeshResult &r, bool precise, const Vector3 &origin, const Quat &rot) { return LineMesh(start, dir, mdl, r, precise, 0, origin, rot); }
 
 bool Intersection::LineMesh(const Vector3 &_start, const Vector3 &_dir, ModelMesh &mesh, LineMeshResult &r, bool precise, const Vector3 *origin, const Quat *rot)
 {
@@ -86,9 +86,9 @@ bool Intersection::LineMesh(const Vector3 &_start, const Vector3 &_dir, ModelMes
 
 static bool is_better_candidate(umath::intersection::Result oldResult, umath::intersection::Result newResult, float *tOld = nullptr, float *tNew = nullptr) { return newResult > oldResult || (tOld != nullptr && newResult == oldResult && tNew > tOld); }
 static bool is_better_candidate(umath::intersection::Result oldResult, umath::intersection::Result newResult, float tOld, float tNew) { return is_better_candidate(oldResult, newResult, &tOld, &tNew); }
-bool Intersection::LineMesh(const Vector3 &_start, const Vector3 &_dir, ModelSubMesh &subMesh, LineMeshResult &r, bool precise, const Vector3 *origin, const Quat *rot)
+bool Intersection::LineMesh(const Vector3 &_start, const Vector3 &_dir, pragma::ModelSubMesh &subMesh, LineMeshResult &r, bool precise, const Vector3 *origin, const Quat *rot)
 {
-	if(subMesh.GetGeometryType() != ModelSubMesh::GeometryType::Triangles || subMesh.GetTriangleCount() == 0)
+	if(subMesh.GetGeometryType() != pragma::ModelSubMesh::GeometryType::Triangles || subMesh.GetTriangleCount() == 0)
 		return false;
 	auto start = _start;
 	auto dir = _dir;

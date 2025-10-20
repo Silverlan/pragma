@@ -32,7 +32,7 @@ export namespace pragma {
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 	  protected:
-		BaseNameComponent(BaseEntity &ent);
+		BaseNameComponent(pragma::ecs::BaseEntity &ent);
 		util::PStringProperty m_name;
 		CallbackHandle m_cbOnNameChanged = {};
 	};

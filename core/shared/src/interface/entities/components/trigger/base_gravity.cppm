@@ -26,7 +26,7 @@ export {
 
 				enum class NetFlags : uint8_t { None = 0, StartTouch = 1, UseForce = StartTouch << 1 };
 
-				DLLNETWORK void apply_gravity(BaseEntity *ent, uint32_t flags, const Vector3 &gravityDir, const Vector3 &dirUp, bool bUseForce, float gravityForce, std::shared_ptr<Vector3> *upDir = nullptr);
+				DLLNETWORK void apply_gravity(pragma::ecs::BaseEntity *ent, uint32_t flags, const Vector3 &gravityDir, const Vector3 &dirUp, bool bUseForce, float gravityForce, std::shared_ptr<Vector3> *upDir = nullptr);
 			};
 		};
 		class DLLNETWORK BaseEntityTriggerGravityComponent : public BaseEntityComponent {
@@ -35,16 +35,22 @@ export {
 			virtual void Initialize() override;
 			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		protected:
-			virtual void OnResetGravity(BaseEntity *ent, GravitySettings &settings);
-			virtual void OnStartTouch(BaseEntity *ent);
-			void OnEndTouch(BaseEntity *ent);
+			virtual void OnResetGravity(pragma::ecs::BaseEntity *ent, GravitySettings &settings);
+			virtual void OnStartTouch(pragma::ecs::BaseEntity *ent);
+			void OnEndTouch(pragma::ecs::BaseEntity *ent);
 
 			Vector3 m_kvGravityDir = {};
 			float m_kvGravityForce = 0.f;
 			bool m_kvUseForce = false;
 			std::unordered_map<std::shared_ptr<EntityHandle>, GravitySettings> m_gravityReset;
 		};
+        using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::Entity::TriggerGravity::SpawnFlags);
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::Entity::TriggerGravity::NetFlags);
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::Entity::TriggerGravity::SpawnFlags> : std::true_type {};
+		
+        template<>
+        struct enable_bitwise_operators<pragma::Entity::TriggerGravity::NetFlags> : std::true_type {};
+    }
 };

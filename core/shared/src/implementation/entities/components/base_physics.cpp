@@ -42,7 +42,7 @@ void BasePhysicsComponent::RegisterEvents(pragma::EntityComponentManager &compon
 	EVENT_HANDLE_RAYCAST = registerEvent("HANDLE_RAYCAST", ComponentEventInfo::Type::Explicit);
 	EVENT_INITIALIZE_PHYSICS = registerEvent("INITIALIZE_PHYSICS", ComponentEventInfo::Type::Broadcast);
 }
-BasePhysicsComponent::BasePhysicsComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_collisionType(COLLISIONTYPE::NONE), m_moveType(MOVETYPE::NONE) {}
+BasePhysicsComponent::BasePhysicsComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_collisionType(COLLISIONTYPE::NONE), m_moveType(MOVETYPE::NONE) {}
 void BasePhysicsComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();
@@ -109,7 +109,7 @@ float BasePhysicsComponent::GetAABBDistance(const Vector3 &p) const
 	umath::geometry::closest_point_on_aabb_to_point(min, max, p, &r);
 	return uvec::distance(r, p);
 }
-float BasePhysicsComponent::GetAABBDistance(const BaseEntity &ent) const
+float BasePhysicsComponent::GetAABBDistance(const pragma::ecs::BaseEntity &ent) const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	auto origin0 = pTrComponent ? pTrComponent->GetPosition() : Vector3 {};
@@ -144,7 +144,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 	PHYSICSTYPE type = GetPhysicsType();
 	if(type == PHYSICSTYPE::NONE)
 		return;
-	PhysObj *phys = GetPhysicsObject();
+	pragma::physics::PhysObj *phys = GetPhysicsObject();
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
@@ -183,7 +183,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 	{
 		auto &rotCur = pTrComponent->GetRotation();
 		if(fabsf(rot.w - rotCur.w) > ENT_EPSILON || fabsf(rot.x - rotCur.x) > ENT_EPSILON || fabsf(rot.y - rotCur.y) > ENT_EPSILON || fabsf(rot.z - rotCur.z) > ENT_EPSILON) {
-			ent.SetStateFlag(BaseEntity::StateFlags::RotationChanged);
+			ent.SetStateFlag(pragma::ecs::BaseEntity::StateFlags::RotationChanged);
 			bSnapshot = true;
 
 			// Sanity check
@@ -216,7 +216,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 	if(pTrComponent) {
 		auto &posCur = pTrComponent->GetPosition();
 		if(fabsf(pos.x - posCur.x) > ENT_EPSILON || fabsf(pos.y - posCur.y) > ENT_EPSILON || fabsf(pos.z - posCur.z) > ENT_EPSILON) {
-			ent.SetStateFlag(BaseEntity::StateFlags::PositionChanged);
+			ent.SetStateFlag(pragma::ecs::BaseEntity::StateFlags::PositionChanged);
 			pTrComponent->UpdateLastMovedTime();
 			bSnapshot = true;
 
@@ -277,7 +277,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 		pTrComponent->OnPoseChanged(transformChangeFlags, false);
 }
 
-BaseEntity *BasePhysicsComponent::GetGroundEntity() const { return nullptr; }
+pragma::ecs::BaseEntity *BasePhysicsComponent::GetGroundEntity() const { return nullptr; }
 
 void BasePhysicsComponent::SetCollisionCallbacksEnabled(bool b) { m_bColCallbacksEnabled = b; }
 void BasePhysicsComponent::SetCollisionContactReportEnabled(bool b)
@@ -328,7 +328,7 @@ void BasePhysicsComponent::SetSimulationEnabled(bool b)
 bool BasePhysicsComponent::GetSimulationEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::SimulationEnabled); }
 bool BasePhysicsComponent::IsTrigger() const
 {
-	PhysObj *phys = GetPhysicsObject();
+	pragma::physics::PhysObj *phys = GetPhysicsObject();
 	if(phys == NULL)
 		return false;
 	return phys->IsTrigger();
@@ -338,7 +338,7 @@ void BasePhysicsComponent::SetCollisionFilter(pragma::physics::CollisionMask fil
 {
 	m_collisionFilterGroup = filterGroup;
 	m_collisionFilterMask = filterMask;
-	PhysObj *phys = GetPhysicsObject();
+	pragma::physics::PhysObj *phys = GetPhysicsObject();
 	if(phys == NULL)
 		return;
 	phys->SetCollisionFilter(filterGroup, filterMask);
@@ -399,7 +399,7 @@ MOVETYPE BasePhysicsComponent::GetMoveType() const { return m_moveType; }
 void BasePhysicsComponent::SetMoveType(MOVETYPE movetype) { m_moveType = movetype; }
 bool BasePhysicsComponent::IsOnGround() const
 {
-	PhysObj *phys = GetPhysicsObject();
+	pragma::physics::PhysObj *phys = GetPhysicsObject();
 	if(phys == NULL || !phys->IsController())
 		return false;
 	ControllerPhysObj *physController = static_cast<ControllerPhysObj *>(phys);
@@ -407,7 +407,7 @@ bool BasePhysicsComponent::IsOnGround() const
 }
 bool BasePhysicsComponent::IsGroundWalkable() const
 {
-	PhysObj *phys = GetPhysicsObject();
+	pragma::physics::PhysObj *phys = GetPhysicsObject();
 	if(phys == NULL || !phys->IsController())
 		return false;
 	ControllerPhysObj *physController = static_cast<ControllerPhysObj *>(phys);
@@ -448,7 +448,7 @@ void BasePhysicsComponent::GetCollisionBounds(Vector3 *min, Vector3 *max) const
 void BasePhysicsComponent::SetCollisionBounds(const Vector3 &min, const Vector3 &max)
 {
 	if(min.x != m_colMin.x || min.y != m_colMin.y || min.z != m_colMin.z || max.x != m_colMax.x || max.y != m_colMax.y || max.z != m_colMax.z)
-		GetEntity().SetStateFlag(BaseEntity::StateFlags::CollisionBoundsChanged);
+		GetEntity().SetStateFlag(pragma::ecs::BaseEntity::StateFlags::CollisionBoundsChanged);
 	m_colMin = min;
 	m_colMax = max;
 	auto extents = (max - min) * 0.5f;
@@ -487,7 +487,7 @@ Vector3 BasePhysicsComponent::GetCollisionCenter() const
 
 void BasePhysicsComponent::PhysicsUpdate(double tDelta)
 {
-	PhysObj *phys = GetPhysicsObject();
+	pragma::physics::PhysObj *phys = GetPhysicsObject();
 	CEPhysicsUpdateData evData {tDelta};
 	MOVETYPE movetype = GetMoveType();
 	if(phys != NULL && m_physObject->IsStatic() == false) {
@@ -499,7 +499,7 @@ void BasePhysicsComponent::PhysicsUpdate(double tDelta)
 
 void BasePhysicsComponent::PrePhysicsSimulate()
 {
-	PhysObj *phys = GetPhysicsObject();
+	pragma::physics::PhysObj *phys = GetPhysicsObject();
 	InvokeEventCallbacks(EVENT_ON_PRE_PHYSICS_SIMULATE);
 	if(phys == NULL || phys->IsStatic())
 		return;
@@ -727,7 +727,7 @@ void BasePhysicsComponent::UpdateRagdollPose()
 
 bool BasePhysicsComponent::PostPhysicsSimulate()
 {
-	PhysObj *phys = GetPhysicsObject();
+	pragma::physics::PhysObj *phys = GetPhysicsObject();
 	CEPostPhysicsSimulate evData {};
 	InvokeEventCallbacks(EVENT_ON_POST_PHYSICS_SIMULATE, evData);
 	if(phys == NULL || phys->IsStatic())
@@ -739,14 +739,14 @@ bool BasePhysicsComponent::PostPhysicsSimulate()
 #if PHYS_KEEP_SIMULATION_TRANSFORM != 0
 Vector3 BasePhysicsComponent::GetPhysicsSimulationOffset()
 {
-	PhysObj *phys = GetPhysicsObject();
+	pragma::physics::PhysObj *phys = GetPhysicsObject();
 	if(phys == NULL || phys->IsStatic())
 		return Vector3(0, 0, 0);
 	return dynamic_cast<PhysObjDynamic *>(phys)->GetSimulationOffset();
 }
 Quat BasePhysicsComponent::GetPhysicsSimulationRotation()
 {
-	PhysObj *phys = GetPhysicsObject();
+	pragma::physics::PhysObj *phys = GetPhysicsObject();
 	if(phys == NULL || phys->IsStatic())
 		return uquat::identity();
 	return dynamic_cast<PhysObjDynamic *>(phys)->GetSimulationRotation();

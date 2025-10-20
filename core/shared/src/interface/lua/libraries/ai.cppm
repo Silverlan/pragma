@@ -7,6 +7,8 @@ module;
 
 export module pragma.shared:scripting.lua.libraries.ai;
 
+export import pragma.lua;
+
 export namespace Lua {
 	namespace ai {
 		DLLNETWORK void register_library(Lua::Interface &lua);

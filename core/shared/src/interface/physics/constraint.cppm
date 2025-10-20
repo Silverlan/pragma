@@ -39,8 +39,8 @@ export namespace pragma::physics {
 		Quat GetTargetRotation();
 
 		// Returns the entity this constraint belongs to (if any)
-		BaseEntity *GetEntity() const;
-		void SetEntity(BaseEntity &ent);
+		pragma::ecs::BaseEntity *GetEntity() const;
+		void SetEntity(pragma::ecs::BaseEntity &ent);
 
 		virtual float GetBreakForce() const = 0;
 		virtual void SetBreakForce(float threshold) = 0;

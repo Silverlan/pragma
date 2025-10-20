@@ -5,6 +5,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <iostream>
+#include <functional>
 
 #define MATRIX_OSTREAM_DEC(type)                                                                                                                                                                                                                                                                 \
 	DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const Mat##type &m);                                                                                                                                                                                                                     \

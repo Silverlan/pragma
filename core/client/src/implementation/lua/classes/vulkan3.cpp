@@ -7,7 +7,6 @@ module;
 #include "udm.hpp"
 
 #include "pragma/lua/luaapi.h"
-#include "pragma/lua/types/udm.hpp"
 #include "stdafx_client.h"
 #include <luabind/class.hpp>
 #include <prosper_framebuffer.hpp>

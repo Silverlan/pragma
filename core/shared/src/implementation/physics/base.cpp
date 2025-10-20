@@ -30,8 +30,8 @@ void pragma::physics::IBase::SetUserData(void *userData) const
 	m_userData = userData;
 }
 void *pragma::physics::IBase::GetUserData() const { return m_userData; }
-void pragma::physics::IBase::SetPhysObj(PhysObj &physObj) { m_physObj = &physObj; }
-PhysObj *pragma::physics::IBase::GetPhysObj() const { return m_physObj; }
+void pragma::physics::IBase::SetPhysObj(pragma::physics::PhysObj &physObj) { m_physObj = &physObj; }
+pragma::physics::PhysObj *pragma::physics::IBase::GetPhysObj() const { return m_physObj; }
 void pragma::physics::IBase::Initialize() {}
 void pragma::physics::IBase::OnRemove()
 {

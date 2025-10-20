@@ -16,6 +16,6 @@ export namespace pragma {
 		using BaseEntityComponent::BaseEntityComponent;
 	  protected:
 		std::string m_kvSurfaceMaterial;
-		void UpdateSurfaceMaterial(Game *game);
+		void UpdateSurfaceMaterial(pragma::Game *game);
 	};
 };

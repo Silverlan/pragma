@@ -33,8 +33,8 @@ uint32_t pragma::physics::PhysObjCreateInfo::AddShape(pragma::physics::IShape &s
 	return 1;
 }
 void pragma::physics::PhysObjCreateInfo::SetModelMeshBoneMapping(MeshIndex modelMeshIndex, BoneId boneIndex) { m_modelMeshIndexToShapeIndex[modelMeshIndex] = boneIndex; }
-void pragma::physics::PhysObjCreateInfo::SetModel(Model &model) { m_model = model.GetHandle(); }
-Model *pragma::physics::PhysObjCreateInfo::GetModel() const { return m_model.get(); }
+void pragma::physics::PhysObjCreateInfo::SetModel(pragma::Model &model) { m_model = model.GetHandle(); }
+pragma::Model *pragma::physics::PhysObjCreateInfo::GetModel() const { return m_model.get(); }
 const std::unordered_map<pragma::physics::PhysObjCreateInfo::BoneId, std::vector<pragma::physics::PhysObjCreateInfo::ShapeInfo>> &pragma::physics::PhysObjCreateInfo::GetShapes() const { return m_shapes; }
 const std::unordered_map<pragma::physics::PhysObjCreateInfo::MeshIndex, pragma::physics::PhysObjCreateInfo::BoneId> &pragma::physics::PhysObjCreateInfo::GetModelMeshBoneMappings() const { return m_modelMeshIndexToShapeIndex; }
 
@@ -164,7 +164,7 @@ PhysObjHandle BasePhysicsComponent::InitializePhysics(const physics::PhysObjCrea
 					bPhys = true;
 					if(m_physObject != nullptr)
 						DestroyPhysicsObject();
-					m_physObject = util::to_shared_handle<PhysObj>(PhysObj::Create<RigidPhysObj, pragma::physics::IRigidBody &>(*this, *body));
+					m_physObject = util::to_shared_handle<pragma::physics::PhysObj>(pragma::physics::PhysObj::Create<RigidPhysObj, pragma::physics::IRigidBody &>(*this, *body));
 				}
 				else
 					m_physObject->AddCollisionObject(*body);
@@ -194,7 +194,7 @@ PhysObjHandle BasePhysicsComponent::InitializePhysics(const physics::PhysObjCrea
 			bPhys = true;
 			if(m_physObject != nullptr)
 				DestroyPhysicsObject();
-			m_physObject = util::to_shared_handle<PhysObj>(PhysObj::Create<RigidPhysObj, pragma::physics::IRigidBody &>(*this, *body));
+			m_physObject = util::to_shared_handle<pragma::physics::PhysObj>(pragma::physics::PhysObj::Create<RigidPhysObj, pragma::physics::IRigidBody &>(*this, *body));
 		}
 		else
 			m_physObject->AddCollisionObject(*body);
@@ -458,7 +458,7 @@ PhysObjHandle BasePhysicsComponent::InitializePhysics(const physics::PhysObjCrea
 	return PhysObjHandle {m_physObject};
 }
 
-util::TSharedHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags flags)
+util::TSharedHandle<pragma::physics::PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags flags)
 {
 	physics::PhysObjCreateInfo physObjCreateInfo {};
 
@@ -489,14 +489,14 @@ util::TSharedHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFl
 	return util::claim_shared_handle_ownership(InitializePhysics(physObjCreateInfo, flags, meshes.front()->GetBoneParent()));
 }
 
-util::TSharedHandle<PhysObj> BasePhysicsComponent::InitializeBoxControllerPhysics()
+util::TSharedHandle<pragma::physics::PhysObj> BasePhysicsComponent::InitializeBoxControllerPhysics()
 {
 	Vector3 min, max;
 	GetCollisionBounds(&min, &max);
 	auto origin = (min + max) / 2.f;
 	auto extents = max - min;
 
-	m_physObject = util::to_shared_handle<PhysObj>(PhysObj::Create<BoxControllerPhysObj>(*this, extents * 0.5f, 24));
+	m_physObject = util::to_shared_handle<pragma::physics::PhysObj>(pragma::physics::PhysObj::Create<BoxControllerPhysObj>(*this, extents * 0.5f, 24));
 	if(m_physObject == nullptr)
 		return {};
 	m_physObject->GetCollisionObject()->SetOrigin(-origin);
@@ -508,12 +508,12 @@ util::TSharedHandle<PhysObj> BasePhysicsComponent::InitializeBoxControllerPhysic
 	OnPhysicsInitialized();
 	return m_physObject;
 }
-util::TSharedHandle<PhysObj> BasePhysicsComponent::InitializeCapsuleControllerPhysics()
+util::TSharedHandle<pragma::physics::PhysObj> BasePhysicsComponent::InitializeCapsuleControllerPhysics()
 {
 	Vector3 min, max;
 	GetCollisionBounds(&min, &max);
 
-	m_physObject = util::to_shared_handle<PhysObj>(PhysObj::Create<CapsuleControllerPhysObj>(*this, CUInt32(umath::max(max.x - min.x, max.z - min.z)), CUInt32(max.y - min.y), 24));
+	m_physObject = util::to_shared_handle<pragma::physics::PhysObj>(pragma::physics::PhysObj::Create<CapsuleControllerPhysObj>(*this, CUInt32(umath::max(max.x - min.x, max.z - min.z)), CUInt32(max.y - min.y), 24));
 	if(m_physObject == nullptr)
 		return {};
 	m_physicsType = PHYSICSTYPE::CAPSULECONTROLLER;
@@ -533,7 +533,7 @@ void BasePhysicsComponent::ClearAwakeStatus()
 		return;
 	awakePhysC.erase(it);
 }
-void BasePhysicsComponent::OnPhysicsWake(PhysObj *)
+void BasePhysicsComponent::OnPhysicsWake(pragma::physics::PhysObj *)
 {
 	GetEntity().MarkForSnapshot(true);
 
@@ -546,7 +546,7 @@ void BasePhysicsComponent::OnPhysicsWake(PhysObj *)
 	}
 	awakePhysC.push_back(GetHandle<BasePhysicsComponent>());
 }
-void BasePhysicsComponent::OnPhysicsSleep(PhysObj *)
+void BasePhysicsComponent::OnPhysicsSleep(pragma::physics::PhysObj *)
 {
 	if(AreForcePhysicsAwakeCallbacksEnabled())
 		return;
@@ -558,7 +558,7 @@ void BasePhysicsComponent::OnPhysicsSleep(PhysObj *)
 	ClearAwakeStatus();
 }
 
-PhysObj *BasePhysicsComponent::GetPhysicsObject() const { return const_cast<PhysObj *>(m_physObject.get()); }
+pragma::physics::PhysObj *BasePhysicsComponent::GetPhysicsObject() const { return const_cast<pragma::physics::PhysObj *>(m_physObject.get()); }
 
 void BasePhysicsComponent::InitializePhysObj()
 {
@@ -579,7 +579,7 @@ void BasePhysicsComponent::InitializePhysObj()
 	//	pos -= o->GetOrigin();
 	//SetPosition(pos);//,true); // Update our position, since our origin may have changed
 }
-PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physics::IConvexShape &shape, PhysFlags flags)
+pragma::physics::PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physics::IConvexShape &shape, PhysFlags flags)
 {
 	//btScalar contactProcessingThreshold = BT_LARGE_FLOAT;
 	auto bDynamic = umath::is_flag_set(flags, PhysFlags::Dynamic);
@@ -587,7 +587,7 @@ PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physics::IConvexShape &
 
 	if(m_physObject)
 		DestroyPhysicsObject();
-	m_physObject = util::to_shared_handle<PhysObj>(PhysObj::Create<RigidPhysObj, pragma::physics::IRigidBody &>(*this, *body));
+	m_physObject = util::to_shared_handle<pragma::physics::PhysObj>(pragma::physics::PhysObj::Create<RigidPhysObj, pragma::physics::IRigidBody &>(*this, *body));
 	auto group = GetCollisionFilter();
 	auto mask = GetCollisionFilterMask();
 	if(bDynamic) {
@@ -618,7 +618,7 @@ PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physics::IConvexShape &
 	OnPhysicsInitialized();
 	return m_physObject.get();
 }
-PhysObj *BasePhysicsComponent::InitializePhysics(PHYSICSTYPE type, PhysFlags flags)
+pragma::physics::PhysObj *BasePhysicsComponent::InitializePhysics(PHYSICSTYPE type, PhysFlags flags)
 {
 	umath::set_flag(flags, PhysFlags::Dynamic, type != PHYSICSTYPE::STATIC);
 	if(m_physObject)
@@ -642,7 +642,7 @@ PhysObj *BasePhysicsComponent::InitializePhysics(PHYSICSTYPE type, PhysFlags fla
 			auto mdlComponent = GetEntity().GetModelComponent();
 			auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 			if(hMdl != nullptr) {
-				Model *mdl = hMdl.get();
+				pragma::Model *mdl = hMdl.get();
 				auto &meshes = mdl->GetCollisionMeshes();
 				if(!meshes.empty())
 					return InitializeModelPhysics(flags).get();
@@ -711,13 +711,13 @@ bool BasePhysicsComponent::IsKinematic() const { return umath::is_flag_set(m_sta
 void BasePhysicsComponent::SetKinematic(bool b)
 {
 	umath::set_flag(m_stateFlags, StateFlags::Kinematic, b);
-	PhysObj *phys = GetPhysicsObject();
+	pragma::physics::PhysObj *phys = GetPhysicsObject();
 	if(phys == NULL || phys->IsStatic())
 		return;
 	PhysObjKinematic *kinematic = dynamic_cast<PhysObjKinematic *>(phys);
 	kinematic->SetKinematic(b);
 }
-bool BasePhysicsComponent::ShouldCollide(PhysObj *, pragma::physics::ICollisionObject *, BaseEntity *entOther, PhysObj *, pragma::physics::ICollisionObject *, bool valDefault) const
+bool BasePhysicsComponent::ShouldCollide(pragma::physics::PhysObj *, pragma::physics::ICollisionObject *, pragma::ecs::BaseEntity *entOther, pragma::physics::PhysObj *, pragma::physics::ICollisionObject *, bool valDefault) const
 {
 	if(m_customCollisions.empty())
 		return valDefault;
@@ -728,20 +728,20 @@ bool BasePhysicsComponent::ShouldCollide(PhysObj *, pragma::physics::ICollisionO
 }
 
 BasePhysicsComponent::CollisionInfo::CollisionInfo() : shouldCollide(false) {}
-BasePhysicsComponent::CollisionInfo::CollisionInfo(BaseEntity *_ent, Bool _shouldCollide) : entity(_ent->GetHandle()), shouldCollide(_shouldCollide) {}
-std::vector<BasePhysicsComponent::CollisionInfo>::iterator BasePhysicsComponent::FindCollisionInfo(BaseEntity *ent)
+BasePhysicsComponent::CollisionInfo::CollisionInfo(pragma::ecs::BaseEntity *_ent, Bool _shouldCollide) : entity(_ent->GetHandle()), shouldCollide(_shouldCollide) {}
+std::vector<BasePhysicsComponent::CollisionInfo>::iterator BasePhysicsComponent::FindCollisionInfo(pragma::ecs::BaseEntity *ent)
 {
 	return std::find_if(m_customCollisions.begin(), m_customCollisions.end(), [ent](CollisionInfo &info) { return (ent == info.entity.get()) ? true : false; });
 }
 BasePhysicsComponent::PhysJoint::PhysJoint(unsigned int _source, unsigned int _target) : source(_source), target(_target) {}
-void BasePhysicsComponent::ResetCollisions(BaseEntity *ent)
+void BasePhysicsComponent::ResetCollisions(pragma::ecs::BaseEntity *ent)
 {
 	auto it = FindCollisionInfo(ent);
 	if(it == m_customCollisions.end())
 		return;
 	m_customCollisions.erase(it);
 }
-void BasePhysicsComponent::SetCollisionsEnabled(BaseEntity *ent, bool b)
+void BasePhysicsComponent::SetCollisionsEnabled(pragma::ecs::BaseEntity *ent, bool b)
 {
 	for(auto it = m_customCollisions.begin(); it != m_customCollisions.end();) {
 		auto &info = *it;
@@ -757,8 +757,8 @@ void BasePhysicsComponent::SetCollisionsEnabled(BaseEntity *ent, bool b)
 		m_customCollisions.push_back(CollisionInfo(ent, b));
 	UpdateCCD();
 }
-void BasePhysicsComponent::DisableCollisions(BaseEntity *ent) { SetCollisionsEnabled(ent, false); }
-void BasePhysicsComponent::EnableCollisions(BaseEntity *ent) { SetCollisionsEnabled(ent, true); }
+void BasePhysicsComponent::DisableCollisions(pragma::ecs::BaseEntity *ent) { SetCollisionsEnabled(ent, false); }
+void BasePhysicsComponent::EnableCollisions(pragma::ecs::BaseEntity *ent) { SetCollisionsEnabled(ent, true); }
 void BasePhysicsComponent::UpdateCCD()
 {
 	auto *phys = GetPhysicsObject();

@@ -7,7 +7,6 @@ module;
 #include "udm.hpp"
 
 #include "pragma/lua/luaapi.h"
-#include "pragma/lua/types/udm.hpp"
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"

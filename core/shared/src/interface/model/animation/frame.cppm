@@ -13,6 +13,7 @@ export module pragma.shared:model.animation.frame;
 
 export import :game.coordinate_system;
 export import :model.animation.skeleton;
+export import :types;
 
 export {
 	struct DLLNETWORK FlexFrameData {
@@ -23,8 +24,6 @@ export {
 		bool operator!=(const FlexFrameData &other) const { return !operator==(other); }
 	};
 
-	class Model;
-	namespace pragma::animation {class Animation;};
 	class DLLNETWORK Frame : public std::enable_shared_from_this<Frame> {
 	public:
 		static std::shared_ptr<Frame> Create(unsigned int numBones);
@@ -56,7 +55,7 @@ export {
 
 		uint32_t GetBoneCount() const;
 		void SetBoneCount(uint32_t numBones);
-		std::pair<Vector3, Vector3> CalcRenderBounds(const pragma::animation::Animation &anim, const Model &mdl) const;
+		std::pair<Vector3, Vector3> CalcRenderBounds(const pragma::animation::Animation &anim, const pragma::Model &mdl) const;
 		void Rotate(const Quat &rot);
 		void Translate(const Vector3 &t);
 		void Rotate(const pragma::animation::Skeleton &skeleton, const Quat &rot);

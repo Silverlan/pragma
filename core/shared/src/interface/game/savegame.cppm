@@ -8,14 +8,15 @@ module;
 
 export module pragma.shared:game.savegame;
 
+export import :types;
+
 export {
-	class Game;
 	namespace pragma {
 		namespace savegame {
 			constexpr uint32_t FORMAT_VERSION = 1u;
 			constexpr auto PSAV_IDENTIFIER = "PSAV";
-			bool save(Game &game, const std::string &fileName, std::string &outErr);
-			bool load(Game &game, const std::string &fileName, std::string &outErr);
+			bool save(pragma::Game &game, const std::string &fileName, std::string &outErr);
+			bool load(pragma::Game &game, const std::string &fileName, std::string &outErr);
 		};
 	};
 };

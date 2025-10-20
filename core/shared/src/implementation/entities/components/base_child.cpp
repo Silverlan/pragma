@@ -24,7 +24,7 @@ void BaseChildComponent::RegisterMembers(pragma::EntityComponentManager &compone
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseChildComponent::BaseChildComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseChildComponent::BaseChildComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseChildComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -67,5 +67,5 @@ void BaseChildComponent::SetParent(const pragma::EntityURef &parent)
 	BroadcastEvent(EVENT_ON_PARENT_CHANGED);
 }
 const pragma::EntityURef &BaseChildComponent::GetParent() const { return m_parent; }
-BaseEntity *BaseChildComponent::GetParentEntity() { return m_parent.GetEntity(GetGame()); }
+pragma::ecs::BaseEntity *BaseChildComponent::GetParentEntity() { return m_parent.GetEntity(GetGame()); }
 bool BaseChildComponent::HasParent() const { return GetParentEntity() != nullptr; }

@@ -7,28 +7,28 @@ module pragma.shared;
 
 import :game.game;
 
-Bool Game::Overlap(const TraceData &data, std::vector<TraceResult> *optOutResults) const
+Bool pragma::Game::Overlap(const TraceData &data, std::vector<TraceResult> *optOutResults) const
 {
 	auto *physEnv = GetPhysicsEnvironment();
 	if(physEnv == nullptr)
 		return false;
 	return physEnv->Overlap(data, optOutResults);
 }
-Bool Game::RayCast(const TraceData &data, std::vector<TraceResult> *optOutResults) const
+Bool pragma::Game::RayCast(const TraceData &data, std::vector<TraceResult> *optOutResults) const
 {
 	auto *physEnv = GetPhysicsEnvironment();
 	if(physEnv == nullptr)
 		return false;
 	return physEnv->RayCast(data, optOutResults);
 }
-Bool Game::Sweep(const TraceData &data, std::vector<TraceResult> *optOutResults) const
+Bool pragma::Game::Sweep(const TraceData &data, std::vector<TraceResult> *optOutResults) const
 {
 	auto *physEnv = GetPhysicsEnvironment();
 	if(physEnv == nullptr)
 		return false;
 	return physEnv->Sweep(data, optOutResults);
 }
-TraceResult Game::Overlap(const TraceData &data) const
+TraceResult pragma::Game::Overlap(const TraceData &data) const
 {
 	std::vector<TraceResult> results {};
 	if(Overlap(data, &results) == false) {
@@ -38,7 +38,7 @@ TraceResult Game::Overlap(const TraceData &data) const
 	}
 	return results.front();
 }
-TraceResult Game::RayCast(const TraceData &data) const
+TraceResult pragma::Game::RayCast(const TraceData &data) const
 {
 	std::vector<TraceResult> results {};
 	if(RayCast(data, &results) == false) {
@@ -48,7 +48,7 @@ TraceResult Game::RayCast(const TraceData &data) const
 	}
 	return results.front();
 }
-TraceResult Game::Sweep(const TraceData &data) const
+TraceResult pragma::Game::Sweep(const TraceData &data) const
 {
 	std::vector<TraceResult> results {};
 	if(Sweep(data, &results) == false) {

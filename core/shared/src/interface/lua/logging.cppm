@@ -12,6 +12,7 @@ module;
 export module pragma.shared:scripting.lua.logging;
 
 export import :core.logging;
+import pragma.lua;
 
 export namespace Lua::logging {
 	DLLNETWORK std::string to_string(lua_State *l, int i);

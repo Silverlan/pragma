@@ -7,7 +7,7 @@ module pragma.shared;
 
 import :entities.raycast;
 
-TraceData util::get_entity_trace_data(BaseEntity &ent)
+TraceData util::get_entity_trace_data(pragma::ecs::BaseEntity &ent)
 {
 	auto pCharComponent = ent.GetCharacterComponent();
 	if(pCharComponent.valid())

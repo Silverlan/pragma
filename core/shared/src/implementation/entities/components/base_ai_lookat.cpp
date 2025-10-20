@@ -99,7 +99,7 @@ void BaseAIComponent::SetLookTarget(const Vector3 &pos, float t)
 
 	OnLookTargetChanged();
 }
-void BaseAIComponent::SetLookTarget(const BaseEntity &ent, float t)
+void BaseAIComponent::SetLookTarget(const pragma::ecs::BaseEntity &ent, float t)
 {
 	m_neckInfo.lookTime = t;
 	if(m_neckInfo.lookTargetType == BaseAIComponent::LookTargetType::Entity && m_neckInfo.hEntityLookTarget.get() == &ent)

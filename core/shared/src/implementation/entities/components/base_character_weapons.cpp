@@ -12,7 +12,7 @@ import :entities.components.base_character;
 using namespace pragma;
 
 std::vector<EntityHandle> &BaseCharacterComponent::GetWeapons() { return m_weapons; }
-void BaseCharacterComponent::GiveWeapon(BaseEntity &ent)
+void BaseCharacterComponent::GiveWeapon(pragma::ecs::BaseEntity &ent)
 {
 	if(!ent.IsWeapon())
 		return;
@@ -24,7 +24,7 @@ void BaseCharacterComponent::GiveWeapon(BaseEntity &ent)
 	if(GetActiveWeapon() == nullptr)
 		DeployWeapon(ent);
 }
-BaseEntity *BaseCharacterComponent::GiveWeapon(std::string className)
+pragma::ecs::BaseEntity *BaseCharacterComponent::GiveWeapon(std::string className)
 {
 	auto &ent = GetEntity();
 	auto *state = ent.GetNetworkState();
@@ -40,25 +40,25 @@ BaseEntity *BaseCharacterComponent::GiveWeapon(std::string className)
 	GiveWeapon(*wep);
 	return wep;
 }
-BaseEntity *BaseCharacterComponent::GetActiveWeapon()
+pragma::ecs::BaseEntity *BaseCharacterComponent::GetActiveWeapon()
 {
 	if(m_weaponActive.valid() == false)
 		return nullptr;
 	return m_weaponActive.get();
 }
-BaseEntity *BaseCharacterComponent::GetWeapon(std::string className)
+pragma::ecs::BaseEntity *BaseCharacterComponent::GetWeapon(std::string className)
 {
 	ustring::to_lower(className);
 	auto it = std::find_if(m_weapons.begin(), m_weapons.end(), [&className](const EntityHandle &hEnt) { return (hEnt.valid() && hEnt.get()->GetClass() == className) ? true : false; });
 	return (it != m_weapons.end()) ? it->get() : nullptr;
 }
-std::vector<BaseEntity *> BaseCharacterComponent::GetWeapons(std::string className)
+std::vector<pragma::ecs::BaseEntity *> BaseCharacterComponent::GetWeapons(std::string className)
 {
-	std::vector<BaseEntity *> weapons;
+	std::vector<pragma::ecs::BaseEntity *> weapons;
 	GetWeapons(className, weapons);
 	return weapons;
 }
-void BaseCharacterComponent::GetWeapons(std::string className, std::vector<BaseEntity *> &weapons)
+void BaseCharacterComponent::GetWeapons(std::string className, std::vector<pragma::ecs::BaseEntity *> &weapons)
 {
 	ustring::to_lower(className);
 	for(auto &hEnt : m_weapons) {
@@ -75,7 +75,7 @@ void BaseCharacterComponent::DeployWeapon(const std::string &className)
 		return;
 	DeployWeapon(*it->get());
 }
-void BaseCharacterComponent::DeployWeapon(BaseEntity &ent)
+void BaseCharacterComponent::DeployWeapon(pragma::ecs::BaseEntity &ent)
 {
 	if(&ent == GetActiveWeapon())
 		return;
@@ -91,7 +91,7 @@ void BaseCharacterComponent::DeployWeapon(BaseEntity &ent)
 	auto evOnDeployWeapon = CEOnDeployWeapon {ent};
 	BroadcastEvent(EVENT_ON_DEPLOY_WEAPON, evOnDeployWeapon);
 }
-void BaseCharacterComponent::SetActiveWeapon(BaseEntity *ent)
+void BaseCharacterComponent::SetActiveWeapon(pragma::ecs::BaseEntity *ent)
 {
 	if(ent == nullptr)
 		m_weaponActive = EntityHandle();
@@ -124,7 +124,7 @@ void BaseCharacterComponent::RemoveWeapon(std::string className)
 		}
 	}
 }
-std::vector<EntityHandle>::iterator BaseCharacterComponent::RemoveWeapon(BaseEntity &ent)
+std::vector<EntityHandle>::iterator BaseCharacterComponent::RemoveWeapon(pragma::ecs::BaseEntity &ent)
 {
 	auto it = std::find_if(m_weapons.begin(), m_weapons.end(), [&ent](const EntityHandle &hEnt) { return (hEnt.get() == &ent) ? true : false; });
 	if(it == m_weapons.end())

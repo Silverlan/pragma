@@ -21,7 +21,7 @@ static_assert(sizeof(Vector3) == sizeof(::pragma::bvh::Vec));
 
 const ::pragma::bvh::Vec &pragma::bvh::to_bvh_vector(const Vector3 &v) { return reinterpret_cast<const ::pragma::bvh::Vec &>(v); }
 const Vector3 &pragma::bvh::from_bvh_vector(const ::pragma::bvh::Vec &v) { return reinterpret_cast<const Vector3 &>(v); }
-bool pragma::bvh::is_mesh_bvh_compatible(const ::ModelSubMesh &mesh) { return mesh.GetGeometryType() == ModelSubMesh::GeometryType::Triangles; }
+bool pragma::bvh::is_mesh_bvh_compatible(const pragma::ModelSubMesh &mesh) { return mesh.GetGeometryType() == pragma::ModelSubMesh::GeometryType::Triangles; }
 
 pragma::bvh::Primitive pragma::bvh::create_triangle(const Vector3 &a, const Vector3 &b, const Vector3 &c) { return pragma::bvh::Primitive {to_bvh_vector(a), to_bvh_vector(b), to_bvh_vector(c)}; }
 
@@ -326,9 +326,9 @@ bool pragma::bvh::MeshBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir
 
 pragma::bvh::Ray pragma::bvh::get_ray(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) { return Ray {to_bvh_vector(origin), to_bvh_vector(dir), minDist, maxDist}; }
 
-std::unordered_map<std::string, std::shared_ptr<ModelSubMesh>> pragma::bvh::get_uuid_mesh_map(Model &mdl)
+std::unordered_map<std::string, std::shared_ptr<pragma::ModelSubMesh>> pragma::bvh::get_uuid_mesh_map(pragma::Model &mdl)
 {
-	std::unordered_map<std::string, std::shared_ptr<ModelSubMesh>> mdlMeshes;
+	std::unordered_map<std::string, std::shared_ptr<pragma::ModelSubMesh>> mdlMeshes;
 	for(auto &mg : mdl.GetMeshGroups()) {
 		for(auto &m : mg->GetMeshes()) {
 			for(auto &sm : m->GetSubMeshes()) {
@@ -365,7 +365,7 @@ void pragma::bvh::debug::print_bvh_tree(pragma::bvh::Bvh &bvh)
 	Con::cout << "BVH Tree:" << ss.str() << Con::endl;
 }
 
-void pragma::bvh::debug::draw_bvh_tree(const Game &game, pragma::bvh::Bvh &bvh, const umath::ScaledTransform &pose, float duration)
+void pragma::bvh::debug::draw_bvh_tree(const pragma::Game &game, pragma::bvh::Bvh &bvh, const umath::ScaledTransform &pose, float duration)
 {
 	constexpr size_t stack_size = 64;
 	::bvh::v2::SmallStack<pragma::bvh::Bvh::Index, stack_size> stack;
@@ -391,13 +391,13 @@ restart:
 		}
 	}
 }
-void pragma::bvh::debug::draw_node(const Game &game, const pragma::bvh::BBox &bbox, const umath::ScaledTransform &pose, const Color &col, float duration)
+void pragma::bvh::debug::draw_node(const pragma::Game &game, const pragma::bvh::BBox &bbox, const umath::ScaledTransform &pose, const Color &col, float duration)
 {
 	auto vstart = from_bvh_vector(bbox.min);
 	auto vend = from_bvh_vector(bbox.max);
-	const_cast<Game &>(game).DrawBox(pose.GetOrigin(), vstart, vend, pose.GetRotation(), Color::White, col, duration);
+	const_cast<pragma::Game &>(game).DrawBox(pose.GetOrigin(), vstart, vend, pose.GetRotation(), Color::White, col, duration);
 }
-void pragma::bvh::debug::draw_node(const Game &game, const pragma::bvh::Node &node, const umath::ScaledTransform &pose, const Color &col, float duration)
+void pragma::bvh::debug::draw_node(const pragma::Game &game, const pragma::bvh::Node &node, const umath::ScaledTransform &pose, const Color &col, float duration)
 {
 	auto bbox = node.get_bbox();
 	draw_node(game, bbox, pose, col, duration);

@@ -227,7 +227,7 @@ void PolyMesh::Validate()
 }
 bool PolyMesh::IsValid() { return m_bValid; }
 
-std::shared_ptr<Model> PolyMesh::GenerateModel()
+std::shared_ptr<pragma::Model> PolyMesh::GenerateModel()
 {
 	/*auto mdl = std::make_shared<Model>();
 	auto meshCol = std::make_shared<CollisionMesh>();

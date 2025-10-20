@@ -68,7 +68,7 @@ static uint8_t clip_triangle(const std::function<void(uint16_t)> &fAddTriangleIn
 	return 0;
 }
 
-void CollisionMesh::ClipAgainstPlane(const Vector3 &n, double d, CollisionMesh &clippedMesh)
+void pragma::physics::CollisionMesh::ClipAgainstPlane(const Vector3 &n, double d, pragma::physics::CollisionMesh &clippedMesh)
 {
 	const auto &verts = GetVertices();
 	const auto &triangles = GetTriangles();
@@ -155,7 +155,7 @@ void CollisionMesh::ClipAgainstPlane(const Vector3 &n, double d, CollisionMesh &
 	clippedMesh.m_centerOfMass = m_centerOfMass;
 	clippedMesh.m_volume = m_volume;
 }
-void CollisionMesh::ClipAgainstPlane(const Vector3 &n, double d, CollisionMesh &clippedMeshA, CollisionMesh &clippedMeshB)
+void pragma::physics::CollisionMesh::ClipAgainstPlane(const Vector3 &n, double d, pragma::physics::CollisionMesh &clippedMeshA, pragma::physics::CollisionMesh &clippedMeshB)
 {
 	ClipAgainstPlane(n, d, clippedMeshA);
 	ClipAgainstPlane(-n, -d, clippedMeshB);

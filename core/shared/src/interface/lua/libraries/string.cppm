@@ -5,6 +5,9 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <string>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:scripting.lua.libraries.string;
 
 export namespace Lua {

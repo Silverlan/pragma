@@ -38,7 +38,7 @@ void BaseEnvExplosionComponent::Explode()
 	float radius = 512.f;
 	unsigned short damage = 12;
 	Vector3 force(0.f, 0.f, 0.f);
-	EntityIterator entIt {*ent.GetNetworkState()->GetGameState()};
+	pragma::ecs::EntityIterator entIt {*ent.GetNetworkState()->GetGameState()};
 	entIt.AttachFilter<EntityIteratorFilterComponent>("transform");
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::DamageableComponent>>();
 	for(auto *entOther : entIt) {

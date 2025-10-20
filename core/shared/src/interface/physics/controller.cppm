@@ -71,6 +71,10 @@ export {
 			Vector3 m_halfExtents {};
 			ShapeType m_shapeType = ShapeType::Capsule;
 		};
+		using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::physics::IController::CollisionFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::physics::IController::CollisionFlags> : std::true_type {};
+	}
 };

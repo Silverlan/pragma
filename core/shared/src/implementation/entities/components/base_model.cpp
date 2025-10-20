@@ -50,7 +50,7 @@ void BaseModelComponent::RegisterMembers(pragma::EntityComponentManager &compone
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseModelComponent::BaseModelComponent(BaseEntity &ent) : BaseEntityComponent(ent)
+BaseModelComponent::BaseModelComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent)
 {
 	m_skin = util::SimpleProperty<util::UInt32Property, uint32_t>::Create(0u);
 	m_skin->AddCallback([this](std::reference_wrapper<const uint32_t> oldVal, std::reference_wrapper<const uint32_t> newVal) { SetSkin(newVal.get()); });
@@ -61,7 +61,7 @@ void BaseModelComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	m_netEvSetBodyGroup = SetupNetEvent("set_body_group");
 	m_netEvMaxDrawDist = SetupNetEvent("set_max_draw_distance");
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "model", false)) {
 			m_kvModel = kvData.value;
@@ -157,7 +157,7 @@ bool BaseModelComponent::GetAttachment(const std::string &name, Vector3 *pos, Qu
 
 void BaseModelComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
 
-void BaseModelComponent::GetAnimations(Activity activity, std::vector<unsigned int> &animations) const
+void BaseModelComponent::GetAnimations(pragma::Activity activity, std::vector<unsigned int> &animations) const
 {
 	auto hModel = GetModel();
 	if(hModel == nullptr)
@@ -172,11 +172,11 @@ unsigned char BaseModelComponent::GetAnimationActivityWeight(unsigned int animat
 		return 0;
 	return hModel->GetAnimationActivityWeight(animation);
 }
-Activity BaseModelComponent::GetAnimationActivity(unsigned int animation) const
+pragma::Activity BaseModelComponent::GetAnimationActivity(unsigned int animation) const
 {
 	auto hModel = GetModel();
 	if(hModel == nullptr)
-		return Activity::Invalid;
+		return pragma::Activity::Invalid;
 	return hModel->GetAnimationActivity(animation);
 }
 float BaseModelComponent::GetAnimationDuration(unsigned int animation) const
@@ -264,7 +264,7 @@ void BaseModelComponent::SetModel(const std::string &mdl)
 
 	if(mdl.empty() == true) {
 		if(m_model)
-			SetModel(std::shared_ptr<Model> {});
+			SetModel(std::shared_ptr<pragma::Model> {});
 		return;
 	}
 
@@ -280,7 +280,7 @@ void BaseModelComponent::SetModel(const std::string &mdl)
 		model = game->LoadModel("error");
 		if(model == nullptr) {
 			if(GetModel() == prevMdl) // Model might have been changed during TModelLoader::Load-call in single player (on the client)
-				SetModel(std::shared_ptr<Model>(nullptr));
+				SetModel(std::shared_ptr<pragma::Model>(nullptr));
 			return;
 		}
 	}
@@ -296,7 +296,7 @@ void BaseModelComponent::OnModelMaterialsLoaded()
 	m_bMaterialsLoaded = true;
 	BroadcastEvent(EVENT_ON_MODEL_MATERIALS_LOADED);
 }
-const std::shared_ptr<Model> &BaseModelComponent::GetModel() const { return m_model; }
+const std::shared_ptr<pragma::Model> &BaseModelComponent::GetModel() const { return m_model; }
 unsigned int BaseModelComponent::GetSkin() const { return *m_skin; }
 const std::shared_ptr<util::UInt32Property> &BaseModelComponent::GetSkinProperty() const { return m_skin; }
 void BaseModelComponent::SetSkin(unsigned int skin)
@@ -312,13 +312,13 @@ void BaseModelComponent::SetSkin(unsigned int skin)
 	BroadcastEvent(EVENT_ON_SKIN_CHANGED, evData);
 }
 
-void BaseModelComponent::SetModel(const std::shared_ptr<Model> &mdl)
+void BaseModelComponent::SetModel(const std::shared_ptr<pragma::Model> &mdl)
 {
 	ClearMembers();
 
 	// If bodygroups have been specified before the entity was spawned, keep them.
 	// Otherwise they will be discarded.
-	auto keepBodygroups = umath::is_flag_set(GetEntity().GetStateFlags(), BaseEntity::StateFlags::IsSpawning);
+	auto keepBodygroups = umath::is_flag_set(GetEntity().GetStateFlags(), pragma::ecs::BaseEntity::StateFlags::IsSpawning);
 
 	m_model = mdl;
 	if(!keepBodygroups)
@@ -367,7 +367,7 @@ void BaseModelComponent::SetModel(const std::shared_ptr<Model> &mdl)
 	OnModelChanged(mdl);
 }
 
-void BaseModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
+void BaseModelComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &model)
 {
 	CEOnModelChanged evData {model};
 	BroadcastEvent(EVENT_ON_MODEL_CHANGED, evData);
@@ -526,5 +526,5 @@ void CEOnSkinChanged::PushArguments(lua_State *l) { Lua::PushInt(l, skinId); }
 
 ///////////////
 
-CEOnModelChanged::CEOnModelChanged(const std::shared_ptr<Model> &model) : model {model} {}
-void CEOnModelChanged::PushArguments(lua_State *l) { Lua::Push<std::shared_ptr<Model>>(l, model); }
+CEOnModelChanged::CEOnModelChanged(const std::shared_ptr<pragma::Model> &model) : model {model} {}
+void CEOnModelChanged::PushArguments(lua_State *l) { Lua::Push<std::shared_ptr<pragma::Model>>(l, model); }

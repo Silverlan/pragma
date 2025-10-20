@@ -11,110 +11,110 @@ export module pragma.shared:physics.enums;
 
 import pragma.math;
 
-export namespace pragma::physics {
-    enum class MOVETYPE : int { NONE, WALK, FLY, NOCLIP, FREE, PHYSICS };
+export {
+    namespace pragma::physics {
+        enum class MOVETYPE : int { NONE, WALK, FLY, NOCLIP, FREE, PHYSICS };
 
 
-	namespace pragma::physics {
-		enum class CollisionMask : uint32_t {
+        enum class CollisionMask : uint32_t {
 
-			None = 0,
+            None = 0,
 
-			Static = 1,
+            Static = 1,
 
-			Dynamic = Static << 1,
+            Dynamic = Static << 1,
 
-			Generic = Dynamic << 1,
+            Generic = Dynamic << 1,
 
-			Player = Generic << 1,
+            Player = Generic << 1,
 
-			NPC = Player << 1,
+            NPC = Player << 1,
 
-			Vehicle = NPC << 1,
+            Vehicle = NPC << 1,
 
-			Item = Vehicle << 1,
+            Item = Vehicle << 1,
 
-			Particle = Item << 1,
+            Particle = Item << 1,
 
-			Character = Particle << 1,
+            Character = Particle << 1,
 
-			Trigger = Character << 1,
+            Trigger = Character << 1,
 
-			Water = Trigger << 1,
+            Water = Trigger << 1,
 
-			WaterSurface = Water << 1,
+            WaterSurface = Water << 1,
 
-			All = (WaterSurface << 1) - 1,
+            All = (WaterSurface << 1) - 1,
 
-			Default = WaterSurface << 1,
-
-
-
-			PlayerHitbox = Default << 1,
-
-			NPCHitbox = PlayerHitbox << 1,
-
-			CharacterHitbox = NPCHitbox | PlayerHitbox,
-
-			AllHitbox = All & ~Player & ~NPC | CharacterHitbox,
+            Default = WaterSurface << 1,
 
 
 
-			NoCollision = NPCHitbox << 1 // Only use as collision group, never as collision mask
+            PlayerHitbox = Default << 1,
 
-		};
+            NPCHitbox = PlayerHitbox << 1,
 
-		enum class RayCastFlags : uint32_t {
+            CharacterHitbox = NPCHitbox | PlayerHitbox,
 
-			None = 0u,
-
-			ReportHitPosition = 1u,
-
-			ReportHitNormal = ReportHitPosition << 1u,
-
-			ReportHitUV = ReportHitNormal << 1u,
-
-			ReportAllResults = ReportHitUV << 1u,
-
-			ReportAnyResult = ReportAllResults << 1u,
-
-			ReportBackFaceHits = ReportAnyResult << 1u,
-
-			Precise = ReportBackFaceHits << 1u,
+            AllHitbox = All & ~Player & ~NPC | CharacterHitbox,
 
 
 
-			IgnoreDynamic = Precise << 1u,
+            NoCollision = NPCHitbox << 1 // Only use as collision group, never as collision mask
 
-			IgnoreStatic = IgnoreDynamic << 1u,
+        };
 
-			InvertFilter = IgnoreStatic << 1u,
+        enum class RayCastFlags : uint32_t {
 
+            None = 0u,
 
+            ReportHitPosition = 1u,
 
-			Default = ReportHitPosition | ReportHitNormal | ReportHitUV
+            ReportHitNormal = ReportHitPosition << 1u,
 
-		};
+            ReportHitUV = ReportHitNormal << 1u,
 
-		using namespace umath::scoped_enum::bitwise;
-	}
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::physics::CollisionMask> : std::true_type {};
+            ReportAllResults = ReportHitUV << 1u,
 
-		template<>
-		struct enable_bitwise_operators<pragma::physics::RayCastFlags> : std::true_type {};
-	}
+            ReportAnyResult = ReportAllResults << 1u,
 
+            ReportBackFaceHits = ReportAnyResult << 1u,
 
-
-    enum class COLLISIONTYPE : int { NONE, AABB, OBB, BRUSH };
+            Precise = ReportBackFaceHits << 1u,
 
 
 
-    enum class PHYSICSTYPE : int { NONE, DYNAMIC, STATIC, SOFTBODY, BOXCONTROLLER, CAPSULECONTROLLER };
+            IgnoreDynamic = Precise << 1u,
+
+            IgnoreStatic = IgnoreDynamic << 1u,
+
+            InvertFilter = IgnoreStatic << 1u,
 
 
 
-	enum class RayCastHitType : uint8_t { None = 0, Touch, Block };
-};
+            Default = ReportHitPosition | ReportHitNormal | ReportHitUV
+
+        };
+
+        using namespace umath::scoped_enum::bitwise;
+
+
+
+        enum class COLLISIONTYPE : int { NONE, AABB, OBB, BRUSH };
+
+
+
+        enum class PHYSICSTYPE : int { NONE, DYNAMIC, STATIC, SOFTBODY, BOXCONTROLLER, CAPSULECONTROLLER };
+
+
+
+        enum class RayCastHitType : uint8_t { None = 0, Touch, Block };
+    };
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::physics::CollisionMask> : std::true_type {};
+
+        template<>
+        struct enable_bitwise_operators<pragma::physics::RayCastFlags> : std::true_type {};
+    }
+}

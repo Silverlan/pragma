@@ -11,17 +11,17 @@ import :model.animation.skeletal_animation;
 
 import panima;
 
-Activity pragma::animation::skeletal::get_activity(const panima::Animation &anim)
+pragma::Activity pragma::animation::skeletal::get_activity(const panima::Animation &anim)
 {
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
-	auto act = Activity::Invalid;
+	auto act = pragma::Activity::Invalid;
 	const_cast<Animation &>(anim).GetProperties()["activity"](act);
 	return act;
 #else
-	return Activity::Invalid;
+	return pragma::Activity::Invalid;
 #endif
 }
-void pragma::animation::skeletal::set_activity(panima::Animation &anim, Activity act)
+void pragma::animation::skeletal::set_activity(panima::Animation &anim, pragma::Activity act)
 {
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	anim.GetProperties()["activity"] = act;

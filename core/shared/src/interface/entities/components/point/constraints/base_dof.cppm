@@ -20,6 +20,6 @@ export namespace pragma {
 		Vector3 m_kvLimLinUpper;
 		Vector3 m_kvLimAngLower;
 		Vector3 m_kvLimAngUpper;
-		virtual void InitializeConstraint(BaseEntity *src, BaseEntity *tgt) override;
+		virtual void InitializeConstraint(pragma::ecs::BaseEntity *src, pragma::ecs::BaseEntity *tgt) override;
 	};
 };

@@ -7,6 +7,8 @@ module;
 #include "noise/noise.h"
 #include "noiseutils.h"
 
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:scripting.lua.libraries.noise;
 
 export import pragma.math;

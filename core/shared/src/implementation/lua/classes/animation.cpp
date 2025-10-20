@@ -270,12 +270,12 @@ void Lua::Animation::GetBlendController(lua_State *l, pragma::animation::Animati
 		return;
 	push_blend_controller(l, *bc);
 }
-void Lua::Animation::CalcRenderBounds(lua_State *l, pragma::animation::Animation &anim, const std::shared_ptr<::Model> &mdl)
+void Lua::Animation::CalcRenderBounds(lua_State *l, pragma::animation::Animation &anim, const std::shared_ptr<pragma::Model> &mdl)
 {
 	anim.CalcRenderBounds(*mdl);
 	GetRenderBounds(l, anim, mdl);
 }
-void Lua::Animation::GetRenderBounds(lua_State *l, pragma::animation::Animation &anim, const std::shared_ptr<::Model> &)
+void Lua::Animation::GetRenderBounds(lua_State *l, pragma::animation::Animation &anim, const std::shared_ptr<pragma::Model> &)
 {
 	auto &bounds = anim.GetRenderBounds();
 	Lua::Push<Vector3>(l, bounds.first);
@@ -404,7 +404,7 @@ void Lua::Frame::Localize(lua_State *, ::Frame &frame, pragma::animation::Animat
 void Lua::Frame::Globalize(lua_State *, ::Frame &frame, pragma::animation::Animation &anim, pragma::animation::Skeleton *skeleton) { frame.Globalize(anim, *skeleton); }
 void Lua::Frame::Localize(lua_State *, ::Frame &frame, pragma::animation::Skeleton *skeleton) { frame.Localize(*skeleton); }
 void Lua::Frame::Globalize(lua_State *, ::Frame &frame, pragma::animation::Skeleton *skeleton) { frame.Globalize(*skeleton); }
-void Lua::Frame::CalcRenderBounds(lua_State *l, ::Frame &frame, pragma::animation::Animation &anim, const std::shared_ptr<::Model> &mdl)
+void Lua::Frame::CalcRenderBounds(lua_State *l, ::Frame &frame, pragma::animation::Animation &anim, const std::shared_ptr<pragma::Model> &mdl)
 {
 	auto renderBounds = frame.CalcRenderBounds(anim, *mdl);
 	Lua::Push<Vector3>(l, renderBounds.first);
@@ -542,7 +542,7 @@ void Lua::MeshVertexAnimation::GetFrames(lua_State *l, ::MeshVertexAnimation &an
 	auto frameIdx = 1u;
 	for(auto &frame : frames) {
 		Lua::PushInt(l, frameIdx++);
-		Lua::Push<std::shared_ptr<::MeshVertexFrame>>(l, frame);
+		Lua::Push<std::shared_ptr<pragma::MeshVertexFrame>>(l, frame);
 		Lua::SetTableValue(l, t);
 	}
 }
@@ -553,10 +553,10 @@ void Lua::MeshVertexAnimation::GetMesh(lua_State *l, ::MeshVertexAnimation &anim
 	if(mesh == nullptr || subMesh == nullptr)
 		return;
 	Lua::Push<std::shared_ptr<::ModelMesh>>(l, mesh->shared_from_this());
-	Lua::Push<std::shared_ptr<::ModelSubMesh>>(l, subMesh->shared_from_this());
+	Lua::Push<std::shared_ptr<pragma::ModelSubMesh>>(l, subMesh->shared_from_this());
 }
 ///////////////////////////////////////
-void Lua::MeshVertexFrame::GetVertices(lua_State *l, ::MeshVertexFrame &frame)
+void Lua::MeshVertexFrame::GetVertices(lua_State *l, pragma::MeshVertexFrame &frame)
 {
 	auto &verts = frame.GetVertices();
 	auto t = Lua::CreateTable(l);
@@ -567,17 +567,17 @@ void Lua::MeshVertexFrame::GetVertices(lua_State *l, ::MeshVertexFrame &frame)
 		Lua::SetTableValue(l, t);
 	}
 }
-void Lua::MeshVertexFrame::SetVertexCount(lua_State *l, ::MeshVertexFrame &frame, uint32_t numVerts) { frame.SetVertexCount(numVerts); }
-void Lua::MeshVertexFrame::SetVertexPosition(lua_State *l, ::MeshVertexFrame &frame, uint32_t vertIdx, const Vector3 &pos) { frame.SetVertexPosition(vertIdx, pos); }
-void Lua::MeshVertexFrame::GetVertexPosition(lua_State *l, ::MeshVertexFrame &frame, uint32_t vertIdx)
+void Lua::MeshVertexFrame::SetVertexCount(lua_State *l, pragma::MeshVertexFrame &frame, uint32_t numVerts) { frame.SetVertexCount(numVerts); }
+void Lua::MeshVertexFrame::SetVertexPosition(lua_State *l, pragma::MeshVertexFrame &frame, uint32_t vertIdx, const Vector3 &pos) { frame.SetVertexPosition(vertIdx, pos); }
+void Lua::MeshVertexFrame::GetVertexPosition(lua_State *l, pragma::MeshVertexFrame &frame, uint32_t vertIdx)
 {
 	Vector3 pos {};
 	if(frame.GetVertexPosition(vertIdx, pos) == false)
 		return;
 	Lua::Push<Vector3>(l, pos);
 }
-void Lua::MeshVertexFrame::SetVertexNormal(lua_State *l, ::MeshVertexFrame &frame, uint32_t vertIdx, const Vector3 &n) { frame.SetVertexNormal(vertIdx, n); }
-void Lua::MeshVertexFrame::GetVertexNormal(lua_State *l, ::MeshVertexFrame &frame, uint32_t vertIdx)
+void Lua::MeshVertexFrame::SetVertexNormal(lua_State *l, pragma::MeshVertexFrame &frame, uint32_t vertIdx, const Vector3 &n) { frame.SetVertexNormal(vertIdx, n); }
+void Lua::MeshVertexFrame::GetVertexNormal(lua_State *l, pragma::MeshVertexFrame &frame, uint32_t vertIdx)
 {
 	Vector3 n {};
 	if(frame.GetVertexPosition(vertIdx, n) == false)

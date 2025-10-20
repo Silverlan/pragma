@@ -45,7 +45,7 @@ export {
 			const std::vector<NetworkedVariable> &GetNetworkedVariables() const;
 	#endif
 		protected:
-			BaseNetworkedComponent(BaseEntity &ent);
+			BaseNetworkedComponent(pragma::ecs::BaseEntity &ent);
 			NetworkFlags m_networkFlags = NetworkFlags::None;
 	#if NETWORKED_VARS_ENABLED != 0
 			virtual void OnNetworkedVariableCreated(NetworkedVariable &nwVar);
@@ -57,8 +57,12 @@ export {
 			pragma::NetEventId m_netEvSetVar = pragma::INVALID_NET_EVENT;
 	#endif
 		};
+        using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseNetworkedComponent::NetworkFlags)
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::BaseNetworkedComponent::NetworkFlags> : std::true_type {};
+    }
 
 	#if NETWORKED_VARS_ENABLED != 0
 	template<typename T>

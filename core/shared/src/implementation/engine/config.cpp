@@ -12,14 +12,14 @@ module pragma.shared;
 
 import :engine;
 
-void Engine::PreloadConfig(NwStateType type, const std::string &configName)
+void pragma::Engine::PreloadConfig(NwStateType type, const std::string &configName)
 {
 	auto &cfg = GetConVarConfig(type);
 	cfg = std::make_unique<ConVarInfoList>();
 	auto &cmds = *cfg.get();
 	ExecConfig(configName, cmds);
 }
-void Engine::PreloadConfig(StateInstance &instance, const std::string &configName)
+void pragma::Engine::PreloadConfig(StateInstance &instance, const std::string &configName)
 {
 	if(!instance.state)
 		return;
@@ -29,13 +29,13 @@ void Engine::PreloadConfig(StateInstance &instance, const std::string &configNam
 		PreloadConfig(NwStateType::Client, configName);
 }
 
-Engine::ConVarInfoList::ConVarArgs *Engine::ConVarInfoList::Find(const std::string &cmd)
+pragma::Engine::ConVarInfoList::ConVarArgs *pragma::Engine::ConVarInfoList::Find(const std::string &cmd)
 {
 	auto it = m_cvarMap.find(cmd);
 	return (it != m_cvarMap.end()) ? &it->second : nullptr;
 }
 
-void Engine::ConVarInfoList::Add(const std::string &cmd, const ConVarArgs &args)
+void pragma::Engine::ConVarInfoList::Add(const std::string &cmd, const ConVarArgs &args)
 {
 	if(m_cvars.size() == m_cvars.capacity())
 		m_cvars.reserve(m_cvars.size() * 1.5 + 50);
@@ -43,18 +43,18 @@ void Engine::ConVarInfoList::Add(const std::string &cmd, const ConVarArgs &args)
 	m_cvarMap[cmd] = args;
 }
 
-bool Engine::ExecConfig(const std::string &cfg, ConVarInfoList &infoList)
+bool pragma::Engine::ExecConfig(const std::string &cfg, ConVarInfoList &infoList)
 {
-	return Engine::ExecConfig(cfg, [&infoList](std::string &cmd, std::vector<std::string> &argv) { infoList.Add(cmd, argv); });
+	return pragma::Engine::ExecConfig(cfg, [&infoList](std::string &cmd, std::vector<std::string> &argv) { infoList.Add(cmd, argv); });
 }
 
-void Engine::ExecCommands(ConVarInfoList &cmds)
+void pragma::Engine::ExecCommands(ConVarInfoList &cmds)
 {
 	for(auto &cmd : cmds.GetConVars())
 		RunConsoleCommand(cmd.cmd, cmd.args);
 }
 
-bool Engine::ExecConfig(const std::string &cfg, const std::function<void(std::string &, std::vector<std::string> &)> &callback)
+bool pragma::Engine::ExecConfig(const std::string &cfg, const std::function<void(std::string &, std::vector<std::string> &)> &callback)
 {
 	std::string path = cfg;
 	if(path.substr(path.length() - 4) != ".cfg")
@@ -72,12 +72,12 @@ bool Engine::ExecConfig(const std::string &cfg, const std::function<void(std::st
 	return true;
 }
 
-bool Engine::ExecConfig(const std::string &cfg)
+bool pragma::Engine::ExecConfig(const std::string &cfg)
 {
 	return ExecConfig(cfg, [this](std::string &cmd, std::vector<std::string> &argv) { RunConsoleCommand(cmd, argv); });
 }
 
-void Engine::LoadServerConfig()
+void pragma::Engine::LoadServerConfig()
 {
 	ExecConfig("engine.cfg");
 	PreloadConfig(NwStateType::Server, "server.cfg");
@@ -86,9 +86,9 @@ void Engine::LoadServerConfig()
 	ExecCommands(*cfg);
 }
 
-void Engine::LoadConfig() { LoadServerConfig(); }
+void pragma::Engine::LoadConfig() { LoadServerConfig(); }
 
-void Engine::SaveServerConfig()
+void pragma::Engine::SaveServerConfig()
 {
 	FileManager::CreatePath("cfg");
 	std::string path = "cfg\\server.cfg";
@@ -100,7 +100,7 @@ void Engine::SaveServerConfig()
 	WriteServerConfig(f);
 }
 
-void Engine::SaveEngineConfig()
+void pragma::Engine::SaveEngineConfig()
 {
 	FileManager::CreatePath("cfg");
 	std::string path = "cfg\\engine.cfg";
@@ -112,7 +112,7 @@ void Engine::SaveEngineConfig()
 	WriteEngineConfig(f);
 }
 
-void Engine::RestoreConVarsForUnknownCommands(VFilePtrReal f, const ConVarInfoList &origCvarValues, const std::map<std::string, std::shared_ptr<ConConf>> &stateConVars)
+void pragma::Engine::RestoreConVarsForUnknownCommands(VFilePtrReal f, const ConVarInfoList &origCvarValues, const std::map<std::string, std::shared_ptr<ConConf>> &stateConVars)
 {
 	// We need to restore commands from the previous config in cases where we don't know the command.
 	// In this case the command may be from a script or module that hasn't been loaded during this instance and
@@ -131,7 +131,7 @@ void Engine::RestoreConVarsForUnknownCommands(VFilePtrReal f, const ConVarInfoLi
 	}
 }
 
-void Engine::WriteEngineConfig(VFilePtrReal f)
+void pragma::Engine::WriteEngineConfig(VFilePtrReal f)
 {
 	auto &cvars = GetConVars();
 	for(auto it = cvars.begin(); it != cvars.end(); it++) {
@@ -146,7 +146,7 @@ void Engine::WriteEngineConfig(VFilePtrReal f)
 	}
 }
 
-void Engine::WriteServerConfig(VFilePtrReal f)
+void pragma::Engine::WriteServerConfig(VFilePtrReal f)
 {
 	auto *stateSv = GetServerNetworkState();
 	if(stateSv != nullptr) {

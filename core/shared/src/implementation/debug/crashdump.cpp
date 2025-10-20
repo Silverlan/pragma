@@ -281,7 +281,7 @@ bool CrashHandler::GenerateCrashDump() const
 	// ask the user if they want to save a dump file
 	auto saveDump = false;
 	auto *engine = pragma::get_engine();
-	auto shouldShowMsBox = !Engine::Get()->IsNonInteractiveMode();
+	auto shouldShowMsBox = !pragma::Engine::Get()->IsNonInteractiveMode();
 #ifdef _WIN32
 	shouldShowMsBox = (shouldShowMsBox && util::get_subsystem() == util::SubSystem::GUI);
 #endif
@@ -327,7 +327,7 @@ bool CrashHandler::GenerateCrashDump() const
 		std::string zipFileName;
 		LOGGER.debug("Closing logger...");
 		pragma::detail::close_logger();
-		auto zipFile = Engine::GenerateEngineDump("crashdumps/crashdump", zipFileName, err);
+		auto zipFile = pragma::Engine::GenerateEngineDump("crashdumps/crashdump", zipFileName, err);
 		if(zipFile) {
 #ifdef _WIN32
 			std::string dumpErr;
@@ -388,7 +388,7 @@ bool CrashHandler::GenerateCrashDump() const
 #endif
 	if(crashInProsperModule) {
 		// Probably a rendering related crash.
-		Engine::Get()->HandleOpenGLFallback();
+		pragma::Engine::Get()->HandleOpenGLFallback();
 	}
 
 	// We've done all we can, just force quit at this point

@@ -3,6 +3,8 @@
 
 module;
 
+#include <string>
+
 export module pragma.shared:scripting.lua.libraries;
 
 export import :scripting.lua.libraries.ai;

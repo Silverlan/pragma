@@ -12,7 +12,7 @@ import :entities.components.constraints.copy_location;
 
 using namespace pragma;
 
-ConstraintCopyLocationComponent::ConstraintCopyLocationComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+ConstraintCopyLocationComponent::ConstraintCopyLocationComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintCopyLocationComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

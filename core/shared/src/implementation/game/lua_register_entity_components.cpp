@@ -7,7 +7,6 @@ module;
 
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 #include "pragma/lua/policies/generic_policy.hpp"
-#include "pragma/lua/types/udm.hpp"
 
 
 
@@ -20,10 +19,10 @@ module pragma.shared;
 import :game.game;
 
 namespace Lua {
-	bool get_bullet_master(BaseEntity &ent);
+	bool get_bullet_master(pragma::ecs::BaseEntity &ent);
 	pragma::AnimationEvent get_animation_event(lua_State *l, int32_t tArgs, uint32_t eventId);
 };
-bool Lua::get_bullet_master(BaseEntity &ent)
+bool Lua::get_bullet_master(pragma::ecs::BaseEntity &ent)
 {
 	auto bMaster = true;
 	if(ent.IsWeapon()) {
@@ -80,20 +79,26 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, ValueDriver);
 #endif
 
-enum class BvhIntersectionFlags : uint32_t {
-	None = 0u,
-	ReturnPrimitives = 1u,
-	ReturnMeshes = ReturnPrimitives << 1u,
-};
-REGISTER_BASIC_BITWISE_OPERATORS(BvhIntersectionFlags)
+namespace pragma {
+	enum class BvhIntersectionFlags : uint32_t {
+		None = 0u,
+		ReturnPrimitives = 1u,
+		ReturnMeshes = ReturnPrimitives << 1u,
+	};
+    using namespace umath::scoped_enum::bitwise;
+}
+namespace umath::scoped_enum::bitwise {
+	template<>
+	struct enable_bitwise_operators<pragma::BvhIntersectionFlags> : std::true_type {};
+}
 using IntersectionTestResult = Lua::type<std::pair<bool, Lua::var<std::optional<std::vector<uint64_t>>, std::optional<std::vector<pragma::MeshIntersectionInfo::MeshInfo>>>>>;
-static IntersectionTestResult bvh_intersection_test(lua_State *l, const std::function<bool(pragma::IntersectionInfo *)> &fTest, BvhIntersectionFlags flags)
+static IntersectionTestResult bvh_intersection_test(lua_State *l, const std::function<bool(pragma::IntersectionInfo *)> &fTest, pragma::BvhIntersectionFlags flags)
 {
-	if(!umath::is_flag_set(flags, BvhIntersectionFlags::ReturnPrimitives | BvhIntersectionFlags::ReturnMeshes)) {
+	if(!umath::is_flag_set(flags, pragma::BvhIntersectionFlags::ReturnPrimitives | pragma::BvhIntersectionFlags::ReturnMeshes)) {
 		auto res = fTest(nullptr);
 		return luabind::object {l, std::pair<bool, std::optional<std::vector<uint64_t>>> {res, {}}};
 	}
-	if(umath::is_flag_set(flags, BvhIntersectionFlags::ReturnPrimitives)) {
+	if(umath::is_flag_set(flags, pragma::BvhIntersectionFlags::ReturnPrimitives)) {
 		pragma::PrimitiveIntersectionInfo info {};
 		auto res = fTest(&info);
 		if(!res)
@@ -121,15 +126,15 @@ std::optional<TResult> get_meta_bone_value_ls(const pragma::MetaRigComponent &me
 	return get_meta_bone_value<TResult, GetValue>(metaC, bone, umath::CoordinateSpace::Local);
 }
 
-void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
+void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {
 	pragma::lua::register_entity_component_classes(GetLuaState(), entsMod);
 
 	auto classDefEntRef = luabind::class_<pragma::EntityURef>("UniversalEntityReference");
-	classDefEntRef.def(luabind::constructor<const BaseEntity &>());
+	classDefEntRef.def(luabind::constructor<const pragma::ecs::BaseEntity &>());
 	classDefEntRef.def(luabind::constructor<const std::string &>());
 	classDefEntRef.def(luabind::tostring(luabind::self));
-	classDefEntRef.def("GetEntity", static_cast<BaseEntity *(pragma::EntityURef::*)(Game &)>(&pragma::EntityURef::GetEntity));
+	classDefEntRef.def("GetEntity", static_cast<pragma::ecs::BaseEntity *(pragma::EntityURef::*)(pragma::Game &)>(&pragma::EntityURef::GetEntity));
 	classDefEntRef.def(
 	  "GetUuid", +[](pragma::EntityURef &uref) -> std::optional<Lua::util::Uuid> {
 		  auto uuid = uref.GetUuid();
@@ -142,9 +147,9 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto classDefCompRef = luabind::class_<pragma::EntityUComponentRef, pragma::EntityURef>("UniversalComponentReference");
 	classDefCompRef.def(luabind::constructor<const std::string &, pragma::ComponentId>());
 	classDefCompRef.def(luabind::constructor<const std::string &, const std::string &>());
-	classDefCompRef.def(luabind::constructor<const BaseEntity &, pragma::ComponentId>());
+	classDefCompRef.def(luabind::constructor<const pragma::ecs::BaseEntity &, pragma::ComponentId>());
 	classDefCompRef.def(luabind::tostring(luabind::self));
-	classDefCompRef.def("GetComponent", static_cast<pragma::BaseEntityComponent *(pragma::EntityUComponentRef::*)(Game &)>(&pragma::EntityUComponentRef::GetComponent));
+	classDefCompRef.def("GetComponent", static_cast<pragma::BaseEntityComponent *(pragma::EntityUComponentRef::*)(pragma::Game &)>(&pragma::EntityUComponentRef::GetComponent));
 	classDefCompRef.def("GetComponentId", &pragma::EntityUComponentMemberRef::GetComponentId);
 	classDefCompRef.def(
 	  "GetComponentName", +[](const pragma::EntityUComponentRef &ref) -> std::optional<std::string> {
@@ -162,28 +167,28 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto classDefMemRef = luabind::class_<pragma::EntityUComponentMemberRef, luabind::bases<pragma::EntityUComponentRef, pragma::EntityURef>>("UniversalMemberReference");
 	classDefMemRef.def(luabind::constructor<const std::string &, pragma::ComponentId, const std::string &>());
 	classDefMemRef.def(luabind::constructor<const std::string &, const std::string &, const std::string &>());
-	classDefMemRef.def(luabind::constructor<const BaseEntity &, pragma::ComponentId, const std::string &>());
-	classDefMemRef.def(luabind::constructor<const BaseEntity &, const std::string &, const std::string &>());
+	classDefMemRef.def(luabind::constructor<const pragma::ecs::BaseEntity &, pragma::ComponentId, const std::string &>());
+	classDefMemRef.def(luabind::constructor<const pragma::ecs::BaseEntity &, const std::string &, const std::string &>());
 	classDefMemRef.def(luabind::constructor<const std::string &>());
 	classDefMemRef.def(luabind::constructor<>());
 	classDefMemRef.def(luabind::tostring(luabind::self));
 	classDefMemRef.def("GetMemberInfo", &pragma::EntityUComponentMemberRef::GetMemberInfo);
 	classDefMemRef.def(
-	  "GetMemberIndex", +[](Game &game, const pragma::EntityUComponentMemberRef &ref) -> std::optional<pragma::ComponentMemberIndex> {
+	  "GetMemberIndex", +[](pragma::Game &game, const pragma::EntityUComponentMemberRef &ref) -> std::optional<pragma::ComponentMemberIndex> {
 		  if(ref.GetMemberIndex() == pragma::INVALID_COMPONENT_ID)
 			  ref.GetMemberInfo(game);
 		  auto idx = ref.GetMemberIndex();
 		  return (idx != pragma::INVALID_COMPONENT_ID) ? idx : std::optional<pragma::ComponentMemberIndex> {};
 	  });
 	classDefMemRef.def(
-	  "GetMemberName", +[](Game &game, const pragma::EntityUComponentMemberRef &ref) -> std::optional<std::string> {
+	  "GetMemberName", +[](pragma::Game &game, const pragma::EntityUComponentMemberRef &ref) -> std::optional<std::string> {
 		  if(ref.GetMemberIndex() == pragma::INVALID_COMPONENT_ID)
 			  ref.GetMemberInfo(game);
 		  auto name = ref.GetMemberName();
 		  return !name.empty() ? name : std::optional<std::string> {};
 	  });
 	classDefMemRef.def(
-	  "GetPath", +[](Game &game, const pragma::EntityUComponentMemberRef &ref) -> std::optional<std::string> {
+	  "GetPath", +[](pragma::Game &game, const pragma::EntityUComponentMemberRef &ref) -> std::optional<std::string> {
 		  auto *c = ref.GetComponent(game);
 		  auto *cInfo = c ? c->GetComponentInfo() : nullptr;
 		  auto &memberName = ref.GetMemberName();
@@ -196,7 +201,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  return name;
 	  });
 	classDefMemRef.def(
-	  "GetValue", +[](lua_State *l, Game &game, const pragma::EntityUComponentMemberRef &ref) {
+	  "GetValue", +[](lua_State *l, pragma::Game &game, const pragma::EntityUComponentMemberRef &ref) {
 		  auto *c = ref.GetComponent(game);
 		  auto *memberInfo = ref.GetMemberInfo(game);
 		  if(!c || !memberInfo)
@@ -212,7 +217,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	  const std::string &>(GetLuaState());
 
 	auto classDefMultiEntRef = luabind::class_<pragma::MultiEntityURef>("MultiUniversalEntityReference");
-	classDefMultiEntRef.def(luabind::constructor<const BaseEntity &>());
+	classDefMultiEntRef.def(luabind::constructor<const pragma::ecs::BaseEntity &>());
 	classDefMultiEntRef.def(luabind::constructor<const std::string &>());
 	classDefMultiEntRef.def("FindEntities", &pragma::MultiEntityURef::FindEntities);
 	entsMod[classDefMultiEntRef];
@@ -302,17 +307,17 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	// defBvh.def("IntersectionTest", static_cast<std::optional<pragma::bvh::HitInfo> (pragma::IntersectionHandlerComponent::*)(const Vector3 &, const Vector3 &, float, float) const>(&pragma::IntersectionHandlerComponent::IntersectionTest));
 	defIntersectionHandler.def("IntersectionTestAabb", static_cast<bool (pragma::IntersectionHandlerComponent::*)(const Vector3 &, const Vector3 &) const>(&pragma::IntersectionHandlerComponent::IntersectionTestAabb));
 	defIntersectionHandler.def(
-	  "IntersectionTestAabb", +[](lua_State *l, const pragma::IntersectionHandlerComponent &bvhC, const Vector3 &min, const Vector3 &max, BvhIntersectionFlags flags) -> IntersectionTestResult {
+	  "IntersectionTestAabb", +[](lua_State *l, const pragma::IntersectionHandlerComponent &bvhC, const Vector3 &min, const Vector3 &max, pragma::BvhIntersectionFlags flags) -> IntersectionTestResult {
 		  return bvh_intersection_test(l, [&bvhC, &min, &max](pragma::IntersectionInfo *info) { return info ? bvhC.IntersectionTestAabb(min, max, *info) : bvhC.IntersectionTestAabb(min, max); }, flags);
 	  });
 	defIntersectionHandler.def("IntersectionTestKDop", static_cast<bool (pragma::IntersectionHandlerComponent::*)(const std::vector<umath::Plane> &) const>(&pragma::IntersectionHandlerComponent::IntersectionTestKDop));
 	defIntersectionHandler.def(
-	  "IntersectionTestKDop", +[](lua_State *l, const pragma::IntersectionHandlerComponent &bvhC, const std::vector<umath::Plane> &planes, BvhIntersectionFlags flags) -> IntersectionTestResult {
+	  "IntersectionTestKDop", +[](lua_State *l, const pragma::IntersectionHandlerComponent &bvhC, const std::vector<umath::Plane> &planes, pragma::BvhIntersectionFlags flags) -> IntersectionTestResult {
 		  return bvh_intersection_test(l, [&bvhC, &planes](pragma::IntersectionInfo *info) { return info ? bvhC.IntersectionTestKDop(planes, *info) : bvhC.IntersectionTestKDop(planes); }, flags);
 	  });
-	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_NONE", umath::to_integral(BvhIntersectionFlags::None));
-	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_BIT_RETURN_PRIMITIVES", umath::to_integral(BvhIntersectionFlags::ReturnPrimitives));
-	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_BIT_RETURN_MESHES", umath::to_integral(BvhIntersectionFlags::ReturnMeshes));
+	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_NONE", umath::to_integral(pragma::BvhIntersectionFlags::None));
+	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_BIT_RETURN_PRIMITIVES", umath::to_integral(pragma::BvhIntersectionFlags::ReturnPrimitives));
+	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_BIT_RETURN_MESHES", umath::to_integral(pragma::BvhIntersectionFlags::ReturnMeshes));
 
 	auto defBvhHitInfo = luabind::class_<pragma::HitInfo>("HitInfo");
 	defBvhHitInfo.def_readonly("mesh", &pragma::HitInfo::mesh);
@@ -325,7 +330,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  else
 			  info.entity->PushLuaObject(l);
 	  },
-	  +[](pragma::HitInfo &info, BaseEntity *ent) { info.entity = ent ? ent->GetHandle() : EntityHandle {}; });
+	  +[](pragma::HitInfo &info, pragma::ecs::BaseEntity *ent) { info.entity = ent ? ent->GetHandle() : EntityHandle {}; });
 	defBvhHitInfo.def_readonly("primitiveIndex", &pragma::HitInfo::primitiveIndex);
 	defBvhHitInfo.def_readonly("distance", &pragma::HitInfo::distance);
 	defBvhHitInfo.def_readonly("t", &pragma::HitInfo::t);
@@ -425,7 +430,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 			  group->ClearEntities(safely);
 	  });
 	defComposite.def(
-	  "GetEntities", +[](lua_State *l, pragma::ecs::CompositeComponent &hComponent) -> luabind::tableT<BaseEntity> {
+	  "GetEntities", +[](lua_State *l, pragma::ecs::CompositeComponent &hComponent) -> luabind::tableT<pragma::ecs::BaseEntity> {
 		  auto &ents = hComponent.GetRootCompositeGroup().GetEntities();
 		  auto tEnts = luabind::newtable(l);
 		  int32_t idx = 1;
@@ -437,7 +442,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  return tEnts;
 	  });
 	defComposite.def(
-	  "GetEntities", +[](lua_State *l, pragma::ecs::CompositeComponent &hComponent, const std::string &groupName) -> luabind::tableT<BaseEntity> {
+	  "GetEntities", +[](lua_State *l, pragma::ecs::CompositeComponent &hComponent, const std::string &groupName) -> luabind::tableT<pragma::ecs::BaseEntity> {
 		  auto tEnts = luabind::newtable(l);
 		  auto *group = hComponent.GetRootCompositeGroup().FindChildGroup(groupName);
 		  if(!group)
@@ -452,11 +457,11 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  return tEnts;
 	  });
 	defComposite.def("GetRootGroup", static_cast<pragma::ecs::CompositeGroup &(pragma::ecs::CompositeComponent::*)()>(&pragma::ecs::CompositeComponent::GetRootCompositeGroup));
-	defComposite.def("AddEntity", +[](lua_State *l, pragma::ecs::CompositeComponent &hComponent, BaseEntity &ent) { hComponent.GetRootCompositeGroup().AddEntity(ent); });
-	defComposite.def("AddEntity", +[](lua_State *l, pragma::ecs::CompositeComponent &hComponent, BaseEntity &ent, const std::string &groupName) { hComponent.GetRootCompositeGroup().AddChildGroup(groupName).AddEntity(ent); });
+	defComposite.def("AddEntity", +[](lua_State *l, pragma::ecs::CompositeComponent &hComponent, pragma::ecs::BaseEntity &ent) { hComponent.GetRootCompositeGroup().AddEntity(ent); });
+	defComposite.def("AddEntity", +[](lua_State *l, pragma::ecs::CompositeComponent &hComponent, pragma::ecs::BaseEntity &ent, const std::string &groupName) { hComponent.GetRootCompositeGroup().AddChildGroup(groupName).AddEntity(ent); });
 	auto defCompositeGroup = luabind::class_<pragma::ecs::CompositeGroup>("CompositeGroup");
 	defCompositeGroup.def("AddEntity", &pragma::ecs::CompositeGroup::AddEntity);
-	defCompositeGroup.def("AddEntity", +[](lua_State *l, pragma::ecs::CompositeGroup &hComponent, BaseEntity &ent, const std::string &groupName) { hComponent.AddChildGroup(groupName).AddEntity(ent); });
+	defCompositeGroup.def("AddEntity", +[](lua_State *l, pragma::ecs::CompositeGroup &hComponent, pragma::ecs::BaseEntity &ent, const std::string &groupName) { hComponent.AddChildGroup(groupName).AddEntity(ent); });
 	defCompositeGroup.def("RemoveEntity", &pragma::ecs::CompositeGroup::RemoveEntity);
 	defCompositeGroup.def("ClearEntities", &pragma::ecs::CompositeGroup::ClearEntities);
 	defCompositeGroup.def("ClearEntities", &pragma::ecs::CompositeGroup::ClearEntities, luabind::default_parameter_policy<2, true> {});
@@ -473,7 +478,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 			  group->ClearEntities(safely);
 	  });
 	defCompositeGroup.def(
-	  "GetEntities", +[](lua_State *l, pragma::ecs::CompositeGroup &hComponent) -> luabind::tableT<BaseEntity> {
+	  "GetEntities", +[](lua_State *l, pragma::ecs::CompositeGroup &hComponent) -> luabind::tableT<pragma::ecs::BaseEntity> {
 		  auto &ents = hComponent.GetEntities();
 		  auto tEnts = luabind::newtable(l);
 		  int32_t idx = 1;
@@ -775,7 +780,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defSubmergible.def("GetSubmergedFraction", &pragma::SubmergibleComponent::GetSubmergedFraction);
 	defSubmergible.def("IsInWater", &pragma::SubmergibleComponent::IsInWater);
 	defSubmergible.def("GetSubmergedFractionProperty", &pragma::SubmergibleComponent::GetSubmergedFractionProperty);
-	defSubmergible.def("GetWaterEntity", static_cast<BaseEntity *(pragma::SubmergibleComponent::*)()>(&pragma::SubmergibleComponent::GetWaterEntity));
+	defSubmergible.def("GetWaterEntity", static_cast<pragma::ecs::BaseEntity *(pragma::SubmergibleComponent::*)()>(&pragma::SubmergibleComponent::GetWaterEntity));
 	defSubmergible.add_static_constant("EVENT_ON_WATER_SUBMERGED", pragma::SubmergibleComponent::EVENT_ON_WATER_SUBMERGED);
 	defSubmergible.add_static_constant("EVENT_ON_WATER_EMERGED", pragma::SubmergibleComponent::EVENT_ON_WATER_EMERGED);
 	defSubmergible.add_static_constant("EVENT_ON_WATER_ENTERED", pragma::SubmergibleComponent::EVENT_ON_WATER_ENTERED);

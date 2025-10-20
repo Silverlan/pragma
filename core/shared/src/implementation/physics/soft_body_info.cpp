@@ -8,10 +8,10 @@ module pragma.shared;
 
 import :physics.soft_body_info;
 
-SoftBodyPhysObj::SoftBodyPhysObj(pragma::BaseEntityComponent *owner) : PhysObj(owner), PhysObjDynamic() {}
+SoftBodyPhysObj::SoftBodyPhysObj(pragma::BaseEntityComponent *owner) : pragma::physics::PhysObj(owner), PhysObjDynamic() {}
 bool SoftBodyPhysObj::Initialize(pragma::physics::ISoftBody &body)
 {
-	if(PhysObj::Initialize() == false)
+	if(pragma::physics::PhysObj::Initialize() == false)
 		return false;
 	AddCollisionObject(body);
 	m_softBodies.push_back(util::shared_handle_cast<pragma::physics::IBase, pragma::physics::ISoftBody>(body.ClaimOwnership()));
@@ -19,7 +19,7 @@ bool SoftBodyPhysObj::Initialize(pragma::physics::ISoftBody &body)
 }
 bool SoftBodyPhysObj::Initialize(const std::vector<pragma::physics::ISoftBody *> &bodies)
 {
-	if(PhysObj::Initialize() == false)
+	if(pragma::physics::PhysObj::Initialize() == false)
 		return false;
 	m_softBodies.reserve(bodies.size());
 	for(auto *body : bodies) {
@@ -56,7 +56,7 @@ void SoftBodyPhysObj::AddCollisionObject(pragma::physics::ICollisionObject &o)
 	auto *body = o.GetSoftBody();
 	if(body == nullptr)
 		return;
-	PhysObj::AddCollisionObject(o);
+	pragma::physics::PhysObj::AddCollisionObject(o);
 	m_softBodies.push_back(util::shared_handle_cast<pragma::physics::IBase, pragma::physics::ISoftBody>(body->ClaimOwnership()));
 }
 

@@ -11,12 +11,12 @@ import :entities.components.global_name;
 
 using namespace pragma;
 
-GlobalNameComponent::GlobalNameComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+GlobalNameComponent::GlobalNameComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void GlobalNameComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "globalname", false))
 			m_globalName = kvData.value;

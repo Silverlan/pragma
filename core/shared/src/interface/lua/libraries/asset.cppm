@@ -6,9 +6,12 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:scripting.lua.libraries.asset;
 
 export import :assets.common;
+export import :scripting.lua.api;
 
 export namespace Lua {
 	namespace asset {

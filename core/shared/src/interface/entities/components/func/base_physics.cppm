@@ -17,7 +17,7 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 	  protected:
-		virtual PhysObj *InitializePhysics();
+		virtual pragma::physics::PhysObj *InitializePhysics();
 
 		float m_kvMass = 0.f;
 		bool m_bClientsidePhysics = false;

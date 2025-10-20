@@ -9,7 +9,7 @@ module;
 export module pragma.shared:scripting.lua.classes.phys_obj;
 
 export namespace Lua {
-	namespace PhysObj {
+	namespace pragma::physics::PhysObj {
 		DLLNETWORK void register_class(lua_State *l, luabind::module_ &mod);
 	};
 };

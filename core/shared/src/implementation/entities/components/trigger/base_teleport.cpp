@@ -15,7 +15,7 @@ void BaseTriggerTeleportComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "target", false))
 			m_target = kvData.value;
@@ -38,9 +38,9 @@ util::EventReply BaseTriggerTeleportComponent::HandleEvent(ComponentEventId even
 			return util::EventReply::Unhandled;
 		auto &ent = GetEntity();
 		auto *game = ent.GetNetworkState()->GetGameState();
-		std::vector<BaseEntity *> targetCandidates;
+		std::vector<pragma::ecs::BaseEntity *> targetCandidates;
 
-		EntityIterator it {*game};
+		pragma::ecs::EntityIterator it {*game};
 		it.AttachFilter<EntityIteratorFilterEntity>(m_target);
 		for(auto *ent : it)
 			targetCandidates.push_back(ent);

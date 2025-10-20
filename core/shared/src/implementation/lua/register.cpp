@@ -384,7 +384,7 @@ bool Lua::util::start_debugger_server(lua_State *l)
 
 	std::string fileName = "start_debugger_server.lua";
 
-	return Engine::Get()->GetNetworkState(l)->GetGameState()->ExecuteLuaFile(fileName);
+	return pragma::Engine::Get()->GetNetworkState(l)->GetGameState()->ExecuteLuaFile(fileName);
 
 }
 
@@ -1396,7 +1396,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 
 		      std::string cvarName = Lua::CheckString(l, 1);
 
-		      auto *nw = Engine::Get()->GetNetworkState(l);
+		      auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 
 		      if(nw)
 
@@ -1432,13 +1432,13 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 
 	  luabind::def("get_convar_bool", &Lua::console::GetConVarBool), luabind::def("get_convar_flags", &Lua::console::GetConVarFlags), luabind::def("register_override", &Lua::console::register_override), luabind::def("clear_override", &Lua::console::clear_override),
 
-	  luabind::def("is_open", &Engine::IsConsoleOpen), luabind::def("toggle", &Engine::ToggleConsole), luabind::def("open", &Engine::OpenConsole), luabind::def("close", &Engine::CloseConsole)];
+	  luabind::def("is_open", &pragma::Engine::IsConsoleOpen), luabind::def("toggle", &pragma::Engine::ToggleConsole), luabind::def("open", &pragma::Engine::OpenConsole), luabind::def("close", &pragma::Engine::CloseConsole)];
 
 
 
 	static const auto fGetConVarName = [](lua_State *l, ConVar &cvar) -> std::string {
 
-		auto *nw = Engine::Get()->GetNetworkState(l);
+		auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 
 		auto &conVars = nw->GetConVars();
 
@@ -1470,7 +1470,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 
 	classDefConVar.def("AddChangeCallback", static_cast<void (*)(lua_State *, ConVar &, const Lua::func<void, Lua::var<std::string, int32_t, float, bool>> &)>([](lua_State *l, ConVar &cvar, const Lua::func<void, Lua::var<std::string, int32_t, float, bool>> &function) {
 
-		Engine::Get()->GetNetworkState(l)->GetGameState()->AddConVarCallback(fGetConVarName(l, cvar), function);
+		pragma::Engine::Get()->GetNetworkState(l)->GetGameState()->AddConVarCallback(fGetConVarName(l, cvar), function);
 
 	}));
 
@@ -2430,7 +2430,7 @@ static void add_log_func(lua_State *l, luabind::object &oLogger, const char *nam
 
 
 
-void Game::RegisterLuaLibraries()
+void pragma::Game::RegisterLuaLibraries()
 
 {
 
@@ -2446,7 +2446,7 @@ void Game::RegisterLuaLibraries()
 
 	    {"export_model_asset", Lua::import::export_model_asset}, {"import_file", +[](lua_State *l) {
 
-		                                                              auto *nw = Engine::Get()->GetNetworkState(l);
+		                                                              auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 
 		                                                              std::string path = Lua::CheckString(l, 1);
 
@@ -2560,7 +2560,7 @@ void Game::RegisterLuaLibraries()
 
 	auto fileMod = luabind::module(GetLuaState(), "file");
 
-	fileMod[luabind::def("open", Lua::file::Open), luabind::def("open", static_cast<std::pair<std::shared_ptr<LFile>, std::optional<std::string>> (*)(lua_State *, std::string, FileOpenMode)>([](lua_State *l, std::string path, FileOpenMode openMode) { return Lua::file::Open(l, path, openMode); })),
+	fileMod[luabind::def("open", Lua::file::Open), luabind::def("open", static_cast<std::pair<std::shared_ptr<LFile>, std::optional<std::string>> (*)(lua_State *, std::string, pragma::FileOpenMode)>([](lua_State *l, std::string path, pragma::FileOpenMode openMode) { return Lua::file::Open(l, path, openMode); })),
 
 	  luabind::def("create_directory", Lua::file::CreateDir), luabind::def("create_path", Lua::file::CreatePath),
 
@@ -3092,19 +3092,19 @@ void Game::RegisterLuaLibraries()
 
 	  })),
 
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, ModelSubMesh &, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
+	  luabind::def("line_with_mesh", static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, pragma::ModelSubMesh &, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
 
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
 
 	  luabind::def("line_with_mesh",
 
-	    static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, ModelSubMesh &, luabind::object &, luabind::object &, bool)>(
+	    static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, pragma::ModelSubMesh &, luabind::object &, luabind::object &, bool)>(
 
-	      [](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1, precise); }),
+	      [](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1, precise); }),
 
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
 
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, ModelSubMesh &, luabind::object &, luabind::object &)>([](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1) {
+	  luabind::def("line_with_mesh", static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, pragma::ModelSubMesh &, luabind::object &, luabind::object &)>([](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1) {
 
 		  return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1);
 
@@ -3132,43 +3132,43 @@ void Game::RegisterLuaLibraries()
 
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
 
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, Model &, uint32_t, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
+	  luabind::def("line_with_mesh", static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, pragma::Model &, uint32_t, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
 
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
 
 	  luabind::def("line_with_mesh",
 
-	    static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, Model &, uint32_t, luabind::object &, luabind::object &, bool)>(
+	    static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, pragma::Model &, uint32_t, luabind::object &, luabind::object &, bool)>(
 
-	      [](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, lod, r0, r1, precise); }),
-
-	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
-
-	  luabind::def("line_with_mesh",
-
-	    static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, Model &, uint32_t, luabind::object &, luabind::object &)>(
-
-	      [](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, lod, r0, r1); }),
-
-	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
-
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, Model &, luabind::table<>, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
+	      [](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, lod, r0, r1, precise); }),
 
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
 
 	  luabind::def("line_with_mesh",
 
-	    static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, Model &, luabind::table<>, luabind::object &, luabind::object &, bool)>(
+	    static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, pragma::Model &, uint32_t, luabind::object &, luabind::object &)>(
 
-	      [](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, Model &mdl, luabind::table<> bodyGroups, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, bodyGroups, r0, r1, precise); }),
+	      [](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, lod, r0, r1); }),
+
+	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
+
+	  luabind::def("line_with_mesh", static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, pragma::Model &, luabind::table<>, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
 
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
 
 	  luabind::def("line_with_mesh",
 
-	    static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, Model &, luabind::table<>, luabind::object &, luabind::object &)>(
+	    static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, pragma::Model &, luabind::table<>, luabind::object &, luabind::object &, bool)>(
 
-	      [](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, Model &mdl, luabind::table<> bodyGroups, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, bodyGroups, r0, r1); }),
+	      [](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, luabind::table<> bodyGroups, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, bodyGroups, r0, r1, precise); }),
+
+	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
+
+	  luabind::def("line_with_mesh",
+
+	    static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, pragma::Model &, luabind::table<>, luabind::object &, luabind::object &)>(
+
+	      [](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, luabind::table<> bodyGroups, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, bodyGroups, r0, r1); }),
 
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
 

@@ -14,8 +14,8 @@ export import :physics.base;
 export import :physics.material;
 
 export {
-	class CollisionMesh;
 	namespace pragma::physics {
+		class CollisionMesh;
 		class IEnvironment;
 		class IConvexShape;
 		class IConvexHullShape;
@@ -79,17 +79,17 @@ export {
 			virtual void SetLocalScaling(const Vector3 &scale) = 0;
 			virtual void InitializeLuaObject(lua_State *lua) override;
 
-			void SetCollisionMesh(CollisionMesh &collisionMesh);
+			void SetCollisionMesh(pragma::physics::CollisionMesh &collisionMesh);
 			void SetCollisionMesh();
-			const CollisionMesh *GetCollisionMesh() const;
-			CollisionMesh *GetCollisionMesh();
+			const pragma::physics::CollisionMesh *GetCollisionMesh() const;
+			pragma::physics::CollisionMesh *GetCollisionMesh();
 
 			virtual bool IsConvex() const override;
 			virtual IConvexShape *GetConvexShape() override;
 		  protected:
 			IConvexShape(IEnvironment &env);
 		  private:
-			std::shared_ptr<CollisionMesh> m_collisionMesh = nullptr;
+			std::shared_ptr<pragma::physics::CollisionMesh> m_collisionMesh = nullptr;
 		};
 
 		class DLLNETWORK ICapsuleShape : virtual public IConvexShape {

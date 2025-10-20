@@ -45,7 +45,7 @@ decltype(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED) BaseEntityCompone
 decltype(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED) BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED = INVALID_COMPONENT_ID;
 decltype(BaseEntityComponent::EVENT_ON_MEMBERS_CHANGED) BaseEntityComponent::EVENT_ON_MEMBERS_CHANGED = INVALID_COMPONENT_ID;
 decltype(BaseEntityComponent::EVENT_ON_ACTIVE_STATE_CHANGED) BaseEntityComponent::EVENT_ON_ACTIVE_STATE_CHANGED = INVALID_COMPONENT_ID;
-BaseEntityComponent::BaseEntityComponent(BaseEntity &ent) : m_entity {ent} {}
+BaseEntityComponent::BaseEntityComponent(pragma::ecs::BaseEntity &ent) : m_entity {ent} {}
 BaseEntityComponent::~BaseEntityComponent()
 {
 	if(m_callbackInfos) {
@@ -602,10 +602,10 @@ void BaseEntityComponent::FlagCallbackForRemoval(const CallbackHandle &hCallback
 	cbInfo.hCallback = hCallback;
 	cbInfo.pComponent = component;
 }
-const BaseEntity &BaseEntityComponent::GetEntity() const { return const_cast<BaseEntityComponent *>(this)->GetEntity(); }
-BaseEntity &BaseEntityComponent::GetEntity() { return m_entity; }
-const BaseEntity &BaseEntityComponent::operator->() const { return GetEntity(); }
-BaseEntity &BaseEntityComponent::operator->() { return GetEntity(); }
+const pragma::ecs::BaseEntity &BaseEntityComponent::GetEntity() const { return const_cast<BaseEntityComponent *>(this)->GetEntity(); }
+pragma::ecs::BaseEntity &BaseEntityComponent::GetEntity() { return m_entity; }
+const pragma::ecs::BaseEntity &BaseEntityComponent::operator->() const { return GetEntity(); }
+pragma::ecs::BaseEntity &BaseEntityComponent::operator->() { return GetEntity(); }
 ComponentId BaseEntityComponent::GetComponentId() const { return m_componentId; }
 std::vector<BaseEntityComponent::CallbackInfo> &BaseEntityComponent::GetCallbackInfos() const
 {
@@ -757,9 +757,9 @@ CallbackHandle BaseEntityComponent::BindEvent(ComponentEventId eventId, const st
 }
 util::EventReply BaseEntityComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(eventId == BaseEntity::EVENT_ON_SPAWN)
+	if(eventId == pragma::ecs::BaseEntity::EVENT_ON_SPAWN)
 		OnEntitySpawn();
-	else if(eventId == BaseEntity::EVENT_ON_POST_SPAWN)
+	else if(eventId == pragma::ecs::BaseEntity::EVENT_ON_POST_SPAWN)
 		OnEntityPostSpawn();
 
 	if(!m_boundEvents)
@@ -841,7 +841,7 @@ void BaseEntityComponent::OnEntityComponentRemoved(BaseEntityComponent &componen
 	if(BroadcastEvent(EVENT_ON_ENTITY_COMPONENT_REMOVED, evData) != util::EventReply::Handled && genericC)
 		genericC->InvokeEventCallbacks(BaseGenericComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED, evData);
 }
-Game &BaseEntityComponent::GetGame() { return *GetNetworkState().GetGameState(); }
+pragma::Game &BaseEntityComponent::GetGame() { return *GetNetworkState().GetGameState(); }
 NetworkState &BaseEntityComponent::GetNetworkState() { return *GetEntity().GetNetworkState(); }
 EntityComponentManager &BaseEntityComponent::GetComponentManager() { return GetGame().GetEntityComponentManager(); }
 void BaseEntityComponent::Save(udm::LinkedPropertyWrapperArg udm)
@@ -870,8 +870,8 @@ void BaseEntityComponent::Load(udm::LinkedPropertyWrapperArg udm)
 void BaseEntityComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) {}
 void BaseEntityComponent::OnEntitySpawn() {}
 void BaseEntityComponent::OnEntityPostSpawn() { UpdateTickPolicy(); }
-void BaseEntityComponent::OnAttached(BaseEntity &ent) {}
-void BaseEntityComponent::OnDetached(BaseEntity &ent)
+void BaseEntityComponent::OnAttached(pragma::ecs::BaseEntity &ent) {}
+void BaseEntityComponent::OnDetached(pragma::ecs::BaseEntity &ent)
 {
 	if(m_callbackInfos) {
 		for(auto it = m_callbackInfos->begin(); it != m_callbackInfos->end();) {
@@ -937,7 +937,7 @@ double BaseEntityComponent::LastTick() const { return m_tickData.lastTick; }
 
 double BaseEntityComponent::DeltaTime() const
 {
-	Game *game = GetEntity().GetNetworkState()->GetGameState();
+	pragma::Game *game = GetEntity().GetNetworkState()->GetGameState();
 	//auto r = game->CurTime() -m_lastThink; // This would be more accurate, but can be 0 if the engine had to catch up on the tick rate
 	auto r = game->DeltaTickTime();
 	//assert(r != 0.0); // Delta time mustn't ever be 0, otherwise there can be problems with animation events repeating (among other things)
@@ -953,7 +953,7 @@ bool BaseEntityComponent::Tick(double tDelta)
 	OnTick(tDelta);
 	if(hThis.expired())
 		return true; // This component isn't valid anymore; Return immediately
-	Game *game = ent.GetNetworkState()->GetGameState();
+	pragma::Game *game = ent.GetNetworkState()->GetGameState();
 	m_tickData.lastTick = game->CurTime();
 
 	m_stateFlags &= ~pragma::BaseEntityComponent::StateFlags::IsThinking;
@@ -998,11 +998,11 @@ std::optional<std::string> BaseEntityComponent::GetMemberUri(ComponentMemberInde
 		return {};
 	return GetMemberUri(GetEntity().GetNetworkState()->GetGameState(), GetEntity().GetUuid(), GetComponentId(), *info->GetName());
 }
-std::optional<std::string> BaseEntityComponent::GetUri(Game *game, std::variant<util::Uuid, std::string> entityIdentifier, std::variant<ComponentId, std::string> componentIdentifier)
+std::optional<std::string> BaseEntityComponent::GetUri(pragma::Game *game, std::variant<util::Uuid, std::string> entityIdentifier, std::variant<ComponentId, std::string> componentIdentifier)
 {
 	return std::visit(
 	  [&componentIdentifier, game](auto &value) -> std::optional<std::string> {
-		  auto uri = BaseEntity::GetUri(value);
+		  auto uri = pragma::ecs::BaseEntity::GetUri(value);
 		  auto q = uri.find('?');
 		  auto componentName = std::visit(
 		    [game](auto &value) -> std::optional<std::string> {
@@ -1025,7 +1025,7 @@ std::optional<std::string> BaseEntityComponent::GetUri(Game *game, std::variant<
 	  },
 	  entityIdentifier);
 }
-std::optional<std::string> BaseEntityComponent::GetMemberUri(Game *game, std::variant<util::Uuid, std::string> entityIdentifier, std::variant<ComponentId, std::string> componentIdentifier, std::variant<ComponentMemberIndex, std::string> memberIdentifier)
+std::optional<std::string> BaseEntityComponent::GetMemberUri(pragma::Game *game, std::variant<util::Uuid, std::string> entityIdentifier, std::variant<ComponentId, std::string> componentIdentifier, std::variant<ComponentMemberIndex, std::string> memberIdentifier)
 {
 	auto uri = GetUri(game, entityIdentifier, componentIdentifier);
 	if(!uri.has_value())
@@ -1065,7 +1065,7 @@ std::optional<std::string> BaseEntityComponent::GetMemberUri(Game *game, std::va
 	return uri->substr(0, q) + "/" + *memberName + uri->substr(q);
 }
 
-spdlog::logger *find_logger(Game &game, std::type_index typeIndex) {
+spdlog::logger *find_logger(pragma::Game &game, std::type_index typeIndex) {
 	auto &componentManager = game.GetEntityComponentManager();
 	pragma::ComponentId componentId;
 	if (componentManager.GetComponentId(typeIndex, componentId)) {
@@ -1079,7 +1079,7 @@ spdlog::logger *find_logger(Game &game, std::type_index typeIndex) {
 spdlog::logger &pragma::BaseEntityComponent::get_logger(std::type_index typeIndex) {
 	auto *engine = pragma::get_engine();
 
-	for (auto *state : {Engine::Get()->GetClientState(), Engine::Get()->GetServerNetworkState()}) {
+	for (auto *state : {pragma::Engine::Get()->GetClientState(), pragma::Engine::Get()->GetServerNetworkState()}) {
 		if (!state)
 			continue;
 		auto *game = state->GetGameState();

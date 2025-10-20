@@ -3,6 +3,8 @@
 
 module;
 
+#include <string>
+
 export module pragma.shared;
 
 export import :ai;

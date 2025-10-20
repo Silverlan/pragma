@@ -10,7 +10,7 @@ import :entities.components.input_movement_controller;
 
 using namespace pragma;
 
-InputMovementControllerComponent::InputMovementControllerComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+InputMovementControllerComponent::InputMovementControllerComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void InputMovementControllerComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

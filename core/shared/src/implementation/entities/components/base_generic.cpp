@@ -20,4 +20,4 @@ void BaseGenericComponent::RegisterEvents(pragma::EntityComponentManager &compon
 	EVENT_ON_MEMBERS_CHANGED = registerEvent("GENERIC_ON_MEMBERS_CHANGED", ComponentEventInfo::Type::Explicit);
 }
 
-BaseGenericComponent::BaseGenericComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseGenericComponent::BaseGenericComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}

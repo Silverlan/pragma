@@ -48,7 +48,7 @@ bool BaseSoftBodyComponent::InitializeSoftBodyData()
 				it = subMeshes.erase(it);
 				continue;
 			}
-			auto itTest = std::find_if(colMeshes.begin(), colMeshes.end(), [&subMesh](const std::shared_ptr<CollisionMesh> &colMesh) { return (colMesh->GetSoftBodyMesh() == subMesh.get()); });
+			auto itTest = std::find_if(colMeshes.begin(), colMeshes.end(), [&subMesh](const std::shared_ptr<pragma::physics::CollisionMesh> &colMesh) { return (colMesh->GetSoftBodyMesh() == subMesh.get()); });
 			if(itTest == colMeshes.end()) {
 				it = subMeshes.erase(it);
 				continue;

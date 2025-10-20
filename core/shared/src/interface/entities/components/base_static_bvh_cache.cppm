@@ -23,9 +23,9 @@ export namespace pragma {
 		virtual ~BaseStaticBvhCacheComponent() override;
 		void SetCacheDirty();
 
-		void SetEntityDirty(BaseEntity &ent);
-		void AddEntity(BaseEntity &ent);
-		void RemoveEntity(BaseEntity &ent, bool removeFinal = true);
+		void SetEntityDirty(pragma::ecs::BaseEntity &ent);
+		void AddEntity(pragma::ecs::BaseEntity &ent);
+		void RemoveEntity(pragma::ecs::BaseEntity &ent, bool removeFinal = true);
 
 		virtual bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, HitInfo &outHitInfo) const override;
 		using BaseBvhComponent::IntersectionTest;
@@ -38,11 +38,11 @@ export namespace pragma {
 			std::atomic<bool> complete = false;
 		};
 
-		BaseStaticBvhCacheComponent(BaseEntity &ent);
-		void RemoveEntityFromBvh(const BaseEntity &ent);
+		BaseStaticBvhCacheComponent(pragma::ecs::BaseEntity &ent);
+		void RemoveEntityFromBvh(const pragma::ecs::BaseEntity &ent);
 		void UpdateBuild();
 
-		void Build(std::vector<std::shared_ptr<ModelSubMesh>> &&meshes, std::vector<BaseEntity *> &&meshToEntity, std::vector<umath::ScaledTransform> &&meshPoses);
+		void Build(std::vector<std::shared_ptr<pragma::ModelSubMesh>> &&meshes, std::vector<pragma::ecs::BaseEntity *> &&meshToEntity, std::vector<umath::ScaledTransform> &&meshPoses);
 
 		virtual void TestRebuildBvh() = 0;
 		bool m_staticBvhDirty = false;

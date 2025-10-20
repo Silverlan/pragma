@@ -8,7 +8,7 @@ module pragma.shared;
 
 import :engine;
 
-Engine::StateInstance::StateInstance(const std::shared_ptr<msys::MaterialManager> &matManager, msys::Material *matErr) : materialManager {matManager}, state(nullptr)
+pragma::Engine::StateInstance::StateInstance(const std::shared_ptr<msys::MaterialManager> &matManager, msys::Material *matErr) : materialManager {matManager}, state(nullptr)
 {
 	if(matErr == nullptr) {
 		Con::cout << "Unable to load error material! Validate or reinstall the game files!" << Con::endl;
@@ -17,7 +17,7 @@ Engine::StateInstance::StateInstance(const std::shared_ptr<msys::MaterialManager
 	materialManager->SetErrorMaterial(matErr);
 }
 
-Engine::StateInstance::~StateInstance()
+pragma::Engine::StateInstance::~StateInstance()
 {
 	state = nullptr; // Has to be cleared before the material manager!
 	materialManager = nullptr;

@@ -7,6 +7,8 @@ module;
 
 export module pragma.shared:scripting.lua.libraries.animation;
 
+export import pragma.lua;
+
 export namespace Lua {
 	namespace animation {
 		DLLNETWORK void register_library(Lua::Interface &lua);

@@ -12,10 +12,10 @@ module pragma.shared;
 import :entities.iterator;
 
 std::size_t EntityContainer::Size() const { return ents.size(); }
-BaseEntity *EntityContainer::At(std::size_t index) { return ents.at(index); }
+pragma::ecs::BaseEntity *EntityContainer::At(std::size_t index) { return ents.at(index); }
 
 std::size_t ComponentContainer::Size() const { return components.size(); }
-BaseEntity *ComponentContainer::At(std::size_t index)
+pragma::ecs::BaseEntity *ComponentContainer::At(std::size_t index)
 {
 	auto *component = components.at(index);
 	return (component != nullptr) ? &component->GetEntity() : nullptr;
@@ -23,10 +23,10 @@ BaseEntity *ComponentContainer::At(std::size_t index)
 
 /////////////////
 
-EntityIteratorData::EntityIteratorData(Game &game) : game(game), entities(std::make_unique<EntityContainer>(game.GetBaseEntities(), game.GetBaseEntityCount())) {}
-EntityIteratorData::EntityIteratorData(Game &game, const std::vector<pragma::BaseEntityComponent *> &components, std::size_t count) : game(game), entities(std::make_unique<ComponentContainer>(components, count)) {}
+EntityIteratorData::EntityIteratorData(pragma::Game &game) : game(game), entities(std::make_unique<EntityContainer>(game.GetBaseEntities(), game.GetBaseEntityCount())) {}
+EntityIteratorData::EntityIteratorData(pragma::Game &game, const std::vector<pragma::BaseEntityComponent *> &components, std::size_t count) : game(game), entities(std::make_unique<ComponentContainer>(components, count)) {}
 std::size_t EntityIteratorData::GetCount() const { return entities->Count(); }
-bool EntityIteratorData::ShouldPass(BaseEntity &ent, std::size_t index) const
+bool EntityIteratorData::ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) const
 {
 	for(auto &fFilter : filters) {
 		if(fFilter->ShouldPass(ent, index) == false)
@@ -51,7 +51,7 @@ BaseEntityIterator::BaseEntityIterator(const std::shared_ptr<EntityIteratorData>
 			++(*this);
 	}
 }
-bool BaseEntityIterator::ShouldPass(BaseEntity &ent, std::size_t index) const { return m_iteratorData ? m_iteratorData->ShouldPass(ent, index) : false; }
+bool BaseEntityIterator::ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) const { return m_iteratorData ? m_iteratorData->ShouldPass(ent, index) : false; }
 std::size_t BaseEntityIterator::GetCount() const { return m_iteratorData ? m_iteratorData->GetCount() : 0; }
 BaseEntityIterator &BaseEntityIterator::operator++()
 {
@@ -71,8 +71,8 @@ BaseEntityIterator BaseEntityIterator::operator++(int)
 	operator++();
 	return r;
 }
-BaseEntity *BaseEntityIterator::operator*() { return operator->(); }
-BaseEntity *BaseEntityIterator::operator->() { return m_iteratorData ? m_iteratorData->entities->At(m_currentIndex) : nullptr; }
+pragma::ecs::BaseEntity *BaseEntityIterator::operator*() { return operator->(); }
+pragma::ecs::BaseEntity *BaseEntityIterator::operator->() { return m_iteratorData ? m_iteratorData->entities->At(m_currentIndex) : nullptr; }
 bool BaseEntityIterator::operator==(const BaseEntityIterator &other)
 {
 	if(!m_iteratorData)
@@ -83,13 +83,13 @@ bool BaseEntityIterator::operator!=(const BaseEntityIterator &other) { return !o
 
 /////////////////
 
-EntityIterator::EntityIterator(Game &game, bool) : m_iteratorData(std::make_shared<EntityIteratorData>(game)) {}
-EntityIterator::EntityIterator(Game &game, FilterFlags filterFlags) : EntityIterator(game, false)
+pragma::ecs::EntityIterator::EntityIterator(pragma::Game &game, bool) : m_iteratorData(std::make_shared<EntityIteratorData>(game)) {}
+pragma::ecs::EntityIterator::EntityIterator(pragma::Game &game, FilterFlags filterFlags) : pragma::ecs::EntityIterator(game, false)
 {
 	if(filterFlags != FilterFlags::None)
 		AttachFilter<EntityIteratorFilterFlags>(filterFlags);
 }
-EntityIterator::EntityIterator(Game &game, pragma::ComponentId componentId, FilterFlags filterFlags)
+pragma::ecs::EntityIterator::EntityIterator(pragma::Game &game, pragma::ComponentId componentId, FilterFlags filterFlags)
 {
 	if(componentId != pragma::INVALID_COMPONENT_ID) {
 		std::size_t count;
@@ -101,7 +101,7 @@ EntityIterator::EntityIterator(Game &game, pragma::ComponentId componentId, Filt
 	if(filterFlags != FilterFlags::None)
 		AttachFilter<EntityIteratorFilterFlags>(filterFlags);
 }
-EntityIterator::EntityIterator(Game &game, const std::string &componentName, FilterFlags filterFlags)
+pragma::ecs::EntityIterator::EntityIterator(pragma::Game &game, const std::string &componentName, FilterFlags filterFlags)
 {
 	auto componentId = pragma::INVALID_COMPONENT_ID;
 	if(game.GetEntityComponentManager().GetComponentTypeId(componentName, componentId) == true && componentId != pragma::INVALID_COMPONENT_ID) {
@@ -115,10 +115,10 @@ EntityIterator::EntityIterator(Game &game, const std::string &componentName, Fil
 	if(filterFlags != FilterFlags::None)
 		AttachFilter<EntityIteratorFilterFlags>(filterFlags);
 }
-std::size_t EntityIterator::GetCount() const { return m_iteratorData ? m_iteratorData->GetCount() : 0; }
-BaseEntityIterator EntityIterator::begin() const { return BaseEntityIterator {m_iteratorData, false}; }
-BaseEntityIterator EntityIterator::end() const { return BaseEntityIterator {m_iteratorData, true}; }
-void EntityIterator::SetBaseComponentType(pragma::ComponentId componentId)
+std::size_t pragma::ecs::EntityIterator::GetCount() const { return m_iteratorData ? m_iteratorData->GetCount() : 0; }
+BaseEntityIterator pragma::ecs::EntityIterator::begin() const { return BaseEntityIterator {m_iteratorData, false}; }
+BaseEntityIterator pragma::ecs::EntityIterator::end() const { return BaseEntityIterator {m_iteratorData, true}; }
+void pragma::ecs::EntityIterator::SetBaseComponentType(pragma::ComponentId componentId)
 {
 	if(!m_iteratorData)
 		return;
@@ -126,7 +126,7 @@ void EntityIterator::SetBaseComponentType(pragma::ComponentId componentId)
 	auto &components = m_iteratorData->game.GetEntityComponentManager().GetComponents(componentId, count);
 	m_iteratorData->entities = std::make_unique<ComponentContainer>(components, count);
 }
-void EntityIterator::SetBaseComponentType(std::type_index typeIndex)
+void pragma::ecs::EntityIterator::SetBaseComponentType(std::type_index typeIndex)
 {
 	if(!m_iteratorData)
 		return;
@@ -134,7 +134,7 @@ void EntityIterator::SetBaseComponentType(std::type_index typeIndex)
 	m_iteratorData->game.GetEntityComponentManager().GetComponentId(typeIndex, componentId);
 	SetBaseComponentType(componentId);
 }
-void EntityIterator::SetBaseComponentType(const std::string &componentName)
+void pragma::ecs::EntityIterator::SetBaseComponentType(const std::string &componentName)
 {
 	if(!m_iteratorData)
 		return;

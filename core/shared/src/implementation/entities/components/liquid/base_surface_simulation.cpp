@@ -22,12 +22,12 @@ void BaseLiquidSurfaceSimulationComponent::RegisterEvents(pragma::EntityComponen
 
 void BaseLiquidSurfaceSimulationComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
 
-BaseLiquidSurfaceSimulationComponent::BaseLiquidSurfaceSimulationComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseLiquidSurfaceSimulationComponent::BaseLiquidSurfaceSimulationComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void BaseLiquidSurfaceSimulationComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "max_wave_height", false))
 			SetMaxWaveHeight(ustring::to_float(kvData.value));

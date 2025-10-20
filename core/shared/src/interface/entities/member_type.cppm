@@ -4,6 +4,8 @@
 module;
 
 
+#include <variant>
+
 export module pragma.shared:entities.member_type;
 
 export import :entities.enums;

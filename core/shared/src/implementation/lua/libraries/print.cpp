@@ -105,7 +105,7 @@ int Lua::console::msg(lua_State *l, int st)
 {
 	int argc = lua_gettop(l);
 	if(argc > 0) {
-		NetworkState *state = Engine::Get()->GetNetworkState(l);
+		NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 		if(state == NULL)
 			::util::set_console_color(::pragma::console::ConsoleColorFlags::White | ::pragma::console::ConsoleColorFlags::Intensity);
 		else if(state->IsServer())
@@ -126,7 +126,7 @@ int Lua::console::msg(lua_State *l, int st)
 int Lua::debug::print(lua_State *l)
 {
 	auto flags = ::pragma::console::ConsoleColorFlags::None;
-	if(Engine::Get()->GetNetworkState(l)->IsClient())
+	if(pragma::Engine::Get()->GetNetworkState(l)->IsClient())
 		flags |= ::pragma::console::ConsoleColorFlags::BackgroundMagenta;
 	else
 		flags |= ::pragma::console::ConsoleColorFlags::BackgroundCyan;

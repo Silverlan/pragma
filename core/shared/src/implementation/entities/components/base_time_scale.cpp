@@ -22,12 +22,12 @@ void BaseTimeScaleComponent::RegisterMembers(pragma::EntityComponentManager &com
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseTimeScaleComponent::BaseTimeScaleComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_timeScale {util::FloatProperty::Create(1.f)} {}
+BaseTimeScaleComponent::BaseTimeScaleComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_timeScale {util::FloatProperty::Create(1.f)} {}
 void BaseTimeScaleComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "time_scale", false))
 			*m_timeScale = util::to_float(kvData.value);

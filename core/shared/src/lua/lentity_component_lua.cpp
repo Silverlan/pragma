@@ -14,7 +14,7 @@ std::ostream &operator<<(std::ostream &out, const pragma::BaseEntityComponent *h
 		auto &ent = hComponent->GetEntity();
 		auto &componentInfo = *ent.GetNetworkState()->GetGameState()->GetEntityComponentManager().GetComponentInfo(hComponent->GetComponentId());
 		out << componentInfo.name << "][";
-		const_cast<BaseEntity &>(ent).print(out);
+		const_cast<pragma::ecs::BaseEntity &>(ent).print(out);
 		out << "]";
 	}
 	return out;

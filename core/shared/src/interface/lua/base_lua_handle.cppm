@@ -4,10 +4,12 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/raw_object.hpp"
+#include "pragma/lua/core.hpp"
+#include <string>
 
 export module pragma.shared:scripting.lua.base_lua_handle;
 
+import :scripting.lua.api;
 import :scripting.lua.core;
 
 export {

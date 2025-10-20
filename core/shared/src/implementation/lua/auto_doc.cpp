@@ -57,13 +57,13 @@ struct DocInfo {
 static DocInfo s_docInfo {};
 inline std::string wrap_link(const std::string &arg)
 {
-	if(Engine::Get()->GetConsoleType() == Engine::ConsoleType::Terminal)
+	if(pragma::Engine::Get()->GetConsoleType() == pragma::Engine::ConsoleType::Terminal)
 		return arg;
 	return "{[l:lua_help \"" + arg + "\"]}" + arg + "{[/l]}";
 }
 inline std::string wrap_web_link(const std::string &arg)
 {
-	if(Engine::Get()->GetConsoleType() == Engine::ConsoleType::Terminal)
+	if(pragma::Engine::Get()->GetConsoleType() == pragma::Engine::ConsoleType::Terminal)
 		return arg;
 	return "{[l:url \"" + arg + "\"]}" + arg + "{[/l]}";
 }

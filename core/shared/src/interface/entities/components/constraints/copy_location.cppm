@@ -12,7 +12,7 @@ export import :entities.components.constraints.space;
 export namespace pragma {
 	class DLLNETWORK ConstraintCopyLocationComponent final : public BaseEntityComponent {
 	  public:
-		ConstraintCopyLocationComponent(BaseEntity &ent);
+		ConstraintCopyLocationComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		virtual void InitializeLuaObject(lua_State *lua) override;

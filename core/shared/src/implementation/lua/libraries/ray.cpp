@@ -25,13 +25,13 @@ void Lua::TraceData::GetDistance(lua_State *l, ::TraceData &data) { Lua::PushNum
 void Lua::TraceData::GetDirection(lua_State *l, ::TraceData &data) { Lua::Push<Vector3>(l, data.GetDirection()); }
 void Lua::TraceData::SetFilter(lua_State *l, ::TraceData &data, luabind::object)
 {
-	if(Lua::IsType<BaseEntity>(l, 2)) {
-		auto &ent = Lua::Check<BaseEntity>(l, 2);
+	if(Lua::IsType<pragma::ecs::BaseEntity>(l, 2)) {
+		auto &ent = Lua::Check<pragma::ecs::BaseEntity>(l, 2);
 		data.SetFilter(ent);
 		return;
 	}
-	else if(Lua::IsType<::PhysObj>(l, 2)) {
-		auto &phys = Lua::Check<::PhysObj>(l, 2);
+	else if(Lua::IsType<pragma::physics::PhysObj>(l, 2)) {
+		auto &phys = Lua::Check<pragma::physics::PhysObj>(l, 2);
 		data.SetFilter(phys);
 		return;
 	}
@@ -44,7 +44,7 @@ void Lua::TraceData::SetFilter(lua_State *l, ::TraceData &data, luabind::object)
 		std::vector<EntityHandle> ents;
 		while(Lua::GetNextPair(l, table) != 0) /* 3 */
 		{
-			BaseEntity &v = Lua::Check<BaseEntity>(l, -1); /* 3 */
+			pragma::ecs::BaseEntity &v = Lua::Check<pragma::ecs::BaseEntity>(l, -1); /* 3 */
 			ents.push_back(v.GetHandle());
 
 			Lua::Pop(l, 1); /* 2 */

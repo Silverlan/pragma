@@ -81,7 +81,7 @@ export namespace pragma {
 		BaseOwnableComponent *GetOwnerComponent();
 		virtual void OnEntitySpawn() override;
 	  protected:
-		BaseWeaponComponent(BaseEntity &ent);
+		BaseWeaponComponent(pragma::ecs::BaseEntity &ent);
 		void UpdateTickPolicy();
 		bool CanPrimaryAttack() const;
 		bool CanSecondaryAttack() const;

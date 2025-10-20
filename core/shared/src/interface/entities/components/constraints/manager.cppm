@@ -24,7 +24,7 @@ export namespace pragma {
 		static ComponentEventId EVENT_APPLY_CONSTRAINT;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		ConstraintManagerComponent(BaseEntity &ent);
+		ConstraintManagerComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		virtual void OnEntitySpawn() override;

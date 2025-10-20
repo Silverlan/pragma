@@ -4,22 +4,24 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/lua/core.hpp"
+#include <string>
 
 export module pragma.shared:scripting.lua.libraries.engine;
 
 import :console.enums;
+export import :scripting.lua.api;
+export import :types;
 
 #undef LoadLibrary
 
 export {
-	class Model;
-	class NetworkState;
 	namespace Lua {
 		namespace engine {
 			DLLNETWORK void PrecacheModel_sv(lua_State *l, const std::string &mdlName);
 			DLLNETWORK void LoadSoundScripts(lua_State *l, const std::string &fileName, bool precache);
 			DLLNETWORK void LoadSoundScripts(lua_State *l, const std::string &fileName);
-			DLLNETWORK std::shared_ptr<Model> get_model(lua_State *l, const std::string &mdlName);
+			DLLNETWORK std::shared_ptr<pragma::Model> get_model(lua_State *l, const std::string &mdlName);
 			DLLNETWORK var<bool, std::string> LoadLibrary(lua_State *l, const std::string &path);
 			DLLNETWORK bool UnloadLibrary(lua_State *l, const std::string &path);
 			DLLNETWORK bool IsLibraryLoaded(NetworkState &nw, const std::string &path);

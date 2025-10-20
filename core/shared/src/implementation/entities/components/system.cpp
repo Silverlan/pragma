@@ -28,7 +28,7 @@ BaseEntityComponentSystem::~BaseEntityComponentSystem()
 	}
 }
 void BaseEntityComponentSystem::OnRemove() { umath::set_flag(m_stateFlags, StateFlags::IsBeingRemoved); }
-void BaseEntityComponentSystem::Initialize(BaseEntity &ent, EntityComponentManager &componentManager)
+void BaseEntityComponentSystem::Initialize(pragma::ecs::BaseEntity &ent, EntityComponentManager &componentManager)
 {
 	m_entity = &ent;
 	m_componentManager = &componentManager;

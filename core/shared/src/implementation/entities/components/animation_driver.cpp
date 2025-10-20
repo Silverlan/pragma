@@ -41,7 +41,7 @@ void AnimationDriverComponent::RegisterMembers(pragma::EntityComponentManager &c
 	}
 }
 
-pragma::AnimationDriverComponent::AnimationDriverComponent(BaseEntity &ent) : BaseEntityComponent {ent}, m_parameters {udm::Property::Create<udm::Element>()}, m_descriptor {ent.GetLuaState()} {}
+pragma::AnimationDriverComponent::AnimationDriverComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent {ent}, m_parameters {udm::Property::Create<udm::Element>()}, m_descriptor {ent.GetLuaState()} {}
 
 udm::PProperty &AnimationDriverComponent::GetParameters() { return m_parameters; }
 void AnimationDriverComponent::UpdateParameters()

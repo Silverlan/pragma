@@ -3,6 +3,9 @@
 
 module;
 
+#include <string>
+#include <functional>
+
 export module pragma.shared:entities.components.environment;
 
 export import :entities.components.environment.audio;

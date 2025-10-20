@@ -9,7 +9,7 @@ import :entities.components.flex_merge;
 
 using namespace pragma;
 
-bool FlexMergeComponent::can_merge(const Model &mdl, const Model &mdlParent)
+bool FlexMergeComponent::can_merge(const pragma::Model &mdl, const pragma::Model &mdlParent)
 {
 	auto &flexControllers = mdl.GetFlexControllers();
 	for(auto &flexCon : flexControllers) {
@@ -32,7 +32,7 @@ void FlexMergeComponent::RegisterMembers(pragma::EntityComponentManager &compone
 		registerMember(std::move(memberInfo));
 	}
 }
-FlexMergeComponent::FlexMergeComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+FlexMergeComponent::FlexMergeComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void FlexMergeComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

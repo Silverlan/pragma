@@ -11,6 +11,7 @@ module;
 export module pragma.shared:audio.sound_script_events;
 
 export import :audio.sound;
+export import pragma.udm;
 
 #undef CreateEvent
 

@@ -9,9 +9,9 @@ module pragma.shared;
 
 import :model.model;
 
-const std::vector<ObjectAttachment> &Model::GetObjectAttachments() const { return const_cast<Model *>(this)->GetObjectAttachments(); }
-std::vector<ObjectAttachment> &Model::GetObjectAttachments() { return m_objectAttachments; }
-uint32_t Model::AddObjectAttachment(ObjectAttachment::Type type, const std::string &name, const std::string &attachment, const std::unordered_map<std::string, std::string> &keyValues)
+const std::vector<ObjectAttachment> &pragma::Model::GetObjectAttachments() const { return const_cast<pragma::Model *>(this)->GetObjectAttachments(); }
+std::vector<ObjectAttachment> &pragma::Model::GetObjectAttachments() { return m_objectAttachments; }
+uint32_t pragma::Model::AddObjectAttachment(ObjectAttachment::Type type, const std::string &name, const std::string &attachment, const std::unordered_map<std::string, std::string> &keyValues)
 {
 	m_objectAttachments.push_back({});
 	auto &objAtt = m_objectAttachments.back();
@@ -22,14 +22,14 @@ uint32_t Model::AddObjectAttachment(ObjectAttachment::Type type, const std::stri
 	ustring::to_lower(objAtt.name);
 	return m_objectAttachments.size() - 1u;
 }
-uint32_t Model::GetObjectAttachmentCount() const { return m_objectAttachments.size(); }
-ObjectAttachment *Model::GetObjectAttachment(uint32_t idx)
+uint32_t pragma::Model::GetObjectAttachmentCount() const { return m_objectAttachments.size(); }
+ObjectAttachment *pragma::Model::GetObjectAttachment(uint32_t idx)
 {
 	if(idx >= m_objectAttachments.size())
 		return nullptr;
 	return &m_objectAttachments.at(idx);
 }
-bool Model::LookupObjectAttachment(const std::string &name, uint32_t &attId) const
+bool pragma::Model::LookupObjectAttachment(const std::string &name, uint32_t &attId) const
 {
 	auto lname = name;
 	ustring::to_lower(lname);
@@ -38,14 +38,14 @@ bool Model::LookupObjectAttachment(const std::string &name, uint32_t &attId) con
 		return false;
 	return it - m_objectAttachments.begin();
 }
-bool Model::RemoveObjectAttachment(const std::string &name)
+bool pragma::Model::RemoveObjectAttachment(const std::string &name)
 {
 	auto attIdx = 0u;
 	if(LookupObjectAttachment(name, attIdx) == false)
 		return false;
 	return RemoveObjectAttachment(attIdx);
 }
-bool Model::RemoveObjectAttachment(uint32_t idx)
+bool pragma::Model::RemoveObjectAttachment(uint32_t idx)
 {
 	if(idx >= m_objectAttachments.size())
 		return false;

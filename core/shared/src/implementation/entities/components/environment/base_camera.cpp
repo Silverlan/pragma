@@ -3,9 +3,6 @@
 
 module;
 
-
-
-#include <glm/gtx/matrix_decompose.hpp>
 #include <algorithm>
 
 module pragma.shared;
@@ -76,7 +73,7 @@ decltype(BaseEnvCameraComponent::DEFAULT_FAR_Z) BaseEnvCameraComponent::DEFAULT_
 decltype(BaseEnvCameraComponent::DEFAULT_FOV) BaseEnvCameraComponent::DEFAULT_FOV = 90.f;
 decltype(BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV) BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV = 70.f;
 decltype(BaseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE) BaseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE = 72.f;
-BaseEnvCameraComponent::BaseEnvCameraComponent(BaseEntity &ent)
+BaseEnvCameraComponent::BaseEnvCameraComponent(pragma::ecs::BaseEntity &ent)
     : BaseEntityComponent {ent}, m_nearZ(util::FloatProperty::Create(DEFAULT_NEAR_Z)), m_farZ(util::FloatProperty::Create(DEFAULT_FAR_Z)), m_focalDistance(util::FloatProperty::Create(DEFAULT_FOCAL_DISTANCE)), m_projectionMatrix(util::Matrix4Property::Create()),
       m_viewMatrix(util::Matrix4Property::Create()), m_aspectRatio(util::FloatProperty::Create(1.f))
 {

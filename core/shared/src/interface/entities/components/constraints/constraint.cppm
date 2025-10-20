@@ -31,7 +31,7 @@ export namespace pragma {
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		ConstraintComponent(BaseEntity &ent);
+		ConstraintComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		virtual void OnEntitySpawn() override;

@@ -10,7 +10,7 @@ import :entities.components.map;
 
 using namespace pragma;
 
-MapComponent::MapComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+MapComponent::MapComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void MapComponent::Initialize()
 {

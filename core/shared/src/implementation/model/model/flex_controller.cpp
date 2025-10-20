@@ -12,12 +12,12 @@ module pragma.shared;
 
 import :model.model;
 
-std::vector<FlexController>::const_iterator Model::FindFlexController(const std::string &name) const { return const_cast<Model *>(this)->FindFlexController(name); }
-std::vector<FlexController>::iterator Model::FindFlexController(const std::string &name)
+std::vector<FlexController>::const_iterator pragma::Model::FindFlexController(const std::string &name) const { return const_cast<pragma::Model *>(this)->FindFlexController(name); }
+std::vector<FlexController>::iterator pragma::Model::FindFlexController(const std::string &name)
 {
 	return std::find_if(m_flexControllers.begin(), m_flexControllers.end(), [&name](const FlexController &fc) { return ustring::compare(fc.name, name, false); });
 }
-bool Model::GetFlexControllerId(const std::string &name, uint32_t &id) const
+bool pragma::Model::GetFlexControllerId(const std::string &name, uint32_t &id) const
 {
 	auto it = FindFlexController(name);
 	if(it == m_flexControllers.end())
@@ -25,17 +25,17 @@ bool Model::GetFlexControllerId(const std::string &name, uint32_t &id) const
 	id = it - m_flexControllers.begin();
 	return true;
 }
-const std::vector<FlexController> &Model::GetFlexControllers() const { return const_cast<Model *>(this)->GetFlexControllers(); }
-std::vector<FlexController> &Model::GetFlexControllers() { return m_flexControllers; }
-const FlexController *Model::GetFlexController(uint32_t id) const { return const_cast<Model *>(this)->GetFlexController(id); }
-FlexController *Model::GetFlexController(uint32_t id) { return (id < m_flexControllers.size()) ? &m_flexControllers.at(id) : nullptr; }
-const FlexController *Model::GetFlexController(const std::string &name) const { return const_cast<Model *>(this)->GetFlexController(name); }
-FlexController *Model::GetFlexController(const std::string &name)
+const std::vector<FlexController> &pragma::Model::GetFlexControllers() const { return const_cast<pragma::Model *>(this)->GetFlexControllers(); }
+std::vector<FlexController> &pragma::Model::GetFlexControllers() { return m_flexControllers; }
+const FlexController *pragma::Model::GetFlexController(uint32_t id) const { return const_cast<pragma::Model *>(this)->GetFlexController(id); }
+FlexController *pragma::Model::GetFlexController(uint32_t id) { return (id < m_flexControllers.size()) ? &m_flexControllers.at(id) : nullptr; }
+const FlexController *pragma::Model::GetFlexController(const std::string &name) const { return const_cast<pragma::Model *>(this)->GetFlexController(name); }
+FlexController *pragma::Model::GetFlexController(const std::string &name)
 {
 	auto it = FindFlexController(name);
 	return (it != m_flexControllers.end()) ? &(*it) : nullptr;
 }
-FlexController &Model::AddFlexController(const std::string &name)
+FlexController &pragma::Model::AddFlexController(const std::string &name)
 {
 	if(name.find_first_of("/\\") != std::string::npos)
 		throw std::invalid_argument {"Name '" + name + "' contains illegal characters!"};
@@ -47,21 +47,21 @@ FlexController &Model::AddFlexController(const std::string &name)
 	}
 	return *it;
 }
-void Model::RemoveFlexController(uint32_t id)
+void pragma::Model::RemoveFlexController(uint32_t id)
 {
 	if(id >= m_flexControllers.size())
 		return;
 	m_flexControllers.erase(m_flexControllers.begin() + id);
 }
-void Model::RemoveFlexController(const std::string &name)
+void pragma::Model::RemoveFlexController(const std::string &name)
 {
 	auto it = FindFlexController(name);
 	if(it == m_flexControllers.end())
 		return;
 	m_flexControllers.erase(it);
 }
-uint32_t Model::GetFlexControllerCount() const { return m_flexControllers.size(); }
-const std::string *Model::GetFlexControllerName(uint32_t id) const
+uint32_t pragma::Model::GetFlexControllerCount() const { return m_flexControllers.size(); }
+const std::string *pragma::Model::GetFlexControllerName(uint32_t id) const
 {
 	if(id >= m_flexControllers.size())
 		return nullptr;
@@ -70,15 +70,15 @@ const std::string *Model::GetFlexControllerName(uint32_t id) const
 
 //////////////
 
-void Model::SetMaxEyeDeflection(umath::Degree eyeDeflection) { m_maxEyeDeflection = eyeDeflection; }
-umath::Degree Model::GetMaxEyeDeflection() const { return m_maxEyeDeflection; }
+void pragma::Model::SetMaxEyeDeflection(umath::Degree eyeDeflection) { m_maxEyeDeflection = eyeDeflection; }
+umath::Degree pragma::Model::GetMaxEyeDeflection() const { return m_maxEyeDeflection; }
 
-std::vector<Flex>::const_iterator Model::FindFlex(const std::string &name) const { return const_cast<Model *>(this)->FindFlex(name); }
-std::vector<Flex>::iterator Model::FindFlex(const std::string &name)
+std::vector<Flex>::const_iterator pragma::Model::FindFlex(const std::string &name) const { return const_cast<pragma::Model *>(this)->FindFlex(name); }
+std::vector<Flex>::iterator pragma::Model::FindFlex(const std::string &name)
 {
 	return std::find_if(m_flexes.begin(), m_flexes.end(), [&name](const Flex &flex) { return ustring::compare(flex.GetName(), name, false); });
 }
-bool Model::GetFlexId(const std::string &name, uint32_t &id) const
+bool pragma::Model::GetFlexId(const std::string &name, uint32_t &id) const
 {
 	auto it = FindFlex(name);
 	if(it == m_flexes.end())
@@ -86,17 +86,17 @@ bool Model::GetFlexId(const std::string &name, uint32_t &id) const
 	id = it - m_flexes.begin();
 	return true;
 }
-const std::vector<Flex> &Model::GetFlexes() const { return const_cast<Model *>(this)->GetFlexes(); }
-std::vector<Flex> &Model::GetFlexes() { return m_flexes; }
-const Flex *Model::GetFlex(uint32_t id) const { return const_cast<Model *>(this)->GetFlex(id); }
-Flex *Model::GetFlex(uint32_t id) { return (id < m_flexes.size()) ? &m_flexes.at(id) : nullptr; }
-const Flex *Model::GetFlex(const std::string &name) const { return const_cast<Model *>(this)->GetFlex(name); }
-Flex *Model::GetFlex(const std::string &name)
+const std::vector<Flex> &pragma::Model::GetFlexes() const { return const_cast<pragma::Model *>(this)->GetFlexes(); }
+std::vector<Flex> &pragma::Model::GetFlexes() { return m_flexes; }
+const Flex *pragma::Model::GetFlex(uint32_t id) const { return const_cast<pragma::Model *>(this)->GetFlex(id); }
+Flex *pragma::Model::GetFlex(uint32_t id) { return (id < m_flexes.size()) ? &m_flexes.at(id) : nullptr; }
+const Flex *pragma::Model::GetFlex(const std::string &name) const { return const_cast<pragma::Model *>(this)->GetFlex(name); }
+Flex *pragma::Model::GetFlex(const std::string &name)
 {
 	auto it = FindFlex(name);
 	return (it != m_flexes.end()) ? &(*it) : nullptr;
 }
-Flex &Model::AddFlex(const std::string &name)
+Flex &pragma::Model::AddFlex(const std::string &name)
 {
 	if(name.find_first_of("/\\") != std::string::npos)
 		throw std::invalid_argument {"Name '" + name + "' contains illegal characters!"};
@@ -107,27 +107,27 @@ Flex &Model::AddFlex(const std::string &name)
 	}
 	return *it;
 }
-void Model::RemoveFlex(uint32_t id)
+void pragma::Model::RemoveFlex(uint32_t id)
 {
 	if(id >= m_flexes.size())
 		return;
 	m_flexes.erase(m_flexes.begin() + id);
 }
-void Model::RemoveFlex(const std::string &name)
+void pragma::Model::RemoveFlex(const std::string &name)
 {
 	auto it = FindFlex(name);
 	if(it == m_flexes.end())
 		return;
 	m_flexes.erase(it);
 }
-uint32_t Model::GetFlexCount() const { return m_flexes.size(); }
-const std::string *Model::GetFlexName(uint32_t id) const
+uint32_t pragma::Model::GetFlexCount() const { return m_flexes.size(); }
+const std::string *pragma::Model::GetFlexName(uint32_t id) const
 {
 	if(id >= m_flexes.size())
 		return nullptr;
 	return &m_flexes.at(id).GetName();
 }
-bool Model::GetFlexFormula(uint32_t id, std::string &formula) const
+bool pragma::Model::GetFlexFormula(uint32_t id, std::string &formula) const
 {
 	auto *flex = GetFlex(id);
 	if(flex == nullptr)
@@ -425,7 +425,7 @@ bool Model::GetFlexFormula(uint32_t id, std::string &formula) const
 	}
 	return false;
 }
-bool Model::GetFlexFormula(const std::string &name, std::string &formula) const
+bool pragma::Model::GetFlexFormula(const std::string &name, std::string &formula) const
 {
 	auto id = 0u;
 	if(GetFlexId(name, id) == false)

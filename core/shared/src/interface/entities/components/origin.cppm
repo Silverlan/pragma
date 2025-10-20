@@ -18,7 +18,7 @@ export namespace pragma {
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		OriginComponent(BaseEntity &ent);
+		OriginComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		void SetOriginPose(const umath::Transform &pose);

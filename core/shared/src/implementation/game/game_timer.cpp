@@ -8,21 +8,21 @@ module pragma.shared;
 
 import :game.game;
 
-Timer *Game::CreateTimer(float delay, int reps, LuaFunctionObject luaFunction, TimerType timeType)
+Timer *pragma::Game::CreateTimer(float delay, int reps, LuaFunctionObject luaFunction, TimerType timeType)
 {
 	m_timers.push_back(std::make_unique<Timer>(delay, reps, luaFunction, timeType));
 	return m_timers.back().get();
 }
 
-Timer *Game::CreateTimer(float delay, int reps, const CallbackHandle &hCallback, TimerType timeType)
+Timer *pragma::Game::CreateTimer(float delay, int reps, const CallbackHandle &hCallback, TimerType timeType)
 {
 	m_timers.push_back(std::make_unique<Timer>(delay, reps, hCallback, timeType));
 	return m_timers.back().get();
 }
 
-void Game::ClearTimers() { m_timers.clear(); }
+void pragma::Game::ClearTimers() { m_timers.clear(); }
 
-void Game::UpdateTimers()
+void pragma::Game::UpdateTimers()
 {
 	for(auto i = decltype(m_timers.size()) {0u}; i < m_timers.size(); ++i) {
 		auto &timer = *m_timers.at(i);

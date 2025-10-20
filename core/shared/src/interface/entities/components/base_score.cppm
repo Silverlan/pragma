@@ -26,7 +26,7 @@ export namespace pragma {
 		void AddScore(Score score);
 		void SubtractScore(Score score);
 	  protected:
-		BaseScoreComponent(BaseEntity &ent);
+		BaseScoreComponent(pragma::ecs::BaseEntity &ent);
 		util::PInt32Property m_score;
 		pragma::NetEventId m_netEvSetScore = pragma::INVALID_NET_EVENT;
 		CallbackHandle m_cbOnScoreChanged = {};

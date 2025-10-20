@@ -15,8 +15,14 @@ import :model.model_manager;
 
 #define WMD_VERSION 38
 
-enum class CollisionMeshLoadFlags : uint64_t { None = 0u, SoftBody = 1u, Convex = SoftBody << 1u };
-REGISTER_BASIC_BITWISE_OPERATORS(CollisionMeshLoadFlags)
+namespace pragma {
+	enum class CollisionMeshLoadFlags : uint64_t { None = 0u, SoftBody = 1u, Convex = SoftBody << 1u };
+    using namespace umath::scoped_enum::bitwise;
+}
+namespace umath::scoped_enum::bitwise {
+	template<>
+	struct enable_bitwise_operators<pragma::CollisionMeshLoadFlags> : std::true_type {};
+}
 
 struct DLLNETWORK FWMDBone {
 	std::string name;
@@ -90,8 +96,8 @@ bool pragma::asset::WmdFormatHandler::LoadData(ModelProcessor &processor, ModelL
 		Con::cwar << "Incompatible model format version " << ver << "!" << Con::endl;
 		return false;
 	}
-	auto flags = f.Read<Model::Flags>();
-	m_bStatic = umath::is_flag_set(flags, Model::Flags::Static);
+	auto flags = f.Read<pragma::Model::Flags>();
+	m_bStatic = umath::is_flag_set(flags, pragma::Model::Flags::Static);
 
 	Vector3 eyeOffset {};
 	if(ver > 0x0007)
@@ -203,7 +209,7 @@ bool pragma::asset::WmdFormatHandler::LoadData(ModelProcessor &processor, ModelL
 	return true;
 }
 
-void pragma::asset::WmdFormatHandler::LoadBones(unsigned short version, unsigned int numBones, Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadBones(unsigned short version, unsigned int numBones, pragma::Model &mdl)
 {
 	auto &skeleton = mdl.GetSkeleton();
 	auto reference = pragma::animation::Animation::Create();
@@ -276,7 +282,7 @@ void pragma::asset::WmdFormatHandler::LoadBones(unsigned short version, unsigned
 	mdl.GenerateBindPoseMatrices();
 }
 
-void pragma::asset::WmdFormatHandler::LoadHitboxes(uint16_t version, Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadHitboxes(uint16_t version, pragma::Model &mdl)
 {
 	if(version <= 0x0004) // Hitboxes aren't supported until version 0x0005
 		return;
@@ -290,7 +296,7 @@ void pragma::asset::WmdFormatHandler::LoadHitboxes(uint16_t version, Model &mdl)
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadObjectAttachments(Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadObjectAttachments(pragma::Model &mdl)
 {
 	auto numObjectAttachments = m_file->Read<uint32_t>();
 	mdl.GetObjectAttachments().reserve(numObjectAttachments);
@@ -310,7 +316,7 @@ void pragma::asset::WmdFormatHandler::LoadObjectAttachments(Model &mdl)
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadAttachments(Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadAttachments(pragma::Model &mdl)
 {
 	unsigned int numAttachments = m_file->Read<unsigned int>();
 	for(unsigned int i = 0; i < numAttachments; i++) {
@@ -340,7 +346,7 @@ static void clamp_bounds(Vector3 &min, Vector3 &max, unsigned short version)
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadMeshes(unsigned short version, Model &mdl, const std::function<std::shared_ptr<ModelMesh>()> &meshFactory, const std::function<std::shared_ptr<ModelSubMesh>()> &subMeshFactory)
+void pragma::asset::WmdFormatHandler::LoadMeshes(unsigned short version, pragma::Model &mdl, const std::function<std::shared_ptr<ModelMesh>()> &meshFactory, const std::function<std::shared_ptr<pragma::ModelSubMesh>()> &subMeshFactory)
 {
 	Vector3 renderMin, renderMax;
 	for(char i = 0; i < 3; i++)
@@ -460,7 +466,7 @@ void pragma::asset::WmdFormatHandler::LoadMeshes(unsigned short version, Model &
 					subMesh->SetSkinTextureIndex(texId);
 
 					if(version >= 27) {
-						auto geometryType = m_file->Read<ModelSubMesh::GeometryType>();
+						auto geometryType = m_file->Read<pragma::ModelSubMesh::GeometryType>();
 						subMesh->SetGeometryType(geometryType);
 					}
 
@@ -558,7 +564,7 @@ void pragma::asset::WmdFormatHandler::LoadMeshes(unsigned short version, Model &
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadCollisionMeshes(Game *game, unsigned short version, Model &mdl, SurfaceMaterial *smDefault)
+void pragma::asset::WmdFormatHandler::LoadCollisionMeshes(pragma::Game *game, unsigned short version, pragma::Model &mdl, SurfaceMaterial *smDefault)
 {
 	if(smDefault == nullptr)
 		smDefault = m_gameState->GetSurfaceMaterial(0);
@@ -593,7 +599,7 @@ void pragma::asset::WmdFormatHandler::LoadCollisionMeshes(Game *game, unsigned s
 			collisionMin[j] = umath::min(collisionMin[j], m_file->Read<float>() - origin[j]);
 		for(char j = 0; j < 3; j++)
 			collisionMax[j] = umath::max(collisionMax[j], m_file->Read<float>() - origin[j]);
-		auto mesh = CollisionMesh::Create(game);
+		auto mesh = pragma::physics::CollisionMesh::Create(game);
 		if(matSurface != nullptr)
 			mesh->SetSurfaceMaterial(CInt32(matSurface->GetIndex()));
 		mesh->SetMass(massPerMesh);
@@ -670,7 +676,7 @@ void pragma::asset::WmdFormatHandler::LoadCollisionMeshes(Game *game, unsigned s
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadBlendControllers(Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadBlendControllers(pragma::Model &mdl)
 {
 	unsigned short numControllers = m_file->Read<unsigned short>();
 	for(unsigned short i = 0; i < numControllers; i++) {
@@ -682,7 +688,7 @@ void pragma::asset::WmdFormatHandler::LoadBlendControllers(Model &mdl)
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadIKControllers(uint16_t version, Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadIKControllers(uint16_t version, pragma::Model &mdl)
 {
 	if(version < 0x0016)
 		return;
@@ -705,7 +711,7 @@ void pragma::asset::WmdFormatHandler::LoadIKControllers(uint16_t version, Model 
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version, Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version, pragma::Model &mdl)
 {
 	unsigned int numAnimations = m_file->Read<unsigned int>();
 	for(unsigned int i = 0; i < numAnimations; i++) {
@@ -739,7 +745,7 @@ void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version, Mod
 				auto meshGroup = mdl.GetMeshGroup(meshGroupId);
 				auto &meshes = meshGroup->GetMeshes();
 				std::shared_ptr<ModelMesh> mesh = (meshId < meshes.size()) ? meshes.at(meshId) : nullptr;
-				std::shared_ptr<ModelSubMesh> subMesh = nullptr;
+				std::shared_ptr<pragma::ModelSubMesh> subMesh = nullptr;
 				if(mesh != nullptr) {
 					auto &subMeshes = mesh->GetSubMeshes();
 					if(subMeshId < subMeshes.size())
@@ -750,9 +756,9 @@ void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version, Mod
 					uint64_t endOfFrameOffset = 0;
 					if(version >= 32)
 						endOfFrameOffset = m_file->Read<uint64_t>();
-					auto flags = MeshVertexFrame::Flags::None;
+					auto flags = pragma::MeshVertexFrame::Flags::None;
 					if(version >= 25)
-						flags = m_file->Read<MeshVertexFrame::Flags>();
+						flags = m_file->Read<pragma::MeshVertexFrame::Flags>();
 
 					if(version >= 32) {
 						if(subMesh == nullptr) {
@@ -798,7 +804,7 @@ void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version, Mod
 								auto idx = m_file->Read<uint16_t>();
 								auto v = m_file->Read<std::array<uint16_t, 3>>();
 								meshFrame->SetVertexPosition(idx, v);
-								if(umath::is_flag_set(flags, MeshVertexFrame::Flags::HasDeltaValues)) {
+								if(umath::is_flag_set(flags, pragma::MeshVertexFrame::Flags::HasDeltaValues)) {
 									auto deltaVal = m_file->Read<uint16_t>();
 									meshFrame->SetDeltaValue(idx, deltaVal);
 								}
@@ -807,7 +813,7 @@ void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version, Mod
 						else {
 							Con::cwar << "Invalid mesh reference in vertex animation '" << name << "'! Skipping..." << Con::endl;
 							auto szPerVertex = sizeof(uint16_t) * 3;
-							if(umath::is_flag_set(flags, MeshVertexFrame::Flags::HasDeltaValues))
+							if(umath::is_flag_set(flags, pragma::MeshVertexFrame::Flags::HasDeltaValues))
 								szPerVertex += sizeof(uint16_t);
 							m_file->Seek(m_file->Tell() + numUsedVerts * szPerVertex);
 						}
@@ -903,7 +909,7 @@ void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version, Mod
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadLODData(unsigned short version, Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadLODData(unsigned short version, pragma::Model &mdl)
 {
 	if(version >= 0x0004) {
 		auto numLods = m_file->Read<unsigned char>();
@@ -1006,7 +1012,7 @@ void pragma::asset::WmdFormatHandler::LoadChildBones(const pragma::animation::Sk
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadSoftBodyData(Model &mdl, CollisionMesh &colMesh)
+void pragma::asset::WmdFormatHandler::LoadSoftBodyData(pragma::Model &mdl, pragma::physics::CollisionMesh &colMesh)
 {
 	auto meshGroupId = m_file->Read<uint32_t>();
 	auto meshId = m_file->Read<uint32_t>();
@@ -1053,7 +1059,7 @@ void pragma::asset::WmdFormatHandler::LoadSoftBodyData(Model &mdl, CollisionMesh
 		colMesh.SetSoftBody(false);
 }
 
-void pragma::asset::WmdFormatHandler::LoadJoints(Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadJoints(pragma::Model &mdl)
 {
 	auto numJoints = m_file->Read<uint32_t>();
 	for(auto i = decltype(numJoints) {0u}; i < numJoints; ++i) {
@@ -1071,7 +1077,7 @@ void pragma::asset::WmdFormatHandler::LoadJoints(Model &mdl)
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadBodygroups(Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadBodygroups(pragma::Model &mdl)
 {
 	auto numBodygroups = m_file->Read<unsigned short>();
 	for(unsigned short i = 0; i < numBodygroups; i++) {

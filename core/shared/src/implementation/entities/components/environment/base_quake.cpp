@@ -19,7 +19,7 @@ void BaseEnvQuakeComponent::Initialize()
 
 	auto &ent = GetEntity();
 	ent.AddComponent("toggle");
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "frequency", false))
 			m_frequency = util::to_float(kvData.value);

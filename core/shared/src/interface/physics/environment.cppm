@@ -7,6 +7,9 @@ module;
 #include <vector>
 #include <unordered_map>
 
+#include <string>
+#include <string_view>
+
 
 
 
@@ -192,8 +195,12 @@ export {
 			SurfaceTypeManager m_surfTypeManager = {};
 			TireTypeManager m_tireTypeManager = {};
 		};
+		using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::physics::IEnvironment::StateFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::physics::IEnvironment::StateFlags> : std::true_type {};
+	}
 
 	template<class T, typename... TARGS>
 	std::shared_ptr<T> pragma::physics::IEnvironment::CreateSharedPtr(TARGS &&...args)

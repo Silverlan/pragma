@@ -6,34 +6,36 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <variant>
 
+#include <string>
+
+#include <memory>
+
+#include <vector>
+
 export module pragma.shared:entities.universal_reference;
 
 export import :entities.base_entity_handle;
 export import :entities.components.handle;
 export import :entities.enums;
 export import :entities.member_reference;
+export import :types;
 
 export {
-	class BaseEntity;
-	class EntityIterator;
-	class Game;
 	namespace pragma {
-		struct ComponentMemberInfo;
-		class BaseEntityComponent;
 		using EntityIdentifier = std::variant<util::Uuid, std::string>;
 		struct DLLNETWORK EntityURef {
 			EntityURef(const EntityURef &other);
 			EntityURef(EntityURef &&other);
 			EntityURef() : EntityURef {util::Uuid {}} {}
 			EntityURef(EntityIdentifier identifier);
-			EntityURef(const BaseEntity &ent);
+			EntityURef(const pragma::ecs::BaseEntity &ent);
 			EntityURef &operator=(const EntityURef &other);
 			EntityURef &operator=(EntityURef &&other);
-			BaseEntity *GetEntity(Game &game);
-			const BaseEntity *GetEntity(Game &game) const { return const_cast<EntityURef *>(this)->GetEntity(game); }
+			pragma::ecs::BaseEntity *GetEntity(pragma::Game &game);
+			const pragma::ecs::BaseEntity *GetEntity(pragma::Game &game) const { return const_cast<EntityURef *>(this)->GetEntity(game); }
 
 			bool HasEntityReference() const;
-			static void AttachEntityFilter(EntityIterator &it, const EntityIdentifier &identifier);
+			static void AttachEntityFilter(pragma::ecs::EntityIterator &it, const EntityIdentifier &identifier);
 			const EntityIdentifier *GetIdentifier() const { return m_identifier.get(); }
 			std::optional<util::Uuid> GetUuid() const;
 			std::optional<std::string> GetClassOrName() const;
@@ -48,14 +50,14 @@ export {
 			EntityUComponentRef();
 			EntityUComponentRef(EntityIdentifier identifier, ComponentId componentId);
 			EntityUComponentRef(EntityIdentifier identifier, const std::string &componentName);
-			EntityUComponentRef(const BaseEntity &ent, ComponentId componentId);
-			EntityUComponentRef(const BaseEntity &ent, const std::string &componentName);
+			EntityUComponentRef(const pragma::ecs::BaseEntity &ent, ComponentId componentId);
+			EntityUComponentRef(const pragma::ecs::BaseEntity &ent, const std::string &componentName);
 			EntityUComponentRef(const EntityUComponentRef &other);
 			EntityUComponentRef(EntityUComponentRef &&other);
 			EntityUComponentRef &operator=(const EntityUComponentRef &other);
 			EntityUComponentRef &operator=(EntityUComponentRef &&other);
-			BaseEntityComponent *GetComponent(Game &game);
-			const BaseEntityComponent *GetComponent(Game &game) const { return const_cast<EntityUComponentRef *>(this)->GetComponent(game); }
+			BaseEntityComponent *GetComponent(pragma::Game &game);
+			const BaseEntityComponent *GetComponent(pragma::Game &game) const { return const_cast<EntityUComponentRef *>(this)->GetComponent(game); }
 
 			bool HasComponentReference() const;
 			ComponentId GetComponentId() const { return m_componentId; }
@@ -72,13 +74,13 @@ export {
 			EntityUComponentMemberRef();
 			EntityUComponentMemberRef(EntityIdentifier identifier, ComponentId componentId, const std::string &memberName);
 			EntityUComponentMemberRef(EntityIdentifier identifier, const std::string &componentName, const std::string &memberName);
-			EntityUComponentMemberRef(const BaseEntity &ent, ComponentId componentId, const std::string &memberName);
-			EntityUComponentMemberRef(const BaseEntity &ent, const std::string &componentName, const std::string &memberName);
+			EntityUComponentMemberRef(const pragma::ecs::BaseEntity &ent, ComponentId componentId, const std::string &memberName);
+			EntityUComponentMemberRef(const pragma::ecs::BaseEntity &ent, const std::string &componentName, const std::string &memberName);
 			EntityUComponentMemberRef(const EntityUComponentMemberRef &) = default;
 			EntityUComponentMemberRef(const std::string &path);
-			const ComponentMemberInfo *GetMemberInfo(Game &game) const;
+			const ComponentMemberInfo *GetMemberInfo(pragma::Game &game) const;
 			pragma::ComponentMemberIndex GetMemberIndex() const;
-			void UpdateMemberIndex(Game &game) const;
+			void UpdateMemberIndex(pragma::Game &game) const;
 			const std::string &GetMemberName() const;
 
 			EntityUComponentMemberRef &operator=(const EntityUComponentMemberRef &) = default;
@@ -101,10 +103,10 @@ export {
 			MultiEntityURef(const MultiEntityURef &other);
 			MultiEntityURef(MultiEntityURef &&other);
 			MultiEntityURef(EntityIdentifier identifier);
-			MultiEntityURef(const BaseEntity &ent);
+			MultiEntityURef(const pragma::ecs::BaseEntity &ent);
 			MultiEntityURef &operator=(const MultiEntityURef &other);
 			MultiEntityURef &operator=(MultiEntityURef &&other);
-			void FindEntities(Game &game, std::vector<BaseEntity *> &outEnts) const;
+			void FindEntities(pragma::Game &game, std::vector<pragma::ecs::BaseEntity *> &outEnts) const;
 
 			bool HasEntityReference() const;
 			const EntityIdentifier *GetIdentifier() const { return m_identifier.get(); }
@@ -118,13 +120,13 @@ export {
 			MultiEntityUComponentRef();
 			MultiEntityUComponentRef(EntityIdentifier identifier, ComponentId componentId);
 			MultiEntityUComponentRef(EntityIdentifier identifier, const std::string &componentName);
-			MultiEntityUComponentRef(const BaseEntity &ent, ComponentId componentId);
-			MultiEntityUComponentRef(const BaseEntity &ent, const std::string &componentName);
+			MultiEntityUComponentRef(const pragma::ecs::BaseEntity &ent, ComponentId componentId);
+			MultiEntityUComponentRef(const pragma::ecs::BaseEntity &ent, const std::string &componentName);
 			MultiEntityUComponentRef(const MultiEntityUComponentRef &other);
 			MultiEntityUComponentRef(MultiEntityUComponentRef &&other);
 			MultiEntityUComponentRef &operator=(const MultiEntityUComponentRef &other);
 			MultiEntityUComponentRef &operator=(MultiEntityUComponentRef &&other);
-			void FindComponents(Game &game, std::vector<BaseEntityComponent *> &outComponents) const;
+			void FindComponents(pragma::Game &game, std::vector<BaseEntityComponent *> &outComponents) const;
 
 			bool HasComponentReference() const;
 			ComponentId GetComponentId() const { return m_componentId; }

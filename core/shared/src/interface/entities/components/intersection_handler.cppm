@@ -11,10 +11,10 @@ export module pragma.shared:entities.components.intersection_handler;
 export import :entities.components.base;
 
 export {
-	class ModelSubMesh;
 	namespace pragma {
+		class ModelSubMesh;
 		struct DLLNETWORK HitInfo {
-			std::shared_ptr<ModelSubMesh> mesh;
+			std::shared_ptr<pragma::ModelSubMesh> mesh;
 			EntityHandle entity;
 			size_t primitiveIndex;
 			float distance;
@@ -30,8 +30,8 @@ export {
 
 		struct DLLNETWORK MeshIntersectionInfo : public IntersectionInfo {
 			struct DLLNETWORK MeshInfo {
-				ModelSubMesh *mesh = nullptr;
-				BaseEntity *entity = nullptr;
+				pragma::ModelSubMesh *mesh = nullptr;
+				pragma::ecs::BaseEntity *entity = nullptr;
 			};
 			std::vector<MeshInfo> meshInfos;
 		};
@@ -50,7 +50,7 @@ export {
 				bool (*intersectionTestAabb)(void *, const Vector3 &, const Vector3 &, IntersectionInfo *) = [](void *, const Vector3 &, const Vector3 &, IntersectionInfo *) -> bool { return false; };
 				bool (*intersectionTestKDop)(void *, const std::vector<umath::Plane> &, IntersectionInfo *) = [](void *, const std::vector<umath::Plane> &, IntersectionInfo *) -> bool { return false; };
 			};
-			IntersectionHandlerComponent(BaseEntity &ent);
+			IntersectionHandlerComponent(pragma::ecs::BaseEntity &ent);
 			virtual void Initialize() override;
 
 			void ClearIntersectionHandler();

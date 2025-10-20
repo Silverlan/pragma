@@ -33,7 +33,7 @@ void BaseGamemodeComponent::RegisterEvents(pragma::EntityComponentManager &compo
 	EVENT_ON_MAP_INITIALIZED = registerEvent("ON_MAP_INITIALIZED", ComponentEventInfo::Type::Explicit);
 	EVENT_ON_GAME_READY = registerEvent("ON_GAME_READY", ComponentEventInfo::Type::Explicit);
 }
-BaseGamemodeComponent::BaseGamemodeComponent(BaseEntity &ent) : BaseEntityComponent(ent) { ent.GetNetworkState()->GetGameState()->GetGamemodeComponents().push_back(this); }
+BaseGamemodeComponent::BaseGamemodeComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) { ent.GetNetworkState()->GetGameState()->GetGamemodeComponents().push_back(this); }
 
 void BaseGamemodeComponent::Initialize() { BaseEntityComponent::Initialize(); }
 

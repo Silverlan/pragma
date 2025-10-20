@@ -21,6 +21,6 @@ export namespace pragma {
 		float m_kvSoftness = 1.f;
 		float m_kvRelaxationFactor = 1.f;
 
-		virtual void InitializeConstraint(BaseEntity *src, BaseEntity *tgt) override;
+		virtual void InitializeConstraint(pragma::ecs::BaseEntity *src, pragma::ecs::BaseEntity *tgt) override;
 	};
 };

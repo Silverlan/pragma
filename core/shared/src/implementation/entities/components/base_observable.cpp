@@ -18,7 +18,7 @@ pragma::ObserverCameraData::ObserverCameraData() : enabled {util::BoolProperty::
 
 ComponentEventId BaseObservableComponent::EVENT_ON_OBSERVER_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseObservableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_OBSERVER_CHANGED = registerEvent("ON_OBSERVER_CHANGED", ComponentEventInfo::Type::Broadcast); }
-BaseObservableComponent::BaseObservableComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_viewOffset(0, 0, 0) {}
+BaseObservableComponent::BaseObservableComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_viewOffset(0, 0, 0) {}
 
 void BaseObservableComponent::Initialize()
 {

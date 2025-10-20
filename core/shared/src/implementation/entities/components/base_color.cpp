@@ -48,7 +48,7 @@ void BaseColorComponent::RegisterMembers(pragma::EntityComponentManager &compone
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseColorComponent::BaseColorComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_color(util::SimpleProperty<util::Vector4Property, Vector4>::Create(Color::White.ToVector4())) {}
+BaseColorComponent::BaseColorComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_color(util::SimpleProperty<util::Vector4Property, Vector4>::Create(Color::White.ToVector4())) {}
 BaseColorComponent::~BaseColorComponent()
 {
 	if(m_cbOnColorChanged.IsValid())
@@ -58,7 +58,7 @@ void BaseColorComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "color", false)) {
 			Vector4 r;

@@ -18,7 +18,7 @@ void ActionInputControllerComponent::RegisterEvents(pragma::EntityComponentManag
 	EVENT_ON_ACTION_INPUT_CHANGED = registerEvent("ON_ACTION_INPUT_CHANGED", ComponentEventInfo::Type::Explicit);
 }
 
-ActionInputControllerComponent::ActionInputControllerComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+ActionInputControllerComponent::ActionInputControllerComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ActionInputControllerComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void ActionInputControllerComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ActionInputControllerComponent::OnRemove() { BaseEntityComponent::OnRemove(); }

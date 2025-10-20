@@ -30,7 +30,7 @@ void ConstraintLookAtComponent::RegisterMembers(pragma::EntityComponentManager &
 	}
 }
 
-ConstraintLookAtComponent::ConstraintLookAtComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+ConstraintLookAtComponent::ConstraintLookAtComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintLookAtComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -56,12 +56,12 @@ ConstraintLookAtComponent::TrackAxis ConstraintLookAtComponent::GetTrackAxis() c
 
 // TODO: Use Model::GetTwistAxisRotationOffset?
 static std::array<Quat, umath::to_integral(ConstraintLookAtComponent::TrackAxis::Count)> g_axisRotations {
-  Model::GetTwistAxisRotationOffset(pragma::SignedAxis::X),    // x+
-  Model::GetTwistAxisRotationOffset(pragma::SignedAxis::Y),    // y+
-  Model::GetTwistAxisRotationOffset(pragma::SignedAxis::Z),    // z+
-  Model::GetTwistAxisRotationOffset(pragma::SignedAxis::NegX), // x-
-  Model::GetTwistAxisRotationOffset(pragma::SignedAxis::NegY), // y-
-  Model::GetTwistAxisRotationOffset(pragma::SignedAxis::NegZ)  // z-
+  pragma::Model::GetTwistAxisRotationOffset(pragma::SignedAxis::X),    // x+
+  pragma::Model::GetTwistAxisRotationOffset(pragma::SignedAxis::Y),    // y+
+  pragma::Model::GetTwistAxisRotationOffset(pragma::SignedAxis::Z),    // z+
+  pragma::Model::GetTwistAxisRotationOffset(pragma::SignedAxis::NegX), // x-
+  pragma::Model::GetTwistAxisRotationOffset(pragma::SignedAxis::NegY), // y-
+  pragma::Model::GetTwistAxisRotationOffset(pragma::SignedAxis::NegZ)  // z-
 };
 
 static void rotate_towards_axis(Quat &rotation, const Vector3 &targetAxis, const Vector3 &upAxis, pragma::ConstraintLookAtComponent::TrackAxis eAxis)

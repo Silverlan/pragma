@@ -10,19 +10,18 @@ export module pragma.shared:entities.components.bone_merge;
 export import :entities.components.base;
 export import :entities.universal_reference;
 export import :model.animation.bone;
+export import :types;
 
 export {
-	class Model;
 	namespace pragma {
-		class BaseAnimatedComponent;
 		class DLLNETWORK BoneMergeComponent final : public BaseEntityComponent {
 		  public:
-			static bool can_merge(const Model &mdl, const Model &mdlParent, bool includeRootBones = false);
+			static bool can_merge(const pragma::Model &mdl, const pragma::Model &mdlParent, bool includeRootBones = false);
 			static ComponentEventId EVENT_ON_TARGET_CHANGED;
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-			BoneMergeComponent(BaseEntity &ent);
+			BoneMergeComponent(pragma::ecs::BaseEntity &ent);
 			virtual void Initialize() override;
 			virtual void OnRemove() override;
 			virtual void OnTick(double tDelta) override;

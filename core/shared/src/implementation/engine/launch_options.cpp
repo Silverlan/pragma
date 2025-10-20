@@ -14,9 +14,9 @@ import :engine;
 
 void register_launch_parameters(LaunchParaMap &map);
 
-Engine::LaunchCommand::LaunchCommand(const std::string &cmd, const std::vector<std::string> &_args) : command(cmd), args(_args) {}
+pragma::Engine::LaunchCommand::LaunchCommand(const std::string &cmd, const std::vector<std::string> &_args) : command(cmd), args(_args) {}
 
-void Engine::InitLaunchOptions(int argc, char *argv[])
+void pragma::Engine::InitLaunchOptions(int argc, char *argv[])
 {
 	auto &parameters = GetLaunchParaMap()->GetParameters();
 	std::vector<std::string> launchCmdArgs {};
@@ -94,21 +94,21 @@ void Engine::InitLaunchOptions(int argc, char *argv[])
 
 //////////////////////////////
 
-extern Engine *engine;
+extern pragma::Engine *engine;
 DLLNETWORK void LPARAM_console(const std::vector<std::string> &argv)
 {
 	if(!argv.empty()) {
-		auto conType = Engine::ConsoleType::Terminal;
+		auto conType = pragma::Engine::ConsoleType::Terminal;
 		if(ustring::compare<std::string>(argv[0], "guid"))
-			conType = Engine::ConsoleType::GUIDetached;
+			conType = pragma::Engine::ConsoleType::GUIDetached;
 		else if(ustring::compare<std::string>(argv[0], "gui"))
-			conType = Engine::ConsoleType::GUI;
-		Engine::Get()->SetConsoleType(conType);
+			conType = pragma::Engine::ConsoleType::GUI;
+		pragma::Engine::Get()->SetConsoleType(conType);
 	}
-	Engine::Get()->OpenConsole();
+	pragma::Engine::Get()->OpenConsole();
 }
 
-DLLNETWORK void LPARAM_dev(const std::vector<std::string> &argv) { Engine::Get()->SetDeveloperMode(true); }
+DLLNETWORK void LPARAM_dev(const std::vector<std::string> &argv) { pragma::Engine::Get()->SetDeveloperMode(true); }
 
 DLLNETWORK std::optional<std::string> g_lpLogFile = pragma::DEFAULT_LOG_FILE;
 DLLNETWORK void LPARAM_log_file(const std::vector<std::string> &argv)
@@ -156,14 +156,14 @@ DLLNETWORK void LPARAM_tcpport(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	Engine::Get()->AddLaunchConVar("net_port_tcp", argv[0]); //WEAVETODO
+	pragma::Engine::Get()->AddLaunchConVar("net_port_tcp", argv[0]); //WEAVETODO
 }
 
 DLLNETWORK void LPARAM_udpport(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	Engine::Get()->AddLaunchConVar("net_port_udp", argv[0]); //WEAVETODO
+	pragma::Engine::Get()->AddLaunchConVar("net_port_udp", argv[0]); //WEAVETODO
 }
 
 DLLNETWORK void LPARAM_tcponly(const std::vector<std::string> &argv) {} //m_bTCPOnly = true;}//WEAVETODO
@@ -194,7 +194,7 @@ DLLNETWORK void LPARAM_USE_VKV_PARSER(const std::vector<std::string> &argv)
 
 DLLNETWORK void LPARAM_help(const std::vector<std::string> &argv)
 {
-	Engine::Get()->OpenConsole();
+	pragma::Engine::Get()->OpenConsole();
 	LaunchParaMap *map = GetLaunchParaMap();
 	if(map == NULL)
 		return;
@@ -221,9 +221,9 @@ static void LPARAM_luaext(const std::vector<std::string> &argv)
 	// Lua::set_precompiled_files_enabled(false);
 }
 
-static void LPARAM_verbose(const std::vector<std::string> &argv) { Engine::Get()->SetVerbose(true); }
-static void LPARAM_console_subsystem(const std::vector<std::string> &argv) { Engine::Get()->SetConsoleSubsystem(true); }
-static void LPARAM_non_interactive(const std::vector<std::string> &argv) { Engine::Get()->SetNonInteractiveMode(true); }
+static void LPARAM_verbose(const std::vector<std::string> &argv) { pragma::Engine::Get()->SetVerbose(true); }
+static void LPARAM_console_subsystem(const std::vector<std::string> &argv) { pragma::Engine::Get()->SetConsoleSubsystem(true); }
+static void LPARAM_non_interactive(const std::vector<std::string> &argv) { pragma::Engine::Get()->SetNonInteractiveMode(true); }
 static void LPARAM_disable_linenoise(const std::vector<std::string> &argv)
 {
 	// -disable_linenoise is handled in Engine constructor

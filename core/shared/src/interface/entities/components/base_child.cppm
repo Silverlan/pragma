@@ -24,13 +24,13 @@ export namespace pragma {
 		void SetParent(const pragma::EntityURef &parent);
 		const pragma::EntityURef &GetParent() const;
 
-		BaseEntity *GetParentEntity();
-		const BaseEntity *GetParentEntity() const { return const_cast<BaseChildComponent *>(this)->GetParentEntity(); }
+		pragma::ecs::BaseEntity *GetParentEntity();
+		const pragma::ecs::BaseEntity *GetParentEntity() const { return const_cast<BaseChildComponent *>(this)->GetParentEntity(); }
 		bool HasParent() const;
 	  protected:
-		BaseChildComponent(BaseEntity &ent);
+		BaseChildComponent(pragma::ecs::BaseEntity &ent);
 		virtual void OnEntitySpawn() override;
-		virtual void OnParentChanged(BaseEntity *parent) {};
+		virtual void OnParentChanged(pragma::ecs::BaseEntity *parent) {};
 
 		EntityURef m_parent;
 		bool m_parentValid = false;

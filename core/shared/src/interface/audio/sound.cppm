@@ -113,8 +113,8 @@ export {
 		NetworkState *GetNetworkState() const;
 		virtual float GetMaxAudibleDistance() const;
 		float GetSoundIntensity(const Vector3 &pos) const;
-		virtual void SetSource(BaseEntity *ent);
-		BaseEntity *GetSource() const;
+		virtual void SetSource(pragma::ecs::BaseEntity *ent);
+		pragma::ecs::BaseEntity *GetSource() const;
 		virtual void SetRange(float start, float end);
 		virtual void ClearRange();
 		bool HasRange() const;

@@ -34,7 +34,7 @@ void Lua::PhysShape::register_class(lua_State *l, luabind::module_ &mod)
 	mod[classDef];
 
 	auto convexClassDef = luabind::class_<pragma::physics::IConvexShape, luabind::bases<pragma::physics::IShape, pragma::physics::IBase>>("ConvexShape");
-	convexClassDef.def("GetCollisionMesh", static_cast<::CollisionMesh *(pragma::physics::IConvexShape::*)()>(&pragma::physics::IConvexShape::GetCollisionMesh), luabind::shared_from_this_policy<0> {});
+	convexClassDef.def("GetCollisionMesh", static_cast<pragma::physics::CollisionMesh *(pragma::physics::IConvexShape::*)()>(&pragma::physics::IConvexShape::GetCollisionMesh), luabind::shared_from_this_policy<0> {});
 	mod[convexClassDef];
 
 	auto capsuleShapeDef = luabind::class_<pragma::physics::ICapsuleShape, luabind::bases<pragma::physics::IConvexShape, pragma::physics::IShape, pragma::physics::IBase>>("CapsuleShape");
@@ -70,7 +70,7 @@ void Lua::PhysShape::register_class(lua_State *l, luabind::module_ &mod)
 #if 0
 	// Bullet triangle mesh deformation
 	// This is unstable and can cause the game to crash
-	triangleShapeClassDef.def("Test",static_cast<void(*)(lua_State*,LPhysTriangleShape&,EntityHandle&,PhysRigidBodyHandle&,std::shared_ptr<::ModelSubMesh>&,const Vector3&,float,float)>([](lua_State *l,LPhysTriangleShape &shape,EntityHandle &hEnt,PhysRigidBodyHandle &hBody,std::shared_ptr<::ModelSubMesh> &subMesh,const Vector3 &origin,float radius,float power) {
+	triangleShapeClassDef.def("Test",static_cast<void(*)(lua_State*,LPhysTriangleShape&,EntityHandle&,PhysRigidBodyHandle&,std::shared_ptr<pragma::ModelSubMesh>&,const Vector3&,float,float)>([](lua_State *l,LPhysTriangleShape &shape,EntityHandle &hEnt,PhysRigidBodyHandle &hBody,std::shared_ptr<pragma::ModelSubMesh> &subMesh,const Vector3 &origin,float radius,float power) {
 		auto *iva = static_cast<PhysTriangleShape*>(shape.get())->GetBtIndexVertexArray();
 		if(iva == nullptr)
 			return;

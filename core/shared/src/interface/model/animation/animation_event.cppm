@@ -9,7 +9,7 @@ module;
 
 export module pragma.shared:model.animation.animation_event;
 
-import pragma.math;
+import pragma.filesystem;
 
 export {
 	namespace pragma {

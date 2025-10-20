@@ -11,7 +11,7 @@ import :entities.components.lifeline_link;
 
 using namespace pragma;
 
-LifelineLinkComponent::LifelineLinkComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+LifelineLinkComponent::LifelineLinkComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void LifelineLinkComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void LifelineLinkComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void LifelineLinkComponent::OnRemove()
@@ -24,7 +24,7 @@ void LifelineLinkComponent::OnRemove()
 	}
 }
 
-void LifelineLinkComponent::RemoveEntityOnRemoval(BaseEntity *ent, Bool bRemove) { RemoveEntityOnRemoval(ent->GetHandle(), bRemove); }
+void LifelineLinkComponent::RemoveEntityOnRemoval(pragma::ecs::BaseEntity *ent, Bool bRemove) { RemoveEntityOnRemoval(ent->GetHandle(), bRemove); }
 void LifelineLinkComponent::RemoveEntityOnRemoval(const EntityHandle &hEnt, Bool bRemove)
 {
 	if(!hEnt.valid())

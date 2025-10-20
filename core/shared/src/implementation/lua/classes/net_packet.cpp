@@ -16,7 +16,7 @@ import :scripting.lua.classes.net_packet;
 void Lua::NetPacket::register_class(luabind::class_<::NetPacket> &classDef)
 {
 	Lua::DataStream::register_class<::NetPacket>(classDef);
-	classDef.def("WriteEntity", static_cast<void (*)(lua_State *, ::NetPacket &, BaseEntity *)>(&Lua::NetPacket::WriteEntity));
+	classDef.def("WriteEntity", static_cast<void (*)(lua_State *, ::NetPacket &, pragma::ecs::BaseEntity *)>(&Lua::NetPacket::WriteEntity));
 	classDef.def("WriteEntity", static_cast<void (*)(lua_State *, ::NetPacket &)>(&Lua::NetPacket::WriteEntity));
 	classDef.def("ReadEntity", &Lua::NetPacket::ReadEntity);
 	classDef.def("ReadSoundSource", &Lua::NetPacket::ReadALSound);
@@ -102,10 +102,10 @@ DLLNETWORK void Lua_NetPacket_ReadAngles(lua_State *l, NetPacket &packet)
 	luabind::object(l, a).push(l);
 }
 
-void Lua::NetPacket::WriteEntity(lua_State *l, ::NetPacket &packet, BaseEntity *hEnt)
+void Lua::NetPacket::WriteEntity(lua_State *l, ::NetPacket &packet, pragma::ecs::BaseEntity *hEnt)
 {
 	if(hEnt == nullptr)
-		nwm::write_entity(packet, static_cast<BaseEntity *>(nullptr));
+		nwm::write_entity(packet, static_cast<pragma::ecs::BaseEntity *>(nullptr));
 	else
 		nwm::write_entity(packet, hEnt);
 }
@@ -114,7 +114,7 @@ void Lua::NetPacket::WriteEntity(lua_State *, ::NetPacket &packet) { nwm::write_
 
 void Lua::NetPacket::ReadEntity(lua_State *l, ::NetPacket &packet)
 {
-	BaseEntity *ent = nwm::read_entity(packet);
+	pragma::ecs::BaseEntity *ent = nwm::read_entity(packet);
 	if(ent == nullptr)
 		return;
 	lua_pushentity(l, ent);
@@ -123,7 +123,7 @@ void Lua::NetPacket::ReadEntity(lua_State *l, ::NetPacket &packet)
 void Lua::NetPacket::ReadALSound(lua_State *l, ::NetPacket &packet)
 {
 	unsigned int idx = packet->Read<unsigned int>();
-	NetworkState *state = Engine::Get()->GetNetworkState(l);
+	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	std::shared_ptr<::ALSound> als = state->GetSoundByIndex(idx);
 	if(als == NULL)
 		return;

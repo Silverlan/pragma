@@ -20,14 +20,14 @@ export import :physics.surface_material;
 
 export namespace pragma {
 	struct DLLNETWORK CEOnDeployWeapon : public ComponentEvent {
-		CEOnDeployWeapon(BaseEntity &entWeapon);
+		CEOnDeployWeapon(pragma::ecs::BaseEntity &entWeapon);
 		virtual void PushArguments(lua_State *l) override;
-		BaseEntity &weapon;
+		pragma::ecs::BaseEntity &weapon;
 	};
 	struct DLLNETWORK CEOnSetActiveWeapon : public ComponentEvent {
-		CEOnSetActiveWeapon(BaseEntity *entWeapon);
+		CEOnSetActiveWeapon(pragma::ecs::BaseEntity *entWeapon);
 		virtual void PushArguments(lua_State *l) override;
-		BaseEntity *weapon;
+		pragma::ecs::BaseEntity *weapon;
 	};
 	struct DLLNETWORK CEOnSetCharacterOrientation : public ComponentEvent {
 		CEOnSetCharacterOrientation(const Vector3 &up);
@@ -61,7 +61,7 @@ export namespace pragma {
 		//
 		enum class FootType : uint8_t { Left = 0, Right };
 
-		BaseCharacterComponent(BaseEntity &ent);
+		BaseCharacterComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~BaseCharacterComponent() = default;
 		virtual void FootStep(FootType foot);
 		virtual Vector3 GetEyePosition() const;
@@ -121,19 +121,19 @@ export namespace pragma {
 
 		// Weapons
 		std::vector<EntityHandle> &GetWeapons();
-		virtual void GiveWeapon(BaseEntity &ent);
-		BaseEntity *GiveWeapon(std::string className);
-		BaseEntity *GetActiveWeapon();
-		BaseEntity *GetWeapon(std::string className);
-		std::vector<BaseEntity *> GetWeapons(std::string className);
-		void GetWeapons(std::string className, std::vector<BaseEntity *> &weapons);
+		virtual void GiveWeapon(pragma::ecs::BaseEntity &ent);
+		pragma::ecs::BaseEntity *GiveWeapon(std::string className);
+		pragma::ecs::BaseEntity *GetActiveWeapon();
+		pragma::ecs::BaseEntity *GetWeapon(std::string className);
+		std::vector<pragma::ecs::BaseEntity *> GetWeapons(std::string className);
+		void GetWeapons(std::string className, std::vector<pragma::ecs::BaseEntity *> &weapons);
 		void RemoveWeapon(std::string className);
-		virtual std::vector<EntityHandle>::iterator RemoveWeapon(BaseEntity &ent);
+		virtual std::vector<EntityHandle>::iterator RemoveWeapon(pragma::ecs::BaseEntity &ent);
 		virtual void RemoveWeapons();
 		void DeployWeapon(const std::string &className);
-		virtual void DeployWeapon(BaseEntity &ent);
+		virtual void DeployWeapon(pragma::ecs::BaseEntity &ent);
 		// Don't call this directly!
-		virtual void SetActiveWeapon(BaseEntity *ent);
+		virtual void SetActiveWeapon(pragma::ecs::BaseEntity *ent);
 		virtual void HolsterWeapon();
 		bool HasWeapon(std::string className);
 		virtual void PrimaryAttack();
@@ -185,7 +185,7 @@ export namespace pragma {
 
 		// PhysX
 		virtual void InitializeController();
-		virtual void InitializePhysObj(PhysObj *phys);
+		virtual void InitializePhysObj(pragma::physics::PhysObj *phys);
 
 		bool HandleAnimationEvent(const pragma::AnimationEvent &ev);
 		virtual void PlayFootStepSound(FootType foot, const SurfaceMaterial &surfMat, float scale);

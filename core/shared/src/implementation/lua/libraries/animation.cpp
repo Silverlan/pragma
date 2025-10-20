@@ -7,7 +7,6 @@ module;
 #include "sstream"
 
 #include "pragma/lua/policies/shared_from_this_policy.hpp"
-#include "pragma/lua/types/udm.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 
 

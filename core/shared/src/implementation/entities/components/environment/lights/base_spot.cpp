@@ -44,12 +44,12 @@ void BaseEnvLightSpotComponent::RegisterMembers(pragma::EntityComponentManager &
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseEnvLightSpotComponent::BaseEnvLightSpotComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_blendFraction(util::FloatProperty::Create(0.1f)), m_coneStartOffset(util::FloatProperty::Create(0.f)) {}
+BaseEnvLightSpotComponent::BaseEnvLightSpotComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_blendFraction(util::FloatProperty::Create(0.1f)), m_coneStartOffset(util::FloatProperty::Create(0.f)) {}
 void BaseEnvLightSpotComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "outerconeangle", false)) {
 			if(m_fieldAngleComponent.valid())

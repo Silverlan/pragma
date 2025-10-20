@@ -299,7 +299,7 @@ void Lua::TableDump(lua_State *lua, int n)
 
 
 
-Game::Game(NetworkState *state)
+pragma::Game::Game(NetworkState *state)
 
 {
 
@@ -331,7 +331,7 @@ Game::Game(NetworkState *state)
 
 	RegisterCallback<void, pragma::BasePlayerComponent *>("OnPlayerJoined");
 
-	RegisterCallback<void, BaseEntity *>("OnEntityCreated");
+	RegisterCallback<void, pragma::ecs::BaseEntity *>("OnEntityCreated");
 
 	RegisterCallback<void>("PrePhysicsSimulate");
 
@@ -339,11 +339,11 @@ Game::Game(NetworkState *state)
 
 
 
-	RegisterCallback<void, BaseEntity *, uint16_t, uint16_t>("OnEntityHealthChanged");
+	RegisterCallback<void, pragma::ecs::BaseEntity *, uint16_t, uint16_t>("OnEntityHealthChanged");
 
-	RegisterCallback<void, BaseEntity *, std::reference_wrapper<DamageInfo>>("OnEntityTakeDamage");
+	RegisterCallback<void, pragma::ecs::BaseEntity *, std::reference_wrapper<DamageInfo>>("OnEntityTakeDamage");
 
-	RegisterCallback<void, BaseEntity *, std::reference_wrapper<DamageInfo>, uint16_t, uint16_t>("OnEntityTakenDamage");
+	RegisterCallback<void, pragma::ecs::BaseEntity *, std::reference_wrapper<DamageInfo>, uint16_t, uint16_t>("OnEntityTakenDamage");
 
 	RegisterCallback<void, pragma::BaseAIComponent *, DamageInfo *>("OnNPCDeath");
 
@@ -361,9 +361,9 @@ Game::Game(NetworkState *state)
 
 	RegisterCallback<void, lua_State *>("OnLuaInitialized");
 
-	RegisterCallback<void, BaseEntity *>("OnEntitySpawned");
+	RegisterCallback<void, pragma::ecs::BaseEntity *>("OnEntitySpawned");
 
-	RegisterCallback<void, Game *>("OnGameInitialized");
+	RegisterCallback<void, pragma::Game *>("OnGameInitialized");
 
 	RegisterCallback<void>("OnMapLoaded");
 
@@ -373,7 +373,7 @@ Game::Game(NetworkState *state)
 
 	RegisterCallback<void, ALSound *>("OnSoundCreated");
 
-	RegisterCallback<void, std::reference_wrapper<std::shared_ptr<Model>>>("OnModelLoaded");
+	RegisterCallback<void, std::reference_wrapper<std::shared_ptr<pragma::Model>>>("OnModelLoaded");
 
 
 
@@ -389,11 +389,11 @@ Game::Game(NetworkState *state)
 
 
 
-Game::~Game() {}
+pragma::Game::~pragma::Game() {}
 
 
 
-void Game::OnRemove()
+void pragma::Game::OnRemove()
 
 {
 
@@ -467,13 +467,13 @@ void Game::OnRemove()
 
 
 
-bool Game::IsServer() { return false; }
+bool pragma::Game::IsServer() { return false; }
 
-bool Game::IsClient() { return false; }
+bool pragma::Game::IsClient() { return false; }
 
 
 
-void Game::GetLuaRegisteredEntities(std::vector<std::string> &luaClasses) const
+void pragma::Game::GetLuaRegisteredEntities(std::vector<std::string> &luaClasses) const
 
 {
 
@@ -491,25 +491,25 @@ void Game::GetLuaRegisteredEntities(std::vector<std::string> &luaClasses) const
 
 
 
-void Game::OnMapLoaded() {}
+void pragma::Game::OnMapLoaded() {}
 
 
 
-void Game::InitializeLuaScriptWatcher() { m_scriptWatcher = std::make_unique<LuaDirectoryWatcherManager>(this); }
+void pragma::Game::InitializeLuaScriptWatcher() { m_scriptWatcher = std::make_unique<LuaDirectoryWatcherManager>(this); }
 
 
 
-BaseEntity *Game::GetGameModeEntity() { return m_entGamemode.get(); }
+pragma::ecs::BaseEntity *pragma::Game::GetGameModeEntity() { return m_entGamemode.get(); }
 
-BaseEntity *Game::GetGameEntity() { return m_entGame.get(); }
+pragma::ecs::BaseEntity *pragma::Game::GetGameEntity() { return m_entGame.get(); }
 
-bool Game::IsGameInitialized() const { return (m_flags & GameFlags::GameInitialized) != GameFlags::None; }
+bool pragma::Game::IsGameInitialized() const { return (m_flags & GameFlags::GameInitialized) != GameFlags::None; }
 
-bool Game::IsMapLoaded() const { return (m_flags & GameFlags::MapLoaded) != GameFlags::None; }
+bool pragma::Game::IsMapLoaded() const { return (m_flags & GameFlags::MapLoaded) != GameFlags::None; }
 
 
 
-void Game::OnPlayerReady(pragma::BasePlayerComponent &pl)
+void pragma::Game::OnPlayerReady(pragma::BasePlayerComponent &pl)
 
 {
 
@@ -525,7 +525,7 @@ void Game::OnPlayerReady(pragma::BasePlayerComponent &pl)
 
 
 
-void Game::OnPlayerDropped(pragma::BasePlayerComponent &pl, pragma::networking::DropReason reason)
+void pragma::Game::OnPlayerDropped(pragma::BasePlayerComponent &pl, pragma::networking::DropReason reason)
 
 {
 
@@ -541,7 +541,7 @@ void Game::OnPlayerDropped(pragma::BasePlayerComponent &pl, pragma::networking::
 
 
 
-void Game::OnPlayerJoined(pragma::BasePlayerComponent &pl)
+void pragma::Game::OnPlayerJoined(pragma::BasePlayerComponent &pl)
 
 {
 
@@ -557,23 +557,23 @@ void Game::OnPlayerJoined(pragma::BasePlayerComponent &pl)
 
 
 
-unsigned char Game::GetPlayerCount() { return m_numPlayers; }
+unsigned char pragma::Game::GetPlayerCount() { return m_numPlayers; }
 
 
 
-LuaEntityManager &Game::GetLuaEntityManager() { return *m_luaEnts.get(); }
+LuaEntityManager &pragma::Game::GetLuaEntityManager() { return *m_luaEnts.get(); }
 
 
 
-pragma::AnimationUpdateManager &Game::GetAnimationUpdateManager() { return *m_animUpdateManager; }
+pragma::AnimationUpdateManager &pragma::Game::GetAnimationUpdateManager() { return *m_animUpdateManager; }
 
 
 
-const GameModeInfo *Game::GetGameMode() const { return const_cast<Game *>(this)->GetGameMode(); }
+const GameModeInfo *pragma::Game::GetGameMode() const { return const_cast<pragma::Game *>(this)->GetGameMode(); }
 
-GameModeInfo *Game::GetGameMode() { return m_gameMode; }
+GameModeInfo *pragma::Game::GetGameMode() { return m_gameMode; }
 
-void Game::SetGameMode(const std::string &gameMode)
+void pragma::Game::SetGameMode(const std::string &gameMode)
 
 {
 
@@ -595,27 +595,27 @@ void Game::SetGameMode(const std::string &gameMode)
 
 
 
-void Game::SetupEntity(BaseEntity *) {}
+void pragma::Game::SetupEntity(pragma::ecs::BaseEntity *) {}
 
 
 
-bool Game::IsMultiPlayer() const { return Engine::Get()->IsMultiPlayer(); }
+bool pragma::Game::IsMultiPlayer() const { return pragma::Engine::Get()->IsMultiPlayer(); }
 
-bool Game::IsSinglePlayer() const { return Engine::Get()->IsSinglePlayer(); }
-
-
-
-const pragma::physics::IEnvironment *Game::GetPhysicsEnvironment() const { return const_cast<Game *>(this)->GetPhysicsEnvironment(); }
-
-pragma::physics::IEnvironment *Game::GetPhysicsEnvironment() { return m_physEnvironment.get(); }
+bool pragma::Game::IsSinglePlayer() const { return pragma::Engine::Get()->IsSinglePlayer(); }
 
 
 
-void Game::OnEntityCreated(BaseEntity *ent)
+const pragma::physics::IEnvironment *pragma::Game::GetPhysicsEnvironment() const { return const_cast<pragma::Game *>(this)->GetPhysicsEnvironment(); }
+
+pragma::physics::IEnvironment *pragma::Game::GetPhysicsEnvironment() { return m_physEnvironment.get(); }
+
+
+
+void pragma::Game::OnEntityCreated(pragma::ecs::BaseEntity *ent)
 
 {
 
-	CallCallbacks<void, BaseEntity *>("OnEntityCreated", ent);
+	CallCallbacks<void, pragma::ecs::BaseEntity *>("OnEntityCreated", ent);
 
 	auto &o = ent->GetLuaObject();
 
@@ -625,33 +625,33 @@ void Game::OnEntityCreated(BaseEntity *ent)
 
 
 
-Vector3 &Game::GetGravity() { return m_gravity; }
+Vector3 &pragma::Game::GetGravity() { return m_gravity; }
 
-void Game::SetGravity(Vector3 &gravity) { m_gravity = gravity; }
-
-
-
-std::vector<std::string> *Game::GetLuaNetMessageIndices() { return &m_luaNetMessageIndex; }
+void pragma::Game::SetGravity(Vector3 &gravity) { m_gravity = gravity; }
 
 
 
-LuaDirectoryWatcherManager &Game::GetLuaScriptWatcher() { return *m_scriptWatcher; }
-
-ResourceWatcherManager &Game::GetResourceWatcher() { return GetNetworkState()->GetResourceWatcher(); }
+std::vector<std::string> *pragma::Game::GetLuaNetMessageIndices() { return &m_luaNetMessageIndex; }
 
 
 
-const std::shared_ptr<pragma::nav::Mesh> &Game::GetNavMesh() const { return const_cast<Game *>(this)->GetNavMesh(); }
+LuaDirectoryWatcherManager &pragma::Game::GetLuaScriptWatcher() { return *m_scriptWatcher; }
 
-std::shared_ptr<pragma::nav::Mesh> &Game::GetNavMesh() { return m_navMesh; }
-
-
-
-std::shared_ptr<pragma::nav::Mesh> Game::LoadNavMesh(const std::string &fname) { return pragma::nav::Mesh::Load(*this, fname); }
+ResourceWatcherManager &pragma::Game::GetResourceWatcher() { return GetNetworkState()->GetResourceWatcher(); }
 
 
 
-bool Game::LoadNavMesh(bool bReload)
+const std::shared_ptr<pragma::nav::Mesh> &pragma::Game::GetNavMesh() const { return const_cast<pragma::Game *>(this)->GetNavMesh(); }
+
+std::shared_ptr<pragma::nav::Mesh> &pragma::Game::GetNavMesh() { return m_navMesh; }
+
+
+
+std::shared_ptr<pragma::nav::Mesh> pragma::Game::LoadNavMesh(const std::string &fname) { return pragma::nav::Mesh::Load(*this, fname); }
+
+
+
+bool pragma::Game::LoadNavMesh(bool bReload)
 
 {
 
@@ -695,11 +695,11 @@ bool Game::LoadNavMesh(bool bReload)
 
 
 
-void Game::InitializeMountedAddon(const AddonInfo &addonInfo) const { m_scriptWatcher->MountDirectory(addonInfo.GetLocalPath() + "/lua", true); }
+void pragma::Game::InitializeMountedAddon(const AddonInfo &addonInfo) const { m_scriptWatcher->MountDirectory(addonInfo.GetLocalPath() + "/lua", true); }
 
 
 
-void Game::Initialize()
+void pragma::Game::Initialize()
 
 {
 
@@ -731,7 +731,7 @@ void Game::Initialize()
 
 
 
-void Game::OnInitialized()
+void pragma::Game::OnInitialized()
 
 {
 
@@ -743,13 +743,13 @@ void Game::OnInitialized()
 
 
 
-void Game::SetUp() {}
+void pragma::Game::SetUp() {}
 
 
 
 static bool check_validity(pragma::BasePhysicsComponent &physC) { return !umath::is_flag_set(physC.BaseEntityComponent::GetStateFlags(), pragma::BaseEntityComponent::StateFlags::Removed); }
 
-static bool check_validity(BaseEntity *ent)
+static bool check_validity(pragma::ecs::BaseEntity *ent)
 
 {
 
@@ -913,7 +913,7 @@ class PhysEventCallback : public pragma::physics::IEventCallback {
 
 
 
-void Game::InitializeGame()
+void pragma::Game::InitializeGame()
 
 {
 
@@ -1007,7 +1007,7 @@ void Game::InitializeGame()
 
 
 
-	m_cbProfilingHandle = Engine::Get()->AddProfilingHandler([this](bool profilingEnabled) {
+	m_cbProfilingHandle = pragma::Engine::Get()->AddProfilingHandler([this](bool profilingEnabled) {
 
 		if(profilingEnabled == false) {
 
@@ -1019,7 +1019,7 @@ void Game::InitializeGame()
 
 		std::string postFix = IsClient() ? " (CL)" : " (SV)";
 
-		auto &cpuProfiler = Engine::Get()->GetProfiler();
+		auto &cpuProfiler = pragma::Engine::Get()->GetProfiler();
 
 		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>>();
 
@@ -1031,19 +1031,19 @@ void Game::InitializeGame()
 
 
 
-void Game::GetEntities(std::vector<BaseEntity *> **ents) { *ents = &m_baseEnts; }
+void pragma::Game::GetEntities(std::vector<pragma::ecs::BaseEntity *> **ents) { *ents = &m_baseEnts; }
 
-void Game::GetSpawnedEntities(std::vector<BaseEntity *> *ents)
+void pragma::Game::GetSpawnedEntities(std::vector<pragma::ecs::BaseEntity *> *ents)
 
 {
 
-	std::vector<BaseEntity *> *baseEnts;
+	std::vector<pragma::ecs::BaseEntity *> *baseEnts;
 
 	GetEntities(&baseEnts);
 
 	for(unsigned int i = 0; i < baseEnts->size(); i++) {
 
-		BaseEntity *ent = (*baseEnts)[i];
+		pragma::ecs::BaseEntity *ent = (*baseEnts)[i];
 
 		if(ent != NULL && ent->IsSpawned())
 
@@ -1055,11 +1055,11 @@ void Game::GetSpawnedEntities(std::vector<BaseEntity *> *ents)
 
 
 
-NetworkState *Game::GetNetworkState() { return m_stateNetwork; }
+NetworkState *pragma::Game::GetNetworkState() { return m_stateNetwork; }
 
 
 
-void Game::UpdateTime()
+void pragma::Game::UpdateTime()
 
 {
 
@@ -1079,7 +1079,7 @@ void Game::UpdateTime()
 
 }
 
-void Game::Think()
+void pragma::Game::Think()
 
 {
 
@@ -1091,7 +1091,7 @@ void Game::Think()
 
 }
 
-void Game::PostThink()
+void pragma::Game::PostThink()
 
 {
 
@@ -1103,15 +1103,15 @@ void Game::PostThink()
 
 
 
-double &Game::GetLastThink() { return m_tLast; }
+double &pragma::Game::GetLastThink() { return m_tLast; }
 
-double &Game::GetLastTick() { return m_tLastTick; }
+double &pragma::Game::GetLastTick() { return m_tLastTick; }
 
 
 
-pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *Game::GetProfilingStageManager() { return m_profilingStageManager.get(); }
+pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *pragma::Game::GetProfilingStageManager() { return m_profilingStageManager.get(); }
 
-bool Game::StartProfilingStage(const char *stage)
+bool pragma::Game::StartProfilingStage(const char *stage)
 
 {
 
@@ -1125,7 +1125,7 @@ bool Game::StartProfilingStage(const char *stage)
 
 }
 
-bool Game::StopProfilingStage()
+bool pragma::Game::StopProfilingStage()
 
 {
 
@@ -1141,27 +1141,27 @@ bool Game::StopProfilingStage()
 
 
 
-std::string Game::GetMapName() { return m_mapInfo.name; }
+std::string pragma::Game::GetMapName() { return m_mapInfo.name; }
 
 
 
-const std::vector<BaseEntity *> &Game::GetBaseEntities() const { return const_cast<Game *>(this)->GetBaseEntities(); }
+const std::vector<pragma::ecs::BaseEntity *> &pragma::Game::GetBaseEntities() const { return const_cast<pragma::Game *>(this)->GetBaseEntities(); }
 
-std::vector<BaseEntity *> &Game::GetBaseEntities() { return m_baseEnts; }
+std::vector<pragma::ecs::BaseEntity *> &pragma::Game::GetBaseEntities() { return m_baseEnts; }
 
-std::size_t Game::GetBaseEntityCount() const { return m_numEnts; }
-
-
-
-void Game::ScheduleEntityForRemoval(BaseEntity &ent) { m_entsScheduledForRemoval.push(ent.GetHandle()); }
+std::size_t pragma::Game::GetBaseEntityCount() const { return m_numEnts; }
 
 
 
-void Game::UpdateAnimations(double dt) { m_animUpdateManager->UpdateAnimations(dt); }
+void pragma::Game::ScheduleEntityForRemoval(pragma::ecs::BaseEntity &ent) { m_entsScheduledForRemoval.push(ent.GetHandle()); }
 
 
 
-void Game::Tick()
+void pragma::Game::UpdateAnimations(double dt) { m_animUpdateManager->UpdateAnimations(dt); }
+
+
+
+void pragma::Game::Tick()
 
 {
 
@@ -1177,7 +1177,7 @@ void Game::Tick()
 
 	else
 
-		m_tDeltaTick = (1.f / Engine::Get()->GetTickRate()) * GetTimeScale(); //m_tCur -m_tLastTick;
+		m_tDeltaTick = (1.f / pragma::Engine::Get()->GetTickRate()) * GetTimeScale(); //m_tCur -m_tLastTick;
 
 	for(auto *ent : m_baseEnts) {
 
@@ -1393,27 +1393,27 @@ void Game::Tick()
 
 }
 
-void Game::PostTick() { m_tLastTick = m_tCur; }
+void pragma::Game::PostTick() { m_tLastTick = m_tCur; }
 
 
 
-void Game::SetGameFlags(GameFlags flags) { m_flags = flags; }
+void pragma::Game::SetGameFlags(GameFlags flags) { m_flags = flags; }
 
-Game::GameFlags Game::GetGameFlags() const { return m_flags; }
-
-
-
-bool Game::IsMapInitialized() const { return (m_flags & GameFlags::MapInitialized) != GameFlags::None; }
-
-bool Game::IsGameReady() const { return (m_flags & GameFlags::GameReady) != GameFlags::None; }
+pragma::Game::GameFlags pragma::Game::GetGameFlags() const { return m_flags; }
 
 
 
-const MapInfo &Game::GetMapInfo() const { return m_mapInfo; }
+bool pragma::Game::IsMapInitialized() const { return (m_flags & GameFlags::MapInitialized) != GameFlags::None; }
+
+bool pragma::Game::IsGameReady() const { return (m_flags & GameFlags::GameReady) != GameFlags::None; }
 
 
 
-void Game::UpdatePackagePaths()
+const MapInfo &pragma::Game::GetMapInfo() const { return m_mapInfo; }
+
+
+
+void pragma::Game::UpdatePackagePaths()
 
 {
 
@@ -1471,9 +1471,9 @@ void Game::UpdatePackagePaths()
 
 
 
-bool Game::LoadSoundScripts(const char *file) { return m_stateNetwork->LoadSoundScripts(file, true); }
+bool pragma::Game::LoadSoundScripts(const char *file) { return m_stateNetwork->LoadSoundScripts(file, true); }
 
-bool Game::LoadMap(const std::string &map, const Vector3 &origin, std::vector<EntityHandle> *entities)
+bool pragma::Game::LoadMap(const std::string &map, const Vector3 &origin, std::vector<EntityHandle> *entities)
 
 {
 
@@ -1669,9 +1669,9 @@ bool Game::LoadMap(const std::string &map, const Vector3 &origin, std::vector<En
 
 
 
-void Game::InitializeWorldData(pragma::asset::WorldData &worldData) {}
+void pragma::Game::InitializeWorldData(pragma::asset::WorldData &worldData) {}
 
-void Game::InitializeMapEntities(pragma::asset::WorldData &worldData, std::vector<EntityHandle> &outEnt)
+void pragma::Game::InitializeMapEntities(pragma::asset::WorldData &worldData, std::vector<EntityHandle> &outEnt)
 
 {
 
@@ -1695,11 +1695,11 @@ void Game::InitializeMapEntities(pragma::asset::WorldData &worldData, std::vecto
 
 
 
-std::shared_ptr<Model> Game::CreateModel(const std::string &mdl) const { return m_stateNetwork->GetModelManager().CreateModel(mdl); }
+std::shared_ptr<pragma::Model> pragma::Game::CreateModel(const std::string &mdl) const { return m_stateNetwork->GetModelManager().CreateModel(mdl); }
 
-std::shared_ptr<Model> Game::CreateModel(bool bAddReference) const { return m_stateNetwork->GetModelManager().CreateModel("", bAddReference); }
+std::shared_ptr<pragma::Model> pragma::Game::CreateModel(bool bAddReference) const { return m_stateNetwork->GetModelManager().CreateModel("", bAddReference); }
 
-bool Game::PrecacheModel(const std::string &mdl)
+bool pragma::Game::PrecacheModel(const std::string &mdl)
 
 {
 
@@ -1717,9 +1717,9 @@ bool Game::PrecacheModel(const std::string &mdl)
 
 		auto mdl = pragma::asset::ModelManager::GetAssetObject(asset);
 
-		CallCallbacks<void, std::reference_wrapper<std::shared_ptr<Model>>>("OnModelLoaded", mdl);
+		CallCallbacks<void, std::reference_wrapper<std::shared_ptr<pragma::Model>>>("OnModelLoaded", mdl);
 
-		CallLuaCallbacks<void, std::shared_ptr<Model>>("OnModelLoaded", mdl);
+		CallLuaCallbacks<void, std::shared_ptr<pragma::Model>>("OnModelLoaded", mdl);
 
 	};
 
@@ -1729,7 +1729,7 @@ bool Game::PrecacheModel(const std::string &mdl)
 
 }
 
-std::shared_ptr<Model> Game::LoadModel(const std::string &mdl, bool bReload)
+std::shared_ptr<pragma::Model> pragma::Game::LoadModel(const std::string &mdl, bool bReload)
 
 {
 
@@ -1761,9 +1761,9 @@ std::shared_ptr<Model> Game::LoadModel(const std::string &mdl, bool bReload)
 
 	if(r != nullptr) {
 
-		CallCallbacks<void, std::reference_wrapper<std::shared_ptr<Model>>>("OnModelLoaded", r);
+		CallCallbacks<void, std::reference_wrapper<std::shared_ptr<pragma::Model>>>("OnModelLoaded", r);
 
-		CallLuaCallbacks<void, std::shared_ptr<Model>>("OnModelLoaded", r);
+		CallLuaCallbacks<void, std::shared_ptr<pragma::Model>>("OnModelLoaded", r);
 
 	}
 
@@ -1781,7 +1781,7 @@ std::shared_ptr<Model> Game::LoadModel(const std::string &mdl, bool bReload)
 
 
 
-void Game::OnGameReady()
+void pragma::Game::OnGameReady()
 
 {
 
@@ -1817,7 +1817,7 @@ void Game::OnGameReady()
 
 
 
-void Game::SetWorld(pragma::BaseWorldComponent *entWorld)
+void pragma::Game::SetWorld(pragma::BaseWorldComponent *entWorld)
 
 {
 
@@ -1831,21 +1831,21 @@ void Game::SetWorld(pragma::BaseWorldComponent *entWorld)
 
 
 
-std::vector<pragma::ComponentHandle<pragma::BasePhysicsComponent>> &Game::GetAwakePhysicsComponents() { return m_awakePhysicsEntities; }
+std::vector<pragma::ComponentHandle<pragma::BasePhysicsComponent>> &pragma::Game::GetAwakePhysicsComponents() { return m_awakePhysicsEntities; }
 
 
 
-const pragma::EntityComponentManager &Game::GetEntityComponentManager() const { return const_cast<Game *>(this)->GetEntityComponentManager(); }
+const pragma::EntityComponentManager &pragma::Game::GetEntityComponentManager() const { return const_cast<pragma::Game *>(this)->GetEntityComponentManager(); }
 
-pragma::EntityComponentManager &Game::GetEntityComponentManager() { return *m_componentManager; }
+pragma::EntityComponentManager &pragma::Game::GetEntityComponentManager() { return *m_componentManager; }
 
 
 
-SurfaceMaterial &Game::CreateSurfaceMaterial(const std::string &identifier, Float friction, Float restitution) { return m_surfaceMaterialManager->Create(identifier, friction, restitution); }
+SurfaceMaterial &pragma::Game::CreateSurfaceMaterial(const std::string &identifier, Float friction, Float restitution) { return m_surfaceMaterialManager->Create(identifier, friction, restitution); }
 
-SurfaceMaterial *Game::GetSurfaceMaterial(const std::string &id) { return m_surfaceMaterialManager ? m_surfaceMaterialManager->GetMaterial(id) : nullptr; }
+SurfaceMaterial *pragma::Game::GetSurfaceMaterial(const std::string &id) { return m_surfaceMaterialManager ? m_surfaceMaterialManager->GetMaterial(id) : nullptr; }
 
-SurfaceMaterial *Game::GetSurfaceMaterial(UInt32 id)
+SurfaceMaterial *pragma::Game::GetSurfaceMaterial(UInt32 id)
 
 {
 
@@ -1863,43 +1863,43 @@ SurfaceMaterial *Game::GetSurfaceMaterial(UInt32 id)
 
 }
 
-std::vector<SurfaceMaterial> *Game::GetSurfaceMaterials() { return m_surfaceMaterialManager ? &m_surfaceMaterialManager->GetMaterials() : nullptr; }
+std::vector<SurfaceMaterial> *pragma::Game::GetSurfaceMaterials() { return m_surfaceMaterialManager ? &m_surfaceMaterialManager->GetMaterials() : nullptr; }
 
 
 
-double &Game::RealTime() { return m_tReal; }
+double &pragma::Game::RealTime() { return m_tReal; }
 
-double &Game::CurTime() { return m_tCur; }
+double &pragma::Game::CurTime() { return m_tCur; }
 
-double &Game::ServerTime() { return CurTime(); }
+double &pragma::Game::ServerTime() { return CurTime(); }
 
-double &Game::DeltaTime() { return m_tDelta; }
+double &pragma::Game::DeltaTime() { return m_tDelta; }
 
-double &Game::DeltaRealTime() { return m_stateNetwork->DeltaTime(); }
+double &pragma::Game::DeltaRealTime() { return m_stateNetwork->DeltaTime(); }
 
-double &Game::LastThink() { return m_tLast; }
+double &pragma::Game::LastThink() { return m_tLast; }
 
-double &Game::LastTick() { return m_tLastTick; }
+double &pragma::Game::LastTick() { return m_tLastTick; }
 
-double &Game::DeltaTickTime() { return m_tDeltaTick; }
-
-
-
-float Game::GetTimeScale() { return 1.f; }
-
-void Game::SetTimeScale(float t) { m_stateNetwork->SetConVar("host_timescale", std::to_string(t)); }
+double &pragma::Game::DeltaTickTime() { return m_tDeltaTick; }
 
 
 
-ConConf *Game::GetConVar(const std::string &scmd) { return m_stateNetwork->GetConVar(scmd); }
+float pragma::Game::GetTimeScale() { return 1.f; }
 
-int Game::GetConVarInt(const std::string &scmd) { return m_stateNetwork->GetConVarInt(scmd); }
+void pragma::Game::SetTimeScale(float t) { m_stateNetwork->SetConVar("host_timescale", std::to_string(t)); }
 
-std::string Game::GetConVarString(const std::string &scmd) { return m_stateNetwork->GetConVarString(scmd); }
 
-float Game::GetConVarFloat(const std::string &scmd) { return m_stateNetwork->GetConVarFloat(scmd); }
 
-bool Game::GetConVarBool(const std::string &scmd) { return m_stateNetwork->GetConVarBool(scmd); }
+ConConf *pragma::Game::GetConVar(const std::string &scmd) { return m_stateNetwork->GetConVar(scmd); }
 
-pragma::console::ConVarFlags Game::GetConVarFlags(const std::string &scmd) { return m_stateNetwork->GetConVarFlags(scmd); }
+int pragma::Game::GetConVarInt(const std::string &scmd) { return m_stateNetwork->GetConVarInt(scmd); }
+
+std::string pragma::Game::GetConVarString(const std::string &scmd) { return m_stateNetwork->GetConVarString(scmd); }
+
+float pragma::Game::GetConVarFloat(const std::string &scmd) { return m_stateNetwork->GetConVarFloat(scmd); }
+
+bool pragma::Game::GetConVarBool(const std::string &scmd) { return m_stateNetwork->GetConVarBool(scmd); }
+
+pragma::console::ConVarFlags pragma::Game::GetConVarFlags(const std::string &scmd) { return m_stateNetwork->GetConVarFlags(scmd); }
 

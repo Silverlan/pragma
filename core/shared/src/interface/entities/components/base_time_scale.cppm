@@ -26,7 +26,7 @@ export namespace pragma {
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 	  protected:
-		BaseTimeScaleComponent(BaseEntity &ent);
+		BaseTimeScaleComponent(pragma::ecs::BaseEntity &ent);
 		pragma::NetEventId m_netEvSetTimeScale = pragma::INVALID_NET_EVENT;
 		util::PFloatProperty m_timeScale = nullptr;
 	};

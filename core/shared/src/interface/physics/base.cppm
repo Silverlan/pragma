@@ -4,17 +4,19 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/raw_object.hpp"
 #include <memory>
 #include <vector>
+
+#include "pragma/lua/core.hpp"
 
 export module pragma.shared:physics.base;
 
 export import :physics.enums;
+export import :scripting.lua.api;
+export import :types;
 export import pragma.util;
 
 export {
-	class PhysObj;
 	namespace pragma::physics {
 		class IEnvironment;
 		class DLLNETWORK IBase : public std::enable_shared_from_this<IBase> {
@@ -38,11 +40,11 @@ export {
 			void Push(lua_State *l);
 
 			void *GetUserData() const;
-			PhysObj *GetPhysObj() const;
-			void SetPhysObj(PhysObj &physObj);
+			pragma::physics::PhysObj *GetPhysObj() const;
+			void SetPhysObj(pragma::physics::PhysObj &physObj);
 		  protected:
 			friend IEnvironment;
-			friend PhysObj;
+			friend pragma::physics::PhysObj;
 			IBase(IEnvironment &env);
 			void SetUserData(void *userData) const;
 			virtual void InitializeLuaHandle(const util::TWeakSharedHandle<IBase> &handle);
@@ -55,7 +57,7 @@ export {
 			std::unique_ptr<luabind::object> m_luaObj = nullptr;
 		  private:
 			mutable void *m_userData = nullptr;
-			mutable PhysObj *m_physObj = nullptr;
+			mutable pragma::physics::PhysObj *m_physObj = nullptr;
 		};
 
 		class DLLNETWORK IWorldObject {

@@ -36,7 +36,7 @@ Timer::~Timer()
 	}
 }
 
-double Timer::GetCurTime(Game *game)
+double Timer::GetCurTime(pragma::Game *game)
 {
 	switch(m_timeType) {
 	case TimerType::CurTime:
@@ -47,7 +47,7 @@ double Timer::GetCurTime(Game *game)
 	return game->ServerTime();
 }
 
-double Timer::GetDeltaTime(Game *game)
+double Timer::GetDeltaTime(pragma::Game *game)
 {
 	switch(m_timeType) {
 	case TimerType::CurTime:
@@ -58,7 +58,7 @@ double Timer::GetDeltaTime(Game *game)
 	return game->DeltaTickTime();
 }
 
-void Timer::Update(Game *game)
+void Timer::Update(pragma::Game *game)
 {
 	if(!m_bRunning)
 		return;
@@ -77,7 +77,7 @@ void Timer::Update(Game *game)
 	}
 }
 
-void Timer::Call(Game *game)
+void Timer::Call(pragma::Game *game)
 {
 	if(m_luaFunction.is_valid()) {
 		game->ProtectedLuaCall(
@@ -91,13 +91,13 @@ void Timer::Call(Game *game)
 	m_callback();
 }
 
-void Timer::SetCall(Game *game, LuaFunctionObject luaFunction)
+void Timer::SetCall(pragma::Game *game, LuaFunctionObject luaFunction)
 {
 	m_luaFunction = luaFunction;
 	m_callback = CallbackHandle();
 }
 
-void Timer::SetCall(Game *game, const CallbackHandle &hCallback)
+void Timer::SetCall(pragma::Game *game, const CallbackHandle &hCallback)
 {
 	m_luaFunction = {};
 	m_callback = hCallback;
@@ -105,7 +105,7 @@ void Timer::SetCall(Game *game, const CallbackHandle &hCallback)
 
 void Timer::Reset() { m_next = m_delay + m_next; }
 
-void Timer::Start(Game *)
+void Timer::Start(pragma::Game *)
 {
 	if(m_bRunning)
 		return;
@@ -122,7 +122,7 @@ void Timer::Stop()
 	m_next = 0.f;
 }
 
-void Timer::Remove(Game *game)
+void Timer::Remove(pragma::Game *game)
 {
 	m_bIsValid = false;
 	m_luaFunction = {};

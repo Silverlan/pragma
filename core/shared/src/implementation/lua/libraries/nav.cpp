@@ -16,7 +16,7 @@ void Lua::nav::register_library(Lua::Interface &lua)
 {
 	auto &modNav = lua.RegisterLibrary("nav");
 	modNav[luabind::def("generate", static_cast<void (*)(lua_State *)>([](lua_State *l) {
-		auto &nw = *Engine::Get()->GetNetworkState(l);
+		auto &nw = *pragma::Engine::Get()->GetNetworkState(l);
 		auto &game = *nw.GetGameState();
 		std::string err;
 		std::shared_ptr<RcNavMesh> mesh = nullptr;
@@ -24,8 +24,8 @@ void Lua::nav::register_library(Lua::Interface &lua)
 		if(Lua::IsSet(l, 2) == false)
 			mesh = pragma::nav::generate(game, navConfig, &err);
 		else {
-			if(Lua::IsType<BaseEntity>(l, 2)) {
-				auto &ent = Lua::Check<BaseEntity>(l, 2);
+			if(Lua::IsType<pragma::ecs::BaseEntity>(l, 2)) {
+				auto &ent = Lua::Check<pragma::ecs::BaseEntity>(l, 2);
 				mesh = pragma::nav::generate(game, navConfig, ent, &err);
 			}
 			else {
@@ -104,7 +104,7 @@ void Lua::nav::register_library(Lua::Interface &lua)
 		Lua::Push(l, navMesh);
 	})),
 	  luabind::def("load", static_cast<opt<std::shared_ptr<pragma::nav::Mesh>> (*)(lua_State *)>([](lua_State *l) -> opt<std::shared_ptr<pragma::nav::Mesh>> {
-		  auto &nw = *Engine::Get()->GetNetworkState(l);
+		  auto &nw = *pragma::Engine::Get()->GetNetworkState(l);
 		  auto &game = *nw.GetGameState();
 		  std::string fname = Lua::CheckString(l, 1);
 		  pragma::nav::Config config;
@@ -148,7 +148,7 @@ void Lua::nav::register_library(Lua::Interface &lua)
 			Lua::PushString(l, "This file operation is not allowed!");
 			return;
 		}
-		auto &nw = *Engine::Get()->GetNetworkState(l);
+		auto &nw = *pragma::Engine::Get()->GetNetworkState(l);
 		auto &game = *nw.GetGameState();
 		std::string err;
 		auto r = navMesh.Save(game, outName, err);

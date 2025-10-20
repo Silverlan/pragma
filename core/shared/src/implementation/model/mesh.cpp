@@ -29,7 +29,7 @@ unsigned int Mesh::GetVertexBuffer() { return m_bufVertex; }
 
 msys::Material *Mesh::GetMaterial() { return m_material; }
 void Mesh::SetMaterial(msys::Material *material) { m_material = material; }
-void Mesh::SetMaterial(const char *texture) { m_material = Engine::Get()->GetServerNetworkState()->LoadMaterial(texture); }
+void Mesh::SetMaterial(const char *texture) { m_material = pragma::Engine::Get()->GetServerNetworkState()->LoadMaterial(texture); }
 
 unsigned int Mesh::GetVertexCount() { return m_numVerts; }
 

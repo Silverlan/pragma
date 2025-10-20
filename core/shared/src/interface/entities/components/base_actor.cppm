@@ -5,6 +5,8 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <string>
+
 export module pragma.shared:entities.components.base_actor;
 
 export import :entities.components.base;
@@ -46,7 +48,7 @@ export namespace pragma {
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 	  protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
-		BaseActorComponent(BaseEntity &ent);
+		BaseActorComponent(pragma::ecs::BaseEntity &ent);
 		bool m_bAlive;
 		util::PBoolProperty m_bFrozen = nullptr;
 		std::string m_moveControllerName = "move_yaw";
@@ -61,7 +63,7 @@ export namespace pragma {
 		};
 		pragma::NetEventId m_netEvSetFrozen = pragma::INVALID_NET_EVENT;
 		std::vector<HitboxData> m_hitboxData;
-		std::unique_ptr<PhysObj> m_physHitboxes;
+		std::unique_ptr<pragma::physics::PhysObj> m_physHitboxes;
 		virtual void OnPhysicsInitialized();
 		virtual void OnPhysicsDestroyed();
 		virtual void PhysicsUpdate(double tDelta);

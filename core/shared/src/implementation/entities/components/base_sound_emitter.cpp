@@ -25,7 +25,7 @@ ComponentEventId BaseSoundEmitterComponent::EVENT_ON_SOUND_CREATED = pragma::INV
 
 void BaseSoundEmitterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_SOUND_CREATED = registerEvent("ON_SOUND_CREATED", ComponentEventInfo::Type::Broadcast); }
 
-BaseSoundEmitterComponent::BaseSoundEmitterComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseSoundEmitterComponent::BaseSoundEmitterComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 BaseSoundEmitterComponent::~BaseSoundEmitterComponent()
 

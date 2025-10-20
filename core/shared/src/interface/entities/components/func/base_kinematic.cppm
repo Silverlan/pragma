@@ -34,6 +34,6 @@ export namespace pragma {
 		virtual void StartForward();
 		virtual void StartBackward();
 	  private:
-		void MoveToTarget(BaseEntity *node, float speed);
+		void MoveToTarget(pragma::ecs::BaseEntity *node, float speed);
 	};
 };

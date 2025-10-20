@@ -12,26 +12,35 @@ module;
 
 export module pragma.shared:util.font_set;
 
+import pragma.math;
+
 export {
-	enum class FontSetFlag : uint8_t {
-		None = 0,
-		Bold = 1,
-		Italic = Bold << 1u,
-		Mono = Italic << 1u,
-		Serif = Mono << 1u,
-		Sans = Serif << 1u,
-	};
+	namespace pragma {
+		enum class FontSetFlag : uint8_t {
+			None = 0,
+			Bold = 1,
+			Italic = Bold << 1u,
+			Mono = Italic << 1u,
+			Serif = Mono << 1u,
+			Sans = Serif << 1u,
+		};
+        using namespace umath::scoped_enum::bitwise;
+	}
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::FontSetFlag> : std::true_type {};
+    }
+
 	struct DLLNETWORK FontSetFileData {
-		FontSetFlag flags = FontSetFlag::None;
+		pragma::FontSetFlag flags = pragma::FontSetFlag::None;
 		std::string fileName;
 		std::optional<uint32_t> fontSizeAdjustment {};
 	};
 	struct DLLNETWORK FontSet {
 		std::vector<FontSetFileData> fileData;
 		std::vector<std::string> features;
-		FontSetFileData *FindFontFileCandidate(FontSetFlag flags);
-		const FontSetFileData *FindFontFileCandidate(FontSetFlag flags) const;
+		FontSetFileData *FindFontFileCandidate(pragma::FontSetFlag flags);
+		const FontSetFileData *FindFontFileCandidate(pragma::FontSetFlag flags) const;
 		bool HasFeature(const std::string_view &feature) const;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(FontSetFlag)
 };

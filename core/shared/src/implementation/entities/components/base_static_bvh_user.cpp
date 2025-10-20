@@ -17,7 +17,7 @@ void BaseStaticBvhUserComponent::RegisterEvents(pragma::EntityComponentManager &
 	EVENT_ON_STATIC_BVH_COMPONENT_CHANGED = registerEvent("ON_STATIC_BVH_COMPONENT_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
 
-BaseStaticBvhUserComponent::BaseStaticBvhUserComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseStaticBvhUserComponent::BaseStaticBvhUserComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 BaseStaticBvhUserComponent::~BaseStaticBvhUserComponent() {}
 void BaseStaticBvhUserComponent::Initialize()
 {

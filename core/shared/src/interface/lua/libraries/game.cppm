@@ -4,7 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-
+#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.libraries.game;
 
@@ -14,13 +14,13 @@ export {
 	namespace Lua {
 		namespace game {
 			// Standard Lua API
-			DLLNETWORK luabind::object call_callbacks(lua_State *l, Game &game, const std::string &identifier);
-			DLLNETWORK luabind::object call_callbacks(lua_State *l, Game &game, const std::string &identifier, luabind::object arg0);
-			DLLNETWORK luabind::object call_callbacks(lua_State *l, Game &game, const std::string &identifier, luabind::object arg0, luabind::object arg1);
-			DLLNETWORK luabind::object call_callbacks(lua_State *l, Game &game, const std::string &identifier, luabind::object arg0, luabind::object arg1, luabind::object arg2);
-			DLLNETWORK luabind::object call_callbacks(lua_State *l, Game &game, const std::string &identifier, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3);
-			DLLNETWORK luabind::object call_callbacks(lua_State *l, Game &game, const std::string &identifier, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4);
-			DLLNETWORK luabind::object call_callbacks(lua_State *l, Game &game, const std::string &identifier, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5);
+			DLLNETWORK luabind::object call_callbacks(lua_State *l, pragma::Game &game, const std::string &identifier);
+			DLLNETWORK luabind::object call_callbacks(lua_State *l, pragma::Game &game, const std::string &identifier, luabind::object arg0);
+			DLLNETWORK luabind::object call_callbacks(lua_State *l, pragma::Game &game, const std::string &identifier, luabind::object arg0, luabind::object arg1);
+			DLLNETWORK luabind::object call_callbacks(lua_State *l, pragma::Game &game, const std::string &identifier, luabind::object arg0, luabind::object arg1, luabind::object arg2);
+			DLLNETWORK luabind::object call_callbacks(lua_State *l, pragma::Game &game, const std::string &identifier, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3);
+			DLLNETWORK luabind::object call_callbacks(lua_State *l, pragma::Game &game, const std::string &identifier, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4);
+			DLLNETWORK luabind::object call_callbacks(lua_State *l, pragma::Game &game, const std::string &identifier, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5);
 
 			DLLNETWORK opt<type<CallbackHandle>> add_callback(lua_State *l, const std::string &identifier, const func<void> &function);
 			DLLNETWORK void clear_callbacks(lua_State *l, const std::string &identifier);
@@ -39,8 +39,8 @@ export {
 			DLLNETWORK bool load_nav_mesh(lua_State *l, bool reload = false);
 			DLLNETWORK bool is_map_loaded(lua_State *l);
 			DLLNETWORK std::string get_map_name(lua_State *l);
-			DLLNETWORK Game::GameFlags get_game_state_flags(lua_State *l);
-			DLLNETWORK std::pair<bool, int> load_map(lua_State *l, std::string &mapName, BaseEntity **entWorld, Vector3 &origin);
+			DLLNETWORK pragma::Game::GameFlags get_game_state_flags(lua_State *l);
+			DLLNETWORK std::pair<bool, int> load_map(lua_State *l, std::string &mapName, pragma::ecs::BaseEntity **entWorld, Vector3 &origin);
 
 			DLLNETWORK void register_shared_functions(lua_State *l, luabind::module_ &modGame);
 		};

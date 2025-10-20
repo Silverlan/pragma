@@ -18,7 +18,7 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 
-		BaseEntity *GetSpotlightTarget() const;
+		pragma::ecs::BaseEntity *GetSpotlightTarget() const;
 
 		void SetIntensityFactor(float intensityFactor);
 		float GetIntensityFactor() const;
@@ -26,7 +26,7 @@ export namespace pragma {
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 	  protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
-		virtual void SetSpotlightTarget(BaseEntity &ent);
+		virtual void SetSpotlightTarget(pragma::ecs::BaseEntity &ent);
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		float m_coneStartOffset = 0.f;
 		float m_intensityFactor = 1.f;

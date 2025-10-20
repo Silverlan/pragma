@@ -19,7 +19,7 @@ using namespace pragma;
 
 static spdlog::logger &LOGGER = pragma::register_logger("bvh");
 
-BaseStaticBvhCacheComponent::BaseStaticBvhCacheComponent(BaseEntity &ent) : BaseBvhComponent(ent) {}
+BaseStaticBvhCacheComponent::BaseStaticBvhCacheComponent(pragma::ecs::BaseEntity &ent) : BaseBvhComponent(ent) {}
 BaseStaticBvhCacheComponent::~BaseStaticBvhCacheComponent()
 {
 	if(m_buildWorker) {
@@ -54,7 +54,7 @@ bool BaseStaticBvhCacheComponent::IntersectionTest(const Vector3 &origin, const 
 	return BaseBvhComponent::IntersectionTest(origin, dir, minDist, maxDist, outHitInfo);
 }
 
-void BaseStaticBvhCacheComponent::Build(std::vector<std::shared_ptr<ModelSubMesh>> &&meshes, std::vector<BaseEntity *> &&meshToEntity, std::vector<umath::ScaledTransform> &&meshPoses)
+void BaseStaticBvhCacheComponent::Build(std::vector<std::shared_ptr<pragma::ModelSubMesh>> &&meshes, std::vector<pragma::ecs::BaseEntity *> &&meshToEntity, std::vector<umath::ScaledTransform> &&meshPoses)
 {
 	LOGGER.info("Building new static BVH cache...");
 	m_bvhInitialized = true;
@@ -139,7 +139,7 @@ void BaseStaticBvhCacheComponent::UpdateBuild()
 	m_staticBvhDirty = false;
 	TestRebuildBvh();
 }
-void BaseStaticBvhCacheComponent::SetEntityDirty(BaseEntity &ent)
+void BaseStaticBvhCacheComponent::SetEntityDirty(pragma::ecs::BaseEntity &ent)
 {
 	SetCacheDirty();
 
@@ -155,7 +155,7 @@ void BaseStaticBvhCacheComponent::SetEntityDirty(BaseEntity &ent)
 		c->InitializeDynamicBvhSubstitute(m_currentBvhCacheVersion + 1); // Temporarily initialize a dynamic BVH until the new static BVH has been built
 	}
 }
-void BaseStaticBvhCacheComponent::AddEntity(BaseEntity &ent)
+void BaseStaticBvhCacheComponent::AddEntity(pragma::ecs::BaseEntity &ent)
 {
 	auto *c = static_cast<BaseStaticBvhUserComponent *>(ent.AddComponent("static_bvh_user").get());
 	auto it = m_entities.find(c);
@@ -167,7 +167,7 @@ void BaseStaticBvhCacheComponent::AddEntity(BaseEntity &ent)
 
 	SetEntityDirty(ent);
 }
-void BaseStaticBvhCacheComponent::RemoveEntity(BaseEntity &ent, bool removeFinal)
+void BaseStaticBvhCacheComponent::RemoveEntity(pragma::ecs::BaseEntity &ent, bool removeFinal)
 {
 	auto *c = static_cast<BaseStaticBvhUserComponent *>(ent.FindComponent("static_bvh_user").get());
 	if(!c)
@@ -181,7 +181,7 @@ void BaseStaticBvhCacheComponent::RemoveEntity(BaseEntity &ent, bool removeFinal
 	m_entities.erase(it);
 	RemoveEntityFromBvh(ent);
 }
-void BaseStaticBvhCacheComponent::RemoveEntityFromBvh(const BaseEntity &ent)
+void BaseStaticBvhCacheComponent::RemoveEntityFromBvh(const pragma::ecs::BaseEntity &ent)
 {
 	m_bvhDataMutex.lock();
 	if(m_bvhData) {

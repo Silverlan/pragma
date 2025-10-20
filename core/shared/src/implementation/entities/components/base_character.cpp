@@ -91,7 +91,7 @@ void BaseCharacterComponent::RegisterEvents(pragma::EntityComponentManager &comp
 
 
 
-BaseCharacterComponent::BaseCharacterComponent(BaseEntity &ent) : BaseActorComponent(ent), m_slopeLimit(util::FloatProperty::Create(CFloat(umath::cos(umath::deg_to_rad(45.0f))))), m_stepOffset(util::FloatProperty::Create(2.f)), m_jumpPower(util::FloatProperty::Create(0.f)) {}
+BaseCharacterComponent::BaseCharacterComponent(pragma::ecs::BaseEntity &ent) : BaseActorComponent(ent), m_slopeLimit(util::FloatProperty::Create(CFloat(umath::cos(umath::deg_to_rad(45.0f))))), m_stepOffset(util::FloatProperty::Create(2.f)), m_jumpPower(util::FloatProperty::Create(0.f)) {}
 
 
 
@@ -101,7 +101,7 @@ const util::PFloatProperty &BaseCharacterComponent::GetStepOffsetProperty() cons
 
 
 
-void BaseCharacterComponent::InitializePhysObj(PhysObj *)
+void BaseCharacterComponent::InitializePhysObj(pragma::physics::PhysObj *)
 
 {
 
@@ -1107,7 +1107,7 @@ void BaseCharacterComponent::DetachFromGround(float duration) { m_tDetachFromGro
 
 
 
-CEOnDeployWeapon::CEOnDeployWeapon(BaseEntity &entWeapon) : weapon {entWeapon} {}
+CEOnDeployWeapon::CEOnDeployWeapon(pragma::ecs::BaseEntity &entWeapon) : weapon {entWeapon} {}
 
 void CEOnDeployWeapon::PushArguments(lua_State *l) { weapon.GetLuaObject().push(l); }
 
@@ -1117,7 +1117,7 @@ void CEOnDeployWeapon::PushArguments(lua_State *l) { weapon.GetLuaObject().push(
 
 
 
-CEOnSetActiveWeapon::CEOnSetActiveWeapon(BaseEntity *entWeapon) : weapon {entWeapon} {}
+CEOnSetActiveWeapon::CEOnSetActiveWeapon(pragma::ecs::BaseEntity *entWeapon) : weapon {entWeapon} {}
 
 void CEOnSetActiveWeapon::PushArguments(lua_State *l)
 

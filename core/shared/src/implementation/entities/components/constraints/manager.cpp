@@ -21,7 +21,7 @@ static std::vector<ConstraintManagerComponent::ConstraintInfo> &get_constraints(
 }
 ComponentEventId ConstraintManagerComponent::EVENT_APPLY_CONSTRAINT = pragma::INVALID_COMPONENT_ID;
 void ConstraintManagerComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_APPLY_CONSTRAINT = registerEvent("APPLY_CONSTRAINT", ComponentEventInfo::Type::Explicit); }
-ConstraintManagerComponent::ConstraintManagerComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+ConstraintManagerComponent::ConstraintManagerComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintManagerComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void ConstraintManagerComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 

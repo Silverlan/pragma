@@ -15,7 +15,7 @@ export namespace pragma {
 		enum class ClampRegion : uint32_t { Inside = 0, Outside, OnSurface };
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		ConstraintLimitDistanceComponent(BaseEntity &ent);
+		ConstraintLimitDistanceComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		void SetClampRegion(ClampRegion clampRegion);

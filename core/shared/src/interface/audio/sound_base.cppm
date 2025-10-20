@@ -5,7 +5,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <cinttypes>
-#include <utility>
+#include <tuple>
 
 export module pragma.shared:audio.sound_base;
 

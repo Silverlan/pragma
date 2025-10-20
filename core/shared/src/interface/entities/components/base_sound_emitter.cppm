@@ -36,7 +36,7 @@ export namespace pragma {
 		void StopSounds();
 		void GetSounds(std::vector<std::shared_ptr<ALSound>> **sounds);
 	  protected:
-		BaseSoundEmitterComponent(BaseEntity &ent);
+		BaseSoundEmitterComponent(pragma::ecs::BaseEntity &ent);
 		void InitializeSound(const std::shared_ptr<ALSound> &snd);
 		virtual void UpdateSoundTransform(ALSound &snd) const;
 		virtual bool ShouldRemoveSound(ALSound &snd) const;

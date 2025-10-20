@@ -17,7 +17,7 @@ using namespace pragma;
 
 ComponentEventId BaseAttachmentComponent::EVENT_ON_ATTACHMENT_UPDATE = INVALID_COMPONENT_ID;
 void BaseAttachmentComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_ATTACHMENT_UPDATE = registerEvent("ON_ATTACHMENT_UPDATE", ComponentEventInfo::Type::Explicit); }
-BaseAttachmentComponent::BaseAttachmentComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseAttachmentComponent::BaseAttachmentComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseAttachmentComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -48,7 +48,7 @@ util::EventReply BaseAttachmentComponent::HandleEvent(ComponentEventId eventId, 
 			});
 		}
 	}
-	else if(eventId == BaseEntity::EVENT_HANDLE_KEY_VALUE) {
+	else if(eventId == pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE) {
 		auto &kvData = static_cast<CEKeyValueData &>(evData);
 		if(ustring::compare<std::string>(kvData.key, "parent", false) || ustring::compare<std::string>(kvData.key, "parentname", false))
 			m_kvParent = kvData.value;
@@ -72,7 +72,7 @@ void BaseAttachmentComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
 	if(!m_kvParent.empty()) {
-		EntityIterator entIt {*GetEntity().GetNetworkState()->GetGameState(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+		pragma::ecs::EntityIterator entIt {*GetEntity().GetNetworkState()->GetGameState(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 		entIt.AttachFilter<EntityIteratorFilterEntity>(m_kvParent);
 		auto it = entIt.begin();
 		if(it != entIt.end()) {
@@ -145,7 +145,7 @@ void BaseAttachmentComponent::UpdateAttachmentData(bool bForceReload)
 	else if(!m_attachment->boneMapping.empty())
 		m_attachment->boneMapping.clear();
 }
-AttachmentData *BaseAttachmentComponent::SetupAttachment(BaseEntity *ent, const AttachmentInfo &attInfo)
+AttachmentData *BaseAttachmentComponent::SetupAttachment(pragma::ecs::BaseEntity *ent, const AttachmentInfo &attInfo)
 {
 	if(m_parentModelChanged.IsValid())
 		m_parentModelChanged.Remove();
@@ -232,13 +232,13 @@ AttachmentData *BaseAttachmentComponent::SetupAttachment(BaseEntity *ent, const 
 	OnAttachmentChanged();
 	return m_attachment.get();
 }
-AttachmentData *BaseAttachmentComponent::AttachToEntity(BaseEntity *ent, const AttachmentInfo &attInfo)
+AttachmentData *BaseAttachmentComponent::AttachToEntity(pragma::ecs::BaseEntity *ent, const AttachmentInfo &attInfo)
 {
 	auto *attData = SetupAttachment(ent, attInfo);
 	UpdateAttachmentOffset();
 	return attData;
 }
-AttachmentData *BaseAttachmentComponent::AttachToBone(BaseEntity *ent, uint32_t boneID, const AttachmentInfo &attInfo)
+AttachmentData *BaseAttachmentComponent::AttachToBone(pragma::ecs::BaseEntity *ent, uint32_t boneID, const AttachmentInfo &attInfo)
 {
 	SetupAttachment(ent, attInfo);
 	if(m_attachment == nullptr)
@@ -268,7 +268,7 @@ AttachmentData *BaseAttachmentComponent::AttachToBone(BaseEntity *ent, uint32_t 
 	UpdateAttachmentOffset();
 	return m_attachment.get();
 }
-AttachmentData *BaseAttachmentComponent::AttachToBone(BaseEntity *ent, std::string bone, const AttachmentInfo &attInfo)
+AttachmentData *BaseAttachmentComponent::AttachToBone(pragma::ecs::BaseEntity *ent, std::string bone, const AttachmentInfo &attInfo)
 {
 	if(ent == nullptr) {
 		ClearAttachment();
@@ -286,7 +286,7 @@ AttachmentData *BaseAttachmentComponent::AttachToBone(BaseEntity *ent, std::stri
 	}
 	return AttachToBone(ent, boneID, attInfo);
 }
-AttachmentData *BaseAttachmentComponent::AttachToAttachment(BaseEntity *ent, uint32_t attachmentID, const AttachmentInfo &attInfo)
+AttachmentData *BaseAttachmentComponent::AttachToAttachment(pragma::ecs::BaseEntity *ent, uint32_t attachmentID, const AttachmentInfo &attInfo)
 {
 	SetupAttachment(ent, attInfo);
 	if(m_attachment == NULL)
@@ -315,7 +315,7 @@ AttachmentData *BaseAttachmentComponent::AttachToAttachment(BaseEntity *ent, uin
 	UpdateAttachmentOffset();
 	return m_attachment.get();
 }
-AttachmentData *BaseAttachmentComponent::AttachToAttachment(BaseEntity *ent, std::string attachment, const AttachmentInfo &attInfo)
+AttachmentData *BaseAttachmentComponent::AttachToAttachment(pragma::ecs::BaseEntity *ent, std::string attachment, const AttachmentInfo &attInfo)
 {
 	if(ent == nullptr) {
 		ClearAttachment();
@@ -365,9 +365,9 @@ bool BaseAttachmentComponent::HasAttachmentFlag(pragma::FAttachmentMode flag) co
 	return ((m_attachment->flags & flag) == flag) ? true : false;
 }
 
-BaseEntity *BaseAttachmentComponent::GetParent() const { return GetEntity().GetParent(); }
+pragma::ecs::BaseEntity *BaseAttachmentComponent::GetParent() const { return GetEntity().GetParent(); }
 AttachmentData *BaseAttachmentComponent::GetAttachmentData() const { return m_attachment.get(); }
-void BaseAttachmentComponent::UpdateViewAttachmentOffset(BaseEntity *ent, pragma::BaseCharacterComponent &pl, Vector3 &pos, Quat &rot, Bool bYawOnly) const
+void BaseAttachmentComponent::UpdateViewAttachmentOffset(pragma::ecs::BaseEntity *ent, pragma::BaseCharacterComponent &pl, Vector3 &pos, Quat &rot, Bool bYawOnly) const
 {
 	if(bYawOnly == false) {
 		pos = pl.GetEyePosition();
@@ -461,7 +461,7 @@ void BaseAttachmentComponent::UpdateAttachmentOffset(bool invokeUpdateEvents)
 {
 	auto &entThis = GetEntity();
 	NetworkState *state = entThis.GetNetworkState();
-	Game *game = state->GetGameState();
+	pragma::Game *game = state->GetGameState();
 	auto t = CFloat(game->CurTime());
 	if(t <= m_tLastAttachmentUpdate)
 		return;

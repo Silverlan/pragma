@@ -13,7 +13,7 @@ export import pragma.util;
 export namespace pragma {
 	class DLLNETWORK OrientationComponent final : public BaseEntityComponent {
 	  public:
-		OrientationComponent(BaseEntity &ent);
+		OrientationComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		const util::PVector3Property &GetUpDirectionProperty() const;

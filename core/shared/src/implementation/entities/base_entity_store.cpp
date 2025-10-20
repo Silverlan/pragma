@@ -12,7 +12,7 @@ import :entities.base_entity;
 
 static const auto ENTITY_DATA_VERSION = 1u;
 
-void BaseEntity::Load(udm::LinkedPropertyWrapper &udm)
+void pragma::ecs::BaseEntity::Load(udm::LinkedPropertyWrapper &udm)
 {
 	uint32_t spawnFlags = m_spawnFlags;
 	udm["spawnFlags"] >> spawnFlags;
@@ -40,7 +40,7 @@ void BaseEntity::Load(udm::LinkedPropertyWrapper &udm)
 	// Networked variables
 	// TODO
 }
-void BaseEntity::Save(udm::LinkedPropertyWrapper &udm)
+void pragma::ecs::BaseEntity::Save(udm::LinkedPropertyWrapper &udm)
 {
 	udm["entityDataVersion"] << ENTITY_DATA_VERSION;
 	udm["spawnFlags"] << m_spawnFlags;
@@ -63,7 +63,7 @@ void BaseEntity::Save(udm::LinkedPropertyWrapper &udm)
 	// Networked variables
 	// TODO
 }
-BaseEntity *BaseEntity::Copy()
+pragma::ecs::BaseEntity *pragma::ecs::BaseEntity::Copy()
 {
 	auto *nw = GetNetworkState();
 	auto *game = nw->GetGameState();
@@ -77,7 +77,7 @@ BaseEntity *BaseEntity::Copy()
 	return ent;
 }
 
-bool BaseEntity::CreateMemberReference(pragma::EntityIdentifier identifier, std::string var, pragma::EntityUComponentMemberRef &outRef)
+bool pragma::ecs::BaseEntity::CreateMemberReference(pragma::EntityIdentifier identifier, std::string var, pragma::EntityUComponentMemberRef &outRef)
 {
 	if(var.empty()) {
 		outRef = pragma::EntityUComponentMemberRef {std::move(identifier), "", ""};
@@ -96,7 +96,7 @@ bool BaseEntity::CreateMemberReference(pragma::EntityIdentifier identifier, std:
 	outRef = pragma::EntityUComponentMemberRef {std::move(identifier), std::string {componentName}, std::string {memberName}};
 	return true;
 }
-bool BaseEntity::ParseUri(std::string uriPath, pragma::EntityUComponentMemberRef &outRef, const util::Uuid *optSelf)
+bool pragma::ecs::BaseEntity::ParseUri(std::string uriPath, pragma::EntityUComponentMemberRef &outRef, const util::Uuid *optSelf)
 {
 	uriparser::Uri uri {std::move(uriPath)};
 	auto scheme = uri.scheme();
@@ -126,6 +126,6 @@ bool BaseEntity::ParseUri(std::string uriPath, pragma::EntityUComponentMemberRef
 		return CreateMemberReference(*optSelf, std::move(memberName), outRef);
 	return false;
 }
-std::string BaseEntity::GetUri() const { return GetUri(GetUuid()); }
-std::string BaseEntity::GetUri(util::Uuid uuid) { return "pragma:game/entity?entity_uuid=" + util::uuid_to_string(uuid); }
-std::string BaseEntity::GetUri(const std::string name) { return "pragma:game/entity?entity_name=" + name; }
+std::string pragma::ecs::BaseEntity::GetUri() const { return GetUri(GetUuid()); }
+std::string pragma::ecs::BaseEntity::GetUri(util::Uuid uuid) { return "pragma:game/entity?entity_uuid=" + util::uuid_to_string(uuid); }
+std::string pragma::ecs::BaseEntity::GetUri(const std::string name) { return "pragma:game/entity?entity_name=" + name; }

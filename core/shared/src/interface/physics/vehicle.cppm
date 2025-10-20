@@ -5,7 +5,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <optional>
-
+#include <vector>
 
 
 export module pragma.shared:physics.vehicle;
@@ -225,6 +225,10 @@ export {
 		protected:
 			IWheel(IEnvironment &env);
 		};
+        using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::physics::WheelCreateInfo::Flags)
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::physics::WheelCreateInfo::Flags> : std::true_type {};
+    }
 };

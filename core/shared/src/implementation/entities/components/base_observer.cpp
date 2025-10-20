@@ -12,7 +12,7 @@ using namespace pragma;
 ComponentEventId BaseObserverComponent::EVENT_ON_OBSERVATION_MODE_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseObserverComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_OBSERVATION_MODE_CHANGED = registerEvent("ON_OBSERVATION_MODE_CHANGED", ComponentEventInfo::Type::Broadcast); }
 
-BaseObserverComponent::BaseObserverComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_obsMode(util::TEnumProperty<ObserverMode>::Create(ObserverMode::FirstPerson)) {}
+BaseObserverComponent::BaseObserverComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_obsMode(util::TEnumProperty<ObserverMode>::Create(ObserverMode::FirstPerson)) {}
 
 BaseObserverComponent::~BaseObserverComponent() {}
 

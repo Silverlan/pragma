@@ -205,9 +205,9 @@ void pragma::asset::update_extension_cache(Type type)
 		}
 	}
 
-	auto *nw = Engine::Get()->GetClientState();
+	auto *nw = pragma::Engine::Get()->GetClientState();
 	if(!nw)
-		nw = Engine::Get()->GetServerNetworkState();
+		nw = pragma::Engine::Get()->GetServerNetworkState();
 	if(!nw)
 		return;
 
@@ -307,8 +307,8 @@ std::optional<std::string> pragma::asset::find_file(const std::string &name, Typ
 		}
 	case Type::Material:
 		{
-			auto *sv = Engine::Get()->GetServerNetworkState();
-			auto *cl = Engine::Get()->GetClientState();
+			auto *sv = pragma::Engine::Get()->GetServerNetworkState();
+			auto *cl = pragma::Engine::Get()->GetClientState();
 			auto *nw = sv ? sv : cl; // Doesn't matter which one
 			return nw ? nw->GetMaterialManager().FindAssetFilePath(name) : std::optional<std::string> {};
 		}
@@ -343,8 +343,8 @@ bool pragma::asset::is_loaded(NetworkState &nw, const std::string &name, Type ty
 
 /////////////
 
-void pragma::asset::ModelAssetWrapper::SetModel(Model &model) { m_model = model.shared_from_this(); }
-Model *pragma::asset::ModelAssetWrapper::GetModel() const { return m_model.get(); }
+void pragma::asset::ModelAssetWrapper::SetModel(pragma::Model &model) { m_model = model.shared_from_this(); }
+pragma::Model *pragma::asset::ModelAssetWrapper::GetModel() const { return m_model.get(); }
 
 void pragma::asset::MaterialAssetWrapper::SetMaterial(msys::Material &mat) { m_material = mat.GetHandle(); }
 msys::Material *pragma::asset::MaterialAssetWrapper::GetMaterial() const { return m_material.get(); }
@@ -363,7 +363,7 @@ void pragma::asset::AssetManager::RegisterExporter(const ExporterInfo &importerI
 	exporter.handler = exportHandler;
 	m_exporters[umath::to_integral(type)].push_back(exporter);
 }
-std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::ImportAsset(Game &game, Type type, ufile::IFile *f, const std::optional<std::string> &filePath, std::string *optOutErr) const
+std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::ImportAsset(pragma::Game &game, Type type, ufile::IFile *f, const std::optional<std::string> &filePath, std::string *optOutErr) const
 {
 	auto fpath = filePath;
 	if(f == nullptr && filePath.has_value()) {
@@ -437,7 +437,7 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 	}
 	return nullptr;
 }
-bool pragma::asset::AssetManager::ExportAsset(Game &game, Type type, ufile::IFile &f, const IAssetWrapper &assetWrapper, std::string *optOutErr) const
+bool pragma::asset::AssetManager::ExportAsset(pragma::Game &game, Type type, ufile::IFile &f, const IAssetWrapper &assetWrapper, std::string *optOutErr) const
 {
 	for(auto &exporter : m_exporters[umath::to_integral(type)]) {
 		std::string err;

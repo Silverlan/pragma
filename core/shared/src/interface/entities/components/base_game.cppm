@@ -20,6 +20,6 @@ export namespace pragma {
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 	  protected:
-		BaseGameComponent(BaseEntity &ent);
+		BaseGameComponent(pragma::ecs::BaseEntity &ent);
 	};
 };

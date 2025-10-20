@@ -52,7 +52,7 @@ void Lua::HandleLuaError(lua_State *l, Lua::StatusCode s)
 
 std::string Lua::GetErrorMessagePrefix(lua_State *l)
 {
-	auto *state = Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	if(state != nullptr)
 		return state->GetMessagePrefix();
 	return "";

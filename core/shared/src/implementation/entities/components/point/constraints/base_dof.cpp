@@ -16,7 +16,7 @@ void BasePointConstraintDoFComponent::Initialize()
 {
 	BasePointConstraintComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "limit_lin_lower", false))
 			m_kvLimLinLower = uvec::create(kvData.value);
@@ -32,7 +32,7 @@ void BasePointConstraintDoFComponent::Initialize()
 	});
 }
 
-void BasePointConstraintDoFComponent::InitializeConstraint(BaseEntity *src, BaseEntity *tgt)
+void BasePointConstraintDoFComponent::InitializeConstraint(pragma::ecs::BaseEntity *src, pragma::ecs::BaseEntity *tgt)
 {
 	auto pPhysComponentTgt = tgt->GetPhysicsComponent();
 	auto *physTgt = pPhysComponentTgt ? dynamic_cast<RigidPhysObj *>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;

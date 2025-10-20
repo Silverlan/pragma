@@ -11,12 +11,12 @@ export module pragma.shared:scripting.lua.classes.net_packet;
 export import pragma.util;
 
 export {
-	class BaseEntity;
+	namespace pragma::ecs {class BaseEntity;}
 	class ALSound;
 	namespace Lua {
 		namespace NetPacket {
 			DLLNETWORK void register_class(luabind::class_<::NetPacket> &classDef);
-			DLLNETWORK void WriteEntity(lua_State *l, ::NetPacket &packet, BaseEntity *hEnt);
+			DLLNETWORK void WriteEntity(lua_State *l, ::NetPacket &packet, pragma::ecs::BaseEntity *hEnt);
 			DLLNETWORK void WriteEntity(lua_State *l, ::NetPacket &packet);
 			DLLNETWORK void ReadEntity(lua_State *l, ::NetPacket &packet);
 			DLLNETWORK void WriteALSound(lua_State *l, ::NetPacket &packet, std::shared_ptr<ALSound> snd);

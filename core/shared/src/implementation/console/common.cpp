@@ -8,6 +8,6 @@ module pragma.shared;
 
 import :console.common;
 
-extern Engine *engine;
-ConVarHandle GetConVar(std::string scmd) { return Engine::Get()->GetConVarHandle(scmd); }
-ConVarHandle GetEngineConVar(std::string scmd) { return Engine::Get()->GetConVarHandle(scmd); }
+extern pragma::Engine *engine;
+ConVarHandle GetConVar(std::string scmd) { return pragma::Engine::Get()->GetConVarHandle(scmd); }
+ConVarHandle GetEngineConVar(std::string scmd) { return pragma::Engine::Get()->GetConVarHandle(scmd); }

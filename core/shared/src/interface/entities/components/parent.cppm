@@ -17,7 +17,7 @@ export namespace pragma {
 		static ComponentEventId EVENT_ON_CHILD_REMOVED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		ParentComponent(BaseEntity &ent);
+		ParentComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *lua) override;
 		virtual void OnRemove() override;

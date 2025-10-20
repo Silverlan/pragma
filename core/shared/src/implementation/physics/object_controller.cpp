@@ -44,13 +44,13 @@ bool ControllerPhysObj::IsGroundWalkable() const
 	auto bGroundWalkable = (angle <= umath::deg_to_rad(slopeLimit));
 	return bGroundWalkable;
 }
-BaseEntity *ControllerPhysObj::GetGroundEntity() const
+pragma::ecs::BaseEntity *ControllerPhysObj::GetGroundEntity() const
 {
 	auto *o = GetGroundPhysObject();
 	auto *pOwner = (o != nullptr) ? o->GetOwner() : nullptr;
 	return (pOwner != nullptr) ? &pOwner->GetEntity() : nullptr;
 }
-PhysObj *ControllerPhysObj::GetGroundPhysObject() const
+pragma::physics::PhysObj *ControllerPhysObj::GetGroundPhysObject() const
 {
 	auto *o = GetGroundPhysCollisionObject();
 	return o ? o->GetPhysObj() : nullptr;
@@ -66,7 +66,7 @@ void ControllerPhysObj::PostSimulate()
 	if(owner == nullptr)
 		return;
 	NetworkState *state = owner->GetEntity().GetNetworkState();
-	Game *game = state->GetGameState();
+	pragma::Game *game = state->GetGameState();
 	//PhysTransform t = m_ghostObject->GetWorldTransform();
 	//auto shape = m_ghostObject->GetCollisionShape();
 
@@ -148,7 +148,7 @@ void ControllerPhysObj::SetOrientation(const Quat &rot)
 {
 	//PhysObj::SetOrientation(rot);
 }
-pragma::BaseEntityComponent *ControllerPhysObj::GetOwner() { return PhysObj::GetOwner(); }
+pragma::BaseEntityComponent *ControllerPhysObj::GetOwner() { return pragma::physics::PhysObj::GetOwner(); }
 umath::Degree ControllerPhysObj::GetSlopeLimit() const
 {
 	if(m_controller == nullptr)
@@ -237,7 +237,7 @@ void ControllerPhysObj::UpdateVelocity()
 	if(m_owner.expired())
 		return;
 	NetworkState *state = m_owner->GetEntity().GetNetworkState();
-	Game *game = state->GetGameState();
+	pragma::Game *game = state->GetGameState();
 	double delta = game->DeltaTickTime();
 	float scale;
 	if(delta == 0)
@@ -266,7 +266,7 @@ bool BoxControllerPhysObj::Initialize(const Vector3 &halfExtents, unsigned int s
 	startTransform.SetIdentity();
 	startTransform.SetOrigin(pos);
 	NetworkState *state = m_networkState;
-	Game *game = state->GetGameState();
+	pragma::Game *game = state->GetGameState();
 	auto *physEnv = game->GetPhysicsEnvironment();
 	if(physEnv == nullptr)
 		return false;
@@ -284,7 +284,7 @@ bool BoxControllerPhysObj::Initialize(const Vector3 &halfExtents, unsigned int s
 
 Vector3 &BoxControllerPhysObj::GetHalfExtents() { return m_halfExtents; }
 
-ControllerPhysObj::ControllerPhysObj(pragma::BaseEntityComponent *owner) : PhysObj(owner) {}
+ControllerPhysObj::ControllerPhysObj(pragma::BaseEntityComponent *owner) : pragma::physics::PhysObj(owner) {}
 float ControllerPhysObj::GetStepHeight() const { return m_stepHeight; }
 void ControllerPhysObj::SetStepOffset(float) {}
 Vector3 ControllerPhysObj::GetDimensions() const
@@ -302,7 +302,7 @@ void ControllerPhysObj::SetDimensions(const Vector3 &dimensions)
 void ControllerPhysObj::SetPosition(const Vector3 &pos)
 {
 	if(m_controller == nullptr) {
-		PhysObj::SetPosition(pos);
+		pragma::physics::PhysObj::SetPosition(pos);
 		return;
 	}
 	auto posCur = m_controller->GetFootPos();
@@ -311,7 +311,7 @@ void ControllerPhysObj::SetPosition(const Vector3 &pos)
 Vector3 ControllerPhysObj::GetPosition() const
 {
 	if(m_controller == nullptr)
-		return PhysObj::GetPosition();
+		return pragma::physics::PhysObj::GetPosition();
 	return m_controller->GetFootPos();
 }
 unsigned int ControllerPhysObj::Move(const Vector3 &, float, float) { return 0; }
@@ -337,7 +337,7 @@ bool CapsuleControllerPhysObj::Initialize(unsigned int width, unsigned int heigh
 	startTransform.SetOrigin(pos);
 
 	NetworkState *state = m_networkState;
-	Game *game = state->GetGameState();
+	pragma::Game *game = state->GetGameState();
 	auto *physEnv = game->GetPhysicsEnvironment();
 	if(physEnv == nullptr)
 		return false;

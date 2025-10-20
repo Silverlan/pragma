@@ -6,6 +6,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <memory>
 
+#include <iostream>
+
 export module pragma.shared:entities.components.props.base;
 
 export import :entities.components.base;
@@ -17,18 +19,18 @@ export namespace pragma {
 		enum class SpawnFlags : uint32_t { DisableCollisions = 2'048, Static = DisableCollisions << 1 };
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
-		PHYSICSTYPE UpdatePhysicsType(BaseEntity *ent);
-		void InitializePhysics(PHYSICSTYPE physType);
-		void Setup(PHYSICSTYPE physType, MOVETYPE mvType);
+		pragma::physics::PHYSICSTYPE UpdatePhysicsType(pragma::ecs::BaseEntity *ent);
+		void InitializePhysics(pragma::physics::PHYSICSTYPE physType);
+		void Setup(pragma::physics::PHYSICSTYPE physType, pragma::physics::MOVETYPE mvType);
 		virtual void OnEntitySpawn() override;
 	  protected:
 		void InitializePhysics();
 		Vector3 m_kvScale {1.f, 1.f, 1.f};
 		float m_kvMass = std::numeric_limits<float>::quiet_NaN();
-		BasePropComponent(BaseEntity &ent);
+		BasePropComponent(pragma::ecs::BaseEntity &ent);
 		bool SetKeyValue(std::string key, std::string val);
 
-		PHYSICSTYPE m_physicsType = PHYSICSTYPE::NONE;
-		MOVETYPE m_moveType = MOVETYPE::NONE;
+		pragma::physics::PHYSICSTYPE m_physicsType = pragma::physics::PHYSICSTYPE::NONE;
+		pragma::physics::MOVETYPE m_moveType = pragma::physics::MOVETYPE::NONE;
 	};
 };

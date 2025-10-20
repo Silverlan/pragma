@@ -60,7 +60,7 @@ void TraceResult::InitializeMeshes()
 	}
 }
 
-void TraceResult::GetMeshes(ModelMesh **outMesh, ModelSubMesh **outSubMesh)
+void TraceResult::GetMeshes(ModelMesh **outMesh, pragma::ModelSubMesh **outSubMesh)
 {
 	InitializeMeshes();
 	*outMesh = meshInfo->mesh;
@@ -74,7 +74,7 @@ msys::Material *TraceResult::GetMaterial()
 	if(hMdl == nullptr)
 		return nullptr;
 	ModelMesh *mesh = nullptr;
-	ModelSubMesh *subMesh = nullptr;
+	pragma::ModelSubMesh *subMesh = nullptr;
 	GetMeshes(&mesh, &subMesh);
 	if(mesh == nullptr || subMesh == nullptr)
 		return nullptr;
@@ -92,7 +92,7 @@ bool TraceResult::GetMaterial(std::string &mat)
 	if(hMdl == nullptr)
 		return false;
 	ModelMesh *mesh = nullptr;
-	ModelSubMesh *subMesh = nullptr;
+	pragma::ModelSubMesh *subMesh = nullptr;
 	GetMeshes(&mesh, &subMesh);
 	if(mesh == nullptr || subMesh == nullptr)
 		return false;
@@ -160,9 +160,9 @@ pragma::physics::RayCastFlags TraceData::GetFlags() const { return m_flags; }
 void TraceData::SetCollisionFilterMask(pragma::physics::CollisionMask mask) { m_filterMask = mask; }
 void TraceData::SetCollisionFilterGroup(pragma::physics::CollisionMask group) { m_filterGroup = group; }
 void TraceData::SetFilter(const std::shared_ptr<pragma::physics::IRayCastFilterCallback> &filter) { m_filter = filter; }
-void TraceData::SetFilter(BaseEntity &ent) { SetFilter(std::make_unique<::pragma::physics::EntityRayCastFilterCallback>(ent)); }
+void TraceData::SetFilter(pragma::ecs::BaseEntity &ent) { SetFilter(std::make_unique<::pragma::physics::EntityRayCastFilterCallback>(ent)); }
 void TraceData::SetFilter(std::vector<EntityHandle> &&ents) { SetFilter(std::make_unique<::pragma::physics::MultiEntityRayCastFilterCallback>(std::move(ents))); }
-void TraceData::SetFilter(PhysObj &phys) { SetFilter(std::make_unique<::pragma::physics::PhysObjRayCastFilterCallback>(phys)); }
+void TraceData::SetFilter(pragma::physics::PhysObj &phys) { SetFilter(std::make_unique<::pragma::physics::PhysObjRayCastFilterCallback>(phys)); }
 void TraceData::SetFilter(pragma::physics::ICollisionObject &colObj) { SetFilter(std::make_unique<::pragma::physics::CollisionObjRayCastFilterCallback>(colObj)); }
 void TraceData::SetFilter(const std::function<RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> &preFilter, const std::function<RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> &postFilter)
 {

@@ -15,8 +15,8 @@ export module pragma.shared:ai.nav_system;
 export import pragma.udm;
 
 export {
-	class BaseEntity;
-	class Game;
+	namespace pragma::ecs {class BaseEntity;}
+	namespace pragma {class Game;}
 	class RcNavMesh;
 	class DLLNETWORK RcPathResult {
 	public:
@@ -84,33 +84,33 @@ export {
 				float sampleDetailMaxError = 1.f;
 				PartitionType partitionType = PartitionType::Watershed;
 			};
-			DLLNETWORK std::shared_ptr<RcNavMesh> generate(Game &game, const Config &config, std::string *err = nullptr);
-			DLLNETWORK std::shared_ptr<RcNavMesh> generate(Game &game, const Config &config, const BaseEntity &ent, std::string *err = nullptr);
-			DLLNETWORK std::shared_ptr<RcNavMesh> generate(Game &game, const Config &config, const std::vector<Vector3> &verts, const std::vector<int32_t> &indices, const std::vector<ConvexArea> *areas = nullptr, std::string *err = nullptr);
-			DLLNETWORK std::shared_ptr<RcNavMesh> load(Game &game, const std::string &fname, Config &outConfig);
+			DLLNETWORK std::shared_ptr<RcNavMesh> generate(pragma::Game &game, const Config &config, std::string *err = nullptr);
+			DLLNETWORK std::shared_ptr<RcNavMesh> generate(pragma::Game &game, const Config &config, const pragma::ecs::BaseEntity &ent, std::string *err = nullptr);
+			DLLNETWORK std::shared_ptr<RcNavMesh> generate(pragma::Game &game, const Config &config, const std::vector<Vector3> &verts, const std::vector<int32_t> &indices, const std::vector<ConvexArea> *areas = nullptr, std::string *err = nullptr);
+			DLLNETWORK std::shared_ptr<RcNavMesh> load(pragma::Game &game, const std::string &fname, Config &outConfig);
 			class DLLNETWORK Mesh {
 			public:
 				template<class TMesh>
 				static std::shared_ptr<TMesh> Create(const std::shared_ptr<RcNavMesh> &rcMesh, const Config &config);
 				template<class TMesh>
-				static std::shared_ptr<TMesh> Load(Game &game, const std::string &fname);
+				static std::shared_ptr<TMesh> Load(pragma::Game &game, const std::string &fname);
 				static std::shared_ptr<Mesh> Create(const std::shared_ptr<RcNavMesh> &rcMesh, const Config &config);
-				static std::shared_ptr<Mesh> Load(Game &game, const std::string &fname);
+				static std::shared_ptr<Mesh> Load(pragma::Game &game, const std::string &fname);
 
 				std::shared_ptr<RcPathResult> FindPath(const Vector3 &start, const Vector3 &end);
 				bool RayCast(const Vector3 &start, const Vector3 &end, Vector3 &hit);
-				bool Save(Game &game, udm::AssetDataArg outData, std::string &outErr);
-				bool Save(Game &game, const std::string &fileName, std::string &outErr);
+				bool Save(pragma::Game &game, udm::AssetDataArg outData, std::string &outErr);
+				bool Save(pragma::Game &game, const std::string &fileName, std::string &outErr);
 
 				const Config &GetConfig() const;
 
 				const std::shared_ptr<RcNavMesh> &GetRcNavMesh() const;
 				std::shared_ptr<RcNavMesh> &GetRcNavMesh();
 			protected:
-				friend DLLNETWORK std::shared_ptr<RcNavMesh> load(Game &game, const std::string &fname, Config &outConfig);
+				friend DLLNETWORK std::shared_ptr<RcNavMesh> load(pragma::Game &game, const std::string &fname, Config &outConfig);
 				Mesh(const std::shared_ptr<RcNavMesh> &rcMesh, const Config &config);
 				Mesh() = default;
-				bool LoadFromAssetData(Game &game, const udm::AssetData &data, std::string &outErr);
+				bool LoadFromAssetData(pragma::Game &game, const udm::AssetData &data, std::string &outErr);
 				bool FindNearestPoly(const Vector3 &pos, dtPolyRef &ref);
 			private:
 				std::shared_ptr<RcNavMesh> m_rcMesh;
@@ -130,7 +130,7 @@ export {
 		return std::shared_ptr<TMesh>(new TMesh(rcMesh, config));
 	}
 	template<class TMesh>
-	std::shared_ptr<TMesh> pragma::nav::Mesh::Load(Game &game, const std::string &fname)
+	std::shared_ptr<TMesh> pragma::nav::Mesh::Load(pragma::Game &game, const std::string &fname)
 	{
 		Config config;
 		auto rcMesh = load(game, fname, config);

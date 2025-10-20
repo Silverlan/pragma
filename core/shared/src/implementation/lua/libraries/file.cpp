@@ -409,22 +409,22 @@ bool Lua::file::validate_write_operation(lua_State *l, std::string &path)
 	return true;
 }
 
-std::pair<std::shared_ptr<LFile>, std::optional<std::string>> Lua::file::Open(lua_State *l, std::string path, FileOpenMode openMode, fsys::SearchFlags searchFlags)
+std::pair<std::shared_ptr<LFile>, std::optional<std::string>> Lua::file::Open(lua_State *l, std::string path, pragma::FileOpenMode openMode, fsys::SearchFlags searchFlags)
 {
 	std::string mode {};
-	if((openMode & FileOpenMode::Read) != FileOpenMode::None)
+	if((openMode & pragma::FileOpenMode::Read) != pragma::FileOpenMode::None)
 		mode += "r";
-	else if((openMode & FileOpenMode::Write) != FileOpenMode::None)
+	else if((openMode & pragma::FileOpenMode::Write) != pragma::FileOpenMode::None)
 		mode += "w";
-	else if((openMode & FileOpenMode::Append) != FileOpenMode::None)
+	else if((openMode & pragma::FileOpenMode::Append) != pragma::FileOpenMode::None)
 		mode += "a";
 	else
 		return std::pair<std::shared_ptr<LFile>, std::optional<std::string>> {nullptr, "Invalid file open mode"};
-	if((openMode & FileOpenMode::Binary) != FileOpenMode::None)
+	if((openMode & pragma::FileOpenMode::Binary) != pragma::FileOpenMode::None)
 		mode += "b";
-	if((openMode & FileOpenMode::Update) != FileOpenMode::None)
+	if((openMode & pragma::FileOpenMode::Update) != pragma::FileOpenMode::None)
 		mode += "+";
-	if((openMode & (FileOpenMode::Write | FileOpenMode::Append)) != FileOpenMode::None) // Write mode
+	if((openMode & (pragma::FileOpenMode::Write | pragma::FileOpenMode::Append)) != pragma::FileOpenMode::None) // Write mode
 	{
 		if(validate_write_operation(l, path) == false)
 			return std::pair<std::shared_ptr<LFile>, std::optional<std::string>> {nullptr, {}};
@@ -472,7 +472,7 @@ bool Lua::file::DeleteDir(lua_State *l, std::string ppath)
 
 std::shared_ptr<LFile> Lua::file::open_external_asset_file(lua_State *l, const std::string &path, const std::optional<std::string> &game)
 {
-	auto dllHandle = ::util::initialize_external_archive_manager(Engine::Get()->GetNetworkState(l));
+	auto dllHandle = ::util::initialize_external_archive_manager(pragma::Engine::Get()->GetNetworkState(l));
 	if(dllHandle == nullptr)
 		return nullptr;
 	auto *fOpenFile = dllHandle->FindSymbolAddress<void (*)(const std::string &, VFilePtr &, const std::optional<std::string> &)>("open_archive_file");
@@ -491,7 +491,7 @@ void Lua::file::find_external_game_resource_files(lua_State *l, const std::strin
 {
 	outFiles = luabind::newtable(l);
 	outDirs = luabind::newtable(l);
-	auto dllHandle = ::util::initialize_external_archive_manager(Engine::Get()->GetNetworkState(l));
+	auto dllHandle = ::util::initialize_external_archive_manager(pragma::Engine::Get()->GetNetworkState(l));
 	if(dllHandle == nullptr)
 		return;
 	auto *fFindFiles = dllHandle->FindSymbolAddress<void (*)(const std::string &, std::vector<std::string> *, std::vector<std::string> *)>("find_files");

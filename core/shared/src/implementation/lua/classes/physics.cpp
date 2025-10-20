@@ -27,9 +27,9 @@ import :scripting.lua.classes.physics;
 
 namespace Lua {
 	namespace physenv {
-		static Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> raycast(lua_State *l, Game &game, const ::TraceData &traceData);
-		static Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> sweep(lua_State *l, Game &game, const ::TraceData &traceData);
-		static Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> overlap(lua_State *l, Game &game, const ::TraceData &traceData);
+		static Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> raycast(lua_State *l, pragma::Game &game, const ::TraceData &traceData);
+		static Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> sweep(lua_State *l, pragma::Game &game, const ::TraceData &traceData);
+		static Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> overlap(lua_State *l, pragma::Game &game, const ::TraceData &traceData);
 		static ::util::TSharedHandle<pragma::physics::IRigidBody> create_rigid_body(pragma::physics::IEnvironment *env, pragma::physics::IShape &shape, bool dynamic = true);
 		static std::shared_ptr<pragma::physics::IConvexHullShape> create_convex_hull_shape(pragma::physics::IEnvironment *env, pragma::physics::IMaterial &material);
 
@@ -53,13 +53,13 @@ namespace Lua {
 		static ::util::TSharedHandle<pragma::physics::IDoFConstraint> create_DoF_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB, const Quat &rotB);
 		static ::util::TSharedHandle<pragma::physics::IDoFSpringConstraint> create_dof_spring_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB,
 		  const Quat &rotB);
-		static SurfaceMaterial *create_surface_material(Game &game, const std::string &name, float friction, float restitution);
+		static SurfaceMaterial *create_surface_material(pragma::Game &game, const std::string &name, float friction, float restitution);
 
 		static ::util::TSharedHandle<pragma::physics::IController> create_box_controller(pragma::physics::IEnvironment *env, const Vector3 &halfExtents, float stepHeight, float slopeLimit = 45.f, const umath::Transform &startTransform = {});
 		static ::util::TSharedHandle<pragma::physics::IController> create_capsule_controller(pragma::physics::IEnvironment *env, float halfWidth, float halfHeight, float stepHeight, float slopeLimit = 45.f, const umath::Transform &startTransform = {});
 
 		static std::shared_ptr<pragma::physics::IMaterial> create_material(pragma::physics::IEnvironment *env, float staticFriction, float dynamicFriction, float restitution);
-		static luabind::tableT<SurfaceMaterial> get_surface_materials(lua_State *l, Game &game);
+		static luabind::tableT<SurfaceMaterial> get_surface_materials(lua_State *l, pragma::Game &game);
 
 		static void create_character_controller(lua_State *);
 
@@ -116,7 +116,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 			      return nullptr;
 		      return env->CreateVehicle(vhcCreateInfo);
 	      })),
-	  luabind::def("get_surface_material", static_cast<SurfaceMaterial *(Game::*)(const std::string &)>(&Game::GetSurfaceMaterial)), luabind::def("get_surface_material", static_cast<SurfaceMaterial *(Game::*)(uint32_t)>(&Game::GetSurfaceMaterial)),
+	  luabind::def("get_surface_material", static_cast<SurfaceMaterial *(pragma::Game::*)(const std::string &)>(&pragma::Game::GetSurfaceMaterial)), luabind::def("get_surface_material", static_cast<SurfaceMaterial *(pragma::Game::*)(uint32_t)>(&pragma::Game::GetSurfaceMaterial)),
 	  luabind::def("get_surface_materials", get_surface_materials), luabind::def("get_generic_material", static_cast<pragma::physics::IMaterial *(*)(pragma::physics::IEnvironment *)>([](pragma::physics::IEnvironment *env) -> pragma::physics::IMaterial * {
 		  if(env == nullptr)
 			  return nullptr;
@@ -319,7 +319,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 
 		  ss << "[HitEnt:";
 		  if(res.entity.IsValid())
-			  const_cast<BaseEntity *>(res.entity.get())->print(ss);
+			  const_cast<pragma::ecs::BaseEntity *>(res.entity.get())->print(ss);
 		  else
 			  ss << "NULL";
 		  ss << "]";
@@ -354,15 +354,15 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefRayCastResult.property("colObj", static_cast<pragma::physics::ICollisionObject *(*)(lua_State *, TraceResult &)>([](lua_State *l, TraceResult &tr) -> pragma::physics::ICollisionObject * { return tr.collisionObj.Get(); }));
 	classDefRayCastResult.property("mesh", static_cast<std::shared_ptr<::ModelMesh> (*)(lua_State *, TraceResult &)>([](lua_State *l, TraceResult &tr) -> std::shared_ptr<::ModelMesh> {
 		::ModelMesh *mesh = nullptr;
-		::ModelSubMesh *subMesh = nullptr;
+		pragma::ModelSubMesh *subMesh = nullptr;
 		tr.GetMeshes(&mesh, &subMesh);
 		if(mesh == nullptr)
 			return nullptr;
 		return mesh->shared_from_this();
 	}));
-	classDefRayCastResult.property("subMesh", static_cast<std::shared_ptr<::ModelSubMesh> (*)(lua_State *, TraceResult &)>([](lua_State *l, TraceResult &tr) -> std::shared_ptr<::ModelSubMesh> {
+	classDefRayCastResult.property("subMesh", static_cast<std::shared_ptr<pragma::ModelSubMesh> (*)(lua_State *, TraceResult &)>([](lua_State *l, TraceResult &tr) -> std::shared_ptr<pragma::ModelSubMesh> {
 		::ModelMesh *mesh = nullptr;
-		::ModelSubMesh *subMesh = nullptr;
+		pragma::ModelSubMesh *subMesh = nullptr;
 		tr.GetMeshes(&mesh, &subMesh);
 		if(subMesh == nullptr)
 			return nullptr;
@@ -476,7 +476,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classTreeIkTree.scope[luabind::def("Create", static_cast<std::shared_ptr<Tree> (*)(lua_State *)>([](lua_State *l) { return std::make_shared<Tree>(); }))];
 #ifdef ENABLE_DEPRECATED_PHYSICS
 	classTreeIkTree.def("Draw", static_cast<void (*)(lua_State *, Tree &)>([](lua_State *l, Tree &tree) {
-		auto *game = Engine::Get()->GetNetworkState(l)->GetGameState();
+		auto *game = pragma::Engine::Get()->GetNetworkState(l)->GetGameState();
 		auto fGetLocalTransform = [](const Node *node, btTransform &act) {
 			btVector3 axis = btVector3(node->v.x, node->v.y, node->v.z);
 			btQuaternion rot(0, 0, 0, 1);
@@ -764,7 +764,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	Lua::PhysContact::register_class(l, physMod);
 	Lua::PhysShape::register_class(l, physMod);
 }
-Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> Lua::physenv::raycast(lua_State *l, Game &game, const ::TraceData &traceData)
+Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> Lua::physenv::raycast(lua_State *l, pragma::Game &game, const ::TraceData &traceData)
 {
 	std::vector<TraceResult> res;
 	auto r = game.RayCast(traceData, &res);
@@ -777,7 +777,7 @@ Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> Lua::physenv::raycast(
 		table[i + 1] = res[i];
 	return table;
 }
-Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> Lua::physenv::sweep(lua_State *l, Game &game, const ::TraceData &traceData)
+Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> Lua::physenv::sweep(lua_State *l, pragma::Game &game, const ::TraceData &traceData)
 {
 	std::vector<TraceResult> res;
 	auto r = game.Sweep(traceData, &res);
@@ -790,7 +790,7 @@ Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> Lua::physenv::sweep(lu
 		table[i + 1] = res[i];
 	return table;
 }
-Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> Lua::physenv::overlap(lua_State *l, Game &game, const ::TraceData &traceData)
+Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> Lua::physenv::overlap(lua_State *l, pragma::Game &game, const ::TraceData &traceData)
 {
 	std::vector<TraceResult> res;
 	auto r = game.Overlap(traceData, &res);
@@ -968,7 +968,7 @@ std::shared_ptr<pragma::physics::IShape> Lua::physenv::create_heightfield_terrai
 	return env->CreateDoFSpringConstraint(bodyA, pivotA, rotA, bodyB, pivotB, rotB);
 }
 
-SurfaceMaterial *Lua::physenv::create_surface_material(Game &game, const std::string &name, float friction, float restitution) { return &game.CreateSurfaceMaterial(name, friction, restitution); }
+SurfaceMaterial *Lua::physenv::create_surface_material(pragma::Game &game, const std::string &name, float friction, float restitution) { return &game.CreateSurfaceMaterial(name, friction, restitution); }
 
 ::util::TSharedHandle<pragma::physics::IController> Lua::physenv::create_box_controller(pragma::physics::IEnvironment *env, const Vector3 &halfExtents, float stepHeight, float slopeLimit, const umath::Transform &startTransform)
 {
@@ -989,7 +989,7 @@ std::shared_ptr<pragma::physics::IMaterial> Lua::physenv::create_material(pragma
 		return nullptr;
 	return env->CreateMaterial(staticFriction, dynamicFriction, restitution);
 }
-luabind::tableT<SurfaceMaterial> Lua::physenv::get_surface_materials(lua_State *l, Game &game)
+luabind::tableT<SurfaceMaterial> Lua::physenv::get_surface_materials(lua_State *l, pragma::Game &game)
 {
 	auto *mats = game.GetSurfaceMaterials();
 	auto t = luabind::newtable(l);

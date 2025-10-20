@@ -24,12 +24,12 @@ void BaseRadiusComponent::RegisterMembers(pragma::EntityComponentManager &compon
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseRadiusComponent::BaseRadiusComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_radius(util::FloatProperty::Create(0.f)) {}
+BaseRadiusComponent::BaseRadiusComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_radius(util::FloatProperty::Create(0.f)) {}
 void BaseRadiusComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "radius", false))
 			SetRadius(util::to_float(kvData.value));

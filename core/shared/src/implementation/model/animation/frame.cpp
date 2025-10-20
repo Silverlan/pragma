@@ -341,7 +341,7 @@ bool Frame::GetBoneMatrix(unsigned int boneID, Mat4 *mat)
 	return true;
 }
 bool Frame::HasScaleTransforms() const { return !m_scales.empty(); }
-std::pair<Vector3, Vector3> Frame::CalcRenderBounds(const pragma::animation::Animation &anim, const Model &mdl) const
+std::pair<Vector3, Vector3> Frame::CalcRenderBounds(const pragma::animation::Animation &anim, const pragma::Model &mdl) const
 {
 	auto *t = const_cast<Frame *>(this);
 	auto transforms = m_bones;

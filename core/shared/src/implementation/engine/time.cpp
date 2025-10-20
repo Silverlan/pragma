@@ -12,12 +12,12 @@ module pragma.shared;
 
 import :engine;
 
-std::string Engine::GetDate(const std::string &format) { return util::get_date_time(format); }
+std::string pragma::Engine::GetDate(const std::string &format) { return util::get_date_time(format); }
 
-uint64_t Engine::GetTickCount() const { return CUInt64(m_ctTick.GetTime()); }
-double Engine::GetTickTime() const { return CDouble(m_ctTick()); }
-UInt32 Engine::GetTickRate() const { return m_tickRate; }
-void Engine::SetTickRate(UInt32 tickRate)
+uint64_t pragma::Engine::GetTickCount() const { return CUInt64(m_ctTick.GetTime()); }
+double pragma::Engine::GetTickTime() const { return CDouble(m_ctTick()); }
+UInt32 pragma::Engine::GetTickRate() const { return m_tickRate; }
+void pragma::Engine::SetTickRate(UInt32 tickRate)
 {
 	assert(tickRate != 0);
 	if(tickRate == 0) {
@@ -26,6 +26,6 @@ void Engine::SetTickRate(UInt32 tickRate)
 	}
 	m_tickRate = tickRate;
 }
-bool Engine::IsRunning() { return umath::is_flag_set(m_stateFlags, StateFlags::Running); }
-bool Engine::IsGameActive() { return GetServerNetworkState()->IsGameActive(); }
-bool Engine::IsServerOnly() { return true; }
+bool pragma::Engine::IsRunning() { return umath::is_flag_set(m_stateFlags, StateFlags::Running); }
+bool pragma::Engine::IsGameActive() { return GetServerNetworkState()->IsGameActive(); }
+bool pragma::Engine::IsServerOnly() { return true; }

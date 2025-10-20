@@ -16,11 +16,10 @@ import :ai.nav_system;
 export import :model.animation.enums;
 import :entities.components.movement;
 import :physics.raycast_filter;
+export import :types;
 
 export {
-	class Model;
 	namespace pragma {
-		class BaseAIComponent;
 		namespace ai {
 			namespace navigation {
 				struct PathInfo {
@@ -54,14 +53,14 @@ export {
 			enum class MoveResult : uint32_t { TargetUnreachable = 0, TargetReached, WaitingForPath, MovingToTarget };
 			enum class SnapshotFlags : uint8_t { None = 0u, Moving = 1u, MoveSpeed = Moving << 1, TurnSpeed = MoveSpeed << 1u, FaceTarget = TurnSpeed << 1u };
 			static const char *MoveResultToString(MoveResult result);
-			static void ReloadNavThread(Game &game);
+			static void ReloadNavThread(pragma::Game &game);
 			static void ReleaseNavThread();
 			struct DLLNETWORK MoveInfo {
 				MoveInfo() {}
-				MoveInfo(Activity act);
-				MoveInfo(Activity act, bool bMoveOnPath);
-				MoveInfo(Activity act, bool bMoveOnPath, const Vector3 &faceTarget, float moveSpeed, float turnSpeed);
-				Activity activity = Activity::Run;
+				MoveInfo(pragma::Activity act);
+				MoveInfo(pragma::Activity act, bool bMoveOnPath);
+				MoveInfo(pragma::Activity act, bool bMoveOnPath, const Vector3 &faceTarget, float moveSpeed, float turnSpeed);
+				pragma::Activity activity = pragma::Activity::Run;
 				bool moveOnPath = true;
 				Vector3 faceTarget = {std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN()};
 				float moveSpeed = std::numeric_limits<float>::quiet_NaN();
@@ -75,7 +74,7 @@ export {
 			bool TurnStep(const Vector3 &target, const float *turnSpeed = nullptr);
 			void ClearLookTarget();
 			void SetLookTarget(const Vector3 &pos, float t = std::numeric_limits<float>::max());
-			void SetLookTarget(const BaseEntity &ent, float t = std::numeric_limits<float>::max());
+			void SetLookTarget(const pragma::ecs::BaseEntity &ent, float t = std::numeric_limits<float>::max());
 			Vector3 GetLookTarget() const;
 
 			void SetMoveSpeed(int32_t animId, float speed);
@@ -91,20 +90,20 @@ export {
 			virtual void OnPathChanged();
 			virtual void OnPathDestinationReached();
 			bool HasReachedDestination() const;
-			Activity GetMoveActivity() const;
+			pragma::Activity GetMoveActivity() const;
 			void StopMoving();
 			Vector3 GetUpDirection() const;
 			bool CanMove() const;
 
 			float GetMaxSpeed(bool bUseAnimSpeedIfAvailable = true) const;
 		protected:
-			virtual void OnModelChanged(const std::shared_ptr<Model> &model);
+			virtual void OnModelChanged(const std::shared_ptr<pragma::Model> &model);
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 			static std::atomic<uint32_t> s_npcCount;
 			static std::shared_ptr<ai::navigation::NavThread> s_navThread;
 			//
 		protected:
-			BaseAIComponent(BaseEntity &ent);
+			BaseAIComponent(pragma::ecs::BaseEntity &ent);
 			virtual ~BaseAIComponent() override;
 			void UpdateMovementProperties();
 			virtual void UpdateMovementProperties(MovementComponent &movementC);
@@ -128,7 +127,7 @@ export {
 				std::unique_ptr<float> moveSpeed = nullptr;
 				std::unique_ptr<float> turnSpeed = nullptr;
 				bool moveOnPath = false;
-				Activity moveActivity = Activity::Run;
+				pragma::Activity moveActivity = pragma::Activity::Run;
 				std::unique_ptr<Vector3> faceTarget = nullptr;
 				float destinationTolerance = 10.f;
 			} m_moveInfo;
@@ -179,8 +178,12 @@ export {
 			float CalcAirMovementModifier() const;
 			float CalcMovementAcceleration() const;
 			Vector3 CalcMovementDirection() const;
-			virtual bool IsObstruction(const BaseEntity &ent) const;
+			virtual bool IsObstruction(const pragma::ecs::BaseEntity &ent) const;
 		};
+        using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseAIComponent::SnapshotFlags)
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::BaseAIComponent::SnapshotFlags> : std::true_type {};
+    }
 };

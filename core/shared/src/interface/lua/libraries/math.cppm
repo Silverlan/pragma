@@ -4,10 +4,13 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/lua/core.hpp"
+#include <cinttypes>
 
 export module pragma.shared:scripting.lua.libraries.math;
 
 export import :math.easing;
+export import :scripting.lua.api;
 export import pragma.math;
 
 export namespace Lua {

@@ -14,7 +14,7 @@ export namespace pragma {
 	class ConstraintSpaceComponent;
 	class DLLNETWORK ConstraintCopyRotationComponent final : public BaseEntityComponent {
 	  public:
-		ConstraintCopyRotationComponent(BaseEntity &ent);
+		ConstraintCopyRotationComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		virtual void InitializeLuaObject(lua_State *lua) override;

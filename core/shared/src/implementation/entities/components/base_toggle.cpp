@@ -29,12 +29,12 @@ void BaseToggleComponent::RegisterMembers(pragma::EntityComponentManager &compon
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseToggleComponent::BaseToggleComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_bTurnedOn(util::BoolProperty::Create(false)) {}
+BaseToggleComponent::BaseToggleComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_bTurnedOn(util::BoolProperty::Create(false)) {}
 void BaseToggleComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "startdisabled", false))
 			m_bStartDisabled = util::to_boolean(kvData.value);
@@ -81,7 +81,7 @@ void BaseToggleComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t versi
 	SetTurnedOn(isTurnedOn);
 }
 
-bool BaseToggleComponent::ToggleInput(std::string input, BaseEntity *, BaseEntity *, std::string data)
+bool BaseToggleComponent::ToggleInput(std::string input, pragma::ecs::BaseEntity *, pragma::ecs::BaseEntity *, std::string data)
 {
 	if(input == "turnon")
 		TurnOn();

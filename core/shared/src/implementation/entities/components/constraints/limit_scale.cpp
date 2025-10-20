@@ -123,7 +123,7 @@ void ConstraintLimitScaleComponent::RegisterMembers(pragma::EntityComponentManag
 	}
 }
 
-ConstraintLimitScaleComponent::ConstraintLimitScaleComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+ConstraintLimitScaleComponent::ConstraintLimitScaleComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintLimitScaleComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

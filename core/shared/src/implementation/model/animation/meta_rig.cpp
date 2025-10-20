@@ -156,7 +156,7 @@ bool pragma::animation::MetaRig::Save(const Skeleton &skeleton, udm::AssetDataAr
 	return true;
 }
 
-void pragma::animation::MetaRig::DebugPrint(const Model &mdl)
+void pragma::animation::MetaRig::DebugPrint(const pragma::Model &mdl)
 {
 	auto &skeleton = mdl.GetSkeleton();
 	std::stringstream ss;

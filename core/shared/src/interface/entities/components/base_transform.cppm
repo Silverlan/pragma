@@ -58,7 +58,7 @@ export {
 			Vector3 GetUp(pragma::CoordinateSpace space = pragma::CoordinateSpace::World) const;
 			Vector3 GetRight(pragma::CoordinateSpace space = pragma::CoordinateSpace::World) const;
 			float GetDistance(const Vector3 &p) const;
-			float GetDistance(const BaseEntity &ent) const;
+			float GetDistance(const pragma::ecs::BaseEntity &ent) const;
 			void GetOrientation(Vector3 *forward, Vector3 *right, Vector3 *up = nullptr) const;
 
 			void Teleport(const umath::Transform &targetPose);
@@ -73,9 +73,9 @@ export {
 
 			Vector3 GetOrigin() const;
 
-			Vector3 GetDirection(const BaseEntity &ent, bool bIgnoreYAxis = false) const;
-			EulerAngles GetAngles(const BaseEntity &ent, bool bIgnoreYAxis = false) const;
-			float GetDotProduct(const BaseEntity &ent, bool bIgnoreYAxis = false) const;
+			Vector3 GetDirection(const pragma::ecs::BaseEntity &ent, bool bIgnoreYAxis = false) const;
+			EulerAngles GetAngles(const pragma::ecs::BaseEntity &ent, bool bIgnoreYAxis = false) const;
+			float GetDotProduct(const pragma::ecs::BaseEntity &ent, bool bIgnoreYAxis = false) const;
 			Vector3 GetDirection(const Vector3 &pos, bool bIgnoreYAxis = false) const;
 			EulerAngles GetAngles(const Vector3 &pos, bool bIgnoreYAxis = false) const;
 			float GetDotProduct(const Vector3 &pos, bool bIgnoreYAxis = false) const;
@@ -108,7 +108,7 @@ export {
 			void UpdateLastMovedTime();
 			void OnPoseChanged(TransformChangeFlags changeFlags, bool updatePhysics = true);
 		protected:
-			BaseTransformComponent(BaseEntity &ent);
+			BaseTransformComponent(pragma::ecs::BaseEntity &ent);
 			pragma::NetEventId m_netEvSetScale = pragma::INVALID_NET_EVENT;
 			double m_tLastMoved = 0.0; // Last time the entity moved or changed rotation
 			Vector3 m_eyeOffset = {};
@@ -121,6 +121,10 @@ export {
 			umath::Transform targetPose;
 			umath::Transform deltaPose;
 		};
+        using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::TransformChangeFlags)
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::TransformChangeFlags> : std::true_type {};
+    }
 };

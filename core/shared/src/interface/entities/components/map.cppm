@@ -12,7 +12,7 @@ export import :entities.components.base;
 export namespace pragma {
 	class DLLNETWORK MapComponent final : public BaseEntityComponent {
 	  public:
-		MapComponent(BaseEntity &ent);
+		MapComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		void SetMapIndex(unsigned int idx);
 		unsigned int GetMapIndex() const;

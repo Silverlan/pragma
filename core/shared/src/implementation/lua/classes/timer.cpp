@@ -12,7 +12,7 @@ import :scripting.lua.classes.timer;
 
 DLLNETWORK void Lua_Timer_Start(lua_State *l, TimerHandle &timer)
 {
-	NetworkState *state = Engine::Get()->GetNetworkState(l);
+	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	lua_checktimer(l, timer);
 	timer.GetTimer()->Start(state->GetGameState());
 }
@@ -31,7 +31,7 @@ DLLNETWORK void Lua_Timer_Pause(lua_State *l, TimerHandle &timer)
 
 DLLNETWORK void Lua_Timer_Remove(lua_State *l, TimerHandle &timer)
 {
-	NetworkState *state = Engine::Get()->GetNetworkState(l);
+	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	lua_checktimer(l, timer);
 	timer.GetTimer()->Remove(state->GetGameState());
 }
@@ -82,7 +82,7 @@ DLLNETWORK void Lua_Timer_IsPaused(lua_State *l, TimerHandle &timer)
 
 DLLNETWORK void Lua_Timer_Call(lua_State *l, TimerHandle &timer)
 {
-	NetworkState *state = Engine::Get()->GetNetworkState(l);
+	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	lua_checktimer(l, timer);
 	timer.GetTimer()->Call(state->GetGameState());
 }
@@ -90,7 +90,7 @@ DLLNETWORK void Lua_Timer_Call(lua_State *l, TimerHandle &timer)
 DLLNETWORK void Lua_Timer_SetCall(lua_State *l, TimerHandle &timer, LuaFunctionObject o)
 {
 	lua_checktimer(l, timer);
-	NetworkState *state = Engine::Get()->GetNetworkState(l);
+	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	timer.GetTimer()->SetCall(state->GetGameState(), o);
 }
 
@@ -99,7 +99,7 @@ DLLNETWORK void Lua_Timer_SetCall(lua_State *l, TimerHandle &timer, LuaFunctionO
 std::shared_ptr<TimerHandle> Lua::time::create_timer(lua_State *l, float delay, int32_t repetitions, LuaFunctionObject fc, TimerType timerType)
 {
 	Lua::CheckType(fc, Lua::Type::Function);
-	auto *state = Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *timer = game->CreateTimer(delay, repetitions, fc, timerType);
 	return timer->CreateHandle();
@@ -109,7 +109,7 @@ std::shared_ptr<TimerHandle> Lua::time::create_timer(lua_State *l, float delay, 
 std::shared_ptr<TimerHandle> Lua::time::create_simple_timer(lua_State *l, float delay, LuaFunctionObject fc, TimerType timerType)
 {
 	Lua::CheckType(fc, Lua::Type::Function);
-	auto *state = Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *timer = game->CreateTimer(delay, 1, fc, timerType);
 	timer->Start(game);

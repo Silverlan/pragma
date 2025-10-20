@@ -63,7 +63,7 @@ void BaseTransformComponent::RegisterMembers(pragma::EntityComponentManager &com
 	memberInfoScale.AddTypeMetaData(poseComponentMetaData);
 	registerMember(std::move(memberInfoScale));
 }
-BaseTransformComponent::BaseTransformComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseTransformComponent::BaseTransformComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseTransformComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -78,7 +78,7 @@ void BaseTransformComponent::Initialize()
 		SetEyeOffset(mdl.get()->GetEyeOffset());
 		return util::EventReply::Unhandled;
 	});
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		/*if(ustring::compare(kvData.key,"origin",false))
 			SetPosition(uvec::create(kvData.value));
@@ -115,9 +115,9 @@ void BaseTransformComponent::OnPoseChanged(TransformChangeFlags changeFlags, boo
 {
 	auto &ent = GetEntity();
 	if(umath::is_flag_set(changeFlags, TransformChangeFlags::PositionChanged))
-		ent.SetStateFlag(BaseEntity::StateFlags::PositionChanged);
+		ent.SetStateFlag(pragma::ecs::BaseEntity::StateFlags::PositionChanged);
 	if(umath::is_flag_set(changeFlags, TransformChangeFlags::RotationChanged))
-		ent.SetStateFlag(BaseEntity::StateFlags::RotationChanged);
+		ent.SetStateFlag(pragma::ecs::BaseEntity::StateFlags::RotationChanged);
 	m_tLastMoved = ent.GetNetworkState()->GetGameState()->CurTime();
 	if(updatePhysics) {
 		auto pPhysComponent = ent.GetPhysicsComponent();
@@ -217,7 +217,7 @@ void BaseTransformComponent::SetScale(const Vector3 &scale, pragma::CoordinateSp
 }
 
 float BaseTransformComponent::GetDistance(const Vector3 &p) const { return uvec::distance(GetPosition(), p); }
-float BaseTransformComponent::GetDistance(const BaseEntity &ent) const
+float BaseTransformComponent::GetDistance(const pragma::ecs::BaseEntity &ent) const
 {
 	auto pTrComponent = ent.GetTransformComponent();
 	return uvec::distance(GetPosition(), pTrComponent ? pTrComponent->GetPosition() : Vector3 {});
@@ -404,17 +404,17 @@ void BaseTransformComponent::SetRawScale(const Vector3 &scale, pragma::Coordinat
 	m_pose.SetScale(scale);
 }
 
-Vector3 BaseTransformComponent::GetDirection(const BaseEntity &ent, bool bIgnoreYAxis) const
+Vector3 BaseTransformComponent::GetDirection(const pragma::ecs::BaseEntity &ent, bool bIgnoreYAxis) const
 {
 	auto pTrComponent = ent.GetTransformComponent();
 	return GetDirection(pTrComponent ? ent.GetCenter() : Vector3 {}, bIgnoreYAxis);
 }
-EulerAngles BaseTransformComponent::GetAngles(const BaseEntity &ent, bool bIgnoreYAxis) const
+EulerAngles BaseTransformComponent::GetAngles(const pragma::ecs::BaseEntity &ent, bool bIgnoreYAxis) const
 {
 	auto pTrComponent = ent.GetTransformComponent();
 	return GetAngles(pTrComponent ? ent.GetCenter() : Vector3 {}, bIgnoreYAxis);
 }
-float BaseTransformComponent::GetDotProduct(const BaseEntity &ent, bool bIgnoreYAxis) const
+float BaseTransformComponent::GetDotProduct(const pragma::ecs::BaseEntity &ent, bool bIgnoreYAxis) const
 {
 	auto pTrComponent = ent.GetTransformComponent();
 	return GetDotProduct(pTrComponent ? ent.GetCenter() : Vector3 {}, bIgnoreYAxis);

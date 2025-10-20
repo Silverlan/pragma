@@ -6,8 +6,6 @@ module;
 
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 
-#include "pragma/lua/types/udm.hpp"
-
 
 
 #include <luabind/copy_policy.hpp>
@@ -67,12 +65,12 @@ void Lua::Material::register_class(luabind::class_<msys::Material> &classDef)
 		return luabind::object {l, result};
 	}));
 	classDef.def(
-	  "Save", +[](lua_State *l, ::Engine *engine, msys::Material &mat, const std::string &fname) -> luabind::variant<std::string, bool> {
+	  "Save", +[](lua_State *l, pragma::Engine *engine, msys::Material &mat, const std::string &fname) -> luabind::variant<std::string, bool> {
 		  std::string err;
 		  auto result = mat.Save(fname, err);
 		  if(result == false)
 			  return luabind::object {l, err};
-		  Engine::Get()->PollResourceWatchers();
+		  pragma::Engine::Get()->PollResourceWatchers();
 		  return luabind::object {l, result};
 	  });
 	classDef.def("IsError", &msys::Material::IsError);

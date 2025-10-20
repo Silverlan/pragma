@@ -8,8 +8,6 @@ module;
 
 #include "pragma/lua/lua_call.hpp"
 
-#include "pragma/lua/types/udm.hpp"
-
 #include "pragma/logging.hpp"
 
 #include "pragma/lua/policies/default_parameter_policy.hpp"

@@ -82,7 +82,7 @@ void Lua::ALSound::register_class(luabind::class_<::ALSound> &classDef)
 	classDef.def("GetMaxAudibleDistance", &::ALSound::GetMaxAudibleDistance);
 	classDef.def("GetIntensity", &::ALSound::GetSoundIntensity);
 	classDef.def("GetSource", &::ALSound::GetSource);
-	classDef.def("SetSource", static_cast<void (::ALSound::*)(BaseEntity *)>(&::ALSound::SetSource));
+	classDef.def("SetSource", static_cast<void (::ALSound::*)(pragma::ecs::BaseEntity *)>(&::ALSound::SetSource));
 	classDef.def("SetSource", static_cast<void (*)(lua_State *, ::ALSound &)>(&Lua::ALSound::SetSource));
 	classDef.def("SetRange", &::ALSound::SetRange);
 	classDef.def("ClearRange", &::ALSound::ClearRange);

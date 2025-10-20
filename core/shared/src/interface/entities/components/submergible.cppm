@@ -18,17 +18,17 @@ export namespace pragma {
 		static ComponentEventId EVENT_ON_WATER_EXITED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		SubmergibleComponent(BaseEntity &ent);
+		SubmergibleComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		bool IsSubmerged() const;
 		bool IsFullySubmerged() const;
 		bool IsInWater() const;
 		float GetSubmergedFraction() const;
-		void SetSubmergedFraction(BaseEntity &waterEntity, float fraction);
+		void SetSubmergedFraction(pragma::ecs::BaseEntity &waterEntity, float fraction);
 
-		BaseEntity *GetWaterEntity();
-		const BaseEntity *GetWaterEntity() const;
+		pragma::ecs::BaseEntity *GetWaterEntity();
+		const pragma::ecs::BaseEntity *GetWaterEntity() const;
 		const util::PFloatProperty &GetSubmergedFractionProperty() const;
 		virtual void InitializeLuaObject(lua_State *l) override;
 	  protected:

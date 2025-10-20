@@ -13,6 +13,6 @@ using namespace pragma;
 void BaseLiquidVolumeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) {}
 
 void BaseLiquidVolumeComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
-BaseLiquidVolumeComponent::BaseLiquidVolumeComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseLiquidVolumeComponent::BaseLiquidVolumeComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void BaseLiquidVolumeComponent::Initialize() { BaseEntityComponent::Initialize(); }

@@ -3,6 +3,8 @@
 
 module;
 
+#include <string>
+
 export module pragma.shared:game;
 export import :game.animation_channel_cache_data;
 export import :game.animation_update_manager;

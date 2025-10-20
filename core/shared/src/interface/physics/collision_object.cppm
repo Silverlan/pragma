@@ -7,6 +7,8 @@ module;
 #include <memory>
 #include <vector>
 
+#include <iostream>
+
 
 
 export module pragma.shared:physics.collision_object;
@@ -15,7 +17,9 @@ export import :physics.base;
 export import :physics.shape;
 
 export {
-	class ModelSubMesh;
+	namespace pragma {
+		class ModelSubMesh;
+	}
 	namespace pragma::physics {
 		class IGhostObject;
 		class IRigidBody;
@@ -228,8 +232,8 @@ export {
 			virtual bool MeshVertexIndexToNodeIndex(uint16_t meshVertexIndex, uint16_t &nodeIndex) const = 0;
 			virtual bool NodeIndexToMeshVertexIndex(uint16_t nodeIndex, uint16_t &meshVertexIndex) const = 0;
 
-			virtual void SetSubMesh(const ModelSubMesh &subMesh, const std::vector<uint16_t> &meshVertexIndicesToLocalVertexIndices) = 0;
-			ModelSubMesh *GetSubMesh() const;
+			virtual void SetSubMesh(const pragma::ModelSubMesh &subMesh, const std::vector<uint16_t> &meshVertexIndicesToLocalVertexIndices) = 0;
+			pragma::ModelSubMesh *GetSubMesh() const;
 
 			virtual void UpdateLinearVelocity() = 0;
 
@@ -315,10 +319,14 @@ export {
 			virtual float GetMaterialVolumeStiffnessCoefficient(uint32_t matId) const = 0;
 		protected:
 			ISoftBody(IEnvironment &env, pragma::physics::IShape &shape, const std::vector<uint16_t> &meshVertIndicesToPhysIndices);
-			std::weak_ptr<ModelSubMesh> m_subMesh = {};
+			std::weak_ptr<pragma::ModelSubMesh> m_subMesh = {};
 		};
+		using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::physics::ICollisionObject::StateFlags)
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::physics::ICollisionObject::StateFlags> : std::true_type {};
+    }
 
 	DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::physics::ICollisionObject &o);
 	DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::physics::IGhostObject &o);

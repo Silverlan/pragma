@@ -16,6 +16,6 @@ export namespace pragma {
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 	  protected:
-		BaseLiquidVolumeComponent(BaseEntity &ent);
+		BaseLiquidVolumeComponent(pragma::ecs::BaseEntity &ent);
 	};
 };

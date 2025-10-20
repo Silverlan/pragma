@@ -3,10 +3,6 @@
 
 module;
 
-
-
-#include <glm/gtx/projection.hpp>
-
 module pragma.shared;
 
 import :scripting.lua.classes.vector;

@@ -20,7 +20,7 @@ void BaseVehicleComponent::RegisterEvents(pragma::EntityComponentManager &compon
 	EVENT_ON_DRIVER_ENTERED = registerEvent("ON_DRIVER_ENTERED", ComponentEventInfo::Type::Broadcast);
 	EVENT_ON_DRIVER_EXITED = registerEvent("ON_DRIVER_EXITED", ComponentEventInfo::Type::Broadcast);
 }
-BaseVehicleComponent::BaseVehicleComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseVehicleComponent::BaseVehicleComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void BaseVehicleComponent::OnRemove()
 {
@@ -185,7 +185,7 @@ void BaseVehicleComponent::ClearDriver()
 		m_physVehicle->ResetControls();
 }
 
-void BaseVehicleComponent::SetDriver(BaseEntity *ent)
+void BaseVehicleComponent::SetDriver(pragma::ecs::BaseEntity *ent)
 {
 	if(m_driver.valid())
 		ClearDriver();
@@ -195,7 +195,7 @@ void BaseVehicleComponent::SetDriver(BaseEntity *ent)
 	BroadcastEvent(EVENT_ON_DRIVER_ENTERED);
 }
 
-BaseEntity *BaseVehicleComponent::GetDriver() { return m_driver.get(); }
+pragma::ecs::BaseEntity *BaseVehicleComponent::GetDriver() { return m_driver.get(); }
 Bool BaseVehicleComponent::HasDriver() const { return m_driver.valid(); }
 
 BaseWheelComponent *BaseVehicleComponent::CreateWheelEntity(uint8_t wheelIndex)
@@ -231,7 +231,7 @@ void BaseVehicleComponent::InitializeWheelEntities()
 	}
 }
 
-BaseEntity *BaseVehicleComponent::GetSteeringWheel() { return m_steeringWheel.get(); }
+pragma::ecs::BaseEntity *BaseVehicleComponent::GetSteeringWheel() { return m_steeringWheel.get(); }
 
 void BaseVehicleComponent::SetupVehicle(const pragma::physics::VehicleCreateInfo &createInfo, const std::vector<std::string> &wheelModels)
 {

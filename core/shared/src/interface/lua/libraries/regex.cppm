@@ -6,6 +6,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <regex>
 
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:scripting.lua.libraries.regex;
 
 export {

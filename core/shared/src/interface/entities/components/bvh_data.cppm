@@ -25,8 +25,8 @@ export namespace pragma::bvh {
 	constexpr bool should_permute = true;
 
 	struct DLLNETWORK MeshRange {
-		BaseEntity *entity = nullptr;
-		std::shared_ptr<ModelSubMesh> mesh;
+		pragma::ecs::BaseEntity *entity = nullptr;
+		std::shared_ptr<pragma::ModelSubMesh> mesh;
 		size_t start;
 		size_t end;
 		bool operator<(const MeshRange &other) const { return start < other.start; }
@@ -34,9 +34,9 @@ export namespace pragma::bvh {
 
 	struct DLLNETWORK MeshIntersectionRange {
 		MeshIntersectionRange(const MeshRange &range) : entity {range.entity}, mesh {range.mesh.get()}, start {range.start}, end {range.end} {}
-		MeshIntersectionRange(ModelSubMesh &mesh, size_t start, size_t end) : mesh {&mesh}, start {start}, end {end} {}
-		BaseEntity *entity = nullptr;
-		ModelSubMesh *mesh = nullptr;
+		MeshIntersectionRange(pragma::ModelSubMesh &mesh, size_t start, size_t end) : mesh {&mesh}, start {start}, end {end} {}
+		pragma::ecs::BaseEntity *entity = nullptr;
+		pragma::ModelSubMesh *mesh = nullptr;
 		size_t start;
 		size_t end;
 		bool operator<(const MeshRange &other) const { return start < other.start; }
@@ -110,16 +110,16 @@ export namespace pragma::bvh {
 	DLLNETWORK Ray get_ray(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist);
 	DLLNETWORK const ::pragma::bvh::Vec &to_bvh_vector(const Vector3 &v);
 	DLLNETWORK const Vector3 &from_bvh_vector(const ::pragma::bvh::Vec &v);
-	DLLNETWORK bool is_mesh_bvh_compatible(const ::ModelSubMesh &mesh);
+	DLLNETWORK bool is_mesh_bvh_compatible(const pragma::ModelSubMesh &mesh);
 
-	DLLNETWORK std::unordered_map<std::string, std::shared_ptr<ModelSubMesh>> get_uuid_mesh_map(Model &mdl);
+	DLLNETWORK std::unordered_map<std::string, std::shared_ptr<pragma::ModelSubMesh>> get_uuid_mesh_map(pragma::Model &mdl);
 
 	namespace debug {
 		Color DEFAULT_NODE_COLOR = Color {0, 255, 0, 64};
 		DLLNETWORK void print_bvh_tree(pragma::bvh::Bvh &bvh);
-		DLLNETWORK void draw_bvh_tree(const Game &game, pragma::bvh::Bvh &bvh, const umath::ScaledTransform &pose = {}, float duration = 20.f);
-		DLLNETWORK void draw_node(const Game &game, const pragma::bvh::Node &node, const umath::ScaledTransform &pose = {}, const Color &col = DEFAULT_NODE_COLOR, float duration = 20.f);
-		DLLNETWORK void draw_node(const Game &game, const pragma::bvh::BBox &bbox, const umath::ScaledTransform &pose = {}, const Color &col = DEFAULT_NODE_COLOR, float duration = 20.f);
+		DLLNETWORK void draw_bvh_tree(const pragma::Game &game, pragma::bvh::Bvh &bvh, const umath::ScaledTransform &pose = {}, float duration = 20.f);
+		DLLNETWORK void draw_node(const pragma::Game &game, const pragma::bvh::Node &node, const umath::ScaledTransform &pose = {}, const Color &col = DEFAULT_NODE_COLOR, float duration = 20.f);
+		DLLNETWORK void draw_node(const pragma::Game &game, const pragma::bvh::BBox &bbox, const umath::ScaledTransform &pose = {}, const Color &col = DEFAULT_NODE_COLOR, float duration = 20.f);
 	};
 };
 

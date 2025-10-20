@@ -72,7 +72,7 @@ void ConstraintComponent::RegisterMembers(pragma::EntityComponentManager &compon
 		registerMember(std::move(memberInfo));
 	}
 }
-ConstraintComponent::ConstraintComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+ConstraintComponent::ConstraintComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void ConstraintComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ConstraintComponent::ApplyConstraint() { InvokeEventCallbacks(EVENT_APPLY_CONSTRAINT); }
@@ -192,7 +192,7 @@ void ConstraintComponent::SetDrivenObject(const pragma::EntityUComponentMemberRe
 		BroadcastEvent(EVENT_ON_DRIVEN_OBJECT_CHANGED);
 		return;
 	}
-	auto constraintManagerC = const_cast<BaseEntity *>(ent)->AddComponent<ConstraintManagerComponent>();
+	auto constraintManagerC = const_cast<pragma::ecs::BaseEntity *>(ent)->AddComponent<ConstraintManagerComponent>();
 	assert(constraintManagerC.valid());
 	constraintManagerC->AddConstraint(*this);
 	m_curDrivenConstraintManager = constraintManagerC;

@@ -17,7 +17,7 @@ void BasePointConstraintBallSocketComponent::OnEntitySpawn()
 	BasePointConstraintComponent::InitializeConstraint();
 }
 
-void BasePointConstraintBallSocketComponent::InitializeConstraint(BaseEntity *src, BaseEntity *tgt)
+void BasePointConstraintBallSocketComponent::InitializeConstraint(pragma::ecs::BaseEntity *src, pragma::ecs::BaseEntity *tgt)
 {
 	auto pPhysComponentTgt = tgt->GetPhysicsComponent();
 	auto *physTgt = pPhysComponentTgt ? dynamic_cast<RigidPhysObj *>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;

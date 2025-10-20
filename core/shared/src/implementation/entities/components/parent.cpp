@@ -17,7 +17,7 @@ void ParentComponent::RegisterEvents(pragma::EntityComponentManager &componentMa
 	EVENT_ON_CHILD_ADDED = registerEvent("ON_CHILD_ADDED", ComponentEventInfo::Type::Broadcast);
 	EVENT_ON_CHILD_REMOVED = registerEvent("ON_CHILD_REMOVED", ComponentEventInfo::Type::Broadcast);
 }
-ParentComponent::ParentComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+ParentComponent::ParentComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ParentComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void ParentComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ParentComponent::OnRemove()

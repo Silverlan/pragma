@@ -61,7 +61,7 @@ NetworkState::NetworkState() : CallbackHandler(), CVarHandler()
 
 {
 
-	m_ctReal.Reset(static_cast<int64_t>(Engine::Get()->GetTickCount()));
+	m_ctReal.Reset(static_cast<int64_t>(pragma::Engine::Get()->GetTickCount()));
 
 	m_tReal = CDouble(m_ctReal());
 
@@ -95,7 +95,7 @@ NetworkState::NetworkState() : CallbackHandler(), CVarHandler()
 
 
 
-	m_cbProfilingHandle = Engine::Get()->AddProfilingHandler([this](bool profilingEnabled) {
+	m_cbProfilingHandle = pragma::Engine::Get()->AddProfilingHandler([this](bool profilingEnabled) {
 
 		if(profilingEnabled == false) {
 
@@ -107,7 +107,7 @@ NetworkState::NetworkState() : CallbackHandler(), CVarHandler()
 
 		std::string postFix = IsClient() ? " (CL)" : " (SV)";
 
-		auto &cpuProfiler = Engine::Get()->GetProfiler();
+		auto &cpuProfiler = pragma::Engine::Get()->GetProfiler();
 
 		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>>();
 
@@ -391,7 +391,7 @@ bool NetworkState::CheatsEnabled() const
 
 		return true;
 
-	return Engine::Get()->GetConVarBool("sv_cheats");
+	return pragma::Engine::Get()->GetConVarBool("sv_cheats");
 
 }
 
@@ -561,7 +561,7 @@ void NetworkState::ChangeLevel(const std::string &map)
 
 	m_mapInfo->name = map;
 
-	Game *game = GetGameState();
+	pragma::Game *game = GetGameState();
 
 	if(IsServer()) // Hack: These are already called clientside in ClientState::HandleReceiveGameInfo
 
@@ -625,7 +625,7 @@ bool NetworkState::IsGameActive() { return false; }
 
 
 
-Game *NetworkState::GetGameState() { return m_game.get(); }
+pragma::Game *NetworkState::GetGameState() { return m_game.get(); }
 
 
 
@@ -643,7 +643,7 @@ void NetworkState::Initialize()
 
 		spdlog::info("Initializing server state...");
 
-		if(Engine::Get()->IsServerOnly()) {
+		if(pragma::Engine::Get()->IsServerOnly()) {
 
 			Con::cout << "If you encounter problems, such as the server not showing up in the server browser, or clients not being able to connect to it, please make sure the following ports are forwarded:" << Con::endl;
 
@@ -795,7 +795,7 @@ void NetworkState::implFindSimilarConVars(const std::string &input, std::vector<
 
 {
 
-	Engine::Get()->implFindSimilarConVars(input, similarCmds);
+	pragma::Engine::Get()->implFindSimilarConVars(input, similarCmds);
 
 	CVarHandler::implFindSimilarConVars(input, similarCmds);
 
@@ -865,7 +865,7 @@ bool NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::string> 
 
 	if(bEngine == true)
 
-		cv = Engine::Get()->CVarHandler::GetConVar(scmd);
+		cv = pragma::Engine::Get()->CVarHandler::GetConVar(scmd);
 
 	if(cv == nullptr)
 
@@ -913,7 +913,7 @@ bool NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::string> 
 
 		if(bEngine)
 
-			Engine::Get()->CVarHandler::SetConVar(scmd, argv[0]);
+			pragma::Engine::Get()->CVarHandler::SetConVar(scmd, argv[0]);
 
 		else
 
@@ -1087,7 +1087,7 @@ void NetworkState::InitializeDLLModule(lua_State *l, std::shared_ptr<util::Libra
 
 
 
-	auto *luaInterface = Engine::Get()->GetLuaInterface(l);
+	auto *luaInterface = pragma::Engine::Get()->GetLuaInterface(l);
 
 	if(luaInterface != nullptr) {
 
@@ -1133,7 +1133,7 @@ bool NetworkState::UnloadLibrary(const std::string &library)
 
 			if(ptrTerminateLua != nullptr)
 
-				ptrTerminateLua(*Engine::Get()->GetLuaInterface(pair.first));
+				ptrTerminateLua(*pragma::Engine::Get()->GetLuaInterface(pair.first));
 
 			pair.second.erase(it);
 
@@ -1319,7 +1319,7 @@ void NetworkState::TerminateLuaModules(lua_State *l)
 
 		return;
 
-	auto *luaInterface = Engine::Get()->GetLuaInterface(l);
+	auto *luaInterface = pragma::Engine::Get()->GetLuaInterface(l);
 
 	if(luaInterface != nullptr) {
 
@@ -1411,7 +1411,7 @@ ConVar *NetworkState::RegisterConVar(const std::string &scmd, const std::shared_
 
 	auto *cv = static_cast<ConVar *>(itNew.first->second.get());
 
-	auto &cfg = Engine::Get()->GetConVarConfig(GetType());
+	auto &cfg = pragma::Engine::Get()->GetConVarConfig(GetType());
 
 	if(cfg) {
 
@@ -1511,7 +1511,7 @@ void NetworkState::Think()
 
 	CallCallbacks<void>("Think");
 
-	Game *game = GetGameState();
+	pragma::Game *game = GetGameState();
 
 	if(game != NULL)
 
@@ -1571,7 +1571,7 @@ void NetworkState::Tick()
 
 	CallCallbacks<void>("Tick");
 
-	Game *game = GetGameState();
+	pragma::Game *game = GetGameState();
 
 	if(game != NULL)
 

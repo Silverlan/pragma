@@ -4,6 +4,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/lua/core.hpp"
+#include <string>
 
 
 export module pragma.shared:scripting.lua.libraries.util;
@@ -110,7 +112,7 @@ export namespace Lua {
 		DLLNETWORK std::string get_addon_path(lua_State *l, const std::string &relPath);
 		DLLNETWORK std::string get_string_hash(const std::string &str);
 		DLLNETWORK luabind::object get_class_value(lua_State *l, const luabind::object &o, const std::string &key);
-		DLLNETWORK Lua::var<bool, ::util::ParallelJob<luabind::object>> pack_zip_archive(lua_State *l, Game &game, const std::string &zipFileName, const luabind::table<> &t);
+		DLLNETWORK Lua::var<bool, ::util::ParallelJob<luabind::object>> pack_zip_archive(lua_State *l, pragma::Game &game, const std::string &zipFileName, const luabind::table<> &t);
 
 		DLLNETWORK void register_std_vector_types(lua_State *l);
 

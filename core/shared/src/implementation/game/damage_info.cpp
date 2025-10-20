@@ -21,19 +21,19 @@ void DamageInfo::AddDamage(unsigned short dmg)
 }
 void DamageInfo::ScaleDamage(float scale) { m_damage = umath::limit<UInt16>(UInt32(Float(m_damage) * scale)); }
 unsigned short DamageInfo::GetDamage() { return m_damage; }
-BaseEntity *DamageInfo::GetAttacker()
+pragma::ecs::BaseEntity *DamageInfo::GetAttacker()
 {
 	if(!m_attacker.valid())
 		return nullptr;
 	return m_attacker.get();
 }
-BaseEntity *DamageInfo::GetInflictor()
+pragma::ecs::BaseEntity *DamageInfo::GetInflictor()
 {
 	if(!m_inflictor.valid())
 		return nullptr;
 	return m_inflictor.get();
 }
-void DamageInfo::SetAttacker(const BaseEntity *ent)
+void DamageInfo::SetAttacker(const pragma::ecs::BaseEntity *ent)
 {
 	if(m_attacker.valid())
 		m_attacker = EntityHandle();
@@ -42,7 +42,7 @@ void DamageInfo::SetAttacker(const BaseEntity *ent)
 	m_attacker = ent->GetHandle();
 }
 void DamageInfo::SetAttacker(const EntityHandle &hnd) { SetAttacker(hnd.get()); }
-void DamageInfo::SetInflictor(const BaseEntity *ent)
+void DamageInfo::SetInflictor(const pragma::ecs::BaseEntity *ent)
 {
 	if(m_inflictor.valid())
 		m_inflictor = EntityHandle();

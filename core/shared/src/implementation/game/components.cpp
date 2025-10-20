@@ -9,7 +9,7 @@ module pragma.shared;
 import :game.game;
 
 
-void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
+void pragma::Game::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
 {
 	constexpr auto hideInEditor = pragma::ComponentRegInfo::Flags::HideInEditor;
 	componentManager.RegisterComponentType<pragma::DamageableComponent>("damageable", {"gameplay"});
@@ -49,5 +49,5 @@ void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentM
 	componentManager.RegisterComponentType<pragma::InputMovementControllerComponent>("input_movement_controller", {"input", hideInEditor});
 
 	pragma::BaseEntityComponent::RegisterEvents(componentManager, [&componentManager](const std::string &evName, pragma::ComponentEventInfo::Type type) -> pragma::ComponentEventId { return componentManager.RegisterEvent(evName, typeid(pragma::BaseEntityComponent), type); });
-	BaseEntity::RegisterEvents(componentManager);
+	pragma::ecs::BaseEntity::RegisterEvents(componentManager);
 }

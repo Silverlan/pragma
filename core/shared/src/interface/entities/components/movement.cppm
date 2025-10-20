@@ -25,7 +25,7 @@ export namespace pragma {
 		static ComponentEventId EVENT_ON_UPDATE_MOVEMENT;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		MovementComponent(BaseEntity &ent);
+		MovementComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 

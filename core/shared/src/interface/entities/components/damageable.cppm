@@ -15,7 +15,7 @@ export namespace pragma {
 	  public:
 		static ComponentEventId EVENT_ON_TAKE_DAMAGE;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		DamageableComponent(BaseEntity &ent);
+		DamageableComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		// Called right before the entity is about to take damage

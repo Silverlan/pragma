@@ -54,7 +54,7 @@ void ConstraintSpaceComponent::RegisterMembers(pragma::EntityComponentManager &c
 		registerMember(std::move(memberInfo));
 	}
 }
-ConstraintSpaceComponent::ConstraintSpaceComponent(BaseEntity &ent) : BaseEntityComponent(ent)
+ConstraintSpaceComponent::ConstraintSpaceComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent)
 {
 	m_axisEnabled.fill(true);
 	m_axisInverted.fill(false);

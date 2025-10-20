@@ -19,7 +19,7 @@ void BaseShooterComponent::RegisterEvents(pragma::EntityComponentManager &compon
 	EVENT_ON_FIRE_BULLETS = registerEvent("ON_FIRE_BULLETS", ComponentEventInfo::Type::Broadcast);
 	EVENT_ON_BULLETS_FIRED = registerEvent("ON_BULLETS_FIRED", ComponentEventInfo::Type::Broadcast);
 }
-BaseShooterComponent::BaseShooterComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseShooterComponent::BaseShooterComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseShooterComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -68,7 +68,7 @@ void BaseShooterComponent::OnFireBullets(const BulletInfo &bulletInfo, Vector3 &
 	BroadcastEvent(EVENT_ON_FIRE_BULLETS, evData);
 }
 
-RayCastHitType BaseShooterComponent::OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, PhysObj &phys, physics::ICollisionObject &col) { return RayCastHitType::Block; }
+RayCastHitType BaseShooterComponent::OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, pragma::physics::PhysObj &phys, physics::ICollisionObject &col) { return RayCastHitType::Block; }
 
 void BaseShooterComponent::GetBulletTraceData(const BulletInfo &bulletInfo, TraceData &data) const
 {

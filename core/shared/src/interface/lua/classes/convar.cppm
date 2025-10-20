@@ -3,8 +3,9 @@
 
 module;
 
-#include "pragma/lua/types/udm.hpp"
 #include "pragma/networkdefinitions.h"
+
+#include <string>
 
 
 export module pragma.shared:scripting.lua.classes.convar;
@@ -12,6 +13,7 @@ export module pragma.shared:scripting.lua.classes.convar;
 export import :console.convar;
 export import :entities.components.base_player;
 export import :scripting.lua.api;
+export import :scripting.lua.types;
 
 export {
 	namespace Lua::console {

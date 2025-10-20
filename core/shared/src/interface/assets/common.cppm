@@ -11,10 +11,9 @@ module;
 
 export module pragma.shared:assets.common;
 
+export import :types;
 export import pragma.materialsystem;
 
-export class NetworkState;
-export class Model;
 export namespace pragma::asset {
 	constexpr auto FORMAT_MAP_BINARY = "pmap_b";
 	constexpr auto FORMAT_MAP_ASCII = "pmap";
@@ -95,10 +94,10 @@ export namespace pragma::asset {
 
 	struct DLLNETWORK ModelAssetWrapper : public IAssetWrapper {
 		virtual Type GetType() const override { return Type::Model; }
-		void SetModel(Model &model);
-		Model *GetModel() const;
+		void SetModel(pragma::Model &model);
+		pragma::Model *GetModel() const;
 	  private:
-		std::shared_ptr<Model> m_model = nullptr;
+		std::shared_ptr<pragma::Model> m_model = nullptr;
 	};
 
 	struct DLLNETWORK MaterialAssetWrapper : public IAssetWrapper {

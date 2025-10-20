@@ -23,13 +23,13 @@ void BaseLiquidControlComponent::RegisterEvents(pragma::EntityComponentManager &
 
 void BaseLiquidControlComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
 
-BaseLiquidControlComponent::BaseLiquidControlComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseLiquidControlComponent::BaseLiquidControlComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void BaseLiquidControlComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	m_netEvCreateSplash = SetupNetEvent("create_splash");
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "surface_material", false)) {
 			if(ustring::compare<std::string>(kvData.value, "default", false) == false) {
@@ -124,7 +124,7 @@ void BaseLiquidControlComponent::CreateSplash(const Vector3 &origin, float radiu
 	BroadcastEvent(EVENT_ON_SPLASH, CEOnSplash {splashInfo});
 }
 
-bool BaseLiquidControlComponent::OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, PhysObj *phys, pragma::physics::ICollisionObject *col, const LocalRayResult &result)
+bool BaseLiquidControlComponent::OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, pragma::physics::PhysObj *phys, pragma::physics::ICollisionObject *col, const LocalRayResult &result)
 {
 	/*if(m_physSurfaceSim != nullptr)
 	{

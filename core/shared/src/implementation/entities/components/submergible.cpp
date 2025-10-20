@@ -20,14 +20,14 @@ void SubmergibleComponent::RegisterEvents(pragma::EntityComponentManager &compon
 	EVENT_ON_WATER_ENTERED = registerEvent("ON_WATER_ENTERED", ComponentEventInfo::Type::Broadcast);
 	EVENT_ON_WATER_EXITED = registerEvent("ON_WATER_EXITED", ComponentEventInfo::Type::Broadcast);
 }
-SubmergibleComponent::SubmergibleComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_submergedFraction(util::FloatProperty::Create(0.f)) {}
+SubmergibleComponent::SubmergibleComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_submergedFraction(util::FloatProperty::Create(0.f)) {}
 void SubmergibleComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void SubmergibleComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 bool SubmergibleComponent::IsSubmerged() const { return (GetSubmergedFraction() >= 0.6f) ? true : false; }
 bool SubmergibleComponent::IsFullySubmerged() const { return (GetSubmergedFraction() >= 0.99f) ? true : false; }
 bool SubmergibleComponent::IsInWater() const { return (GetSubmergedFraction() > 0.f) ? true : false; }
 float SubmergibleComponent::GetSubmergedFraction() const { return *m_submergedFraction; }
-void SubmergibleComponent::SetSubmergedFraction(BaseEntity &waterEntity, float fraction)
+void SubmergibleComponent::SetSubmergedFraction(pragma::ecs::BaseEntity &waterEntity, float fraction)
 {
 	m_waterEntity = (fraction > 0.f) ? waterEntity.GetHandle() : EntityHandle {};
 	auto bInWater = IsInWater();
@@ -67,5 +67,5 @@ void SubmergibleComponent::OnWaterExited() { BroadcastEvent(EVENT_ON_WATER_EXITE
 
 const util::PFloatProperty &SubmergibleComponent::GetSubmergedFractionProperty() const { return m_submergedFraction; }
 
-BaseEntity *SubmergibleComponent::GetWaterEntity() { return m_waterEntity.get(); }
-const BaseEntity *SubmergibleComponent::GetWaterEntity() const { return const_cast<SubmergibleComponent *>(this)->GetWaterEntity(); }
+pragma::ecs::BaseEntity *SubmergibleComponent::GetWaterEntity() { return m_waterEntity.get(); }
+const pragma::ecs::BaseEntity *SubmergibleComponent::GetWaterEntity() const { return const_cast<SubmergibleComponent *>(this)->GetWaterEntity(); }

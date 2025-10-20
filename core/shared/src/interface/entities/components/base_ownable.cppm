@@ -12,10 +12,10 @@ export import :entities.property;
 
 export namespace pragma {
 	struct DLLNETWORK CEOnOwnerChanged : public ComponentEvent {
-		CEOnOwnerChanged(BaseEntity *oldOwner, BaseEntity *newOwner);
+		CEOnOwnerChanged(pragma::ecs::BaseEntity *oldOwner, pragma::ecs::BaseEntity *newOwner);
 		virtual void PushArguments(lua_State *l) override;
-		BaseEntity *oldOwner;
-		BaseEntity *newOwner;
+		pragma::ecs::BaseEntity *oldOwner;
+		pragma::ecs::BaseEntity *newOwner;
 	};
 	class DLLNETWORK BaseOwnableComponent : public BaseEntityComponent {
 	  public:
@@ -24,13 +24,13 @@ export namespace pragma {
 
 		virtual void Initialize() override;
 		const pragma::PEntityProperty &GetOwnerProperty() const;
-		void SetOwner(BaseEntity &owner);
+		void SetOwner(pragma::ecs::BaseEntity &owner);
 		void ClearOwner();
-		BaseEntity *GetOwner();
-		const BaseEntity *GetOwner() const;
+		pragma::ecs::BaseEntity *GetOwner();
+		const pragma::ecs::BaseEntity *GetOwner() const;
 	  protected:
-		BaseOwnableComponent(BaseEntity &ent);
-		virtual void SetOwner(BaseEntity *owner);
+		BaseOwnableComponent(pragma::ecs::BaseEntity &ent);
+		virtual void SetOwner(pragma::ecs::BaseEntity *owner);
 		pragma::NetEventId m_netEvSetOwner = pragma::INVALID_NET_EVENT;
 		pragma::PEntityProperty m_owner;
 	};

@@ -6,20 +6,19 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <vector>
 #include <iostream>
-
+#include <functional>
 
 export module pragma.shared:model.poly_mesh;
 
 export import :model.poly;
+export import :types;
 
 export {
-	class Model;
 	class DLLNETWORK PolyMeshInfo {
 	public:
 		std::vector<Vector3> vertexList;
 	};
 
-	namespace pragma::physics {class IEnvironment;};
 	class DLLNETWORK PolyMesh {
 		friend Con::c_cout &operator<<(Con::c_cout &, const PolyMesh &);
 	public:
@@ -50,9 +49,9 @@ export {
 		const std::vector<std::shared_ptr<Poly>> &GetPolys() const;
 		std::vector<std::shared_ptr<Poly>> &GetPolys();
 		void debug_print();
-		std::shared_ptr<Model> GenerateModel();
+		std::shared_ptr<pragma::Model> GenerateModel();
 		template<class TPoly, class TPolyMesh>
-		static Model *GenerateModel(const std::vector<std::shared_ptr<TPolyMesh>> &meshes);
+		static pragma::Model *GenerateModel(const std::vector<std::shared_ptr<TPolyMesh>> &meshes);
 		template<class TSide, class TPolyMesh, class TBrushMesh>
 		static void GenerateBrushMeshes(pragma::physics::IEnvironment &env, std::vector<std::shared_ptr<TBrushMesh>> &outBrushMeshes, const std::vector<std::shared_ptr<TPolyMesh>> &meshes);
 		void GetBounds(Vector3 *min, Vector3 *max);
@@ -71,7 +70,7 @@ export {
 	}
 
 	template<class TPoly, class TPolyMesh>
-	Model *PolyMesh::GenerateModel(const std::vector<std::shared_ptr<TPolyMesh>> &meshes) // Obsolete?
+	pragma::Model *PolyMesh::GenerateModel(const std::vector<std::shared_ptr<TPolyMesh>> &meshes) // Obsolete?
 	{
 		return nullptr;
 		/*Model *mdl = new Model();

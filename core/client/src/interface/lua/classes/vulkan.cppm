@@ -7,7 +7,6 @@ module;
 #include "udm.hpp"
 #include "mathutil/color.h"
 #include "sharedutils/datastream.h"
-#include "pragma/lua/types/udm.hpp"
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_image_view.hpp>
 #include <buffers/prosper_buffer.hpp>

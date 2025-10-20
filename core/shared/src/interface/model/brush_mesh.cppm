@@ -6,6 +6,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <vector>
 
+#include <iostream>
+
 export module pragma.shared:model.brush_mesh;
 
 export import :model.side;

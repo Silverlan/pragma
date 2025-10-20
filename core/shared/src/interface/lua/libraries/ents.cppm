@@ -4,7 +4,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-
+#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.libraries.ents;
 
@@ -17,53 +17,53 @@ export import :scripting.lua.entity_iterator;
 
 export namespace Lua {
 	namespace ents {
-		DLLNETWORK LuaEntityIterator create_lua_entity_iterator(lua_State *l, const tb<LuaEntityIteratorFilterBase> &filterTable, EntityIterator::FilterFlags filterFlags = EntityIterator::FilterFlags::Default);
-		DLLNETWORK LuaEntityComponentIterator create_lua_entity_component_iterator(lua_State *l, pragma::ComponentId componentId, const tb<LuaEntityIteratorFilterBase> &filterTable, EntityIterator::FilterFlags filterFlags = EntityIterator::FilterFlags::Default);
+		DLLNETWORK LuaEntityIterator create_lua_entity_iterator(lua_State *l, const tb<LuaEntityIteratorFilterBase> &filterTable, pragma::ecs::EntityIterator::FilterFlags filterFlags = pragma::ecs::EntityIterator::FilterFlags::Default);
+		DLLNETWORK LuaEntityComponentIterator create_lua_entity_component_iterator(lua_State *l, pragma::ComponentId componentId, const tb<LuaEntityIteratorFilterBase> &filterTable, pragma::ecs::EntityIterator::FilterFlags filterFlags = pragma::ecs::EntityIterator::FilterFlags::Default);
 
 		DLLNETWORK void register_library(lua_State *l);
 
-		DLLNETWORK opt<mult<type<BaseEntity>, double>> get_closest(lua_State *l, const Vector3 &origin);
-		DLLNETWORK opt<mult<type<BaseEntity>, double>> get_farthest(lua_State *l, const Vector3 &origin);
-		DLLNETWORK tb<type<BaseEntity>> get_sorted_by_distance(lua_State *l, const Vector3 &origin);
-		DLLNETWORK type<BaseEntity> get_random(lua_State *l);
+		DLLNETWORK opt<mult<type<pragma::ecs::BaseEntity>, double>> get_closest(lua_State *l, const Vector3 &origin);
+		DLLNETWORK opt<mult<type<pragma::ecs::BaseEntity>, double>> get_farthest(lua_State *l, const Vector3 &origin);
+		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> get_sorted_by_distance(lua_State *l, const Vector3 &origin);
+		DLLNETWORK type<pragma::ecs::BaseEntity> get_random(lua_State *l);
 		DLLNETWORK opt<std::string> get_component_name(lua_State *l, pragma::ComponentId componentId);
 		DLLNETWORK opt<uint32_t> get_component_id(lua_State *l, const std::string &componentName);
 
-		DLLNETWORK size_t get_lua_component_member_count(Game &game, pragma::ComponentId componentId);
-		DLLNETWORK pragma::ComponentMemberInfo *get_lua_component_member_info(Game &game, pragma::ComponentId componentId, pragma::ComponentMemberIndex memberIndex);
+		DLLNETWORK size_t get_lua_component_member_count(pragma::Game &game, pragma::ComponentId componentId);
+		DLLNETWORK pragma::ComponentMemberInfo *get_lua_component_member_info(pragma::Game &game, pragma::ComponentId componentId, pragma::ComponentMemberIndex memberIndex);
 
-		DLLNETWORK tb<type<BaseEntity>> get_all(lua_State *l);
-		DLLNETWORK tb<type<BaseEntity>> get_all(lua_State *l, func<type<BaseEntity>> func);
-		DLLNETWORK tb<type<BaseEntity>> get_all(lua_State *l, EntityIterator::FilterFlags filterFlags = EntityIterator::FilterFlags::Default);
-		DLLNETWORK tb<type<BaseEntity>> get_all(lua_State *l, EntityIterator::FilterFlags filterFlags, const tb<LuaEntityIteratorFilterBase> &filters);
-		DLLNETWORK tb<type<BaseEntity>> get_all(lua_State *l, const tb<LuaEntityIteratorFilterBase> &filters);
+		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> get_all(lua_State *l);
+		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> get_all(lua_State *l, func<type<pragma::ecs::BaseEntity>> func);
+		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> get_all(lua_State *l, pragma::ecs::EntityIterator::FilterFlags filterFlags = pragma::ecs::EntityIterator::FilterFlags::Default);
+		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> get_all(lua_State *l, pragma::ecs::EntityIterator::FilterFlags filterFlags, const tb<LuaEntityIteratorFilterBase> &filters);
+		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> get_all(lua_State *l, const tb<LuaEntityIteratorFilterBase> &filters);
 		DLLNETWORK tb<type<pragma::BaseEntityComponent>> get_all_c(lua_State *l, func<type<pragma::BaseEntityComponent>> func);
 
-		DLLNETWORK tb<type<BaseEntity>> get_spawned(lua_State *l);
-		DLLNETWORK tb<type<BaseEntity>> get_players(lua_State *l);
-		DLLNETWORK tb<type<BaseEntity>> get_npcs(lua_State *l);
-		DLLNETWORK tb<type<BaseEntity>> get_weapons(lua_State *l);
+		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> get_spawned(lua_State *l);
+		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> get_players(lua_State *l);
+		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> get_npcs(lua_State *l);
+		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> get_weapons(lua_State *l);
 		DLLNETWORK tb<type<pragma::BaseVehicleComponent>> get_vehicles(lua_State *l);
-		DLLNETWORK opt<type<BaseEntity>> get_world(lua_State *l);
-		DLLNETWORK opt<type<BaseEntity>> get_by_index(lua_State *l, uint32_t idx);
-		DLLNETWORK opt<type<BaseEntity>> get_by_local_index(lua_State *l, uint32_t idx);
-		DLLNETWORK opt<type<BaseEntity>> find_by_unique_index(lua_State *l, const std::string &uuid);
+		DLLNETWORK opt<type<pragma::ecs::BaseEntity>> get_world(lua_State *l);
+		DLLNETWORK opt<type<pragma::ecs::BaseEntity>> get_by_index(lua_State *l, uint32_t idx);
+		DLLNETWORK opt<type<pragma::ecs::BaseEntity>> get_by_local_index(lua_State *l, uint32_t idx);
+		DLLNETWORK opt<type<pragma::ecs::BaseEntity>> find_by_unique_index(lua_State *l, const std::string &uuid);
 		DLLNETWORK type<EntityHandle> get_null(lua_State *l);
-		DLLNETWORK type<BaseEntity> create(lua_State *l, const std::string &classname);
-		DLLNETWORK Lua::type<BaseEntity> create_prop(lua_State *l, const std::string &mdl, const Vector3 *origin, const EulerAngles *angles, bool physicsProp);
+		DLLNETWORK type<pragma::ecs::BaseEntity> create(lua_State *l, const std::string &classname);
+		DLLNETWORK Lua::type<pragma::ecs::BaseEntity> create_prop(lua_State *l, const std::string &mdl, const Vector3 *origin, const EulerAngles *angles, bool physicsProp);
 
-		DLLNETWORK type<BaseEntity> create_trigger(lua_State *l, const Vector3 &origin, pragma::physics::IShape &shape);
-		DLLNETWORK type<BaseEntity> create_trigger(lua_State *l, const Vector3 &origin, const Vector3 &min, const Vector3 &max, const EulerAngles &angles);
-		DLLNETWORK type<BaseEntity> create_trigger(lua_State *l, const Vector3 &origin, float radius);
+		DLLNETWORK type<pragma::ecs::BaseEntity> create_trigger(lua_State *l, const Vector3 &origin, pragma::physics::IShape &shape);
+		DLLNETWORK type<pragma::ecs::BaseEntity> create_trigger(lua_State *l, const Vector3 &origin, const Vector3 &min, const Vector3 &max, const EulerAngles &angles);
+		DLLNETWORK type<pragma::ecs::BaseEntity> create_trigger(lua_State *l, const Vector3 &origin, float radius);
 
-		DLLNETWORK tb<type<BaseEntity>> find_by_filter(lua_State *l, const std::string &name);
-		DLLNETWORK tb<type<BaseEntity>> find_by_class(lua_State *l, const std::string &className);
-		DLLNETWORK tb<type<BaseEntity>> find_by_name(lua_State *l, const std::string &name);
-		DLLNETWORK tb<type<BaseEntity>> find_by_component(lua_State *l, const std::string &componentName);
-		DLLNETWORK tb<type<BaseEntity>> find_in_aabb(lua_State *l, const Vector3 &min, const Vector3 &max);
-		DLLNETWORK tb<type<BaseEntity>> find_in_sphere(lua_State *l, const Vector3 &origin, float radius);
-		DLLNETWORK tb<type<BaseEntity>> find_in_box(lua_State *l, const Vector3 &min, const Vector3 &max);
-		DLLNETWORK tb<type<BaseEntity>> find_in_cone(lua_State *l, const Vector3 &origin, const Vector3 &dir, float radius, float angle);
+		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> find_by_filter(lua_State *l, const std::string &name);
+		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> find_by_class(lua_State *l, const std::string &className);
+		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> find_by_name(lua_State *l, const std::string &name);
+		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> find_by_component(lua_State *l, const std::string &componentName);
+		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> find_in_aabb(lua_State *l, const Vector3 &min, const Vector3 &max);
+		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> find_in_sphere(lua_State *l, const Vector3 &origin, float radius);
+		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> find_in_box(lua_State *l, const Vector3 &min, const Vector3 &max);
+		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> find_in_cone(lua_State *l, const Vector3 &origin, const Vector3 &dir, float radius, float angle);
 		DLLNETWORK opt<pragma::ComponentEventId> get_event_id(lua_State *l, const std::string &name);
 		DLLNETWORK void register_class(lua_State *l, const std::string &className, const Lua::classObject &classObject);
 		DLLNETWORK void register_class(lua_State *l, const std::string &className, const luabind::tableT<luabind::variant<std::string, pragma::ComponentId>> &tComponents, LuaEntityType type);
@@ -79,7 +79,7 @@ export namespace Lua {
 			auto o = luabind::object(luabind::from_stack(l, idxClass));
 			if(!o)
 				return 0;
-			auto *state = ::Engine::Get()->GetNetworkState(l);
+			auto *state = pragma::Engine::Get()->GetNetworkState(l);
 			auto *game = state->GetGameState();
 			auto &manager = game->GetLuaEntityManager();
 
@@ -116,7 +116,7 @@ export namespace Lua {
 			pragma::ComponentRegInfo regInfo {categoryPath};
 			auto componentId = game->GetEntityComponentManager().RegisterComponentType(
 			  name,
-			  [o, game, name, firstCreation](BaseEntity &ent) mutable -> util::TSharedHandle<pragma::BaseEntityComponent> {
+			  [o, game, name, firstCreation](pragma::ecs::BaseEntity &ent) mutable -> util::TSharedHandle<pragma::BaseEntityComponent> {
 				  if(firstCreation) {
 					  firstCreation = false;
 

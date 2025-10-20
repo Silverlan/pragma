@@ -11,7 +11,7 @@ import :game.savegame;
 
 using namespace pragma;
 
-bool savegame::save(Game &game, const std::string &fileName, std::string &outErr)
+bool savegame::save(pragma::Game &game, const std::string &fileName, std::string &outErr)
 {
 	auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(), "wb");
 	if(f == nullptr) {
@@ -45,7 +45,7 @@ bool savegame::save(Game &game, const std::string &fileName, std::string &outErr
 	}
 	return udmData->Save(f);
 }
-bool savegame::load(Game &game, const std::string &fileName, std::string &outErr)
+bool savegame::load(pragma::Game &game, const std::string &fileName, std::string &outErr)
 {
 	auto udmData = util::load_udm_asset(fileName, &outErr);
 	if(udmData == nullptr)

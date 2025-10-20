@@ -36,7 +36,7 @@ export {
 			void SetDSPEffect(const std::string &identifier);
 			void SetInnerRadius(float radius);
 			void SetOuterRadius(float radius);
-			bool Input(const std::string &input, BaseEntity *activator, BaseEntity *caller, std::string data);
+			bool Input(const std::string &input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, std::string data);
 			float GetGain() const;
 			virtual void SetGain(float gain);
 		protected:

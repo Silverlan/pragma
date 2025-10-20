@@ -11,10 +11,10 @@ export module pragma.shared:entities.components.base_physics;
 
 export import :entities.components.base;
 export import :physics;
+export import :types;
 
 export {
 	class Frame;
-	class Model;
 	namespace pragma {
 		namespace physics {
 			struct DLLNETWORK PhysObjCreateInfo {
@@ -27,14 +27,14 @@ export {
 				// Returns the number of shapes that have been added
 				uint32_t AddShape(pragma::physics::IShape &shape, const umath::Transform &localPose = {}, BoneId boneId = -1);
 				void SetModelMeshBoneMapping(MeshIndex modelMeshIndex, BoneId boneIndex);
-				void SetModel(Model &model);
-				Model *GetModel() const;
+				void SetModel(pragma::Model &model);
+				pragma::Model *GetModel() const;
 				const std::unordered_map<BoneId, std::vector<ShapeInfo>> &GetShapes() const;
 				const std::unordered_map<MeshIndex, BoneId> &GetModelMeshBoneMappings() const;
 			private:
 				std::unordered_map<BoneId, std::vector<ShapeInfo>> m_shapes = {};
 				std::unordered_map<MeshIndex, BoneId> m_modelMeshIndexToShapeIndex = {};
-				util::WeakHandle<Model> m_model = {};
+				util::WeakHandle<pragma::Model> m_model = {};
 			};
 		};
 		struct DLLNETWORK CEPhysicsUpdateData : public ComponentEvent {
@@ -53,7 +53,7 @@ export {
 		protected:
 			struct DLLNETWORK CollisionInfo {
 				CollisionInfo();
-				CollisionInfo(BaseEntity *ent, Bool shouldCollide);
+				CollisionInfo(pragma::ecs::BaseEntity *ent, Bool shouldCollide);
 				EntityHandle entity;
 				Bool shouldCollide;
 			};
@@ -102,13 +102,13 @@ export {
 			Vector3 GetCenter() const;
 
 			float GetAABBDistance(const Vector3 &p) const;
-			float GetAABBDistance(const BaseEntity &ent) const;
+			float GetAABBDistance(const pragma::ecs::BaseEntity &ent) const;
 
-			virtual bool ShouldCollide(PhysObj *physThis, pragma::physics::ICollisionObject *colThis, BaseEntity *entOther, PhysObj *physOther, pragma::physics::ICollisionObject *colOther, bool valDefault) const;
-			void ResetCollisions(BaseEntity *ent);
-			void DisableCollisions(BaseEntity *ent);
-			void EnableCollisions(BaseEntity *ent);
-			void SetCollisionsEnabled(BaseEntity *ent, bool b);
+			virtual bool ShouldCollide(pragma::physics::PhysObj *physThis, pragma::physics::ICollisionObject *colThis, pragma::ecs::BaseEntity *entOther, pragma::physics::PhysObj *physOther, pragma::physics::ICollisionObject *colOther, bool valDefault) const;
+			void ResetCollisions(pragma::ecs::BaseEntity *ent);
+			void DisableCollisions(pragma::ecs::BaseEntity *ent);
+			void EnableCollisions(pragma::ecs::BaseEntity *ent);
+			void SetCollisionsEnabled(pragma::ecs::BaseEntity *ent, bool b);
 			void UpdateCCD();
 			void SetCollisionCallbacksEnabled(bool b);
 			bool GetCollisionCallbacksEnabled() const;
@@ -122,21 +122,21 @@ export {
 			virtual bool PostPhysicsSimulate();
 			virtual void SetKinematic(bool b);
 			bool IsKinematic() const;
-			virtual void OnPhysicsWake(PhysObj *phys);
-			virtual void OnPhysicsSleep(PhysObj *phys);
+			virtual void OnPhysicsWake(pragma::physics::PhysObj *phys);
+			virtual void OnPhysicsSleep(pragma::physics::PhysObj *phys);
 			bool IsOnGround() const;
 			bool IsGroundWalkable() const;
 
 			void SetForcePhysicsAwakeCallbacksEnabled(bool enabled, bool apply = true, std::optional<bool> isAwakeOverride = {});
 			bool AreForcePhysicsAwakeCallbacksEnabled() const;
 
-			BaseEntity *GetGroundEntity() const;
-			PhysObj *GetPhysicsObject() const;
+			pragma::ecs::BaseEntity *GetGroundEntity() const;
+			pragma::physics::PhysObj *GetPhysicsObject() const;
 			pragma::physics::ICollisionObject *GetCollisionObject(UInt32 boneId) const;
-			virtual PhysObj *InitializePhysics(PHYSICSTYPE type, PhysFlags flags = PhysFlags::None);
-			PhysObj *InitializePhysics(pragma::physics::IConvexShape &shape, PhysFlags flags = PhysFlags::None);
+			virtual pragma::physics::PhysObj *InitializePhysics(pragma::physics::PHYSICSTYPE type, PhysFlags flags = PhysFlags::None);
+			pragma::physics::PhysObj *InitializePhysics(pragma::physics::IConvexShape &shape, PhysFlags flags = PhysFlags::None);
 			virtual void DestroyPhysicsObject();
-			PHYSICSTYPE GetPhysicsType() const;
+			pragma::physics::PHYSICSTYPE GetPhysicsType() const;
 			void DropToFloor();
 			bool IsTrigger() const;
 			virtual void SetCollisionFilter(pragma::physics::CollisionMask filterGroup, pragma::physics::CollisionMask filterMask);
@@ -159,10 +159,10 @@ export {
 			bool IsRayResultCallbackEnabled() const;
 			void SetRayResultCallbackEnabled(bool b);
 
-			MOVETYPE GetMoveType() const;
-			virtual void SetMoveType(MOVETYPE movetype);
-			COLLISIONTYPE GetCollisionType() const;
-			virtual void SetCollisionType(COLLISIONTYPE collisiontype);
+			pragma::physics::MOVETYPE GetMoveType() const;
+			virtual void SetMoveType(pragma::physics::MOVETYPE movetype);
+			pragma::physics::COLLISIONTYPE GetCollisionType() const;
+			virtual void SetCollisionType(pragma::physics::COLLISIONTYPE collisiontype);
 
 			std::vector<PhysJoint> &GetPhysConstraints();
 
@@ -206,7 +206,7 @@ export {
 			// Should only be called from within an EVENT_INITIALIZE_PHYSICS event!
 			PhysObjHandle InitializePhysics(const physics::PhysObjCreateInfo &physObjCreateInfo, PhysFlags flags, int32_t rootMeshBoneId = -1);
 		protected:
-			BasePhysicsComponent(BaseEntity &ent);
+			BasePhysicsComponent(pragma::ecs::BaseEntity &ent);
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 
 			// Mass used for initialization; Not necessarily the same as the mass of the actual physics object
@@ -217,16 +217,16 @@ export {
 			pragma::NetEventId m_netEvSetSimEnabled = pragma::INVALID_NET_EVENT;
 
 			bool m_bRayResultCallbackEnabled = false;
-			PHYSICSTYPE m_physicsType = PHYSICSTYPE::NONE;
-			util::TSharedHandle<PhysObj> m_physObject = nullptr;
+			pragma::physics::PHYSICSTYPE m_physicsType = pragma::physics::PHYSICSTYPE::NONE;
+			util::TSharedHandle<pragma::physics::PhysObj> m_physObject = nullptr;
 			std::vector<PhysJoint> m_joints;
 			std::vector<CollisionInfo> m_customCollisions;
-			std::vector<CollisionInfo>::iterator FindCollisionInfo(BaseEntity *ent);
+			std::vector<CollisionInfo>::iterator FindCollisionInfo(pragma::ecs::BaseEntity *ent);
 			util::TSharedHandle<pragma::physics::IRigidBody> CreateRigidBody(pragma::physics::IShape &shape, bool dynamic, const umath::Transform &localPose = {});
-			util::TSharedHandle<PhysObj> InitializeSoftBodyPhysics();
-			util::TSharedHandle<PhysObj> InitializeModelPhysics(PhysFlags flags = PhysFlags::Dynamic);
-			util::TSharedHandle<PhysObj> InitializeBoxControllerPhysics();
-			util::TSharedHandle<PhysObj> InitializeCapsuleControllerPhysics();
+			util::TSharedHandle<pragma::physics::PhysObj> InitializeSoftBodyPhysics();
+			util::TSharedHandle<pragma::physics::PhysObj> InitializeModelPhysics(PhysFlags flags = PhysFlags::Dynamic);
+			util::TSharedHandle<pragma::physics::PhysObj> InitializeBoxControllerPhysics();
+			util::TSharedHandle<pragma::physics::PhysObj> InitializeCapsuleControllerPhysics();
 			virtual void OnPhysicsInitialized();
 			virtual void OnPhysicsDestroyed();
 			pragma::physics::CollisionMask m_collisionFilterGroup = pragma::physics::CollisionMask::Default;
@@ -240,8 +240,8 @@ export {
 			void UpdateRagdollPose();
 
 			StateFlags m_stateFlags = StateFlags::CollisionsEnabled;
-			MOVETYPE m_moveType = {};
-			COLLISIONTYPE m_collisionType = {};
+			pragma::physics::MOVETYPE m_moveType = {};
+			pragma::physics::COLLISIONTYPE m_collisionType = {};
 			float m_colRadius = 0.f;
 			Vector3 m_colMin = {};
 			Vector3 m_colMax = {};
@@ -249,9 +249,9 @@ export {
 			void ClearAwakeStatus();
 		};
 		struct DLLNETWORK CEInitializePhysics : public ComponentEvent {
-			CEInitializePhysics(PHYSICSTYPE type, BasePhysicsComponent::PhysFlags flags);
+			CEInitializePhysics(pragma::physics::PHYSICSTYPE type, BasePhysicsComponent::PhysFlags flags);
 			virtual void PushArguments(lua_State *l) override;
-			PHYSICSTYPE physicsType;
+			pragma::physics::PHYSICSTYPE physicsType;
 			BasePhysicsComponent::PhysFlags flags;
 		};
 		struct DLLNETWORK CEPostPhysicsSimulate : public ComponentEvent {
@@ -261,7 +261,13 @@ export {
 			virtual void HandleReturnValues(lua_State *l) override;
 			bool keepAwake = true;
 		};
+        using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::BasePhysicsComponent::StateFlags);
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::BasePhysicsComponent::PhysFlags)
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::BasePhysicsComponent::StateFlags> : std::true_type {};
+		
+        template<>
+        struct enable_bitwise_operators<pragma::BasePhysicsComponent::PhysFlags> : std::true_type {};
+    }
 };

@@ -18,14 +18,14 @@ export namespace pragma {
 		virtual void OnRemove() override;
 
 		const pragma::PEntityProperty &GetPointAtTargetProperty() const;
-		void SetPointAtTarget(BaseEntity &ent);
+		void SetPointAtTarget(pragma::ecs::BaseEntity &ent);
 		void ClearPointAtTarget();
-		BaseEntity *GetPointAtTarget() const;
+		pragma::ecs::BaseEntity *GetPointAtTarget() const;
 	  protected:
-		BasePointAtTargetComponent(BaseEntity &ent);
+		BasePointAtTargetComponent(pragma::ecs::BaseEntity &ent);
 		void UpdatePose();
 		virtual void OnEntitySpawn() override;
-		virtual void SetPointAtTarget(BaseEntity *ent);
+		virtual void SetPointAtTarget(pragma::ecs::BaseEntity *ent);
 
 		std::string m_kvPointAtTargetName = "";
 		pragma::PEntityProperty m_pointAtTarget;

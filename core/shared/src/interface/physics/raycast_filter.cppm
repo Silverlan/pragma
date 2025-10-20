@@ -15,7 +15,7 @@ export import :physics.object_handle;
 export import :physics.shape;
 
 export {
-	class BaseEntity;
+	namespace pragma::ecs {class BaseEntity;}
 	namespace pragma::physics {
 		class DLLNETWORK IRayCastFilterCallback {
 		public:
@@ -28,7 +28,7 @@ export {
 
 		class DLLNETWORK EntityRayCastFilterCallback : public IRayCastFilterCallback {
 		public:
-			EntityRayCastFilterCallback(BaseEntity &ent);
+			EntityRayCastFilterCallback(pragma::ecs::BaseEntity &ent);
 			virtual RayCastHitType PreFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
 			virtual RayCastHitType PostFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
 			virtual bool HasPreFilter() const override;
@@ -50,7 +50,7 @@ export {
 
 		class DLLNETWORK PhysObjRayCastFilterCallback : public IRayCastFilterCallback {
 		public:
-			PhysObjRayCastFilterCallback(PhysObj &physObj);
+			PhysObjRayCastFilterCallback(pragma::physics::PhysObj &physObj);
 			virtual RayCastHitType PreFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
 			virtual RayCastHitType PostFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
 			virtual bool HasPreFilter() const override;

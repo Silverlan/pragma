@@ -7,6 +7,10 @@ module;
 #include <functional>
 #include <optional>
 #include <typeindex>
+#include <stdexcept>
+#include <string>
+
+#include <sharedutils/magic_enum.hpp>
 
 export module pragma.shared:entities.member_info;
 

@@ -23,7 +23,7 @@ export namespace pragma {
 		const util::PBoolProperty &GetIgnitableProperty() const;
 		bool IsOnFire() const;
 		bool IsIgnitable() const;
-		virtual util::EventReply Ignite(float duration, BaseEntity *attacker = nullptr, BaseEntity *inflictor = nullptr);
+		virtual util::EventReply Ignite(float duration, pragma::ecs::BaseEntity *attacker = nullptr, pragma::ecs::BaseEntity *inflictor = nullptr);
 		virtual void Extinguish();
 		virtual void SetIgnitable(bool b);
 		virtual void OnTick(double dt) override;
@@ -31,7 +31,7 @@ export namespace pragma {
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 	  protected:
-		BaseFlammableComponent(BaseEntity &ent);
+		BaseFlammableComponent(pragma::ecs::BaseEntity &ent);
 		pragma::NetEventId m_netEvIgnite = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvExtinguish = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvSetIgnitable = pragma::INVALID_NET_EVENT;
@@ -40,7 +40,7 @@ export namespace pragma {
 		float m_tExtinguishTime = 0.f;
 	};
 	struct DLLNETWORK CEOnIgnited : public ComponentEvent {
-		CEOnIgnited(float duration, BaseEntity *attacker, BaseEntity *inflictor);
+		CEOnIgnited(float duration, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor);
 		virtual void PushArguments(lua_State *l) override;
 		float duration;
 		EntityHandle attacker;

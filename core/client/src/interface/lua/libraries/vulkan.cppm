@@ -10,7 +10,6 @@ module;
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
 #include "pragma/lua/luaapi.h"
-#include "pragma/lua/types/udm.hpp"
 #include "udm.hpp"
 #include "mathutil/color.h"
 

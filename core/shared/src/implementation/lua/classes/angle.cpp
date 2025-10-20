@@ -5,8 +5,6 @@ module;
 
 
 
-#include <glm/gtx/euler_angles.hpp>
-
 module pragma.shared;
 
 import :scripting.lua.classes.angle;

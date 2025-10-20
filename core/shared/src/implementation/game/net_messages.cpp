@@ -12,7 +12,7 @@ bool NetIncludePacketID(NetworkState *state, std::string identifier, NetPacket &
 {
 	if(!state->IsGameActive())
 		return false;
-	Game *game = state->GetGameState();
+	pragma::Game *game = state->GetGameState();
 	unsigned int ID = game->GetNetMessageID(identifier);
 	if(ID == 0)
 		return false;
@@ -22,9 +22,9 @@ bool NetIncludePacketID(NetworkState *state, std::string identifier, NetPacket &
 	return true;
 }
 
-void Game::RegisterLuaNetMessage(std::string name, int handler) { m_luaNetMessages.insert(std::unordered_map<std::string, int>::value_type(name, handler)); }
+void pragma::Game::RegisterLuaNetMessage(std::string name, int handler) { m_luaNetMessages.insert(std::unordered_map<std::string, int>::value_type(name, handler)); }
 
-bool Game::RegisterNetMessage(std::string name)
+bool pragma::Game::RegisterNetMessage(std::string name)
 {
 	for(int i = 1; i < m_luaNetMessageIndex.size(); i++) {
 		if(m_luaNetMessageIndex[i] == name)
@@ -34,7 +34,7 @@ bool Game::RegisterNetMessage(std::string name)
 	return true;
 }
 
-unsigned int Game::GetNetMessageID(std::string name)
+unsigned int pragma::Game::GetNetMessageID(std::string name)
 {
 	for(unsigned int i = 1; i < m_luaNetMessageIndex.size(); i++) {
 		if(m_luaNetMessageIndex[i] == name)
@@ -43,7 +43,7 @@ unsigned int Game::GetNetMessageID(std::string name)
 	return 0;
 }
 
-std::string *Game::GetNetMessageIdentifier(unsigned int ID)
+std::string *pragma::Game::GetNetMessageIdentifier(unsigned int ID)
 {
 	if(ID >= m_luaNetMessageIndex.size())
 		return nullptr;

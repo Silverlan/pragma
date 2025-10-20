@@ -16,7 +16,7 @@ void BasePointConstraintHingeComponent::Initialize()
 {
 	BasePointConstraintComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "limit_low", false))
 			m_kvLimitLow = util::to_float(kvData.value);
@@ -34,7 +34,7 @@ void BasePointConstraintHingeComponent::Initialize()
 	});
 }
 
-void BasePointConstraintHingeComponent::InitializeConstraint(BaseEntity *src, BaseEntity *tgt)
+void BasePointConstraintHingeComponent::InitializeConstraint(pragma::ecs::BaseEntity *src, pragma::ecs::BaseEntity *tgt)
 {
 	auto pPhysComponentTgt = tgt->GetPhysicsComponent();
 	auto *physTgt = pPhysComponentTgt ? dynamic_cast<RigidPhysObj *>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;

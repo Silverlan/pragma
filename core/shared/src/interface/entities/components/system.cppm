@@ -18,7 +18,7 @@ export import :entities.manager;
 export import :entities.enums;
 
 export {
-	class BaseEntity;
+	namespace pragma::ecs {class BaseEntity;}
 	namespace pragma {
 		class EntityComponentManager;
 		class DLLNETWORK BaseEntityComponentSystem {
@@ -71,18 +71,22 @@ export {
 		protected:
 			BaseEntityComponentSystem() = default;
 
-			void Initialize(BaseEntity &ent, EntityComponentManager &componentManager);
+			void Initialize(pragma::ecs::BaseEntity &ent, EntityComponentManager &componentManager);
 			virtual void OnComponentAdded(BaseEntityComponent &component);
 			virtual void OnComponentRemoved(BaseEntityComponent &component);
 		private:
 			std::unordered_map<ComponentId, ComponentHandle<BaseEntityComponent>> m_componentLookupTable; // Only contains one (the first) component per type; Used for fast lookups
 			std::vector<util::TSharedHandle<BaseEntityComponent>> m_components;
 			EntityComponentManager *m_componentManager;
-			BaseEntity *m_entity;
+			pragma::ecs::BaseEntity *m_entity;
 			mutable StateFlags m_stateFlags = StateFlags::None;
 		};
+        using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseEntityComponentSystem::StateFlags)
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::BaseEntityComponentSystem::StateFlags> : std::true_type {};
+    }
 
 	template<class TComponent, typename>
 	pragma::ComponentHandle<TComponent> pragma::BaseEntityComponentSystem::AddComponent(bool bForceCreateNew)

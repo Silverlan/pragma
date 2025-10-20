@@ -62,7 +62,11 @@ export namespace pragma {
 		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeShaderResources() override;
 	};
+    using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderRayTracing::RenderFlags)
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::ShaderRayTracing::RenderFlags> : std::true_type {};
+    }
 };

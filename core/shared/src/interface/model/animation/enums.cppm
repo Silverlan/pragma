@@ -9,82 +9,90 @@ module;
 
 export module pragma.shared:model.animation.enums;
 
+import pragma.math;
+
 export {
     constexpr uint32_t PRAGMA_ANIMATION_VERSION = 2;
-	enum class Activity : uint16_t {
-		Invalid,
+	namespace pragma {
+		enum class Activity : uint16_t {
+			Invalid,
 
-		Idle,
-		Walk,
-		Run,
-		Jump,
-		Crouch,
-		CrouchIdle,
-		CrouchWalk,
-		Uncrouch,
-		Alert,
+			Idle,
+			Walk,
+			Run,
+			Jump,
+			Crouch,
+			CrouchIdle,
+			CrouchWalk,
+			Uncrouch,
+			Alert,
 
-		FlinchHead,
-		FlinchChest,
-		FlinchStomach,
-		FlinchLeftArm,
-		FlinchRightArm,
-		FlinchLeftLeg,
-		FlinchRightLeg,
-		FlinchPhysics,
-		FlinchGeneric,
-		FlinchLight,
-		FlinchMedium,
-		FlinchHeavy,
+			FlinchHead,
+			FlinchChest,
+			FlinchStomach,
+			FlinchLeftArm,
+			FlinchRightArm,
+			FlinchLeftLeg,
+			FlinchRightLeg,
+			FlinchPhysics,
+			FlinchGeneric,
+			FlinchLight,
+			FlinchMedium,
+			FlinchHeavy,
 
-		Die,
-		TurnLeft,
-		TurnRight,
+			Die,
+			TurnLeft,
+			TurnRight,
 
-		MeleeAttack1,
-		MeleeAttack2,
-		MeleeAttack3,
-		MeleeAttack4,
-		MeleeAttack5,
-		RangeAttack1,
-		RangeAttack2,
-		RangeAttack3,
-		RangeAttack4,
-		RangeAttack5,
+			MeleeAttack1,
+			MeleeAttack2,
+			MeleeAttack3,
+			MeleeAttack4,
+			MeleeAttack5,
+			RangeAttack1,
+			RangeAttack2,
+			RangeAttack3,
+			RangeAttack4,
+			RangeAttack5,
 
-		VmIdle,
-		VmDeploy,
-		VmHolster,
+			VmIdle,
+			VmDeploy,
+			VmHolster,
 
-		VmPrimaryAttack,
-		VmSecondaryAttack,
-		VmTertiaryAttack,
-		VmAttack4,
-		VmAttack5,
-		VmAttack6,
-		VmAttack7,
-		VmAttack8,
-		VmAttack9,
-		VmAttack10,
+			VmPrimaryAttack,
+			VmSecondaryAttack,
+			VmTertiaryAttack,
+			VmAttack4,
+			VmAttack5,
+			VmAttack6,
+			VmAttack7,
+			VmAttack8,
+			VmAttack9,
+			VmAttack10,
 
-		VmReload,
+			VmReload,
 
-		VmRun,
-		VmRunPassive,
-		VmWalk,
-		VmWalkCrouched,
-		VmAimToPassive,
+			VmRun,
+			VmRunPassive,
+			VmWalk,
+			VmWalkCrouched,
+			VmAimToPassive,
 
-		VmPassiveToAim,
-		VmAimToIronSight,
-		VmIronSightToAim,
+			VmPassiveToAim,
+			VmAimToIronSight,
+			VmIronSightToAim,
 
-		GestureTurnLeft,
-		GestureTurnRight,
+			GestureTurnLeft,
+			GestureTurnRight,
 
-		Count
-	};
-	REGISTER_BASIC_ARITHMETIC_OPERATORS(Activity)
+			Count
+		};
+        using namespace umath::scoped_enum::bitwise;
+	}
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::Activity> : std::true_type {};
+    }
 
 	extern DLLNETWORK std::unordered_map<int32_t, std::string> ACTIVITY_NAMES;
 
@@ -102,22 +110,28 @@ export {
 
 			Default = Transmit
 		};
-	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::FPlayAnim)
 
-	enum class FAnim : uint32_t {
-		None = 0,
-		Loop = 1,
-		NoRepeat = 2,
-		MoveX = 32,
-		MoveZ = 64,
-		Autoplay = 128,
-		Gesture = 256,
-		NoMoveBlend = 512,
+		enum class FAnim : uint32_t {
+			None = 0,
+			Loop = 1,
+			NoRepeat = 2,
+			MoveX = 32,
+			MoveZ = 64,
+			Autoplay = 128,
+			Gesture = 256,
+			NoMoveBlend = 512,
 
-		Count = 7
+			Count = 7
+		};
+        using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(FAnim)
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::FPlayAnim> : std::true_type {};
+
+        template<>
+        struct enable_bitwise_operators<pragma::FAnim> : std::true_type {};
+    }
 
 	namespace pragma::animation {
 		using BoneId = uint16_t;

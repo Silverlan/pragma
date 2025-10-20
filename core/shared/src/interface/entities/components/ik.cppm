@@ -13,10 +13,12 @@ export module pragma.shared:entities.components.ik;
 
 export import :entities.components.base;
 
+#undef max
+
 export namespace pragma {
 	class DLLNETWORK IKComponent final : public BaseEntityComponent {
 	  public:
-		IKComponent(BaseEntity &ent);
+		IKComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		void SetIKControllerEnabled(uint32_t ikControllerId, bool b);

@@ -6,6 +6,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <memory>
 
+#include <string>
+
 export module pragma.shared:audio.sound_script;
 
 export import :audio.sound;

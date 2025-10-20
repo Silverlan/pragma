@@ -31,7 +31,7 @@ void ConstraintLimitDistanceComponent::RegisterMembers(pragma::EntityComponentMa
 	}
 }
 
-ConstraintLimitDistanceComponent::ConstraintLimitDistanceComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+ConstraintLimitDistanceComponent::ConstraintLimitDistanceComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintLimitDistanceComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

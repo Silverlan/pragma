@@ -27,7 +27,7 @@ void BaseEnvLightSpotVolComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "cone_height", false))
 			GetEntity().SetKeyValue("radius", kvData.value);
@@ -72,15 +72,15 @@ void BaseEnvLightSpotVolComponent::Load(udm::LinkedPropertyWrapperArg udm, uint3
 void BaseEnvLightSpotVolComponent::SetIntensityFactor(float intensityFactor) { m_intensityFactor = intensityFactor; }
 float BaseEnvLightSpotVolComponent::GetIntensityFactor() const { return m_intensityFactor; }
 
-BaseEntity *BaseEnvLightSpotVolComponent::GetSpotlightTarget() const { return const_cast<BaseEntity *>(m_hSpotlightTarget.get()); }
+pragma::ecs::BaseEntity *BaseEnvLightSpotVolComponent::GetSpotlightTarget() const { return const_cast<pragma::ecs::BaseEntity *>(m_hSpotlightTarget.get()); }
 
-void BaseEnvLightSpotVolComponent::SetSpotlightTarget(BaseEntity &ent) { m_hSpotlightTarget = ent.GetHandle(); }
+void BaseEnvLightSpotVolComponent::SetSpotlightTarget(pragma::ecs::BaseEntity &ent) { m_hSpotlightTarget = ent.GetHandle(); }
 
 void BaseEnvLightSpotVolComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
 	if(m_kvSpotlightTargetName.empty() == false) {
-		EntityIterator entIt {*GetEntity().GetNetworkState()->GetGameState(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+		pragma::ecs::EntityIterator entIt {*GetEntity().GetNetworkState()->GetGameState(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 		entIt.AttachFilter<EntityIteratorFilterEntity>(m_kvSpotlightTargetName);
 		auto it = entIt.begin();
 		if(it != entIt.end())

@@ -4,10 +4,12 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/lua/core.hpp"
 #include <unordered_map>
 #include <variant>
 #include "pragma/logging.hpp"
 #include <typeindex>
+#include <iostream>
 #ifdef _WIN32
 #if __cpp_lib_format >= 202207L
 #include <format>
@@ -26,7 +28,7 @@ export import :entities.components.events.event_info;
 export import :scripting.lua.base_lua_handle;
 export import pragma.util;
 
-namespace pragma {
+export namespace pragma {
 	class DLLNETWORK EEntityComponentCallbackEvent : public util::ExtensibleEnum {
 	  public:
 		using util::ExtensibleEnum::ExtensibleEnum;
@@ -36,11 +38,19 @@ namespace pragma {
 		enum class E : uint32_t { Count };
 	};
 };
-DEFINE_STD_HASH_SPECIALIZATION(pragma::EEntityComponentCallbackEvent);
+export namespace std {                                                                                                                                                                                                                                                                              \
+	template<>                                                                                                                                                                                                                                                                               \
+	struct hash<pragma::EEntityComponentCallbackEvent> {                                                                                                                                                                                                                                                                  \
+		std::size_t operator()(const pragma::EEntityComponentCallbackEvent &object) const                                                                                                                                                                                                                                 \
+		{                                                                                                                                                                                                                                                                                    \
+			return object.Hash();                                                                                                                                                                                                                                                            \
+		}                                                                                                                                                                                                                                                                                    \
+	};                                                                                                                                                                                                                                                                                       \
+}
 
 export {
-	class BaseEntity;
-	class Game;
+	namespace pragma::ecs {class BaseEntity;}
+	namespace pragma {class Game;}
 	class NetworkState;
 	namespace pragma {
 		class EntityComponentManager;
@@ -111,13 +121,13 @@ export {
 			BaseEntityComponent &operator=(BaseEntityComponent &&) = delete;
 
 			virtual ~BaseEntityComponent();
-			const BaseEntity &GetEntity() const;
-			BaseEntity &GetEntity();
-			const BaseEntity &operator->() const;
-			BaseEntity &operator->();
+			const pragma::ecs::BaseEntity &GetEntity() const;
+			pragma::ecs::BaseEntity &GetEntity();
+			const pragma::ecs::BaseEntity &operator->() const;
+			pragma::ecs::BaseEntity &operator->();
 
-			Game &GetGame();
-			const Game &GetGame() const { return const_cast<BaseEntityComponent *>(this)->GetGame(); }
+			pragma::Game &GetGame();
+			const pragma::Game &GetGame() const { return const_cast<BaseEntityComponent *>(this)->GetGame(); }
 			NetworkState &GetNetworkState();
 			const NetworkState &GetNetworkState() const { return const_cast<BaseEntityComponent *>(this)->GetNetworkState(); }
 			EntityComponentManager &GetComponentManager();
@@ -195,8 +205,8 @@ export {
 			// Same as above, but assumes the callback never 'handles' the event. This is mostly to avoid cases where the return value is omitted by accident.
 			CallbackHandle BindEventUnhandled(ComponentEventId eventId, const std::function<void(std::reference_wrapper<ComponentEvent>)> &fCallback);
 
-			virtual void OnAttached(BaseEntity &ent);
-			virtual void OnDetached(BaseEntity &ent);
+			virtual void OnAttached(pragma::ecs::BaseEntity &ent);
+			virtual void OnDetached(pragma::ecs::BaseEntity &ent);
 
 			virtual void Save(udm::LinkedPropertyWrapperArg udm);
 			void Load(udm::LinkedPropertyWrapperArg udm);
@@ -267,12 +277,12 @@ export {
 			std::string GetUri() const;
 			std::string GetMemberUri(const std::string &memberName) const;
 			std::optional<std::string> GetMemberUri(ComponentMemberIndex memberIdx) const;
-			static std::optional<std::string> GetUri(Game *game, std::variant<util::Uuid, std::string> entityIdentifier, std::variant<ComponentId, std::string> componentIdentifier);
-			static std::optional<std::string> GetMemberUri(Game *game, std::variant<util::Uuid, std::string> entityIdentifier, std::variant<ComponentId, std::string> componentIdentifier, std::variant<ComponentMemberIndex, std::string> memberIdentifier);
+			static std::optional<std::string> GetUri(pragma::Game *game, std::variant<util::Uuid, std::string> entityIdentifier, std::variant<ComponentId, std::string> componentIdentifier);
+			static std::optional<std::string> GetMemberUri(pragma::Game *game, std::variant<util::Uuid, std::string> entityIdentifier, std::variant<ComponentId, std::string> componentIdentifier, std::variant<ComponentMemberIndex, std::string> memberIdentifier);
 		protected:
 			friend EntityComponentManager;
 			friend BaseEntityComponentSystem;
-			BaseEntityComponent(BaseEntity &ent);
+			BaseEntityComponent(pragma::ecs::BaseEntity &ent);
 			void CleanUp();
 			void UpdateTickPolicy();
 			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData);
@@ -306,7 +316,7 @@ export {
 			std::unordered_map<ComponentEventId, std::vector<CallbackHandle>> &GetBoundEvents() const;
 		protected:
 			void OnEntityComponentAdded(BaseEntityComponent &component, bool bSkipEventBinding);
-			BaseEntity &m_entity;
+			pragma::ecs::BaseEntity &m_entity;
 
 			StateFlags m_stateFlags = StateFlags::None;
 			TickData m_tickData {};
@@ -317,8 +327,12 @@ export {
 			mutable std::unique_ptr<std::unordered_map<ComponentEventId, std::vector<CallbackHandle>>> m_eventCallbacks;
 			mutable std::unique_ptr<std::unordered_map<ComponentEventId, std::vector<CallbackHandle>>> m_boundEvents;
 		};
+        using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseEntityComponent::StateFlags)
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::BaseEntityComponent::StateFlags> : std::true_type {};
+    }
 
 	DLLNETWORK std::ostream &operator<<(std::ostream &os, const pragma::BaseEntityComponent &component);
 
@@ -383,10 +397,10 @@ export {
 		logger.critical(fmt, std::forward<Args>(args)...);
 	}
 
-	spdlog::logger *find_logger(Game &game, std::type_index typeIndex);
+	spdlog::logger *find_logger(pragma::Game &game, std::type_index typeIndex);
 
 	template<typename TClass>
-	spdlog::logger *find_logger(Game &game) {
+	spdlog::logger *find_logger(pragma::Game &game) {
 		return find_logger(game, typeid(TClass));
 	}
 

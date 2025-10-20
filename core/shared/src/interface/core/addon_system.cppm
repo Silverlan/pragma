@@ -11,6 +11,7 @@ module;
 export module pragma.shared:core.addon_system;
 
 import pragma.pad;
+export import pragma.filesystem;
 
 export {
     uint64_t FSYS_SEARCH_ADDON = 2048;

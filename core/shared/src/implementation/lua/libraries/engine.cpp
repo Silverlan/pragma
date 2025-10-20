@@ -10,7 +10,7 @@ import :scripting.lua.libraries.engine;
 
 #undef LoadLibrary
 
-void Lua::engine::exit() { ::Engine::Get()->ShutDown(); }
+void Lua::engine::exit() { pragma::Engine::Get()->ShutDown(); }
 
 std::string Lua::engine::get_working_directory()
 {
@@ -56,29 +56,29 @@ void Lua::engine::PrecacheModel_sv(lua_State *l, const std::string &mdlName)
 	);*/
 }
 
-std::shared_ptr<Model> Lua::engine::get_model(lua_State *l, const std::string &mdlName)
+std::shared_ptr<pragma::Model> Lua::engine::get_model(lua_State *l, const std::string &mdlName)
 {
-	auto *state = ::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	return game->LoadModel(mdlName);
 }
 
 void Lua::engine::LoadSoundScripts(lua_State *l, const std::string &fileName, bool precache)
 {
-	NetworkState *state = ::Engine::Get()->GetNetworkState(l);
+	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	state->LoadSoundScripts(fileName.c_str(), precache);
 }
 void Lua::engine::LoadSoundScripts(lua_State *l, const std::string &fileName) { LoadSoundScripts(l, fileName, false); }
 
 bool Lua::engine::LibraryExists(lua_State *l, const std::string &library)
 {
-	auto libAbs = ::util::get_normalized_module_path(library, ::Engine::Get()->GetNetworkState(l)->IsClient());
+	auto libAbs = ::util::get_normalized_module_path(library, pragma::Engine::Get()->GetNetworkState(l)->IsClient());
 	return FileManager::Exists(libAbs);
 }
 
 bool Lua::engine::UnloadLibrary(lua_State *l, const std::string &path)
 {
-	NetworkState *state = ::Engine::Get()->GetNetworkState(l);
+	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	std::string err;
 	return state->UnloadLibrary(path);
 }
@@ -87,7 +87,7 @@ bool Lua::engine::IsLibraryLoaded(NetworkState &nw, const std::string &path) { r
 
 Lua::var<bool, std::string> Lua::engine::LoadLibrary(lua_State *l, const std::string &path)
 {
-	NetworkState *state = ::Engine::Get()->GetNetworkState(l);
+	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	std::string err;
 	bool b = state->InitializeLibrary(path, &err, l) != nullptr;
 	if(b)
@@ -95,12 +95,12 @@ Lua::var<bool, std::string> Lua::engine::LoadLibrary(lua_State *l, const std::st
 	return luabind::object {l, err};
 }
 
-uint64_t Lua::engine::GetTickCount() { return ::Engine::Get()->GetTickCount(); }
+uint64_t Lua::engine::GetTickCount() { return pragma::Engine::Get()->GetTickCount(); }
 
-void Lua::engine::set_record_console_output(bool record) { ::Engine::Get()->SetRecordConsoleOutput(record); }
+void Lua::engine::set_record_console_output(bool record) { pragma::Engine::Get()->SetRecordConsoleOutput(record); }
 Lua::opt<Lua::mult<std::string, Con::MessageFlags, Lua::opt<Color>>> Lua::engine::poll_console_output(lua_State *l)
 {
-	auto output = ::Engine::Get()->PollConsoleOutput();
+	auto output = pragma::Engine::Get()->PollConsoleOutput();
 	if(output.has_value() == false)
 		return nil;
 	luabind::object color {};

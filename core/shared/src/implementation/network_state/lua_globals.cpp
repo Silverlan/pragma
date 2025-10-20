@@ -892,7 +892,7 @@ void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 
 
 
-static BaseEntity *find_entity(lua_State *l, Game &game, luabind::object o)
+static pragma::ecs::BaseEntity *find_entity(lua_State *l, pragma::Game &game, luabind::object o)
 
 
 
@@ -902,7 +902,7 @@ static BaseEntity *find_entity(lua_State *l, Game &game, luabind::object o)
 
 
 
-	BaseEntity *ent = nullptr;
+	pragma::ecs::BaseEntity *ent = nullptr;
 
 
 
@@ -932,7 +932,7 @@ static BaseEntity *find_entity(lua_State *l, Game &game, luabind::object o)
 
 
 
-		EntityIterator entIt {game, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+		pragma::ecs::EntityIterator entIt {game, pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 
 
 
@@ -962,7 +962,7 @@ static BaseEntity *find_entity(lua_State *l, Game &game, luabind::object o)
 
 
 
-			EntityIterator entIt {game, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+			pragma::ecs::EntityIterator entIt {game, pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 
 
 
@@ -977,12 +977,12 @@ static BaseEntity *find_entity(lua_State *l, Game &game, luabind::object o)
 
 
 
-				std::vector<BaseEntity *> ents;
+				std::vector<pragma::ecs::BaseEntity *> ents;
 
 
 
 
-				void Add(BaseEntity *ent, const std::string &name)
+				void Add(pragma::ecs::BaseEntity *ent, const std::string &name)
 
 
 
@@ -1197,7 +1197,7 @@ static BaseEntity *find_entity(lua_State *l, Game &game, luabind::object o)
 
 
 
-void Game::RegisterLuaGlobals()
+void pragma::Game::RegisterLuaGlobals()
 
 
 
@@ -1227,7 +1227,7 @@ void Game::RegisterLuaGlobals()
 
 
 
-		auto *nw = Engine::Get()->GetNetworkState(l);
+		auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 
 
 
@@ -1317,32 +1317,32 @@ void Game::RegisterLuaGlobals()
 
 
 
-	    {"STATE_FLAG_NONE", umath::to_integral(Game::GameFlags::None)},
+	    {"STATE_FLAG_NONE", umath::to_integral(pragma::Game::GameFlags::None)},
 
 
 
 
-	    {"STATE_FLAG_BIT_MAP_INITIALIZED", umath::to_integral(Game::GameFlags::MapInitialized)},
+	    {"STATE_FLAG_BIT_MAP_INITIALIZED", umath::to_integral(pragma::Game::GameFlags::MapInitialized)},
 
 
 
 
-	    {"STATE_FLAG_BIT_GAME_INITIALIZED", umath::to_integral(Game::GameFlags::GameInitialized)},
+	    {"STATE_FLAG_BIT_GAME_INITIALIZED", umath::to_integral(pragma::Game::GameFlags::GameInitialized)},
 
 
 
 
-	    {"STATE_FLAG_BIT_MAP_LOADED", umath::to_integral(Game::GameFlags::MapLoaded)},
+	    {"STATE_FLAG_BIT_MAP_LOADED", umath::to_integral(pragma::Game::GameFlags::MapLoaded)},
 
 
 
 
-	    {"STATE_FLAG_BIT_INITIAL_TICK", umath::to_integral(Game::GameFlags::InitialTick)},
+	    {"STATE_FLAG_BIT_INITIAL_TICK", umath::to_integral(pragma::Game::GameFlags::InitialTick)},
 
 
 
 
-	    {"STATE_FLAG_BIT_LEVEL_TRANSITION", umath::to_integral(Game::GameFlags::LevelTransition)},
+	    {"STATE_FLAG_BIT_LEVEL_TRANSITION", umath::to_integral(pragma::Game::GameFlags::LevelTransition)},
 
 
 
@@ -1882,27 +1882,27 @@ void Game::RegisterLuaGlobals()
 
 
 
-	    {"OPEN_MODE_READ", umath::to_integral(FileOpenMode::Read)},
+	    {"OPEN_MODE_READ", umath::to_integral(pragma::FileOpenMode::Read)},
 
 
 
 
-	    {"OPEN_MODE_WRITE", umath::to_integral(FileOpenMode::Write)},
+	    {"OPEN_MODE_WRITE", umath::to_integral(pragma::FileOpenMode::Write)},
 
 
 
 
-	    {"OPEN_MODE_APPEND", umath::to_integral(FileOpenMode::Append)},
+	    {"OPEN_MODE_APPEND", umath::to_integral(pragma::FileOpenMode::Append)},
 
 
 
 
-	    {"OPEN_MODE_UPDATE", umath::to_integral(FileOpenMode::Update)},
+	    {"OPEN_MODE_UPDATE", umath::to_integral(pragma::FileOpenMode::Update)},
 
 
 
 
-	    {"OPEN_MODE_BINARY", umath::to_integral(FileOpenMode::Binary)},
+	    {"OPEN_MODE_BINARY", umath::to_integral(pragma::FileOpenMode::Binary)},
 
 
 
@@ -2127,7 +2127,7 @@ void Game::RegisterLuaGlobals()
 
 
 
-			auto &nw = *Engine::Get()->GetNetworkState(l);
+			auto &nw = *pragma::Engine::Get()->GetNetworkState(l);
 
 
 
@@ -2342,7 +2342,7 @@ void Game::RegisterLuaGlobals()
 
 
 
-			auto &nw = *Engine::Get()->GetNetworkState(l);
+			auto &nw = *pragma::Engine::Get()->GetNetworkState(l);
 
 
 

@@ -6,6 +6,7 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <exception>
 #include <memory>
+#include <string>
 
 export module pragma.shared:core.engine_init;
 
@@ -39,11 +40,11 @@ export {
 		return en;
 	}
 
-	inline DLLNETWORK std::shared_ptr<Engine> InitializeServer(int argc, char *argv[])
+	inline DLLNETWORK std::shared_ptr<pragma::Engine> InitializeServer(int argc, char *argv[])
 	{
 		auto exe = engine_info::get_executable_name();
 		pragma::debug::CrashHandler::Get().SetAppName(exe);
-		auto en = std::shared_ptr<Engine> {new Engine {argc, argv}, [](Engine *p) {
+		auto en = std::shared_ptr<pragma::Engine> {new pragma::Engine {argc, argv}, [](pragma::Engine *p) {
 											if(std::uncaught_exceptions() > 0) {
 												// If we're stack unwinding due to an uncaught exception,
 												// we DON'T want to destroy the engine, since we'll need

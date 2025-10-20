@@ -21,7 +21,7 @@ void SceneSnapshot::AddMaterial(msys::Material &mat)
 	m_materials.push_back(mat.GetHandle());
 }
 
-void SceneSnapshot::AddModel(Model &mdl, uint32_t skin)
+void SceneSnapshot::AddModel(pragma::Model &mdl, uint32_t skin)
 {
 	for(auto &meshGroup : mdl.GetMeshGroups()) {
 		for(auto &mesh : meshGroup->GetMeshes()) {

@@ -15,7 +15,7 @@ import :scripting.lua.classes.parallel_job;
 
 using namespace pragma::lua;
 
-LuaWorker::LuaWorker(Game &game, const std::string &name) : m_workerName {name}
+LuaWorker::LuaWorker(pragma::Game &game, const std::string &name) : m_workerName {name}
 {
 	m_cbThink = game.AddCallback("Think", FunctionCallback<void>::Create([this]() { Update(); }));
 	m_cbEndGame = game.AddCallback("EndGame", FunctionCallback<void>::Create([this]() { Clear(); }));

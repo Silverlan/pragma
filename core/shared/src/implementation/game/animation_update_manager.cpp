@@ -11,7 +11,7 @@ module pragma.shared;
 
 import :game.animation_update_manager;
 
-pragma::AnimationUpdateManager::AnimationUpdateManager(Game &game) : game {game}
+pragma::AnimationUpdateManager::AnimationUpdateManager(pragma::Game &game) : game {game}
 {
 	auto &componentManager = game.GetEntityComponentManager();
 	auto r = componentManager.GetComponentTypeId("animated", m_animatedComponentId);
@@ -24,7 +24,7 @@ pragma::AnimationUpdateManager::AnimationUpdateManager(Game &game) : game {game}
 		exit(EXIT_FAILURE);
 	}
 }
-void pragma::AnimationUpdateManager::UpdateEntityState(BaseEntity &ent)
+void pragma::AnimationUpdateManager::UpdateEntityState(pragma::ecs::BaseEntity &ent)
 {
 	auto animC = ent.GetAnimatedComponent();
 	if(animC.valid() && umath::is_flag_set(animC->GetStateFlags(), BaseEntityComponent::StateFlags::Removed))
@@ -51,7 +51,7 @@ void pragma::AnimationUpdateManager::UpdateEntityState(BaseEntity &ent)
 const std::vector<pragma::AnimationUpdateManager::AnimatedEntity> &pragma::AnimationUpdateManager::GetAnimatedEntities() const { return m_animatedEntities; }
 void pragma::AnimationUpdateManager::UpdateEntityAnimationDrivers(double dt)
 {
-	for(auto *ent : EntityIterator {game, m_animationDriverComponentId})
+	for(auto *ent : pragma::ecs::EntityIterator {game, m_animationDriverComponentId})
 		ent->GetComponent<pragma::AnimationDriverComponent>()->ApplyDriver();
 }
 void pragma::AnimationUpdateManager::UpdateConstraints(double dt) { pragma::ConstraintManagerComponent::ApplyConstraints(*game.GetNetworkState()); }
@@ -110,7 +110,7 @@ void pragma::AnimationUpdateManager::UpdateAnimations(double dt)
 
 	game.StartProfilingStage("HandleAnimationEvents");
 	{
-		EntityIterator entIt {game, m_animatedComponentId};
+		pragma::ecs::EntityIterator entIt {game, m_animatedComponentId};
 		for(auto *ent : entIt) {
 			auto animC = ent->GetAnimatedComponent();
 			animC->HandleAnimationEvents();

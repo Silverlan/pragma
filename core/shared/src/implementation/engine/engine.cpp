@@ -71,7 +71,7 @@ import pragma.oskit;
 
 
 
-const pragma::IServerState &Engine::GetServerStateInterface() const
+const pragma::IServerState &pragma::Engine::GetServerStateInterface() const
 
 {
 
@@ -127,7 +127,7 @@ const pragma::IServerState &Engine::GetServerStateInterface() const
 
 
 
-decltype(Engine::DEFAULT_TICK_RATE) Engine::DEFAULT_TICK_RATE = ENGINE_DEFAULT_TICK_RATE;
+decltype(pragma::Engine::DEFAULT_TICK_RATE) pragma::Engine::DEFAULT_TICK_RATE = ENGINE_DEFAULT_TICK_RATE;
 
 
 
@@ -149,9 +149,9 @@ void DLLNETWORK RunEngine(int argc, char *argv[])
 
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 
-std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &Engine::GetConVarPtrs() { return *conVarPtrs; }
+std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &pragma::Engine::GetConVarPtrs() { return *conVarPtrs; }
 
-ConVarHandle Engine::GetConVarHandle(std::string scvar)
+ConVarHandle pragma::Engine::GetConVarHandle(std::string scvar)
 
 {
 
@@ -169,11 +169,11 @@ ConVarHandle Engine::GetConVarHandle(std::string scvar)
 
 
 
-static Engine *g_engine = nullptr;
+static pragma::Engine *g_engine = nullptr;
 
 
 
-Engine *Engine::Get() { return g_engine; }
+pragma::Engine *pragma::Engine::Get() { return g_engine; }
 
 
 
@@ -189,7 +189,7 @@ extern bool g_lpSandboxed;
 
 
 
-Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(Engine::DEFAULT_TICK_RATE), m_stateFlags {StateFlags::Running | StateFlags::MultiThreadedAssetLoadingEnabled}
+pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(pragma::Engine::DEFAULT_TICK_RATE), m_stateFlags {StateFlags::Running | StateFlags::MultiThreadedAssetLoadingEnabled}
 
 {
 
@@ -349,29 +349,29 @@ Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_ti
 
 
 
-pragma::asset::AssetManager &Engine::GetAssetManager() { return *m_assetManager; }
+pragma::asset::AssetManager &pragma::Engine::GetAssetManager() { return *m_assetManager; }
 
-const pragma::asset::AssetManager &Engine::GetAssetManager() const { return const_cast<Engine *>(this)->GetAssetManager(); }
-
-
-
-bool Engine::IsProgramInFocus() const { return false; }
+const pragma::asset::AssetManager &pragma::Engine::GetAssetManager() const { return const_cast<pragma::Engine *>(this)->GetAssetManager(); }
 
 
 
-void Engine::ClearConsole() { std::system("cls"); }
+bool pragma::Engine::IsProgramInFocus() const { return false; }
 
 
 
-void Engine::SetConsoleType(ConsoleType type) { m_consoleType = type; }
+void pragma::Engine::ClearConsole() { std::system("cls"); }
 
 
 
-Engine::ConsoleType Engine::GetConsoleType() const { return (m_consoleInfo && m_consoleInfo->console) ? ConsoleType::Terminal : ConsoleType::None; }
+void pragma::Engine::SetConsoleType(ConsoleType type) { m_consoleType = type; }
 
 
 
-void Engine::SetReplicatedConVar(const std::string &cvar, const std::string &val)
+pragma::Engine::ConsoleType pragma::Engine::GetConsoleType() const { return (m_consoleInfo && m_consoleInfo->console) ? ConsoleType::Terminal : ConsoleType::None; }
+
+
+
+void pragma::Engine::SetReplicatedConVar(const std::string &cvar, const std::string &val)
 
 {
 
@@ -399,9 +399,9 @@ void Engine::SetReplicatedConVar(const std::string &cvar, const std::string &val
 
 
 
-std::thread::id Engine::GetMainThreadId() const { return m_mainThreadId; }
+std::thread::id pragma::Engine::GetMainThreadId() const { return m_mainThreadId; }
 
-std::optional<Engine::ConsoleOutput> Engine::PollConsoleOutput()
+std::optional<pragma::Engine::ConsoleOutput> pragma::Engine::PollConsoleOutput()
 
 {
 
@@ -429,7 +429,7 @@ std::optional<Engine::ConsoleOutput> Engine::PollConsoleOutput()
 
 }
 
-void Engine::SetRecordConsoleOutput(bool record)
+void pragma::Engine::SetRecordConsoleOutput(bool record)
 
 {
 
@@ -449,7 +449,7 @@ void Engine::SetRecordConsoleOutput(bool record)
 
 
 
-CallbackHandle Engine::AddProfilingHandler(const std::function<void(bool)> &handler)
+CallbackHandle pragma::Engine::AddProfilingHandler(const std::function<void(bool)> &handler)
 
 {
 
@@ -463,7 +463,7 @@ CallbackHandle Engine::AddProfilingHandler(const std::function<void(bool)> &hand
 
 
 
-void Engine::SetProfilingEnabled(bool bEnabled)
+void pragma::Engine::SetProfilingEnabled(bool bEnabled)
 
 {
 
@@ -489,11 +489,11 @@ void Engine::SetProfilingEnabled(bool bEnabled)
 
 
 
-pragma::pad::PackageManager *Engine::GetPADPackageManager() const { return m_padPackageManager; }
+pragma::pad::PackageManager *pragma::Engine::GetPADPackageManager() const { return m_padPackageManager; }
 
 
 
-void Engine::LockResourceWatchers()
+void pragma::Engine::LockResourceWatchers()
 
 {
 
@@ -511,7 +511,7 @@ void Engine::LockResourceWatchers()
 
 }
 
-void Engine::UnlockResourceWatchers()
+void pragma::Engine::UnlockResourceWatchers()
 
 {
 
@@ -529,7 +529,7 @@ void Engine::UnlockResourceWatchers()
 
 }
 
-void Engine::PollResourceWatchers()
+void pragma::Engine::PollResourceWatchers()
 
 {
 
@@ -547,7 +547,7 @@ void Engine::PollResourceWatchers()
 
 }
 
-util::ScopeGuard Engine::ScopeLockResourceWatchers()
+util::ScopeGuard pragma::Engine::ScopeLockResourceWatchers()
 
 {
 
@@ -579,7 +579,7 @@ util::ScopeGuard Engine::ScopeLockResourceWatchers()
 
 
 
-void Engine::AddParallelJob(const util::ParallelJobWrapper &job, const std::string &jobName)
+void pragma::Engine::AddParallelJob(const util::ParallelJobWrapper &job, const std::string &jobName)
 
 {
 
@@ -601,7 +601,7 @@ void Engine::AddParallelJob(const util::ParallelJobWrapper &job, const std::stri
 
 
 
-void Engine::Close()
+void pragma::Engine::Close()
 
 {
 
@@ -735,7 +735,7 @@ static uint32_t clear_assets(NetworkState *state, pragma::asset::Type type, bool
 
 
 
-				std::unordered_map<Model *, std::string> oldCache;
+				std::unordered_map<pragma::Model *, std::string> oldCache;
 
 				for(auto &pair : cache) {
 
@@ -755,7 +755,7 @@ static uint32_t clear_assets(NetworkState *state, pragma::asset::Type type, bool
 
 
 
-				std::unordered_map<Model *, std::string> newCache;
+				std::unordered_map<pragma::Model *, std::string> newCache;
 
 				for(auto &pair : cache) {
 
@@ -865,7 +865,7 @@ static uint32_t clear_assets(NetworkState *state, pragma::asset::Type type, bool
 
 }
 
-uint32_t Engine::DoClearUnusedAssets(pragma::asset::Type type) const
+uint32_t pragma::Engine::DoClearUnusedAssets(pragma::asset::Type type) const
 
 {
 
@@ -879,7 +879,7 @@ uint32_t Engine::DoClearUnusedAssets(pragma::asset::Type type) const
 
 }
 
-uint32_t Engine::ClearUnusedAssets(pragma::asset::Type type, bool verbose) const
+uint32_t pragma::Engine::ClearUnusedAssets(pragma::asset::Type type, bool verbose) const
 
 {
 
@@ -893,7 +893,7 @@ uint32_t Engine::ClearUnusedAssets(pragma::asset::Type type, bool verbose) const
 
 }
 
-void Engine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
+void pragma::Engine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
 
 {
 
@@ -911,9 +911,9 @@ void Engine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
 
 }
 
-void Engine::UpdateAssetMultiThreadedLoadingEnabled() { SetAssetMultiThreadedLoadingEnabled(umath::is_flag_set(m_stateFlags, StateFlags::MultiThreadedAssetLoadingEnabled)); }
+void pragma::Engine::UpdateAssetMultiThreadedLoadingEnabled() { SetAssetMultiThreadedLoadingEnabled(umath::is_flag_set(m_stateFlags, StateFlags::MultiThreadedAssetLoadingEnabled)); }
 
-uint32_t Engine::ClearUnusedAssets(const std::vector<pragma::asset::Type> &types, bool verbose) const
+uint32_t pragma::Engine::ClearUnusedAssets(const std::vector<pragma::asset::Type> &types, bool verbose) const
 
 {
 
@@ -933,13 +933,13 @@ uint32_t Engine::ClearUnusedAssets(const std::vector<pragma::asset::Type> &types
 
 
 
-void Engine::SetRunUpdaterOnClose(bool run) { umath::set_flag(m_stateFlags, StateFlags::RunUpdaterOnClose, run); }
+void pragma::Engine::SetRunUpdaterOnClose(bool run) { umath::set_flag(m_stateFlags, StateFlags::RunUpdaterOnClose, run); }
 
-bool Engine::ShouldRunUpdaterOnClose() const { return umath::is_flag_set(m_stateFlags, StateFlags::RunUpdaterOnClose); }
+bool pragma::Engine::ShouldRunUpdaterOnClose() const { return umath::is_flag_set(m_stateFlags, StateFlags::RunUpdaterOnClose); }
 
 
 
-void Engine::ClearCache()
+void pragma::Engine::ClearCache()
 
 {
 
@@ -1025,7 +1025,7 @@ void Engine::ClearCache()
 
 
 
-NetworkState *Engine::GetServerNetworkState() const
+NetworkState *pragma::Engine::GetServerNetworkState() const
 
 {
 
@@ -1039,7 +1039,7 @@ NetworkState *Engine::GetServerNetworkState() const
 
 
 
-void Engine::EndGame()
+void pragma::Engine::EndGame()
 
 {
 
@@ -1055,7 +1055,7 @@ void Engine::EndGame()
 
 
 
-void Engine::SetMountExternalGameResources(bool b)
+void pragma::Engine::SetMountExternalGameResources(bool b)
 
 {
 
@@ -1067,21 +1067,21 @@ void Engine::SetMountExternalGameResources(bool b)
 
 }
 
-bool Engine::ShouldMountExternalGameResources() const { return m_bMountExternalGameResources; }
+bool pragma::Engine::ShouldMountExternalGameResources() const { return m_bMountExternalGameResources; }
 
 
 
-pragma::debug::CPUProfiler &Engine::GetProfiler() const { return *m_cpuProfiler; }
+pragma::debug::CPUProfiler &pragma::Engine::GetProfiler() const { return *m_cpuProfiler; }
 
-pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *Engine::GetProfilingStageManager() { return m_profilingStageManager.get(); }
+pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *pragma::Engine::GetProfilingStageManager() { return m_profilingStageManager.get(); }
 
-bool Engine::StartProfilingStage(const char *stage) { return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage); }
+bool pragma::Engine::StartProfilingStage(const char *stage) { return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage); }
 
-bool Engine::StopProfilingStage() { return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(); }
+bool pragma::Engine::StopProfilingStage() { return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(); }
 
 
 
-void Engine::RunTickEvents()
+void pragma::Engine::RunTickEvents()
 
 {
 
@@ -1113,7 +1113,7 @@ void Engine::RunTickEvents()
 
 }
 
-void Engine::AddTickEvent(const std::function<void()> &ev)
+void pragma::Engine::AddTickEvent(const std::function<void()> &ev)
 
 {
 
@@ -1127,7 +1127,7 @@ void Engine::AddTickEvent(const std::function<void()> &ev)
 
 
 
-void Engine::Tick()
+void pragma::Engine::Tick()
 
 {
 
@@ -1163,7 +1163,7 @@ void Engine::Tick()
 
 
 
-void Engine::UpdateParallelJobs()
+void pragma::Engine::UpdateParallelJobs()
 
 {
 
@@ -1229,11 +1229,11 @@ void Engine::UpdateParallelJobs()
 
 
 
-ConVarMap *Engine::GetConVarMap() { return console_system::engine::get_convar_map(); }
+ConVarMap *pragma::Engine::GetConVarMap() { return console_system::engine::get_convar_map(); }
 
 
 
-std::unique_ptr<Engine::ConVarInfoList> &Engine::GetConVarConfig(NwStateType type)
+std::unique_ptr<pragma::Engine::ConVarInfoList> &pragma::Engine::GetConVarConfig(NwStateType type)
 
 {
 
@@ -1243,7 +1243,7 @@ std::unique_ptr<Engine::ConVarInfoList> &Engine::GetConVarConfig(NwStateType typ
 
 }
 
-Engine::StateInstance &Engine::GetStateInstance(NetworkState &nw)
+pragma::Engine::StateInstance &pragma::Engine::GetStateInstance(NetworkState &nw)
 
 {
 
@@ -1253,35 +1253,35 @@ Engine::StateInstance &Engine::GetStateInstance(NetworkState &nw)
 
 }
 
-Engine::StateInstance &Engine::GetServerStateInstance() { return *m_svInstance; }
+pragma::Engine::StateInstance &pragma::Engine::GetServerStateInstance() { return *m_svInstance; }
 
 
 
-void Engine::SetVerbose(bool bVerbose) { umath::set_flag(m_stateFlags, StateFlags::Verbose, bVerbose); }
+void pragma::Engine::SetVerbose(bool bVerbose) { umath::set_flag(m_stateFlags, StateFlags::Verbose, bVerbose); }
 
-bool Engine::IsVerbose() const { return umath::is_flag_set(m_stateFlags, StateFlags::Verbose); }
-
-
-
-void Engine::SetConsoleSubsystem(bool consoleSubsystem) { umath::set_flag(m_stateFlags, StateFlags::ConsoleSubsystem, consoleSubsystem); }
-
-bool Engine::IsConsoleSubsystem() const { return umath::is_flag_set(m_stateFlags, StateFlags::ConsoleSubsystem); }
+bool pragma::Engine::IsVerbose() const { return umath::is_flag_set(m_stateFlags, StateFlags::Verbose); }
 
 
 
-void Engine::SetDeveloperMode(bool devMode) { umath::set_flag(m_stateFlags, StateFlags::DeveloperMode, devMode); }
+void pragma::Engine::SetConsoleSubsystem(bool consoleSubsystem) { umath::set_flag(m_stateFlags, StateFlags::ConsoleSubsystem, consoleSubsystem); }
 
-bool Engine::IsDeveloperModeEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::DeveloperMode); }
-
-
-
-void Engine::SetNonInteractiveMode(bool nonInteractiveMode) { umath::set_flag(m_stateFlags, StateFlags::NonInteractiveMode, nonInteractiveMode); }
-
-bool Engine::IsNonInteractiveMode() const { return umath::is_flag_set(m_stateFlags, StateFlags::NonInteractiveMode); }
+bool pragma::Engine::IsConsoleSubsystem() const { return umath::is_flag_set(m_stateFlags, StateFlags::ConsoleSubsystem); }
 
 
 
-void Engine::SetLinenoiseEnabled(bool enabled)
+void pragma::Engine::SetDeveloperMode(bool devMode) { umath::set_flag(m_stateFlags, StateFlags::DeveloperMode, devMode); }
+
+bool pragma::Engine::IsDeveloperModeEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::DeveloperMode); }
+
+
+
+void pragma::Engine::SetNonInteractiveMode(bool nonInteractiveMode) { umath::set_flag(m_stateFlags, StateFlags::NonInteractiveMode, nonInteractiveMode); }
+
+bool pragma::Engine::IsNonInteractiveMode() const { return umath::is_flag_set(m_stateFlags, StateFlags::NonInteractiveMode); }
+
+
+
+void pragma::Engine::SetLinenoiseEnabled(bool enabled)
 
 {
 
@@ -1297,29 +1297,29 @@ void Engine::SetLinenoiseEnabled(bool enabled)
 
 }
 
-bool Engine::IsLinenoiseEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::UseLinenoise); }
+bool pragma::Engine::IsLinenoiseEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::UseLinenoise); }
 
 
 
-void Engine::SetManagedByPackageManager(bool isPackageManagerInstallation) { umath::set_flag(m_stateFlags, StateFlags::ManagedByPackageManager, isPackageManagerInstallation); }
+void pragma::Engine::SetManagedByPackageManager(bool isPackageManagerInstallation) { umath::set_flag(m_stateFlags, StateFlags::ManagedByPackageManager, isPackageManagerInstallation); }
 
-bool Engine::IsManagedByPackageManager() const { return umath::is_flag_set(m_stateFlags, StateFlags::ManagedByPackageManager); }
-
-
-
-void Engine::SetSandboxed(bool sandboxed) { umath::set_flag(m_stateFlags, StateFlags::Sandboxed, sandboxed); }
-
-bool Engine::IsSandboxed() const { return umath::is_flag_set(m_stateFlags, StateFlags::Sandboxed); }
+bool pragma::Engine::IsManagedByPackageManager() const { return umath::is_flag_set(m_stateFlags, StateFlags::ManagedByPackageManager); }
 
 
 
-void Engine::SetCLIOnly(bool cliOnly) { umath::set_flag(m_stateFlags, StateFlags::CLIOnly, cliOnly); }
+void pragma::Engine::SetSandboxed(bool sandboxed) { umath::set_flag(m_stateFlags, StateFlags::Sandboxed, sandboxed); }
 
-bool Engine::IsCLIOnly() const { return umath::is_flag_set(m_stateFlags, StateFlags::CLIOnly); }
+bool pragma::Engine::IsSandboxed() const { return umath::is_flag_set(m_stateFlags, StateFlags::Sandboxed); }
 
 
 
-void Engine::Release() { Close(); }
+void pragma::Engine::SetCLIOnly(bool cliOnly) { umath::set_flag(m_stateFlags, StateFlags::CLIOnly, cliOnly); }
+
+bool pragma::Engine::IsCLIOnly() const { return umath::is_flag_set(m_stateFlags, StateFlags::CLIOnly); }
+
+
+
+void pragma::Engine::Release() { Close(); }
 
 
 
@@ -1329,7 +1329,7 @@ extern std::vector<std::string> g_lpResourceDirs;
 
 
 
-bool Engine::Initialize(int argc, char *argv[])
+bool pragma::Engine::Initialize(int argc, char *argv[])
 
 {
 
@@ -1577,7 +1577,7 @@ bool Engine::Initialize(int argc, char *argv[])
 
 
 
-void Engine::InitializeAssetManager(util::FileAssetManager &assetManager) const
+void pragma::Engine::InitializeAssetManager(util::FileAssetManager &assetManager) const
 
 {
 
@@ -1657,11 +1657,11 @@ void Engine::InitializeAssetManager(util::FileAssetManager &assetManager) const
 
 
 
-void Engine::InitializeExternalArchiveManager() { util::initialize_external_archive_manager(GetServerNetworkState()); }
+void pragma::Engine::InitializeExternalArchiveManager() { util::initialize_external_archive_manager(GetServerNetworkState()); }
 
 
 
-void Engine::RunLaunchCommands()
+void pragma::Engine::RunLaunchCommands()
 
 {
 
@@ -1773,7 +1773,7 @@ void Engine::RunLaunchCommands()
 
 
 
-Lua::Interface *Engine::GetLuaInterface(lua_State *l)
+Lua::Interface *pragma::Engine::GetLuaInterface(lua_State *l)
 
 {
 
@@ -1799,7 +1799,7 @@ Lua::Interface *Engine::GetLuaInterface(lua_State *l)
 
 
 
-NetworkState *Engine::GetNetworkState(lua_State *l)
+NetworkState *pragma::Engine::GetNetworkState(lua_State *l)
 
 {
 
@@ -1819,7 +1819,7 @@ NetworkState *Engine::GetNetworkState(lua_State *l)
 
 
 
-bool Engine::IsMultiPlayer() const
+bool pragma::Engine::IsMultiPlayer() const
 
 {
 
@@ -1833,11 +1833,11 @@ bool Engine::IsMultiPlayer() const
 
 }
 
-bool Engine::IsSinglePlayer() const { return !IsMultiPlayer(); }
+bool pragma::Engine::IsSinglePlayer() const { return !IsMultiPlayer(); }
 
 
 
-void Engine::StartServer(bool singlePlayer)
+void pragma::Engine::StartServer(bool singlePlayer)
 
 {
 
@@ -1853,7 +1853,7 @@ void Engine::StartServer(bool singlePlayer)
 
 
 
-void Engine::CloseServer()
+void pragma::Engine::CloseServer()
 
 {
 
@@ -1869,11 +1869,11 @@ void Engine::CloseServer()
 
 
 
-bool Engine::IsClientConnected() { return false; }
+bool pragma::Engine::IsClientConnected() { return false; }
 
 
 
-bool Engine::IsServerRunning()
+bool pragma::Engine::IsServerRunning()
 
 {
 
@@ -1889,7 +1889,7 @@ bool Engine::IsServerRunning()
 
 
 
-void Engine::StartNewGame(const std::string &map, bool singlePlayer)
+void pragma::Engine::StartNewGame(const std::string &map, bool singlePlayer)
 
 {
 
@@ -1907,7 +1907,7 @@ void Engine::StartNewGame(const std::string &map, bool singlePlayer)
 
 
 
-void Engine::StartDefaultGame(const std::string &map)
+void pragma::Engine::StartDefaultGame(const std::string &map)
 
 {
 
@@ -1919,7 +1919,7 @@ void Engine::StartDefaultGame(const std::string &map)
 
 
 
-std::optional<uint64_t> Engine::GetServerSteamId() const
+std::optional<uint64_t> pragma::Engine::GetServerSteamId() const
 
 {
 
@@ -1941,7 +1941,7 @@ std::optional<uint64_t> Engine::GetServerSteamId() const
 
 static auto cvRemoteDebugging = GetConVar("sh_lua_remote_debugging");
 
-int32_t Engine::GetRemoteDebugging() const { return cvRemoteDebugging->GetInt(); }
+int32_t pragma::Engine::GetRemoteDebugging() const { return cvRemoteDebugging->GetInt(); }
 
 
 
@@ -1951,7 +1951,7 @@ extern std::string __lp_gamemode;
 
 static auto cvMountExternalResources = GetConVar("sh_mount_external_game_resources");
 
-void Engine::Start()
+void pragma::Engine::Start()
 
 {
 
@@ -2039,11 +2039,11 @@ void Engine::Start()
 
 
 
-void Engine::UpdateTickCount() { m_ctTick.Update(); }
+void pragma::Engine::UpdateTickCount() { m_ctTick.Update(); }
 
 
 
-std::unique_ptr<uzip::ZIPFile> Engine::GenerateEngineDump(const std::string &baseName, std::string &outZipFileName, std::string &outErr)
+std::unique_ptr<uzip::ZIPFile> pragma::Engine::GenerateEngineDump(const std::string &baseName, std::string &outZipFileName, std::string &outErr)
 
 {
 
@@ -2085,9 +2085,9 @@ std::unique_ptr<uzip::ZIPFile> Engine::GenerateEngineDump(const std::string &bas
 
 	// Write Info
 
-	if(Engine::Get() != nullptr)
+	if(pragma::Engine::Get() != nullptr)
 
-		Engine::Get()->DumpDebugInformation(*zipFile.get());
+		pragma::Engine::Get()->DumpDebugInformation(*zipFile.get());
 
 	return zipFile;
 
@@ -2095,7 +2095,7 @@ std::unique_ptr<uzip::ZIPFile> Engine::GenerateEngineDump(const std::string &bas
 
 
 
-void Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
+void pragma::Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 
 {
 
@@ -2119,7 +2119,7 @@ void Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 
 		engineInfo << " x86";
 
-	if(Engine::Get() != nullptr)
+	if(pragma::Engine::Get() != nullptr)
 
 		engineInfo << "\nEngine Version: " << get_pretty_engine_version();
 
@@ -2277,21 +2277,21 @@ void Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 
 
 
-	const_cast<Engine *>(this)->CallCallbacks<void, std::reference_wrapper<uzip::ZIPFile>>("DumpDebugInformation", zip);
+	const_cast<pragma::Engine *>(this)->CallCallbacks<void, std::reference_wrapper<uzip::ZIPFile>>("DumpDebugInformation", zip);
 
 }
 
 
 
-const long long &Engine::GetLastTick() const { return m_lastTick; }
+const long long &pragma::Engine::GetLastTick() const { return m_lastTick; }
 
 
 
-long long Engine::GetDeltaTick() const { return GetTickCount() - m_lastTick; }
+long long pragma::Engine::GetDeltaTick() const { return GetTickCount() - m_lastTick; }
 
 
 
-void Engine::Think()
+void pragma::Engine::Think()
 
 {
 
@@ -2311,7 +2311,7 @@ void Engine::Think()
 
 
 
-NetworkState *Engine::OpenServerState()
+NetworkState *pragma::Engine::OpenServerState()
 
 {
 
@@ -2335,7 +2335,7 @@ NetworkState *Engine::OpenServerState()
 
 
 
-void Engine::CloseServerState()
+void pragma::Engine::CloseServerState()
 
 {
 
@@ -2355,41 +2355,41 @@ void Engine::CloseServerState()
 
 
 
-NetworkState *Engine::GetClientState() const { return NULL; }
+NetworkState *pragma::Engine::GetClientState() const { return NULL; }
 
 
 
-NetworkState *Engine::GetActiveState() { return GetServerNetworkState(); }
+NetworkState *pragma::Engine::GetActiveState() { return GetServerNetworkState(); }
 
 
 
-bool Engine::IsActiveState(NetworkState *state) { return state == GetActiveState(); }
+bool pragma::Engine::IsActiveState(NetworkState *state) { return state == GetActiveState(); }
 
 
 
-void Engine::AddLaunchConVar(std::string cvar, std::string val) { m_launchCommands.push_back({cvar, {val}}); }
+void pragma::Engine::AddLaunchConVar(std::string cvar, std::string val) { m_launchCommands.push_back({cvar, {val}}); }
 
 
 
-void Engine::ShutDown() { umath::set_flag(m_stateFlags, StateFlags::Running, false); }
+void pragma::Engine::ShutDown() { umath::set_flag(m_stateFlags, StateFlags::Running, false); }
 
 
 
-void Engine::HandleLocalHostPlayerClientPacket(NetPacket &p) {}
+void pragma::Engine::HandleLocalHostPlayerClientPacket(NetPacket &p) {}
 
-void Engine::HandleLocalHostPlayerServerPacket(NetPacket &p) { return GetServerStateInterface().handle_local_host_player_server_packet(p); }
-
-
-
-bool Engine::ConnectLocalHostPlayerClient() { return GetServerStateInterface().connect_local_host_player_client(); }
+void pragma::Engine::HandleLocalHostPlayerServerPacket(NetPacket &p) { return GetServerStateInterface().handle_local_host_player_server_packet(p); }
 
 
 
-void Engine::WriteToLog(const std::string &str) { pragma::log(str); }
+bool pragma::Engine::ConnectLocalHostPlayerClient() { return GetServerStateInterface().connect_local_host_player_client(); }
 
 
 
-Engine::~Engine()
+void pragma::Engine::WriteToLog(const std::string &str) { pragma::log(str); }
+
+
+
+pragma::Engine::~pragma::Engine()
 
 {
 
@@ -2419,7 +2419,7 @@ Engine::~Engine()
 
 
 
-Engine *pragma::get_engine() { return g_engine; }
+pragma::Engine *pragma::get_engine() { return g_engine; }
 
-NetworkState *pragma::get_server_state() { return Engine::Get()->GetServerStateInterface().get_server_state(); }
+NetworkState *pragma::get_server_state() { return pragma::Engine::Get()->GetServerStateInterface().get_server_state(); }
 

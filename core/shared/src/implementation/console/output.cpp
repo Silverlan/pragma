@@ -57,23 +57,23 @@ void Con::disable_ansi_color_codes()
 
 int Con::GetLogLevel()
 {
-	if(Engine::Get() == NULL || !Engine::Get()->IsRunning())
+	if(pragma::Engine::Get() == NULL || !pragma::Engine::Get()->IsRunning())
 		return 0;
 	return cvLog->GetInt();
 }
 
 void Con::WriteToLog(std::stringstream &ss)
 {
-	if(Engine::Get() == NULL)
+	if(pragma::Engine::Get() == NULL)
 		return;
 	WriteToLog(ss.str());
 }
 
 void Con::WriteToLog(std::string str)
 {
-	if(Engine::Get() == NULL)
+	if(pragma::Engine::Get() == NULL)
 		return;
-	Engine::Get()->WriteToLog(str);
+	pragma::Engine::Get()->WriteToLog(str);
 }
 
 void Con::set_output_callback(const std::function<void(const std::string_view &, MessageFlags, const ::Color *)> &callback) { detail::outputCallback = callback; }

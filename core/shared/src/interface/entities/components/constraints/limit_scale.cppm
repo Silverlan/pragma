@@ -14,7 +14,7 @@ export namespace pragma {
 	  public:
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		ConstraintLimitScaleComponent(BaseEntity &ent);
+		ConstraintLimitScaleComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		void SetMinimum(pragma::Axis axis, float value);

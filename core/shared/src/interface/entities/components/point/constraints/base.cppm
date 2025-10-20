@@ -7,6 +7,8 @@ module;
 #include <string>
 #include <vector>
 
+#include <iostream>
+
 
 export module pragma.shared:entities.components.point.constraints.base;
 
@@ -19,7 +21,7 @@ export namespace pragma {
 
 	class DLLNETWORK BasePointConstraintComponent : public BaseEntityComponent {
 	  public:
-		BasePointConstraintComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+		BasePointConstraintComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
@@ -32,10 +34,10 @@ export namespace pragma {
 		Vector3 m_posTarget = {0.f, 0.f, 0.f};
 		std::vector<util::TSharedHandle<physics::IConstraint>> m_constraints;
 		bool SetKeyValue(std::string key, std::string val);
-		BaseEntity *GetSourceEntity();
-		void GetTargetEntities(std::vector<BaseEntity *> &entsTgt);
+		pragma::ecs::BaseEntity *GetSourceEntity();
+		void GetTargetEntities(std::vector<pragma::ecs::BaseEntity *> &entsTgt);
 		virtual void InitializeConstraint();
-		virtual void InitializeConstraint(BaseEntity *src, BaseEntity *tgt);
+		virtual void InitializeConstraint(pragma::ecs::BaseEntity *src, pragma::ecs::BaseEntity *tgt);
 		virtual void ClearConstraint();
 		void OnTurnOn();
 		void OnTurnOff();

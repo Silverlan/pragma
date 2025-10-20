@@ -12,7 +12,7 @@ import :entities.components.constraints.copy_scale;
 
 using namespace pragma;
 
-ConstraintCopyScaleComponent::ConstraintCopyScaleComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+ConstraintCopyScaleComponent::ConstraintCopyScaleComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintCopyScaleComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

@@ -8,14 +8,24 @@ module;
 #include <memory>
 #include <string>
 
+#include <vector>
+
+#include "pragma/lua/core.hpp"
+
 
 export module pragma.shared:scripting.lua.libraries.file;
 
 export import pragma.lua;
 
 export {
-	enum class FileOpenMode : uint32_t { None = 0u, Read = 1u, Write = Read << 1u, Append = Write << 1u, Update = Append << 1u, Binary = Update << 1u };
-	REGISTER_BASIC_BITWISE_OPERATORS(FileOpenMode);
+	namespace pragma {
+		enum class FileOpenMode : uint32_t { None = 0u, Read = 1u, Write = Read << 1u, Append = Write << 1u, Update = Append << 1u, Binary = Update << 1u };
+		using namespace umath::scoped_enum::bitwise;
+	}
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::FileOpenMode> : std::true_type {};
+	}
 
 	class DLLNETWORK LFile {
 	public:
@@ -60,14 +70,14 @@ export {
 		return (*(T *)&(buf[0]));
 	}
 
-	#define lua_lfile_datatype(datatype, suffix, luapush)                                                                                                                                                                                                                                            \
-		inline DLLNETWORK void Lua_LFile_Write##suffix(lua_State *, LFile &f, datatype d)                                                                                                                                                                                                            \
-		{                                                                                                                                                                                                                                                                                            \
-			f.Write<datatype>(d);                                                                                                                                                                                                                                                                    \
-		}                                                                                                                                                                                                                                                                                            \
-		inline DLLNETWORK void Lua_LFile_Read##suffix(lua_State *l, LFile &f)                                                                                                                                                                                                                        \
-		{                                                                                                                                                                                                                                                                                            \
-			luapush(l, f.Read<datatype>());                                                                                                                                                                                                                                                          \
+	#define lua_lfile_datatype(datatype, suffix, luapush)																																																											\
+		inline DLLNETWORK void Lua_LFile_Write##suffix(lua_State *, LFile &f, datatype d)																																																			\
+		{																																																																							\
+			f.Write<datatype>(d);																																																																	\
+		}																																																																							\
+		inline DLLNETWORK void Lua_LFile_Read##suffix(lua_State *l, LFile &f)																																																						\
+		{																																																																							\
+			luapush(l, f.Read<datatype>());																																																														  \
 		}
 
 	DLLNETWORK void Lua_LFile_Close(lua_State *l, LFile &f);
@@ -123,7 +133,7 @@ export {
 			DLLNETWORK bool validate_write_operation(lua_State *l, std::string &path, std::string &outRootPath);
 			DLLNETWORK std::string to_relative_path(const std::string &path);
 
-			DLLNETWORK std::pair<std::shared_ptr<LFile>, std::optional<std::string>> Open(lua_State *l, std::string path, FileOpenMode openMode, fsys::SearchFlags searchFlags = fsys::SearchFlags::All);
+			DLLNETWORK std::pair<std::shared_ptr<LFile>, std::optional<std::string>> Open(lua_State *l, std::string path, pragma::FileOpenMode openMode, fsys::SearchFlags searchFlags = fsys::SearchFlags::All);
 			DLLNETWORK bool CreateDir(lua_State *l, std::string path);
 			DLLNETWORK bool CreatePath(lua_State *l, std::string path);
 			DLLNETWORK bool Delete(lua_State *l, std::string path);

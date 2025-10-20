@@ -8,7 +8,7 @@ module pragma.shared;
 
 import :game.game;
 
-std::string Game::GetGameModeScriptDirectoryPath() const
+std::string pragma::Game::GetGameModeScriptDirectoryPath() const
 {
 	auto *info = GetGameMode();
 	if(info == nullptr)
@@ -16,14 +16,14 @@ std::string Game::GetGameModeScriptDirectoryPath() const
 	auto &id = info->id;
 	return "gamemodes\\" + id;
 }
-std::string Game::GetGameModeScriptDirectoryNetworkPath() const
+std::string pragma::Game::GetGameModeScriptDirectoryNetworkPath() const
 {
 	auto path = GetGameModeScriptDirectoryPath();
 	if(path.empty())
 		return "";
 	return path + '\\' + GetLuaNetworkDirectoryName();
 }
-std::string Game::GetGameModeScriptFilePath() const
+std::string pragma::Game::GetGameModeScriptFilePath() const
 {
 	auto path = GetGameModeScriptDirectoryNetworkPath();
 	if(path.empty())
@@ -31,7 +31,7 @@ std::string Game::GetGameModeScriptFilePath() const
 	return path + '\\' + GetLuaNetworkFileName();
 }
 
-void Game::ReloadGameModeScripts()
+void pragma::Game::ReloadGameModeScripts()
 {
 	auto fileName = GetGameModeScriptFilePath();
 	if(fileName.empty())
@@ -39,7 +39,7 @@ void Game::ReloadGameModeScripts()
 	ExecuteLuaFile(fileName);
 }
 
-bool Game::InitializeGameMode()
+bool pragma::Game::InitializeGameMode()
 {
 	auto *info = GetGameMode();
 	if(info == nullptr)
@@ -55,7 +55,7 @@ bool Game::InitializeGameMode()
 	return true;
 }
 
-bool Game::IsGameModeInitialized() const
+bool pragma::Game::IsGameModeInitialized() const
 {
 	if(m_entGamemode.valid() == false)
 		return false;

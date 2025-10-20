@@ -26,7 +26,7 @@ void BaseTouchComponent::RegisterEvents(pragma::EntityComponentManager &componen
 	EVENT_ON_TRIGGER = registerEvent("ON_TRIGGER", ComponentEventInfo::Type::Broadcast);
 	EVENT_ON_TRIGGER_INITIALIZED = registerEvent("ON_TRIGGER_INITIALIZED", ComponentEventInfo::Type::Broadcast);
 }
-BaseTouchComponent::BaseTouchComponent(BaseEntity &ent) : BaseEntityComponent(ent) { m_touching.reserve(10); }
+BaseTouchComponent::BaseTouchComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) { m_touching.reserve(10); }
 
 void BaseTouchComponent::Initialize()
 {
@@ -162,7 +162,7 @@ void BaseTouchComponent::UpdateTouch()
 				if(IsTouching(*contactEvent.contactTarget.get()))
 					break;
 				auto *ent = contactEvent.contactTarget.get();
-				StartTouch(PhysTouch {ent, contactEvent.contactTarget->CallOnRemove(FunctionCallback<void, BaseEntity *>::Create([this](BaseEntity *ent) { EndTouch(*ent); }))});
+				StartTouch(PhysTouch {ent, contactEvent.contactTarget->CallOnRemove(FunctionCallback<void, pragma::ecs::BaseEntity *>::Create([this](pragma::ecs::BaseEntity *ent) { EndTouch(*ent); }))});
 				break;
 			}
 		case ContactEvent::Event::EndTouch:
@@ -183,7 +183,7 @@ void BaseTouchComponent::UpdateTouch()
 void BaseTouchComponent::OnTouch(PhysTouch &) {}
 void BaseTouchComponent::OnContact(physics::ContactInfo &contact) {}
 bool BaseTouchComponent::IsTouchEnabled() const { return true; }
-void BaseTouchComponent::StartTouch(BaseEntity &entOther, PhysObj &physOther, physics::ICollisionObject &objThis, physics::ICollisionObject &objOther)
+void BaseTouchComponent::StartTouch(pragma::ecs::BaseEntity &entOther, pragma::physics::PhysObj &physOther, physics::ICollisionObject &objThis, physics::ICollisionObject &objOther)
 {
 	m_contactEventQueue.push({entOther.GetHandle(), ContactEvent::Event::StartTouch});
 
@@ -191,7 +191,7 @@ void BaseTouchComponent::StartTouch(BaseEntity &entOther, PhysObj &physOther, ph
 	if(pPhysComponent)
 		pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(true, true, true);
 }
-void BaseTouchComponent::EndTouch(BaseEntity &entOther, PhysObj &physOther, physics::ICollisionObject &objThis, physics::ICollisionObject &objOther)
+void BaseTouchComponent::EndTouch(pragma::ecs::BaseEntity &entOther, pragma::physics::PhysObj &physOther, physics::ICollisionObject &objThis, physics::ICollisionObject &objOther)
 {
 	m_contactEventQueue.push({entOther.GetHandle(), ContactEvent::Event::EndTouch});
 
@@ -208,7 +208,7 @@ void BaseTouchComponent::Contact(const pragma::physics::ContactInfo &contactInfo
 		pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(true);
 }
 
-bool BaseTouchComponent::CanTrigger(BaseEntity &ent)
+bool BaseTouchComponent::CanTrigger(pragma::ecs::BaseEntity &ent)
 {
 	auto evCanTriggerData = CECanTriggerData {&ent};
 	if(BroadcastEvent(EVENT_CAN_TRIGGER, evCanTriggerData) == util::EventReply::Handled)
@@ -218,7 +218,7 @@ bool BaseTouchComponent::CanTrigger(BaseEntity &ent)
 	return (m_triggerFlags & TriggerFlags::Everything) == TriggerFlags::Everything || ((m_triggerFlags & TriggerFlags::NPCs) != TriggerFlags::None && ent.IsNPC()) || ((m_triggerFlags & TriggerFlags::Players) != TriggerFlags::None && ent.IsPlayer())
 	  || ((m_triggerFlags & TriggerFlags::Physics) != TriggerFlags::None && ent.IsNPC() == false && ent.IsPlayer() == false && ent.GetPhysicsComponent() && ent.GetPhysicsComponent()->GetPhysicsObject() != nullptr);
 }
-void BaseTouchComponent::OnStartTouch(BaseEntity &ent)
+void BaseTouchComponent::OnStartTouch(pragma::ecs::BaseEntity &ent)
 {
 	BroadcastEvent(EVENT_ON_START_TOUCH, CETouchData {ent});
 
@@ -228,7 +228,7 @@ void BaseTouchComponent::OnStartTouch(BaseEntity &ent)
 	if(pIoComponent != nullptr)
 		pIoComponent->TriggerOutput("onstarttouch", &ent);
 }
-void BaseTouchComponent::OnEndTouch(BaseEntity &ent)
+void BaseTouchComponent::OnEndTouch(pragma::ecs::BaseEntity &ent)
 {
 	BroadcastEvent(EVENT_ON_END_TOUCH, CETouchData {ent});
 
@@ -238,7 +238,7 @@ void BaseTouchComponent::OnEndTouch(BaseEntity &ent)
 	if(pIoComponent != nullptr)
 		pIoComponent->TriggerOutput("onendtouch", &ent);
 }
-void BaseTouchComponent::OnTrigger(BaseEntity &ent)
+void BaseTouchComponent::OnTrigger(pragma::ecs::BaseEntity &ent)
 {
 	BroadcastEvent(EVENT_ON_TRIGGER, CETouchData {ent});
 
@@ -248,17 +248,17 @@ void BaseTouchComponent::OnTrigger(BaseEntity &ent)
 	if(pIoComponent != nullptr)
 		pIoComponent->TriggerOutput("trigger", &ent);
 }
-void BaseTouchComponent::Trigger(BaseEntity &ent) { OnTrigger(ent); }
+void BaseTouchComponent::Trigger(pragma::ecs::BaseEntity &ent) { OnTrigger(ent); }
 
 void BaseTouchComponent::FireStartTouchEvents(TouchInfo &touch, bool isFirstTouch)
 {
-	BaseEntity *ent = touch.touch.entity.get();
+	pragma::ecs::BaseEntity *ent = touch.touch.entity.get();
 	touch.triggered = IsTouchEnabled() && CanTrigger(*ent);
 	if(touch.triggered == false)
 		return;
 	auto &entThis = GetEntity();
 	auto pPhysComponent = ent->GetPhysicsComponent();
-	PhysObj *phys = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
+	pragma::physics::PhysObj *phys = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 	auto hEnt = entThis.GetHandle();
 	OnStartTouch(*ent);
 	if(isFirstTouch) {
@@ -274,7 +274,7 @@ void BaseTouchComponent::FireStartTouchEvents(TouchInfo &touch, bool isFirstTouc
 
 void BaseTouchComponent::FireEndTouchEvents(TouchInfo &touch, bool isLastTouch)
 {
-	BaseEntity *ent = touch.touch.entity.get();
+	pragma::ecs::BaseEntity *ent = touch.touch.entity.get();
 	if(!IsTouchEnabled() || touch.triggered == false)
 		return;
 	touch.triggered = false;
@@ -291,27 +291,27 @@ void BaseTouchComponent::FireEndTouchEvents(TouchInfo &touch, bool isLastTouch)
 
 void BaseTouchComponent::StartTouch(const PhysTouch &touch)
 {
-	BaseEntity *ent = const_cast<BaseEntity *>(touch.entity.get());
+	pragma::ecs::BaseEntity *ent = const_cast<pragma::ecs::BaseEntity *>(touch.entity.get());
 	if(ent == nullptr || IsTouching(*ent))
 		return;
 	auto bFirst = m_touching.empty();
 	m_touching.push_back({touch, false});
 	FireStartTouchEvents(m_touching.back(), bFirst);
 }
-void BaseTouchComponent::StartTouch(BaseEntity &ent)
+void BaseTouchComponent::StartTouch(pragma::ecs::BaseEntity &ent)
 {
 	if(!CanTrigger(ent) || IsTouching(ent))
 		return;
-	PhysTouch touch = PhysTouch(&ent, ent.CallOnRemove(FunctionCallback<void, BaseEntity *>::Create([this](BaseEntity *ent) { EndTouch(*ent); })));
+	PhysTouch touch = PhysTouch(&ent, ent.CallOnRemove(FunctionCallback<void, pragma::ecs::BaseEntity *>::Create([this](pragma::ecs::BaseEntity *ent) { EndTouch(*ent); })));
 	StartTouch(touch);
 }
 void BaseTouchComponent::SetTriggerFlags(TriggerFlags flags) { m_triggerFlags = flags; }
 BaseTouchComponent::TriggerFlags BaseTouchComponent::GetTriggerFlags() const { return m_triggerFlags; }
-bool BaseTouchComponent::IsTouching(BaseEntity &ent) const
+bool BaseTouchComponent::IsTouching(pragma::ecs::BaseEntity &ent) const
 {
 	return std::find_if(m_touching.begin(), m_touching.end(), [&ent](const TouchInfo &touchInfo) { return touchInfo.touch.entity.get() == &ent; }) != m_touching.end();
 }
-void BaseTouchComponent::EndTouch(BaseEntity &ent)
+void BaseTouchComponent::EndTouch(pragma::ecs::BaseEntity &ent)
 {
 	auto it = std::find_if(m_touching.begin(), m_touching.end(), [&ent](const TouchInfo &touchInfo) { return touchInfo.touch.entity.get() == &ent; });
 	if(it == m_touching.end())
@@ -323,7 +323,7 @@ const std::vector<BaseTouchComponent::TouchInfo> &BaseTouchComponent::GetTouchin
 
 ////////////////
 
-CECanTriggerData::CECanTriggerData(BaseEntity *ent) : entity(ent) {}
+CECanTriggerData::CECanTriggerData(pragma::ecs::BaseEntity *ent) : entity(ent) {}
 uint32_t CECanTriggerData::GetReturnCount() { return 1u; }
 void CECanTriggerData::HandleReturnValues(lua_State *l)
 {
@@ -340,7 +340,7 @@ void CECanTriggerData::PushArguments(lua_State *l)
 
 ////////////////
 
-CETouchData::CETouchData(BaseEntity &ent) : entity(&ent) {}
+CETouchData::CETouchData(pragma::ecs::BaseEntity &ent) : entity(&ent) {}
 void CETouchData::PushArguments(lua_State *l)
 {
 	if(entity != nullptr)

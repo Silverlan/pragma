@@ -13,7 +13,6 @@ export import :entities.components.liquid.base_control;
 export import :entities.components.liquid.base_surface_simulation;
 
 export {
-	class PhysObj;
 	namespace pragma {
 		class DLLNETWORK BaseBuoyancyComponent : public BaseEntityComponent {
 		  public:
@@ -23,8 +22,8 @@ export {
 
 			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		  protected:
-			BaseBuoyancyComponent(BaseEntity &ent);
-			virtual void OnEndTouch(BaseEntity *ent, PhysObj *phys);
+			BaseBuoyancyComponent(pragma::ecs::BaseEntity &ent);
+			virtual void OnEndTouch(pragma::ecs::BaseEntity *ent, pragma::physics::PhysObj *phys);
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 			void OnPhysicsInitialized();
 			void SimulateBuoyancy() const;

@@ -27,7 +27,7 @@ void nwm::write_quat(NetPacket &packet, const Quat &rot)
 	packet->Write<float>(rot.y);
 	packet->Write<float>(rot.z);
 }
-void nwm::write_entity(NetPacket &packet, const BaseEntity *ent) { packet->Write<unsigned int>((ent != nullptr) ? ent->GetIndex() : (unsigned int)(-1)); }
+void nwm::write_entity(NetPacket &packet, const pragma::ecs::BaseEntity *ent) { packet->Write<unsigned int>((ent != nullptr) ? ent->GetIndex() : (unsigned int)(-1)); }
 void nwm::write_entity(NetPacket &packet, const EntityHandle &hEnt) { write_entity(packet, hEnt.get()); }
 Vector3 nwm::read_vector(NetPacket &packet)
 {
@@ -55,13 +55,13 @@ Quat nwm::read_quat(NetPacket &packet)
 	return rot;
 }
 
-static BaseEntity *read_entity(NetPacket &packet, const std::function<void(BaseEntity *)> &onCreated = nullptr, CallbackHandle *hCallback = nullptr)
+static pragma::ecs::BaseEntity *read_entity(NetPacket &packet, const std::function<void(pragma::ecs::BaseEntity *)> &onCreated = nullptr, CallbackHandle *hCallback = nullptr)
 {
 	NetworkState *state;
 	if(!packet.IsClient())
-		state = Engine::Get()->GetServerNetworkState();
+		state = pragma::Engine::Get()->GetServerNetworkState();
 	else
-		state = Engine::Get()->GetClientState();
+		state = pragma::Engine::Get()->GetClientState();
 	if(state == nullptr || !state->IsGameActive())
 		return nullptr;
 	auto *game = state->GetGameState();
@@ -76,9 +76,9 @@ static BaseEntity *read_entity(NetPacket &packet, const std::function<void(BaseE
 	}
 	if(onCreated == nullptr)
 		return nullptr;
-	auto cb = FunctionCallback<void, BaseEntity *>::Create(nullptr);
-	cb.get<Callback<void, BaseEntity *>>()->SetFunction(std::bind(
-	  [onCreated, idx](CallbackHandle hCb, BaseEntity *ent) {
+	auto cb = FunctionCallback<void, pragma::ecs::BaseEntity *>::Create(nullptr);
+	cb.get<Callback<void, pragma::ecs::BaseEntity *>>()->SetFunction(std::bind(
+	  [onCreated, idx](CallbackHandle hCb, pragma::ecs::BaseEntity *ent) {
 		  if(ent->GetIndex() != idx)
 			  return;
 		  onCreated(ent);
@@ -89,16 +89,16 @@ static BaseEntity *read_entity(NetPacket &packet, const std::function<void(BaseE
 	*hCallback = game->AddCallback("OnEntityCreated", cb);
 	return nullptr;
 }
-CallbackHandle nwm::read_entity(NetPacket &packet, const std::function<void(BaseEntity *)> &onCreated)
+CallbackHandle nwm::read_entity(NetPacket &packet, const std::function<void(pragma::ecs::BaseEntity *)> &onCreated)
 {
 	CallbackHandle r;
 	::read_entity(packet, onCreated, &r);
 	return r;
 }
-BaseEntity *nwm::read_entity(NetPacket &packet) { return ::read_entity(packet); }
+pragma::ecs::BaseEntity *nwm::read_entity(NetPacket &packet) { return ::read_entity(packet); }
 
-void nwm::write_player(NetPacket &packet, const BaseEntity *pl) { write_entity(packet, pl); }
-void nwm::write_player(NetPacket &packet, const pragma::BasePlayerComponent *plComponent) { write_entity(packet, (plComponent != nullptr) ? dynamic_cast<BaseEntity *>(plComponent->GetBasePlayer()) : nullptr); }
+void nwm::write_player(NetPacket &packet, const pragma::ecs::BaseEntity *pl) { write_entity(packet, pl); }
+void nwm::write_player(NetPacket &packet, const pragma::BasePlayerComponent *plComponent) { write_entity(packet, (plComponent != nullptr) ? dynamic_cast<pragma::ecs::BaseEntity *>(plComponent->GetBasePlayer()) : nullptr); }
 pragma::BasePlayerComponent *nwm::read_player(NetPacket &packet)
 {
 	auto *ent = dynamic_cast<BasePlayer *>(::read_entity(packet));

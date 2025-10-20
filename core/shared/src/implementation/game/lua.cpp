@@ -15,10 +15,10 @@ module pragma.shared;
 
 import :game.game;
 
-Lua::Interface &Game::GetLuaInterface() { return *m_lua; }
-lua_State *Game::GetLuaState() { return (m_lua != nullptr) ? m_lua->GetState() : nullptr; }
+Lua::Interface &pragma::Game::GetLuaInterface() { return *m_lua; }
+lua_State *pragma::Game::GetLuaState() { return (m_lua != nullptr) ? m_lua->GetState() : nullptr; }
 
-void Game::InitializeLua()
+void pragma::Game::InitializeLua()
 {
 	m_luaIncludeStack.clear();
 	m_lua = std::make_shared<Lua::Interface>();
@@ -47,17 +47,17 @@ void Game::InitializeLua()
 	// Add module paths
 	UpdatePackagePaths();
 
-	auto remDeb = Engine::Get()->GetRemoteDebugging();
+	auto remDeb = pragma::Engine::Get()->GetRemoteDebugging();
 	if((remDeb == 1 && IsServer()) == true || (remDeb == 2 && IsClient() == true))
 		Lua::debug::enable_remote_debugging(GetLuaState());
 }
 
-const pragma::lua::ClassManager &Game::GetLuaClassManager() const { return const_cast<Game *>(this)->GetLuaClassManager(); }
-pragma::lua::ClassManager &Game::GetLuaClassManager() { return *m_luaClassManager; }
+const pragma::lua::ClassManager &pragma::Game::GetLuaClassManager() const { return const_cast<pragma::Game *>(this)->GetLuaClassManager(); }
+pragma::lua::ClassManager &pragma::Game::GetLuaClassManager() { return *m_luaClassManager; }
 
-void Game::SetupLua() { GetNetworkState()->InitializeLuaModules(GetLuaState()); }
+void pragma::Game::SetupLua() { GetNetworkState()->InitializeLuaModules(GetLuaState()); }
 
-Lua::StatusCode Game::LoadLuaFile(std::string &fInOut, fsys::SearchFlags includeFlags, fsys::SearchFlags excludeFlags)
+Lua::StatusCode pragma::Game::LoadLuaFile(std::string &fInOut, fsys::SearchFlags includeFlags, fsys::SearchFlags excludeFlags)
 {
 	auto *l = GetLuaState();
 	auto r = Lua::LoadFile(l, fInOut, includeFlags, excludeFlags);
@@ -65,35 +65,35 @@ Lua::StatusCode Game::LoadLuaFile(std::string &fInOut, fsys::SearchFlags include
 	return r;
 }
 
-bool Game::ExecuteLuaFile(std::string &fInOut, lua_State *optCustomLuaState)
+bool pragma::Game::ExecuteLuaFile(std::string &fInOut, lua_State *optCustomLuaState)
 {
 	auto *l = optCustomLuaState ? optCustomLuaState : GetLuaState();
 	auto r = pragma::scripting::lua::execute_file(l, fInOut);
 	return r == Lua::StatusCode::Ok;
 }
 
-void Game::RunLuaFiles(const std::string &subPath)
+void pragma::Game::RunLuaFiles(const std::string &subPath)
 {
 	auto *l = GetLuaState();
 	pragma::scripting::lua::execute_files_in_directory(l, subPath);
 }
 
-bool Game::RunLua(const std::string &lua, const std::string &chunkName)
+bool pragma::Game::RunLua(const std::string &lua, const std::string &chunkName)
 {
 	auto *l = GetLuaState();
 	auto r = pragma::scripting::lua::run_string(l, lua, chunkName);
 	return r == Lua::StatusCode::Ok;
 }
 
-Lua::StatusCode Game::ProtectedLuaCall(const std::function<Lua::StatusCode(lua_State *)> &pushFuncArgs, int32_t numResults) { return pragma::scripting::lua::protected_call(GetLuaState(), pushFuncArgs, numResults); }
+Lua::StatusCode pragma::Game::ProtectedLuaCall(const std::function<Lua::StatusCode(lua_State *)> &pushFuncArgs, int32_t numResults) { return pragma::scripting::lua::protected_call(GetLuaState(), pushFuncArgs, numResults); }
 
-const std::array<std::string, 6> &Game::GetLuaEntityDirectories() const
+const std::array<std::string, 6> &pragma::Game::GetLuaEntityDirectories() const
 {
 	static std::array<std::string, 6> dirs = {"entities", "weapons", "vehicles", "npcs", "gamemodes", "players"};
 	return dirs;
 }
 
-void Game::LoadLuaComponents(const std::string &typePath)
+void pragma::Game::LoadLuaComponents(const std::string &typePath)
 {
 	std::string path = Lua::SCRIPT_DIRECTORY_SLASH;
 	path += typePath;
@@ -104,7 +104,7 @@ void Game::LoadLuaComponents(const std::string &typePath)
 		LoadLuaComponent(typePath, dir);
 }
 
-void Game::LoadLuaEntities(std::string subPath)
+void pragma::Game::LoadLuaEntities(std::string subPath)
 {
 	std::string path = Lua::SCRIPT_DIRECTORY_SLASH;
 	path += subPath;
@@ -115,13 +115,13 @@ void Game::LoadLuaEntities(std::string subPath)
 		LoadLuaEntity(subPath, dirs[1]);
 }
 
-bool Game::LoadLuaComponent(const std::string &luaFilePath, const std::string &mainPath, const std::string &componentName)
+bool pragma::Game::LoadLuaComponent(const std::string &luaFilePath, const std::string &mainPath, const std::string &componentName)
 {
 	auto luaFilePathNoLuaDir = luaFilePath.substr(4);
 	return ExecuteLuaFile(luaFilePathNoLuaDir);
 }
 
-bool Game::LoadLuaEntity(const std::string &mainPath, const std::string &className)
+bool pragma::Game::LoadLuaEntity(const std::string &mainPath, const std::string &className)
 {
 	auto fpath = mainPath + '\\' + className;
 	if(FileManager::Exists(Lua::SCRIPT_DIRECTORY_SLASH + fpath + Lua::DOT_FILE_EXTENSION) || FileManager::Exists(Lua::SCRIPT_DIRECTORY_SLASH + fpath + Lua::DOT_FILE_EXTENSION_PRECOMPILED))
@@ -131,7 +131,7 @@ bool Game::LoadLuaEntity(const std::string &mainPath, const std::string &classNa
 		return LoadLuaEntity(fpath);
 	return false;
 }
-bool Game::LoadLuaComponent(const std::string &mainPath, const std::string &componentName)
+bool pragma::Game::LoadLuaComponent(const std::string &mainPath, const std::string &componentName)
 {
 	auto nwStateDirName = GetLuaNetworkDirectoryName();
 	auto luaFileName = GetLuaNetworkFileName();
@@ -153,7 +153,7 @@ bool Game::LoadLuaComponent(const std::string &mainPath, const std::string &comp
 	return LoadLuaComponent(filePathLuaFile, mainPath, componentName);
 }
 
-bool Game::LoadLuaEntity(std::string path)
+bool pragma::Game::LoadLuaEntity(std::string path)
 {
 	std::string ext;
 	if(ufile::get_extension(path, &ext) == true && (ustring::compare<std::string>(ext, Lua::FILE_EXTENSION, false) == true || ustring::compare<std::string>(ext, Lua::FILE_EXTENSION_PRECOMPILED, false) == true))
@@ -175,7 +175,7 @@ bool Game::LoadLuaEntity(std::string path)
 	return ExecuteLuaFile(pathWithoutLuaDir);
 }
 
-bool Game::LoadLuaComponent(std::string path)
+bool pragma::Game::LoadLuaComponent(std::string path)
 {
 	std::string ext;
 	if(ufile::get_extension(path, &ext) == true && (ustring::compare<std::string>(ext, Lua::FILE_EXTENSION, false) == true || ustring::compare<std::string>(ext, Lua::FILE_EXTENSION_PRECOMPILED, false) == true))
@@ -201,7 +201,7 @@ bool Game::LoadLuaComponent(std::string path)
 	return ExecuteLuaFile(pathWithoutLuaDir);
 }
 
-bool Game::LoadLuaEntityByClass(const std::string &className)
+bool pragma::Game::LoadLuaEntityByClass(const std::string &className)
 {
 	auto nwStateSubPath = GetLuaNetworkDirectoryName() + '\\';
 	for(auto &typePath : GetLuaEntityDirectories()) {
@@ -229,7 +229,7 @@ bool Game::LoadLuaEntityByClass(const std::string &className)
 	}*/
 	return false;
 }
-bool Game::LoadLuaComponentByName(const std::string &componentName)
+bool pragma::Game::LoadLuaComponentByName(const std::string &componentName)
 {
 	for(auto &typePath : GetLuaEntityDirectories()) {
 		auto luaFilePath = Lua::SCRIPT_DIRECTORY_SLASH + typePath + "\\components\\" + componentName;
@@ -241,7 +241,7 @@ bool Game::LoadLuaComponentByName(const std::string &componentName)
 	return false;
 }
 
-CallbackHandle Game::AddConVarCallback(const std::string &cvar, LuaFunction function)
+CallbackHandle pragma::Game::AddConVarCallback(const std::string &cvar, LuaFunction function)
 {
 	auto lcvar = cvar;
 	ustring::to_lower(lcvar);
@@ -252,9 +252,9 @@ CallbackHandle Game::AddConVarCallback(const std::string &cvar, LuaFunction func
 	it->second.push_back(cb);
 	return cb.GetFunction();
 }
-const std::unordered_map<std::string, std::vector<CvarCallback>> &Game::GetConVarCallbacks() const { return m_cvarCallbacks; }
+const std::unordered_map<std::string, std::vector<CvarCallback>> &pragma::Game::GetConVarCallbacks() const { return m_cvarCallbacks; }
 
-void Game::RegisterLua()
+void pragma::Game::RegisterLua()
 {
 	RegisterLuaClasses();
 	RegisterLuaLibraries();

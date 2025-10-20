@@ -11,7 +11,7 @@ import :scripting.lua.script_watcher;
 
 //import pragma.scripting.lua;
 
-LuaDirectoryWatcherManager::LuaDirectoryWatcherManager(Game *game) : m_game(game) { m_watcherManager = filemanager::create_directory_watcher_manager(); }
+LuaDirectoryWatcherManager::LuaDirectoryWatcherManager(pragma::Game *game) : m_game(game) { m_watcherManager = filemanager::create_directory_watcher_manager(); }
 
 void LuaDirectoryWatcherManager::Poll()
 {

@@ -10,7 +10,7 @@ import :entities.components.point.constraints.base_fixed;
 
 using namespace pragma;
 
-void BasePointConstraintFixedComponent::InitializeConstraint(BaseEntity *src, BaseEntity *tgt)
+void BasePointConstraintFixedComponent::InitializeConstraint(pragma::ecs::BaseEntity *src, pragma::ecs::BaseEntity *tgt)
 {
 	auto pPhysComponentTgt = tgt->GetPhysicsComponent();
 	auto *physTgt = pPhysComponentTgt ? dynamic_cast<RigidPhysObj *>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;

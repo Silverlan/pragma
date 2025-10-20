@@ -125,7 +125,7 @@ void SSEPlaySound::Precache()
 		PrecacheSound(sources[i].c_str());
 }
 
-void SSEPlaySound::PrecacheSound(const char *name) { Engine::Get()->GetServerNetworkState()->PrecacheSound(name, GetChannel()); }
+void SSEPlaySound::PrecacheSound(const char *name) { pragma::Engine::Get()->GetServerNetworkState()->PrecacheSound(name, GetChannel()); }
 void SSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 {
 	SoundScriptEvent::Initialize(prop);

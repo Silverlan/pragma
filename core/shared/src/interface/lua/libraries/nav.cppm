@@ -7,6 +7,8 @@ module;
 
 export module pragma.shared:scripting.lua.libraries.nav;
 
+export import :scripting.lua.api;
+
 export namespace Lua {
 	namespace nav {
 		DLLNETWORK void register_library(Lua::Interface &lua);

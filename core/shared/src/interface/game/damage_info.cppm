@@ -31,11 +31,11 @@ export {
 		void AddDamage(unsigned short dmg);
 		void ScaleDamage(float scale);
 		unsigned short GetDamage();
-		BaseEntity *GetAttacker();
-		void SetAttacker(const BaseEntity *ent);
+		pragma::ecs::BaseEntity *GetAttacker();
+		void SetAttacker(const pragma::ecs::BaseEntity *ent);
 		void SetAttacker(const EntityHandle &hnd);
-		BaseEntity *GetInflictor();
-		void SetInflictor(const BaseEntity *ent);
+		pragma::ecs::BaseEntity *GetInflictor();
+		void SetInflictor(const pragma::ecs::BaseEntity *ent);
 		void SetInflictor(const EntityHandle &hnd);
 		unsigned int GetDamageTypes();
 		void SetDamageType(DAMAGETYPE type);

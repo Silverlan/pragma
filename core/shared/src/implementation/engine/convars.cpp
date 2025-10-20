@@ -8,7 +8,7 @@ module pragma.shared;
 
 import :engine;
 
-std::string Engine::GetConVarString(const std::string &cv)
+std::string pragma::Engine::GetConVarString(const std::string &cv)
 {
 	auto *cvar = GetConVar(cv);
 	if(cvar == nullptr)
@@ -16,7 +16,7 @@ std::string Engine::GetConVarString(const std::string &cv)
 	return static_cast<ConVar *>(cvar)->GetString();
 }
 
-int Engine::GetConVarInt(const std::string &cv)
+int pragma::Engine::GetConVarInt(const std::string &cv)
 {
 	auto *cvar = GetConVar(cv);
 	if(cvar == nullptr)
@@ -24,7 +24,7 @@ int Engine::GetConVarInt(const std::string &cv)
 	return static_cast<ConVar *>(cvar)->GetInt();
 }
 
-float Engine::GetConVarFloat(const std::string &cv)
+float pragma::Engine::GetConVarFloat(const std::string &cv)
 {
 	auto *cvar = GetConVar(cv);
 	if(cvar == nullptr)
@@ -32,7 +32,7 @@ float Engine::GetConVarFloat(const std::string &cv)
 	return static_cast<ConVar *>(cvar)->GetFloat();
 }
 
-bool Engine::GetConVarBool(const std::string &cv)
+bool pragma::Engine::GetConVarBool(const std::string &cv)
 {
 	auto *cvar = GetConVar(cv);
 	if(cvar == nullptr)
@@ -40,7 +40,7 @@ bool Engine::GetConVarBool(const std::string &cv)
 	return static_cast<ConVar *>(cvar)->GetBool();
 }
 
-ConConf *Engine::GetConVar(const std::string &cv)
+ConConf *pragma::Engine::GetConVar(const std::string &cv)
 {
 	auto *stateSv = GetServerNetworkState();
 	auto *cvar = (stateSv != nullptr) ? stateSv->GetConVar(cv) : nullptr;

@@ -14,7 +14,7 @@ import :entities.components.base_wheel;
 
 using namespace pragma;
 
-BaseWheelComponent::BaseWheelComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseWheelComponent::BaseWheelComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void BaseWheelComponent::Initialize()
 {
@@ -49,7 +49,7 @@ BaseWheelComponent::~BaseWheelComponent()
 		m_cbOnSpawn.Remove();
 }
 #if 0
-void BaseWheelComponent::Attach(BaseEntity *ent,UChar wheelId)
+void BaseWheelComponent::Attach(pragma::ecs::BaseEntity *ent,UChar wheelId)
 {
 	Detach();
 	if(!ent->IsVehicle())
@@ -65,7 +65,7 @@ void BaseWheelComponent::Attach(BaseEntity *ent,UChar wheelId)
 		auto *pGenericComponentEnt = static_cast<pragma::BaseGenericComponent*>(ent->FindComponent("entity").get());
 		if(pGenericComponentEnt != nullptr)
 		{
-			m_cbOnSpawn = pGenericComponentEnt->BindEventUnhandled(BaseEntity::EVENT_ON_SPAWN,[this,fAttachWheel](std::reference_wrapper<pragma::ComponentEvent> evData) {
+			m_cbOnSpawn = pGenericComponentEnt->BindEventUnhandled(pragma::ecs::BaseEntity::EVENT_ON_SPAWN,[this,fAttachWheel](std::reference_wrapper<pragma::ComponentEvent> evData) {
 				auto cb = m_cbOnSpawn;
 				volatile ScopeGuard sg([cb]() mutable {if(cb.IsValid()) cb.Remove();});
 				if(GetEntity().IsSpawned() == true)
@@ -75,7 +75,7 @@ void BaseWheelComponent::Attach(BaseEntity *ent,UChar wheelId)
 					auto *pGenericComponent = static_cast<pragma::BaseGenericComponent*>(GetEntity().FindComponent("entity").get());
 					if(pGenericComponent != nullptr)
 					{
-						m_cbOnSpawn = pGenericComponent->BindEventUnhandled(BaseEntity::EVENT_ON_SPAWN,[this,fAttachWheel](std::reference_wrapper<pragma::ComponentEvent> evData) {
+						m_cbOnSpawn = pGenericComponent->BindEventUnhandled(pragma::ecs::BaseEntity::EVENT_ON_SPAWN,[this,fAttachWheel](std::reference_wrapper<pragma::ComponentEvent> evData) {
 							auto cb = m_cbOnSpawn;
 							volatile ScopeGuard sg([cb]() mutable {if(cb.IsValid()) cb.Remove();});
 							fAttachWheel();
@@ -90,7 +90,7 @@ void BaseWheelComponent::Attach(BaseEntity *ent,UChar wheelId)
 		auto *pGenericComponent = static_cast<pragma::BaseGenericComponent*>(GetEntity().FindComponent("entity").get());
 		if(pGenericComponent != nullptr)
 		{
-			m_cbOnSpawn = pGenericComponent->BindEventUnhandled(BaseEntity::EVENT_ON_SPAWN,[this,fAttachWheel](std::reference_wrapper<pragma::ComponentEvent> evData) {
+			m_cbOnSpawn = pGenericComponent->BindEventUnhandled(pragma::ecs::BaseEntity::EVENT_ON_SPAWN,[this,fAttachWheel](std::reference_wrapper<pragma::ComponentEvent> evData) {
 				auto cb = m_cbOnSpawn;
 				volatile ScopeGuard sg([cb]() mutable {if(cb.IsValid()) cb.Remove();});
 				fAttachWheel();

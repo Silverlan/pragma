@@ -21,8 +21,8 @@ export namespace pragma::ecs {
 		CompositeGroup(CompositeGroup &&) = delete;
 		CompositeGroup &operator=(const CompositeGroup &) = delete;
 		CompositeGroup &operator=(CompositeGroup &&) = delete;
-		void AddEntity(BaseEntity &ent);
-		void RemoveEntity(BaseEntity &ent);
+		void AddEntity(pragma::ecs::BaseEntity &ent);
+		void RemoveEntity(pragma::ecs::BaseEntity &ent);
 		const std::string &GetGroupName() const { return m_groupName; }
 		void SetGroupName(const std::string &name) { m_groupName = name; }
 		std::unordered_map<UuidHash, EntityHandle> &GetEntities() { return m_ents; }
@@ -33,7 +33,7 @@ export namespace pragma::ecs {
 		CompositeGroup *FindChildGroup(const std::string &name);
 		void ClearEntities(bool safely = true);
 	  private:
-		std::unordered_map<UuidHash, EntityHandle>::const_iterator FindEntity(BaseEntity &ent) const;
+		std::unordered_map<UuidHash, EntityHandle>::const_iterator FindEntity(pragma::ecs::BaseEntity &ent) const;
 		std::string m_groupName;
 		std::unordered_map<UuidHash, EntityHandle> m_ents;
 		std::vector<std::unique_ptr<CompositeGroup>> m_childGroups;
@@ -49,7 +49,7 @@ export namespace pragma::ecs {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		CompositeComponent(BaseEntity &ent);
+		CompositeComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 
@@ -67,10 +67,10 @@ export namespace pragma::ecs {
 
 	namespace events {
 		struct DLLNETWORK CECompositeEntityChanged : public ComponentEvent {
-			CECompositeEntityChanged(CompositeGroup &group, BaseEntity &ent);
+			CECompositeEntityChanged(CompositeGroup &group, pragma::ecs::BaseEntity &ent);
 			virtual void PushArguments(lua_State *l) override;
 			CompositeGroup &group;
-			BaseEntity &ent;
+			pragma::ecs::BaseEntity &ent;
 		};
 	};
 };

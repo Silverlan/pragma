@@ -16,7 +16,7 @@ void UsableComponent::RegisterEvents(pragma::EntityComponentManager &componentMa
 	EVENT_ON_USE = registerEvent("ON_USE", ComponentEventInfo::Type::Broadcast);
 	EVENT_CAN_USE = registerEvent("CAN_USE", ComponentEventInfo::Type::Broadcast);
 }
-UsableComponent::UsableComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+UsableComponent::UsableComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void UsableComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -24,13 +24,13 @@ void UsableComponent::Initialize()
 }
 void UsableComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-bool UsableComponent::CanUse(BaseEntity *ent) const
+bool UsableComponent::CanUse(pragma::ecs::BaseEntity *ent) const
 {
 	pragma::CECanUseData evCanUse {ent};
 	BroadcastEvent(EVENT_CAN_USE, evCanUse);
 	return evCanUse.canUse;
 }
-void UsableComponent::OnUse(BaseEntity *ent)
+void UsableComponent::OnUse(pragma::ecs::BaseEntity *ent)
 {
 	pragma::CEOnUseData evData {ent};
 	BroadcastEvent(EVENT_ON_USE, evData);
@@ -38,7 +38,7 @@ void UsableComponent::OnUse(BaseEntity *ent)
 
 ////////
 
-CEOnUseData::CEOnUseData(BaseEntity *ent) : entity(ent) {}
+CEOnUseData::CEOnUseData(pragma::ecs::BaseEntity *ent) : entity(ent) {}
 void CEOnUseData::PushArguments(lua_State *l)
 {
 	if(entity != nullptr)
@@ -49,7 +49,7 @@ void CEOnUseData::PushArguments(lua_State *l)
 
 ////////
 
-CECanUseData::CECanUseData(BaseEntity *ent) : entity(ent) {}
+CECanUseData::CECanUseData(pragma::ecs::BaseEntity *ent) : entity(ent) {}
 void CECanUseData::PushArguments(lua_State *l)
 {
 	if(entity != nullptr)

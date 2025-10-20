@@ -17,7 +17,6 @@ module;
 #include "pragma/lua/types/nil_type.hpp"
 
 
-#include <glm/gtx/matrix_decompose.hpp>
 #include <luabind/iterator_policy.hpp>
 #include <luabind/out_value_policy.hpp>
 #include <luabind/copy_policy.hpp>
@@ -658,7 +657,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defLuaParallelJob.def("SetProgressCallback", +[](util::ParallelJob<luabind::object> &job, const Lua::func<float> &func) { static_cast<pragma::lua::LuaWorker &>(job.GetWorker()).SetProgressCallback(func); });
 	modUtil[defLuaParallelJob];
 	modUtil[luabind::def(
-	  "create_parallel_job", +[](Game &game, const std::string &name, const Lua::func<void> &func, const Lua::func<void> &cancelFunc) -> std::shared_ptr<util::ParallelJob<luabind::object>> {
+	  "create_parallel_job", +[](pragma::Game &game, const std::string &name, const Lua::func<void> &func, const Lua::func<void> &cancelFunc) -> std::shared_ptr<util::ParallelJob<luabind::object>> {
 		  auto job = std::make_shared<util::ParallelJob<luabind::object>>(util::create_parallel_job<pragma::lua::LuaWorker>(game, name));
 		  static_cast<pragma::lua::LuaWorker &>(job->GetWorker()).AddLuaTask(func, cancelFunc, 0.f);
 		  return job;
@@ -1459,7 +1458,7 @@ static bool operator==(const EntityHandle &v, const LEntityProperty &prop) { ret
 static std::ostream &operator<<(std::ostream &str, const LEntityProperty &v)
 {
 	if((*v)->valid())
-		const_cast<BaseEntity *>((*v)->get())->print(str);
+		const_cast<pragma::ecs::BaseEntity *>((*v)->get())->print(str);
 	else
 		str << "NULL";
 	return str;
@@ -1469,7 +1468,7 @@ namespace pragma::lua {
 	void register_thread_pool(lua_State *l, luabind::module_ &modUtil);
 };
 
-void Game::RegisterLuaClasses()
+void pragma::Game::RegisterLuaClasses()
 {
 	NetworkState::RegisterSharedLuaClasses(GetLuaInterface());
 
@@ -1492,7 +1491,7 @@ void Game::RegisterLuaClasses()
 	defSplashDamageInfo.def("SetCone", static_cast<void (*)(lua_State *, util::SplashDamageInfo &, const Vector3 &, float)>([](lua_State *l, util::SplashDamageInfo &splashDamageInfo, const Vector3 &coneDirection, float coneAngle) { splashDamageInfo.cone = {{coneDirection, coneAngle}}; }));
 	defSplashDamageInfo.def("SetCallback", static_cast<void (*)(lua_State *, util::SplashDamageInfo &, luabind::object)>([](lua_State *l, util::SplashDamageInfo &splashDamageInfo, luabind::object oCallback) {
 		Lua::CheckFunction(l, 2);
-		splashDamageInfo.callback = [l, oCallback](BaseEntity *ent, DamageInfo &dmgInfo) -> bool {
+		splashDamageInfo.callback = [l, oCallback](pragma::ecs::BaseEntity *ent, DamageInfo &dmgInfo) -> bool {
 			auto r = Lua::CallFunction(
 			  l,
 			  [ent, &dmgInfo, &oCallback](lua_State *l) -> Lua::StatusCode {
@@ -1565,7 +1564,7 @@ void Game::RegisterLuaClasses()
 	modMath[defPlane];
 }
 
-LuaEntityIterator Lua::ents::create_lua_entity_iterator(lua_State *l, const tb<LuaEntityIteratorFilterBase> &filterTable, EntityIterator::FilterFlags filterFlags)
+LuaEntityIterator Lua::ents::create_lua_entity_iterator(lua_State *l, const tb<LuaEntityIteratorFilterBase> &filterTable, pragma::ecs::EntityIterator::FilterFlags filterFlags)
 {
 	auto r = LuaEntityIterator {l, filterFlags};
 	if(filterTable) {
@@ -1588,7 +1587,7 @@ LuaEntityIterator Lua::ents::create_lua_entity_iterator(lua_State *l, const tb<L
 	return r;
 }
 
-LuaEntityComponentIterator Lua::ents::create_lua_entity_component_iterator(lua_State *l, pragma::ComponentId componentId, const tb<LuaEntityIteratorFilterBase> &filterTable, EntityIterator::FilterFlags filterFlags)
+LuaEntityComponentIterator Lua::ents::create_lua_entity_component_iterator(lua_State *l, pragma::ComponentId componentId, const tb<LuaEntityIteratorFilterBase> &filterTable, pragma::ecs::EntityIterator::FilterFlags filterFlags)
 {
 	auto r = LuaEntityComponentIterator {l, componentId, filterFlags};
 	if(filterTable) {
@@ -1613,18 +1612,18 @@ LuaEntityComponentIterator Lua::ents::create_lua_entity_component_iterator(lua_S
 
 struct LuaEntityIteratorFilterFunction : public LuaEntityIteratorFilterBase {
 	LuaEntityIteratorFilterFunction(Lua::func<bool> oFunc);
-	virtual void Attach(EntityIterator &iterator) override;
+	virtual void Attach(pragma::ecs::EntityIterator &iterator) override;
   private:
 	luabind::object m_function;
 };
 
 LuaEntityIteratorFilterFunction::LuaEntityIteratorFilterFunction(Lua::func<bool> oFunc) : m_function {oFunc} {}
-void LuaEntityIteratorFilterFunction::Attach(EntityIterator &iterator)
+void LuaEntityIteratorFilterFunction::Attach(pragma::ecs::EntityIterator &iterator)
 {
 	auto *data = iterator.GetIteratorData();
 	auto *components = (data && data->entities && typeid(*data->entities) == typeid(ComponentContainer)) ? static_cast<ComponentContainer *>(data->entities.get()) : nullptr;
 	auto *l = m_function.interpreter();
-	iterator.AttachFilter<EntityIteratorFilterUser>([this, l, components](BaseEntity &ent, std::size_t index) -> bool {
+	iterator.AttachFilter<EntityIteratorFilterUser>([this, l, components](pragma::ecs::BaseEntity &ent, std::size_t index) -> bool {
 		auto r = Lua::CallFunction(
 		  l,
 		  [this, &ent, index, components](lua_State *l) -> Lua::StatusCode {
@@ -1654,24 +1653,24 @@ static LuaEntityComponentIterator &citerator(lua_State *l, pragma::ComponentId c
 	s_centIterator = LuaEntityComponentIterator {l, componentId};
 	return *s_centIterator;
 }
-static LuaEntityComponentIterator &citerator(lua_State *l, pragma::ComponentId componentId, const Lua::var<EntityIterator::FilterFlags, Lua::tb<LuaEntityIteratorFilterBase>> &oFilterOrFlags)
+static LuaEntityComponentIterator &citerator(lua_State *l, pragma::ComponentId componentId, const Lua::var<pragma::ecs::EntityIterator::FilterFlags, Lua::tb<LuaEntityIteratorFilterBase>> &oFilterOrFlags)
 {
-	auto filterFlags = EntityIterator::FilterFlags::Default;
+	auto filterFlags = pragma::ecs::EntityIterator::FilterFlags::Default;
 	luabind::object filterTable {};
 	if(Lua::IsNumber(l, 2))
-		filterFlags = static_cast<EntityIterator::FilterFlags>(luabind::object_cast<uint32_t>(oFilterOrFlags));
+		filterFlags = static_cast<pragma::ecs::EntityIterator::FilterFlags>(luabind::object_cast<uint32_t>(oFilterOrFlags));
 	else
 		filterTable = oFilterOrFlags;
 	s_centIterator = Lua::ents::create_lua_entity_component_iterator(l, componentId, filterTable, filterFlags);
 	return *s_centIterator;
 }
-static LuaEntityComponentIterator &citerator(lua_State *l, pragma::ComponentId componentId, EntityIterator::FilterFlags filterFlags, const Lua::tb<LuaEntityIteratorFilterBase> &oFilter)
+static LuaEntityComponentIterator &citerator(lua_State *l, pragma::ComponentId componentId, pragma::ecs::EntityIterator::FilterFlags filterFlags, const Lua::tb<LuaEntityIteratorFilterBase> &oFilter)
 {
 	s_centIterator = Lua::ents::create_lua_entity_component_iterator(l, componentId, oFilter, filterFlags);
 	return *s_centIterator;
 }
 
-void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
+void pragma::Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 {
 	auto &modEnts = GetLuaInterface().RegisterLibrary("ents");
 	RegisterLuaEntityComponents(modEnts);
@@ -1684,11 +1683,11 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	  luabind::return_stl_iterator {})];
 	modEnts[luabind::def(
 	  "iterator",
-	  +[](lua_State *l, const Lua::var<EntityIterator::FilterFlags, Lua::tb<LuaEntityIteratorFilterBase>> &oFilterOrFlags) -> LuaEntityIterator & {
-		  auto filterFlags = EntityIterator::FilterFlags::Default;
+	  +[](lua_State *l, const Lua::var<pragma::ecs::EntityIterator::FilterFlags, Lua::tb<LuaEntityIteratorFilterBase>> &oFilterOrFlags) -> LuaEntityIterator & {
+		  auto filterFlags = pragma::ecs::EntityIterator::FilterFlags::Default;
 		  luabind::object filterTable {};
 		  if(Lua::IsNumber(l, 1))
-			  filterFlags = static_cast<EntityIterator::FilterFlags>(luabind::object_cast<uint32_t>(oFilterOrFlags));
+			  filterFlags = static_cast<pragma::ecs::EntityIterator::FilterFlags>(luabind::object_cast<uint32_t>(oFilterOrFlags));
 		  else
 			  filterTable = oFilterOrFlags;
 		  s_entIterator = Lua::ents::create_lua_entity_iterator(l, filterTable, filterFlags);
@@ -1697,19 +1696,19 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	  luabind::return_stl_iterator {})];
 	modEnts[luabind::def(
 	  "iterator",
-	  +[](lua_State *l, EntityIterator::FilterFlags filterFlags, const Lua::tb<LuaEntityIteratorFilterBase> &oFilter) -> LuaEntityIterator & {
+	  +[](lua_State *l, pragma::ecs::EntityIterator::FilterFlags filterFlags, const Lua::tb<LuaEntityIteratorFilterBase> &oFilter) -> LuaEntityIterator & {
 		  s_entIterator = Lua::ents::create_lua_entity_iterator(l, oFilter, filterFlags);
 		  return *s_entIterator;
 	  },
 	  luabind::return_stl_iterator {})];
 	modEnts[luabind::def("citerator", +[](lua_State *l, Lua::nil_type) -> LuaEntityComponentIterator & { return citerator(l, pragma::INVALID_COMPONENT_ID); }, luabind::return_stl_iterator {})];
 	modEnts[luabind::def("citerator", static_cast<LuaEntityComponentIterator &(*)(lua_State *, pragma::ComponentId)>(&citerator), luabind::return_stl_iterator {})];
-	modEnts[luabind::def("citerator", static_cast<LuaEntityComponentIterator &(*)(lua_State *, pragma::ComponentId, const Lua::var<EntityIterator::FilterFlags, Lua::tb<LuaEntityIteratorFilterBase>> &)>(&citerator), luabind::return_stl_iterator {})];
-	modEnts[luabind::def("citerator", static_cast<LuaEntityComponentIterator &(*)(lua_State *, pragma::ComponentId, EntityIterator::FilterFlags, const Lua::tb<LuaEntityIteratorFilterBase> &)>(&citerator), luabind::return_stl_iterator {})];
+	modEnts[luabind::def("citerator", static_cast<LuaEntityComponentIterator &(*)(lua_State *, pragma::ComponentId, const Lua::var<pragma::ecs::EntityIterator::FilterFlags, Lua::tb<LuaEntityIteratorFilterBase>> &)>(&citerator), luabind::return_stl_iterator {})];
+	modEnts[luabind::def("citerator", static_cast<LuaEntityComponentIterator &(*)(lua_State *, pragma::ComponentId, pragma::ecs::EntityIterator::FilterFlags, const Lua::tb<LuaEntityIteratorFilterBase> &)>(&citerator), luabind::return_stl_iterator {})];
 
 	modEnts[luabind::def(
 	  "citerator",
-	  +[](lua_State *l, Game &game, const std::string &componentName) -> LuaEntityComponentIterator & {
+	  +[](lua_State *l, pragma::Game &game, const std::string &componentName) -> LuaEntityComponentIterator & {
 		  pragma::ComponentId componentId;
 		  if(!game.GetEntityComponentManager().GetComponentTypeId(componentName, componentId))
 			  Lua::Error(l, "Unknown component type '" + componentName + "'!");
@@ -1718,7 +1717,7 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	  luabind::return_stl_iterator {})];
 	modEnts[luabind::def(
 	  "citerator",
-	  +[](lua_State *l, Game &game, const std::string &componentName, const Lua::var<EntityIterator::FilterFlags, Lua::tb<LuaEntityIteratorFilterBase>> &oFilterOrFlags) -> LuaEntityComponentIterator & {
+	  +[](lua_State *l, pragma::Game &game, const std::string &componentName, const Lua::var<pragma::ecs::EntityIterator::FilterFlags, Lua::tb<LuaEntityIteratorFilterBase>> &oFilterOrFlags) -> LuaEntityComponentIterator & {
 		  pragma::ComponentId componentId;
 		  if(!game.GetEntityComponentManager().GetComponentTypeId(componentName, componentId))
 			  Lua::Error(l, "Unknown component type '" + componentName + "'!");
@@ -1727,7 +1726,7 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	  luabind::return_stl_iterator {})];
 	modEnts[luabind::def(
 	  "citerator",
-	  +[](lua_State *l, Game &game, const std::string &componentName, EntityIterator::FilterFlags filterFlags, const Lua::tb<LuaEntityIteratorFilterBase> &oFilter) -> LuaEntityComponentIterator & {
+	  +[](lua_State *l, pragma::Game &game, const std::string &componentName, pragma::ecs::EntityIterator::FilterFlags filterFlags, const Lua::tb<LuaEntityIteratorFilterBase> &oFilter) -> LuaEntityComponentIterator & {
 		  pragma::ComponentId componentId;
 		  if(!game.GetEntityComponentManager().GetComponentTypeId(componentName, componentId))
 			  Lua::Error(l, "Unknown component type '" + componentName + "'!");
@@ -1792,27 +1791,27 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "ents",
 	  {
-	    {"ITERATOR_FILTER_BIT_NONE", umath::to_integral(EntityIterator::FilterFlags::None)},
-	    {"ITERATOR_FILTER_BIT_SPAWNED", umath::to_integral(EntityIterator::FilterFlags::Spawned)},
-	    {"ITERATOR_FILTER_BIT_PENDING", umath::to_integral(EntityIterator::FilterFlags::Pending)},
-	    {"ITERATOR_FILTER_BIT_INCLUDE_SHARED", umath::to_integral(EntityIterator::FilterFlags::IncludeShared)},
-	    {"ITERATOR_FILTER_BIT_INCLUDE_NETWORK_LOCAL", umath::to_integral(EntityIterator::FilterFlags::IncludeNetworkLocal)},
+	    {"ITERATOR_FILTER_BIT_NONE", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::None)},
+	    {"ITERATOR_FILTER_BIT_SPAWNED", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Spawned)},
+	    {"ITERATOR_FILTER_BIT_PENDING", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Pending)},
+	    {"ITERATOR_FILTER_BIT_INCLUDE_SHARED", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::IncludeShared)},
+	    {"ITERATOR_FILTER_BIT_INCLUDE_NETWORK_LOCAL", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::IncludeNetworkLocal)},
 
-	    {"ITERATOR_FILTER_BIT_CHARACTER", umath::to_integral(EntityIterator::FilterFlags::Character)},
-	    {"ITERATOR_FILTER_BIT_PLAYER", umath::to_integral(EntityIterator::FilterFlags::Player)},
-	    {"ITERATOR_FILTER_BIT_WEAPON", umath::to_integral(EntityIterator::FilterFlags::Weapon)},
-	    {"ITERATOR_FILTER_BIT_VEHICLE", umath::to_integral(EntityIterator::FilterFlags::Vehicle)},
-	    {"ITERATOR_FILTER_BIT_NPC", umath::to_integral(EntityIterator::FilterFlags::NPC)},
-	    {"ITERATOR_FILTER_BIT_PHYSICAL", umath::to_integral(EntityIterator::FilterFlags::Physical)},
-	    {"ITERATOR_FILTER_BIT_SCRIPTED", umath::to_integral(EntityIterator::FilterFlags::Scripted)},
-	    {"ITERATOR_FILTER_BIT_MAP_ENTITY", umath::to_integral(EntityIterator::FilterFlags::MapEntity)},
+	    {"ITERATOR_FILTER_BIT_CHARACTER", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Character)},
+	    {"ITERATOR_FILTER_BIT_PLAYER", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Player)},
+	    {"ITERATOR_FILTER_BIT_WEAPON", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Weapon)},
+	    {"ITERATOR_FILTER_BIT_VEHICLE", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Vehicle)},
+	    {"ITERATOR_FILTER_BIT_NPC", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::NPC)},
+	    {"ITERATOR_FILTER_BIT_PHYSICAL", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Physical)},
+	    {"ITERATOR_FILTER_BIT_SCRIPTED", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Scripted)},
+	    {"ITERATOR_FILTER_BIT_MAP_ENTITY", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::MapEntity)},
 
-	    {"ITERATOR_FILTER_BIT_HAS_TRANSFORM", umath::to_integral(EntityIterator::FilterFlags::HasTransform)},
-	    {"ITERATOR_FILTER_BIT_HAS_MODEL", umath::to_integral(EntityIterator::FilterFlags::HasModel)},
+	    {"ITERATOR_FILTER_BIT_HAS_TRANSFORM", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::HasTransform)},
+	    {"ITERATOR_FILTER_BIT_HAS_MODEL", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::HasModel)},
 
-	    {"ITERATOR_FILTER_ANY_TYPE", umath::to_integral(EntityIterator::FilterFlags::AnyType)},
-	    {"ITERATOR_FILTER_ANY", umath::to_integral(EntityIterator::FilterFlags::Any)},
-	    {"ITERATOR_FILTER_DEFAULT", umath::to_integral(EntityIterator::FilterFlags::Default)},
+	    {"ITERATOR_FILTER_ANY_TYPE", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::AnyType)},
+	    {"ITERATOR_FILTER_ANY", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Any)},
+	    {"ITERATOR_FILTER_DEFAULT", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Default)},
 
 	    {"TICK_POLICY_ALWAYS", umath::to_integral(pragma::TickPolicy::Always)},
 	    {"TICK_POLICY_NEVER", umath::to_integral(pragma::TickPolicy::Never)},
@@ -1916,9 +1915,9 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	classDefDamageInfo.def("ScaleDamage", &::DamageInfo::ScaleDamage);
 	classDefDamageInfo.def("GetDamage", &::DamageInfo::GetDamage);
 	classDefDamageInfo.def("GetAttacker", &::DamageInfo::GetAttacker);
-	classDefDamageInfo.def("SetAttacker", static_cast<void (::DamageInfo::*)(const BaseEntity *)>(&::DamageInfo::SetAttacker));
+	classDefDamageInfo.def("SetAttacker", static_cast<void (::DamageInfo::*)(const pragma::ecs::BaseEntity *)>(&::DamageInfo::SetAttacker));
 	classDefDamageInfo.def("GetInflictor", &::DamageInfo::GetInflictor);
-	classDefDamageInfo.def("SetInflictor", static_cast<void (::DamageInfo::*)(const BaseEntity *)>(&::DamageInfo::SetInflictor));
+	classDefDamageInfo.def("SetInflictor", static_cast<void (::DamageInfo::*)(const pragma::ecs::BaseEntity *)>(&::DamageInfo::SetInflictor));
 	classDefDamageInfo.def("GetDamageTypes", &::DamageInfo::GetDamageTypes);
 	classDefDamageInfo.def("SetDamageType", &::DamageInfo::SetDamageType);
 	classDefDamageInfo.def("AddDamageType", &::DamageInfo::AddDamageType);

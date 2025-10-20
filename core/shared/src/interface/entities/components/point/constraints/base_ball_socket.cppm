@@ -16,6 +16,6 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 	  protected:
-		virtual void InitializeConstraint(BaseEntity *src, BaseEntity *tgt) override;
+		virtual void InitializeConstraint(pragma::ecs::BaseEntity *src, pragma::ecs::BaseEntity *tgt) override;
 	};
 };

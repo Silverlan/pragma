@@ -25,7 +25,7 @@ export namespace pragma {
 		virtual void SetObserverTarget(BaseObservableComponent *ent);
 		BaseObservableComponent *GetObserverTarget() const;
 	  protected:
-		BaseObserverComponent(BaseEntity &ent);
+		BaseObserverComponent(pragma::ecs::BaseEntity &ent);
 		void ClearObserverTarget();
 		virtual void OnRemove() override;
 		virtual void DoSetObserverMode(ObserverMode mode) {};

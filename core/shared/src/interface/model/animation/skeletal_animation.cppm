@@ -6,6 +6,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <cinttypes>
 
+#include <string_view>
+
 
 export module pragma.shared:model.animation.skeletal_animation;
 
@@ -26,8 +28,8 @@ export {
 		using BoneChannelMap = std::unordered_map<pragma::animation::BoneId, AnimBoneChannelDesc>;
 
 		util::EnumRegister &get_activity_enum_register();
-		Activity get_activity(const panima::Animation &anim);
-		void set_activity(panima::Animation &anim, Activity act);
+		pragma::Activity get_activity(const panima::Animation &anim);
+		void set_activity(panima::Animation &anim, pragma::Activity act);
 		uint8_t get_activity_weight(const panima::Animation &anim);
 		void set_activity_weight(panima::Animation &anim, uint8_t weight);
 

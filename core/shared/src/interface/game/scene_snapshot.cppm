@@ -9,10 +9,10 @@ module;
 
 export module pragma.shared:game.scene_snapshot;
 
+export import :types;
 export import pragma.materialsystem;
 
 export {
-	class Model;
 	namespace pragma {
 		class DLLNETWORK SceneSnapshot : public std::enable_shared_from_this<SceneSnapshot> {
 		  public:
@@ -39,7 +39,7 @@ export {
 			SceneSnapshot &operator=(const SceneSnapshot &) = delete;
 
 			void MergeMeshesByMaterial();
-			void AddModel(Model &mdl, uint32_t skin = 0u);
+			void AddModel(pragma::Model &mdl, uint32_t skin = 0u);
 			const std::vector<std::shared_ptr<Mesh>> &GetMeshes() const;
 			std::vector<std::shared_ptr<Mesh>> &GetMeshes();
 			const std::vector<std::shared_ptr<Object>> &GetObjects() const;

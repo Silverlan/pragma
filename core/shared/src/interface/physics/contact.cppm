@@ -31,6 +31,10 @@ export {
 			std::vector<ContactPoint> contactPoints;
 			Flags flags;
 		};
+		using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::physics::ContactInfo::Flags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::physics::ContactInfo::Flags> : std::true_type {};
+	}
 };

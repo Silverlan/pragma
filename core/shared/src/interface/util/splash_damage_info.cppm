@@ -11,7 +11,7 @@ export module pragma.shared:util.splash_damage_info;
 
 import :game.damage_info;
 
-export class BaseEntity;
+export class pragma::ecs::BaseEntity;
 export namespace util {
 	struct DLLNETWORK SplashDamageInfo {
 		SplashDamageInfo();
@@ -19,6 +19,6 @@ export namespace util {
 		Vector3 origin = {};
 		float radius = 0.f;
 		std::optional<std::pair<Vector3, float>> cone = {};
-		std::function<bool(BaseEntity *, DamageInfo &)> callback = nullptr;
+		std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> callback = nullptr;
 	};
 };

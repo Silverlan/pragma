@@ -12,7 +12,7 @@ import :entities.components.constraints.copy_rotation;
 
 using namespace pragma;
 
-ConstraintCopyRotationComponent::ConstraintCopyRotationComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+ConstraintCopyRotationComponent::ConstraintCopyRotationComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintCopyRotationComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

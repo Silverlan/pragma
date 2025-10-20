@@ -15,7 +15,7 @@ using namespace pragma;
 ComponentEventId BaseNameComponent::EVENT_ON_NAME_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseNameComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_NAME_CHANGED = registerEvent("ON_NAME_CHANGED", ComponentEventInfo::Type::Broadcast); }
 void BaseNameComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) { using T = BaseNameComponent; }
-BaseNameComponent::BaseNameComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_name(util::StringProperty::Create()) {}
+BaseNameComponent::BaseNameComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_name(util::StringProperty::Create()) {}
 BaseNameComponent::~BaseNameComponent()
 {
 	if(m_cbOnNameChanged.IsValid())
@@ -25,7 +25,7 @@ void BaseNameComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "name", false) || ustring::compare<std::string>(kvData.key, "targetname", false))
 			*m_name = kvData.value;

@@ -8,12 +8,12 @@ module pragma.shared;
 
 import :console.find_entities;
 
-std::vector<BaseEntity *> command::find_trace_targets(NetworkState *state, pragma::BaseCharacterComponent &pl, const std::function<void(TraceData &)> &trCallback)
+std::vector<pragma::ecs::BaseEntity *> command::find_trace_targets(NetworkState *state, pragma::BaseCharacterComponent &pl, const std::function<void(TraceData &)> &trCallback)
 {
 	auto *game = state->GetGameState();
 	if(game == nullptr)
 		return {};
-	std::vector<BaseEntity *> ents;
+	std::vector<pragma::ecs::BaseEntity *> ents;
 	auto trData = pl.GetAimTraceData();
 	if(trCallback != nullptr)
 		trCallback(trData);
@@ -26,17 +26,17 @@ std::vector<BaseEntity *> command::find_trace_targets(NetworkState *state, pragm
 	return ents;
 }
 
-std::vector<BaseEntity *> command::find_named_targets(NetworkState *state, const std::string &targetName)
+std::vector<pragma::ecs::BaseEntity *> command::find_named_targets(NetworkState *state, const std::string &targetName)
 {
 	auto *game = state->GetGameState();
 	if(game == nullptr)
 		return {};
-	std::vector<BaseEntity *> ents;
+	std::vector<pragma::ecs::BaseEntity *> ents;
 	{
 		auto uuid = util::uuid_string_to_bytes(targetName);
 		if(uuid != util::Uuid {}) {
 			// Check for UUID
-			EntityIterator entIt {*game, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+			pragma::ecs::EntityIterator entIt {*game, pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 			entIt.AttachFilter<EntityIteratorFilterUuid>(uuid);
 			ents.reserve(entIt.GetCount());
 			for(auto *ent : entIt)
@@ -44,7 +44,7 @@ std::vector<BaseEntity *> command::find_named_targets(NetworkState *state, const
 		}
 	}
 	if(ents.empty()) {
-		EntityIterator entIt {*game, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+		pragma::ecs::EntityIterator entIt {*game, pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 		entIt.AttachFilter<EntityIteratorFilterEntity>(targetName);
 		ents.reserve(entIt.GetCount());
 		for(auto *ent : entIt)
@@ -59,19 +59,19 @@ std::vector<BaseEntity *> command::find_named_targets(NetworkState *state, const
 	return ents;
 }
 
-std::vector<BaseEntity *> command::find_target_entity(NetworkState *state, pragma::BaseCharacterComponent &pl, std::vector<std::string> &argv, const std::function<void(TraceData &)> &trCallback)
+std::vector<pragma::ecs::BaseEntity *> command::find_target_entity(NetworkState *state, pragma::BaseCharacterComponent &pl, std::vector<std::string> &argv, const std::function<void(TraceData &)> &trCallback)
 {
 	if(argv.empty())
 		return find_trace_targets(state, pl, trCallback);
 	return find_named_targets(state, argv[0]);
 }
 
-std::vector<std::pair<BaseEntity *, float>> util::cmd::get_sorted_entities(Game &game, pragma::BasePlayerComponent *pl)
+std::vector<std::pair<pragma::ecs::BaseEntity *, float>> util::cmd::get_sorted_entities(pragma::Game &game, pragma::BasePlayerComponent *pl)
 {
-	std::vector<BaseEntity *> *entities;
+	std::vector<pragma::ecs::BaseEntity *> *entities;
 	game.GetEntities(&entities);
 
-	std::vector<std::pair<BaseEntity *, float>> sortedEntities {};
+	std::vector<std::pair<pragma::ecs::BaseEntity *, float>> sortedEntities {};
 	auto charComponent = (pl != nullptr) ? pl->GetEntity().GetCharacterComponent() : pragma::ComponentHandle<pragma::BaseCharacterComponent> {};
 	sortedEntities.reserve(entities->size());
 	for(auto *ent : *entities) {
@@ -83,6 +83,6 @@ std::vector<std::pair<BaseEntity *, float>> util::cmd::get_sorted_entities(Game 
 			d = uvec::distance(charComponent->GetEyePosition(), ent->GetCenter());
 		sortedEntities.push_back(std::make_pair(ent, d));
 	}
-	std::sort(sortedEntities.begin(), sortedEntities.end(), [](const std::pair<BaseEntity *, float> &pair0, const std::pair<BaseEntity *, float> &pair1) { return pair0.second < pair1.second; });
+	std::sort(sortedEntities.begin(), sortedEntities.end(), [](const std::pair<pragma::ecs::BaseEntity *, float> &pair0, const std::pair<pragma::ecs::BaseEntity *, float> &pair1) { return pair0.second < pair1.second; });
 	return sortedEntities;
 }

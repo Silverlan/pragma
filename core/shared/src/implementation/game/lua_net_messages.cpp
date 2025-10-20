@@ -7,7 +7,7 @@ module pragma.shared;
 
 import :game.game;
 
-AmmoTypeManager &Game::GetAmmoTypeManager() { return *m_ammoTypes.get(); }
-Bool Game::RegisterAmmoType(const std::string &name, Int32 damage, Float force, DAMAGETYPE dmgType, AmmoType **ammoOut) { return m_ammoTypes->RegisterAmmoType(name, damage, force, dmgType, ammoOut); }
-AmmoType *Game::GetAmmoType(const std::string &name, UInt32 *ammoId) { return m_ammoTypes->GetAmmoType(name, ammoId); }
-AmmoType *Game::GetAmmoType(UInt32 ammoId) { return m_ammoTypes->GetAmmoType(ammoId); }
+AmmoTypeManager &pragma::Game::GetAmmoTypeManager() { return *m_ammoTypes.get(); }
+Bool pragma::Game::RegisterAmmoType(const std::string &name, Int32 damage, Float force, DAMAGETYPE dmgType, AmmoType **ammoOut) { return m_ammoTypes->RegisterAmmoType(name, damage, force, dmgType, ammoOut); }
+AmmoType *pragma::Game::GetAmmoType(const std::string &name, UInt32 *ammoId) { return m_ammoTypes->GetAmmoType(name, ammoId); }
+AmmoType *pragma::Game::GetAmmoType(UInt32 ammoId) { return m_ammoTypes->GetAmmoType(ammoId); }

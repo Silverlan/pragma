@@ -21,7 +21,7 @@ void BaseScoreComponent::RegisterMembers(pragma::EntityComponentManager &compone
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseScoreComponent::BaseScoreComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_score(util::Int32Property::Create(0)) {}
+BaseScoreComponent::BaseScoreComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_score(util::Int32Property::Create(0)) {}
 BaseScoreComponent::~BaseScoreComponent()
 {
 	if(m_cbOnScoreChanged.IsValid())
@@ -31,7 +31,7 @@ void BaseScoreComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "score", false))
 			*m_score = util::to_int(kvData.value);

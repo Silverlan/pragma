@@ -12,9 +12,10 @@ module;
 export module pragma.shared:scripting.lua.classes.parallel_job;
 
 import :networking.util;
+export import :scripting.lua.api;
+export import :types;
 
 export {
-	class Game;
 	namespace pragma::lua {
 		class DLLNETWORK LuaWorker : public util::ParallelWorker<luabind::object> {
 		  public:
@@ -23,7 +24,7 @@ export {
 				Pending,
 			};
 
-			LuaWorker(Game &game, const std::string &name);
+			LuaWorker(pragma::Game &game, const std::string &name);
 			virtual ~LuaWorker() override;
 			virtual luabind::object GetResult() override;
 			virtual void Wait() override;

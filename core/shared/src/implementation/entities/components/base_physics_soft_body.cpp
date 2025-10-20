@@ -13,7 +13,7 @@ import :entities.components.base_physics;
 
 using namespace pragma;
 
-util::TSharedHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
+util::TSharedHandle<pragma::physics::PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 {
 	auto &ent = GetEntity();
 	auto *pSoftBodyComponent = static_cast<pragma::BaseSoftBodyComponent *>(ent.AddComponent("softbody").get());
@@ -123,17 +123,17 @@ util::TSharedHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 				rigid->Spawn();
 				pRigid = rigid.Get();
 			}
-			softBody->AppendAnchor(nodeIdx, *pRigid, (anchor.flags & CollisionMesh::SoftBodyAnchor::Flags::DisableCollisions) != CollisionMesh::SoftBodyAnchor::Flags::None, anchor.influence);
+			softBody->AppendAnchor(nodeIdx, *pRigid, (anchor.flags & pragma::physics::CollisionMesh::SoftBodyAnchor::Flags::DisableCollisions) != pragma::physics::CollisionMesh::SoftBodyAnchor::Flags::None, anchor.influence);
 		}
 		if(phys == nullptr)
-			phys = util::to_shared_handle<SoftBodyPhysObj>(PhysObj::Create<SoftBodyPhysObj, pragma::physics::ISoftBody &>(*this, *softBody));
+			phys = util::to_shared_handle<SoftBodyPhysObj>(pragma::physics::PhysObj::Create<SoftBodyPhysObj, pragma::physics::ISoftBody &>(*this, *softBody));
 		else
 			phys->AddCollisionObject(*softBody);
 	}
 
 	if(phys == nullptr)
 		return {};
-	m_physObject = util::shared_handle_cast<SoftBodyPhysObj, PhysObj>(phys);
+	m_physObject = util::shared_handle_cast<SoftBodyPhysObj, pragma::physics::PhysObj>(phys);
 	m_physObject->Spawn();
 
 	m_physicsType = PHYSICSTYPE::SOFTBODY;

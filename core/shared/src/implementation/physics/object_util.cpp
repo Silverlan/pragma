@@ -12,7 +12,7 @@ void PhysObjKinematic::SetKinematic(bool b) { m_bKinematic = b; }
 
 void PhysObjDynamic::PreSimulate()
 {
-	auto *phys = dynamic_cast<PhysObj *>(this);
+	auto *phys = dynamic_cast<pragma::physics::PhysObj *>(this);
 	for(auto &hObj : phys->GetCollisionObjects()) {
 		if(hObj.IsValid() == false || hObj->IsRigid() == false)
 			continue;
@@ -21,7 +21,7 @@ void PhysObjDynamic::PreSimulate()
 }
 void PhysObjDynamic::PostSimulate()
 {
-	auto *phys = dynamic_cast<PhysObj *>(this);
+	auto *phys = dynamic_cast<pragma::physics::PhysObj *>(this);
 	for(auto &hObj : phys->GetCollisionObjects()) {
 		if(hObj.IsValid() == false || hObj->IsRigid() == false)
 			continue;
@@ -36,7 +36,7 @@ bool PhysObjKinematic::IsKinematic() const { return false; }
 #if PHYS_KEEP_SIMULATION_TRANSFORM != 0
 void PhysObjDynamic::PreSimulate()
 {
-	PhysObj *phys = dynamic_cast<PhysObj *>(this);
+	pragma::physics::PhysObj *phys = dynamic_cast<pragma::physics::PhysObj *>(this);
 	std::vector<PhysCollisionObject *> &objs = phys->GetCollisionObjects();
 	if(m_offsets.size() != objs.size())
 		m_offsets.resize(objs.size());

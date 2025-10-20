@@ -16,7 +16,7 @@ export namespace pragma {
 	class DLLNETWORK BaseTriggerPushComponent : public BaseEntityComponent {
 	  public:
 		enum class SpawnFlags : uint32_t { ChangeVelocityDirection = 2'048 };
-		BaseTriggerPushComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+		BaseTriggerPushComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnTick(double dt) override;
 	  protected:

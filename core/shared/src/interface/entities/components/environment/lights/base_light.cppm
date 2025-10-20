@@ -94,6 +94,10 @@ export {
 			const Vector3 &pos;
 			Candela intensity = 0.f;
 		};
+        using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseEnvLightComponent::LightFlags)
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::BaseEnvLightComponent::LightFlags> : std::true_type {};
+    }
 };

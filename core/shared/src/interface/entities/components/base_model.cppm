@@ -5,15 +5,17 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <string>
+
 
 export module pragma.shared:entities.components.base_model;
 
 export import :entities.components.base;
 export import :model.animation.enums;
+export import :types;
 export import pragma.util;
 
 export {
-	class Model;
 	namespace pragma {
 		class BaseBvhComponent;
 		class IntersectionHandlerComponent;
@@ -29,9 +31,9 @@ export {
 			uint32_t skinId;
 		};
 		struct DLLNETWORK CEOnModelChanged : public ComponentEvent {
-			CEOnModelChanged(const std::shared_ptr<Model> &model);
+			CEOnModelChanged(const std::shared_ptr<pragma::Model> &model);
 			virtual void PushArguments(lua_State *l) override;
-			std::shared_ptr<Model> model;
+			std::shared_ptr<pragma::Model> model;
 		};
 		class DLLNETWORK BaseModelComponent : public BaseEntityComponent, public DynamicMemberRegister {
 		  public:
@@ -49,15 +51,15 @@ export {
 			Int32 LookupBone(const std::string &name) const;
 			int LookupAnimation(const std::string &name) const;
 			int LookupAttachment(const std::string &name) const;
-			void GetAnimations(Activity activity, std::vector<unsigned int> &animations) const;
+			void GetAnimations(pragma::Activity activity, std::vector<unsigned int> &animations) const;
 			unsigned char GetAnimationActivityWeight(unsigned int animation) const;
-			Activity GetAnimationActivity(unsigned int animation) const;
+			pragma::Activity GetAnimationActivity(unsigned int animation) const;
 			float GetAnimationDuration(unsigned int animation) const;
 			void OnModelMaterialsLoaded();
 			bool HasModelMaterialsLoaded() const;
 			void SetModel(const std::string &mdl);
-			virtual void SetModel(const std::shared_ptr<Model> &mdl);
-			const std::shared_ptr<Model> &GetModel() const;
+			virtual void SetModel(const std::shared_ptr<pragma::Model> &mdl);
+			const std::shared_ptr<pragma::Model> &GetModel() const;
 			std::string GetModelName() const;
 			void SetModelName(const std::string &name);
 			bool HasModel() const;
@@ -97,11 +99,11 @@ export {
 
 			virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 		  protected:
-			BaseModelComponent(BaseEntity &ent);
+			BaseModelComponent(pragma::ecs::BaseEntity &ent);
 			virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
-			virtual void OnModelChanged(const std::shared_ptr<Model> &model);
+			virtual void OnModelChanged(const std::shared_ptr<pragma::Model> &model);
 			virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
-			std::shared_ptr<Model> m_model = nullptr;
+			std::shared_ptr<pragma::Model> m_model = nullptr;
 
 			BaseBvhComponent *m_bvhComponent = nullptr;
 			IntersectionHandlerComponent *m_intersectionHandlerComponent = nullptr;

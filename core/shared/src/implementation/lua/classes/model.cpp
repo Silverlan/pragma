@@ -46,7 +46,7 @@ import panima;
 
 
 
-void Lua::ModelMeshGroup::register_class(luabind::class_<::ModelMeshGroup> &classDef)
+void Lua::ModelMeshGroup::register_class(luabind::class_<pragma::ModelMeshGroup> &classDef)
 
 {
 
@@ -60,9 +60,9 @@ void Lua::ModelMeshGroup::register_class(luabind::class_<::ModelMeshGroup> &clas
 
 	classDef.def("AddMesh", &AddMesh);
 
-	classDef.def("ClearMeshes", static_cast<void (*)(lua_State *, ::ModelMeshGroup &)>([](lua_State *l, ::ModelMeshGroup &meshGroup) { meshGroup.GetMeshes().clear(); }));
+	classDef.def("ClearMeshes", static_cast<void (*)(lua_State *, pragma::ModelMeshGroup &)>([](lua_State *l, pragma::ModelMeshGroup &meshGroup) { meshGroup.GetMeshes().clear(); }));
 
-	classDef.def("SetMeshes", static_cast<void (*)(lua_State *, ::ModelMeshGroup &, luabind::object)>([](lua_State *l, ::ModelMeshGroup &meshGroup, luabind::object tMeshes) {
+	classDef.def("SetMeshes", static_cast<void (*)(lua_State *, pragma::ModelMeshGroup &, luabind::object)>([](lua_State *l, pragma::ModelMeshGroup &meshGroup, luabind::object tMeshes) {
 
 		auto idxMeshes = 2;
 
@@ -92,7 +92,7 @@ void Lua::ModelMeshGroup::register_class(luabind::class_<::ModelMeshGroup> &clas
 
 	}));
 
-	classDef.def("GetMesh", static_cast<void (*)(lua_State *, ::ModelMeshGroup &, uint32_t)>([](lua_State *l, ::ModelMeshGroup &meshGroup, uint32_t index) {
+	classDef.def("GetMesh", static_cast<void (*)(lua_State *, pragma::ModelMeshGroup &, uint32_t)>([](lua_State *l, pragma::ModelMeshGroup &meshGroup, uint32_t index) {
 
 		auto &meshes = meshGroup.GetMeshes();
 
@@ -104,15 +104,15 @@ void Lua::ModelMeshGroup::register_class(luabind::class_<::ModelMeshGroup> &clas
 
 	}));
 
-	classDef.def("GetMeshCount", static_cast<void (*)(lua_State *, ::ModelMeshGroup &, uint32_t)>([](lua_State *l, ::ModelMeshGroup &meshGroup, uint32_t index) { Lua::PushInt(l, meshGroup.GetMeshCount()); }));
+	classDef.def("GetMeshCount", static_cast<void (*)(lua_State *, pragma::ModelMeshGroup &, uint32_t)>([](lua_State *l, pragma::ModelMeshGroup &meshGroup, uint32_t index) { Lua::PushInt(l, meshGroup.GetMeshCount()); }));
 
 }
 
-void Lua::ModelMeshGroup::Create(lua_State *l, const std::string &name) { Lua::Push<std::shared_ptr<::ModelMeshGroup>>(l, ::ModelMeshGroup::Create(name)); }
+void Lua::ModelMeshGroup::Create(lua_State *l, const std::string &name) { Lua::Push<std::shared_ptr<pragma::ModelMeshGroup>>(l, pragma::ModelMeshGroup::Create(name)); }
 
-void Lua::ModelMeshGroup::GetName(lua_State *l, ::ModelMeshGroup &meshGroup) { Lua::PushString(l, meshGroup.GetName()); }
+void Lua::ModelMeshGroup::GetName(lua_State *l, pragma::ModelMeshGroup &meshGroup) { Lua::PushString(l, meshGroup.GetName()); }
 
-void Lua::ModelMeshGroup::GetMeshes(lua_State *l, ::ModelMeshGroup &meshGroup)
+void Lua::ModelMeshGroup::GetMeshes(lua_State *l, pragma::ModelMeshGroup &meshGroup)
 
 {
 
@@ -136,7 +136,7 @@ void Lua::ModelMeshGroup::GetMeshes(lua_State *l, ::ModelMeshGroup &meshGroup)
 
 }
 
-void Lua::ModelMeshGroup::AddMesh(lua_State *, ::ModelMeshGroup &meshGroup, ::ModelMesh &mesh) { meshGroup.AddMesh(mesh.shared_from_this()); }
+void Lua::ModelMeshGroup::AddMesh(lua_State *, pragma::ModelMeshGroup &meshGroup, ::ModelMesh &mesh) { meshGroup.AddMesh(mesh.shared_from_this()); }
 
 
 
@@ -226,7 +226,7 @@ void Lua::Joint::RemoveKeyValue(lua_State *l, JointInfo &joint, const std::strin
 
 
 
-static std::ostream &operator<<(std::ostream &out, const Model &mdl)
+static std::ostream &operator<<(std::ostream &out, const pragma::Model &mdl)
 
 {
 
@@ -332,9 +332,9 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, VertexWeight);
 
 
 
-template<typename TResult, typename TBoneIdentifier, bool (::Model::*GetValue)(pragma::animation::BoneId, TResult &, umath::CoordinateSpace) const>
+template<typename TResult, typename TBoneIdentifier, bool (pragma::Model::*GetValue)(pragma::animation::BoneId, TResult &, umath::CoordinateSpace) const>
 
-std::optional<TResult> get_reference_bone_value(const ::Model &mdl, TBoneIdentifier boneIdentifier, umath::CoordinateSpace space)
+std::optional<TResult> get_reference_bone_value(const pragma::Model &mdl, TBoneIdentifier boneIdentifier, umath::CoordinateSpace space)
 
 {
 
@@ -360,9 +360,9 @@ std::optional<TResult> get_reference_bone_value(const ::Model &mdl, TBoneIdentif
 
 
 
-template<typename TResult, typename TBoneIdentifier, bool (::Model::*GetValue)(pragma::animation::BoneId, TResult &, umath::CoordinateSpace) const>
+template<typename TResult, typename TBoneIdentifier, bool (pragma::Model::*GetValue)(pragma::animation::BoneId, TResult &, umath::CoordinateSpace) const>
 
-std::optional<TResult> get_reference_bone_value_ls(const ::Model &mdl, TBoneIdentifier boneIdentifier)
+std::optional<TResult> get_reference_bone_value_ls(const pragma::Model &mdl, TBoneIdentifier boneIdentifier)
 
 {
 
@@ -374,35 +374,35 @@ std::optional<TResult> get_reference_bone_value_ls(const ::Model &mdl, TBoneIden
 
 template<typename TResult>
 
-void def_bone_methods(luabind::class_<::Model> &classDef)
+void def_bone_methods(luabind::class_<pragma::Model> &classDef)
 
 {
 
 	// Note: luabind::default_parameter_policy would be a better choice here, but doesn't work for the CoordinateSpace parameter for some unknown reason
 
-	classDef.def("GetReferenceBonePose", &get_reference_bone_value_ls<umath::ScaledTransform, TResult, &::Model::GetReferenceBonePose>);
+	classDef.def("GetReferenceBonePose", &get_reference_bone_value_ls<umath::ScaledTransform, TResult, &pragma::Model::GetReferenceBonePose>);
 
-	classDef.def("GetReferenceBonePos", &get_reference_bone_value_ls<Vector3, TResult, &::Model::GetReferenceBonePos>);
+	classDef.def("GetReferenceBonePos", &get_reference_bone_value_ls<Vector3, TResult, &pragma::Model::GetReferenceBonePos>);
 
-	classDef.def("GetReferenceBoneRot", &get_reference_bone_value_ls<Quat, TResult, &::Model::GetReferenceBoneRot>);
+	classDef.def("GetReferenceBoneRot", &get_reference_bone_value_ls<Quat, TResult, &pragma::Model::GetReferenceBoneRot>);
 
-	classDef.def("GetReferenceBoneScale", &get_reference_bone_value_ls<Vector3, TResult, &::Model::GetReferenceBoneScale>);
+	classDef.def("GetReferenceBoneScale", &get_reference_bone_value_ls<Vector3, TResult, &pragma::Model::GetReferenceBoneScale>);
 
 
 
-	classDef.def("GetReferenceBonePose", &get_reference_bone_value<umath::ScaledTransform, TResult, &::Model::GetReferenceBonePose>);
+	classDef.def("GetReferenceBonePose", &get_reference_bone_value<umath::ScaledTransform, TResult, &pragma::Model::GetReferenceBonePose>);
 
-	classDef.def("GetReferenceBonePos", &get_reference_bone_value<Vector3, TResult, &::Model::GetReferenceBonePos>);
+	classDef.def("GetReferenceBonePos", &get_reference_bone_value<Vector3, TResult, &pragma::Model::GetReferenceBonePos>);
 
-	classDef.def("GetReferenceBoneRot", &get_reference_bone_value<Quat, TResult, &::Model::GetReferenceBoneRot>);
+	classDef.def("GetReferenceBoneRot", &get_reference_bone_value<Quat, TResult, &pragma::Model::GetReferenceBoneRot>);
 
-	classDef.def("GetReferenceBoneScale", &get_reference_bone_value<Vector3, TResult, &::Model::GetReferenceBoneScale>);
+	classDef.def("GetReferenceBoneScale", &get_reference_bone_value<Vector3, TResult, &pragma::Model::GetReferenceBoneScale>);
 
 }
 
 
 
-void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef, luabind::class_<::ModelMesh> &classDefModelMesh, luabind::class_<::ModelSubMesh> &classDefModelSubMesh)
+void Lua::Model::register_class(lua_State *l, luabind::class_<pragma::Model> &classDef, luabind::class_<::ModelMesh> &classDefModelMesh, luabind::class_<pragma::ModelSubMesh> &classDefModelSubMesh)
 
 {
 
@@ -412,9 +412,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def(luabind::const_self == luabind::const_self);
 
-	classDef.def("Validate", &::Model::Validate);
+	classDef.def("Validate", &pragma::Model::Validate);
 
-	classDef.def("RemoveUnusedMaterialReferences", &::Model::RemoveUnusedMaterialReferences);
+	classDef.def("RemoveUnusedMaterialReferences", &pragma::Model::RemoveUnusedMaterialReferences);
 
 	classDef.def("GetCollisionMeshes", &GetCollisionMeshes);
 
@@ -422,17 +422,17 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def("GetSkeleton", &GetSkeleton);
 
-	classDef.def("TransformBone", &::Model::TransformBone);
+	classDef.def("TransformBone", &pragma::Model::TransformBone);
 
-	classDef.def("TransformBone", &::Model::TransformBone, luabind::default_parameter_policy<4, umath::CoordinateSpace::World> {});
+	classDef.def("TransformBone", &pragma::Model::TransformBone, luabind::default_parameter_policy<4, umath::CoordinateSpace::World> {});
 
 	classDef.def("GetAttachmentCount", &GetAttachmentCount);
 
 	classDef.def("GetAttachments", &GetAttachments);
 
-	classDef.def("GetAttachment", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&GetAttachment));
+	classDef.def("GetAttachment", static_cast<void (*)(lua_State *, pragma::Model &, const std::string &)>(&GetAttachment));
 
-	classDef.def("GetAttachment", static_cast<void (*)(lua_State *, ::Model &, int32_t)>(&GetAttachment));
+	classDef.def("GetAttachment", static_cast<void (*)(lua_State *, pragma::Model &, int32_t)>(&GetAttachment));
 
 	classDef.def("LookupAttachment", &LookupAttachment);
 
@@ -440,25 +440,25 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def("LookupAnimation", &LookupAnimation);
 
-	classDef.def("AddAttachment", static_cast<void (*)(lua_State *, ::Model &, const std::string &, const std::string &, const Vector3 &, const EulerAngles &)>(&AddAttachment));
+	classDef.def("AddAttachment", static_cast<void (*)(lua_State *, pragma::Model &, const std::string &, const std::string &, const Vector3 &, const EulerAngles &)>(&AddAttachment));
 
-	classDef.def("AddAttachment", static_cast<void (*)(lua_State *, ::Model &, const std::string &, uint32_t, const Vector3 &, const EulerAngles &)>(&AddAttachment));
+	classDef.def("AddAttachment", static_cast<void (*)(lua_State *, pragma::Model &, const std::string &, uint32_t, const Vector3 &, const EulerAngles &)>(&AddAttachment));
 
-	classDef.def("SetAttachmentData", static_cast<void (*)(lua_State *, ::Model &, const std::string &, luabind::object)>(&SetAttachmentData));
+	classDef.def("SetAttachmentData", static_cast<void (*)(lua_State *, pragma::Model &, const std::string &, luabind::object)>(&SetAttachmentData));
 
-	classDef.def("SetAttachmentData", static_cast<void (*)(lua_State *, ::Model &, uint32_t, luabind::object)>(&SetAttachmentData));
+	classDef.def("SetAttachmentData", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t, luabind::object)>(&SetAttachmentData));
 
-	classDef.def("RemoveAttachment", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&RemoveAttachment));
+	classDef.def("RemoveAttachment", static_cast<void (*)(lua_State *, pragma::Model &, const std::string &)>(&RemoveAttachment));
 
-	classDef.def("RemoveAttachment", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&RemoveAttachment));
+	classDef.def("RemoveAttachment", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>(&RemoveAttachment));
 
 
 
-	classDef.def("FindBoneTwistAxis", &::Model::FindBoneTwistAxis);
+	classDef.def("FindBoneTwistAxis", &pragma::Model::FindBoneTwistAxis);
 
-	classDef.def("FindBoneAxisForDirection", &::Model::FindBoneAxisForDirection);
+	classDef.def("FindBoneAxisForDirection", &pragma::Model::FindBoneAxisForDirection);
 
-	classDef.scope[luabind::def("get_twist_axis_rotation_offset", &::Model::GetTwistAxisRotationOffset)];
+	classDef.scope[luabind::def("get_twist_axis_rotation_offset", &pragma::Model::GetTwistAxisRotationOffset)];
 
 
 
@@ -472,9 +472,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def("LookupObjectAttachment", &LookupObjectAttachment);
 
-	classDef.def("RemoveObjectAttachment", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&RemoveObjectAttachment));
+	classDef.def("RemoveObjectAttachment", static_cast<void (*)(lua_State *, pragma::Model &, const std::string &)>(&RemoveObjectAttachment));
 
-	classDef.def("RemoveObjectAttachment", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&RemoveObjectAttachment));
+	classDef.def("RemoveObjectAttachment", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>(&RemoveObjectAttachment));
 
 
 
@@ -482,9 +482,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def("GetBlendControllers", &GetBlendControllers);
 
-	classDef.def("GetBlendController", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&GetBlendController));
+	classDef.def("GetBlendController", static_cast<void (*)(lua_State *, pragma::Model &, const std::string &)>(&GetBlendController));
 
-	classDef.def("GetBlendController", static_cast<void (*)(lua_State *, ::Model &, int32_t)>(&GetBlendController));
+	classDef.def("GetBlendController", static_cast<void (*)(lua_State *, pragma::Model &, int32_t)>(&GetBlendController));
 
 	classDef.def("LookupBlendController", &LookupBlendController);
 
@@ -494,9 +494,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def("GetAnimationNames", &GetAnimationNames);
 
-	classDef.def("GetAnimation", static_cast<void (*)(lua_State *, ::Model &, const char *)>(&GetAnimation));
+	classDef.def("GetAnimation", static_cast<void (*)(lua_State *, pragma::Model &, const char *)>(&GetAnimation));
 
-	classDef.def("GetAnimation", static_cast<void (*)(lua_State *, ::Model &, unsigned int)>(&GetAnimation));
+	classDef.def("GetAnimation", static_cast<void (*)(lua_State *, pragma::Model &, unsigned int)>(&GetAnimation));
 
 	classDef.def("GetAnimationName", &GetAnimationName);
 
@@ -508,7 +508,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 
 
-	classDef.def("CalcBoneLength", &::Model::CalcBoneLength);
+	classDef.def("CalcBoneLength", &pragma::Model::CalcBoneLength);
 
 	classDef.def("PrecacheTextureGroup", &PrecacheTextureGroup);
 
@@ -532,27 +532,27 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def("GetMeshGroupId", &GetMeshGroupId);
 
-	classDef.def("GetMeshGroup", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&GetMeshGroup));
+	classDef.def("GetMeshGroup", static_cast<void (*)(lua_State *, pragma::Model &, const std::string &)>(&GetMeshGroup));
 
-	classDef.def("GetMeshGroup", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&GetMeshGroup));
+	classDef.def("GetMeshGroup", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>(&GetMeshGroup));
 
-	classDef.def("GetMeshes", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&Lua::Model::GetMeshes));
+	classDef.def("GetMeshes", static_cast<void (*)(lua_State *, pragma::Model &, const std::string &)>(&Lua::Model::GetMeshes));
 
-	classDef.def("GetMeshes", static_cast<void (*)(lua_State *, ::Model &, luabind::object)>(&Lua::Model::GetMeshes));
+	classDef.def("GetMeshes", static_cast<void (*)(lua_State *, pragma::Model &, luabind::object)>(&Lua::Model::GetMeshes));
 
 	classDef.def("GetMeshGroups", &Lua::Model::GetMeshGroups);
 
-	classDef.def("AddMeshGroup", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&Lua::Model::AddMeshGroup));
+	classDef.def("AddMeshGroup", static_cast<void (*)(lua_State *, pragma::Model &, const std::string &)>(&Lua::Model::AddMeshGroup));
 
-	classDef.def("AddMeshGroup", static_cast<void (*)(lua_State *, ::Model &, ::ModelMeshGroup &)>(&Lua::Model::AddMeshGroup));
+	classDef.def("AddMeshGroup", static_cast<void (*)(lua_State *, pragma::Model &, pragma::ModelMeshGroup &)>(&Lua::Model::AddMeshGroup));
 
 	classDef.def("UpdateCollisionBounds", &Lua::Model::UpdateCollisionBounds);
 
 	classDef.def("UpdateRenderBounds", &Lua::Model::UpdateRenderBounds);
 
-	classDef.def("Update", static_cast<void (*)(lua_State *, ::Model &)>(&Lua::Model::Update));
+	classDef.def("Update", static_cast<void (*)(lua_State *, pragma::Model &)>(&Lua::Model::Update));
 
-	classDef.def("Update", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&Lua::Model::Update));
+	classDef.def("Update", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>(&Lua::Model::Update));
 
 	classDef.def("GetName", &Lua::Model::GetName);
 
@@ -578,7 +578,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def("GetMaterials", &Lua::Model::GetMaterials);
 
-	classDef.def("GetMaterial", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>([](lua_State *l, ::Model &mdl, uint32_t idx) {
+	classDef.def("GetMaterial", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>([](lua_State *l, pragma::Model &mdl, uint32_t idx) {
 
 		auto *mat = mdl.GetMaterial(idx);
 
@@ -590,7 +590,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	}));
 
-	classDef.def("GetMaterialIndex", static_cast<void (*)(lua_State *, ::Model &, ::ModelSubMesh &, uint32_t)>([](lua_State *l, ::Model &mdl, ::ModelSubMesh &mesh, uint32_t skinId) {
+	classDef.def("GetMaterialIndex", static_cast<void (*)(lua_State *, pragma::Model &, pragma::ModelSubMesh &, uint32_t)>([](lua_State *l, pragma::Model &mdl, pragma::ModelSubMesh &mesh, uint32_t skinId) {
 
 		auto idx = mdl.GetMaterialIndex(mesh, skinId);
 
@@ -604,7 +604,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def(
 
-	  "GetSubMesh", +[](lua_State *l, ::Model &mdl, uint32_t mgId, uint32_t mId, uint32_t smId) -> std::shared_ptr<::ModelSubMesh> {
+	  "GetSubMesh", +[](lua_State *l, pragma::Model &mdl, uint32_t mgId, uint32_t mId, uint32_t smId) -> std::shared_ptr<pragma::ModelSubMesh> {
 
 		  auto *sm = mdl.GetSubMesh(mgId, mId, smId);
 
@@ -618,7 +618,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def(
 
-	  "FindSubMeshId", +[](lua_State *l, ::Model &mdl, ::ModelSubMesh &smTgt) -> std::optional<std::tuple<uint32_t, uint32_t, uint32_t>> {
+	  "FindSubMeshId", +[](lua_State *l, pragma::Model &mdl, pragma::ModelSubMesh &smTgt) -> std::optional<std::tuple<uint32_t, uint32_t, uint32_t>> {
 
 		  auto &meshGroups = mdl.GetMeshGroups();
 
@@ -670,9 +670,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def("GetHitboxBounds", &Lua::Model::GetHitboxBounds);
 
-	classDef.def("GetHitboxBones", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&Lua::Model::GetHitboxBones));
+	classDef.def("GetHitboxBones", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>(&Lua::Model::GetHitboxBones));
 
-	classDef.def("GetHitboxBones", static_cast<void (*)(lua_State *, ::Model &)>(&Lua::Model::GetHitboxBones));
+	classDef.def("GetHitboxBones", static_cast<void (*)(lua_State *, pragma::Model &)>(&Lua::Model::GetHitboxBones));
 
 	classDef.def("SetHitboxGroup", &Lua::Model::SetHitboxGroup);
 
@@ -684,23 +684,23 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def("GetBodyGroup", &Lua::Model::GetBodyGroup);
 
-	classDef.def("GetExtensionData", &::Model::GetExtensionData);
+	classDef.def("GetExtensionData", &pragma::Model::GetExtensionData);
 
-	classDef.def("GenerateHitboxes", &::Model::GenerateHitboxes);
+	classDef.def("GenerateHitboxes", &pragma::Model::GenerateHitboxes);
 
-	classDef.def("GenerateMetaRig", &::Model::GenerateMetaRig);
+	classDef.def("GenerateMetaRig", &pragma::Model::GenerateMetaRig);
 
-	classDef.def("GenerateMetaBlendShapes", &::Model::GenerateMetaBlendShapes);
+	classDef.def("GenerateMetaBlendShapes", &pragma::Model::GenerateMetaBlendShapes);
 
-	classDef.def("GetMetaRig", &::Model::GetMetaRig);
+	classDef.def("GetMetaRig", &pragma::Model::GetMetaRig);
 
-	classDef.def("ClearMetaRig", &::Model::ClearMetaRig);
+	classDef.def("ClearMetaRig", &pragma::Model::ClearMetaRig);
 
-	classDef.def("GetMetaRigReferencePose", &::Model::GetMetaRigReferencePose);
+	classDef.def("GetMetaRigReferencePose", &pragma::Model::GetMetaRigReferencePose);
 
 	classDef.def(
 
-	  "GenerateStandardMetaRigReferenceBonePoses", +[](const ::Model &mdl) -> std::optional<std::vector<umath::ScaledTransform>> {
+	  "GenerateStandardMetaRigReferenceBonePoses", +[](const pragma::Model &mdl) -> std::optional<std::vector<umath::ScaledTransform>> {
 
 		  std::vector<umath::ScaledTransform> poses;
 
@@ -712,11 +712,11 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	  });
 
-	classDef.def("CalcNormalizedMetaBoneRotation", &::Model::CalcNormalizedMetaBoneRotation);
+	classDef.def("CalcNormalizedMetaBoneRotation", &pragma::Model::CalcNormalizedMetaBoneRotation);
 
-	classDef.def("RetargetMetaBoneRotation", &::Model::RetargetMetaBoneRotation);
+	classDef.def("RetargetMetaBoneRotation", &pragma::Model::RetargetMetaBoneRotation);
 
-	classDef.def("GetMetaRigBoneParentId", &::Model::GetMetaRigBoneParentId);
+	classDef.def("GetMetaRigBoneParentId", &pragma::Model::GetMetaRigBoneParentId);
 
 	classDef.def("GetTextureGroupCount", &Lua::Model::GetTextureGroupCount);
 
@@ -726,9 +726,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def("SaveLegacy", &Lua::Model::Save);
 
-	classDef.def("Save", static_cast<void (*)(lua_State *, ::Model &, ::udm::AssetData &)>([](lua_State *l, ::Model &mdl, ::udm::AssetData &assetData) {
+	classDef.def("Save", static_cast<void (*)(lua_State *, pragma::Model &, ::udm::AssetData &)>([](lua_State *l, pragma::Model &mdl, ::udm::AssetData &assetData) {
 
-		auto *nw = Engine::Get()->GetNetworkState(l);
+		auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 
 		auto *game = nw ? nw->GetGameState() : nullptr;
 
@@ -750,9 +750,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	}));
 
-	classDef.def("Save", static_cast<void (*)(lua_State *, ::Model &)>([](lua_State *l, ::Model &mdl) {
+	classDef.def("Save", static_cast<void (*)(lua_State *, pragma::Model &)>([](lua_State *l, pragma::Model &mdl) {
 
-		auto *nw = Engine::Get()->GetNetworkState(l);
+		auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 
 		auto *game = nw ? nw->GetGameState() : nullptr;
 
@@ -776,9 +776,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def(
 
-	  "Save", +[](lua_State *l, ::Engine *engine, ::Model &mdl, const std::string &fname) {
+	  "Save", +[](lua_State *l, pragma::Engine *engine, pragma::Model &mdl, const std::string &fname) {
 
-		  auto *nw = Engine::Get()->GetNetworkState(l);
+		  auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 
 		  auto *game = nw ? nw->GetGameState() : nullptr;
 
@@ -796,7 +796,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 		  else {
 
-			  Engine::Get()->PollResourceWatchers();
+			  pragma::Engine::Get()->PollResourceWatchers();
 
 			  Lua::PushBool(l, result);
 
@@ -804,9 +804,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	  });
 
-	classDef.def("Copy", static_cast<void (*)(lua_State *, ::Model &)>(&Lua::Model::Copy));
+	classDef.def("Copy", static_cast<void (*)(lua_State *, pragma::Model &)>(&Lua::Model::Copy));
 
-	classDef.def("Copy", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&Lua::Model::Copy));
+	classDef.def("Copy", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>(&Lua::Model::Copy));
 
 	classDef.def("GetVertexCount", &Lua::Model::GetVertexCount);
 
@@ -816,9 +816,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def("GetMaterialPaths", &Lua::Model::GetTexturePaths);
 
-	classDef.def("LoadMaterials", static_cast<void (*)(lua_State *, ::Model &)>(&Lua::Model::LoadMaterials));
+	classDef.def("LoadMaterials", static_cast<void (*)(lua_State *, pragma::Model &)>(&Lua::Model::LoadMaterials));
 
-	classDef.def("LoadMaterials", static_cast<void (*)(lua_State *, ::Model &, bool)>(&Lua::Model::LoadMaterials));
+	classDef.def("LoadMaterials", static_cast<void (*)(lua_State *, pragma::Model &, bool)>(&Lua::Model::LoadMaterials));
 
 	classDef.def("AddMaterialPath", &Lua::Model::AddTexturePath);
 
@@ -856,35 +856,35 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def("AddTextureGroup", &Lua::Model::AddTextureGroup);
 
-	classDef.def("Merge", static_cast<void (*)(lua_State *, ::Model &, ::Model &, uint32_t)>(&Lua::Model::Merge));
+	classDef.def("Merge", static_cast<void (*)(lua_State *, pragma::Model &, pragma::Model &, uint32_t)>(&Lua::Model::Merge));
 
-	classDef.def("Merge", static_cast<void (*)(lua_State *, ::Model &, ::Model &)>(&Lua::Model::Merge));
+	classDef.def("Merge", static_cast<void (*)(lua_State *, pragma::Model &, pragma::Model &)>(&Lua::Model::Merge));
 
 	classDef.def("GetLODCount", &Lua::Model::GetLODCount);
 
-	classDef.def("GetLODData", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&Lua::Model::GetLODData));
+	classDef.def("GetLODData", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>(&Lua::Model::GetLODData));
 
-	classDef.def("GetLODData", static_cast<void (*)(lua_State *, ::Model &)>(&Lua::Model::GetLODData));
+	classDef.def("GetLODData", static_cast<void (*)(lua_State *, pragma::Model &)>(&Lua::Model::GetLODData));
 
 	classDef.def("GetLOD", &Lua::Model::GetLOD);
 
-	classDef.def("GenerateLowLevelLODs", &::Model::GenerateLowLevelLODs);
+	classDef.def("GenerateLowLevelLODs", &pragma::Model::GenerateLowLevelLODs);
 
-	classDef.def("GenerateCollisionMeshes", &::Model::GenerateCollisionMeshes);
+	classDef.def("GenerateCollisionMeshes", &pragma::Model::GenerateCollisionMeshes);
 
-	classDef.def("GenerateCollisionMeshes", +[](::Model &mdl, bool convex, float mass) -> bool { return mdl.GenerateCollisionMeshes(convex, mass); });
+	classDef.def("GenerateCollisionMeshes", +[](pragma::Model &mdl, bool convex, float mass) -> bool { return mdl.GenerateCollisionMeshes(convex, mass); });
 
-	classDef.def("TranslateLODMeshes", static_cast<void (*)(lua_State *, ::Model &, uint32_t, luabind::object)>(&Lua::Model::TranslateLODMeshes));
+	classDef.def("TranslateLODMeshes", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t, luabind::object)>(&Lua::Model::TranslateLODMeshes));
 
-	classDef.def("TranslateLODMeshes", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&Lua::Model::TranslateLODMeshes));
+	classDef.def("TranslateLODMeshes", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>(&Lua::Model::TranslateLODMeshes));
 
 	classDef.def("GetJoints", &Lua::Model::GetJoints);
 
-	classDef.def("SetReferencePoses", &::Model::SetReferencePoses);
+	classDef.def("SetReferencePoses", &pragma::Model::SetReferencePoses);
 
-	classDef.def("SetReferencePoses", &::Model::SetReferencePoses, luabind::default_parameter_policy<3, false> {});
+	classDef.def("SetReferencePoses", &pragma::Model::SetReferencePoses, luabind::default_parameter_policy<3, false> {});
 
-	classDef.def("AddJoint", static_cast<JointInfo *(*)(lua_State *, ::Model &, JointType, pragma::animation::BoneId, pragma::animation::BoneId)>([](lua_State *l, ::Model &mdl, JointType type, pragma::animation::BoneId child, pragma::animation::BoneId parent) -> JointInfo * {
+	classDef.def("AddJoint", static_cast<JointInfo *(*)(lua_State *, pragma::Model &, JointType, pragma::animation::BoneId, pragma::animation::BoneId)>([](lua_State *l, pragma::Model &mdl, JointType type, pragma::animation::BoneId child, pragma::animation::BoneId parent) -> JointInfo * {
 
 		auto &joint = mdl.AddJoint(type, child, parent);
 
@@ -892,7 +892,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	}));
 
-	classDef.def("ClearJoints", static_cast<void (*)(lua_State *, ::Model &)>([](lua_State *l, ::Model &mdl) { mdl.GetJoints().clear(); }));
+	classDef.def("ClearJoints", static_cast<void (*)(lua_State *, pragma::Model &)>([](lua_State *l, pragma::Model &mdl) { mdl.GetJoints().clear(); }));
 
 	classDef.def("GetVertexAnimations", &Lua::Model::GetVertexAnimations);
 
@@ -902,13 +902,13 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def("RemoveVertexAnimation", &Lua::Model::RemoveVertexAnimation);
 
-	classDef.def("GetBodyGroupMeshes", static_cast<void (*)(lua_State *, ::Model &, luabind::object, uint32_t)>(&Lua::Model::GetBodyGroupMeshes));
+	classDef.def("GetBodyGroupMeshes", static_cast<void (*)(lua_State *, pragma::Model &, luabind::object, uint32_t)>(&Lua::Model::GetBodyGroupMeshes));
 
-	classDef.def("GetBodyGroupMeshes", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&Lua::Model::GetBodyGroupMeshes));
+	classDef.def("GetBodyGroupMeshes", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>(&Lua::Model::GetBodyGroupMeshes));
 
-	classDef.def("GetBodyGroupMeshes", static_cast<void (*)(lua_State *, ::Model &)>(&Lua::Model::GetBodyGroupMeshes));
+	classDef.def("GetBodyGroupMeshes", static_cast<void (*)(lua_State *, pragma::Model &)>(&Lua::Model::GetBodyGroupMeshes));
 
-	classDef.def("GetBodyGroupMesh", static_cast<void (*)(lua_State *, ::Model &, uint32_t, uint32_t)>([](lua_State *l, ::Model &mdl, uint32_t bodyGroupId, uint32_t bgValue) {
+	classDef.def("GetBodyGroupMesh", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t, uint32_t)>([](lua_State *l, pragma::Model &mdl, uint32_t bodyGroupId, uint32_t bgValue) {
 
 		uint32_t meshId;
 
@@ -924,13 +924,13 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def("LookupFlexController", &Lua::Model::GetFlexControllerId);
 
-	classDef.def("GetFlexController", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&Lua::Model::GetFlexController));
+	classDef.def("GetFlexController", static_cast<void (*)(lua_State *, pragma::Model &, const std::string &)>(&Lua::Model::GetFlexController));
 
-	classDef.def("GetFlexController", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&Lua::Model::GetFlexController));
+	classDef.def("GetFlexController", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>(&Lua::Model::GetFlexController));
 
 	classDef.def(
 
-	  "AddFlexController", +[](::Model &mdl, const std::string &name, float min, float max) -> pragma::animation::FlexControllerId {
+	  "AddFlexController", +[](pragma::Model &mdl, const std::string &name, float min, float max) -> pragma::animation::FlexControllerId {
 
 		  uint32_t id;
 
@@ -946,19 +946,19 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def("GetFlexes", &Lua::Model::GetFlexes);
 
-	classDef.def("AddFlex", +[](::Model &mdl, const ::Flex &flex) { mdl.GetFlexes().push_back(flex); });
+	classDef.def("AddFlex", +[](pragma::Model &mdl, const ::Flex &flex) { mdl.GetFlexes().push_back(flex); });
 
 	classDef.def("LookupFlex", &Lua::Model::GetFlexId);
 
-	classDef.def("GetFlexFormula", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&Lua::Model::GetFlexFormula));
+	classDef.def("GetFlexFormula", static_cast<void (*)(lua_State *, pragma::Model &, const std::string &)>(&Lua::Model::GetFlexFormula));
 
-	classDef.def("GetFlexFormula", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&Lua::Model::GetFlexFormula));
+	classDef.def("GetFlexFormula", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>(&Lua::Model::GetFlexFormula));
 
-	classDef.def("GetFlexControllerCount", static_cast<void (*)(lua_State *, ::Model &)>([](lua_State *l, ::Model &mdl) { Lua::PushInt(l, mdl.GetFlexControllerCount()); }));
+	classDef.def("GetFlexControllerCount", static_cast<void (*)(lua_State *, pragma::Model &)>([](lua_State *l, pragma::Model &mdl) { Lua::PushInt(l, mdl.GetFlexControllerCount()); }));
 
-	classDef.def("GetFlexCount", static_cast<void (*)(lua_State *, ::Model &)>([](lua_State *l, ::Model &mdl) { Lua::PushInt(l, mdl.GetFlexCount()); }));
+	classDef.def("GetFlexCount", static_cast<void (*)(lua_State *, pragma::Model &)>([](lua_State *l, pragma::Model &mdl) { Lua::PushInt(l, mdl.GetFlexCount()); }));
 
-	classDef.def("CalcFlexWeight", static_cast<void (*)(lua_State *, ::Model &, uint32_t, luabind::object)>([](lua_State *l, ::Model &mdl, uint32_t flexId, luabind::object oFc) {
+	classDef.def("CalcFlexWeight", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t, luabind::object)>([](lua_State *l, pragma::Model &mdl, uint32_t flexId, luabind::object oFc) {
 
 		Lua::CheckFunction(l, 3);
 
@@ -1006,7 +1006,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	}));
 
-	classDef.def("CalcReferenceAttachmentPose", static_cast<void (*)(lua_State *, ::Model &, int32_t)>([](lua_State *l, ::Model &mdl, int32_t attIdx) {
+	classDef.def("CalcReferenceAttachmentPose", static_cast<void (*)(lua_State *, pragma::Model &, int32_t)>([](lua_State *l, pragma::Model &mdl, int32_t attIdx) {
 
 		auto t = mdl.CalcReferenceAttachmentPose(attIdx);
 
@@ -1018,7 +1018,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	}));
 
-	classDef.def("CalcReferenceBonePose", static_cast<void (*)(lua_State *, ::Model &, int32_t)>([](lua_State *l, ::Model &mdl, int32_t boneIdx) {
+	classDef.def("CalcReferenceBonePose", static_cast<void (*)(lua_State *, pragma::Model &, int32_t)>([](lua_State *l, pragma::Model &mdl, int32_t boneIdx) {
 
 		auto t = mdl.CalcReferenceBonePose(boneIdx);
 
@@ -1030,19 +1030,19 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	}));
 
-	classDef.def("IsRootBone", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>([](lua_State *l, ::Model &mdl, uint32_t boneId) { Lua::PushBool(l, mdl.IsRootBone(boneId)); }));
+	classDef.def("IsRootBone", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>([](lua_State *l, pragma::Model &mdl, uint32_t boneId) { Lua::PushBool(l, mdl.IsRootBone(boneId)); }));
 
-	classDef.def("GetFlags", static_cast<void (*)(lua_State *, ::Model &)>([](lua_State *l, ::Model &mdl) { Lua::PushInt(l, mdl.GetMetaInfo().flags); }));
+	classDef.def("GetFlags", static_cast<void (*)(lua_State *, pragma::Model &)>([](lua_State *l, pragma::Model &mdl) { Lua::PushInt(l, mdl.GetMetaInfo().flags); }));
 
-	classDef.def("SetFlags", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>([](lua_State *l, ::Model &mdl, uint32_t flags) { mdl.GetMetaInfo().flags = static_cast<::Model::Flags>(flags); }));
+	classDef.def("SetFlags", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>([](lua_State *l, pragma::Model &mdl, uint32_t flags) { mdl.GetMetaInfo().flags = static_cast<pragma::Model::Flags>(flags); }));
 
-	classDef.def("HasFlag", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>([](lua_State *l, ::Model &mdl, uint32_t flag) { Lua::PushBool(l, umath::is_flag_set(mdl.GetMetaInfo().flags, static_cast<::Model::Flags>(flag)) != 0); }));
+	classDef.def("HasFlag", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>([](lua_State *l, pragma::Model &mdl, uint32_t flag) { Lua::PushBool(l, umath::is_flag_set(mdl.GetMetaInfo().flags, static_cast<pragma::Model::Flags>(flag)) != 0); }));
 
-	classDef.def("IsStatic", static_cast<void (*)(lua_State *, ::Model &)>([](lua_State *l, ::Model &mdl) { Lua::PushBool(l, umath::is_flag_set(mdl.GetMetaInfo().flags, ::Model::Flags::Static)); }));
+	classDef.def("IsStatic", static_cast<void (*)(lua_State *, pragma::Model &)>([](lua_State *l, pragma::Model &mdl) { Lua::PushBool(l, umath::is_flag_set(mdl.GetMetaInfo().flags, pragma::Model::Flags::Static)); }));
 
 	classDef.def(
 
-	  "GetEyeball", +[](lua_State *l, ::Model &mdl, uint32_t eyeIdx) {
+	  "GetEyeball", +[](lua_State *l, pragma::Model &mdl, uint32_t eyeIdx) {
 
 		  auto *eyeball = mdl.GetEyeball(eyeIdx);
 
@@ -1054,7 +1054,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	  });
 
-	classDef.def("GetEyeballs", static_cast<void (*)(lua_State *, ::Model &)>([](lua_State *l, ::Model &mdl) {
+	classDef.def("GetEyeballs", static_cast<void (*)(lua_State *, pragma::Model &)>([](lua_State *l, pragma::Model &mdl) {
 
 		auto &eyeballs = mdl.GetEyeballs();
 
@@ -1074,9 +1074,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	}));
 
-	classDef.def("GetEyeballCount", static_cast<void (*)(lua_State *, ::Model &)>([](lua_State *l, ::Model &mdl) { Lua::PushInt(l, mdl.GetEyeballCount()); }));
+	classDef.def("GetEyeballCount", static_cast<void (*)(lua_State *, pragma::Model &)>([](lua_State *l, pragma::Model &mdl) { Lua::PushInt(l, mdl.GetEyeballCount()); }));
 
-	classDef.def("IsStatic", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>([](lua_State *l, ::Model &mdl, uint32_t eyeballIndex) {
+	classDef.def("IsStatic", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>([](lua_State *l, pragma::Model &mdl, uint32_t eyeballIndex) {
 
 		auto *eyeball = mdl.GetEyeball(eyeballIndex);
 
@@ -1088,7 +1088,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	}));
 
-	classDef.def("AddEyeball", static_cast<void (*)(lua_State *, ::Model &, Eyeball &)>([](lua_State *l, ::Model &mdl, Eyeball &eyeball) { mdl.AddEyeball(eyeball); }));
+	classDef.def("AddEyeball", static_cast<void (*)(lua_State *, pragma::Model &, Eyeball &)>([](lua_State *l, pragma::Model &mdl, Eyeball &eyeball) { mdl.AddEyeball(eyeball); }));
 
 
 
@@ -1098,13 +1098,13 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def("LookupIKController", &Lua::Model::LookupIKController);
 
-	classDef.def("AddIKController", static_cast<void (*)(lua_State *, ::Model &, const std::string &, uint32_t, const std::string &, uint32_t)>(&Lua::Model::AddIKController));
+	classDef.def("AddIKController", static_cast<void (*)(lua_State *, pragma::Model &, const std::string &, uint32_t, const std::string &, uint32_t)>(&Lua::Model::AddIKController));
 
-	classDef.def("AddIKController", static_cast<void (*)(lua_State *, ::Model &, const std::string &, uint32_t, const std::string &)>(&Lua::Model::AddIKController));
+	classDef.def("AddIKController", static_cast<void (*)(lua_State *, pragma::Model &, const std::string &, uint32_t, const std::string &)>(&Lua::Model::AddIKController));
 
-	classDef.def("RemoveIKController", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&Lua::Model::RemoveIKController));
+	classDef.def("RemoveIKController", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>(&Lua::Model::RemoveIKController));
 
-	classDef.def("RemoveIKController", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&Lua::Model::RemoveIKController));
+	classDef.def("RemoveIKController", static_cast<void (*)(lua_State *, pragma::Model &, const std::string &)>(&Lua::Model::RemoveIKController));
 
 
 
@@ -1120,7 +1120,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def(
 
-	  "GetPhonemes", +[](const ::Model &mdl) -> std::vector<std::string> {
+	  "GetPhonemes", +[](const pragma::Model &mdl) -> std::vector<std::string> {
 
 		  auto &phonemeMap = mdl.GetPhonemeMap();
 
@@ -1142,31 +1142,31 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 
 
-	classDef.def("SelectWeightedAnimation", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>([](lua_State *l, ::Model &mdl, uint32_t activity) { Lua::PushInt(l, mdl.SelectWeightedAnimation(static_cast<Activity>(activity))); }));
+	classDef.def("SelectWeightedAnimation", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>([](lua_State *l, pragma::Model &mdl, uint32_t activity) { Lua::PushInt(l, mdl.SelectWeightedAnimation(static_cast<pragma::Activity>(activity))); }));
 
-	classDef.def("SelectWeightedAnimation", static_cast<void (*)(lua_State *, ::Model &, uint32_t, int32_t)>([](lua_State *l, ::Model &mdl, uint32_t activity, int32_t animIgnore) { Lua::PushInt(l, mdl.SelectWeightedAnimation(static_cast<Activity>(activity), animIgnore)); }));
+	classDef.def("SelectWeightedAnimation", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t, int32_t)>([](lua_State *l, pragma::Model &mdl, uint32_t activity, int32_t animIgnore) { Lua::PushInt(l, mdl.SelectWeightedAnimation(static_cast<pragma::Activity>(activity), animIgnore)); }));
 
-	classDef.def("SelectFirstAnimation", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>([](lua_State *l, ::Model &mdl, uint32_t activity) { Lua::PushInt(l, mdl.SelectFirstAnimation(static_cast<Activity>(activity))); }));
+	classDef.def("SelectFirstAnimation", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>([](lua_State *l, pragma::Model &mdl, uint32_t activity) { Lua::PushInt(l, mdl.SelectFirstAnimation(static_cast<pragma::Activity>(activity))); }));
 
-	classDef.def("GetAnimationActivityWeight", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>([](lua_State *l, ::Model &mdl, uint32_t anim) { Lua::PushInt(l, mdl.GetAnimationActivityWeight(anim)); }));
+	classDef.def("GetAnimationActivityWeight", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>([](lua_State *l, pragma::Model &mdl, uint32_t anim) { Lua::PushInt(l, mdl.GetAnimationActivityWeight(anim)); }));
 
-	classDef.def("GetAnimationActivity", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>([](lua_State *l, ::Model &mdl, uint32_t anim) { Lua::PushInt(l, umath::to_integral(mdl.GetAnimationActivity(anim))); }));
+	classDef.def("GetAnimationActivity", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>([](lua_State *l, pragma::Model &mdl, uint32_t anim) { Lua::PushInt(l, umath::to_integral(mdl.GetAnimationActivity(anim))); }));
 
-	classDef.def("GetAnimationDuration", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>([](lua_State *l, ::Model &mdl, uint32_t anim) { Lua::PushNumber(l, mdl.GetAnimationDuration(anim)); }));
+	classDef.def("GetAnimationDuration", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>([](lua_State *l, pragma::Model &mdl, uint32_t anim) { Lua::PushNumber(l, mdl.GetAnimationDuration(anim)); }));
 
-	classDef.def("HasVertexWeights", static_cast<void (*)(lua_State *, ::Model &)>([](lua_State *l, ::Model &mdl) { Lua::PushBool(l, mdl.HasVertexWeights()); }));
+	classDef.def("HasVertexWeights", static_cast<void (*)(lua_State *, pragma::Model &)>([](lua_State *l, pragma::Model &mdl) { Lua::PushBool(l, mdl.HasVertexWeights()); }));
 
 
 
 	// Flex animations
 
-	classDef.def("GetFlexAnimations", static_cast<luabind::object (*)(lua_State *, ::Model &)>([](lua_State *l, ::Model &mdl) -> luabind::object { return Lua::vector_to_table(l, mdl.GetFlexAnimations()); }));
+	classDef.def("GetFlexAnimations", static_cast<luabind::object (*)(lua_State *, pragma::Model &)>([](lua_State *l, pragma::Model &mdl) -> luabind::object { return Lua::vector_to_table(l, mdl.GetFlexAnimations()); }));
 
-	classDef.def("GetFlexAnimationNames", static_cast<luabind::object (*)(lua_State *, ::Model &)>([](lua_State *l, ::Model &mdl) -> luabind::object { return Lua::vector_to_table(l, mdl.GetFlexAnimationNames()); }));
+	classDef.def("GetFlexAnimationNames", static_cast<luabind::object (*)(lua_State *, pragma::Model &)>([](lua_State *l, pragma::Model &mdl) -> luabind::object { return Lua::vector_to_table(l, mdl.GetFlexAnimationNames()); }));
 
-	classDef.def("GetFlexAnimationCount", static_cast<uint32_t (*)(lua_State *, ::Model &)>([](lua_State *l, ::Model &mdl) -> uint32_t { return mdl.GetFlexAnimations().size(); }));
+	classDef.def("GetFlexAnimationCount", static_cast<uint32_t (*)(lua_State *, pragma::Model &)>([](lua_State *l, pragma::Model &mdl) -> uint32_t { return mdl.GetFlexAnimations().size(); }));
 
-	classDef.def("AddFlexAnimation", static_cast<std::shared_ptr<FlexAnimation> (*)(lua_State *, ::Model &, const std::string &)>([](lua_State *l, ::Model &mdl, const std::string &name) -> std::shared_ptr<FlexAnimation> {
+	classDef.def("AddFlexAnimation", static_cast<std::shared_ptr<FlexAnimation> (*)(lua_State *, pragma::Model &, const std::string &)>([](lua_State *l, pragma::Model &mdl, const std::string &name) -> std::shared_ptr<FlexAnimation> {
 
 		auto anim = std::make_shared<FlexAnimation>();
 
@@ -1176,9 +1176,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	}));
 
-	classDef.def("AddFlexAnimation", static_cast<void (*)(lua_State *, ::Model &, const std::string &, FlexAnimation &)>([](lua_State *l, ::Model &mdl, const std::string &name, FlexAnimation &flexAnim) { mdl.AddFlexAnimation(name, flexAnim); }));
+	classDef.def("AddFlexAnimation", static_cast<void (*)(lua_State *, pragma::Model &, const std::string &, FlexAnimation &)>([](lua_State *l, pragma::Model &mdl, const std::string &name, FlexAnimation &flexAnim) { mdl.AddFlexAnimation(name, flexAnim); }));
 
-	classDef.def("LookupFlexAnimation", static_cast<luabind::object (*)(lua_State *, ::Model &, const std::string &)>([](lua_State *l, ::Model &mdl, const std::string &name) -> luabind::object {
+	classDef.def("LookupFlexAnimation", static_cast<luabind::object (*)(lua_State *, pragma::Model &, const std::string &)>([](lua_State *l, pragma::Model &mdl, const std::string &name) -> luabind::object {
 
 		auto id = mdl.LookupFlexAnimation(name);
 
@@ -1190,7 +1190,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	}));
 
-	classDef.def("GetFlexAnimation", static_cast<luabind::object (*)(lua_State *, ::Model &, uint32_t)>([](lua_State *l, ::Model &mdl, uint32_t idx) -> luabind::object {
+	classDef.def("GetFlexAnimation", static_cast<luabind::object (*)(lua_State *, pragma::Model &, uint32_t)>([](lua_State *l, pragma::Model &mdl, uint32_t idx) -> luabind::object {
 
 		auto *flexAnim = mdl.GetFlexAnimation(idx);
 
@@ -1202,7 +1202,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	}));
 
-	classDef.def("GetFlexAnimationName", static_cast<luabind::object (*)(lua_State *, ::Model &, uint32_t)>([](lua_State *l, ::Model &mdl, uint32_t idx) -> luabind::object {
+	classDef.def("GetFlexAnimationName", static_cast<luabind::object (*)(lua_State *, pragma::Model &, uint32_t)>([](lua_State *l, pragma::Model &mdl, uint32_t idx) -> luabind::object {
 
 		auto *name = mdl.GetFlexAnimationName(idx);
 
@@ -1214,9 +1214,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	}));
 
-	classDef.def("ClearFlexAnimations", static_cast<void (*)(lua_State *, ::Model &)>([](lua_State *l, ::Model &mdl) { mdl.GetFlexAnimations().clear(); }));
+	classDef.def("ClearFlexAnimations", static_cast<void (*)(lua_State *, pragma::Model &)>([](lua_State *l, pragma::Model &mdl) { mdl.GetFlexAnimations().clear(); }));
 
-	classDef.def("RemoveFlexAnimation", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>([](lua_State *l, ::Model &mdl, uint32_t idx) {
+	classDef.def("RemoveFlexAnimation", static_cast<void (*)(lua_State *, pragma::Model &, uint32_t)>([](lua_State *l, pragma::Model &mdl, uint32_t idx) {
 
 		auto &flexAnims = mdl.GetFlexAnimations();
 
@@ -1230,55 +1230,55 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 
 
-	classDef.add_static_constant("FLAG_NONE", umath::to_integral(::Model::Flags::None));
+	classDef.add_static_constant("FLAG_NONE", umath::to_integral(pragma::Model::Flags::None));
 
-	classDef.add_static_constant("FLAG_BIT_STATIC", umath::to_integral(::Model::Flags::Static));
+	classDef.add_static_constant("FLAG_BIT_STATIC", umath::to_integral(pragma::Model::Flags::Static));
 
-	classDef.add_static_constant("FLAG_BIT_INANIMATE", umath::to_integral(::Model::Flags::Inanimate));
+	classDef.add_static_constant("FLAG_BIT_INANIMATE", umath::to_integral(pragma::Model::Flags::Inanimate));
 
-	classDef.add_static_constant("FLAG_BIT_DONT_PRECACHE_TEXTURE_GROUPS", umath::to_integral(::Model::Flags::DontPrecacheTextureGroups));
-
-
-
-	classDef.add_static_constant("FMERGE_NONE", umath::to_integral(::Model::MergeFlags::None));
-
-	classDef.add_static_constant("FMERGE_ANIMATIONS", umath::to_integral(::Model::MergeFlags::Animations));
-
-	classDef.add_static_constant("FMERGE_ATTACHMENTS", umath::to_integral(::Model::MergeFlags::Attachments));
-
-	classDef.add_static_constant("FMERGE_BLEND_CONTROLLERS", umath::to_integral(::Model::MergeFlags::BlendControllers));
-
-	classDef.add_static_constant("FMERGE_HITBOXES", umath::to_integral(::Model::MergeFlags::Hitboxes));
-
-	classDef.add_static_constant("FMERGE_JOINTS", umath::to_integral(::Model::MergeFlags::Joints));
-
-	classDef.add_static_constant("FMERGE_COLLISION_MESHES", umath::to_integral(::Model::MergeFlags::CollisionMeshes));
-
-	classDef.add_static_constant("FMERGE_MESHES", umath::to_integral(::Model::MergeFlags::Meshes));
-
-	classDef.add_static_constant("FMERGE_ALL", umath::to_integral(::Model::MergeFlags::All));
+	classDef.add_static_constant("FLAG_BIT_DONT_PRECACHE_TEXTURE_GROUPS", umath::to_integral(pragma::Model::Flags::DontPrecacheTextureGroups));
 
 
 
-	classDef.add_static_constant("FCOPY_NONE", umath::to_integral(::Model::CopyFlags::None));
+	classDef.add_static_constant("FMERGE_NONE", umath::to_integral(pragma::Model::MergeFlags::None));
 
-	classDef.add_static_constant("FCOPY_SHALLOW", umath::to_integral(::Model::CopyFlags::ShallowCopy));
+	classDef.add_static_constant("FMERGE_ANIMATIONS", umath::to_integral(pragma::Model::MergeFlags::Animations));
 
-	classDef.add_static_constant("FCOPY_BIT_MESHES", umath::to_integral(::Model::CopyFlags::CopyMeshesBit));
+	classDef.add_static_constant("FMERGE_ATTACHMENTS", umath::to_integral(pragma::Model::MergeFlags::Attachments));
 
-	classDef.add_static_constant("FCOPY_BIT_ANIMATIONS", umath::to_integral(::Model::CopyFlags::CopyAnimationsBit));
+	classDef.add_static_constant("FMERGE_BLEND_CONTROLLERS", umath::to_integral(pragma::Model::MergeFlags::BlendControllers));
 
-	classDef.add_static_constant("FCOPY_BIT_VERTEX_ANIMATIONS", umath::to_integral(::Model::CopyFlags::CopyVertexAnimationsBit));
+	classDef.add_static_constant("FMERGE_HITBOXES", umath::to_integral(pragma::Model::MergeFlags::Hitboxes));
 
-	classDef.add_static_constant("FCOPY_BIT_COLLISION_MESHES", umath::to_integral(::Model::CopyFlags::CopyCollisionMeshesBit));
+	classDef.add_static_constant("FMERGE_JOINTS", umath::to_integral(pragma::Model::MergeFlags::Joints));
 
-	classDef.add_static_constant("FCOPY_BIT_FLEX_ANIMATIONS", umath::to_integral(::Model::CopyFlags::CopyFlexAnimationsBit));
+	classDef.add_static_constant("FMERGE_COLLISION_MESHES", umath::to_integral(pragma::Model::MergeFlags::CollisionMeshes));
 
-	classDef.add_static_constant("FCOPY_BIT_COPY_UNIQUE_IDS", umath::to_integral(::Model::CopyFlags::CopyUniqueIdsBit));
+	classDef.add_static_constant("FMERGE_MESHES", umath::to_integral(pragma::Model::MergeFlags::Meshes));
 
-	classDef.add_static_constant("FCOPY_BIT_COPY_VERTEX_DATA", umath::to_integral(::Model::CopyFlags::CopyVertexData));
+	classDef.add_static_constant("FMERGE_ALL", umath::to_integral(pragma::Model::MergeFlags::All));
 
-	classDef.add_static_constant("FCOPY_DEEP", umath::to_integral(::Model::CopyFlags::DeepCopy));
+
+
+	classDef.add_static_constant("FCOPY_NONE", umath::to_integral(pragma::Model::CopyFlags::None));
+
+	classDef.add_static_constant("FCOPY_SHALLOW", umath::to_integral(pragma::Model::CopyFlags::ShallowCopy));
+
+	classDef.add_static_constant("FCOPY_BIT_MESHES", umath::to_integral(pragma::Model::CopyFlags::CopyMeshesBit));
+
+	classDef.add_static_constant("FCOPY_BIT_ANIMATIONS", umath::to_integral(pragma::Model::CopyFlags::CopyAnimationsBit));
+
+	classDef.add_static_constant("FCOPY_BIT_VERTEX_ANIMATIONS", umath::to_integral(pragma::Model::CopyFlags::CopyVertexAnimationsBit));
+
+	classDef.add_static_constant("FCOPY_BIT_COLLISION_MESHES", umath::to_integral(pragma::Model::CopyFlags::CopyCollisionMeshesBit));
+
+	classDef.add_static_constant("FCOPY_BIT_FLEX_ANIMATIONS", umath::to_integral(pragma::Model::CopyFlags::CopyFlexAnimationsBit));
+
+	classDef.add_static_constant("FCOPY_BIT_COPY_UNIQUE_IDS", umath::to_integral(pragma::Model::CopyFlags::CopyUniqueIdsBit));
+
+	classDef.add_static_constant("FCOPY_BIT_COPY_VERTEX_DATA", umath::to_integral(pragma::Model::CopyFlags::CopyVertexData));
+
+	classDef.add_static_constant("FCOPY_DEEP", umath::to_integral(pragma::Model::CopyFlags::DeepCopy));
 
 
 
@@ -1322,13 +1322,13 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.scope[luabind::def(
 
-	  "Load", +[](lua_State *l, ::Game &game, ::udm::AssetData &assetData) -> Lua::var<::ModelSubMesh, std::pair<bool, std::string>> {
+	  "Load", +[](lua_State *l, pragma::Game &game, ::udm::AssetData &assetData) -> Lua::var<pragma::ModelSubMesh, std::pair<bool, std::string>> {
 
 		  auto mdl = game.CreateModel(false);
 
 		  std::string err;
 
-		  auto result = ::Model::Load(*mdl, *game.GetNetworkState(), assetData, err);
+		  auto result = pragma::Model::Load(*mdl, *game.GetNetworkState(), assetData, err);
 
 		  if(result)
 
@@ -1902,17 +1902,17 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 
 
-	classDefAnimation.add_static_constant("FLAG_LOOP", umath::to_integral(FAnim::Loop));
+	classDefAnimation.add_static_constant("FLAG_LOOP", umath::to_integral(pragma::FAnim::Loop));
 
-	classDefAnimation.add_static_constant("FLAG_NOREPEAT", umath::to_integral(FAnim::NoRepeat));
+	classDefAnimation.add_static_constant("FLAG_NOREPEAT", umath::to_integral(pragma::FAnim::NoRepeat));
 
-	classDefAnimation.add_static_constant("FLAG_MOVEX", umath::to_integral(FAnim::MoveX));
+	classDefAnimation.add_static_constant("FLAG_MOVEX", umath::to_integral(pragma::FAnim::MoveX));
 
-	classDefAnimation.add_static_constant("FLAG_MOVEZ", umath::to_integral(FAnim::MoveZ));
+	classDefAnimation.add_static_constant("FLAG_MOVEZ", umath::to_integral(pragma::FAnim::MoveZ));
 
-	classDefAnimation.add_static_constant("FLAG_AUTOPLAY", umath::to_integral(FAnim::Autoplay));
+	classDefAnimation.add_static_constant("FLAG_AUTOPLAY", umath::to_integral(pragma::FAnim::Autoplay));
 
-	classDefAnimation.add_static_constant("FLAG_GESTURE", umath::to_integral(FAnim::Gesture));
+	classDefAnimation.add_static_constant("FLAG_GESTURE", umath::to_integral(pragma::FAnim::Gesture));
 
 
 
@@ -2490,9 +2490,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 
 
-	auto classDefMeshVertexFrame = luabind::class_<::MeshVertexFrame>("Frame")
+	auto classDefMeshVertexFrame = luabind::class_<pragma::MeshVertexFrame>("Frame")
 
-	                                 .def("Rotate", static_cast<void (*)(lua_State *, ::MeshVertexFrame &, const Quat &)>([](lua_State *l, ::MeshVertexFrame &meshVertFrame, const Quat &rot) { meshVertFrame.Rotate(rot); }))
+	                                 .def("Rotate", static_cast<void (*)(lua_State *, pragma::MeshVertexFrame &, const Quat &)>([](lua_State *l, pragma::MeshVertexFrame &meshVertFrame, const Quat &rot) { meshVertFrame.Rotate(rot); }))
 
 	                                 .def("GetVertices", &Lua::MeshVertexFrame::GetVertices)
 
@@ -2506,15 +2506,15 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	                                 .def("GetVertexNormal", &Lua::MeshVertexFrame::GetVertexNormal)
 
-	                                 .def("GetVertexCount", static_cast<void (*)(lua_State *, ::MeshVertexFrame &)>([](lua_State *l, ::MeshVertexFrame &meshVertFrame) { Lua::PushInt(l, meshVertFrame.GetVertexCount()); }))
+	                                 .def("GetVertexCount", static_cast<void (*)(lua_State *, pragma::MeshVertexFrame &)>([](lua_State *l, pragma::MeshVertexFrame &meshVertFrame) { Lua::PushInt(l, meshVertFrame.GetVertexCount()); }))
 
-	                                 .def("GetFlags", static_cast<void (*)(lua_State *, ::MeshVertexFrame &)>([](lua_State *l, ::MeshVertexFrame &meshVertFrame) { Lua::PushInt(l, umath::to_integral(meshVertFrame.GetFlags())); }))
+	                                 .def("GetFlags", static_cast<void (*)(lua_State *, pragma::MeshVertexFrame &)>([](lua_State *l, pragma::MeshVertexFrame &meshVertFrame) { Lua::PushInt(l, umath::to_integral(meshVertFrame.GetFlags())); }))
 
-	                                 .def("SetFlags", static_cast<void (*)(lua_State *, ::MeshVertexFrame &, uint32_t)>([](lua_State *l, ::MeshVertexFrame &meshVertFrame, uint32_t flags) { meshVertFrame.SetFlags(static_cast<::MeshVertexFrame::Flags>(flags)); }))
+	                                 .def("SetFlags", static_cast<void (*)(lua_State *, pragma::MeshVertexFrame &, uint32_t)>([](lua_State *l, pragma::MeshVertexFrame &meshVertFrame, uint32_t flags) { meshVertFrame.SetFlags(static_cast<pragma::MeshVertexFrame::Flags>(flags)); }))
 
-	                                 .def("SetDeltaValue", static_cast<void (*)(lua_State *, ::MeshVertexFrame &, uint32_t, float)>([](lua_State *l, ::MeshVertexFrame &meshVertFrame, uint32_t vertId, float value) { meshVertFrame.SetDeltaValue(vertId, value); }))
+	                                 .def("SetDeltaValue", static_cast<void (*)(lua_State *, pragma::MeshVertexFrame &, uint32_t, float)>([](lua_State *l, pragma::MeshVertexFrame &meshVertFrame, uint32_t vertId, float value) { meshVertFrame.SetDeltaValue(vertId, value); }))
 
-	                                 .def("GetDeltaValue", static_cast<void (*)(lua_State *, ::MeshVertexFrame &, uint32_t)>([](lua_State *l, ::MeshVertexFrame &meshVertFrame, uint32_t vertId) {
+	                                 .def("GetDeltaValue", static_cast<void (*)(lua_State *, pragma::MeshVertexFrame &, uint32_t)>([](lua_State *l, pragma::MeshVertexFrame &meshVertFrame, uint32_t vertId) {
 
 		                                 float value;
 
@@ -2526,9 +2526,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	                                 }));
 
-	classDefMeshVertexFrame.add_static_constant("FLAG_NONE", umath::to_integral(::MeshVertexFrame::Flags::None));
+	classDefMeshVertexFrame.add_static_constant("FLAG_NONE", umath::to_integral(pragma::MeshVertexFrame::Flags::None));
 
-	classDefMeshVertexFrame.add_static_constant("FLAG_BIT_HAS_DELTA_VALUES", umath::to_integral(::MeshVertexFrame::Flags::HasDeltaValues));
+	classDefMeshVertexFrame.add_static_constant("FLAG_BIT_HAS_DELTA_VALUES", umath::to_integral(pragma::MeshVertexFrame::Flags::HasDeltaValues));
 
 
 
@@ -2632,13 +2632,13 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 
 
-	auto modelMeshGroupClassDef = luabind::class_<::ModelMeshGroup>("MeshGroup");
+	auto modelMeshGroupClassDef = luabind::class_<pragma::ModelMeshGroup>("MeshGroup");
 
 	Lua::ModelMeshGroup::register_class(modelMeshGroupClassDef);
 
 
 
-	auto collisionMeshClassDef = luabind::class_<::CollisionMesh>("CollisionMesh");
+	auto collisionMeshClassDef = luabind::class_<pragma::physics::CollisionMesh>("CollisionMesh");
 
 	Lua::CollisionMesh::register_class(collisionMeshClassDef);
 
@@ -2898,7 +2898,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 
 
-void Lua::Model::GetCollisionMeshes(lua_State *l, ::Model &mdl)
+void Lua::Model::GetCollisionMeshes(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -2912,7 +2912,7 @@ void Lua::Model::GetCollisionMeshes(lua_State *l, ::Model &mdl)
 
 	for(auto i = decltype(meshes.size()) {0}; i < meshes.size(); ++i) {
 
-		Lua::Push<std::shared_ptr<::CollisionMesh>>(l, meshes[i]);
+		Lua::Push<std::shared_ptr<pragma::physics::CollisionMesh>>(l, meshes[i]);
 
 		lua_rawseti(l, top, i + 1);
 
@@ -2922,7 +2922,7 @@ void Lua::Model::GetCollisionMeshes(lua_State *l, ::Model &mdl)
 
 
 
-void Lua::Model::ClearCollisionMeshes(lua_State *l, ::Model &mdl)
+void Lua::Model::ClearCollisionMeshes(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -2934,7 +2934,7 @@ void Lua::Model::ClearCollisionMeshes(lua_State *l, ::Model &mdl)
 
 
 
-void Lua::Model::GetSkeleton(lua_State *l, ::Model &mdl)
+void Lua::Model::GetSkeleton(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -2988,7 +2988,7 @@ static void push_attachment(lua_State *l, const Attachment &att)
 
 }
 
-void Lua::Model::GetAttachmentCount(lua_State *l, ::Model &mdl)
+void Lua::Model::GetAttachmentCount(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -2998,7 +2998,7 @@ void Lua::Model::GetAttachmentCount(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetAttachment(lua_State *l, ::Model &mdl, int32_t attId)
+void Lua::Model::GetAttachment(lua_State *l, pragma::Model &mdl, int32_t attId)
 
 {
 
@@ -3014,7 +3014,7 @@ void Lua::Model::GetAttachment(lua_State *l, ::Model &mdl, int32_t attId)
 
 }
 
-void Lua::Model::GetAttachment(lua_State *l, ::Model &mdl, const std::string &name)
+void Lua::Model::GetAttachment(lua_State *l, pragma::Model &mdl, const std::string &name)
 
 {
 
@@ -3030,7 +3030,7 @@ void Lua::Model::GetAttachment(lua_State *l, ::Model &mdl, const std::string &na
 
 }
 
-void Lua::Model::GetAttachments(lua_State *l, ::Model &mdl)
+void Lua::Model::GetAttachments(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -3100,7 +3100,7 @@ static void push_blend_controller(lua_State *l, const BlendController &blendCont
 
 }
 
-void Lua::Model::LookupAnimation(lua_State *l, ::Model &mdl, const std::string &name)
+void Lua::Model::LookupAnimation(lua_State *l, pragma::Model &mdl, const std::string &name)
 
 {
 
@@ -3112,7 +3112,7 @@ void Lua::Model::LookupAnimation(lua_State *l, ::Model &mdl, const std::string &
 
 }
 
-void Lua::Model::LookupAttachment(lua_State *l, ::Model &mdl, const std::string &name)
+void Lua::Model::LookupAttachment(lua_State *l, pragma::Model &mdl, const std::string &name)
 
 {
 
@@ -3124,7 +3124,7 @@ void Lua::Model::LookupAttachment(lua_State *l, ::Model &mdl, const std::string 
 
 }
 
-void Lua::Model::LookupBone(lua_State *l, ::Model &mdl, const std::string &name)
+void Lua::Model::LookupBone(lua_State *l, pragma::Model &mdl, const std::string &name)
 
 {
 
@@ -3136,7 +3136,7 @@ void Lua::Model::LookupBone(lua_State *l, ::Model &mdl, const std::string &name)
 
 }
 
-void Lua::Model::AddAttachment(lua_State *l, ::Model &mdl, const std::string &name, const std::string &boneName, const Vector3 &offset, const EulerAngles &ang)
+void Lua::Model::AddAttachment(lua_State *l, pragma::Model &mdl, const std::string &name, const std::string &boneName, const Vector3 &offset, const EulerAngles &ang)
 
 {
 
@@ -3152,7 +3152,7 @@ void Lua::Model::AddAttachment(lua_State *l, ::Model &mdl, const std::string &na
 
 }
 
-void Lua::Model::AddAttachment(lua_State *l, ::Model &mdl, const std::string &name, uint32_t boneId, const Vector3 &offset, const EulerAngles &ang)
+void Lua::Model::AddAttachment(lua_State *l, pragma::Model &mdl, const std::string &name, uint32_t boneId, const Vector3 &offset, const EulerAngles &ang)
 
 {
 
@@ -3226,7 +3226,7 @@ static void get_attachment(lua_State *l, LuaAttachmentData &att, int32_t t)
 
 }
 
-void Lua::Model::SetAttachmentData(lua_State *l, ::Model &mdl, const std::string &name, luabind::object data)
+void Lua::Model::SetAttachmentData(lua_State *l, pragma::Model &mdl, const std::string &name, luabind::object data)
 
 {
 
@@ -3260,7 +3260,7 @@ void Lua::Model::SetAttachmentData(lua_State *l, ::Model &mdl, const std::string
 
 }
 
-void Lua::Model::SetAttachmentData(lua_State *l, ::Model &mdl, uint32_t attId, luabind::object data)
+void Lua::Model::SetAttachmentData(lua_State *l, pragma::Model &mdl, uint32_t attId, luabind::object data)
 
 {
 
@@ -3294,7 +3294,7 @@ void Lua::Model::SetAttachmentData(lua_State *l, ::Model &mdl, uint32_t attId, l
 
 }
 
-void Lua::Model::RemoveAttachment(lua_State *l, ::Model &mdl, const std::string &name)
+void Lua::Model::RemoveAttachment(lua_State *l, pragma::Model &mdl, const std::string &name)
 
 {
 
@@ -3304,7 +3304,7 @@ void Lua::Model::RemoveAttachment(lua_State *l, ::Model &mdl, const std::string 
 
 }
 
-void Lua::Model::RemoveAttachment(lua_State *l, ::Model &mdl, uint32_t attId)
+void Lua::Model::RemoveAttachment(lua_State *l, pragma::Model &mdl, uint32_t attId)
 
 {
 
@@ -3314,7 +3314,7 @@ void Lua::Model::RemoveAttachment(lua_State *l, ::Model &mdl, uint32_t attId)
 
 }
 
-void Lua::Model::GetBlendControllerCount(lua_State *l, ::Model &mdl)
+void Lua::Model::GetBlendControllerCount(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -3324,7 +3324,7 @@ void Lua::Model::GetBlendControllerCount(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetBlendController(lua_State *l, ::Model &mdl, int32_t blendControllerId)
+void Lua::Model::GetBlendController(lua_State *l, pragma::Model &mdl, int32_t blendControllerId)
 
 {
 
@@ -3340,7 +3340,7 @@ void Lua::Model::GetBlendController(lua_State *l, ::Model &mdl, int32_t blendCon
 
 }
 
-void Lua::Model::GetBlendController(lua_State *l, ::Model &mdl, const std::string &name)
+void Lua::Model::GetBlendController(lua_State *l, pragma::Model &mdl, const std::string &name)
 
 {
 
@@ -3356,7 +3356,7 @@ void Lua::Model::GetBlendController(lua_State *l, ::Model &mdl, const std::strin
 
 }
 
-void Lua::Model::GetBlendControllers(lua_State *l, ::Model &mdl)
+void Lua::Model::GetBlendControllers(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -3384,7 +3384,7 @@ void Lua::Model::GetBlendControllers(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::LookupBlendController(lua_State *l, ::Model &mdl, const std::string &name)
+void Lua::Model::LookupBlendController(lua_State *l, pragma::Model &mdl, const std::string &name)
 
 {
 
@@ -3396,7 +3396,7 @@ void Lua::Model::LookupBlendController(lua_State *l, ::Model &mdl, const std::st
 
 
 
-void Lua::Model::GetAnimationCount(lua_State *l, ::Model &mdl)
+void Lua::Model::GetAnimationCount(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -3412,7 +3412,7 @@ void Lua::Model::GetAnimationCount(lua_State *l, ::Model &mdl)
 
 
 
-void Lua::Model::GetAnimationNames(lua_State *l, ::Model &mdl)
+void Lua::Model::GetAnimationNames(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -3444,7 +3444,7 @@ void Lua::Model::GetAnimationNames(lua_State *l, ::Model &mdl)
 
 
 
-void Lua::Model::GetAnimations(lua_State *l, ::Model &mdl)
+void Lua::Model::GetAnimations(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -3470,7 +3470,7 @@ void Lua::Model::GetAnimations(lua_State *l, ::Model &mdl)
 
 
 
-void Lua::Model::GetAnimationName(lua_State *l, ::Model &mdl, unsigned int animID)
+void Lua::Model::GetAnimationName(lua_State *l, pragma::Model &mdl, unsigned int animID)
 
 {
 
@@ -3488,7 +3488,7 @@ void Lua::Model::GetAnimationName(lua_State *l, ::Model &mdl, unsigned int animI
 
 
 
-void Lua::Model::GetAnimation(lua_State *l, ::Model &mdl, unsigned int animID)
+void Lua::Model::GetAnimation(lua_State *l, pragma::Model &mdl, unsigned int animID)
 
 {
 
@@ -3506,7 +3506,7 @@ void Lua::Model::GetAnimation(lua_State *l, ::Model &mdl, unsigned int animID)
 
 
 
-void Lua::Model::GetAnimation(lua_State *l, ::Model &mdl, const char *name)
+void Lua::Model::GetAnimation(lua_State *l, pragma::Model &mdl, const char *name)
 
 {
 
@@ -3524,7 +3524,7 @@ void Lua::Model::GetAnimation(lua_State *l, ::Model &mdl, const char *name)
 
 
 
-void Lua::Model::PrecacheTextureGroup(lua_State *, ::Model &mdl, unsigned int group)
+void Lua::Model::PrecacheTextureGroup(lua_State *, pragma::Model &mdl, unsigned int group)
 
 {
 
@@ -3536,7 +3536,7 @@ void Lua::Model::PrecacheTextureGroup(lua_State *, ::Model &mdl, unsigned int gr
 
 
 
-void Lua::Model::PrecacheTextureGroups(lua_State *, ::Model &mdl)
+void Lua::Model::PrecacheTextureGroups(lua_State *, pragma::Model &mdl)
 
 {
 
@@ -3548,7 +3548,7 @@ void Lua::Model::PrecacheTextureGroups(lua_State *, ::Model &mdl)
 
 
 
-void Lua::Model::GetReference(lua_State *l, ::Model &mdl)
+void Lua::Model::GetReference(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -3586,7 +3586,7 @@ void Lua::Model::SetReferenceBoneMatrix(lua_State *l,::Model &mdl,uint32_t boneI
 
 }*/
 
-void Lua::Model::GetLocalBonePosition(lua_State *l, ::Model &mdl, UInt32 animId, UInt32 frameId, UInt32 boneId)
+void Lua::Model::GetLocalBonePosition(lua_State *l, pragma::Model &mdl, UInt32 animId, UInt32 frameId, UInt32 boneId)
 
 {
 
@@ -3608,7 +3608,7 @@ void Lua::Model::GetLocalBonePosition(lua_State *l, ::Model &mdl, UInt32 animId,
 
 }
 
-void Lua::Model::LookupBodyGroup(lua_State *l, ::Model &mdl, const std::string &name)
+void Lua::Model::LookupBodyGroup(lua_State *l, pragma::Model &mdl, const std::string &name)
 
 {
 
@@ -3620,7 +3620,7 @@ void Lua::Model::LookupBodyGroup(lua_State *l, ::Model &mdl, const std::string &
 
 }
 
-void Lua::Model::GetBaseMeshGroupIds(lua_State *l, ::Model &mdl)
+void Lua::Model::GetBaseMeshGroupIds(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -3646,7 +3646,7 @@ void Lua::Model::GetBaseMeshGroupIds(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::SetBaseMeshGroupIds(lua_State *l, ::Model &mdl, luabind::object o)
+void Lua::Model::SetBaseMeshGroupIds(lua_State *l, pragma::Model &mdl, luabind::object o)
 
 {
 
@@ -3682,7 +3682,7 @@ void Lua::Model::SetBaseMeshGroupIds(lua_State *l, ::Model &mdl, luabind::object
 
 }
 
-void Lua::Model::AddBaseMeshGroupId(lua_State *l, ::Model &mdl)
+void Lua::Model::AddBaseMeshGroupId(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -3702,7 +3702,7 @@ void Lua::Model::AddBaseMeshGroupId(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetMeshGroupId(lua_State *l, ::Model &mdl, uint32_t bodyGroupId, uint32_t groupId)
+void Lua::Model::GetMeshGroupId(lua_State *l, pragma::Model &mdl, uint32_t bodyGroupId, uint32_t groupId)
 
 {
 
@@ -3720,7 +3720,7 @@ void Lua::Model::GetMeshGroupId(lua_State *l, ::Model &mdl, uint32_t bodyGroupId
 
 
 
-void Lua::Model::GetMeshGroup(lua_State *l, ::Model &mdl, const std::string &meshGroupName)
+void Lua::Model::GetMeshGroup(lua_State *l, pragma::Model &mdl, const std::string &meshGroupName)
 
 {
 
@@ -3732,13 +3732,13 @@ void Lua::Model::GetMeshGroup(lua_State *l, ::Model &mdl, const std::string &mes
 
 		return;
 
-	Lua::Push<std::shared_ptr<::ModelMeshGroup>>(l, meshGroup);
+	Lua::Push<std::shared_ptr<pragma::ModelMeshGroup>>(l, meshGroup);
 
 }
 
 
 
-void Lua::Model::GetMeshGroup(lua_State *l, ::Model &mdl, uint32_t mgId)
+void Lua::Model::GetMeshGroup(lua_State *l, pragma::Model &mdl, uint32_t mgId)
 
 {
 
@@ -3756,7 +3756,7 @@ void Lua::Model::GetMeshGroup(lua_State *l, ::Model &mdl, uint32_t mgId)
 
 
 
-void Lua::Model::GetMeshes(lua_State *l, ::Model &mdl, const std::string &meshGroup)
+void Lua::Model::GetMeshes(lua_State *l, pragma::Model &mdl, const std::string &meshGroup)
 
 {
 
@@ -3788,7 +3788,7 @@ void Lua::Model::GetMeshes(lua_State *l, ::Model &mdl, const std::string &meshGr
 
 
 
-void Lua::Model::GetMeshes(lua_State *l, ::Model &mdl, luabind::object o)
+void Lua::Model::GetMeshes(lua_State *l, pragma::Model &mdl, luabind::object o)
 
 {
 
@@ -3838,7 +3838,7 @@ void Lua::Model::GetMeshes(lua_State *l, ::Model &mdl, luabind::object o)
 
 
 
-void Lua::Model::GetMeshGroups(lua_State *l, ::Model &mdl)
+void Lua::Model::GetMeshGroups(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -3854,7 +3854,7 @@ void Lua::Model::GetMeshGroups(lua_State *l, ::Model &mdl)
 
 		Lua::PushInt(l, n);
 
-		Lua::Push<std::shared_ptr<::ModelMeshGroup>>(l, meshGroup);
+		Lua::Push<std::shared_ptr<pragma::ModelMeshGroup>>(l, meshGroup);
 
 		Lua::SetTableValue(l, t);
 
@@ -3866,7 +3866,7 @@ void Lua::Model::GetMeshGroups(lua_State *l, ::Model &mdl)
 
 
 
-void Lua::Model::AddMeshGroup(lua_State *l, ::Model &mdl, const std::string &name)
+void Lua::Model::AddMeshGroup(lua_State *l, pragma::Model &mdl, const std::string &name)
 
 {
 
@@ -3874,13 +3874,13 @@ void Lua::Model::AddMeshGroup(lua_State *l, ::Model &mdl, const std::string &nam
 
 	auto meshGroup = mdl.AddMeshGroup(name);
 
-	Lua::Push<std::shared_ptr<::ModelMeshGroup>>(l, meshGroup);
+	Lua::Push<std::shared_ptr<pragma::ModelMeshGroup>>(l, meshGroup);
 
 }
 
 
 
-void Lua::Model::AddMeshGroup(lua_State *, ::Model &mdl, ::ModelMeshGroup &meshGroup)
+void Lua::Model::AddMeshGroup(lua_State *, pragma::Model &mdl, pragma::ModelMeshGroup &meshGroup)
 
 {
 
@@ -3894,7 +3894,7 @@ void Lua::Model::AddMeshGroup(lua_State *, ::Model &mdl, ::ModelMeshGroup &meshG
 
 
 
-void Lua::Model::UpdateCollisionBounds(lua_State *, ::Model &mdl)
+void Lua::Model::UpdateCollisionBounds(lua_State *, pragma::Model &mdl)
 
 {
 
@@ -3904,7 +3904,7 @@ void Lua::Model::UpdateCollisionBounds(lua_State *, ::Model &mdl)
 
 }
 
-void Lua::Model::UpdateRenderBounds(lua_State *, ::Model &mdl)
+void Lua::Model::UpdateRenderBounds(lua_State *, pragma::Model &mdl)
 
 {
 
@@ -3914,7 +3914,7 @@ void Lua::Model::UpdateRenderBounds(lua_State *, ::Model &mdl)
 
 }
 
-void Lua::Model::Update(lua_State *, ::Model &mdl)
+void Lua::Model::Update(lua_State *, pragma::Model &mdl)
 
 {
 
@@ -3924,7 +3924,7 @@ void Lua::Model::Update(lua_State *, ::Model &mdl)
 
 }
 
-void Lua::Model::Update(lua_State *, ::Model &mdl, uint32_t flags)
+void Lua::Model::Update(lua_State *, pragma::Model &mdl, uint32_t flags)
 
 {
 
@@ -3934,7 +3934,7 @@ void Lua::Model::Update(lua_State *, ::Model &mdl, uint32_t flags)
 
 }
 
-void Lua::Model::GetName(lua_State *l, ::Model &mdl)
+void Lua::Model::GetName(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -3944,7 +3944,7 @@ void Lua::Model::GetName(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetMass(lua_State *l, ::Model &mdl)
+void Lua::Model::GetMass(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -3954,7 +3954,7 @@ void Lua::Model::GetMass(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::SetMass(lua_State *, ::Model &mdl, float mass)
+void Lua::Model::SetMass(lua_State *, pragma::Model &mdl, float mass)
 
 {
 
@@ -3964,7 +3964,7 @@ void Lua::Model::SetMass(lua_State *, ::Model &mdl, float mass)
 
 }
 
-void Lua::Model::GetBoneCount(lua_State *l, ::Model &mdl)
+void Lua::Model::GetBoneCount(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -3974,7 +3974,7 @@ void Lua::Model::GetBoneCount(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetCollisionBounds(lua_State *l, ::Model &mdl)
+void Lua::Model::GetCollisionBounds(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -3990,7 +3990,7 @@ void Lua::Model::GetCollisionBounds(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetRenderBounds(lua_State *l, ::Model &mdl)
+void Lua::Model::GetRenderBounds(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4006,7 +4006,7 @@ void Lua::Model::GetRenderBounds(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::SetCollisionBounds(lua_State *, ::Model &mdl, const Vector3 &min, const Vector3 &max)
+void Lua::Model::SetCollisionBounds(lua_State *, pragma::Model &mdl, const Vector3 &min, const Vector3 &max)
 
 {
 
@@ -4016,7 +4016,7 @@ void Lua::Model::SetCollisionBounds(lua_State *, ::Model &mdl, const Vector3 &mi
 
 }
 
-void Lua::Model::SetRenderBounds(lua_State *, ::Model &mdl, const Vector3 &min, const Vector3 &max)
+void Lua::Model::SetRenderBounds(lua_State *, pragma::Model &mdl, const Vector3 &min, const Vector3 &max)
 
 {
 
@@ -4026,7 +4026,7 @@ void Lua::Model::SetRenderBounds(lua_State *, ::Model &mdl, const Vector3 &min, 
 
 }
 
-void Lua::Model::AddCollisionMesh(lua_State *, ::Model &mdl, ::CollisionMesh &colMesh)
+void Lua::Model::AddCollisionMesh(lua_State *, pragma::Model &mdl, pragma::physics::CollisionMesh &colMesh)
 
 {
 
@@ -4036,7 +4036,7 @@ void Lua::Model::AddCollisionMesh(lua_State *, ::Model &mdl, ::CollisionMesh &co
 
 }
 
-void Lua::Model::AddMaterial(lua_State *l, ::Model &mdl, uint32_t textureGroup, msys::Material *mat)
+void Lua::Model::AddMaterial(lua_State *l, pragma::Model &mdl, uint32_t textureGroup, msys::Material *mat)
 
 {
 
@@ -4058,7 +4058,7 @@ void Lua::Model::AddMaterial(lua_State *l, ::Model &mdl, uint32_t textureGroup, 
 
 }
 
-void Lua::Model::SetMaterial(lua_State *l, ::Model &mdl, uint32_t matId, msys::Material *mat)
+void Lua::Model::SetMaterial(lua_State *l, pragma::Model &mdl, uint32_t matId, msys::Material *mat)
 
 {
 
@@ -4068,13 +4068,13 @@ void Lua::Model::SetMaterial(lua_State *l, ::Model &mdl, uint32_t matId, msys::M
 
 }
 
-void Lua::Model::GetMaterials(lua_State *l, ::Model &mdl)
+void Lua::Model::GetMaterials(lua_State *l, pragma::Model &mdl)
 
 {
 
 	//Lua::CheckModel(l,1);
 
-	auto *nw = Engine::Get()->GetNetworkState(l);
+	auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 
 	auto &matManager = nw->GetMaterialManager();
 
@@ -4102,7 +4102,7 @@ void Lua::Model::GetMaterials(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetMaterialCount(lua_State *l, ::Model &mdl)
+void Lua::Model::GetMaterialCount(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4112,7 +4112,7 @@ void Lua::Model::GetMaterialCount(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetMeshGroupCount(lua_State *l, ::Model &mdl)
+void Lua::Model::GetMeshGroupCount(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4122,7 +4122,7 @@ void Lua::Model::GetMeshGroupCount(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetMeshCount(lua_State *l, ::Model &mdl)
+void Lua::Model::GetMeshCount(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4132,7 +4132,7 @@ void Lua::Model::GetMeshCount(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetSubMeshCount(lua_State *l, ::Model &mdl)
+void Lua::Model::GetSubMeshCount(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4142,7 +4142,7 @@ void Lua::Model::GetSubMeshCount(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetCollisionMeshCount(lua_State *l, ::Model &mdl)
+void Lua::Model::GetCollisionMeshCount(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4152,7 +4152,7 @@ void Lua::Model::GetCollisionMeshCount(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetBodyGroupId(lua_State *l, ::Model &mdl, const std::string &bodyGroupName)
+void Lua::Model::GetBodyGroupId(lua_State *l, pragma::Model &mdl, const std::string &bodyGroupName)
 
 {
 
@@ -4162,7 +4162,7 @@ void Lua::Model::GetBodyGroupId(lua_State *l, ::Model &mdl, const std::string &b
 
 }
 
-void Lua::Model::GetBodyGroupCount(lua_State *l, ::Model &mdl)
+void Lua::Model::GetBodyGroupCount(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4204,7 +4204,7 @@ static void push_body_group(lua_State *l, const BodyGroup &bg)
 
 }
 
-void Lua::Model::GetBodyGroups(lua_State *l, ::Model &mdl)
+void Lua::Model::GetBodyGroups(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4228,7 +4228,7 @@ void Lua::Model::GetBodyGroups(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetBodyGroup(lua_State *l, ::Model &mdl, uint32_t bgId)
+void Lua::Model::GetBodyGroup(lua_State *l, pragma::Model &mdl, uint32_t bgId)
 
 {
 
@@ -4244,7 +4244,7 @@ void Lua::Model::GetBodyGroup(lua_State *l, ::Model &mdl, uint32_t bgId)
 
 }
 
-void Lua::Model::AddHitbox(lua_State *, ::Model &mdl, uint32_t boneId, uint32_t hitGroup, const Vector3 &min, const Vector3 &max)
+void Lua::Model::AddHitbox(lua_State *, pragma::Model &mdl, uint32_t boneId, uint32_t hitGroup, const Vector3 &min, const Vector3 &max)
 
 {
 
@@ -4254,7 +4254,7 @@ void Lua::Model::AddHitbox(lua_State *, ::Model &mdl, uint32_t boneId, uint32_t 
 
 }
 
-void Lua::Model::GetHitboxCount(lua_State *l, ::Model &mdl)
+void Lua::Model::GetHitboxCount(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4264,7 +4264,7 @@ void Lua::Model::GetHitboxCount(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetHitboxGroup(lua_State *l, ::Model &mdl, uint32_t boneId)
+void Lua::Model::GetHitboxGroup(lua_State *l, pragma::Model &mdl, uint32_t boneId)
 
 {
 
@@ -4274,7 +4274,7 @@ void Lua::Model::GetHitboxGroup(lua_State *l, ::Model &mdl, uint32_t boneId)
 
 }
 
-void Lua::Model::GetHitboxBounds(lua_State *l, ::Model &mdl, uint32_t boneId)
+void Lua::Model::GetHitboxBounds(lua_State *l, pragma::Model &mdl, uint32_t boneId)
 
 {
 
@@ -4292,7 +4292,7 @@ void Lua::Model::GetHitboxBounds(lua_State *l, ::Model &mdl, uint32_t boneId)
 
 }
 
-void Lua::Model::GetHitboxBones(lua_State *l, ::Model &mdl, uint32_t hitGroup)
+void Lua::Model::GetHitboxBones(lua_State *l, pragma::Model &mdl, uint32_t hitGroup)
 
 {
 
@@ -4314,7 +4314,7 @@ void Lua::Model::GetHitboxBones(lua_State *l, ::Model &mdl, uint32_t hitGroup)
 
 }
 
-void Lua::Model::GetHitboxBones(lua_State *l, ::Model &mdl)
+void Lua::Model::GetHitboxBones(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4336,7 +4336,7 @@ void Lua::Model::GetHitboxBones(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::SetHitboxGroup(lua_State *l, ::Model &mdl, uint32_t boneId, uint32_t hitGroup)
+void Lua::Model::SetHitboxGroup(lua_State *l, pragma::Model &mdl, uint32_t boneId, uint32_t hitGroup)
 
 {
 
@@ -4354,7 +4354,7 @@ void Lua::Model::SetHitboxGroup(lua_State *l, ::Model &mdl, uint32_t boneId, uin
 
 }
 
-void Lua::Model::SetHitboxBounds(lua_State *l, ::Model &mdl, uint32_t boneId, const Vector3 &min, const Vector3 &max)
+void Lua::Model::SetHitboxBounds(lua_State *l, pragma::Model &mdl, uint32_t boneId, const Vector3 &min, const Vector3 &max)
 
 {
 
@@ -4374,7 +4374,7 @@ void Lua::Model::SetHitboxBounds(lua_State *l, ::Model &mdl, uint32_t boneId, co
 
 }
 
-void Lua::Model::RemoveHitbox(lua_State *l, ::Model &mdl, uint32_t boneId)
+void Lua::Model::RemoveHitbox(lua_State *l, pragma::Model &mdl, uint32_t boneId)
 
 {
 
@@ -4392,7 +4392,7 @@ void Lua::Model::RemoveHitbox(lua_State *l, ::Model &mdl, uint32_t boneId)
 
 }
 
-void Lua::Model::GetTextureGroupCount(lua_State *l, ::Model &mdl)
+void Lua::Model::GetTextureGroupCount(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4420,7 +4420,7 @@ static void push_texture_group(lua_State *l, TextureGroup &group)
 
 }
 
-void Lua::Model::GetTextureGroups(lua_State *l, ::Model &mdl)
+void Lua::Model::GetTextureGroups(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4446,7 +4446,7 @@ void Lua::Model::GetTextureGroups(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetTextureGroup(lua_State *l, ::Model &mdl, uint32_t id)
+void Lua::Model::GetTextureGroup(lua_State *l, pragma::Model &mdl, uint32_t id)
 
 {
 
@@ -4464,7 +4464,7 @@ void Lua::Model::GetTextureGroup(lua_State *l, ::Model &mdl, uint32_t id)
 
 
 
-void Lua::Model::Save(lua_State *l, ::Model &mdl, const std::string &name)
+void Lua::Model::Save(lua_State *l, pragma::Model &mdl, const std::string &name)
 
 {
 
@@ -4482,7 +4482,7 @@ void Lua::Model::Save(lua_State *l, ::Model &mdl, const std::string &name)
 
 	}
 
-	auto r = mdl.SaveLegacy(Engine::Get()->GetNetworkState(l)->GetGameState(), mdlName, rootPath);
+	auto r = mdl.SaveLegacy(pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), mdlName, rootPath);
 
 	Lua::PushBool(l, r);
 
@@ -4490,13 +4490,13 @@ void Lua::Model::Save(lua_State *l, ::Model &mdl, const std::string &name)
 
 
 
-void Lua::Model::Copy(lua_State *l, ::Model &mdl)
+void Lua::Model::Copy(lua_State *l, pragma::Model &mdl)
 
 {
 
 	//Lua::CheckModel(l,1);
 
-	auto cpy = mdl.Copy(Engine::Get()->GetNetworkState(l)->GetGameState());
+	auto cpy = mdl.Copy(pragma::Engine::Get()->GetNetworkState(l)->GetGameState());
 
 	Lua::Push<decltype(cpy)>(l, cpy);
 
@@ -4504,13 +4504,13 @@ void Lua::Model::Copy(lua_State *l, ::Model &mdl)
 
 
 
-void Lua::Model::Copy(lua_State *l, ::Model &mdl, uint32_t copyFlags)
+void Lua::Model::Copy(lua_State *l, pragma::Model &mdl, uint32_t copyFlags)
 
 {
 
 	//Lua::CheckModel(l,1);
 
-	auto cpy = mdl.Copy(Engine::Get()->GetNetworkState(l)->GetGameState(), static_cast<::Model::CopyFlags>(copyFlags));
+	auto cpy = mdl.Copy(pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), static_cast<pragma::Model::CopyFlags>(copyFlags));
 
 	Lua::Push<decltype(cpy)>(l, cpy);
 
@@ -4518,7 +4518,7 @@ void Lua::Model::Copy(lua_State *l, ::Model &mdl, uint32_t copyFlags)
 
 
 
-void Lua::Model::GetVertexCount(lua_State *l, ::Model &mdl)
+void Lua::Model::GetVertexCount(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4528,7 +4528,7 @@ void Lua::Model::GetVertexCount(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetTriangleCount(lua_State *l, ::Model &mdl)
+void Lua::Model::GetTriangleCount(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4538,7 +4538,7 @@ void Lua::Model::GetTriangleCount(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetTextures(lua_State *l, ::Model &mdl)
+void Lua::Model::GetTextures(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4560,7 +4560,7 @@ void Lua::Model::GetTextures(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetTexturePaths(lua_State *l, ::Model &mdl)
+void Lua::Model::GetTexturePaths(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4582,21 +4582,21 @@ void Lua::Model::GetTexturePaths(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::LoadMaterials(lua_State *l, ::Model &mdl) { LoadMaterials(l, mdl, false); }
+void Lua::Model::LoadMaterials(lua_State *l, pragma::Model &mdl) { LoadMaterials(l, mdl, false); }
 
-void Lua::Model::LoadMaterials(lua_State *l, ::Model &mdl, bool bReload)
+void Lua::Model::LoadMaterials(lua_State *l, pragma::Model &mdl, bool bReload)
 
 {
 
 	//Lua::CheckModel(l,1);
 
-	auto *nw = Engine::Get()->GetNetworkState(l);
+	auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 
 	mdl.LoadMaterials(bReload);
 
 }
 
-void Lua::Model::AddTexturePath(lua_State *, ::Model &mdl, const std::string &path)
+void Lua::Model::AddTexturePath(lua_State *, pragma::Model &mdl, const std::string &path)
 
 {
 
@@ -4608,7 +4608,7 @@ void Lua::Model::AddTexturePath(lua_State *, ::Model &mdl, const std::string &pa
 
 
 
-void Lua::Model::RemoveTexturePath(lua_State *, ::Model &mdl, uint32_t idx)
+void Lua::Model::RemoveTexturePath(lua_State *, pragma::Model &mdl, uint32_t idx)
 
 {
 
@@ -4618,7 +4618,7 @@ void Lua::Model::RemoveTexturePath(lua_State *, ::Model &mdl, uint32_t idx)
 
 }
 
-void Lua::Model::SetTexturePaths(lua_State *l, ::Model &mdl, luabind::object o)
+void Lua::Model::SetTexturePaths(lua_State *l, pragma::Model &mdl, luabind::object o)
 
 {
 
@@ -4648,7 +4648,7 @@ void Lua::Model::SetTexturePaths(lua_State *l, ::Model &mdl, luabind::object o)
 
 }
 
-void Lua::Model::RemoveTexture(lua_State *, ::Model &mdl, uint32_t idx)
+void Lua::Model::RemoveTexture(lua_State *, pragma::Model &mdl, uint32_t idx)
 
 {
 
@@ -4658,7 +4658,7 @@ void Lua::Model::RemoveTexture(lua_State *, ::Model &mdl, uint32_t idx)
 
 }
 
-void Lua::Model::ClearTextures(lua_State *, ::Model &mdl)
+void Lua::Model::ClearTextures(lua_State *, pragma::Model &mdl)
 
 {
 
@@ -4668,7 +4668,7 @@ void Lua::Model::ClearTextures(lua_State *, ::Model &mdl)
 
 }
 
-void Lua::Model::Rotate(lua_State *, ::Model &mdl, const Quat &rot)
+void Lua::Model::Rotate(lua_State *, pragma::Model &mdl, const Quat &rot)
 
 {
 
@@ -4678,7 +4678,7 @@ void Lua::Model::Rotate(lua_State *, ::Model &mdl, const Quat &rot)
 
 }
 
-void Lua::Model::Translate(lua_State *, ::Model &mdl, const Vector3 &t)
+void Lua::Model::Translate(lua_State *, pragma::Model &mdl, const Vector3 &t)
 
 {
 
@@ -4688,7 +4688,7 @@ void Lua::Model::Translate(lua_State *, ::Model &mdl, const Vector3 &t)
 
 }
 
-void Lua::Model::Scale(lua_State *, ::Model &mdl, const Vector3 &scale)
+void Lua::Model::Scale(lua_State *, pragma::Model &mdl, const Vector3 &scale)
 
 {
 
@@ -4698,7 +4698,7 @@ void Lua::Model::Scale(lua_State *, ::Model &mdl, const Vector3 &scale)
 
 }
 
-void Lua::Model::GetEyeOffset(lua_State *l, ::Model &mdl)
+void Lua::Model::GetEyeOffset(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4708,7 +4708,7 @@ void Lua::Model::GetEyeOffset(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::SetEyeOffset(lua_State *l, ::Model &mdl, const Vector3 &offset)
+void Lua::Model::SetEyeOffset(lua_State *l, pragma::Model &mdl, const Vector3 &offset)
 
 {
 
@@ -4718,7 +4718,7 @@ void Lua::Model::SetEyeOffset(lua_State *l, ::Model &mdl, const Vector3 &offset)
 
 }
 
-void Lua::Model::AddAnimation(lua_State *l, ::Model &mdl, const std::string &name, pragma::animation::Animation &anim)
+void Lua::Model::AddAnimation(lua_State *l, pragma::Model &mdl, const std::string &name, pragma::animation::Animation &anim)
 
 {
 
@@ -4728,7 +4728,7 @@ void Lua::Model::AddAnimation(lua_State *l, ::Model &mdl, const std::string &nam
 
 }
 
-void Lua::Model::RemoveAnimation(lua_State *l, ::Model &mdl, uint32_t idx)
+void Lua::Model::RemoveAnimation(lua_State *l, pragma::Model &mdl, uint32_t idx)
 
 {
 
@@ -4744,7 +4744,7 @@ void Lua::Model::RemoveAnimation(lua_State *l, ::Model &mdl, uint32_t idx)
 
 }
 
-void Lua::Model::ClearAnimations(lua_State *l, ::Model &mdl)
+void Lua::Model::ClearAnimations(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4756,7 +4756,7 @@ void Lua::Model::ClearAnimations(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::ClipAgainstPlane(lua_State *l, ::Model &mdl, const Vector3 &n, double d, ::Model &clippedMdlA, ::Model &clippedMdlB)
+void Lua::Model::ClipAgainstPlane(lua_State *l, pragma::Model &mdl, const Vector3 &n, double d, pragma::Model &clippedMdlA, pragma::Model &clippedMdlB)
 
 {
 
@@ -4766,7 +4766,7 @@ void Lua::Model::ClipAgainstPlane(lua_State *l, ::Model &mdl, const Vector3 &n, 
 
 }
 
-void Lua::Model::ClearMeshGroups(lua_State *l, ::Model &mdl)
+void Lua::Model::ClearMeshGroups(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4778,7 +4778,7 @@ void Lua::Model::ClearMeshGroups(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::RemoveMeshGroup(lua_State *l, ::Model &mdl, uint32_t idx)
+void Lua::Model::RemoveMeshGroup(lua_State *l, pragma::Model &mdl, uint32_t idx)
 
 {
 
@@ -4816,7 +4816,7 @@ void Lua::Model::RemoveMeshGroup(lua_State *l, ::Model &mdl, uint32_t idx)
 
 }
 
-void Lua::Model::ClearBaseMeshGroupIds(lua_State *l, ::Model &mdl)
+void Lua::Model::ClearBaseMeshGroupIds(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4826,7 +4826,7 @@ void Lua::Model::ClearBaseMeshGroupIds(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::AddTextureGroup(lua_State *l, ::Model &mdl)
+void Lua::Model::AddTextureGroup(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4838,7 +4838,7 @@ void Lua::Model::AddTextureGroup(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::Merge(lua_State *l, ::Model &mdl, ::Model &mdlOther)
+void Lua::Model::Merge(lua_State *l, pragma::Model &mdl, pragma::Model &mdlOther)
 
 {
 
@@ -4848,17 +4848,17 @@ void Lua::Model::Merge(lua_State *l, ::Model &mdl, ::Model &mdlOther)
 
 }
 
-void Lua::Model::Merge(lua_State *l, ::Model &mdl, ::Model &mdlOther, uint32_t mergeFlags)
+void Lua::Model::Merge(lua_State *l, pragma::Model &mdl, pragma::Model &mdlOther, uint32_t mergeFlags)
 
 {
 
 	//Lua::CheckModel(l,1);
 
-	mdl.Merge(mdlOther, static_cast<::Model::MergeFlags>(mergeFlags));
+	mdl.Merge(mdlOther, static_cast<pragma::Model::MergeFlags>(mergeFlags));
 
 }
 
-void Lua::Model::GetLODCount(lua_State *l, ::Model &mdl)
+void Lua::Model::GetLODCount(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4904,7 +4904,7 @@ static void push_lod(lua_State *l, const LODInfo &info)
 
 }
 
-void Lua::Model::GetLODData(lua_State *l, ::Model &mdl)
+void Lua::Model::GetLODData(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -4928,7 +4928,7 @@ void Lua::Model::GetLODData(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetLOD(lua_State *l, ::Model &mdl, uint32_t idx)
+void Lua::Model::GetLOD(lua_State *l, pragma::Model &mdl, uint32_t idx)
 
 {
 
@@ -4940,7 +4940,7 @@ void Lua::Model::GetLOD(lua_State *l, ::Model &mdl, uint32_t idx)
 
 }
 
-void Lua::Model::GetLODData(lua_State *l, ::Model &mdl, uint32_t lod)
+void Lua::Model::GetLODData(lua_State *l, pragma::Model &mdl, uint32_t lod)
 
 {
 
@@ -4956,7 +4956,7 @@ void Lua::Model::GetLODData(lua_State *l, ::Model &mdl, uint32_t lod)
 
 }
 
-void Lua::Model::TranslateLODMeshes(lua_State *l, ::Model &mdl, uint32_t lod)
+void Lua::Model::TranslateLODMeshes(lua_State *l, pragma::Model &mdl, uint32_t lod)
 
 {
 
@@ -4996,7 +4996,7 @@ void Lua::Model::TranslateLODMeshes(lua_State *l, ::Model &mdl, uint32_t lod)
 
 }
 
-void Lua::Model::TranslateLODMeshes(lua_State *l, ::Model &mdl, uint32_t lod, luabind::object o)
+void Lua::Model::TranslateLODMeshes(lua_State *l, pragma::Model &mdl, uint32_t lod, luabind::object o)
 
 {
 
@@ -5054,7 +5054,7 @@ void Lua::Model::TranslateLODMeshes(lua_State *l, ::Model &mdl, uint32_t lod, lu
 
 }
 
-void Lua::Model::GetJoints(lua_State *l, ::Model &mdl)
+void Lua::Model::GetJoints(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -5076,7 +5076,7 @@ void Lua::Model::GetJoints(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetVertexAnimations(lua_State *l, ::Model &mdl)
+void Lua::Model::GetVertexAnimations(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -5098,7 +5098,7 @@ void Lua::Model::GetVertexAnimations(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetVertexAnimation(lua_State *l, ::Model &mdl, const std::string &name)
+void Lua::Model::GetVertexAnimation(lua_State *l, pragma::Model &mdl, const std::string &name)
 
 {
 
@@ -5112,7 +5112,7 @@ void Lua::Model::GetVertexAnimation(lua_State *l, ::Model &mdl, const std::strin
 
 }
 
-void Lua::Model::AddVertexAnimation(lua_State *l, ::Model &mdl, const std::string &name)
+void Lua::Model::AddVertexAnimation(lua_State *l, pragma::Model &mdl, const std::string &name)
 
 {
 
@@ -5122,9 +5122,9 @@ void Lua::Model::AddVertexAnimation(lua_State *l, ::Model &mdl, const std::strin
 
 }
 
-void Lua::Model::RemoveVertexAnimation(lua_State *l, ::Model &mdl, const std::string &name) { mdl.RemoveVertexAnimation(name); }
+void Lua::Model::RemoveVertexAnimation(lua_State *l, pragma::Model &mdl, const std::string &name) { mdl.RemoveVertexAnimation(name); }
 
-static void get_body_group_meshes(lua_State *l, ::Model &mdl, const std::vector<uint32_t> &bodyGroupIds, uint32_t lod)
+static void get_body_group_meshes(lua_State *l, pragma::Model &mdl, const std::vector<uint32_t> &bodyGroupIds, uint32_t lod)
 
 {
 
@@ -5148,7 +5148,7 @@ static void get_body_group_meshes(lua_State *l, ::Model &mdl, const std::vector<
 
 }
 
-void Lua::Model::GetBodyGroupMeshes(lua_State *l, ::Model &mdl, luabind::object oBodygroups, uint32_t lod)
+void Lua::Model::GetBodyGroupMeshes(lua_State *l, pragma::Model &mdl, luabind::object oBodygroups, uint32_t lod)
 
 {
 
@@ -5188,7 +5188,7 @@ void Lua::Model::GetBodyGroupMeshes(lua_State *l, ::Model &mdl, luabind::object 
 
 }
 
-void Lua::Model::GetBodyGroupMeshes(lua_State *l, ::Model &mdl, uint32_t lod)
+void Lua::Model::GetBodyGroupMeshes(lua_State *l, pragma::Model &mdl, uint32_t lod)
 
 {
 
@@ -5202,7 +5202,7 @@ void Lua::Model::GetBodyGroupMeshes(lua_State *l, ::Model &mdl, uint32_t lod)
 
 }
 
-void Lua::Model::GetBodyGroupMeshes(lua_State *l, ::Model &mdl) { GetBodyGroupMeshes(l, mdl, 0u); }
+void Lua::Model::GetBodyGroupMeshes(lua_State *l, pragma::Model &mdl) { GetBodyGroupMeshes(l, mdl, 0u); }
 
 static void push_flex_controller(lua_State *l, const FlexController &fc)
 
@@ -5236,7 +5236,7 @@ static void push_flex_controller(lua_State *l, const FlexController &fc)
 
 }
 
-void Lua::Model::GetFlexController(lua_State *l, ::Model &mdl, const std::string &name)
+void Lua::Model::GetFlexController(lua_State *l, pragma::Model &mdl, const std::string &name)
 
 {
 
@@ -5250,7 +5250,7 @@ void Lua::Model::GetFlexController(lua_State *l, ::Model &mdl, const std::string
 
 }
 
-void Lua::Model::GetFlexController(lua_State *l, ::Model &mdl, uint32_t id)
+void Lua::Model::GetFlexController(lua_State *l, pragma::Model &mdl, uint32_t id)
 
 {
 
@@ -5264,7 +5264,7 @@ void Lua::Model::GetFlexController(lua_State *l, ::Model &mdl, uint32_t id)
 
 }
 
-void Lua::Model::GetFlexControllers(lua_State *l, ::Model &mdl)
+void Lua::Model::GetFlexControllers(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -5288,7 +5288,7 @@ void Lua::Model::GetFlexControllers(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetFlexControllerId(lua_State *l, ::Model &mdl, const std::string &name)
+void Lua::Model::GetFlexControllerId(lua_State *l, pragma::Model &mdl, const std::string &name)
 
 {
 
@@ -5304,7 +5304,7 @@ void Lua::Model::GetFlexControllerId(lua_State *l, ::Model &mdl, const std::stri
 
 }
 
-void Lua::Model::GetFlexes(lua_State *l, ::Model &mdl)
+void Lua::Model::GetFlexes(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -5326,7 +5326,7 @@ void Lua::Model::GetFlexes(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetFlexId(lua_State *l, ::Model &mdl, const std::string &name)
+void Lua::Model::GetFlexId(lua_State *l, pragma::Model &mdl, const std::string &name)
 
 {
 
@@ -5342,7 +5342,7 @@ void Lua::Model::GetFlexId(lua_State *l, ::Model &mdl, const std::string &name)
 
 }
 
-void Lua::Model::GetFlexFormula(lua_State *l, ::Model &mdl, uint32_t flexId)
+void Lua::Model::GetFlexFormula(lua_State *l, pragma::Model &mdl, uint32_t flexId)
 
 {
 
@@ -5356,7 +5356,7 @@ void Lua::Model::GetFlexFormula(lua_State *l, ::Model &mdl, uint32_t flexId)
 
 }
 
-void Lua::Model::GetFlexFormula(lua_State *l, ::Model &mdl, const std::string &flexName)
+void Lua::Model::GetFlexFormula(lua_State *l, pragma::Model &mdl, const std::string &flexName)
 
 {
 
@@ -5370,7 +5370,7 @@ void Lua::Model::GetFlexFormula(lua_State *l, ::Model &mdl, const std::string &f
 
 }
 
-void Lua::Model::GetIKControllers(lua_State *l, ::Model &mdl)
+void Lua::Model::GetIKControllers(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -5392,7 +5392,7 @@ void Lua::Model::GetIKControllers(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetIKController(lua_State *l, ::Model &mdl, uint32_t id)
+void Lua::Model::GetIKController(lua_State *l, pragma::Model &mdl, uint32_t id)
 
 {
 
@@ -5406,7 +5406,7 @@ void Lua::Model::GetIKController(lua_State *l, ::Model &mdl, uint32_t id)
 
 }
 
-void Lua::Model::LookupIKController(lua_State *l, ::Model &mdl, const std::string &name)
+void Lua::Model::LookupIKController(lua_State *l, pragma::Model &mdl, const std::string &name)
 
 {
 
@@ -5424,7 +5424,7 @@ void Lua::Model::LookupIKController(lua_State *l, ::Model &mdl, const std::strin
 
 }
 
-void Lua::Model::AddIKController(lua_State *l, ::Model &mdl, const std::string &name, uint32_t chainLength, const std::string &type, uint32_t method)
+void Lua::Model::AddIKController(lua_State *l, pragma::Model &mdl, const std::string &name, uint32_t chainLength, const std::string &type, uint32_t method)
 
 {
 
@@ -5438,15 +5438,15 @@ void Lua::Model::AddIKController(lua_State *l, ::Model &mdl, const std::string &
 
 }
 
-void Lua::Model::AddIKController(lua_State *l, ::Model &mdl, const std::string &name, uint32_t chainLength, const std::string &type) { AddIKController(l, mdl, name, chainLength, type, umath::to_integral(::util::ik::Method::Default)); }
+void Lua::Model::AddIKController(lua_State *l, pragma::Model &mdl, const std::string &name, uint32_t chainLength, const std::string &type) { AddIKController(l, mdl, name, chainLength, type, umath::to_integral(::util::ik::Method::Default)); }
 
-void Lua::Model::RemoveIKController(lua_State *l, ::Model &mdl, uint32_t id) { mdl.RemoveIKController(id); }
+void Lua::Model::RemoveIKController(lua_State *l, pragma::Model &mdl, uint32_t id) { mdl.RemoveIKController(id); }
 
-void Lua::Model::RemoveIKController(lua_State *l, ::Model &mdl, const std::string &name) { mdl.RemoveIKController(name); }
+void Lua::Model::RemoveIKController(lua_State *l, pragma::Model &mdl, const std::string &name) { mdl.RemoveIKController(name); }
 
-void Lua::Model::AddIncludeModel(lua_State *l, ::Model &mdl, const std::string &modelName) { mdl.GetMetaInfo().includes.push_back(modelName); }
+void Lua::Model::AddIncludeModel(lua_State *l, pragma::Model &mdl, const std::string &modelName) { mdl.GetMetaInfo().includes.push_back(modelName); }
 
-void Lua::Model::GetIncludeModels(lua_State *l, ::Model &mdl)
+void Lua::Model::GetIncludeModels(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -5468,7 +5468,7 @@ void Lua::Model::GetIncludeModels(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetPhonemeMap(lua_State *l, ::Model &mdl)
+void Lua::Model::GetPhonemeMap(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -5502,7 +5502,7 @@ void Lua::Model::GetPhonemeMap(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::AssignDistinctMaterial(lua_State *l, ::Model &mdl, ::ModelMeshGroup &group, ::ModelMesh &mesh, ::ModelSubMesh &subMesh)
+void Lua::Model::AssignDistinctMaterial(lua_State *l, pragma::Model &mdl, pragma::ModelMeshGroup &group, ::ModelMesh &mesh, pragma::ModelSubMesh &subMesh)
 
 {
 
@@ -5516,7 +5516,7 @@ void Lua::Model::AssignDistinctMaterial(lua_State *l, ::Model &mdl, ::ModelMeshG
 
 }
 
-void Lua::Model::SetPhonemeMap(lua_State *l, ::Model &mdl, luabind::object o)
+void Lua::Model::SetPhonemeMap(lua_State *l, pragma::Model &mdl, luabind::object o)
 
 {
 
@@ -5632,7 +5632,7 @@ static void push_object_attachment(lua_State *l, const ObjectAttachment &att)
 
 }
 
-void Lua::Model::GetObjectAttachments(lua_State *l, ::Model &mdl)
+void Lua::Model::GetObjectAttachments(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -5656,7 +5656,7 @@ void Lua::Model::GetObjectAttachments(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::AddObjectAttachment(lua_State *l, ::Model &mdl, uint32_t type, const std::string &name, const std::string &attachment, luabind::object oKeyValues)
+void Lua::Model::AddObjectAttachment(lua_State *l, pragma::Model &mdl, uint32_t type, const std::string &name, const std::string &attachment, luabind::object oKeyValues)
 
 {
 
@@ -5690,7 +5690,7 @@ void Lua::Model::AddObjectAttachment(lua_State *l, ::Model &mdl, uint32_t type, 
 
 }
 
-void Lua::Model::GetObjectAttachmentCount(lua_State *l, ::Model &mdl)
+void Lua::Model::GetObjectAttachmentCount(lua_State *l, pragma::Model &mdl)
 
 {
 
@@ -5700,7 +5700,7 @@ void Lua::Model::GetObjectAttachmentCount(lua_State *l, ::Model &mdl)
 
 }
 
-void Lua::Model::GetObjectAttachment(lua_State *l, ::Model &mdl, uint32_t idx)
+void Lua::Model::GetObjectAttachment(lua_State *l, pragma::Model &mdl, uint32_t idx)
 
 {
 
@@ -5716,7 +5716,7 @@ void Lua::Model::GetObjectAttachment(lua_State *l, ::Model &mdl, uint32_t idx)
 
 }
 
-void Lua::Model::LookupObjectAttachment(lua_State *l, ::Model &mdl, const std::string &name)
+void Lua::Model::LookupObjectAttachment(lua_State *l, pragma::Model &mdl, const std::string &name)
 
 {
 
@@ -5734,7 +5734,7 @@ void Lua::Model::LookupObjectAttachment(lua_State *l, ::Model &mdl, const std::s
 
 }
 
-void Lua::Model::RemoveObjectAttachment(lua_State *l, ::Model &mdl, const std::string &name)
+void Lua::Model::RemoveObjectAttachment(lua_State *l, pragma::Model &mdl, const std::string &name)
 
 {
 
@@ -5744,7 +5744,7 @@ void Lua::Model::RemoveObjectAttachment(lua_State *l, ::Model &mdl, const std::s
 
 }
 
-void Lua::Model::RemoveObjectAttachment(lua_State *l, ::Model &mdl, uint32_t idx)
+void Lua::Model::RemoveObjectAttachment(lua_State *l, pragma::Model &mdl, uint32_t idx)
 
 {
 

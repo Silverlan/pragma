@@ -204,7 +204,7 @@ static void calc_surface_plane(const PhysWaterSurfaceSimulator *surfaceSim, cons
 	}
 }
 
-void pragma::physics::WaterBuoyancySimulator::Simulate(BaseEntity &entWater, const PhysLiquid &liquid, BaseEntity &ent, Vector3 waterPlane, double waterPlaneDist, const Vector3 &waterVelocity, const PhysWaterSurfaceSimulator *surfaceSim) const
+void pragma::physics::WaterBuoyancySimulator::Simulate(pragma::ecs::BaseEntity &entWater, const PhysLiquid &liquid, pragma::ecs::BaseEntity &ent, Vector3 waterPlane, double waterPlaneDist, const Vector3 &waterVelocity, const PhysWaterSurfaceSimulator *surfaceSim) const
 {
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto physType = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsType() : PHYSICSTYPE::NONE;

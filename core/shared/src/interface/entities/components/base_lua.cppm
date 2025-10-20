@@ -3,10 +3,10 @@
 
 module;
 
-#include "pragma/lua/types/udm.hpp"
-#include <any>
 #include "pragma/networkdefinitions.h"
-
+#include "pragma/lua/core.hpp"
+#include <string>
+#include <any>
 
 
 
@@ -14,6 +14,7 @@ export module pragma.shared:entities.components.base_lua;
 
 export import :entities.components.base;
 export import :entities.member_type;
+export import :scripting.lua.types;
 export import :util.any;
 
 export {
@@ -190,8 +191,8 @@ export {
 			virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
-			virtual void OnAttached(BaseEntity &ent) override;
-			virtual void OnDetached(BaseEntity &ent) override;
+			virtual void OnAttached(pragma::ecs::BaseEntity &ent) override;
+			virtual void OnDetached(pragma::ecs::BaseEntity &ent) override;
 
 			const luabind::object &GetLuaObject() const;
 			luabind::object &GetLuaObject();
@@ -269,7 +270,7 @@ export {
 			void Lua_OnEntityComponentRemoved(BaseLuaBaseEntityComponent &hComponent) {}
 			static void default_Lua_OnEntityComponentRemoved(lua_State *l, BaseLuaBaseEntityComponent &hComponent) {}
 		protected:
-			BaseLuaBaseEntityComponent(BaseEntity &ent);
+			BaseLuaBaseEntityComponent(pragma::ecs::BaseEntity &ent);
 			luabind::object *GetClassObject();
 			const luabind::object *GetClassObject() const { return const_cast<BaseLuaBaseEntityComponent *>(this)->GetClassObject(); }
 			virtual void InitializeLuaObject(lua_State *l) override;
@@ -375,8 +376,12 @@ export {
 				def.def("OnMembersChanged", static_cast<void (T::*)()>(&T::OnMembersChanged));
 			}
 		};
+        using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseLuaBaseEntityComponent::MemberFlags)
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::BaseLuaBaseEntityComponent::MemberFlags> : std::true_type {};
+    }
 
 	template<typename T>
 	void pragma::BaseLuaBaseEntityComponent::SetDynamicMemberValue(ComponentMemberIndex memberIndex, const T &value)

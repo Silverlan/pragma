@@ -7,6 +7,8 @@ module;
 
 #undef GetClassName
 
+#include <string>
+
 export module pragma.shared:entities.components.base_gamemode;
 
 export import :entities.components.base;
@@ -51,7 +53,7 @@ export namespace pragma {
 		const std::string &GetAuthor() const;
 		::util::Version GetGamemodeVersion() const;
 	  protected:
-		BaseGamemodeComponent(BaseEntity &ent);
+		BaseGamemodeComponent(pragma::ecs::BaseEntity &ent);
 	};
 	struct DLLNETWORK CEPlayerDeath : public ComponentEvent {
 		CEPlayerDeath(BasePlayerComponent &pl, DamageInfo *dmgInfo);

@@ -15,7 +15,7 @@ void MovementComponent::RegisterEvents(pragma::EntityComponentManager &component
 	BaseEntityComponent::RegisterEvents(componentManager, registerEvent);
 	EVENT_ON_UPDATE_MOVEMENT = registerEvent("ON_UPDATE_MOVEMENT", ComponentEventInfo::Type::Explicit);
 }
-MovementComponent::MovementComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+MovementComponent::MovementComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void MovementComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

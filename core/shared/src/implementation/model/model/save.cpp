@@ -47,7 +47,7 @@ static void write_offset(VFilePtrReal f, uint64_t offIndex)
 	f->Seek(cur);
 }
 
-static void to_vertex_list(ModelMesh &mesh, std::vector<umath::Vertex> &vertices, std::unordered_map<ModelSubMesh *, std::vector<uint32_t>> &vertexIds)
+static void to_vertex_list(ModelMesh &mesh, std::vector<umath::Vertex> &vertices, std::unordered_map<pragma::ModelSubMesh *, std::vector<uint32_t>> &vertexIds)
 {
 	vertices.reserve(mesh.GetVertexCount());
 	for(auto &subMesh : mesh.GetSubMeshes()) {
@@ -71,7 +71,7 @@ struct MeshBoneWeight {
 	uint64_t vertId;
 	float weight;
 };
-static void to_vertex_weight_list(ModelMesh &mesh, std::unordered_map<uint32_t, std::vector<MeshBoneWeight>> &boneWeights, const std::unordered_map<ModelSubMesh *, std::vector<uint32_t>> &vertexIds)
+static void to_vertex_weight_list(ModelMesh &mesh, std::unordered_map<uint32_t, std::vector<MeshBoneWeight>> &boneWeights, const std::unordered_map<pragma::ModelSubMesh *, std::vector<uint32_t>> &vertexIds)
 {
 	// TODO: Has to be the same order as 'to_vertex_list'!!
 	for(auto &subMesh : mesh.GetSubMeshes()) {
@@ -94,9 +94,9 @@ static void to_vertex_weight_list(ModelMesh &mesh, std::unordered_map<uint32_t, 
 	}
 }
 
-std::shared_ptr<Model> Model::Copy(Game *game, CopyFlags copyFlags) const
+std::shared_ptr<pragma::Model> pragma::Model::Copy(pragma::Game *game, CopyFlags copyFlags) const
 {
-	auto fCreateModel = static_cast<std::shared_ptr<Model> (Game::*)(bool) const>(&Game::CreateModel);
+	auto fCreateModel = static_cast<std::shared_ptr<pragma::Model> (pragma::Game::*)(bool) const>(&pragma::Game::CreateModel);
 	auto mdl = (game->*fCreateModel)(false);
 	if(mdl == nullptr)
 		return nullptr;
@@ -141,12 +141,12 @@ std::shared_ptr<Model> Model::Copy(Game *game, CopyFlags copyFlags) const
 	for(auto &ikController : mdl->m_ikControllers)
 		ikController = std::make_shared<IKController>(*ikController);
 	std::unordered_map<ModelMesh *, ModelMesh *> oldMeshToNewMesh;
-	std::unordered_map<ModelSubMesh *, ModelSubMesh *> oldSubMeshToNewSubMesh;
+	std::unordered_map<pragma::ModelSubMesh *, pragma::ModelSubMesh *> oldSubMeshToNewSubMesh;
 	if((copyFlags & CopyFlags::CopyMeshesBit) != CopyFlags::None) {
 		auto copyVertexData = umath::is_flag_set(copyFlags, CopyFlags::CopyVertexData);
 		for(auto &meshGroup : mdl->m_meshGroups) {
-			auto newMeshGroup = ModelMeshGroup::Create(meshGroup->GetName());
-			static_assert(sizeof(ModelMeshGroup) == 72, "Update this function when making changes to this class!");
+			auto newMeshGroup = pragma::ModelMeshGroup::Create(meshGroup->GetName());
+			static_assert(sizeof(pragma::ModelMeshGroup) == 72, "Update this function when making changes to this class!");
 			newMeshGroup->GetMeshes() = meshGroup->GetMeshes();
 			for(auto &mesh : newMeshGroup->GetMeshes()) {
 				auto newMesh = mesh->Copy();
@@ -186,7 +186,7 @@ std::shared_ptr<Model> Model::Copy(Game *game, CopyFlags copyFlags) const
 	if((copyFlags & CopyFlags::CopyCollisionMeshesBit) != CopyFlags::None) {
 		for(auto &colMesh : mdl->m_collisionMeshes) {
 			auto oldColMesh = colMesh;
-			colMesh = CollisionMesh::Create(*colMesh);
+			colMesh = pragma::physics::CollisionMesh::Create(*colMesh);
 			if(umath::is_flag_set(copyFlags, CopyFlags::CopyUniqueIdsBit))
 				colMesh->SetUuid(oldColMesh->GetUuid());
 			// TODO: Update shape?
@@ -209,18 +209,18 @@ std::shared_ptr<Model> Model::Copy(Game *game, CopyFlags copyFlags) const
 	//
 
 #ifdef _WIN32
-	static_assert(sizeof(Model) == 1024, "Update this function when making changes to this class!");
+	static_assert(sizeof(pragma::Model) == 1024, "Update this function when making changes to this class!");
 #endif
 	return mdl;
 }
 
-bool Model::FindSubMeshIndex(const ModelMeshGroup *optMeshGroup, const ModelMesh *optMesh, const ModelSubMesh *optSubMesh, uint32_t &outGroupIdx, uint32_t &outMeshIdx, uint32_t &outSubMeshIdx) const
+bool pragma::Model::FindSubMeshIndex(const pragma::ModelMeshGroup *optMeshGroup, const ModelMesh *optMesh, const pragma::ModelSubMesh *optSubMesh, uint32_t &outGroupIdx, uint32_t &outMeshIdx, uint32_t &outSubMeshIdx) const
 {
 	auto &meshGroups = GetMeshGroups();
 	uint32_t mgStart = 0;
 	uint32_t mgEnd = meshGroups.size();
 	if(optMeshGroup) {
-		auto it = std::find_if(meshGroups.begin(), meshGroups.end(), [optMeshGroup](const std::shared_ptr<ModelMeshGroup> &mmg) { return mmg.get() == optMeshGroup; });
+		auto it = std::find_if(meshGroups.begin(), meshGroups.end(), [optMeshGroup](const std::shared_ptr<pragma::ModelMeshGroup> &mmg) { return mmg.get() == optMeshGroup; });
 		if(it == meshGroups.end())
 			return false;
 		mgStart = (it - meshGroups.begin());
@@ -253,7 +253,7 @@ bool Model::FindSubMeshIndex(const ModelMeshGroup *optMeshGroup, const ModelMesh
 		for(auto j = meshStart; j < meshEnd; ++j) {
 			auto &mesh = meshes[j];
 			auto &subMeshes = mesh->GetSubMeshes();
-			auto it = std::find_if(subMeshes.begin(), subMeshes.end(), [optSubMesh](const std::shared_ptr<ModelSubMesh> &subMesh) { return subMesh.get() == optSubMesh; });
+			auto it = std::find_if(subMeshes.begin(), subMeshes.end(), [optSubMesh](const std::shared_ptr<pragma::ModelSubMesh> &subMesh) { return subMesh.get() == optSubMesh; });
 			if(it == subMeshes.end())
 				continue;
 			outGroupIdx = i;
@@ -265,7 +265,7 @@ bool Model::FindSubMeshIndex(const ModelMeshGroup *optMeshGroup, const ModelMesh
 	return false;
 }
 
-bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::string &outErr)
+bool pragma::Model::LoadFromAssetData(pragma::Game &game, const udm::AssetData &data, std::string &outErr)
 {
 	if(data.GetAssetType() != PMDL_IDENTIFIER) {
 		outErr = "Incorrect format!";
@@ -318,17 +318,17 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 		umath::set_flag(outFlags, flag, udmFlags[name](false));
 	};
 	auto &flags = GetMetaInfo().flags;
-	readFlag(udm, Model::Flags::Static, "static", flags);
-	readFlag(udm, Model::Flags::Inanimate, "inanimate", flags);
-	readFlag(udm, Model::Flags::DontPrecacheTextureGroups, "dontPrecacheSkins", flags);
-	readFlag(udm, Model::Flags::WorldGeometry, "worldGeometry", flags);
-	readFlag(udm, Model::Flags::GeneratedHitboxes, "generatedHitboxes", flags);
-	readFlag(udm, Model::Flags::GeneratedLODs, "generatedLODs", flags);
-	readFlag(udm, Model::Flags::GeneratedMetaRig, "generatedMetaRig", flags);
-	readFlag(udm, Model::Flags::GeneratedMetaBlendShapes, "generatedMetaBlendShapes", flags);
-	static_assert(umath::to_integral(Model::Flags::Count) == 13, "Update this list when new flags have been added!");
+	readFlag(udm, pragma::Model::Flags::Static, "static", flags);
+	readFlag(udm, pragma::Model::Flags::Inanimate, "inanimate", flags);
+	readFlag(udm, pragma::Model::Flags::DontPrecacheTextureGroups, "dontPrecacheSkins", flags);
+	readFlag(udm, pragma::Model::Flags::WorldGeometry, "worldGeometry", flags);
+	readFlag(udm, pragma::Model::Flags::GeneratedHitboxes, "generatedHitboxes", flags);
+	readFlag(udm, pragma::Model::Flags::GeneratedLODs, "generatedLODs", flags);
+	readFlag(udm, pragma::Model::Flags::GeneratedMetaRig, "generatedMetaRig", flags);
+	readFlag(udm, pragma::Model::Flags::GeneratedMetaBlendShapes, "generatedMetaBlendShapes", flags);
+	static_assert(umath::to_integral(pragma::Model::Flags::Count) == 13, "Update this list when new flags have been added!");
 
-	auto isStatic = umath::is_flag_set(flags, Model::Flags::Static);
+	auto isStatic = umath::is_flag_set(flags, pragma::Model::Flags::Static);
 	if(!isStatic) {
 		auto udmSkeleton = udm["skeleton"];
 		m_skeleton = pragma::animation::Skeleton::Load(udm::AssetData {udmSkeleton}, outErr);
@@ -435,7 +435,7 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 	colMeshes.resize(numColMeshes);
 	for(auto i = decltype(numColMeshes) {0u}; i < numColMeshes; ++i) {
 		auto &colMesh = colMeshes[i];
-		colMesh = CollisionMesh::Load(game, *this, udm::AssetData {udmColMeshes[i]}, outErr);
+		colMesh = pragma::physics::CollisionMesh::Load(game, *this, udm::AssetData {udmColMeshes[i]}, outErr);
 		if(colMesh == nullptr) {
 			outErr = "Failed to load collision mesh " + std::to_string(i) + ": " + outErr;
 			return false;
@@ -462,7 +462,7 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 	auto udmMeshGroups = udm["meshGroups"];
 	meshGroups.resize(udmMeshGroups.GetChildCount());
 	for(auto udmMeshGroup : udmMeshGroups.ElIt()) {
-		auto meshGroup = ModelMeshGroup::Create(std::string {udmMeshGroup.key});
+		auto meshGroup = pragma::ModelMeshGroup::Create(std::string {udmMeshGroup.key});
 		uint32_t groupIdx = 0;
 		udmMeshGroup.property["index"](groupIdx);
 		if(groupIdx >= meshGroups.size()) {
@@ -696,7 +696,7 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 	return true;
 }
 
-bool Model::Save(Game &game, const std::string &fileName, std::string &outErr)
+bool pragma::Model::Save(pragma::Game &game, const std::string &fileName, std::string &outErr)
 {
 	auto udmData = udm::Data::Create();
 	auto result = Save(game, udmData->GetAssetData(), outErr);
@@ -719,7 +719,7 @@ bool Model::Save(Game &game, const std::string &fileName, std::string &outErr)
 	pragma::get_engine()->PollResourceWatchers();
 	return true;
 }
-bool Model::Save(Game &game, std::string &outErr)
+bool pragma::Model::Save(pragma::Game &game, std::string &outErr)
 {
 	auto mdlName = GetName();
 	ufile::remove_extension_from_filename(mdlName, pragma::asset::get_supported_extensions(pragma::asset::Type::Model));
@@ -737,7 +737,7 @@ bool Model::Save(Game &game, std::string &outErr)
 	return Save(game, absFileName, outErr);
 }
 
-bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
+bool pragma::Model::Save(pragma::Game &game, udm::AssetDataArg outData, std::string &outErr)
 {
 	outData.SetAssetType(PMDL_IDENTIFIER);
 	outData.SetAssetVersion(PMDL_VERSION);
@@ -776,18 +776,18 @@ bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 			return;
 		udm["flags"][name] = true;
 	};
-	auto writeModelFlag = [&udm, flags, &writeFlag](Model::Flags flag, const std::string &name) { writeFlag(udm, flag, name, flags); };
-	writeModelFlag(Model::Flags::Static, "static");
-	writeModelFlag(Model::Flags::Inanimate, "inanimate");
-	writeModelFlag(Model::Flags::DontPrecacheTextureGroups, "dontPrecacheSkins");
-	writeModelFlag(Model::Flags::WorldGeometry, "worldGeometry");
-	writeModelFlag(Model::Flags::GeneratedHitboxes, "generatedHitboxes");
-	writeModelFlag(Model::Flags::GeneratedLODs, "generatedLODs");
-	writeModelFlag(Model::Flags::GeneratedMetaRig, "generatedMetaRig");
-	writeModelFlag(Model::Flags::GeneratedMetaBlendShapes, "generatedMetaBlendShapes");
-	static_assert(umath::to_integral(Model::Flags::Count) == 13, "Update this list when new flags have been added!");
+	auto writeModelFlag = [&udm, flags, &writeFlag](pragma::Model::Flags flag, const std::string &name) { writeFlag(udm, flag, name, flags); };
+	writeModelFlag(pragma::Model::Flags::Static, "static");
+	writeModelFlag(pragma::Model::Flags::Inanimate, "inanimate");
+	writeModelFlag(pragma::Model::Flags::DontPrecacheTextureGroups, "dontPrecacheSkins");
+	writeModelFlag(pragma::Model::Flags::WorldGeometry, "worldGeometry");
+	writeModelFlag(pragma::Model::Flags::GeneratedHitboxes, "generatedHitboxes");
+	writeModelFlag(pragma::Model::Flags::GeneratedLODs, "generatedLODs");
+	writeModelFlag(pragma::Model::Flags::GeneratedMetaRig, "generatedMetaRig");
+	writeModelFlag(pragma::Model::Flags::GeneratedMetaBlendShapes, "generatedMetaBlendShapes");
+	static_assert(umath::to_integral(pragma::Model::Flags::Count) == 13, "Update this list when new flags have been added!");
 
-	auto isStatic = umath::is_flag_set(flags, Model::Flags::Static);
+	auto isStatic = umath::is_flag_set(flags, pragma::Model::Flags::Static);
 	if(!isStatic) {
 		auto udmSkeleton = udm["skeleton"];
 		auto &skeleton = GetSkeleton();
@@ -1085,7 +1085,7 @@ bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 	return true;
 }
 
-bool Model::SaveLegacy(Game *game, const std::string &name, const std::string &rootPath) const
+bool pragma::Model::SaveLegacy(pragma::Game *game, const std::string &name, const std::string &rootPath) const
 {
 	auto fname = pragma::asset::get_normalized_path(name, pragma::asset::Type::Model) + '.' + pragma::asset::FORMAT_MODEL_LEGACY;
 	fname = rootPath + "models\\" + fname;
@@ -1093,7 +1093,7 @@ bool Model::SaveLegacy(Game *game, const std::string &name, const std::string &r
 	auto f = FileManager::OpenFile<VFilePtrReal>(fname.c_str(), "wb");
 	if(f == nullptr)
 		return false;
-	auto &mdl = const_cast<Model &>(*this);
+	auto &mdl = const_cast<pragma::Model &>(*this);
 	auto &skeleton = mdl.GetSkeleton();
 	auto &bones = skeleton.GetBones();
 	auto &refPose = mdl.GetReference();
@@ -1103,7 +1103,7 @@ bool Model::SaveLegacy(Game *game, const std::string &name, const std::string &r
 	auto &hitboxes = mdl.GetHitboxes();
 	auto &meta = mdl.GetMetaInfo();
 	auto flags = meta.flags;
-	auto bStatic = umath::is_flag_set(flags, Model::Flags::Static);
+	auto bStatic = umath::is_flag_set(flags, pragma::Model::Flags::Static);
 
 	auto &texturePaths = meta.texturePaths;
 	assert(texturePaths.size() <= std::numeric_limits<uint8_t>::max());
@@ -1262,7 +1262,7 @@ bool Model::SaveLegacy(Game *game, const std::string &name, const std::string &r
 				f->Write<uint16_t>(static_cast<uint16_t>(subMesh->GetSkinTextureIndex()));
 
 				// Version 27
-				f->Write<ModelSubMesh::GeometryType>(subMesh->GetGeometryType());
+				f->Write<pragma::ModelSubMesh::GeometryType>(subMesh->GetGeometryType());
 				//
 				f->Write<uint32_t>(subMesh->GetReferenceId());
 
@@ -1407,7 +1407,7 @@ bool Model::SaveLegacy(Game *game, const std::string &name, const std::string &r
 			auto meshGroupId = std::numeric_limits<uint32_t>::max();
 			auto meshId = std::numeric_limits<uint32_t>::max();
 			auto subMeshId = std::numeric_limits<uint32_t>::max();
-			ModelSubMesh *subMesh = nullptr;
+			pragma::ModelSubMesh *subMesh = nullptr;
 			if(bSoftBody == true) {
 				auto bFound = false;
 				for(auto i = decltype(meshGroups.size()) {0}; i < meshGroups.size(); ++i) {
@@ -1488,7 +1488,7 @@ bool Model::SaveLegacy(Game *game, const std::string &name, const std::string &r
 
 				f->Write<uint32_t>(sbAnchors->size());
 				for(auto &anchor : *sbAnchors)
-					f->Write<CollisionMesh::SoftBodyAnchor>(anchor);
+					f->Write<pragma::physics::CollisionMesh::SoftBodyAnchor>(anchor);
 			}
 			//
 		}
@@ -1561,7 +1561,7 @@ bool Model::SaveLegacy(Game *game, const std::string &name, const std::string &r
 					auto &subMeshes = mesh->GetSubMeshes();
 					meshGroupId = itMeshGroup - meshGroups.begin();
 					meshId = itMesh - meshes.begin();
-					auto itSubMesh = std::find_if(subMeshes.begin(), subMeshes.end(), [subMesh](const std::shared_ptr<ModelSubMesh> &other) { return (other.get() == subMesh) ? true : false; });
+					auto itSubMesh = std::find_if(subMeshes.begin(), subMeshes.end(), [subMesh](const std::shared_ptr<pragma::ModelSubMesh> &other) { return (other.get() == subMesh) ? true : false; });
 					if(itSubMesh == subMeshes.end())
 						break;
 					subMeshId = itSubMesh - subMeshes.begin();
@@ -1582,7 +1582,7 @@ bool Model::SaveLegacy(Game *game, const std::string &name, const std::string &r
 					auto flags = frame->GetFlags();
 					auto offsetToEndOfFrameOffset = f->Tell();
 					f->Write<uint64_t>(0ull);
-					f->Write<MeshVertexFrame::Flags>(flags);
+					f->Write<pragma::MeshVertexFrame::Flags>(flags);
 
 					struct Attribute {
 						Attribute(const std::string &name, const std::vector<std::array<uint16_t, 4>> &vertexData) : name {name}, vertexData {vertexData} {}
@@ -1591,7 +1591,7 @@ bool Model::SaveLegacy(Game *game, const std::string &name, const std::string &r
 					};
 					std::vector<Attribute> attributes {};
 					attributes.push_back({"position", frame->GetVertices()});
-					if(umath::is_flag_set(flags, MeshVertexFrame::Flags::HasNormals))
+					if(umath::is_flag_set(flags, pragma::MeshVertexFrame::Flags::HasNormals))
 						attributes.push_back({"normal", frame->GetNormals()});
 					std::set<uint16_t> usedVertIndices {};
 					for(auto &attr : attributes) {

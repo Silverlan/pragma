@@ -66,8 +66,12 @@ export {
 		private:
 			void OnRefreshComplete();
 		};
+        using namespace umath::scoped_enum::bitwise;
 	}
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::networking::IMasterServerQueryDispatcher::Filter::Flags);
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::networking::IMasterServerQueryDispatcher::Filter::Flags> : std::true_type {};
+    }
 
 	template<class TMasterServerQueryDispatcher>
 	std::unique_ptr<pragma::networking::IMasterServerQueryDispatcher, void (*)(pragma::networking::IMasterServerQueryDispatcher *)> pragma::networking::IMasterServerQueryDispatcher::Create()

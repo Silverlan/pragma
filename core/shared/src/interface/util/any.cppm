@@ -6,12 +6,16 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <any>
 
+#include <string>
+
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:util.any;
 
+export import :types;
 export import pragma.util;
 
 export {
-	class Game;
 	namespace util {
 		enum class VarType : uint8_t {
 			Invalid = 0,
@@ -52,7 +56,7 @@ export {
 
 		DLLNETWORK void WriteAny(::DataStream &ds, ::util::VarType varType, const std::any &value, uint32_t *pos = nullptr);
 		DLLNETWORK void WriteAny(::NetPacket &ds, ::util::VarType varType, const std::any &value, uint32_t *pos = nullptr);
-		DLLNETWORK void ReadAny(Game &game, ::DataStream &ds, ::util::VarType varType, std::any &outValue);
+		DLLNETWORK void ReadAny(pragma::Game &game, ::DataStream &ds, ::util::VarType varType, std::any &outValue);
 		DLLNETWORK void ReadAny(::NetPacket &ds, ::util::VarType varType, std::any &outValue);
 	};
 };

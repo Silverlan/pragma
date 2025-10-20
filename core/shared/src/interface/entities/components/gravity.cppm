@@ -38,7 +38,7 @@ export namespace pragma {
 	  public:
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
 		
-		GravityComponent(BaseEntity &ent);
+		GravityComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		virtual void SetGravityScale(float scale) override;

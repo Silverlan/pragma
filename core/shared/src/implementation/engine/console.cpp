@@ -53,11 +53,11 @@ static int getline_async_thread_safe(std::string &str, const int &fd = 0, char d
 }
 #endif
 
-extern Engine *engine;
+extern pragma::Engine *engine;
 static std::atomic_bool bCheckInput = true;
 static void KeyboardInput()
 {
-	if(Engine::Get()->IsNonInteractiveMode())
+	if(pragma::Engine::Get()->IsNonInteractiveMode())
 		return;
 	//TODO: Rewrite this to use non-blocking algorythms
 	std::string line;
@@ -65,7 +65,7 @@ static void KeyboardInput()
 	while(bCheckInput) {
 		std::getline(std::cin, line);
 		if(bCheckInput)
-			Engine::Get()->ConsoleInput(line);
+			pragma::Engine::Get()->ConsoleInput(line);
 	}
 #else
 	int retval;
@@ -75,7 +75,7 @@ static void KeyboardInput()
 			// Process std::string output
 			// Make sure to reset string if continuing through loop
 			if(bCheckInput)
-				Engine::Get()->ConsoleInput(line);
+				pragma::Engine::Get()->ConsoleInput(line);
 
 			line = "";
 		}
@@ -84,13 +84,13 @@ static void KeyboardInput()
 #endif
 }
 
-void Engine::ConsoleInput(const std::string_view &line, bool printLine) // TODO: Make sure input-thread and engine don't access m_consoleInput at the same time?
+void pragma::Engine::ConsoleInput(const std::string_view &line, bool printLine) // TODO: Make sure input-thread and engine don't access m_consoleInput at the same time?
 {
 	std::unique_lock lock {m_consoleInputMutex};
 	m_consoleInput.push({std::string {line}, printLine});
 }
 
-void Engine::ToggleConsole()
+void pragma::Engine::ToggleConsole()
 {
 	if(IsConsoleOpen()) {
 		CloseConsole();
@@ -99,7 +99,7 @@ void Engine::ToggleConsole()
 	OpenConsole();
 }
 
-Engine::ConsoleInstance::ConsoleInstance()
+pragma::Engine::ConsoleInstance::ConsoleInstance()
 {
 	console = std::make_unique<DebugConsole>();
 	console->open();
@@ -107,7 +107,7 @@ Engine::ConsoleInstance::ConsoleInstance()
 	auto useConsoleThread = true;
 #ifdef __linux__
 	auto useLinenoise = true;
-	if(Engine::Get()->IsNonInteractiveMode() || Engine::Get()->IsLinenoiseEnabled() == false)
+	if(pragma::Engine::Get()->IsNonInteractiveMode() || pragma::Engine::Get()->IsLinenoiseEnabled() == false)
 		useLinenoise = false;
 	if(useLinenoise) {
 		useConsoleThread = false;
@@ -120,7 +120,7 @@ Engine::ConsoleInstance::ConsoleInstance()
 	}
 }
 
-Engine::ConsoleInstance::~ConsoleInstance()
+pragma::Engine::ConsoleInstance::~ConsoleInstance()
 {
 #ifdef __linux__
 	//In linux we most likely run from console. Relinquish our control of cin.
@@ -145,7 +145,7 @@ Engine::ConsoleInstance::~ConsoleInstance()
 		consoleThread->join();
 }
 
-void Engine::OpenConsole()
+void pragma::Engine::OpenConsole()
 {
 	if(m_consoleInfo == nullptr) {
 		m_consoleInfo = std::unique_ptr<ConsoleInstance> {new ConsoleInstance {}};
@@ -153,7 +153,7 @@ void Engine::OpenConsole()
 	}
 }
 
-void Engine::CloseConsole()
+void pragma::Engine::CloseConsole()
 {
 	if(!m_consoleInfo)
 		return;
@@ -161,10 +161,10 @@ void Engine::CloseConsole()
 	m_consoleInfo = nullptr;
 }
 
-bool Engine::IsConsoleOpen() const { return m_consoleInfo != NULL; }
-DebugConsole *Engine::GetConsole() { return m_consoleInfo ? m_consoleInfo->console.get() : nullptr; }
+bool pragma::Engine::IsConsoleOpen() const { return m_consoleInfo != NULL; }
+DebugConsole *pragma::Engine::GetConsole() { return m_consoleInfo ? m_consoleInfo->console.get() : nullptr; }
 
-void Engine::ProcessConsoleInput(KeyState pressState)
+void pragma::Engine::ProcessConsoleInput(KeyState pressState)
 {
 #ifdef __linux__
 	if(pragma::console::impl::is_linenoise_enabled())
@@ -193,14 +193,14 @@ void Engine::ProcessConsoleInput(KeyState pressState)
 	}
 }
 
-void Engine::ProcessConsoleInput(const std::string_view &line, KeyState pressState, float magnitude)
+void pragma::Engine::ProcessConsoleInput(const std::string_view &line, KeyState pressState, float magnitude)
 {
-	ustring::get_sequence_commands(std::string {line}, [pressState, magnitude](std::string cmd, std::vector<std::string> &argv) { Engine::Get()->RunConsoleCommand(cmd, argv, pressState, magnitude); });
+	ustring::get_sequence_commands(std::string {line}, [pressState, magnitude](std::string cmd, std::vector<std::string> &argv) { pragma::Engine::Get()->RunConsoleCommand(cmd, argv, pressState, magnitude); });
 }
 
-bool Engine::RunEngineConsoleCommand(std::string scmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(ConConf *, float &)> &callback)
+bool pragma::Engine::RunEngineConsoleCommand(std::string scmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(ConConf *, float &)> &callback)
 {
-	auto *cv = Engine::Get()->CVarHandler::GetConVar(scmd);
+	auto *cv = pragma::Engine::Get()->CVarHandler::GetConVar(scmd);
 	if(cv == nullptr)
 		return false;
 	if(callback != nullptr && callback(cv, magnitude) == false)
@@ -231,7 +231,7 @@ bool Engine::RunEngineConsoleCommand(std::string scmd, std::vector<std::string> 
 	return false;
 }
 
-bool Engine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(ConConf *, float &)> &callback)
+bool pragma::Engine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(ConConf *, float &)> &callback)
 {
 	std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::tolower);
 	auto *stateSv = GetServerNetworkState();

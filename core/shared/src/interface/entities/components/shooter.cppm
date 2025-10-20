@@ -49,7 +49,7 @@ export {
 			virtual void OnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin = nullptr);
 			virtual void FireBullets(const BulletInfo &bulletInfo, std::vector<TraceResult> &outHitTargets, bool bMaster = true) = 0;
 		  protected:
-			BaseShooterComponent(BaseEntity &ent);
+			BaseShooterComponent(pragma::ecs::BaseEntity &ent);
 			struct DLLNETWORK NextBulletInfo {
 				std::vector<Vector3> destinations;
 				EntityHandle source;
@@ -57,7 +57,7 @@ export {
 			mutable std::unique_ptr<NextBulletInfo> m_nextBullet = nullptr;
 			void ReceiveBulletEvent(NetPacket &packet, pragma::BasePlayerComponent *pl = nullptr);
 			std::vector<Vector3> GetBulletDestinations(const Vector3 &origin, const Vector3 &dir, const BulletInfo &bulletInfo);
-			virtual RayCastHitType OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, PhysObj &phys, physics::ICollisionObject &col);
+			virtual pragma::physics::RayCastHitType OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, pragma::physics::PhysObj &phys, physics::ICollisionObject &col);
 
 			pragma::NetEventId m_netEvFireBullets = pragma::INVALID_NET_EVENT;
 		};

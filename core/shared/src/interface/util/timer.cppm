@@ -10,20 +10,20 @@ export module pragma.shared:util.timer;
 
 export import :game.enums;
 export import :scripting.lua.core;
+export import :types;
 export import :util.timer_handle;
 
 export {
-	class Game;
 	class DLLNETWORK Timer {
 	public:
 		Timer(float delay, unsigned int reps, LuaFunctionObject luaFunction, TimerType timetype = TimerType::CurTime);
 		Timer(float delay, unsigned int reps, const CallbackHandle &hCallback, TimerType timetype = TimerType::CurTime);
 		~Timer();
-		void Update(Game *game);
-		void Start(Game *game);
+		void Update(pragma::Game *game);
+		void Start(pragma::Game *game);
 		void Pause();
 		void Stop();
-		void Remove(Game *game);
+		void Remove(pragma::Game *game);
 		bool IsValid();
 		bool IsRunning();
 		bool IsPaused();
@@ -34,10 +34,10 @@ export {
 		unsigned int GetRepetitionsLeft();
 		void SetRepetitions(unsigned int rep);
 		std::shared_ptr<TimerHandle> CreateHandle();
-		void SetCall(Game *game, LuaFunctionObject luaFunction);
-		void SetCall(Game *game, const CallbackHandle &hCallback);
+		void SetCall(pragma::Game *game, LuaFunctionObject luaFunction);
+		void SetCall(pragma::Game *game, const CallbackHandle &hCallback);
 
-		void Call(Game *game);
+		void Call(pragma::Game *game);
 	private:
 		TimerType m_timeType;
 		float m_delay;
@@ -50,8 +50,8 @@ export {
 		bool m_bIsValid;
 		std::vector<std::shared_ptr<TimerHandle>> m_handles;
 
-		double GetCurTime(Game *game);
-		double GetDeltaTime(Game *game);
+		double GetCurTime(pragma::Game *game);
+		double GetDeltaTime(pragma::Game *game);
 	protected:
 		float m_next;
 		virtual void Reset();

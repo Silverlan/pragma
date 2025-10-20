@@ -5,6 +5,8 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <string>
+
 export module pragma.shared:entities.components.animation_driver;
 
 export import :entities.components.base;
@@ -18,7 +20,7 @@ export namespace pragma {
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		AnimationDriverComponent(BaseEntity &ent);
+		AnimationDriverComponent(pragma::ecs::BaseEntity &ent);
 
 		virtual void Initialize() override;
 		virtual void OnRemove() override;

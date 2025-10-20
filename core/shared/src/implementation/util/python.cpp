@@ -41,9 +41,9 @@ static IPythonWrapper *get_py_wrapper()
 	initialized = true;
 
 	// Which networkstate we use doesn't really matter
-	auto *nw = Engine::Get()->GetServerNetworkState();
+	auto *nw = pragma::Engine::Get()->GetServerNetworkState();
 	if(!nw)
-		nw = Engine::Get()->GetClientState();
+		nw = pragma::Engine::Get()->GetClientState();
 	if(!nw)
 		return nullptr;
 	std::string err;

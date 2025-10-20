@@ -30,14 +30,14 @@ std::ostream &operator<<(std::ostream &out, const BulletInfo &o)
 
 	out << "[Attacker:";
 	if(o.hAttacker.valid())
-		const_cast<BaseEntity *>(o.hAttacker.get())->print(out);
+		const_cast<pragma::ecs::BaseEntity *>(o.hAttacker.get())->print(out);
 	else
 		out << "NULL";
 	out << "]";
 
 	out << "[Inflictor:";
 	if(o.hInflictor.valid())
-		const_cast<BaseEntity *>(o.hInflictor.get())->print(out);
+		const_cast<pragma::ecs::BaseEntity *>(o.hInflictor.get())->print(out);
 	else
 		out << "NULL";
 	out << "]";

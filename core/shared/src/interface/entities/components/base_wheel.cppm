@@ -20,7 +20,7 @@ export namespace pragma {
 
 		void SetupWheel(BaseVehicleComponent &vhc, const pragma::physics::WheelCreateInfo &createInfo, uint8_t wheelId);
 	  protected:
-		BaseWheelComponent(BaseEntity &ent);
+		BaseWheelComponent(pragma::ecs::BaseEntity &ent);
 		void UpdatePose();
 		ComponentHandle<pragma::BaseVehicleComponent> m_vehicle = {};
 		uint8_t m_wheelId = 0u;

@@ -9,6 +9,8 @@ module;
 
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/lua/core.hpp"
+#include <string>
 
 
 

@@ -17,7 +17,7 @@ export namespace pragma {
 		static ComponentEventId EVENT_ON_ACTION_INPUT_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		ActionInputControllerComponent(BaseEntity &ent);
+		ActionInputControllerComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 

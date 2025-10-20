@@ -13,12 +13,12 @@ import :entities.components.environment.lights.base_directional;
 using namespace pragma;
 
 Candela BaseEnvLightDirectionalComponent::CalcIntensityAtPoint(Candela intensity, const Vector3 &point) { return intensity; }
-BaseEnvLightDirectionalComponent::BaseEnvLightDirectionalComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_ambientColor(util::ColorProperty::Create(Color(255, 255, 255, 200))) {}
+BaseEnvLightDirectionalComponent::BaseEnvLightDirectionalComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_ambientColor(util::ColorProperty::Create(Color(255, 255, 255, 200))) {}
 void BaseEnvLightDirectionalComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "color_ambient", false))
 			*m_ambientColor = Color(kvData.value);

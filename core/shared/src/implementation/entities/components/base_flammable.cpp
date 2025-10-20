@@ -19,13 +19,13 @@ void BaseFlammableComponent::RegisterEvents(pragma::EntityComponentManager &comp
 	EVENT_ON_IGNITED = registerEvent("ON_IGNITED", ComponentEventInfo::Type::Broadcast);
 	EVENT_ON_EXTINGUISHED = registerEvent("ON_EXTINGUISHED", ComponentEventInfo::Type::Broadcast);
 }
-BaseFlammableComponent::BaseFlammableComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_bIsOnFire(util::BoolProperty::Create(false)), m_bIgnitable(util::BoolProperty::Create(true)) {}
+BaseFlammableComponent::BaseFlammableComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_bIsOnFire(util::BoolProperty::Create(false)), m_bIgnitable(util::BoolProperty::Create(true)) {}
 BaseFlammableComponent::~BaseFlammableComponent() { Extinguish(); }
 void BaseFlammableComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "flammable", false))
 			*m_bIgnitable = util::to_boolean(kvData.value);
@@ -97,7 +97,7 @@ const util::PBoolProperty &BaseFlammableComponent::GetOnFireProperty() const { r
 const util::PBoolProperty &BaseFlammableComponent::GetIgnitableProperty() const { return m_bIgnitable; }
 bool BaseFlammableComponent::IsOnFire() const { return *m_bIsOnFire; }
 bool BaseFlammableComponent::IsIgnitable() const { return *m_bIgnitable; }
-util::EventReply BaseFlammableComponent::Ignite(float duration, BaseEntity *attacker, BaseEntity *inflictor)
+util::EventReply BaseFlammableComponent::Ignite(float duration, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor)
 {
 	auto &ent = GetEntity();
 	auto pSubmergibleComponent = ent.GetComponent<pragma::SubmergibleComponent>();
@@ -133,7 +133,7 @@ void BaseFlammableComponent::SetIgnitable(bool b)
 
 ////////////
 
-CEOnIgnited::CEOnIgnited(float duration, BaseEntity *attacker, BaseEntity *inflictor) : duration {duration}, attacker {attacker ? attacker->GetHandle() : EntityHandle {}}, inflictor {inflictor ? inflictor->GetHandle() : EntityHandle {}} {}
+CEOnIgnited::CEOnIgnited(float duration, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor) : duration {duration}, attacker {attacker ? attacker->GetHandle() : EntityHandle {}}, inflictor {inflictor ? inflictor->GetHandle() : EntityHandle {}} {}
 void CEOnIgnited::PushArguments(lua_State *l)
 {
 	Lua::PushNumber(l, duration);

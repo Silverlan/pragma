@@ -22,7 +22,7 @@ export namespace pragma {
 		static Candela CalcIntensityAtPoint(const Vector3 &lightPos, Candela intensity, const Vector3 &lightDir, umath::Degree outerConeAngle, umath::Degree innerConeAngle, const Vector3 &point, std::optional<float> radius = {});
 
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
-		BaseEnvLightSpotComponent(BaseEntity &ent);
+		BaseEnvLightSpotComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		virtual void SetOuterConeAngle(umath::Degree ang);

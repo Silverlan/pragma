@@ -6,6 +6,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <functional>
 
+#include <string>
+
 export module pragma.shared:map.world_data;
 
 export import :map.entity_data;

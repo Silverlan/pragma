@@ -11,16 +11,16 @@ export import :entities.components.base;
 
 export namespace pragma {
 	struct DLLNETWORK CEOnUseData : public ComponentEvent {
-		CEOnUseData(BaseEntity *ent);
+		CEOnUseData(pragma::ecs::BaseEntity *ent);
 		virtual void PushArguments(lua_State *l) override;
-		BaseEntity *entity;
+		pragma::ecs::BaseEntity *entity;
 	};
 	struct DLLNETWORK CECanUseData : public ComponentEvent {
-		CECanUseData(BaseEntity *ent);
+		CECanUseData(pragma::ecs::BaseEntity *ent);
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua_State *l) override;
-		BaseEntity *entity;
+		pragma::ecs::BaseEntity *entity;
 		bool canUse = true;
 	};
 	class DLLNETWORK UsableComponent final : public BaseEntityComponent {
@@ -28,11 +28,11 @@ export namespace pragma {
 		static pragma::ComponentEventId EVENT_ON_USE;
 		static pragma::ComponentEventId EVENT_CAN_USE;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		UsableComponent(BaseEntity &ent);
+		UsableComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 
-		bool CanUse(BaseEntity *pl) const;
-		void OnUse(BaseEntity *pl);
+		bool CanUse(pragma::ecs::BaseEntity *pl) const;
+		void OnUse(pragma::ecs::BaseEntity *pl);
 	};
 };

@@ -12,9 +12,9 @@ import :entities.components.props.base;
 
 using namespace pragma;
 
-BasePropComponent::BasePropComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+BasePropComponent::BasePropComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
-PHYSICSTYPE BasePropComponent::UpdatePhysicsType(BaseEntity *ent)
+PHYSICSTYPE BasePropComponent::UpdatePhysicsType(pragma::ecs::BaseEntity *ent)
 {
 	if(ent->GetSpawnFlags() & umath::to_integral(SpawnFlags::Static)) {
 		m_kvMass = 0.f;
@@ -75,7 +75,7 @@ void BasePropComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		return SetKeyValue(kvData.key, kvData.value) ? util::EventReply::Handled : util::EventReply::Unhandled;
 	});

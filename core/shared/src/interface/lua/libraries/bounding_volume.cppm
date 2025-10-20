@@ -4,10 +4,11 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-
+#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.libraries.bounding_volume;
 
+export import :scripting.lua.api;
 export import pragma.math;
 
 export namespace Lua::boundingvolume {

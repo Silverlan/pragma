@@ -5,6 +5,8 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <cinttypes>
+
 
 
 export module pragma.shared:entities.components.environment.base_camera;
@@ -25,7 +27,7 @@ export {
 			static const float DEFAULT_FOCAL_DISTANCE;
 
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
-			BaseEnvCameraComponent(BaseEntity &ent);
+			BaseEnvCameraComponent(pragma::ecs::BaseEntity &ent);
 			virtual void Initialize() override;
 
 			enum class StateFlags : uint32_t { None = 0u, ViewMatrixDirtyBit = 1u, ProjectionMatrixDirtyBit = ViewMatrixDirtyBit << 1u, CustomViewMatrix = ProjectionMatrixDirtyBit << 1u, CustomProjectionMatrix = CustomViewMatrix << 1u };
@@ -112,6 +114,10 @@ export {
 			StateFlags m_stateFlags = StateFlags::None;
 			ComponentHandle<BaseFieldAngleComponent> m_fieldAngleComponent;
 		};
+        using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseEnvCameraComponent::StateFlags)
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::BaseEnvCameraComponent::StateFlags> : std::true_type {};
+    }
 };

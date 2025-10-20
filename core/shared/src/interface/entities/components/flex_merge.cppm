@@ -12,18 +12,18 @@ export import :entities.components.base_flex;
 export import :entities.universal_reference;
 export import :model.animation.enums;
 export import :model.animation.flex_animation;
+export import :types;
 
 export {
-	class Model;
 	namespace pragma {
 		class DLLNETWORK FlexMergeComponent final : public BaseEntityComponent {
 		  public:
-			static bool can_merge(const Model &mdl, const Model &mdlParent);
+			static bool can_merge(const pragma::Model &mdl, const pragma::Model &mdlParent);
 			static ComponentEventId EVENT_ON_TARGET_CHANGED;
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-			FlexMergeComponent(BaseEntity &ent);
+			FlexMergeComponent(pragma::ecs::BaseEntity &ent);
 			virtual void Initialize() override;
 			virtual void OnRemove() override;
 			virtual void OnTick(double tDelta) override;

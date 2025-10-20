@@ -7,6 +7,8 @@ module;
 #include <unordered_map>
 #include <string>
 
+#include <array>
+
 
 export module pragma.shared:model.animation.meta_rig;
 
@@ -14,9 +16,9 @@ export import :game.coordinate_system;
 export import :model.animation.enums;
 export import :model.animation.flex_animation;
 export import :model.animation.skeleton;
+export import :types;
 
 export {
-	class Model;
 	namespace pragma::animation {
 		enum class MetaRigBoneType : uint8_t {
 			// Note: Child bone types must not be defined before their parent!
@@ -236,7 +238,7 @@ export {
 
 			bool Save(const Skeleton &skeleton, const udm::AssetData &outData, std::string &outErr) const;
 			float GetReferenceScale() const;
-			void DebugPrint(const Model &mdl);
+			void DebugPrint(const pragma::Model &mdl);
 			const MetaRigBone *GetBone(pragma::animation::MetaRigBoneType type) const;
 			const MetaRigBlendShape *GetBlendShape(pragma::animation::BlendShape blendShape) const;
 			std::optional<pragma::animation::MetaRigBoneType> FindMetaBoneType(pragma::animation::BoneId boneId) const;

@@ -67,7 +67,7 @@ void ConstraintLimitRotationComponent::RegisterMembers(pragma::EntityComponentMa
 	}
 }
 
-ConstraintLimitRotationComponent::ConstraintLimitRotationComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+ConstraintLimitRotationComponent::ConstraintLimitRotationComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintLimitRotationComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

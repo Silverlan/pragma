@@ -18,17 +18,17 @@ export import :physics.touch;
 export {
 	namespace pragma {
 		struct DLLNETWORK CECanTriggerData : public ComponentEvent {
-			CECanTriggerData(BaseEntity *ent);
+			CECanTriggerData(pragma::ecs::BaseEntity *ent);
 			virtual void PushArguments(lua_State *l) override;
 			virtual uint32_t GetReturnCount() override;
 			virtual void HandleReturnValues(lua_State *l) override;
-			BaseEntity *entity;
+			pragma::ecs::BaseEntity *entity;
 			bool canTrigger = true;
 		};
 		struct DLLNETWORK CETouchData : public ComponentEvent {
-			CETouchData(BaseEntity &ent);
+			CETouchData(pragma::ecs::BaseEntity &ent);
 			virtual void PushArguments(lua_State *l) override;
-			BaseEntity *entity;
+			pragma::ecs::BaseEntity *entity;
 		};
 		class DLLNETWORK BaseTouchComponent : public BaseEntityComponent {
 		public:
@@ -51,21 +51,21 @@ export {
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			using BaseEntityComponent::BaseEntityComponent;
 			// Only called if collision callbacks are enabled (Entity::SetCollisionCallbacksEnabled(true))
-			void StartTouch(BaseEntity &entOther, PhysObj &physOther, physics::ICollisionObject &objThis, physics::ICollisionObject &objOther);
-			void EndTouch(BaseEntity &entOther, PhysObj &physOther, physics::ICollisionObject &objThis, physics::ICollisionObject &objOther);
+			void StartTouch(pragma::ecs::BaseEntity &entOther, pragma::physics::PhysObj &physOther, physics::ICollisionObject &objThis, physics::ICollisionObject &objOther);
+			void EndTouch(pragma::ecs::BaseEntity &entOther, pragma::physics::PhysObj &physOther, physics::ICollisionObject &objThis, physics::ICollisionObject &objOther);
 			// Only called if collision callbacks and contact reports are enabled (Entity::SetCollisionCallbacksEnabled(true),Entity::SetCollisionContactReportEnabled(true))
 			void Contact(const pragma::physics::ContactInfo &contactInfo);
 
 			virtual void Initialize() override;
 			virtual void OnRemove() override;
 			const std::vector<TouchInfo> &GetTouchingInfo() const;
-			void Trigger(BaseEntity &ent);
-			void StartTouch(BaseEntity &ent);
-			void EndTouch(BaseEntity &ent);
-			virtual bool CanTrigger(BaseEntity &ent);
-			virtual void OnTrigger(BaseEntity &ent);
-			virtual void OnStartTouch(BaseEntity &ent);
-			virtual void OnEndTouch(BaseEntity &ent);
+			void Trigger(pragma::ecs::BaseEntity &ent);
+			void StartTouch(pragma::ecs::BaseEntity &ent);
+			void EndTouch(pragma::ecs::BaseEntity &ent);
+			virtual bool CanTrigger(pragma::ecs::BaseEntity &ent);
+			virtual void OnTrigger(pragma::ecs::BaseEntity &ent);
+			virtual void OnStartTouch(pragma::ecs::BaseEntity &ent);
+			virtual void OnEndTouch(pragma::ecs::BaseEntity &ent);
 			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
 			void SetTriggerFlags(TriggerFlags flags);
@@ -76,7 +76,7 @@ export {
 			void SetNeverDisablePhysicsCallbacks(bool b);
 		protected:
 			void UpdatePhysics();
-			bool IsTouching(BaseEntity &ent) const;
+			bool IsTouching(pragma::ecs::BaseEntity &ent) const;
 
 			std::vector<physics::ContactInfo> m_contactReport;
 
@@ -86,7 +86,7 @@ export {
 
 			TriggerFlags m_triggerFlags = TriggerFlags::None;
 			bool m_neverDisablePhysicsCallbacks = false;
-			BaseTouchComponent(BaseEntity &ent);
+			BaseTouchComponent(pragma::ecs::BaseEntity &ent);
 			void OnPhysicsInitialized();
 			void UpdateTouch();
 			void StartTouch(const PhysTouch &touch);
@@ -96,6 +96,10 @@ export {
 			virtual void OnTouch(PhysTouch &touch);
 			virtual bool IsTouchEnabled() const;
 		};
+        using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseTouchComponent::TriggerFlags)
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::BaseTouchComponent::TriggerFlags> : std::true_type {};
+    }
 };

@@ -65,7 +65,7 @@ export {
 			const ValueDriverDescriptor &GetDescriptor() const { return m_descriptor; }
 			pragma::ComponentId GetComponentId() const { return m_componentId; }
 
-			Result Apply(BaseEntity &ent);
+			Result Apply(pragma::ecs::BaseEntity &ent);
 			void ResetFailureState();
 			bool IsFailureFlagSet() const;
 		private:

@@ -11,7 +11,7 @@ module pragma.shared;
 
 import :game.game;
 
-void Game::SplashDamage(const Vector3 &origin, Float radius, DamageInfo &dmg, const std::function<bool(BaseEntity *, DamageInfo &)> &callback)
+void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, DamageInfo &dmg, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback)
 {
 	auto &force = dmg.GetForce();
 	auto forceLen = uvec::length(force);
@@ -19,13 +19,13 @@ void Game::SplashDamage(const Vector3 &origin, Float radius, DamageInfo &dmg, co
 	if(radius <= 0.f)
 		return;
 	struct EntityCandidate {
-		EntityCandidate(BaseEntity *ent, Vector3 &pos, Float dist) : hEntity(ent->GetHandle()), position(pos), distance(dist) {}
+		EntityCandidate(pragma::ecs::BaseEntity *ent, Vector3 &pos, Float dist) : hEntity(ent->GetHandle()), position(pos), distance(dist) {}
 		EntityHandle hEntity;
 		Vector3 position;
 		Float distance;
 	};
 	std::vector<EntityCandidate> ents;
-	EntityIterator entIt {*this};
+	pragma::ecs::EntityIterator entIt {*this};
 	entIt.AttachFilter<EntityIteratorFilterSphere>(origin, radius);
 	for(auto *ent : entIt) {
 		auto pTrComponent = ent->GetTransformComponent();
@@ -126,7 +126,7 @@ void Game::SplashDamage(const Vector3 &origin, Float radius, DamageInfo &dmg, co
 		}
 	}
 }
-void Game::SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force, BaseEntity *attacker, BaseEntity *inflictor, const std::function<bool(BaseEntity *, DamageInfo &)> &callback)
+void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback)
 {
 	DamageInfo info;
 	info.SetForce(Vector3(force, 0.f, 0.f));
@@ -136,7 +136,7 @@ void Game::SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Floa
 	info.SetDamageType(DAMAGETYPE::EXPLOSION);
 	SplashDamage(origin, radius, info, callback);
 }
-void Game::SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force, const EntityHandle &attacker, const EntityHandle &inflictor, const std::function<bool(BaseEntity *, DamageInfo &)> &callback)
+void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force, const EntityHandle &attacker, const EntityHandle &inflictor, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback)
 {
-	SplashDamage(origin, radius, damage, force, const_cast<BaseEntity *>(attacker.get()), const_cast<BaseEntity *>(inflictor.get()), callback);
+	SplashDamage(origin, radius, damage, force, const_cast<pragma::ecs::BaseEntity *>(attacker.get()), const_cast<pragma::ecs::BaseEntity *>(inflictor.get()), callback);
 }

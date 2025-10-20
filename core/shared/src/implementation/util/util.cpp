@@ -137,12 +137,12 @@ void util::write_udm_entity(udm::LinkedPropertyWrapperArg udm, EntityHandle &hEn
 	if(hEnt.valid())
 		udm = util::uuid_to_string(hEnt->GetUuid());
 }
-EntityHandle util::read_udm_entity(Game &game, udm::LinkedPropertyWrapperArg udm)
+EntityHandle util::read_udm_entity(pragma::Game &game, udm::LinkedPropertyWrapperArg udm)
 {
 	std::string uuid;
 	udm(uuid);
 	if(util::is_uuid(uuid)) {
-		EntityIterator entIt {game, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+		pragma::ecs::EntityIterator entIt {game, pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 		entIt.AttachFilter<EntityIteratorFilterUuid>(util::uuid_string_to_bytes(uuid));
 		auto it = entIt.begin();
 		auto *ent = (it != entIt.end()) ? *it : nullptr;

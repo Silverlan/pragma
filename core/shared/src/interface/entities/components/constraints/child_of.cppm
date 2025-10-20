@@ -17,7 +17,7 @@ export namespace pragma {
 	  public:
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		ConstraintChildOfComponent(BaseEntity &ent);
+		ConstraintChildOfComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		void SetLocationAxisEnabled(pragma::Axis axis, bool enabled);

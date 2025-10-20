@@ -3,6 +3,9 @@
 
 module;
 
+#include <string>
+#include <functional>
+
 export module pragma.shared:entities.components;
 
 export import :entities.components.action_input_controller;

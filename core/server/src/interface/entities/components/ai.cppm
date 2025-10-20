@@ -314,6 +314,10 @@ export {
 			bool PlayAnimation(const AIAnimationInfo &info);
 			bool m_bSkipHandling = false;
 		};
+        using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::SAIComponent::AIAnimationInfo::AIAnimFlags)
+    namespace umath::scoped_enum::bitwise {
+        template<>
+        struct enable_bitwise_operators<pragma::SAIComponent::AIAnimationInfo::AIAnimFlags> : std::true_type {};
+    }
 };

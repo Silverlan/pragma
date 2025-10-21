@@ -1085,7 +1085,7 @@ Vector2 BaseAIComponent::CalcMovementSpeed() const
 
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
 
-	if(pPhysComponent && (pPhysComponent->GetMoveType() != MOVETYPE::WALK || pPhysComponent->IsOnGround() == false))
+	if(pPhysComponent && (pPhysComponent->GetMoveType() != pragma::physics::MOVETYPE::WALK || pPhysComponent->IsOnGround() == false))
 
 		return {pVelComponent.valid() ? uvec::length(pVelComponent->GetVelocity()) : 0.f, 0.f};
 
@@ -1129,7 +1129,7 @@ Vector3 BaseAIComponent::CalcMovementDirection() const
 
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
 
-	if(pPhysComponent && (pPhysComponent->GetMoveType() != MOVETYPE::WALK || pPhysComponent->IsOnGround() == false)) {
+	if(pPhysComponent && (pPhysComponent->GetMoveType() != pragma::physics::MOVETYPE::WALK || pPhysComponent->IsOnGround() == false)) {
 
 		auto vel = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {};
 

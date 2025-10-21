@@ -6,6 +6,8 @@ module;
 
 
 
+#include <cmath>
+
 module pragma.shared;
 
 import :entities.components.point.constraints.base_dof;

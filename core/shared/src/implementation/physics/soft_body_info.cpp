@@ -4,6 +4,8 @@
 module;
 
 
+#include <string>
+
 module pragma.shared;
 
 import :physics.soft_body_info;

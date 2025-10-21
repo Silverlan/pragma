@@ -362,14 +362,14 @@ PhysObjHandle BasePhysicsComponent::InitializePhysics(const physics::PhysObjCrea
 	// Collision group/mask have to be set before spawning the physics object, otherwise
 	// there may be incorrect collisions directly after spawn.
 	if(umath::is_flag_set(flags, PhysFlags::Dynamic) == true) {
-		m_physicsType = PHYSICSTYPE::DYNAMIC;
+		m_physicsType = pragma::physics::MOVETYPE::DYNAMIC;
 		SetCollisionFilter(pragma::physics::CollisionMask::Dynamic | pragma::physics::CollisionMask::Generic, pragma::physics::CollisionMask::All);
-		SetMoveType(MOVETYPE::PHYSICS);
+		SetMoveType(pragma::physics::MOVETYPE::PHYSICS);
 	}
 	else {
-		m_physicsType = PHYSICSTYPE::STATIC;
+		m_physicsType = pragma::physics::MOVETYPE::STATIC;
 		SetCollisionFilter(pragma::physics::CollisionMask::Static | pragma::physics::CollisionMask::Generic, pragma::physics::CollisionMask::All);
-		SetMoveType(MOVETYPE::NONE);
+		SetMoveType(pragma::physics::MOVETYPE::NONE);
 	}
 	m_physObject->Spawn();
 	auto &collisionObjs = m_physObject->GetCollisionObjects();
@@ -503,7 +503,7 @@ util::TSharedHandle<pragma::physics::PhysObj> BasePhysicsComponent::InitializeBo
 		return {};
 	m_physObject->GetCollisionObject()->SetOrigin(-origin);
 	static_cast<BoxControllerPhysObj *>(m_physObject.get())->SetCollisionBounds(min, max);
-	m_physicsType = PHYSICSTYPE::BOXCONTROLLER;
+	m_physicsType = pragma::physics::PHYSICSTYPE::BOXCONTROLLER;
 	SetCollisionFilter(pragma::physics::CollisionMask::Dynamic | pragma::physics::CollisionMask::Generic | pragma::physics::CollisionMask::Player, pragma::physics::CollisionMask::All & ~pragma::physics::CollisionMask::Particle & ~pragma::physics::CollisionMask::Item);
 	m_physObject->Spawn();
 	InitializePhysObj();
@@ -518,7 +518,7 @@ util::TSharedHandle<pragma::physics::PhysObj> BasePhysicsComponent::InitializeCa
 	m_physObject = util::to_shared_handle<pragma::physics::PhysObj>(pragma::physics::PhysObj::Create<CapsuleControllerPhysObj>(*this, CUInt32(umath::max(max.x - min.x, max.z - min.z)), CUInt32(max.y - min.y), 24));
 	if(m_physObject == nullptr)
 		return {};
-	m_physicsType = PHYSICSTYPE::CAPSULECONTROLLER;
+	m_physicsType = pragma::physics::PHYSICSTYPE::CAPSULECONTROLLER;
 	SetCollisionFilter(pragma::physics::CollisionMask::Dynamic | pragma::physics::CollisionMask::Generic | pragma::physics::CollisionMask::Player, pragma::physics::CollisionMask::All & ~pragma::physics::CollisionMask::Particle & ~pragma::physics::CollisionMask::Item);
 	m_physObject->Spawn();
 	InitializePhysObj();
@@ -571,7 +571,7 @@ void BasePhysicsComponent::InitializePhysObj()
 		phys->SetCollisionFilterMask(m_collisionFilterMask);
 	if(IsKinematic())
 		SetKinematic(true);
-	phys->SetStatic((GetPhysicsType() == PHYSICSTYPE::STATIC) ? true : false);
+	phys->SetStatic((GetPhysicsType() == pragma::physics::MOVETYPE::STATIC) ? true : false);
 	auto pVelComponent = GetEntity().GetComponent<pragma::VelocityComponent>();
 	phys->SetLinearVelocity(pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {});
 	UpdateCCD();
@@ -593,20 +593,20 @@ pragma::physics::PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physic
 	auto group = GetCollisionFilter();
 	auto mask = GetCollisionFilterMask();
 	if(bDynamic) {
-		m_physicsType = PHYSICSTYPE::STATIC;
+		m_physicsType = pragma::physics::MOVETYPE::STATIC;
 		if(group == pragma::physics::CollisionMask::Default)
 			group = pragma::physics::CollisionMask::Static | pragma::physics::CollisionMask::Generic;
 		if(mask == pragma::physics::CollisionMask::Default)
 			mask = pragma::physics::CollisionMask::All & ~pragma::physics::CollisionMask::Particle & ~pragma::physics::CollisionMask::Item;
-		SetMoveType(MOVETYPE::NONE);
+		SetMoveType(pragma::physics::MOVETYPE::NONE);
 	}
 	else {
-		m_physicsType = PHYSICSTYPE::DYNAMIC;
+		m_physicsType = pragma::physics::MOVETYPE::DYNAMIC;
 		if(group == pragma::physics::CollisionMask::Default)
 			group = pragma::physics::CollisionMask::Dynamic | pragma::physics::CollisionMask::Generic;
 		if(mask == pragma::physics::CollisionMask::Default)
 			mask = pragma::physics::CollisionMask::All & ~pragma::physics::CollisionMask::Particle & ~pragma::physics::CollisionMask::Item;
-		SetMoveType(MOVETYPE::PHYSICS);
+		SetMoveType(pragma::physics::MOVETYPE::PHYSICS);
 	}
 	if(group != pragma::physics::CollisionMask::Default)
 		SetCollisionFilterGroup(group);
@@ -620,12 +620,12 @@ pragma::physics::PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physic
 	OnPhysicsInitialized();
 	return m_physObject.get();
 }
-pragma::physics::PhysObj *BasePhysicsComponent::InitializePhysics(PHYSICSTYPE type, PhysFlags flags)
+pragma::physics::PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physics::PHYSICSTYPE type, PhysFlags flags)
 {
-	umath::set_flag(flags, PhysFlags::Dynamic, type != PHYSICSTYPE::STATIC);
+	umath::set_flag(flags, PhysFlags::Dynamic, type != pragma::physics::MOVETYPE::STATIC);
 	if(m_physObject)
 		DestroyPhysicsObject();
-	if(type != PHYSICSTYPE::STATIC) {
+	if(type != pragma::physics::MOVETYPE::STATIC) {
 		auto &ent = GetEntity();
 		ent.AddComponent<pragma::VelocityComponent>();
 		ent.AddComponent<pragma::GravityComponent>();
@@ -634,12 +634,12 @@ pragma::physics::PhysObj *BasePhysicsComponent::InitializePhysics(PHYSICSTYPE ty
 	if(BroadcastEvent(EVENT_INITIALIZE_PHYSICS, evInitPhysics) == util::EventReply::Handled)
 		return GetPhysicsObject(); // Handled by an external component
 	switch(type) {
-	case PHYSICSTYPE::BOXCONTROLLER:
+	case pragma::physics::PHYSICSTYPE::BOXCONTROLLER:
 		return InitializeBoxControllerPhysics().get();
-	case PHYSICSTYPE::CAPSULECONTROLLER:
+	case pragma::physics::PHYSICSTYPE::CAPSULECONTROLLER:
 		return InitializeCapsuleControllerPhysics().get();
-	case PHYSICSTYPE::STATIC:
-	case PHYSICSTYPE::DYNAMIC:
+	case pragma::physics::MOVETYPE::STATIC:
+	case pragma::physics::MOVETYPE::DYNAMIC:
 		{
 			auto mdlComponent = GetEntity().GetModelComponent();
 			auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
@@ -649,9 +649,9 @@ pragma::physics::PhysObj *BasePhysicsComponent::InitializePhysics(PHYSICSTYPE ty
 				if(!meshes.empty())
 					return InitializeModelPhysics(flags).get();
 			}
-			return nullptr; //InitializeBrushPhysics((type == PHYSICSTYPE::DYNAMIC) ? true : false); // Obsolete?
+			return nullptr; //InitializeBrushPhysics((type == pragma::physics::MOVETYPE::DYNAMIC) ? true : false); // Obsolete?
 		}
-	case PHYSICSTYPE::SOFTBODY:
+	case pragma::physics::MOVETYPE::SOFTBODY:
 		return InitializeSoftBodyPhysics().get();
 	}
 	return nullptr;
@@ -684,7 +684,7 @@ void BasePhysicsComponent::DestroyPhysicsObject()
 	m_physObject = nullptr;
 	m_joints.clear();
 	m_physObject = {};
-	m_physicsType = PHYSICSTYPE::NONE;
+	m_physicsType = pragma::physics::PHYSICSTYPE::NONE;
 	umath::set_flag(m_stateFlags, StateFlags::Ragdoll, false);
 	GetEntity().RemoveComponent("softbody");
 

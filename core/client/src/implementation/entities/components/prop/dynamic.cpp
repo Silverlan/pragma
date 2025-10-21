@@ -22,8 +22,8 @@ void CPropDynamicComponent::OnEntityComponentAdded(BaseEntityComponent &componen
 	BasePropDynamicComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(pragma::CPhysicsComponent)) {
 		auto *pPhysComponent = static_cast<pragma::CPhysicsComponent *>(&component);
-		pPhysComponent->SetMoveType(MOVETYPE::NONE);
-		// m_propPhysType = PHYSICSTYPE::DYNAMIC;
+		pPhysComponent->SetMoveType(pragma::physics::MOVETYPE::NONE);
+		// m_propPhysType = pragma::physics::MOVETYPE::DYNAMIC;
 	}
 	else if(typeid(component) == typeid(pragma::CRenderComponent)) {
 		auto *pRenderComponent = static_cast<pragma::CRenderComponent *>(&component);

@@ -4,6 +4,8 @@
 module;
 
 
+#include <string>
+
 module pragma.shared;
 
 import :entities.components.base_character;
@@ -23,8 +25,8 @@ void BaseCharacterComponent::UpdateOrientation()
 {
 	auto &ent = GetEntity();
 	auto physComponent = ent.GetPhysicsComponent();
-	auto physType = physComponent ? physComponent->GetPhysicsType() : PHYSICSTYPE::NONE;
-	if(physType != PHYSICSTYPE::BOXCONTROLLER && physType != PHYSICSTYPE::CAPSULECONTROLLER)
+	auto physType = physComponent ? physComponent->GetPhysicsType() : pragma::physics::PHYSICSTYPE::NONE;
+	if(physType != pragma::physics::PHYSICSTYPE::BOXCONTROLLER && physType != pragma::physics::PHYSICSTYPE::CAPSULECONTROLLER)
 		return;
 	auto normal = uvec::UP;
 	if(m_orientationComponent)

@@ -356,5 +356,5 @@ void Lua::PushAny(lua_State *l, ::util::VarType varType, const std::any &value) 
 void Lua::PushNewAnyProperty(lua_State *l, ::util::VarType varType, const std::any &value) { get_any_handler(varType).PushNewProperty(l, value); }
 void Lua::WriteAny(::DataStream &ds, ::util::VarType varType, const std::any &value, uint32_t *pos) { get_any_handler(varType).Write(ds, value, pos); }
 void Lua::WriteAny(::NetPacket &ds, ::util::VarType varType, const std::any &value, uint32_t *pos) { get_any_handler(varType).Write(ds, value, pos); }
-void Lua::ReadAny(pragma::Game &game, ::DataStream &ds, ::util::VarType varType, std::any &outValue) { get_any_handler(varType).Read(game, ds, outValue); }
+void Lua::ReadAny(::pragma::Game &game, ::DataStream &ds, ::util::VarType varType, std::any &outValue) { get_any_handler(varType).Read(game, ds, outValue); }
 void Lua::ReadAny(::NetPacket &ds, ::util::VarType varType, std::any &outValue) { get_any_handler(varType).Read(ds, outValue); }

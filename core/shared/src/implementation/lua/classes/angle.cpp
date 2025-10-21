@@ -23,41 +23,41 @@ EulerAngles Lua::Angle::Copy(lua_State *l, const EulerAngles &ang) { return ang;
 void Lua::Angle::ToQuaternion(lua_State *l, const EulerAngles &ang, uint32_t rotationOrder)
 {
 	auto m = umat::identity();
-	switch(static_cast<pragma::RotationOrder>(rotationOrder)) {
-	case pragma::RotationOrder::XYZ:
+	switch(static_cast<::pragma::RotationOrder>(rotationOrder)) {
+	case ::pragma::RotationOrder::XYZ:
 		m = glm::eulerAngleXYZ(umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.r));
 		break;
-	case pragma::RotationOrder::YXZ:
+	case ::pragma::RotationOrder::YXZ:
 		m = glm::eulerAngleYXZ(umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.r));
 		break;
-	case pragma::RotationOrder::XZX:
+	case ::pragma::RotationOrder::XZX:
 		m = glm::eulerAngleXZX(umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.p));
 		break;
-	case pragma::RotationOrder::XYX:
+	case ::pragma::RotationOrder::XYX:
 		m = glm::eulerAngleXYX(umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.p));
 		break;
-	case pragma::RotationOrder::YXY:
+	case ::pragma::RotationOrder::YXY:
 		m = glm::eulerAngleYXY(umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.y));
 		break;
-	case pragma::RotationOrder::YZY:
+	case ::pragma::RotationOrder::YZY:
 		m = glm::eulerAngleYZY(umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.y));
 		break;
-	case pragma::RotationOrder::ZYZ:
+	case ::pragma::RotationOrder::ZYZ:
 		m = glm::eulerAngleZYZ(umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.r));
 		break;
-	case pragma::RotationOrder::ZXZ:
+	case ::pragma::RotationOrder::ZXZ:
 		m = glm::eulerAngleZXZ(umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.r));
 		break;
-	case pragma::RotationOrder::XZY:
+	case ::pragma::RotationOrder::XZY:
 		m = glm::eulerAngleXZY(umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.y));
 		break;
-	case pragma::RotationOrder::YZX:
+	case ::pragma::RotationOrder::YZX:
 		m = glm::eulerAngleYZX(umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.p));
 		break;
-	case pragma::RotationOrder::ZYX:
+	case ::pragma::RotationOrder::ZYX:
 		m = glm::eulerAngleZYX(umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.p));
 		break;
-	case pragma::RotationOrder::ZXY:
+	case ::pragma::RotationOrder::ZXY:
 		m = glm::eulerAngleZXY(umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.y));
 		break;
 	}

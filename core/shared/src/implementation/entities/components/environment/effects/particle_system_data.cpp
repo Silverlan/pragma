@@ -4,6 +4,8 @@
 module;
 
 
+#include <string>
+
 module pragma.shared;
 
 import :entities.components.environment.effects.particle_system;

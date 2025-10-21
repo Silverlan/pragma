@@ -3,6 +3,10 @@
 
 module;
 
+#include "pragma/lua/core.hpp"
+#include <string>
+
+#include <algorithm>
 
 #include "cassert"
 

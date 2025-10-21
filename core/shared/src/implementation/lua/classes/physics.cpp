@@ -266,9 +266,9 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 
 	Lua::RegisterLibraryEnums(l, libName,
 
-	  {{"TYPE_NONE", umath::to_integral(PHYSICSTYPE::NONE)}, {"TYPE_DYNAMIC", umath::to_integral(PHYSICSTYPE::DYNAMIC)}, {"TYPE_STATIC", umath::to_integral(PHYSICSTYPE::STATIC)}, {"TYPE_BOXCONTROLLER", umath::to_integral(PHYSICSTYPE::BOXCONTROLLER)},
+	  {{"TYPE_NONE", umath::to_integral(pragma::physics::PHYSICSTYPE::NONE)}, {"TYPE_DYNAMIC", umath::to_integral(pragma::physics::PHYSICSTYPE::DYNAMIC)}, {"TYPE_STATIC", umath::to_integral(pragma::physics::PHYSICSTYPE::STATIC)}, {"TYPE_BOXCONTROLLER", umath::to_integral(pragma::physics::PHYSICSTYPE::BOXCONTROLLER)},
 
-	    {"TYPE_CAPSULECONTROLLER", umath::to_integral(PHYSICSTYPE::CAPSULECONTROLLER)}, {"TYPE_SOFTBODY", umath::to_integral(PHYSICSTYPE::SOFTBODY)},
+	    {"TYPE_CAPSULECONTROLLER", umath::to_integral(pragma::physics::PHYSICSTYPE::CAPSULECONTROLLER)}, {"TYPE_SOFTBODY", umath::to_integral(pragma::physics::PHYSICSTYPE::SOFTBODY)},
 
 
 

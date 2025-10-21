@@ -3,6 +3,8 @@
 
 module;
 
+#include <cmath>
+
 #include <sharedutils/magic_enum.hpp>
 
 #include "sstream"

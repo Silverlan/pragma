@@ -4,6 +4,8 @@
 module;
 
 
+#include <string>
+
 module pragma.shared;
 
 import :entities.components.func.base_soft_physics;
@@ -17,7 +19,7 @@ PhysSoftBodyInfo *BaseFuncSoftPhysicsComponent::GetSoftBodyInfo() { return &m_so
 {
 	if(m_bClientsidePhysics == true)
 		return nullptr;
-	return Entity::InitializePhysics(PHYSICSTYPE::SOFTBODY);
+	return Entity::InitializePhysics(pragma::physics::PHYSICSTYPE::SOFTBODY);
 }*/
 
 void BaseFuncSoftPhysicsComponent::Initialize()

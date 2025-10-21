@@ -3,6 +3,8 @@
 
 module;
 
+#include <string>
+
 #include <memory>
 
 #include "algorithm"

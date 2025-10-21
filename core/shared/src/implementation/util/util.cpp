@@ -7,6 +7,11 @@ module;
 
 
 
+#include <functional>
+#include <functional>
+
+#include <string>
+
 #include <memory>
 
 module pragma.shared;

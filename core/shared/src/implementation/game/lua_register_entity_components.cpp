@@ -18,6 +18,7 @@ module;
 
 module pragma.shared;
 
+import :entities.base_entity;
 import :game.game;
 
 namespace Lua {

@@ -53,7 +53,7 @@ void CLiquidComponent::OnEntitySpawn()
 	auto &ent = static_cast<CBaseEntity &>(GetEntity());
 	//auto pPhysComponent = ent.GetPhysicsComponent();
 	//if(pPhysComponent != nullptr)
-	//	pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
+	//	pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::STATIC);
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(pRenderComponent) {
 		// pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::Water);

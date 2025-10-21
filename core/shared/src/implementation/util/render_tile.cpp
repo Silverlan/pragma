@@ -19,10 +19,10 @@ Mat4 pragma::rendering::calc_tile_offset_matrix(const Tile &tile)
 	auto h_clip = 2.f * tile.h - 1;
 
 	Mat4 m0 {1.f};
-	auto scale = glm::scale(m0, Vector3 {2.f / w_clip, 2.f / h_clip, 1.f});
+	auto scale = glm::gtc::scale(m0, Vector3 {2.f / w_clip, 2.f / h_clip, 1.f});
 
 	Mat4 m1 {1.f};
-	auto translate = glm::translate(m1, Vector3 {-(x_clip + 0.5f * w_clip), -(y_clip + 0.5f * h_clip), 0.f});
+	auto translate = glm::gtc::translate(m1, Vector3 {-(x_clip + 0.5f * w_clip), -(y_clip + 0.5f * h_clip), 0.f});
 	return scale * translate;
 }
 

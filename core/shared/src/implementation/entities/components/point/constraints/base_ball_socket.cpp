@@ -3,6 +3,8 @@
 
 module;
 
+#include <string>
+
 module pragma.shared;
 
 import :entities.components.point.constraints.base_ball_socket;

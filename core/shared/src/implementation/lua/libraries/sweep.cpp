@@ -6,6 +6,8 @@ module;
 
 
 
+#include <string>
+
 module pragma.shared;
 
 import :scripting.lua.libraries.sweep;

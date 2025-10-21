@@ -29,7 +29,7 @@ void CPhysicsComponent::Initialize()
 	// TODO
 	BindEvent(CAnimatedComponent::EVENT_ON_SKELETON_UPDATED,[this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto *phys = GetPhysicsObject();
-		if(phys != nullptr && GetPhysicsType() == PHYSICSTYPE::DYNAMIC)
+		if(phys != nullptr && GetPhysicsType() == pragma::physics::MOVETYPE::DYNAMIC)
 		{
 			auto *o = phys->GetCollisionObject();
 			if(o != nullptr)
@@ -62,14 +62,14 @@ void CPhysicsComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { 
 void CPhysicsComponent::OnEntitySpawn()
 {
 	BasePhysicsComponent::OnEntitySpawn();
-	if(m_physicsType != PHYSICSTYPE::NONE)
+	if(m_physicsType != pragma::physics::PHYSICSTYPE::NONE)
 		InitializePhysics(m_physicsType);
 }
 void CPhysicsComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CPhysicsComponent::PrePhysicsSimulate()
 {
 	auto dt = pragma::get_cgame()->DeltaTime();
-	if(dt > 0.0 && GetPhysicsType() != PHYSICSTYPE::SOFTBODY) {
+	if(dt > 0.0 && GetPhysicsType() != pragma::physics::MOVETYPE::SOFTBODY) {
 		auto pVelComponent = GetEntity().GetComponent<pragma::VelocityComponent>();
 		if(pVelComponent.valid())
 			pVelComponent->SetVelocity(pVelComponent->GetVelocity() + GetLinearCorrectionVelocity() / static_cast<float>(dt));
@@ -79,7 +79,7 @@ void CPhysicsComponent::PrePhysicsSimulate()
 bool CPhysicsComponent::PostPhysicsSimulate()
 {
 	auto dt = pragma::get_cgame()->DeltaTime();
-	if(dt > 0.0 && GetPhysicsType() != PHYSICSTYPE::SOFTBODY) {
+	if(dt > 0.0 && GetPhysicsType() != pragma::physics::MOVETYPE::SOFTBODY) {
 		auto pVelComponent = GetEntity().GetComponent<pragma::VelocityComponent>();
 		if(pVelComponent.valid())
 			pVelComponent->SetVelocity(pVelComponent->GetVelocity() - GetLinearCorrectionVelocity() / static_cast<float>(dt));

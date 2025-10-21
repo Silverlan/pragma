@@ -5,6 +5,10 @@ module;
 
 
 
+#include <string>
+
+#include <utility>
+
 module pragma.shared;
 
 import :entities.components.base_time_scale;

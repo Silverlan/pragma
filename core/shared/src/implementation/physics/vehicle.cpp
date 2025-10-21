@@ -5,6 +5,8 @@ module;
 
 
 
+#include <string>
+
 module pragma.shared;
 
 import :physics.vehicle;

@@ -1219,7 +1219,7 @@ void pragma::Game::Tick()
 
 	for(auto &hPhysC : awakePhysics) {
 
-		if(hPhysC.expired() || hPhysC->GetPhysicsType() == PHYSICSTYPE::NONE)
+		if(hPhysC.expired() || hPhysC->GetPhysicsType() == pragma::physics::PHYSICSTYPE::NONE)
 
 			continue;
 
@@ -1231,7 +1231,7 @@ void pragma::Game::Tick()
 
 	for(auto &hPhysC : awakePhysics) {
 
-		if(hPhysC.expired() || hPhysC->GetPhysicsType() == PHYSICSTYPE::NONE)
+		if(hPhysC.expired() || hPhysC->GetPhysicsType() == pragma::physics::PHYSICSTYPE::NONE)
 
 			continue;
 
@@ -1267,7 +1267,7 @@ void pragma::Game::Tick()
 
 		auto &hPhysC = *it;
 
-		if(hPhysC.expired() || hPhysC->GetPhysicsType() == PHYSICSTYPE::NONE) {
+		if(hPhysC.expired() || hPhysC->GetPhysicsType() == pragma::physics::PHYSICSTYPE::NONE) {
 
 			++it;
 

@@ -23,8 +23,8 @@ export {
 			virtual void InitializeLuaObject(lua_State *l) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 		protected:
-			PHYSICSTYPE m_propPhysType = PHYSICSTYPE::NONE;
-			MOVETYPE m_propMoveType = MOVETYPE::NONE;
+			PHYSICSTYPE m_propPhysType = pragma::physics::PHYSICSTYPE::NONE;
+			MOVETYPE m_propMoveType = pragma::physics::MOVETYPE::NONE;
 		};
 	};
 

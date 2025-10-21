@@ -5,6 +5,8 @@ module;
 
 
 
+#include <string>
+
 module pragma.shared;
 
 import :entities.components.triggers.base_teleport;

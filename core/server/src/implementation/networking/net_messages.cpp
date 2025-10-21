@@ -406,13 +406,13 @@ void NET_sv_NOCLIP(pragma::networking::IServerClient &session, NetPacket packet)
 	auto pPhysComponent = pl->GetEntity().GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
 		return;
-	auto bNoclip = pPhysComponent->GetMoveType() != MOVETYPE::NOCLIP;
+	auto bNoclip = pPhysComponent->GetMoveType() != pragma::physics::MOVETYPE::NOCLIP;
 	if(bNoclip == false) {
-		pPhysComponent->SetMoveType(MOVETYPE::WALK);
+		pPhysComponent->SetMoveType(pragma::physics::MOVETYPE::WALK);
 		pPhysComponent->SetCollisionFilterGroup(CollisionMask::Player);
 	}
 	else {
-		pPhysComponent->SetMoveType(MOVETYPE::NOCLIP);
+		pPhysComponent->SetMoveType(pragma::physics::MOVETYPE::NOCLIP);
 		pPhysComponent->SetCollisionFilterGroup(CollisionMask::NoCollision);
 		//pl->SetCollisionsEnabled(false); // Bugged due to CCD
 	}

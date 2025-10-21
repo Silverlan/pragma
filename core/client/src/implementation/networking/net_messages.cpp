@@ -1098,7 +1098,7 @@ void NET_cl_ENT_PHYS_INIT(NetPacket packet)
 	if(pPhysComponent == nullptr)
 		return;
 	unsigned int type = packet->Read<unsigned int>();
-	pPhysComponent->InitializePhysics(PHYSICSTYPE(type));
+	pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE(type));
 }
 
 void NET_cl_ENT_PHYS_DESTROY(NetPacket packet)
@@ -1142,7 +1142,7 @@ void NET_cl_ENT_MOVETYPE(NetPacket packet)
 	auto pPhysComponent = ent->GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
 		return;
-	MOVETYPE movetype = MOVETYPE(packet->Read<unsigned char>());
+	MOVETYPE movetype = pragma::physics::MOVETYPE(packet->Read<unsigned char>());
 	pPhysComponent->SetMoveType(movetype);
 }
 
@@ -1158,11 +1158,11 @@ void NET_cl_PL_TOGGLE_NOCLIP(NetPacket packet)
 	if(pPhysComponent == nullptr)
 		return;
 	if(bNoclip == false) {
-		pPhysComponent->SetMoveType(MOVETYPE::WALK);
+		pPhysComponent->SetMoveType(pragma::physics::MOVETYPE::WALK);
 		pPhysComponent->SetCollisionFilterGroup(CollisionMask::Player);
 	}
 	else {
-		pPhysComponent->SetMoveType(MOVETYPE::NOCLIP);
+		pPhysComponent->SetMoveType(pragma::physics::MOVETYPE::NOCLIP);
 		pPhysComponent->SetCollisionFilterGroup(CollisionMask::NoCollision);
 		//pl->SetCollisionsEnabled(false); // Bugged due to CCD
 	}

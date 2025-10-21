@@ -4,6 +4,8 @@
 module;
 
 
+#include <string>
+
 module pragma.shared;
 
 import :entities.components.base_skybox;
@@ -30,5 +32,5 @@ void BaseSkyboxComponent::OnEntitySpawn()
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
 	if(!pPhysComponent)
 		return;
-	pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
+	pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::STATIC);
 }

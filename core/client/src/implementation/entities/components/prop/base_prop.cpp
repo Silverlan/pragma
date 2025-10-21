@@ -34,7 +34,7 @@ void CPropComponent::Initialize()
 		auto &ent = GetEntity();
 		auto physType = UpdatePhysicsType(&ent);
 		auto &mdl = static_cast<CEOnModelChanged&>(evData.get()).model;
-		if(mdl.get() == nullptr || !ent.IsSpawned() || physType == PHYSICSTYPE::NONE)
+		if(mdl.get() == nullptr || !ent.IsSpawned() || physType == pragma::physics::PHYSICSTYPE::NONE)
 			return;
 		BasePropComponent::InitializePhysics(physType);
 	});*/

@@ -8,6 +8,12 @@ module;
 
 
 
+#include <cstring>
+
+#include <memory>
+#include <functional>
+#include <functional>
+
 #include <sharedutils/magic_enum.hpp>
 
 #include "string_view"

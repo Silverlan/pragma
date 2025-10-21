@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include <memory>
+#include <functional>
+#include <string>
+#include <functional>
+
 #include "algorithm"
 
 
@@ -97,7 +102,7 @@ void BaseTouchComponent::UpdatePhysics()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(!pPhysComponent)
 		return;
-	pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
+	pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::STATIC);
 }
 void BaseTouchComponent::OnEntitySpawn()
 {

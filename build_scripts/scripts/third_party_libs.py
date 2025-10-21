@@ -19,7 +19,6 @@ get_submodule("fmt","https://github.com/fmtlib/fmt.git","40626af") # v11.2.0
 get_submodule("freetype","https://github.com/aseprite/freetype2.git","9a2d6d97b2d8a5d22d02948b783df12b764afa2d")
 get_submodule("glfw","https://github.com/Silverlan/glfw.git","8d6f5d9bc8477057dccc1190d46b0945219e2f33","feat/drag-callback")
 get_submodule("gli","https://github.com/Silverlan/gli.git","bd1f7de24d64c60573d9647496db608bfc1136c7")
-get_submodule("glm","https://github.com/g-truc/glm.git","0af55cc") # v1.0.1
 get_submodule("libnoise","https://github.com/qknight/libnoise.git","9ce0737b55812f7de907e86dc633724524e3a8e8")
 get_submodule("libsamplerate","https://github.com/libsndfile/libsamplerate.git","15c392d")
 if platform == "linux":

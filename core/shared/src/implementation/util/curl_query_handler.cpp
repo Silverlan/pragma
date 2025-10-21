@@ -3,6 +3,11 @@
 
 module;
 
+#include <string>
+
+#include <functional>
+#include <functional>
+
 #include <memory>
 
 #include "memory"

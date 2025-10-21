@@ -3,6 +3,8 @@
 
 module;
 
+#include <string>
+
 module pragma.shared;
 
 import :scripting.lua.classes.data_stream;

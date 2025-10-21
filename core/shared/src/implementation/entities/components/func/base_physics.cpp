@@ -4,6 +4,8 @@
 module;
 
 
+#include <string>
+
 module pragma.shared;
 
 import :entities.components.func.base_physics;
@@ -50,7 +52,7 @@ void BaseFuncPhysicsComponent::OnEntitySpawn()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr) {
 		pPhysComponent->DestroyPhysicsObject();
-		pPhysComponent->SetMoveType(MOVETYPE::PHYSICS);
+		pPhysComponent->SetMoveType(pragma::physics::MOVETYPE::PHYSICS);
 	}
 	auto *phys = InitializePhysics();
 	if(phys != nullptr) {
@@ -65,5 +67,5 @@ pragma::physics::PhysObj *BaseFuncPhysicsComponent::InitializePhysics()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
 		return nullptr;
-	return pPhysComponent->InitializePhysics((m_kvMass > 0) ? PHYSICSTYPE::DYNAMIC : PHYSICSTYPE::STATIC);
+	return pPhysComponent->InitializePhysics((m_kvMass > 0) ? pragma::physics::PHYSICSTYPE::DYNAMIC : pragma::physics::PHYSICSTYPE::STATIC);
 }

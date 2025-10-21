@@ -7,6 +7,8 @@ module;
 
 
 
+#include <string>
+
 module pragma.shared;
 
 import :entities.components.point.constraints.base_cone_twist;

@@ -7,6 +7,10 @@ module;
 
 
 
+#include <string>
+
+#include <utility>
+
 module pragma.shared;
 
 import :entities.components.base_field_angle;

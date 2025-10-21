@@ -5,6 +5,8 @@ module;
 
 
 
+#include <string>
+
 #include <tuple>
 
 module pragma.shared;

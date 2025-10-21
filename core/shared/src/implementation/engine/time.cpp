@@ -3,6 +3,11 @@
 
 module;
 
+#include <memory>
+#include <functional>
+#include <string>
+#include <functional>
+
 #include <cassert>
 #ifdef _WIN32
 #include <Windows.h>

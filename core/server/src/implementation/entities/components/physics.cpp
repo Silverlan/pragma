@@ -37,7 +37,7 @@ void SPhysicsComponent::SetKinematic(bool b)
 	}
 }
 
-void SPhysicsComponent::SetMoveType(MOVETYPE movetype)
+void SPhysicsComponent::SetMoveType(pragma::physics::MOVETYPE movetype)
 {
 	BasePhysicsComponent::SetMoveType(movetype);
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
@@ -118,7 +118,7 @@ void SPhysicsComponent::SetCollisionFilter(CollisionMask filterGroup, CollisionM
 bool SPhysicsComponent::PostPhysicsSimulate()
 {
 	auto keepAwake = BasePhysicsComponent::PostPhysicsSimulate();
-	if(GetPhysicsType() != PHYSICSTYPE::SOFTBODY)
+	if(GetPhysicsType() != pragma::physics::MOVETYPE::SOFTBODY)
 		return keepAwake;
 #ifdef ENABLE_DEPRECATED_PHYSICS
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());

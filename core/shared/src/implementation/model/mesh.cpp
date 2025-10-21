@@ -4,6 +4,11 @@
 module;
 
 
+#include <memory>
+#include <functional>
+#include <string>
+#include <functional>
+
 module pragma.shared;
 
 import :model.mesh;

@@ -73,7 +73,7 @@ void CSoftBodyComponent::ReleaseSoftBodyData()
 void CSoftBodyComponent::UpdateSoftBodyGeometry()
 {
 	// prosper TODO
-	/*if(GetPhysicsType() != PHYSICSTYPE::SOFTBODY || m_softBodyData == nullptr || m_softBodyBuffers == nullptr)
+	/*if(GetPhysicsType() != pragma::physics::MOVETYPE::SOFTBODY || m_softBodyData == nullptr || m_softBodyBuffers == nullptr)
 		return;
 	auto *phys = GetPhysicsObject();
 	if(phys == nullptr || !phys->IsSoftBody())

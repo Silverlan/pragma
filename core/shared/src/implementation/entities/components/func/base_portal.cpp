@@ -4,6 +4,8 @@
 module;
 
 
+#include <string>
+
 module pragma.shared;
 
 import :entities.components.func.base_portal;
@@ -24,5 +26,5 @@ void BaseFuncPortalComponent::OnEntitySpawn()
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
 		return;
-	pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
+	pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::STATIC);
 }

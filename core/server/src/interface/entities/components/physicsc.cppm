@@ -30,7 +30,7 @@ export namespace pragma {
 
 		virtual void SetCollisionFilter(CollisionMask filterGroup, CollisionMask filterMask) override;
 
-		virtual void SetMoveType(MOVETYPE movetype) override;
+		virtual void SetMoveType(pragma::physics::MOVETYPE movetype) override;
 		void SetCollisionType(COLLISIONTYPE collisiontype) override;
 
 		virtual bool ShouldTransmitNetData() const override { return true; }

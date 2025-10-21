@@ -22,7 +22,7 @@ void CTouchComponent::OnEntitySpawn()
 	if(ent.IsClientsideOnly() == true) {
 		auto pPhysComponent = ent.GetPhysicsComponent();
 		if(pPhysComponent != nullptr)
-			pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
+			pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::STATIC);
 	}
 	auto pRenderComponent = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
 	if(pRenderComponent)

@@ -3,6 +3,10 @@
 
 module;
 
+#include <functional>
+#include <string>
+#include <functional>
+
 #include <memory>
 
 #include "cassert"

@@ -4,6 +4,10 @@
 module;
 
 
+#include <string>
+
+#include <utility>
+
 module pragma.shared;
 
 import :entities.components.environment.base_fog_controller;

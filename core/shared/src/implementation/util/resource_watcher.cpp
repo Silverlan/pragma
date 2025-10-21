@@ -6,7 +6,7 @@ module;
 
 #include <memory>
 #include <string>
-
+#include <stdexcept>
 #include "algorithm"
 
 #include "cassert"

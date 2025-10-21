@@ -3,6 +3,8 @@
 
 module;
 
+#include <string>
+
 #include <cmath>
 
 module pragma.shared;

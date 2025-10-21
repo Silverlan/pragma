@@ -5,6 +5,10 @@ module;
 
 #include <string>
 #include <iostream>
+#include <optional>
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 
 module pragma.shared;
 

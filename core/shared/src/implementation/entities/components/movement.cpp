@@ -4,6 +4,8 @@
 module;
 
 
+#include <string>
+
 module pragma.shared;
 
 import :entities.components.movement;
@@ -80,8 +82,8 @@ float MovementComponent::GetMovementBlendScale() const
 bool MovementComponent::CanMove() const
 {
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	auto mvType = pPhysComponent ? pPhysComponent->GetMoveType() : MOVETYPE::NONE;
-	if(!pPhysComponent || mvType == MOVETYPE::NONE)
+	auto mvType = pPhysComponent ? pPhysComponent->GetMoveType() : pragma::physics::MOVETYPE::NONE;
+	if(!pPhysComponent || mvType == pragma::physics::MOVETYPE::NONE)
 		return false;
 	auto *pPhysObj = pPhysComponent->GetPhysicsObject();
 	return pPhysObj != nullptr && pPhysObj->IsController();
@@ -124,7 +126,7 @@ bool MovementComponent::UpdateMovement()
 	if(phys == nullptr || phys->IsController() == false)
 		return false;
 	auto mv = pPhysComponent->GetMoveType();
-	if(mv == MOVETYPE::NONE || mv == MOVETYPE::PHYSICS)
+	if(mv == pragma::physics::MOVETYPE::NONE || mv == pragma::physics::MOVETYPE::PHYSICS)
 		return false;
 	InvokeEventCallbacks(EVENT_ON_UPDATE_MOVEMENT);
 	auto *physController = static_cast<ControllerPhysObj *>(phys);
@@ -158,7 +160,7 @@ bool MovementComponent::UpdateMovement()
 
 	Vector3 forward = uquat::forward(rot);
 	Vector3 right = uquat::right(rot);
-	if(mv == MOVETYPE::WALK && bSubmerged == false) {
+	if(mv == pragma::physics::MOVETYPE::WALK && bSubmerged == false) {
 		// No movement on up-axis
 		auto upDir = uvec::UP;
 		if(m_orientationComponent)
@@ -233,7 +235,7 @@ bool MovementComponent::UpdateMovement()
 		}
 	}
 
-	if(pPhysComponent->IsGroundWalkable() || mv != MOVETYPE::WALK || bSubmerged == true) {
+	if(pPhysComponent->IsGroundWalkable() || mv != pragma::physics::MOVETYPE::WALK || bSubmerged == true) {
 		auto friction = 0.8f;
 		std::optional<Vector3> contactNormal = {};
 		if(phys != nullptr && phys->IsController()) {
@@ -319,7 +321,7 @@ bool MovementComponent::UpdateMovement()
 	uvec::rotate(&localVel, viewRot);
 	auto contactNormal = physController->GetController()->GetGroundTouchNormal();
 	;
-	if(vel.y <= 0.1f && physController->IsGroundWalkable() && (contactNormal.has_value() && pGroundContactInfo->contactDistance >= threshold) && mv == MOVETYPE::WALK) {
+	if(vel.y <= 0.1f && physController->IsGroundWalkable() && (contactNormal.has_value() && pGroundContactInfo->contactDistance >= threshold) && mv == pragma::physics::MOVETYPE::WALK) {
 		auto &info = *pGroundContactInfo;
 		//auto pos = uvec::create((info.controllerIndex == 0u ? info.contactPoint.getPositionWorldOnA() : info.contactPoint.getPositionWorldOnB()) /PhysEnv::WORLD_SCALE);
 		auto n = -*contactNormal;

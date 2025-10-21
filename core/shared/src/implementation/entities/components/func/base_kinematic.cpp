@@ -57,7 +57,7 @@ void BaseFuncKinematicComponent::OnEntitySpawn()
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr) {
-		pPhysComponent->InitializePhysics(PHYSICSTYPE::DYNAMIC);
+		pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::DYNAMIC);
 		pPhysComponent->SetKinematic(true);
 	}
 	NetworkState *state = ent.GetNetworkState();

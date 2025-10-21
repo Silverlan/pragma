@@ -207,7 +207,7 @@ static void calc_surface_plane(const PhysWaterSurfaceSimulator *surfaceSim, cons
 void pragma::physics::WaterBuoyancySimulator::Simulate(pragma::ecs::BaseEntity &entWater, const PhysLiquid &liquid, pragma::ecs::BaseEntity &ent, Vector3 waterPlane, double waterPlaneDist, const Vector3 &waterVelocity, const PhysWaterSurfaceSimulator *surfaceSim) const
 {
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto physType = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsType() : PHYSICSTYPE::NONE;
+	auto physType = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsType() : pragma::physics::PHYSICSTYPE::NONE;
 	auto *physObj = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(physObj == nullptr)
 		return;
@@ -216,8 +216,8 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(pragma::ecs::BaseEntity &
 
 	auto totalVolume = 0.0;
 	auto totalSubmerged = 0.0;
-	if(physType == PHYSICSTYPE::BOXCONTROLLER || physType == PHYSICSTYPE::CAPSULECONTROLLER) {
-		if(pPhysComponent->GetMoveType() == MOVETYPE::NOCLIP)
+	if(physType == pragma::physics::PHYSICSTYPE::BOXCONTROLLER || physType == pragma::physics::PHYSICSTYPE::CAPSULECONTROLLER) {
+		if(pPhysComponent->GetMoveType() == pragma::physics::MOVETYPE::NOCLIP)
 			return;
 		const auto mass = 10.0;
 		const auto dragCoefficient = 2.0;

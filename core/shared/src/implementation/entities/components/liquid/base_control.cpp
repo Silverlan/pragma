@@ -7,6 +7,12 @@ module;
 
 
 
+#include <memory>
+#include <functional>
+
+#include <tuple>
+#include <string>
+
 module pragma.shared;
 
 import :entities.components.liquid.base_control;

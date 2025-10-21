@@ -117,7 +117,7 @@ void GravityComponent::ApplyGravity(double dt)
 	if(pPhys == nullptr || pPhys->IsDisabled() == true)
 		return;
 	auto moveType = pPhysComponent->GetMoveType();
-	if(moveType != MOVETYPE::WALK && moveType != MOVETYPE::PHYSICS)
+	if(moveType != pragma::physics::MOVETYPE::WALK && moveType != pragma::physics::MOVETYPE::PHYSICS)
 		return;
 	if(pPhys->IsRigid()) {
 		auto *pPhysRigid = static_cast<RigidPhysObj *>(pPhys);

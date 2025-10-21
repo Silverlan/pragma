@@ -493,7 +493,7 @@ pragma::physics::PhysObj *pragma::ecs::BaseEntity::GetPhysicsObject() const
 }
 
 
-pragma::physics::PhysObj *pragma::ecs::BaseEntity::InitializePhysics(PHYSICSTYPE type)
+pragma::physics::PhysObj *pragma::ecs::BaseEntity::InitializePhysics(pragma::physics::PHYSICSTYPE type)
 
 
 {

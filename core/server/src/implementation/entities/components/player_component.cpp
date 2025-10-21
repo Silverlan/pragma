@@ -132,7 +132,7 @@ void SPlayerComponent::OnRespawn()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
-		pPhysComponent->InitializePhysics(PHYSICSTYPE::CAPSULECONTROLLER);
+		pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::CAPSULECONTROLLER);
 	auto observerC = GetEntity().GetComponent<SObserverComponent>();
 	if(observerC.valid())
 		observerC->SetObserverMode(ObserverMode::FirstPerson);

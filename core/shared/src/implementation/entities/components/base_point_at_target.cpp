@@ -3,6 +3,8 @@
 
 module;
 
+#include <string>
+
 module pragma.shared;
 
 import :entities.components.base_point_at_target;

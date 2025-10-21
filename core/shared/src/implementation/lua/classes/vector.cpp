@@ -3,6 +3,8 @@
 
 module;
 
+#include <cmath>
+
 #include "pragma/lua/core.hpp"
 
 module pragma.shared;

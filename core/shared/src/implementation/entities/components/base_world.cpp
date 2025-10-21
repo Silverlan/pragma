@@ -4,6 +4,11 @@
 module;
 
 
+#include <memory>
+#include <functional>
+#include <string>
+#include <functional>
+
 module pragma.shared;
 
 import :entities.components.base_world;
@@ -33,7 +38,7 @@ void BaseWorldComponent::InitializePhysics()
 		return;
 	auto mdl = ent.GetModel();
 	if(mdl)
-		pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
+		pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::STATIC);
 	else
 		pPhysComponent->DestroyPhysicsObject();
 }

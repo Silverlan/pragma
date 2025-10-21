@@ -138,9 +138,9 @@ util::TSharedHandle<pragma::physics::PhysObj> BasePhysicsComponent::InitializeSo
 	m_physObject = util::shared_handle_cast<SoftBodyPhysObj, pragma::physics::PhysObj>(phys);
 	m_physObject->Spawn();
 
-	m_physicsType = PHYSICSTYPE::SOFTBODY;
+	m_physicsType = pragma::physics::MOVETYPE::SOFTBODY;
 	SetCollisionFilter(pragma::physics::CollisionMask::Dynamic | pragma::physics::CollisionMask::Generic, pragma::physics::CollisionMask::All);
-	SetMoveType(MOVETYPE::PHYSICS);
+	SetMoveType(pragma::physics::MOVETYPE::PHYSICS);
 
 	InitializePhysObj();
 	OnPhysicsInitialized();

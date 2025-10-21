@@ -6,6 +6,8 @@ module;
 
 
 
+#include <string>
+
 //#define ENABLE_DEPRECATED_PHYSICS
 
 module pragma.shared;

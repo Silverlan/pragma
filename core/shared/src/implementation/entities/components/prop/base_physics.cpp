@@ -3,6 +3,8 @@
 
 module;
 
+#include <string>
+
 module pragma.shared;
 
 import :entities.components.props.base_physics;
@@ -32,9 +34,9 @@ void BasePropPhysicsComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
 	auto *pPropComponent = static_cast<pragma::BasePropComponent *>(GetEntity().FindComponent("prop").get());
-	auto physType = PHYSICSTYPE::NONE;
+	auto physType = pragma::physics::PHYSICSTYPE::NONE;
 	if(pPropComponent == nullptr)
 		return;
 	physType = pPropComponent->UpdatePhysicsType(&GetEntity());
-	pPropComponent->Setup(physType, MOVETYPE::PHYSICS);
+	pPropComponent->Setup(physType, pragma::physics::MOVETYPE::PHYSICS);
 }

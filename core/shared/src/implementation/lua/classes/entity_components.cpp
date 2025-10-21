@@ -19233,7 +19233,7 @@ void pragma::lua::base_physics_component::register_class(luabind::module_ &mod)
 
 
 
-	def.def("SetMoveType", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, int)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, int moveType) { hEnt.SetMoveType(MOVETYPE(moveType)); }));
+	def.def("SetMoveType", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, int)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, int moveType) { hEnt.SetMoveType(pragma::physics::MOVETYPE(moveType)); }));
 
 
 
@@ -19305,7 +19305,7 @@ void pragma::lua::base_physics_component::register_class(luabind::module_ &mod)
 
 
 
-		pragma::physics::PhysObj *phys = hEnt.InitializePhysics(PHYSICSTYPE(type), static_cast<pragma::BasePhysicsComponent::PhysFlags>(physFlags));
+		pragma::physics::PhysObj *phys = hEnt.InitializePhysics(pragma::physics::PHYSICSTYPE(type), static_cast<pragma::BasePhysicsComponent::PhysFlags>(physFlags));
 
 
 
@@ -19350,7 +19350,7 @@ void pragma::lua::base_physics_component::register_class(luabind::module_ &mod)
 
 
 
-		pragma::physics::PhysObj *phys = hEnt.InitializePhysics(PHYSICSTYPE(type));
+		pragma::physics::PhysObj *phys = hEnt.InitializePhysics(pragma::physics::PHYSICSTYPE(type));
 
 
 
@@ -20007,7 +20007,7 @@ void pragma::lua::base_physics_component::register_class(luabind::module_ &mod)
 
 
 
-		return (physType != PHYSICSTYPE::NONE && physType != PHYSICSTYPE::STATIC && physType != PHYSICSTYPE::BOXCONTROLLER && physType != PHYSICSTYPE::CAPSULECONTROLLER) ? true : false;
+		return (physType != pragma::physics::PHYSICSTYPE::NONE && physType != pragma::physics::PHYSICSTYPE::STATIC && physType != pragma::physics::PHYSICSTYPE::BOXCONTROLLER && physType != pragma::physics::PHYSICSTYPE::CAPSULECONTROLLER) ? true : false;
 
 
 
@@ -20250,7 +20250,7 @@ void pragma::lua::base_physics_component::register_class(luabind::module_ &mod)
 
 
 
-	def.add_static_constant("MOVETYPE_NONE", umath::to_integral(MOVETYPE::NONE));
+	def.add_static_constant("MOVETYPE_NONE", umath::to_integral(pragma::physics::MOVETYPE::NONE));
 
 
 
@@ -20259,7 +20259,7 @@ void pragma::lua::base_physics_component::register_class(luabind::module_ &mod)
 
 
 
-	def.add_static_constant("MOVETYPE_WALK", umath::to_integral(MOVETYPE::WALK));
+	def.add_static_constant("MOVETYPE_WALK", umath::to_integral(pragma::physics::MOVETYPE::WALK));
 
 
 
@@ -20268,7 +20268,7 @@ void pragma::lua::base_physics_component::register_class(luabind::module_ &mod)
 
 
 
-	def.add_static_constant("MOVETYPE_NOCLIP", umath::to_integral(MOVETYPE::NOCLIP));
+	def.add_static_constant("MOVETYPE_NOCLIP", umath::to_integral(pragma::physics::MOVETYPE::NOCLIP));
 
 
 
@@ -20277,7 +20277,7 @@ void pragma::lua::base_physics_component::register_class(luabind::module_ &mod)
 
 
 
-	def.add_static_constant("MOVETYPE_FLY", umath::to_integral(MOVETYPE::FLY));
+	def.add_static_constant("MOVETYPE_FLY", umath::to_integral(pragma::physics::MOVETYPE::FLY));
 
 
 
@@ -20286,7 +20286,7 @@ void pragma::lua::base_physics_component::register_class(luabind::module_ &mod)
 
 
 
-	def.add_static_constant("MOVETYPE_FREE", umath::to_integral(MOVETYPE::FREE));
+	def.add_static_constant("MOVETYPE_FREE", umath::to_integral(pragma::physics::MOVETYPE::FREE));
 
 
 
@@ -20295,7 +20295,7 @@ void pragma::lua::base_physics_component::register_class(luabind::module_ &mod)
 
 
 
-	def.add_static_constant("MOVETYPE_PHYSICS", umath::to_integral(MOVETYPE::PHYSICS));
+	def.add_static_constant("MOVETYPE_PHYSICS", umath::to_integral(pragma::physics::MOVETYPE::PHYSICS));
 
 
 

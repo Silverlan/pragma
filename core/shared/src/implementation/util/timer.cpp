@@ -31,8 +31,8 @@ Timer::~Timer()
 	for(auto i = m_handles.size() - 1; i != size_t(-1); i--) {
 		std::shared_ptr<TimerHandle> pTimer = m_handles[i];
 		TimerHandle *hTimer = pTimer.get();
-		if(hTimer != NULL)
-			hTimer->m_timer = NULL;
+		if(hTimer != nullptr)
+			hTimer->m_timer = nullptr;
 	}
 }
 

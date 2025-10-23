@@ -650,7 +650,7 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector
 	auto oldProjMat = hCam->GetProjectionMatrix();
 	auto oldViewMat = hCam->GetViewMatrix();
 
-	auto mProj = glm::perspectiveRH<float>(glm::radians(90.0f),1.f,hCam->GetNearZ(),hCam->GetFarZ());
+	auto mProj = glm::gtc::perspectiveRH<float>(glm::radians(90.0f),1.f,hCam->GetNearZ(),hCam->GetFarZ());
 	mProj = glm::gtc::scale(mProj,Vector3(-1.f,-1.f,1.f));
 	hCam->SetProjectionMatrix(mProj);
 

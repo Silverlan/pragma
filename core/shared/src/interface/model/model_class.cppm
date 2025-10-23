@@ -171,7 +171,6 @@ export {
 
 	namespace pragma {
 		class DLLNETWORK Model : public std::enable_shared_from_this<pragma::Model> {
-			friend Con::c_cout &operator<<(Con::c_cout &, const pragma::Model &);
 		public:
 			pragma::Model();
 			virtual void Remove();

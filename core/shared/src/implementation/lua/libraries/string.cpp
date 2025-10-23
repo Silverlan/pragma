@@ -3,10 +3,12 @@
 
 module;
 
+#include <string>
 
 #include "pragma/lua/core.hpp"
 #include <cctype>
 #include <cstdio>
+#include <algorithm>
 
 module pragma.shared;
 

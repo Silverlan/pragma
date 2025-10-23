@@ -29,7 +29,9 @@ namespace Lua {
 
 bool Lua::is_entity(const luabind::object &o) { return luabind::object_cast_nothrow<EntityHandle *>(o, static_cast<EntityHandle *>(nullptr)); }
 
-static bool operator==(const ::pragma::ecs::BaseEntity &a, const ::pragma::ecs::BaseEntity &b) { return &a == &b; }
+namespace pragma::ecs {
+	static bool operator==(const BaseEntity &a, const BaseEntity &b) { return &a == &b; }
+}
 
 template<typename T>
 bool set_member_value(lua_State *l, ::pragma::ecs::BaseEntity &ent, const std::string &uri, T value)

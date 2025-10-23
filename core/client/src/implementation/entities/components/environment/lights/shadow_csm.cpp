@@ -192,7 +192,7 @@ void CShadowCSMComponent::UpdateFrustum(uint32_t splitId, pragma::CCameraCompone
 	auto matViewSplit = glm::gtc::lookAtRH(frustumTop, frustumTop + dir, uvec::get_perpendicular(perp));
 
 	std::array<Vector3, 2> bounds = {-Vector3(diameter, diameter, diameter), Vector3(diameter, diameter, diameter)};
-	frustumSplit.projection = glm::ortho(bounds.at(0).z, bounds.at(1).z, bounds.at(0).x, bounds.at(1).x, -bounds.at(1).y * 2.f, bounds.at(1).y * 2.f);
+	frustumSplit.projection = glm::gtc::ortho(bounds.at(0).z, bounds.at(1).z, bounds.at(0).x, bounds.at(1).x, -bounds.at(1).y * 2.f, bounds.at(1).y * 2.f);
 	auto scale = Vector3(1.f, -1.f, 1.f);
 	frustumSplit.projection = glm::gtc::scale(frustumSplit.projection, scale);
 

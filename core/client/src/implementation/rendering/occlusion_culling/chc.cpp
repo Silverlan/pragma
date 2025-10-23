@@ -259,7 +259,7 @@ void CHC::SetDrawDebugTexture(bool b)
 			auto *debugCamera = m_debugQueryDepthOverheadCamera.get();
 			debugCamera->SetForward(Vector3(0.f,1.f,0.f));
 			debugCamera->SetUp(Vector3(-1.f,0.f,0.f));
-			auto matProj = glm::ortho(0.f,8192.f,8192.f,0.f,cam->GetZNear(),32768.f);//glm::ortho(0.f,16384.f,16384.f,0.f,cam->GetZNear(),32768.f);
+			auto matProj = glm::gtc::ortho(0.f,8192.f,8192.f,0.f,cam->GetZNear(),32768.f);//glm::gtc::ortho(0.f,16384.f,16384.f,0.f,cam->GetZNear(),32768.f);
 			debugCamera->SetProjectionMatrix(matProj);
 			debugCamera->UpdateViewMatrix();
 

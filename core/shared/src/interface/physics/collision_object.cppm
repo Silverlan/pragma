@@ -322,14 +322,14 @@ export {
 			std::weak_ptr<pragma::ModelSubMesh> m_subMesh = {};
 		};
 		using namespace umath::scoped_enum::bitwise;
+
+		DLLNETWORK std::ostream &operator<<(std::ostream &out, const ICollisionObject &o);
+		DLLNETWORK std::ostream &operator<<(std::ostream &out, const IGhostObject &o);
+		DLLNETWORK std::ostream &operator<<(std::ostream &out, const IRigidBody &o);
+		DLLNETWORK std::ostream &operator<<(std::ostream &out, const ISoftBody &o);
 	};
     namespace umath::scoped_enum::bitwise {
         template<>
         struct enable_bitwise_operators<pragma::physics::ICollisionObject::StateFlags> : std::true_type {};
     }
-
-	DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::physics::ICollisionObject &o);
-	DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::physics::IGhostObject &o);
-	DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::physics::IRigidBody &o);
-	DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::physics::ISoftBody &o);
 };

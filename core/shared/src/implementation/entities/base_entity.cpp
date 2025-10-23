@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include <string>
+
 #include <functional>
 
 #include "sstream"
@@ -78,7 +80,7 @@ bool pragma::ecs::BaseEntity::IsStatic() const
 }
 bool pragma::ecs::BaseEntity::IsDynamic() const { return !IsStatic(); }
 
-Con::c_cout &pragma::ecs::BaseEntity::print(Con::c_cout &os)
+Con::c_cout &pragma::ecs::BaseEntity::print(Con::c_cout &os) const
 {
 	auto *componentManager = GetComponentManager();
 	auto pNameComponent = componentManager ? static_cast<pragma::BaseNameComponent *>(FindComponent("name").get()) : nullptr;
@@ -93,7 +95,7 @@ Con::c_cout &pragma::ecs::BaseEntity::print(Con::c_cout &os)
 	return os;
 }
 
-std::ostream &pragma::ecs::BaseEntity::print(std::ostream &os)
+std::ostream &pragma::ecs::BaseEntity::print(std::ostream &os) const
 {
 	auto pNameComponent = static_cast<pragma::BaseNameComponent *>(FindComponent("name").get());
 	os << "Entity[G:" << m_index << "][L:" << GetLocalIndex() << "][C:" << GetClass() << "][N:" << (pNameComponent != nullptr ? pNameComponent->GetName() : "") << "][";
@@ -418,23 +420,21 @@ CallbackHandle pragma::ecs::BaseEntity::CallOnRemove(const CallbackHandle &hCall
 
 ////////////////////////////////////
 
-DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const EntityHandle &ent)
+Con::c_cout &operator<<(Con::c_cout &os, const EntityHandle &ent)
 {
 	if(!ent.valid())
 		os << "NULL";
 	else
-		os << const_cast<pragma::ecs::BaseEntity &>(*ent.get());
+		os << *ent.get();
 	return os;
 }
 
-static std::ostream &operator<<(std::ostream &os, pragma::ecs::BaseEntity &ent) { return ent.print(os); }
-
-DLLNETWORK std::ostream &operator<<(std::ostream &os, const EntityHandle ent)
+std::ostream &operator<<(std::ostream &os, const EntityHandle ent)
 {
 	if(!ent.valid())
 		os << "NULL";
 	else
-		os << const_cast<pragma::ecs::BaseEntity &>(*ent.get());
+		os << *ent.get();
 	return os;
 }
 

@@ -3,6 +3,8 @@
 
 module;
 
+#include <algorithm>
+
 #include "sharedutils/magic_enum.hpp"
 #include "pragma/lua/core.hpp"
 #include "pragma/logging.hpp"

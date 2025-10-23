@@ -104,14 +104,14 @@ void Lua::Mat4::Decompose(lua_State *l, const ::Mat4 &mat)
 
 ::Mat4 Lua::matrix::create_orthogonal_matrix(float left, float right, float bottom, float top, float zNear, float zFar)
 {
-	auto p = glm::ortho(left, right, bottom, top, zNear, zFar);
+	auto p = glm::gtc::ortho(left, right, bottom, top, zNear, zFar);
 	p = glm::gtc::scale(p, Vector3(1.f, -1.f, 1.f));
 	return p;
 }
 
 ::Mat4 Lua::matrix::create_perspective_matrix(float fov, float aspectRatio, float zNear, float zFar)
 {
-	auto p = glm::perspective(fov, aspectRatio, zNear, zFar);
+	auto p = glm::gtc::perspective(fov, aspectRatio, zNear, zFar);
 	p = glm::gtc::scale(p, Vector3(1.f, -1.f, 1.f));
 	return p;
 }

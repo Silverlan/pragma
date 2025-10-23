@@ -234,8 +234,8 @@ export {
 			bool IsWorld() const;
 			virtual bool IsScripted() const;
 
-			virtual Con::c_cout &print(Con::c_cout &);
-			virtual std::ostream &print(std::ostream &);
+			virtual Con::c_cout &print(Con::c_cout &) const;
+			virtual std::ostream &print(std::ostream &) const;
 			std::string ToString() const;
 
 			bool IsRemoved() const;
@@ -282,14 +282,20 @@ export {
 			pragma::NetEventId SetupNetEvent(const std::string &name) const;
 		};
     	using namespace umath::scoped_enum::bitwise;
+
+		inline DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const BaseEntity &ent) { return ent.print(os); }
+
+		inline std::ostream& operator<<(std::ostream& os, const BaseEntity& ent) {
+			const_cast<BaseEntity&>(ent).print(os);
+			return os;
+		}
+		using ::operator<<;
 	}
 	namespace umath::scoped_enum::bitwise {
 		template<>
 		struct enable_bitwise_operators<pragma::ecs::BaseEntity::StateFlags> : std::true_type {};
 	}
 	#pragma warning(pop)
-
-	inline DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, pragma::ecs::BaseEntity &ent) { return ent.print(os); }
 
 	DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const EntityHandle &ent);
 	DLLNETWORK std::ostream &operator<<(std::ostream &os, const EntityHandle ent);
@@ -303,9 +309,4 @@ export {
 			return std::format_to(ctx.out(), "{}", ss.str());
 		}
 	};
-
-	inline std::ostream& operator<<(std::ostream& os, const pragma::ecs::BaseEntity& ent) {
-		const_cast<pragma::ecs::BaseEntity&>(ent).print(os);
-		return os;
-	}
 };

@@ -365,13 +365,13 @@ void pragma::Game::RegisterLuaGlobals()
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "file",
 	  {
-	    {"FLAG_INVALID", fsys::FVFile::Invalid},
-	    {"FLAG_PACKAGE", fsys::FVFile::Package},
-	    {"FLAG_COMPRESSED", fsys::FVFile::Compressed},
-	    {"FLAG_DIRECTORY", fsys::FVFile::Directory},
-	    {"FLAG_ENCRYPTED", fsys::FVFile::Encrypted},
-	    {"FLAG_VIRTUAL", fsys::FVFile::Virtual},
-	    {"FLAG_READONLY", fsys::FVFile::ReadOnly},
+	    {"FLAG_INVALID", umath::to_integral(fsys::FVFile::Invalid)},
+	    {"FLAG_PACKAGE", umath::to_integral(fsys::FVFile::Package)},
+	    {"FLAG_COMPRESSED", umath::to_integral(fsys::FVFile::Compressed)},
+	    {"FLAG_DIRECTORY", umath::to_integral(fsys::FVFile::Directory)},
+	    {"FLAG_ENCRYPTED", umath::to_integral(fsys::FVFile::Encrypted)},
+	    {"FLAG_VIRTUAL", umath::to_integral(fsys::FVFile::Virtual)},
+	    {"FLAG_READONLY", umath::to_integral(fsys::FVFile::ReadOnly)},
 
 	    {"OPEN_MODE_READ", umath::to_integral(pragma::FileOpenMode::Read)},
 	    {"OPEN_MODE_WRITE", umath::to_integral(pragma::FileOpenMode::Write)},
@@ -382,12 +382,12 @@ void pragma::Game::RegisterLuaGlobals()
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "file",
 	  {
-	    {"TYPE_VIRTUAL", EVFile::Virtual},
-	    {"TYPE_LOCAL", EVFile::Local},
-	    {"TYPE_PACKAGE", EVFile::Package},
+	    {"TYPE_VIRTUAL", umath::to_integral(EVFile::Virtual)},
+	    {"TYPE_LOCAL", umath::to_integral(EVFile::Local)},
+	    {"TYPE_PACKAGE", umath::to_integral(EVFile::Package)},
 	  });
 
-	Lua::RegisterLibraryEnums(GetLuaState(), "file",
+	/*Lua::RegisterLibraryEnums(GetLuaState(), "file",
 	  {
 	    {"ATTRIBUTE_ARCHIVE", FILE_ATTRIBUTE_ARCHIVE},
 	    {"ATTRIBUTE_COMPRESSED", FILE_ATTRIBUTE_COMPRESSED},
@@ -405,7 +405,7 @@ void pragma::Game::RegisterLuaGlobals()
 	    {"ATTRIBUTE_TEMPORARY", FILE_ATTRIBUTE_TEMPORARY},
 	    {"ATTRIBUTE_VIRTUAL", FILE_ATTRIBUTE_VIRTUAL},
 	    {"ATTRIBUTE_INVALID", INVALID_FILE_ATTRIBUTES},
-	  });
+	  });*/
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "file",
 	  {

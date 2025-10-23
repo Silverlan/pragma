@@ -205,7 +205,7 @@ void pragma::physics::ISoftBody::InitializeLuaObject(lua_State *lua) { IBase::In
 
 //////////////////////////
 
-std::ostream &operator<<(std::ostream &out, const pragma::physics::ICollisionObject &o)
+std::ostream &pragma::physics::operator<<(std::ostream &out, const ICollisionObject &o)
 {
 	out << "PhysColObj";
 	out << "[Pos:" << o.GetPos() << "]";
@@ -216,14 +216,14 @@ std::ostream &operator<<(std::ostream &out, const pragma::physics::ICollisionObj
 	out << "[Bounds:(" << min << ")(" << max << ")]";
 	return out;
 }
-std::ostream &operator<<(std::ostream &out, const pragma::physics::IGhostObject &o)
+std::ostream &pragma::physics::operator<<(std::ostream &out, const IGhostObject &o)
 {
-	operator<<(out, static_cast<const pragma::physics::ICollisionObject &>(o));
+	operator<<(out, static_cast<const ICollisionObject &>(o));
 	return out;
 }
-std::ostream &operator<<(std::ostream &out, const pragma::physics::IRigidBody &o)
+std::ostream &pragma::physics::operator<<(std::ostream &out, const IRigidBody &o)
 {
-	operator<<(out, static_cast<const pragma::physics::ICollisionObject &>(o));
+	operator<<(out, static_cast<const ICollisionObject &>(o));
 	out << "PhysColObj";
 	out << "[Pos:" << o.GetPos() << "]";
 	out << "[Ang:" << EulerAngles {o.GetRotation()} << "]";
@@ -232,8 +232,8 @@ std::ostream &operator<<(std::ostream &out, const pragma::physics::IRigidBody &o
 	out << "[Awake:" << o.IsAwake() << "]";
 	return out;
 }
-std::ostream &operator<<(std::ostream &out, const pragma::physics::ISoftBody &o)
+std::ostream &pragma::physics::operator<<(std::ostream &out, const ISoftBody &o)
 {
-	operator<<(out, static_cast<const pragma::physics::ICollisionObject &>(o));
+	operator<<(out, static_cast<const ICollisionObject &>(o));
 	return out;
 }

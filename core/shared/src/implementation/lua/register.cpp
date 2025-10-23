@@ -1291,8 +1291,8 @@ void pragma::Game::RegisterLuaLibraries()
 	  luabind::def("find", static_cast<void (*)(lua_State *, const std::string &, luabind::object &, luabind::object &)>([](lua_State *l, const std::string &path, luabind::object &outFiles, luabind::object &outDirs) { Lua::file::Find(l, path, fsys::SearchFlags::All, outFiles, outDirs); }),
 	    luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>>::type {}),
 	  luabind::def("find_lua_files", Lua::file::FindLuaFiles), luabind::def("find_lua_files", static_cast<luabind::object (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &path) { return Lua::file::FindLuaFiles(l, path); })),
-	  luabind::def("get_attributes", FileManager::GetFileAttributes), luabind::def("get_flags", static_cast<uint64_t (*)(std::string, fsys::SearchFlags)>(+[](std::string path, fsys::SearchFlags searchFlags) { return FileManager::GetFileFlags(path, searchFlags); })),
-	  luabind::def("get_flags", static_cast<uint64_t (*)(std::string)>(+[](std::string path) { return FileManager::GetFileFlags(path); })),
+	  luabind::def("get_attributes", FileManager::GetFileAttributes), luabind::def("get_flags", static_cast<fsys::FVFile (*)(std::string, fsys::SearchFlags)>(+[](std::string path, fsys::SearchFlags searchFlags) { return FileManager::GetFileFlags(path, searchFlags); })),
+	  luabind::def("get_flags", static_cast<fsys::FVFile (*)(std::string)>(+[](std::string path) { return FileManager::GetFileFlags(path); })),
 	  luabind::def("find_absolute_path", static_cast<luabind::object (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &path) -> luabind::object {
 		  std::string rpath;
 		  auto res = FileManager::FindAbsolutePath(path, rpath);

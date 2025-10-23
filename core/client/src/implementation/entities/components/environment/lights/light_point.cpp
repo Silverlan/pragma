@@ -90,7 +90,7 @@ void CLightPointComponent::Initialize()
 	m_bSkipMatrixUpdate = true;
 	UpdateProjectionMatrix();
 	m_bSkipMatrixUpdate = false;
-	//SetProjectionMatrix(glm::perspective<float>(35.f *2.f,1.f,2.f,m_distance));
+	//SetProjectionMatrix(glm::gtc::perspective<float>(35.f *2.f,1.f,2.f,m_distance));
 	//SetViewMatrix(glm::lookAt(GetPosition(),GetPosition() +Vector3(1,0,0),Vector3(0,1,0)));
 	for(auto i = 0; i < 6; i++)
 		UpdateTransformationMatrix(i);
@@ -124,7 +124,7 @@ void CLightPointComponent::UpdateProjectionMatrix()
 {
 	auto scale = Vector3(-1.f, -1.f, 1.f); // Vulkan TODO
 	auto pRadiusComponent = GetEntity().GetComponent<CRadiusComponent>();
-	auto p = glm::perspectiveRH<float>(CFloat(umath::deg_to_rad(90.f)), 1.f, 2.f, pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f); // Vulkan TODO
+	auto p = glm::gtc::perspectiveRH<float>(CFloat(umath::deg_to_rad(90.f)), 1.f, 2.f, pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f); // Vulkan TODO
 	p = glm::gtc::scale(p, scale);
 	SetProjectionMatrix(p);
 	UpdateViewMatrices();

@@ -139,27 +139,31 @@ static void register_directory_watcher(lua_State *l, luabind::module_ &modUtil)
 	modUtil[*defListener];
 }
 
-std::ostream &operator<<(std::ostream &out, const umath::Transform &t)
-{
-	auto &origin = t.GetOrigin();
-	auto &rot = t.GetRotation();
-	auto ang = EulerAngles {rot};
-	out << "Transform[" << origin.x << "," << origin.y << "," << origin.z << "][" << ang.p << "," << ang.y << "," << ang.r << "]";
-	return out;
+namespace umath {
+	std::ostream &operator<<(std::ostream &out, const umath::Transform &t)
+	{
+		auto &origin = t.GetOrigin();
+		auto &rot = t.GetRotation();
+		auto ang = EulerAngles {rot};
+		out << "Transform[" << origin.x << "," << origin.y << "," << origin.z << "][" << ang.p << "," << ang.y << "," << ang.r << "]";
+		return out;
+	}
+	std::ostream &operator<<(std::ostream &out, const umath::ScaledTransform &t)
+	{
+		auto &origin = t.GetOrigin();
+		auto &rot = t.GetRotation();
+		auto ang = EulerAngles {rot};
+		auto &scale = t.GetScale();
+		out << "ScaledTransform[" << origin.x << "," << origin.y << "," << origin.z << "][" << ang.p << "," << ang.y << "," << ang.r << "][" << scale.x << "," << scale.y << "," << scale.z << "]";
+		return out;
+	}
 }
-std::ostream &operator<<(std::ostream &out, const umath::ScaledTransform &t)
-{
-	auto &origin = t.GetOrigin();
-	auto &rot = t.GetRotation();
-	auto ang = EulerAngles {rot};
-	auto &scale = t.GetScale();
-	out << "ScaledTransform[" << origin.x << "," << origin.y << "," << origin.z << "][" << ang.p << "," << ang.y << "," << ang.r << "][" << scale.x << "," << scale.y << "," << scale.z << "]";
-	return out;
-}
-std::ostream &operator<<(std::ostream &out, const uimg::ImageLayerSet &layerSet)
-{
-	out << "ImageLayerSet[" << layerSet.images.size() << "]";
-	return out;
+namespace uimg {
+	std::ostream &operator<<(std::ostream &out, const uimg::ImageLayerSet &layerSet)
+	{
+		out << "ImageLayerSet[" << layerSet.images.size() << "]";
+		return out;
+	}
 }
 template<typename T>
 static void register_string_to_vector_type_constructor(lua_State *l)
@@ -174,25 +178,25 @@ static void register_string_to_vector_type_constructor(lua_State *l)
 	  const std::string &>(l);
 }
 
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::string, Utf8String);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, Transform);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, ScaledTransform);
+// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::string, Utf8String);
+// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, Transform);
+// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, ScaledTransform);
 
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, BaseParallelJob);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, Path);
-#ifdef __linux__
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, Version);
-#endif
+// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, BaseParallelJob);
+// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, Path);
+// #ifdef __linux__
+// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, Version);
+// #endif
 
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(uimg, ImageBuffer);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(uimg, ImageLayerSet);
+// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(uimg, ImageBuffer);
+// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(uimg, ImageLayerSet);
 
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Vector3i);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Vector4i);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Vector2);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Vector3);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Vector4);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Quat);
+// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Vector3i);
+// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Vector4i);
+// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Vector2);
+// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Vector3);
+// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Vector4);
+// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Quat);
 
 /* namespace panima
 {
@@ -205,24 +209,24 @@ std::ostream &operator<<(std::ostream &out,const pragma::animation::Bone &o)
 
 #undef DEFINE_OSTEAM_OPERATOR_NAMESPACE_ALIAS
 
-namespace glm {
-	std::ostream &operator<<(std::ostream &out, Vector3 &o) { return ::operator<<(out, o); }
-	std::ostream &operator<<(std::ostream &out, Vector4 &o) { return ::operator<<(out, o); }
-
-#define DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(type)                                                                                                                                                                                                                                            \
-	std::ostream &operator<<(std::ostream &out, const Mat##type &o) { return ::operator<<(out, o); }
-
-	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(2x2)
-	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(2x3)
-	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(2x4)
-	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(3x2)
-	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(3x3)
-	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(3x4)
-	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(4x2)
-	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(4x3)
-	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(4x4)
-
-};
+//namespace glm {
+//	std::ostream &operator<<(std::ostream &out, Vector3 &o) { return ::operator<<(out, o); }
+//	std::ostream &operator<<(std::ostream &out, Vector4 &o) { return ::operator<<(out, o); }
+//
+//#define DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(type)                                                                                                                                                                                                                                            \
+//	std::ostream &operator<<(std::ostream &out, const Mat##type &o) { return ::operator<<(out, o); }
+//
+//	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(2x2)
+//	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(2x3)
+//	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(2x4)
+//	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(3x2)
+//	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(3x3)
+//	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(3x4)
+//	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(4x2)
+//	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(4x3)
+//	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(4x4)
+//
+//};
 
 std::string pragma::lua::detail::tostring(const luabind::object &o)
 {

@@ -3,6 +3,7 @@
 
 module;
 
+#include <optional>
 #include <unordered_map>
 #include "sstream"
 #include "memory"
@@ -10,6 +11,7 @@ module;
 #include "cassert"
 #include <vector>
 #include <stack>
+#include <string>
 
 module pragma.shared;
 
@@ -69,12 +71,6 @@ bool pragma::Model::MetaInfo::operator==(const MetaInfo &other) const
 }
 
 std::unordered_map<std::string, std::shared_ptr<pragma::Model>> pragma::Model::m_models;
-
-Con::c_cout &operator<<(Con::c_cout &os, const pragma::Model &mdl)
-{
-	os << "Model[" << mdl.GetName() << "]";
-	return os;
-}
 
 pragma::Model::MetaInfo::MetaInfo() {}
 
@@ -245,7 +241,7 @@ pragma::Model &pragma::Model::operator=(const pragma::Model &other)
 
 const PhonemeMap &pragma::Model::GetPhonemeMap() const { return const_cast<pragma::Model *>(this)->GetPhonemeMap(); }
 PhonemeMap &pragma::Model::GetPhonemeMap() { return m_phonemeMap; }
-udm::PropertyWrapper pragma::Model::GetExtensionData() const { return *m_extensions; }
+udm::PropertyWrapper pragma::Model::GetExtensionData() const { return udm::PropertyWrapper{*m_extensions}; }
 void pragma::Model::Rotate(const Quat &rot)
 {
 	uvec::rotate(&m_collisionMin, rot);
@@ -1914,7 +1910,7 @@ std::optional<pragma::animation::MetaRigBoneType> pragma::Model::GetMetaRigBoneP
 	if(!m_metaRig)
 		return {};
 	auto parentId = pragma::animation::get_meta_rig_bone_parent_type(type);
-	if(parentId == pragma::animation::MetaRigBoneType::Spine3) {
+	if(parentId && *parentId == pragma::animation::MetaRigBoneType::Spine3) {
 		for(auto candidate : {pragma::animation::MetaRigBoneType::Spine3, pragma::animation::MetaRigBoneType::Spine2, pragma::animation::MetaRigBoneType::Spine1, pragma::animation::MetaRigBoneType::Spine}) {
 			auto *bone = m_metaRig->GetBone(candidate);
 			if(!bone)

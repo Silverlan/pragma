@@ -1,43 +1,24 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
-
 
 #include <memory>
 #include <functional>
 #include <functional>
-
 #include "pragma/lua/core.hpp"
-
 #include "sstream"
-
 #include "pragma/lua/ostream_operator_alias.hpp"
-
 #include "memory"
 
-
-
-
-
-
-
-
-
 module pragma.shared;
-
 import :scripting.lua.libraries.util;
 import :entities.components.environment.base_quake;
-
 import se_script;
 import util_zip;
 // import pragma.scripting.lua;
-
 #undef RegisterClass
-
 static auto s_bIgnoreIncludeCache = false;
 void Lua::set_ignore_include_cache(bool b) { s_bIgnoreIncludeCache = b; }
-
 std::optional<std::string> Lua::find_script_file(const std::string &fileName)
 {
 	auto raw = fileName + Lua::DOT_FILE_EXTENSION;
@@ -48,12 +29,10 @@ std::optional<std::string> Lua::find_script_file(const std::string &fileName)
 		return precompiled;
 	return {};
 }
-
 luabind::detail::class_rep *Lua::get_crep(luabind::object o)
 {
 	auto *L = o.interpreter();
 	luabind::detail::class_rep *crep = nullptr;
-
 	o.push(L);
 	if(luabind::detail::is_class_rep(L, -1)) {
 		crep = static_cast<luabind::detail::class_rep *>(lua_touserdata(L, -1));
@@ -71,7 +50,6 @@ luabind::detail::class_rep *Lua::get_crep(luabind::object o)
 	}
 	return crep;
 }
-
 static Vector3 calc_hair_normal(const Vector3 &flowNormal, const Vector3 &faceNormal)
 {
 	auto hairNormal = flowNormal - uvec::project(flowNormal, faceNormal);
@@ -82,7 +60,6 @@ static Vector3 calc_hair_normal(const Vector3 &flowNormal, const Vector3 &faceNo
 		hairNormal = faceNormal;
 	return hairNormal;
 }
-
 static Vector3 apply_curvature(const Vector3 &baseHairDir, const Vector3 &surfaceTargetNormal, float curvature, float factor)
 {
 	if(uvec::distance(baseHairDir, surfaceTargetNormal) < 0.001f)
@@ -92,12 +69,10 @@ static Vector3 apply_curvature(const Vector3 &baseHairDir, const Vector3 &surfac
 	uvec::normalize(&n); // Probably not needed
 	return n;
 }
-
 static bool save_hair_strand_data(const util::HairStrandData &strandData, ::udm::AssetDataArg outData, std::string &outErr)
 {
 	outData.SetAssetType("PHD");
 	outData.SetAssetVersion(1);
-
 	auto udm = *outData;
 	udm["strandCount"] = strandData.hairSegments.size();
 	udm.AddArray("segmentCounts", strandData.hairSegments, ::udm::ArrayType::Compressed);
@@ -121,14 +96,12 @@ static bool load_hair_strand_data(util::HairStrandData &strandData, const ::udm:
 	udmStrands["thickness"](strandData.thicknessData);
 	return true;
 }
-
 static std::unique_ptr<util::HairStrandData> generate_hair_file(const util::HairConfig &hairConfig, const util::HairData &hairData)
 {
 	auto numHair = hairData.hairPoints.size();
 	auto numSegments = hairConfig.numSegments;
 	auto numPoints = numHair * (numSegments + 1);
 	auto hairFile = std::make_unique<util::HairStrandData>();
-
 	auto &lxUvs = hairFile->uvs;
 	auto &thicknessData = hairFile->thicknessData;
 	auto &points = hairFile->points;
@@ -141,7 +114,6 @@ static std::unique_ptr<util::HairStrandData> generate_hair_file(const util::Hair
 		points[hairIdx] = {p.x, p.y, p.z};
 		lxUvs[hairIdx] = {uv.x, uv.y};
 		thicknessData[hairIdx] = thickness;
-
 		++hairIdx;
 	};
 	hairSegments.resize(hairData.hairPoints.size());
@@ -149,12 +121,10 @@ static std::unique_ptr<util::HairStrandData> generate_hair_file(const util::Hair
 		auto &p = hairData.hairPoints[i];
 		auto &uv = hairData.hairUvs[i];
 		auto &faceNormal = hairData.hairNormals[i];
-
 		auto hairStrength = hairConfig.defaultHairStrength;
 		auto length = hairConfig.defaultLength;
 		auto randomHairLengthFactor = hairConfig.randomHairLengthFactor;
 		auto thickness = hairConfig.defaultThickness;
-
 		Vector3 gravity {0.f, -1.f, 0.f};
 		auto lxGravity = gravity;
 		gravity = {lxGravity.x, lxGravity.y, lxGravity.z};
@@ -162,18 +132,15 @@ static std::unique_ptr<util::HairStrandData> generate_hair_file(const util::Hair
 		auto baseHairNormal = calc_hair_normal(flowNormal, faceNormal);
 		auto hairNormal = faceNormal * hairStrength + (1.f - hairStrength) * baseHairNormal;
 		uvec::normalize(&hairNormal);
-
 		//hairPoints.push_back(p);
 		//hairPoints.push_back(p +n *length); // TODO: Take adjacent face normals into account for hair direction?
 		auto hairLength = length * (1.f - randomHairLengthFactor) + length * randomHairLengthFactor * umath::random(0.f, 1.f);
-
 		fAddHairPoint(p, uv, thickness);
 		auto lenPerSegment = hairLength / static_cast<float>(numSegments);
 		auto p0 = p;
 		hairSegments[i] = numSegments;
 		for(auto j = decltype(numSegments) {0u}; j < numSegments; ++j) {
 			auto f = (j + 1) / static_cast<float>(numSegments);
-
 			auto n = apply_curvature(hairNormal, baseHairNormal, hairConfig.curvature, f);
 			//auto p0 = (j > 0) ? hairPoints.back() : p;
 			auto p1 = p0 + n * lenPerSegment;
@@ -183,7 +150,6 @@ static std::unique_ptr<util::HairStrandData> generate_hair_file(const util::Hair
 	}
 	return hairFile;
 }
-
 void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 {
 	auto defWorldData = luabind::class_<pragma::asset::WorldData>("WorldData");
@@ -204,7 +170,6 @@ void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 			  return {worldData, err};
 		  return {worldData, {}};
 	  })];
-
 	auto defOutput = luabind::class_<pragma::asset::Output>("Output");
 	defOutput.def(luabind::constructor<>());
 	defOutput.def(luabind::tostring(luabind::self));
@@ -215,7 +180,6 @@ void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 	defOutput.def_readwrite("delay", &pragma::asset::Output::delay);
 	defOutput.def_readwrite("name", &pragma::asset::Output::times);
 	defWorldData.scope[defOutput];
-
 	auto defComponentData = luabind::class_<pragma::asset::ComponentData>("ComponentData");
 	defComponentData.def(luabind::tostring(luabind::self));
 	defComponentData.add_static_constant("FLAG_NONE", umath::to_integral(pragma::asset::ComponentData::Flags::None));
@@ -224,7 +188,6 @@ void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 	defComponentData.def("SetFlags", &pragma::asset::ComponentData::SetFlags);
 	defComponentData.def("GetData", +[](pragma::asset::ComponentData &componentData) -> ::udm::LinkedPropertyWrapper { return ::udm::LinkedPropertyWrapper {*componentData.GetData()}; });
 	defWorldData.scope[defComponentData];
-
 	auto defEntityData = luabind::class_<pragma::asset::EntityData>("EntityData");
 	defEntityData.def(luabind::tostring(luabind::self));
 	defEntityData.add_static_constant("FLAG_NONE", umath::to_integral(pragma::asset::EntityData::Flags::None));
@@ -258,7 +221,6 @@ void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 		  return {firstLeaf, numLeaves};
 	  });
 	defWorldData.scope[defEntityData];
-
 	defWorldData.add_static_constant("DATA_FLAG_NONE", umath::to_integral(pragma::asset::WorldData::DataFlags::None));
 	defWorldData.add_static_constant("DATA_FLAG_HAS_LIGHTMAP_ATLAS_BIT", umath::to_integral(pragma::asset::WorldData::DataFlags::HasLightmapAtlas));
 	defWorldData.add_static_constant("DATA_FLAG_HAS_BSP_TREE_BIT", umath::to_integral(pragma::asset::WorldData::DataFlags::HasBSPTree));
@@ -296,12 +258,10 @@ void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 	pragma::lua::define_custom_constructor<pragma::asset::EntityData, +[]() -> std::shared_ptr<pragma::asset::EntityData> { return pragma::asset::EntityData::Create(); }>(l);
 	pragma::lua::define_custom_constructor<pragma::asset::WorldData, +[](NetworkState &nw) -> std::shared_ptr<pragma::asset::WorldData> { return pragma::asset::WorldData::Create(nw); }, NetworkState &>(l);
 }
-
 void Lua::util::register_os(lua_State *l, luabind::module_ &mod)
 {
 	mod[luabind::def("set_prevent_os_sleep_mode", &::util::set_prevent_os_sleep_mode)];
 	mod[luabind::def("is_dark_mode", &::util::is_dark_mode)];
-
 	mod[luabind::def(
 	  "show_notification", +[](pragma::Engine &engine, const std::string &summary, const std::string &body) {
 		  if(engine.IsCLIOnly())
@@ -315,13 +275,11 @@ void Lua::util::register_os(lua_State *l, luabind::module_ &mod)
 		  return ::util::show_notification(msg, "");
 	  })];
 }
-
 static Lua::var<bool, Lua::opt<std::string>, ::util::FunctionalParallelWorker> extract_files(lua_State *l, pragma::Game &game, const Lua::type<uzip::ZIPFile> &ozip, const std::string &outputPath, bool runInBackground = false)
 {
 	auto path = ::util::Path::CreateFile(outputPath);
 	path.Canonicalize();
 	path = ::util::Path::CreatePath(filemanager::get_program_write_path()) + path;
-
 	auto &zip = *luabind::object_cast<uzip::ZIPFile *>(ozip);
 	if(runInBackground) {
 		auto job = ::util::create_parallel_job<::util::FunctionalParallelWorker>(false);
@@ -334,13 +292,11 @@ static Lua::var<bool, Lua::opt<std::string>, ::util::FunctionalParallelWorker> e
 			std::condition_variable waitCond;
 			std::mutex mutex;
 			std::atomic<bool> complete = false;
-
 			std::string err;
 			auto res = zip.ExtractFiles(path.GetString(), err, [&worker, &mutex, &waitCond, &complete](float progress, bool pcomplete) mutable {
 				worker.UpdateProgress(progress);
 				if(pcomplete) {
 					worker.SetStatus(::util::JobStatus::Successful);
-
 					mutex.lock();
 					complete = true;
 					waitCond.notify_one();
@@ -360,23 +316,19 @@ static Lua::var<bool, Lua::opt<std::string>, ::util::FunctionalParallelWorker> e
 				worker.SetStatus(::util::JobStatus::Failed, err);
 				return;
 			}
-
 			auto ul = std::unique_lock<std::mutex> {mutex};
 			waitCond.wait(ul, [&complete]() -> bool { return complete; });
-
 			if(!worker.IsCancelled())
 				worker.SetStatus(util::JobStatus::Successful);
 		});
 		return luabind::object {l, job};
 	}
-
 	std::string err;
 	auto res = zip.ExtractFiles(path.GetString(), err);
 	if(!res)
 		return luabind::object {l, std::pair<bool, std::string> {res, err}};
 	return luabind::object {l, res};
 }
-
 void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 {
 	mod[luabind::def("is_valid", static_cast<bool (*)(lua_State *)>(Lua::util::is_valid)), luabind::def("is_valid", static_cast<bool (*)(lua_State *, const luabind::object &)>(Lua::util::is_valid)),
@@ -398,18 +350,14 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 	  luabind::def("register_class", static_cast<luabind::object (*)(lua_State *, const luabind::table<> &, const std::string &, const luabind::object &, const luabind::object &)>(Lua::util::register_class)),
 	  luabind::def("register_class", static_cast<luabind::object (*)(lua_State *, const luabind::table<> &, const std::string &, const luabind::object &)>(Lua::util::register_class)),
 	  luabind::def("register_class", static_cast<luabind::object (*)(lua_State *, const luabind::table<> &, const std::string &)>(Lua::util::register_class)),
-
 	  luabind::def("local_to_world", static_cast<Quat (*)(lua_State *, const Quat &, const Quat &)>(local_to_world)), luabind::def("local_to_world", static_cast<Vector3 (*)(lua_State *, const Vector3 &, const Quat &, const Vector3 &)>(local_to_world)),
 	  luabind::def("local_to_world", static_cast<void (*)(lua_State *, const Vector3 &, const Quat &, const Vector3 &, const Quat &)>(local_to_world)),
-
 	  luabind::def("world_to_local", static_cast<Quat (*)(lua_State *, const Quat &, const Quat &)>(world_to_local)), luabind::def("world_to_local", static_cast<Vector3 (*)(lua_State *, const Vector3 &, const Quat &, const Vector3 &)>(world_to_local)),
 	  luabind::def("world_to_local", static_cast<void (*)(lua_State *, const Vector3 &, const Quat &, const Vector3 &, const Quat &)>(world_to_local)),
-
 	  luabind::def("get_pretty_duration", static_cast<std::string (*)(lua_State *, uint32_t, uint32_t, bool)>(Lua::util::get_pretty_duration)), luabind::def("get_pretty_duration", static_cast<std::string (*)(lua_State *, uint32_t, uint32_t)>(Lua::util::get_pretty_duration)),
 	  luabind::def("get_pretty_duration", static_cast<std::string (*)(lua_State *, uint32_t)>(Lua::util::get_pretty_duration)), luabind::def("get_pretty_time", Lua::util::get_pretty_time),
 	  luabind::def(
 	    "get_object_hash", +[](Lua::userData o) { return std::hash<void *> {}(lua_touserdata(o.interpreter(), 1)); }),
-
 	  luabind::def("fade_property", static_cast<luabind::object (*)(lua_State *, LColorProperty &, const ::Color &, float)>(Lua::util::fade_property)),
 	  luabind::def("fade_property", static_cast<luabind::object (*)(lua_State *, LVector2iProperty &, const ::Vector2i &, float)>(Lua::util::fade_property)),
 	  luabind::def("fade_property", static_cast<luabind::object (*)(lua_State *, LVector3Property &, const Vector3 &, float)>(Lua::util::fade_property)),
@@ -420,14 +368,11 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 	  luabind::def("fade_property", static_cast<luabind::object (*)(lua_State *, LEulerAnglesProperty &, const ::EulerAngles &, float)>(Lua::util::fade_property)),
 	  luabind::def("fade_property", static_cast<luabind::object (*)(lua_State *, LGenericIntPropertyWrapper &, const int64_t &, float)>(Lua::util::fade_property)),
 	  luabind::def("fade_property", static_cast<luabind::object (*)(lua_State *, LGenericFloatPropertyWrapper &, const double &, float)>(Lua::util::fade_property)),
-
 	  luabind::def("round_string", static_cast<std::string (*)(lua_State *, float, uint32_t)>(Lua::util::round_string)), luabind::def("round_string", static_cast<std::string (*)(lua_State *, float)>(Lua::util::round_string)),
-
 	  luabind::def("get_type_name", Lua::util::get_type_name), luabind::def("is_same_object", Lua::util::is_same_object), luabind::def("clamp_resolution_to_aspect_ratio", Lua::util::clamp_resolution_to_aspect_ratio), luabind::def("get_class_value", Lua::util::get_class_value),
 	  luabind::def("pack_zip_archive", Lua::util::pack_zip_archive), luabind::def("world_space_point_to_screen_space_uv", static_cast<void (*)(lua_State *, const Vector3 &, const ::Mat4 &, float, float)>(Lua::util::world_space_point_to_screen_space_uv)),
 	  luabind::def("world_space_direction_to_screen_space", Lua::util::world_space_direction_to_screen_space), luabind::def("calc_screen_space_distance_to_world_space_position", Lua::util::calc_screenspace_distance_to_worldspace_position),
 	  luabind::def("depth_to_distance", Lua::util::depth_to_distance),
-
 	  luabind::def("generate_hair_file", &generate_hair_file),
 	  luabind::def(
 	    "generate_hair_data", +[](float hairPerArea, const pragma::ModelSubMesh &mesh) {
@@ -438,7 +383,6 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 			    virtual const Vector3 GetVertexPosition(uint32_t vertIdx) const override { return getVertexPosition(vertIdx); }
 			    virtual const Vector3 GetVertexNormal(uint32_t vertIdx) const override { return getVertexNormal(vertIdx); }
 			    virtual const ::Vector2 GetVertexUv(uint32_t vertIdx) const override { return getVertexUv(vertIdx); }
-
 			    std::function<uint32_t()> getTriangleCount = nullptr;
 			    std::function<uint32_t()> getVertexCount = nullptr;
 			    std::function<std::array<uint32_t, 3>(uint32_t)> getTriangle = nullptr;
@@ -446,7 +390,6 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 			    std::function<Vector3(uint32_t)> getVertexNormal = nullptr;
 			    std::function<::Vector2(uint32_t)> getVertexUv = nullptr;
 		    };
-
 		    auto meshInterface = std::make_unique<MeshInterface>();
 		    meshInterface->getTriangleCount = [&mesh]() -> uint32_t { return mesh.GetTriangleCount(); };
 		    meshInterface->getVertexCount = [&mesh]() -> uint32_t { return mesh.GetVertexCount(); };
@@ -454,14 +397,11 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 		    meshInterface->getVertexPosition = [&mesh](uint32_t vertIdx) -> Vector3 { return mesh.GetVertexPosition(vertIdx) * static_cast<float>(util::units_to_metres(1.f)); };
 		    meshInterface->getVertexNormal = [&mesh](uint32_t vertIdx) -> Vector3 { return mesh.GetVertexNormal(vertIdx); };
 		    meshInterface->getVertexUv = [&mesh](uint32_t vertIdx) -> ::Vector2 { return mesh.GetVertexUV(vertIdx); };
-
 		    ::util::HairGenerator gen {};
 		    gen.SetMeshDataInterface(std::move(meshInterface));
 		    return gen.Generate(hairPerArea);
 	    })];
-
 	Lua::util::register_world_data(l, mod);
-
 	auto defHairStrandData = luabind::class_<::util::HairStrandData>("HairStrandData");
 	defHairStrandData.def(
 	  "Save", +[](const ::util::HairStrandData &strandData, ::udm::AssetDataArg outData) {
@@ -479,7 +419,6 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 	defHairStrandData.def("GetStrandUv", +[](const ::util::HairStrandData &strandData, uint32_t idx) { return strandData.uvs[idx]; });
 	defHairStrandData.def("GetStrandThickness", +[](const ::util::HairStrandData &strandData, uint32_t idx) { return strandData.thicknessData[idx]; });
 	mod[defHairStrandData];
-
 	auto defHairConfig = luabind::class_<::util::HairConfig>("HairConfig");
 	defHairConfig.def(luabind::constructor<>());
 	defHairConfig.def_readwrite("numSegments", &::util::HairConfig::numSegments);
@@ -490,19 +429,15 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 	defHairConfig.def_readwrite("randomHairLengthFactor", &::util::HairConfig::randomHairLengthFactor);
 	defHairConfig.def_readwrite("curvature", &::util::HairConfig::curvature);
 	mod[defHairConfig];
-
 	auto defHairData = luabind::class_<::util::HairData>("HairData");
 	mod[defHairData];
-
 	auto defZip = luabind::class_<uzip::ZIPFile>("ZipFile");
 	defZip.add_static_constant("OPEN_MODE_READ", umath::to_integral(uzip::OpenMode::Read));
 	defZip.add_static_constant("OPEN_MODE_WRITE", umath::to_integral(uzip::OpenMode::Write));
-
 	defZip.scope[luabind::def(
 	  "open", +[](const std::string &filePath, uzip::OpenMode openMode) -> std::shared_ptr<uzip::ZIPFile> {
 		  auto path = ::util::Path::CreateFile(filePath);
 		  path.Canonicalize();
-
 		  if(openMode == uzip::OpenMode::Read) {
 			  std::string absPath;
 			  if(!filemanager::find_absolute_path(path.GetString(), absPath))
@@ -511,7 +446,6 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 		  }
 		  else
 			  path = ::util::FilePath(filemanager::get_program_write_path(), path);
-
 		  std::string err;
 		  auto zipFile = uzip::ZIPFile::Open(path.GetString(), err, openMode);
 		  if(!zipFile)
@@ -564,7 +498,6 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 	  });
 	mod[defZip];
 }
-
 void Lua::util::register_shared(lua_State *l, luabind::module_ &mod)
 {
 	register_shared_generic(l, mod);
@@ -590,18 +523,15 @@ static Lua::mult<bool, Lua::opt<std::string>> exec_python(lua_State *l, const st
 	return luabind::object {l, res};
 }
 static Lua::mult<bool, Lua::opt<std::string>> exec_python(lua_State *l, const std::string &fileName) { return exec_python(l, fileName, {}); }
-
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::rendering, pragma::rendering::Tile);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfig);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigBone);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigControl);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigConstraint);
-
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::asset, pragma::asset::Output);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::asset, pragma::asset::ComponentData);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::asset, pragma::asset::EntityData);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::asset, pragma::asset::WorldData);
-
 void Lua::util::register_library(lua_State *l)
 {
 	auto pythonMod = luabind::module(l, "python");
@@ -619,9 +549,7 @@ void Lua::util::register_library(lua_State *l)
 	            }),
 	  luabind::def("exec", static_cast<Lua::mult<bool, Lua::opt<std::string>> (*)(lua_State *, const std::string &)>(&exec_python)),
 	  luabind::def("exec", static_cast<Lua::mult<bool, Lua::opt<std::string>> (*)(lua_State *, const std::string &, const std::vector<std::string> &)>(&exec_python)), luabind::def("init_blender", &pragma::python::init_blender), luabind::def("reload", &pragma::python::reload)];
-
 	auto utilMod = luabind::module(l, "util");
-
 	auto defRigConfig = luabind::class_<pragma::ik::RigConfig>("IkRigConfig");
 	defRigConfig.def(luabind::constructor<>());
 	defRigConfig.def(luabind::tostring(luabind::self));
@@ -665,13 +593,11 @@ void Lua::util::register_library(lua_State *l)
 			  return std::pair<bool, std::optional<std::string>> {false, "Unknown error"};
 		  return std::pair<bool, std::optional<std::string>> {true, {}};
 	  });
-
 	auto defRigBone = luabind::class_<pragma::ik::RigConfigBone>("Bone");
 	defRigBone.def(luabind::tostring(luabind::self));
 	defRigBone.def_readwrite("locked", &pragma::ik::RigConfigBone::locked);
 	defRigBone.def_readwrite("name", &pragma::ik::RigConfigBone::name);
 	defRigConfig.scope[defRigBone];
-
 	auto defRigControl = luabind::class_<pragma::ik::RigConfigControl>("Control");
 	defRigControl.def(luabind::tostring(luabind::self));
 	defRigControl.add_static_constant("TYPE_DRAG", umath::to_integral(pragma::ik::RigConfigControl::Type::Drag));
@@ -688,7 +614,6 @@ void Lua::util::register_library(lua_State *l)
 	defRigControl.def_readwrite("rigidity", &pragma::ik::RigConfigControl::rigidity);
 	defRigConfig.scope[defRigControl];
 	defRigConfig.scope[defRigBone];
-
 	auto defRigConstraint = luabind::class_<pragma::ik::RigConfigConstraint>("Constraint");
 	defRigConstraint.def(luabind::tostring(luabind::self));
 	defRigConstraint.add_static_constant("TYPE_FIXED", umath::to_integral(pragma::ik::RigConfigConstraint::Type::Fixed));
@@ -703,7 +628,6 @@ void Lua::util::register_library(lua_State *l)
 	defRigConstraint.def_readwrite("axis", &pragma::ik::RigConfigConstraint::axis);
 	defRigConfig.scope[defRigConstraint];
 	utilMod[defRigConfig];
-
 	auto defRenderTile = luabind::class_<pragma::rendering::Tile>("RenderTile");
 	defRenderTile.def(luabind::constructor<>());
 	defRenderTile.def(luabind::constructor<float, float, float, float>());
@@ -713,7 +637,6 @@ void Lua::util::register_library(lua_State *l)
 	defRenderTile.def_readwrite("w", &pragma::rendering::Tile::w);
 	defRenderTile.def_readwrite("h", &pragma::rendering::Tile::h);
 	utilMod[defRenderTile];
-
 	utilMod[luabind::def("splash_damage", splash_damage), luabind::def("get_date_time", static_cast<std::string (*)(const std::string &)>(Lua::util::date_time)), luabind::def("get_date_time", static_cast<std::string (*)()>(Lua::util::date_time)),
 	  luabind::def("is_table", static_cast<bool (*)(luabind::argument)>(Lua::util::is_table)), luabind::def("is_table", static_cast<bool (*)()>(Lua::util::is_table)),
 	  luabind::def("get_faded_time_factor", static_cast<float (*)(float, float, float, float)>(Lua::util::get_faded_time_factor)), luabind::def("get_faded_time_factor", static_cast<float (*)(float, float, float)>(Lua::util::get_faded_time_factor)),
@@ -732,7 +655,6 @@ void Lua::util::register_library(lua_State *l)
 		    return util::Uuid {::util::generate_uuid_v4(seed)};
 	    }),
 	  luabind::def("run_updater", +[](pragma::Engine &engine) { engine.SetRunUpdaterOnClose(true); })];
-
 	auto defUuid = luabind::class_<util::Uuid>("Uuid");
 	defUuid.def("__tostring", +[](const util::Uuid &uuid) { return ::util::uuid_to_string(uuid.value); });
 	defUuid.def(
@@ -746,11 +668,9 @@ void Lua::util::register_library(lua_State *l)
 	utilMod[defUuid];
 	pragma::lua::define_custom_constructor<util::Uuid, +[](const std::string &uuid) -> util::Uuid { return util::Uuid {::util::uuid_string_to_bytes(uuid)}; }, const std::string &>(l);
 }
-
 std::string Lua::global::get_script_path() { return Lua::GetIncludePath(); }
 EulerAngles Lua::global::angle_rand() { return EulerAngles(umath::random(-180.f, 180.f), umath::random(-180.f, 180.f), umath::random(-180.f, 180.f)); }
 EulerAngles Lua::global::create_from_string(const std::string &str) { return EulerAngles {str}; }
-
 static bool check_valid_lua_object(lua_State *l, const luabind::object &o)
 {
 	auto *pEnt = luabind::object_cast_nothrow<EntityHandle *>(o, static_cast<EntityHandle *>(nullptr));
@@ -768,7 +688,6 @@ static bool check_valid_lua_object(lua_State *l, const luabind::object &o)
 	}
 	return bValid;
 }
-
 bool Lua::util::is_valid(lua_State *l) { return false; }
 bool Lua::util::is_valid(lua_State *l, const luabind::object &o)
 {
@@ -792,23 +711,19 @@ bool Lua::util::is_valid(lua_State *l, const luabind::object &o)
 	}
 	return true;
 }
-
 bool Lua::util::is_valid_entity(lua_State *l)
 {
 	if(!Lua::IsSet(l, 1) || !Lua::IsType<pragma::ecs::BaseEntity>(l, 1))
 		return false;
 	return is_valid(l);
 }
-
 static bool is_entity(const luabind::object &o) { return luabind::object_cast_nothrow<EntityHandle *>(o, static_cast<EntityHandle *>(nullptr)); }
-
 bool Lua::util::is_valid_entity(lua_State *l, const luabind::object &o)
 {
 	if(!o || !is_entity(o))
 		return false;
 	return is_valid(l, o);
 }
-
 static void safely_remove(const luabind::object &o, const char *removeFunction, bool useSafeMethod)
 {
 	auto *pEnt = luabind::object_cast_nothrow<EntityHandle *>(o, static_cast<EntityHandle *>(nullptr));
@@ -838,7 +753,6 @@ static void safely_remove(const luabind::object &o, const char *removeFunction, 
 	{
 	}
 }
-
 void Lua::util::remove(lua_State *l, const luabind::object &o, bool removeSafely)
 {
 	auto type = luabind::type(o);
@@ -857,13 +771,10 @@ void Lua::util::remove(lua_State *l, const luabind::object &o, bool removeSafely
 	safely_remove(o, removeFunction, removeSafely);
 }
 void Lua::util::remove(lua_State *l, const luabind::object &o) { return remove(l, o, false); }
-
 bool Lua::util::is_table(luabind::argument arg) { return luabind::type(arg) == LUA_TTABLE; }
 bool Lua::util::is_table() { return false; }
-
 std::string Lua::util::date_time(const std::string &format) { return pragma::Engine::Get()->GetDate(format); }
 std::string Lua::util::date_time() { return pragma::Engine::Get()->GetDate(); }
-
 luabind::object Lua::util::fire_bullets(lua_State *l, BulletInfo &bulletInfo, bool hitReport, const std::function<void(DamageInfo &, ::TraceData &, TraceResult &, uint32_t &)> &f)
 {
 	DamageInfo dmg;
@@ -872,10 +783,8 @@ luabind::object Lua::util::fire_bullets(lua_State *l, BulletInfo &bulletInfo, bo
 	dmg.SetSource(bulletInfo.effectOrigin);
 	dmg.SetAttacker(bulletInfo.hAttacker.get());
 	dmg.SetInflictor(bulletInfo.hInflictor.get());
-
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
-
 	auto &src = dmg.GetSource();
 	luabind::object t {};
 	if(hitReport == true)
@@ -951,12 +860,10 @@ luabind::object Lua::util::fire_bullets(lua_State *l, BulletInfo &bulletInfo, bo
 }
 luabind::object Lua::util::fire_bullets(lua_State *l, BulletInfo &bulletInfo, bool hitReport) { return fire_bullets(l, bulletInfo, hitReport, nullptr); }
 luabind::object Lua::util::fire_bullets(lua_State *l, BulletInfo &bulletInfo) { return fire_bullets(l, bulletInfo, false, nullptr); }
-
 static luabind::object register_class(lua_State *l, const std::string &pclassName, uint32_t idxBaseClassStart, const luabind::table<> *baseTable = nullptr)
 {
 	auto className = pclassName;
 	auto fullClassName = className;
-
 	auto nParentClasses = Lua::GetStackTop(l) - 1;
 	auto fRegisterBaseClasses = [l, nParentClasses, idxBaseClassStart]() {
 		for(auto i = idxBaseClassStart; i <= (nParentClasses + 1); ++i) {
@@ -967,13 +874,11 @@ static luabind::object register_class(lua_State *l, const std::string &pclassNam
 				pragma::scripting::lua::raise_error(l, err);                                 // TODO: Is this okay to do here? Maybe we should throw an exception instead.
 		}
 	};
-
 	auto d = className.rfind('.');
 	std::string slibs;
 	if(d != std::string::npos) {
 		slibs = className;
 		className = ustring::substr(className, d + 1);
-
 		std::vector<std::string> libs;
 		ustring::explode(slibs, ".", libs);
 		if(libs.empty() == false) {
@@ -982,7 +887,6 @@ static luabind::object register_class(lua_State *l, const std::string &pclassNam
 				Lua::Pop(l, 1); /* 0 */
 				return {};
 			}
-
 			auto numPop = 0u;
 			for(auto it = libs.begin() + 1; it != libs.end(); ++it) {
 				auto bLast = (it == libs.end() - 1);
@@ -999,7 +903,6 @@ static luabind::object register_class(lua_State *l, const std::string &pclassNam
 				}
 				if(bLast == true) {
 					Lua::Pop(l, numPop + 1); /* 0 */
-
 					auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 					auto *game = nw->GetGameState();
 					auto *classInfo = game->GetLuaClassManager().FindClassInfo(fullClassName);
@@ -1008,17 +911,14 @@ static luabind::object register_class(lua_State *l, const std::string &pclassNam
 						classInfo->regFunc.push(l); /* 1 */
 						fRegisterBaseClasses();
 						Lua::Pop(l, 1); /* 0 */
-
 						return classInfo->classObject;
 					}
-
 					return {};
 				}
 			}
 			Lua::Pop(l, numPop + 1); /* 0 */
 		}
 	}
-
 	if(slibs.empty()) {
 		// Check if class already exists
 		auto oBase = baseTable ? luabind::object {*baseTable} : luabind::globals(l);
@@ -1032,14 +932,11 @@ static luabind::object register_class(lua_State *l, const std::string &pclassNam
 				classInfo->regFunc.push(l); /* 1 */
 				fRegisterBaseClasses();
 				Lua::Pop(l, 1); /* 0 */
-
 				return classInfo->classObject;
 			}
-
 			return {};
 		}
 	}
-
 	auto restorePreviousGlobalValue = (!slibs.empty() || baseTable != nullptr);
 	if(restorePreviousGlobalValue)
 		Lua::GetGlobal(l, className); /* +1 */
@@ -1054,7 +951,6 @@ static luabind::object register_class(lua_State *l, const std::string &pclassNam
 		oClass = luabind::globals(l)[className];
 		luabind::object regFc {luabind::from_stack(l, -1)};
 		game->GetLuaClassManager().RegisterClass(fullClassName, oClass, regFc);
-
 		// Init default constructor and print methods; They can still be overwritten by the Lua script
 		oClass["__init"] = luabind::make_function(
 		  l, +[](lua_State *l, const luabind::object &o) {
@@ -1068,7 +964,6 @@ static luabind::object register_class(lua_State *l, const std::string &pclassNam
 				  if(std::find(initialized.begin(), initialized.end(), base.base) != initialized.end())
 					  continue;
 				  initialized.push_back(base.base);
-
 				  base.base->get_table(l);
 				  auto oBase = luabind::object {luabind::from_stack(l, -1)};
 				  crep = base.base;
@@ -1079,17 +974,14 @@ static luabind::object register_class(lua_State *l, const std::string &pclassNam
 			  crep = nullptr;
 		  });
 		oClass["__tostring"] = luabind::make_function(l, +[](lua_State *l, const luabind::object &o) -> std::string { return luabind::get_class_info(luabind::from_stack(l, 1)).name; });
-
 		fRegisterBaseClasses();
 		Lua::Pop(l, 1); /* 0 */
-
 		if(slibs.empty() == false) {
 			ss = std::stringstream {};
 			ss << slibs << "=" << className;
 			r = pragma::scripting::lua::run_string(l, ss.str(), "internal", 1);
 			if(r == Lua::StatusCode::Ok)
 				Lua::Pop(l, 1); /* 0 */
-
 			Lua::PushNil(l);              /* 1 */
 			Lua::SetGlobal(l, className); /* 0 */
 		}
@@ -1099,7 +991,6 @@ static luabind::object register_class(lua_State *l, const std::string &pclassNam
 			Lua::SetGlobal(l, className); /* 0 */
 		}
 	}
-
 	if(restorePreviousGlobalValue)
 		Lua::SetGlobal(l, className); /* -1 */
 	return oClass;
@@ -1112,7 +1003,6 @@ static luabind::object register_class(lua_State *l, const std::string &className
 			(*i).push(l);
 			++n;
 		}
-
 		auto r = ::register_class(l, className, idxBaseClassStart + 1, baseTable);
 		for(auto i = decltype(n) {0u}; i < n; ++i)
 			Lua::RemoveValue(l, -2);
@@ -1125,9 +1015,7 @@ luabind::object Lua::util::register_class(lua_State *l, const std::string &class
 luabind::object Lua::util::register_class(lua_State *l, const std::string &className, const luabind::object &oBase0, const luabind::object &oBase1, const luabind::object &oBase2) { return ::register_class(l, className, 2); }
 luabind::object Lua::util::register_class(lua_State *l, const std::string &className, const luabind::object &oBase0, const luabind::object &oBase1, const luabind::object &oBase2, const luabind::object &oBase3) { return ::register_class(l, className, 2); }
 luabind::object Lua::util::register_class(lua_State *l, const std::string &className, const luabind::object &oBase0, const luabind::object &oBase1, const luabind::object &oBase2, const luabind::object &oBase3, const luabind::object &oBase4) { return ::register_class(l, className, 2); }
-
 luabind::object Lua::util::register_class(lua_State *l, const std::string &pclassName) { return ::register_class(l, pclassName, 2); }
-
 void Lua::util::splash_damage(lua_State *l, const ::util::SplashDamageInfo &splashDamageInfo)
 {
 	auto *nw = pragma::Engine::Get()->GetNetworkState(l);
@@ -1160,7 +1048,6 @@ void Lua::util::splash_damage(lua_State *l, const ::util::SplashDamageInfo &spla
 	}
 	game->SplashDamage(splashDamageInfo.origin, splashDamageInfo.radius, const_cast<DamageInfo &>(splashDamageInfo.damageInfo), splashDamageInfo.callback);
 }
-
 luabind::object Lua::util::register_class(lua_State *l, const luabind::table<> &t, const std::string &className) { return ::register_class(l, className, 3, &t); }
 luabind::object Lua::util::register_class(lua_State *l, const luabind::table<> &t, const std::string &className, const luabind::object &oBase0) { return ::register_class(l, className, oBase0, 3, &t); }
 luabind::object Lua::util::register_class(lua_State *l, const luabind::table<> &t, const std::string &className, const luabind::object &oBase0, const luabind::object &oBase1) { return ::register_class(l, className, 3); }
@@ -1170,7 +1057,6 @@ luabind::object Lua::util::register_class(lua_State *l, const luabind::table<> &
 {
 	return ::register_class(l, className, 3);
 }
-
 static void shake_screen(lua_State *l, const Vector3 &pos, float radius, float amplitude, float frequency, float duration, float fadeIn, float fadeOut, bool useRadius)
 {
 	auto *nw = pragma::Engine::Get()->GetNetworkState(l);
@@ -1201,28 +1087,23 @@ static void shake_screen(lua_State *l, const Vector3 &pos, float radius, float a
 }
 void Lua::util::shake_screen(lua_State *l, const Vector3 &pos, float radius, float amplitude, float frequency, float duration, float fadeIn, float fadeOut) { ::shake_screen(l, pos, radius, amplitude, frequency, duration, fadeIn, fadeOut, true); }
 void Lua::util::shake_screen(lua_State *l, float amplitude, float frequency, float duration, float fadeIn, float fadeOut) { ::shake_screen(l, {}, {}, amplitude, frequency, duration, fadeIn, fadeOut, false); }
-
 float Lua::util::get_faded_time_factor(float cur, float dur, float fadeIn, float fadeOut) { return ::util::get_faded_time_factor(CFloat(cur), CFloat(dur), fadeIn, fadeOut); }
 float Lua::util::get_faded_time_factor(float cur, float dur, float fadeIn) { return get_faded_time_factor(cur, dur, fadeIn, 0.f); }
 float Lua::util::get_faded_time_factor(float cur, float dur) { return get_faded_time_factor(cur, dur, 0.f); }
-
 float Lua::util::get_scale_factor(float val, float min, float max) { return ::util::get_scale_factor(CFloat(val), CFloat(min), CFloat(max)); }
 float Lua::util::get_scale_factor(float val, float min) { return ::util::get_scale_factor(CFloat(val), CFloat(min)); }
-
 Quat Lua::util::local_to_world(lua_State *l, const Quat &r0, const Quat &r1)
 {
 	auto res = r1;
 	uvec::local_to_world(r0, res);
 	return res;
 }
-
 Vector3 Lua::util::local_to_world(lua_State *l, const Vector3 &vLocal, const Quat &rLocal, const Vector3 &v)
 {
 	auto vOut = v;
 	uvec::local_to_world(vLocal, rLocal, vOut);
 	return vOut;
 }
-
 void Lua::util::local_to_world(lua_State *l, const Vector3 &vLocal, const Quat &rLocal, const Vector3 &v, const Quat &r)
 {
 	auto vOut = v;
@@ -1231,21 +1112,18 @@ void Lua::util::local_to_world(lua_State *l, const Vector3 &vLocal, const Quat &
 	Lua::Push<Vector3>(l, vOut);
 	Lua::Push<Quat>(l, rOut);
 }
-
 Quat Lua::util::world_to_local(lua_State *l, const Quat &rLocal, const Quat &r)
 {
 	auto rOut = r;
 	uvec::world_to_local(rLocal, rOut);
 	return rOut;
 }
-
 Vector3 Lua::util::world_to_local(lua_State *l, const Vector3 &vLocal, const Quat &rLocal, const Vector3 &v)
 {
 	auto vOut = v;
 	uvec::world_to_local(vLocal, rLocal, vOut);
 	return vOut;
 }
-
 void Lua::util::world_to_local(lua_State *l, const Vector3 &vLocal, const Quat &rLocal, const Vector3 &v, const Quat &r)
 {
 	auto vOut = v;
@@ -1254,7 +1132,6 @@ void Lua::util::world_to_local(lua_State *l, const Vector3 &vLocal, const Quat &
 	Lua::Push<Vector3>(l, vOut);
 	Lua::Push<Quat>(l, rOut);
 }
-
 Vector3 Lua::util::calc_world_direction_from_2d_coordinates(lua_State *l, const Vector3 &forward, const Vector3 &right, const Vector3 &up, float fov, float nearZ, float farZ, float aspectRatio, const ::Vector2 &uv)
 {
 	return uvec::calc_world_direction_from_2d_coordinates(forward, right, up, static_cast<float>(umath::deg_to_rad(fov)), nearZ, farZ, aspectRatio, 0.f, 0.f, uv);
@@ -1316,19 +1193,14 @@ std::string Lua::util::get_pretty_time(lua_State *l, float t)
 	seconds -= minutes * 60.0;
 	auto hours = umath::floor(minutes / 60.f);
 	minutes -= hours * 60.f;
-
 	auto prettyTime = ustring::fill_zeroes(::util::round_string(seconds), 2) + '.' + ustring::fill_zeroes(::util::round_string(milliseconds), 3);
-
 	prettyTime = ustring::fill_zeroes(::util::round_string(minutes), 2) + ':' + prettyTime;
-
 	if(hours > 0.f)
 		prettyTime = ustring::fill_zeroes(::util::round_string(hours), 2) + ':' + prettyTime;
-
 	if(sign < 0)
 		prettyTime = '-' + prettyTime;
 	return prettyTime;
 }
-
 double Lua::util::units_to_metres(double units) { return ::pragma::units_to_metres(units); }
 double Lua::util::metres_to_units(double metres) { return ::pragma::metres_to_units(metres); }
 luabind::object Lua::util::read_scene_file(lua_State *l, const std::string &fileName)
@@ -1343,11 +1215,9 @@ luabind::object Lua::util::read_scene_file(lua_State *l, const std::string &file
 	std::function<void(const source_engine::script::SceneScriptValue &)> fPushValue = nullptr;
 	fPushValue = [l, &fPushValue](const source_engine::script::SceneScriptValue &val) {
 		auto t = Lua::CreateTable(l);
-
 		Lua::PushString(l, "identifier");
 		Lua::PushString(l, val.identifier);
 		Lua::SetTableValue(l, t);
-
 		Lua::PushString(l, "parameters");
 		auto tParams = Lua::CreateTable(l);
 		auto paramIdx = 1u;
@@ -1357,7 +1227,6 @@ luabind::object Lua::util::read_scene_file(lua_State *l, const std::string &file
 			Lua::SetTableValue(l, tParams);
 		}
 		Lua::SetTableValue(l, t);
-
 		Lua::PushString(l, "children");
 		auto tChildren = Lua::CreateTable(l);
 		auto childIdx = 1u;
@@ -1373,7 +1242,6 @@ luabind::object Lua::util::read_scene_file(lua_State *l, const std::string &file
 	Lua::Pop(l, 1);
 	return o;
 }
-
 template<class TProperty, typename TUnderlyingType>
 static luabind::object fade_property_generic(pragma::Game &game, lua_State *l, TProperty &vProp, const TUnderlyingType &vDst, float duration, const std::function<TUnderlyingType(const TUnderlyingType &, const TUnderlyingType &, float)> &fLerp)
 {
@@ -1397,13 +1265,11 @@ static luabind::object fade_property_generic(pragma::Game &game, lua_State *l, T
 	game.AddCallback("Think", cb);
 	return luabind::object {l, cb};
 }
-
 template<class TProperty, typename TUnderlyingType>
 luabind::object fade_vector_property_generic(pragma::Game &game, lua_State *l, TProperty &vProp, const TUnderlyingType &vDst, float duration, const std::function<TUnderlyingType(const TUnderlyingType &, const TUnderlyingType &, float)> &fLerp)
 {
 	return fade_property_generic<TProperty, TUnderlyingType>(game, l, vProp, vDst, duration, fLerp);
 }
-
 luabind::object Lua::util::fade_property(lua_State *l, LColorProperty &colProp, const ::Color &colDst, float duration)
 {
 	auto &game = *pragma::Engine::Get()->GetNetworkState(l)->GetGameState();
@@ -1411,7 +1277,6 @@ luabind::object Lua::util::fade_property(lua_State *l, LColorProperty &colProp, 
 	auto hsvDst = ::util::rgb_to_hsv(colDst);
 	auto aSrc = (*colProp)->a;
 	auto aDst = colDst.a;
-
 	auto tStart = game.RealTime();
 	auto cb = FunctionCallback<void>::Create(nullptr);
 	cb.get<Callback<void>>()->SetFunction([&game, tStart, duration, colProp, hsvSrc, hsvDst, aSrc, aDst, cb]() mutable {
@@ -1429,39 +1294,33 @@ luabind::object Lua::util::fade_property(lua_State *l, LColorProperty &colProp, 
 	game.AddCallback("Think", cb);
 	return luabind::object {l, cb};
 }
-
 luabind::object Lua::util::fade_property(lua_State *l, LVector2Property &vProp, const ::Vector2 &vDst, float duration)
 {
 	auto &game = *pragma::Engine::Get()->GetNetworkState(l)->GetGameState();
 	return fade_vector_property_generic<LVector2Property, ::Vector2>(game, l, vProp, vDst, duration, [](const ::Vector2 &a, const ::Vector2 &b, float factor) -> ::Vector2 { return ::Vector2 {umath::lerp(a.x, b.x, factor), umath::lerp(a.y, b.y, factor)}; });
 }
-
 luabind::object Lua::util::fade_property(lua_State *l, LVector2iProperty &vProp, const ::Vector2i &vDst, float duration)
 {
 	auto &game = *pragma::Engine::Get()->GetNetworkState(l)->GetGameState();
 	return fade_vector_property_generic<LVector2iProperty, ::Vector2i>(game, l, vProp, vDst, duration,
 	  [](const ::Vector2i &a, const ::Vector2i &b, float factor) -> ::Vector2i { return ::Vector2i {static_cast<int32_t>(umath::lerp(a.x, b.x, factor)), static_cast<int32_t>(umath::lerp(a.y, b.y, factor))}; });
 }
-
 luabind::object Lua::util::fade_property(lua_State *l, LVector3Property &vProp, const ::Vector3 &vDst, float duration)
 {
 	auto &game = *pragma::Engine::Get()->GetNetworkState(l)->GetGameState();
 	return fade_vector_property_generic<LVector3Property, Vector3>(game, l, vProp, vDst, duration, uvec::lerp);
 }
-
 luabind::object Lua::util::fade_property(lua_State *l, LVector3iProperty &vProp, const ::Vector3i &vDst, float duration)
 {
 	auto &game = *pragma::Engine::Get()->GetNetworkState(l)->GetGameState();
 	return fade_vector_property_generic<LVector3iProperty, ::Vector3i>(game, l, vProp, vDst, duration, uvec::lerp);
 }
-
 luabind::object Lua::util::fade_property(lua_State *l, LVector4Property &vProp, const ::Vector4 &vDst, float duration)
 {
 	auto &game = *pragma::Engine::Get()->GetNetworkState(l)->GetGameState();
 	return fade_vector_property_generic<LVector4Property, ::Vector4>(game, l, vProp, vDst, duration,
 	  [](const ::Vector4 &a, const ::Vector4 &b, float factor) -> ::Vector4 { return ::Vector4 {umath::lerp(a.x, b.x, factor), umath::lerp(a.y, b.y, factor), umath::lerp(a.z, b.z, factor), umath::lerp(a.w, b.w, factor)}; });
 }
-
 luabind::object Lua::util::fade_property(lua_State *l, LVector4iProperty &vProp, const ::Vector4i &vDst, float duration)
 {
 	auto &game = *pragma::Engine::Get()->GetNetworkState(l)->GetGameState();
@@ -1469,54 +1328,44 @@ luabind::object Lua::util::fade_property(lua_State *l, LVector4iProperty &vProp,
 		return ::Vector4i {static_cast<int32_t>(umath::lerp(a.x, b.x, factor)), static_cast<int32_t>(umath::lerp(a.y, b.y, factor)), static_cast<int32_t>(umath::lerp(a.z, b.z, factor)), static_cast<int32_t>(umath::lerp(a.w, b.w, factor))};
 	});
 }
-
 luabind::object Lua::util::fade_property(lua_State *l, LQuatProperty &vProp, const ::Quat &vDst, float duration)
 {
 	auto &game = *pragma::Engine::Get()->GetNetworkState(l)->GetGameState();
 	return fade_vector_property_generic<LQuatProperty, Quat>(game, l, vProp, vDst, duration, uquat::slerp);
 }
-
 luabind::object Lua::util::fade_property(lua_State *l, LEulerAnglesProperty &vProp, const ::EulerAngles &vDst, float duration)
 {
 	auto &game = *pragma::Engine::Get()->GetNetworkState(l)->GetGameState();
 	return fade_vector_property_generic<LEulerAnglesProperty, ::EulerAngles>(game, l, vProp, vDst, duration,
 	  [](const ::EulerAngles &a, const ::EulerAngles &b, float factor) -> ::EulerAngles { return ::EulerAngles {static_cast<float>(umath::lerp_angle(a.p, b.p, factor)), static_cast<float>(umath::lerp_angle(a.y, b.y, factor)), static_cast<float>(umath::lerp_angle(a.r, b.r, factor))}; });
 }
-
 luabind::object Lua::util::fade_property(lua_State *l, LGenericIntPropertyWrapper &vProp, const int64_t &vDst, float duration)
 {
 	auto &game = *pragma::Engine::Get()->GetNetworkState(l)->GetGameState();
 	return fade_vector_property_generic<LGenericIntPropertyWrapper, int64_t>(game, l, vProp, vDst, duration, [](const int64_t &a, const int64_t &b, float factor) -> int64_t { return umath::lerp(a, b, factor); });
 }
-
 luabind::object Lua::util::fade_property(lua_State *l, LGenericFloatPropertyWrapper &vProp, const double &vDst, float duration)
 {
 	auto &game = *pragma::Engine::Get()->GetNetworkState(l)->GetGameState();
 	return fade_vector_property_generic<LGenericFloatPropertyWrapper, double>(game, l, vProp, vDst, duration, [](const double &a, const double &b, float factor) -> double { return umath::lerp(a, b, factor); });
 }
-
 std::string Lua::util::round_string(lua_State *l, float value) { return round_string(l, value, 0); }
 std::string Lua::util::round_string(lua_State *l, float value, uint32_t places) { return ::util::round_string(value, places); }
-
 std::string Lua::util::get_type_name(lua_State *l, const luabind::object &o)
 {
 	if(Lua::IsSet(l, 1) == false)
 		return Lua::IsNone(l, 1) ? "none" : "nil";
-
 	auto *crep = Lua::get_crep(o);
 	if(crep)
 		return crep->name();
 	return lua_typename(l, lua_type(l, -1));
 }
-
 std::string Lua::util::variable_type_to_string(::util::VarType varType) { return ::util::variable_type_to_string(varType); }
 std::string Lua::util::get_string_hash(const std::string &str) { return std::to_string(std::hash<std::string> {}(str)); }
-
 luabind::object Lua::util::get_class_value(lua_State *l, const luabind::object &oClass, const std::string &key)
 {
 	int32_t t = 1;
 	Lua::CheckUserData(l, t);
-
 	auto n = Lua::GetStackTop(l);
 	Lua::PushString(l, key);                    /* 1 */
 	auto r = Lua::GetProtectedTableValue(l, t); /* 2 */
@@ -1530,7 +1379,6 @@ luabind::object Lua::util::get_class_value(lua_State *l, const luabind::object &
 	Lua::Pop(l);
 	return ro;
 }
-
 Lua::var<bool, ::util::ParallelJob<luabind::object>> Lua::util::pack_zip_archive(lua_State *l, pragma::Game &game, const std::string &pzipFileName, const luabind::table<> &t)
 {
 	auto zipFileName = pzipFileName;
@@ -1538,7 +1386,6 @@ Lua::var<bool, ::util::ParallelJob<luabind::object>> Lua::util::pack_zip_archive
 	zipFileName += ".zip";
 	if(Lua::file::validate_write_operation(l, zipFileName) == false)
 		return luabind::object {l, false};
-
 	std::unordered_map<std::string, std::string> files {};
 	std::unordered_map<std::string, std::string> customTextFiles {};
 	std::unordered_map<std::string, ::DataStream> customBinaryFiles {};
@@ -1569,10 +1416,8 @@ Lua::var<bool, ::util::ParallelJob<luabind::object>> Lua::util::pack_zip_archive
 			}
 		}
 	}
-
 	filemanager::create_path(ufile::get_path_from_filename(zipFileName));
 	auto absFilePath = ::util::FilePath(filemanager::get_program_write_path(), zipFileName).GetString();
-
 	std::string err;
 	auto zip = uzip::ZIPFile::Open(absFilePath, err, uzip::OpenMode::Write);
 	if(zip == nullptr) {
@@ -1580,7 +1425,6 @@ Lua::var<bool, ::util::ParallelJob<luabind::object>> Lua::util::pack_zip_archive
 		return luabind::object {l, false};
 	}
 	auto pzip = std::shared_ptr<uzip::ZIPFile> {std::move(zip)};
-
 	struct ResultData {
 		std::vector<std::string> notFound;
 	};
@@ -1630,7 +1474,6 @@ Lua::var<bool, ::util::ParallelJob<luabind::object>> Lua::util::pack_zip_archive
 		incrementFileIndex();
 		pzip->SetPackProgressCallback([&worker](double progress) { worker.UpdateProgress(0.05f + progress * 0.95f); });
 		pzip = nullptr;
-
 		if(!worker.IsCancelled()) {
 			ResultData resultData {};
 			resultData.notFound = std::move(notFound);
@@ -1651,7 +1494,6 @@ Lua::var<bool, ::util::ParallelJob<luabind::object>> Lua::util::pack_zip_archive
 	  1.f);
 	return luabind::object {l, jobWrapper};
 }
-
 std::string Lua::util::get_addon_path(lua_State *l, const std::string &relPath)
 {
 	std::string rpath;
@@ -1661,14 +1503,12 @@ std::string Lua::util::get_addon_path(lua_State *l, const std::string &relPath)
 		return relPath;
 	return rpath;
 }
-
 std::string Lua::util::get_addon_path(lua_State *l)
 {
 	auto path = Lua::get_current_file(l);
 	ustring::replace(path, "\\", "/");
 	if(ustring::compare(path.c_str(), "addons/", false, 7) == false)
 		return "";
-
 	// Get path up to addon directory
 	auto br = path.find('/', 7);
 	if(br != std::string::npos)

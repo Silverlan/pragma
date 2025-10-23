@@ -14,13 +14,7 @@ module;
 #include "cassert"
 
 #include "pragma/logging.hpp"
-
-
 #include "pragma/networkdefinitions.h"
-
-
-
-
 
 module pragma.shared;
 

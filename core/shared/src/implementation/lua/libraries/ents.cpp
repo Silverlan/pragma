@@ -3,26 +3,14 @@
 
 module;
 
-
 #include <memory>
 #include <functional>
 #include <functional>
-
 #include <sharedutils/magic_enum.hpp>
-
 #include "pragma/lua/core.hpp"
-
 #include "sstream"
-
-
 #include "memory"
-
 #include "algorithm"
-
-
-
-
-
 
 module pragma.shared;
 

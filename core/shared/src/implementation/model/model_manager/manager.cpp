@@ -1,28 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
-
 
 #include <memory>
 #include <functional>
 #include <functional>
-
 #include <string>
-
 #include "memory"
-
 #include "algorithm"
-
 #include "cassert"
 
-
-
-
 module pragma.shared;
-
 import :model.model_manager;
-
 pragma::asset::IModelFormatHandler::IModelFormatHandler(util::IAssetManager &assetManager) : util::IAssetFormatHandler {assetManager} {}
 bool pragma::asset::IModelFormatHandler::LoadData(ModelProcessor &processor, ModelLoadInfo &info)
 {
@@ -35,16 +24,13 @@ bool pragma::asset::IModelFormatHandler::LoadData(ModelProcessor &processor, Mod
 	}
 	return model != nullptr;
 }
-
 ///////////
-
 pragma::asset::PmdlFormatHandler::PmdlFormatHandler(util::IAssetManager &assetManager) : IModelFormatHandler {assetManager} {}
 bool pragma::asset::PmdlFormatHandler::LoadData(ModelProcessor &processor, ModelLoadInfo &info)
 {
 	auto &mdlManager = static_cast<ModelManager &>(GetAssetManager());
 	auto &nw = mdlManager.GetNetworkState();
 	auto &game = *nw.GetGameState();
-
 	auto udm = util::load_udm_asset(std::move(m_file));
 	if(udm == nullptr)
 		return false;
@@ -61,9 +47,7 @@ bool pragma::asset::PmdlFormatHandler::LoadData(ModelProcessor &processor, Model
 	model = mdl;
 	return IModelFormatHandler::LoadData(processor, info);
 }
-
 ///////////
-
 std::unique_ptr<util::IAssetProcessor> pragma::asset::ModelLoader::CreateAssetProcessor(const std::string &identifier, const std::string &ext, std::unique_ptr<util::IAssetFormatHandler> &&formatHandler)
 {
 	auto processor = util::TAssetFormatLoader<ModelProcessor>::CreateAssetProcessor(identifier, ext, std::move(formatHandler));
@@ -72,9 +56,7 @@ std::unique_ptr<util::IAssetProcessor> pragma::asset::ModelLoader::CreateAssetPr
 	mdlProcessor.formatExtension = ext;
 	return processor;
 }
-
 ///////////
-
 pragma::asset::ModelLoadInfo::ModelLoadInfo(util::AssetLoadFlags flags) : util::AssetLoadInfo {flags} {}
 pragma::asset::ModelProcessor::ModelProcessor(util::AssetFormatLoader &loader, std::unique_ptr<util::IAssetFormatHandler> &&handler) : util::FileAssetProcessor {loader, std::move(handler)} {}
 bool pragma::asset::ModelProcessor::Load()
@@ -95,7 +77,6 @@ bool pragma::asset::ModelProcessor::Finalize()
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("load_model_update_buffers");
 #endif
-
 	auto &assetManager = static_cast<ModelManager &>(handler->GetAssetManager());
 	auto &includes = model->GetMetaInfo().includes;
 	if(!includes.empty()) {
@@ -109,14 +90,12 @@ bool pragma::asset::ModelProcessor::Finalize()
 		}
 		model->Update(); // Need to update again
 	}
-
 	model->Update(pragma::model::ModelUpdateFlags::UpdateBuffers | pragma::model::ModelUpdateFlags::UpdateChildren);
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().EndTask();
 #endif
 	return true;
 }
-
 static const std::vector<std::string> &get_model_extensions()
 {
 	static std::vector<std::string> extensions {};
@@ -135,7 +114,6 @@ static const std::vector<std::string> &get_model_extensions()
 	}
 	return extensions;
 }
-
 /*std::optional<util::AssetLoadJobId> pragma::asset::ModelLoader::AddJob(
 	NetworkState &nw,const std::string &identifier,const std::string &ext,const std::unique_ptr<ufile::IFile> &file,util::AssetLoadJobPriority priority
 )
@@ -144,7 +122,6 @@ static const std::vector<std::string> &get_model_extensions()
 	auto processor = std::make_unique<ModelProcessor>(nw,*this,std::move(file));
 	return IAssetLoader::AddJob(identifier,std::move(processor),priority);
 }*/
-
 pragma::asset::ModelManager::ModelManager(NetworkState &nw) : m_nw {nw}
 {
 	auto fileHandler = std::make_unique<util::AssetFileHandler>();
@@ -161,17 +138,14 @@ pragma::asset::ModelManager::ModelManager(NetworkState &nw) : m_nw {nw}
 	SetFileHandler(std::move(fileHandler));
 	SetRootDirectory("models");
 	m_loader = std::make_unique<ModelLoader>(*this);
-
 	RegisterFormatHandler<PmdlFormatHandler>("pmdl_b");
 	RegisterFormatHandler<PmdlFormatHandler>("pmdl");
 	RegisterFormatHandler<WmdFormatHandler>("wmd"); // Legacy format
-
 	// Import formats
 	RegisterImportHandler<SourceMdlFormatHandler>("mdl");
 	RegisterImportHandler<Source2VmdlFormatHandler>("vmdl_c");
 	RegisterImportHandler<NifFormatHandler>("nif");
 	RegisterImportHandler<PmxFormatHandler>("pmx");
-
 	auto addBlenderFormatHandler = [this](std::string ext) { return RegisterImportHandler(ext, [ext](util::IAssetManager &assetManager) -> std::unique_ptr<util::IImportAssetFormatHandler> { return std::make_unique<BlenderFormatHandler>(assetManager, ext); }); };
 	addBlenderFormatHandler("blend");
 	addBlenderFormatHandler("fbx");
@@ -180,7 +154,6 @@ pragma::asset::ModelManager::ModelManager(NetworkState &nw) : m_nw {nw}
 	addBlenderFormatHandler("obj");
 	addBlenderFormatHandler("abc");
 	addBlenderFormatHandler("usd");
-
 	auto &assetManager = pragma::get_engine()->GetAssetManager();
 	auto numImporters = assetManager.GetImporterCount(pragma::asset::Type::Model);
 	for(auto i = decltype(numImporters) {0u}; i < numImporters; ++i) {
@@ -203,7 +176,6 @@ std::shared_ptr<pragma::Model> pragma::asset::ModelManager::CreateModel(const st
 	auto mdl = CreateModel(boneCount, name);
 	auto &skeleton = mdl->GetSkeleton();
 	auto reference = pragma::animation::Animation::Create();
-
 	if(bAddReference == true) {
 		auto frame = Frame::Create(1);
 		auto *root = new pragma::animation::Bone;
@@ -213,23 +185,18 @@ std::shared_ptr<pragma::Model> pragma::asset::ModelManager::CreateModel(const st
 		auto &rootBones = skeleton.GetRootBones();
 		rootBones[0] = skeleton.GetBone(rootID).lock();
 		reference->AddBoneId(0);
-
 		frame->SetBonePosition(0, Vector3(0.f, 0.f, 0.f));
 		frame->SetBoneOrientation(0, uquat::identity());
-
 		auto refFrame = Frame::Create(*frame);
 		frame->Localize(*reference, skeleton);
 		reference->AddFrame(frame);
 		mdl->AddAnimation("reference", reference);
 		mdl->SetReference(refFrame);
-
 		auto &baseMeshes = mdl->GetBaseMeshes();
 		baseMeshes.push_back(0);
 		mdl->AddMeshGroup("reference");
-
 		mdl->CreateTextureGroup();
 	}
-
 	if(addToCache) {
 		auto asset = std::make_shared<util::Asset>();
 		asset->assetObject = mdl;
@@ -259,7 +226,6 @@ bool pragma::asset::ModelManager::PrecacheModel(const std::string &mdlName) cons
 std::shared_ptr<pragma::Model> pragma::asset::ModelManager::LoadModel(FWMD &wmd,const std::string &mdlName) const
 {
 
-
 }
 std::shared_ptr<pragma::Model> pragma::asset::ModelManager::LoadModel(const std::string &cacheName,const std::shared_ptr<ufile::IFile> &file,const std::string &ext)
 {
@@ -268,9 +234,7 @@ std::shared_ptr<pragma::Model> pragma::asset::ModelManager::LoadModel(const std:
 		return GetAssetObject(*asset);
 	auto fp = std::make_unique<fsys::File>(file);
 	auto jobId = m_loader->AddJob(m_nw,cacheName,ext,std::move(fp));
-
 	return jobId.has_value();
-
 	mdl->Update();
 	AddToCache(mdlName,std::make_shared<ModelAsset>(mdl));
 	if(outIsNewModel != nullptr)
@@ -285,34 +249,24 @@ std::shared_ptr<pragma::Model> pragma::asset::ModelManager::LoadModel(const std:
 	if(bReload == false)
 	{
 		FlagForRemoval(mdlName,false);
-
 		auto *asset = FindCachedAsset(mdlName);
 		if(asset)
 			return static_cast<ModelAsset*>(asset)->model;
 	}
-
 	assert(m_nw.GetGameState());
 	//FWMD wmdLoader {m_nw.GetGameState()};
 	//auto mdl = LoadModel(wmdLoader,ToCacheIdentifier(mdlName));
-
 	std::string pathCache(pmodel);
 	// std::transform(pathCache.begin(),pathCache.end(),pathCache.begin(),::tolower);
-
 	auto model = pmodel;
 	
 	std::string ext;
 	auto mdlPath = pragma::asset::find_file(pathCache,pragma::asset::Type::Model,&ext);
 	if(mdlPath.has_value())
 		model = *mdlPath;
-
 	std::string path = "models\\";
 	path += model;
-
 	ustring::to_lower(ext);
-
-
-
-
 
 
 

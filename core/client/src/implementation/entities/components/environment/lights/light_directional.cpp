@@ -114,7 +114,7 @@ void CLightDirectionalComponent::Initialize()
 	if(pTrComponent != nullptr) {
 		Vector3 pos = pTrComponent->GetPosition();
 		auto dir = pTrComponent->GetForward();
-		SetViewMatrix(glm::lookAtRH(pos, pos + dir, uvec::get_perpendicular(dir)));
+		SetViewMatrix(glm::gtc::lookAtRH(pos, pos + dir, uvec::get_perpendicular(dir)));
 		auto &trC = static_cast<CTransformComponent &>(*pTrComponent);
 		FlagCallbackForRemoval(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,
 		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
@@ -292,7 +292,7 @@ void CLightDirectionalComponent::OnEntityComponentAdded(BaseEntityComponent &com
 			                         if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::RotationChanged) == false)
 				                         return util::EventReply::Unhandled;
 			                         auto dir = uquat::forward(trC.GetRotation());
-			                         SetViewMatrix(glm::lookAtRH(trC.GetPosition(), trC.GetPosition() + dir, uvec::get_perpendicular(dir)));
+			                         SetViewMatrix(glm::gtc::lookAtRH(trC.GetPosition(), trC.GetPosition() + dir, uvec::get_perpendicular(dir)));
 
 			                         //auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
 			                         //if(pLightComponent.valid())

@@ -3,10 +3,12 @@
 
 module;
 
-#include <luabind/detail/conversion_policies/native_converter.hpp>
+#include "pragma/lua/core.hpp"
 #include <optional>
 
 export module pragma.shared:scripting.lua.converters.optional;
+
+export import luabind;
 
 export namespace luabind {
 	template<typename T>

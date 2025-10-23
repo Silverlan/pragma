@@ -3,16 +3,12 @@
 
 module;
 
-#include <luabind/pointer_traits.hpp>
-#include <luabind/detail/policy.hpp>
-#include <luabind/detail/conversion_policies/value_converter.hpp> // for default_converter, etc
-#include <luabind/get_main_thread.hpp>                            // for get_main_thread
-#include <luabind/handle.hpp>                                     // for handle
-#include <luabind/detail/decorate_type.hpp>                       // for decorated_type
+#include "pragma/lua/core.hpp"
 #include <memory>
 
 export module pragma.shared:scripting.lua.handles;
 
+export import luabind;
 export import pragma.util;
 
 // Note: get_const_holder and get_pointer have to be defined

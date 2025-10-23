@@ -6,6 +6,8 @@
 
 module;
 
+#include <sharedutils/magic_enum.hpp>
+
 #include "sstream"
 
 
@@ -30,11 +32,8 @@ module;
 
 
 
-#include <luabind/iterator_policy.hpp>
 
-#include <luabind/copy_policy.hpp>
 
-#include <luabind/detail/type_traits.hpp>
 
 
 
@@ -672,11 +671,11 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 
 	  });
 
-	classDefRayCastResult.add_static_constant("HIT_TYPE_BLOCK", umath::to_integral(RayCastHitType::Block));
+	classDefRayCastResult.add_static_constant("HIT_TYPE_BLOCK", umath::to_integral(pragma::physics::RayCastHitType::Block));
 
-	classDefRayCastResult.add_static_constant("HIT_TYPE_TOUCH", umath::to_integral(RayCastHitType::Touch));
+	classDefRayCastResult.add_static_constant("HIT_TYPE_TOUCH", umath::to_integral(pragma::physics::RayCastHitType::Touch));
 
-	classDefRayCastResult.add_static_constant("HIT_TYPE_NONE", umath::to_integral(RayCastHitType::None));
+	classDefRayCastResult.add_static_constant("HIT_TYPE_NONE", umath::to_integral(pragma::physics::RayCastHitType::None));
 
 	classDefRayCastResult.def_readonly("hitType", reinterpret_cast<std::underlying_type_t<decltype(TraceResult::hitType)> TraceResult::*>(&TraceResult::hitType));
 
@@ -686,7 +685,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 
 			return;
 
-		lua_pushentity(l, tr.entity);
+		tr.entity->GetLuaObject().push(l);
 
 	}));
 

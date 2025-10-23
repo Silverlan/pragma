@@ -6,8 +6,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
 #include "pragma/logging.hpp"
-#include <fmt/core.h>
 #include <string>
+#include <format>
 
 export module pragma.shared:scripting.lua.logging;
 
@@ -25,7 +25,7 @@ export namespace Lua::logging {
 			args[i] = to_string(l, argOffset + (i + 1));
 
 		auto &logger = pragma::register_logger(loggerIdentifier);
-		auto log = [&](const auto &...elements) { logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(elements...))); };
+		auto log = [&](const auto &...elements) { logger.log(logLevel, std::vformat(msg, std::make_format_args(elements...))); };
 		std::apply(log, args);
 	}
 

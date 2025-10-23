@@ -9,6 +9,7 @@ module;
 
 export module pragma.shared:scripting.lua.libraries.geometry;
 
+export import luabind;
 export import pragma.math;
 
 export namespace Lua {

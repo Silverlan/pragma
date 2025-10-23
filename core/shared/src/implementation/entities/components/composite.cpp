@@ -5,7 +5,7 @@ module;
 #include <string>
 
 #include "algorithm"
-
+#include <memory>
 
 
 #include <unordered_set>

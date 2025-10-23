@@ -232,22 +232,22 @@ class RagDoll {
 
 		transform.setIdentity();
 		transform.setOrigin(scale * btVector3(btScalar(-0.35), btScalar(1.45), btScalar(0.)));
-		transform.getBasis().setEulerZYX(0, 0, M_PI_2);
+		transform.getBasis().setEulerZYX(0, 0, umath::pi_2);
 		m_bodies[BODYPART_LEFT_UPPER_ARM] = createRigidBody(btScalar(1.), offset * transform, m_shapes[BODYPART_LEFT_UPPER_ARM]);
 
 		transform.setIdentity();
 		transform.setOrigin(scale * btVector3(btScalar(-0.7), btScalar(1.45), btScalar(0.)));
-		transform.getBasis().setEulerZYX(0, 0, M_PI_2);
+		transform.getBasis().setEulerZYX(0, 0, umath::pi_2);
 		m_bodies[BODYPART_LEFT_LOWER_ARM] = createRigidBody(btScalar(1.), offset * transform, m_shapes[BODYPART_LEFT_LOWER_ARM]);
 
 		transform.setIdentity();
 		transform.setOrigin(scale * btVector3(btScalar(0.35), btScalar(1.45), btScalar(0.)));
-		transform.getBasis().setEulerZYX(0, 0, -M_PI_2);
+		transform.getBasis().setEulerZYX(0, 0, -umath::pi_2);
 		m_bodies[BODYPART_RIGHT_UPPER_ARM] = createRigidBody(btScalar(1.), offset * transform, m_shapes[BODYPART_RIGHT_UPPER_ARM]);
 
 		transform.setIdentity();
 		transform.setOrigin(scale * btVector3(btScalar(0.7), btScalar(1.45), btScalar(0.)));
-		transform.getBasis().setEulerZYX(0, 0, -M_PI_2);
+		transform.getBasis().setEulerZYX(0, 0, -umath::pi_2);
 		m_bodies[BODYPART_RIGHT_LOWER_ARM] = createRigidBody(btScalar(1.), offset * transform, m_shapes[BODYPART_RIGHT_LOWER_ARM]);
 
 		// Setup some damping on the m_bodies
@@ -267,9 +267,9 @@ class RagDoll {
 
 		localA.setIdentity();
 		localB.setIdentity();
-		localA.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localA.getBasis().setEulerZYX(0, umath::pi_2, 0);
 		localA.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.15), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localB.getBasis().setEulerZYX(0, umath::pi_2, 0);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.15), btScalar(0.)));
 
 		std::vector<btRigidBody *> rigidBodies;
@@ -277,84 +277,84 @@ class RagDoll {
 			rigidBodies.push_back(static_cast<PhysRigidBody *>(hBody.get())->GetRigidBody());
 
 		hingeC = physEnv->AddHingeConstraint(new btHingeConstraint(*rigidBodies[BODYPART_PELVIS], *rigidBodies[BODYPART_SPINE], localA, localB));
-		hingeC->SetLimit(btScalar(-M_PI_4), btScalar(M_PI_2));
+		hingeC->SetLimit(btScalar(-umath::pi_4), btScalar(umath::pi_2));
 		m_joints[JOINT_PELVIS_SPINE] = hingeC;
 		hingeC->DisableCollisions();
 
 		localA.setIdentity();
 		localB.setIdentity();
-		localA.getBasis().setEulerZYX(0, 0, M_PI_2);
+		localA.getBasis().setEulerZYX(0, 0, umath::pi_2);
 		localA.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.30), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, 0, M_PI_2);
+		localB.getBasis().setEulerZYX(0, 0, umath::pi_2);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.14), btScalar(0.)));
 		coneC = physEnv->AddConeTwistConstraint(new btConeTwistConstraint(*rigidBodies[BODYPART_SPINE], *rigidBodies[BODYPART_HEAD], localA, localB));
-		coneC->SetLimit(M_PI_4, M_PI_4, M_PI_2);
+		coneC->SetLimit(umath::pi_4, umath::pi_4, umath::pi_2);
 		m_joints[JOINT_SPINE_HEAD] = coneC;
 		coneC->DisableCollisions();
 
 		localA.setIdentity();
 		localB.setIdentity();
-		localA.getBasis().setEulerZYX(0, 0, -M_PI_4 * 5);
+		localA.getBasis().setEulerZYX(0, 0, -umath::pi_4 * 5);
 		localA.setOrigin(scale * btVector3(btScalar(-0.18), btScalar(-0.10), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, 0, -M_PI_4 * 5);
+		localB.getBasis().setEulerZYX(0, 0, -umath::pi_4 * 5);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.225), btScalar(0.)));
 		coneC = physEnv->AddConeTwistConstraint(new btConeTwistConstraint(*rigidBodies[BODYPART_PELVIS], *rigidBodies[BODYPART_LEFT_UPPER_LEG], localA, localB));
-		coneC->SetLimit(M_PI_4, M_PI_4, 0);
+		coneC->SetLimit(umath::pi_4, umath::pi_4, 0);
 		m_joints[JOINT_LEFT_HIP] = coneC;
 		coneC->DisableCollisions();
 
 		localA.setIdentity();
 		localB.setIdentity();
-		localA.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localA.getBasis().setEulerZYX(0, umath::pi_2, 0);
 		localA.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.225), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localB.getBasis().setEulerZYX(0, umath::pi_2, 0);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.185), btScalar(0.)));
 		hingeC = physEnv->AddHingeConstraint(new btHingeConstraint(*rigidBodies[BODYPART_LEFT_UPPER_LEG], *rigidBodies[BODYPART_LEFT_LOWER_LEG], localA, localB));
-		hingeC->SetLimit(btScalar(0), btScalar(M_PI_2));
+		hingeC->SetLimit(btScalar(0), btScalar(umath::pi_2));
 		m_joints[JOINT_LEFT_KNEE] = hingeC;
 		hingeC->DisableCollisions();
 
 		localA.setIdentity();
 		localB.setIdentity();
-		localA.getBasis().setEulerZYX(0, 0, M_PI_4);
+		localA.getBasis().setEulerZYX(0, 0, umath::pi_4);
 		localA.setOrigin(scale * btVector3(btScalar(0.18), btScalar(-0.10), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, 0, M_PI_4);
+		localB.getBasis().setEulerZYX(0, 0, umath::pi_4);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.225), btScalar(0.)));
 		coneC = physEnv->AddConeTwistConstraint(new btConeTwistConstraint(*rigidBodies[BODYPART_PELVIS], *rigidBodies[BODYPART_RIGHT_UPPER_LEG], localA, localB));
-		coneC->SetLimit(M_PI_4, M_PI_4, 0);
+		coneC->SetLimit(umath::pi_4, umath::pi_4, 0);
 		m_joints[JOINT_RIGHT_HIP] = coneC;
 		coneC->DisableCollisions();
 
 		localA.setIdentity();
 		localB.setIdentity();
-		localA.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localA.getBasis().setEulerZYX(0, umath::pi_2, 0);
 		localA.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.225), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localB.getBasis().setEulerZYX(0, umath::pi_2, 0);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.185), btScalar(0.)));
 		hingeC = physEnv->AddHingeConstraint(new btHingeConstraint(*rigidBodies[BODYPART_RIGHT_UPPER_LEG], *rigidBodies[BODYPART_RIGHT_LOWER_LEG], localA, localB));
-		hingeC->SetLimit(btScalar(0), btScalar(M_PI_2));
+		hingeC->SetLimit(btScalar(0), btScalar(umath::pi_2));
 		m_joints[JOINT_RIGHT_KNEE] = hingeC;
 		hingeC->DisableCollisions();
 
 		localA.setIdentity();
 		localB.setIdentity();
-		localA.getBasis().setEulerZYX(0, 0, M_PI);
+		localA.getBasis().setEulerZYX(0, 0, umath::pi);
 		localA.setOrigin(scale * btVector3(btScalar(-0.2), btScalar(0.15), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, 0, M_PI_2);
+		localB.getBasis().setEulerZYX(0, 0, umath::pi_2);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.18), btScalar(0.)));
 		coneC = physEnv->AddConeTwistConstraint(new btConeTwistConstraint(*rigidBodies[BODYPART_SPINE], *rigidBodies[BODYPART_LEFT_UPPER_ARM], localA, localB));
-		coneC->SetLimit(M_PI_2, M_PI_2, 0);
+		coneC->SetLimit(umath::pi_2, umath::pi_2, 0);
 		m_joints[JOINT_LEFT_SHOULDER] = coneC;
 		coneC->DisableCollisions();
 
 		localA.setIdentity();
 		localB.setIdentity();
-		localA.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localA.getBasis().setEulerZYX(0, umath::pi_2, 0);
 		localA.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.18), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localB.getBasis().setEulerZYX(0, umath::pi_2, 0);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.14), btScalar(0.)));
 		hingeC = physEnv->AddHingeConstraint(new btHingeConstraint(*rigidBodies[BODYPART_LEFT_UPPER_ARM], *rigidBodies[BODYPART_LEFT_LOWER_ARM], localA, localB));
-		hingeC->SetLimit(btScalar(-M_PI_2), btScalar(0));
+		hingeC->SetLimit(btScalar(-umath::pi_2), btScalar(0));
 		m_joints[JOINT_LEFT_ELBOW] = hingeC;
 		hingeC->DisableCollisions();
 
@@ -362,21 +362,21 @@ class RagDoll {
 		localB.setIdentity();
 		localA.getBasis().setEulerZYX(0, 0, 0);
 		localA.setOrigin(scale * btVector3(btScalar(0.2), btScalar(0.15), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, 0, M_PI_2);
+		localB.getBasis().setEulerZYX(0, 0, umath::pi_2);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.18), btScalar(0.)));
 		coneC = physEnv->AddConeTwistConstraint(new btConeTwistConstraint(*rigidBodies[BODYPART_SPINE], *rigidBodies[BODYPART_RIGHT_UPPER_ARM], localA, localB));
-		coneC->SetLimit(M_PI_2, M_PI_2, 0);
+		coneC->SetLimit(umath::pi_2, umath::pi_2, 0);
 		m_joints[JOINT_RIGHT_SHOULDER] = coneC;
 		coneC->DisableCollisions();
 
 		localA.setIdentity();
 		localB.setIdentity();
-		localA.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localA.getBasis().setEulerZYX(0, umath::pi_2, 0);
 		localA.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.18), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localB.getBasis().setEulerZYX(0, umath::pi_2, 0);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.14), btScalar(0.)));
 		hingeC = physEnv->AddHingeConstraint(new btHingeConstraint(*rigidBodies[BODYPART_RIGHT_UPPER_ARM], *rigidBodies[BODYPART_RIGHT_LOWER_ARM], localA, localB));
-		hingeC->SetLimit(btScalar(-M_PI_2), btScalar(0));
+		hingeC->SetLimit(btScalar(-umath::pi_2), btScalar(0));
 		m_joints[JOINT_RIGHT_ELBOW] = hingeC;
 		hingeC->DisableCollisions();
 	}

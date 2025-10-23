@@ -8,6 +8,7 @@ module;
 
 export module pragma.shared:scripting.lua.classes.vector;
 
+export import luabind;
 export import pragma.math;
 
 export namespace Lua {

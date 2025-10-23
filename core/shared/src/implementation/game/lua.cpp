@@ -10,7 +10,6 @@ module;
 #include <chrono>
 #include "pragma/networkdefinitions.h"
 
-#include <luabind/exception_handler.hpp>
 
 module pragma.shared;
 

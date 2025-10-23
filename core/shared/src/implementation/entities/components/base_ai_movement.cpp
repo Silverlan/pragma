@@ -11,8 +11,8 @@ module;
 
 
 #include "cassert"
-
-
+#include <cmath>
+#include <string>
 
 
 
@@ -791,7 +791,7 @@ void BaseAIComponent::PathStep(float)
 
 		auto moveTarget = m_entity->GetPosition() +50.f *dirTest;//(uvec::length(m_entity->GetVelocity()) *tDelta) *dirTest;
 
-		moveTarget = (*p1) +glm::proj(moveTarget -(*p1),(*p2) -(*p1));
+		moveTarget = (*p1) +glm::gtx::proj(moveTarget -(*p1),(*p2) -(*p1));
 
 
 
@@ -903,7 +903,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 
 	const auto fCheckForObstruction = [this, &pTrComponent, &dir, t](TraceResult &r) -> bool {
 
-		if(r.hitType != RayCastHitType::None && (r.entity.valid() == false || IsObstruction(*r.entity.get()))) // Obstructed
+		if(r.hitType != pragma::physics::RayCastHitType::None && (r.entity.valid() == false || IsObstruction(*r.entity.get()))) // Obstructed
 
 		{
 
@@ -911,7 +911,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 
 			auto aimDir = pTrComponent->GetForward();
 
-			auto newDir = aimDir - glm::proj(aimDir, r.normal);
+			auto newDir = aimDir - glm::gtx::proj(aimDir, r.normal);
 
 			uvec::normalize(&newDir);
 

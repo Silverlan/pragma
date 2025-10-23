@@ -4,6 +4,12 @@
 module;
 
 
+#include <memory>
+#include <functional>
+#include <functional>
+
+#include <sharedutils/magic_enum.hpp>
+
 #include "pragma/lua/core.hpp"
 
 #include "sstream"
@@ -678,9 +684,9 @@ Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_trigger(lua_State *l, const
 
 	auto extents = max - min;
 	auto center = (max + min) * 0.5f;
-	origin += center;
+	auto centerOrigin = origin +center;
 	auto shape = phys->CreateBoxShape(extents * 0.5f, phys->GetGenericMaterial());
-	return Lua::ents::create_trigger(l, origin, &angles, shape.get());
+	return Lua::ents::create_trigger(l, centerOrigin, &angles, shape.get());
 }
 
 static Lua::tb<Lua::type<pragma::ecs::BaseEntity>> entities_to_table(lua_State *l, std::vector<pragma::ecs::BaseEntity *> &ents)

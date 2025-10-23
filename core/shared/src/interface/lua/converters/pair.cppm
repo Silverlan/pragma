@@ -4,9 +4,11 @@
 module;
 
 #include "pragma/lua/core.hpp"
-#include <luabind/detail/conversion_policies/native_converter.hpp>
+#include <tuple>
 
 export module pragma.shared:scripting.lua.converters.pair;
+
+export import :scripting.lua.types.base_types;
 
 export namespace luabind {
 	template<typename T0, typename T1>

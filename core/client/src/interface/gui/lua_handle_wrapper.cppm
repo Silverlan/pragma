@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <luabind/luabind.hpp>
 #include "pragma/lua/luaapi.h"
 
 

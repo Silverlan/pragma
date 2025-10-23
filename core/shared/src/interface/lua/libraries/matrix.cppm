@@ -9,6 +9,7 @@ module;
 
 export module pragma.shared:scripting.lua.libraries.matrix;
 
+export import luabind;
 export import pragma.math;
 
 #define LUA_MATRIX_MEMBERS_DEC(type)                                                                                                                                                                                                                                                             \

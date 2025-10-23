@@ -3,6 +3,8 @@
 
 module;
 
+#include <functional>
+
 #include "pragma/lua/core.hpp"
 #include <iostream>
 #include <chrono>
@@ -14,7 +16,6 @@ module;
 
 
 
-#include <luabind/copy_policy.hpp>
 
 module pragma.shared;
 
@@ -22,10 +23,10 @@ import :entities.base_entity;
 import :game.game;
 
 namespace Lua {
-	bool get_bullet_master(pragma::ecs::BaseEntity &ent);
-	pragma::AnimationEvent get_animation_event(lua_State *l, int32_t tArgs, uint32_t eventId);
+	bool get_bullet_master(::pragma::ecs::BaseEntity &ent);
+	::pragma::AnimationEvent get_animation_event(lua_State *l, int32_t tArgs, uint32_t eventId);
 };
-bool Lua::get_bullet_master(pragma::ecs::BaseEntity &ent)
+bool Lua::get_bullet_master(::pragma::ecs::BaseEntity &ent)
 {
 	auto bMaster = true;
 	if(ent.IsWeapon()) {
@@ -43,8 +44,8 @@ bool Lua::get_bullet_master(pragma::ecs::BaseEntity &ent)
 pragma::AnimationEvent Lua::get_animation_event(lua_State *l, int32_t tArgs, uint32_t eventId)
 {
 	Lua::CheckTable(l, tArgs);
-	pragma::AnimationEvent ev {};
-	ev.eventID = static_cast<pragma::AnimationEvent::Type>(eventId);
+	::pragma::AnimationEvent ev {};
+	ev.eventID = static_cast<::pragma::AnimationEvent::Type>(eventId);
 	auto numArgs = Lua::GetObjectLength(l, tArgs);
 	for(auto i = decltype(numArgs) {0}; i < numArgs; ++i) {
 		Lua::PushInt(l, i + 1); /* 1 */

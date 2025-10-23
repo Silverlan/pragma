@@ -4,13 +4,10 @@
 module;
 
 #include "pragma/lua/ldefinitions.h"
-#include <luabind/luabind.hpp>
-#include <luabind/operator.hpp>
-#include <luabind/pseudo_traits.hpp>
-#include <luabind/make_function_signature.hpp>
 
 export module pragma.shared:scripting.lua.types.udm;
 
+export import luabind;
 export import pragma.udm;
 
 export namespace luabind {

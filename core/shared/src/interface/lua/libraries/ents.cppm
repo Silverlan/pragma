@@ -5,6 +5,8 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
+#include <algorithm>
+#include <string>
 
 export module pragma.shared:scripting.lua.libraries.ents;
 

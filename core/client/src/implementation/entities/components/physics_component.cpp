@@ -39,7 +39,7 @@ void CPhysicsComponent::Initialize()
 				auto animComponent = GetEntity().GetAnimatedComponent();
 				if(animComponent.valid())
 					animComponent->GetLocalBonePosition(boneId,posRoot);
-				//offset = glm::translate(offset,-posRoot); // Deprecated? TODO: Remove this entire block!
+				//offset = glm::gtc::translate(offset,-posRoot); // Deprecated? TODO: Remove this entire block!
 				static_cast<CEOnSkeletonUpdated&>(evData.get()).physRootBoneId = boneId;
 				return util::EventReply::Handled;
 			}

@@ -5,6 +5,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/ldefinitions.h"
+#include <memory>
 
 export module pragma.shared:util.timer;
 

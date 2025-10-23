@@ -4,8 +4,10 @@
 module;
 
 
-#include "cassert"
+#include <string>
 
+#include "cassert"
+#include <algorithm>
 
 
 module pragma.shared;

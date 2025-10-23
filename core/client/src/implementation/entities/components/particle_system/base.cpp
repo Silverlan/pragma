@@ -1564,7 +1564,7 @@ void ecs::CParticleSystemComponent::Simulate(double tDelta)
 				if(umath::is_flag_set(m_flags, Flags::HasMovingParticles) == false && uvec::length_sqr(velEffective) > 0.f)
 					umath::set_flag(m_flags, Flags::HasMovingParticles, true);
 			}
-			p.SetCameraDistance(glm::length2(pos - posCam));
+			p.SetCameraDistance(glm::gtx::length2(pos - posCam));
 			for(auto &op : m_operators)
 				op->PostSimulate(p, tDelta);
 			//numRender++;

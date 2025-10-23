@@ -3,10 +3,14 @@
 
 module;
 
+#include <memory>
+#include <functional>
+#include <functional>
+
 #include "algorithm"
 
 #include "cassert"
-
+#include <string>
 
 #include <unordered_set>
 

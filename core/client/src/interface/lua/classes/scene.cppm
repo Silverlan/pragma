@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/lua/luaapi.h"
-#include "luabind/copy_policy.hpp"
 #include "prosper_render_pass.hpp"
 #include "prosper_command_buffer.hpp"
 #include <image/prosper_texture.hpp>

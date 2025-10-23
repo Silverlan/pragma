@@ -3,6 +3,8 @@
 
 module;
 
+#include <functional>
+
 #include <string>
 
 #include "cstring"
@@ -72,7 +74,7 @@ void BaseIOComponent::Input(const std::string input, pragma::ecs::BaseEntity *ac
 
 void BaseIOComponent::StoreOutput(std::string name, std::string info)
 {
-	StringToLower(name);
+	ustring::to_lower(name);
 	std::vector<std::string> data;
 	ustring::explode(info, ",", data);
 	auto numData = data.size();
@@ -97,7 +99,7 @@ void BaseIOComponent::StoreOutput(std::string name, std::string info)
 
 void BaseIOComponent::StoreOutput(std::string name, std::string entities, std::string input, std::string param, float delay, int times)
 {
-	StringToLower(name);
+	ustring::to_lower(name);
 	std::unordered_map<std::string, std::vector<Output>>::iterator it = m_outputs.find(name);
 	if(it == m_outputs.end())
 		it = m_outputs.insert(std::unordered_map<std::string, std::vector<Output>>::value_type(name, std::vector<Output>())).first;
@@ -168,7 +170,7 @@ bool BaseIOComponent::FireSingleOutput(Output &output, pragma::ecs::BaseEntity *
 
 void BaseIOComponent::Input(std::string input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, std::string data)
 {
-	StringToLower(input);
+	ustring::to_lower(input);
 
 	pragma::CEInputData inputData {input, activator, caller, data};
 	if(BroadcastEvent(EVENT_HANDLE_INPUT, inputData) == util::EventReply::Handled)
@@ -198,7 +200,7 @@ void BaseIOComponent::Input(std::string input, pragma::ecs::BaseEntity *activato
 
 void BaseIOComponent::TriggerOutput(std::string name, pragma::ecs::BaseEntity *activator, IoFlags flags)
 {
-	StringToLower(name);
+	ustring::to_lower(name);
 	std::unordered_map<std::string, std::vector<Output>>::iterator it = m_outputs.find(name);
 	if(it == m_outputs.end())
 		return;

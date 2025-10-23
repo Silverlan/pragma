@@ -3,6 +3,10 @@
 
 module;
 
+#include <memory>
+
+#include <functional>
+
 #include <string>
 
 module pragma.shared;

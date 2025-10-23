@@ -6,6 +6,10 @@
 
 module;
 
+#include <memory>
+#include <functional>
+#include <functional>
+
 #include "pragma/lua/core.hpp"
 
 #include "sstream"
@@ -29,7 +33,6 @@ module;
 
 
 
-#include <luabind/iterator_policy.hpp>
 
 
 
@@ -3713,7 +3716,7 @@ void Lua::Model::GetMeshGroupId(lua_State *l, pragma::Model &mdl, uint32_t bodyG
 
 	auto r = mdl.GetMesh(bodyGroupId, groupId, meshId);
 
-	UNUSED(r);
+	// UNUSED(r);
 
 	Lua::PushInt(l, static_cast<int32_t>(meshId));
 

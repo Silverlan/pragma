@@ -4,7 +4,6 @@
 #ifndef __LUA_SHADER_CONVERTERS_HPP__
 #define __LUA_SHADER_CONVERTERS_HPP__
 
-#include <luabind/detail/conversion_policies/native_converter.hpp>
 
 namespace prosper {
 	class Shader;

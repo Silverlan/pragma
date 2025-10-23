@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/lua/core.hpp"
-#include <luabind/detail/signature_types.hpp>
 
 export module pragma.shared:scripting.lua.user_type_info;
 

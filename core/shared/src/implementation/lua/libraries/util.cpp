@@ -4,6 +4,10 @@
 module;
 
 
+#include <memory>
+#include <functional>
+#include <functional>
+
 #include "pragma/lua/core.hpp"
 
 #include "sstream"
@@ -19,7 +23,6 @@ module;
 
 
 
-#include <luabind/class_info.hpp>
 
 module pragma.shared;
 
@@ -85,7 +88,7 @@ static Vector3 apply_curvature(const Vector3 &baseHairDir, const Vector3 &surfac
 	if(uvec::distance(baseHairDir, surfaceTargetNormal) < 0.001f)
 		return baseHairDir;
 	auto f = factor * curvature;
-	auto n = glm::slerp(baseHairDir, surfaceTargetNormal, f);
+	auto n = glm::gtc::slerp(baseHairDir, surfaceTargetNormal, f);
 	uvec::normalize(&n); // Probably not needed
 	return n;
 }
@@ -887,16 +890,16 @@ luabind::object Lua::util::fire_bullets(lua_State *l, BulletInfo &bulletInfo, bo
 		data.SetTarget(src + bulletDir * bulletInfo.distance);
 		data.SetCollisionFilterMask(pragma::physics::CollisionMask::AllHitbox & ~pragma::physics::CollisionMask::Trigger); // Let everything pass (Except specific filters below)
 		auto *attacker = dmg.GetAttacker();
-		data.SetFilter([attacker](pragma::physics::IShape &shape, pragma::physics::IRigidBody &body) -> RayCastHitType {
+		data.SetFilter([attacker](pragma::physics::IShape &shape, pragma::physics::IRigidBody &body) -> pragma::physics::RayCastHitType {
 			auto *phys = body.GetPhysObj();
 			auto *ent = phys ? phys->GetOwner() : nullptr;
 			if(ent == nullptr || &ent->GetEntity() == attacker) // Attacker can't shoot themselves
-				return RayCastHitType::None;
+				return pragma::physics::RayCastHitType::None;
 			auto filterGroup = phys->GetCollisionFilter();
 			auto mdlComponent = ent->GetEntity().GetModelComponent();
 			if(mdlComponent && mdlComponent->GetHitboxCount() > 0 && (filterGroup & pragma::physics::CollisionMask::NPC) != pragma::physics::CollisionMask::None || (filterGroup & pragma::physics::CollisionMask::Player) != pragma::physics::CollisionMask::None) // Filter out player and NPC collision objects, since we only want to check their hitboxes
-				return RayCastHitType::None;
-			return RayCastHitType::Block;
+				return pragma::physics::RayCastHitType::None;
+			return pragma::physics::RayCastHitType::Block;
 		});
 		auto filterGroup = pragma::physics::CollisionMask::None;
 		if(attacker != nullptr) {

@@ -8,6 +8,11 @@ module;
 
 
 
+#include <string>
+
+#include <memory>
+#include <functional>
+
 #include "pragma/lua/core.hpp"
 
 #include "algorithm"

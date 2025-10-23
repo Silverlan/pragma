@@ -24,6 +24,7 @@ export import :entities.enums;
 export import :entities.components.events.event_info;
 export import :entities.member_info;
 export import :entities.member_type;
+export import luabind;
 
 export {
 	namespace pragma::ecs {class BaseEntity;}

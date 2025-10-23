@@ -916,9 +916,9 @@ struct MoveChannel : public Channel {
 
 	static const Vector2 &Cast(const void *v) { return *static_cast<const Vector2 *>(v); }
 
-	virtual bool CompareValues(const void *v0, const void *v1) const override { return glm::length2(Cast(v0) - Cast(v1)) < 0.001f; }
+	virtual bool CompareValues(const void *v0, const void *v1) const override { return glm::gtx::length2(Cast(v0) - Cast(v1)) < 0.001f; }
 
-	virtual bool CompareWithDefault(const void *v) const override { return glm::length2(Cast(v)) < 0.001f; }
+	virtual bool CompareWithDefault(const void *v) const override { return glm::gtx::length2(Cast(v)) < 0.001f; }
 
 	virtual const void *GetValue(size_t idx) const override { return &values[idx]; }
 

@@ -17,7 +17,6 @@ module;
 #include "cassert"
 
 
-#include <luabind/iterator_policy.hpp>
 
 module pragma.shared;
 

@@ -5,7 +5,6 @@ module;
 #include "pragma/lua/luaapi.h"
 
 #include "stdafx_server.h"
-#include <luabind/copy_policy.hpp>
 
 module pragma.server.scripting.lua.classes.faction;
 

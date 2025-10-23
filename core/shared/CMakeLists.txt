@@ -23,15 +23,10 @@ pr_add_dependency(${PROJ_NAME} oskit TARGET PRIVATE)
 pr_add_dependency(${PROJ_NAME} Recast TARGET)
 pr_add_dependency(${PROJ_NAME} Detour TARGET)
 pr_add_dependency(${PROJ_NAME} spdlog TARGET PUBLIC)
-pr_add_dependency(${PROJ_NAME} fmt TARGET)
 pr_add_dependency(${PROJ_NAME} clip2tri-static TARGET)
 pr_add_dependency(${PROJ_NAME} poly2tri-static TARGET)
 pr_add_dependency(${PROJ_NAME} clipper-static TARGET)
 pr_add_dependency(${PROJ_NAME} muparserx TARGET)
-
-# We need these for the convar headers
-target_include_directories(${PROJ_NAME} PRIVATE "../server/include/")
-target_include_directories(${PROJ_NAME} PRIVATE "../client/include/")
 
 pr_add_third_party_dependency(${PROJ_NAME} bvh PUBLIC)
 pr_add_third_party_dependency(${PROJ_NAME} eigen)

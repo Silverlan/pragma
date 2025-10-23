@@ -355,7 +355,7 @@ void CMD_ent_create(NetworkState *state, pragma::BasePlayerComponent *pl, std::v
 	trData.SetFilter(ent);
 	trData.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter | RayCastFlags::IgnoreDynamic);
 	auto r = SGame::Get()->RayCast(trData);
-	if(r.hitType == RayCastHitType::None) {
+	if(r.hitType == pragma::physics::RayCastHitType::None) {
 		Con::cwar << "No place to spawn entity!" << Con::endl;
 		return;
 	}

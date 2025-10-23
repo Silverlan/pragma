@@ -5,6 +5,8 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
+#include <string>
+#include <memory>
 
 export module pragma.shared:scripting.lua.object_base;
 

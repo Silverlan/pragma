@@ -4,11 +4,12 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <luabind/detail/conversion_policies/native_converter.hpp>
+#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.converters.global_string;
 
 export import :util.global_string_table;
+export import luabind;
 
 export namespace luabind {
 	template<>

@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include <string>
+
+#include <memory>
+#include <functional>
+
 #include "pragma/lua/core.hpp"
 
 #include "string_view"
@@ -9,7 +14,6 @@ module;
 
 
 
-#include <luabind/copy_policy.hpp>
 
 module pragma.shared;
 
@@ -47,7 +51,7 @@ void Lua::Material::register_class(luabind::class_<msys::Material> &classDef)
 		auto matCopy = mat.Copy();
 		if(matCopy == nullptr)
 			return;
-		Lua::Push<msys::MaterialHandle>(l, matCopy);
+		Lua::Push<::msys::MaterialHandle>(l, matCopy->GetHandle());
 	}));
 	classDef.def("UpdateTextures", &msys::Material::UpdateTextures);
 	classDef.def("UpdateTextures", &msys::Material::UpdateTextures, luabind::default_parameter_policy<2, bool {false}> {});

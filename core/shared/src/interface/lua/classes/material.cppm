@@ -8,6 +8,7 @@ module;
 
 export module pragma.shared:scripting.lua.classes.material;
 
+export import luabind;
 export import pragma.materialsystem;
 
 export namespace Lua {

@@ -125,7 +125,7 @@ void CLightPointComponent::UpdateProjectionMatrix()
 	auto scale = Vector3(-1.f, -1.f, 1.f); // Vulkan TODO
 	auto pRadiusComponent = GetEntity().GetComponent<CRadiusComponent>();
 	auto p = glm::perspectiveRH<float>(CFloat(umath::deg_to_rad(90.f)), 1.f, 2.f, pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f); // Vulkan TODO
-	p = glm::scale(p, scale);
+	p = glm::gtc::scale(p, scale);
 	SetProjectionMatrix(p);
 	UpdateViewMatrices();
 }
@@ -175,12 +175,12 @@ void CLightPointComponent::UpdateViewMatrices()
 	m_bSkipMatrixUpdate = true;
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
-	SetViewMatrix(glm::lookAtRH(pos, pos + directions[umath::to_integral(CubeMapSide::Left)], Vector3(0, 1, 0)), umath::to_integral(CubeMapSide::Left)); //umat::look_at(pos,pos +Vector3(1,0,0),Vector3(0,1,0)),1); // Vulkan TODO
-	SetViewMatrix(glm::lookAtRH(pos, pos + directions[umath::to_integral(CubeMapSide::Right)], Vector3(0, 1, 0)), umath::to_integral(CubeMapSide::Right));
-	SetViewMatrix(glm::lookAtRH(pos, pos + directions[umath::to_integral(CubeMapSide::Top)], Vector3(0, 0, -1)), umath::to_integral(CubeMapSide::Top));
-	SetViewMatrix(glm::lookAtRH(pos, pos + directions[umath::to_integral(CubeMapSide::Bottom)], Vector3(0, 0, 1)), umath::to_integral(CubeMapSide::Bottom));
-	SetViewMatrix(glm::lookAtRH(pos, pos + directions[umath::to_integral(CubeMapSide::Front)], Vector3(0, 1, 0)), umath::to_integral(CubeMapSide::Front));
-	SetViewMatrix(glm::lookAtRH(pos, pos + directions[umath::to_integral(CubeMapSide::Back)], Vector3(0, 1, 0)), umath::to_integral(CubeMapSide::Back));
+	SetViewMatrix(glm::gtc::lookAtRH(pos, pos + directions[umath::to_integral(CubeMapSide::Left)], Vector3(0, 1, 0)), umath::to_integral(CubeMapSide::Left)); //umat::look_at(pos,pos +Vector3(1,0,0),Vector3(0,1,0)),1); // Vulkan TODO
+	SetViewMatrix(glm::gtc::lookAtRH(pos, pos + directions[umath::to_integral(CubeMapSide::Right)], Vector3(0, 1, 0)), umath::to_integral(CubeMapSide::Right));
+	SetViewMatrix(glm::gtc::lookAtRH(pos, pos + directions[umath::to_integral(CubeMapSide::Top)], Vector3(0, 0, -1)), umath::to_integral(CubeMapSide::Top));
+	SetViewMatrix(glm::gtc::lookAtRH(pos, pos + directions[umath::to_integral(CubeMapSide::Bottom)], Vector3(0, 0, 1)), umath::to_integral(CubeMapSide::Bottom));
+	SetViewMatrix(glm::gtc::lookAtRH(pos, pos + directions[umath::to_integral(CubeMapSide::Front)], Vector3(0, 1, 0)), umath::to_integral(CubeMapSide::Front));
+	SetViewMatrix(glm::gtc::lookAtRH(pos, pos + directions[umath::to_integral(CubeMapSide::Back)], Vector3(0, 1, 0)), umath::to_integral(CubeMapSide::Back));
 	m_bSkipMatrixUpdate = b;
 	if(m_bSkipMatrixUpdate == false) {
 		for(auto i = 0; i < 6; i++)

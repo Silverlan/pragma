@@ -7,6 +7,7 @@ module;
 #include "pragma/lua/core.hpp"
 #include <optional>
 #include <string>
+#include <functional>
 
 export module pragma.shared:scripting.lua.util;
 

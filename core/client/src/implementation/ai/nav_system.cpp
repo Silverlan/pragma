@@ -245,7 +245,7 @@ void CMD_debug_nav_path_start(NetworkState *state, pragma::BasePlayerComponent *
 	data.SetSource(origin);
 	data.SetTarget(origin + dir * 65'536.f);
 	auto r = pragma::get_cgame()->RayCast(data);
-	if(r.hitType == RayCastHitType::None)
+	if(r.hitType == pragma::physics::RayCastHitType::None)
 		return;
 	static_cast<pragma::nav::CMesh &>(*navMesh).SetDebugPathStart(r.position);
 }
@@ -273,7 +273,7 @@ void CMD_debug_nav_path_end(NetworkState *state, pragma::BasePlayerComponent *pl
 	data.SetSource(origin);
 	data.SetTarget(origin + dir * 65'536.f);
 	auto r = pragma::get_cgame()->RayCast(data);
-	if(r.hitType == RayCastHitType::None)
+	if(r.hitType == pragma::physics::RayCastHitType::None)
 		return;
 	static_cast<pragma::nav::CMesh &>(*navMesh).SetDebugPathEnd(r.position);
 }

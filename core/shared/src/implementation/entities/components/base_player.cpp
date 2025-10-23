@@ -259,7 +259,7 @@ bool BasePlayerComponent::CanUnCrouch() const
 	data.SetShape(*m_shapeStand);
 
 
-	return game->Sweep(data).hitType == RayCastHitType::None; // Overlap only works with collision objects, not with individual shapes, so we have to use Sweep instead
+	return game->Sweep(data).hitType == pragma::physics::RayCastHitType::None; // Overlap only works with collision objects, not with individual shapes, so we have to use Sweep instead
 
 
 }
@@ -503,8 +503,6 @@ void BasePlayerComponent::OnTick(double tDelta)
 
 
 		}
- pragma::physics::MOVETYPE
-
 		else {
 
 
@@ -1369,7 +1367,7 @@ pragma::ecs::BaseEntity *BasePlayerComponent::FindUseEntity() const
 					auto result = game->RayCast(data);
 
 
-					if(result.hitType == RayCastHitType::None || result.entity.get() == entOther) {
+					if(result.hitType == pragma::physics::RayCastHitType::None || result.entity.get() == entOther) {
 
 
 						dotClosest = dot;
@@ -1513,7 +1511,7 @@ Vector2 BasePlayerComponent::CalcMovementSpeed() const
 	auto physComponent = GetEntity().GetPhysicsComponent();
 
 
-	if(physComponent && physComponent->GetMoveType() == MOVETYPE::NOCLIP) {
+	if(physComponent && physComponent->GetMoveType() == pragma::physics::MOVETYPE::NOCLIP) {
 
 
 		speed = GetEntity().GetNetworkState()->GetGameState()->GetConVarFloat("sv_noclip_speed");

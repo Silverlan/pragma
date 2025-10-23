@@ -10,7 +10,6 @@ module;
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <luabind/class.hpp>
 #include <prosper_framebuffer.hpp>
 #include <prosper_fence.hpp>
 #include <prosper_command_buffer.hpp>
@@ -27,7 +26,6 @@ module;
 #include <prosper_event.hpp>
 #include "prosper_util.hpp"
 #include <sharedutils/datastream.h>
-#include <luabind/copy_policy.hpp>
 #include <luainterface.hpp>
 #include <sharedutils/util.h>
 

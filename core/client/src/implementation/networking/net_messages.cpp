@@ -1928,7 +1928,7 @@ void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, st
 		entClosest = ent;
 	}
 	if(closestMesh.has_value()) {
-		res.hitType = RayCastHitType::Block;
+		res.hitType = pragma::physics::RayCastHitType::Block;
 		res.entity = entClosest->GetHandle();
 		res.position = closestMesh->hitPos;
 		res.normal = {};
@@ -1942,7 +1942,7 @@ void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, st
 	else
 		res = pragma::get_cgame()->RayCast(trData);
 
-	if(res.hitType == RayCastHitType::None) {
+	if(res.hitType == pragma::physics::RayCastHitType::None) {
 		Con::cout << "Nothing found in player aim direction!" << Con::endl;
 		return;
 	}

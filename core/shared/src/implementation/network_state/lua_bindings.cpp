@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include <sharedutils/magic_enum.hpp>
+#include "pragma/lua/core.hpp"
+
 #include "string_view"
 
 #include "sstream"
@@ -15,9 +18,6 @@ module;
 
 
 
-#include <luabind/iterator_policy.hpp>
-#include <luabind/out_value_policy.hpp>
-#include <luabind/copy_policy.hpp>
 
 module pragma.shared;
 
@@ -75,7 +75,6 @@ std::ostream &operator<<(std::ostream &out, const ALSound &snd)
 }
 
 static void RegisterLuaMatrices(Lua::Interface &lua);
-static void RegisterIk(Lua::Interface &lua);
 
 static void create_directory_change_listener(lua_State *l, const std::string &path, luabind::object callback, DirectoryWatcherCallback::WatchFlags flags)
 {
@@ -901,7 +900,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		Vector3 translation;
 		Vector3 skew;
 		Vector4 perspective;
-		glm::decompose(transformation, scale, rotation, translation, skew, perspective);
+		glm::gtx::decompose(transformation, scale, rotation, translation, skew, perspective);
 		t.SetOrigin(translation);
 		t.SetRotation(rotation);
 	}));
@@ -1220,7 +1219,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	}));
 	defVector->def("GetAngle", static_cast<float (*)(lua_State *, const Vector3 &, const Vector3 &)>([](lua_State *l, const Vector3 &a, const Vector3 &b) -> float { return umath::deg_to_rad(uvec::get_angle(a, b)); }));
 	defVector->def("Slerp", static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, float)>([](lua_State *l, const Vector3 &a, const Vector3 &b, float factor) {
-		auto result = glm::slerp(a, b, factor);
+		auto result = glm::gtc::slerp(a, b, factor);
 		Lua::Push<Vector3>(l, result);
 	}));
 	defVector->def("Copy", &Lua::Vector::Copy);
@@ -1384,8 +1383,8 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat->def("Normalize", &uquat::normalize);
 	defQuat->def("GetNormal", &uquat::get_normal);
 	defQuat->def("Copy", &Lua::Quaternion::Copy);
-	defQuat->def("ToMatrix", static_cast<Mat4 (*)(const Quat &)>(&glm::toMat4));
-	defQuat->def("ToMatrix3", static_cast<Mat3 (*)(const Quat &)>(&glm::toMat3));
+	defQuat->def("ToMatrix", static_cast<Mat4 (*)(const Quat &)>(&glm::gtx::toMat4));
+	defQuat->def("ToMatrix3", static_cast<Mat3 (*)(const Quat &)>(&glm::gtx::toMat3));
 	defQuat->def("Lerp", &uquat::lerp);
 	defQuat->def("Slerp", &uquat::slerp);
 	defQuat->def("ToEulerAngles", Lua::Quaternion::ToEulerAngles);
@@ -1420,7 +1419,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat->def("ClampRotation", static_cast<Quat (*)(lua_State *, Quat &, const EulerAngles &, const EulerAngles &)>([](lua_State *l, Quat &rot, const EulerAngles &minBounds, const EulerAngles &maxBounds) -> Quat { return uquat::clamp_rotation(rot, minBounds, maxBounds); }));
 	defQuat->def("ClampRotation", static_cast<Quat (*)(lua_State *, Quat &, const EulerAngles &)>([](lua_State *l, Quat &rot, const EulerAngles &bounds) -> Quat { return uquat::clamp_rotation(rot, -bounds, bounds); }));
 	defQuat->def("Distance", &uquat::distance);
-	defQuat->def("GetConjugate", static_cast<Quat (*)(const Quat &)>(&glm::conjugate));
+	defQuat->def("GetConjugate", static_cast<Quat (*)(const Quat &)>(&glm::gtc::conjugate));
 	defQuat->def("AlignToAxis", &uquat::align_rotation_to_axis);
 	defQuat->def("Equals", +[](const Quat &a, const Quat &b, float epsilon) { return umath::abs(a.x - b.x) <= epsilon && umath::abs(a.y - b.y) <= epsilon && umath::abs(a.z - b.z) <= epsilon && umath::abs(a.w - b.w) <= epsilon; });
 	defQuat->def(
@@ -1448,7 +1447,6 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	_G["Quaternion"] = _G["math"]["Quaternion"];
 
 	RegisterLuaMatrices(lua);
-	RegisterIk(lua);
 	//modelMeshClassDef.scope[luabind::def("Create",&Lua::ModelMesh::Client::Create)];
 }
 
@@ -2108,60 +2106,4 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat4x3.def("Set", static_cast<void (*)(lua_State *, ::Mat4x3 &, const ::Mat4x3 &)>(&Lua::Mat4x3::Set));
 	modMath[defMat4x3];
 	register_string_to_vector_type_constructor<Mat4x3>(lua.GetState());
-}
-
-class IkLuaConstraint : public uvec::ik::IkConstraint {
-  public:
-	IkLuaConstraint(uvec::ik::IkJoint &joint, luabind::object o) : IkConstraint {joint}, m_function {o} {}
-	virtual void Apply(int i) override;
-  private:
-	luabind::object m_function;
-};
-void IkLuaConstraint::Apply(int i) { m_function(i); }
-
-static void RegisterIk(Lua::Interface &lua)
-{
-	auto defIkSolver = luabind::class_<uvec::ik::IkSolver>("IkSolver");
-	defIkSolver.def("GetGlobalTransform", &uvec::ik::IkSolver::GetGlobalTransform);
-	defIkSolver.def("SetLocalTransform", &uvec::ik::IkSolver::SetLocalTransform);
-	defIkSolver.def("GetLocalTransform", &uvec::ik::IkSolver::GetLocalTransform);
-	defIkSolver.def("Solve", &uvec::ik::IkSolver::Solve);
-	defIkSolver.def("Resize", &uvec::ik::IkSolver::Resize);
-	defIkSolver.def("Size", &uvec::ik::IkSolver::Size);
-	defIkSolver.def("AddHingeConstraint", static_cast<uvec::ik::IkHingeConstraint *(*)(uvec::ik::IkSolver &, uint32_t, const Vector3 &)>([](uvec::ik::IkSolver &solver, uint32_t idx, const Vector3 &axis) { return &solver.GetJoint(idx).AddConstraint<uvec::ik::IkHingeConstraint>(axis); }));
-	defIkSolver.def("AddBallSocketConstraint", static_cast<uvec::ik::IkBallSocketConstraint *(*)(uvec::ik::IkSolver &, uint32_t, float)>([](uvec::ik::IkSolver &solver, uint32_t idx, float limit) { return &solver.GetJoint(idx).AddConstraint<uvec::ik::IkBallSocketConstraint>(limit); }));
-	defIkSolver.def("AddCustomConstraint",
-	  static_cast<uvec::ik::IkConstraint *(*)(lua_State *, uvec::ik::IkSolver &, uint32_t, const Lua::func<void, int32_t> &)>(
-	    [](lua_State *l, uvec::ik::IkSolver &solver, uint32_t idx, const Lua::func<void, int32_t> &function) -> uvec::ik::IkConstraint * { return &solver.GetJoint(idx).AddConstraint<IkLuaConstraint>(function); }));
-
-	auto &modIk = lua.RegisterLibrary("ik");
-	auto defIkConstraint = luabind::class_<uvec::ik::IkConstraint>("IkConstraint");
-	defIkConstraint.def("GetJointIndex", static_cast<uint32_t (*)(lua_State *, uvec::ik::IkConstraint &)>([](lua_State *l, uvec::ik::IkConstraint &constraint) -> uint32_t { return constraint.GetJoint().GetJointIndex(); }));
-	modIk[defIkConstraint];
-
-	auto defIkHingeConstraint = luabind::class_<uvec::ik::IkHingeConstraint, uvec::ik::IkConstraint>("IkHingeConstraint");
-	defIkHingeConstraint.def("SetLimits", &uvec::ik::IkHingeConstraint::SetLimits);
-	defIkHingeConstraint.def("ClearLimits", &uvec::ik::IkHingeConstraint::ClearLimits);
-	defIkHingeConstraint.def("GetLimits", &uvec::ik::IkHingeConstraint::GetLimits);
-	modIk[defIkHingeConstraint];
-
-	auto defIkBallSocketConstraint = luabind::class_<uvec::ik::IkBallSocketConstraint, uvec::ik::IkConstraint>("IkBallSocketConstraint");
-	defIkBallSocketConstraint.def("SetLimit", &uvec::ik::IkBallSocketConstraint::SetLimit);
-	defIkBallSocketConstraint.def("GetLimit", static_cast<std::optional<float> (*)(lua_State *, uvec::ik::IkBallSocketConstraint &)>([](lua_State *l, uvec::ik::IkBallSocketConstraint &constraint) -> std::optional<float> {
-		float limit;
-		if(constraint.GetLimit(limit) == false)
-			return {};
-		return limit;
-	}));
-	modIk[defIkBallSocketConstraint];
-
-	auto defCcdSolver = luabind::class_<uvec::ik::CCDSolver, uvec::ik::IkSolver>("CCDIkSolver");
-	defCcdSolver.def(luabind::constructor<>());
-
-	auto defFABRIKSolver = luabind::class_<uvec::ik::FABRIKSolver, uvec::ik::IkSolver>("FABRIkSolver");
-	defFABRIKSolver.def(luabind::constructor<>());
-
-	modIk[defIkSolver];
-	modIk[defCcdSolver];
-	modIk[defFABRIKSolver];
 }

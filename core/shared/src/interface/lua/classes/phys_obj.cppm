@@ -8,8 +8,10 @@ module;
 
 export module pragma.shared:scripting.lua.classes.phys_obj;
 
+export import luabind;
+
 export namespace Lua {
-	namespace pragma::physics::PhysObj {
+	namespace PhysObj {
 		DLLNETWORK void register_class(lua_State *l, luabind::module_ &mod);
 	};
 };

@@ -4,10 +4,10 @@
 module;
 
 #include "pragma/lua/core.hpp"
-#include <luabind/detail/conversion_policies/native_converter.hpp>
 #include <vector>
 #include <map>
 #include <array>
+#include <cassert>
 #include <unordered_map>
 
 export module pragma.shared:scripting.lua.converters.vector;

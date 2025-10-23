@@ -8,8 +8,8 @@ module;
 export module pragma.shared:types;
 
 export {
+	class ALSound;
     namespace pragma {
-	    class ALSound;
         class BaseEntityComponent;
         class BaseFilterComponent;
 		struct ComponentMemberInfo;

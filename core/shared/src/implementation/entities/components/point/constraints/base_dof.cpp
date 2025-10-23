@@ -3,8 +3,7 @@
 
 module;
 
-
-
+#include <string>
 
 #include <cmath>
 
@@ -64,7 +63,7 @@ void BasePointConstraintDoFComponent::InitializeConstraint(pragma::ecs::BaseEnti
 			if(dof != nullptr) {
 				dof->SetEntity(GetEntity());
 				//dof->SetLinearLimit(Vector3(1.f,1.f,1.f),Vector3(-1.f,-1.f,-1.f));
-				dof->SetAngularLimit(Vector3(M_PI, M_PI, M_PI), Vector3(-M_PI, -M_PI, -M_PI));
+				dof->SetAngularLimit(EulerAngles(180, 180, 180), EulerAngles(-180, -180, -180));
 				//dof->SetLinearLimit(m_kvLimLinLower,m_kvLimLinUpper);
 				//dof->SetAngularLimit(m_kvLimAngLower,m_kvLimAngUpper);
 				m_constraints.push_back(util::shared_handle_cast<pragma::physics::IDoFConstraint, pragma::physics::IConstraint>(dof));

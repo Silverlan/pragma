@@ -5,12 +5,13 @@
 #define __LDEFINITIONS_H__
 
 #include "pragma/networkdefinitions.h"
-#include <luabind/luabind.hpp>
-#include <luabind/operator.hpp>
-#include <luabind/pseudo_traits.hpp>
-#include <luabind/make_function_signature.hpp>
-#include "pragma/lua/ldefinitions.h"
 #include <type_traits>
+
+extern "C"
+{
+#include "lua.h"
+#include "lauxlib.h"
+}
 
 #define luaL_checkboolean(L, n) (luaL_checktype(L, (n), LUA_TBOOLEAN))
 #define luaL_checkfunction(L, n) (luaL_checktype(L, (n), LUA_TFUNCTION))

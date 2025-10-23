@@ -5,6 +5,7 @@ module;
 
 
 #include "pragma/lua/core.hpp"
+#include <stdexcept>
 
 module pragma.shared;
 

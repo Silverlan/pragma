@@ -5,7 +5,9 @@ module;
 
 
 
+#include <string>
 
+#include <cstdlib>
 #include <utility>
 
 module pragma.shared;

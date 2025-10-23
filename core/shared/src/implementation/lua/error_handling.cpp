@@ -3,10 +3,13 @@
 
 module;
 
+#include <memory>
+#include <functional>
+#include <functional>
+
 #include "pragma/lua/core.hpp"
 
 #include "algorithm"
-#include <luabind/exception_handler.hpp>
 #include <stack>
 #include <sstream>
 #include <chrono>
@@ -56,7 +59,7 @@ void Lua::OpenFileInZeroBrane(const std::string &fname, uint32_t lineId)
 			tLastFileOpened = t;
 			auto fullLocalPath = GetLuaFilePath(fname);
 			if(fullLocalPath.has_value())
-				pragma::debug::open_file_in_zerobrane(*fullLocalPath, lineId);
+				::pragma::debug::open_file_in_zerobrane(*fullLocalPath, lineId);
 		}
 	}
 }
@@ -118,7 +121,7 @@ bool Lua::get_callstack(lua_State *l, std::stringstream &ss)
 				break;
 			}
 			else {
-				auto filename = pragma::scripting::lua::util::make_clickable_lua_script_link(get_source(d), d.currentline);
+				auto filename = ::pragma::scripting::lua::util::make_clickable_lua_script_link(get_source(d), d.currentline);
 				ss << "\n" << t << level << ": " << (d.name != nullptr ? d.name : "?") << "[" << d.linedefined << ":" << d.lastlinedefined << "] [" << d.what << ":" << d.namewhat << "] : " << filename;
 			}
 		}
@@ -164,13 +167,13 @@ bool Lua::PrintTraceback(lua_State *l, std::stringstream &ssOut, const std::stri
 				//open_lua_file(fname,lineId);
 			}
 			std::stringstream ssErrMsg;
-			auto lineMsg = pragma::scripting::lua::util::make_clickable_lua_script_link(shortSrc, d.currentline);
+			auto lineMsg = ::pragma::scripting::lua::util::make_clickable_lua_script_link(shortSrc, d.currentline);
 			ssErrMsg << lineMsg << " " << errMsg;
 			errMsg = ssErrMsg.str();
 		}
 		transform_path(d, errMsg, d.currentline);
 		ssOut << errMsg;
-		bNl = pragma::scripting::lua::util::get_code_snippet(ssOut, get_source(d), d.currentline, ":");
+		bNl = ::pragma::scripting::lua::util::get_code_snippet(ssOut, get_source(d), d.currentline, ":");
 	}
 	else {
 		ssOut << errMsg;
@@ -199,7 +202,7 @@ void Lua::PrintTraceback(lua_State *l, const std::string *pOptErrMsg)
 	auto tbMsg = ssTbMsg.str();
 
 	std::stringstream ss;
-	pragma::scripting::lua::util::get_lua_doc_info(ss, tbMsg);
+	::pragma::scripting::lua::util::get_lua_doc_info(ss, tbMsg);
 	Con::cout << ss.str();
 	Con::flush();
 }
@@ -209,7 +212,7 @@ int Lua::HandleTracebackError(lua_State *l)
 	if(!Lua::IsString(l, -1))
 		return 1;
 	std::string msg = Lua::ToString(l, -1);
-	auto *nw = pragma::get_engine()->GetNetworkState(l);
+	auto *nw = ::pragma::get_engine()->GetNetworkState(l);
 	auto *game = nw ? nw->GetGameState() : nullptr;
 	if(game)
 		game->CallLuaCallbacks<void, std::string>("OnLuaError", msg);
@@ -254,8 +257,8 @@ void Lua::initialize_error_handler()
 			if(Lua::IsString(l, -1) == false)
 				return 0; // This should never happen
 			std::string errMsg = Lua::CheckString(l, -1);
-			auto formattedMsg = pragma::scripting::lua::format_error_message(l, errMsg, Lua::StatusCode::ErrorRun, nullptr);
-			pragma::scripting::lua::submit_error(l, formattedMsg);
+			auto formattedMsg = ::pragma::scripting::lua::format_error_message(l, errMsg, Lua::StatusCode::ErrorRun, nullptr);
+			::pragma::scripting::lua::submit_error(l, formattedMsg);
 			return 0;
 		});
 	});

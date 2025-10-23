@@ -3,7 +3,8 @@
 
 module;
 #include "memory"
-
+#include <iostream>
+#include <string>
 
 module pragma.shared;
 

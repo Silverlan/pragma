@@ -4,9 +4,12 @@
 module;
 
 #include "pragma/lua/core.hpp"
+#include <typeinfo>
+#include <string>
 
 export module pragma.shared:scripting.lua.class_wrapper;
 
+export import luabind;
 import pragma.util;
 
 export namespace pragma {

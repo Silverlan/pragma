@@ -4,6 +4,10 @@
 module;
 
 
+#include <iostream>
+#include <memory>
+#include <functional>
+
 #include "pragma/lua/core.hpp"
 
 #include "cassert"
@@ -311,7 +315,7 @@ bool Lua::game::raycast(lua_State *l, const ::TraceData &data)
 		r.fraction = tClosest;
 		r.distance = d *tClosest;
 		r.entity = entClosest->GetHandle();
-		r.hitType = RayCastHitType::Block;
+		r.hitType = pragma::physics::RayCastHitType::Block;
 		r.position = start +n *(d *tClosest);
 		r.startPosition = start;
 		auto *phys = entClosest->GetPhysicsComponent()->GetPhysicsObject();

@@ -4,9 +4,10 @@
 module;
 
 #include "pragma/lua/core.hpp"
-#include <luabind/detail/policy.hpp>
 
 export module pragma.shared:scripting.lua.policies.generic;
+
+export import luabind;
 
 export namespace luabind {
 	namespace detail {

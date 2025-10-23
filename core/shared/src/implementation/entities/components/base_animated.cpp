@@ -1930,7 +1930,7 @@ void BaseAnimatedComponent::PlayAnimation(int animation, FPlayAnim flags)
 
 				auto animFadeOut = anim->GetFadeOutTime();
 
-				UNUSED(animFadeOut);
+				// UNUSED(animFadeOut);
 
 				auto animLastFadeOut = animLast->GetFadeOutTime();
 

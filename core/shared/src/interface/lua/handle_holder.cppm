@@ -3,10 +3,10 @@
 
 module;
 
-#include <luabind/pointer_traits.hpp>
 
 export module pragma.shared:scripting.lua.handle_holder;
 
+export import luabind;
 export import pragma.util;
 
 export {

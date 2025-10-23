@@ -5,10 +5,13 @@ module;
 
 #include "pragma/lua/core.hpp"
 #include <unordered_map>
+#include <string>
+#include <optional>
 
 export module pragma.shared:scripting.lua.entity_manager;
 
 export import :entities.enums;
+export import luabind;
 
 export class DLLNETWORK LuaEntityManager {
   public:

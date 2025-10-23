@@ -3,6 +3,8 @@
 
 module;
 
+#include <vector>
+
 #include <cmath>
 
 #include <sharedutils/magic_enum.hpp>
@@ -11,7 +13,8 @@ module;
 
 
 #include "memory"
-
+#include <unordered_map>
+#include <string>
 #include "cstring"
 #include "pragma/model/simplify.h"
 
@@ -1241,7 +1244,7 @@ void pragma::model::create_sphere(pragma::ModelSubMesh &mesh, const SphereCreate
 		auto &meshVert = meshVerts.back();
 		meshVert.position = v;
 		auto &n = meshVert.normal = uvec::get_normal(v - origin);
-		meshVert.uv = {umath::atan2(n.x, n.z) / (2.f * M_PI) + 0.5f, n.y * 0.5f + 0.5f};
+		meshVert.uv = {umath::atan2(n.x, n.z) / (2.f * umath::pi) + 0.5f, n.y * 0.5f + 0.5f};
 	}
 
 	mesh.SetSkinTextureIndex(0);

@@ -474,7 +474,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 						auto m = umat::identity();
 						const Vector2 scale {2.f, 2.f};
 						const Vector3 matScale {-scale.x, -scale.y, -1.f};
-						m = glm::scale(m, matScale);
+						m = glm::gtc::scale(m, matScale);
 						m = cam->GetProjectionMatrix() * cam->GetViewMatrix() * m;
 
 						pragma::ShaderDebug::PushConstants pushConstants {m, Vector4 {1.f, 1.f, 1.f, 1.f}};

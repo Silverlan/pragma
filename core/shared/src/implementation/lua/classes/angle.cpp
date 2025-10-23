@@ -5,6 +5,8 @@ module;
 
 
 
+#include <string>
+
 #include "pragma/lua/core.hpp"
 
 module pragma.shared;
@@ -25,40 +27,40 @@ void Lua::Angle::ToQuaternion(lua_State *l, const EulerAngles &ang, uint32_t rot
 	auto m = umat::identity();
 	switch(static_cast<::pragma::RotationOrder>(rotationOrder)) {
 	case ::pragma::RotationOrder::XYZ:
-		m = glm::eulerAngleXYZ(umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.r));
+		m = glm::gtx::eulerAngleXYZ(umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.r));
 		break;
 	case ::pragma::RotationOrder::YXZ:
-		m = glm::eulerAngleYXZ(umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.r));
+		m = glm::gtx::eulerAngleYXZ(umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.r));
 		break;
 	case ::pragma::RotationOrder::XZX:
-		m = glm::eulerAngleXZX(umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.p));
+		m = glm::gtx::eulerAngleXZX(umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.p));
 		break;
 	case ::pragma::RotationOrder::XYX:
-		m = glm::eulerAngleXYX(umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.p));
+		m = glm::gtx::eulerAngleXYX(umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.p));
 		break;
 	case ::pragma::RotationOrder::YXY:
-		m = glm::eulerAngleYXY(umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.y));
+		m = glm::gtx::eulerAngleYXY(umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.y));
 		break;
 	case ::pragma::RotationOrder::YZY:
-		m = glm::eulerAngleYZY(umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.y));
+		m = glm::gtx::eulerAngleYZY(umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.y));
 		break;
 	case ::pragma::RotationOrder::ZYZ:
-		m = glm::eulerAngleZYZ(umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.r));
+		m = glm::gtx::eulerAngleZYZ(umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.r));
 		break;
 	case ::pragma::RotationOrder::ZXZ:
-		m = glm::eulerAngleZXZ(umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.r));
+		m = glm::gtx::eulerAngleZXZ(umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.r));
 		break;
 	case ::pragma::RotationOrder::XZY:
-		m = glm::eulerAngleXZY(umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.y));
+		m = glm::gtx::eulerAngleXZY(umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.y));
 		break;
 	case ::pragma::RotationOrder::YZX:
-		m = glm::eulerAngleYZX(umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.p));
+		m = glm::gtx::eulerAngleYZX(umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.p));
 		break;
 	case ::pragma::RotationOrder::ZYX:
-		m = glm::eulerAngleZYX(umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.p));
+		m = glm::gtx::eulerAngleZYX(umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.p));
 		break;
 	case ::pragma::RotationOrder::ZXY:
-		m = glm::eulerAngleZXY(umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.y));
+		m = glm::gtx::eulerAngleZXY(umath::deg_to_rad(ang.r), umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.y));
 		break;
 	}
 	auto q = glm::quat_cast(m);

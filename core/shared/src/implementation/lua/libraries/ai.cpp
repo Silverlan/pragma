@@ -4,6 +4,10 @@
 module;
 
 
+#include <string>
+
+#include <type_traits>
+
 module pragma.shared;
 
 import :scripting.lua.libraries.ai;

@@ -10,7 +10,6 @@ module;
 
 #include "stdafx_client.h"
 #include "luasystem.h"
-#include <luabind/copy_policy.hpp>
 
 module pragma.client;
 

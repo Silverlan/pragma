@@ -3,7 +3,10 @@
 
 module;
 
-#include <luabind/object.hpp>
+
+#include <string>
+
+#include <string_view>
 
 module pragma.shared;
 
@@ -14,7 +17,7 @@ void luabind::default_converter<std::string_view>::to_lua(lua_State *L, std::str
 void luabind::default_converter<std::string_view>::to_lua(lua_State *L, std::string_view *x)
 {
 	if(!x)
-		lua_pushnil(L);
+		Lua::PushNil(L);
 	else
 		to_lua(L, *x);
 }

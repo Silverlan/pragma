@@ -270,7 +270,7 @@ void CDecalComponent::OnEntitySpawn()
 	tr.SetTarget(pos +dir *18.f);
 	tr.SetFlags(RayCastFlags::Default | RayCastFlags::IgnoreDynamic);
 	auto r = pragma::get_cgame()->RayCast(tr);
-	if(r.hitType != RayCastHitType::None)
+	if(r.hitType != pragma::physics::RayCastHitType::None)
 	{
 		pTrComponent->SetPosition(r.position +dir *-std::numeric_limits<float>::epsilon());
 		auto &rot = pTrComponent->GetOrientation();

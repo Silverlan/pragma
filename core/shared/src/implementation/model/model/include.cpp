@@ -6,7 +6,7 @@ module;
 #include "algorithm"
 
 #include "pragma/logging.hpp"
-
+#include <string>
 
 
 module pragma.shared;
@@ -321,7 +321,7 @@ void pragma::Model::Merge(const pragma::Model &other, MergeFlags flags)
 		textures.reserve(textures.size() + texturesOther.size());
 		std::unordered_map<uint32_t, uint32_t> otherMatIdxToThisMatIdx {};
 		for(auto i = decltype(texturesOther.size()) {0u}; i < texturesOther.size(); ++i) {
-			auto *matOther = (i < other.m_materials.size()) ? other.m_materials.at(i).get() : nullptr;
+			auto *matOther = (i < other.m_materials.size()) ? const_cast<msys::Material*>(other.m_materials.at(i).get()) : nullptr;
 			auto idx = AddTexture(texturesOther.at(i), matOther);
 			otherMatIdxToThisMatIdx.insert(std::make_pair(i, idx));
 		}

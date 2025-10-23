@@ -13,6 +13,8 @@ module;
 
 export module pragma.shared:scripting.lua.class_manager;
 
+export import luabind;
+
 export namespace pragma::lua {
 	class DLLNETWORK ClassManager {
 	  public:

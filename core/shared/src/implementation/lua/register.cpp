@@ -44,11 +44,8 @@ module;
 
 #include <mpParser.h>
 
-#include <luabind/out_value_policy.hpp>
 
-#include <luabind/copy_policy.hpp>
 
-#include <luabind/discard_result_policy.hpp>
 
 #include <filesystem>
 
@@ -58,7 +55,6 @@ module;
 
 #include <spdlog/fmt/fmt.h>
 
-#include <fmt/core.h>
 
 #include "noise/noise.h"
 
@@ -384,7 +380,7 @@ bool Lua::util::start_debugger_server(lua_State *l)
 
 	std::string fileName = "start_debugger_server.lua";
 
-	return pragma::Engine::Get()->GetNetworkState(l)->GetGameState()->ExecuteLuaFile(fileName);
+	return ::pragma::Engine::Get()->GetNetworkState(l)->GetGameState()->ExecuteLuaFile(fileName);
 
 }
 
@@ -1298,9 +1294,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 
 	if(Lua::get_extended_lua_modules_enabled()) {
 
-		DLLLUA int lua_snapshot(lua_State * L);
-
-		lua_pushtablecfunction(lua.GetState(), "debug", "snapshot", lua_snapshot);
+		lua_pushtablecfunction(lua.GetState(), "debug", "snapshot", &lua::snapshot);
 
 		isBreakDefined = true;
 
@@ -2312,7 +2306,7 @@ void log_with_args(spdlog::logger &logger, const char *msg, spdlog::level::level
 
 
 
-	auto log = [&](const auto &...elements) { logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(elements...))); };
+	auto log = [&](const auto &...elements) { logger.log(logLevel, std::vformat(msg, std::make_format_args(elements...))); };
 
 	std::apply(log, args);
 
@@ -3360,7 +3354,7 @@ void pragma::Game::RegisterLuaLibraries()
 
 	modMat[luabind::def("create_from_axis_angle", umat::create_from_axis_angle), luabind::def("create_from_axes", umat::create_from_axes), luabind::def("create_reflection", umat::create_reflection), luabind::def("create_orthogonal_matrix", Lua::matrix::create_orthogonal_matrix),
 
-	  luabind::def("create_perspective_matrix", Lua::matrix::create_perspective_matrix), luabind::def("create_look_at_matrix", glm::lookAtRH<float, glm::packed_highp>),
+	  luabind::def("create_perspective_matrix", Lua::matrix::create_perspective_matrix), luabind::def("create_look_at_matrix", glm::gtc::lookAtRH<float, glm::packed_highp>),
 
 	  luabind::def("calc_covariance_matrix", static_cast<::Mat3 (*)(lua_State *, luabind::table<>, const Vector3 &)>(Lua::matrix::calc_covariance_matrix)), luabind::def("calc_covariance_matrix", static_cast<::Mat3 (*)(lua_State *, luabind::table<>)>(Lua::matrix::calc_covariance_matrix)),
 

@@ -27,7 +27,6 @@
 #include <prosper_window.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_prepared_command_buffer.hpp>
-#include <luabind/copy_policy.hpp>
 #include <fsys/ifile.hpp>
 #include "texturemanager/texture.h"
 

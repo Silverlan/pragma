@@ -9,6 +9,8 @@
 
 module;
 
+#include <string>
+
 #include <memory>
 
 

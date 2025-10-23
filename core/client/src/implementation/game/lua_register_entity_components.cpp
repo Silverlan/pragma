@@ -14,10 +14,8 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>
 #include <prosper_descriptor_set_group.hpp>
-#include <luabind/copy_policy.hpp>
 #include <image/prosper_render_target.hpp>
 #include <util_image_buffer.hpp>
-#include <luabind/copy_policy.hpp>
 
 module pragma.client;
 

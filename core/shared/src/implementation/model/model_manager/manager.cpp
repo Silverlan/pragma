@@ -4,6 +4,12 @@
 module;
 
 
+#include <memory>
+#include <functional>
+#include <functional>
+
+#include <string>
+
 #include "memory"
 
 #include "algorithm"

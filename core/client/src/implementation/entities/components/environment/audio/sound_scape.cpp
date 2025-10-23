@@ -54,7 +54,7 @@ void CSoundScapeComponent::OnTick(double dt)
 				tr.SetTarget(pTrComponent->GetPosition());
 				tr.SetFlags(RayCastFlags::Default | RayCastFlags::IgnoreDynamic);
 				auto result = pragma::get_cgame()->RayCast(tr);
-				if(result.hitType == RayCastHitType::None)
+				if(result.hitType == pragma::physics::RayCastHitType::None)
 					StartSoundScape();
 			}
 		}

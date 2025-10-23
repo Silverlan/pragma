@@ -4,6 +4,10 @@
 module;
 
 #include "pragma/lua/core.hpp"
+#include <functional>
+#include <vector>
+#include <unordered_map>
+#include <string>
 
 export module pragma.shared:scripting.lua.core;
 

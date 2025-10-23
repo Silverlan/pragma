@@ -3,13 +3,15 @@
 
 module;
 
+#include <string>
+
 #include "pragma/lua/core.hpp"
 
 module pragma.shared;
 
 import :scripting.lua.classes.convar;
 
-ConVar *Lua::console::CreateConVar(lua_State *l, const std::string &cmd, ::udm::Type type, Lua::udm_type def, pragma::console::ConVarFlags flags, const std::string &help)
+ConVar *Lua::console::CreateConVar(lua_State *l, const std::string &cmd, ::udm::Type type, Lua::udm_type def, ::pragma::console::ConVarFlags flags, const std::string &help)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	if(state == nullptr)
@@ -29,12 +31,12 @@ ConVar *Lua::console::CreateConVar(lua_State *l, const std::string &cmd, ::udm::
 	return state->RegisterConVar(cmd, cvar);
 }
 
-void Lua::console::CreateConCommand(lua_State *l, const std::string &name, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &function, pragma::console::ConVarFlags flags, const std::string &help)
+void Lua::console::CreateConCommand(lua_State *l, const std::string &name, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &function, ::pragma::console::ConVarFlags flags, const std::string &help)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	state->CreateConCommand(name, function, flags, help);
 }
-void Lua::console::CreateConCommand(lua_State *l, const std::string &name, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &function, pragma::console::ConVarFlags flags)
+void Lua::console::CreateConCommand(lua_State *l, const std::string &name, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &function, ::pragma::console::ConVarFlags flags)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	state->CreateConCommand(name, function, flags);
@@ -42,7 +44,7 @@ void Lua::console::CreateConCommand(lua_State *l, const std::string &name, const
 void Lua::console::CreateConCommand(lua_State *l, const std::string &name, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &function, const std::string &help)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
-	state->CreateConCommand(name, function, pragma::console::ConVarFlags::None, help);
+	state->CreateConCommand(name, function, ::pragma::console::ConVarFlags::None, help);
 }
 
 ConVar *Lua::console::GetConVar(lua_State *l, const std::string &name)
@@ -97,10 +99,10 @@ pragma::console::ConVarFlags Lua::console::GetConVarFlags(lua_State *l, const st
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	if(state == nullptr)
-		return pragma::console::ConVarFlags::None;
+		return ::pragma::console::ConVarFlags::None;
 	auto *cv = state->GetConVar(conVar);
 	if(cv == nullptr)
-		return pragma::console::ConVarFlags::None;
+		return ::pragma::console::ConVarFlags::None;
 	return cv->GetFlags();
 }
 

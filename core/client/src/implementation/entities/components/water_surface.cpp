@@ -34,8 +34,8 @@ void CWaterSurfaceComponent::Initialize()
 		auto scale = pTrComponent != nullptr ? pTrComponent->GetScale() : Vector3 {1.f, 1.f, 1.f};
 		auto &matData = static_cast<CEOnUpdateRenderMatrices &>(evData.get());
 		matData.pose = {};
-		matData.transformation = glm::scale(umat::identity(), scale);
-		//matData.transformation = matData.translation *matData.rotation *glm::scale(umat::identity(),scale);
+		matData.transformation = glm::gtc::scale(umat::identity(), scale);
+		//matData.transformation = matData.translation *matData.rotation *glm::gtc::scale(umat::identity(),scale);
 	});
 	// TODO
 	//BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {

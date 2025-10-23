@@ -153,7 +153,7 @@ std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const ModelSubM
 	auto pVertexAnimatedComponent = GetEntity().GetComponent<pragma::CVertexAnimatedComponent>();
 	if(pVertexAnimatedComponent.expired() || pVertexAnimatedComponent->GetLocalVertexPosition(subMesh, vertexId, vertexOffset, optOutNormalOffset, optOutDelta) == false)
 		return t;
-	return *t * glm::translate(umat::identity(), vertexOffset); // TODO: Confirm order!
+	return *t * glm::gtc::translate(umat::identity(), vertexOffset); // TODO: Confirm order!
 }
 
 void CAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl) { BaseAnimatedComponent::OnModelChanged(mdl); }

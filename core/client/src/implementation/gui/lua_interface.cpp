@@ -14,7 +14,6 @@ module;
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <luabind/copy_policy.hpp>
 
 module pragma.client;
 

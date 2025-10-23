@@ -3,6 +3,10 @@
 
 module;
 
+#include <memory>
+#include <functional>
+#include <functional>
+
 #include <sharedutils/magic_enum.hpp>
 
 #include <iostream>
@@ -134,7 +138,7 @@ pragma::physics::ICollisionObject *pragma::physics::PhysObj::GetCollisionObject(
 	return hObj.Get();
 }
 
-pragma::physics::PhysObj::~pragma::physics::PhysObj()
+pragma::physics::PhysObj::~PhysObj()
 {
 	pragma::BaseLuaHandle::InvalidateHandle();
 	//NetworkState *state = m_networkState;

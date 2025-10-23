@@ -47,10 +47,12 @@ module;
 
 
 
+#include <unordered_map>
+
 #include "pragma/lua/core.hpp"
 
 #include "noise/noise.h"
-
+#include <string>
 
 
 
@@ -60,7 +62,6 @@ module;
 
 
 // import pragma.scripting.lua;
-
 
 
 
@@ -1844,37 +1845,37 @@ void pragma::Game::RegisterLuaGlobals()
 
 
 
-	    {"FLAG_INVALID", FVFile::Invalid},
+	    {"FLAG_INVALID", fsys::FVFile::Invalid},
 
 
 
 
-	    {"FLAG_PACKAGE", FVFile::Package},
+	    {"FLAG_PACKAGE", fsys::FVFile::Package},
 
 
 
 
-	    {"FLAG_COMPRESSED", FVFile::Compressed},
+	    {"FLAG_COMPRESSED", fsys::FVFile::Compressed},
 
 
 
 
-	    {"FLAG_DIRECTORY", FVFile::Directory},
+	    {"FLAG_DIRECTORY", fsys::FVFile::Directory},
 
 
 
 
-	    {"FLAG_ENCRYPTED", FVFile::Encrypted},
+	    {"FLAG_ENCRYPTED", fsys::FVFile::Encrypted},
 
 
 
 
-	    {"FLAG_VIRTUAL", FVFile::Virtual},
+	    {"FLAG_VIRTUAL", fsys::FVFile::Virtual},
 
 
 
 
-	    {"FLAG_READONLY", FVFile::ReadOnly},
+	    {"FLAG_READONLY", fsys::FVFile::ReadOnly},
 
 
 

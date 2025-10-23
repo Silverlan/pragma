@@ -3,12 +3,11 @@
 
 module;
 
-#include <luabind/config.hpp>
-#include <luabind/detail/policy.hpp>
-#include "luabind/nil.hpp"
 #include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.policies.default_parameter;
+
+export import luabind;
 
 export namespace luabind {
 	namespace detail {

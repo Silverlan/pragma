@@ -12,10 +12,8 @@ module;
 #include <prosper_swap_command_buffer.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 #include <sharedutils/util_hash.hpp>
-#include <luabind/out_value_policy.hpp>
 #include <util_formatted_text.hpp>
 #include <prosper_window.hpp>
-#include <luabind/copy_policy.hpp>
 #include "pragma/lua/luaapi.h"
 #include "sharedutils/functioncallback.h"
 #include "sharedutils/util_event_reply.hpp"

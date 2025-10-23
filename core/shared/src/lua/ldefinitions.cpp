@@ -42,8 +42,8 @@ void Lua::HandleLuaError(lua_State *l)
 	if(!Lua::IsString(l, -1))
 		return;
 	std::string msg = Lua::ToString(l, -1);
-	msg = pragma::scripting::lua::format_error_message(l, msg, Lua::StatusCode::ErrorRun);
-	pragma::scripting::lua::submit_error(l, msg);
+	msg = ::pragma::scripting::lua::format_error_message(l, msg, Lua::StatusCode::ErrorRun);
+	::pragma::scripting::lua::submit_error(l, msg);
 }
 
 void Lua::HandleLuaError(lua_State *l, Lua::StatusCode s)
@@ -54,7 +54,7 @@ void Lua::HandleLuaError(lua_State *l, Lua::StatusCode s)
 
 std::string Lua::GetErrorMessagePrefix(lua_State *l)
 {
-	auto *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = ::pragma::Engine::Get()->GetNetworkState(l);
 	if(state != nullptr)
 		return state->GetMessagePrefix();
 	return "";

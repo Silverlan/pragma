@@ -3,6 +3,10 @@
 
 module;
 
+#include <string>
+
+#include <utility>
+
 module pragma.shared;
 
 import :scripting.lua.classes.phys_soft_body_info;

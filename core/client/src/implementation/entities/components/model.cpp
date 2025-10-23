@@ -14,7 +14,6 @@ module;
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 #include <prosper_command_buffer.hpp>
-#include <luabind/copy_policy.hpp>
 
 module pragma.client;
 

@@ -3,6 +3,11 @@
 
 module;
 
+#include <memory>
+#include <functional>
+#include <string>
+#include <functional>
+
 #include "memory"
 
 #include "algorithm"
@@ -364,7 +369,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 			auto *game = ent.GetNetworkState()->GetGameState();
 			auto rayResult = game->RayCast(traceData);
 
-			if(rayResult.hitType != RayCastHitType::None) {
+			if(rayResult.hitType != pragma::physics::RayCastHitType::None) {
 				auto posRay = rayResult.position + rayResult.normal * footInfo.yOffset;
 				if(pTrComponent)
 					pTrComponent->WorldToLocal(&posRay);

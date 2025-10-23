@@ -3,6 +3,9 @@
 
 module;
 
+#include <functional>
+#include <functional>
+
 #include <string>
 
 #include <memory>
@@ -108,14 +111,14 @@ bool pragma::asset::WmdFormatHandler::LoadData(ModelProcessor &processor, ModelL
 		eyeOffset = f.Read<Vector3>();
 
 	unsigned long long offModelData = f.Read<unsigned long long>();
-	UNUSED(offModelData);
+	// UNUSED(offModelData);
 	unsigned long long offMeshes = f.Read<unsigned long long>();
-	UNUSED(offMeshes);
+	// UNUSED(offMeshes);
 	unsigned long long offLODData = f.Read<unsigned long long>();
-	UNUSED(offLODData);
+	// UNUSED(offLODData);
 	if(ver >= 0x0004) {
 		auto offBodygroups = f.Read<unsigned long long>();
-		UNUSED(offBodygroups);
+		// UNUSED(offBodygroups);
 	}
 	if(ver >= 38)
 		f.Read<unsigned long long>(); // Joints
@@ -254,10 +257,10 @@ void pragma::asset::WmdFormatHandler::LoadBones(unsigned short version, unsigned
 
 			if(version <= 0x0001) {
 				unsigned char joint = m_file->Read<unsigned char>();
-				UNUSED(joint);
+				// UNUSED(joint);
 			}
-			//trans = glm::translate(trans,pos);
-			//trans = glm::rotate(trans,orientation);
+			//trans = glm::gtc::translate(trans,pos);
+			//trans = glm::gtc::rotate(trans,orientation);
 			/*Matex4x3 trans;
 			for(int x=0;x<4;x++)
 			{

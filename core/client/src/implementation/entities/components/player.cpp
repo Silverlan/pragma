@@ -187,7 +187,7 @@ void CPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang, float dur
 	static_cast<Callback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>> *>(cb.get())->SetFunction([cb, tStart, ang, dur](std::reference_wrapper<Vector3>, std::reference_wrapper<Quat> rot) mutable {
 		auto &t = pragma::get_cgame()->CurTime();
 		auto tDelta = umath::min(static_cast<float>(t - tStart), dur);
-		auto sc = static_cast<float>(umath::sin(tDelta / (dur / 2.f) * M_PI_2));
+		auto sc = static_cast<float>(umath::sin(tDelta / (dur / 2.f) * umath::pi_2));
 		EulerAngles rotOffset {static_cast<float>(umath::approach_angle(0.f, ang.p, umath::abs(ang.p) * sc)), static_cast<float>(umath::approach_angle(0.f, ang.y, umath::abs(ang.y) * sc)), static_cast<float>(umath::approach_angle(0.f, ang.r, umath::abs(ang.r) * sc))};
 		rot.get() = rot.get() * uquat::create(rotOffset);
 		if(tDelta >= dur) {
@@ -274,7 +274,7 @@ void CPlayerComponent::OnUpdateMatrices(Mat4 &transformMatrix)
 	if(IsLocalPlayer() && IsInFirstPersonMode()) {
 		auto pTrComponent = GetEntity().GetTransformComponent();
 		auto t = (pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::FORWARD) * VIEW_BODY_OFFSET;
-		transformMatrix = glm::translate(umat::identity(), t) * transformMatrix; // Translate to align shadow with view body
+		transformMatrix = glm::gtc::translate(umat::identity(), t) * transformMatrix; // Translate to align shadow with view body
 	}
 }
 

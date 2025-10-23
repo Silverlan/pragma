@@ -9,6 +9,8 @@ module;
 
 export module pragma.shared:scripting.lua.base_lua_obj;
 
+export import luabind;
+
 export {
 	class DLLNETWORK BaseLuaObj {
 	protected:

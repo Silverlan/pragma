@@ -4,6 +4,10 @@
 module;
 
 
+#include <string>
+
+#include <array>
+
 #include "pragma/lua/core.hpp"
 
 #include "algorithm"

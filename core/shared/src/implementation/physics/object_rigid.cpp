@@ -4,6 +4,8 @@
 module;
 
 
+#include <string>
+
 module pragma.shared;
 
 import :physics.object;
@@ -287,7 +289,7 @@ void RigidPhysObj::SetLinearVelocity(const Vector3 &vel)
 Vector3 RigidPhysObj::GetAngularVelocity() const
 {
 	auto *body = GetRigidBody();
-	if(body == NULL)
+	if(body == nullptr)
 		return Vector3(0.f, 0.f, 0.f);
 	return body->GetAngularVelocity();
 }
@@ -320,7 +322,7 @@ void RigidPhysObj::WakeUp()
 bool RigidPhysObj::IsSleeping() const
 {
 	auto *body = GetRigidBody();
-	if(body == NULL)
+	if(body == nullptr)
 		return true;
 	return body->IsAsleep();
 }

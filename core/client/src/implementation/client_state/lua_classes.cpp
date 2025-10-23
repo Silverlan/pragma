@@ -39,8 +39,6 @@ module;
 #include <prosper_render_pass.hpp>
 #include <shader/prosper_shader_t.hpp>
 #include <luainterface.hpp>
-#include <luabind/copy_policy.hpp>
-#include <luabind/return_reference_to_policy.hpp>
 #include <material_property_block_view.hpp>
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>

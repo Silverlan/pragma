@@ -3,6 +3,9 @@
 
 module;
 
+#include <string>
+
+#include <cstdio>
 
 module pragma.shared;
 

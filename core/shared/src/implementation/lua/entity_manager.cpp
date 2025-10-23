@@ -3,6 +3,8 @@
 
 module;
 
+#include <string>
+
 #include "pragma/lua/core.hpp"
 #include "algorithm"
 

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <luabind/detail/conversion_policies/native_converter.hpp>
 #include "pragma/lua/core.hpp"
 #include <vector>
 #include <map>
@@ -15,6 +14,7 @@ export module pragma.shared:scripting.lua.converters.game_types;
 
 export import :physics.base;
 export import :scripting.lua.base_lua_handle;
+export import :scripting.lua.types.base_types;
 export import :types;
 
 export namespace luabind {

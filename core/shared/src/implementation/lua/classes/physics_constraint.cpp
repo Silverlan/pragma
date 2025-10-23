@@ -6,6 +6,10 @@ module;
 
 
 
+#include <functional>
+
+#include <string>
+
 module pragma.shared;
 
 import :scripting.lua.classes.physics;

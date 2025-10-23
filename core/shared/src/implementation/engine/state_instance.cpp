@@ -3,6 +3,12 @@
 
 module;
 
+#include <memory>
+#include <functional>
+#include <string>
+#include <functional>
+
+#include <cstdlib>
 
 module pragma.shared;
 

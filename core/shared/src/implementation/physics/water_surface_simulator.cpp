@@ -4,8 +4,12 @@
 module;
 
 
-#include "cstring"
+#include <string>
 
+#include <algorithm>
+
+#include "cstring"
+#include <cmath>
 #include "cassert"
 
 

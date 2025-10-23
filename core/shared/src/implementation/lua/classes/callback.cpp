@@ -4,6 +4,7 @@
 module;
 
 #include <iostream>
+#include <functional>
 #include "pragma/lua/core.hpp"
 
 #include "pragma/networkdefinitions.h"

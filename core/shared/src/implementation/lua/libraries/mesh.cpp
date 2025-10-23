@@ -5,6 +5,10 @@ module;
 
 
 
+#include <string>
+
+#include <vector>
+
 module pragma.shared;
 
 import :scripting.lua.libraries.mesh;

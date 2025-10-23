@@ -8,6 +8,7 @@ module;
 
 export module pragma.shared:scripting.lua.classes.phys_soft_body_info;
 
+export import luabind;
 export import :physics.soft_body_info;
 
 export namespace Lua {

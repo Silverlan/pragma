@@ -5,5 +5,6 @@ module;
 
 export module pragma.shared:scripting.lua.types;
 
+export import :scripting.lua.types.base_types;
 export import :scripting.lua.types.nil;
 export import :scripting.lua.types.udm;

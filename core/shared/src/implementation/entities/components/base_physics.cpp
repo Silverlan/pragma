@@ -6,6 +6,9 @@
 
 module;
 
+#include <unordered_map>
+#include <vector>
+
 #include "sstream"
 
 
@@ -86,7 +89,7 @@ void BasePhysicsComponent::RegisterEvents(pragma::EntityComponentManager &compon
 
 }
 
-BasePhysicsComponent::BasePhysicsComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_collisionType(COLLISIONTYPE::NONE), m_moveType(pragma::physics::PHYSICSTYPE::NONE) {}
+BasePhysicsComponent::BasePhysicsComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_collisionType(pragma::physics::COLLISIONTYPE::NONE), m_moveType(pragma::physics::MOVETYPE::NONE) {}
 
 void BasePhysicsComponent::OnRemove()
 
@@ -284,7 +287,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 
 {
 
-	PHYSICSTYPE type = GetPhysicsType();
+	auto type = GetPhysicsType();
 
 	if(type == pragma::physics::PHYSICSTYPE::NONE)
 
@@ -468,7 +471,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 
 	}
 
-	if(type == pragma::physics::MOVETYPE::DYNAMIC) {
+	if(type == pragma::physics::PHYSICSTYPE::DYNAMIC) {
 
 		/*RigidPhysObj *phys = static_cast<RigidPhysObj*>(m_physObject);
 
@@ -778,19 +781,19 @@ bool BasePhysicsComponent::RayResultCallback(pragma::physics::CollisionMask rayC
 
 
 
-PHYSICSTYPE BasePhysicsComponent::GetPhysicsType() const { return m_physicsType; }
+pragma::physics::PHYSICSTYPE BasePhysicsComponent::GetPhysicsType() const { return m_physicsType; }
 
 
 
-COLLISIONTYPE BasePhysicsComponent::GetCollisionType() const { return m_collisionType; }
+pragma::physics::COLLISIONTYPE BasePhysicsComponent::GetCollisionType() const { return m_collisionType; }
 
 
 
-void BasePhysicsComponent::SetCollisionType(COLLISIONTYPE collisiontype) { m_collisionType = collisiontype; }
+void BasePhysicsComponent::SetCollisionType(pragma::physics::COLLISIONTYPE collisiontype) { m_collisionType = collisiontype; }
 
 
 
-MOVETYPE BasePhysicsComponent::GetMoveType() const { return m_moveType; }
+pragma::physics::MOVETYPE BasePhysicsComponent::GetMoveType() const { return m_moveType; }
 
 
 
@@ -838,7 +841,7 @@ const Vector3 &BasePhysicsComponent::GetLocalOrigin() const
 
 	auto *phys = GetPhysicsObject();
 
-	if(phys == nullptr || (physType != pragma::physics::MOVETYPE::DYNAMIC && physType != pragma::physics::MOVETYPE::STATIC))
+	if(phys == nullptr || (physType != pragma::physics::PHYSICSTYPE::DYNAMIC && physType != pragma::physics::PHYSICSTYPE::STATIC))
 
 		return uvec::ORIGIN;
 
@@ -862,7 +865,7 @@ Vector3 BasePhysicsComponent::GetOrigin() const
 
 	auto *phys = GetPhysicsObject();
 
-	if(phys == nullptr || (physType != pragma::physics::MOVETYPE::DYNAMIC && physType != pragma::physics::MOVETYPE::STATIC)) {
+	if(phys == nullptr || (physType != pragma::physics::PHYSICSTYPE::DYNAMIC && physType != pragma::physics::PHYSICSTYPE::STATIC)) {
 
 		auto pTrComponent = GetEntity().GetTransformComponent();
 
@@ -910,7 +913,7 @@ void BasePhysicsComponent::SetCollisionBounds(const Vector3 &min, const Vector3 
 
 	if(m_physObject != nullptr && m_physObject->IsController()) {
 
-		auto *phys = static_cast<ControllerPhy(pragma::physics::PHYSICSTYPEysObject.get());
+		auto *phys = static_cast<ControllerPhysObj *>(m_physObject.get());
 
 		phys->SetCollisionBounds(min, max);
 
@@ -980,7 +983,7 @@ void BasePhysicsComponent::PhysicsUpdate(double tDelta)
 
 	CEPhysicsUpdateData evData {tDelta};
 
-	MOVETYPE movetype = GetMoveType();
+	auto movetype = GetMoveType();
 
 	if(phys != NULL && m_physObject->IsStatic() == false) {
 
@@ -1558,7 +1561,7 @@ void BasePhysicsComponent::DropToFloor()
 
 	auto result = game->Sweep(trace);
 
-	if(result.hitType == RayCastHitType::None || result.distance == 0.f)
+	if(result.hitType == pragma::physics::RayCastHitType::None || result.distance == 0.f)
 
 		return;
 
@@ -1822,7 +1825,7 @@ void CEHandleRaycast::PushArguments(lua_State *l) {}
 
 
 
-CEInitializePhysics::CEInitializePhysics(PHYSICSTYPE type, BasePhysicsComponent::PhysFlags flags) : physicsType {type}, flags {flags} {}
+CEInitializePhysics::CEInitializePhysics(pragma::physics::PHYSICSTYPE type, BasePhysicsComponent::PhysFlags flags) : physicsType {type}, flags {flags} {}
 
 void CEInitializePhysics::PushArguments(lua_State *l)
 

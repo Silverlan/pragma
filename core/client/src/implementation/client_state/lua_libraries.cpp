@@ -18,7 +18,6 @@ module;
 
 #include "stdafx_client.h"
 #include <alsound_effect.hpp>
-#include <luabind/copy_policy.hpp>
 #include <luainterface.hpp>
 #include <prosper_window.hpp>
 #include <prosper_command_buffer.hpp>

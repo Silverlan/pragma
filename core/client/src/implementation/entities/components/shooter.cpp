@@ -54,7 +54,7 @@ void ecs::CShooterComponent::FireBullets(const BulletInfo &bulletInfo, const Vec
 			const auto minTracerDistance = 80.f; // Don't show a tracer if the distance is less than this, otherwise the tracer might look odd when close to a wall.
 			if(bulletInfo.tracerCount > 0 && (i % bulletInfo.tracerCount) == 0 && l > minTracerDistance)
 				pragma::get_cgame()->CreateParticleTracer<pragma::ecs::CParticleSystemComponent>(effectsOrigins, hitPos, bulletInfo.tracerRadius, bulletInfo.tracerColor, bulletInfo.tracerLength, bulletInfo.tracerSpeed, bulletInfo.tracerMaterial, bulletInfo.tracerBloom);
-			if(result.hitType != RayCastHitType::None) {
+			if(result.hitType != pragma::physics::RayCastHitType::None) {
 				auto *col = result.collisionObj.Get();
 				if(col != nullptr) {
 					auto surfaceMaterialId = col->GetSurfaceMaterial();

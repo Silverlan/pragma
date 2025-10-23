@@ -4,8 +4,12 @@
 module;
 
 
-#include <string>
+#include <memory>
+#include <functional>
+#include <functional>
 
+#include <string>
+#include <stdexcept>
 #include "memory"
 
 #include "cstring"

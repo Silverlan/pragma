@@ -3,7 +3,8 @@
 
 module;
 
-#include <luabind/object.hpp>
+
+#include <string>
 
 module pragma.shared;
 
@@ -14,7 +15,7 @@ void luabind::default_converter<pragma::string::Utf8String>::to_lua(lua_State *L
 void luabind::default_converter<pragma::string::Utf8String>::to_lua(lua_State *L, pragma::string::Utf8String *x)
 {
 	if(!x)
-		lua_pushnil(L);
+		Lua::PushNil(L);
 	else
 		to_lua(L, *x);
 }

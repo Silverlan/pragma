@@ -4,6 +4,8 @@
 module;
 
 
+#include <string>
+
 #include <memory>
 #include "pragma/lua/core.hpp"
 

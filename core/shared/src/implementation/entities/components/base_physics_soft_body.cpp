@@ -7,6 +7,10 @@ module;
 
 
 
+#include <functional>
+#include <string>
+#include <functional>
+
 #include <memory>
 
 module pragma.shared;
@@ -138,7 +142,7 @@ util::TSharedHandle<pragma::physics::PhysObj> BasePhysicsComponent::InitializeSo
 	m_physObject = util::shared_handle_cast<SoftBodyPhysObj, pragma::physics::PhysObj>(phys);
 	m_physObject->Spawn();
 
-	m_physicsType = pragma::physics::MOVETYPE::SOFTBODY;
+	m_physicsType = pragma::physics::PHYSICSTYPE::SOFTBODY;
 	SetCollisionFilter(pragma::physics::CollisionMask::Dynamic | pragma::physics::CollisionMask::Generic, pragma::physics::CollisionMask::All);
 	SetMoveType(pragma::physics::MOVETYPE::PHYSICS);
 

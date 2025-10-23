@@ -5,6 +5,9 @@ module;
 
 
 
+#include <string>
+#include <vector>
+
 #include <utility>
 
 module pragma.shared;

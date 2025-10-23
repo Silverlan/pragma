@@ -6,7 +6,12 @@ module;
 
 
 
-#include <luabind/out_value_policy.hpp>
+
+#include <functional>
+
+#include <string>
+
+#include "pragma/lua/core.hpp"
 
 module pragma.shared;
 

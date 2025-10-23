@@ -3,10 +3,15 @@
 
 module;
 
+#include <string>
+
+#include <algorithm>
 
 module pragma.shared;
 
 import :util.timer;
+
+#undef max
 
 Timer::Timer() : m_bRemove(false), m_next(0), m_bRunning(false), m_bIsValid(true), m_callback() {}
 
@@ -144,7 +149,7 @@ void Timer::InvalidateHandle(TimerHandle *hTimer)
 {
 	for(auto i = m_handles.size() - 1; i != size_t(-1); i--) {
 		if(m_handles[i].get() == hTimer) {
-			hTimer->m_timer = NULL;
+			hTimer->m_timer = nullptr;
 			m_handles.erase(m_handles.begin() + i);
 			break;
 		}

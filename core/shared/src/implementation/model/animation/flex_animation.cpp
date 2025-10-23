@@ -10,6 +10,7 @@ module;
 #include "memory"
 
 #include "cassert"
+#include <vector>
 
 
 module pragma.shared;

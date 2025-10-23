@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <luabind/detail/conversion_policies/conversion_policies.hpp>
 #include <memory>
 
 export module pragma.shared:scripting.lua.converters.file;

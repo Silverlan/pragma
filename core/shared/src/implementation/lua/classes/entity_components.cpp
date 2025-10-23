@@ -108,7 +108,7 @@ module;
 
 
 
-
+#include "sharedutils/magic_enum.hpp"
 #include "pragma/lua/core.hpp"
 
 #include "pragma/logging.hpp"
@@ -180,7 +180,6 @@ module;
 
 
 
-#include <luabind/out_value_policy.hpp>
 
 
 
@@ -189,7 +188,6 @@ module;
 
 
 
-#include <luabind/copy_policy.hpp>
 
 
 
@@ -198,7 +196,6 @@ module;
 
 
 
-#include <luabind/discard_result_policy.hpp>
 
 
 
@@ -207,7 +204,6 @@ module;
 
 
 
-#include <fmt/core.h>
 
 
 
@@ -5508,7 +5504,7 @@ void log_with_args(const pragma::BaseEntityComponent &component, const char *msg
 
 
 
-	auto log = [&](const auto &...elements) { component.Log(logLevel, fmt::vformat(msg, fmt::make_format_args(elements...))); };
+	auto log = [&](const auto &...elements) { component.Log(logLevel, std::vformat(msg, std::make_format_args(elements...))); };
 
 
 
@@ -19206,7 +19202,7 @@ void pragma::lua::base_physics_component::register_class(luabind::module_ &mod)
 
 
 
-		MOVETYPE mt = hEnt.GetMoveType();
+		pragma::physics::MOVETYPE mt = hEnt.GetMoveType();
 
 
 

@@ -14,6 +14,8 @@ module pragma.shared;
 
 import :console.enums;
 
+#undef max
+
 static pragma::console::ConsoleColorFlags s_activeConsoleColorFlags = pragma::console::ConsoleColorFlags::None;
 std::string util::get_ansi_color_code(pragma::console::ConsoleColorFlags flags)
 {
@@ -143,7 +145,7 @@ const std::unordered_map<pragma::console::ConsoleColorFlags, Color> colorMap = {
 
   {pragma::console::ConsoleColorFlags::Red, Color {209 / 2, 17 / 2, 65 / 2}}, {pragma::console::ConsoleColorFlags::Green, Color {0 / 2, 177 / 2, 89 / 2}}, {pragma::console::ConsoleColorFlags::Blue, Color {0 / 2, 174 / 2, 219 / 2}}, {pragma::console::ConsoleColorFlags::Yellow, Color {255 / 2, 196 / 2, 37 / 2}},
   {pragma::console::ConsoleColorFlags::Cyan, Color {132 / 2, 193 / 2, 255 / 2}}, {pragma::console::ConsoleColorFlags::Magenta, Color {255 / 2, 51 / 2, 119 / 2}}, {pragma::console::ConsoleColorFlags::White, Color {255 / 2, 255 / 2, 255 / 2}}};
-std::optional<Color> util::console_color_flags_to_color(ConsoleColorFlags flags)
+std::optional<Color> util::console_color_flags_to_color(pragma::console::ConsoleColorFlags flags)
 {
 	auto foregroundFlags = flags & (pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 	auto it = colorMap.find(foregroundFlags);
@@ -167,7 +169,7 @@ pragma::console::ConsoleColorFlags util::color_to_console_color_flags(const Colo
 	return bestCandidate;
 }
 
-std::string util::get_true_color_code(std::optional<Color> foregroundColor, std::optional<Color> backgroundColor, ConsoleDecoratorFlags flags)
+std::string util::get_true_color_code(std::optional<Color> foregroundColor, std::optional<Color> backgroundColor, pragma::console::ConsoleDecoratorFlags flags)
 {
 	std::string colorCode;
 	if(foregroundColor)
@@ -175,21 +177,21 @@ std::string util::get_true_color_code(std::optional<Color> foregroundColor, std:
 	if(backgroundColor)
 		colorCode += "\033[48;2;" + std::to_string(backgroundColor->r) + ";" + std::to_string(backgroundColor->g) + ";" + std::to_string(backgroundColor->b) + "m";
 
-	if(flags != ConsoleDecoratorFlags::None) {
+	if(flags != pragma::console::ConsoleDecoratorFlags::None) {
 		std::string decoratorCode;
-		if((flags & ConsoleDecoratorFlags::Bold) != ConsoleDecoratorFlags::None)
+		if((flags & pragma::console::ConsoleDecoratorFlags::Bold) != pragma::console::ConsoleDecoratorFlags::None)
 			decoratorCode += ";1";
-		if((flags & ConsoleDecoratorFlags::Underline) != ConsoleDecoratorFlags::None)
+		if((flags & pragma::console::ConsoleDecoratorFlags::Underline) != pragma::console::ConsoleDecoratorFlags::None)
 			decoratorCode += ";4";
-		if((flags & ConsoleDecoratorFlags::SlowBlink) != ConsoleDecoratorFlags::None)
+		if((flags & pragma::console::ConsoleDecoratorFlags::SlowBlink) != pragma::console::ConsoleDecoratorFlags::None)
 			decoratorCode += ";5";
-		if((flags & ConsoleDecoratorFlags::Framed) != ConsoleDecoratorFlags::None)
+		if((flags & pragma::console::ConsoleDecoratorFlags::Framed) != pragma::console::ConsoleDecoratorFlags::None)
 			decoratorCode += ";51";
-		if((flags & ConsoleDecoratorFlags::Encircled) != ConsoleDecoratorFlags::None)
+		if((flags & pragma::console::ConsoleDecoratorFlags::Encircled) != pragma::console::ConsoleDecoratorFlags::None)
 			decoratorCode += ";52";
-		if((flags & ConsoleDecoratorFlags::Overlined) != ConsoleDecoratorFlags::None)
+		if((flags & pragma::console::ConsoleDecoratorFlags::Overlined) != pragma::console::ConsoleDecoratorFlags::None)
 			decoratorCode += ";53";
-		if((flags & ConsoleDecoratorFlags::Reset) != ConsoleDecoratorFlags::None)
+		if((flags & pragma::console::ConsoleDecoratorFlags::Reset) != pragma::console::ConsoleDecoratorFlags::None)
 			decoratorCode += ";0";
 		if(decoratorCode.empty() == false) {
 			decoratorCode = decoratorCode.substr(1);

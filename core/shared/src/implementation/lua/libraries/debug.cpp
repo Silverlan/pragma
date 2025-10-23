@@ -28,22 +28,22 @@ int Lua::debug::collectgarbage(lua_State *l)
 }
 void Lua::debug::stackdump(lua_State *l)
 {
-	int top = lua_gettop(l);
+	int top = lua::get_top(l);
 	Con::cout << "Total in stack: " << top << Con::endl;
 	for(int i = 1; i <= top; i++) {
-		int t = lua_type(l, i);
+		int t = lua::type(l, i);
 		switch(t) {
 		case LUA_TSTRING:
-			Con::cout << "string: " << lua_tostring(l, i) << Con::endl;
+			Con::cout << "string: " << lua::to_string(l, i) << Con::endl;
 			break;
 		case LUA_TBOOLEAN:
-			Con::cout << "boolean: " << (lua_toboolean(l, i) ? "true" : "false") << Con::endl;
+			Con::cout << "boolean: " << (lua:to_boolean(l, i) ? "true" : "false") << Con::endl;
 			break;
 		case LUA_TNUMBER:
-			Con::cout << "number: " << lua_tonumber(l, i) << Con::endl;
+			Con::cout << "number: " << lua::to_number(l, i) << Con::endl;
 			break;
 		default:
-			Con::cout << lua_typename(l, i) << Con::endl;
+			Con::cout << lua::type_name(l, i) << Con::endl;
 			break;
 		}
 	}

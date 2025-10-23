@@ -8,7 +8,6 @@ module;
 
 #include "pragma/lua/luaapi.h"
 #include "stdafx_client.h"
-#include <luabind/class.hpp>
 #include <prosper_framebuffer.hpp>
 #include <prosper_fence.hpp>
 #include <prosper_command_buffer.hpp>
@@ -24,7 +23,6 @@ module;
 #include <prosper_swap_command_buffer.hpp>
 #include <prosper_event.hpp>
 #include <sharedutils/datastream.h>
-#include <luabind/copy_policy.hpp>
 #include <luainterface.hpp>
 #include <sharedutils/util.h>
 

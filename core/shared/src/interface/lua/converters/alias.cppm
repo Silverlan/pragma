@@ -3,10 +3,12 @@
 
 module;
 
-#include <luabind/object.hpp>
 #include "pragma/lua/core.hpp"
+#include <memory>
 
 export module pragma.shared:scripting.lua.converters.alias;
+
+export import :scripting.lua.types.base_types;
 
 export namespace luabind {
 	template<typename T>

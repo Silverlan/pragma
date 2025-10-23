@@ -4,6 +4,10 @@
 module;
 
 
+#include <functional>
+
+#include <iostream>
+
 #include "pragma/lua/ostream_operator_alias.hpp"
 
 

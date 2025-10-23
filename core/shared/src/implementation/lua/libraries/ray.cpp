@@ -16,6 +16,8 @@ module;
 
 
 
+#include <string>
+
 #include "pragma/lua/core.hpp"
 
 module pragma.shared;
@@ -114,7 +116,7 @@ void Lua::TraceData::SetFilter(lua_State *l, ::TraceData &data, luabind::object)
 
 	auto oFc = luabind::object(luabind::from_stack(l, 2));
 
-	data.SetFilter([l, oFc](pragma::physics::IShape &shape, pragma::physics::IRigidBody &body) -> RayCastHitType {
+	data.SetFilter([l, oFc](pragma::physics::IShape &shape, pragma::physics::IRigidBody &body) -> pragma::physics::RayCastHitType {
 
 		auto c = Lua::CallFunction(
 
@@ -136,9 +138,9 @@ void Lua::TraceData::SetFilter(lua_State *l, ::TraceData &data, luabind::object)
 
 		if(c != Lua::StatusCode::Ok || Lua::IsSet(l, -1) == false || Lua::IsNumber(l, -1) == false)
 
-			return RayCastHitType::Block;
+			return pragma::physics::RayCastHitType::Block;
 
-		return static_cast<RayCastHitType>(Lua::CheckInt(l, -1));
+		return static_cast<pragma::physics::RayCastHitType>(Lua::CheckInt(l, -1));
 
 	});
 

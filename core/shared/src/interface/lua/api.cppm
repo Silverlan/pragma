@@ -5,11 +5,8 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <luabind/luabind.hpp>
-#include <luabind/operator.hpp>
-#include <luabind/pseudo_traits.hpp>
-#include <luabind/make_function_signature.hpp>
 #include "pragma/lua/ldefinitions.h"
+#include <stdexcept>
 
 export module pragma.shared:scripting.lua.api;
 

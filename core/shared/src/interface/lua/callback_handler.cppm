@@ -7,6 +7,7 @@ module;
 #include "pragma/lua/core.hpp"
 #include <queue>
 #include <string>
+#include <unordered_map>
 
 export module pragma.shared:scripting.lua.callback_handler;
 

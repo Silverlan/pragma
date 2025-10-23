@@ -599,12 +599,12 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector
 		std::pair<Vector3,Vector3>{Vector3{0.0f,0.0f,-1.0f},Vector3{0.0f,1.0f,0.0f}} // Back
 	};
 	static const std::array<Mat4,6> cubemapViewMatrices = {
-		glm::lookAtRH(Vector3{0.0f,0.0f,0.0f},forwardUpDirs.at(0).first,forwardUpDirs.at(0).second),
-		glm::lookAtRH(Vector3{0.0f,0.0f,0.0f},forwardUpDirs.at(1).first,forwardUpDirs.at(1).second),
-		glm::lookAtRH(Vector3{0.0f,0.0f,0.0f},forwardUpDirs.at(2).first,forwardUpDirs.at(2).second),
-		glm::lookAtRH(Vector3{0.0f,0.0f,0.0f},forwardUpDirs.at(3).first,forwardUpDirs.at(3).second),
-		glm::lookAtRH(Vector3{0.0f,0.0f,0.0f},forwardUpDirs.at(4).first,forwardUpDirs.at(4).second),
-		glm::lookAtRH(Vector3{0.0f,0.0f,0.0f},forwardUpDirs.at(5).first,forwardUpDirs.at(5).second)
+		glm::gtc::lookAtRH(Vector3{0.0f,0.0f,0.0f},forwardUpDirs.at(0).first,forwardUpDirs.at(0).second),
+		glm::gtc::lookAtRH(Vector3{0.0f,0.0f,0.0f},forwardUpDirs.at(1).first,forwardUpDirs.at(1).second),
+		glm::gtc::lookAtRH(Vector3{0.0f,0.0f,0.0f},forwardUpDirs.at(2).first,forwardUpDirs.at(2).second),
+		glm::gtc::lookAtRH(Vector3{0.0f,0.0f,0.0f},forwardUpDirs.at(3).first,forwardUpDirs.at(3).second),
+		glm::gtc::lookAtRH(Vector3{0.0f,0.0f,0.0f},forwardUpDirs.at(4).first,forwardUpDirs.at(4).second),
+		glm::gtc::lookAtRH(Vector3{0.0f,0.0f,0.0f},forwardUpDirs.at(5).first,forwardUpDirs.at(5).second)
 	};
 
 	if(useRaytracing)
@@ -651,7 +651,7 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector
 	auto oldViewMat = hCam->GetViewMatrix();
 
 	auto mProj = glm::perspectiveRH<float>(glm::radians(90.0f),1.f,hCam->GetNearZ(),hCam->GetFarZ());
-	mProj = glm::scale(mProj,Vector3(-1.f,-1.f,1.f));
+	mProj = glm::gtc::scale(mProj,Vector3(-1.f,-1.f,1.f));
 	hCam->SetProjectionMatrix(mProj);
 
 	auto img = CreateCubemapImage();

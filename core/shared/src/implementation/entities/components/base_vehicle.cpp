@@ -33,10 +33,6 @@ module pragma.shared;
 
 import :entities.components.base_vehicle;
 
-
-(pragma::physics::PHYSICSTYPE
-
-
 using namespace pragma;
 
 
@@ -106,7 +102,7 @@ void BaseVehicleComponent::OnRemove()
 
 
 
-void BaseVehicleComponent::InitializeVehiclePhysics(PHYSICSTYPE type, BasePhysicsComponent::PhysFlags flags)
+void BaseVehicleComponent::InitializeVehiclePhysics(pragma::physics::PHYSICSTYPE type, BasePhysicsComponent::PhysFlags flags)
 
 
 {
@@ -853,7 +849,7 @@ void BaseVehicleComponent::Initialize()
 		auto &physInitData = static_cast<CEInitializePhysics &>(evData.get());
 
 
-		if(physInitData.physicsType != pragma::physics::MOVETYPE::DYNAMIC)
+		if(physInitData.physicsType != pragma::physics::PHYSICSTYPE::DYNAMIC)
 
 
 			return util::EventReply::Unhandled;

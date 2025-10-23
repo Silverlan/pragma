@@ -3,9 +3,10 @@
 
 module;
 
-#include <luabind/detail/conversion_policies/conversion_policies.hpp>
 
 export module pragma.shared:scripting.lua.policies.core;
+
+export import luabind;
 
 export namespace luabind {
 	namespace detail {

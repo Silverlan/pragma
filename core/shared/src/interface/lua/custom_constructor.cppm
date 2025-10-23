@@ -3,12 +3,14 @@
 
 module;
 
-#include <luabind/lua_argument_proxy.hpp>
-#include <luabind/detail/object_rep.hpp>
-#include <luabind/function.hpp>
+#include "pragma/lua/core.hpp"
+#include <stdexcept>
+#include <memory>
+#include <cassert>
 
 export module pragma.shared:scripting.lua.custom_constructor;
 
+export import luabind;
 export import pragma.util;
 
 export namespace pragma::lua {

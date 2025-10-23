@@ -3,6 +3,8 @@
 
 module;
 
+#include <string>
+
 #include <algorithm>
 
 module pragma.shared;
@@ -139,7 +141,7 @@ void BaseEnvCameraComponent::UpdateViewMatrix()
 	if(!whTrComponent)
 		return;
 	auto &pos = whTrComponent->GetPosition();
-	*m_viewMatrix = glm::lookAtRH(pos, pos + whTrComponent->GetForward(), whTrComponent->GetUp());
+	*m_viewMatrix = glm::gtc::lookAtRH(pos, pos + whTrComponent->GetForward(), whTrComponent->GetUp());
 	umath::set_flag(m_stateFlags, StateFlags::ViewMatrixDirtyBit, false);
 	umath::set_flag(m_stateFlags, StateFlags::CustomViewMatrix, false);
 }
@@ -163,7 +165,7 @@ void BaseEnvCameraComponent::SetViewMatrix(const Mat4 &mat)
 		Vector3 translation;
 		Vector3 skew;
 		Vector4 perspective;
-		glm::decompose(glm::inverse(mat), scale, rotation, translation, skew, perspective);
+		glm::gtx::decompose(glm::inverse(mat), scale, rotation, translation, skew, perspective);
 
 		// Invert forward vector
 		auto forward = -uquat::forward(rotation);
@@ -626,11 +628,11 @@ void BaseEnvCameraComponent::CreateFrustumKDop(const std::vector<umath::Plane> &
 
 Mat4 BaseEnvCameraComponent::CalcProjectionMatrix(umath::Radian fovRad, float aspectRatio, float nearZ, float farZ, const rendering::Tile *optTile)
 {
-	auto mat = glm::perspectiveRH(fovRad, aspectRatio, normalize_plane_z(nearZ), normalize_plane_z(farZ));
+	auto mat = glm::gtc::perspectiveRH(fovRad, aspectRatio, normalize_plane_z(nearZ), normalize_plane_z(farZ));
 
 	if(optTile)
 		mat = pragma::rendering::calc_tile_offset_matrix(*optTile) * mat;
 
-	mat = glm::scale(mat, Vector3(1.f, -1.f, 1.f));
+	mat = glm::gtc::scale(mat, Vector3(1.f, -1.f, 1.f));
 	return mat;
 }

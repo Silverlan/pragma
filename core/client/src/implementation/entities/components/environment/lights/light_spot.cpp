@@ -124,7 +124,7 @@ void CLightSpotComponent::UpdateViewMatrices()
 	if(pTrComponent == nullptr)
 		return;
 	auto dir = pTrComponent->GetForward();
-	SetViewMatrix(glm::lookAtRH(pTrComponent->GetPosition(), pTrComponent->GetPosition() + dir, uvec::get_perpendicular(dir)));
+	SetViewMatrix(glm::gtc::lookAtRH(pTrComponent->GetPosition(), pTrComponent->GetPosition() + dir, uvec::get_perpendicular(dir)));
 	UpdateTransformMatrix();
 }
 void CLightSpotComponent::ReceiveData(NetPacket &packet)
@@ -160,7 +160,7 @@ void CLightSpotComponent::UpdateProjectionMatrix()
 	auto scale = Vector3(-1.f, -1.f, 1.f); // Vulkan TODO
 	//SetProjectionMatrix(glm::perspectiveLH<float>(CFloat(umath::deg_to_rad(m_angOuterCutoff *2.f)),1.f,2.f,m_distance));
 	//auto p = glm::perspective<float>(CFloat(umath::deg_to_rad(m_angOuterCutoff *2.f)),1.f,1.f,m_distance);
-	//p = glm::scale(p,scale); /* Shadow TODO */
+	//p = glm::gtc::scale(p,scale); /* Shadow TODO */
 	/*static Mat4 transform{
 		1.f,0.f,0.f,0.f,
 		0.f,-1.f,0.f,0.f,
@@ -171,7 +171,7 @@ void CLightSpotComponent::UpdateProjectionMatrix()
 	auto pRadiusComponent = GetEntity().GetComponent<CRadiusComponent>();
 	auto p = glm::perspectiveRH<float>(CFloat(umath::deg_to_rad(GetOuterConeAngle())), 1.f, 2.f, pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
 	//p = transform *p;
-	p = glm::scale(p, scale); /* Shadow TODO */
+	p = glm::gtc::scale(p, scale); /* Shadow TODO */
 	SetProjectionMatrix(p);
 	UpdateTransformMatrix();
 }

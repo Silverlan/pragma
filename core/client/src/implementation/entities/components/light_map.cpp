@@ -30,7 +30,6 @@ module;
 #include <util_image.hpp>
 #include <util_texture_info.hpp>
 #include <fsys/ifile.hpp>
-#include <luabind/copy_policy.hpp>
 #include <texturemanager/texturemanager.h>
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>

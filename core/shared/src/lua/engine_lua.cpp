@@ -4,8 +4,7 @@
 #include "pragma/lua/core.hpp"
 #include "pragma/logging.hpp"
 #include "pragma/networkdefinitions.h"
-#include <luabind/class_info.hpp>
-#include <luabind/function_introspection.hpp>
+#include "lualib.h"
 
 import pragma.shared;
 
@@ -61,7 +60,7 @@ void Lua::initialize_lua_state(Lua::Interface &lua)
 	Lua::initialize_error_handler();
 	lua_atpanic(l, [](lua_State *l) -> int32_t {
 		spdlog::get("lua")->critical("Lua Panic!");
-		pragma::debug::generate_crash_dump();
+		::pragma::debug::generate_crash_dump();
 		return 0;
 	});
 }

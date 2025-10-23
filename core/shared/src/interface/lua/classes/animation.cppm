@@ -5,6 +5,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
+#include <string>
 
 export module pragma.shared:scripting.lua.classes.animation;
 
@@ -88,7 +89,7 @@ export namespace Lua {
 		DLLNETWORK void GetFrames(lua_State *l, ::MeshVertexAnimation &anim);
 		DLLNETWORK void GetMesh(lua_State *l, ::MeshVertexAnimation &anim);
 	};
-	namespace pragma::MeshVertexFrame {
+	namespace MeshVertexFrame {
 		DLLNETWORK void GetVertices(lua_State *l, ::pragma::MeshVertexFrame &frame);
 		DLLNETWORK void SetVertexCount(lua_State *l, ::pragma::MeshVertexFrame &frame, uint32_t numVerts);
 		DLLNETWORK void SetVertexPosition(lua_State *l, ::pragma::MeshVertexFrame &frame, uint32_t vertIdx, const Vector3 &pos);

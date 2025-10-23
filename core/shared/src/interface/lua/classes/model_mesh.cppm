@@ -5,9 +5,11 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
+#include <string>
 
 export module pragma.shared:scripting.lua.classes.model_mesh;
 
+export import luabind;
 export import :model.model_mesh;
 
 export class pragma::Model;

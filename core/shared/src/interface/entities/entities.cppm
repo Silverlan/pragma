@@ -3,6 +3,8 @@
 
 module;
 
+#include <memory>
+
 export module pragma.shared:entities;
 
 export import :entities.base_entity;

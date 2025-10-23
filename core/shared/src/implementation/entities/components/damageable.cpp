@@ -3,6 +3,10 @@
 
 module;
 
+#include <string>
+
+#include <functional>
+
 module pragma.shared;
 
 import :entities.components.damageable;

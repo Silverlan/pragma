@@ -3,13 +3,16 @@
 
 module;
 
-#include "memory"
+#include <string>
 
+#include "memory"
+#include <functional>
 
 
 module pragma.shared;
 
 import :entities.components.gravity;
+import luabind;
 
 using namespace pragma;
 
@@ -250,11 +253,11 @@ bool GravityComponent::CalcBallisticVelocity(const Vector3 &origin, const Vector
 
 namespace Lua {
 	namespace Gravity {
-		static void CalcBallisticVelocity(lua_State *l, pragma::GravityComponent &hEnt, const Vector3 &origin, const Vector3 &destPos, float fireAngle, float maxSpeed, float spread, float maxPitch, float maxYaw);
+		static void CalcBallisticVelocity(lua_State *l, ::pragma::GravityComponent &hEnt, const Vector3 &origin, const Vector3 &destPos, float fireAngle, float maxSpeed, float spread, float maxPitch, float maxYaw);
 	};
 };
 
-void Lua::Gravity::CalcBallisticVelocity(lua_State *l, pragma::GravityComponent &hEnt, const Vector3 &origin, const Vector3 &destPos, float fireAngle, float maxSpeed, float spread, float maxPitch, float maxYaw)
+void Lua::Gravity::CalcBallisticVelocity(lua_State *l, ::pragma::GravityComponent &hEnt, const Vector3 &origin, const Vector3 &destPos, float fireAngle, float maxSpeed, float spread, float maxPitch, float maxYaw)
 {
 	Vector3 vel;
 	auto b = hEnt.CalcBallisticVelocity(origin, destPos, fireAngle, maxSpeed, spread, maxPitch, maxYaw, vel);

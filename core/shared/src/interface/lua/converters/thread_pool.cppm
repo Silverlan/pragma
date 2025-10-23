@@ -5,7 +5,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <luabind/detail/conversion_policies/native_converter.hpp>
 
 export module pragma.shared:scripting.lua.converters.thread_pool;
 

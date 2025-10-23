@@ -67,8 +67,8 @@ void CParticleInitializerPositionRandomSphere::OnParticleCreated(CParticle &part
 	float r = m_distMin + sqrtf(umath::random(0.f, offset * offset));
 	float x = umath::random(0.f, 1.f);
 	float y = umath::random(0.f, 1.f);
-	float theta = 2.f * CFloat(M_PI) * x;
-	float phi = (1.f - sqrtf(y)) * CFloat(M_PI) / 2.f;
+	float theta = 2.f * CFloat(umath::pi) * x;
+	float phi = (1.f - sqrtf(y)) * CFloat(umath::pi) / 2.f;
 	x = r * cosf(theta) * cosf(phi);
 	y = r * sinf(phi) * ((umath::random(0, 1) == 1) ? 1 : -1); // TODO: Avoid the additional call to Math::Random
 	float z = r * sinf(theta) * cosf(phi);

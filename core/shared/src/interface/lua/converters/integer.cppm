@@ -7,6 +7,8 @@ module;
 
 export module pragma.shared:scripting.lua.converters.integer;
 
+export import luabind;
+
 export namespace luabind {
 	// uint64_t
 	template<>

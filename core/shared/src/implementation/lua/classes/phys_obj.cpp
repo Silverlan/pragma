@@ -4,16 +4,17 @@
 module;
 
 
+#include <iostream>
+
 #include "pragma/lua/core.hpp"
 
-#include <luabind/out_value_policy.hpp>
 
 module pragma.shared;
 
 import :scripting.lua.classes.phys_obj;
 
 namespace Lua {
-	namespace pragma::physics::PhysObj {
+	namespace PhysObj {
 		static bool IsValid(PhysObjHandle &hPhysObj);
 		static luabind::tableT<pragma::physics::ICollisionObject> GetCollisionObjects(lua_State *l, pragma::physics::PhysObj &physObj);
 		static void SetCollisionFilterGroup(lua_State *l, pragma::physics::PhysObj &physObj, int group);

@@ -3,6 +3,8 @@
 
 module;
 
+#include <string>
+
 #include "pragma/networkdefinitions.h"
 
 module pragma.shared;

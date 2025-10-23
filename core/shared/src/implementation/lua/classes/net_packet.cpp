@@ -4,6 +4,12 @@
 module;
 
 
+#include <functional>
+
+#include <string>
+
+#include <memory>
+
 #include "pragma/lua/core.hpp"
 
 #include "pragma/networkdefinitions.h"

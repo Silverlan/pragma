@@ -36,7 +36,7 @@ DLLNETWORK void Lua_Timer_Remove(lua_State *l, TimerHandle &timer)
 	timer.GetTimer()->Remove(state->GetGameState());
 }
 
-DLLNETWORK void Lua_Timer_IsValid(lua_State *l, TimerHandle &timer) { lua_pushboolean(l, timer.IsValid()); }
+DLLNETWORK void Lua_Timer_IsValid(lua_State *l, TimerHandle &timer) { lua::push_boolean(l, timer.IsValid()); }
 
 DLLNETWORK void Lua_Timer_GetTimeLeft(lua_State *l, TimerHandle &timer)
 {
@@ -71,13 +71,13 @@ DLLNETWORK void Lua_Timer_SetRepetitions(lua_State *l, TimerHandle &timer, unsig
 DLLNETWORK void Lua_Timer_IsRunning(lua_State *l, TimerHandle &timer)
 {
 	lua_checktimer(l, timer);
-	lua_pushboolean(l, timer.GetTimer()->IsRunning());
+	lua::push_boolean(l, timer.GetTimer()->IsRunning());
 }
 
 DLLNETWORK void Lua_Timer_IsPaused(lua_State *l, TimerHandle &timer)
 {
 	lua_checktimer(l, timer);
-	lua_pushboolean(l, timer.GetTimer()->IsPaused());
+	lua::push_boolean(l, timer.GetTimer()->IsPaused());
 }
 
 DLLNETWORK void Lua_Timer_Call(lua_State *l, TimerHandle &timer)

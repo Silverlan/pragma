@@ -4,6 +4,8 @@
 module;
 
 
+#include <string>
+
 module pragma.shared;
 
 import :scripting.lua.classes.property_generic;

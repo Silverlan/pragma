@@ -5,6 +5,8 @@ module;
 
 
 
+#include <string>
+
 module pragma.shared;
 
 import :entities.components.shooter;
@@ -68,7 +70,7 @@ void BaseShooterComponent::OnFireBullets(const BulletInfo &bulletInfo, Vector3 &
 	BroadcastEvent(EVENT_ON_FIRE_BULLETS, evData);
 }
 
-RayCastHitType BaseShooterComponent::OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, pragma::physics::PhysObj &phys, physics::ICollisionObject &col) { return RayCastHitType::Block; }
+pragma::physics::RayCastHitType BaseShooterComponent::OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, pragma::physics::PhysObj &phys, physics::ICollisionObject &col) { return pragma::physics::RayCastHitType::Block; }
 
 void BaseShooterComponent::GetBulletTraceData(const BulletInfo &bulletInfo, TraceData &data) const
 {
@@ -76,15 +78,15 @@ void BaseShooterComponent::GetBulletTraceData(const BulletInfo &bulletInfo, Trac
 	auto *inflictor = bulletInfo.hInflictor.get();
 	auto *entSrc = (attacker != nullptr) ? attacker : (inflictor != nullptr) ? inflictor : &GetEntity();
 	data.SetCollisionFilterMask(pragma::physics::CollisionMask::AllHitbox & ~pragma::physics::CollisionMask::Trigger); // Let everything pass (Except specific filters below)
-	data.SetFilter([this, &data, attacker, inflictor, &bulletInfo](pragma::physics::IShape &shape, pragma::physics::IRigidBody &body) -> RayCastHitType {
+	data.SetFilter([this, &data, attacker, inflictor, &bulletInfo](pragma::physics::IShape &shape, pragma::physics::IRigidBody &body) -> pragma::physics::RayCastHitType {
 		auto *phys = body.GetPhysObj();
 		auto *ent = phys ? phys->GetOwner() : nullptr;
 		if(ent == nullptr || &ent->GetEntity() == &GetEntity() || &ent->GetEntity() == attacker || &ent->GetEntity() == inflictor) // Attacker can't shoot themselves or the inflictor
-			return RayCastHitType::None;
+			return pragma::physics::RayCastHitType::None;
 		auto filterGroup = phys->GetCollisionFilter();
 		auto mdlComponent = ent->GetEntity().GetModelComponent();
 		if(mdlComponent && mdlComponent->GetHitboxCount() > 0 && (filterGroup & pragma::physics::CollisionMask::NPC) != pragma::physics::CollisionMask::None || (filterGroup & pragma::physics::CollisionMask::Player) != pragma::physics::CollisionMask::None) // Filter out player and NPC collision objects, since we only want to check their hitboxes
-			return RayCastHitType::None;
+			return pragma::physics::RayCastHitType::None;
 		return const_cast<BaseShooterComponent *>(this)->OnBulletHit(bulletInfo, data, *phys, body);
 	});
 	auto physComponent = GetEntity().GetPhysicsComponent();

@@ -4,6 +4,10 @@
 module;
 
 
+#include <string>
+
+#include <variant>
+
 #include "pragma/lua/core.hpp"
 
 module pragma.shared;

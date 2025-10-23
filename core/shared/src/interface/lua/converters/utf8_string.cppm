@@ -4,11 +4,12 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <luabind/detail/conversion_policies/native_converter.hpp>
+#include "pragma/lua/core.hpp"
 #include <string_view>
 
 export module pragma.shared:scripting.lua.converters.utf8_string;
 
+export import luabind;
 import pragma.string.unicode;
 
 export namespace luabind {

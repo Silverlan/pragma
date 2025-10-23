@@ -5,6 +5,8 @@ module;
 
 
 #include "pragma/lua/core.hpp"
+#include <cctype>
+#include <cstdio>
 
 module pragma.shared;
 

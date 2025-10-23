@@ -19,8 +19,8 @@ export {
 	namespace pragma::physics {
 		class DLLNETWORK IRayCastFilterCallback {
 		public:
-			virtual RayCastHitType PreFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const = 0;
-			virtual RayCastHitType PostFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const = 0;
+			virtual pragma::physics::RayCastHitType PreFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const = 0;
+			virtual pragma::physics::RayCastHitType PostFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const = 0;
 			virtual bool HasPreFilter() const = 0;
 			virtual bool HasPostFilter() const = 0;
 			virtual ~IRayCastFilterCallback() = default;
@@ -29,8 +29,8 @@ export {
 		class DLLNETWORK EntityRayCastFilterCallback : public IRayCastFilterCallback {
 		public:
 			EntityRayCastFilterCallback(pragma::ecs::BaseEntity &ent);
-			virtual RayCastHitType PreFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
-			virtual RayCastHitType PostFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
+			virtual pragma::physics::RayCastHitType PreFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
+			virtual pragma::physics::RayCastHitType PostFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
 			virtual bool HasPreFilter() const override;
 			virtual bool HasPostFilter() const override;
 		private:
@@ -40,8 +40,8 @@ export {
 		class DLLNETWORK MultiEntityRayCastFilterCallback : public IRayCastFilterCallback {
 		public:
 			MultiEntityRayCastFilterCallback(std::vector<EntityHandle> &&ents);
-			virtual RayCastHitType PreFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
-			virtual RayCastHitType PostFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
+			virtual pragma::physics::RayCastHitType PreFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
+			virtual pragma::physics::RayCastHitType PostFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
 			virtual bool HasPreFilter() const override;
 			virtual bool HasPostFilter() const override;
 		private:
@@ -51,8 +51,8 @@ export {
 		class DLLNETWORK PhysObjRayCastFilterCallback : public IRayCastFilterCallback {
 		public:
 			PhysObjRayCastFilterCallback(pragma::physics::PhysObj &physObj);
-			virtual RayCastHitType PreFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
-			virtual RayCastHitType PostFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
+			virtual pragma::physics::RayCastHitType PreFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
+			virtual pragma::physics::RayCastHitType PostFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
 			virtual bool HasPreFilter() const override;
 			virtual bool HasPostFilter() const override;
 		private:
@@ -62,8 +62,8 @@ export {
 		class DLLNETWORK CollisionObjRayCastFilterCallback : public IRayCastFilterCallback {
 		public:
 			CollisionObjRayCastFilterCallback(ICollisionObject &physObj);
-			virtual RayCastHitType PreFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
-			virtual RayCastHitType PostFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
+			virtual pragma::physics::RayCastHitType PreFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
+			virtual pragma::physics::RayCastHitType PostFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
 			virtual bool HasPreFilter() const override;
 			virtual bool HasPostFilter() const override;
 		private:
@@ -72,14 +72,14 @@ export {
 
 		class DLLNETWORK CustomRayCastFilterCallback : public IRayCastFilterCallback {
 		public:
-			CustomRayCastFilterCallback(const std::function<RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> &preFilter, const std::function<RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> &postFilter = nullptr);
-			virtual RayCastHitType PreFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
-			virtual RayCastHitType PostFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
+			CustomRayCastFilterCallback(const std::function<pragma::physics::RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> &preFilter, const std::function<pragma::physics::RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> &postFilter = nullptr);
+			virtual pragma::physics::RayCastHitType PreFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
+			virtual pragma::physics::RayCastHitType PostFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const override;
 			virtual bool HasPreFilter() const override;
 			virtual bool HasPostFilter() const override;
 		private:
-			std::function<RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> m_preFilter = nullptr;
-			std::function<RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> m_postFilter = nullptr;
+			std::function<pragma::physics::RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> m_preFilter = nullptr;
+			std::function<pragma::physics::RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> m_postFilter = nullptr;
 		};
 	};
 };

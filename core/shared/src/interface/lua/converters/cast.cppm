@@ -3,9 +3,11 @@
 
 module;
 
-#include <luabind/detail/conversion_policies/conversion_policies.hpp>
+#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.converters.cast;
+
+export import luabind;
 
 export namespace luabind {
 	template<typename TCpp, typename TLua>

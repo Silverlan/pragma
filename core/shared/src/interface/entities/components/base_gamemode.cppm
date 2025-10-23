@@ -1,13 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
+#include <string>
 
 #undef GetClassName
-
-#include <string>
 
 export module pragma.shared:entities.components.base_gamemode;
 

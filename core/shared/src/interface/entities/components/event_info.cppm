@@ -1,13 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <typeindex>
-#include <string>
-#include <optional>
 #include <functional>
+#include <optional>
+#include <string>
+#include <typeindex>
 
 export module pragma.shared:entities.components.events.event_info;
 

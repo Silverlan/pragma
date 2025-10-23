@@ -1,17 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
-#include "sstream"
-
-
-#include "memory"
-
-
 
 #include <bvh/v2/default_builder.h>
-#include <bvh/v2/stack.h>
 #include <bvh/v2/reinsertion_optimizer.h>
+#include <bvh/v2/stack.h>
+#include <memory>
+#include <sstream>
 
 module pragma.shared;
 

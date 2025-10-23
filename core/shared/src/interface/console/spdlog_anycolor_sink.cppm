@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2023 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/pattern_formatter.h>
-#include <spdlog/formatter.h>
 #include <spdlog/fmt/bundled/format.h>
+#include <spdlog/formatter.h>
+#include <spdlog/pattern_formatter.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+
 #ifdef _WIN32
 #include <Windows.h>
 #endif

@@ -1,20 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-
+#include <memory>
 #include <string>
-#include <vector>
-
-#include "memory"
-
-
-
-
-
-
 #include <unordered_set>
+#include <vector>
 
 #if 0
 #include <assimp/Importer.hpp>

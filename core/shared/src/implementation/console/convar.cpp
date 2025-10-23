@@ -1,14 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-#include "memory"
-#include "cassert"
-#include <memory>
-#include <functional>
 #include "pragma/networkdefinitions.h"
 #include "sharedutils/magic_enum.hpp"
+#include <cassert>
+#include <functional>
+#include <memory>
 
 module pragma.shared;
 

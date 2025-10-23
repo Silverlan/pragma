@@ -1,15 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/logging.hpp"
 #include "pragma/lua/core.hpp"
+#include <iostream>
+#include <typeindex>
 #include <unordered_map>
 #include <variant>
-#include "pragma/logging.hpp"
-#include <typeindex>
-#include <iostream>
+
 #ifdef _WIN32
 #if __cpp_lib_format >= 202207L
 #include <format>

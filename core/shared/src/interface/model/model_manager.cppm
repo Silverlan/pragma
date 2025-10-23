@@ -1,13 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <unordered_map>
-#include <vector>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 export module pragma.shared:model.model_manager;
 

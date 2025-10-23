@@ -2,15 +2,14 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <memory>
-#include <functional>
-#include <functional>
 #include "pragma/lua/core.hpp"
-#include "sstream"
 #include "pragma/lua/ostream_operator_alias.hpp"
-#include "memory"
+#include <functional>
+#include <memory>
+#include <sstream>
 
 module pragma.shared;
+
 import :scripting.lua.libraries.util;
 import :entities.components.environment.base_quake;
 import se_script;

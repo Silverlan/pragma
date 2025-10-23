@@ -1,21 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2023 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
-#include <sharedutils/magic_enum.hpp>
 
-#include "string_view"
-
-#include "memory"
-
-
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/pattern_formatter.h>
-#include <spdlog/formatter.h>
-#include <spdlog/fmt/bundled/format.h>
-#include <atomic>
 #include "pragma/logging.hpp"
+#include <sharedutils/magic_enum.hpp>
+#include <spdlog/fmt/bundled/format.h>
+#include <spdlog/formatter.h>
+#include <spdlog/pattern_formatter.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <atomic>
+#include <memory>
+#include <string_view>
 
 module pragma.shared;
 

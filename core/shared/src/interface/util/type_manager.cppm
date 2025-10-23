@@ -1,14 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
 #include <cinttypes>
-#include <type_traits>
 #include <string>
-#include <vector>
+#include <type_traits>
 #include <unordered_map>
+#include <vector>
 
 export module pragma.shared:util.type_manager;
 

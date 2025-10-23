@@ -1,21 +1,20 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
 #include <spdlog/spdlog.h>
-#include <optional>
-#include <memory>
-#include <unordered_map>
-#include <chrono>
 #include <array>
-#include <stack>
+#include <chrono>
+#include <memory>
+#include <optional>
 #include <set>
-
-#define ENABLE_DEBUG_HISTORY 0
+#include <stack>
+#include <unordered_map>
 
 export module pragma.shared:debug.performance_profiler;
+
+#define ENABLE_DEBUG_HISTORY 0
 
 import pragma.util;
 

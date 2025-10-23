@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
+#include <cstdio>
 #include <string>
 
-#include <cstdio>
 // #include <windows.h>
 // #include <tlhelp32.h>
+
 #ifdef _WIN32
 #include "debug/StackWalker/StackWalker.h"
 #endif

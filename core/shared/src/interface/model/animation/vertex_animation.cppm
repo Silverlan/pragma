@@ -1,13 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <vector>
-#include <string>
 #include <array>
+#include <memory>
+#include <string>
+#include <vector>
 
 export module pragma.shared:model.animation.vertex_animation;
 

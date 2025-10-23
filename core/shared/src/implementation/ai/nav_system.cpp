@@ -1,20 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-#include "memory"
-
-#include "cassert"
-#include <string>
-#include <functional>
-
-
-#include "Recast.h"
 #include "DetourNavMesh.h"
 #include "DetourNavMeshBuilder.h"
 #include "DetourNavMeshQuery.h"
+#include "Recast.h"
+#include <cassert>
+#include <functional>
 #include <iostream>
+#include <memory>
+#include <string>
 
 module pragma.shared;
 

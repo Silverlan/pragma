@@ -1,12 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
 #include <functional>
 #include <memory>
+#include <string>
 
 export module pragma.shared:util.curl_query_handler;
 

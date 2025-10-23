@@ -1,25 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-#include <vector>
-
-#include <cmath>
-
-#include <sharedutils/magic_enum.hpp>
-
-#include "sstream"
-
-
-#include "memory"
-#include <unordered_map>
-#include <string>
-#include "cstring"
 #include "pragma/model/simplify.h"
-
-
-
+#include <sharedutils/magic_enum.hpp>
+#include <cmath>
+#include <cstring>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 module pragma.shared;
 

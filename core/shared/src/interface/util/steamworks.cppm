@@ -1,13 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
+#include <cinttypes>
 
 #ifndef DLLSPEC_ISTEAMWORKS
 #define DLLSPEC_ISTEAMWORKS
 #endif
-#include <cinttypes>
 
 export module pragma.shared:util.steamworks;
 

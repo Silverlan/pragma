@@ -1,12 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
 #include <memory>
-#include <string>
 #include <optional>
+#include <string>
 #include <vector>
 
 export module pragma.shared:assets.common;

@@ -1,18 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-#include "memory"
-#include "cassert"
+#include <cassert>
 #include <cmath>
+#include <memory>
 #include <string>
+
+module pragma.shared;
 
 #define AI_OBSTRUCTION_CHECK_RAYCAST_TYPE_RAY 0
 #define AI_OBSTRUCTION_CHECK_RAYCAST_TYPE_SWEEP 1
 #define AI_OBSTRUCTION_CHECK_RAYCAST_TYPE AI_OBSTRUCTION_CHECK_RAYCAST_TYPE_SWEEP
-
-module pragma.shared;
 
 import :entities.components.base_ai;
 

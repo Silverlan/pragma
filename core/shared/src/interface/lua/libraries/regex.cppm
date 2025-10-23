@@ -1,12 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <regex>
-
 #include "pragma/lua/core.hpp"
+#include <regex>
 
 export module pragma.shared:scripting.lua.libraries.regex;
 

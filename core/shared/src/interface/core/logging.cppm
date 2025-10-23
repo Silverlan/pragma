@@ -1,11 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2023 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <optional>
 #include "pragma/logging.hpp"
+#include <optional>
 
 export module pragma.shared:core.logging;
 

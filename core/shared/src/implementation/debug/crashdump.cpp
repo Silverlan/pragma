@@ -1,12 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
-#include <iostream>
 
-#include "pragma/logging.hpp"
-
-#include <exception>
 #ifdef _WIN32
 #include <Windows.h>
 #include <tchar.h>
@@ -15,7 +10,11 @@ module;
 #include <signal.h>
 #include <execinfo.h>
 #endif
+
 #include "crashdump_helper.hpp"
+#include "pragma/logging.hpp"
+#include <exception>
+#include <iostream>
 
 module pragma.shared;
 

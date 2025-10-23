@@ -1,12 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
-#include "memory"
 
-
+#include <cstring>
+#include <memory>
+#include <string>
 
 // Sound duration for mp3 files
+//
+#undef max
+
 #ifdef WEAVE_MP3_SUPPORT_ENABLED
 #ifdef _WIN32
 #include <Windows.h>
@@ -14,11 +17,6 @@ module;
 #include "mpafile.h"
 #endif
 #endif
-//
-#include <string>
-#include <cstring>
-
-#undef max
 
 module pragma.shared;
 

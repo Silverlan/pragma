@@ -1,16 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
+
 #include <algorithm>
-
-#include "string_view"
-#include <string>
-#include "memory"
-#include <functional>
-
 #include <atomic>
+#include <functional>
 #include <iostream>
+#include <memory>
+#include <string>
+#include <string_view>
+
 #ifdef __linux__
 
 #include <pthread.h>

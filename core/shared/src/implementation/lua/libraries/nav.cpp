@@ -1,17 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-
-
-
-#include <functional>
-
-#include <string>
-
-#include <memory>
 #include "pragma/lua/core.hpp"
+#include <functional>
+#include <memory>
+#include <string>
 
 module pragma.shared;
 

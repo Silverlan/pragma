@@ -1,12 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-#include <unordered_map>
-#include "pragma/lua/core.hpp"
 #include "noise/noise.h"
+#include "pragma/lua/core.hpp"
 #include <string>
+#include <unordered_map>
 
 // import pragma.scripting.lua;
 

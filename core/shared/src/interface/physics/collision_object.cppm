@@ -1,15 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
+#include <iostream>
 #include <memory>
 #include <vector>
-
-#include <iostream>
-
-
 
 export module pragma.shared:physics.collision_object;
 

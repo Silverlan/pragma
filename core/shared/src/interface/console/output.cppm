@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <iostream>
-#include <sstream>
 #include <atomic>
-#include <mutex>
 #include <functional>
+#include <iostream>
+#include <memory>
+#include <mutex>
+#include <sstream>
 #include <string_view>
+
 #ifdef _WIN32
 #include <Windows.h>
 
@@ -24,8 +25,6 @@ module;
 #define BACKGROUND_RED 64
 #define BACKGROUND_INTENSITY 128
 #endif
-
-#include <memory>
 
 export module pragma.shared:console.output;
 

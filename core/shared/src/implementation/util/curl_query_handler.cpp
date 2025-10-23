@@ -1,21 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-#include <string>
-
+#include <algorithm>
+#include <cassert>
 #include <functional>
-#include <functional>
-
 #include <memory>
-
-#include "memory"
-
-#include "algorithm"
-
-#include "cassert"
-
+#include <string>
 
 module pragma.shared;
 

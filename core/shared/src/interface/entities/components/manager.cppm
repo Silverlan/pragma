@@ -1,20 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
+#include <sharedutils/magic_enum.hpp>
 #include <cinttypes>
-#include <string>
 #include <functional>
 #include <memory>
-#include <vector>
-#include <unordered_map>
-#include <typeindex>
 #include <queue>
-
-#include <sharedutils/magic_enum.hpp>
+#include <string>
+#include <typeindex>
+#include <unordered_map>
+#include <vector>
 
 export module pragma.shared:entities.manager;
 

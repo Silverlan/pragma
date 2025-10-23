@@ -1,19 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <bvh/v2/bvh.h>
-#include <bvh/v2/vec.h>
-#include <bvh/v2/tri.h>
 #include <bvh/v2/bbox.h>
+#include <bvh/v2/bvh.h>
+#include <bvh/v2/default_builder.h>
 #include <bvh/v2/executor.h>
 #include <bvh/v2/thread_pool.h>
-#include <bvh/v2/default_builder.h>
+#include <bvh/v2/tri.h>
+#include <bvh/v2/vec.h>
 #include <memory>
-
-
 
 export module pragma.shared:entities.components.bvh_data;
 

@@ -1,19 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-#include <memory>
-#include <functional>
-#include <functional>
-
-#include <chrono>
-
-#include "memory"
-#include <chrono>
-#include "algorithm"
 #include <sharedutils/util_date.hpp>
-
+#include <algorithm>
+#include <chrono>
+#include <functional>
+#include <memory>
 
 module pragma.shared;
 

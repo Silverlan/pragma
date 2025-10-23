@@ -1,30 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
-
-
-#include <functional>
-
-#include <memory>
-
-#include <thread>
-
-#include <iomanip>
 
 #include <sharedutils/magic_enum.hpp>
 #include <algorithm>
-#include "string_view"
-
-#include "sstream"
-
-
-#include "memory"
-
-
-
-#include <unordered_set>
 #include <chrono>
+#include <functional>
+#include <iomanip>
+#include <memory>
+#include <sstream>
+#include <string_view>
+#include <thread>
+#include <unordered_set>
 
 #undef CreateFile
 

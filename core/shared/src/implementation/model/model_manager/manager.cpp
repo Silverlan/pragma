@@ -2,15 +2,14 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <algorithm>
+#include <cassert>
+#include <functional>
 #include <memory>
-#include <functional>
-#include <functional>
 #include <string>
-#include "memory"
-#include "algorithm"
-#include "cassert"
 
 module pragma.shared;
+
 import :model.model_manager;
 pragma::asset::IModelFormatHandler::IModelFormatHandler(util::IAssetManager &assetManager) : util::IAssetFormatHandler {assetManager} {}
 bool pragma::asset::IModelFormatHandler::LoadData(ModelProcessor &processor, ModelLoadInfo &info)

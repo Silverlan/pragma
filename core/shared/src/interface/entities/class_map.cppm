@@ -1,11 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-#include <unordered_map>
 #include <string>
 #include <typeindex>
+#include <unordered_map>
 
 export module pragma.shared:entities.class_map;
 

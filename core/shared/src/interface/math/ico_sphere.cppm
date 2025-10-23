@@ -1,13 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <vector>
-#include <unordered_map>
 #include <stdint.h>
-
+#include <unordered_map>
+#include <vector>
 
 export module pragma.shared:math.ico_sphere;
 

@@ -15,15 +15,14 @@ get_submodule("clip2tri","https://github.com/raptor/clip2tri.git","f62a734d22733
 get_submodule("efsw","https://github.com/SpartanJ/efsw.git","1bb814c")
 get_submodule("eigen","https://gitlab.com/libeigen/eigen.git","b66188b5") # v3.4.1
 get_submodule("exprtk","https://github.com/ArashPartow/exprtk.git","f46bffcd6966d38a09023fb37ba9335214c9b959")
-get_submodule("fmt","https://github.com/fmtlib/fmt.git","40626af") # v11.2.0
 get_submodule("freetype","https://github.com/aseprite/freetype2.git","9a2d6d97b2d8a5d22d02948b783df12b764afa2d")
-get_submodule("glfw","https://github.com/Silverlan/glfw.git","8d6f5d9bc8477057dccc1190d46b0945219e2f33","feat/drag-callback")
-get_submodule("gli","https://github.com/Silverlan/gli.git","bd1f7de24d64c60573d9647496db608bfc1136c7")
+get_submodule("glfw","https://github.com/Silverlan/glfw.git","8d6f5d9bc8477057dccc1190d46b0945219e2f33", "feat/drag-callback")
+get_submodule("gli","https://github.com/Silverlan/gli.git","264bcc558d672469aa4fc4cf8768c0ea296ea4c6", "feat/cxx_module")
 get_submodule("libnoise","https://github.com/qknight/libnoise.git","9ce0737b55812f7de907e86dc633724524e3a8e8")
 get_submodule("libsamplerate","https://github.com/libsndfile/libsamplerate.git","15c392d")
 if platform == "linux":
     get_submodule("linenoise.cpp","https://github.com/Silverlan/linenoise.cpp.git","74ae32ebf22d18a7e22afe1eeecf04171311ebcf")
-get_submodule("luabind","https://github.com/Silverlan/luabind-deboostified.git","0a84faa0ab6539428300cf7bd2fafcf47cac12c8")
+get_submodule("luabind","https://github.com/Silverlan/luabind-deboostified.git","df2eb23d48d86d5a4b96a80f952c64be806abc7d", "feat/cxx_module")
 get_submodule("luajit","https://github.com/Silverlan/LuaJIT.git","cb42653","v2.1")
 get_submodule("lunasvg","https://github.com/sammycage/lunasvg.git","7b6970f") # v3.4.0
 get_submodule("miniball","https://github.com/Silverlan/miniball.git","609fbf16e7a9cc3dc8f88e4d1c7a1d8ead842bb1")

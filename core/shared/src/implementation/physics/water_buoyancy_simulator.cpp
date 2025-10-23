@@ -1,17 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
-#include "sstream"
 
-
-
+#include <sstream>
 
 // See http://www.randygaul.net/wp-content/uploads/2014/02/RigidBodies_WaterSurface.pdf for algorithms
 
-#define ENABLE_DEBUG_DRAW 0
-
 module pragma.shared;
+
+#define ENABLE_DEBUG_DRAW 0
 
 import :physics.water_buoyancy_simulator;
 

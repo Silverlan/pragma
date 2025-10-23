@@ -1,12 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 export module pragma.shared:debug.behavior_tree_node;
 

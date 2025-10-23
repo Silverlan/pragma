@@ -1,11 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
 #include <unordered_set>
-
 
 export module pragma.shared:entities.components.base_static_bvh_cache;
 

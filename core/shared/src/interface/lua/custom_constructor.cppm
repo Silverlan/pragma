@@ -1,12 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/lua/core.hpp"
-#include <stdexcept>
-#include <memory>
 #include <cassert>
+#include <memory>
+#include <stdexcept>
 
 export module pragma.shared:scripting.lua.custom_constructor;
 

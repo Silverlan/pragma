@@ -1,11 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
 #include <sstream>
+#include <string>
 #include <vector>
 
 #ifdef _WIN32

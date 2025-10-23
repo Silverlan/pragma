@@ -1,13 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-#include <functional>
-#include <string>
+#include <algorithm>
 #include <functional>
 #include <memory>
-#include <algorithm>
+#include <string>
+
 module pragma.shared;
 
 import :assets.file_formats.legacy_weave_animation_data;

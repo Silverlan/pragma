@@ -1,15 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <vector>
-#include <cinttypes>
-#include <mutex>
 #include <array>
 #include <atomic>
+#include <cinttypes>
+#include <mutex>
 #include <queue>
+#include <vector>
 
 export module pragma.shared:physics.water_surface_simulator;
 

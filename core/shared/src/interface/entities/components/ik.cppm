@@ -1,12 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
-#ifdef _WIN32
-#include <Windows.h>
-#endif
 #include "pragma/buss_ik/Jacobian.h"
 
 export module pragma.shared:entities.components.ik;

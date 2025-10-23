@@ -1,16 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <unordered_map>
 #include <string>
 #include <unordered_map>
 
-#define COMMA ,
-
 export module pragma.shared:networking.net_message_map;
+
+#define COMMA ,
 
 export import pragma.network_manager;
 

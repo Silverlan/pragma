@@ -1,13 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
 #include <iostream>
-#include <vector>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 export module pragma.shared:model.animation.bone_list;
 

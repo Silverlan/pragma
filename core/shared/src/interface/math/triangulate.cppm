@@ -14,14 +14,13 @@
 /**********************************************************************/
 /************ HEADER FILE FOR TRIANGULATE.H ***************************/
 /**********************************************************************/
-
 module;
 
-// Source: http://www.flipcode.com/archives/Efficient_Polygon_Triangulation.shtml
-
 #include "pragma/networkdefinitions.h"
-#include <vector>
 #include <cinttypes>
+#include <vector>
+
+// Source: http://www.flipcode.com/archives/Efficient_Polygon_Triangulation.shtml
 
 export module pragma.shared:math.triangulate;
 

@@ -1,6 +1,6 @@
 # Luabind
 set(BUILD_SHARED_LIBS
-    ON
+    OFF
     CACHE BOOL ".." FORCE)
 set(LUA_INCLUDE_DIR ${DEPENDENCY_LUAJIT_INCLUDE} CACHE STRING "" FORCE)
 set(LUA_LIBRARY ${DEPENDENCY_LUA_LIBRARY} CACHE STRING "" FORCE)
@@ -66,18 +66,10 @@ pr_set_target_folder(spdlog third_party_libs)
 unset(CMAKE_CXX_STANDARD)
 #
 
-# fmt
+# gli
 unset(BUILD_SHARED_LIBS CACHE)
-set(FMT_TEST
-    OFF
-    CACHE BOOL OFF FORCE)
-set(FMT_DOC
-    OFF
-    CACHE BOOL OFF FORCE)
-pr_include_third_party_library(fmt)
-set(BUILD_SHARED_LIBS
-    ON
-    CACHE BOOL ".." FORCE)
+add_subdirectory("third_party_libs/gli/gli")
+set(BUILD_SHARED_LIBS ON CACHE BOOL ".." FORCE)
 #
 
 # 7zip cpp

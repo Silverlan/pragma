@@ -1,15 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-#include "string_view"
-#include "sstream"
-#include "memory"
-#include "cassert"
 #include "pragma/networkdefinitions.h"
-#include <spdlog/pattern_formatter.h>
 #include "pragma/logging.hpp"
+#include <spdlog/pattern_formatter.h>
+#include <cassert>
+#include <memory>
+#include <sstream>
+#include <string_view>
 
 #ifdef __linux__
 #include <pthread.h>

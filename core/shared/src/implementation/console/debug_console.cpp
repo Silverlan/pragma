@@ -1,11 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-
-#include <iostream>
 #include "pragma/logging.hpp"
+#include <iostream>
+
 #ifdef _WIN32
 #include <windows.h>
 #elif defined(__linux__)

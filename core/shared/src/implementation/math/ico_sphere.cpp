@@ -4,12 +4,10 @@
 *
 * Copyright (c) 2009 Andreas Kahler
 */
-
 module;
 
-#include <string>
-
 #include <cmath>
+#include <string>
 
 module pragma.shared;
 

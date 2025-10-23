@@ -1,12 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <vector>
-#include <iostream>
 #include <functional>
+#include <iostream>
+#include <vector>
 
 export module pragma.shared:model.poly_mesh;
 

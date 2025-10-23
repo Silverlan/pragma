@@ -1,31 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-#include <sharedutils/magic_enum.hpp>
-
-#include "pragma/lua/core.hpp"
-
-#include "string_view"
-
-#include "sstream"
-
-#include "variant"
-
-
-#include "memory"
-
-#include "algorithm"
-
-#include "cassert"
-
-
-#include "pragma/logging.hpp"
-
 #include <any>
-
-
+#include "pragma/logging.hpp"
+#include "pragma/lua/core.hpp"
+#include <sharedutils/magic_enum.hpp>
+#include <algorithm>
+#include <cassert>
+#include <memory>
+#include <sstream>
+#include <string_view>
+#include <variant>
 
 module pragma.shared;
 

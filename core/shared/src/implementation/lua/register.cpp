@@ -1,24 +1,24 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-#include "sstream"
-#include "memory"
-#include "pragma/lua/core.hpp"
+#include <mpParser.h>
+#include "noise/noise.h"
 #include "pragma/debug/debugbreak.hpp"
 #include "pragma/logging.hpp"
-#include <chrono>
-#include <regex>
-#include <complex>
-#include <random>
-#include <algorithm>
-#include <mpParser.h>
-#include <filesystem>
+#include "pragma/lua/core.hpp"
 #include <spdlog/common.h>
-#include <spdlog/formatter.h>
 #include <spdlog/fmt/fmt.h>
-#include "noise/noise.h"
+#include <spdlog/formatter.h>
+#include <algorithm>
+#include <chrono>
+#include <complex>
+#include <filesystem>
+#include <memory>
+#include <random>
+#include <regex>
+#include <sstream>
+
 #ifndef _WIN32
 #include <signal.h>
 #endif

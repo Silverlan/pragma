@@ -1,19 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <iostream>
 #include <functional>
+#include <iostream>
+
+export module pragma.shared:math.print;                                                                                                                                                                                                                                                          \
+
+export import :console.output;
 
 #define MATRIX_OSTREAM_DEC(type)                                                                                                                                                                                                                                                                 \
 	DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const Mat##type &m);                                                                                                                                                                                                                     \
 	DLLNETWORK std::ostream &operator<<(std::ostream &os, const Mat##type &m);
-	
-export module pragma.shared:math.print;
-
-export import :console.output;
 
 export {
 	MATRIX_OSTREAM_DEC(2x2);

@@ -10,14 +10,13 @@
 // ** SUBMITTED BY JOHN W. RATCLIFF (jratcliff@verant.com) July 22, 2000
 
 // Source: http://www.flipcode.com/archives/Efficient_Polygon_Triangulation.shtml
-
 module;
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <assert.h>
 #include <string>
+#include <string.h>
 
 module pragma.shared;
 

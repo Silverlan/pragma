@@ -1,16 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <typeindex>
-#include <vector>
 #include <memory>
 #include <optional>
-
 #include <string>
-
+#include <typeindex>
+#include <vector>
 
 export module pragma.shared:entities.iterator;
 

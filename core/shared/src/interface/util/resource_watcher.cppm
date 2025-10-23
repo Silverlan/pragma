@@ -1,12 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
 #include <mutex>
-#include <unordered_set>
 #include <unordered_map>
+#include <unordered_set>
 
 export module pragma.shared:util.resource_watcher;
 

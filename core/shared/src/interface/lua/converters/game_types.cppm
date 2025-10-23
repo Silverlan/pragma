@@ -1,14 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <vector>
-#include <map>
 #include <array>
+#include <map>
 #include <unordered_map>
+#include <vector>
 
 export module pragma.shared:scripting.lua.converters.game_types;
 

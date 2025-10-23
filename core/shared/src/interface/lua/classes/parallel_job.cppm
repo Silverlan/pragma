@@ -1,13 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
 #include <condition_variable>
-#include <queue>
 #include <mutex>
+#include <queue>
 
 export module pragma.shared:scripting.lua.classes.parallel_job;
 

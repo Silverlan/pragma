@@ -1,15 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-
-#include <functional>
-
-#include <iostream>
-
 #include "pragma/lua/ostream_operator_alias.hpp"
-
+#include <functional>
+#include <iostream>
 
 module pragma.shared;
 

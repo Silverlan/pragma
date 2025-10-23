@@ -1,14 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
 #include "pragma/networkdefinitions.h"
+#include <string>
+#include <string_view>
 #include <unordered_set>
 
 #undef GetCurrentTime
-#include <string>
-#include <string_view>
 
 export module pragma.shared:entities.components.panima;
 

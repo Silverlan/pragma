@@ -274,7 +274,7 @@ void WIMainMenu::Initialize()
 		m_hVersionAttributes = CreateChild<WIText>();
 		auto *pAttributes = static_cast<WIText *>(m_hVersionAttributes.get());
 		pAttributes->AddStyleClass("game_version");
-		pAttributes->SetColor(Color::Red);
+		pAttributes->SetColor(colors::Red);
 		pAttributes->SetText("[D]");
 		pAttributes->SizeToContents();
 		if(m_hVersion.IsValid()) {

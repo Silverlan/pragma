@@ -14,7 +14,7 @@ module pragma.client;
 import :rendering.world_environment;
 WorldEnvironment::Fog::Fog()
 {
-	m_color = std::make_shared<util::ColorProperty>(Color::White);
+	m_color = std::make_shared<util::ColorProperty>(colors::White);
 	m_start = std::make_shared<util::FloatProperty>(0.f);
 	m_end = std::make_shared<util::FloatProperty>(0.f);
 	m_maxDensity = std::make_shared<util::FloatProperty>(0.f);

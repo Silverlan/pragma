@@ -494,10 +494,10 @@ static void debug_dump_render_queues(const util::DrawSceneInfo &drawSceneInfo)
 			if(item.entity != curEntity) {
 				curEntity = item.entity;
 				auto *ent = item.GetEntity();
-				ss << util::get_true_color_code(Color::Orange) << "Entity" << util::get_reset_color_code() << ": " << (ent ? ent->ToString() : "NULL") << "\n";
+				ss << util::get_true_color_code(colors::Orange) << "Entity" << util::get_reset_color_code() << ": " << (ent ? ent->ToString() : "NULL") << "\n";
 			}
 			auto *mesh = item.GetMesh();
-			ss << util::get_true_color_code(Color::White) << "Mesh" << util::get_reset_color_code() << ": ";
+			ss << util::get_true_color_code(colors::White) << "Mesh" << util::get_reset_color_code() << ": ";
 			if(!mesh)
 				ss << "NULL\n";
 			else
@@ -537,7 +537,7 @@ static void debug_dump_render_queues(const std::vector<util::DrawSceneInfo> &dra
 	Con::cout << "Dumping render queues..." << Con::endl;
 	uint32_t i = 0;
 	for(auto &drawSceneInfo : drawSceneInfos) {
-		Con::cout << util::get_true_color_code(Color::Red) << "Scene #" << (i++) << util::get_reset_color_code() << Con::endl;
+		Con::cout << util::get_true_color_code(colors::Red) << "Scene #" << (i++) << util::get_reset_color_code() << Con::endl;
 		debug_dump_render_queues(drawSceneInfo);
 	}
 }

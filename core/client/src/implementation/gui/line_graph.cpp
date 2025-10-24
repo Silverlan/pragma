@@ -19,7 +19,7 @@ void WILineGraph::Initialize()
 	WIBase::Initialize();
 	auto *pOutline = WGUI::GetInstance().Create<WIRect>(this);
 	m_hOutline = pOutline->GetHandle();
-	pOutline->SetColor(Color::White);
+	pOutline->SetColor(colors::White);
 	pOutline->SetHeight(1);
 	pOutline->SetAutoAlignToParent(true, false);
 }
@@ -85,8 +85,8 @@ void WILineGraph::UpdateGraph()
 	auto numValues = values.size();
 	auto w = GetWidth();
 	auto h = GetHeight();
-	auto &colA = Color::Lime;
-	auto &colB = Color::Red;
+	auto &colA = colors::Lime;
+	auto &colB = colors::Red;
 	auto inc = w / static_cast<float>(numValues);
 	Vector2i prevEndPos {0.f, h - h * values[0]};
 	auto colPrev = colA.Lerp(colB, values[0]);

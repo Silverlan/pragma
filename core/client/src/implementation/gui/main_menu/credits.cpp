@@ -55,7 +55,7 @@ WIText &WIMainMenuCredits::AddText(const std::string &header, const std::string 
 	auto *pText = static_cast<WIText *>(WGUI::GetInstance().Create<WIText>(m_creditsContainer.get()));
 	pText->SetText(header);
 	pText->AddStyleClass(styleClass);
-	pText->SetColor(Color::White);
+	pText->SetColor(colors::White);
 	pText->CenterToParentX();
 	AddCreditsElement(*pText);
 	return *pText;

@@ -116,7 +116,7 @@ static void calc_surface_plane(const PhysWaterSurfaceSimulator *surfaceSim, cons
 	auto *game = ent.GetNetworkState()->GetGameState(); // TODO
 	if(game->IsClient())
 	{
-		game->DrawLine(Vector3(),waterPlaneRelObj *static_cast<float>(waterPlaneDistRelObj),Color::Red,0.1f);
+		game->DrawLine(Vector3(),waterPlaneRelObj *static_cast<float>(waterPlaneDistRelObj),colors::Red,0.1f);
 		Con::cout<<"Distance: "<<waterPlaneDistRelObj<<Con::endl;
 	}*/
 
@@ -128,7 +128,7 @@ static void calc_surface_plane(const PhysWaterSurfaceSimulator *surfaceSim, cons
 		{
 			auto x = vProj;
 			uvec::local_to_world(pos,rot,x);
-			game->DrawLine(x,x +Vector3(0,100,0),Color::White,5.f);
+			game->DrawLine(x,x +Vector3(0,100,0),colors::White,5.f);
 		}*/
 		uvec::min(&min, vProj); // TODO: What if plane is slanted?
 		uvec::max(&max, vProj);
@@ -196,7 +196,7 @@ static void calc_surface_plane(const PhysWaterSurfaceSimulator *surfaceSim, cons
 		{
 			for(auto &p : surfaceIntersectionPoints)
 				game->DrawLine(p,p +Vector3(0,100,0),Color::White,1.f);
-			game->DrawPlane(waterPlaneRelObj,-waterPlaneDistRelObj,Color::Red,1.f);
+			game->DrawPlane(waterPlaneRelObj,-waterPlaneDistRelObj,colors::Red,1.f);
 		}*/
 	}
 }
@@ -391,8 +391,8 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(pragma::ecs::BaseEntity &
 				if(nw->IsClient())
 				{
 					auto *game = nw->GetGameState();
-					game->DrawPlane(n,-d,Color::Red,0.1f);
-					game->DrawLine(n *static_cast<float>(d),n *static_cast<float>(d) +n *100.f,Color::Lime,0.1f);
+					game->DrawPlane(n,-d,colors::Red,0.1f);
+					game->DrawLine(n *static_cast<float>(d),n *static_cast<float>(d) +n *100.f,colors::Lime,0.1f);
 					//virtual void DrawPlane(const Vector3 &n,float dist,const Color &color,float duration=0.f)=0;
 				}
 			}*/

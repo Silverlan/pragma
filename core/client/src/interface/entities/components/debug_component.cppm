@@ -129,7 +129,7 @@ export namespace pragma {
         auto pToggleComponent = ent.template GetComponent<CToggleComponent>();
         if(pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false)
             return;
-        auto color = Color::White.ToVector4();
+        auto color = colors::White.ToVector4();
         if(m_colorOverride)
             color = m_colorOverride->ToVector4();
         else {

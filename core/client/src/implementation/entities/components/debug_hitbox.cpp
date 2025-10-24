@@ -100,31 +100,31 @@ void CDebugHitboxComponent::InitializeDebugObjects()
 				else {
 					switch(hb.group) {
 					case HitGroup::Head:
-						col = Color::Red;
+						col = colors::Red;
 						break;
 					case HitGroup::Chest:
-						col = Color::Lime;
+						col = colors::Lime;
 						break;
 					case HitGroup::Stomach:
-						col = Color::Blue;
+						col = colors::Blue;
 						break;
 					case HitGroup::LeftArm:
-						col = Color::Yellow;
+						col = colors::Yellow;
 						break;
 					case HitGroup::RightArm:
-						col = Color::Cyan;
+						col = colors::Cyan;
 						break;
 					case HitGroup::LeftLeg:
-						col = Color::Magenta;
+						col = colors::Magenta;
 						break;
 					case HitGroup::RightLeg:
-						col = Color::OrangeRed;
+						col = colors::OrangeRed;
 						break;
 					case HitGroup::Gear:
-						col = Color::SpringGreen;
+						col = colors::SpringGreen;
 						break;
 					case HitGroup::Tail:
-						col = Color::Violet;
+						col = colors::Violet;
 						break;
 					}
 				}

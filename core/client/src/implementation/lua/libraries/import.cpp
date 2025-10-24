@@ -173,7 +173,7 @@ int Lua::lib_export::export_scene(lua_State *l)
 		else if(dirLightC.valid())
 			lightOut->mType = aiLightSourceType::aiLightSource_DIRECTIONAL;
 		auto colC = ent->GetComponent<pragma::CColorComponent>();
-		auto col = colC.valid() ? colC->GetColor() : Color::White;
+		auto col = colC.valid() ? colC->GetColor() : colors::White;
 		auto vcol = col.ToVector4();
 		lightOut->mColorDiffuse = aiColor3D{vcol.r,vcol.g,vcol.b} *vcol.a;
 

@@ -586,7 +586,7 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 			if(debugDraw) {
 				if(umath::is_flag_set(debugDrawInfo->flags, bvh::DebugDrawInfo::Flags::DrawTraversedMeshesBit) || (res && umath::is_flag_set(debugDrawInfo->flags, bvh::DebugDrawInfo::Flags::DrawHitMeshesBit))) {
 					auto color = res ? Color {0, 255, 0, 64} : Color {255, 0, 0, 64};
-					draw_mesh(*meshBvh, debugDrawInfo->basePose * effectiveBonePoses[boneId], color, Color::White, debugDrawInfo->duration);
+					draw_mesh(*meshBvh, debugDrawInfo->basePose * effectiveBonePoses[boneId], color, colors::White, debugDrawInfo->duration);
 				}
 			}
 			if(!res)
@@ -635,7 +635,7 @@ void CHitboxBvhComponent::DebugDrawHitboxMeshes(animation::BoneId boneId, float 
 	auto it = m_hitboxMeshBvhCaches.find(boneId);
 	if(it == m_hitboxMeshBvhCaches.end())
 		return;
-	const std::array<Color, 6> colors {Color::Red, Color::Lime, Color::Blue, Color::Yellow, Color::Cyan, Color::Magenta};
+	const std::array<Color, 6> colors {colors::Red, colors::Lime, colors::Blue, colors::Yellow, colors::Cyan, colors::Magenta};
 	auto &hitboxBvhInfos = it->second;
 	uint32_t colorIdx = 0;
 	auto pose = GetEntity().GetPose();
@@ -667,7 +667,7 @@ void CHitboxBvhComponent::DebugDrawHitboxMeshes(animation::BoneId boneId, float 
 			}
 		});
 
-		auto o = DebugRenderer::DrawMesh(dbgVerts, {col, Color::White, duration});
+		auto o = DebugRenderer::DrawMesh(dbgVerts, {col, colors::White, duration});
 		if(o)
 			o->SetPose(pose);
 
@@ -685,8 +685,8 @@ void CHitboxBvhComponent::DebugDraw()
 		return;
 	auto &effectivePoses = animC->GetProcessedBones();
 	auto numBones = effectivePoses.size();
-	auto color = Color::Red;
-	auto outlineColor = Color::Lime;
+	auto color = colors::Red;
+	auto outlineColor = colors::Lime;
 	auto duration = 20.f;
 	for(auto &hObb : m_hitboxBvh->primitives) {
 		if(hObb.boneId >= numBones)

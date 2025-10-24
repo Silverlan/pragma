@@ -498,20 +498,20 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 				auto enPos = uvec::create(pos);
 				//auto it = m_dbgObjects.find(0u);
 				//if(it == m_dbgObjects.end())
-				//	it = m_dbgObjects.insert(std::make_pair(0u,DebugRenderer::DrawPoint(enPos,Color::Lime))).first;
+				//	it = m_dbgObjects.insert(std::make_pair(0u,DebugRenderer::DrawPoint(enPos,colors::Lime))).first;
 				//it->second->SetPos(enPos);
 
 				auto enForward = uvec::create((tr.getBasis().getColumn(0)));
 				auto enRight = uvec::create((tr.getBasis().getColumn(1)));
 				auto enUp = uvec::create((tr.getBasis().getColumn(2)));
-				fUpdateLine(1, enPos, enPos + enForward * static_cast<float>(0.05f / PhysEnv::WORLD_SCALE), Color::Red);
-				fUpdateLine(2, enPos, enPos + enRight * static_cast<float>(0.05f / PhysEnv::WORLD_SCALE), Color::Lime);
-				fUpdateLine(3, enPos, enPos + enUp * static_cast<float>(0.05f / PhysEnv::WORLD_SCALE), Color::Aqua);
+				fUpdateLine(1, enPos, enPos + enForward * static_cast<float>(0.05f / PhysEnv::WORLD_SCALE), colors::Red);
+				fUpdateLine(2, enPos, enPos + enRight * static_cast<float>(0.05f / PhysEnv::WORLD_SCALE), colors::Lime);
+				fUpdateLine(3, enPos, enPos + enUp * static_cast<float>(0.05f / PhysEnv::WORLD_SCALE), colors::Aqua);
 
 				btVector3 axisLocal = btVector3(node->v.x, node->v.y, node->v.z);
 				btVector3 axisWorld = tr.getBasis() * axisLocal;
 
-				fUpdateLine(4, enPos, enPos + 0.1f * uvec::create(axisWorld), Color::Yellow);
+				fUpdateLine(4, enPos, enPos + 0.1f * uvec::create(axisWorld), colors::Yellow);
 
 				//node->DrawNode(node == root);	// Recursively draw node and update ModelView matrix
 				if(node->left) {
@@ -521,7 +521,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 					btTransform trl = tr * act;
 					auto trOrigin = uvec::create(tr.getOrigin() / PhysEnv::WORLD_SCALE);
 					auto trlOrigin = uvec::create(trl.getOrigin() / PhysEnv::WORLD_SCALE);
-					fUpdateLine(5, trOrigin, trlOrigin, Color::Maroon);
+					fUpdateLine(5, trOrigin, trlOrigin, colors::Maroon);
 					fDrawTree(node->left, trl); // Draw tree of children recursively
 				}
 				//	glPopMatrix();
@@ -531,7 +531,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 					btTransform trr = tr * act;
 					auto trOrigin = uvec::create(tr.getOrigin() / PhysEnv::WORLD_SCALE);
 					auto trrOrigin = uvec::create(trr.getOrigin() / PhysEnv::WORLD_SCALE);
-					fUpdateLine(6, trOrigin, trrOrigin, Color::Silver);
+					fUpdateLine(6, trOrigin, trrOrigin, colors::Silver);
 					fDrawTree(node->right, trr); // Draw right siblings recursively
 				}
 			}

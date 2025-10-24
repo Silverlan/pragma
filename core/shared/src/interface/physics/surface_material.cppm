@@ -46,7 +46,7 @@ export {
 			float metalness = 0.f;
 			float roughness = 0.5f;
 			struct {
-				Color color = Color::White;
+				Color color = colors::White;
 				Vector3 scatterColor = {0.f, 0.f, 0.f};
 				Vector3 radiusMM {};
 				float factor = 0.f;

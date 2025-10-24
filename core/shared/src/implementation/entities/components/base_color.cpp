@@ -20,7 +20,7 @@ void BaseColorComponent::RegisterMembers(pragma::EntityComponentManager &compone
 	using T = BaseColorComponent;
 	{
 		auto memberInfo = create_component_member_info<T, Vector3, [](const ComponentMemberInfo &, T &component, const Vector3 &value) { component.SetColor(value); }, [](const ComponentMemberInfo &, T &component, Vector3 &value) { value = component.GetColor(); }>("color",
-		  Color::White.ToVector3(), AttributeSpecializationType::Color);
+		  colors::White.ToVector3(), AttributeSpecializationType::Color);
 		memberInfo.SetInterpolationFunction<T, Vector3, [](const Vector3 &col0, const Vector3 &col1, double t, Vector3 &vOut) {
 			double h0, s0, v0;
 			util::rgb_to_hsv(col0, h0, s0, v0);
@@ -48,7 +48,7 @@ void BaseColorComponent::RegisterMembers(pragma::EntityComponentManager &compone
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseColorComponent::BaseColorComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_color(util::SimpleProperty<util::Vector4Property, Vector4>::Create(Color::White.ToVector4())) {}
+BaseColorComponent::BaseColorComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_color(util::SimpleProperty<util::Vector4Property, Vector4>::Create(colors::White.ToVector4())) {}
 BaseColorComponent::~BaseColorComponent()
 {
 	if(m_cbOnColorChanged.IsValid())

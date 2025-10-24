@@ -485,21 +485,21 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 					auto enPos = uvec::create(pos);
 					//auto it = m_dbgObjects.find(0u);
 					//if(it == m_dbgObjects.end())
-					//	it = m_dbgObjects.insert(std::make_pair(0u,DebugRenderer::DrawPoint(enPos,Color::Lime))).first;
+					//	it = m_dbgObjects.insert(std::make_pair(0u,DebugRenderer::DrawPoint(enPos,colors::Lime))).first;
 					//it->second->SetPos(enPos);
 
 					auto enForward = uquat::forward(tr.GetRotation());
 					auto enRight = uquat::right(tr.GetRotation());
 					auto enUp = uquat::up(tr.GetRotation());
 					auto worldScale = game->GetPhysicsEnvironment()->GetWorldScale();
-					fUpdateLine(1, enPos, enPos + enForward * static_cast<float>(0.05f / worldScale), Color::Red);
-					fUpdateLine(2, enPos, enPos + enRight * static_cast<float>(0.05f / worldScale), Color::Lime);
-					fUpdateLine(3, enPos, enPos + enUp * static_cast<float>(0.05f / worldScale), Color::Aqua);
+					fUpdateLine(1, enPos, enPos + enForward * static_cast<float>(0.05f / worldScale), colors::Red);
+					fUpdateLine(2, enPos, enPos + enRight * static_cast<float>(0.05f / worldScale), colors::Lime);
+					fUpdateLine(3, enPos, enPos + enUp * static_cast<float>(0.05f / worldScale), colors::Aqua);
 
 					Vector3 axisLocal = Vector3(node->v.x, node->v.y, node->v.z);
 					Vector3 axisWorld = tr * axisLocal;
 
-					fUpdateLine(4, enPos, enPos + 0.1f * uvec::create(axisWorld), Color::Yellow);
+					fUpdateLine(4, enPos, enPos + 0.1f * uvec::create(axisWorld), colors::Yellow);
 
 					//node->DrawNode(node == root);	// Recursively draw node and update ModelView matrix
 					if(node->left) {
@@ -509,7 +509,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 						umath::Transform trl = tr * act;
 						auto trOrigin = tr.GetOrigin();
 						auto trlOrigin = trl.GetOrigin();
-						fUpdateLine(5, trOrigin, trlOrigin, Color::Maroon);
+						fUpdateLine(5, trOrigin, trlOrigin, colors::Maroon);
 						fDrawTree(node->left, trl); // Draw tree of children recursively
 					}
 					//	glPopMatrix();
@@ -519,7 +519,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 						umath::Transform trr = tr * act;
 						auto trOrigin = tr.GetOrigin();
 						auto trrOrigin = trr.GetOrigin();
-						fUpdateLine(6, trOrigin, trrOrigin, Color::Silver);
+						fUpdateLine(6, trOrigin, trrOrigin, colors::Silver);
 						fDrawTree(node->right, trr); // Draw right siblings recursively
 					}
 				}

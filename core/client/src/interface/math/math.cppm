@@ -42,7 +42,7 @@ Watt pragma::math::cycles::get_light_power(const CLightComponent &light)
 	auto lumen = light.GetLightIntensityLumen();
 	auto &ent = light.GetEntity();
 	auto colC = ent.GetComponent<CColorComponent>();
-	auto col = colC.valid() ? colC->GetColor() : Color::White;
+	auto col = colC.valid() ? colC->GetColor() : colors::White;
 	auto pointC = ent.GetComponent<CLightPointComponent>();
 	if(pointC.valid())
 		return ulighting::cycles::lumen_to_watt_point(lumen, col.ToVector3());

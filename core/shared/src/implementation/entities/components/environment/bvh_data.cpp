@@ -390,7 +390,7 @@ void pragma::bvh::debug::draw_node(const pragma::Game &game, const pragma::bvh::
 {
 	auto vstart = from_bvh_vector(bbox.min);
 	auto vend = from_bvh_vector(bbox.max);
-	const_cast<pragma::Game &>(game).DrawBox(pose.GetOrigin(), vstart, vend, pose.GetRotation(), Color::White, col, duration);
+	const_cast<pragma::Game &>(game).DrawBox(pose.GetOrigin(), vstart, vend, pose.GetRotation(), colors::White, col, duration);
 }
 void pragma::bvh::debug::draw_node(const pragma::Game &game, const pragma::bvh::Node &node, const umath::ScaledTransform &pose, const Color &col, float duration)
 {

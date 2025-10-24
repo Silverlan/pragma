@@ -608,11 +608,11 @@ std::array<std::shared_ptr<DebugRenderer::BaseObject>, 3> DebugRenderer::DrawAxi
 	uvec::rotate(&rz, renderInfo.pose.GetRotation());
 	auto &origin = renderInfo.pose.GetOrigin();
 	auto tmpRenderInfo = renderInfo;
-	tmpRenderInfo.SetColor(Color::Red);
+	tmpRenderInfo.SetColor(colors::Red);
 	auto o0 = DrawLine(origin, origin + rx * distance);
-	tmpRenderInfo.SetColor(Color::Lime);
+	tmpRenderInfo.SetColor(colors::Lime);
 	auto o1 = DrawLine(origin, origin + ry * distance);
-	tmpRenderInfo.SetColor(Color::Blue);
+	tmpRenderInfo.SetColor(colors::Blue);
 	auto o2 = DrawLine(origin, origin + rz * distance);
 	return {o0, o1, o2};
 }

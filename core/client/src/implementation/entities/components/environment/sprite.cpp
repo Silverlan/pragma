@@ -51,7 +51,7 @@ void CSpriteComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 void CSpriteComponent::UpdateColor()
 {
 	auto colorC = GetEntity().GetComponent<CColorComponent>();
-	auto colorFactor = colorC.valid() ? colorC->GetColor() : Color::White.ToVector4();
+	auto colorFactor = colorC.valid() ? colorC->GetColor() : colors::White.ToVector4();
 	if(m_hParticle.IsValid())
 		m_hParticle->SetColorFactor(colorFactor);
 }

@@ -123,7 +123,7 @@ void CRendererPpVolumetricComponent::DoRenderEffect(const util::DrawSceneInfo &d
 				auto *dsInstance = renderC->GetRenderDescriptorSet();
 				if(!dsInstance)
 					continue;
-				pushConstants.color = colorC.valid() ? colorC->GetColor() : Color::White.ToVector4();
+				pushConstants.color = colorC.valid() ? colorC->GetColor() : colors::White.ToVector4();
 				pushConstants.color = Vector4 {uimg::linear_to_srgb(reinterpret_cast<Vector3 &>(pushConstants.color)), pushConstants.color.w};
 				pushConstants.color.w = lightC.valid() ? (lightC->GetLightIntensityCandela() * lightIntensityFactor) : 1.f;
 				pushConstants.color.w *= volC->GetIntensityFactor();

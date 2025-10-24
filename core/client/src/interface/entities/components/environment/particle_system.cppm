@@ -350,7 +350,7 @@ export namespace pragma::ecs {
 		uint32_t m_idxLast = 0u;
 		uint32_t m_emissionRate = 0u;
 		uint32_t m_nextParticleEmissionCount = std::numeric_limits<uint32_t>::max();
-		Color m_initialColor = Color::White;
+		Color m_initialColor = colors::White;
 		Flags m_flags = static_cast<Flags>(umath::to_integral(Flags::SoftParticles) | umath::to_integral(Flags::AutoSimulate));
 		std::vector<CallbackHandle> m_renderCallbacks;
 		std::pair<Vector3, Vector3> m_renderBounds = {{}, {}};

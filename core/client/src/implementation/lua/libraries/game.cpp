@@ -73,7 +73,7 @@ static void update_vehicle(Vehicle_Car *vhc)
 	auto origin = uvec::create(t.getOrigin() / PhysEnv::WORLD_SCALE);
 	auto axis = uvec::create(t.getRotation().getAxis());
 	uvec::normalize(&axis);
-	pragma::get_cgame()->DrawLine(origin, origin + axis * 400.f, Color::Red, 0.5f);
+	pragma::get_cgame()->DrawLine(origin, origin + axis * 400.f, colors::Red, 0.5f);
 }
 #endif
 
@@ -791,7 +791,7 @@ int Lua::game::Client::test(lua_State *l)
 		verts.push_back(Vector3(f.m_n[2]->m_x.x(),f.m_n[2]->m_x.y(),f.m_n[2]->m_x.z()) /static_cast<float>(PhysEnv::WORLD_SCALE));
 		verts.push_back(Vector3(f.m_n[1]->m_x.x(),f.m_n[1]->m_x.y(),f.m_n[1]->m_x.z()) /static_cast<float>(PhysEnv::WORLD_SCALE));
 	}
-	DebugRenderer::DrawMesh(verts,Color::Red,Color::Lime,36.f);
+	DebugRenderer::DrawMesh(verts,colors::Red,colors::Lime,36.f);
 	//game->Draw
 #endif
 	return 0;

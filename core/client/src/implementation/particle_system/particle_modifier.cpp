@@ -40,8 +40,8 @@ class DLLCLIENT CParticleInitializerLifetimeRandom : public CParticleInitializer
 
 class DLLCLIENT CParticleInitializerColorRandom : public CParticleInitializer {
   private:
-	Color m_colorA = Color::White;
-	Color m_colorB = Color::White;
+	Color m_colorA = colors::White;
+	Color m_colorB = colors::White;
 	std::unique_ptr<Color> m_colorC = nullptr;
   public:
 	CParticleInitializerColorRandom() = default;

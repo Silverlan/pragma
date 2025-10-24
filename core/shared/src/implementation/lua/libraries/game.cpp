@@ -151,7 +151,7 @@ Lua::opt<Vector3> Lua::game::get_light_color(lua_State *l, const Vector3 &pos)
 		if(dist >= lightDist)
 			continue;
 		auto pColComponent = static_cast<pragma::BaseColorComponent *>(ent->FindComponent("color").get());
-		auto &lightCol = (pColComponent != nullptr) ? pColComponent->GetColor() : ::Color::White;
+		auto &lightCol = (pColComponent != nullptr) ? pColComponent->GetColor() : ::colors::White;
 		auto brightness = lightCol.a / 255.f;
 		brightness *= dist / lightDist;
 		col += Vector3(lightCol.r / 255.f, lightCol.g / 255.f, lightCol.b / 255.f) * brightness;

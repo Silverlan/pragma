@@ -66,8 +66,8 @@ void WINetGraph::AddGraphValue(uint32_t sz)
 
 WIText *WINetGraph::CreateText(const std::string &text)
 {
-	auto &colText = Color::White;
-	auto &colShadow = Color::Black;
+	auto &colText = colors::White;
+	auto &colShadow = colors::Black;
 	Vector2i shadowOffset {2.f, 2.f};
 
 	auto *pText = WGUI::GetInstance().Create<WIText>(this);

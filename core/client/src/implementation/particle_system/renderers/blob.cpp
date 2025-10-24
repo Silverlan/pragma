@@ -116,7 +116,7 @@ void CParticleRendererBlob::UpdateDebugNeighborLinks()
 				auto &cLinks1 = m_particleLinks[particleIdx1];
 				auto it = std::find_if(cLinks1.links.begin(), cLinks1.links.end(), [particleIdx0](const Link &link) { return (link.targetParticleIdx == particleIdx0) ? true : false; });
 				if(it == cLinks1.links.end())
-					col = Color::Red; // Link is one-way only (Which shouldn't happen), color it red
+					col = colors::Red; // Link is one-way only (Which shouldn't happen), color it red
 
 				// Update color
 				auto &colOld = o.GetColor();
@@ -229,7 +229,7 @@ void CParticleRendererBlob::OnParticleSystemStarted()
 	    }));
 	static auto dbg = std::make_unique<DebugGameGUI>([renderTex]() {
 		auto *b = WGUI::Create<WIRect>();
-		b->SetColor(Color::White);
+		b->SetColor(colors::White);
 		b->SetSize(512, 512);
 
 		auto *r = WGUI::Create<WITexturedRect>(b);

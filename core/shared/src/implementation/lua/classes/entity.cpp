@@ -386,7 +386,7 @@ void Lua::Entity::register_class(luabind::class_<::pragma::ecs::BaseEntity> &cla
 	  "GetColor", +[](::pragma::ecs::BaseEntity &ent) {
 		  auto col = ent.GetColor();
 		  if(!col.has_value())
-			  return ::Color::White;
+			  return ::colors::White;
 		  return *col;
 	  });
 	classDef.def("GetPhysicsObject", &::pragma::ecs::BaseEntity::GetPhysicsObject);

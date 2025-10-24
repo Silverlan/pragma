@@ -1875,10 +1875,10 @@ void CMD_debug_draw_line(NetworkState *state, pragma::BasePlayerComponent *pl, s
 	}
 	auto srcPos = cam->GetEntity().GetPosition();
 	auto tgtPos = uvec::create(argv.front());
-	pragma::get_cgame()->DrawLine(srcPos, tgtPos, Color::White, 12.f);
-	pragma::get_cgame()->DrawLine(tgtPos, tgtPos + uvec::RIGHT, Color::Red, 12.f);
-	pragma::get_cgame()->DrawLine(tgtPos, tgtPos + uvec::UP, Color::Lime, 12.f);
-	pragma::get_cgame()->DrawLine(tgtPos, tgtPos + uvec::FORWARD, Color::Blue, 12.f);
+	pragma::get_cgame()->DrawLine(srcPos, tgtPos, colors::White, 12.f);
+	pragma::get_cgame()->DrawLine(tgtPos, tgtPos + uvec::RIGHT, colors::Red, 12.f);
+	pragma::get_cgame()->DrawLine(tgtPos, tgtPos + uvec::UP, colors::Lime, 12.f);
+	pragma::get_cgame()->DrawLine(tgtPos, tgtPos + uvec::FORWARD, colors::Blue, 12.f);
 }
 
 void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
@@ -1975,7 +1975,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 	BaseEntity *ent = nullptr;
 
 	static const auto fGetStateInfo = [](const DebugBehaviorTreeNode &node, Color &col, std::string &text) {
-		col = Color::White;
+		col = colors::White;
 		text = node.name + " (";
 		switch(node.state) {
 		case DebugBehaviorTreeNode::State::Pending:

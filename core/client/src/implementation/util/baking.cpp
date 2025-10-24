@@ -288,7 +288,7 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directi
 		ld.position = l->GetEntity().GetPosition();
 		ld.direction = l->GetEntity().GetForward();
 		auto col = l->GetEntity().GetColor();
-		ld.color = col.has_value() ? col->ToVector3() : Color::White.ToVector3();
+		ld.color = col.has_value() ? col->ToVector3() : colors::White.ToVector3();
 		ld.intensity = l->GetLightIntensityCandela();
 
 		auto spotC = l->GetEntity().GetComponent<::pragma::CLightSpotComponent>();

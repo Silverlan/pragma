@@ -28,7 +28,7 @@ std::shared_ptr<::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawLin
 {
 	DebugRenderInfo debugRenderInfo {};
 	debugRenderInfo.duration = 12.f;
-	debugRenderInfo.color = ::Color::Red;
+	debugRenderInfo.color = ::colors::Red;
 	return DrawLine(start, end, debugRenderInfo);
 }
 std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawLine(const ::Vector3 &start, const ::Vector3 &end, const DebugRenderInfo &renderInfo)

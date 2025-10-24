@@ -394,17 +394,17 @@ void BaseAIComponent::PathStep(float)
 		auto moveTarget = m_entity->GetPosition() +50.f *dirTest;//(uvec::length(m_entity->GetVelocity()) *tDelta) *dirTest;
 		moveTarget = (*p1) +glm::gtx::proj(moveTarget -(*p1),(*p2) -(*p1));
 
-		game->DrawLine(moveTarget,moveTarget +Vector3(0,50,0),Color::Fuchsia,0.1f);
+		game->DrawLine(moveTarget,moveTarget +Vector3(0,50,0),colors::Fuchsia,0.1f);
 
 		auto segDist = uvec::distance(*p1,*p2);
 		auto s = (segDist > 0.f) ? umath::min(uvec::distance(*p1,moveTarget) /segDist,1.f) : 0.f;
 		//Con::cout<<"s: "<<s<<"; segDist: "<<segDist<<"; Distance to move target: "<<uvec::distance(*p1,moveTarget)<<Con::endl;
 		tgt = util::calc_hermite_spline_position(*p0,*p1,*p2,p3,s,1.f);//0.f);
 
-		game->DrawLine(*p0,*p1,Color::Yellow,0.1f);
-		game->DrawLine(*p1,*p2,Color::Aqua,0.1f);
-		game->DrawLine(*p2,p3,Color::Lime,0.1f);
-		game->DrawLine(tgt,tgt +Vector3(0,100,0),Color::Red,0.1f);
+		game->DrawLine(*p0,*p1,colors::Yellow,0.1f);
+		game->DrawLine(*p1,*p2,colors::Aqua,0.1f);
+		game->DrawLine(*p2,p3,colors::Lime,0.1f);
+		game->DrawLine(tgt,tgt +Vector3(0,100,0),colors::Red,0.1f);
 		*/
 		//
 	}

@@ -85,18 +85,18 @@ bool GUIDebugCursorManager::Initialize()
 	pText->SetVisible(false);
 	pText->EnableShadow(true);
 	pText->SetShadowOffset(Vector2i(1, 1));
-	pText->SetColor(Color::Orange);
+	pText->SetColor(colors::Orange);
 
 	for(auto &hEl : m_borderElements) {
 		auto *el = WGUI::GetInstance().Create<WIRect>();
-		el->SetColor(Color::Red);
+		el->SetColor(colors::Red);
 		el->SetZPos(std::numeric_limits<int>::max());
 		el->SetVisible(false);
 		hEl = el->GetHandle();
 	}
 	for(auto &hEl : m_borderElementsConstrained) {
 		auto *el = WGUI::GetInstance().Create<WIRect>();
-		el->SetColor(Color::Aqua);
+		el->SetColor(colors::Aqua);
 		el->SetAlpha(0.75f);
 		el->SetZPos(std::numeric_limits<int>::max());
 		el->SetVisible(false);

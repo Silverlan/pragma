@@ -20,7 +20,7 @@ import pragma.client;
 const std::string OPENVR_MODULE_PATH = "openvr/pr_openvr";
 
 static std::string lastMessage = "";
-static Color lastColor = Color::White;
+static Color lastColor = colors::White;
 static WIHandle hHmdViewMessage = {};
 static WIHandle hHmdViewText = {};
 static void update_text()
@@ -65,7 +65,7 @@ static void cl_render_vr_enabled(bool b)
 	if(client->InitializeLibrary(OPENVR_MODULE_PATH, &err) == nullptr) {
 		lastMessage = pragma::locale::get_text("vr_msg_error_load", std::vector<std::string> {err});
 		Con::cerr << lastMessage << Con::endl;
-		lastColor = Color::Red;
+		lastColor = colors::Red;
 		show_hmd_message();
 		return;
 	}
@@ -79,7 +79,7 @@ static void cl_render_vr_enabled(bool b)
 	if(fInitialize(err, reqInstanceExtensions, reqDeviceExtensions) == false) {
 		lastMessage = pragma::locale::get_text("vr_msg_error_init", std::vector<std::string> {err});
 		Con::cerr << lastMessage << Con::endl;
-		lastColor = Color::Red;
+		lastColor = colors::Red;
 		show_hmd_message();
 	}
 	else {
@@ -108,7 +108,7 @@ static void cl_render_vr_enabled(bool b)
 		}*/
 
 		lastMessage = pragma::locale::get_text("vr_msg_switch_display");
-		lastColor = Color::White;
+		lastColor = colors::White;
 	}
 }
 namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("cl_render_vr_enabled", +[](NetworkState *, const ConVar &, bool, bool b) { cl_render_vr_enabled(b); }); }

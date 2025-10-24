@@ -713,7 +713,7 @@ if with_pfm:
 			name="pr_unirender",
 			commitSha="68c1d10ccf90b725cd7f73e954c06eadfb3122f3",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git",
-			branch="feat/cxx_module"
+			branch="feat/cxx_modules"
 		)
 		add_pragma_module(
 			name="pr_xatlas",

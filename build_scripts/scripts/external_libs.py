@@ -36,7 +36,7 @@ get_submodule("util_vmf","https://github.com/Silverlan/util_vmf.git","9817fd13e5
 get_submodule("util_zip","https://github.com/Silverlan/util_zip.git","499d10b552383bda351d37fe764c3d42f2479b62", "feat/cxx_module")
 get_submodule("util_shadergraph","https://github.com/Silverlan/util_shadergraph.git","49e63c9a1dedf5cc5a2ad04ed67607b94a2e9d8c")
 get_submodule("vfilesystem","https://github.com/Silverlan/vfilesystem.git","69d332b6a98dfe877a3f411665aded2f13636d31", "feat/cxx_module")
-get_submodule("wgui","https://github.com/Silverlan/wgui.git","9997db2dcbaf90fd51134918a9f94575c6b80422", "feat/cxx_modules2")
+get_submodule("wgui","https://github.com/Silverlan/wgui.git","7e64fac2bafa9af61a71e4e14ad33f533e844291", "feat/cxx_modules2")
 get_submodule("util_unicode","https://github.com/Silverlan/util_unicode.git","d3d5cf3e23d41bbfd3a90c9014904355c895b320", "feat/cxx_module")
 get_submodule("cppbezierfit","https://github.com/Silverlan/cppbezierfit.git","f691045dfdb3313205a09ef4f460203be0a3152c")
 

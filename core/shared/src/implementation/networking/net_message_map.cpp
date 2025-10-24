@@ -12,11 +12,11 @@ import :networking.net_message_map;
 
 ClientMessageMap *GetClientMessageMap()
 {
-	ClientMessageMap g_clientMessageMap;
+	static ClientMessageMap g_clientMessageMap;
 	return &g_clientMessageMap;
 }
 ServerMessageMap *GetServerMessageMap()
 {
-	ServerMessageMap g_serverMessageMap;
+	static ServerMessageMap g_serverMessageMap;
 	return &g_serverMessageMap;
 }

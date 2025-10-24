@@ -254,4 +254,8 @@ export {
 	typedef std::ostream &(*conmanipulator)(std::ostream &);
 	DLLNETWORK Con::c_ccl &operator<<(Con::c_ccl &con, conmanipulator manipulator);
 	//
+
+	namespace Con {
+		using ::operator<<;
+	}
 };

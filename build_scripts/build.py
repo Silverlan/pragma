@@ -731,7 +731,7 @@ if with_pfm:
 			name="pr_opencv",
 			commitSha="9997713c9afb755f53f739b39769fcf153730fbf",
 			repositoryUrl="https://github.com/Silverlan/pr_opencv.git",
-			"feat/cxx_module"
+			branch="feat/cxx_module"
 		)
 
 if with_pfm:

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <string>
+
 #include <sharedutils/magic_enum.hpp>
 #include <algorithm>
 #include <cassert>

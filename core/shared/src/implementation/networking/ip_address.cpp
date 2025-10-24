@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <memory>
+#include <functional>
+#include <string>
+
 module pragma.shared;
 
 import :networking.ip_address;

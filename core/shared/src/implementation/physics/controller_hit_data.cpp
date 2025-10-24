@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <string>
+
 module pragma.shared;
 
 import :physics.controller_hit_data;

@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <memory>
+#include <functional>
+#include <string>
+#include <functional>
+#include <vector>
+
 module pragma.shared;
 
 import :model.model_manager;

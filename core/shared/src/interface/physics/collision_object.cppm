@@ -323,6 +323,8 @@ export {
 		DLLNETWORK std::ostream &operator<<(std::ostream &out, const IGhostObject &o);
 		DLLNETWORK std::ostream &operator<<(std::ostream &out, const IRigidBody &o);
 		DLLNETWORK std::ostream &operator<<(std::ostream &out, const ISoftBody &o);
+
+		using ::operator<<;
 	};
     namespace umath::scoped_enum::bitwise {
         template<>

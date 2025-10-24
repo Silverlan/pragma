@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <string>
+
 module pragma.shared;
 
 import :physics.tire_type_manager;

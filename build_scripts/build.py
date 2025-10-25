@@ -19,8 +19,8 @@ prebuilt_tag = "2025-08-20"
 
 # See https://stackoverflow.com/a/43357954/1879228 for boolean args
 if platform == "linux":
-	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-20')
-	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-20')
+	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-21')
+	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-21')
 	defaultGenerator = "Ninja Multi-Config"
 else:
 	defaultGenerator = "Visual Studio 17 2022"
@@ -271,18 +271,18 @@ if build_all == False:
     else:
         print(f"Directory '{base_path}' is already up-to-date.")
 
-########## clang-20 ##########
-# Due to a compiler bug with C++20 Modules in clang, we have to use clang-20 for now,
+########## clang-21 ##########
+# Due to a compiler bug with C++20 Modules in clang, we have to use clang-21 for now,
 # which is not available in package managers yet.
-if platform == "linux" and (c_compiler == "clang-20" or c_compiler == "clang++-20"):
+if platform == "linux" and (c_compiler == "clang-21" or c_compiler == "clang++-21"):
 	clang_staging_path = get_library_root_dir("clang")
 	if build_all:
 		curDir = os.getcwd()
 		os.chdir(deps_dir)
-		clang20_root = os.getcwd() +"/LLVM-20.1.8-Linux-X64"
+		clang20_root = os.getcwd() +"/LLVM-21.1.4-Linux-X64"
 		if not Path(clang20_root).is_dir():
-			print_msg("Downloading clang-20...")
-			http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.8/LLVM-20.1.8-Linux-X64.tar.xz",format="tar.xz")
+			print_msg("Downloading clang-21...")
+			http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.4/LLVM-21.1.4-Linux-X64.tar.xz",format="tar.xz")
 		os.chdir(curDir)
 
 		copy_preserving_symlink(Path(clang20_root +"/bin/clang"), Path(clang_staging_path +"/bin"))
@@ -294,9 +294,9 @@ if platform == "linux" and (c_compiler == "clang-20" or c_compiler == "clang++-2
 		copytree(clang20_root +"/include/clang-c", clang_staging_path +"/include/clang-c")
 		copytree(clang20_root +"/lib/clang", clang_staging_path +"/lib/clang")
 
-	if c_compiler == "clang-20":
+	if c_compiler == "clang-21":
 		c_compiler = clang_staging_path +"/bin/clang"
-	if cxx_compiler == "clang++-20":
+	if cxx_compiler == "clang++-21":
 		cxx_compiler = clang_staging_path +"/bin/clang++"
 	print_msg("Setting c_compiler override to '" +c_compiler +"'")
 	print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")

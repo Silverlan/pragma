@@ -8,6 +8,10 @@ module;
 #include <typeindex>
 #include <vector>
 
+#include <cinttypes>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.system;
 
 export import :entities.components.base;
@@ -87,41 +91,43 @@ export {
         struct enable_bitwise_operators<pragma::BaseEntityComponentSystem::StateFlags> : std::true_type {};
     }
 
-	template<class TComponent, typename>
-	pragma::ComponentHandle<TComponent> pragma::BaseEntityComponentSystem::AddComponent(bool bForceCreateNew)
-	{
-		ComponentId componentId;
-		if(m_componentManager->GetComponentTypeId<TComponent>(componentId) == false)
-			return {};
-		auto whComponent = AddComponent(componentId, bForceCreateNew);
-		if(whComponent.expired())
-			return {};
-		return whComponent->template GetHandle<TComponent>();
-	}
-	template<class TComponent, typename>
-	void pragma::BaseEntityComponentSystem::RemoveComponent()
-	{
-		ComponentId componentId;
-		if(m_componentManager->GetComponentTypeId<TComponent>(componentId) == false)
-			return;
-		RemoveComponent(componentId);
-	}
-	template<class TComponent, typename>
-	pragma::ComponentHandle<TComponent> pragma::BaseEntityComponentSystem::GetComponent() const
-	{
-		ComponentId componentId;
-		if(m_componentManager->GetComponentId(std::type_index(typeid(TComponent)), componentId) == false)
-			return pragma::ComponentHandle<TComponent> {};
-		auto it = m_componentLookupTable.find(componentId);
-		return (it != m_componentLookupTable.end()) ? const_cast<BaseEntityComponent *>(it->second.get())->GetHandle<TComponent>() : pragma::ComponentHandle<TComponent> {};
-	}
-	template<class TComponent, typename>
-	bool pragma::BaseEntityComponentSystem::HasComponent() const
-	{
-		ComponentId componentId;
-		if(m_componentManager->GetComponentId(std::type_index(typeid(TComponent)), componentId) == false)
-			return false;
-		auto it = m_componentLookupTable.find(componentId);
-		return it != m_componentLookupTable.end() && it->second.expired() == false;
+	namespace pragma {
+		template<class TComponent, typename>
+		ComponentHandle<TComponent> BaseEntityComponentSystem::AddComponent(bool bForceCreateNew)
+		{
+			ComponentId componentId;
+			if(m_componentManager->GetComponentTypeId<TComponent>(componentId) == false)
+				return {};
+			auto whComponent = AddComponent(componentId, bForceCreateNew);
+			if(whComponent.expired())
+				return {};
+			return whComponent->template GetHandle<TComponent>();
+		}
+		template<class TComponent, typename>
+		void BaseEntityComponentSystem::RemoveComponent()
+		{
+			ComponentId componentId;
+			if(m_componentManager->GetComponentTypeId<TComponent>(componentId) == false)
+				return;
+			RemoveComponent(componentId);
+		}
+		template<class TComponent, typename>
+		ComponentHandle<TComponent> BaseEntityComponentSystem::GetComponent() const
+		{
+			ComponentId componentId;
+			if(m_componentManager->GetComponentId(std::type_index(typeid(TComponent)), componentId) == false)
+				return ComponentHandle<TComponent> {};
+			auto it = m_componentLookupTable.find(componentId);
+			return (it != m_componentLookupTable.end()) ? const_cast<BaseEntityComponent *>(it->second.get())->GetHandle<TComponent>() : ComponentHandle<TComponent> {};
+		}
+		template<class TComponent, typename>
+		bool BaseEntityComponentSystem::HasComponent() const
+		{
+			ComponentId componentId;
+			if(m_componentManager->GetComponentId(std::type_index(typeid(TComponent)), componentId) == false)
+				return false;
+			auto it = m_componentLookupTable.find(componentId);
+			return it != m_componentLookupTable.end() && it->second.expired() == false;
+		}
 	}
 };

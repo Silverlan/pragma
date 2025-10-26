@@ -5,6 +5,13 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 
+#include <cinttypes>
+#include <vector>
+#include <functional>
+#include <memory>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.func.base_button;
 
 export import :audio.sound;

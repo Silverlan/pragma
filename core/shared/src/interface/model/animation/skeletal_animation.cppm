@@ -6,6 +6,10 @@ module;
 #include <cinttypes>
 #include <string_view>
 
+#include <memory>
+#include <string>
+#include <unordered_map>
+
 export module pragma.shared:model.animation.skeletal_animation;
 
 import panima;

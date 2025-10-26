@@ -8,6 +8,22 @@ module;
 #include <string>
 #include <vector>
 
+#include <functional>
+#include <unordered_map>
+
+#include <cinttypes>
+#include <thread>
+#include <condition_variable>
+
+#include "pragma/lua/core.hpp"
+
+#include <optional>
+
+#include <array>
+#include <tuple>
+
+#include <cstring>
+
 export module pragma.shared:console.cvar_handler;
 
 export import :console.convar_handle;
@@ -42,7 +58,13 @@ export {
 		void ClearCommands();
 
 		template<class T>
-		T *GetConVar(std::string scmd);
+		T *GetConVar(std::string scmd)
+		{
+			ConConf *cv = GetConVar(scmd);
+			if(cv == NULL)
+				return NULL;
+			return static_cast<T *>(cv);
+		}
 		ConConf *GetConVar(std::string scmd);
 
 		int GetConVarInt(std::string scmd);
@@ -77,13 +99,4 @@ export {
 		virtual void implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const;
 	};
 	#pragma warning(pop)
-
-	template<class T>
-	T *CVarHandler::GetConVar(std::string scvar)
-	{
-		ConConf *cv = GetConVar(scvar);
-		if(cv == NULL)
-			return NULL;
-		return static_cast<T *>(cv);
-	}
 };

@@ -6,6 +6,19 @@ module;
 #include <string>
 #include <vector>
 
+#include <cinttypes>
+#include <memory>
+#include <functional>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
+#include <optional>
+
+#include <array>
+#include <tuple>
+
+#include <cstring>
+
 export module pragma.shared:audio.sound;
 
 export import :audio.effect_params;
@@ -31,7 +44,7 @@ export {
 
 	#pragma warning(push)
 	#pragma warning(disable : 4251)
-	class DLLNETWORK ALSound : virtual public util::inheritable_enable_shared_from_this<ALSound>, virtual public CallbackHandler, public LuaCallbackHandler {
+	class DLLNETWORK ALSound : virtual public util::inheritable_enable_shared_from_this<ALSound>, virtual public util::CallbackHandler, public LuaCallbackHandler {
 	public:
 		enum class NetEvent : uint8_t {
 			Play = 0,

@@ -8,6 +8,16 @@ module;
 #include <deque>
 #include <vector>
 
+#include <cinttypes>
+#include <optional>
+#include <string>
+#include <functional>
+#include <memory>
+#include <unordered_map>
+
+#include <queue>
+#include <cstring>
+
 export module pragma.shared:game.game;
 
 export import :console.convar;
@@ -38,7 +48,7 @@ export import :util.timer;
 
 export {
 	namespace pragma {
-		class DLLNETWORK Game : public CallbackHandler, public LuaCallbackHandler {
+		class DLLNETWORK Game : public util::CallbackHandler, public LuaCallbackHandler {
 		public:
 			pragma::physics::IEnvironment *GetPhysicsEnvironment();
 			const pragma::physics::IEnvironment *GetPhysicsEnvironment() const;
@@ -188,7 +198,7 @@ export {
 			//
 		public:
 			//
-			pragma::Game(NetworkState *state);
+			Game(NetworkState *state);
 			virtual ~Game();
 			virtual void OnRemove();
 			virtual bool IsServer();
@@ -384,94 +394,95 @@ export {
         struct enable_bitwise_operators<pragma::Game::GameFlags> : std::true_type {};
     }
 
-	template<class T>
-	T *pragma::Game::GetConVar(const std::string &scmd)
-	{
-		ConConf *cv = GetConVar(scmd);
-		if(cv == NULL)
-			return NULL;
-		return static_cast<T *>(cv);
-	}
-
 	DLLNETWORK void IncludeLuaEntityBaseClasses(lua_State *l, int refEntities, int obj, int data);
-
-	template<class TLuaEntity, class THandle>
-	pragma::ecs::BaseEntity *pragma::Game::CreateLuaEntity(std::string classname, luabind::object &oClass, bool bLoadIfNotExists)
-	{
-		auto *o = m_luaEnts->GetClassObject(classname);
-		if(o == nullptr) {
-			if(bLoadIfNotExists && LoadLuaEntityByClass(classname) == true)
-				return CreateLuaEntity<TLuaEntity, THandle>(classname, oClass, false);
-			return nullptr;
+	namespace pragma {
+		template<class T>
+		T *Game::GetConVar(const std::string &scmd)
+		{
+			ConConf *cv = GetConVar(scmd);
+			if(cv == NULL)
+				return NULL;
+			return static_cast<T *>(cv);
 		}
-		luabind::object r;
-		pragma::ecs::BaseEntity *el = nullptr;
-	#ifndef LUABIND_NO_EXCEPTIONS
-		try {
-	#endif
-			r = (*o)();
-			auto *elLua = luabind::object_cast<TLuaEntity *>(r);
-			auto *holder = luabind::object_cast<THandle *>(r);
-			if(elLua && holder) {
-				elLua->SetupLua(r, classname);
-				holder->SetHandle(util::weak_shared_handle_cast<pragma::ecs::BaseEntity, TLuaEntity>(elLua->GetHandle()));
-				el = elLua;
-			}
-			else {
-				Con::csv << "WARNING: Unable to create lua entity '" << classname << "': Lua class is not derived from valid entity base!" << Con::endl;
+
+		template<class TLuaEntity, class THandle>
+		ecs::BaseEntity *Game::CreateLuaEntity(std::string classname, luabind::object &oClass, bool bLoadIfNotExists)
+		{
+			auto *o = m_luaEnts->GetClassObject(classname);
+			if(o == nullptr) {
+				if(bLoadIfNotExists && LoadLuaEntityByClass(classname) == true)
+					return CreateLuaEntity<TLuaEntity, THandle>(classname, oClass, false);
 				return nullptr;
 			}
-	#ifndef LUABIND_NO_EXCEPTIONS
-		}
-		catch(luabind::error &) {
-			Lua::HandleLuaError(GetLuaState());
-			return nullptr;
-		}
-	#endif
-		if(!el) {
-			Con::cwar << "Unable to create lua entity '" << classname << "'!" << Con::endl;
-			return nullptr;
-		}
-		oClass = *o;
-		return el;
-	}
-
-	template<class TComponent, class THolder>
-	pragma::BaseEntityComponent *pragma::Game::CreateLuaEntityComponent(pragma::ecs::BaseEntity &ent, std::string classname)
-	{
-		auto *o = m_luaEnts->GetComponentClassObject(classname);
-		if(o == nullptr)
-			return nullptr;
-		luabind::object r;
-		pragma::BaseEntityComponent *el = nullptr;
-	#ifndef LUABIND_NO_EXCEPTIONS
-		try {
-	#endif
-			r = (*o)(ent.GetLuaObject());
-
-			auto *elLua = luabind::object_cast<TComponent *>(r);
-			auto *holder = luabind::object_cast<THolder *>(r);
-			if(elLua && holder) {
-				elLua->SetupLua(r);
-				holder->SetHandle(util::weak_shared_handle_cast<pragma::BaseEntityComponent, TComponent>(elLua->GetHandle()));
-				el = elLua;
+			luabind::object r;
+			ecs::BaseEntity *el = nullptr;
+		#ifndef LUABIND_NO_EXCEPTIONS
+			try {
+		#endif
+				r = (*o)();
+				auto *elLua = luabind::object_cast<TLuaEntity *>(r);
+				auto *holder = luabind::object_cast<THandle *>(r);
+				if(elLua && holder) {
+					elLua->SetupLua(r, classname);
+					holder->SetHandle(util::weak_shared_handle_cast<ecs::BaseEntity, TLuaEntity>(elLua->GetHandle()));
+					el = elLua;
+				}
+				else {
+					Con::csv << "WARNING: Unable to create lua entity '" << classname << "': Lua class is not derived from valid entity base!" << Con::endl;
+					return nullptr;
+				}
+		#ifndef LUABIND_NO_EXCEPTIONS
 			}
-			else {
-				Con::csv << "WARNING: Unable to create lua entity component '" << classname << "': Lua class is not derived from valid entity component base!" << Con::endl;
+			catch(luabind::error &) {
+				Lua::HandleLuaError(GetLuaState());
 				return nullptr;
 			}
-	#ifndef LUABIND_NO_EXCEPTIONS
+		#endif
+			if(!el) {
+				Con::cwar << "Unable to create lua entity '" << classname << "'!" << Con::endl;
+				return nullptr;
+			}
+			oClass = *o;
+			return el;
 		}
-		catch(luabind::error &) {
-			Lua::HandleLuaError(GetLuaState());
-			return nullptr;
+
+		template<class TComponent, class THolder>
+		BaseEntityComponent *Game::CreateLuaEntityComponent(ecs::BaseEntity &ent, std::string classname)
+		{
+			auto *o = m_luaEnts->GetComponentClassObject(classname);
+			if(o == nullptr)
+				return nullptr;
+			luabind::object r;
+			BaseEntityComponent *el = nullptr;
+		#ifndef LUABIND_NO_EXCEPTIONS
+			try {
+		#endif
+				r = (*o)(ent.GetLuaObject());
+
+				auto *elLua = luabind::object_cast<TComponent *>(r);
+				auto *holder = luabind::object_cast<THolder *>(r);
+				if(elLua && holder) {
+					elLua->SetupLua(r);
+					holder->SetHandle(util::weak_shared_handle_cast<BaseEntityComponent, TComponent>(elLua->GetHandle()));
+					el = elLua;
+				}
+				else {
+					Con::csv << "WARNING: Unable to create lua entity component '" << classname << "': Lua class is not derived from valid entity component base!" << Con::endl;
+					return nullptr;
+				}
+		#ifndef LUABIND_NO_EXCEPTIONS
+			}
+			catch(luabind::error &) {
+				Lua::HandleLuaError(GetLuaState());
+				return nullptr;
+			}
+		#endif
+			if(!r) {
+				Con::cwar << "Unable to create lua entity component '" << classname << "'!" << Con::endl;
+				return nullptr;
+			}
+			return el;
 		}
-	#endif
-		if(!r) {
-			Con::cwar << "Unable to create lua entity component '" << classname << "'!" << Con::endl;
-			return nullptr;
-		}
-		return el;
 	}
 
 	DLLNETWORK bool NetIncludePacketID(NetworkState *state, std::string identifier, NetPacket &packet, NetPacket &packetNew);

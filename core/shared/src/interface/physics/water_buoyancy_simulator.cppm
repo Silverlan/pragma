@@ -4,6 +4,10 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <cinttypes>
+#include <vector>
+#include <memory>
+
 export module pragma.shared:physics.water_buoyancy_simulator;
 
 export import :physics.liquid;

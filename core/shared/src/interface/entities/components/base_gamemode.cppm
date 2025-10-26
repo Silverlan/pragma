@@ -7,6 +7,11 @@ module;
 
 #undef GetClassName
 
+#include <cinttypes>
+#include <optional>
+#include <memory>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.base_gamemode;
 
 export import :entities.components.base;

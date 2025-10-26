@@ -7,6 +7,10 @@ module;
 #include <string>
 #include <vector>
 
+#include <cinttypes>
+#include <memory>
+#include <unordered_map>
+
 export module pragma.shared:model.animation.animation;
 
 import panima;

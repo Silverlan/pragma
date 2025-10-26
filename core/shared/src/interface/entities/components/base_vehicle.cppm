@@ -4,6 +4,14 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <cinttypes>
+#include <optional>
+#include <vector>
+#include <string>
+#include <functional>
+#include <memory>
+#include <unordered_map>
+
 export module pragma.shared:entities.components.base_vehicle;
 
 export import :entities.components.base_physics;

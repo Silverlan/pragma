@@ -9,6 +9,15 @@ module;
 
 #undef GetCurrentTime
 
+#include <array>
+#include <cinttypes>
+#include <vector>
+#include <memory>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
+#include <optional>
+
 export module pragma.shared:entities.components.panima;
 
 export import :entities.components.base;

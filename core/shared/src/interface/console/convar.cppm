@@ -6,6 +6,13 @@ module;
 #include <map>
 #include <string>
 
+#include <cinttypes>
+#include <vector>
+#include <memory>
+#include <functional>
+
+#include <optional>
+
 export module pragma.shared:console.convar;
 
 export import :console.cvar_callback;

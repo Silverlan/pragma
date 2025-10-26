@@ -8,6 +8,8 @@ module;
 #include <string>
 #include <unordered_map>
 
+#include <vector>
+
 export module pragma.shared:model.animation.skeleton;
 
 export import :model.animation.bone;

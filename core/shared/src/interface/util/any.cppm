@@ -7,6 +7,17 @@ module;
 #include "pragma/lua/core.hpp"
 #include <string>
 
+#include <cinttypes>
+
+#include <optional>
+
+#include <memory>
+
+#include <functional>
+#include <unordered_map>
+
+#include <vector>
+
 export module pragma.shared:util.any;
 
 export import :types;
@@ -51,9 +62,9 @@ export {
 		DLLNETWORK void PushAny(lua_State *l, ::util::VarType varType, const std::any &value);
 		DLLNETWORK void PushNewAnyProperty(lua_State *l, ::util::VarType varType, const std::any &value);
 
-		DLLNETWORK void WriteAny(::DataStream &ds, ::util::VarType varType, const std::any &value, uint32_t *pos = nullptr);
+		DLLNETWORK void WriteAny(util::DataStream &ds, ::util::VarType varType, const std::any &value, uint32_t *pos = nullptr);
 		DLLNETWORK void WriteAny(::NetPacket &ds, ::util::VarType varType, const std::any &value, uint32_t *pos = nullptr);
-		DLLNETWORK void ReadAny(pragma::Game &game, ::DataStream &ds, ::util::VarType varType, std::any &outValue);
+		DLLNETWORK void ReadAny(pragma::Game &game, util::DataStream &ds, ::util::VarType varType, std::any &outValue);
 		DLLNETWORK void ReadAny(::NetPacket &ds, ::util::VarType varType, std::any &outValue);
 	};
 };

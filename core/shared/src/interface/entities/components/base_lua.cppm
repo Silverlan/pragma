@@ -7,6 +7,16 @@ module;
 #include "pragma/lua/core.hpp"
 #include <string>
 
+#include <cinttypes>
+#include <vector>
+#include <memory>
+#include <functional>
+#include <unordered_map>
+
+#include <array>
+#include <optional>
+#include <tuple>
+
 export module pragma.shared:entities.components.base_lua;
 
 export import :entities.components.base;
@@ -380,36 +390,38 @@ export {
         struct enable_bitwise_operators<pragma::BaseLuaBaseEntityComponent::MemberFlags> : std::true_type {};
     }
 
-	template<typename T>
-	void pragma::BaseLuaBaseEntityComponent::SetDynamicMemberValue(ComponentMemberIndex memberIndex, const T &value)
-	{
-		auto *memberInfo = GetMemberInfo(memberIndex);
-		if(!memberInfo)
-			return;
-		ents::EntityMemberType type;
-		auto *anyVal = GetDynamicMemberValue(memberIndex, type);
-		if(!anyVal)
-			return;
-		udm::visit(pragma::ents::member_type_to_udm_type(memberInfo->type), [this, memberInfo, &value, anyVal](auto tag) {
-			using TMember = typename decltype(tag)::type;
-			if constexpr(udm::is_convertible<T, TMember>())
-				*anyVal = udm::convert<T, TMember>(value);
-		});
-	}
-	template<typename T>
-	bool pragma::BaseLuaBaseEntityComponent::GetDynamicMemberValue(ComponentMemberIndex memberIndex, T &outValue, ents::EntityMemberType &outType)
-	{
-		auto *anyVal = GetDynamicMemberValue(memberIndex, outType);
-		if(!anyVal)
-			return false;
-		return udm::visit(pragma::ents::member_type_to_udm_type(outType), [anyVal, &outValue](auto tag) {
-			using TMember = typename decltype(tag)::type;
-			if constexpr(udm::is_udm_type<T>() && udm::is_udm_type<TMember>() && is_valid_component_property_type_v<TMember> && udm::is_convertible<TMember, T>()) {
-				outValue = udm::convert<TMember, T>(std::any_cast<TMember>(*anyVal));
-				return true;
-			}
-			return false;
-		});
+	namespace pragma {
+		template<typename T>
+		void BaseLuaBaseEntityComponent::SetDynamicMemberValue(ComponentMemberIndex memberIndex, const T &value)
+		{
+			auto *memberInfo = GetMemberInfo(memberIndex);
+			if(!memberInfo)
+				return;
+			ents::EntityMemberType type;
+			auto *anyVal = GetDynamicMemberValue(memberIndex, type);
+			if(!anyVal)
+				return;
+			udm::visit(ents::member_type_to_udm_type(memberInfo->type), [this, memberInfo, &value, anyVal](auto tag) {
+				using TMember = typename decltype(tag)::type;
+				if constexpr(udm::is_convertible<T, TMember>())
+					*anyVal = udm::convert<T, TMember>(value);
+			});
+		}
+		template<typename T>
+		bool BaseLuaBaseEntityComponent::GetDynamicMemberValue(ComponentMemberIndex memberIndex, T &outValue, ents::EntityMemberType &outType)
+		{
+			auto *anyVal = GetDynamicMemberValue(memberIndex, outType);
+			if(!anyVal)
+				return false;
+			return udm::visit(ents::member_type_to_udm_type(outType), [anyVal, &outValue](auto tag) {
+				using TMember = typename decltype(tag)::type;
+				if constexpr(udm::is_udm_type<T>() && udm::is_udm_type<TMember>() && is_valid_component_property_type_v<TMember> && udm::is_convertible<TMember, T>()) {
+					outValue = udm::convert<TMember, T>(std::any_cast<TMember>(*anyVal));
+					return true;
+				}
+				return false;
+			});
+		}
 	}
 
 	namespace Lua {

@@ -8,6 +8,15 @@ module;
 #include <queue>
 #include <thread>
 
+#include <vector>
+#include <functional>
+#include <memory>
+#include <map>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
+#include <optional>
+
 export module pragma.shared:engine;
 
 export import :assets.manager;
@@ -34,7 +43,7 @@ export {
 
 	class NetworkState;
 	namespace pragma {
-		class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
+		class DLLNETWORK Engine : public CVarHandler, public util::CallbackHandler {
 		public:
 			static const uint32_t DEFAULT_TICK_RATE;
 			// For internal use only! Not to be used directly!
@@ -91,7 +100,7 @@ export {
 			std::mutex m_consoleOutputMutex = {};
 		public:
 			static pragma::Engine *Get();
-			pragma::Engine(int argc, char *argv[]);
+			Engine(int argc, char *argv[]);
 			virtual ~Engine();
 
 			enum class StateFlags : uint32_t {
@@ -358,16 +367,16 @@ export {
 	namespace pragma {
 		DLLNETWORK pragma::Engine *get_engine();
 		DLLNETWORK NetworkState *get_server_state();
-	};
 
-	template<class T>
-	T *pragma::Engine::GetConVar(const std::string &scvar)
-	{
-		ConConf *cv = GetConVar(scvar);
-		if(cv == NULL)
-			return NULL;
-		return static_cast<T *>(cv);
-	}
+		template<class T>
+		T *Engine::GetConVar(const std::string &scvar)
+		{
+			ConConf *cv = GetConVar(scvar);
+			if(cv == NULL)
+				return NULL;
+			return static_cast<T *>(cv);
+		}
+	};
 };
 
 export class LaunchParaMap;

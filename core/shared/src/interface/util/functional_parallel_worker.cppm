@@ -7,6 +7,17 @@ module;
 #include <mutex>
 #include <optional>
 
+#include <cinttypes>
+#include <string>
+#include <memory>
+
+#include <unordered_map>
+
+#include <vector>
+
+#include <thread>
+#include <condition_variable>
+
 export module pragma.shared:util.functional_parallel_worker;
 
 export import pragma.util;
@@ -76,128 +87,130 @@ export {
 		};
 	};
 
-	template<typename T>
-	util::TFunctionalParallelWorker<T>::~TFunctionalParallelWorker()
-	{
-		if(m_callOnRemove)
-			m_callOnRemove();
-	}
+	namespace util {
+		template<typename T>
+		TFunctionalParallelWorker<T>::~TFunctionalParallelWorker()
+		{
+			if(m_callOnRemove)
+				m_callOnRemove();
+		}
 
-	template<typename T>
-	void util::TFunctionalParallelWorker<T>::CallOnRemove(const std::function<void(void)> &callOnRemove)
-	{
-		m_callOnRemove = callOnRemove;
-	}
+		template<typename T>
+		void TFunctionalParallelWorker<T>::CallOnRemove(const std::function<void(void)> &callOnRemove)
+		{
+			m_callOnRemove = callOnRemove;
+		}
 
-	template<typename T>
-	bool util::TFunctionalParallelWorker<T>::IsTaskCancelled() const
-	{
-		return m_taskCancelled;
-	}
+		template<typename T>
+		bool TFunctionalParallelWorker<T>::IsTaskCancelled() const
+		{
+			return m_taskCancelled;
+		}
 
-	template<typename T>
-	void util::TFunctionalParallelWorker<T>::CancelTask()
-	{
-		if(!this->IsPending())
-			return;
-		m_taskMutex.lock();
-		m_taskCancelled = true;
-		m_nextTask = nullptr;
-		m_taskMutex.unlock();
+		template<typename T>
+		void TFunctionalParallelWorker<T>::CancelTask()
+		{
+			if(!this->IsPending())
+				return;
+			m_taskMutex.lock();
+			m_taskCancelled = true;
+			m_nextTask = nullptr;
+			m_taskMutex.unlock();
 
-		m_taskAvailableMutex.lock();
-		m_taskAvailableCond.notify_one();
-		m_taskAvailableMutex.unlock();
+			m_taskAvailableMutex.lock();
+			m_taskAvailableCond.notify_one();
+			m_taskAvailableMutex.unlock();
 
-		WaitForTask();
+			WaitForTask();
 
-		m_taskComplete = false;
-		m_taskCancelled = false;
-	}
+			m_taskComplete = false;
+			m_taskCancelled = false;
+		}
 
-	template<typename T>
-	void util::TFunctionalParallelWorker<T>::ResetTask(const Task &task)
-	{
-		CancelTask();
+		template<typename T>
+		void TFunctionalParallelWorker<T>::ResetTask(const Task &task)
+		{
+			CancelTask();
 
-		m_taskMutex.lock();
-		m_nextTask = task;
-		m_taskMutex.unlock();
+			m_taskMutex.lock();
+			m_nextTask = task;
+			m_taskMutex.unlock();
 
-		m_taskAvailableMutex.lock();
-		m_taskAvailable = true;
-		m_taskAvailableCond.notify_one();
-		m_taskAvailableMutex.unlock();
-	}
+			m_taskAvailableMutex.lock();
+			m_taskAvailable = true;
+			m_taskAvailableCond.notify_one();
+			m_taskAvailableMutex.unlock();
+		}
 
-	template<typename T>
-	util::TFunctionalParallelWorker<T>::TFunctionalParallelWorker(bool continuousUntilCancelled) : util::ParallelWorker<T> {}, m_continuousUntilCancelled {continuousUntilCancelled}
-	{
-		this->AddThread([this]() {
-			while(!IsFinished()) {
-				auto ul = std::unique_lock<std::mutex> {m_taskAvailableMutex};
-				m_taskAvailableCond.wait(ul, [this]() -> bool { return m_taskAvailable || IsFinished() || m_taskCancelled; });
-				if(IsFinished())
-					break;
-				m_taskMutex.lock();
-				auto task = std::move(m_nextTask);
-				m_nextTask = nullptr;
-				m_taskAvailable = false;
-				auto taskCancelled = m_taskCancelled ? true : false;
-				m_taskCancelled = false;
-				m_taskMutex.unlock();
+		template<typename T>
+		TFunctionalParallelWorker<T>::TFunctionalParallelWorker(bool continuousUntilCancelled) : ParallelWorker<T> {}, m_continuousUntilCancelled {continuousUntilCancelled}
+		{
+			this->AddThread([this]() {
+				while(!IsFinished()) {
+					auto ul = std::unique_lock<std::mutex> {m_taskAvailableMutex};
+					m_taskAvailableCond.wait(ul, [this]() -> bool { return m_taskAvailable || IsFinished() || m_taskCancelled; });
+					if(IsFinished())
+						break;
+					m_taskMutex.lock();
+					auto task = std::move(m_nextTask);
+					m_nextTask = nullptr;
+					m_taskAvailable = false;
+					auto taskCancelled = m_taskCancelled ? true : false;
+					m_taskCancelled = false;
+					m_taskMutex.unlock();
 
-				if(!taskCancelled) {
-					assert(task != nullptr);
-					if(task)
-						task(*this);
+					if(!taskCancelled) {
+						assert(task != nullptr);
+						if(task)
+							task(*this);
+					}
+
+					m_taskCompleteMutex.lock();
+					m_taskComplete = true;
+					m_taskCompleteCond.notify_one();
+					m_taskCompleteMutex.unlock();
 				}
 
 				m_taskCompleteMutex.lock();
 				m_taskComplete = true;
 				m_taskCompleteCond.notify_one();
 				m_taskCompleteMutex.unlock();
-			}
+			});
+		}
+		template<typename T>
+		bool TFunctionalParallelWorker<T>::IsFinished() const
+		{
+			if(this->IsCancelled())
+				return true;
+			if(m_continuousUntilCancelled)
+				return false;
+			return this->GetStatus() != JobStatus::Pending;
+		}
+		template<typename T>
+		void TFunctionalParallelWorker<T>::WaitForTask()
+		{
+			auto ul = std::unique_lock<std::mutex> {m_taskCompleteMutex};
+			m_taskCompleteCond.wait(ul, [this]() -> bool { return m_taskComplete; });
+		}
+		template<typename T>
+		T TFunctionalParallelWorkerWithResult<T>::GetResult()
+		{
+			return m_result;
+		}
+		template<typename T>
+		void TFunctionalParallelWorkerWithResult<T>::SetResult(T &&val)
+		{
+			m_result = val;
+		}
+		template<typename T>
+		void TFunctionalParallelWorker<T>::DoCancel(const std::string &resultMsg, std::optional<int32_t> resultCode)
+		{
+			ParallelWorker<T>::DoCancel(resultMsg, resultCode);
 
-			m_taskCompleteMutex.lock();
-			m_taskComplete = true;
-			m_taskCompleteCond.notify_one();
-			m_taskCompleteMutex.unlock();
-		});
-	}
-	template<typename T>
-	bool util::TFunctionalParallelWorker<T>::IsFinished() const
-	{
-		if(this->IsCancelled())
-			return true;
-		if(m_continuousUntilCancelled)
-			return false;
-		return this->GetStatus() != util::JobStatus::Pending;
-	}
-	template<typename T>
-	void util::TFunctionalParallelWorker<T>::WaitForTask()
-	{
-		auto ul = std::unique_lock<std::mutex> {m_taskCompleteMutex};
-		m_taskCompleteCond.wait(ul, [this]() -> bool { return m_taskComplete; });
-	}
-	template<typename T>
-	T util::TFunctionalParallelWorkerWithResult<T>::GetResult()
-	{
-		return m_result;
-	}
-	template<typename T>
-	void util::TFunctionalParallelWorkerWithResult<T>::SetResult(T &&val)
-	{
-		m_result = val;
-	}
-	template<typename T>
-	void util::TFunctionalParallelWorker<T>::DoCancel(const std::string &resultMsg, std::optional<int32_t> resultCode)
-	{
-		util::ParallelWorker<T>::DoCancel(resultMsg, resultCode);
-
-		m_taskAvailableMutex.lock();
-		m_taskAvailable = true;
-		m_taskAvailableCond.notify_one();
-		m_taskAvailableMutex.unlock();
+			m_taskAvailableMutex.lock();
+			m_taskAvailable = true;
+			m_taskAvailableCond.notify_one();
+			m_taskAvailableMutex.unlock();
+		}
 	}
 };

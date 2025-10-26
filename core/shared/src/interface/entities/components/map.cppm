@@ -4,6 +4,11 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <array>
+#include <cinttypes>
+#include <optional>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.map;
 
 export import :entities.components.base;

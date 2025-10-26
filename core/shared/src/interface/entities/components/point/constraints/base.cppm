@@ -7,6 +7,9 @@ module;
 #include <string>
 #include <vector>
 
+#include <cinttypes>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.point.constraints.base;
 
 export import :entities.components.base;

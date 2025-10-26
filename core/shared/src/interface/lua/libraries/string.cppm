@@ -6,6 +6,8 @@ module;
 #include "pragma/lua/core.hpp"
 #include <string>
 
+#include <cinttypes>
+
 export module pragma.shared:scripting.lua.libraries.string;
 
 export import luabind;

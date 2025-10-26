@@ -6,6 +6,12 @@ module;
 #include <memory>
 #include <string>
 
+#include <optional>
+#include <vector>
+#include <functional>
+#include <queue>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.meta_rig;
 
 export import :entities.components.base_animated;

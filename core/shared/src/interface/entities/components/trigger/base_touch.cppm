@@ -6,6 +6,11 @@ module;
 #include <queue>
 #include <vector>
 
+#include <cinttypes>
+#include <memory>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.triggers.base_touch;
 
 export import :entities.components.base;

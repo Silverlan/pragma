@@ -46,15 +46,15 @@ export namespace luabind {
 	struct DLLNETWORK default_converter<pragma::GString &&> : default_converter<pragma::GString> {};
 }
 
-export {
+export namespace luabind {
 	template<typename U>
-	pragma::GString luabind::default_converter<pragma::GString>::to_cpp(lua_State *L, U u, int index)
+	pragma::GString default_converter<pragma::GString>::to_cpp(lua_State *L, U u, int index)
 	{
 		return {luaL_checkstring(L, index)};
 	}
 
 	template<class U>
-	int luabind::default_converter<pragma::GString>::match(lua_State *l, U u, int index)
+	int default_converter<pragma::GString>::match(lua_State *l, U u, int index)
 	{
 		return lua_isstring(l, index) ? 1 : no_match;
 	}

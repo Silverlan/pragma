@@ -6,6 +6,10 @@ module;
 #include <string>
 #include <vector>
 
+#include <cinttypes>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.triggers.base_teleport;
 
 export import :entities.components.base;

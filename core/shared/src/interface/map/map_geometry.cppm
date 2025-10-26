@@ -5,6 +5,9 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <cinttypes>
 
+#include <vector>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:map.map_geometry;
 
 export import :physics.surface_material;

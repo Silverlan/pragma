@@ -5,6 +5,9 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 
+#include <cinttypes>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.environment.lights.base_spot_vol;
 
 export import :entities.components.base;

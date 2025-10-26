@@ -11,6 +11,8 @@ module;
 
 #include <cinttypes>
 
+#include <functional>
+
 export module pragma.shared:model.model_mesh;
 
 export import :game.coordinate_system;
@@ -48,8 +50,8 @@ export {
 				return 0;
 			}
 
-			pragma::ModelSubMesh();
-			pragma::ModelSubMesh(const pragma::ModelSubMesh &other);
+			ModelSubMesh();
+			ModelSubMesh(const pragma::ModelSubMesh &other);
 			static std::shared_ptr<pragma::ModelSubMesh> Load(pragma::Game &game, const udm::AssetData &data, std::string &outErr);
 			bool operator==(const pragma::ModelSubMesh &other) const;
 			bool operator!=(const pragma::ModelSubMesh &other) const;

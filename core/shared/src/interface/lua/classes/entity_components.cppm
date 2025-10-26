@@ -6,6 +6,10 @@ module;
 #include "pragma/lua/core.hpp"
 #include <string>
 
+#include <optional>
+#include <vector>
+#include <functional>
+
 export module pragma.shared:scripting.lua.classes.entity_components;
 
 export import :entities.components.base;

@@ -17,6 +17,16 @@ module;
 #endif
 #endif
 
+#include <optional>
+
+#include <cinttypes>
+#include <string>
+#include <memory>
+
+#include <functional>
+
+#include <vector>
+
 export module pragma.shared:entities.components.base;
 
 export import :entities.base_entity_handle;
@@ -336,76 +346,78 @@ export {
 
 	DLLNETWORK std::ostream &operator<<(std::ostream &os, const pragma::BaseEntityComponent &component);
 
-	template<class TComponent>
-	pragma::ComponentHandle<const TComponent> pragma::BaseEntityComponent::GetHandle() const
-	{
-		return pragma::BaseLuaHandle::GetHandle<const TComponent>();
-	}
-	template<class TComponent>
-	pragma::ComponentHandle<TComponent> pragma::BaseEntityComponent::GetHandle()
-	{
-		return pragma::BaseLuaHandle::GetHandle<TComponent>();
-	}
+	namespace pragma {
+		template<class TComponent>
+		ComponentHandle<const TComponent> BaseEntityComponent::GetHandle() const
+		{
+			return BaseLuaHandle::GetHandle<const TComponent>();
+		}
+		template<class TComponent>
+		ComponentHandle<TComponent> BaseEntityComponent::GetHandle()
+		{
+			return BaseLuaHandle::GetHandle<TComponent>();
+		}
+
+			template<typename... Args>
+		void BaseEntityComponent::Log(spdlog::level::level_enum level, const std::string &msg) const
+		{
+			auto &logger = InitLogger();
+			logger.log(level, msg);
+		}
 
 		template<typename... Args>
-	void pragma::BaseEntityComponent::Log(spdlog::level::level_enum level, const std::string &msg) const
-	{
-		auto &logger = InitLogger();
-		logger.log(level, msg);
-	}
+		void BaseEntityComponent::Log(spdlog::level::level_enum level, format_string_t<Args...> fmt, Args &&...args) const
+		{
+			auto &logger = InitLogger();
+			logger.log(level, fmt, std::forward<Args>(args)...);
+		}
+		template<typename... Args>
+		void BaseEntityComponent::LogTrace(format_string_t<Args...> fmt, Args &&...args) const
+		{
+			auto &logger = InitLogger();
+			logger.trace(fmt, std::forward<Args>(args)...);
+		}
+		template<typename... Args>
+		void BaseEntityComponent::LogDebug(format_string_t<Args...> fmt, Args &&...args) const
+		{
+			auto &logger = InitLogger();
+			logger.debug(fmt, std::forward<Args>(args)...);
+		}
+		template<typename... Args>
+		void BaseEntityComponent::LogInfo(format_string_t<Args...> fmt, Args &&...args) const
+		{
+			auto &logger = InitLogger();
+			logger.info(fmt, std::forward<Args>(args)...);
+		}
+		template<typename... Args>
+		void BaseEntityComponent::LogWarn(format_string_t<Args...> fmt, Args &&...args) const
+		{
+			auto &logger = InitLogger();
+			logger.warn(fmt, std::forward<Args>(args)...);
+		}
+		template<typename... Args>
+		void BaseEntityComponent::LogError(format_string_t<Args...> fmt, Args &&...args) const
+		{
+			auto &logger = InitLogger();
+			logger.error(fmt, std::forward<Args>(args)...);
+		}
+		template<typename... Args>
+		void BaseEntityComponent::LogCritical(format_string_t<Args...> fmt, Args &&...args) const
+		{
+			auto &logger = InitLogger();
+			logger.critical(fmt, std::forward<Args>(args)...);
+		}
 
-	template<typename... Args>
-	void pragma::BaseEntityComponent::Log(spdlog::level::level_enum level, format_string_t<Args...> fmt, Args &&...args) const
-	{
-		auto &logger = InitLogger();
-		logger.log(level, fmt, std::forward<Args>(args)...);
-	}
-	template<typename... Args>
-	void pragma::BaseEntityComponent::LogTrace(format_string_t<Args...> fmt, Args &&...args) const
-	{
-		auto &logger = InitLogger();
-		logger.trace(fmt, std::forward<Args>(args)...);
-	}
-	template<typename... Args>
-	void pragma::BaseEntityComponent::LogDebug(format_string_t<Args...> fmt, Args &&...args) const
-	{
-		auto &logger = InitLogger();
-		logger.debug(fmt, std::forward<Args>(args)...);
-	}
-	template<typename... Args>
-	void pragma::BaseEntityComponent::LogInfo(format_string_t<Args...> fmt, Args &&...args) const
-	{
-		auto &logger = InitLogger();
-		logger.info(fmt, std::forward<Args>(args)...);
-	}
-	template<typename... Args>
-	void pragma::BaseEntityComponent::LogWarn(format_string_t<Args...> fmt, Args &&...args) const
-	{
-		auto &logger = InitLogger();
-		logger.warn(fmt, std::forward<Args>(args)...);
-	}
-	template<typename... Args>
-	void pragma::BaseEntityComponent::LogError(format_string_t<Args...> fmt, Args &&...args) const
-	{
-		auto &logger = InitLogger();
-		logger.error(fmt, std::forward<Args>(args)...);
-	}
-	template<typename... Args>
-	void pragma::BaseEntityComponent::LogCritical(format_string_t<Args...> fmt, Args &&...args) const
-	{
-		auto &logger = InitLogger();
-		logger.critical(fmt, std::forward<Args>(args)...);
-	}
+		spdlog::logger *find_logger(Game &game, std::type_index typeIndex);
 
-	spdlog::logger *find_logger(pragma::Game &game, std::type_index typeIndex);
+		template<typename TClass>
+		spdlog::logger *find_logger(Game &game) {
+			return find_logger(game, typeid(TClass));
+		}
 
-	template<typename TClass>
-	spdlog::logger *find_logger(pragma::Game &game) {
-		return find_logger(game, typeid(TClass));
-	}
-
-	template<typename TClass>
-	spdlog::logger &pragma::BaseEntityComponent::get_logger() {
-		return get_logger(typeid(TClass));
+		template<typename TClass>
+		spdlog::logger &BaseEntityComponent::get_logger() {
+			return get_logger(typeid(TClass));
+		}
 	}
 };

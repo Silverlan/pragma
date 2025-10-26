@@ -5,6 +5,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
 
+#include <memory>
+
 export module pragma.shared:scripting.lua.converters.thread_pool;
 
 export import :scripting.lua.classes.thread_pool;
@@ -44,9 +46,9 @@ export namespace luabind {
 	struct DLLNETWORK default_converter<pragma::lua::LuaThreadWrapper &&> : default_converter<pragma::lua::LuaThreadWrapper> {};
 }
 
-export {
+export namespace luabind {
 	template<typename U>
-	pragma::lua::LuaThreadWrapper luabind::default_converter<pragma::lua::LuaThreadWrapper>::to_cpp(lua_State *L, U u, int index)
+	pragma::lua::LuaThreadWrapper default_converter<pragma::lua::LuaThreadWrapper>::to_cpp(lua_State *L, U u, int index)
 	{
 		if(Lua::IsType<pragma::lua::LuaThreadTask>(L, index))
 			return pragma::lua::LuaThreadWrapper {Lua::Check<std::shared_ptr<pragma::lua::LuaThreadTask>>(L, index)};
@@ -54,7 +56,7 @@ export {
 	}
 
 	template<class U>
-	int luabind::default_converter<pragma::lua::LuaThreadWrapper>::match(lua_State *l, U u, int index)
+	int default_converter<pragma::lua::LuaThreadWrapper>::match(lua_State *l, U u, int index)
 	{
 		return Lua::IsType<pragma::lua::LuaThreadTask>(l, index) ? 1 : Lua::IsType<pragma::lua::LuaThreadPool>(l, index) ? 1 : no_match;
 	}

@@ -38,7 +38,7 @@ export namespace luabind {
 	concept is_native_type = std::is_arithmetic_v<T> || std::is_same_v<base_type<T>, std::string> || std::is_same_v<T, const char *>;
 
 	template<typename T>
-	using type_converter = std::conditional_t<is_native_type<T>, luabind::default_converter<T>,
-	  std::conditional_t<std::is_pointer_v<T>, std::conditional_t<std::is_const_v<std::remove_pointer_t<T>>, luabind::detail::const_pointer_converter, luabind::detail::pointer_converter>,
-	    std::conditional_t<std::is_reference_v<T>, std::conditional_t<std::is_const_v<std::remove_reference_t<T>>, luabind::detail::const_ref_converter, luabind::detail::ref_converter>, luabind::detail::value_converter>>>;
+	using type_converter = std::conditional_t<is_native_type<T>, default_converter<T>,
+	  std::conditional_t<std::is_pointer_v<T>, std::conditional_t<std::is_const_v<std::remove_pointer_t<T>>, detail::const_pointer_converter, luabind::detail::pointer_converter>,
+	    std::conditional_t<std::is_reference_v<T>, std::conditional_t<std::is_const_v<std::remove_reference_t<T>>, detail::const_ref_converter, luabind::detail::ref_converter>, luabind::detail::value_converter>>>;
 };

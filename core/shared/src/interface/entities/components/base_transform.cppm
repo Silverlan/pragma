@@ -4,6 +4,12 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <cinttypes>
+#include <optional>
+#include <functional>
+#include <memory>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.base_transform;
 
 export import :entities.components.base;

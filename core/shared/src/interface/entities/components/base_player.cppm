@@ -5,6 +5,11 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <iostream>
 
+#include <optional>
+#include <memory>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.base_player;
 
 export import :entities.components.base;
@@ -16,9 +21,9 @@ export import :model.animation.enums;
 export import :physics.shape;
 
 export {
-	class pragma::Engine;
 	class BasePlayer;
 	namespace pragma {
+		class Engine;
 		class ActionInputControllerComponent;
 		class BaseObservableComponent;
 		class DLLNETWORK BasePlayerComponent : public BaseEntityComponent {

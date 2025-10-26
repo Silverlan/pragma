@@ -5,6 +5,9 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <cinttypes>
 
+#include <array>
+#include <vector>
+
 export module pragma.shared:entities.components.environment.base_camera;
 
 export import :entities.components.base;

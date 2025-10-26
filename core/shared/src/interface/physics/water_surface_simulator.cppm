@@ -12,6 +12,18 @@ module;
 
 #include <memory>
 
+#include <optional>
+#include "pragma/lua/core.hpp"
+
+#include <functional>
+
+#include <string>
+
+#include <unordered_map>
+
+#include <thread>
+#include <condition_variable>
+
 export module pragma.shared:physics.water_surface_simulator;
 
 export import pragma.math;

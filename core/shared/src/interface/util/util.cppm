@@ -2,6 +2,16 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <vector>
+#include <functional>
+#include <memory>
+#include <map>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
+#include <optional>
+#include <queue>
+
 export module pragma.shared:util;
 
 export import :util.any;
@@ -16,7 +26,6 @@ export import :util.giblet_create_info;
 export import :util.global_string_table;
 export import :util.lookup_identifier;
 export import :util.umodule;
-export import :util.mvp_base;
 export import :util.python;
 export import :util.render_tile;
 export import :util.resource_watcher;

@@ -7,6 +7,14 @@ module;
 #include <string>
 #include <vector>
 
+#include <cinttypes>
+#include <optional>
+#include <memory>
+#include <functional>
+#include <thread>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:console.commands;
 
 export import :entities.components.base_player;

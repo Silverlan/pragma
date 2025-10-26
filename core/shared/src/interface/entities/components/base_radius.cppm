@@ -4,6 +4,11 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <cinttypes>
+#include <vector>
+#include <memory>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.base_radius;
 
 export import :entities.components.base;

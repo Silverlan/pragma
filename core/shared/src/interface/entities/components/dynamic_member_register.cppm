@@ -6,6 +6,12 @@ module;
 #include <string>
 #include <unordered_map>
 
+#include <cinttypes>
+#include <optional>
+#include <vector>
+#include <memory>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.dynamic_member_register;
 
 export import :entities.enums;

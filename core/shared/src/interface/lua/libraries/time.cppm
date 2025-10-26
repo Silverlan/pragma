@@ -5,6 +5,10 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
 
+#include <cinttypes>
+#include <string>
+#include <memory>
+
 export module pragma.shared:scripting.lua.libraries.time;
 
 export import :util.enums;

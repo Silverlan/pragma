@@ -5,6 +5,11 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <memory>
 
+#include <cinttypes>
+#include <optional>
+#include <vector>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:scripting.lua.converters.file;
 
 export import :scripting.lua.core;
@@ -31,15 +36,15 @@ export namespace luabind {
 	};
 };
 
-export {
+export namespace luabind {
 	template<class U>
-	int luabind::default_converter<std::shared_ptr<ufile::IFile>, void>::match(lua_State *L, U, int index)
+	int default_converter<std::shared_ptr<ufile::IFile>, void>::match(lua_State *L, U, int index)
 	{
 		return Lua::IsType<LFile>(L, index) ? 0 : no_match;
 	}
 
 	template<class U>
-	std::shared_ptr<ufile::IFile> luabind::default_converter<std::shared_ptr<ufile::IFile>>::to_cpp(lua_State *L, U u, int index)
+	std::shared_ptr<ufile::IFile> default_converter<std::shared_ptr<ufile::IFile>>::to_cpp(lua_State *L, U u, int index)
 	{
 		auto *f = luabind::object_cast<LFile *>(luabind::object {luabind::from_stack(L, index)});
 		return f->GetHandle();

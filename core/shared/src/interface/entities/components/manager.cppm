@@ -14,6 +14,8 @@ module;
 #include <unordered_map>
 #include <vector>
 
+#include <optional>
+
 export module pragma.shared:entities.manager;
 
 export import :util.global_string_table;
@@ -163,37 +165,39 @@ export {
         struct enable_bitwise_operators<pragma::ComponentFlags> : std::true_type {};
     }
 
-	template<class TComponent, typename>
-	pragma::ComponentId pragma::EntityComponentManager::RegisterComponentType(const std::string &name, const ComponentRegInfo &regInfo)
-	{
-		auto flags = ComponentFlags::None;
-		if(std::is_base_of<pragma::BaseNetComponent, TComponent>::value)
-			flags |= ComponentFlags::Networked;
-		auto componentId = PreRegisterComponentType(name);
-		TComponent::RegisterEvents(*this, [this, componentId](const std::string &evName, ComponentEventInfo::Type type) {
-			auto id = RegisterEvent<TComponent>(evName, type);
-			auto it = m_componentEvents.find(id);
-			assert(it != m_componentEvents.end());
-			it->second.componentId = componentId;
-			return id;
-		});
-		RegisterComponentType(name, [](pragma::ecs::BaseEntity &ent) { return util::TSharedHandle<BaseEntityComponent> {new TComponent {ent}, [](pragma::BaseEntityComponent *c) { delete c; }}; }, regInfo, flags, std::type_index(typeid(TComponent)));
-		auto &componentInfo = *m_componentInfos[componentId];
-		TComponent::RegisterMembers(*this, [this, &componentInfo](ComponentMemberInfo &&memberInfo) -> ComponentMemberIndex { return RegisterMember(componentInfo, std::move(memberInfo)); });
-		if(m_luaBindingRegistrations.size() == m_luaBindingRegistrations.capacity())
-			m_luaBindingRegistrations.reserve(m_luaBindingRegistrations.size() * 1.5 + 50);
-		m_luaBindingRegistrations.push_back(&TComponent::RegisterLuaBindings);
-		return componentId;
-	}
+	namespace pragma {
+		template<class TComponent, typename>
+		ComponentId EntityComponentManager::RegisterComponentType(const std::string &name, const ComponentRegInfo &regInfo)
+		{
+			auto flags = ComponentFlags::None;
+			if(std::is_base_of<BaseNetComponent, TComponent>::value)
+				flags |= ComponentFlags::Networked;
+			auto componentId = PreRegisterComponentType(name);
+			TComponent::RegisterEvents(*this, [this, componentId](const std::string &evName, ComponentEventInfo::Type type) {
+				auto id = RegisterEvent<TComponent>(evName, type);
+				auto it = m_componentEvents.find(id);
+				assert(it != m_componentEvents.end());
+				it->second.componentId = componentId;
+				return id;
+			});
+			RegisterComponentType(name, [](ecs::BaseEntity &ent) { return util::TSharedHandle<BaseEntityComponent> {new TComponent {ent}, [](BaseEntityComponent *c) { delete c; }}; }, regInfo, flags, std::type_index(typeid(TComponent)));
+			auto &componentInfo = *m_componentInfos[componentId];
+			TComponent::RegisterMembers(*this, [this, &componentInfo](ComponentMemberInfo &&memberInfo) -> ComponentMemberIndex { return RegisterMember(componentInfo, std::move(memberInfo)); });
+			if(m_luaBindingRegistrations.size() == m_luaBindingRegistrations.capacity())
+				m_luaBindingRegistrations.reserve(m_luaBindingRegistrations.size() * 1.5 + 50);
+			m_luaBindingRegistrations.push_back(&TComponent::RegisterLuaBindings);
+			return componentId;
+		}
 
-	template<class TComponent, typename>
-	bool pragma::EntityComponentManager::GetComponentTypeId(ComponentId &outId) const
-	{
-		auto it = m_typeIndexToComponentId.find(std::type_index(typeid(TComponent)));
-		if(it == m_typeIndexToComponentId.end())
-			return false;
-		outId = it->second;
-		return true;
+		template<class TComponent, typename>
+		bool EntityComponentManager::GetComponentTypeId(ComponentId &outId) const
+		{
+			auto it = m_typeIndexToComponentId.find(std::type_index(typeid(TComponent)));
+			if(it == m_typeIndexToComponentId.end())
+				return false;
+			outId = it->second;
+			return true;
+		}
 	}
 };
 

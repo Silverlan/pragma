@@ -7,6 +7,17 @@ module;
 #include <mutex>
 #include <thread>
 
+#include <cinttypes>
+#include <vector>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include "pragma/lua/core.hpp"
+
+#include <optional>
+#include <functional>
+#include <memory>
+
 export module pragma.shared:entities.components.base_character;
 
 export import :entities.components.base_actor;

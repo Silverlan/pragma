@@ -72,12 +72,14 @@ export {
         struct enable_bitwise_operators<pragma::networking::IMasterServerQueryDispatcher::Filter::Flags> : std::true_type {};
     }
 
-	template<class TMasterServerQueryDispatcher>
-	std::unique_ptr<pragma::networking::IMasterServerQueryDispatcher, void (*)(pragma::networking::IMasterServerQueryDispatcher *)> pragma::networking::IMasterServerQueryDispatcher::Create()
-	{
-		return std::unique_ptr<IMasterServerQueryDispatcher, void (*)(IMasterServerQueryDispatcher *)> {new TMasterServerQueryDispatcher {}, [](IMasterServerQueryDispatcher *p) {
-																											p->Release();
-																											delete p;
-																										}};
+	namespace pragma {
+		template<class TMasterServerQueryDispatcher>
+		std::unique_ptr<networking::IMasterServerQueryDispatcher, void (*)(networking::IMasterServerQueryDispatcher *)> networking::IMasterServerQueryDispatcher::Create()
+		{
+			return std::unique_ptr<IMasterServerQueryDispatcher, void (*)(IMasterServerQueryDispatcher *)> {new TMasterServerQueryDispatcher {}, [](IMasterServerQueryDispatcher *p) {
+																												p->Release();
+																												delete p;
+																											}};
+		}
 	}
 };

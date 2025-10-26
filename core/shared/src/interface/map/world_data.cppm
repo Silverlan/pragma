@@ -6,6 +6,9 @@ module;
 #include <functional>
 #include <string>
 
+#include <cinttypes>
+#include <memory>
+
 export module pragma.shared:map.world_data;
 
 export import :map.entity_data;

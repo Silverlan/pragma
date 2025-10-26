@@ -6,6 +6,10 @@ module;
 #include <deque>
 #include <mutex>
 
+#include <memory>
+#include <string>
+#include <unordered_map>
+
 export module pragma.shared:networking.message_tracker;
 
 export import pragma.network_manager;

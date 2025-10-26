@@ -6,6 +6,9 @@ module;
 #include <iostream>
 #include <vector>
 
+#include <cinttypes>
+#include <memory>
+
 export module pragma.shared:model.animation.pose;
 
 export import :model.animation.bone;

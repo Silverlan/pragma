@@ -6,12 +6,23 @@ module;
 #include "pragma/lua/core.hpp"
 #include <string>
 
+#include <cinttypes>
+#include <optional>
+#include <vector>
+#include <memory>
+
+#include <functional>
+
+#include <unordered_map>
+
 export module pragma.shared:scripting.lua.classes.model_mesh;
 
 export import luabind;
 export import :model.model_mesh;
 
-export class pragma::Model;
+export namespace pragma {
+	class Model;
+}
 export namespace Lua {
 	namespace ModelMesh {
 		DLLNETWORK void register_class(luabind::class_<::ModelMesh> &classDef);

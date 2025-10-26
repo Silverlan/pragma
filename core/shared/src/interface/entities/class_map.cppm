@@ -23,41 +23,29 @@ export {
 		std::unordered_map<std::string, T *(*)(void)> m_factories;
 		std::unordered_map<size_t, std::string> m_classNames;
 	public:
-		void AddClass(std::string name, const std::type_info &info, T *(*fc)(void));
-		void GetFactories(std::unordered_map<std::string, T *(*)(void)> **factories);
-		bool GetClassName(const std::type_info &info, std::string *classname);
-		T *(*FindFactory(std::string classname))();
+		void AddClass(std::string name, const std::type_info &info, T *(*fc)(void))
+		{
+			m_factories.insert(typename std::unordered_map<std::string, T *(*)(void)>::value_type(name, fc));
+			m_classNames.insert(typename std::unordered_map<size_t, std::string>::value_type(info.hash_code(), name));
+		}
+		void GetFactories(std::unordered_map<std::string, T *(*)(void)> **factories)
+		{
+			*factories = &m_factories;
+		}
+		bool GetClassName(const std::type_info &info, std::string *classname)
+		{
+			std::unordered_map<size_t, std::string>::iterator i = m_classNames.find(info.hash_code());
+			if(i == m_classNames.end())
+				return false;
+			*classname = i->second;
+			return true;
+		}
+		T *(*FindFactory(std::string classname))()
+		{
+			typename std::unordered_map<std::string, T *(*)()>::iterator i = m_factories.find(classname);
+			if(i == m_factories.end())
+				return NULL;
+			return i->second;
+		}
 	};
-
-	template<class T>
-	void EntityClassMap<T>::AddClass(std::string name, const std::type_info &info, T *(*fc)(void))
-	{
-		m_factories.insert(typename std::unordered_map<std::string, T *(*)(void)>::value_type(name, fc));
-		m_classNames.insert(typename std::unordered_map<size_t, std::string>::value_type(info.hash_code(), name));
-	}
-
-	template<class T>
-	void EntityClassMap<T>::GetFactories(std::unordered_map<std::string, T *(*)(void)> **factories)
-	{
-		*factories = &m_factories;
-	}
-
-	template<class T>
-	bool EntityClassMap<T>::GetClassName(const std::type_info &info, std::string *classname)
-	{
-		std::unordered_map<size_t, std::string>::iterator i = m_classNames.find(info.hash_code());
-		if(i == m_classNames.end())
-			return false;
-		*classname = i->second;
-		return true;
-	}
-
-	template<class T>
-	T *(*EntityClassMap<T>::FindFactory(std::string classname))()
-	{
-		typename std::unordered_map<std::string, T *(*)()>::iterator i = m_factories.find(classname);
-		if(i == m_factories.end())
-			return NULL;
-		return i->second;
-	}
 };

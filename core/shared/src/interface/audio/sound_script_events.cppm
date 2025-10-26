@@ -7,6 +7,11 @@ module;
 #include <string>
 #include <vector>
 
+#include <cinttypes>
+#include <functional>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:audio.sound_script_events;
 
 export import :audio.sound;

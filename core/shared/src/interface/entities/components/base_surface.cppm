@@ -5,6 +5,12 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 
+#include <cinttypes>
+#include <optional>
+#include <functional>
+#include <memory>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.base_surface;
 
 export import :entities.components.base;

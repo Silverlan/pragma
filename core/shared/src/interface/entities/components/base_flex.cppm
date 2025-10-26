@@ -5,14 +5,28 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 
+#include <cinttypes>
+#include <optional>
+#include <memory>
+#include "pragma/lua/core.hpp"
+
+#include <vector>
+#include <functional>
+#include <unordered_map>
+
+#include <array>
+#include <tuple>
+
+#include <cstring>
+
 export module pragma.shared:entities.components.base_flex;
 
 export import :entities.components.base;
 export import :model.animation.enums;
 
 export {
-	class pragma::Model;
 	namespace pragma {
+		class Model;
 		class DLLNETWORK BaseFlexComponent : public BaseEntityComponent, public DynamicMemberRegister {
 		public:
 			enum class StateFlags : uint8_t {

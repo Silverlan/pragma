@@ -4,6 +4,12 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <vector>
+#include <memory>
+#include <unordered_map>
+#include <cstring>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.input_movement_controller;
 
 export import :entities.components.base;

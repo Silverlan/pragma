@@ -8,6 +8,9 @@ module;
 #include <unordered_map>
 #include <vector>
 
+#include <cinttypes>
+#include <memory>
+
 export module pragma.shared:model.animation.bone_list;
 
 export struct DLLNETWORK BoneList // Simplified Skeleton without an hierarchy

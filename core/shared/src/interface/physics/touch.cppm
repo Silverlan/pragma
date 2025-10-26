@@ -8,7 +8,9 @@ export module pragma.shared:physics.touch;
 
 export import :entities.base_entity_handle;
 
-export class pragma::ecs::BaseEntity;
+export namespace pragma::ecs {
+	class BaseEntity;
+}
 export struct DLLNETWORK PhysTouch {
 	PhysTouch(pragma::ecs::BaseEntity *ent, CallbackHandle onRemove);
 	~PhysTouch();

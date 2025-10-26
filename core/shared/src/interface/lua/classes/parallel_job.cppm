@@ -8,6 +8,9 @@ module;
 #include <mutex>
 #include <queue>
 
+#include <optional>
+#include <functional>
+
 export module pragma.shared:scripting.lua.classes.parallel_job;
 
 import :networking.util;

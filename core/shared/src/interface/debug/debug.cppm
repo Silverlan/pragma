@@ -5,6 +5,13 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 
+#include <cinttypes>
+#include <vector>
+#include <functional>
+#include <memory>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:debug;
 
 export import :debug.behavior_tree_node;

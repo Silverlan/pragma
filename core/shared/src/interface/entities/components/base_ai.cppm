@@ -7,6 +7,15 @@ module;
 #include <mutex>
 #include <queue>
 
+#include <cinttypes>
+#include <optional>
+#include <memory>
+#include <string>
+#include <functional>
+#include <thread>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.base_ai;
 
 export import :entities.components.base;

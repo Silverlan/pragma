@@ -6,6 +6,11 @@ module;
 #include <string>
 #include <vector>
 
+#include <cinttypes>
+#include <optional>
+#include <memory>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:model.flexes;
 
 import :model.animation.vertex_animation;

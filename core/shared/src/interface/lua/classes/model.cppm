@@ -5,6 +5,12 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
 
+#include <cinttypes>
+#include <vector>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+
 export module pragma.shared:scripting.lua.classes.model;
 
 export import :model;

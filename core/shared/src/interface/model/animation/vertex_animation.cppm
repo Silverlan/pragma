@@ -10,6 +10,12 @@ module;
 
 #include <cinttypes>
 
+#include <optional>
+
+#include <unordered_map>
+
+#include <functional>
+
 export module pragma.shared:model.animation.vertex_animation;
 
 export import :game.coordinate_system;
@@ -28,8 +34,8 @@ export {
 				Count = 2
 			};
 
-			pragma::MeshVertexFrame() = default;
-			pragma::MeshVertexFrame(const pragma::MeshVertexFrame &other);
+			MeshVertexFrame() = default;
+			MeshVertexFrame(const pragma::MeshVertexFrame &other);
 
 			const std::vector<std::array<uint16_t, 4>> &GetVertices() const;
 			std::vector<std::array<uint16_t, 4>> &GetVertices();

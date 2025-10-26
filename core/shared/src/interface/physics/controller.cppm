@@ -6,6 +6,10 @@ module;
 #include <memory>
 #include <optional>
 
+#include <cinttypes>
+#include <vector>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:physics.controller;
 
 export import :physics.collision_object;

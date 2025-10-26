@@ -7,6 +7,11 @@ module;
 #include <string>
 #include <unordered_map>
 
+#include <cinttypes>
+#include <optional>
+#include <vector>
+#include <memory>
+
 export module pragma.shared:model.animation.meta_rig;
 
 export import :game.coordinate_system;

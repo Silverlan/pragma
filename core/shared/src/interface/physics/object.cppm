@@ -10,6 +10,10 @@ module;
 #ifdef __linux__
 #endif
 
+#include <cinttypes>
+#include <functional>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:physics.object;
 
 export import :physics.collision_object;
@@ -127,9 +131,9 @@ export {
 			std::pair<float, float> GetSleepingThreshold() const;
 		protected:
 			friend pragma::physics::ICollisionObject;
-			pragma::physics::PhysObj(pragma::BaseEntityComponent *owner, pragma::physics::ICollisionObject &object);
-			pragma::physics::PhysObj(pragma::BaseEntityComponent *owner, const std::vector<pragma::physics::ICollisionObject *> &objects);
-			pragma::physics::PhysObj(pragma::BaseEntityComponent *owner);
+			PhysObj(pragma::BaseEntityComponent *owner, pragma::physics::ICollisionObject &object);
+			PhysObj(pragma::BaseEntityComponent *owner, const std::vector<pragma::physics::ICollisionObject *> &objects);
+			PhysObj(pragma::BaseEntityComponent *owner);
 			bool Initialize();
 			void OnCollisionObjectWake(pragma::physics::ICollisionObject &o);
 			void OnCollisionObjectSleep(pragma::physics::ICollisionObject &o);
@@ -145,6 +149,27 @@ export {
 			StateFlags m_stateFlags = StateFlags::None;
 			uint32_t m_colObjAwakeCount = 0u;
 		};
+
+		template<class TPhysObj, typename... TARGS>
+		std::unique_ptr<TPhysObj> PhysObj::Create(pragma::BaseEntityComponent &owner, TARGS... args)
+		{
+			auto physObj = std::unique_ptr<TPhysObj> {new TPhysObj {&owner}};
+			if(physObj->Initialize(args...) == false)
+				return nullptr;
+			return physObj;
+		}
+
+		template<class TPhysObj, typename... TARGS>
+		std::unique_ptr<TPhysObj> PhysObj::Create(pragma::BaseEntityComponent &owner, const std::vector<ICollisionObject *> &objects, TARGS... args)
+		{
+			auto physObj = std::unique_ptr<TPhysObj> {new TPhysObj {&owner}};
+			if(physObj->Initialize(args...) == false)
+				return nullptr;
+			for(auto *o : objects)
+				physObj->AddCollisionObject(*o);
+			return physObj;
+		}
+
 		using namespace umath::scoped_enum::bitwise;
 	}
 	namespace umath::scoped_enum::bitwise {
@@ -153,26 +178,6 @@ export {
 	}
 
 	DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::physics::PhysObj &o);
-
-	template<class TPhysObj, typename... TARGS>
-	std::unique_ptr<TPhysObj> pragma::physics::PhysObj::Create(pragma::BaseEntityComponent &owner, TARGS... args)
-	{
-		auto physObj = std::unique_ptr<TPhysObj> {new TPhysObj {&owner}};
-		if(physObj->Initialize(args...) == false)
-			return nullptr;
-		return physObj;
-	}
-
-	template<class TPhysObj, typename... TARGS>
-	std::unique_ptr<TPhysObj> pragma::physics::PhysObj::Create(pragma::BaseEntityComponent &owner, const std::vector<pragma::physics::ICollisionObject *> &objects, TARGS... args)
-	{
-		auto physObj = std::unique_ptr<TPhysObj> {new TPhysObj {&owner}};
-		if(physObj->Initialize(args...) == false)
-			return nullptr;
-		for(auto *o : objects)
-			physObj->AddCollisionObject(*o);
-		return physObj;
-	}
 
 	////////////////////////////////////
 

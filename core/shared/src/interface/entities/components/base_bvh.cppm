@@ -4,6 +4,15 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <cinttypes>
+#include <vector>
+#include <functional>
+#include <memory>
+#include <queue>
+#include <cstring>
+
+#include <optional>
+
 export module pragma.shared:entities.components.base_bvh;
 
 export import :entities.components.base;

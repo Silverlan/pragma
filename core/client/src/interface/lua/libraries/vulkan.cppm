@@ -118,16 +118,18 @@ export {
 		struct DLLNETWORK default_converter<Lua::Vulkan::PreparedCommandLuaArg &&> : default_converter<Lua::Vulkan::PreparedCommandLuaArg> {};
 	}
 
-	template<typename U>
-	Lua::Vulkan::PreparedCommandLuaArg luabind::default_converter<Lua::Vulkan::PreparedCommandLuaArg>::to_cpp(lua_State *L, U u, int index)
-	{
-		return Lua::Vulkan::PreparedCommandLuaArg {luabind::object {luabind::from_stack(L, index)}};
-	}
+	namespace luabind {
+		template<typename U>
+		Lua::Vulkan::PreparedCommandLuaArg default_converter<Lua::Vulkan::PreparedCommandLuaArg>::to_cpp(lua_State *L, U u, int index)
+		{
+			return Lua::Vulkan::PreparedCommandLuaArg {luabind::object {luabind::from_stack(L, index)}};
+		}
 
-	template<class U>
-	int luabind::default_converter<Lua::Vulkan::PreparedCommandLuaArg>::match(lua_State *l, U u, int index)
-	{
-		return (luabind::check_udm<true, true, true>(l, index) || Lua::IsType<Lua::Vulkan::PreparedCommandLuaDynamicArg>(l, index)) ? 1 : no_match;
+		template<class U>
+		int default_converter<Lua::Vulkan::PreparedCommandLuaArg>::match(lua_State *l, U u, int index)
+		{
+			return (luabind::check_udm<true, true, true>(l, index) || Lua::IsType<Lua::Vulkan::PreparedCommandLuaDynamicArg>(l, index)) ? 1 : no_match;
+		}
 	}
 	//
 };

@@ -20,11 +20,20 @@ module;
 #include <optional>
 #include <vector>
 
+#include <unordered_map>
+#include <tuple>
+
+#include <array>
+
+#include <string>
+
+#include <functional>
+
 export module pragma.shared:console.spdlog_anycolor_sink;
 
 import :console.output;
 
-export {
+export namespace pragma::console {
 	// Based on wincolor_sink
 	template<typename ConsoleMutex>
 	class anycolor_sink : public spdlog::sinks::sink {

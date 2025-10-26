@@ -5,6 +5,10 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 
+#include <array>
+#include <cinttypes>
+#include <vector>
+
 export module pragma.shared:entities.components.environment.audio.dsp.base_dsp;
 
 export import :entities.components.base;

@@ -58,16 +58,18 @@ export {
 		struct DLLNETWORK default_converter<LuaShaderRecordTarget &&> : default_converter<LuaShaderRecordTarget> {};
 	}
 
-	template<typename U>
-	LuaShaderRecordTarget luabind::default_converter<LuaShaderRecordTarget>::to_cpp(lua_State *L, U u, int index)
-	{
-		return LuaShaderRecordTarget {luabind::object {luabind::from_stack(L, index)}};
-	}
+	namespace luabind {
+		template<typename U>
+		LuaShaderRecordTarget default_converter<LuaShaderRecordTarget>::to_cpp(lua_State *L, U u, int index)
+		{
+			return LuaShaderRecordTarget {luabind::object {luabind::from_stack(L, index)}};
+		}
 
-	template<class U>
-	int luabind::default_converter<LuaShaderRecordTarget>::match(lua_State *l, U u, int index)
-	{
-		return (Lua::IsType<prosper::ShaderBindState>(l, index) || Lua::IsType<prosper::util::PreparedCommandBuffer>(l, index)) ? 1 : no_match;
+		template<class U>
+		int default_converter<LuaShaderRecordTarget>::match(lua_State *l, U u, int index)
+		{
+			return (Lua::IsType<prosper::ShaderBindState>(l, index) || Lua::IsType<prosper::util::PreparedCommandBuffer>(l, index)) ? 1 : no_match;
+		}
 	}
 	//
 

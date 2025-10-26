@@ -4,6 +4,13 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <array>
+#include <cinttypes>
+#include <optional>
+#include <vector>
+#include <tuple>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.constraints.look_at;
 
 export import :entities.components.constraints.base;

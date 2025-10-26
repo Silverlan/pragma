@@ -12,13 +12,22 @@ module;
 
 #include <memory>
 
+#include <vector>
+
+#include <unordered_map>
+#include <tuple>
+
+#include <array>
+
+#include <functional>
+
 export module pragma.shared:scripting.lua.classes.data_stream;
 
 export import pragma.lua;
 
 export namespace Lua {
 	namespace DataStream {
-		DLLNETWORK void register_class(luabind::class_<::DataStream> &classDef);
+		DLLNETWORK void register_class(luabind::class_<util::DataStream> &classDef);
 		template<class TDataStream>
 		void GetSize(lua_State *l, TDataStream &ds)
 		{

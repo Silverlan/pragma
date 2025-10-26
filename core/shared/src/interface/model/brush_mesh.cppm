@@ -6,6 +6,11 @@ module;
 #include <iostream>
 #include <vector>
 
+#include <optional>
+#include <memory>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:model.brush_mesh;
 
 export import :model.side;

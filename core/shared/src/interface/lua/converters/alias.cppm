@@ -54,10 +54,10 @@ export namespace luabind {
 	concept is_one_of_alias_candidates = std::disjunction_v<std::is_same<T, Ts>...> || std::disjunction_v<std::is_same<T, std::add_lvalue_reference_t<std::add_const_t<Ts>>>...>; // Is value or const reference?
 };
 
-export {
+export namespace luabind {
 	template<class TBase, class... T>
 	template<size_t I, typename... Tp>
-	bool luabind::alias_converter<TBase, T...>::match_any(lua_State *L, int index)
+	bool alias_converter<TBase, T...>::match_any(lua_State *L, int index)
 	{
 		using T2 = typename std::tuple_element<I, std::tuple<Tp...>>::type;
 		if constexpr(!std::is_same_v<T2, TBase>) // Base type has already been covered by 'match'
@@ -85,7 +85,7 @@ export {
 
 	template<class TBase, class... T>
 	template<class U>
-	int luabind::alias_converter<TBase, T...>::match(lua_State *L, U u, int index)
+	int alias_converter<TBase, T...>::match(lua_State *L, U u, int index)
 	{
 		auto res = m_converter.match(L, decorate_type_t<TBase>(), index);
 		if(res != no_match)
@@ -96,7 +96,7 @@ export {
 
 	template<class TBase, class... T>
 	template<class U>
-	TBase luabind::alias_converter<TBase, T...>::to_cpp(lua_State *L, U u, int index)
+	TBase alias_converter<TBase, T...>::to_cpp(lua_State *L, U u, int index)
 	{
 		if(m_tmp)
 			return *m_tmp;
@@ -104,7 +104,7 @@ export {
 	}
 
 	template<class TBase, class... T>
-	void luabind::alias_converter<TBase, T...>::to_lua(lua_State *L, TBase x)
+	void alias_converter<TBase, T...>::to_lua(lua_State *L, TBase x)
 	{
 		m_converter.to_lua(L, x);
 	}

@@ -4,6 +4,12 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <cinttypes>
+#include <memory>
+#include <functional>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.action_input_controller;
 
 export import :entities.components.base;

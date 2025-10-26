@@ -45,20 +45,20 @@ export namespace luabind {
 	struct DLLNETWORK default_converter<pragma::string::Utf8String &&> : default_converter<pragma::string::Utf8String> {};
 }
 
-export {
-	luabind::default_converter<pragma::string::Utf8String>::value_type luabind::default_converter<pragma::string::Utf8String>::to_cpp_deferred(lua_State *, int)
+export namespace luabind {
+	default_converter<pragma::string::Utf8String>::value_type default_converter<pragma::string::Utf8String>::to_cpp_deferred(lua_State *, int)
 	{
 		return {};
 	}
 
 	template<typename U>
-	pragma::string::Utf8String luabind::default_converter<pragma::string::Utf8String>::to_cpp(lua_State *L, U u, int index)
+	pragma::string::Utf8String default_converter<pragma::string::Utf8String>::to_cpp(lua_State *L, U u, int index)
 	{
 		return {luaL_checkstring(L, index)};
 	}
 
 	template<class U>
-	int luabind::default_converter<pragma::string::Utf8String>::match(lua_State *l, U u, int index)
+	int default_converter<pragma::string::Utf8String>::match(lua_State *l, U u, int index)
 	{
 		return lua_isstring(l, index) ? 1 : no_match;
 	}

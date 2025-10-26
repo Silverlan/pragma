@@ -5,6 +5,16 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <format>
 
+#include <cinttypes>
+#include <vector>
+#include <functional>
+#include <memory>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
+#include <optional>
+#include <string>
+
 export module pragma.shared:entities.base_entity;
 
 export import :audio.enums;
@@ -62,7 +72,7 @@ export {
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
 			virtual pragma::GString GetClass() const;
-			pragma::ecs::BaseEntity();
+			BaseEntity();
 			void Construct(unsigned int idx);
 			EntityHandle GetHandle() const;
 

@@ -5,6 +5,11 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 
+#include <cinttypes>
+#include <memory>
+#include <functional>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:scripting.lua.libraries.debug;
 
 export import :entities.components.base_ai;

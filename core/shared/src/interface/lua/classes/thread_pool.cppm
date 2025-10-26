@@ -6,6 +6,12 @@ module;
 #include "pragma/lua/core.hpp"
 #include <string>
 
+#include <cinttypes>
+#include <vector>
+#include <functional>
+#include <memory>
+#include <unordered_map>
+
 export module pragma.shared:scripting.lua.classes.thread_pool;
 
 export import :util.thread_pool;

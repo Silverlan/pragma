@@ -11,6 +11,9 @@ module;
 
 #include <memory>
 
+#include <optional>
+#include <functional>
+
 export module pragma.shared:util.type_manager;
 
 export import pragma.util;
@@ -51,29 +54,31 @@ export {
 		};
 	};
 
-	template<class TType>
-	template<typename... TARGS>
-	::util::TWeakSharedHandle<TType> pragma::TTypeManager<TType>::RegisterType(const std::string &name, TARGS &&...args)
-	{
-		auto hType = FindType(name);
-		if(hType.GetRawPtr())
-			return hType;
-		auto id = m_registeredTypes.size();
-		m_typeNameToId[name] = id;
-		m_registeredTypes.push_back(::util::TSharedHandle<TType> {new TType {static_cast<TypeId>(id), name, std::forward<TARGS>(args)...}});
-		return ::util::TWeakSharedHandle<TType> {m_registeredTypes.back()};
-	}
+	namespace pragma {
+		template<class TType>
+		template<typename... TARGS>
+		::util::TWeakSharedHandle<TType> TTypeManager<TType>::RegisterType(const std::string &name, TARGS &&...args)
+		{
+			auto hType = FindType(name);
+			if(hType.GetRawPtr())
+				return hType;
+			auto id = m_registeredTypes.size();
+			m_typeNameToId[name] = id;
+			m_registeredTypes.push_back(::util::TSharedHandle<TType> {new TType {static_cast<TypeId>(id), name, std::forward<TARGS>(args)...}});
+			return ::util::TWeakSharedHandle<TType> {m_registeredTypes.back()};
+		}
 
-	template<class TType>
-	::util::TWeakSharedHandle<TType> pragma::TTypeManager<TType>::GetType(TypeId id) const
-	{
-		return (id < m_registeredTypes.size()) ? m_registeredTypes.at(id) : ::util::TWeakSharedHandle<TType> {};
-	}
+		template<class TType>
+		::util::TWeakSharedHandle<TType> TTypeManager<TType>::GetType(TypeId id) const
+		{
+			return (id < m_registeredTypes.size()) ? m_registeredTypes.at(id) : ::util::TWeakSharedHandle<TType> {};
+		}
 
-	template<class TType>
-	::util::TWeakSharedHandle<TType> pragma::TTypeManager<TType>::FindType(const std::string &name) const
-	{
-		auto it = m_typeNameToId.find(name);
-		return (it != m_typeNameToId.end()) ? ::util::TWeakSharedHandle<TType> {m_registeredTypes.at(it->second)} : ::util::TWeakSharedHandle<TType> {};
+		template<class TType>
+		::util::TWeakSharedHandle<TType> TTypeManager<TType>::FindType(const std::string &name) const
+		{
+			auto it = m_typeNameToId.find(name);
+			return (it != m_typeNameToId.end()) ? ::util::TWeakSharedHandle<TType> {m_registeredTypes.at(it->second)} : ::util::TWeakSharedHandle<TType> {};
+		}
 	}
 };

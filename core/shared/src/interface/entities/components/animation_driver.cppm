@@ -5,6 +5,14 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 
+#include <cinttypes>
+#include <memory>
+#include <functional>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
+#include <optional>
+
 export module pragma.shared:entities.components.animation_driver;
 
 export import :entities.components.base;

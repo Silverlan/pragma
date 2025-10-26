@@ -4,6 +4,13 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <array>
+#include <cinttypes>
+#include <vector>
+#include <memory>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.origin;
 
 export import :entities.components.base;

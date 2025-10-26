@@ -31,43 +31,30 @@ export {
 	protected:
 		OctTreeNode *m_children[nodeCount];
 	public:
-		OctTreeNode(OctTreeNode<nodeCount> *parent = nullptr);
-		virtual ~OctTreeNode() override;
-		virtual bool IsLeaf() = 0;
-		unsigned char GetChildCount();
-		OctTreeNode *GetParent();
-		virtual OctTreeNode *GetChild(unsigned char idx) override;
-	};
-
-	template<int nodeCount>
-	OctTreeNode<nodeCount>::OctTreeNode(OctTreeNode<nodeCount> *parent) : BaseOctTreeNode(parent)
-	{
-		for(unsigned int i = 0; i < nodeCount; i++)
-			m_children[i] = nullptr;
-	}
-
-	template<int nodeCount>
-	OctTreeNode<nodeCount>::~OctTreeNode()
-	{
-		for(unsigned int i = 0; i < nodeCount; i++) {
-			if(m_children[i] != nullptr)
-				delete m_children[i];
+		OctTreeNode(OctTreeNode<nodeCount> *parent = nullptr) : BaseOctTreeNode(parent)
+		{
+			for(unsigned int i = 0; i < nodeCount; i++)
+				m_children[i] = nullptr;
 		}
-	}
-
-	template<int nodeCount>
-	unsigned char OctTreeNode<nodeCount>::GetChildCount()
-	{
-		return nodeCount;
-	}
-	template<int nodeCount>
-	OctTreeNode<nodeCount> *OctTreeNode<nodeCount>::GetParent()
-	{
-		return static_cast<OctTreeNode<nodeCount> *>(m_parent);
-	}
-	template<int nodeCount>
-	OctTreeNode<nodeCount> *OctTreeNode<nodeCount>::GetChild(unsigned char idx)
-	{
-		return m_children[idx];
-	}
+		virtual ~OctTreeNode() override
+		{
+			for(unsigned int i = 0; i < nodeCount; i++) {
+				if(m_children[i] != nullptr)
+					delete m_children[i];
+			}
+		}
+		virtual bool IsLeaf() = 0;
+		unsigned char GetChildCount()
+		{
+			return nodeCount;
+		}
+		OctTreeNode *GetParent()
+		{
+			return static_cast<OctTreeNode<nodeCount> *>(m_parent);
+		}
+		virtual OctTreeNode *GetChild(unsigned char idx) override
+		{
+			return m_children[idx];
+		}
+	};
 };

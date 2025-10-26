@@ -6,6 +6,10 @@ module;
 #include <unordered_map>
 #include <vector>
 
+#include <cinttypes>
+#include <optional>
+#include <memory>
+
 export module pragma.shared:model.animation.frame;
 
 export import :game.coordinate_system;

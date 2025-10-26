@@ -8,6 +8,11 @@ module;
 #include <unordered_map>
 #include <vector>
 
+#include <cinttypes>
+#include <memory>
+#include <functional>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:physics.environment;
 
 export import :physics.constraint;
@@ -190,50 +195,51 @@ export {
 			SurfaceTypeManager m_surfTypeManager = {};
 			TireTypeManager m_tireTypeManager = {};
 		};
+
+		template<class T, typename... TARGS>
+		std::shared_ptr<T> IEnvironment::CreateSharedPtr(TARGS &&...args)
+		{
+			auto ptr = std::shared_ptr<T> {new T {std::forward<TARGS>(args)...}, [](T *o) {
+											o->OnRemove();
+											delete o;
+										}};
+			ptr->Initialize();
+			return ptr;
+		}
+		template<class T, typename... TARGS>
+		util::TSharedHandle<T> IEnvironment::CreateSharedHandle(TARGS &&...args)
+		{
+			auto handle = util::TSharedHandle<T> {new T {std::forward<TARGS>(args)...}, [](T *o) {
+													o->OnRemove();
+													delete o;
+												}};
+			handle->Initialize();
+			handle->InitializeLuaHandle(util::TWeakSharedHandle<IBase> {util::shared_handle_cast<T, IBase>(handle)});
+			return handle;
+		}
+
+		template<class T>
+		void IEnvironment::CallCallbacks(Event eventid, T &obj)
+		{
+			auto itCb = m_callbacks.find(eventid);
+			if(itCb == m_callbacks.end())
+				return;
+			auto &v = itCb->second;
+			for(auto it = v.begin(); it != v.end();) {
+				auto &hCallback = *it;
+				if(hCallback.IsValid() == false) {
+					it = v.erase(it);
+					continue;
+				}
+				hCallback.Call<void, T *>(&obj);
+				++it;
+			}
+		}
+
 		using namespace umath::scoped_enum::bitwise;
 	};
 	namespace umath::scoped_enum::bitwise {
 		template<>
 		struct enable_bitwise_operators<pragma::physics::IEnvironment::StateFlags> : std::true_type {};
-	}
-
-	template<class T, typename... TARGS>
-	std::shared_ptr<T> pragma::physics::IEnvironment::CreateSharedPtr(TARGS &&...args)
-	{
-		auto ptr = std::shared_ptr<T> {new T {std::forward<TARGS>(args)...}, [](T *o) {
-										o->OnRemove();
-										delete o;
-									}};
-		ptr->Initialize();
-		return ptr;
-	}
-	template<class T, typename... TARGS>
-	util::TSharedHandle<T> pragma::physics::IEnvironment::CreateSharedHandle(TARGS &&...args)
-	{
-		auto handle = util::TSharedHandle<T> {new T {std::forward<TARGS>(args)...}, [](T *o) {
-												o->OnRemove();
-												delete o;
-											}};
-		handle->Initialize();
-		handle->InitializeLuaHandle(util::TWeakSharedHandle<IBase> {util::shared_handle_cast<T, IBase>(handle)});
-		return handle;
-	}
-
-	template<class T>
-	void pragma::physics::IEnvironment::CallCallbacks(Event eventid, T &obj)
-	{
-		auto itCb = m_callbacks.find(eventid);
-		if(itCb == m_callbacks.end())
-			return;
-		auto &v = itCb->second;
-		for(auto it = v.begin(); it != v.end();) {
-			auto &hCallback = *it;
-			if(hCallback.IsValid() == false) {
-				it = v.erase(it);
-				continue;
-			}
-			hCallback.Call<void, T *>(&obj);
-			++it;
-		}
 	}
 };

@@ -6,6 +6,11 @@ module;
 #include "pragma/lua/core.hpp"
 #include <string>
 
+#include <cinttypes>
+#include <optional>
+#include <vector>
+#include <memory>
+
 export module pragma.shared:scripting.lua.classes.skeleton;
 
 export import :model.animation.skeleton;

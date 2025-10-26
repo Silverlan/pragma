@@ -10,6 +10,9 @@ module;
 
 #undef CreateEvent
 
+#include <optional>
+#include <functional>
+
 export module pragma.shared:audio.sound_script_manager;
 
 export import :audio.sound_script_events;
@@ -31,7 +34,11 @@ export {
 		std::unordered_map<std::string, std::shared_ptr<SoundScript>> m_soundScripts;
 		std::vector<std::string> m_soundScriptFiles;
 		template<class TSoundScript>
-		bool Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts = NULL);
+		bool Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts = NULL)
+		{
+			return Load(
+			fname, [this](const std::string &name) -> std::shared_ptr<SoundScript> { return std::make_shared<TSoundScript>(this, name); }, scripts);
+		}
 		bool Load(const char *fname, const std::function<std::shared_ptr<SoundScript>(const std::string &)> fCreateSoundScript, std::vector<std::shared_ptr<SoundScript>> *scripts = NULL);
 	public:
 		static const std::string &GetSoundScriptPath();
@@ -45,11 +52,4 @@ export {
 		const std::unordered_map<std::string, std::shared_ptr<SoundScript>> &GetScripts() const;
 		const std::vector<std::string> &GetSoundScriptFiles() const;
 	};
-
-	template<class TSoundScript>
-	bool SoundScriptManager::Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts)
-	{
-		return Load(
-		fname, [this](const std::string &name) -> std::shared_ptr<SoundScript> { return std::make_shared<TSoundScript>(this, name); }, scripts);
-	}
 };

@@ -41,10 +41,10 @@ export namespace luabind {
 	struct default_converter<std::optional<T> &&> : default_converter<std::optional<T>> {};
 }
 
-export {
+export namespace luabind {
 	template<typename T>
 	template<typename U>
-	std::optional<T> luabind::default_converter<std::optional<T>>::to_cpp(lua_State *L, U u, int index)
+	std::optional<T> default_converter<std::optional<T>>::to_cpp(lua_State *L, U u, int index)
 	{
 		if(lua_isnil(L, index))
 			return {};
@@ -53,7 +53,7 @@ export {
 
 	template<typename T>
 	template<class U>
-	int luabind::default_converter<std::optional<T>>::match(lua_State *l, U u, int index)
+	int default_converter<std::optional<T>>::match(lua_State *l, U u, int index)
 	{
 		if(lua_isnil(l, index))
 			return 1;
@@ -61,7 +61,7 @@ export {
 	}
 
 	template<typename T>
-	void luabind::default_converter<std::optional<T>>::to_lua(lua_State *L, std::optional<T> const &x)
+	void default_converter<std::optional<T>>::to_lua(lua_State *L, std::optional<T> const &x)
 	{
 		if(!x.has_value())
 			lua_pushnil(L);
@@ -70,7 +70,7 @@ export {
 	}
 
 	template<typename T>
-	void luabind::default_converter<std::optional<T>>::to_lua(lua_State *L, std::optional<T> *x)
+	void default_converter<std::optional<T>>::to_lua(lua_State *L, std::optional<T> *x)
 	{
 		if(!x || !x->has_value())
 			lua_pushnil(L);

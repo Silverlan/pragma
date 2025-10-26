@@ -8,6 +8,8 @@ module;
 #include <optional>
 #include <string>
 
+#include <cinttypes>
+
 export module pragma.shared:scripting.lua.util;
 
 export import pragma.lua;

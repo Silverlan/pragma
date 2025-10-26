@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <cinttypes>
+
 export module pragma.shared:scripting.lua.handle_holder;
 
 export import luabind;
@@ -31,24 +33,24 @@ export {
 		{
 			return pointer.get();
 		}
-	};
 
-	template<typename T>
-	pragma::lua::HandleHolder<T>::HandleHolder(T *ptr) : m_ptr {ptr}
-	{
-	}
-	template<typename T>
-	T *pragma::lua::HandleHolder<T>::get() const
-	{
-		if(m_hasHandle)
-			return m_handle.template get<T>();
-		return m_ptr;
-	}
-	template<typename T>
-	void pragma::lua::HandleHolder<T>::SetHandle(const util::TWeakSharedHandle<T> &handle)
-	{
-		m_hasHandle = true;
-		m_handle = handle;
+		template<typename T>
+		HandleHolder<T>::HandleHolder(T *ptr) : m_ptr {ptr}
+		{
+		}
+		template<typename T>
+		T *HandleHolder<T>::get() const
+		{
+			if(m_hasHandle)
+				return m_handle.template get<T>();
+			return m_ptr;
+		}
+		template<typename T>
+		void HandleHolder<T>::SetHandle(const util::TWeakSharedHandle<T> &handle)
+		{
+			m_hasHandle = true;
+			m_handle = handle;
+		}
 	}
 
 	namespace luabind {

@@ -7,6 +7,10 @@ module;
 #include <string>
 #include <vector>
 
+#include <optional>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:physics.collision_mesh;
 
 export import :game.coordinate_system;
@@ -33,11 +37,11 @@ export {
 				bool operator!=(const SoftBodyAnchor &other) const { return !operator==(other); }
 			};
 		#pragma pack(pop)
-			pragma::physics::CollisionMesh(const pragma::physics::CollisionMesh &other);
+			CollisionMesh(const pragma::physics::CollisionMesh &other);
 			bool operator==(const pragma::physics::CollisionMesh &other) const;
 			bool operator!=(const pragma::physics::CollisionMesh &other) const { return !operator==(other); }
 		private:
-			pragma::physics::CollisionMesh(pragma::Game *game);
+			CollisionMesh(pragma::Game *game);
 
 			//void PhysSoftBody::AppendAnchor(uint32_t nodeId,PhysRigidBody &body,const Vector3 &localPivot,bool bDisableCollision,float influence)
 			struct DLLNETWORK SoftBodyInfo {

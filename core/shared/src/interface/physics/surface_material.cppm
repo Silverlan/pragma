@@ -7,6 +7,12 @@ module;
 #include <string>
 #include <unordered_map>
 
+#include <vector>
+#include <memory>
+#include <functional>
+#include <queue>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:physics.surface_material;
 
 export import :ai.nav_system;

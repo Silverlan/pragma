@@ -6,6 +6,16 @@ module;
 #include <string>
 #include <unordered_set>
 
+#include <vector>
+#include <functional>
+#include <memory>
+#include <map>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
+#include <optional>
+#include <queue>
+
 export module pragma.shared:network_state;
 
 export import :assets.common;
@@ -22,7 +32,7 @@ export import :types;
 export import :util.resource_watcher;
 
 export {
-	class DLLNETWORK NetworkState : public CallbackHandler, public CVarHandler {
+	class DLLNETWORK NetworkState : public util::CallbackHandler, public CVarHandler {
 		// For internal use only! Not to be used directly!
 	protected:
 		static ConVarHandle GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ptrs, std::string scvar);

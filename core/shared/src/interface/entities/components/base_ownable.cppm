@@ -4,6 +4,12 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <array>
+#include <cinttypes>
+#include <optional>
+#include <tuple>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.base_ownable;
 
 export import :entities.components.base;

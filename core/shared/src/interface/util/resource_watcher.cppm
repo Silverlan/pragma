@@ -7,6 +7,12 @@ module;
 #include <unordered_map>
 #include <unordered_set>
 
+#include <vector>
+#include <string>
+#include <functional>
+
+#include <memory>
+
 export module pragma.shared:util.resource_watcher;
 
 export import :networking.util;

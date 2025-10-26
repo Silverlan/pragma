@@ -8,6 +8,8 @@ module;
 
 #undef GetMessage
 
+#include <cinttypes>
+
 export module pragma.shared:networking.error;
 
 export namespace pragma::networking {

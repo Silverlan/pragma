@@ -8,6 +8,12 @@ module;
 #include <unordered_map>
 #include <vector>
 
+#include <cinttypes>
+#include <optional>
+#include <functional>
+#include <thread>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:model.model;
 
 import :console.output;
@@ -44,7 +50,7 @@ export {
 
 			bool IsEqual(const pragma::ModelMeshGroup &other) const;
 		private:
-			pragma::ModelMeshGroup(const std::string &name);
+			ModelMeshGroup(const std::string &name);
 			std::string m_name;
 			std::vector<std::shared_ptr<ModelMesh>> m_meshes;
 		};
@@ -171,7 +177,7 @@ export {
 	namespace pragma {
 		class DLLNETWORK Model : public std::enable_shared_from_this<pragma::Model> {
 		public:
-			pragma::Model();
+			Model();
 			virtual void Remove();
 			enum class Flags : uint32_t {
 				None = 0u,
@@ -566,8 +572,8 @@ export {
 			std::optional<pragma::SignedAxis> FindBoneAxisForDirection(pragma::animation::BoneId boneId, const Vector3 &dir) const;
 			static Quat GetTwistAxisRotationOffset(pragma::SignedAxis axis);
 		protected:
-			pragma::Model(NetworkState *nw, uint32_t numBones, const std::string &name = "");
-			pragma::Model(const pragma::Model &other);
+			Model(NetworkState *nw, uint32_t numBones, const std::string &name = "");
+			Model(const pragma::Model &other);
 			bool LoadFromAssetData(pragma::Game &game, const udm::AssetData &data, std::string &outErr);
 			virtual void OnMaterialMissing(const std::string &matName);
 			void AddLoadingMaterial(msys::Material &mat, std::optional<uint32_t> index = {});
@@ -642,6 +648,18 @@ export {
 			std::vector<CallbackHandle> m_onAllMatsLoadedCallbacks;
 			void OnMaterialLoaded();
 		};
+
+		template<class TModel>
+		std::shared_ptr<pragma::Model> Create(NetworkState *nw, uint32_t numBones, const std::string &name)
+		{
+			return std::shared_ptr<pragma::Model> {new TModel {nw, numBones, name}};
+		}
+		template<class TModel>
+		std::shared_ptr<pragma::Model> Create(const pragma::Model &other)
+		{
+			return std::shared_ptr<pragma::Model> {new TModel {other}};
+		}
+
         using namespace umath::scoped_enum::bitwise;
 	}
     namespace umath::scoped_enum::bitwise {
@@ -658,15 +676,4 @@ export {
         struct enable_bitwise_operators<pragma::Model::StateFlags> : std::true_type {};
     }
 	#pragma warning(pop)
-
-	template<class TModel>
-	std::shared_ptr<pragma::Model> pragma::Model::Create(NetworkState *nw, uint32_t numBones, const std::string &name)
-	{
-		return std::shared_ptr<pragma::Model> {new TModel {nw, numBones, name}};
-	}
-	template<class TModel>
-	std::shared_ptr<pragma::Model> pragma::Model::Create(const pragma::Model &other)
-	{
-		return std::shared_ptr<pragma::Model> {new TModel {other}};
-	}
 };

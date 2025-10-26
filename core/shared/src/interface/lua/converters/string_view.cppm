@@ -44,15 +44,15 @@ export namespace luabind {
 	struct DLLNETWORK default_converter<std::string_view &&> : default_converter<std::string_view> {};
 }
 
-export {
+export namespace luabind {
 	template<typename U>
-	std::string_view luabind::default_converter<std::string_view>::to_cpp(lua_State *L, U u, int index)
+	std::string_view default_converter<std::string_view>::to_cpp(lua_State *L, U u, int index)
 	{
 		return {luaL_checkstring(L, index)};
 	}
 
 	template<class U>
-	int luabind::default_converter<std::string_view>::match(lua_State *l, U u, int index)
+	int default_converter<std::string_view>::match(lua_State *l, U u, int index)
 	{
 		return lua_isstring(l, index) ? 1 : no_match;
 	}

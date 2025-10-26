@@ -7,6 +7,8 @@ module;
 #include <optional>
 #include <string>
 
+#include <cinttypes>
+
 export module pragma.shared:scripting.lua.error_handling;
 
 export import pragma.lua;

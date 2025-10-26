@@ -8,6 +8,11 @@ module;
 #include <unordered_set>
 #include <vector>
 
+#include <cinttypes>
+#include <optional>
+#include <memory>
+#include <functional>
+
 export module pragma.shared:model.model_manager;
 
 export import :model.model;

@@ -12,6 +12,13 @@ module;
 #include <bvh/v2/vec.h>
 #include <memory>
 
+#include <cinttypes>
+#include <vector>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.bvh_data;
 
 export import :entities.components.base;

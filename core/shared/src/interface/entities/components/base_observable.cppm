@@ -5,6 +5,11 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <optional>
 
+#include <array>
+#include <cinttypes>
+#include <tuple>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.base_observable;
 
 export import :entities.components.base;

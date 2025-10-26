@@ -6,6 +6,8 @@ module;
 #include <optional>
 #include <string>
 
+#include <cinttypes>
+
 export module pragma.shared:util.lookup_identifier;
 
 export namespace pragma {

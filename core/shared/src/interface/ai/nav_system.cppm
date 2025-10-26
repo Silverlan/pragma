@@ -17,6 +17,9 @@ module;
 
 #include "pragma/lua/core.hpp"
 
+#include <unordered_map>
+#include <tuple>
+
 export module pragma.shared:ai.nav_system;
 
 export import pragma.udm;
@@ -131,16 +134,18 @@ export {
 		struct enable_bitwise_operators<pragma::nav::PolyFlags> : std::true_type {};
 	}
 
-	template<class TMesh>
-	std::shared_ptr<TMesh> pragma::nav::Mesh::Create(const std::shared_ptr<RcNavMesh> &rcMesh, const Config &config)
-	{
-		return std::shared_ptr<TMesh>(new TMesh(rcMesh, config));
-	}
-	template<class TMesh>
-	std::shared_ptr<TMesh> pragma::nav::Mesh::Load(pragma::Game &game, const std::string &fname)
-	{
-		Config config;
-		auto rcMesh = load(game, fname, config);
-		return (rcMesh != nullptr) ? Create<TMesh>(rcMesh, config) : nullptr;
+	namespace pragma {
+		template<class TMesh>
+		std::shared_ptr<TMesh> nav::Mesh::Create(const std::shared_ptr<RcNavMesh> &rcMesh, const Config &config)
+		{
+			return std::shared_ptr<TMesh>(new TMesh(rcMesh, config));
+		}
+		template<class TMesh>
+		std::shared_ptr<TMesh> nav::Mesh::Load(Game &game, const std::string &fname)
+		{
+			Config config;
+			auto rcMesh = load(game, fname, config);
+			return (rcMesh != nullptr) ? Create<TMesh>(rcMesh, config) : nullptr;
+		}
 	}
 };

@@ -6,6 +6,14 @@ module;
 #include <queue>
 #include <string>
 
+#include <cinttypes>
+#include <memory>
+#include <functional>
+#include <unordered_map>
+#include "pragma/lua/core.hpp"
+
+#include <optional>
+
 export module pragma.shared:entities.components.base_animated;
 
 export import :entities.components.base;

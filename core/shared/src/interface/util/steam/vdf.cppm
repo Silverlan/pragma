@@ -7,6 +7,10 @@ module;
 #include <unordered_map>
 #include <vector>
 
+#include <cinttypes>
+#include <thread>
+#include <condition_variable>
+
 export module pragma.shared:util.steam.vdf;
 
 export import pragma.util;

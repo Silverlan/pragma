@@ -9,13 +9,21 @@ module;
 #include <typeindex>
 #include <vector>
 
+#include <functional>
+#include <queue>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.iterator;
 
 import :entities.base_entity;
 export import :entities.enums;
+import :game.game;
 export import :types;
 
 export {
+	namespace pragma {
+		class Game;
+	}
 	struct DLLNETWORK IEntityIteratorFilter {
 		IEntityIteratorFilter() = default;
 		IEntityIteratorFilter(pragma::Game &game) {}
@@ -84,7 +92,7 @@ export {
 	};
 
 	namespace pragma::ecs {
-		class DLLNETWORK pragma::ecs::EntityIterator {
+		class DLLNETWORK EntityIterator {
 		public:
 			friend BaseEntityIterator;
 			enum class FilterFlags : uint32_t {
@@ -114,13 +122,13 @@ export {
 				Any = Spawned | Pending | IncludeShared | IncludeNetworkLocal | AnyType
 			};
 
-			pragma::ecs::EntityIterator(pragma::Game &game, FilterFlags filterFlags = FilterFlags::Default);
-			pragma::ecs::EntityIterator(pragma::Game &game, pragma::ComponentId componentId, FilterFlags filterFlags = FilterFlags::Default);
-			pragma::ecs::EntityIterator(pragma::Game &game, const std::string &componentName, FilterFlags filterFlags = FilterFlags::Default);
-			pragma::ecs::EntityIterator(const pragma::ecs::EntityIterator &) = default;
-			pragma::ecs::EntityIterator(pragma::ecs::EntityIterator &&) = delete;
-			pragma::ecs::EntityIterator &operator=(const pragma::ecs::EntityIterator &) = default;
-			pragma::ecs::EntityIterator &operator=(pragma::ecs::EntityIterator &&) = default;
+			EntityIterator(pragma::Game &game, FilterFlags filterFlags = FilterFlags::Default);
+			EntityIterator(pragma::Game &game, pragma::ComponentId componentId, FilterFlags filterFlags = FilterFlags::Default);
+			EntityIterator(pragma::Game &game, const std::string &componentName, FilterFlags filterFlags = FilterFlags::Default);
+			EntityIterator(const EntityIterator &) = default;
+			EntityIterator(EntityIterator &&) = delete;
+			EntityIterator &operator=(const EntityIterator &) = default;
+			EntityIterator &operator=(EntityIterator &&) = default;
 
 			BaseEntityIterator begin() const;
 			BaseEntityIterator end() const;
@@ -132,8 +140,8 @@ export {
 			// Internal use only!
 			EntityIteratorData *GetIteratorData() { return m_iteratorData.get(); }
 		protected:
-			pragma::ecs::EntityIterator() = default;
-			pragma::ecs::EntityIterator(pragma::Game &game, bool /* dummy */);
+			EntityIterator() = default;
+			EntityIterator(pragma::Game &game, bool /* dummy */);
 			void SetBaseComponentType(pragma::ComponentId componentId);
 			void SetBaseComponentType(std::type_index typeIndex);
 			void SetBaseComponentType(const std::string &componentName);
@@ -371,27 +379,29 @@ export {
 		pragma::Game &m_game;
 	};
 
-	template<class TFilter, typename... TARGS>
-	void pragma::ecs::EntityIterator::AttachFilter(TARGS... args)
-	{
-		static_assert(std::is_base_of<IEntityIteratorFilter, TFilter>::value, "TFilter must be a descendant of IEntityIteratorFilter!");
-		if(typeid(*m_iteratorData->entities) == typeid(EntityContainer)) {
-			if constexpr(std::is_same_v<EntityIteratorFilterComponent, TFilter>) {
-				// If a component filter was attached, we can optimize by only iterating the components of
-				// that type (instead of iterating over all entities). In this case we don't actually need to
-				// attach a filter.
-				SetBaseComponentType(std::forward<TARGS>(args)...);
-				return;
-			}
+	namespace pragma::ecs {
+		template<class TFilter, typename... TARGS>
+		void EntityIterator::AttachFilter(TARGS... args)
+		{
+			static_assert(std::is_base_of<IEntityIteratorFilter, TFilter>::value, "TFilter must be a descendant of IEntityIteratorFilter!");
+			if(typeid(*m_iteratorData->entities) == typeid(EntityContainer)) {
+				if constexpr(std::is_same_v<EntityIteratorFilterComponent, TFilter>) {
+					// If a component filter was attached, we can optimize by only iterating the components of
+					// that type (instead of iterating over all entities). In this case we don't actually need to
+					// attach a filter.
+					SetBaseComponentType(std::forward<TARGS>(args)...);
+					return;
+				}
 
-			std::optional<std::type_index> componentTypeIndex {};
-			GetIteratorFilterComponentType<TFilter>(componentTypeIndex);
-			if(componentTypeIndex.has_value()) {
-				// Same as the block above, but for TEntityIteratorFilterComponent
-				SetBaseComponentType(*componentTypeIndex);
-				return;
+				std::optional<std::type_index> componentTypeIndex {};
+				GetIteratorFilterComponentType<TFilter>(componentTypeIndex);
+				if(componentTypeIndex.has_value()) {
+					// Same as the block above, but for TEntityIteratorFilterComponent
+					SetBaseComponentType(*componentTypeIndex);
+					return;
+				}
 			}
+			m_iteratorData->filters.emplace_back(std::make_unique<TFilter>(m_iteratorData->game, std::forward<TARGS>(args)...));
 		}
-		m_iteratorData->filters.emplace_back(std::make_unique<TFilter>(m_iteratorData->game, std::forward<TARGS>(args)...));
 	}
 };

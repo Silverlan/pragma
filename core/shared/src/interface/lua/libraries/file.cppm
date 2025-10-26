@@ -9,6 +9,15 @@ module;
 #include <string>
 #include <vector>
 
+#include <cinttypes>
+
+#include <unordered_map>
+#include <tuple>
+
+#include <array>
+
+#include <functional>
+
 export module pragma.shared:scripting.lua.libraries.file;
 
 export import pragma.lua;
@@ -42,29 +51,23 @@ export {
 		bool Read(void *buf, unsigned long long l);
 		void Write(void *c, unsigned long long l);
 		template<class T>
-		void Write(T t);
+		void Write(T t)
+		{
+			Write(static_cast<void *>(&t), sizeof(T));
+		}
 		template<class T>
-		T Read();
+		T Read()
+		{
+			char buf[sizeof(T)];
+			Read(buf, sizeof(T));
+			return (*(T *)&(buf[0]));
+		}
 		void WriteString(std::string str);
 		std::string ReadLine();
 		std::string ReadString();
 		bool Eof();
 		void IgnoreComments(std::string start = "//", std::string end = "\n");
 	};
-
-	template<class T>
-	void LFile::Write(T t)
-	{
-		Write(static_cast<void *>(&t), sizeof(T));
-	}
-
-	template<class T>
-	inline T LFile::Read()
-	{
-		char buf[sizeof(T)];
-		Read(buf, sizeof(T));
-		return (*(T *)&(buf[0]));
-	}
 
 	#define lua_lfile_datatype(datatype, suffix, luapush)																																																											\
 		inline DLLNETWORK void Lua_LFile_Write##suffix(lua_State *, LFile &f, datatype d)																																																			\
@@ -116,9 +119,9 @@ export {
 	DLLNETWORK void Lua_LFile_IgnoreComments(lua_State *l, LFile &f, std::string start);
 	DLLNETWORK void Lua_LFile_IgnoreComments(lua_State *l, LFile &f, std::string start, std::string end);
 	DLLNETWORK void Lua_LFile_Read(lua_State *l, LFile &f, uint32_t size);
-	DLLNETWORK void Lua_LFile_Read(lua_State *l, LFile &f, ::DataStream &ds, uint32_t size);
-	DLLNETWORK void Lua_LFile_Write(lua_State *l, LFile &f, ::DataStream &ds);
-	DLLNETWORK void Lua_LFile_Write(lua_State *l, LFile &f, ::DataStream &ds, uint32_t size);
+	DLLNETWORK void Lua_LFile_Read(lua_State *l, LFile &f, util::DataStream &ds, uint32_t size);
+	DLLNETWORK void Lua_LFile_Write(lua_State *l, LFile &f, util::DataStream &ds);
+	DLLNETWORK void Lua_LFile_Write(lua_State *l, LFile &f, util::DataStream &ds, uint32_t size);
 	DLLNETWORK void Lua_LFile_GetPath(lua_State *l, LFile &f);
 
 	////////////////////////////////////

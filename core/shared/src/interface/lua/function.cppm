@@ -7,6 +7,18 @@ module;
 #include <memory>
 #include <string>
 
+#include <cinttypes>
+
+#include <vector>
+
+#include <optional>
+#include <unordered_map>
+#include <tuple>
+
+#include <array>
+
+#include <functional>
+
 export module pragma.shared:scripting.lua.function;
 
 import :scripting.lua.core;
@@ -25,56 +37,51 @@ export {
 		luabind::object &GetLuaObject();
 		void operator()();
 		template<class T, typename... TARGS>
-		T Call(TARGS... args);
-		template<class T, typename... TARGS>
-		bool Call(T *ret, TARGS... args);
-	};
-
-	template<class T, typename... TARGS>
-	T LuaFunction::Call(TARGS... args)
-	{
-		auto &r = m_luaFunction;
-	#ifndef LUABIND_NO_EXCEPTIONS
-		try {
-	#endif
-			return static_cast<T>(luabind::call_function<T>(*r, std::forward<TARGS>(args)...));
-	#ifndef LUABIND_NO_EXCEPTIONS
-		}
-		catch(const luabind::error &) {
-			Lua::HandleLuaError(r->interpreter());
-		}
-		catch(const luabind::cast_failed &) {
+		T Call(TARGS... args)
+		{
+			auto &r = m_luaFunction;
+		#ifndef LUABIND_NO_EXCEPTIONS
+			try {
+		#endif
+				return static_cast<T>(luabind::call_function<T>(*r, std::forward<TARGS>(args)...));
+		#ifndef LUABIND_NO_EXCEPTIONS
+			}
+			catch(const luabind::error &) {
+				Lua::HandleLuaError(r->interpreter());
+			}
+			catch(const luabind::cast_failed &) {
+				return T();
+			}
+		#endif
 			return T();
 		}
-	#endif
-		return T();
-	}
-	template<class T, typename... TARGS>
-	bool LuaFunction::Call(T *ret, TARGS... args)
-	{
-		auto &r = m_luaFunction;
-	#ifndef LUABIND_NO_EXCEPTIONS
-		try {
-	#endif
-			*ret = static_cast<T>(luabind::call_function<T>(*r, std::forward<TARGS>(args)...));
-	#ifndef LUABIND_NO_EXCEPTIONS
-		}
-		catch(luabind::error &) {
-			Lua::HandleLuaError(r->interpreter());
-			return false;
-		}
-		catch(std::exception &) {
-			return false;
-		}
-	#endif
+		template<class T, typename... TARGS>
+		bool Call(T *ret, TARGS... args)
+		{
+			auto &r = m_luaFunction;
+		#ifndef LUABIND_NO_EXCEPTIONS
+			try {
+		#endif
+				*ret = static_cast<T>(luabind::call_function<T>(*r, std::forward<TARGS>(args)...));
+		#ifndef LUABIND_NO_EXCEPTIONS
+			}
+			catch(luabind::error &) {
+				Lua::HandleLuaError(r->interpreter());
+				return false;
+			}
+			catch(std::exception &) {
+				return false;
+			}
+		#endif
 
-		// TODO: What was this for?
-		/*auto *state = r->interpreter();
-		r->push(state);
-		auto cret = (lua_iscfunction(state, -1) == 0) ? true : false;
-		Lua::Pop(state, 1);
-		return cret;*/
+			// TODO: What was this for?
+			/*auto *state = r->interpreter();
+			r->push(state);
+			auto cret = (lua_iscfunction(state, -1) == 0) ? true : false;
+			Lua::Pop(state, 1);
+			return cret;*/
 
-		return true;
-	}
+			return true;
+		}
+	};
 }

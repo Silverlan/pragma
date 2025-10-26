@@ -6,6 +6,9 @@ module;
 #include <optional>
 #include <vector>
 
+#include <cinttypes>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:physics.vehicle;
 
 export import :physics.collision_object;

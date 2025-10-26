@@ -4,6 +4,12 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <vector>
+#include <memory>
+#include <unordered_map>
+#include <cstring>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.lifeline_link;
 
 export import :entities.components.base;

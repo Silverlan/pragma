@@ -6,6 +6,9 @@ module;
 #include <cinttypes>
 #include <limits>
 
+#include <vector>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:physics.material;
 
 export import :physics.base;

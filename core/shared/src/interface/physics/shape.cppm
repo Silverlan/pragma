@@ -6,6 +6,8 @@ module;
 #include <memory>
 #include <vector>
 
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:physics.shape;
 
 export import :physics.base;

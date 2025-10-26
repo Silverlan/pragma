@@ -18,6 +18,14 @@ module;
 
 #include <vector>
 
+#include <tuple>
+
+#include <string>
+
+#include <functional>
+
+#include <cstring>
+
 export module pragma.shared:debug.performance_profiler;
 
 #define ENABLE_DEBUG_HISTORY 0
@@ -161,115 +169,115 @@ export {
 				CPUProfiler() = default;
 				virtual std::shared_ptr<Timer> CreateTimer() override;
 			};
-		};
-	};
 
-	template<class TProfilingStage>
-	TProfilingStage &pragma::debug::ProfilingStageManager<TProfilingStage>::GetProfilerStage(std::thread::id tid, const char *name)
-	{
-		auto itThread = m_threadProfilingMap.find(tid);
-		if(itThread == m_threadProfilingMap.end()) {
-			std::stringstream ss;
-			ss << tid;
-			throw std::runtime_error {"No profiling stages exist for thread " + ss.str() + "!"};
-		}
-		auto &profilingStages = itThread->second.stageMap;
-		auto it = profilingStages.find(name);
-		if(it == profilingStages.end())
-			throw std::runtime_error {"Unknown profiler stage '" + std::string {name} + "'!"};
-		return *it->second;
-	}
-
-	template<class TProfilingStage>
-	bool pragma::debug::ProfilingStageManager<TProfilingStage>::StartProfilerStage(const char *name)
-	{
-		std::unique_lock<std::mutex> lock {m_profilingStageMutex};
-
-		auto tid = std::this_thread::get_id();
-		auto itThread = m_threadProfilingMap.find(tid);
-		if(itThread == m_threadProfilingMap.end())
-			itThread = m_threadProfilingMap.insert(std::make_pair(tid, ProfilingStageMap {})).first;
-
-		auto &threadData = itThread->second;
-		auto &profilingStages = threadData.stageMap;
-		auto &stageStack = threadData.stageStack;
-
-	#if ENABLE_DEBUG_HISTORY == 1
-		std::string prefix(stageStack.size() * 2, ' ');
-		threadData.history.push_back({prefix + "Start " + std::string {name}, util::get_formatted_stack_backtrace_string()});
-		while(threadData.history.size() > 1000)
-			threadData.history.erase(threadData.history.begin());
-	#endif
-
-		auto it = profilingStages.find(name);
-		if(it == profilingStages.end()) {
-			const char *parentName = nullptr;
-			if(!stageStack.empty())
-				parentName = stageStack.top();
-			std::stringstream ss;
-			ss << tid;
-			spdlog::info("Creating new profiling stage '{}' with parent '{}' for thread {}...", name, parentName ? parentName : "NULL", ss.str());
-			auto stage = ProfilingStage::Create<TProfilingStage>(*m_profiler, tid, name);
-			it = profilingStages.insert(std::make_pair(name, stage)).first;
-
-			if(parentName) {
-				auto &stageParent = GetProfilerStage(tid, parentName);
-				stage->SetParent(&stageParent);
+			template<class TProfilingStage>
+			TProfilingStage &ProfilingStageManager<TProfilingStage>::GetProfilerStage(std::thread::id tid, const char *name)
+			{
+				auto itThread = m_threadProfilingMap.find(tid);
+				if(itThread == m_threadProfilingMap.end()) {
+					std::stringstream ss;
+					ss << tid;
+					throw std::runtime_error {"No profiling stages exist for thread " + ss.str() + "!"};
+				}
+				auto &profilingStages = itThread->second.stageMap;
+				auto it = profilingStages.find(name);
+				if(it == profilingStages.end())
+					throw std::runtime_error {"Unknown profiler stage '" + std::string {name} + "'!"};
+				return *it->second;
 			}
-			else
-				stage->SetParent(&m_profiler->GetRootStage());
+
+			template<class TProfilingStage>
+			bool ProfilingStageManager<TProfilingStage>::StartProfilerStage(const char *name)
+			{
+				std::unique_lock<std::mutex> lock {m_profilingStageMutex};
+
+				auto tid = std::this_thread::get_id();
+				auto itThread = m_threadProfilingMap.find(tid);
+				if(itThread == m_threadProfilingMap.end())
+					itThread = m_threadProfilingMap.insert(std::make_pair(tid, ProfilingStageMap {})).first;
+
+				auto &threadData = itThread->second;
+				auto &profilingStages = threadData.stageMap;
+				auto &stageStack = threadData.stageStack;
+
+			#if ENABLE_DEBUG_HISTORY == 1
+				std::string prefix(stageStack.size() * 2, ' ');
+				threadData.history.push_back({prefix + "Start " + std::string {name}, util::get_formatted_stack_backtrace_string()});
+				while(threadData.history.size() > 1000)
+					threadData.history.erase(threadData.history.begin());
+			#endif
+
+				auto it = profilingStages.find(name);
+				if(it == profilingStages.end()) {
+					const char *parentName = nullptr;
+					if(!stageStack.empty())
+						parentName = stageStack.top();
+					std::stringstream ss;
+					ss << tid;
+					spdlog::info("Creating new profiling stage '{}' with parent '{}' for thread {}...", name, parentName ? parentName : "NULL", ss.str());
+					auto stage = ProfilingStage::Create<TProfilingStage>(*m_profiler, tid, name);
+					it = profilingStages.insert(std::make_pair(name, stage)).first;
+
+					if(parentName) {
+						auto &stageParent = GetProfilerStage(tid, parentName);
+						stage->SetParent(&stageParent);
+					}
+					else
+						stage->SetParent(&m_profiler->GetRootStage());
+				}
+
+				stageStack.push(name);
+				return it->second->Start();
+			}
+
+			template<class TProfilingStage>
+			bool ProfilingStageManager<TProfilingStage>::StopProfilerStage()
+			{
+				std::unique_lock<std::mutex> lock {m_profilingStageMutex};
+
+				auto tid = std::this_thread::get_id();
+				auto itThread = m_threadProfilingMap.find(tid);
+				if(itThread == m_threadProfilingMap.end())
+					throw std::logic_error {"Attempted to stop profiling stage on thread that has never started a profiling stage."};
+				auto &threadData = itThread->second;
+				auto &profilingStages = threadData.stageMap;
+				auto &stageStack = threadData.stageStack;
+
+				if(stageStack.empty())
+					throw std::logic_error {"Attempted to stop profiling stage, but no stage has been started!"};
+
+			#if ENABLE_DEBUG_HISTORY == 1
+				std::string prefix((stageStack.size() - 1) * 2, ' ');
+				threadData.history.push_back({prefix + "Stop " + std::string {stageStack.top()}, util::get_formatted_stack_backtrace_string()});
+			#endif
+
+				auto &stage = GetProfilerStage(tid, stageStack.top());
+				stageStack.pop();
+				return stage.Stop();
+			}
+
+			template<class TProfilingStage>
+			void ProfilingStageManager<TProfilingStage>::InitializeProfilingStageManager(Profiler &profiler)
+			{
+				m_profiler = &profiler;
+			}
+
+			template<class TProfiler>
+			std::shared_ptr<TProfiler> Profiler::Create()
+			{
+				auto profiler = std::shared_ptr<TProfiler> {new TProfiler {}};
+				profiler->Initialize();
+				return profiler;
+			}
+
+			template<class TProfilingStage>
+			std::shared_ptr<TProfilingStage> ProfilingStage::Create(Profiler &profiler, std::thread::id tid, const std::string &name)
+			{
+				auto result = std::shared_ptr<TProfilingStage> {new TProfilingStage {profiler, tid, name}};
+				result->Initialize();
+				profiler.AddStage(*result);
+				return result;
+			}
 		}
-
-		stageStack.push(name);
-		return it->second->Start();
-	}
-
-	template<class TProfilingStage>
-	bool pragma::debug::ProfilingStageManager<TProfilingStage>::StopProfilerStage()
-	{
-		std::unique_lock<std::mutex> lock {m_profilingStageMutex};
-
-		auto tid = std::this_thread::get_id();
-		auto itThread = m_threadProfilingMap.find(tid);
-		if(itThread == m_threadProfilingMap.end())
-			throw std::logic_error {"Attempted to stop profiling stage on thread that has never started a profiling stage."};
-		auto &threadData = itThread->second;
-		auto &profilingStages = threadData.stageMap;
-		auto &stageStack = threadData.stageStack;
-
-		if(stageStack.empty())
-			throw std::logic_error {"Attempted to stop profiling stage, but no stage has been started!"};
-
-	#if ENABLE_DEBUG_HISTORY == 1
-		std::string prefix((stageStack.size() - 1) * 2, ' ');
-		threadData.history.push_back({prefix + "Stop " + std::string {stageStack.top()}, util::get_formatted_stack_backtrace_string()});
-	#endif
-
-		auto &stage = GetProfilerStage(tid, stageStack.top());
-		stageStack.pop();
-		return stage.Stop();
-	}
-
-	template<class TProfilingStage>
-	void pragma::debug::ProfilingStageManager<TProfilingStage>::InitializeProfilingStageManager(Profiler &profiler)
-	{
-		m_profiler = &profiler;
-	}
-
-	template<class TProfiler>
-	std::shared_ptr<TProfiler> pragma::debug::Profiler::Create()
-	{
-		auto profiler = std::shared_ptr<TProfiler> {new TProfiler {}};
-		profiler->Initialize();
-		return profiler;
-	}
-
-	template<class TProfilingStage>
-	std::shared_ptr<TProfilingStage> pragma::debug::ProfilingStage::Create(Profiler &profiler, std::thread::id tid, const std::string &name)
-	{
-		auto result = std::shared_ptr<TProfilingStage> {new TProfilingStage {profiler, tid, name}};
-		result->Initialize();
-		profiler.AddStage(*result);
-		return result;
 	}
 };

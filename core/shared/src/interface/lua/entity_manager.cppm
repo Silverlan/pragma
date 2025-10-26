@@ -7,6 +7,8 @@ module;
 #include <string>
 #include <unordered_map>
 
+#include <vector>
+
 export module pragma.shared:scripting.lua.entity_manager;
 
 export import :entities.enums;

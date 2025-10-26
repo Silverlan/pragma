@@ -4,6 +4,12 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <cinttypes>
+#include <optional>
+#include <vector>
+#include <memory>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:assets.file_formats.legacy_weave_animation_data;
 
 import :model.animation;

@@ -7,6 +7,12 @@ module;
 #include <string>
 #include <vector>
 
+#include <cinttypes>
+#include <memory>
+
+#include <optional>
+#include <unordered_map>
+
 export module pragma.shared:model.poly;
 
 import :console.output;

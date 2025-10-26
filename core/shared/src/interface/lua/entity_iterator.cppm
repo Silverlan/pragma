@@ -5,6 +5,9 @@ module;
 #include "pragma/lua/core.hpp"
 #include <string>
 
+#include <vector>
+#include <memory>
+
 export module pragma.shared:scripting.lua.entity_iterator;
 
 export import :entities.iterator;

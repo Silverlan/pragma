@@ -7,9 +7,14 @@ module;
 #include <algorithm>
 #include <string>
 
+#include <cinttypes>
+#include <vector>
+#include <memory>
+
 export module pragma.shared:scripting.lua.libraries.ents;
 
 import :console.output;
+import :engine;
 export import :entities.base_entity;
 export import :game;
 export import :network_state;

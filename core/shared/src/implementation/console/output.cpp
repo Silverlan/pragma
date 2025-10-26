@@ -2,6 +2,13 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <cinttypes>
+#include <vector>
+#include <memory>
+#include <map>
+#include <unordered_set>
+#include <cstring>
+
 #include "pragma/networkdefinitions.h"
 #include <functional>
 #include <iostream>

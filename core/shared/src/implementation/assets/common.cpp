@@ -2,6 +2,14 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <cinttypes>
+#include <optional>
+#include <vector>
+#include <cstring>
+#include <unordered_map>
+#include <cmath>
+#include "pragma/lua/core.hpp"
+
 #include <cassert>
 #include <functional>
 #include <memory>

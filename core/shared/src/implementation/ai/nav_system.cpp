@@ -2,6 +2,18 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <unordered_set>
+
+#include <map>
+
+#include <cinttypes>
+#include <optional>
+#include <vector>
+#include <cstring>
+#include <unordered_map>
+#include <cmath>
+#include "pragma/lua/core.hpp"
+
 #include "DetourNavMesh.h"
 #include "DetourNavMeshBuilder.h"
 #include "DetourNavMeshQuery.h"

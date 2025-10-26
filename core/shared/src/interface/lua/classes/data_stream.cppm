@@ -6,6 +6,12 @@ module;
 #include "pragma/lua/core.hpp"
 #include <string>
 
+#include <cinttypes>
+
+#include <optional>
+
+#include <memory>
+
 export module pragma.shared:scripting.lua.classes.data_stream;
 
 export import pragma.lua;

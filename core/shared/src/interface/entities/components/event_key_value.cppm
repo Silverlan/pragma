@@ -5,6 +5,10 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 
+#include <cinttypes>
+#include <memory>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:entities.components.events.key_value;
 
 export import :entities.components.events.event;

@@ -4,6 +4,10 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
+#include <cinttypes>
+#include <optional>
+#include <memory>
+
 export module pragma.shared:debug.intel_vtune;
 
 export {

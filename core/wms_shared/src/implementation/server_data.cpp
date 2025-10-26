@@ -11,7 +11,7 @@ import :server_data;
 
 WMServerData::WMServerData() : engineVersion {0, 0, 0}, tcpPort(0), udpPort(0), players(0), maxPlayers(0), bots(0), password(false) {}
 
-void WMServerData::Write(DataStream &stream) const
+void WMServerData::Write(util::DataStream &stream) const
 {
 	stream->Write<util::Version>(engineVersion);
 	stream->Write<unsigned short>(tcpPort);
@@ -24,7 +24,7 @@ void WMServerData::Write(DataStream &stream) const
 	stream->WriteString(gameMode);
 	stream->Write<bool>(password);
 }
-void WMServerData::Read(DataStream &stream, WMServerData &data)
+void WMServerData::Read(util::DataStream &stream, WMServerData &data)
 {
 	data.engineVersion = stream->Read<util::Version>();
 	data.tcpPort = stream->Read<unsigned short>();

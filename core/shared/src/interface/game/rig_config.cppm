@@ -8,6 +8,9 @@ module;
 #include <string>
 #include <vector>
 
+#include <memory>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:game.rig_config;
 
 export import :game.coordinate_system;

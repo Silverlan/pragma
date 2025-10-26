@@ -8,7 +8,7 @@ module;
 #include <string>
 #include <vector>
 
-export module pragma.shared:util.module;
+export module pragma.shared:util.umodule;
 
 export import pragma.util;
 

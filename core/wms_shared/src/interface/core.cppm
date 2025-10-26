@@ -4,6 +4,7 @@
 module;
 
 #include <string>
+#include <cinttypes>
 
 export module pragma.wms:core;
 

@@ -7,6 +7,9 @@ module;
 #include <string>
 #include <unordered_map>
 
+#include <cinttypes>
+#include <optional>
+
 export module pragma.shared:game.value_driver;
 
 export import :entities.enums;

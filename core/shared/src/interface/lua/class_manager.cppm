@@ -10,6 +10,9 @@ module;
 
 #undef RegisterClass
 
+#include <cinttypes>
+#include <vector>
+
 export module pragma.shared:scripting.lua.class_manager;
 
 export import luabind;

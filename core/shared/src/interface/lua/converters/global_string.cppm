@@ -5,6 +5,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
 
+#include <cinttypes>
+
 export module pragma.shared:scripting.lua.converters.global_string;
 
 export import :util.global_string_table;

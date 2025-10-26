@@ -6,6 +6,8 @@ module;
 #include <cinttypes>
 #include <limits>
 
+#include <vector>
+
 export module pragma.shared:physics.enums;
 
 import pragma.math;

@@ -9,6 +9,8 @@ module;
 #include <unordered_map>
 #include <vector>
 
+#include <cinttypes>
+
 export module pragma.shared:model.model_mesh;
 
 export import :game.coordinate_system;

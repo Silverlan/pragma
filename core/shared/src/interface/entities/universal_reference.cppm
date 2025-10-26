@@ -8,6 +8,9 @@ module;
 #include <variant>
 #include <vector>
 
+#include <cinttypes>
+#include <optional>
+
 export module pragma.shared:entities.universal_reference;
 
 export import :entities.base_entity_handle;

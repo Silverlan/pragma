@@ -6,6 +6,14 @@ module;
 #include <typeindex>
 #include <unordered_map>
 
+#include <cinttypes>
+
+#include <memory>
+#include "pragma/lua/core.hpp"
+
+#include <optional>
+#include <vector>
+
 export module pragma.shared:entities.class_map;
 
 export {

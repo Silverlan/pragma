@@ -8,6 +8,9 @@ module;
 #include <unordered_map>
 #include <vector>
 
+#include <cinttypes>
+#include <limits>
+
 export module pragma.locale;
 
 export import pragma.string.unicode;

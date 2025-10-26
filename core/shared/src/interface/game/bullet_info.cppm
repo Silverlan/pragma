@@ -6,6 +6,10 @@ module;
 #include <limits>
 #include <string>
 
+#include <cinttypes>
+#include <memory>
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:game.bullet_info;
 
 export import :entities.base_entity_handle;

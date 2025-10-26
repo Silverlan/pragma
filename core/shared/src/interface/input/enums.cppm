@@ -5,6 +5,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 
+#include <cinttypes>
+
 export module pragma.shared:input.enums;
 
 import pragma.math;

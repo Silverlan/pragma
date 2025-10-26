@@ -12,6 +12,12 @@ module;
 #include <stack>
 #include <unordered_map>
 
+#include <cinttypes>
+
+#include "pragma/lua/core.hpp"
+
+#include <vector>
+
 export module pragma.shared:debug.performance_profiler;
 
 #define ENABLE_DEBUG_HISTORY 0

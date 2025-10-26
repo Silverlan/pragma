@@ -8,6 +8,8 @@ module;
 #include <unordered_map>
 #include <vector>
 
+#include <cinttypes>
+
 export module pragma.shared:scripting.lua.core;
 
 export import pragma.lua;

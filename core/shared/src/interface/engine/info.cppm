@@ -7,6 +7,8 @@ module;
 #include <string>
 #include <vector>
 
+#include <cinttypes>
+
 export module pragma.shared:engine.info;
 
 export import pragma.util;

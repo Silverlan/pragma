@@ -9,6 +9,14 @@ module;
 #include <string>
 #include <vector>
 
+#include <cinttypes>
+
+#include <limits>
+
+#include <optional>
+
+#include "pragma/lua/core.hpp"
+
 export module pragma.shared:ai.nav_system;
 
 export import pragma.udm;

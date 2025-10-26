@@ -15,7 +15,7 @@ export import :util.functional_parallel_worker;
 export import :util.giblet_create_info;
 export import :util.global_string_table;
 export import :util.lookup_identifier;
-export import :util.module;
+export import :util.umodule;
 export import :util.mvp_base;
 export import :util.python;
 export import :util.render_tile;

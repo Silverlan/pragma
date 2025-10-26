@@ -5,6 +5,8 @@ module;
 #include <cinttypes>
 #include <limits>
 
+#include <memory>
+
 export module pragma.shared:entities.enums;
 
 import panima;

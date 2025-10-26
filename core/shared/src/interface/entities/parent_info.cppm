@@ -6,6 +6,8 @@ module;
 #include <optional>
 #include <vector>
 
+#include <cinttypes>
+
 export module pragma.shared:entities.parent_info;
 
 export import :entities.enums;

@@ -10,6 +10,8 @@ module;
 #include <queue>
 #include <vector>
 
+#include <memory>
+
 export module pragma.shared:physics.water_surface_simulator;
 
 export import pragma.math;

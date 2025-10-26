@@ -26,8 +26,8 @@ export {
 		std::string map;
 		std::string gameMode;
 		bool password;
-		void Write(DataStream &stream) const;
-		static void Read(DataStream &stream, WMServerData &data);
+		void Write(util::DataStream &stream) const;
+		static void Read(util::DataStream &stream, WMServerData &data);
 	};
 	DLLWMSSHARED std::ostream &operator<<(std::ostream &out, const WMServerData &data);
 	#pragma warning(pop)

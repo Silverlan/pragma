@@ -6,6 +6,9 @@ module;
 #include <optional>
 #include <string>
 
+#include <cinttypes>
+#include <vector>
+
 export module pragma.shared:console.enums;
 
 export import pragma.math;

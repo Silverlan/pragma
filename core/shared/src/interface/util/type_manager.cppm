@@ -9,6 +9,8 @@ module;
 #include <unordered_map>
 #include <vector>
 
+#include <memory>
+
 export module pragma.shared:util.type_manager;
 
 export import pragma.util;

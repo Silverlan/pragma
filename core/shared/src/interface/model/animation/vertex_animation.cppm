@@ -8,6 +8,8 @@ module;
 #include <string>
 #include <vector>
 
+#include <cinttypes>
+
 export module pragma.shared:model.animation.vertex_animation;
 
 export import :game.coordinate_system;

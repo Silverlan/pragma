@@ -8,6 +8,8 @@ module;
 #include <string>
 #include <typeindex>
 
+#include <cinttypes>
+
 export module pragma.shared:entities.components.events.event_info;
 
 export import :entities.enums;

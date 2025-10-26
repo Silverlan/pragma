@@ -7,6 +7,9 @@ module;
 #include <string>
 #include <vector>
 
+#include <cinttypes>
+#include <limits>
+
 export module pragma.shared:debug.behavior_tree_node;
 
 export {

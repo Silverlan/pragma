@@ -10,6 +10,10 @@ module;
 #include <string>
 #include <typeindex>
 
+#include <memory>
+
+#include <cinttypes>
+
 export module pragma.shared:entities.member_info;
 
 export import :entities.enums;

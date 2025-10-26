@@ -7,6 +7,10 @@ module;
 #include <functional>
 #include <string>
 
+#include <cinttypes>
+#include <optional>
+#include <memory>
+
 export module pragma.shared:assets.manager;
 
 import :assets.common;

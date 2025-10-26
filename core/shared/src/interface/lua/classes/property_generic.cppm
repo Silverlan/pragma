@@ -5,6 +5,8 @@ module;
 #include <functional>
 #include <memory>
 
+#include <cinttypes>
+
 export module pragma.shared:scripting.lua.classes.property_generic;
 
 export import pragma.util;

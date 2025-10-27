@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <thread>
+
 #include <algorithm>
 #include <atomic>
 #include <functional>
@@ -9,6 +11,7 @@ module;
 #include <memory>
 #include <string>
 #include <string_view>
+#include <mutex>
 
 #ifdef __linux__
 

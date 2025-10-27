@@ -14,8 +14,8 @@ import :gui.main_menu_base;
 import :gui.options_list;
 
 import :client_state;
+import :locale;
 import pragma.gui;
-import pragma.locale;
 import pragma.string.unicode;
 
 WIMainMenuBase::WIMainMenuBase() : WIBase(), m_selected(-1) { AddStyleClass("main_menu"); }

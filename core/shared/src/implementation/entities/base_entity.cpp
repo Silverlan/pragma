@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <typeindex>
+
+#include <optional>
+#include "pragma/lua/core.hpp"
+
 #include "pragma/networkdefinitions.h"
 #include <functional>
 #include <iostream>

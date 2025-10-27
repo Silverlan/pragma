@@ -12,8 +12,8 @@ module pragma.client;
 import :gui.detachable;
 
 import :engine;
+import :locale;
 import pragma.gui;
-import pragma.locale;
 
 #undef CreateWindow
 

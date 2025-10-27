@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <cinttypes>
+#include <unordered_map>
+
 #include <string>
 #include <string_view>
 

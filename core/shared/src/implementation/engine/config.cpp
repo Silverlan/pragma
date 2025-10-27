@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <map>
+
 #include "pragma/logging.hpp"
 #include <cassert>
 #include <memory>

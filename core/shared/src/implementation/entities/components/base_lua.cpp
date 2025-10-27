@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <mutex>
+
 #include <any>
 #include "pragma/logging.hpp"
 #include "pragma/lua/core.hpp"

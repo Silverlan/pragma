@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <cinttypes>
+#include <unordered_map>
+
 #include "pragma/networkdefinitions.h"
 #include <algorithm>
 #include <cassert>
@@ -10,7 +13,7 @@ module;
 module pragma.shared;
 
 import :input.enums;
-import pragma.locale;
+import :locale;
 
 DLLNETWORK bool KeyToString(short c, std::string *key)
 {

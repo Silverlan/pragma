@@ -22,9 +22,9 @@ import :gui.snap_area;
 
 import :client_state;
 import :engine;
+import :locale;
 import pragma.gui;
 import pragma.string.unicode;
-import pragma.locale;
 
 
 

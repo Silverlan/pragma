@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <queue>
+
 #include <sharedutils/util_date.hpp>
 #include <algorithm>
 #include <chrono>

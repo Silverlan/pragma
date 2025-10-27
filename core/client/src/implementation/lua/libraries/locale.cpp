@@ -10,7 +10,7 @@ module pragma.client;
 
 import :scripting.lua.libraries.locale;
 import :client_state;
-import pragma.locale;
+import :locale;
 import pragma.string.unicode;
 
 

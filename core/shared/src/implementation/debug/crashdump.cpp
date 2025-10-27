@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <cstring>
+
 #ifdef _WIN32
 #include <Windows.h>
 #include <tchar.h>
@@ -19,8 +21,8 @@ module;
 module pragma.shared;
 
 import :debug.crashdump;
+import :locale;
 import util_zip;
-import pragma.locale;
 
 #undef CreateDirectory
 

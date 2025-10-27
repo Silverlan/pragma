@@ -405,7 +405,7 @@ void pragma::detail::initialize_logger(::util::LogSeverity conLogLevel, ::util::
 	if(g_loggerInitialized)
 		return;
 	g_logFileName = logFile;
-	auto consoleSink = std::make_shared<anycolor_color_sink_mt>();
+	auto consoleSink = std::make_shared<console::anycolor_color_sink_mt>();
 	if(g_ansiColorCodesEnabled) {
 		consoleSink->set_color(spdlog::level::trace, util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Red | pragma::console::ConsoleColorFlags::Green | pragma::console::ConsoleColorFlags::Blue));
 		consoleSink->set_color(spdlog::level::debug, util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Green | pragma::console::ConsoleColorFlags::Blue));

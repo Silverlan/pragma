@@ -39,9 +39,9 @@ import :audio;
 import :client_state;
 import :engine;
 import :entities.components;
+import :locale;
 import :rendering.render_apis;
 import pragma.pad;
-import pragma.locale;
 import pragma.string.unicode;
 
 

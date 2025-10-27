@@ -73,13 +73,13 @@ import :client_state;
 import :entities.components;
 import :game;
 import :gui;
+import :locale;
 import :model;
 import :networking;
 import :rendering.shader_graph;
 import :rendering.shaders;
 import pragma.gui;
 import pragma.shadergraph;
-import pragma.locale;
 import pragma.string.unicode;
 
 extern "C" {

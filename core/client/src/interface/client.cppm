@@ -23,5 +23,4 @@ export import :scripting.lua;
 export import :util;
 
 export import pragma.gui;
-export import pragma.locale;
 export import pragma.string.unicode;

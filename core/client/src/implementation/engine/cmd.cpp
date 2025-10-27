@@ -32,8 +32,8 @@ import :console.register_commands;
 import :engine;
 import :entities.components;
 import :game;
+import :locale;
 import :rendering.render_apis;
-import pragma.locale;
 // import pragma.scripting.lua;
 #ifndef _MSC_VER
 import pragma.string.unicode;

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include "pragma/lua/core.hpp"
+
 #include <string>
 
 #include <sharedutils/magic_enum.hpp>

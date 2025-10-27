@@ -19,7 +19,7 @@ module;
 module pragma.shared;
 
 import :console.output;
-import pragma.locale;
+import :locale;
 
 #undef CreateFile
 

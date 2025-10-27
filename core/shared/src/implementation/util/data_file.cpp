@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <vector>
+#include <unordered_map>
+
 #include <cstdio>
 #include <string>
 

@@ -11,9 +11,9 @@ module;
 module pragma.client;
 
 import :gui.choice_list;
+import :locale;
 
 import pragma.gui;
-import pragma.locale;
 import pragma.string.unicode;
 
 WIChoiceList::WIChoiceList() : WIBase(), m_selected(UInt(-1)) { RegisterCallback<void, uint32_t, std::reference_wrapper<std::string>>("OnSelect"); }

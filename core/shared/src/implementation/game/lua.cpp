@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <functional>
+#include <unordered_map>
+
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
 #include <chrono>

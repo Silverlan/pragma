@@ -11,7 +11,7 @@ module pragma.client;
 import :gui.main_menu_load_game;
 import :client_state;
 import :engine;
-import pragma.locale;
+import :locale;
 
 WIMainMenuLoadGame::WIMainMenuLoadGame() : WIMainMenuBase() {}
 

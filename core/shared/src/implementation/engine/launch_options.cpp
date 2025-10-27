@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <unordered_set>
+
 #include "pragma/networkdefinitions.h"
 #include "pragma/logging.hpp"
 #include <sstream>

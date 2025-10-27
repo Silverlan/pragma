@@ -11,7 +11,7 @@ module;
 #include <cinttypes>
 #include <limits>
 
-export module pragma.locale;
+export module pragma.shared:locale;
 
 export import pragma.string.unicode;
 export import pragma.udm;

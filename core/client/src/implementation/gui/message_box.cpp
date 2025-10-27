@@ -12,9 +12,9 @@ module pragma.client;
 
 import :gui.message_box;
 import :gui.frame;
+import :locale;
 
 import pragma.gui;
-import pragma.locale;
 
 const Int32 MARGIN_X = 32;
 const Int32 MARGIN_Y = 50;

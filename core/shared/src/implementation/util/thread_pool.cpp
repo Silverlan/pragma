@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <mutex>
+
 #include <functional>
 #include <memory>
 #include <string>

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <vector>
+
 #include "noise/noise.h"
 #include "pragma/lua/core.hpp"
 #include <string>

@@ -2,6 +2,13 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <mutex>
+
+#include <typeindex>
+
+#include <optional>
+#include <cstring>
+
 #include <bvh/v2/stack.h>
 #include <cassert>
 #include <memory>

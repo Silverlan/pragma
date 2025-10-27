@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include "pragma/lua/core.hpp"
+
+#include <cmath>
+
 #include "pragma/logging.hpp"
 #include <sstream>
 #include <unordered_map>

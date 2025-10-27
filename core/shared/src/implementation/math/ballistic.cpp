@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <cmath>
+
 #include <algorithm>
 #include <cassert>
 #include <string>

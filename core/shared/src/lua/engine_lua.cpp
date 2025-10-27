@@ -5,6 +5,8 @@
 #include "pragma/logging.hpp"
 #include "pragma/networkdefinitions.h"
 #include "lualib.h"
+#include <cstring>
+
 
 import pragma.shared;
 

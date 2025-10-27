@@ -10,6 +10,7 @@ module;
 #include <cstring>
 
 #include "pragma/networkdefinitions.h"
+#include <spdlog/logger.h>
 #include <functional>
 #include <iostream>
 #include <sstream>
@@ -18,6 +19,8 @@ module;
 
 #ifdef _WIN32
 #include <Windows.h>
+#else
+#define DWORD unsigned int
 #endif
 
 module pragma.shared;

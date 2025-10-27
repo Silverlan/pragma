@@ -18,7 +18,7 @@ module pragma.client;
 
 
 import :engine;
-import pragma.locale;
+import :locale;
 import pragma.string.unicode;
 
 void CEngine::SaveClientConfig()

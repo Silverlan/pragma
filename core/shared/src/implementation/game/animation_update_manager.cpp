@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <chrono>
+
 #include <algorithm>
 #include <cassert>
 #include <functional>

@@ -32,4 +32,5 @@ export {
 		float physHeight = 0.0;
 		PhysShape physShape = PhysShape::Model;
 	};
+#pragma pack(pop)
 };

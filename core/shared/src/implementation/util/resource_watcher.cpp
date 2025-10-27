@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <vector>
+#include <functional>
+#include <unordered_set>
+
 #include <algorithm>
 #include <cassert>
 #include <memory>
@@ -10,9 +14,8 @@ module;
 
 module pragma.shared;
 
+import :locale;
 import :util.resource_watcher;
-
-import pragma.locale;
 
 decltype(EResourceWatcherCallbackType::Model) EResourceWatcherCallbackType::Model = EResourceWatcherCallbackType {umath::to_integral(E::Model)};
 decltype(EResourceWatcherCallbackType::Material) EResourceWatcherCallbackType::Material = EResourceWatcherCallbackType {umath::to_integral(E::Material)};

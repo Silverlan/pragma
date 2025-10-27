@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <map>
+#include "pragma/lua/core.hpp"
+
 #include "pragma/networkdefinitions.h"
 #include "pragma/logging.hpp"
 #include <spdlog/pattern_formatter.h>
@@ -19,9 +22,10 @@ module pragma.shared;
 
 import :engine;
 
+import :debug.intel_vtune;
+import :locale;
 import util_zip;
 import pragma.pad;
-import pragma.locale;
 import pragma.oskit;
 
 const pragma::IServerState &pragma::Engine::GetServerStateInterface() const
@@ -107,7 +111,7 @@ pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullpt
 #endif
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	debug::open_domain();
+	::debug::open_domain();
 #endif
 
 	util::debug::set_lua_backtrace_function([this]() -> std::string {
@@ -1189,7 +1193,7 @@ pragma::Engine::~Engine()
 	if(umath::is_flag_set(m_stateFlags, StateFlags::Running))
 		throw std::runtime_error("Engine has to be closed before it can be destroyed!");
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	debug::close_domain();
+	::debug::close_domain();
 #endif
 
 	util::debug::set_lua_backtrace_function(nullptr);

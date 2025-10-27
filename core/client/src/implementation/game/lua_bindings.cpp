@@ -36,8 +36,8 @@ module;
 
 module pragma.client;
 
+import :locale;
 import :scripting.lua.libraries.net_messages;
-import pragma.locale;
 import pragma.shared;
 import pragma.string.unicode;
 

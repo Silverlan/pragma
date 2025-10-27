@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <typeindex>
+
+#include <cstring>
+#include "pragma/lua/core.hpp"
+
 #include "pragma/networkdefinitions.h"
 #include "pragma/logging.hpp"
 #include <sharedutils/magic_enum.hpp>
@@ -1054,7 +1059,7 @@ std::optional<std::string> BaseEntityComponent::GetMemberUri(pragma::Game *game,
 	return uri->substr(0, q) + "/" + *memberName + uri->substr(q);
 }
 
-spdlog::logger *find_logger(pragma::Game &game, std::type_index typeIndex) {
+spdlog::logger *pragma::find_logger(pragma::Game &game, std::type_index typeIndex) {
 	auto &componentManager = game.GetEntityComponentManager();
 	pragma::ComponentId componentId;
 	if (componentManager.GetComponentId(typeIndex, componentId)) {

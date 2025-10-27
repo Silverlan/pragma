@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include "pragma/lua/core.hpp"
+
 #include <sharedutils/magic_enum.hpp>
 #include <algorithm>
 #include <chrono>
@@ -19,11 +21,11 @@ module pragma.shared;
 
 import :console.commands;
 import :engine;
+import :locale;
 import :network_state;
 
 import util_zip;
 import pragma.doc;
-import pragma.locale;
 // import pragma.scripting.lua;
 
 static std::optional<std::string> udm_convert(const std::string &fileName)

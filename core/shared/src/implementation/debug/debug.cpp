@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <cinttypes>
+
 #include <cstdio>
 #include <string>
 
@@ -15,7 +17,7 @@ module;
 module pragma.shared;
 
 import :debug;
-import pragma.locale;
+import :locale;
 
 void pragma::debug::start_profiling_task(const char *taskName)
 {

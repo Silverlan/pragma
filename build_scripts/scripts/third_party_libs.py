@@ -17,7 +17,7 @@ get_submodule("eigen","https://gitlab.com/libeigen/eigen.git","b66188b5") # v3.4
 get_submodule("exprtk","https://github.com/ArashPartow/exprtk.git","f46bffcd6966d38a09023fb37ba9335214c9b959")
 get_submodule("freetype","https://github.com/aseprite/freetype2.git","9a2d6d97b2d8a5d22d02948b783df12b764afa2d")
 get_submodule("glfw","https://github.com/Silverlan/glfw.git","8d6f5d9bc8477057dccc1190d46b0945219e2f33", "feat/drag-callback")
-get_submodule("gli","https://github.com/Silverlan/gli.git","daa56b52cdfa87f7b2199b84c309c5c6d620ab05", "feat/cxx_module")
+get_submodule("gli","https://github.com/Silverlan/gli.git","49f9baee8272d102d739482b97ba411fa955f814", "feat/cxx_module")
 get_submodule("libnoise","https://github.com/qknight/libnoise.git","9ce0737b55812f7de907e86dc633724524e3a8e8")
 get_submodule("libsamplerate","https://github.com/libsndfile/libsamplerate.git","15c392d")
 if platform == "linux":

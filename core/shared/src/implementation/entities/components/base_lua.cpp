@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <cstring>
+
 #include <mutex>
 
 #include <any>
 #include "pragma/logging.hpp"
 #include "pragma/lua/core.hpp"
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include <sharedutils/magic_enum.hpp>
 #include <algorithm>
 #include <cassert>
@@ -1554,10 +1557,6 @@ pragma::BaseLuaBaseEntityComponent::MemberFlags pragma::lua::string_to_member_fl
 	flags &= ~flagsRem;
 	return flags;
 }
-
-#ifdef __linux__
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
-#endif
 
 void Lua::register_base_entity_component(luabind::module_ &modEnts)
 {

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <typeindex>
+
 #include <algorithm>
 #include <cassert>
 #include <functional>

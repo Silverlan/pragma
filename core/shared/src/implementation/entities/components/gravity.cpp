@@ -265,10 +265,6 @@ void Lua::Gravity::CalcBallisticVelocity(lua_State *l, ::pragma::GravityComponen
 		Lua::Push<Vector3>(l, vel);
 }
 
-#ifdef __linux__
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
-#endif
-
 void GravityComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
 {
 	auto def = pragma::lua::create_entity_component_class<pragma::GravityComponent, pragma::BaseEntityComponent>("GravityComponent");

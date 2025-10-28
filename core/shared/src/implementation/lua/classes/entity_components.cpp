@@ -5,6 +5,7 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "pragma/logging.hpp"
 #include "pragma/lua/core.hpp"
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include "sharedutils/magic_enum.hpp"
 #include <algorithm>
 
@@ -422,7 +423,6 @@ static std::vector<pragma::ComponentMemberIndex> get_dynamic_member_ids(pragma::
 }
 
 #ifdef __linux__
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, Path);
 #endif
 

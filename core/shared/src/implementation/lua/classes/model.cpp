@@ -5,6 +5,7 @@ module;
 #include <optional>
 
 #include "pragma/lua/core.hpp"
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include <functional>
 #include <memory>
 #include <sstream>
@@ -156,6 +157,9 @@ namespace pragma::animation {
 #ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, Vertex);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, VertexWeight);
+// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::animation, Animation);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::animation, Skeleton);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, Model);
 #endif
 
 template<typename TResult, typename TBoneIdentifier, bool (pragma::Model::*GetValue)(pragma::animation::BoneId, TResult &, umath::CoordinateSpace) const>

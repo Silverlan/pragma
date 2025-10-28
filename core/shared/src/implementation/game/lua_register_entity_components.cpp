@@ -2,7 +2,14 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <cinttypes>
+#include <memory>
+
+#include <vector>
+#include <cstring>
+
 #include "pragma/lua/core.hpp"
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include <chrono>
 #include <functional>
 #include <iostream>
@@ -64,15 +71,14 @@ using ComponentMemberReferencePolicy = luabind::generic_policy<N, pragma::Compon
 	}>;
 */
 
-#ifdef __linux__
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, pragma::EntityURef);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, pragma::EntityUComponentRef);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, pragma::EntityUComponentMemberRef);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, pragma::MultiEntityURef);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, pragma::MultiEntityUComponentRef);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, EntityURef);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, EntityUComponentRef);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, EntityUComponentMemberRef);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, MultiEntityURef);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, MultiEntityUComponentRef);
+
+// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, ValueDriver);
-#endif
 
 namespace pragma {
 	enum class BvhIntersectionFlags : uint32_t {

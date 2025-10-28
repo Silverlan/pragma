@@ -32,11 +32,6 @@ export import :console.enums;
 export import pragma.util;
 
 export {
-	namespace pragma {
-		struct GString;
-	};
-	DLLNETWORK std::ostream &operator<<(std::ostream &stream, const pragma::GString &str);
-
 	namespace Con {
 		class c_crit;
 	};

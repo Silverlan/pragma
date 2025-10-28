@@ -3,7 +3,7 @@
 module;
 
 #include <cinttypes>
-
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include "pragma/lua/core.hpp"
 #include <iostream>
 
@@ -29,6 +29,10 @@ static std::ostream &operator<<(std::ostream &out, const pragma::physics::PhysOb
 		operator<<(out, *physObj);
 	return out;
 }
+
+#ifdef __linux__
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::physics, PhysObj);
+#endif
 
 void Lua::PhysObj::register_class(lua_State *l, luabind::module_ &mod)
 {

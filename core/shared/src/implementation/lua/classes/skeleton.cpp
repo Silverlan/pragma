@@ -4,6 +4,10 @@ module;
 
 #include <algorithm>
 #include <string>
+#include "pragma/lua/core.hpp"
+#include <memory>
+#include <cinttypes>
+#include <functional>
 
 module pragma.shared;
 

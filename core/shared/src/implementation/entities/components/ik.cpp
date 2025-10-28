@@ -3,7 +3,8 @@
 module;
 
 #include "pragma/lua/core.hpp"
-
+#include "pragma/buss_ik/Tree.h"
+#include "pragma/buss_ik/Jacobian.h"
 #include <algorithm>
 #include <cassert>
 #include <functional>
@@ -15,10 +16,6 @@ module pragma.shared;
 import :entities.components.ik;
 
 using namespace pragma;
-
-namespace pragma {
-	using ::operator<<;
-};
 
 IKComponent::IKComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void IKComponent::Initialize()

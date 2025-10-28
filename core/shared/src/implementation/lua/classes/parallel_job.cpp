@@ -7,6 +7,8 @@ module;
 #include <functional>
 #include <memory>
 #include <sstream>
+#include <thread>
+#include <mutex>
 
 module pragma.shared;
 

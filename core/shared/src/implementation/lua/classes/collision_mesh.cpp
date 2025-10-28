@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <cinttypes>
+
+#include <vector>
+#include <cstring>
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include "pragma/lua/core.hpp"
 #include <functional>
 #include <memory>
@@ -10,6 +15,8 @@ module;
 module pragma.shared;
 
 import :scripting.lua.classes.collision_mesh;
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::physics, CollisionMesh);
 
 void Lua::CollisionMesh::register_class(luabind::class_<::pragma::physics::CollisionMesh> &classDef)
 {

@@ -4,6 +4,7 @@ module;
 
 #include "pragma/lua/core.hpp"
 #include <cmath>
+#include <cinttypes>
 #include <string>
 
 module pragma.shared;

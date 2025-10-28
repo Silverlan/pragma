@@ -4,6 +4,7 @@ module;
 
 #include "pragma/logging.hpp"
 #include <cassert>
+#include <iostream>
 
 module pragma.shared;
 

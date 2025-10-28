@@ -337,14 +337,14 @@ export {
 			mutable std::unique_ptr<std::unordered_map<ComponentEventId, std::vector<CallbackHandle>>> m_eventCallbacks;
 			mutable std::unique_ptr<std::unordered_map<ComponentEventId, std::vector<CallbackHandle>>> m_boundEvents;
 		};
+		DLLNETWORK std::ostream &operator<<(std::ostream &os, const pragma::BaseEntityComponent &component);
+		
         using namespace umath::scoped_enum::bitwise;
 	};
     namespace umath::scoped_enum::bitwise {
         template<>
         struct enable_bitwise_operators<pragma::BaseEntityComponent::StateFlags> : std::true_type {};
     }
-
-	DLLNETWORK std::ostream &operator<<(std::ostream &os, const pragma::BaseEntityComponent &component);
 
 	namespace pragma {
 		template<class TComponent>

@@ -4,7 +4,10 @@ module;
 
 #include <vector>
 #include "pragma/lua/core.hpp"
-
+#include "pragma/buss_ik/Node.h"
+#include "pragma/buss_ik/Tree.h"
+#include "pragma/buss_ik/Jacobian.h"
+#include <unordered_map>
 #include <sharedutils/magic_enum.hpp>
 #include <algorithm>
 #include <memory>

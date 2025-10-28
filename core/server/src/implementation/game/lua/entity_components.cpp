@@ -16,11 +16,6 @@ import pragma.shared;
 
 void RegisterLuaEntityComponents2_sv(lua_State *l, luabind::module_ &entsMod);
 
-#ifdef __linux__
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEnvSoundDspComponent);
-#endif
-
 void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {
 	Game::RegisterLuaEntityComponents(entsMod);

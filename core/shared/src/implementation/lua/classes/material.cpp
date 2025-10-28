@@ -7,10 +7,13 @@ module;
 #include <memory>
 #include <string>
 #include <string_view>
+#include "pragma/lua/ostream_operator_alias.hpp"
 
 module pragma.shared;
 
 import :scripting.lua.classes.material;
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(msys, Material);
 
 void Lua::Material::register_class(luabind::class_<msys::Material> &classDef)
 {

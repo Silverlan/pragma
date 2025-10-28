@@ -44,12 +44,11 @@ export {
 		DLLNETWORK const char *register_global_string(const std::string &str);
 		DLLNETWORK const char *register_global_string(const std::string_view &str);
 		DLLNETWORK const char *register_global_string(const char *str);
+		DLLNETWORK std::ostream &operator<<(std::ostream &stream, const GString &str);
 	};
 
 	template<>
 	struct std::hash<pragma::GString> {
 		std::size_t operator()(const pragma::GString &k) const { return std::hash<std::string>()(k.c_str()); }
 	};
-
-	DLLNETWORK std::ostream &operator<<(std::ostream &stream, const pragma::GString &str);
 };

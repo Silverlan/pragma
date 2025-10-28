@@ -546,14 +546,14 @@ pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *pragma::Gam
 bool pragma::Game::StartProfilingStage(const char *stage)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	debug::get_domain().BeginTask("stage_" + std::string {stage});
+	::debug::get_domain().BeginTask("stage_" + std::string {stage});
 #endif
 	return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage);
 }
 bool pragma::Game::StopProfilingStage()
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	debug::get_domain().EndTask();
+	::debug::get_domain().EndTask();
 #endif
 	return m_profilingStageManager && m_profilingStageManager->StopProfilerStage();
 }
@@ -857,8 +857,8 @@ std::shared_ptr<pragma::Model> pragma::Game::LoadModel(const std::string &mdl, b
 	if(mdl.empty())
 		return nullptr;
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	debug::get_domain().BeginTask("load_model");
-	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
+	::debug::get_domain().BeginTask("load_model");
+	util::ScopeGuard sgVtune {[]() { ::debug::get_domain().EndTask(); }};
 #endif
 	spdlog::debug("Loading model '{}'...", mdl);
 	auto *asset = GetNetworkState()->GetModelManager().FindCachedAsset(mdl);

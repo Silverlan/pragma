@@ -9,6 +9,7 @@ module;
 #include <memory>
 
 #include "pragma/lua/core.hpp"
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include <algorithm>
 #include <array>
 #include <string>
@@ -16,6 +17,10 @@ module;
 module pragma.shared;
 
 import :scripting.lua.classes.model_mesh;
+
+#ifdef __linux__
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, ModelSubMesh);
+#endif
 
 void Lua::ModelMesh::register_class(luabind::class_<::ModelMesh> &classDef)
 {

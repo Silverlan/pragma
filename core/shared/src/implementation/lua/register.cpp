@@ -4,6 +4,7 @@ module;
 
 #include <mpParser.h>
 #include "noise/noise.h"
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include "pragma/debug/debugbreak.hpp"
 #include "pragma/logging.hpp"
 #include "pragma/lua/core.hpp"
@@ -184,6 +185,11 @@ bool Lua::util::start_debugger_server(lua_State *l)
 }
 
 static std::vector<bezierfit::VECTOR> reduce(std::vector<bezierfit::VECTOR> points) { return bezierfit::reduce(points); }
+
+#ifdef __linux__
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, util::HSV);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(std, std::match_results<const char *>);
+#endif
 
 void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 {

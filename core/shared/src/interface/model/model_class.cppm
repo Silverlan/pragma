@@ -7,7 +7,7 @@ module;
 #include <string>
 #include <unordered_map>
 #include <vector>
-
+#include <cmath>
 #include <cinttypes>
 #include <optional>
 #include <functional>
@@ -156,9 +156,9 @@ export {
 		void validate_value(const T &v)
 		{
 			if constexpr(std::is_arithmetic_v<T>) {
-				if(isnan(v))
+				if(std::isnan(v))
 					throw std::runtime_error {"NaN value"};
-				if(isinf(v))
+				if(std::isinf(v))
 					throw std::runtime_error {"inv value"};
 			}
 			else if constexpr(std::is_same_v<T, EulerAngles>) {

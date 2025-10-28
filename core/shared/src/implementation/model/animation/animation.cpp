@@ -2,6 +2,16 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <vector>
+#include <functional>
+
+#include <cinttypes>
+
+#include <map>
+#include <cstring>
+#include <unordered_map>
+#include <cmath>
+
 #include "pragma/logging.hpp"
 #include <sharedutils/magic_enum.hpp>
 #include <algorithm>

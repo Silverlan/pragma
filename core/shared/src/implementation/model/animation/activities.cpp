@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <unordered_map>
+#include <random>
+
 #include "pragma/networkdefinitions.h"
 #include <cassert>
 #include <string>

@@ -2,6 +2,25 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <typeindex>
+
+#include <map>
+#include <cmath>
+
+#include <unordered_map>
+#include <random>
+
+#include <mutex>
+#include <condition_variable>
+
+#include <vector>
+
+#include <cinttypes>
+
+#include <optional>
+
+#include <cstring>
+
 #include "pragma/lua/core.hpp"
 #include <sharedutils/magic_enum.hpp>
 #include <algorithm>

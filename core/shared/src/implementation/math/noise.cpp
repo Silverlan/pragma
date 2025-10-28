@@ -21,6 +21,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 module;
 
+#include <algorithm>
+
 #include <random>
 
 module pragma.shared;

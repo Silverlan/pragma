@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <functional>
+#include "pragma/lua/core.hpp"
+#include <cinttypes>
+
 #include <memory>
 #include <string>
 #include <unordered_set>
@@ -19,7 +23,7 @@ module;
 
 module pragma.shared;
 
-import :scripting.lua.libraries.import;
+import :scripting.lua.libraries.lib_import;
 
 int Lua::import::import_wad(lua_State *l)
 {

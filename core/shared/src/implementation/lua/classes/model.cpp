@@ -158,7 +158,7 @@ namespace pragma::animation {
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, Vertex);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, VertexWeight);
 // DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::animation, Animation);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::animation, Skeleton);
+// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::animation, Skeleton);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, Model);
 #endif
 

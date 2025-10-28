@@ -2,6 +2,22 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <cinttypes>
+
+#include <map>
+#include <cmath>
+
+#include <unordered_map>
+#include <random>
+
+#include <algorithm>
+
+#include <optional>
+#include <vector>
+#include <mutex>
+#include <cstring>
+#include <condition_variable>
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include "pragma/lua/core.hpp"
 #include <iostream>
 #include <memory>
@@ -996,6 +1012,12 @@ static std::ostream &operator<<(std::ostream &os, const ::udm::HdrColor &hdr) { 
 namespace Lua::udm {
 	void register_types(Lua::Interface &lua, luabind::module_ &modUdm);
 };
+#ifdef __linux__
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm, udm::Element);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm, udm::Reference);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm, udm::Data);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm, udm::Array);
+#endif
 void Lua::udm::register_types(Lua::Interface &lua, luabind::module_ &modUdm)
 {
 	auto cdEl = luabind::class_<::udm::Element>("Element");

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include <sstream>
+
 #include "pragma/lua/core.hpp"
 #include "stdafx_server.h"
 
@@ -12,7 +14,7 @@ import pragma.server.scripting.lua;
 
 void SGame::RegisterLuaClasses()
 {
-	Game::RegisterLuaClasses();
+	pragma::Game::RegisterLuaClasses();
 
 	auto &modGame = GetLuaInterface().RegisterLibrary("game");
 #if 0
@@ -90,11 +92,11 @@ void SGame::RegisterLuaClasses()
 		luabind::def("test_entity_param",static_cast<void(*)(pragma::ecs::BaseEntity*)>([](pragma::ecs::BaseEntity *ent) {
 			Con::cout<<"Entity: "<<*ent<<Con::endl;
 		})),
-		luabind::def("test_entity_ret",static_cast<pragma::ecs::BaseEntity*(*)(Game&)>([](Game &game) -> pragma::ecs::BaseEntity* {
+		luabind::def("test_entity_ret",static_cast<pragma::ecs::BaseEntity*(*)(pragma::Game&)>([](pragma::Game &game) -> pragma::ecs::BaseEntity* {
 			return &game.GetWorld()->GetEntity();
 		})),
 
-		luabind::def("test_entity_handle_test_get",static_cast<EntityHandleT(*)(Game&)>([](Game &game) -> EntityHandleT {
+		luabind::def("test_entity_handle_test_get",static_cast<EntityHandleT(*)(pragma::Game&)>([](pragma::Game &game) -> EntityHandleT {
 			auto hTest = game.GetWorld()->GetEntity().GetHandle();
 			std::cout<<hTest.get()<<std::endl;
 			return hTest;
@@ -119,46 +121,46 @@ void SGame::RegisterLuaClasses()
 		luabind::def("test_entity_handle_const_pointer_param",static_cast<void(*)(const EntityHandleT*)>([](const EntityHandleT *ent) {
 			Con::cout<<"Entity: "<<(*ent)->GetClass()<<Con::endl;
 		})),
-		luabind::def("test_entity_handle_ret",static_cast<EntityHandleT(*)(Game&)>([](Game &game) -> EntityHandleT {
+		luabind::def("test_entity_handle_ret",static_cast<EntityHandleT(*)(pragma::Game&)>([](pragma::Game &game) -> EntityHandleT {
 			return game.GetWorld()->GetEntity().GetHandle();
 		})),
-		luabind::def("test_entity_handle_const_ret",static_cast<const EntityHandleT(*)(Game&)>([](Game &game) -> const EntityHandleT {
+		luabind::def("test_entity_handle_const_ret",static_cast<const EntityHandleT(*)(pragma::Game&)>([](pragma::Game &game) -> const EntityHandleT {
 			return game.GetWorld()->GetEntity().GetHandle();
 		})),
 
 		luabind::def("test_entity_const_param",static_cast<void(*)(const pragma::ecs::BaseEntity*)>([](const pragma::ecs::BaseEntity *ent) {
 			Con::cout<<"Entity: "<<const_cast<pragma::ecs::BaseEntity&>(*ent)<<Con::endl;
 		})),
-		luabind::def("test_entity_const_ret",static_cast<const pragma::ecs::BaseEntity*(*)(Game&)>([](Game &game) -> const pragma::ecs::BaseEntity* {
+		luabind::def("test_entity_const_ret",static_cast<const pragma::ecs::BaseEntity*(*)(pragma::Game&)>([](pragma::Game &game) -> const pragma::ecs::BaseEntity* {
 			return &game.GetWorld()->GetEntity();
 		})),
 
 		luabind::def("test_entity_null_param",static_cast<void(*)(pragma::ecs::BaseEntity*)>([](pragma::ecs::BaseEntity *ent) {
 			Con::cout<<"Entity: "<<ent<<Con::endl;
 		})),
-		luabind::def("test_entity_null_ret",static_cast<pragma::ecs::BaseEntity*(*)(Game&)>([](Game &game) -> pragma::ecs::BaseEntity* {
+		luabind::def("test_entity_null_ret",static_cast<pragma::ecs::BaseEntity*(*)(pragma::Game&)>([](pragma::Game &game) -> pragma::ecs::BaseEntity* {
 			return nullptr;
 		})),
 
 		luabind::def("test_entity_ref_param",static_cast<void(*)(pragma::ecs::BaseEntity&)>([](pragma::ecs::BaseEntity &ent) {
 			Con::cout<<"Entity: "<<ent<<Con::endl;
 		})),
-		luabind::def("test_entity_ref_ret",static_cast<pragma::ecs::BaseEntity&(*)(Game&)>([](Game &game) -> pragma::ecs::BaseEntity& {
+		luabind::def("test_entity_ref_ret",static_cast<pragma::ecs::BaseEntity&(*)(pragma::Game&)>([](pragma::Game &game) -> pragma::ecs::BaseEntity& {
 			return game.GetWorld()->GetEntity();
 		})),
 
 		luabind::def("test_entity_ref_const_param",static_cast<void(*)(const pragma::ecs::BaseEntity&)>([](const pragma::ecs::BaseEntity &ent) {
 			Con::cout<<"Entity: "<<const_cast<pragma::ecs::BaseEntity&>(ent)<<Con::endl;
 		})),
-		luabind::def("test_entity_ref_const_ret",static_cast<const pragma::ecs::BaseEntity&(*)(Game&)>([](Game &game) -> const pragma::ecs::BaseEntity& {
+		luabind::def("test_entity_ref_const_ret",static_cast<const pragma::ecs::BaseEntity&(*)(pragma::Game&)>([](pragma::Game &game) -> const pragma::ecs::BaseEntity& {
 			return game.GetWorld()->GetEntity();
 		})),
 
 		luabind::def("test_component_param",static_cast<void(*)(pragma::VelocityComponent*)>([](pragma::VelocityComponent *c) {
 			Con::cout<<"Component: "<<c->GetVelocity()<<Con::endl;
 		})),
-		luabind::def("test_component_ret",static_cast<pragma::VelocityComponent*(*)(Game&)>([](Game &game) -> pragma::VelocityComponent* {
-			EntityIterator entIt {game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+		luabind::def("test_component_ret",static_cast<pragma::VelocityComponent*(*)(pragma::Game&)>([](pragma::Game &game) -> pragma::VelocityComponent* {
+			pragma::ecs::EntityIterator entIt {game,pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 			entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::VelocityComponent>>();
 			auto it = entIt.begin();
 			if(it == entIt.end())
@@ -169,19 +171,19 @@ void SGame::RegisterLuaClasses()
 		luabind::def("test_component_handle_param",static_cast<void(*)(pragma::ComponentHandle<pragma::VelocityComponent>&)>([](pragma::ComponentHandle<pragma::VelocityComponent> &c) {
 			Con::cout<<"Component: "<<c->GetVelocity()<<Con::endl;
 		})),
-		luabind::def("test_component_handle_ret",static_cast<pragma::ComponentHandle<pragma::VelocityComponent>(*)(Game&)>([](Game &game) -> pragma::ComponentHandle<pragma::VelocityComponent> {
-			EntityIterator entIt {game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+		luabind::def("test_component_handle_ret",static_cast<pragma::ComponentHandle<pragma::VelocityComponent>(*)(pragma::Game&)>([](pragma::Game &game) -> pragma::ComponentHandle<pragma::VelocityComponent> {
+			pragma::ecs::EntityIterator entIt {game,pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 			entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::VelocityComponent>>();
 			auto it = entIt.begin();
 			if(it == entIt.end())
 				return pragma::ComponentHandle<pragma::VelocityComponent>{};
 			return it->GetComponent<pragma::VelocityComponent>();
 		})),
-		luabind::def("test_component_handle_null_ret",static_cast<pragma::ComponentHandle<pragma::VelocityComponent>(*)(Game&)>([](Game &game) -> pragma::ComponentHandle<pragma::VelocityComponent> {
+		luabind::def("test_component_handle_null_ret",static_cast<pragma::ComponentHandle<pragma::VelocityComponent>(*)(pragma::Game&)>([](pragma::Game &game) -> pragma::ComponentHandle<pragma::VelocityComponent> {
 			return {};
 		})),
 
-		luabind::def("test_hidden_param",static_cast<void(*)(Game&,NetworkState&,Engine&)>([](Game &game,NetworkState &nw,Engine &en) {
+		luabind::def("test_hidden_param",static_cast<void(*)(pragma::Game&,NetworkState&,pragma::Engine&)>([](pragma::Game &game,NetworkState &nw,pragma::Engine &en) {
 			Con::cout<<"Game Map: "<<game.GetMapName()<<Con::endl;
 			Con::cout<<"NetworkState material count: "<<nw.GetMaterialManager().GetMaterials().size()<<Con::endl;
 			Con::cout<<"Last engine tick: "<<en.GetLastTick()<<Con::endl;
@@ -202,9 +204,9 @@ void SGame::RegisterLuaClasses()
 	];
 #endif
 
-	auto materialClassDef = luabind::class_<::Material>("Material");
+	auto materialClassDef = luabind::class_<msys::Material>("Material");
 	Lua::Material::register_class(materialClassDef);
-	materialClassDef.def("SetShader", static_cast<void (*)(lua_State *, ::Material &, const std::string &)>([](lua_State *l, ::Material &mat, const std::string &shader) {
+	materialClassDef.def("SetShader", static_cast<void (*)(lua_State *, msys::Material &, const std::string &)>([](lua_State *l, msys::Material &mat, const std::string &shader) {
 		auto db = mat.GetPropertyDataBlock();
 		if(db == nullptr)
 			return;
@@ -221,7 +223,7 @@ void SGame::RegisterLuaClasses()
 	Lua::ModelSubMesh::register_class(subModelMeshClassDef);
 	subModelMeshClassDef.scope[luabind::def("create", &Lua::ModelSubMesh::Server::Create)];
 
-	auto modelClassDef = luabind::class_<::Model>("Model");
+	auto modelClassDef = luabind::class_<pragma::Model>("Model");
 	Lua::Model::register_class(GetLuaState(), modelClassDef, modelMeshClassDef, subModelMeshClassDef);
 	modelClassDef.def("AddMaterial", &Lua::Model::Server::AddMaterial);
 	modelClassDef.def("SetMaterial", &Lua::Model::Server::SetMaterial);

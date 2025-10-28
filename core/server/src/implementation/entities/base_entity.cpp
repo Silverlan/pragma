@@ -2,6 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include <memory>
+#include <functional>
+#include <functional>
+#include <unordered_map>
+#include <vector>
+
+#include <optional>
+
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_server.h"
@@ -23,7 +31,7 @@ SBaseEntity::SBaseEntity() : pragma::ecs::BaseEntity(), m_bShared(false), m_bSyn
 void SBaseEntity::DoSpawn()
 {
 	pragma::ecs::BaseEntity::DoSpawn();
-	Game *game = ServerState::Get()->GetGameState();
+	pragma::Game *game = ServerState::Get()->GetGameState();
 	game->SpawnEntity(this);
 }
 
@@ -64,7 +72,7 @@ pragma::ecs::BaseEntity *SBaseEntity::GetClientsideEntity() const
 {
 	if(IsShared() == false)
 		return nullptr;
-	auto *clState = Engine::Get()->GetClientState();
+	auto *clState = pragma::Engine::Get()->GetClientState();
 	if(clState == nullptr)
 		return nullptr;
 	auto *game = clState->GetGameState();
@@ -140,7 +148,7 @@ void SBaseEntity::Remove()
 	if(umath::is_flag_set(GetStateFlags(), pragma::ecs::BaseEntity::StateFlags::Removed))
 		return;
 	pragma::ecs::BaseEntity::Remove();
-	Game *game = ServerState::Get()->GetGameState();
+	pragma::Game *game = ServerState::Get()->GetGameState();
 	game->RemoveEntity(this);
 }
 

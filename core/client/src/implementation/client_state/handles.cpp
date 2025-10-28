@@ -229,9 +229,9 @@ void ClientState::HandleReceiveGameInfo(NetPacket &packet)
 	//if(game == NULL)
 	//	return;
 	std::string map = packet->ReadString();
-	auto svGameFlags = packet->Read<Game::GameFlags>();
-	if((svGameFlags & Game::GameFlags::LevelTransition) != Game::GameFlags::None)
-		game->SetGameFlags(game->GetGameFlags() | Game::GameFlags::LevelTransition);
+	auto svGameFlags = packet->Read<pragma::Game::GameFlags>();
+	if((svGameFlags & pragma::Game::GameFlags::LevelTransition) != pragma::Game::GameFlags::None)
+		game->SetGameFlags(game->GetGameFlags() | pragma::Game::GameFlags::LevelTransition);
 	double tServer = packet->Read<double>();
 	tServer -= game->CurTime();
 	game->SetServerTime(tServer);

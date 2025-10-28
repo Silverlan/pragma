@@ -69,7 +69,7 @@ uint32_t pragma::rendering::ForwardPlusInstance::CalcTileCount(uint32_t w, uint3
 static constexpr uint32_t get_shadow_integer_count()
 {
 	// Minimum number of integers required to contain 1 bit for each light with a shadow
-	return umath::to_integral(GameLimits::MaxAbsoluteShadowLights) / 32u + 1u;
+	return umath::to_integral(pragma::GameLimits::MaxAbsoluteShadowLights) / 32u + 1u;
 }
 
 pragma::rendering::ForwardPlusInstance::ForwardPlusInstance(CRasterizationRendererComponent &rasterizer) : m_rasterizer {rasterizer}
@@ -89,7 +89,7 @@ bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &con
 	m_tileCount = CalcTileCount(width, height);
 
 	using VisibleIndex = int32_t;
-	auto numLights = umath::to_integral(GameLimits::MaxAbsoluteLights);
+	auto numLights = umath::to_integral(pragma::GameLimits::MaxAbsoluteLights);
 	auto numTiles = m_tileCount * numLights;
 
 	std::vector<VisibleIndex> defaultIndices(numTiles, -1);

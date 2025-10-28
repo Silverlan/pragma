@@ -96,14 +96,14 @@ export {
 		void DestroyClient();
 
 		virtual void implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const override;
-		virtual Material *LoadMaterial(const std::string &path, bool precache, bool bReload) override;
+		virtual msys::Material *LoadMaterial(const std::string &path, bool precache, bool bReload) override;
 	  public:
 		ClientState();
 		virtual ~ClientState() override;
 		virtual bool IsClient() const override;
 	  public:
 		virtual bool ShouldRemoveSound(ALSound &snd) override;
-		Material *LoadMaterial(const std::string &path, const std::function<void(Material *)> &onLoaded, bool bReload, bool bLoadInstantly); // TODO
+		msys::Material *LoadMaterial(const std::string &path, const std::function<void(msys::Material *)> &onLoaded, bool bReload, bool bLoadInstantly); // TODO
 		msys::MaterialHandle CreateMaterial(const std::string &path, const std::string &shader);
 		msys::MaterialHandle CreateMaterial(const std::string &shader);
 		bool LoadGUILuaFile(std::string f);
@@ -231,8 +231,8 @@ export {
 		void OnPreedit(prosper::Window &window, const pragma::string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret);
 		void OnIMEStatusChanged(prosper::Window &window, bool imeEnabled);
 
-		Material *LoadMaterial(const std::string &path, const std::function<void(Material *)> &onLoaded, bool bReload = false);
-		Material *LoadMaterial(const std::string &path);
+		msys::Material *LoadMaterial(const std::string &path, const std::function<void(msys::Material *)> &onLoaded, bool bReload = false);
+		msys::Material *LoadMaterial(const std::string &path);
 
 		void ReadEntityData(NetPacket &packet);
 	};

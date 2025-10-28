@@ -49,15 +49,15 @@ export namespace pragma {
 		};
 		struct DLLCLIENT HitboxBvhCache {
 			using ModelName = std::string;
-			HitboxBvhCache(Game &game);
+			HitboxBvhCache(pragma::Game &game);
 			~HitboxBvhCache();
 			ModelHitboxBvhCache *GetModelCache(const ModelName &mdlName);
-			std::shared_future<void> GenerateModelCache(const ModelName &mdlName, Model &mdl);
+			std::shared_future<void> GenerateModelCache(const ModelName &mdlName, pragma::Model &mdl);
 		  private:
-			void PrepareModel(Model &mdl);
-			void InitializeModelHitboxBvhCache(Model &mdl, const HitboxMeshBvhBuildTask &buildTask, ModelHitboxBvhCache &mdlHbBvhCache);
+			void PrepareModel(pragma::Model &mdl);
+			void InitializeModelHitboxBvhCache(pragma::Model &mdl, const HitboxMeshBvhBuildTask &buildTask, ModelHitboxBvhCache &mdlHbBvhCache);
 			std::unordered_map<ModelName, std::shared_ptr<ModelHitboxBvhCache>> m_modelBvhCache;
-			Game &m_game;
+			pragma::Game &m_game;
 			pragma::bvh::HitboxMeshBvhBuilder m_builder;
 		};
 	};

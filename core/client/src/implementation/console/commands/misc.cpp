@@ -137,11 +137,11 @@ void CMD_lua_reload_weapon(NetworkState *state, pragma::BasePlayerComponent *, s
 void CMD_lua_reload_entities(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	NetworkState *server = pragma::get_cengine()->GetServerNetworkState();
-	Game *sgame = server->GetGameState();
+	pragma::Game *sgame = server->GetGameState();
 	if(sgame != NULL)
 		sgame->LoadLuaEntities("entities");
 	NetworkState *client = pragma::get_cengine()->GetClientState();
-	Game *cgame = client->GetGameState();
+	pragma::Game *cgame = client->GetGameState();
 	if(cgame != NULL)
 		cgame->LoadLuaEntities("entities");
 }
@@ -149,11 +149,11 @@ void CMD_lua_reload_entities(NetworkState *, pragma::BasePlayerComponent *, std:
 void CMD_lua_reload_weapons(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	NetworkState *server = pragma::get_cengine()->GetServerNetworkState();
-	Game *sgame = server->GetGameState();
+	pragma::Game *sgame = server->GetGameState();
 	if(sgame != NULL)
 		sgame->LoadLuaEntities("weapons");
 	NetworkState *client = pragma::get_cengine()->GetClientState();
-	Game *cgame = client->GetGameState();
+	pragma::Game *cgame = client->GetGameState();
 	if(cgame != NULL)
 		cgame->LoadLuaEntities("weapons");
 }

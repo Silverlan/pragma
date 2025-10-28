@@ -480,7 +480,7 @@ bool CModelComponent::SetBodyGroup(UInt32 groupId, UInt32 id)
 
 void CModelComponent::SetRenderMeshesDirty() { umath::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired); }
 
-void CModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
+void CModelComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &model)
 {
 	auto &ent = GetEntity();
 	auto pRenderComponent = ent.GetComponent<CRenderComponent>();

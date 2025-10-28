@@ -21,7 +21,7 @@ import :engine;
 import :entities.components;
 
 
-static std::string get_screenshot_name(Game *game, uimg::ImageFormat format)
+static std::string get_screenshot_name(pragma::Game *game, uimg::ImageFormat format)
 {
 	std::string map;
 	if(game == nullptr)

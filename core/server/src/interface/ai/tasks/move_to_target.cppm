@@ -23,7 +23,7 @@ export namespace pragma {
 			virtual void Print(const Schedule *sched, std::ostream &o) const override;
 
 			void SetMoveDistance(float dist);
-			void SetMoveActivity(Activity act);
+			void SetMoveActivity(pragma::Activity act);
 		};
 	};
 };

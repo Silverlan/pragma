@@ -16,7 +16,7 @@ bool pragma::networking::LocalClient::Connect(const std::string &ip, Port port, 
 {
 	if(ip != "127.0.0.1")
 		return false;
-	auto result = Engine::Get()->ConnectLocalHostPlayerClient();
+	auto result = pragma::Engine::Get()->ConnectLocalHostPlayerClient();
 	if(result == false)
 		return result;
 	OnConnected();
@@ -31,7 +31,7 @@ bool pragma::networking::LocalClient::SendPacket(Protocol protocol, NetPacket &p
 {
 	packet.SetTimeActivated(util::clock::to_int(util::clock::get_duration_since_start()));
 	packet->SetOffset(0);
-	Engine::Get()->HandleLocalHostPlayerServerPacket(packet);
+	pragma::Engine::Get()->HandleLocalHostPlayerServerPacket(packet);
 	OnPacketSent(protocol, packet);
 	return true;
 }

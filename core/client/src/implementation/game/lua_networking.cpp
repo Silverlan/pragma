@@ -63,7 +63,7 @@ void Lua::net::client::receive(lua_State *l, const std::string &name, const Lua:
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	Game *game = client->GetGameState();
+	pragma::Game *game = client->GetGameState();
 	function.push(l);
 	int fc = lua_createreference(l, 2);
 	Lua::Pop(l, 1);

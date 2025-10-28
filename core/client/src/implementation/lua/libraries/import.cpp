@@ -121,7 +121,7 @@ int Lua::lib_export::export_scene(lua_State *l)
 
 #if 0
 	// Export light sources
-	EntityIterator entIt {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightComponent>>();
 	auto numLights = entIt.GetCount();
 	scene->mLights = new aiLight*[numLights];

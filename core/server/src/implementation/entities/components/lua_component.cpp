@@ -3,6 +3,12 @@
 
 module;
 
+#include <memory>
+#include <functional>
+#include <functional>
+#include <unordered_map>
+#include <vector>
+
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_server.h"

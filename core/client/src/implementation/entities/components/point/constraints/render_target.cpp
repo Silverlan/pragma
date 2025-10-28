@@ -48,8 +48,8 @@ void CRenderTargetComponent::GetRenderSize(float *w, float *h)
 	*h = m_kvRenderHeight;
 }
 
-void CRenderTargetComponent::SetRenderMaterial(Material *mat) { m_matRender = mat; }
-Material *CRenderTargetComponent::GetRenderMaterial() { return m_matRender; }
+void CRenderTargetComponent::SetRenderMaterial(msys::Material *mat) { m_matRender = mat; }
+msys::Material *CRenderTargetComponent::GetRenderMaterial() { return m_matRender; }
 void CRenderTargetComponent::SetRenderMaterial(std::string mat) { SetRenderMaterial(pragma::get_client_state()->LoadMaterial(mat.c_str())); }
 
 void CRenderTargetComponent::SetRefreshRate(float f) { m_kvRefreshRate = f; }

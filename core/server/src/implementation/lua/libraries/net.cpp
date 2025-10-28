@@ -32,7 +32,7 @@ bool Lua::net::server::register_net_message(const std::string &identifier)
 {
 	if(!::ServerState::Get()->IsGameActive())
 		return false;
-	Game *game = ::ServerState::Get()->GetGameState();
+	pragma::Game *game = ::ServerState::Get()->GetGameState();
 	return game->RegisterNetMessage(identifier);
 }
 
@@ -74,7 +74,7 @@ void Lua::net::server::receive(lua_State *l, const std::string &name, const Lua:
 {
 	if(!::ServerState::Get()->IsGameActive())
 		return;
-	Game *game = ::ServerState::Get()->GetGameState();
+	pragma::Game *game = ::ServerState::Get()->GetGameState();
 	function.push(l);
 	int fc = lua_createreference(l, -1);
 	Lua::Pop(l, 1);

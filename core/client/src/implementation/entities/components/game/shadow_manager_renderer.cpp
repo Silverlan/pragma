@@ -70,9 +70,9 @@ ShadowRenderer::ShadowRenderer()
 		}
 	};
 
-	m_octreeCallbacks.subMeshCallback = [this](const Model &mdl, const CModelSubMesh &subMesh, uint32_t renderFlags) {
+	m_octreeCallbacks.subMeshCallback = [this](const pragma::Model &mdl, const CModelSubMesh &subMesh, uint32_t renderFlags) {
 		auto matIdx = mdl.GetMaterialIndex(subMesh);
-		auto *mat = matIdx.has_value() ? const_cast<Model &>(mdl).GetMaterial(*matIdx) : nullptr;
+		auto *mat = matIdx.has_value() ? const_cast<pragma::Model &>(mdl).GetMaterial(*matIdx) : nullptr;
 		m_shadowCasters.push_back({});
 		auto &info = m_shadowCasters.back();
 		info.mesh = &subMesh;
@@ -216,7 +216,7 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(std::shared_ptr<
 	{
 		auto layerFlag = 1<<layerId;
 		auto bProcessMeshes = false;
-		Material *prevMat = nullptr;
+		msys::Material *prevMat = nullptr;
 		for(auto &info : m_shadowCasters)
 		{
 			if(info.entity != nullptr)
@@ -297,7 +297,7 @@ void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffe
 		if(drawParticleShadows == true && renderer) {
 			auto *scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
 			// TODO: Only culled particles
-			EntityIterator entIt {*pragma::get_cgame()};
+			pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 			entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::ecs::CParticleSystemComponent>>();
 			for(auto *ent : entIt) {
 				auto p = ent->GetComponent<pragma::ecs::CParticleSystemComponent>();

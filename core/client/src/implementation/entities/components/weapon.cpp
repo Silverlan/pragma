@@ -330,7 +330,7 @@ void CWeaponComponent::UpdateDeployState()
 	auto *vm = GetViewModel();
 	if(vm == nullptr)
 		return;
-	PlayViewActivity(Activity::VmIdle);
+	PlayViewActivity(pragma::Activity::VmIdle);
 }
 
 void CWeaponComponent::Deploy()
@@ -341,8 +341,8 @@ void CWeaponComponent::Deploy()
 	auto *vm = GetViewModel();
 	if(vm == nullptr)
 		return;
-	if(PlayViewActivity(Activity::VmDeploy) == false)
-		PlayViewActivity(Activity::VmIdle);
+	if(PlayViewActivity(pragma::Activity::VmDeploy) == false)
+		PlayViewActivity(pragma::Activity::VmIdle);
 }
 
 void CWeaponComponent::Holster()
@@ -352,10 +352,10 @@ void CWeaponComponent::Holster()
 	if(vm == NULL)
 		return;
 	CGame *game = pragma::get_client_state()->GetGameState();
-	PlayViewActivity(Activity::VmHolster);
+	PlayViewActivity(pragma::Activity::VmHolster);
 }
 
-Activity CWeaponComponent::TranslateViewActivity(Activity act) { return act; }
+pragma::Activity CWeaponComponent::TranslateViewActivity(pragma::Activity act) { return act; }
 
 pragma::CViewModelComponent *CWeaponComponent::GetViewModel()
 {
@@ -369,7 +369,7 @@ pragma::CViewModelComponent *CWeaponComponent::GetViewModel()
 	return vm;
 }
 
-bool CWeaponComponent::PlayViewActivity(Activity activity, pragma::FPlayAnim flags)
+bool CWeaponComponent::PlayViewActivity(pragma::Activity activity, pragma::FPlayAnim flags)
 {
 	auto *vm = GetViewModel();
 	if(vm == nullptr)
@@ -410,7 +410,7 @@ void CWeaponComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEn
 	BaseWeaponComponent::RegisterLuaBindings(l, modEnts);
 	auto def = pragma::lua::create_entity_component_class<pragma::CWeaponComponent, pragma::BaseWeaponComponent>("WeaponComponent");
 	def.def("PlayViewActivity", &pragma::CWeaponComponent::PlayViewActivity);
-	def.def("PlayViewActivity", static_cast<bool (*)(pragma::CWeaponComponent &wepComponent, Activity)>([](pragma::CWeaponComponent &wepComponent, Activity activity) { return wepComponent.PlayViewActivity(activity); }));
+	def.def("PlayViewActivity", static_cast<bool (*)(pragma::CWeaponComponent &wepComponent, pragma::Activity)>([](pragma::CWeaponComponent &wepComponent, pragma::Activity activity) { return wepComponent.PlayViewActivity(activity); }));
 	def.def("SetViewModel", &pragma::CWeaponComponent::SetViewModel);
 	def.def("GetViewModel", &pragma::CWeaponComponent::GetViewModel);
 	def.def("SetHideWorldModelInFirstPerson", &pragma::CWeaponComponent::SetHideWorldModelInFirstPerson);

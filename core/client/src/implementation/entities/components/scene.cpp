@@ -213,7 +213,7 @@ void CSceneComponent::InitializeShadowDescriptorSet()
 		auto &context = pragma::get_cengine()->GetRenderContext();
 		m_shadowDsg = context.CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SHADOWS);
 		auto &cubeTex = context.GetDummyCubemapTexture();
-		auto n = umath::to_integral(GameLimits::MaxActiveShadowCubeMaps);
+		auto n = umath::to_integral(pragma::GameLimits::MaxActiveShadowCubeMaps);
 		for(auto i = decltype(n) {0u}; i < n; ++i)
 			m_shadowDsg->GetDescriptorSet()->SetBindingArrayTexture(*cubeTex, umath::to_integral(pragma::ShaderSceneLit::ShadowBinding::ShadowCubeMaps), i);
 	}
@@ -285,7 +285,7 @@ void CSceneComponent::InitializeFogBuffer()
 template<typename TCPPM>
 TCPPM *CSceneComponent::FindOcclusionCuller()
 {
-	EntityIterator entIt {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::COcclusionCullerComponent>>();
 	entIt.AttachFilter<EntityIteratorFilterUser>([this](pragma::ecs::BaseEntity &ent, std::size_t index) -> bool { return static_cast<CBaseEntity &>(ent).IsInScene(*this); });
 	auto it = entIt.begin();

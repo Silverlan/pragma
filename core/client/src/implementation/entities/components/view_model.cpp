@@ -50,7 +50,7 @@ void CViewModelComponent::Initialize()
 		}
 		auto animComponent = ent.GetAnimatedComponent();
 		if(animComponent.valid())
-			animComponent->PlayActivity(Activity::VmIdle);
+			animComponent->PlayActivity(pragma::Activity::VmIdle);
 	});
 	BindEventUnhandled(CAnimatedComponent::EVENT_ON_ANIMATION_RESET, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto *wepC = static_cast<pragma::CWeaponComponent*>(GetWeapon());

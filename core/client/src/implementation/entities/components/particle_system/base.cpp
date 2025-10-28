@@ -777,9 +777,9 @@ void ecs::CParticleSystemComponent::SetExtent(float ext)
 float ecs::CParticleSystemComponent::GetRadius() const { return m_radius; }
 float ecs::CParticleSystemComponent::GetExtent() const { return m_extent; }
 
-void ecs::CParticleSystemComponent::SetMaterial(Material *mat) { m_material = mat ? mat->GetHandle() : msys::MaterialHandle {}; }
+void ecs::CParticleSystemComponent::SetMaterial(msys::Material *mat) { m_material = mat ? mat->GetHandle() : msys::MaterialHandle {}; }
 void ecs::CParticleSystemComponent::SetMaterial(const char *mat) { SetMaterial(pragma::get_client_state()->LoadMaterial(mat)); }
-Material *ecs::CParticleSystemComponent::GetMaterial() const { return m_material.get(); }
+msys::Material *ecs::CParticleSystemComponent::GetMaterial() const { return m_material.get(); }
 
 CParticleInitializer *ecs::CParticleSystemComponent::AddInitializer(std::string identifier, const std::unordered_map<std::string, std::string> &values)
 {

@@ -140,7 +140,7 @@ static void debug_water(NetworkState *state, pragma::BasePlayerComponent *pl, st
 	if(pragma::get_cgame() == nullptr || pl == nullptr)
 		return;
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
-	auto ents = command::find_target_entity(state, *charComponent, argv, [](TraceData &trData) { trData.SetCollisionFilterMask(trData.GetCollisionFilterGroup() | CollisionMask::Water | CollisionMask::WaterSurface); });
+	auto ents = command::find_target_entity(state, *charComponent, argv, [](TraceData &trData) { trData.SetCollisionFilterMask(trData.GetCollisionFilterGroup() | pragma::physics::CollisionMask::Water | pragma::physics::CollisionMask::WaterSurface); });
 	auto bFoundWater = false;
 	if(ents.empty() == false) {
 		for(auto *ent : ents) {

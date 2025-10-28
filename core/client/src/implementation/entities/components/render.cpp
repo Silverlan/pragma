@@ -221,7 +221,7 @@ void CRenderComponent::OnEntitySpawn()
 	BaseRenderComponent::OnEntitySpawn();
 	UpdateRenderMeshes();
 
-	EntityIterator entIt {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::COcclusionCullerComponent>>();
 	for(auto *ent : entIt) {
 		auto occlusionCullerC = ent->GetComponent<pragma::COcclusionCullerComponent>();
@@ -268,7 +268,7 @@ bounding_volume::AABB CRenderComponent::CalcAbsoluteRenderBounds() const
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent) {
 		auto physType = pPhysComponent->GetPhysicsType();
-		if(physType == pragma::physics::MOVETYPE::DYNAMIC || physType == pragma::physics::MOVETYPE::STATIC)
+		if(physType == pragma::physics::PHYSICSTYPE::DYNAMIC || physType == pragma::physics::PHYSICSTYPE::STATIC)
 			pose.SetOrigin(pose.GetOrigin() + pPhysComponent->GetLocalOrigin());
 	}
 	absBounds = absBounds.Transform(pose);
@@ -283,7 +283,7 @@ Sphere CRenderComponent::CalcAbsoluteRenderSphere() const
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent) {
 		auto physType = pPhysComponent->GetPhysicsType();
-		if(physType == pragma::physics::MOVETYPE::DYNAMIC || physType == pragma::physics::MOVETYPE::STATIC)
+		if(physType == pragma::physics::PHYSICSTYPE::DYNAMIC || physType == pragma::physics::PHYSICSTYPE::STATIC)
 			pose.SetOrigin(pose.GetOrigin() + pPhysComponent->GetLocalOrigin());
 	}
 	auto &scale = pose.GetScale();
@@ -330,7 +330,7 @@ void CRenderComponent::UpdateRenderBounds()
 {
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
 	auto *phys = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
-	if(phys == nullptr || pPhysComponent->GetPhysicsType() != pragma::physics::MOVETYPE::SOFTBODY || !phys->IsSoftBody())
+	if(phys == nullptr || pPhysComponent->GetPhysicsType() != pragma::physics::PHYSICSTYPE::SOFTBODY || !phys->IsSoftBody())
 		AABB::GetRotatedBounds(m_renderMin,m_renderMax,Mat4{m_renderPose.GetRotation()},&m_renderMinRot,&m_renderMaxRot); // TODO: Use orientation
 	else
 	{
@@ -459,7 +459,7 @@ void CRenderComponent::UpdateMatrices()
 	auto orientation = pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	umath::ScaledTransform pose {};
-	if(pPhysComponent == nullptr || pPhysComponent->GetPhysicsType() != pragma::physics::MOVETYPE::SOFTBODY) {
+	if(pPhysComponent == nullptr || pPhysComponent->GetPhysicsType() != pragma::physics::PHYSICSTYPE::SOFTBODY) {
 		pose.SetOrigin(pPhysComponent != nullptr ? pPhysComponent->GetOrigin() : pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {});
 		pose.SetRotation(orientation);
 	}

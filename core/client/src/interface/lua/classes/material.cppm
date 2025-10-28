@@ -14,15 +14,15 @@ export module pragma.client:scripting.lua.classes.material;
 import :scripting.lua.libraries.vulkan;
 
 export namespace Lua {
-	namespace Material {
+	namespace msys::Material {
 		namespace Client {
-			DLLCLIENT void SetTexture(lua_State *l, ::Material *mat, const std::string &textureID, const std::string &tex);
-			DLLCLIENT void SetTexture(lua_State *l, ::Material *mat, const std::string &textureID, ::Texture &tex);
-			DLLCLIENT void SetTexture(lua_State *l, ::Material *mat, const std::string &textureID, Lua::Vulkan::Texture &hTex);
-			DLLCLIENT void SetTexture(lua_State *l, ::Material *mat, const std::string &textureID, Lua::Vulkan::Texture &hTex, const std::string &name);
-			DLLCLIENT void GetTexture(lua_State *l, ::Material *mat, const std::string &textureID);
-			DLLCLIENT void InitializeShaderData(lua_State *l, ::Material *mat, bool reload);
-			DLLCLIENT void InitializeShaderData(lua_State *l, ::Material *mat);
+			DLLCLIENT void SetTexture(lua_State *l, msys::Material *mat, const std::string &textureID, const std::string &tex);
+			DLLCLIENT void SetTexture(lua_State *l, msys::Material *mat, const std::string &textureID, ::Texture &tex);
+			DLLCLIENT void SetTexture(lua_State *l, msys::Material *mat, const std::string &textureID, Lua::Vulkan::Texture &hTex);
+			DLLCLIENT void SetTexture(lua_State *l, msys::Material *mat, const std::string &textureID, Lua::Vulkan::Texture &hTex, const std::string &name);
+			DLLCLIENT void GetTexture(lua_State *l, msys::Material *mat, const std::string &textureID);
+			DLLCLIENT void InitializeShaderData(lua_State *l, msys::Material *mat, bool reload);
+			DLLCLIENT void InitializeShaderData(lua_State *l, msys::Material *mat);
 		};
 	};
 	namespace TextureInfo {

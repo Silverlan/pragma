@@ -28,7 +28,7 @@ import :game;
 using namespace pragma;
 
 
-void CPBRConverterComponent::UpdateMetalness(Model &mdl, CMaterial &mat)
+void CPBRConverterComponent::UpdateMetalness(pragma::Model &mdl, CMaterial &mat)
 {
 	// Material has no surface material. To find out whether it is a metal material,
 	// we'll try to find a collision mesh near the visual mesh that uses this material
@@ -188,7 +188,7 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl, CMaterial &mat)
 		pragma::get_client_state()->LoadMaterial(mat.GetName(), nullptr, true, true); // Reload material immediately
 }
 
-void CPBRConverterComponent::UpdateMetalness(Model &mdl)
+void CPBRConverterComponent::UpdateMetalness(pragma::Model &mdl)
 {
 	ConvertMaterialsToPBR(mdl);
 	for(auto hMat : mdl.GetMaterials()) {

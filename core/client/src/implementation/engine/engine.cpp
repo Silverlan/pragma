@@ -85,7 +85,7 @@ static const auto SEPARATE_JOYSTICK_AXES = true;
 
 static CEngine *g_engine = nullptr;
 CEngine::CEngine(int argc, char *argv[])
-    : Engine(argc, argv), pragma::RenderContext(), m_nearZ(pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z), //10.0f), //0.1f
+    : pragma::Engine(argc, argv), pragma::RenderContext(), m_nearZ(pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z), //10.0f), //0.1f
       m_farZ(pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z), m_fps(0), m_tFPSTime(0.f), m_tLastFrame(util::Clock::now()), m_tDeltaFrameTime(0), m_audioAPI {"fmod"}
 {
 	g_engine = this;
@@ -126,7 +126,7 @@ CEngine::CEngine(int argc, char *argv[])
 		pragma::asset::AssetManager::ImporterInfo importerInfo {};
 		importerInfo.name = "glTF";
 		importerInfo.fileExtensions = {{"gltf", false}, {"glb", true}, {"vrm", true}}; // VRM is based on glTF ( https://vrm.dev/en/ )
-		GetAssetManager().RegisterImporter(importerInfo, pragma::asset::Type::Model, [](Game &game, ufile::IFile &f, const std::optional<std::string> &mdlPath, std::string &errMsg) -> std::unique_ptr<pragma::asset::IAssetWrapper> {
+		GetAssetManager().RegisterImporter(importerInfo, pragma::asset::Type::Model, [](pragma::Game &game, ufile::IFile &f, const std::optional<std::string> &mdlPath, std::string &errMsg) -> std::unique_ptr<pragma::asset::IAssetWrapper> {
 			util::Path path {};
 			if(mdlPath.has_value()) {
 				path = util::Path::CreateFile(*mdlPath);
@@ -145,7 +145,7 @@ CEngine::CEngine(int argc, char *argv[])
 		pragma::asset::AssetManager::ImporterInfo importerInfo {};
 		importerInfo.name = "fbx";
 		importerInfo.fileExtensions = {{"fbx", true}};
-		GetAssetManager().RegisterImporter(importerInfo, pragma::asset::Type::Model, [](Game &game, ufile::IFile &f, const std::optional<std::string> &mdlPath, std::string &errMsg) -> std::unique_ptr<pragma::asset::IAssetWrapper> {
+		GetAssetManager().RegisterImporter(importerInfo, pragma::asset::Type::Model, [](pragma::Game &game, ufile::IFile &f, const std::optional<std::string> &mdlPath, std::string &errMsg) -> std::unique_ptr<pragma::asset::IAssetWrapper> {
 			util::Path path {};
 			if(mdlPath.has_value()) {
 				path = util::Path::CreateFile(*mdlPath);
@@ -169,7 +169,7 @@ CEngine::CEngine(int argc, char *argv[])
 void CEngine::Release()
 {
 	Close();
-	Engine::Release();
+	pragma::Engine::Release();
 	pragma::RenderContext::Release();
 }
 
@@ -182,7 +182,7 @@ bool CEngine::IsGPUProfilingEnabled() const { return cvGPUProfiling->GetBool(); 
 
 void CEngine::DumpDebugInformation(uzip::ZIPFile &zip) const
 {
-	Engine::DumpDebugInformation(zip);
+	pragma::Engine::DumpDebugInformation(zip);
 
 	auto &renderContext = GetRenderContext();
 
@@ -311,7 +311,7 @@ void CEngine::EndGame()
 	auto *cl = GetClientState();
 	if(cl != nullptr)
 		cl->EndGame();
-	Engine::EndGame();
+	pragma::Engine::EndGame();
 }
 
 void CEngine::Input(int key, pragma::platform::KeyState inputState, pragma::platform::KeyState pressState, pragma::platform::Modifier mods, float magnitude)
@@ -638,7 +638,7 @@ bool CEngine::IsWindowFocused() const { return umath::is_flag_set(m_stateFlags, 
 
 void CEngine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
 {
-	Engine::SetAssetMultiThreadedLoadingEnabled(enabled);
+	pragma::Engine::SetAssetMultiThreadedLoadingEnabled(enabled);
 	auto *cl = GetClientState();
 	if(cl) {
 		auto &mdlManager = cl->GetModelManager();
@@ -687,7 +687,7 @@ std::optional<std::string> g_waylandLibdecorPlugin;
 extern bool g_cli;
 bool CEngine::Initialize(int argc, char *argv[])
 {
-	Engine::Initialize(argc, argv);
+	pragma::Engine::Initialize(argc, argv);
 	SetCLIOnly(g_cli);
 
 #ifdef __linux__
@@ -1023,7 +1023,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 	auto &fontSet = GetDefaultFontSet();
 	auto &gui = WGUI::Open(GetRenderContext(), matManager);
 	RegisterUiElementTypes();
-	gui.SetMaterialLoadHandler([this](const std::string &path) -> Material * { return GetClientState()->LoadMaterial(path); });
+	gui.SetMaterialLoadHandler([this](const std::string &path) -> msys::Material * { return GetClientState()->LoadMaterial(path); });
 	auto *fontData = fontSet.FindFontFileCandidate(FontSetFlag::Sans | FontSetFlag::Bold);
 	if(!fontData) {
 		spdlog::error("Failed to determine default font for font set '{}'!", defaultFontSet);
@@ -1335,7 +1335,7 @@ void CEngine::LoadFontSets()
 }
 void CEngine::RunLaunchCommands()
 {
-	Engine::RunLaunchCommands();
+	pragma::Engine::RunLaunchCommands();
 	auto *cl = GetClientState();
 	if(cl != nullptr)
 		SetHRTFEnabled(cl->GetConVarBool("cl_audio_hrtf_enabled"));
@@ -1344,7 +1344,7 @@ void CEngine::ClearConsole()
 {
 	auto *pConsole = WIConsole::GetConsole();
 	if(pConsole == nullptr) {
-		Engine::ClearConsole();
+		pragma::Engine::ClearConsole();
 		return;
 	}
 	pConsole->Clear();
@@ -1353,7 +1353,7 @@ void CEngine::OpenConsole()
 {
 	switch(m_consoleType) {
 	case ConsoleType::Terminal:
-		Engine::OpenConsole();
+		pragma::Engine::OpenConsole();
 		break;
 	default:
 		{
@@ -1378,7 +1378,7 @@ void CEngine::CloseConsole()
 {
 	switch(m_consoleType) {
 	case ConsoleType::Terminal:
-		Engine::CloseConsole();
+		pragma::Engine::CloseConsole();
 		break;
 	default:
 		{
@@ -1397,7 +1397,7 @@ void CEngine::SetConsoleType(ConsoleType type)
 		return;
 	auto isOpen = IsConsoleOpen();
 	CloseConsole();
-	Engine::SetConsoleType(type);
+	pragma::Engine::SetConsoleType(type);
 	if(isOpen)
 		OpenConsole();
 }
@@ -1407,13 +1407,13 @@ CEngine::ConsoleType CEngine::GetConsoleType() const
 	auto *pFrame = pConsole ? pConsole->GetFrame() : nullptr;
 	if(pFrame && pFrame->IsVisible())
 		return pFrame->IsDetached() ? ConsoleType::GUIDetached : ConsoleType::GUI;
-	return Engine::GetConsoleType();
+	return pragma::Engine::GetConsoleType();
 }
 bool CEngine::IsConsoleOpen() const
 {
 	switch(m_consoleType) {
 	case ConsoleType::Terminal:
-		return Engine::IsConsoleOpen();
+		return pragma::Engine::IsConsoleOpen();
 	default:
 		{
 			auto *pConsole = WIConsole::GetConsole();
@@ -1579,15 +1579,15 @@ std::unique_ptr<CEngine::ConVarInfoList> &CEngine::GetConVarConfig(NwStateType t
 {
 	if(type == NwStateType::Client)
 		return m_clConfig;
-	return Engine::GetConVarConfig(type);
+	return pragma::Engine::GetConVarConfig(type);
 }
-Engine::StateInstance &CEngine::GetStateInstance(NetworkState &nw)
+pragma::Engine::StateInstance &CEngine::GetStateInstance(NetworkState &nw)
 {
 	if(m_clInstance->state.get() == &nw)
 		return *m_clInstance;
-	return Engine::GetStateInstance(nw);
+	return pragma::Engine::GetStateInstance(nw);
 }
-Engine::StateInstance &CEngine::GetClientStateInstance() { return *m_clInstance; }
+pragma::Engine::StateInstance &CEngine::GetClientStateInstance() { return *m_clInstance; }
 
 ::util::WeakHandle<prosper::Shader> CEngine::ReloadShader(const std::string &name)
 {
@@ -1688,7 +1688,7 @@ void CEngine::Disconnect()
 
 bool CEngine::IsMultiPlayer() const
 {
-	if(Engine::IsMultiPlayer())
+	if(pragma::Engine::IsMultiPlayer())
 		return true;
 	auto *clState = static_cast<ClientState *>(GetClientState());
 	if(clState == nullptr)
@@ -1722,7 +1722,7 @@ Lua::Interface *CEngine::GetLuaInterface(lua_State *l)
 		if(cg != nullptr && cg->GetLuaState() == l)
 			return &cg->GetLuaInterface();
 	}
-	return Engine::GetLuaInterface(l);
+	return pragma::Engine::GetLuaInterface(l);
 }
 
 bool CEngine::IsProgramInFocus() const
@@ -1741,10 +1741,10 @@ NetworkState *CEngine::GetNetworkState(lua_State *l)
 		return NULL;
 	if(cl->GetLuaState() == l || cl->GetGUILuaState() == l)
 		return cl;
-	return Engine::GetNetworkState(l);
+	return pragma::Engine::GetNetworkState(l);
 }
 
-void CEngine::Start() { Engine::Start(); }
+void CEngine::Start() { pragma::Engine::Start(); }
 
 void CEngine::Close()
 {
@@ -1782,7 +1782,7 @@ void CEngine::Close()
 	g_engine = nullptr;
 	pragma::RenderContext::Release();
 
-	Engine::Close();
+	pragma::Engine::Close();
 }
 
 void CEngine::OnClose()
@@ -2037,7 +2037,7 @@ void CEngine::Think()
 	UpdateFPS(static_cast<float>(std::chrono::duration_cast<std::chrono::nanoseconds>(m_tDeltaFrameTime).count() / sToNs));
 	//auto tStart = std::chrono::high_resolution_clock::now();
 
-	Engine::Think();
+	pragma::Engine::Think();
 
 	auto *cl = GetClientState();
 	if(cl != NULL)
@@ -2083,7 +2083,7 @@ void CEngine::SetTickDeltaTimeTiedToFrameRate(bool tieToFrameRate) { umath::set_
 void CEngine::UpdateTickCount()
 {
 	if(umath::is_flag_set(m_stateFlags, StateFlags::TickDeltaTimeTiedToFrameRate) == false) {
-		Engine::UpdateTickCount();
+		pragma::Engine::UpdateTickCount();
 		return;
 	}
 	m_ctTick.UpdateByDelta(util::clock::to_seconds(m_tDeltaFrameTime));
@@ -2110,7 +2110,7 @@ void CEngine::Tick()
 	ProcessConsoleInput();
 	RunTickEvents();
 
-	Engine::StartProfilingStage("Tick");
+	pragma::Engine::StartProfilingStage("Tick");
 	// The client tick has to run BEFORE the server tick!!!
 	// This is to avoid issues in singleplayer, where the client would use data it received from the server and apply the same calculations on the already modified data.
 	StartProfilingStage("ClientTick");
@@ -2119,12 +2119,12 @@ void CEngine::Tick()
 		cl->Tick();
 	StopProfilingStage(); // ClientTick
 
-	Engine::StartProfilingStage("ServerTick");
+	pragma::Engine::StartProfilingStage("ServerTick");
 	auto *sv = GetServerNetworkState();
 	if(sv != NULL)
 		sv->Tick();
-	Engine::StopProfilingStage(); // ServerTick
-	Engine::StopProfilingStage(); // Tick
+	pragma::Engine::StopProfilingStage(); // ServerTick
+	pragma::Engine::StopProfilingStage(); // Tick
 
 	UpdateParallelJobs();
 }
@@ -2163,7 +2163,7 @@ uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 {
 	if(type == pragma::asset::Type::Texture || type == pragma::asset::Type::Material || type == pragma::asset::Type::Model)
 		const_cast<CEngine *>(this)->GetRenderContext().WaitIdle();
-	auto n = Engine::DoClearUnusedAssets(type);
+	auto n = pragma::Engine::DoClearUnusedAssets(type);
 	switch(type) {
 	case pragma::asset::Type::Texture:
 		{

@@ -65,7 +65,7 @@ export namespace pragma::ecs {
 		static CParticleSystemComponent *Create(const std::string &fname, CParticleSystemComponent *parent = nullptr, bool bRecordKeyValues = false, bool bAutoSpawn = true);
 		static CParticleSystemComponent *Create(const std::unordered_map<std::string, std::string> &values, CParticleSystemComponent *parent = nullptr, bool bRecordKeyValues = false, bool bAutoSpawn = true);
 		static CParticleSystemComponent *Create(CParticleSystemComponent *parent = nullptr, bool bAutoSpawn = true);
-		static std::shared_ptr<Model> GenerateModel(Game &game, const std::vector<const CParticleSystemComponent *> &particleSystems);
+		static std::shared_ptr<pragma::Model> GenerateModel(pragma::Game &game, const std::vector<const CParticleSystemComponent *> &particleSystems);
 
 		enum class Flags : uint32_t {
 			None = 0u,
@@ -156,9 +156,9 @@ export namespace pragma::ecs {
 		void Clear();
 		const std::vector<ParticleData> &GetRenderParticleData() const;
 		const std::vector<ParticleAnimationData> &GetParticleAnimationData() const;
-		void SetMaterial(Material *mat);
+		void SetMaterial(msys::Material *mat);
 		void SetMaterial(const char *mat);
-		Material *GetMaterial() const;
+		msys::Material *GetMaterial() const;
 		ParticleOrientationType GetOrientationType() const;
 		void SetOrientationType(ParticleOrientationType type);
 		void SetNodeTarget(uint32_t node, CBaseEntity *ent);
@@ -302,7 +302,7 @@ export namespace pragma::ecs {
 		SpriteSheetAnimation *GetSpriteSheetAnimation();
 		const SpriteSheetAnimation *GetSpriteSheetAnimation() const;
 
-		std::shared_ptr<Model> GenerateModel() const;
+		std::shared_ptr<pragma::Model> GenerateModel() const;
 
 		uint32_t GetMaxNodes() const { return m_maxNodes; }
 		void SetMaxNodes(uint32_t maxNodes) { m_maxNodes = maxNodes; }

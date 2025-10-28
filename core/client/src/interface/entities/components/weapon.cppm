@@ -36,7 +36,7 @@ export namespace pragma {
 		virtual bool HandleViewModelAnimationEvent(CViewModelComponent *vm, const AnimationEvent &ev);
 		virtual void Deploy() override;
 		virtual void Holster() override;
-		virtual bool PlayViewActivity(Activity activity, pragma::FPlayAnim flags = pragma::FPlayAnim::Default);
+		virtual bool PlayViewActivity(pragma::Activity activity, pragma::FPlayAnim flags = pragma::FPlayAnim::Default);
 		CViewModelComponent *GetViewModel();
 		virtual void PrimaryAttack() override;
 		virtual void SecondaryAttack() override;
@@ -71,7 +71,7 @@ export namespace pragma {
 		std::optional<umath::Degree> m_viewFov {};
 		CallbackHandle m_cbOnOwnerObserverModeChanged = {};
 		CallbackHandle m_cbOnObserverChanged {};
-		virtual Activity TranslateViewActivity(Activity act);
+		virtual pragma::Activity TranslateViewActivity(pragma::Activity act);
 		virtual void OnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin = nullptr) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		void UpdateViewModel();

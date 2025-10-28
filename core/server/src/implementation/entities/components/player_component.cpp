@@ -3,6 +3,12 @@
 
 module;
 
+#include <memory>
+#include <functional>
+#include <functional>
+#include <unordered_map>
+#include <vector>
+
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_server.h"
@@ -392,7 +398,7 @@ void SPlayerComponent::SetCrouchEyeLevel(float eyelevel)
 	}
 }
 
-bool SPlayerComponent::PlaySharedActivity(Activity activity)
+bool SPlayerComponent::PlaySharedActivity(pragma::Activity activity)
 {
 	auto &ent = GetEntity();
 	auto animComponent = ent.GetAnimatedComponent();
@@ -452,7 +458,7 @@ void Lua::Player::Server::SetActionInput(lua_State *l, pragma::SPlayerComponent 
 {
 	auto *actionInputC = hPl.GetActionInputController();
 	if(actionInputC)
-		actionInputC->SetActionInput(static_cast<Action>(input), pressed);
+		actionInputC->SetActionInput(static_cast<pragma::Action>(input), pressed);
 }
 
 bool Lua::Player::Server::SendResource(lua_State *l, pragma::SPlayerComponent &hPl, const std::string &name) { return hPl.SendResource(name); }

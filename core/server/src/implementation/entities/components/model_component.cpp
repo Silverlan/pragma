@@ -17,7 +17,7 @@ using namespace pragma;
 void SModelComponent::Initialize() { BaseModelComponent::Initialize(); }
 void SModelComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void SModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
+void SModelComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &model)
 {
 	BaseModelComponent::OnModelChanged(model);
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());

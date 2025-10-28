@@ -41,7 +41,7 @@ void CAIComponent::ReceiveSnapshotData(NetPacket &packet)
 	}
 	else {
 		m_moveInfo.moving = true;
-		m_moveInfo.moveActivity = packet->Read<Activity>();
+		m_moveInfo.moveActivity = packet->Read<pragma::Activity>();
 		m_moveInfo.moveDir = packet->Read<Vector3>();
 		m_moveInfo.moveTarget = packet->Read<Vector3>();
 

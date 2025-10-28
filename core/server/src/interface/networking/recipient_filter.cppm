@@ -14,7 +14,11 @@ module;
 
 #include <sstream>
 
+#include <string>
+
 export module pragma.server.networking.recipient_filter;
+
+export import pragma.util;
 
 export namespace pragma::networking {
 	class IServerClient;

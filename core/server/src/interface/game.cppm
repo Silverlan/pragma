@@ -10,6 +10,9 @@ module;
 #include <optional>
 #include "pragma/lua/core.hpp"
 
+#include <memory>
+#include <functional>
+
 
 export module pragma.server.game;
 
@@ -21,7 +24,7 @@ export import pragma.shared;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-export class DLLSERVER SGame : public Game {
+export class DLLSERVER SGame : public pragma::Game {
   private:
 	std::vector<SBaseEntity *> m_ents;
 	std::unique_ptr<CacheInfo> m_luaCache = nullptr;
@@ -69,7 +72,7 @@ export class DLLSERVER SGame : public Game {
 	CallbackHandle m_cbProfilingHandle = {};
 	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>> m_profilingStageManager;
   public:
-	using Game::LoadLuaComponent;
+	using pragma::Game::LoadLuaComponent;
 	virtual void InitializeLua() override;
 	virtual void SetupLua() override;
 	virtual void SetUp() override;

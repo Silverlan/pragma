@@ -89,7 +89,7 @@ void SPhysicsComponent::SetSimulationEnabled(bool b)
 	p->Write<bool>(b);
 	ent.SendNetEvent(m_netEvSetSimEnabled, p, pragma::networking::Protocol::SlowReliable);
 }
-void SPhysicsComponent::SetCollisionType(COLLISIONTYPE collisiontype)
+void SPhysicsComponent::SetCollisionType(pragma::physics::COLLISIONTYPE collisiontype)
 {
 	BasePhysicsComponent::SetCollisionType(collisiontype);
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
@@ -101,7 +101,7 @@ void SPhysicsComponent::SetCollisionType(COLLISIONTYPE collisiontype)
 	ServerState::Get()->SendPacket("ent_collisiontype", p, pragma::networking::Protocol::SlowReliable);
 }
 
-void SPhysicsComponent::SetCollisionFilter(CollisionMask filterGroup, CollisionMask filterMask)
+void SPhysicsComponent::SetCollisionFilter(pragma::physics::CollisionMask filterGroup, pragma::physics::CollisionMask filterMask)
 {
 	BasePhysicsComponent::SetCollisionFilter(filterGroup, filterMask);
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
@@ -117,7 +117,7 @@ void SPhysicsComponent::SetCollisionFilter(CollisionMask filterGroup, CollisionM
 bool SPhysicsComponent::PostPhysicsSimulate()
 {
 	auto keepAwake = BasePhysicsComponent::PostPhysicsSimulate();
-	if(GetPhysicsType() != pragma::physics::MOVETYPE::SOFTBODY)
+	if(GetPhysicsType() != pragma::physics::PHYSICSTYPE::SOFTBODY)
 		return keepAwake;
 #ifdef ENABLE_DEPRECATED_PHYSICS
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());

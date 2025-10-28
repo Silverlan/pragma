@@ -2,6 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include <memory>
+#include <functional>
+#include <functional>
+#include <unordered_map>
+#include <vector>
+
+#include <optional>
+
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_server.h"
@@ -21,7 +29,7 @@ SBaseEntity *SGame::CreateEntity(std::string classname)
 {
 	if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
 		return nullptr;
-	StringToLower(classname);
+	ustring::to_lower(classname);
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("create_entity");
 	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
@@ -82,7 +90,7 @@ void SGame::RemoveEntity(pragma::ecs::BaseEntity *ent)
 
 void SGame::SpawnEntity(pragma::ecs::BaseEntity *ent) // Don't call directly
 {
-	Game::SpawnEntity(ent);
+	pragma::Game::SpawnEntity(ent);
 	auto ID = server_entities::ServerEntityRegistry::Instance().GetNetworkFactoryID(typeid(*ent));
 
 	auto pMapComponent = ent->GetComponent<pragma::MapComponent>();
@@ -185,7 +193,7 @@ SBaseEntity *SGame::CreateLuaEntity(std::string classname, bool bLoadIfNotExists
 	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 	luabind::object oClass {};
-	auto *ent = static_cast<SBaseEntity *>(Game::CreateLuaEntity<SLuaEntity, pragma::lua::HandleHolder<SLuaEntity>>(classname, oClass, bLoadIfNotExists));
+	auto *ent = static_cast<SBaseEntity *>(pragma::Game::CreateLuaEntity<SLuaEntity, pragma::lua::HandleHolder<SLuaEntity>>(classname, oClass, bLoadIfNotExists));
 	if(ent == nullptr)
 		return nullptr;
 	auto oType = oClass["Type"];

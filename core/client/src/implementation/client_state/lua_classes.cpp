@@ -419,7 +419,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	modUtil[defTexInfo];
 
 	auto &modGame = lua.RegisterLibrary("game");
-	auto materialClassDef = luabind::class_<Material>("Material");
+	auto materialClassDef = luabind::class_<msys::Material>("Material");
 
 	auto spriteSheetDef = luabind::class_<SpriteSheetAnimation>("SpriteSheetAnimation");
 
@@ -477,22 +477,22 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	materialClassDef.scope[spriteSheetDef];
 
 	Lua::Material::register_class(materialClassDef);
-	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, Material *, const std::string &, const std::string &)>(&Lua::Material::Client::SetTexture));
-	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, Material *, const std::string &, Texture &)>(&Lua::Material::Client::SetTexture));
-	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, Material *, const std::string &, Lua::Vulkan::Texture &)>(&Lua::Material::Client::SetTexture));
-	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, Material *, const std::string &, Lua::Vulkan::Texture &, const std::string &)>(&Lua::Material::Client::SetTexture));
+	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, msys::Material *, const std::string &, const std::string &)>(&Lua::Material::Client::SetTexture));
+	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, msys::Material *, const std::string &, Texture &)>(&Lua::Material::Client::SetTexture));
+	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, msys::Material *, const std::string &, Lua::Vulkan::Texture &)>(&Lua::Material::Client::SetTexture));
+	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, msys::Material *, const std::string &, Lua::Vulkan::Texture &, const std::string &)>(&Lua::Material::Client::SetTexture));
 	materialClassDef.def("GetTextureInfo", &Lua::Material::Client::GetTexture);
 	materialClassDef.def("ReloadTextures", &reload_textures);
-	materialClassDef.def("InitializeShaderDescriptorSet", static_cast<void (*)(lua_State *, ::Material *, bool)>(&Lua::Material::Client::InitializeShaderData));
-	materialClassDef.def("InitializeShaderDescriptorSet", static_cast<void (*)(lua_State *, ::Material *)>(&Lua::Material::Client::InitializeShaderData));
-	materialClassDef.def("ClearSpriteSheetAnimation", static_cast<void (*)(lua_State *, ::Material &)>([](lua_State *l, ::Material &mat) { static_cast<CMaterial &>(mat).ClearSpriteSheetAnimation(); }));
-	materialClassDef.def("GetSpriteSheetAnimation", static_cast<void (*)(lua_State *, ::Material &)>([](lua_State *l, ::Material &mat) {
+	materialClassDef.def("InitializeShaderDescriptorSet", static_cast<void (*)(lua_State *, msys::Material *, bool)>(&Lua::Material::Client::InitializeShaderData));
+	materialClassDef.def("InitializeShaderDescriptorSet", static_cast<void (*)(lua_State *, msys::Material *)>(&Lua::Material::Client::InitializeShaderData));
+	materialClassDef.def("ClearSpriteSheetAnimation", static_cast<void (*)(lua_State *, msys::Material &)>([](lua_State *l, msys::Material &mat) { static_cast<CMaterial &>(mat).ClearSpriteSheetAnimation(); }));
+	materialClassDef.def("GetSpriteSheetAnimation", static_cast<void (*)(lua_State *, msys::Material &)>([](lua_State *l, msys::Material &mat) {
 		auto *spriteSheetAnim = static_cast<CMaterial &>(mat).GetSpriteSheetAnimation();
 		if(spriteSheetAnim == nullptr)
 			return;
 		Lua::Push<SpriteSheetAnimation *>(l, spriteSheetAnim);
 	}));
-	materialClassDef.def("SetShader", static_cast<void (*)(lua_State *, ::Material &, const std::string &)>([](lua_State *l, ::Material &mat, const std::string &shader) {
+	materialClassDef.def("SetShader", static_cast<void (*)(lua_State *, msys::Material &, const std::string &)>([](lua_State *l, msys::Material &mat, const std::string &shader) {
 		auto db = mat.GetPropertyDataBlock();
 		if(db == nullptr)
 			return;
@@ -505,7 +505,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		pragma::get_cgame()->ReloadMaterialShader(static_cast<CMaterial *>(&mat));
 	}));
 	materialClassDef.def(
-	  "GetPrimaryShader", +[](lua_State *l, ::Material &mat) -> luabind::object {
+	  "GetPrimaryShader", +[](lua_State *l, msys::Material &mat) -> luabind::object {
 		  auto *shader = static_cast<CMaterial &>(mat).GetPrimaryShader();
 		  if(!shader)
 			  return Lua::nil;
@@ -1155,7 +1155,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 
 void CGame::RegisterLuaClasses()
 {
-	Game::RegisterLuaClasses();
+	pragma::Game::RegisterLuaClasses();
 	ClientState::RegisterSharedLuaClasses(GetLuaInterface());
 
 	auto debugMod = luabind::module(GetLuaState(), "debug");
@@ -1468,7 +1468,7 @@ void CGame::RegisterLuaClasses()
 	subModelMeshClassDef.def("GetExtensionData", &pragma::ModelSubMesh::GetExtensionData);
 	subModelMeshClassDef.scope[luabind::def("create", &Lua::ModelSubMesh::Client::Create)];
 
-	auto modelClassDef = luabind::class_<Model>("Model");
+	auto modelClassDef = luabind::class_<pragma::Model>("Model");
 
 	auto defMdlExportInfo = luabind::class_<pragma::asset::ModelExportInfo>("ExportInfo");
 	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_PNG", umath::to_integral(pragma::asset::ModelExportInfo::ImageFormat::PNG));
@@ -1517,32 +1517,32 @@ void CGame::RegisterLuaClasses()
 
 	Lua::Model::register_class(GetLuaState(), modelClassDef, modelMeshClassDef, subModelMeshClassDef);
 	modelClassDef.scope[luabind::def(
-	  "create_quad", +[](Game &game, const pragma::model::QuadCreateInfo &createInfo) -> std::shared_ptr<::Model> {
+	  "create_quad", +[](pragma::Game &game, const pragma::model::QuadCreateInfo &createInfo) -> std::shared_ptr<pragma::Model> {
 		  auto mesh = pragma::model::create_quad(game, createInfo);
 		  return Lua::Model::Client::create_generic_model(game, *mesh);
 	  })];
 	modelClassDef.scope[luabind::def(
-	  "create_sphere", +[](Game &game, const pragma::model::SphereCreateInfo &createInfo) -> std::shared_ptr<::Model> {
+	  "create_sphere", +[](pragma::Game &game, const pragma::model::SphereCreateInfo &createInfo) -> std::shared_ptr<pragma::Model> {
 		  auto mesh = pragma::model::create_sphere(game, createInfo);
 		  return Lua::Model::Client::create_generic_model(game, *mesh);
 	  })];
 	modelClassDef.scope[luabind::def(
-	  "create_cylinder", +[](Game &game, const pragma::model::CylinderCreateInfo &createInfo) -> std::shared_ptr<::Model> {
+	  "create_cylinder", +[](pragma::Game &game, const pragma::model::CylinderCreateInfo &createInfo) -> std::shared_ptr<pragma::Model> {
 		  auto mesh = pragma::model::create_cylinder(game, createInfo);
 		  return Lua::Model::Client::create_generic_model(game, *mesh);
 	  })];
 	modelClassDef.scope[luabind::def(
-	  "create_cone", +[](Game &game, const pragma::model::ConeCreateInfo &createInfo) -> std::shared_ptr<::Model> {
+	  "create_cone", +[](pragma::Game &game, const pragma::model::ConeCreateInfo &createInfo) -> std::shared_ptr<pragma::Model> {
 		  auto mesh = pragma::model::create_cone(game, createInfo);
 		  return Lua::Model::Client::create_generic_model(game, *mesh);
 	  })];
 	modelClassDef.scope[luabind::def(
-	  "create_circle", +[](Game &game, const pragma::model::CircleCreateInfo &createInfo) -> std::shared_ptr<::Model> {
+	  "create_circle", +[](pragma::Game &game, const pragma::model::CircleCreateInfo &createInfo) -> std::shared_ptr<pragma::Model> {
 		  auto mesh = pragma::model::create_circle(game, createInfo);
 		  return Lua::Model::Client::create_generic_model(game, *mesh);
 	  })];
 	modelClassDef.scope[luabind::def(
-	  "create_ring", +[](Game &game, const pragma::model::RingCreateInfo &createInfo) -> std::shared_ptr<::Model> {
+	  "create_ring", +[](pragma::Game &game, const pragma::model::RingCreateInfo &createInfo) -> std::shared_ptr<pragma::Model> {
 		  auto mesh = pragma::model::create_ring(game, createInfo);
 		  return Lua::Model::Client::create_generic_model(game, *mesh);
 	  })];

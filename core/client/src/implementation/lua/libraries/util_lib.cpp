@@ -173,7 +173,7 @@ int Lua::util::Client::import_model(lua_State *l)
 	if(Lua::IsSet(l, 3))
 		importAsSingleModel = Lua::CheckBool(l, 3);
 	std::string errMsg;
-	std::shared_ptr<::Model> mdl = nullptr;
+	std::shared_ptr<pragma::Model> mdl = nullptr;
 	if(f) {
 		mdl = pragma::asset::import_model(*f, errMsg, outputPath, importAsSingleModel);
 	}
@@ -258,13 +258,13 @@ int Lua::util::Client::export_texture(lua_State *l)
 
 int Lua::util::Client::export_material(lua_State *l)
 {
-	::Material *mat = nullptr;
+	msys::Material *mat = nullptr;
 	if(Lua::IsString(l, 1)) {
 		std::string matPath = Lua::CheckString(l, 1);
 		mat = pragma::get_client_state()->LoadMaterial(matPath, nullptr, true, false);
 	}
 	else
-		mat = &Lua::Check<::Material>(l, 1);
+		mat = &Lua::Check<msys::Material>(l, 1);
 
 	if(mat == nullptr) {
 		Lua::PushBool(l, false);

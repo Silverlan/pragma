@@ -59,7 +59,7 @@ void CWorldComponent::Initialize()
 #if 0
 	BindEventUnhandled(CColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &onColorChangedData = static_cast<pragma::CEOnColorChanged &>(evData.get());
-		EntityIterator entIt {*pragma::get_cgame()};
+		pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<CLightDirectionalComponent>>();
 		for(auto *ent : entIt) {
 			auto pToggleComponent = ent->GetComponent<CToggleComponent>();

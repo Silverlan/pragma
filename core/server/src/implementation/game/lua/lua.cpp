@@ -3,6 +3,14 @@
 
 module;
 
+#include <memory>
+#include <functional>
+#include <functional>
+#include <unordered_map>
+#include <vector>
+
+#include <sstream>
+
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_server.h"
@@ -47,8 +55,8 @@ void SGame::RegisterLua()
 	gameMod[luabind::def("change_map", static_cast<void (*)(const std::string &, const std::string &)>(Lua::game::Server::change_level)), luabind::def("change_map", static_cast<void (*)(const std::string &)>(Lua::game::Server::change_level)),
 	  luabind::def("set_gravity", Lua::game::Server::set_gravity), luabind::def("get_gravity", Lua::game::Server::get_gravity), luabind::def("load_model", Lua::game::Server::load_model),
 	  luabind::def("load_sound_scripts", static_cast<void (*)(lua_State *, const std::string &, bool)>(Lua::engine::LoadSoundScripts)), luabind::def("load_sound_scripts", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::LoadSoundScripts)),
-	  luabind::def("precache_model", Lua::engine::PrecacheModel_sv), luabind::def("get_model", Lua::engine::get_model), luabind::def("load_material", static_cast<Material *(*)(const std::string &, bool)>(Lua::engine::server::LoadMaterial)),
-	  luabind::def("load_material", static_cast<Material *(*)(const std::string &)>(Lua::engine::server::LoadMaterial)), luabind::def("set_time_scale", &Lua::game::set_time_scale)];
+	  luabind::def("precache_model", Lua::engine::PrecacheModel_sv), luabind::def("get_model", Lua::engine::get_model), luabind::def("load_material", static_cast<msys::Material *(*)(const std::string &, bool)>(Lua::engine::server::LoadMaterial)),
+	  luabind::def("load_material", static_cast<msys::Material *(*)(const std::string &)>(Lua::engine::server::LoadMaterial)), luabind::def("set_time_scale", &Lua::game::set_time_scale)];
 
 	Lua::ents::register_library(GetLuaState());
 	auto entsMod = luabind::module(GetLuaState(), "ents");
@@ -160,18 +168,18 @@ void SGame::RegisterLua()
 	modNet[classDefClRp];
 
 	Lua::RegisterLibrary(GetLuaState(), "input", {});
-	Game::RegisterLua();
+	pragma::Game::RegisterLua();
 }
 
 void SGame::InitializeLua()
 {
-	Game::InitializeLua();
+	pragma::Game::InitializeLua();
 	CallCallbacks<void, lua_State *>("OnLuaInitialized", GetLuaState());
 }
 
 void SGame::SetupLua()
 {
-	Game::SetupLua();
+	pragma::Game::SetupLua();
 	RunLuaFiles("autorun\\");
 	RunLuaFiles("autorun\\server\\");
 	SetGameMode(GetConVarString("sv_gamemode"));
@@ -182,7 +190,7 @@ void SGame::SetupLua()
 
 bool SGame::LoadLuaComponent(const std::string &luaFilePath, const std::string &mainPath, const std::string &componentName)
 {
-	auto r = Game::LoadLuaComponent(luaFilePath, mainPath, componentName);
+	auto r = pragma::Game::LoadLuaComponent(luaFilePath, mainPath, componentName);
 	if(r == false)
 		return r;
 	auto nComponentName = FileManager::GetCanonicalizedPath(componentName);

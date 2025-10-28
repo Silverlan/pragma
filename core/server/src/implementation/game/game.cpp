@@ -3,6 +3,16 @@
 
 module;
 
+#include <sstream>
+
+#include <memory>
+#include <functional>
+#include <functional>
+#include <unordered_map>
+#include <vector>
+
+#include <optional>
+
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
@@ -28,7 +38,7 @@ DLLSERVER pragma::physics::IEnvironment *s_physEnv = nullptr;
 
 static SGame *g_game = nullptr;
 SGame *SGame::Get() { return g_game; }
-SGame::SGame(NetworkState *state) : Game(state)
+SGame::SGame(NetworkState *state) : pragma::Game(state)
 {
 	g_game = this;
 
@@ -55,12 +65,12 @@ SGame::SGame(NetworkState *state) : Game(state)
 	m_taskManager->RegisterTask(typeid(pragma::ai::TaskLookAtTarget), []() { return std::make_shared<pragma::ai::TaskLookAtTarget>(); });
 	m_taskManager->RegisterTask(typeid(pragma::ai::TaskEvent), []() { return std::make_shared<pragma::ai::TaskEvent>(); }); // These have to correspond with ai::Task enums (See ai_task.h)
 
-	m_cbProfilingHandle = Engine::Get()->AddProfilingHandler([this](bool profilingEnabled) {
+	m_cbProfilingHandle = pragma::Engine::Get()->AddProfilingHandler([this](bool profilingEnabled) {
 		if(profilingEnabled == false) {
 			m_profilingStageManager = nullptr;
 			return;
 		}
-		auto &cpuProfiler = Engine::Get()->GetProfiler();
+		auto &cpuProfiler = pragma::Engine::Get()->GetProfiler();
 		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>>();
 		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler);
 	});
@@ -90,19 +100,19 @@ void SGame::OnRemove()
 	s_physEnv = nullptr;
 	m_taskManager = nullptr;
 
-	Game::OnRemove();
+	pragma::Game::OnRemove();
 }
 
-bool SGame::RunLua(const std::string &lua) { return Game::RunLua(lua, "lua_run"); }
+bool SGame::RunLua(const std::string &lua) { return pragma::Game::RunLua(lua, "lua_run"); }
 
-void SGame::OnEntityCreated(pragma::ecs::BaseEntity *ent) { Game::OnEntityCreated(ent); }
+void SGame::OnEntityCreated(pragma::ecs::BaseEntity *ent) { pragma::Game::OnEntityCreated(ent); }
 
 static CVar cvTimescale = GetServerConVar("host_timescale");
 float SGame::GetTimeScale() { return cvTimescale->GetFloat(); }
 
 void SGame::SetTimeScale(float t)
 {
-	Game::SetTimeScale(t);
+	pragma::Game::SetTimeScale(t);
 	NetPacket p;
 	p->Write<float>(t);
 	ServerState::Get()->SendPacket("game_timescale", p, pragma::networking::Protocol::SlowReliable);
@@ -115,7 +125,7 @@ namespace {
 
 void SGame::Initialize()
 {
-	Game::Initialize();
+	pragma::Game::Initialize();
 
 	InitializeGame();
 	SetupLua();
@@ -129,14 +139,14 @@ void SGame::Initialize()
 	if(m_surfaceMaterialManager)
 		m_surfaceMaterialManager->Load("scripts/physics/materials.udm");
 	m_flags |= GameFlags::GameInitialized;
-	CallCallbacks<void, Game *>("OnGameInitialized", this);
+	CallCallbacks<void, pragma::Game *>("OnGameInitialized", this);
 	for(auto *gmC : GetGamemodeComponents())
 		gmC->OnGameInitialized();
 }
 
 void SGame::SetUp()
 {
-	Game::SetUp();
+	pragma::Game::SetUp();
 	auto *entGame = CreateEntity("game");
 	assert(entGame != nullptr);
 	if(entGame == nullptr) {
@@ -152,7 +162,7 @@ std::shared_ptr<pragma::ModelSubMesh> SGame::CreateModelSubMesh() const { return
 
 bool SGame::LoadMap(const std::string &map, const Vector3 &origin, std::vector<EntityHandle> *entities)
 {
-	bool b = Game::LoadMap(map, origin, entities);
+	bool b = pragma::Game::LoadMap(map, origin, entities);
 	if(b == false)
 		return false;
 	ServerState::Get()->SendPacket("map_ready", pragma::networking::Protocol::SlowReliable);
@@ -176,7 +186,7 @@ pragma::ai::TaskManager &SGame::GetAITaskManager() const { return *m_taskManager
 
 void SGame::Think()
 {
-	Game::Think();
+	pragma::Game::Think();
 	CallCallbacks<void>("Think");
 	CallLuaCallbacks("Think");
 	PostThink();
@@ -190,7 +200,7 @@ bool SGame::StopProfilingStage() { return m_profilingStageManager && m_profiling
 
 void SGame::Tick()
 {
-	Game::Tick();
+	pragma::Game::Tick();
 
 	StartProfilingStage("Snapshot");
 	SendSnapshot();
@@ -202,7 +212,7 @@ void SGame::Tick()
 
 	if(m_changeLevelInfo.has_value()) {
 		// Write entity state of all entities that have a global name component
-		EntityIterator entIt {*this};
+		pragma::ecs::EntityIterator entIt {*this};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::GlobalNameComponent>>();
 
 		std::unordered_map<std::string, udm::PProperty> worldState {};
@@ -222,7 +232,7 @@ void SGame::Tick()
 		}
 
 		auto landmarkName = m_changeLevelInfo->landmarkName;
-		auto entItLandmark = EntityIterator {*this};
+		auto entItLandmark = pragma::ecs::EntityIterator {*this};
 		entItLandmark.AttachFilter<TEntityIteratorFilterComponent<pragma::SInfoLandmarkComponent>>();
 		entItLandmark.AttachFilter<EntityIteratorFilterName>(landmarkName);
 		auto it = entItLandmark.begin();
@@ -241,7 +251,7 @@ void SGame::Tick()
 		ServerState::Get()->ChangeLevel(mapName);
 
 		if(game != nullptr) {
-			auto entItLandmark = EntityIterator {*game};
+			auto entItLandmark = pragma::ecs::EntityIterator {*game};
 			entItLandmark.AttachFilter<TEntityIteratorFilterComponent<pragma::SInfoLandmarkComponent>>();
 			entItLandmark.AttachFilter<EntityIteratorFilterName>(landmarkName);
 			auto it = entItLandmark.begin();
@@ -250,7 +260,7 @@ void SGame::Tick()
 			game->m_deltaTransitionLandmarkOffset = dstLandmarkPos - srcLandmarkPos;
 
 			// Move all global map entities by landmark offset between this level and the previous one
-			auto entItGlobalName = EntityIterator {*game};
+			auto entItGlobalName = pragma::ecs::EntityIterator {*game};
 			// The local player will already be spawned at this point, but doesn't have a map component, so this filter mustn't be included or the player won't be affected
 			//entItGlobalName.AttachFilter<TEntityIteratorFilterComponent<pragma::MapComponent>>();
 			entItGlobalName.AttachFilter<TEntityIteratorFilterComponent<pragma::GlobalNameComponent>>();
@@ -267,7 +277,7 @@ bool SGame::IsClient() { return false; }
 
 bool SGame::RegisterNetMessage(std::string name)
 {
-	if(!Game::RegisterNetMessage(name))
+	if(!pragma::Game::RegisterNetMessage(name))
 		return false;
 	NetPacket packet;
 	packet->WriteString(name);
@@ -347,7 +357,7 @@ void SGame::GenerateLuaCache()
 
 bool SGame::InitializeGameMode()
 {
-	if(Game::InitializeGameMode() == false)
+	if(pragma::Game::InitializeGameMode() == false)
 		return false;
 	auto path = Lua::SCRIPT_DIRECTORY_SLASH + GetGameModeScriptDirectoryPath();
 

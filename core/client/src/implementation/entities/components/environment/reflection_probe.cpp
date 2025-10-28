@@ -65,7 +65,7 @@ static void map_build_reflection_probes(NetworkState *state, pragma::BasePlayerC
 	auto defAngles = util::declvalue(&::RenderSettings::skyAngles);
 	g_renderSettings.skyAngles = EulerAngles {pragma::console::get_command_option_parameter_value(commandOptions, "sky_angles", std::to_string(defAngles.p) + ' ' + std::to_string(defAngles.y) + ' ' + std::to_string(defAngles.r))};
 	if(closest) {
-		EntityIterator entIt {*pragma::get_cgame(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+		pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<CReflectionProbeComponent>>();
 		CReflectionProbeComponent *probeClosest = nullptr;
 		auto dClosest = std::numeric_limits<float>::max();
@@ -177,7 +177,7 @@ static std::vector<CReflectionProbeComponent *> get_probes()
 {
 	if(pragma::get_cgame() == nullptr)
 		return {};
-	EntityIterator entIt {*pragma::get_cgame(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<CReflectionProbeComponent>>();
 	auto numProbes = entIt.GetCount();
 	std::vector<CReflectionProbeComponent *> probes {};
@@ -260,7 +260,7 @@ void CReflectionProbeComponent::RegisterMembers(pragma::EntityComponentManager &
 static uint32_t CUBEMAP_LAYER_WIDTH = 512;
 static uint32_t CUBEMAP_LAYER_HEIGHT = 512;
 static uint32_t RAYTRACING_SAMPLE_COUNT = 32;
-void CReflectionProbeComponent::BuildReflectionProbes(Game &game, std::vector<CReflectionProbeComponent *> &probes, bool rebuild)
+void CReflectionProbeComponent::BuildReflectionProbes(pragma::Game &game, std::vector<CReflectionProbeComponent *> &probes, bool rebuild)
 {
 	g_reflectionProbeQueue = {};
 	if(rebuild) {
@@ -300,7 +300,7 @@ void CReflectionProbeComponent::BuildReflectionProbes(Game &game, std::vector<CR
 	CReflectionProbeComponent::get_logger<CReflectionProbeComponent>().info("Updating {} reflection probes... This may take a while!", numProbes);
 	build_next_reflection_probe();
 }
-void CReflectionProbeComponent::BuildAllReflectionProbes(Game &game, bool rebuild)
+void CReflectionProbeComponent::BuildAllReflectionProbes(pragma::Game &game, bool rebuild)
 {
 	auto probes = get_probes();
 	BuildReflectionProbes(game, probes, rebuild);
@@ -311,7 +311,7 @@ prosper::IDescriptorSet *CReflectionProbeComponent::FindDescriptorSetForClosestP
 	if(pragma::get_cgame() == nullptr)
 		return nullptr;
 	// Find closest reflection probe to camera position
-	EntityIterator entIt {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CReflectionProbeComponent>>();
 	auto dClosest = std::numeric_limits<float>::max();
 	pragma::ecs::BaseEntity *entClosest = nullptr;
@@ -776,7 +776,7 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromEnvMap(const std::stri
 		return false;
 	return GenerateIBLReflectionsFromCubemap(*cubemapTex);
 }
-Material *CReflectionProbeComponent::LoadMaterial(bool &outIsDefault)
+msys::Material *CReflectionProbeComponent::LoadMaterial(bool &outIsDefault)
 {
 	outIsDefault = false;
 	auto matPath = util::Path {GetCubemapIBLMaterialFilePath()};
@@ -947,7 +947,7 @@ static void debug_pbr_ibl(NetworkState *state, pragma::BasePlayerComponent *pl, 
 	if(pragma::get_cgame() == nullptr)
 		return;
 
-	EntityIterator entIt {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<CReflectionProbeComponent>>();
 
 	auto origin = pl->GetEntity().GetPosition();

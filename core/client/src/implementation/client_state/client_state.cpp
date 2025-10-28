@@ -509,7 +509,7 @@ void ClientState::EndGame()
 	// variable and destroy that instead.
 	// TODO: This is really ugly, do it another way!
 	auto game = std::move(m_game);
-	m_game = {game.get(), [](Game *) {}};
+	m_game = {game.get(), [](pragma::Game *) {}};
 	game = nullptr;
 	m_game = nullptr;
 
@@ -630,7 +630,7 @@ void ClientState::StartGame(bool) { StartNewGame(""); }
 void ClientState::StartNewGame(const std::string &gameMode)
 {
 	EndGame();
-	m_game = {new CGame {this}, [](Game *game) {
+	m_game = {new CGame {this}, [](pragma::Game *game) {
 		          game->OnRemove();
 		          delete game;
 	          }};
@@ -657,14 +657,14 @@ pragma::ModelSubMesh *ClientState::CreateSubMesh() const { return new CModelSubM
 ModelMesh *ClientState::CreateMesh() const { return new CModelMesh; }
 
 static auto cvMatStreaming = GetClientConVar("cl_material_streaming_enabled");
-Material *ClientState::LoadMaterial(const std::string &path, bool precache, bool bReload)
+msys::Material *ClientState::LoadMaterial(const std::string &path, bool precache, bool bReload)
 {
 	if(spdlog::get_level() <= spdlog::level::debug)
 		spdlog::debug("Loading material '{}'...", path);
 	return LoadMaterial(path, nullptr, bReload, !precache /*!cvMatStreaming->GetBool()*/);
 }
 
-static void init_shader(Material *mat)
+static void init_shader(msys::Material *mat)
 {
 	if(mat == nullptr)
 		return;
@@ -706,11 +706,11 @@ util::FileAssetManager *ClientState::GetAssetManager(pragma::asset::Type type)
 	return NetworkState::GetAssetManager(type);
 }
 
-Material *ClientState::LoadMaterial(const std::string &path, const std::function<void(Material *)> &onLoaded, bool bReload, bool bLoadInstantly)
+msys::Material *ClientState::LoadMaterial(const std::string &path, const std::function<void(msys::Material *)> &onLoaded, bool bReload, bool bLoadInstantly)
 {
 	auto &matManager = GetMaterialManager();
 	auto success = true;
-	Material *mat = nullptr;
+	msys::Material *mat = nullptr;
 	if(!bLoadInstantly) {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 		debug::get_domain().BeginTask("preload_material");
@@ -805,8 +805,8 @@ Material *ClientState::LoadMaterial(const std::string &path, const std::function
 		init_shader(mat);
 	return mat;
 }
-Material *ClientState::LoadMaterial(const std::string &path) { return LoadMaterial(path, nullptr, false); }
-Material *ClientState::LoadMaterial(const std::string &path, const std::function<void(Material *)> &onLoaded, bool bReload) { return LoadMaterial(path, onLoaded, bReload, !cvMatStreaming->GetBool()); }
+msys::Material *ClientState::LoadMaterial(const std::string &path) { return LoadMaterial(path, nullptr, false); }
+msys::Material *ClientState::LoadMaterial(const std::string &path, const std::function<void(msys::Material *)> &onLoaded, bool bReload) { return LoadMaterial(path, onLoaded, bReload, !cvMatStreaming->GetBool()); }
 
 pragma::networking::IClient *ClientState::GetClient() { return m_client.get(); }
 

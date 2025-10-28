@@ -172,7 +172,7 @@ const std::optional<std::string> &ShaderGameWorldLightingPass::GetShaderMaterial
 GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetMaterialPipelineSpecializationRequirements(CMaterial &mat) const
 {
 	auto flags = GameShaderSpecializationConstantFlag::None;
-	auto hasEmission = (mat.GetTextureInfo(Material::EMISSION_MAP_IDENTIFIER) != nullptr);
+	auto hasEmission = (mat.GetTextureInfo(msys::Material::EMISSION_MAP_IDENTIFIER) != nullptr);
 	if(!hasEmission) {
 		if(mat.GetPropertyValueType("emission_factor") != ds::ValueType::Invalid)
 			hasEmission = get_emission_factor(mat).has_value();

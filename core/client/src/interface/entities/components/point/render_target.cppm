@@ -31,8 +31,8 @@ export {
 			Vector2 GetRenderSize();
 			void GetRenderSize(float *w, float *h);
 
-			void SetRenderMaterial(Material *mat);
-			Material *GetRenderMaterial();
+			void SetRenderMaterial(msys::Material *mat);
+			msys::Material *GetRenderMaterial();
 			void SetRenderMaterial(std::string mat);
 
 			void SetRefreshRate(float f);
@@ -49,7 +49,7 @@ export {
 			void Render(pragma::rendering::SceneRenderPass renderMode);
 
 			std::unique_ptr<Texture> m_texture = nullptr;
-			Material *m_matRender = nullptr;
+			msys::Material *m_matRender = nullptr;
 			float m_refreshRate = 0.f;
 			double m_tLastRefresh;
 			unsigned int m_curDepth = 0u;

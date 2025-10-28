@@ -96,7 +96,7 @@ export {
 			void UpdateEyeballsMT();
 		protected:
 			void UpdateBlinkMT();
-			void OnModelChanged(const std::shared_ptr<Model> &mdl);
+			void OnModelChanged(const std::shared_ptr<pragma::Model> &mdl);
 			Vector3 ClampViewTarget(const Vector3 &viewTarget) const;
 			void UpdateEyeballMT(const Eyeball &eyeball, uint32_t eyeballIndex);
 			void UpdateEyeMaterialData();

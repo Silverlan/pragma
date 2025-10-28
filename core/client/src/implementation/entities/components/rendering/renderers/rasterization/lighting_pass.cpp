@@ -414,7 +414,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 			pragma::get_cgame()->RenderDebugPhysics(pcmd, *cam);
 
 #if DEBUG_RENDER_PERFORMANCE_TEST_ENABLED == 1
-			EntityIterator entIt {*pragma::get_cgame()};
+			pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 			entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CPropDynamicComponent>>();
 			auto it = entIt.begin();
 			static std::shared_ptr<prosper::IBuffer> dbgBuffer = nullptr;

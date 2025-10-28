@@ -29,9 +29,9 @@ void ShaderDebugText::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo 
 
 bool ShaderDebugText::RecordDraw(prosper::ShaderBindState &bindState, prosper::IBuffer &vertexBuffer, uint32_t vertexCount, prosper::IDescriptorSet &descSetTexture, const Mat4 &mvp, const Vector4 &color) const
 {
-	assert(vertexCount <= umath::to_integral(GameLimits::MaxMeshVertices));
-	if(vertexCount > umath::to_integral(GameLimits::MaxMeshVertices)) {
-		Con::cerr << "Attempted to draw debug mesh with more than maximum (" << umath::to_integral(GameLimits::MaxMeshVertices) << ") amount of vertices!" << Con::endl;
+	assert(vertexCount <= umath::to_integral(pragma::GameLimits::MaxMeshVertices));
+	if(vertexCount > umath::to_integral(pragma::GameLimits::MaxMeshVertices)) {
+		Con::cerr << "Attempted to draw debug mesh with more than maximum (" << umath::to_integral(pragma::GameLimits::MaxMeshVertices) << ") amount of vertices!" << Con::endl;
 		return false;
 	}
 	return RecordBindDescriptorSet(bindState, descSetTexture) && ShaderDebug::RecordDraw(bindState, vertexBuffer, vertexCount, mvp, color);

@@ -56,7 +56,7 @@ void CCameraComponent::UpdateState()
 	auto *renderScene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
 	if(renderScene) {
 		if(renderScene->GetActiveCamera().get() == this) {
-			EntityIterator entIt {*pragma::get_cgame()};
+			pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 			entIt.AttachFilter<TEntityIteratorFilterComponent<CCameraComponent>>();
 			for(auto *ent : entIt) {
 				auto toggleC = ent->GetComponent<CToggleComponent>();

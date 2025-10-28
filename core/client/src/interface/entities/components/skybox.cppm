@@ -30,7 +30,7 @@ export {
 			const EulerAngles &GetSkyAngles() const;
 			const Vector4 &GetRenderSkyAngles() const;
 
-			void SetSkyMaterial(Material *mat);
+			void SetSkyMaterial(msys::Material *mat);
 			void ValidateMaterials();
 		private:
 			bool CreateCubemapFromIndividualTextures(const std::string &materialPath, const std::string &postfix = "") const;

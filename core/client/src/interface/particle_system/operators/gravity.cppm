@@ -31,7 +31,7 @@ void CParticleOperatorGravity::Initialize(pragma::BaseEnvParticleSystemComponent
 	CParticleOperatorWorldBase::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		StringToLower(key);
+		ustring::to_lower(key);
 		if(key == "effective_scale")
 			m_gravityScale = util::to_float(it->second);
 		else if(key == "acceleration") {

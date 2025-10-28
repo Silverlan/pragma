@@ -55,7 +55,7 @@ void CMotionBlurDataComponent::UpdateEntityPoses()
 		m_motionBlurData.cameraData.angularCameraVelocity = {angVel, 0.f};
 	}
 
-	EntityIterator entIt {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 	for(auto *ent : entIt) {
 		auto &r = *static_cast<CBaseEntity *>(ent)->GetRenderComponent();

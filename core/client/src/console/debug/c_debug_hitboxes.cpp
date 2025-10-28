@@ -16,7 +16,7 @@ static void debug_hitboxes(NetworkState *state, pragma::BasePlayerComponent *pl,
 		auto *game = state->GetGameState();
 		if(!game)
 			return;
-		auto it = EntityIterator {*game};
+		auto it = pragma::ecs::EntityIterator {*game};
 		it.AttachFilter<TEntityIteratorFilterComponent<pragma::CDebugHitboxComponent>>();
 		for(auto *ent : it)
 			ent->RemoveComponent<pragma::CDebugHitboxComponent>();

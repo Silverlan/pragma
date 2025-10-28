@@ -3,6 +3,13 @@
 
 module;
 
+#include <string>
+#include <vector>
+#include <memory>
+#include <functional>
+#include <functional>
+#include <unordered_map>
+
 #include "stdafx_server.h"
 
 module pragma.server.audio.sound;
@@ -26,7 +33,7 @@ SALSound::SALSound(NetworkState *nw, unsigned int idx, float duration, const std
 SALSound::~SALSound()
 {
 	SendEvent(NetEvent::SetIndex, [](NetPacket &p) { p->Write<uint32_t>(static_cast<uint32_t>(0)); });
-	Game *game = ServerState::Get()->GetGameState();
+	pragma::Game *game = ServerState::Get()->GetGameState();
 	if(game == NULL)
 		return;
 	//for(int i=0;i<m_luaCallbacks.size();i++)

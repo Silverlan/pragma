@@ -25,7 +25,7 @@ bool pragma::networking::LocalServerClient::SendPacket(pragma::networking::Proto
 {
 	packet.SetTimeActivated(util::clock::to_int(util::clock::get_duration_since_start()));
 	packet->SetOffset(0);
-	Engine::Get()->HandleLocalHostPlayerClientPacket(packet);
+	pragma::Engine::Get()->HandleLocalHostPlayerClientPacket(packet);
 	return true;
 }
 bool pragma::networking::LocalServerClient::Drop(DropReason reason, pragma::networking::Error &outErr)

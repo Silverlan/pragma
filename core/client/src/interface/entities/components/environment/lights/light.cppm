@@ -34,9 +34,9 @@ export namespace pragma {
 		bool shouldPass = true;
 	};
 	struct DLLCLIENT CEShouldPassMesh : public ComponentEvent {
-		CEShouldPassMesh(const Model &model, const CModelSubMesh &mesh);
+		CEShouldPassMesh(const pragma::Model &model, const CModelSubMesh &mesh);
 		virtual void PushArguments(lua_State *l) override;
-		const Model &model;
+		const pragma::Model &model;
 		const CModelSubMesh &mesh;
 		bool shouldPass = true;
 	};
@@ -120,7 +120,7 @@ export namespace pragma {
 		bool ShouldUpdateRenderPass(rendering::ShadowMapType smType) const;
 		virtual bool ShouldPass(const CBaseEntity &ent, uint32_t &renderFlags);
 		virtual bool ShouldPass(const CBaseEntity &ent, const CModelMesh &mesh, uint32_t &renderFlags);
-		virtual bool ShouldPass(const Model &mdl, const CModelSubMesh &mesh);
+		virtual bool ShouldPass(const pragma::Model &mdl, const CModelSubMesh &mesh);
 		template<typename TCPPM>
 			pragma::ComponentHandle<TCPPM> GetShadowMap(rendering::ShadowMapType type) const;
 		bool ShouldRender();

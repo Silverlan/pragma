@@ -248,7 +248,7 @@ static bool load_image(tinygltf::Image *image, const int imageIdx, std::string *
 }
 
 struct OutputData {
-	std::shared_ptr<Model> model;
+	std::shared_ptr<pragma::Model> model;
 	std::vector<std::string> models;
 	std::string mapName;
 };
@@ -363,7 +363,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 
 	auto TransformPos = [scale](const Vector3 &v) -> Vector3 { return v * scale; };
 
-	auto mdl = std::shared_ptr<Model> {pragma::get_cgame()->CreateModel(false)};
+	auto mdl = std::shared_ptr<pragma::Model> {pragma::get_cgame()->CreateModel(false)};
 	mdl->GetBaseMeshes() = {0u};
 
 	// Materials
@@ -496,8 +496,8 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 					if(shader) {
 						auto metallicRoughnessSet = shader->ConvertToMetalnessRoughness(pragma::get_cengine()->GetRenderContext(), diffuseTex, specularGlossinessTex, pushConstants, occlusionTex.get());
 						if(metallicRoughnessSet.has_value()) {
-							fWriteImage(Material::ALBEDO_MAP_IDENTIFIER, matName + "_albedo", *metallicRoughnessSet->albedoMap, false /* greyScale */, false /* normalMap */, alphaMode);
-							fWriteImage(Material::RMA_MAP_IDENTIFIER, matName + "_rma", *metallicRoughnessSet->rmaMap, false /* greyScale */, false /* normalMap */);
+							fWriteImage(msys::Material::ALBEDO_MAP_IDENTIFIER, matName + "_albedo", *metallicRoughnessSet->albedoMap, false /* greyScale */, false /* normalMap */, alphaMode);
+							fWriteImage(msys::Material::RMA_MAP_IDENTIFIER, matName + "_rma", *metallicRoughnessSet->rmaMap, false /* greyScale */, false /* normalMap */);
 						}
 					}
 
@@ -511,9 +511,9 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			auto &baseColorTexture = gltfMat.pbrMetallicRoughness.baseColorTexture;
 			auto baseColorImage = fGetImage(baseColorTexture.index);
 			if(baseColorImage)
-				fWriteImage(Material::ALBEDO_MAP_IDENTIFIER, matName + "_albedo", *baseColorImage, false /* greyScale */, false /* normalMap */, alphaMode);
+				fWriteImage(msys::Material::ALBEDO_MAP_IDENTIFIER, matName + "_albedo", *baseColorImage, false /* greyScale */, false /* normalMap */, alphaMode);
 			else
-				cmat->SetTexture(Material::ALBEDO_MAP_IDENTIFIER, "white");
+				cmat->SetTexture(msys::Material::ALBEDO_MAP_IDENTIFIER, "white");
 
 			auto &baseColorFactor = gltfMat.pbrMetallicRoughness.baseColorFactor;
 			if(baseColorFactor != std::vector<double> {1.0, 1.0, 1.0, 1.0})
@@ -522,7 +522,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			auto metallicRoughnessImg = fGetImage(gltfMat.pbrMetallicRoughness.metallicRoughnessTexture.index);
 			if(metallicRoughnessImg) {
 				auto rmaName = matName + "_rma";
-				fWriteImage(Material::RMA_MAP_IDENTIFIER, rmaName, *metallicRoughnessImg, false /* greyScale */, false /* normalMap */);
+				fWriteImage(msys::Material::RMA_MAP_IDENTIFIER, rmaName, *metallicRoughnessImg, false /* greyScale */, false /* normalMap */);
 
 				auto occlusionImg = fGetImage(gltfMat.occlusionTexture.index);
 				if(occlusionImg) {
@@ -542,13 +542,13 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		if(gltfMat.normalTexture.index != -1) {
 			auto &tex = inputData.textures.at(gltfMdl.textures.at(gltfMat.normalTexture.index).source);
 			if(tex)
-				fWriteImage(Material::NORMAL_MAP_IDENTIFIER, matName + "_normal", tex->GetImage(), false /* greyScale */, true /* normalMap */);
+				fWriteImage(msys::Material::NORMAL_MAP_IDENTIFIER, matName + "_normal", tex->GetImage(), false /* greyScale */, true /* normalMap */);
 		}
 
 		if(gltfMat.emissiveTexture.index != -1) {
 			auto &tex = inputData.textures.at(gltfMdl.textures.at(gltfMat.emissiveTexture.index).source);
 			if(tex)
-				fWriteImage(Material::EMISSION_MAP_IDENTIFIER, matName + "_emission", tex->GetImage(), false /* greyScale */, false /* normalMap */);
+				fWriteImage(msys::Material::EMISSION_MAP_IDENTIFIER, matName + "_emission", tex->GetImage(), false /* greyScale */, false /* normalMap */);
 		}
 		auto &emissiveFactor = gltfMat.emissiveFactor;
 		if(emissiveFactor != std::vector<double> {1.0, 1.0, 1.0, 1.0})
@@ -1135,8 +1135,8 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		mdl->AddAnimation(animName, anim);
 	}
 
-	if(numBones > umath::to_integral(GameLimits::MaxBones))
-		Con::cwar << "Model has " << numBones << ", but engine only supports " << umath::to_integral(GameLimits::MaxBones) << ", this may cause rendering glitches!" << Con::endl;
+	if(numBones > umath::to_integral(pragma::GameLimits::MaxBones))
+		Con::cwar << "Model has " << numBones << ", but engine only supports " << umath::to_integral(pragma::GameLimits::MaxBones) << ", this may cause rendering glitches!" << Con::endl;
 #if 0
 	for(auto &meshGroup : mdl->GetMeshGroups())
 	{
@@ -1332,14 +1332,14 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 	outputData.model = mdl;
 	return outputData;
 }
-std::shared_ptr<Model> pragma::asset::import_model(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
+std::shared_ptr<pragma::Model> pragma::asset::import_model(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
 {
 	auto data = ::import_model(&f, "", outErrMsg, outputPath, !importAsSingleModel);
 	if(!data)
 		return nullptr;
 	return data->model;
 }
-std::shared_ptr<Model> pragma::asset::import_model(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
+std::shared_ptr<pragma::Model> pragma::asset::import_model(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
 {
 	auto data = ::import_model(nullptr, fileName, outErrMsg, outputPath, !importAsSingleModel);
 	if(!data)
@@ -1649,8 +1649,8 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 	return true;
 }
 
-bool pragma::asset::export_model(::Model &mdl, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName, std::string *optOutPath) { return GLTFWriter::Export(mdl, exportInfo, outErrMsg, modelName, optOutPath); }
-bool pragma::asset::export_animation(Model &mdl, const std::string &animName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName) { return GLTFWriter::Export(mdl, animName, exportInfo, outErrMsg, modelName); }
+bool pragma::asset::export_model(pragma::Model &mdl, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName, std::string *optOutPath) { return GLTFWriter::Export(mdl, exportInfo, outErrMsg, modelName, optOutPath); }
+bool pragma::asset::export_animation(pragma::Model &mdl, const std::string &animName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName) { return GLTFWriter::Export(mdl, animName, exportInfo, outErrMsg, modelName); }
 bool pragma::asset::export_texture(uimg::ImageBuffer &imgBuf, ModelExportInfo::ImageFormat imageFormat, const std::string &outputPath, std::string &outErrMsg, bool normalMap, bool srgb, uimg::TextureInfo::AlphaMode alphaMode, std::string *optOutOutputPath)
 {
 	std::string inOutPath = std::string{EXPORT_PATH} + outputPath;
@@ -1714,7 +1714,7 @@ bool pragma::asset::export_texture(const std::string &texturePath, ModelExportIn
 		*optOutOutputPath = imgOutputPath;
 	return true;
 }
-std::optional<pragma::asset::MaterialTexturePaths> pragma::asset::export_material(Material &mat, ModelExportInfo::ImageFormat imageFormat, std::string &outErrMsg, std::string *optExportPath, bool normalizeTextureNames)
+std::optional<pragma::asset::MaterialTexturePaths> pragma::asset::export_material(msys::Material &mat, ModelExportInfo::ImageFormat imageFormat, std::string &outErrMsg, std::string *optExportPath, bool normalizeTextureNames)
 {
 	auto name = ufile::get_file_from_filename(mat.GetName());
 	ufile::remove_extension_from_filename(name);
@@ -1734,14 +1734,14 @@ std::optional<pragma::asset::MaterialTexturePaths> pragma::asset::export_materia
 
 	std::string imgOutputPath;
 	if(fSaveTexture(mat.GetAlbedoMap(), false, alphaMode != AlphaMode::Opaque, imgOutputPath, name))
-		texturePaths.insert(std::make_pair(Material::ALBEDO_MAP_IDENTIFIER, imgOutputPath));
+		texturePaths.insert(std::make_pair(msys::Material::ALBEDO_MAP_IDENTIFIER, imgOutputPath));
 	if(fSaveTexture(mat.GetNormalMap(), true, false, imgOutputPath, name + "_normal"))
-		texturePaths.insert(std::make_pair(Material::NORMAL_MAP_IDENTIFIER, imgOutputPath));
+		texturePaths.insert(std::make_pair(msys::Material::NORMAL_MAP_IDENTIFIER, imgOutputPath));
 	if(fSaveTexture(mat.GetRMAMap(), true, false, imgOutputPath, name + "_rma"))
-		texturePaths.insert(std::make_pair(Material::RMA_MAP_IDENTIFIER, imgOutputPath));
+		texturePaths.insert(std::make_pair(msys::Material::RMA_MAP_IDENTIFIER, imgOutputPath));
 
 	if(fSaveTexture(mat.GetGlowMap(), false, false, imgOutputPath, name + "_emission"))
-		texturePaths.insert(std::make_pair(Material::EMISSION_MAP_IDENTIFIER, imgOutputPath));
+		texturePaths.insert(std::make_pair(msys::Material::EMISSION_MAP_IDENTIFIER, imgOutputPath));
 	return texturePaths;
 }
 
@@ -1787,7 +1787,7 @@ class ModelAOWorker : public util::ParallelWorker<pragma::asset::ModelAOWorkerRe
 	std::vector<util::ParallelJob<uimg::ImageLayerSet>> m_matAoJobs {};
 	pragma::asset::ModelAOWorkerResult m_result {};
 };
-std::optional<util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pragma::asset::generate_ambient_occlusion(Model &mdl, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples, pragma::rendering::cycles::SceneInfo::DeviceType aoDevice)
+std::optional<util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pragma::asset::generate_ambient_occlusion(pragma::Model &mdl, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples, pragma::rendering::cycles::SceneInfo::DeviceType aoDevice)
 {
 	std::vector<util::ParallelJob<uimg::ImageLayerSet>> aoJobs {};
 	std::unordered_set<std::string> builtRMAs {};
@@ -1814,7 +1814,7 @@ std::optional<util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pragma::ass
 }
 
 template<class T>
-static bool save_ambient_occlusion(Material &mat, std::string rmaPath, T &img, std::string &errMsg)
+static bool save_ambient_occlusion(msys::Material &mat, std::string rmaPath, T &img, std::string &errMsg)
 {
 	auto *shaderComposeRMA = static_cast<pragma::ShaderComposeRMA *>(pragma::get_cengine()->GetShader("compose_rma").get());
 	if(shaderComposeRMA == nullptr)
@@ -1829,7 +1829,7 @@ static bool save_ambient_occlusion(Material &mat, std::string rmaPath, T &img, s
 		outPath = mat.GetName();
 		outPath.RemoveFileExtension();
 		rmaPath = outPath.GetString() + "_rma";
-		mat.SetTextureProperty(Material::RMA_MAP_IDENTIFIER, rmaPath);
+		mat.SetTextureProperty(msys::Material::RMA_MAP_IDENTIFIER, rmaPath);
 		requiresSave = true;
 	}
 
@@ -1849,7 +1849,7 @@ static bool save_ambient_occlusion(Material &mat, std::string rmaPath, T &img, s
 	return true;
 }
 
-pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(Model &mdl, Material &mat, util::ParallelJob<uimg::ImageLayerSet> &outJob, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples, pragma::rendering::cycles::SceneInfo::DeviceType aoDevice)
+pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::Model &mdl, msys::Material &mat, util::ParallelJob<uimg::ImageLayerSet> &outJob, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples, pragma::rendering::cycles::SceneInfo::DeviceType aoDevice)
 {
 	// TODO: There really is no good way to determine whether the material has a ambient occlusion map or not.
 	// Use a compute shader to determine if it's all white or black?

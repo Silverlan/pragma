@@ -7,11 +7,14 @@ module;
 
 #include <string>
 
+#include <memory>
+
 
 
 export module pragma.server.scripting.lua.libraries.game;
 
 export import luabind;
+export import pragma.math;
 
 export namespace Lua {
 	namespace game {

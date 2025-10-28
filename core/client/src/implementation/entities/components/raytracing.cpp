@@ -226,7 +226,7 @@ static void cmd_render_technique(NetworkState *, const ConVar &, int32_t, int32_
 		return;
 	enum class RenderingTechnique : uint8_t { Rasterization, Raytracing };
 
-	EntityIterator entIt {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<CRenderComponent>>();
 	auto technique = static_cast<RenderingTechnique>(val);
 	switch(technique) {

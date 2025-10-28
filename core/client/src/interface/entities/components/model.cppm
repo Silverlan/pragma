@@ -119,7 +119,7 @@ export namespace pragma {
 		void SetLOD(uint32_t lod);
 	  protected:
 		void UpdateBaseShaderSpecializationFlags();
-		virtual void OnModelChanged(const std::shared_ptr<Model> &model) override;
+		virtual void OnModelChanged(const std::shared_ptr<pragma::Model> &model) override;
 
 		std::unordered_map<const CModelSubMesh *, std::shared_ptr<prosper::IBuffer>> m_lightmapUvBuffers {};
 		uint32_t m_lod = 0u;

@@ -81,7 +81,7 @@ void CEngine::WriteClientConfig(VFilePtrReal f)
 
 void CEngine::LoadConfig()
 {
-	Engine::LoadConfig();
+	pragma::Engine::LoadConfig();
 	PreloadConfig(NwStateType::Client, "client.cfg");
 }
 
@@ -94,7 +94,7 @@ void CEngine::LoadClientConfig()
 
 void CEngine::PreloadConfig(NwStateType type, const std::string &configName)
 {
-	Engine::PreloadConfig(type, configName);
+	pragma::Engine::PreloadConfig(type, configName);
 	if(type != NwStateType::Client)
 		return;
 	auto &cfg = GetConVarConfig(NwStateType::Client);

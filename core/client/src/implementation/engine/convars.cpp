@@ -13,7 +13,7 @@ import :engine;
 
 ConConf *CEngine::GetConVar(const std::string &cv)
 {
-	auto *cvar = Engine::GetConVar(cv);
+	auto *cvar = pragma::Engine::GetConVar(cv);
 	if(cvar != nullptr)
 		return cvar;
 	auto *stateCl = GetClientState();

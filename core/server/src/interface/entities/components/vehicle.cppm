@@ -6,6 +6,9 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
+#include <string>
+#include <functional>
+
 
 export module pragma.server.entities.components.vehicle;
 
@@ -34,7 +37,7 @@ export namespace pragma {
 	  protected:
 		void WriteWheelInfo(NetPacket &p, WheelData &data);
 		CallbackHandle m_playerAction;
-		void OnActionInput(Action action, bool b);
+		void OnActionInput(pragma::Action action, bool b);
 		virtual void OnRemove() override;
 		void OnPostSpawn();
 		void OnUse(pragma::ecs::BaseEntity *pl);

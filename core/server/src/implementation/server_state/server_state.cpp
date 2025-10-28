@@ -41,7 +41,7 @@ ServerState::ServerState() : NetworkState(), m_server(nullptr)
 	m_soundScriptManager = std::make_unique<SoundScriptManager>();
 
 	m_modelManager = std::make_unique<pragma::asset::SModelManager>(*this);
-	Engine::Get()->InitializeAssetManager(*m_modelManager);
+	pragma::Engine::Get()->InitializeAssetManager(*m_modelManager);
 	pragma::asset::update_extension_cache(pragma::asset::Type::Model);
 
 	FileManager::AddCustomMountDirectory("cache", static_cast<fsys::SearchFlags>(pragma::FSYS_SEARCH_CACHE));
@@ -223,8 +223,8 @@ void ServerState::InitializeResourceManager() { m_resourceWatcher = std::make_un
 
 void ServerState::Close()
 {
-	Engine::Get()->SaveEngineConfig();
-	Engine::Get()->SaveServerConfig();
+	pragma::Engine::Get()->SaveEngineConfig();
+	pragma::Engine::Get()->SaveServerConfig();
 	NetworkState::Close();
 }
 
@@ -271,7 +271,7 @@ void ServerState::EndGame()
 	// variable and destroy that instead.
 	// TODO: This is really ugly, do it another way!
 	auto game = std::move(m_game);
-	m_game = {game.get(), [](Game *) {}};
+	m_game = {game.get(), [](pragma::Game *) {}};
 	game = nullptr;
 	m_game = nullptr;
 
@@ -292,7 +292,7 @@ void ServerState::StartGame(bool singlePlayer)
 {
 	NetworkState::StartGame(singlePlayer);
 	StartServer(singlePlayer);
-	m_game = {new SGame {this}, [](Game *game) {
+	m_game = {new SGame {this}, [](pragma::Game *game) {
 		          game->OnRemove();
 		          delete game;
 	          }};
@@ -347,10 +347,10 @@ ConVar *ServerState::SetConVar(std::string scmd, std::string value, bool bApplyI
 		return nullptr;
 	auto flags = cvar->GetFlags();
 	if(((flags & pragma::console::ConVarFlags::Replicated) == pragma::console::ConVarFlags::Replicated || (flags & pragma::console::ConVarFlags::Notify) == pragma::console::ConVarFlags::Notify)) {
-		auto *cl = Engine::Get()->GetClientState();
+		auto *cl = pragma::Engine::Get()->GetClientState();
 		if(cl != nullptr) {
 			// This is a locally hosted game, just inform the client directly
-			Engine::Get()->SetReplicatedConVar(scmd, cvar->GetString());
+			pragma::Engine::Get()->SetReplicatedConVar(scmd, cvar->GetString());
 			return cvar;
 		}
 		NetPacket p;
@@ -400,11 +400,11 @@ WMServerData &ServerState::GetServerData() { return m_serverData; }
 
 void ServerState::GetLuaConCommands(std::unordered_map<std::string, ConCommand *> **cmds) { *cmds = &m_luaConCommands; }
 
-Material *ServerState::LoadMaterial(const std::string &path, bool precache, bool bReload)
+msys::Material *ServerState::LoadMaterial(const std::string &path, bool precache, bool bReload)
 {
 	auto &matManager = GetMaterialManager();
 	auto success = true;
-	Material *mat = nullptr;
+	msys::Material *mat = nullptr;
 	if(precache) {
 		success = matManager.PreloadAsset(path);
 		return nullptr;
@@ -436,7 +436,7 @@ Material *ServerState::LoadMaterial(const std::string &path, bool precache, bool
 	return mat;
 }
 
-msys::MaterialManager &ServerState::GetMaterialManager() { return *Engine::Get()->GetServerStateInstance().materialManager; }
+msys::MaterialManager &ServerState::GetMaterialManager() { return *pragma::Engine::Get()->GetServerStateInstance().materialManager; }
 pragma::ModelSubMesh *ServerState::CreateSubMesh() const { return new pragma::ModelSubMesh; }
 ModelMesh *ServerState::CreateMesh() const { return new ModelMesh; }
 
@@ -444,7 +444,7 @@ namespace {
 	auto _ = pragma::console::server::register_variable_listener<int>("sv_tickrate",+[](NetworkState *, const ConVar &, int, int val) {
 		if(val < 0)
 			val = 0;
-		Engine::Get()->SetTickRate(val);
+		pragma::Engine::Get()->SetTickRate(val);
 	});
 }
 

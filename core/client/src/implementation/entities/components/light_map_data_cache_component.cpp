@@ -64,7 +64,7 @@ void CLightMapDataCacheComponent::InitializeUvBuffers()
 	CLightMapComponent::LOGGER.info("Initializing lightmap uv buffers from cache for {} entities...", m_lightmapDataCache->cacheData.size());
 	uint32_t numInitialized = 0;
 	for(auto &pair : m_lightmapDataCache->cacheData) {
-		EntityIterator entIt {*pragma::get_cgame()};
+		pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 		entIt.AttachFilter<EntityIteratorFilterUuid>(pair.first.uuid);
 		auto it = entIt.begin();
 		if(it == entIt.end())
@@ -81,7 +81,7 @@ void CLightMapDataCacheComponent::InitializeUvBuffers()
 	auto globalLightmapUvBuffer = pragma::CLightMapComponent::GenerateLightmapUVBuffers(buffers);
 
 	if(globalLightmapUvBuffer) {
-		EntityIterator entIt {*pragma::get_cgame()};
+		pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 		entIt.AttachFilter<EntityIteratorFilterUuid>(m_lightmapDataCache->lightmapEntityId);
 		auto it = entIt.begin();
 		if(it != entIt.end()) {
@@ -119,9 +119,9 @@ void CLightMapDataCacheComponent::ReloadCache()
 		CLightMapComponent::LOGGER.error("Failed to load lightmap data cache: {}", err);
 		return;
 	}
-	std::unordered_map<std::string, std::shared_ptr<Model>> cachedModels;
+	std::unordered_map<std::string, std::shared_ptr<pragma::Model>> cachedModels;
 	for(auto &pair : m_lightmapDataCache->cacheData) {
-		EntityIterator entIt {*pragma::get_cgame(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+		pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 		entIt.AttachFilter<EntityIteratorFilterUuid>(pair.first.uuid);
 
 		auto it = entIt.begin();
@@ -166,7 +166,7 @@ void CLightMapDataCacheComponent::ReloadCache()
 		else
 			hasLightmapData = (itCache->second != nullptr);
 
-		std::shared_ptr<Model> lmModel = nullptr;
+		std::shared_ptr<pragma::Model> lmModel = nullptr;
 		if(itCache != cachedModels.end())
 			lmModel = itCache->second;
 		else if(!hasLightmapData) {
@@ -174,7 +174,7 @@ void CLightMapDataCacheComponent::ReloadCache()
 			cachedModels[mdlName] = nullptr;
 		}
 		else {
-			auto cpy = mdl->Copy(GetEntity().GetNetworkState()->GetGameState(), Model::CopyFlags::CopyMeshesBit | Model::CopyFlags::CopyUniqueIdsBit | Model::CopyFlags::CopyVertexData);
+			auto cpy = mdl->Copy(GetEntity().GetNetworkState()->GetGameState(), pragma::Model::CopyFlags::CopyMeshesBit | pragma::Model::CopyFlags::CopyUniqueIdsBit | pragma::Model::CopyFlags::CopyVertexData);
 			for(auto &mg : cpy->GetMeshGroups()) {
 				for(auto &mesh : mg->GetMeshes()) {
 					auto &subMeshes = mesh->GetSubMeshes();

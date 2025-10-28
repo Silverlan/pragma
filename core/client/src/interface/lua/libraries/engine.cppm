@@ -18,18 +18,18 @@ export import pragma.shared;
 export namespace Lua {
 	namespace asset_client {
 		DLLCLIENT void register_library(Lua::Interface &lua, luabind::module_ &modAsset);
-		DLLCLIENT ::Material *get_error_material();
-		DLLCLIENT std::shared_ptr<::Material> create_material(const std::string &identifier, const std::string &shader);
-		DLLCLIENT std::shared_ptr<::Material> create_material(const std::string &shader);
-		DLLCLIENT std::shared_ptr<::Material> create_material(const ::udm::AssetData &data);
-		DLLCLIENT ::Material *get_material(const std::string &identifier);
+		DLLCLIENT msys::Material *get_error_material();
+		DLLCLIENT std::shared_ptr<msys::Material> create_material(const std::string &identifier, const std::string &shader);
+		DLLCLIENT std::shared_ptr<msys::Material> create_material(const std::string &shader);
+		DLLCLIENT std::shared_ptr<msys::Material> create_material(const ::udm::AssetData &data);
+		DLLCLIENT msys::Material *get_material(const std::string &identifier);
 	};
 	namespace engine {
 		DLLCLIENT void precache_material(lua_State *l, const std::string &mat);
 		DLLCLIENT void precache_model(lua_State *l, const std::string &mdl);
-		DLLCLIENT ::Material *load_material(lua_State *l, const std::string &mat, bool reload, bool loadInstantly);
-		DLLCLIENT ::Material *load_material(lua_State *l, const std::string &mat, bool reload);
-		DLLCLIENT ::Material *load_material(lua_State *l, const std::string &mat);
+		DLLCLIENT msys::Material *load_material(lua_State *l, const std::string &mat, bool reload, bool loadInstantly);
+		DLLCLIENT msys::Material *load_material(lua_State *l, const std::string &mat, bool reload);
+		DLLCLIENT msys::Material *load_material(lua_State *l, const std::string &mat);
 		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l, const std::string &name, ::util::AssetLoadFlags loadFlags);
 		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l, const std::string &name);
 		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l, const LFile &file, const std::string &cacheName, ::util::AssetLoadFlags loadFlags);

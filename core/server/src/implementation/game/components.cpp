@@ -3,6 +3,13 @@
 
 module;
 
+#include <memory>
+#include <functional>
+#include <functional>
+#include <unordered_map>
+#include <vector>
+#include <sstream>
+
 #include "stdafx_server.h"
 // --template-include-location
 
@@ -12,7 +19,7 @@ import pragma.server.entities.components;
 
 void SGame::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
 {
-	Game::InitializeEntityComponents(componentManager);
+	pragma::Game::InitializeEntityComponents(componentManager);
 	constexpr auto hideInEditor = pragma::ComponentRegInfo::Flags::HideInEditor;
 	componentManager.RegisterComponentType<pragma::SAIComponent>("ai", {"ai", hideInEditor});
 	componentManager.RegisterComponentType<pragma::SCharacterComponent>("character", {"gameplay", hideInEditor});
@@ -125,4 +132,4 @@ void SGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	// --template-component-register-location
 }
 
-pragma::BaseEntityComponent *SGame::CreateLuaEntityComponent(pragma::ecs::BaseEntity &ent, std::string classname) { return Game::CreateLuaEntityComponent<pragma::SLuaBaseEntityComponent, pragma::lua::SLuaBaseEntityComponentHolder>(ent, classname); }
+pragma::BaseEntityComponent *SGame::CreateLuaEntityComponent(pragma::ecs::BaseEntity &ent, std::string classname) { return pragma::Game::CreateLuaEntityComponent<pragma::SLuaBaseEntityComponent, pragma::lua::SLuaBaseEntityComponentHolder>(ent, classname); }

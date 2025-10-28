@@ -26,7 +26,7 @@ export namespace pragma {
 
 			float GetMoveDistance(const Schedule *sched) const;
 			void SetMoveDistance(float dist);
-			void SetMoveActivity(Activity act);
+			void SetMoveActivity(pragma::Activity act);
 		};
 	};
 };

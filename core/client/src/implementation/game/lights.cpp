@@ -17,7 +17,7 @@ pragma::BaseEnvLightDirectionalComponent *CGame::GetEnvironmentLightSource() con
 void CGame::UpdateEnvironmentLightSource()
 {
 	auto *oldLightSource = m_hEnvLight.get();
-	EntityIterator entIt {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightDirectionalComponent>>();
 	for(auto *ent : entIt) {
 		auto pToggleComponent = ent->GetComponent<pragma::CToggleComponent>();

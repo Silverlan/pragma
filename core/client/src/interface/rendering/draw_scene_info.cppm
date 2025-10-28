@@ -56,7 +56,7 @@ export namespace util {
 		mutable std::unique_ptr<RenderStats> renderStats = nullptr;
 		std::unique_ptr<std::vector<DrawSceneInfo>> subPasses = nullptr;
 
-		::pragma::rendering::RenderMask GetRenderMask(Game &game) const;
+		::pragma::rendering::RenderMask GetRenderMask(pragma::Game &game) const;
 		Vector3 GetPvsOrigin() const;
 		void AddSubPass(const DrawSceneInfo &drawSceneInfo);
 		const std::vector<DrawSceneInfo> *GetSubPasses() const;

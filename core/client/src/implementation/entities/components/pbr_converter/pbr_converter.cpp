@@ -66,7 +66,7 @@ void CPBRConverterComponent::OnRemove()
 	}
 }
 
-void CPBRConverterComponent::ConvertMaterialsToPBR(Model &mdl)
+void CPBRConverterComponent::ConvertMaterialsToPBR(pragma::Model &mdl)
 {
 	for(auto hMat : mdl.GetMaterials()) {
 		if(!hMat)
@@ -78,7 +78,7 @@ void CPBRConverterComponent::ConvertMaterialsToPBR(Model &mdl)
 	}
 }
 
-void CPBRConverterComponent::GenerateAmbientOcclusionMaps(Model &mdl, uint32_t w, uint32_t h, uint32_t samples, bool rebuild) { ScheduleModelUpdate(mdl, false, AmbientOcclusionInfo {w, h, samples, rebuild}); }
+void CPBRConverterComponent::GenerateAmbientOcclusionMaps(pragma::Model &mdl, uint32_t w, uint32_t h, uint32_t samples, bool rebuild) { ScheduleModelUpdate(mdl, false, AmbientOcclusionInfo {w, h, samples, rebuild}); }
 
 void CPBRConverterComponent::GenerateAmbientOcclusionMaps(pragma::ecs::BaseEntity &ent, uint32_t w, uint32_t h, uint32_t samples, bool rebuild)
 {
@@ -88,7 +88,7 @@ void CPBRConverterComponent::GenerateAmbientOcclusionMaps(pragma::ecs::BaseEntit
 	ScheduleModelUpdate(*mdl, false, AmbientOcclusionInfo {w, h, samples, rebuild}, &ent);
 }
 
-void CPBRConverterComponent::UpdateModel(Model &mdl, ModelUpdateInfo &updateInfo, pragma::ecs::BaseEntity *optEnt)
+void CPBRConverterComponent::UpdateModel(pragma::Model &mdl, ModelUpdateInfo &updateInfo, pragma::ecs::BaseEntity *optEnt)
 {
 	if(updateInfo.updateMetalness)
 		UpdateMetalness(mdl);
@@ -101,7 +101,7 @@ void CPBRConverterComponent::UpdateModel(Model &mdl, ModelUpdateInfo &updateInfo
 		m_scheduledModelUpdates.erase(it);
 }
 
-void CPBRConverterComponent::ScheduleModelUpdate(Model &mdl, bool updateMetalness, std::optional<AmbientOcclusionInfo> updateAOInfo, pragma::ecs::BaseEntity *optEnt)
+void CPBRConverterComponent::ScheduleModelUpdate(pragma::Model &mdl, bool updateMetalness, std::optional<AmbientOcclusionInfo> updateAOInfo, pragma::ecs::BaseEntity *optEnt)
 {
 	auto itUpdateInfo = m_scheduledModelUpdates.find(&mdl);
 	if(itUpdateInfo == m_scheduledModelUpdates.end())
@@ -122,7 +122,7 @@ void CPBRConverterComponent::OnEntitySpawn()
 	BaseEntityComponent::OnEntitySpawn();
 
 	auto *client = pragma::get_client_state();
-	m_cbOnModelLoaded = pragma::get_cgame()->AddCallback("OnModelLoaded", FunctionCallback<void, std::reference_wrapper<std::shared_ptr<Model>>>::Create([this](std::reference_wrapper<std::shared_ptr<Model>> mdl) { ScheduleModelUpdate(*mdl.get(), true); }));
+	m_cbOnModelLoaded = pragma::get_cgame()->AddCallback("OnModelLoaded", FunctionCallback<void, std::reference_wrapper<std::shared_ptr<pragma::Model>>>::Create([this](std::reference_wrapper<std::shared_ptr<pragma::Model>> mdl) { ScheduleModelUpdate(*mdl.get(), true); }));
 	m_cbOnMaterialLoaded = client->AddCallback("OnMaterialLoaded", FunctionCallback<void, CMaterial *>::Create([this](CMaterial *mat) {
 		if(ShouldConvertMaterial(*mat) == false)
 			return;
@@ -155,7 +155,7 @@ bool CPBRConverterComponent::ShouldConvertMaterial(CMaterial &mat) const
 {
 	if(m_convertedMaterials.find(mat.GetName()) != m_convertedMaterials.end() || IsPBR(mat) == false)
 		return false;
-	return mat.GetTextureInfo(Material::RMA_MAP_IDENTIFIER) == nullptr;
+	return mat.GetTextureInfo(msys::Material::RMA_MAP_IDENTIFIER) == nullptr;
 }
 
 bool CPBRConverterComponent::IsPBR(CMaterial &mat) const
@@ -283,7 +283,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 		if(matTraditional.GetPropertyType("roughness_factor") == msys::PropertyType::None)
 			matTraditional.SetProperty("roughness_factor", 0.5f);
 	}
-	matTraditional.SetTextureProperty(Material::RMA_MAP_IDENTIFIER, rmaMapName);
+	matTraditional.SetTextureProperty(msys::Material::RMA_MAP_IDENTIFIER, rmaMapName);
 
 	// Note: If no surface material could be found in the material,
 	// the model's surface material will be checked as well in 'GenerateGeometryBasedTextures'.

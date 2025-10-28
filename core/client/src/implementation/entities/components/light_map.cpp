@@ -81,7 +81,7 @@ void CLightMapComponent::InitializeLightMapData(const std::shared_ptr<prosper::T
 	m_meshLightMapUvBuffer = lightMapUvBuffer;
 	m_meshLightMapUvBuffers = meshUvBuffers;
 
-	EntityIterator entIt {*pragma::get_cgame(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapReceiverComponent>>();
 	for(auto *ent : entIt) {
 		auto lightMapReceiverC = ent->GetComponent<pragma::CLightMapReceiverComponent>();
@@ -208,7 +208,7 @@ void CLightMapComponent::UpdateLightmapUvBuffers()
 	auto *cache = GetLightmapDataCache();
 
 	auto &uvBuffers = GetMeshLightMapUvBuffers();
-	EntityIterator entIt {*pragma::get_cgame(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapReceiverComponent>>();
 	for(auto *ent : entIt) {
 		auto lightMapReceiverC = ent->GetComponent<pragma::CLightMapReceiverComponent>();
@@ -242,7 +242,7 @@ std::shared_ptr<prosper::IDynamicResizableBuffer> CLightMapComponent::GenerateLi
 	auto requiredBufferSize = 0ull;
 
 	// Collect all meshes that have lightmap uv coordinates
-	EntityIterator entIt {*pragma::get_cgame(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapReceiverComponent>>();
 
 	// Calculate required buffer size
@@ -440,7 +440,7 @@ bool CLightMapComponent::ImportLightmapAtlas(uimg::ImageBuffer &imgBuffer)
 	auto mapName = pragma::get_cgame()->GetMapName();
 	Con::cout << "Lightmap atlas save result: " << uimg::save_texture("materials/maps/" + mapName + "/lightmap_atlas.dds", imgBuffer, texSaveInfo) << Con::endl;
 
-	EntityIterator entIt {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapComponent>>();
 	auto it = entIt.begin();
 	if(it == entIt.end())
@@ -523,7 +523,7 @@ bool CLightMapComponent::ImportLightmapAtlas(const std::string &path)
 
 bool CLightMapComponent::BakeLightmaps(const LightmapBakeSettings &bakeSettings)
 {
-	EntityIterator entIt {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapComponent>>();
 	auto it = entIt.begin();
 	if(it == entIt.end()) {

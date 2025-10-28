@@ -286,7 +286,7 @@ void CSkyboxComponent::ValidateMaterials()
 			mdl->LoadMaterials();
 	}
 }
-void CSkyboxComponent::SetSkyMaterial(Material *mat)
+void CSkyboxComponent::SetSkyMaterial(msys::Material *mat)
 {
 	auto &ent = GetEntity();
 	auto mdlC = ent.GetComponent<CModelComponent>();
@@ -318,7 +318,7 @@ static void sky_override(NetworkState *, const ConVar &, std::string, std::strin
 	CMaterial *matSky = nullptr;
 	if(skyMat.empty() == false)
 		matSky = static_cast<CMaterial *>(pragma::get_client_state()->LoadMaterial(skyMat, nullptr, false, true));
-	EntityIterator entIt {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CSkyboxComponent>>();
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CModelComponent>>();
 	for(auto *ent : entIt)

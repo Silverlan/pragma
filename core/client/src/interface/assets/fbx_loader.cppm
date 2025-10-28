@@ -48,7 +48,7 @@ export namespace pragma::asset::fbx {
 			int32_t lod = -1;
 			bool skinned = false;
 		};
-		std::shared_ptr<Model> m_model;
+		std::shared_ptr<pragma::Model> m_model;
 		std::string m_mdlPath;
 		std::string m_mdlName;
 		util::Path m_outputPath;

@@ -13,7 +13,7 @@ void SAIComponent::AIAnimationInfo::SetPlayFlags(pragma::FPlayAnim flags) { m_fl
 pragma::FPlayAnim SAIComponent::AIAnimationInfo::GetPlayFlags() const { return m_flags; }
 SAIComponent::AIAnimationInfo::AIAnimFlags SAIComponent::AIAnimationInfo::GetAIAnimFlags() const { return m_aiAnimFlags; }
 
-void SAIComponent::AIAnimationInfo::SetActivity(Activity act) const
+void SAIComponent::AIAnimationInfo::SetActivity(pragma::Activity act) const
 {
 	umath::set_flag(m_aiAnimFlags, AIAnimFlags::PlayAnimation, false);
 	umath::set_flag(m_aiAnimFlags, AIAnimFlags::PlayActivity, true);
@@ -47,7 +47,7 @@ void SAIComponent::AIAnimationInfo::SetFaceTarget(pragma::ecs::BaseEntity &targe
 	m_faceTarget = std::make_shared<EntityHandle>(target.GetHandle());
 }
 int32_t SAIComponent::AIAnimationInfo::GetAnimation() const { return m_animation.animation; }
-Activity SAIComponent::AIAnimationInfo::GetActivity() const { return m_animation.activity; }
+pragma::Activity SAIComponent::AIAnimationInfo::GetActivity() const { return m_animation.activity; }
 const Vector3 *SAIComponent::AIAnimationInfo::GetFacePosition() const
 {
 	if(umath::is_flag_set(m_aiAnimFlags, AIAnimFlags::FacePosition) == false)
@@ -109,7 +109,7 @@ bool SAIComponent::PlayAnimation(const AIAnimationInfo &info)
 	m_bSkipHandling = false;
 	return r;
 }
-bool SAIComponent::PlayActivity(Activity act, const AIAnimationInfo &info)
+bool SAIComponent::PlayActivity(pragma::Activity act, const AIAnimationInfo &info)
 {
 	info.SetActivity(act);
 	return PlayAnimation(info);

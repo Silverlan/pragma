@@ -96,7 +96,7 @@ static void get_local_bone_position(const std::function<Transform(uint32_t)> &fG
 	if(parent != nullptr)
 		apply(parent, pos, rot, scale);
 }
-static void get_local_bone_position(const std::shared_ptr<::Model> &mdl, const std::function<Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr, Vector3 *scale = nullptr)
+static void get_local_bone_position(const std::shared_ptr<pragma::Model> &mdl, const std::function<Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr, Vector3 *scale = nullptr)
 {
 	get_local_bone_position(fGetTransform, bone, fscale, pos, rot, scale);
 	if(rot == nullptr)
@@ -171,8 +171,8 @@ class RagDoll {
 		auto *body = pragma::get_cgame()->GetPhysicsEnvironment()->CreateRigidBody(mass, shape, localInertia);
 
 		body->Spawn();
-		body->SetCollisionFilterGroup(CollisionMask::Dynamic | CollisionMask::Generic);
-		body->SetCollisionFilterMask(CollisionMask::All);
+		body->SetCollisionFilterGroup(pragma::physics::CollisionMask::Dynamic | pragma::physics::CollisionMask::Generic);
+		body->SetCollisionFilterMask(pragma::physics::CollisionMask::All);
 		return body->GetHandle();
 	}
   public:
@@ -442,8 +442,8 @@ int Lua::game::Client::test(lua_State *l)
 
 				body->Spawn();
 				body->SetPos(colMesh->GetOrigin());
-				body->SetCollisionFilterGroup(CollisionMask::Dynamic | CollisionMask::Generic);
-				body->SetCollisionFilterMask(CollisionMask::All);
+				body->SetCollisionFilterGroup(pragma::physics::CollisionMask::Dynamic | pragma::physics::CollisionMask::Generic);
+				body->SetCollisionFilterMask(pragma::physics::CollisionMask::All);
 
 				rigidBodies.push_back(body);
 				boneIds.push_back(colMesh->GetBoneParent());
@@ -487,7 +487,7 @@ int Lua::game::Client::test(lua_State *l)
 #if 0
 	if(true)
 	{
-		EntityIterator entIt {*pragma::get_cgame()};
+		pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 		entIt.AttachFilter<EntityIteratorFilterClass>("prop_physics");
 		auto it = entIt.begin();
 		auto *ent = (it != entIt.end()) ? *it : nullptr;
@@ -652,7 +652,7 @@ int Lua::game::Client::test(lua_State *l)
 										auto ev = channel->AddEvent<choreography::AudioEvent>(sndName);
 										ev->SetTimeRange(startTime,endTime);
 
-										EntityIterator entIt {*pragma::get_cgame()};
+										pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 										entIt.AttachFilter<EntityIteratorFilterClass>("prop_dynamic");
 										auto it = entIt.begin();
 										auto *ent = (it != entIt.end()) ? *it : nullptr;
@@ -725,7 +725,7 @@ int Lua::game::Client::test(lua_State *l)
 										auto ev = channel->AddEvent<choreography::FacialFlexEvent>();
 										ev->SetTimeRange(startTime,endTime);
 
-										EntityIterator entIt{*pragma::get_cgame()};
+										pragma::ecs::EntityIterator entIt{*pragma::get_cgame()};
 										entIt.AttachFilter<EntityIteratorFilterClass>("prop_dynamic");
 										auto it = entIt.begin();
 										auto *ent = (it != entIt.end()) ? *it : nullptr;
@@ -861,7 +861,7 @@ int Lua::game::Client::load_model(lua_State *l)
 }
 int Lua::game::Client::create_model(lua_State *l)
 {
-	std::shared_ptr<::Model> mdl = nullptr;
+	std::shared_ptr<pragma::Model> mdl = nullptr;
 	if(!Lua::IsSet(l, 1))
 		mdl = pragma::get_cgame()->CreateModel();
 	else {
@@ -884,14 +884,14 @@ int Lua::game::Client::create_model(lua_State *l)
 int Lua::game::Client::get_action_input(lua_State *l)
 {
 	auto input = Lua::CheckInt(l, 1);
-	Lua::PushBool(l, pragma::get_cgame()->GetActionInput(static_cast<Action>(input)));
+	Lua::PushBool(l, pragma::get_cgame()->GetActionInput(static_cast<pragma::Action>(input)));
 	return 1;
 }
 int Lua::game::Client::set_action_input(lua_State *l)
 {
 	auto input = Lua::CheckInt(l, 1);
 	auto pressed = Lua::CheckBool(l, 2);
-	pragma::get_cgame()->SetActionInput(static_cast<Action>(input), pressed);
+	pragma::get_cgame()->SetActionInput(static_cast<pragma::Action>(input), pressed);
 	return 0;
 }
 int Lua::game::Client::update_render_buffers(lua_State *l)
@@ -936,7 +936,7 @@ int Lua::game::Client::set_debug_render_filter(lua_State *l)
 	if(t["materialFilter"]) {
 		auto materialFilter = luabind::object {t["materialFilter"]};
 		filter->materialFilter = [materialFilter](CMaterial &mat) mutable -> bool {
-			auto r = materialFilter(static_cast<::Material *>(&mat));
+			auto r = materialFilter(static_cast<msys::Material *>(&mat));
 			return luabind::object_cast<bool>(r);
 		};
 	}
@@ -944,7 +944,7 @@ int Lua::game::Client::set_debug_render_filter(lua_State *l)
 		auto entityFilter = luabind::object {t["entityFilter"]};
 		filter->entityFilter = [entityFilter](CBaseEntity &ent, CMaterial &mat) mutable -> bool {
 			auto &oEnt = ent.GetLuaObject();
-			auto r = entityFilter(oEnt, static_cast<::Material *>(&mat));
+			auto r = entityFilter(oEnt, static_cast<msys::Material *>(&mat));
 			return luabind::object_cast<bool>(r);
 		};
 	}
@@ -952,7 +952,7 @@ int Lua::game::Client::set_debug_render_filter(lua_State *l)
 		auto meshFilter = luabind::object {t["meshFilter"]};
 		filter->meshFilter = [meshFilter](CBaseEntity &ent, CMaterial *mat, CModelSubMesh &mesh, pragma::RenderMeshIndex meshIdx) mutable -> bool {
 			auto &oEnt = ent.GetLuaObject();
-			auto r = meshFilter(oEnt, mat ? static_cast<::Material *>(mat) : nullptr, mesh.shared_from_this(), meshIdx);
+			auto r = meshFilter(oEnt, mat ? static_cast<msys::Material *>(mat) : nullptr, mesh.shared_from_this(), meshIdx);
 			return luabind::object_cast<bool>(r);
 		};
 	}

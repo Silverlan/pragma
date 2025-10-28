@@ -3,6 +3,9 @@
 
 module;
 
+#include <string>
+#include <functional>
+
 #include "stdafx_server.h"
 
 module pragma.server.entities.components.ai;
@@ -46,7 +49,7 @@ void SAIComponent::StartControl(pragma::SPlayerComponent &pl)
 	if(charComponent != nullptr)
 		charComponent->SetNoTarget(true);
 	CancelSchedule();
-	m_controlInfo.actions = Action::None; // We want to overwrite the player's controls, so we need to keep track of them ourselves
+	m_controlInfo.actions = pragma::Action::None; // We want to overwrite the player's controls, so we need to keep track of them ourselves
 	auto pGenericComponent = plEnt.GetComponent<SGenericComponent>();
 	if(pGenericComponent.valid()) {
 		m_controlInfo.hCbOnRemove = pGenericComponent->BindEventUnhandled(pragma::ecs::BaseEntity::EVENT_ON_REMOVE, std::bind(&SAIComponent::EndControl, this));
@@ -57,12 +60,12 @@ void SAIComponent::StartControl(pragma::SPlayerComponent &pl)
 		m_controlInfo.hCbOnActionInput = actionInputC->BindEvent(ActionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			auto &actionInputData = static_cast<CEHandleActionInput &>(evData.get());
 			if(actionInputData.pressed == true) {
-				if((m_controlInfo.actions & actionInputData.action) != Action::None)
+				if((m_controlInfo.actions & actionInputData.action) != pragma::Action::None)
 					return util::EventReply::Handled;
 				m_controlInfo.actions |= actionInputData.action;
 			}
 			else {
-				if((m_controlInfo.actions & actionInputData.action) == Action::None)
+				if((m_controlInfo.actions & actionInputData.action) == pragma::Action::None)
 					return util::EventReply::Handled;
 				m_controlInfo.actions &= ~actionInputData.action;
 			}
@@ -83,8 +86,8 @@ void SAIComponent::StartControl(pragma::SPlayerComponent &pl)
 	DisableAI();
 	OnStartControl(pl);
 }
-Action SAIComponent::GetControllerActionInput() const { return m_controlInfo.actions; }
-void SAIComponent::OnControllerActionInput(Action action, bool pressed)
+pragma::Action SAIComponent::GetControllerActionInput() const { return m_controlInfo.actions; }
+void SAIComponent::OnControllerActionInput(pragma::Action action, bool pressed)
 {
 	CEOnControllerActionInput evData {action, pressed};
 	BroadcastEvent(EVENT_ON_CONTROLLER_ACTION_INPUT);

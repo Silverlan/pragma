@@ -3,6 +3,13 @@
 
 module;
 
+#include <memory>
+#include <functional>
+#include <functional>
+#include <unordered_map>
+#include <vector>
+#include <sstream>
+
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_server.h"
@@ -63,9 +70,9 @@ void SVehicleComponent::ClearDriver()
 	nwm::write_entity(p, nullptr);
 	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetDriver, p, pragma::networking::Protocol::SlowReliable);
 }
-void SVehicleComponent::OnActionInput(Action action, bool b)
+void SVehicleComponent::OnActionInput(pragma::Action action, bool b)
 {
-	if(action == Action::Use) {
+	if(action == pragma::Action::Use) {
 		if(b == false)
 			return;
 		ClearDriver();
@@ -99,7 +106,7 @@ void SVehicleComponent::SetDriver(pragma::ecs::BaseEntity *ent)
 		if(actionInputC) {
 			m_playerAction = actionInputC->BindEvent(ActionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 				auto &actionData = static_cast<CEHandleActionInput &>(evData.get());
-				if(actionData.action == Action::Use) {
+				if(actionData.action == pragma::Action::Use) {
 					OnActionInput(actionData.action, actionData.pressed);
 					return util::EventReply::Handled;
 				}

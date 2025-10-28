@@ -136,7 +136,7 @@ void ShaderTest::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipe
 	pipelineInfo.ToggleDynamicStates(true, {prosper::DynamicState::DepthBias});
 }
 
-static bool bind_texture(Material &mat, prosper::IDescriptorSet &ds, TextureInfo *texInfo, uint32_t bindingIndex, Texture *optDefaultTex = nullptr)
+static bool bind_texture(msys::Material &mat, prosper::IDescriptorSet &ds, TextureInfo *texInfo, uint32_t bindingIndex, Texture *optDefaultTex = nullptr)
 {
 	auto &matManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
@@ -165,7 +165,7 @@ static bool bind_default_texture(prosper::IDescriptorSet &ds, const std::string 
 	return true;
 }
 
-static bool bind_texture(Material &mat, prosper::IDescriptorSet &ds, TextureInfo *texInfo, uint32_t bindingIndex, const std::string &defaultTexName)
+static bool bind_texture(msys::Material &mat, prosper::IDescriptorSet &ds, TextureInfo *texInfo, uint32_t bindingIndex, const std::string &defaultTexName)
 {
 	auto &matManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();

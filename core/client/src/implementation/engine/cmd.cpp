@@ -38,7 +38,7 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 extern bool g_dumpRenderQueues;
 void CEngine::RegisterConsoleCommands()
 {
-	Engine::RegisterConsoleCommands();
+	pragma::Engine::RegisterConsoleCommands();
 	auto &conVarMap = *console_system::client::get_convar_map();
 	RegisterSharedConsoleCommands(conVarMap);
 	conVarMap.RegisterConCommand("lua_exec_cl", &pragma::console::commands::lua_exec, pragma::console::ConVarFlags::None, "Opens and executes a lua-file on the client.", &pragma::console::commands::lua_exec_autocomplete);

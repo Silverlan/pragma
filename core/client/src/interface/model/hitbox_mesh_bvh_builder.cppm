@@ -28,13 +28,13 @@ export namespace pragma::bvh {
 		};
 
 		HitboxMeshBvhBuildTask(BS::thread_pool &threadPool);
-		bool Build(Model &mdl);
+		bool Build(pragma::Model &mdl);
 		const std::unordered_map<BoneName, std::vector<std::shared_ptr<BoneMeshInfo>>> &GetResult() const { return m_boneMeshMap; }
 	  private:
-		bool Build(Model &mdl, pragma::animation::BoneId boneId, const Hitbox &hitbox, const LODInfo &lodInfo);
-		void Serialize(Model &mdl);
-		void BuildHitboxMesh(Model &mdl, pragma::ModelSubMesh &subMesh);
-		void BuildMeshBvh(Model &mdl, pragma::ModelSubMesh &subMesh);
+		bool Build(pragma::Model &mdl, pragma::animation::BoneId boneId, const Hitbox &hitbox, const LODInfo &lodInfo);
+		void Serialize(pragma::Model &mdl);
+		void BuildHitboxMesh(pragma::Model &mdl, pragma::ModelSubMesh &subMesh);
+		void BuildMeshBvh(pragma::Model &mdl, pragma::ModelSubMesh &subMesh);
 
 		BS::thread_pool &m_threadPool;
 		std::unordered_map<BoneName, std::vector<std::shared_ptr<BoneMeshInfo>>> m_boneMeshMap;
@@ -43,7 +43,7 @@ export namespace pragma::bvh {
 	class DLLCLIENT HitboxMeshBvhBuilder {
 	  public:
 		HitboxMeshBvhBuilder();
-		HitboxMeshBvhBuildTask BuildModel(Model &mdl);
+		HitboxMeshBvhBuildTask BuildModel(pragma::Model &mdl);
 		BS::thread_pool &GetThreadPool() { return m_threadPool; }
 	  private:
 		BS::thread_pool m_threadPool;

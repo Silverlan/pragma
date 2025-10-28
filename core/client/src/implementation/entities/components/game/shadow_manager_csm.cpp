@@ -68,7 +68,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 
 		m_shadowCasters.clear();
 
-		EntityIterator entIt {*pragma::get_cgame()};
+		pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 		for(auto *ent : entIt)
 		{
@@ -101,7 +101,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 				for(auto &subMesh : mesh->GetSubMeshes())
 				{
 					auto matIdx = mdl->GetMaterialIndex(*subMesh);
-					auto *mat = matIdx.has_value() ? const_cast<Model&>(*mdl).GetMaterial(*matIdx) : nullptr;
+					auto *mat = matIdx.has_value() ? const_cast<pragma::Model&>(*mdl).GetMaterial(*matIdx) : nullptr;
 					if(mat == nullptr || mat->GetShaderIdentifier() == "nodraw") // TODO
 						continue;
 					if(m_shadowCasters.size() == m_shadowCasters.capacity())
@@ -165,7 +165,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 			const auto fDraw = [this,layerFlag,layer,&drawCmd,&csm](pragma::ShaderShadowCSM &shader,bool bTranslucent) -> bool {
 				auto bRetTranslucent = false;
 				auto bProcessMeshes = false;
-				Material *prevMat = nullptr;
+				msys::Material *prevMat = nullptr;
 				for(auto &info : m_shadowCasters)
 				{
 					if(info.entity != nullptr)
@@ -206,7 +206,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 				if(drawParticleShadows == true)
 				{
 					// TODO: Only culled particles
-					EntityIterator entIt {*pragma::get_cgame()};
+					pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 					entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::ecs::CParticleSystemComponent>>();
 					for(auto *ent : entIt)
 					{

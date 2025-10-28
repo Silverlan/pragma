@@ -27,7 +27,7 @@ void CPhysicsComponent::Initialize()
 	// TODO
 	BindEvent(CAnimatedComponent::EVENT_ON_SKELETON_UPDATED,[this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto *phys = GetPhysicsObject();
-		if(phys != nullptr && GetPhysicsType() == pragma::physics::MOVETYPE::DYNAMIC)
+		if(phys != nullptr && GetPhysicsType() == pragma::physics::PHYSICSTYPE::DYNAMIC)
 		{
 			auto *o = phys->GetCollisionObject();
 			if(o != nullptr)
@@ -67,7 +67,7 @@ void CPhysicsComponent::InitializeLuaObject(lua_State *l) { return BaseEntityCom
 void CPhysicsComponent::PrePhysicsSimulate()
 {
 	auto dt = pragma::get_cgame()->DeltaTime();
-	if(dt > 0.0 && GetPhysicsType() != pragma::physics::MOVETYPE::SOFTBODY) {
+	if(dt > 0.0 && GetPhysicsType() != pragma::physics::PHYSICSTYPE::SOFTBODY) {
 		auto pVelComponent = GetEntity().GetComponent<pragma::VelocityComponent>();
 		if(pVelComponent.valid())
 			pVelComponent->SetVelocity(pVelComponent->GetVelocity() + GetLinearCorrectionVelocity() / static_cast<float>(dt));
@@ -77,7 +77,7 @@ void CPhysicsComponent::PrePhysicsSimulate()
 bool CPhysicsComponent::PostPhysicsSimulate()
 {
 	auto dt = pragma::get_cgame()->DeltaTime();
-	if(dt > 0.0 && GetPhysicsType() != pragma::physics::MOVETYPE::SOFTBODY) {
+	if(dt > 0.0 && GetPhysicsType() != pragma::physics::PHYSICSTYPE::SOFTBODY) {
 		auto pVelComponent = GetEntity().GetComponent<pragma::VelocityComponent>();
 		if(pVelComponent.valid())
 			pVelComponent->SetVelocity(pVelComponent->GetVelocity() - GetLinearCorrectionVelocity() / static_cast<float>(dt));
@@ -88,9 +88,9 @@ bool CPhysicsComponent::PostPhysicsSimulate()
 
 void CPhysicsComponent::ReceiveData(NetPacket &packet)
 {
-	auto physType = static_cast<PHYSICSTYPE>(packet->Read<unsigned int>());
+	auto physType = static_cast<pragma::physics::PHYSICSTYPE>(packet->Read<unsigned int>());
 	m_physicsType = physType;
-	auto moveType = static_cast<MOVETYPE>(packet->Read<uint32_t>());
+	auto moveType = static_cast<pragma::physics::MOVETYPE>(packet->Read<uint32_t>());
 	SetMoveType(moveType);
 }
 

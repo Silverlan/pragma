@@ -18,7 +18,7 @@ import :engine;
 using namespace pragma;
 
 
-PBRAOBakeJob::PBRAOBakeJob(Model &mdl, Material &mat) : hModel {mdl.GetHandle()}, hMaterial {mat.GetHandle()} {}
+PBRAOBakeJob::PBRAOBakeJob(pragma::Model &mdl, msys::Material &mat) : hModel {mdl.GetHandle()}, hMaterial {mat.GetHandle()} {}
 
 void CPBRConverterComponent::ProcessQueue()
 {
@@ -72,7 +72,7 @@ void CPBRConverterComponent::ProcessQueue()
 	pragma::get_cengine()->AddParallelJob(item.job, "Ambient Occlusion");
 }
 
-void CPBRConverterComponent::UpdateAmbientOcclusion(Model &mdl, const AmbientOcclusionInfo &aoInfo, pragma::ecs::BaseEntity *optEnt)
+void CPBRConverterComponent::UpdateAmbientOcclusion(pragma::Model &mdl, const AmbientOcclusionInfo &aoInfo, pragma::ecs::BaseEntity *optEnt)
 {
 	ConvertMaterialsToPBR(mdl);
 
@@ -99,7 +99,7 @@ void CPBRConverterComponent::UpdateAmbientOcclusion(Model &mdl, const AmbientOcc
 	}
 	SetTickPolicy(TickPolicy::Always);
 }
-void CPBRConverterComponent::WriteAOMap(Model &mdl, CMaterial &mat, uimg::ImageBuffer &imgBuffer, uint32_t w, uint32_t h) const
+void CPBRConverterComponent::WriteAOMap(pragma::Model &mdl, CMaterial &mat, uimg::ImageBuffer &imgBuffer, uint32_t w, uint32_t h) const
 {
 	Con::cout << "Ambient occlusion map has been generated for material '" << mat.GetName() << "' of model '" << mdl.GetName() << "'! Combining with RMA map..." << Con::endl;
 
@@ -120,7 +120,7 @@ void CPBRConverterComponent::WriteAOMap(Model &mdl, CMaterial &mat, uimg::ImageB
 		outPath = mat.GetName();
 		outPath.RemoveFileExtension();
 		rmaName = outPath.GetString() + "_rma";
-		mat.SetTextureProperty(Material::RMA_MAP_IDENTIFIER, rmaName);
+		mat.SetTextureProperty(msys::Material::RMA_MAP_IDENTIFIER, rmaName);
 		requiresSave = true;
 	}
 

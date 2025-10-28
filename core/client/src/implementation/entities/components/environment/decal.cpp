@@ -406,7 +406,7 @@ bool CDecalComponent::ApplyDecal()
 	};
 
 	{
-		EntityIterator entIt {*pragma::get_cgame()};
+		pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CStaticBvhCacheComponent>>();
 		for(auto *ent : entIt) {
 			auto bvhC = ent->GetComponent<pragma::CStaticBvhCacheComponent>();
@@ -415,7 +415,7 @@ bool CDecalComponent::ApplyDecal()
 	}
 
 	{
-		EntityIterator entIt {*pragma::get_cgame()};
+		pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CBvhComponent>>();
 		for(auto *ent : entIt) {
 			auto bvhC = ent->GetComponent<pragma::CBvhComponent>();

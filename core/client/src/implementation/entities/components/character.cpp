@@ -48,7 +48,7 @@ void CCharacterComponent::Initialize()
 			// However, this requires sending the moveActivity from the server to the clients (snapshots?)
 			if(anim != nullptr && anim->HasFlag(FAnim::Loop) && (moveSpeed.x > 0.f || moveSpeed.y > 0.f)) //IsMoving())
 			{
-				auto anim = hMdl->GetAnimation(hMdl->SelectFirstAnimation(animComponent->TranslateActivity(Activity::Idle)));
+				auto anim = hMdl->GetAnimation(hMdl->SelectFirstAnimation(animComponent->TranslateActivity(pragma::Activity::Idle)));
 				auto frame = anim ? anim->GetFrame(0) : nullptr;
 				if(frame != nullptr) {
 					auto blendScale = movementC ? movementC->GetMovementBlendScale() : 0.f;

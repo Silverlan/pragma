@@ -23,7 +23,7 @@ void SFuncPhysicsComponent::SendData(NetPacket &packet, networking::ClientRecipi
 	packet->WriteString(m_kvSurfaceMaterial);
 }
 
-PhysObj *SFuncPhysicsComponent::InitializePhysics()
+pragma::physics::PhysObj *SFuncPhysicsComponent::InitializePhysics()
 {
 	if(m_bClientsidePhysics == true)
 		return nullptr;

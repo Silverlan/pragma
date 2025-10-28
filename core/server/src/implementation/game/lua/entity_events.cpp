@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include <sstream>
+
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_server.h"
@@ -13,7 +15,7 @@ import pragma.server.entities.components;
 
 bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject)
 {
-	if(Game::InvokeEntityEvent(component, eventId, argsIdx, bInject))
+	if(pragma::Game::InvokeEntityEvent(component, eventId, argsIdx, bInject))
 		return true;
 	auto *l = GetLuaState();
 	if(eventId == pragma::SAIComponent::EVENT_ON_PRIMARY_TARGET_CHANGED || eventId == pragma::SAIComponent::EVENT_ON_TARGET_VISIBILITY_LOST || eventId == pragma::SAIComponent::EVENT_ON_TARGET_VISIBILITY_REACQUIRED || eventId == pragma::SAIComponent::EVENT_ON_MEMORY_GAINED
@@ -85,7 +87,7 @@ bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t e
 	else if(eventId == pragma::SAIComponent::EVENT_ON_CONTROLLER_ACTION_INPUT) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto action = static_cast<Action>(Lua::CheckInt(l, -1));
+		auto action = static_cast<pragma::Action>(Lua::CheckInt(l, -1));
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 2);

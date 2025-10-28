@@ -419,7 +419,7 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos, const 
 
 	shaderPPWater.InitializeMaterialDescriptorSet(*mat);
 
-	EntityIterator entIt {*pragma::get_cgame(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRendererComponent>>();
 	for(auto *ent : entIt)
 		InitializeRenderer(*ent->GetComponent<pragma::CRendererComponent>());

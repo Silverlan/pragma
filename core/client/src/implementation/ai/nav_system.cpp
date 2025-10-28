@@ -21,7 +21,7 @@ import :game;
 
 
 std::shared_ptr<pragma::nav::CMesh> pragma::nav::CMesh::Create(const std::shared_ptr<RcNavMesh> &rcMesh, const Config &config) { return Mesh::Create<CMesh>(rcMesh, config); }
-std::shared_ptr<pragma::nav::CMesh> pragma::nav::CMesh::Load(Game &game, const std::string &fname) { return Mesh::Load<CMesh>(game, fname); }
+std::shared_ptr<pragma::nav::CMesh> pragma::nav::CMesh::Load(pragma::Game &game, const std::string &fname) { return Mesh::Load<CMesh>(game, fname); }
 void pragma::nav::CMesh::UpdateDebugPath(Vector3 &start, Vector3 &end)
 {
 	auto res = FindPath(start, end);
@@ -241,7 +241,7 @@ void CMD_debug_nav_path_start(NetworkState *state, pragma::BasePlayerComponent *
 
 	TraceData data {};
 	data.SetFilter(ent);
-	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
+	data.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::InvertFilter);
 	data.SetSource(origin);
 	data.SetTarget(origin + dir * 65'536.f);
 	auto r = pragma::get_cgame()->RayCast(data);
@@ -269,7 +269,7 @@ void CMD_debug_nav_path_end(NetworkState *state, pragma::BasePlayerComponent *pl
 
 	TraceData data {};
 	data.SetFilter(ent);
-	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
+	data.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::InvertFilter);
 	data.SetSource(origin);
 	data.SetTarget(origin + dir * 65'536.f);
 	auto r = pragma::get_cgame()->RayCast(data);

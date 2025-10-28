@@ -28,7 +28,7 @@ export namespace pragma {
 		bool RecordWorldRotationBuffer(prosper::ShaderBindState &bindState, prosper::IBuffer &buffer) const;
 		ShaderParticleRotational(prosper::IPrContext &context, const std::string &identifier);
 	  protected:
-		virtual void GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material = nullptr, const pragma::BaseEnvCameraComponent *cam = nullptr) const override;
+		virtual void GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const msys::Material *material = nullptr, const pragma::BaseEnvCameraComponent *cam = nullptr) const override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeShaderResources() override;
 	};

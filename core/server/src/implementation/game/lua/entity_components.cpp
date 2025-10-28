@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include <sstream>
+
 #include "pragma/lua/ostream_operator_alias.hpp"
 
 #include "pragma/lua/core.hpp"
@@ -18,7 +20,7 @@ void RegisterLuaEntityComponents2_sv(lua_State *l, luabind::module_ &entsMod);
 
 void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {
-	Game::RegisterLuaEntityComponents(entsMod);
+	pragma::Game::RegisterLuaEntityComponents(entsMod);
 
 	auto defSGamemode = pragma::lua::create_entity_component_class<pragma::SGamemodeComponent, pragma::BaseGamemodeComponent>("GamemodeComponent");
 	entsMod[defSGamemode];

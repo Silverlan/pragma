@@ -142,7 +142,7 @@ void CLightComponent::DestroyShadowBuffer(bool freeBuffer)
 
 bool CLightComponent::ShouldRender() { return true; }
 
-bool CLightComponent::ShouldPass(const Model &mdl, const CModelSubMesh &mesh)
+bool CLightComponent::ShouldPass(const pragma::Model &mdl, const CModelSubMesh &mesh)
 {
 	auto &materials = mdl.GetMaterials();
 	auto texId = mdl.GetMaterialIndex(mesh);
@@ -626,7 +626,7 @@ static void debug_light_sources(NetworkState *state, pragma::BasePlayerComponent
 	auto &context = pragma::get_cengine()->GetRenderContext();
 	context.WaitIdle();
 
-	EntityIterator entIt {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<CLightComponent>>();
 	std::vector<pragma::CLightComponent *> lights;
 	lights.reserve(entIt.GetCount());
@@ -758,7 +758,7 @@ void CEShouldPassEntity::PushArguments(lua_State *l) {}
 
 /////////////////
 
-CEShouldPassMesh::CEShouldPassMesh(const Model &model, const CModelSubMesh &mesh) : model {model}, mesh {mesh} {}
+CEShouldPassMesh::CEShouldPassMesh(const pragma::Model &model, const CModelSubMesh &mesh) : model {model}, mesh {mesh} {}
 void CEShouldPassMesh::PushArguments(lua_State *l) {}
 
 /////////////////

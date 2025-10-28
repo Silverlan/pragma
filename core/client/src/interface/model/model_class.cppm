@@ -10,7 +10,7 @@ export module pragma.client:model.model_class;
 
 import :model.mesh;
 
-export class DLLCLIENT CModel : public Model {
+export class DLLCLIENT CModel : public pragma::Model {
   public:
 	CModel(NetworkState *nw, uint32_t numBones, const std::string &name = "");
 	void AddMesh(const std::string &meshGroup, const std::shared_ptr<CModelMesh> &mesh);

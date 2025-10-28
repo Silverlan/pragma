@@ -68,7 +68,7 @@ export {
 		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void OnParticleCreated(CParticle &particle) override;
 	protected:
-		std::shared_ptr<Model> m_model = nullptr;
+		std::shared_ptr<pragma::Model> m_model = nullptr;
 		virtual std::shared_ptr<pragma::physics::IShape> CreateShape() override;
 	};
 };

@@ -37,7 +37,7 @@ CBaseEntity *CGame::CreateEntity(std::string classname)
 {
 	if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
 		return nullptr;
-	StringToLower(classname);
+	ustring::to_lower(classname);
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("create_entity");
 	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
@@ -100,7 +100,7 @@ void CGame::UpdateEntityModel(CBaseEntity *ent) { CallCallbacks<void, CBaseEntit
 
 void CGame::SpawnEntity(pragma::ecs::BaseEntity *ent)
 {
-	Game::SpawnEntity(ent);
+	pragma::Game::SpawnEntity(ent);
 	CallCallbacks<void, pragma::ecs::BaseEntity *>("OnEntitySpawned", ent);
 }
 
@@ -132,7 +132,7 @@ CBaseEntity *CGame::CreateLuaEntity(std::string classname, unsigned int idx, boo
 	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 	luabind::object oClass {};
-	auto *ent = static_cast<CBaseEntity *>(Game::CreateLuaEntity<CLuaEntity, pragma::lua::HandleHolder<CLuaEntity>>(classname, oClass, bLoadIfNotExists));
+	auto *ent = static_cast<CBaseEntity *>(pragma::Game::CreateLuaEntity<CLuaEntity, pragma::lua::HandleHolder<CLuaEntity>>(classname, oClass, bLoadIfNotExists));
 	if(ent == nullptr)
 		return nullptr;
 	SetupEntity(ent, idx);

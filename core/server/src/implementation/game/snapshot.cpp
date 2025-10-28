@@ -3,6 +3,12 @@
 
 module;
 
+#include <memory>
+#include <functional>
+#include <functional>
+#include <unordered_map>
+#include <vector>
+
 #include "stdafx_server.h"
 
 module pragma.server.game;
@@ -53,7 +59,7 @@ void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 			packet->Write<decltype(flags)>(flags);
 
 			auto pPhysComponent = ent->GetPhysicsComponent();
-			PhysObj *physObj = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
+			pragma::physics::PhysObj *physObj = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 			if(physObj != NULL && !physObj->IsStatic()) {
 				flags |= pragma::SnapshotFlags::PhysicsData;
 				if(physObj->IsController()) {

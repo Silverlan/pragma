@@ -343,7 +343,7 @@ void NET_cl_LUANET_REG(NetPacket packet)
 	if(!client->IsGameActive())
 		return;
 	std::string name = packet->ReadString();
-	Game *game = client->GetGameState();
+	pragma::Game *game = client->GetGameState();
 	game->RegisterNetMessage(name);
 }
 
@@ -1141,7 +1141,7 @@ void NET_cl_ENT_MOVETYPE(NetPacket packet)
 	auto pPhysComponent = ent->GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
 		return;
-	MOVETYPE movetype = pragma::physics::MOVETYPE(packet->Read<unsigned char>());
+	pragma::physics::MOVETYPE movetype = pragma::physics::MOVETYPE(packet->Read<unsigned char>());
 	pPhysComponent->SetMoveType(movetype);
 }
 
@@ -1158,11 +1158,11 @@ void NET_cl_PL_TOGGLE_NOCLIP(NetPacket packet)
 		return;
 	if(bNoclip == false) {
 		pPhysComponent->SetMoveType(pragma::physics::MOVETYPE::WALK);
-		pPhysComponent->SetCollisionFilterGroup(CollisionMask::Player);
+		pPhysComponent->SetCollisionFilterGroup(pragma::physics::CollisionMask::Player);
 	}
 	else {
 		pPhysComponent->SetMoveType(pragma::physics::MOVETYPE::NOCLIP);
-		pPhysComponent->SetCollisionFilterGroup(CollisionMask::NoCollision);
+		pPhysComponent->SetCollisionFilterGroup(pragma::physics::CollisionMask::NoCollision);
 		//pl->SetCollisionsEnabled(false); // Bugged due to CCD
 	}
 }
@@ -1177,7 +1177,7 @@ void NET_cl_ENT_COLLISIONTYPE(NetPacket packet)
 	auto pPhysComponent = ent->GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
 		return;
-	COLLISIONTYPE collisiontype = COLLISIONTYPE(packet->Read<unsigned char>());
+	pragma::physics::COLLISIONTYPE collisiontype = pragma::physics::COLLISIONTYPE(packet->Read<unsigned char>());
 	pPhysComponent->SetCollisionType(collisiontype);
 }
 
@@ -1232,7 +1232,7 @@ void NET_cl_MAP_LOAD(NetPacket packet)
 	auto bNewWorld = packet->Read<bool>();
 	auto r = false;
 	if(bNewWorld == false)
-		r = pragma::get_cgame()->Game::LoadMap(mapName.c_str(), origin);
+		r = pragma::get_cgame()->pragma::Game::LoadMap(mapName.c_str(), origin);
 	else
 		r = pragma::get_cgame()->LoadMap(mapName.c_str(), origin);
 	if(r == false)
@@ -1296,7 +1296,7 @@ void NET_cl_PLAYERINPUT(NetPacket packet)
 		if(ent.IsCharacter())
 			ent.GetCharacterComponent()->SetViewOrientation(orientation);
 	}
-	auto actions = packet->Read<Action>();
+	auto actions = packet->Read<pragma::Action>();
 	auto bController = packet->Read<bool>();
 	auto *actionInputC = pl ? pl->GetActionInputController() : nullptr;
 	if(bController == true) {
@@ -1304,7 +1304,7 @@ void NET_cl_PLAYERINPUT(NetPacket packet)
 		for(auto v : actionValues) {
 			auto magnitude = packet->Read<float>();
 			if(pl != nullptr)
-				actionInputC->SetActionInputAxisMagnitude(static_cast<Action>(v), magnitude);
+				actionInputC->SetActionInputAxisMagnitude(static_cast<pragma::Action>(v), magnitude);
 		}
 	}
 	if(pl != nullptr)
@@ -1619,8 +1619,8 @@ void NET_cl_ENT_SETCOLLISIONFILTER(NetPacket packet)
 	auto pPhysComponent = ent->GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
 		return;
-	CollisionMask filterGroup = static_cast<CollisionMask>(packet->Read<unsigned int>());
-	CollisionMask filterMask = static_cast<CollisionMask>(packet->Read<unsigned int>());
+	pragma::physics::CollisionMask filterGroup = static_cast<pragma::physics::CollisionMask>(packet->Read<unsigned int>());
+	pragma::physics::CollisionMask filterMask = static_cast<pragma::physics::CollisionMask>(packet->Read<unsigned int>());
 	pPhysComponent->SetCollisionFilter(filterGroup, filterMask);
 }
 
@@ -1906,11 +1906,11 @@ void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, st
 	if(trC.expired())
 		return;
 	auto trData = util::get_entity_trace_data(*trC);
-	trData.SetFlags(RayCastFlags::InvertFilter);
+	trData.SetFlags(pragma::physics::RayCastFlags::InvertFilter);
 	trData.SetFilter(entPl);
 
 	TraceResult res {};
-	EntityIterator entIt {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 	std::optional<Intersection::LineMeshResult> closestMesh {};
 	pragma::ecs::BaseEntity *entClosest = nullptr;

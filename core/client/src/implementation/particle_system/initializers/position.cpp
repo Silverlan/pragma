@@ -17,7 +17,7 @@ void CParticleInitializerPositionRandomBox::Initialize(pragma::BaseEnvParticleSy
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		StringToLower(key);
+		ustring::to_lower(key);
 		if(key == "min")
 			m_min = uvec::create(it->second);
 		else if(key == "max")
@@ -50,7 +50,7 @@ void CParticleInitializerPositionRandomSphere::Initialize(pragma::BaseEnvParticl
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		StringToLower(key);
+		ustring::to_lower(key);
 		if(key == "distance_min")
 			m_distMin = util::to_float(it->second);
 		else if(key == "distance_max")

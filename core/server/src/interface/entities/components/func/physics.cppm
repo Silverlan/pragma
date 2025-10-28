@@ -23,7 +23,7 @@ export {
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual void InitializeLuaObject(lua_State *l) override;
 		protected:
-			virtual PhysObj *InitializePhysics() override;
+			virtual pragma::physics::PhysObj *InitializePhysics() override;
 		};
 	};
 

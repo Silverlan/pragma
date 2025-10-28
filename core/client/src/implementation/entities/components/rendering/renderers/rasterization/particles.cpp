@@ -27,7 +27,7 @@ void pragma::CRasterizationRendererComponent::RenderParticles(prosper::ICommandB
 	// TODO: Only render particles if they're visible
 	auto &culledParticles = m_culledParticles;
 	culledParticles.clear();
-	EntityIterator entIt {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::ecs::CParticleSystemComponent>>();
 	culledParticles.reserve(entIt.GetCount());
 	for(auto *ent : entIt) {

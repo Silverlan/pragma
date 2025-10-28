@@ -15,6 +15,8 @@ module;
 
 export module pragma.server.networking.resource;
 
+export import pragma.filesystem;
+
 export {
 	#pragma warning(push)
 	#pragma warning(disable : 4251)

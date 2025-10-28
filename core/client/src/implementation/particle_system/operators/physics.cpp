@@ -56,8 +56,8 @@ void CParticleOperatorPhysics::OnParticleSystemStarted()
 		auto rigidBody = c_physEnv->CreateRigidBody(*shape);
 		if(rigidBody != nullptr) {
 			m_physicsObjects[i] = rigidBody;
-			rigidBody->SetCollisionFilterGroup(CollisionMask::Particle);
-			rigidBody->SetCollisionFilterMask(CollisionMask::All & ~CollisionMask::Particle);
+			rigidBody->SetCollisionFilterGroup(pragma::physics::CollisionMask::Particle);
+			rigidBody->SetCollisionFilterMask(pragma::physics::CollisionMask::All & ~pragma::physics::CollisionMask::Particle);
 			rigidBody->DisableSimulation();
 			rigidBody->SetCCDEnabled(true);
 			rigidBody->SetLinearDamping(m_linearDamping);

@@ -367,7 +367,7 @@ void pragma::LuaShaderWrapperTextured3D::Lua_InitializePipeline(prosper::BasePip
 	static_cast<LShaderGameWorldLightingPass *>(m_shader)->BaseInitializeGfxPipeline(static_cast<prosper::GraphicsPipelineCreateInfo &>(pipelineInfo), pipelineIdx);
 }
 void pragma::LuaShaderWrapperTextured3D::Lua_InitializeShaderResources() { static_cast<LShaderGameWorldLightingPass *>(m_shader)->BaseInitializeShaderResources(); }
-std::shared_ptr<prosper::IDescriptorSetGroup> pragma::LuaShaderWrapperTextured3D::Lua_InitializeMaterialDescriptorSet(Material &mat) { return static_cast<LShaderGameWorldLightingPass *>(m_shader)->BaseInitializeMaterialDescriptorSet(static_cast<CMaterial &>(mat)); }
+std::shared_ptr<prosper::IDescriptorSetGroup> pragma::LuaShaderWrapperTextured3D::Lua_InitializeMaterialDescriptorSet(msys::Material &mat) { return static_cast<LShaderGameWorldLightingPass *>(m_shader)->BaseInitializeMaterialDescriptorSet(static_cast<CMaterial &>(mat)); }
 void pragma::LuaShaderWrapperTextured3D::Lua_InitializeMaterialData(CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
 {
 	return static_cast<LShaderGameWorldLightingPass *>(m_shader)->BaseInitializeMaterialData(mat, shaderMat, inOutMatData);
@@ -375,7 +375,7 @@ void pragma::LuaShaderWrapperTextured3D::Lua_InitializeMaterialData(CMaterial &m
 void pragma::LuaShaderWrapperTextured3D::Lua_InitializeGfxPipelineVertexAttributes() { static_cast<LShaderGameWorldLightingPass *>(m_shader)->BaseInitializeGfxPipelineVertexAttributes(); }
 void pragma::LuaShaderWrapperTextured3D::Lua_InitializeGfxPipelinePushConstantRanges() { static_cast<LShaderGameWorldLightingPass *>(m_shader)->BaseInitializeGfxPipelinePushConstantRanges(); }
 void pragma::LuaShaderWrapperTextured3D::Lua_InitializeGfxPipelineDescriptorSets() { static_cast<LShaderGameWorldLightingPass *>(m_shader)->BaseInitializeGfxPipelineDescriptorSets(); }
-void pragma::LuaShaderWrapperTextured3D::Lua_OnBindMaterial(Material &mat) {}
+void pragma::LuaShaderWrapperTextured3D::Lua_OnBindMaterial(msys::Material &mat) {}
 int32_t pragma::LuaShaderWrapperTextured3D::Lua_OnDraw(pragma::ModelSubMesh &mesh) { return umath::to_integral(util::EventReply::Unhandled); }
 void pragma::LuaShaderWrapperTextured3D::Lua_OnBindEntity(EntityHandle &hEnt) {}
 void pragma::LuaShaderWrapperTextured3D::Lua_OnBindScene(CRasterizationRendererComponent &renderer, bool bView) {}
@@ -420,7 +420,7 @@ void pragma::LuaShaderWrapperPbr::Lua_InitializeShaderResources() { static_cast<
 void pragma::LuaShaderWrapperPbr::Lua_InitializeGfxPipelineVertexAttributes() { static_cast<LShaderPbr *>(m_shader)->BaseInitializeGfxPipelineVertexAttributes(); }
 void pragma::LuaShaderWrapperPbr::Lua_InitializeGfxPipelinePushConstantRanges() { static_cast<LShaderPbr *>(m_shader)->BaseInitializeGfxPipelinePushConstantRanges(); }
 void pragma::LuaShaderWrapperPbr::Lua_InitializeGfxPipelineDescriptorSets() { static_cast<LShaderPbr *>(m_shader)->BaseInitializeGfxPipelineDescriptorSets(); }
-void pragma::LuaShaderWrapperPbr::Lua_OnBindMaterial(Material &mat) {}
+void pragma::LuaShaderWrapperPbr::Lua_OnBindMaterial(msys::Material &mat) {}
 int32_t pragma::LuaShaderWrapperPbr::Lua_OnDraw(pragma::ModelSubMesh &mesh) { return umath::to_integral(util::EventReply::Unhandled); }
 void pragma::LuaShaderWrapperPbr::Lua_OnBindEntity(EntityHandle &hEnt) {}
 void pragma::LuaShaderWrapperPbr::Lua_OnBindScene(CRasterizationRendererComponent &renderer, bool bView) {}

@@ -233,7 +233,7 @@ void CBaseEntity::OnRemove()
 {
 	auto mdlComponent = GetModelComponent();
 	if(mdlComponent)
-		mdlComponent->SetModel(std::shared_ptr<Model>(nullptr)); // Make sure to clear all clientside model mesh references
+		mdlComponent->SetModel(std::shared_ptr<pragma::Model>(nullptr)); // Make sure to clear all clientside model mesh references
 	pragma::ecs::BaseEntity::OnRemove();
 }
 
@@ -243,7 +243,7 @@ void CBaseEntity::Remove()
 		return;
 	pragma::ecs::BaseEntity::Remove();
 	SceneRenderDesc::AssertRenderQueueThreadInactive();
-	Game *game = pragma::get_client_state()->GetGameState();
+	pragma::Game *game = pragma::get_client_state()->GetGameState();
 	game->RemoveEntity(this);
 }
 

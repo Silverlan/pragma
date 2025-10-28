@@ -32,8 +32,8 @@ export {
 			enum class UpdateStatus : uint8_t { Initial = 0, Pending, Complete, Failed };
 			enum class StateFlags : uint8_t { None = 0u, BakingFailed = 1u, RequiresRebuild = BakingFailed << 1u };
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
-			static void BuildAllReflectionProbes(Game &game, bool rebuild = false);
-			static void BuildReflectionProbes(Game &game, std::vector<CReflectionProbeComponent *> &probes, bool rebuild = false);
+			static void BuildAllReflectionProbes(pragma::Game &game, bool rebuild = false);
+			static void BuildReflectionProbes(pragma::Game &game, std::vector<CReflectionProbeComponent *> &probes, bool rebuild = false);
 			static prosper::IDescriptorSet *FindDescriptorSetForClosestProbe(const CSceneComponent &scene, const Vector3 &origin, float &outIntensity);
 
 			CReflectionProbeComponent(pragma::ecs::BaseEntity &ent);
@@ -62,7 +62,7 @@ export {
 			void SetCubemapIBLMaterialFilePath(const std::string &path);
 		private:
 			static std::shared_ptr<prosper::IImage> CreateCubemapImage();
-			Material *LoadMaterial(bool &outIsDefault);
+			msys::Material *LoadMaterial(bool &outIsDefault);
 
 			void InitializeDescriptorSet();
 			void ClearDescriptorSet();

@@ -11,4 +11,4 @@ import :model.model_class;
 import :model.model_manager;
 import :client_state;
 
-std::shared_ptr<Model> pragma::asset::CModelManager::CreateModel(uint32_t numBones, const std::string &mdlName) { return Model::Create<CModel>(&m_nw, numBones, mdlName); }
+std::shared_ptr<pragma::Model> pragma::asset::CModelManager::CreateModel(uint32_t numBones, const std::string &mdlName) { return pragma::Model::Create<CModel>(&m_nw, numBones, mdlName); }

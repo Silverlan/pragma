@@ -237,7 +237,7 @@ void CObserverComponent::ApplyCameraObservationMode(Vector3 &pos, Quat &rot, Qua
 		TraceData data {};
 		data.SetSource(camLookAtPos);
 		data.SetTarget(camPos);
-		data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
+		data.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::InvertFilter);
 		data.SetFilter(obsC->GetEntity());
 		auto r = GetGame().RayCast(data);
 		pos = (r.hitType == pragma::physics::RayCastHitType::Block) ? r.position : camPos;

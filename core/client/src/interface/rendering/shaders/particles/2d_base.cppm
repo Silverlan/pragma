@@ -81,7 +81,7 @@ export namespace pragma {
 		  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsShadows) const;
 		virtual uint32_t GetSceneDescriptorSetIndex() const;
 
-		void GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, ecs::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material = nullptr, float camNearZ = 0.f,
+		void GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, ecs::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const msys::Material *material = nullptr, float camNearZ = 0.f,
 		  float camFarZ = 0.f) const;
 
 		Vector3 CalcVertexPosition(const pragma::ecs::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t absVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const;
@@ -104,8 +104,8 @@ export namespace pragma {
 		void RegisterDefaultGfxPipelinePushConstantRanges();
 		void RegisterDefaultGfxPipelineDescriptorSetGroups();
 
-		void GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, ecs::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material = nullptr,
+		void GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, ecs::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const msys::Material *material = nullptr,
 		  const pragma::BaseEnvCameraComponent *cam = nullptr) const;
-		virtual void GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material = nullptr, const pragma::BaseEnvCameraComponent *cam = nullptr) const;
+		virtual void GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const msys::Material *material = nullptr, const pragma::BaseEnvCameraComponent *cam = nullptr) const;
 	};
 };

@@ -52,7 +52,7 @@ void CSoundScapeComponent::OnTick(double dt)
 				TraceData tr;
 				tr.SetSource(charComponentEnt.valid() ? charComponentEnt->GetEyePosition() : pTrComponentEnt->GetPosition());
 				tr.SetTarget(pTrComponent->GetPosition());
-				tr.SetFlags(RayCastFlags::Default | RayCastFlags::IgnoreDynamic);
+				tr.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::IgnoreDynamic);
 				auto result = pragma::get_cgame()->RayCast(tr);
 				if(result.hitType == pragma::physics::RayCastHitType::None)
 					StartSoundScape();
@@ -67,7 +67,7 @@ void CSoundScapeComponent::OnEntitySpawn()
 {
 	BaseEnvSoundScapeComponent::OnEntitySpawn();
 	for(auto &pair : m_positions) {
-		EntityIterator itEnt {*pragma::get_cgame()};
+		pragma::ecs::EntityIterator itEnt {*pragma::get_cgame()};
 		itEnt.AttachFilter<EntityIteratorFilterEntity>(pair.second);
 		auto it = itEnt.begin();
 		if(it != itEnt.end())

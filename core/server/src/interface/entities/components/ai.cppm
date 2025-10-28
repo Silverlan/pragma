@@ -6,6 +6,10 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
+#include <memory>
+
+#include <string>
+
 
 
 export module pragma.server.entities.components.ai;
@@ -48,9 +52,9 @@ export {
 			bool isFirstNewTarget;
 		};
 		struct DLLSERVER CEOnControllerActionInput : public ComponentEvent {
-			CEOnControllerActionInput(Action action, bool pressed);
+			CEOnControllerActionInput(pragma::Action action, bool pressed);
 			virtual void PushArguments(lua_State *l) override;
-			Action action;
+			pragma::Action action;
 			bool pressed;
 		};
 		struct DLLSERVER CEOnSuspiciousSoundHeared : public ComponentEvent {
@@ -169,7 +173,7 @@ export {
 			void SetAIEnabled(bool b);
 			void EnableAI();
 			void DisableAI();
-			Action GetControllerActionInput() const;
+			pragma::Action GetControllerActionInput() const;
 			bool IsControllable() const;
 			void SetControllable(bool b);
 			void StartControl(pragma::SPlayerComponent &pl);
@@ -208,7 +212,7 @@ export {
 				void SetPlayAsSchedule(bool playAsSchedule);
 				bool ShouldPlayAsSchedule() const;
 
-				void SetActivity(Activity activity) const;
+				void SetActivity(pragma::Activity activity) const;
 				void SetAnimation(int32_t animation) const;
 
 				void SetFaceTarget(bool primaryTarget);
@@ -217,13 +221,13 @@ export {
 
 				// For internal use only
 				int32_t GetAnimation() const;
-				Activity GetActivity() const;
+				pragma::Activity GetActivity() const;
 				const Vector3 *GetFacePosition() const;
 				pragma::ecs::BaseEntity *GetEntityFaceTarget() const;
 			private:
 				union {
 					int32_t animation;
-					Activity activity = Activity::Invalid;
+					pragma::Activity activity = pragma::Activity::Invalid;
 				} mutable m_animation;
 				pragma::FPlayAnim m_flags = pragma::FPlayAnim::Default;
 				mutable AIAnimFlags m_aiAnimFlags = AIAnimFlags::Default;
@@ -231,7 +235,7 @@ export {
 				mutable std::shared_ptr<void> m_faceTarget = nullptr;
 			};
 
-			bool PlayActivity(Activity act, const AIAnimationInfo &info);
+			bool PlayActivity(pragma::Activity act, const AIAnimationInfo &info);
 			bool PlayAnimation(int32_t anim, const AIAnimationInfo &info);
 		protected:
 			friend ai::BehaviorNode;
@@ -243,7 +247,7 @@ export {
 				CallbackHandle hCbOnRemove = {};
 				CallbackHandle hCbOnKilled = {};
 				CallbackHandle hCbOnActionInput = {};
-				Action actions = Action::None;
+				pragma::Action actions = pragma::Action::None;
 			};
 
 			struct TargetInfo {
@@ -294,7 +298,7 @@ export {
 			virtual void OnMemoryLost(const ai::Memory::Fragment &memFragment);
 			virtual void OnTargetAcquired(pragma::ecs::BaseEntity *ent, float dist, bool bFirst);
 			virtual bool OnSuspiciousSoundHeared(std::shared_ptr<ALSound> &snd);
-			virtual void OnControllerActionInput(Action action, bool b);
+			virtual void OnControllerActionInput(pragma::Action action, bool b);
 			virtual void OnStartControl(pragma::SPlayerComponent &pl);
 			virtual void OnEndControl();
 			virtual void OnPathNodeChanged(uint32_t nodeIdx) override;

@@ -101,10 +101,10 @@ ai::BehaviorNode::Result ai::TaskMoveToTarget::Think(const Schedule *sched, prag
 			moveDistance = paramDist->GetFloat();
 	}*/
 
-	auto moveAct = Activity::Run;
+	auto moveAct = pragma::Activity::Run;
 	auto *paramAct = GetParameter(sched, umath::to_integral(Parameter::MoveActivity));
 	if(paramAct != nullptr && paramAct->GetType() == ai::Schedule::Parameter::Type::Int)
-		moveAct = static_cast<Activity>(paramAct->GetInt());
+		moveAct = static_cast<pragma::Activity>(paramAct->GetInt());
 	ent.MoveTo(pos, moveAct);
 	if(ent.GetDistanceToMoveTarget() <= moveDistance) {
 		ent.OnPathDestinationReached();
@@ -114,4 +114,4 @@ ai::BehaviorNode::Result ai::TaskMoveToTarget::Think(const Schedule *sched, prag
 }
 
 void ai::TaskMoveToTarget::SetMoveDistance(float dist) { SetParameter(umath::to_integral(Parameter::Distance), dist); }
-void ai::TaskMoveToTarget::SetMoveActivity(Activity act) { SetParameter(umath::to_integral(Parameter::MoveActivity), umath::to_integral(act)); }
+void ai::TaskMoveToTarget::SetMoveActivity(pragma::Activity act) { SetParameter(umath::to_integral(Parameter::MoveActivity), umath::to_integral(act)); }

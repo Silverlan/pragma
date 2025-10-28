@@ -582,7 +582,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 		  if(stats)
 			  t = std::chrono::steady_clock::now();
 
-		  EntityIterator entItWorld {*pragma::get_cgame()};
+		  pragma::ecs::EntityIterator entItWorld {*pragma::get_cgame()};
 		  entItWorld.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
 		  bspLeafNodes.reserve(entItWorld.GetCount());
 		  bspTrees.reserve(entItWorld.GetCount());
@@ -673,7 +673,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 			  }
 			  else {
 				  // No occlusion culler available; We'll have to iterate ALL renderable entities
-				  EntityIterator entIt {*pragma::get_cgame()};
+				  pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 				  entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 				  for(auto *ent : entIt) {
 					  if(ShouldConsiderEntity(*static_cast<CBaseEntity *>(ent), m_scene, drawSceneInfo.renderFlags, renderMask) == false)

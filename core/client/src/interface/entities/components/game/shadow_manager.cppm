@@ -21,7 +21,7 @@ export namespace pragma {
 		const CBaseEntity *entity = nullptr;
 		const CModelSubMesh *mesh = nullptr;
 		uint32_t renderFlags = 0;
-		Material *material = nullptr;
+		msys::Material *material = nullptr;
 	};
 
 	class DLLCLIENT ShadowRenderer {
@@ -37,7 +37,7 @@ export namespace pragma {
 			std::function<bool(const OcclusionOctree<std::shared_ptr<ModelMesh>>::Node &)> nodeCallback;
 			std::function<void(const CBaseEntity &, uint32_t)> entityCallback;
 			std::function<void(const std::shared_ptr<ModelMesh> &)> meshCallback;
-			std::function<void(const Model &, const CModelSubMesh &, uint32_t)> subMeshCallback;
+			std::function<void(const pragma::Model &, const CModelSubMesh &, uint32_t)> subMeshCallback;
 		};
 		struct LightSourceData {
 			std::shared_ptr<prosper::IPrimaryCommandBuffer> drawCmd;
@@ -66,7 +66,7 @@ export namespace pragma {
 
 		// Current entity when iterating entity meshes in an octree
 		const CBaseEntity *m_currentEntity = nullptr;
-		Model *m_currentModel = nullptr;
+		pragma::Model *m_currentModel = nullptr;
 		uint32_t m_currentRenderFlags = 0;
 	};
 

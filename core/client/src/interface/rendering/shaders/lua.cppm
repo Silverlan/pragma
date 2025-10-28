@@ -479,8 +479,8 @@ export namespace pragma {
 		virtual void Lua_InitializeShaderResources() override;
 		// virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override; // TODO: ShaderTexturedBase
 
-		std::shared_ptr<prosper::IDescriptorSetGroup> Lua_InitializeMaterialDescriptorSet(Material &mat);
-		static std::shared_ptr<prosper::IDescriptorSetGroup> Lua_default_InitializeMaterialDescriptorSet(lua_State *l, LuaShaderWrapperTextured3D &shader, Material &mat) { return shader.Lua_InitializeMaterialDescriptorSet(mat); }
+		std::shared_ptr<prosper::IDescriptorSetGroup> Lua_InitializeMaterialDescriptorSet(msys::Material &mat);
+		static std::shared_ptr<prosper::IDescriptorSetGroup> Lua_default_InitializeMaterialDescriptorSet(lua_State *l, LuaShaderWrapperTextured3D &shader, msys::Material &mat) { return shader.Lua_InitializeMaterialDescriptorSet(mat); }
 
 		void Lua_InitializeMaterialData(CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData);
 		static void Lua_default_InitializeMaterialData(lua_State *l, LuaShaderWrapperTextured3D &shader, CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
@@ -497,8 +497,8 @@ export namespace pragma {
 		void Lua_InitializeGfxPipelineDescriptorSets();
 		static void Lua_default_InitializeGfxPipelineDescriptorSets(lua_State *l, LuaShaderWrapperTextured3D &shader) { shader.Lua_InitializeGfxPipelineDescriptorSets(); }
 
-		void Lua_OnBindMaterial(Material &mat);
-		static void Lua_default_OnBindMaterial(lua_State *l, LuaShaderWrapperTextured3D &shader, Material &mat) { shader.Lua_OnBindMaterial(mat); }
+		void Lua_OnBindMaterial(msys::Material &mat);
+		static void Lua_default_OnBindMaterial(lua_State *l, LuaShaderWrapperTextured3D &shader, msys::Material &mat) { shader.Lua_OnBindMaterial(mat); }
 
 		int32_t Lua_OnDraw(pragma::ModelSubMesh &mesh);
 		static int32_t Lua_default_OnDraw(lua_State *l, LuaShaderWrapperTextured3D &shader, pragma::ModelSubMesh &mesh) { return shader.Lua_OnDraw(mesh); }
@@ -572,8 +572,8 @@ export namespace pragma {
 		void Lua_InitializeGfxPipelineDescriptorSets();
 		static void Lua_default_InitializeGfxPipelineDescriptorSets(lua_State *l, LuaShaderWrapperPbr &shader) { shader.Lua_InitializeGfxPipelineDescriptorSets(); }
 
-		void Lua_OnBindMaterial(Material &mat);
-		static void Lua_default_OnBindMaterial(lua_State *l, LuaShaderWrapperPbr &shader, Material &mat) { shader.Lua_OnBindMaterial(mat); }
+		void Lua_OnBindMaterial(msys::Material &mat);
+		static void Lua_default_OnBindMaterial(lua_State *l, LuaShaderWrapperPbr &shader, msys::Material &mat) { shader.Lua_OnBindMaterial(mat); }
 
 		int32_t Lua_OnDraw(pragma::ModelSubMesh &mesh);
 		static int32_t Lua_default_OnDraw(lua_State *l, LuaShaderWrapperPbr &shader, pragma::ModelSubMesh &mesh) { return shader.Lua_OnDraw(mesh); }

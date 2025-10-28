@@ -48,7 +48,7 @@ void ShaderPPWater::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &p
 
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPPWater::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
-	auto *dudvMap = mat.GetTextureInfo(Material::DUDV_MAP_IDENTIFIER);
+	auto *dudvMap = mat.GetTextureInfo(msys::Material::DUDV_MAP_IDENTIFIER);
 	if(dudvMap == nullptr || dudvMap->texture == nullptr)
 		return nullptr;
 	auto descSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_REFRACTION_MAP);

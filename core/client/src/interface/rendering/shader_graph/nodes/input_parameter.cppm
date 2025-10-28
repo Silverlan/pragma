@@ -21,7 +21,7 @@ export namespace pragma::rendering::shader_graph {
 		enum class Scope : uint32_t {
 			Global = 0,
 			Object,
-			Material,
+			msys::Material,
 		};
 
 		static constexpr const char *CONST_NAME = "name";

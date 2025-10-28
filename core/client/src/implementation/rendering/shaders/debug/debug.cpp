@@ -87,9 +87,9 @@ bool ShaderDebug::RecordBeginDraw(prosper::ShaderBindState &bindState, Pipeline 
 
 bool ShaderDebug::RecordDraw(prosper::ShaderBindState &bindState, const std::vector<prosper::IBuffer *> &buffers, uint32_t vertexCount, const Mat4 &mvp, const Vector4 &color) const
 {
-	assert(vertexCount <= umath::to_integral(GameLimits::MaxMeshVertices));
-	if(vertexCount > umath::to_integral(GameLimits::MaxMeshVertices)) {
-		spdlog::error("Attempted to draw debug mesh with more than maximum ({}) amount of vertices!", umath::to_integral(GameLimits::MaxMeshVertices));
+	assert(vertexCount <= umath::to_integral(pragma::GameLimits::MaxMeshVertices));
+	if(vertexCount > umath::to_integral(pragma::GameLimits::MaxMeshVertices)) {
+		spdlog::error("Attempted to draw debug mesh with more than maximum ({}) amount of vertices!", umath::to_integral(pragma::GameLimits::MaxMeshVertices));
 		return false;
 	}
 

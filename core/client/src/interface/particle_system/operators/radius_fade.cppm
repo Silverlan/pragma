@@ -57,7 +57,7 @@ void CParticleOperatorRadiusFadeBase::Initialize(pragma::BaseEnvParticleSystemCo
 
 	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		StringToLower(key);
+		ustring::to_lower(key);
 		if(key == m_identifier) // Alternative to "radius_end"
 			m_fRadiusEnd.SetRange(util::to_float(it->second));
 	}

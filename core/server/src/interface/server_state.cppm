@@ -5,6 +5,9 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
+#include <string>
+#include <unordered_map>
+
 export module pragma.server.server_state;
 
 export import pragma.server.audio;
@@ -12,6 +15,7 @@ export import pragma.server.entities.components;
 export import pragma.server.networking;
 export import pragma.server.game;
 export import pragma.shared;
+import pragma.wms;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -38,7 +42,7 @@ export class DLLSERVER ServerState : public NetworkState {
 	std::vector<std::shared_ptr<ALSound>> m_serverSounds;
   protected:
 	virtual void implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const override;
-	virtual Material *LoadMaterial(const std::string &path, bool precache, bool bReload) override;
+	virtual msys::Material *LoadMaterial(const std::string &path, bool precache, bool bReload) override;
 	virtual void InitializeResourceManager() override;
 	void ClearConCommands();
 	void OnMasterServerRegistered(bool b, std::string reason);
@@ -103,7 +107,7 @@ export class DLLSERVER ServerState : public NetworkState {
 	virtual ModelMesh *CreateMesh() const override;
 	virtual bool IsServer() const override;
 	virtual ConVarMap *GetConVarMap() override;
-	ServerMessageMap *GetNetMessageMap();
+	pragma::networking::ServerMessageMap *GetNetMessageMap();
 	SVNetMessage *GetNetMessage(unsigned int ID);
 	unsigned int GetClientMessageID(std::string identifier);
 	virtual ConCommand *CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags = pragma::console::ConVarFlags::None, const std::string &help = "") override;

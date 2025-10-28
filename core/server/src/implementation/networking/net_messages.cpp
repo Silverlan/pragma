@@ -276,7 +276,7 @@ void NET_sv_CMD_CALL(pragma::networking::IServerClient &session, NetPacket packe
 			return false;
 		return true;
 	});
-	if(Engine::Get()->GetClientState() != nullptr)
+	if(pragma::Engine::Get()->GetClientState() != nullptr)
 		return;
 	NetPacket p;
 	auto *cv = ServerState::Get()->GetConVar(cmd);
@@ -312,7 +312,7 @@ void NET_sv_RCON(pragma::networking::IServerClient &session, NetPacket packet)
 		return;
 	}
 	Con::csv << "Remote console input from " << session.GetIdentifier() << ": '" << cvar << "'" << Con::endl;
-	Engine::Get()->ConsoleInput(cvar.c_str());
+	pragma::Engine::Get()->ConsoleInput(cvar.c_str());
 }
 
 void NET_sv_SERVERINFO_REQUEST(pragma::networking::IServerClient &session, NetPacket packet)
@@ -407,11 +407,11 @@ void NET_sv_NOCLIP(pragma::networking::IServerClient &session, NetPacket packet)
 	auto bNoclip = pPhysComponent->GetMoveType() != pragma::physics::MOVETYPE::NOCLIP;
 	if(bNoclip == false) {
 		pPhysComponent->SetMoveType(pragma::physics::MOVETYPE::WALK);
-		pPhysComponent->SetCollisionFilterGroup(CollisionMask::Player);
+		pPhysComponent->SetCollisionFilterGroup(pragma::physics::CollisionMask::Player);
 	}
 	else {
 		pPhysComponent->SetMoveType(pragma::physics::MOVETYPE::NOCLIP);
-		pPhysComponent->SetCollisionFilterGroup(CollisionMask::NoCollision);
+		pPhysComponent->SetCollisionFilterGroup(pragma::physics::CollisionMask::NoCollision);
 		//pl->SetCollisionsEnabled(false); // Bugged due to CCD
 	}
 	NetPacket p;

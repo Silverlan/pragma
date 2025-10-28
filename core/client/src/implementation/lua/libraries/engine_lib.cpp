@@ -62,12 +62,12 @@ void Lua::engine::register_library(lua_State *l)
 			    fontSets.push_back(name);
 		    return fontSets;
 	    })];
-	modEngine[luabind::def("toggle_console", &Engine::ToggleConsole)];
+	modEngine[luabind::def("toggle_console", &pragma::Engine::ToggleConsole)];
 	modEngine[luabind::def(
 	  "generate_info_dump", +[](const std::string &baseName) -> std::optional<std::string> {
 		  std::string zipFileName;
 		  std::string err;
-		  auto zipFile = Engine::GenerateEngineDump(baseName, zipFileName, err);
+		  auto zipFile = pragma::Engine::GenerateEngineDump(baseName, zipFileName, err);
 		  if(!zipFile)
 			  return {};
 		  zipFile = nullptr;
@@ -184,28 +184,28 @@ std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const 
 }
 std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l, const LFile &file) { return load_texture(l, file, ::util::AssetLoadFlags::None); }
 
-Material *Lua::engine::load_material(lua_State *l, const std::string &mat, bool reload, bool loadInstantly) { return pragma::get_client_state()->LoadMaterial(mat, nullptr, reload, loadInstantly); }
-Material *Lua::engine::load_material(lua_State *l, const std::string &mat, bool reload) { return load_material(l, mat, reload, true); }
-Material *Lua::engine::load_material(lua_State *l, const std::string &mat) { return load_material(l, mat, false, true); }
+msys::Material *Lua::engine::load_material(lua_State *l, const std::string &mat, bool reload, bool loadInstantly) { return pragma::get_client_state()->LoadMaterial(mat, nullptr, reload, loadInstantly); }
+msys::Material *Lua::engine::load_material(lua_State *l, const std::string &mat, bool reload) { return load_material(l, mat, reload, true); }
+msys::Material *Lua::engine::load_material(lua_State *l, const std::string &mat) { return load_material(l, mat, false, true); }
 
-Material *Lua::asset_client::get_error_material() { return pragma::get_client_state()->GetMaterialManager().GetErrorMaterial(); }
+msys::Material *Lua::asset_client::get_error_material() { return pragma::get_client_state()->GetMaterialManager().GetErrorMaterial(); }
 
 void Lua::asset_client::register_library(Lua::Interface &lua, luabind::module_ &modAsset)
 {
-	modAsset[luabind::def("create_material", static_cast<std::shared_ptr<::Material> (*)(const std::string &, const std::string &)>(Lua::asset_client::create_material)),
-	  luabind::def("create_material", static_cast<std::shared_ptr<::Material> (*)(const std::string &)>(Lua::asset_client::create_material)), luabind::def("create_material", static_cast<std::shared_ptr<::Material> (*)(const ::udm::AssetData &)>(Lua::asset_client::create_material)),
-	  luabind::def("get_material", static_cast<::Material *(*)(const std::string &)>(Lua::asset_client::get_material)), luabind::def("precache_model", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::precache_model)),
+	modAsset[luabind::def("create_material", static_cast<std::shared_ptr<msys::Material> (*)(const std::string &, const std::string &)>(Lua::asset_client::create_material)),
+	  luabind::def("create_material", static_cast<std::shared_ptr<msys::Material> (*)(const std::string &)>(Lua::asset_client::create_material)), luabind::def("create_material", static_cast<std::shared_ptr<msys::Material> (*)(const ::udm::AssetData &)>(Lua::asset_client::create_material)),
+	  luabind::def("get_material", static_cast<msys::Material *(*)(const std::string &)>(Lua::asset_client::get_material)), luabind::def("precache_model", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::precache_model)),
 	  luabind::def("precache_material", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::precache_material)), luabind::def("get_error_material", Lua::asset_client::get_error_material)];
 }
 
-std::shared_ptr<Material> Lua::asset_client::create_material(const std::string &identifier, const std::string &shader) { return pragma::get_client_state()->CreateMaterial(identifier, shader); }
-std::shared_ptr<Material> Lua::asset_client::create_material(const std::string &shader) { return pragma::get_client_state()->CreateMaterial(shader); }
-std::shared_ptr<Material> Lua::asset_client::create_material(const ::udm::AssetData &data)
+std::shared_ptr<msys::Material> Lua::asset_client::create_material(const std::string &identifier, const std::string &shader) { return pragma::get_client_state()->CreateMaterial(identifier, shader); }
+std::shared_ptr<msys::Material> Lua::asset_client::create_material(const std::string &shader) { return pragma::get_client_state()->CreateMaterial(shader); }
+std::shared_ptr<msys::Material> Lua::asset_client::create_material(const ::udm::AssetData &data)
 {
 	std::string err;
 	return pragma::get_client_state()->GetMaterialManager().CreateMaterial(data, err);
 }
-Material *Lua::asset_client::get_material(const std::string &identifier)
+msys::Material *Lua::asset_client::get_material(const std::string &identifier)
 {
 	auto *asset = pragma::get_client_state()->GetMaterialManager().FindCachedAsset(identifier);
 	return asset ? msys::CMaterialManager::GetAssetObject(*asset).get() : nullptr;
@@ -245,7 +245,7 @@ int Lua::engine::create_particle_system(lua_State *l)
 			std::string key = Lua::ToString(l, -3);
 			if(!Lua::IsTable(l, -2)) {
 				std::string val = Lua::ToString(l, -2);
-				StringToLower(key);
+				ustring::to_lower(key);
 				values[key] = val;
 				Lua::RemoveValue(l, -3);
 				Lua::RemoveValue(l, -2);
@@ -281,7 +281,7 @@ int Lua::engine::create_particle_system(lua_State *l)
 				while(Lua::GetNextPair(l, tchildren) != 0) {
 					if(!Lua::IsTable(l, -1)) {
 						std::string child = Lua::ToString(l, -1);
-						StringToLower(child);
+						ustring::to_lower(child);
 						children.push_back(child);
 						Lua::RemoveValue(l, -1);
 					}
@@ -420,7 +420,7 @@ int Lua::engine::save_particle_system(lua_State *l)
 				Lua::PushValue(l, -2);
 				std::string key = Lua::ToString(l, -3);
 				Lua::RemoveValue(l, -3);
-				StringToLower(key);
+				ustring::to_lower(key);
 				if(key == "initializers" || key == "operators" || key == "renderers") {
 					if(Lua::IsTable(l, -2)) {
 						auto numOperators = Lua::GetObjectLength(l, -2);

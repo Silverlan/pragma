@@ -258,7 +258,7 @@ std::shared_ptr<ALSound> ClientState::CreateSound(std::string snd, pragma::audio
 	});
 	m_soundScripts.push_back(pAs);
 	as->Initialize();
-	Game *game = GetGameState();
+	pragma::Game *game = GetGameState();
 	if(game != NULL) {
 		game->CallCallbacks<void, ALSound *>("OnSoundCreated", as);
 		game->CallLuaCallbacks<void, std::shared_ptr<ALSound>>("OnSoundCreated", pAs);

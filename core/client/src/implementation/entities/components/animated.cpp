@@ -46,7 +46,7 @@ static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBoneBuffer = 
 const std::shared_ptr<prosper::IUniformResizableBuffer> &pragma::get_instance_bone_buffer() { return s_instanceBoneBuffer; }
 void pragma::initialize_articulated_buffers()
 {
-	auto instanceSize = umath::to_integral(GameLimits::MaxBones) * sizeof(Mat4);
+	auto instanceSize = umath::to_integral(pragma::GameLimits::MaxBones) * sizeof(Mat4);
 	auto instanceCount = 512u;
 	auto maxInstanceCount = instanceCount * 4u;
 	prosper::util::BufferCreateInfo createInfo {};
@@ -153,11 +153,11 @@ std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const pragma::M
 	return *t * glm::gtc::translate(umat::identity(), vertexOffset); // TODO: Confirm order!
 }
 
-void CAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl) { BaseAnimatedComponent::OnModelChanged(mdl); }
+void CAnimatedComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &mdl) { BaseAnimatedComponent::OnModelChanged(mdl); }
 
 bool CAnimatedComponent::HasBones() const { return !m_boneMatrices.empty(); }
 
-void CAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)
+void CAnimatedComponent::ResetAnimation(const std::shared_ptr<pragma::Model> &mdl)
 {
 	BaseAnimatedComponent::ResetAnimation(mdl);
 	m_boneMatrices.clear();

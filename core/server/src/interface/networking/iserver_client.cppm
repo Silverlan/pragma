@@ -6,6 +6,11 @@ module;
 #include "pragma/serverdefinitions.h"
 #include <cinttypes>
 
+#include <string>
+#include <vector>
+#include <memory>
+#include <optional>
+
 export module pragma.server.networking.iserver_client;
 
 export import pragma.server.networking.resource;

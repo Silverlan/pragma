@@ -175,7 +175,7 @@ void ShaderParticle2DBase::InitializeRenderPass(std::shared_ptr<prosper::IRender
 
 bool ShaderParticle2DBase::ShouldInitializePipeline(uint32_t pipelineIdx) { return ShaderSceneLit::ShouldInitializePipeline(GetBasePipelineIndex(pipelineIdx)); }
 
-void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, ecs::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material, float camNearZ,
+void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, ecs::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const msys::Material *material, float camNearZ,
   float camFarZ) const
 {
 	auto pTrComponent = particle.GetEntity().GetTransformComponent();
@@ -191,8 +191,8 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, 
 		right = uquat::right(rot);
 		auto scale = particle.GetStaticWorldScale() * 0.25f;
 		if(material != nullptr) {
-			nearZ = const_cast<Material *>(material)->GetDiffuseMap()->width * scale; // Width
-			farZ = const_cast<Material *>(material)->GetDiffuseMap()->height * scale; // Height
+			nearZ = const_cast<msys::Material *>(material)->GetDiffuseMap()->width * scale; // Width
+			farZ = const_cast<msys::Material *>(material)->GetDiffuseMap()->height * scale; // Height
 		}
 	}
 
@@ -209,7 +209,7 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, 
 	}
 }
 
-void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const pragma::ecs::CParticleSystemComponent &particle, pragma::ecs::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material,
+void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const pragma::ecs::CParticleSystemComponent &particle, pragma::ecs::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const msys::Material *material,
   const pragma::BaseEnvCameraComponent *cam) const
 {
 	auto camNearZ = 0.f;
@@ -225,7 +225,7 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, 
 	GetParticleSystemOrientationInfo(matrix, particle, orientationType, up, right, nearZ, farZ, material, camNearZ, camFarZ);
 }
 
-void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const pragma::ecs::CParticleSystemComponent &particle, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const Material *material, const pragma::BaseEnvCameraComponent *cam) const
+void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const pragma::ecs::CParticleSystemComponent &particle, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const msys::Material *material, const pragma::BaseEnvCameraComponent *cam) const
 {
 	return GetParticleSystemOrientationInfo(matrix, particle, particle.GetOrientationType(), up, right, nearZ, farZ, material, cam);
 }

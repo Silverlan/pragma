@@ -208,8 +208,8 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh, pragma:
 	// umath::set_flag(renderFlags,RenderFlags::UseExtendedVertexWeights,mesh.GetExtendedVertexWeights().empty() == false);
 
 	auto numIndices = mesh.GetIndexCount();
-	if(numIndices > umath::to_integral(GameLimits::MaxMeshVertices)) {
-		Con::cerr << "Attempted to draw mesh with more than maximum (" << umath::to_integral(GameLimits::MaxMeshVertices) << ") amount of vertices!" << Con::endl;
+	if(numIndices > umath::to_integral(pragma::GameLimits::MaxMeshVertices)) {
+		Con::cerr << "Attempted to draw mesh with more than maximum (" << umath::to_integral(pragma::GameLimits::MaxMeshVertices) << ") amount of vertices!" << Con::endl;
 		return false;
 	}
 	auto &vkMesh = mesh.GetSceneMesh();

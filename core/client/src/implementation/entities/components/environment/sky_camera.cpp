@@ -63,7 +63,7 @@ void CSkyCameraComponent::BuildSkyMeshRenderQueues(const pragma::CSceneComponent
 {
 	auto &pos = GetEntity().GetPosition();
 
-	EntityIterator entItWorld {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entItWorld {*pragma::get_cgame()};
 	entItWorld.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
 	std::vector<util::BSPTree::Node *> bspLeafNodes;
 	bspLeafNodes.reserve(entItWorld.GetCount());

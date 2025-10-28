@@ -77,7 +77,7 @@ void CDebugLineComponent::DoReloadDebugObject(Color color, const Vector3 &pos, D
 {
 	auto origin = m_targetOrigin;
 	if(m_targetEntity.empty() == false) {
-		EntityIterator entIt {*GetEntity().GetNetworkState()->GetGameState(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+		pragma::ecs::EntityIterator entIt {*GetEntity().GetNetworkState()->GetGameState(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 		entIt.AttachFilter<EntityIteratorFilterName>(m_targetEntity);
 		auto it = entIt.begin();
 		if(it == entIt.end())

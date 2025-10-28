@@ -237,8 +237,8 @@ void ServerState::ReceiveUserInput(pragma::networking::IServerClient &client, Ne
 	nwm::write_quat(pOut, orientation);
 	pl->SetViewPos(packet->Read<Vector3>());
 
-	auto actions = packet->Read<Action>();
-	pOut->Write<Action>(actions);
+	auto actions = packet->Read<pragma::Action>();
+	pOut->Write<pragma::Action>(actions);
 
 	auto bController = packet->Read<bool>();
 	pOut->Write<bool>(bController);
@@ -249,7 +249,7 @@ void ServerState::ReceiveUserInput(pragma::networking::IServerClient &client, Ne
 			auto magnitude = packet->Read<float>();
 			pOut->Write<float>(magnitude);
 			if(actionInputC)
-				actionInputC->SetActionInputAxisMagnitude(static_cast<Action>(v), magnitude);
+				actionInputC->SetActionInputAxisMagnitude(static_cast<pragma::Action>(v), magnitude);
 		}
 	}
 	if(actionInputC)

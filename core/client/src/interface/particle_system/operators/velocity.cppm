@@ -25,7 +25,7 @@ void CParticleOperatorVelocity::Initialize(pragma::BaseEnvParticleSystemComponen
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		StringToLower(key);
+		ustring::to_lower(key);
 		if(key == "velocity")
 			m_velocity = uvec::create(it->second);
 	}

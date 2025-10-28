@@ -98,12 +98,12 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 	texManager.LoadAsset(path, std::move(loadInfo));
 }
 
-void CResourceWatcherManager::OnMaterialReloaded(const std::string &path, const std::unordered_set<Model *> &modelMap)
+void CResourceWatcherManager::OnMaterialReloaded(const std::string &path, const std::unordered_set<pragma::Model *> &modelMap)
 {
 	ResourceWatcherManager::OnMaterialReloaded(path, modelMap);
 	if(pragma::get_cgame() == nullptr)
 		return;
-	EntityIterator entIt {*pragma::get_cgame(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CModelComponent>>();
 	for(auto *ent : entIt) {
 		auto &mdl = ent->GetModel();

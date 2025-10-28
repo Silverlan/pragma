@@ -26,7 +26,7 @@ class DLLCLIENT CParticleInitializerLifetimeRandom : public CParticleInitializer
 		CParticleInitializer::Initialize(pSystem, values);
 		for(auto it = values.begin(); it != values.end(); it++) {
 			std::string key = it->first;
-			StringToLower(key);
+			ustring::to_lower(key);
 			if(key == "lifetime_min")
 				m_lifeMin = util::to_float(it->second);
 			else if(key == "lifetime_max")
@@ -48,7 +48,7 @@ class DLLCLIENT CParticleInitializerColorRandom : public CParticleInitializer {
 		CParticleInitializer::Initialize(pSystem, values);
 		for(auto it = values.begin(); it != values.end(); it++) {
 			std::string key = it->first;
-			StringToLower(key);
+			ustring::to_lower(key);
 			if(key == "color1")
 				m_colorA = Color(it->second);
 			else if(key == "color2")
@@ -77,7 +77,7 @@ class DLLCLIENT CParticleInitializerAlphaRandom : public CParticleInitializer {
 		CParticleInitializer::Initialize(pSystem, values);
 		for(auto it = values.begin(); it != values.end(); it++) {
 			std::string key = it->first;
-			StringToLower(key);
+			ustring::to_lower(key);
 			if(key == "alpha_min")
 				m_alphaMin = util::to_float(it->second);
 			else if(key == "alpha_max")
@@ -106,7 +106,7 @@ class DLLCLIENT CParticleInitializerRotationRandom : public CParticleInitializer
 		CParticleInitializer::Initialize(pSystem, values);
 		for(auto it = values.begin(); it != values.end(); it++) {
 			std::string key = it->first;
-			StringToLower(key);
+			ustring::to_lower(key);
 			if(key == "rotation_quat") {
 				m_rot = uquat::create(it->second);
 				m_bUseQuaternionRotation = true;
@@ -234,7 +234,7 @@ DLLCLIENT ParticleModifierMap *GetParticleModifierMap() { return g_ParticleModif
 
 void ParticleModifierMap::AddInitializer(std::string name, const TParticleModifierFactory<CParticleInitializer> &fc)
 {
-	StringToLower(name);
+	ustring::to_lower(name);
 	m_initializers.insert(std::make_pair(name, TParticleModifierFactory<CParticleInitializer> {[fc, name](pragma::ecs::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)> {
 		auto initializer = fc(c, keyvalues);
 		if(initializer)
@@ -244,7 +244,7 @@ void ParticleModifierMap::AddInitializer(std::string name, const TParticleModifi
 }
 void ParticleModifierMap::AddOperator(std::string name, const TParticleModifierFactory<CParticleOperator> &fc)
 {
-	StringToLower(name);
+	ustring::to_lower(name);
 	m_operators.insert(std::make_pair(name, TParticleModifierFactory<CParticleOperator> {[fc, name](pragma::ecs::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)> {
 		auto op = fc(c, keyvalues);
 		if(op)
@@ -254,7 +254,7 @@ void ParticleModifierMap::AddOperator(std::string name, const TParticleModifierF
 }
 void ParticleModifierMap::AddRenderer(std::string name, const TParticleModifierFactory<CParticleRenderer> &fc)
 {
-	StringToLower(name);
+	ustring::to_lower(name);
 	m_renderers.insert(std::make_pair(name, TParticleModifierFactory<CParticleRenderer> {[fc, name](pragma::ecs::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)> {
 		auto renderer = fc(c, keyvalues);
 		if(renderer)

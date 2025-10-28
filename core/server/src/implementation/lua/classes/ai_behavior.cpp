@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include <string>
+
+#include <functional>
+#include <unordered_map>
+
 #include "pragma/lua/core.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include "stdafx_server.h"

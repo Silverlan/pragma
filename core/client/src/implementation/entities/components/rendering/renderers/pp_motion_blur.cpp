@@ -243,7 +243,7 @@ void CRendererPpMotionBlurComponent::DoUpdatePoses(const CMotionBlurDataComponen
 	m_lastMotionDataBufferUpdateIndex = lastUpdateIdx;
 
 	auto *velShader = pragma::get_velocity_buffer_shader();
-	EntityIterator entIt {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 	for(auto *ent : entIt) {
 		auto &r = *static_cast<CBaseEntity *>(ent)->GetRenderComponent();

@@ -37,7 +37,7 @@ void COcclusionCullerComponent::Initialize()
 	m_occlusionOctree->SetSingleReferenceMode(true);
 	m_occlusionOctree->SetToStringCallback([](CBaseEntity *ent) -> std::string { return std::string {*ent->GetClass()} + " " + std::to_string(ent->GetIndex()); });
 
-	EntityIterator entIt {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 	for(auto *ent : entIt)
 		AddEntity(static_cast<CBaseEntity &>(*ent));

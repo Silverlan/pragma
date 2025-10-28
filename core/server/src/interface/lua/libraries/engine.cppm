@@ -11,7 +11,9 @@ module;
 
 export module pragma.server.scripting.lua.libraries.engine;
 
+export import pragma.materialsystem;
+
 export namespace Lua::engine::server {
-	DLLSERVER Material *LoadMaterial(const std::string &mat, bool reload);
-	DLLSERVER Material *LoadMaterial(const std::string &mat);
+	DLLSERVER msys::Material *LoadMaterial(const std::string &mat, bool reload);
+	DLLSERVER msys::Material *LoadMaterial(const std::string &mat);
 }

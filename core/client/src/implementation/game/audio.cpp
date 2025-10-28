@@ -217,7 +217,7 @@ void CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cacheFlags,
 				if(pWorld != nullptr)
 					fAddEntityMeshes(&static_cast<CBaseEntity &>(pWorld->GetEntity()));
 
-				EntityIterator entIt {*this};
+				pragma::ecs::EntityIterator entIt {*this};
 				entIt.AttachFilter<EntityIteratorFilterClass>("func_brush");
 				for(auto *ent : entIt) {
 					auto *entBrush = dynamic_cast<CFuncBrush *>(ent);
@@ -239,7 +239,7 @@ void CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cacheFlags,
 				}*/
 
 				// Entity sounds may not have been created yet; Add them indirectly
-				EntityIterator entItSnd {*this};
+				pragma::ecs::EntityIterator entItSnd {*this};
 				entItSnd.AttachFilter<EntityIteratorFilterClass>("env_sound");
 				for(auto *ent : entItSnd) {
 					auto pTrComponent = ent->GetTransformComponent();

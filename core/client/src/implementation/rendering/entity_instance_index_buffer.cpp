@@ -22,7 +22,7 @@ rendering::EntityInstanceIndexBuffer::EntityInstanceIndexBuffer()
 	prosper::util::BufferCreateInfo bufCreateInfo = {};
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent;
 	bufCreateInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
-	bufCreateInfo.size = umath::to_integral(GameLimits::MaxEntityInstanceCount) * sizeof(RenderBufferIndex);
+	bufCreateInfo.size = umath::to_integral(pragma::GameLimits::MaxEntityInstanceCount) * sizeof(RenderBufferIndex);
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
 
 	m_buffer = pragma::get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(bufCreateInfo, bufCreateInfo.size);

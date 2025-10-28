@@ -615,7 +615,7 @@ void Lua::WIShape::register_class(luabind::class_<::WIShape, ::WIBase> &classDef
 
 void Lua::WITexturedShape::register_class(luabind::class_<::WITexturedShape, luabind::bases<::WIShape, ::WIBase>> &classDef)
 {
-	classDef.def("SetMaterial", static_cast<void (::WITexturedShape::*)(::Material *)>(&::WITexturedShape::SetMaterial));
+	classDef.def("SetMaterial", static_cast<void (::WITexturedShape::*)(msys::Material *)>(&::WITexturedShape::SetMaterial));
 	classDef.def("SetMaterial", static_cast<void (::WITexturedShape::*)(const std::string &)>(&::WITexturedShape::SetMaterial));
 	classDef.def("GetMaterial", &::WITexturedShape::GetMaterial);
 	classDef.def("SetTexture", static_cast<void (*)(::WITexturedShape &, prosper::Texture &)>([](::WITexturedShape &shape, prosper::Texture &tex) { shape.SetTexture(tex); }));

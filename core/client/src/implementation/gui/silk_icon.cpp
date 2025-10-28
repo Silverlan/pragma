@@ -155,7 +155,7 @@ static SilkIcon icons[] = {SilkIcon("accept", 0, 0), SilkIcon("add", 0, 1), Silk
 
 void WISilkIcon::SetIcon(std::string icon)
 {
-	StringToLower(icon);
+	ustring::to_lower(icon);
 	SilkIcon *info = NULL;
 	for(unsigned int i = 0; i < (sizeof(icons) / sizeof(SilkIcon)); i++) {
 		if(icons[i].name == icon) {

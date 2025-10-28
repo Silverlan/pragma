@@ -67,7 +67,7 @@ void pragma::rendering::shader_material::clear_cache() { g_shaderMaterialCache =
 
 //////////
 
-static std::optional<pragma::shadergraph::Value> get_ds_value(const Material &mat, const std::string_view &propertyPath, udm::Type type)
+static std::optional<pragma::shadergraph::Value> get_ds_value(const msys::Material &mat, const std::string_view &propertyPath, udm::Type type)
 {
 	auto sz = udm::size_of(type);
 	switch(type) {

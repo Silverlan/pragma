@@ -22,7 +22,7 @@ export namespace pragma {
 			virtual std::shared_ptr<BehaviorNode> Copy() const override { return ai::BehaviorNode::Copy<std::remove_const_t<std::remove_reference_t<decltype(*this)>>>(); }
 			virtual void Print(const Schedule *sched, std::ostream &o) const override;
 
-			void SetActivity(Activity activity);
+			void SetActivity(pragma::Activity activity);
 			void SetFaceTarget(const Vector3 &target);
 			void SetFaceTarget(pragma::ecs::BaseEntity &target);
 		};
@@ -31,12 +31,12 @@ export namespace pragma {
 		  protected:
 			virtual int32_t SelectAnimation(const Schedule *sched, pragma::BaseAIComponent &ent, uint8_t paramId = 0) override;
 		  public:
-			enum class Parameter : uint32_t { Activity = umath::to_integral(TaskPlayLayeredAnimation::Parameter::Animation), AnimationSlot = umath::to_integral(TaskPlayLayeredAnimation::Parameter::AnimationSlot) };
+			enum class Parameter : uint32_t { pragma::Activity = umath::to_integral(TaskPlayLayeredAnimation::Parameter::Animation), AnimationSlot = umath::to_integral(TaskPlayLayeredAnimation::Parameter::AnimationSlot) };
 			using TaskPlayLayeredAnimation::TaskPlayLayeredAnimation;
 			virtual std::shared_ptr<BehaviorNode> Copy() const override { return ai::BehaviorNode::Copy<std::remove_const_t<std::remove_reference_t<decltype(*this)>>>(); }
 			virtual void Print(const Schedule *sched, std::ostream &o) const override;
 
-			void SetActivity(Activity activity);
+			void SetActivity(pragma::Activity activity);
 			void SetAnimationSlot(int32_t animationSlot);
 		};
 	};

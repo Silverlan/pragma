@@ -61,7 +61,7 @@ export namespace pragma {
 #pragma warning(push)
 #pragma warning(disable : 4251)
 export class CBaseEntity;
-export class DLLCLIENT CGame : public Game {
+export class DLLCLIENT CGame : public pragma::Game {
   public:
 	CGame(NetworkState *state);
 	virtual ~CGame() override;
@@ -234,7 +234,7 @@ export class DLLCLIENT CGame : public Game {
 	template<typename TCPPM>
 	    void RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, TCPPM &cam);
 
-	using Game::LoadNavMesh;
+	using pragma::Game::LoadNavMesh;
 
 	void OnReceivedRegisterNetEvent(NetPacket &packet);
 	virtual pragma::NetEventId FindNetEvent(const std::string &name) const override;
@@ -250,8 +250,8 @@ export class DLLCLIENT CGame : public Game {
 	uint32_t GetLOD(float dist, uint32_t maxLod = std::numeric_limits<uint32_t>::max()) const;
 	LuaCallbackHandler &GetInputCallbackHandler();
 	uint32_t GetMSAASampleCount();
-	void SetMaterialOverride(Material *mat);
-	Material *GetMaterialOverride();
+	void SetMaterialOverride(msys::Material *mat);
+	msys::Material *GetMaterialOverride();
 	void SetColorScale(const Vector4 &col);
 	Vector4 &GetColorScale();
 	void SetAlphaScale(float a);
@@ -260,7 +260,7 @@ export class DLLCLIENT CGame : public Game {
 	pragma::LuaShaderManager &GetLuaShaderManager();
 	pragma::cxxm_LuaParticleModifierManager &GetLuaParticleModifierManager();
 	pragma::LuaInputBindingLayerRegister &GetLuaInputBindingLayerRegister();
-	Material *GetLoadMaterial();
+	msys::Material *GetLoadMaterial();
 	virtual bool RunLua(const std::string &lua) override;
 	virtual bool InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject) override;
 	void OnReceivedPlayerInputResponse(uint8_t userInputId);
@@ -330,9 +330,9 @@ export class DLLCLIENT CGame : public Game {
 	void UpdateEnvironmentLightSource();
 
 	// Inputs
-	void SetActionInput(Action action, bool b, bool bKeepMagnitude);
-	void SetActionInput(Action action, bool b, float magnitude = 1.f);
-	bool GetActionInput(Action action);
+	void SetActionInput(pragma::Action action, bool b, bool bKeepMagnitude);
+	void SetActionInput(pragma::Action action, bool b, float magnitude = 1.f);
+	bool GetActionInput(pragma::Action action);
 
 	// Util
 	bool SaveImage(prosper::IImage &image, const std::string &fileName, const uimg::TextureInfo &imageWriteInfo) const;
@@ -461,7 +461,7 @@ export class DLLCLIENT CGame : public Game {
 	std::unique_ptr<pragma::rendering::GlobalShaderInputDataManager> m_globalShaderInputDataManager;
 	Vector4 m_clipPlane = {};
 	Vector4 m_colScale = {};
-	Material *m_matOverride = nullptr;
+	msys::Material *m_matOverride = nullptr;
 	bool m_bMainRenderPass = true;
 	std::weak_ptr<prosper::IPrimaryCommandBuffer> m_currentDrawCmd = {};
 	pragma::ComponentHandle<pragma::BaseEntityComponent> m_controlCamera {};

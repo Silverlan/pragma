@@ -56,7 +56,7 @@ static std::unique_ptr<pragma::bvh::MeshBvhTree> generate_mesh_bvh(pragma::Model
 	return pragma::bvh::create_bvh_data(std::move(bvhTris));
 }
 
-static bool generate_mesh_bvh(Model &mdl, const std::string &boneName, pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo)
+static bool generate_mesh_bvh(pragma::Model &mdl, const std::string &boneName, pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo)
 {
 	auto &skeleton = mdl.GetSkeleton();
 	auto &ref = mdl.GetReference();
@@ -131,7 +131,7 @@ static bool calc_bone_mesh_info(pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInf
 	return true;
 }
 
-static bool generate_bvh_mesh(Model &mdl, const std::string &boneName, pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo)
+static bool generate_bvh_mesh(pragma::Model &mdl, const std::string &boneName, pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo)
 {
 	auto &skeleton = mdl.GetSkeleton();
 	auto &ref = mdl.GetReference();
@@ -156,7 +156,7 @@ static bool generate_bvh_mesh(Model &mdl, const std::string &boneName, pragma::b
 	return true;
 }
 
-static void serialize(Model &mdl, const std::string &boneName, pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo)
+static void serialize(pragma::Model &mdl, const std::string &boneName, pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo)
 {
 	::bvh::v2::StdOutputStream outputStream {boneMeshInfo.serializedBvh};
 	auto &bvh = boneMeshInfo.meshBvhTree->bvh;
@@ -165,7 +165,7 @@ static void serialize(Model &mdl, const std::string &boneName, pragma::bvh::Hitb
 
 pragma::bvh::HitboxMeshBvhBuildTask::HitboxMeshBvhBuildTask(BS::thread_pool &threadPool) : m_threadPool {threadPool} {}
 
-bool pragma::bvh::HitboxMeshBvhBuildTask::Build(Model &mdl)
+bool pragma::bvh::HitboxMeshBvhBuildTask::Build(pragma::Model &mdl)
 {
 	auto &lods = mdl.GetLODs();
 	if(lods.empty())
@@ -185,7 +185,7 @@ bool pragma::bvh::HitboxMeshBvhBuildTask::Build(Model &mdl)
 	return true;
 }
 
-bool pragma::bvh::HitboxMeshBvhBuildTask::Build(Model &mdl, pragma::animation::BoneId boneId, const Hitbox &hb, const LODInfo &lodInfo)
+bool pragma::bvh::HitboxMeshBvhBuildTask::Build(pragma::Model &mdl, pragma::animation::BoneId boneId, const Hitbox &hb, const LODInfo &lodInfo)
 {
 	auto &skeleton = mdl.GetSkeleton();
 	auto &ref = mdl.GetReference();
@@ -237,7 +237,7 @@ bool pragma::bvh::HitboxMeshBvhBuildTask::Build(Model &mdl, pragma::animation::B
 	return true;
 }
 
-void pragma::bvh::HitboxMeshBvhBuildTask::Serialize(Model &mdl)
+void pragma::bvh::HitboxMeshBvhBuildTask::Serialize(pragma::Model &mdl)
 {
 	auto extData = mdl.GetExtensionData();
 	auto ubmHitboxBvh = extData["hitboxBvh"];
@@ -279,7 +279,7 @@ void pragma::bvh::HitboxMeshBvhBuildTask::Serialize(Model &mdl)
 
 pragma::bvh::HitboxMeshBvhBuilder::HitboxMeshBvhBuilder() : m_threadPool {15} {}
 
-pragma::bvh::HitboxMeshBvhBuildTask pragma::bvh::HitboxMeshBvhBuilder::BuildModel(Model &mdl)
+pragma::bvh::HitboxMeshBvhBuildTask pragma::bvh::HitboxMeshBvhBuilder::BuildModel(pragma::Model &mdl)
 {
 	HitboxMeshBvhBuildTask task {m_threadPool};
 	task.Build(mdl);

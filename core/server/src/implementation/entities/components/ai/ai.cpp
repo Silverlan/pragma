@@ -161,13 +161,13 @@ void SAIComponent::Initialize()
 	BindEventUnhandled(SModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		pragma::SAIComponent::AIAnimationInfo info {};
 		info.SetPlayAsSchedule(false);
-		PlayActivity(Activity::Idle, info);
+		PlayActivity(pragma::Activity::Idle, info);
 	});
 	BindEventUnhandled(SAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		if(m_schedule == nullptr && IsMoving() == false) {
 			pragma::SAIComponent::AIAnimationInfo info {};
 			info.SetPlayAsSchedule(false);
-			PlayActivity(Activity::Idle, info);
+			PlayActivity(pragma::Activity::Idle, info);
 		}
 		/*auto *task = GetCurrentTask();
 		if(task == NULL)
@@ -208,7 +208,7 @@ void SAIComponent::OnEntitySpawn()
 
 	pragma::SAIComponent::AIAnimationInfo info {};
 	info.SetPlayAsSchedule(false);
-	PlayActivity(Activity::Idle, info);
+	PlayActivity(pragma::Activity::Idle, info);
 
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
@@ -261,7 +261,7 @@ void SAIComponent::SendSnapshotData(NetPacket &packet, pragma::BasePlayerCompone
 			snapshotFlags |= SnapshotFlags::FaceTarget;
 		packet->Write<SnapshotFlags>(snapshotFlags);
 
-		packet->Write<Activity>(m_moveInfo.moveActivity);
+		packet->Write<pragma::Activity>(m_moveInfo.moveActivity);
 		packet->Write<Vector3>(m_moveInfo.moveDir);
 		packet->Write<Vector3>(m_moveInfo.moveTarget);
 		if((snapshotFlags & SnapshotFlags::MoveSpeed) != SnapshotFlags::None)
@@ -282,7 +282,7 @@ void SAIComponent::SetSquad(std::string squadName)
 		m_squad = NULL;
 		return;
 	}
-	StringToLower(squadName);
+	ustring::to_lower(squadName);
 	auto &squads = AISquad::GetAll();
 	auto it = std::find_if(squads.begin(), squads.end(), [&squadName](const std::shared_ptr<AISquad> &squad) { return (squad->name == squadName) ? true : false; });
 	if(it != squads.end()) {
@@ -410,32 +410,32 @@ bool SAIComponent::TurnStep(const Vector3 &target, float &turnAngle, const float
 		return r;
 	auto &ent = GetEntity();
 	auto animComponent = ent.GetAnimatedComponent();
-	auto act = animComponent.valid() ? animComponent->GetActivity() : Activity::Invalid;
+	auto act = animComponent.valid() ? animComponent->GetActivity() : pragma::Activity::Invalid;
 
-	if(r == false && IsMoving() == false && (act == Activity::Idle || act == Activity::Invalid)) {
+	if(r == false && IsMoving() == false && (act == pragma::Activity::Idle || act == pragma::Activity::Invalid)) {
 		if(turnAngle < 0.f) {
 			pragma::SAIComponent::AIAnimationInfo info {};
 			info.SetPlayAsSchedule(false);
-			if(PlayActivity(Activity::TurnLeft, info) == false) {
-				PlayActivity(Activity::Idle, info);
+			if(PlayActivity(pragma::Activity::TurnLeft, info) == false) {
+				PlayActivity(pragma::Activity::Idle, info);
 				if(animComponent.valid())
-					animComponent->PlayLayeredActivity(0, Activity::GestureTurnLeft);
+					animComponent->PlayLayeredActivity(0, pragma::Activity::GestureTurnLeft);
 			}
 		}
 		else {
 			pragma::SAIComponent::AIAnimationInfo info {};
 			info.SetPlayAsSchedule(false);
-			if(PlayActivity(Activity::TurnRight, info) == false) {
-				PlayActivity(Activity::Idle, info);
+			if(PlayActivity(pragma::Activity::TurnRight, info) == false) {
+				PlayActivity(pragma::Activity::Idle, info);
 				if(animComponent.valid())
-					animComponent->PlayLayeredActivity(0, Activity::GestureTurnRight);
+					animComponent->PlayLayeredActivity(0, pragma::Activity::GestureTurnRight);
 			}
 		}
 	}
-	else if(act == Activity::TurnLeft || act == Activity::TurnRight) {
+	else if(act == pragma::Activity::TurnLeft || act == pragma::Activity::TurnRight) {
 		pragma::SAIComponent::AIAnimationInfo info {};
 		info.SetPlayAsSchedule(false);
-		PlayActivity(Activity::Idle, info);
+		PlayActivity(pragma::Activity::Idle, info);
 	}
 	//if(r == true)
 	//	CompleteTask();
@@ -703,7 +703,7 @@ void CEOnTargetAcquired::PushArguments(lua_State *l)
 
 //////////////////
 
-CEOnControllerActionInput::CEOnControllerActionInput(Action action, bool pressed) : action {action}, pressed {pressed} {}
+CEOnControllerActionInput::CEOnControllerActionInput(pragma::Action action, bool pressed) : action {action}, pressed {pressed} {}
 void CEOnControllerActionInput::PushArguments(lua_State *l)
 {
 	Lua::PushInt(l, umath::to_integral(action));

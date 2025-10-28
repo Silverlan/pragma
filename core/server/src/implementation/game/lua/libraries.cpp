@@ -2,6 +2,16 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include <memory>
+#include <vector>
+
+#include <sstream>
+
+#include <string>
+
+#include <functional>
+#include <unordered_map>
+
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_server.h"
@@ -25,7 +35,7 @@ void SGame::RegisterLuaLibraries()
 	  luabind::def("create_giblet", Lua::util::Server::create_giblet), luabind::def("create_explosion", Lua::util::Server::create_explosion), luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::calc_world_direction_from_2d_coordinates)];
 
 	LFile;
-	Game::RegisterLuaLibraries();
+	pragma::Game::RegisterLuaLibraries();
 	auto modAsset = luabind::module_(GetLuaState(), "asset");
 	modAsset[luabind::def(
 	           "load",
@@ -49,9 +59,9 @@ void SGame::RegisterLuaLibraries()
 		           auto asset = manager->LoadAsset(ufile::get_file_from_filename(*fileName), std::move(fp), ext, std::move(loadInfo));
 		           switch(type) {
 		           case pragma::asset::Type::Model:
-			           return luabind::object {l, std::static_pointer_cast<Model>(asset)};
+			           return luabind::object {l, std::static_pointer_cast<pragma::Model>(asset)};
 		           case pragma::asset::Type::Material:
-			           return luabind::object {l, std::static_pointer_cast<Material>(asset)};
+			           return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
 		           }
 		           return luabind::object {};
 	           }),
@@ -65,9 +75,9 @@ void SGame::RegisterLuaLibraries()
 		    auto asset = manager->LoadAsset(name);
 		    switch(type) {
 		    case pragma::asset::Type::Model:
-			    return luabind::object {l, std::static_pointer_cast<Model>(asset)};
+			    return luabind::object {l, std::static_pointer_cast<pragma::Model>(asset)};
 		    case pragma::asset::Type::Material:
-			    return luabind::object {l, std::static_pointer_cast<Material>(asset)};
+			    return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
 		    }
 		    return luabind::object {};
 	    }),
@@ -79,9 +89,9 @@ void SGame::RegisterLuaLibraries()
 		    auto asset = manager->ReloadAsset(name);
 		    switch(type) {
 		    case pragma::asset::Type::Model:
-			    return luabind::object {l, std::static_pointer_cast<Model>(asset)};
+			    return luabind::object {l, std::static_pointer_cast<pragma::Model>(asset)};
 		    case pragma::asset::Type::Material:
-			    return luabind::object {l, std::static_pointer_cast<Material>(asset)};
+			    return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
 		    }
 		    return luabind::object {};
 	    })];

@@ -29,7 +29,7 @@ export import pragma.shared;
 #pragma warning(push)
 #pragma warning(disable : 4251)
 export {
-	class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
+	class DLLCLIENT CEngine : public pragma::Engine, public pragma::RenderContext {
 	  public:
 		CEngine(int argc, char *argv[]);
 		virtual ~CEngine() override;

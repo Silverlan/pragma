@@ -34,10 +34,10 @@ void CShadowManagerComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	m_genericSet.limit = umath::to_integral(GameLimits::MaxActiveShadowMaps);
+	m_genericSet.limit = umath::to_integral(pragma::GameLimits::MaxActiveShadowMaps);
 	m_genericSet.buffers.reserve(m_genericSet.limit);
 
-	m_cubeSet.limit = umath::to_integral(GameLimits::MaxActiveShadowCubeMaps);
+	m_cubeSet.limit = umath::to_integral(pragma::GameLimits::MaxActiveShadowCubeMaps);
 	m_cubeSet.buffers.reserve(m_cubeSet.limit);
 
 	if(m_descSetGroup != nullptr || pragma::ShaderPBR::DESCRIPTOR_SET_SHADOWS.IsValid() == false)

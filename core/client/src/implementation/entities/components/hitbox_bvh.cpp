@@ -35,7 +35,7 @@ static std::shared_ptr<pragma::bvh::HitboxBvhCache> g_hbBvhCache {};
 static std::unique_ptr<BS::thread_pool> g_hbThreadPool {};
 static size_t g_hbBvhCount = 0;
 
-pragma::bvh::HitboxBvhCache::HitboxBvhCache(Game &game) : m_game {game} {}
+pragma::bvh::HitboxBvhCache::HitboxBvhCache(pragma::Game &game) : m_game {game} {}
 pragma::bvh::HitboxBvhCache::~HitboxBvhCache()
 {
 	for(auto &[mdlName, mdlCache] : m_modelBvhCache) {
@@ -49,7 +49,7 @@ pragma::bvh::ModelHitboxBvhCache *pragma::bvh::HitboxBvhCache::GetModelCache(con
 	auto it = m_modelBvhCache.find(normName);
 	return (it != m_modelBvhCache.end() && it->second->complete) ? it->second.get() : nullptr;
 }
-void pragma::bvh::HitboxBvhCache::PrepareModel(Model &mdl)
+void pragma::bvh::HitboxBvhCache::PrepareModel(pragma::Model &mdl)
 {
 	auto t = std::chrono::steady_clock::now();
 	auto savingRequired = false;
@@ -63,7 +63,7 @@ void pragma::bvh::HitboxBvhCache::PrepareModel(Model &mdl)
 			LOGGER.warn("Failed to save model '{}': {}", mdl.GetName(), err);
 	}
 }
-void pragma::bvh::HitboxBvhCache::InitializeModelHitboxBvhCache(Model &mdl, const HitboxMeshBvhBuildTask &buildTask, ModelHitboxBvhCache &mdlHbBvhCache)
+void pragma::bvh::HitboxBvhCache::InitializeModelHitboxBvhCache(pragma::Model &mdl, const HitboxMeshBvhBuildTask &buildTask, ModelHitboxBvhCache &mdlHbBvhCache)
 {
 	auto &skeleton = mdl.GetSkeleton();
 	auto &boneCaches = mdlHbBvhCache.boneCache;
@@ -86,7 +86,7 @@ void pragma::bvh::HitboxBvhCache::InitializeModelHitboxBvhCache(Model &mdl, cons
 		}
 	}
 }
-std::shared_future<void> pragma::bvh::HitboxBvhCache::GenerateModelCache(const ModelName &mdlName, Model &mdl)
+std::shared_future<void> pragma::bvh::HitboxBvhCache::GenerateModelCache(const ModelName &mdlName, pragma::Model &mdl)
 {
 	auto normName = pragma::asset::get_normalized_path(mdlName, pragma::asset::Type::Model);
 	auto it = m_modelBvhCache.find(normName);

@@ -3,6 +3,8 @@
 
 module;
 
+#include <optional>
+
 #include "stdafx_server.h"
 #include <stdexcept>
 

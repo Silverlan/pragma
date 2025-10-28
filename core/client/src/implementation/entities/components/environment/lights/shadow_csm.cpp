@@ -43,7 +43,7 @@ static void cmd_cl_render_shadow_pssm_split_count(NetworkState *, const ConVar &
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
-	EntityIterator entIt {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CShadowCSMComponent>>();
 	for(auto *ent : entIt) {
 		auto hCsmC = ent->GetComponent<pragma::CShadowCSMComponent>();
@@ -59,7 +59,7 @@ static void cmd_render_csm_max_distance(NetworkState *, const ConVar &, float, f
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
-	EntityIterator entIt {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CShadowCSMComponent>>();
 	for(auto *ent : entIt) {
 		auto hCsmC = ent->GetComponent<pragma::CShadowCSMComponent>();
@@ -378,7 +378,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 				if(shaderCsmTransparent != nullptr)
 				{
 					CBaseEntity *prevEntity = nullptr;
-					Material *prevMat = nullptr;
+					msys::Material *prevMat = nullptr;
 					if(shaderCsmTransparent->BeginDraw(drawCmd) == true)
 					{
 						shaderCsmTransparent->BindLight(*pLightComponent);
@@ -435,7 +435,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 		auto i = decltype(m_pendingInfo.meshes.size()){0};
 		std::vector<CWorld*> worldEnts;
 
-		EntityIterator entIt{*pragma::get_cgame()};
+		pragma::ecs::EntityIterator entIt{*pragma::get_cgame()};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 		for(auto *ent : entIt)
 		{

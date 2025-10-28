@@ -16,7 +16,7 @@ ModelLoadManager &ModelLoadManager::Initialize()
 	return *s_manager;
 }
 
-void ModelLoadManager::AddQuery(const NetPacket &packet, const std::shared_ptr<Model> &mdl, const std::string &fileName)
+void ModelLoadManager::AddQuery(const NetPacket &packet, const std::shared_ptr<pragma::Model> &mdl, const std::string &fileName)
 {
 	auto query = std::shared_ptr<ModelLoadQuery>(new ModelLoadQuery());
 	query->packet = packet;

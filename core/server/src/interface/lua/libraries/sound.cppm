@@ -7,6 +7,8 @@ module;
 
 #include <string>
 
+#include <memory>
+
 
 
 export module pragma.server.scripting.lua.libraries.sound;

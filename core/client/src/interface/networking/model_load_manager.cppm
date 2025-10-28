@@ -20,7 +20,7 @@ export {
 	private:
 		struct ModelLoadQuery {
 			NetPacket packet;
-			std::shared_ptr<Model> model;
+			std::shared_ptr<pragma::Model> model;
 			std::string fileName;
 		};
 		std::mutex m_loadMutex;
@@ -37,6 +37,6 @@ export {
 	public:
 		~ModelLoadManager();
 		static ModelLoadManager &Initialize();
-		void AddQuery(const NetPacket &packet, const std::shared_ptr<Model> &mdl, const std::string &fileName);
+		void AddQuery(const NetPacket &packet, const std::shared_ptr<pragma::Model> &mdl, const std::string &fileName);
 	};
 }

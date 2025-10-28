@@ -144,7 +144,7 @@ void CFlexComponent::UpdateEyeFlexes()
 		UpdateEyeFlexes(eyeballs.at(eyeballIdx), eyeballIdx);
 }
 
-void CFlexComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
+void CFlexComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &mdl)
 {
 	m_flexControllers.clear();
 	m_flexWeights.clear();

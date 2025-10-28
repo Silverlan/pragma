@@ -137,7 +137,7 @@ void ecs::CParticleSystemComponent::Clear()
 	umath::set_flag(m_flags, Flags::Setup, false);
 }
 
-std::shared_ptr<Model> ecs::CParticleSystemComponent::GenerateModel(Game &game, const std::vector<const ecs::CParticleSystemComponent *> &particleSystems)
+std::shared_ptr<pragma::Model> ecs::CParticleSystemComponent::GenerateModel(pragma::Game &game, const std::vector<const ecs::CParticleSystemComponent *> &particleSystems)
 {
 	auto *cam = static_cast<CGame&>(game).GetRenderCamera<pragma::CCameraComponent>();
 	if(cam == nullptr)
@@ -234,7 +234,7 @@ std::shared_ptr<Model> ecs::CParticleSystemComponent::GenerateModel(Game &game, 
 	}
 	return mdl;
 }
-std::shared_ptr<Model> ecs::CParticleSystemComponent::GenerateModel() const
+std::shared_ptr<pragma::Model> ecs::CParticleSystemComponent::GenerateModel() const
 {
 	auto &game = static_cast<CGame &>(*GetEntity().GetNetworkState()->GetGameState());
 	std::vector<const ecs::CParticleSystemComponent *> particleSystems {};
@@ -862,12 +862,12 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 	defCParticleSystem.def("SetExtent", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, float)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, float extent) { hComponent.SetExtent(extent); }));
 	defCParticleSystem.def("GetExtent", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushNumber(l, hComponent.GetExtent()); }));
 	defCParticleSystem.def("SetMaterial", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.SetMaterial(name.c_str()); }));
-	defCParticleSystem.def("SetMaterial", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, Material *)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, Material *mat) { hComponent.SetMaterial(mat); }));
+	defCParticleSystem.def("SetMaterial", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, msys::Material *)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, msys::Material *mat) { hComponent.SetMaterial(mat); }));
 	defCParticleSystem.def("GetMaterial", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
 		auto *mat = hComponent.GetMaterial();
 		if(mat == nullptr)
 			return;
-		Lua::Push<Material *>(l, mat);
+		Lua::Push<msys::Material *>(l, mat);
 	}));
 	defCParticleSystem.def("SetOrientationType", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t orientationType) {
 		hComponent.SetOrientationType(static_cast<pragma::ecs::ParticleOrientationType>(orientationType));
@@ -1124,13 +1124,13 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 
 			Lua::Pop(l, 1);
 		}
-		auto mdl = pragma::ecs::CParticleSystemComponent::GenerateModel(static_cast<CGame &>(*Engine::Get()->GetNetworkState(l)->GetGameState()), particleSystems);
+		auto mdl = pragma::ecs::CParticleSystemComponent::GenerateModel(static_cast<CGame &>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState()), particleSystems);
 		if(mdl == nullptr)
 			return;
 		Lua::Push(l, mdl);
 	}))];
 	defCParticleSystem.scope[luabind::def("read_header_data", static_cast<void (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &name) {
-		auto fileHeader = pragma::ecs::CParticleSystemComponent::ReadHeader(*Engine::Get()->GetNetworkState(l), name);
+		auto fileHeader = pragma::ecs::CParticleSystemComponent::ReadHeader(*pragma::Engine::Get()->GetNetworkState(l), name);
 		if(fileHeader.has_value() == false)
 			return;
 		auto t = Lua::CreateTable(l);

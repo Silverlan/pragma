@@ -52,7 +52,7 @@ CMaterialPropertyOverrideComponent::~CMaterialPropertyOverrideComponent()
 	}
 }
 
-Material *CMaterialPropertyOverrideComponent::GetTargetMaterial(uint32_t matIdx)
+msys::Material *CMaterialPropertyOverrideComponent::GetTargetMaterial(uint32_t matIdx)
 {
 	auto &mdl = GetEntity().GetModel();
 	if(!mdl)
@@ -415,7 +415,7 @@ void CMaterialPropertyOverrideComponent::OnRemove()
 	mdlC->UpdateRenderBufferList();
 }
 
-void CMaterialPropertyOverrideComponent::UpdateMaterialOverride(Material &mat)
+void CMaterialPropertyOverrideComponent::UpdateMaterialOverride(msys::Material &mat)
 {
 	auto *mdlC = static_cast<CModelComponent *>(GetEntity().GetModelComponent());
 	if(mdlC)
@@ -517,7 +517,7 @@ void CMaterialPropertyOverrideComponent::UpdateShaderOverride(uint32_t matIdx)
 
 void CMaterialPropertyOverrideComponent::AddMaterialTexturePropertyMember(const std::string &propPath, const pragma::rendering::shader_material::Texture &tex, std::optional<uint32_t> matIdx)
 {
-	Material *mat = nullptr;
+	msys::Material *mat = nullptr;
 	if(matIdx) {
 		auto &mdl = GetEntity().GetModel();
 		if(!mdl)
@@ -578,7 +578,7 @@ void CMaterialPropertyOverrideComponent::AddMaterialTexturePropertyMember(const 
 
 void CMaterialPropertyOverrideComponent::AddMaterialPropertyMember(const pragma::rendering::Property &prop, const std::string &propPath, const std::string &name, std::optional<uint32_t> matIdx)
 {
-	Material *mat = nullptr;
+	msys::Material *mat = nullptr;
 	if(matIdx) {
 		auto &mdl = GetEntity().GetModel();
 		if(!mdl)
@@ -812,7 +812,7 @@ std::optional<ComponentMemberIndex> CMaterialPropertyOverrideComponent::DoGetMem
 }
 
 template<typename T>
-void CMaterialPropertyOverrideComponent::SetMaterialPropertyBufferValue(Material &mat, const pragma::rendering::shader_material::ShaderMaterial &shaderMat, const char *keyName, const T &newVal)
+void CMaterialPropertyOverrideComponent::SetMaterialPropertyBufferValue(msys::Material &mat, const pragma::rendering::shader_material::ShaderMaterial &shaderMat, const char *keyName, const T &newVal)
 {
 	auto &descriptor = shaderMat;
 	auto *buf = static_cast<CMaterial &>(mat).GetSettingsBuffer();
@@ -832,7 +832,7 @@ void CMaterialPropertyOverrideComponent::SetMaterialPropertyBufferValue(Material
 	m_bufferUpdateQueue.emplace(std::move(updateInfo));
 }
 
-void CMaterialPropertyOverrideComponent::ApplyMaterialPropertyOverride(Material &mat, const pragma::rendering::MaterialPropertyBlock &matPropOverride)
+void CMaterialPropertyOverrideComponent::ApplyMaterialPropertyOverride(msys::Material &mat, const pragma::rendering::MaterialPropertyBlock &matPropOverride)
 {
 	for(auto &pair : udm::LinkedPropertyWrapper {matPropOverride.GetPropertyBlock()}.ElIt()) {
 		udm::visit(pair.property->type, [&mat, &pair](auto tag) {

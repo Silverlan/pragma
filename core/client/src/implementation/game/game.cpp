@@ -91,7 +91,7 @@ CGame *pragma::get_client_game() { return g_game; }
 CGame *pragma::get_cgame() { return g_game; }
 
 CGame::CGame(NetworkState *state)
-    : Game(state), m_tServer(0), m_renderScene(util::TWeakSharedHandle<pragma::BaseEntityComponent> {}), m_matOverride(NULL), m_colScale(1, 1, 1, 1),
+    : pragma::Game(state), m_tServer(0), m_renderScene(util::TWeakSharedHandle<pragma::BaseEntityComponent> {}), m_matOverride(NULL), m_colScale(1, 1, 1, 1),
       //m_shaderOverride(NULL), // prosper TODO
       m_matLoad(), m_scene(nullptr),
       /*m_dummyVertexBuffer(nullptr),*/ m_tLastClientUpdate(0.0), // prosper TODO
@@ -286,7 +286,7 @@ void CGame::OnRemove()
 
 	ClearSoundCache();
 
-	Game::OnRemove();
+	pragma::Game::OnRemove();
 }
 
 pragma::rendering::GlobalShaderInputDataManager &CGame::GetGlobalShaderInputDataManager() { return *m_globalShaderInputDataManager; }
@@ -477,10 +477,10 @@ bool CGame::IsRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode) c
 
 void CGame::InitializeLuaScriptWatcher() { m_scriptWatcher = std::make_unique<CLuaDirectoryWatcherManager>(this); }
 
-Material *CGame::GetLoadMaterial() { return m_matLoad.get(); }
+msys::Material *CGame::GetLoadMaterial() { return m_matLoad.get(); }
 void CGame::OnEntityCreated(pragma::ecs::BaseEntity *ent)
 {
-	Game::OnEntityCreated(ent);
+	pragma::Game::OnEntityCreated(ent);
 	if(typeid(*ent) == typeid(CGameEntity)) {
 		m_entGame = ent->GetHandle();
 		m_gameComponent = ent->GetComponent<pragma::CGameComponent>()->GetHandle();
@@ -513,7 +513,7 @@ TCPPM *CGame::GetViewBody()
 }
 template pragma::CViewBodyComponent* CGame::GetViewBody<pragma::CViewBodyComponent>();
 
-static void shader_handler(Material *mat)
+static void shader_handler(msys::Material *mat)
 {
 	if(mat->IsLoaded() == false)
 		return;
@@ -548,7 +548,7 @@ void CGame::ReloadMaterialShader(CMaterial *mat)
 
 void CGame::Initialize()
 {
-	Game::Initialize();
+	pragma::Game::Initialize();
 	auto *client = pragma::get_client_state();
 	auto &materialManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager());
 	materialManager.SetShaderHandler(&shader_handler);
@@ -576,7 +576,7 @@ static void render_debug_mode(NetworkState *, const ConVar &, int32_t, int32_t d
 	if(client == nullptr)
 		return;
 	client->UpdateGameWorldShaderSettings();
-	EntityIterator entIt {*pragma::get_cgame(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CSceneComponent>>();
 	for(auto *ent : entIt) {
 		auto sceneC = ent->GetComponent<pragma::CSceneComponent>();
@@ -626,7 +626,7 @@ TCPPM *CGame::CreateCamera(uint32_t width, uint32_t height, float fov, float nea
 
 void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 {
-	Game::InitializeGame();
+	pragma::Game::InitializeGame();
 	SetupLua();
 
 	m_hCbDrawFrame = pragma::get_cengine()->AddCallback("DrawFrame", FunctionCallback<void, std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>::Create([this](std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>> drawCmd) {
@@ -683,7 +683,7 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 	}
 
 	m_flags |= GameFlags::GameInitialized;
-	CallCallbacks<void, Game *>("OnGameInitialized", this);
+	CallCallbacks<void, pragma::Game *>("OnGameInitialized", this);
 	for(auto *gmC : GetGamemodeComponents())
 		gmC->OnGameInitialized();
 }
@@ -770,8 +770,8 @@ template<typename TCPPM>
 TCPPM *CGame::GetPrimaryCamera() const { return const_cast<pragma::CCameraComponent *>(static_cast<const pragma::CCameraComponent*>(m_primaryCamera.get())); }
 template pragma::CCameraComponent *CGame::GetPrimaryCamera<pragma::CCameraComponent>() const;
 
-void CGame::SetMaterialOverride(Material *mat) { m_matOverride = mat; }
-Material *CGame::GetMaterialOverride() { return m_matOverride; }
+void CGame::SetMaterialOverride(msys::Material *mat) { m_matOverride = mat; }
+msys::Material *CGame::GetMaterialOverride() { return m_matOverride; }
 
 void CGame::SetColorScale(const Vector4 &col) { m_colScale = col; }
 Vector4 &CGame::GetColorScale() { return m_colScale; }
@@ -910,7 +910,7 @@ void CGame::CreateGiblet(const GibletCreateInfo &info) { CreateGiblet<pragma::ec
 
 WIBase *CGame::CreateGUIElement(std::string name, WIHandle *hParent)
 {
-	StringToLower(name);
+	ustring::to_lower(name);
 	WIBase *pParent = NULL;
 	if(hParent != NULL && hParent->IsValid())
 		pParent = hParent->get();
@@ -923,7 +923,7 @@ pragma::LuaInputBindingLayerRegister &CGame::GetLuaInputBindingLayerRegister() {
 
 void CGame::SetUp()
 {
-	Game::SetUp();
+	pragma::Game::SetUp();
 	CListener *listener = CreateEntity<CListener>();
 	m_listener = listener->GetComponent<pragma::CListenerComponent>()->GetHandle();
 
@@ -988,7 +988,7 @@ void CGame::ReloadRenderFrameBuffer()
 
 void CGame::Think()
 {
-	Game::Think();
+	pragma::Game::Think();
 	auto *scene = GetRenderScene<pragma::CSceneComponent>();
 	auto *cam = GetPrimaryCamera<pragma::CCameraComponent>();
 
@@ -1013,7 +1013,7 @@ void CGame::Think()
 static CVar cvUpdateRate = GetClientConVar("cl_updaterate");
 void CGame::Tick()
 {
-	Game::Tick();
+	pragma::Game::Tick();
 	//HandlePlayerMovement();
 	auto &t = RealTime();
 	auto updateRate = cvUpdateRate->GetFloat();
@@ -1101,7 +1101,7 @@ void CGame::SetMaxHDRExposure(Float exposure)
 
 void CGame::OnMapLoaded()
 {
-	Game::OnMapLoaded();
+	pragma::Game::OnMapLoaded();
 
 	auto *scene = GetRenderScene<pragma::CSceneComponent>();
 	if(scene)
@@ -1118,7 +1118,7 @@ void CGame::InitializeMapEntities(pragma::asset::WorldData &worldData, std::vect
 	outEnts.reserve(entityData.size());
 
 	std::unordered_map<uint32_t, EntityHandle> mapIndexToEntity;
-	EntityIterator entIt {*this, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	pragma::ecs::EntityIterator entIt {*this, pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::MapComponent>>();
 	mapIndexToEntity.reserve(entIt.GetCount());
 	for(auto *ent : entIt) {
@@ -1179,7 +1179,7 @@ void CGame::InitializeMapEntities(pragma::asset::WorldData &worldData, std::vect
 
 void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 {
-	Game::InitializeWorldData(worldData);
+	pragma::Game::InitializeWorldData(worldData);
 
 	auto &texManager = static_cast<msys::CMaterialManager &>(static_cast<ClientState *>(GetNetworkState())->GetMaterialManager()).GetTextureManager();
 	auto texture = texManager.LoadAsset(worldData.GetLightmapAtlasTexturePath(GetMapName()));
@@ -1203,7 +1203,7 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 		}
 
 		// Find map entities with lightmap uv sets
-		EntityIterator entIt {*pragma::get_cgame(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+		pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::MapComponent>>();
 		for(auto *ent : entIt)
 			pragma::CLightMapReceiverComponent::SetupLightMapUvData(static_cast<CBaseEntity &>(*ent));
@@ -1234,7 +1234,7 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 
 bool CGame::LoadMap(const std::string &map, const Vector3 &origin, std::vector<EntityHandle> *entities)
 {
-	bool r = Game::LoadMap(map, origin, entities);
+	bool r = pragma::Game::LoadMap(map, origin, entities);
 	m_flags |= GameFlags::MapLoaded;
 	if(r == true) {
 		CallCallbacks<void>("OnMapLoaded");
@@ -1261,7 +1261,7 @@ float CGame::GetTimeScale() { return cvTimescale->GetFloat(); }
 
 void CGame::SetTimeScale(float t)
 {
-	Game::SetTimeScale(t);
+	pragma::Game::SetTimeScale(t);
 	for(auto &rsnd : pragma::get_client_state()->GetSounds()) {
 		auto &snd = static_cast<CALSound &>(rsnd.get());
 		snd.SetPitchModifier(t); // TODO Implement SetPitchModifier for SoundScripts
@@ -1356,8 +1356,8 @@ void CGame::SendUserInput()
 	p->Write<Vector3>(pl->GetViewPos());
 
 	auto *actionInputC = pl->GetActionInputController();
-	auto actions = actionInputC ? actionInputC->GetActionInputs() : Action::None;
-	p->Write<Action>(actions);
+	auto actions = actionInputC ? actionInputC->GetActionInputs() : pragma::Action::None;
+	p->Write<pragma::Action>(actions);
 	auto bControllers = pragma::get_cengine()->GetControllersEnabled();
 	p->Write<bool>(bControllers);
 	if(bControllers == true) {
@@ -1365,7 +1365,7 @@ void CGame::SendUserInput()
 		for(auto v : actionValues) {
 			auto magnitude = 0.f;
 			if(actionInputC)
-				actionInputC->GetActionInputAxisMagnitude(static_cast<Action>(v));
+				actionInputC->GetActionInputAxisMagnitude(static_cast<pragma::Action>(v));
 			p->Write<float>(magnitude);
 		}
 	}
@@ -1375,7 +1375,7 @@ void CGame::SendUserInput()
 double &CGame::ServerTime() { return m_tServer; }
 void CGame::SetServerTime(double t) { m_tServer = t; }
 
-bool CGame::RunLua(const std::string &lua) { return Game::RunLua(lua, "lua_run_cl"); }
+bool CGame::RunLua(const std::string &lua) { return pragma::Game::RunLua(lua, "lua_run_cl"); }
 
 void CGame::UpdateLostPackets()
 {
@@ -1463,7 +1463,7 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 			auto numObjs = packet->Read<uint8_t>();
 			if(ent != NULL) {
 				auto pPhysComponent = ent->GetPhysicsComponent();
-				PhysObj *physObj = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
+				pragma::physics::PhysObj *physObj = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 				if(physObj != NULL && !physObj->IsStatic()) {
 					auto colObjs = physObj->GetCollisionObjects();
 					auto numActualObjs = colObjs.size();
@@ -1569,7 +1569,7 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 	}
 }
 
-static void set_action_input(Action action, bool b, bool bKeepMagnitude, const float *inMagnitude = nullptr)
+static void set_action_input(pragma::Action action, bool b, bool bKeepMagnitude, const float *inMagnitude = nullptr)
 {
 	auto magnitude = 0.f;
 	if(inMagnitude != nullptr)
@@ -1592,10 +1592,10 @@ static void set_action_input(Action action, bool b, bool bKeepMagnitude, const f
 		return;
 	actionInputC->SetActionInput(action, b, true);
 }
-void CGame::SetActionInput(Action action, bool b, bool bKeepMagnitude) { set_action_input(action, b, bKeepMagnitude); }
-void CGame::SetActionInput(Action action, bool b, float magnitude) { set_action_input(action, b, false, &magnitude); }
+void CGame::SetActionInput(pragma::Action action, bool b, bool bKeepMagnitude) { set_action_input(action, b, bKeepMagnitude); }
+void CGame::SetActionInput(pragma::Action action, bool b, float magnitude) { set_action_input(action, b, false, &magnitude); }
 
-bool CGame::GetActionInput(Action action)
+bool CGame::GetActionInput(pragma::Action action)
 {
 	auto *pl = GetLocalPlayer();
 	if(pl == NULL)
@@ -1663,7 +1663,7 @@ bool CGame::LoadAuxEffects(const std::string &fname)
 		return false;
 	for(auto pair : udm.ElIt()) {
 		std::string name = std::string {pair.key};
-		StringToLower(name);
+		ustring::to_lower(name);
 		std::string type;
 		pair.property["type"](type);
 		al::create_aux_effect(name, type, pair.property);

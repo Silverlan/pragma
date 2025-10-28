@@ -484,7 +484,7 @@ static void CVAR_CALLBACK_render_msaa_enabled(NetworkState *, const ConVar &, in
 			continue;
 		shader->ReloadPipelines();
 	}
-	EntityIterator entIt {*pragma::get_cgame(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CSceneComponent>>();
 	for(auto *ent : entIt) {
 		auto sceneC = ent->GetComponent<pragma::CSceneComponent>();

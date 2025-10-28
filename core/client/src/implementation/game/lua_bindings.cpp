@@ -186,8 +186,8 @@ void CGame::RegisterLua()
 	  });
 	auto modGame = luabind::module_(GetLuaState(), "game");
 	Lua::game::register_shared_functions(GetLuaState(), modGame);
-	modGame[luabind::def("load_material", static_cast<Material *(*)(lua_State *, const std::string &, bool, bool)>(Lua::engine::load_material)), luabind::def("load_material", static_cast<Material *(*)(lua_State *, const std::string &, bool)>(Lua::engine::load_material)),
-	  luabind::def("load_material", static_cast<Material *(*)(lua_State *, const std::string &)>(Lua::engine::load_material)),
+	modGame[luabind::def("load_material", static_cast<msys::Material *(*)(lua_State *, const std::string &, bool, bool)>(Lua::engine::load_material)), luabind::def("load_material", static_cast<msys::Material *(*)(lua_State *, const std::string &, bool)>(Lua::engine::load_material)),
+	  luabind::def("load_material", static_cast<msys::Material *(*)(lua_State *, const std::string &)>(Lua::engine::load_material)),
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua_State *, const std::string &, util::AssetLoadFlags)>(Lua::engine::load_texture)),
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua_State *, const std::string &)>(Lua::engine::load_texture)),
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua_State *, const LFile &, const std::string &, util::AssetLoadFlags loadFlags)>(Lua::engine::load_texture)),
@@ -262,7 +262,7 @@ void CGame::RegisterLua()
 
 	Lua::register_shared_client_state(GetLuaState());
 
-	Game::RegisterLua();
+	pragma::Game::RegisterLua();
 	/*lua_bind(
 		luabind::class_<ListenerHandle,EntityHandle>("Listener")
 		.def("SetGain",&Lua_Listener_SetGain)
@@ -538,13 +538,13 @@ void CGame::RegisterLua()
 
 void CGame::InitializeLua()
 {
-	Game::InitializeLua();
+	pragma::Game::InitializeLua();
 	CallCallbacks<void, lua_State *>("OnLuaInitialized", GetLuaState());
 }
 
 void CGame::SetupLua()
 {
-	Game::SetupLua();
+	pragma::Game::SetupLua();
 	RunLuaFiles("autorun/");
 	RunLuaFiles("autorun/client/");
 	InitializeGameMode();
@@ -564,7 +564,7 @@ void CGame::LoadLuaShaders()
 
 void CGame::LoadLuaShader(std::string file)
 {
-	StringToLower(file);
+	ustring::to_lower(file);
 	std::string identifier = file.substr(0, file.length() - 4);
 	file = "shaders/" + file;
 	ExecuteLuaFile(file);

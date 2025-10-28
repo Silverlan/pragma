@@ -57,7 +57,7 @@ export namespace pragma {
 			bool texture = false;
 		};
 		struct MaterialData {
-			std::shared_ptr<Material> material;
+			std::shared_ptr<msys::Material> material;
 			std::unordered_map<std::string, PropertyInfo> properties;
 
 			std::string shaderOverride;
@@ -73,7 +73,7 @@ export namespace pragma {
 		PropertyInfo *FindMaterialPropertyInfo(uint32_t matIdx, const char *key);
 		const PropertyInfo *FindMaterialPropertyInfo(uint32_t matIdx, const char *key) const { return const_cast<CMaterialPropertyOverrideComponent *>(this)->FindMaterialPropertyInfo(matIdx, key); }
 		udm::Property *FindMaterialProperty(uint32_t matIdx, const char *key);
-		Material *GetTargetMaterial(uint32_t matIdx);
+		msys::Material *GetTargetMaterial(uint32_t matIdx);
 
 		static void SetPropertyEnabled(const ComponentMemberInfo &info, CMaterialPropertyOverrideComponent &component, bool enabled);
 		static void GetPropertyEnabled(const ComponentMemberInfo &info, CMaterialPropertyOverrideComponent &component, bool &outEnabled);
@@ -84,7 +84,7 @@ export namespace pragma {
 		void UpdateShaderOverride(uint32_t matIdx);
 		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
 		template<typename T>
-		void SetMaterialPropertyBufferValue(Material &mat, const pragma::rendering::shader_material::ShaderMaterial &shaderMat, const char *keyName, const T &newVal);
+		void SetMaterialPropertyBufferValue(msys::Material &mat, const pragma::rendering::shader_material::ShaderMaterial &shaderMat, const char *keyName, const T &newVal);
 		void PopulateProperties();
 		void PopulateProperties(std::string matName, CMaterial &mat, uint32_t matIdx);
 		void ClearProperties(uint32_t matIdx);
@@ -94,8 +94,8 @@ export namespace pragma {
 			size_t size;
 			std::unique_ptr<std::byte[]> data;
 		};
-		void ApplyMaterialPropertyOverride(Material &mat, const pragma::rendering::MaterialPropertyBlock &matPropOverride);
-		void UpdateMaterialOverride(Material &mat);
+		void ApplyMaterialPropertyOverride(msys::Material &mat, const pragma::rendering::MaterialPropertyBlock &matPropOverride);
+		void UpdateMaterialOverride(msys::Material &mat);
 
 		struct ShaderMaterialPropertyInfo {
 			ShaderMaterialPropertyInfo();

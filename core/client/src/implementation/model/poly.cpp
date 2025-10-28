@@ -33,7 +33,7 @@ void CPoly::CalculateTextureAxes()
 	if(texData == NULL)
 		return;
 
-	Material *mat = GetMaterial();
+	msys::Material *mat = GetMaterial();
 	TextureInfo *tex = NULL;
 	if(mat != NULL)
 		tex = mat->GetTextureInfo("diffusemap");

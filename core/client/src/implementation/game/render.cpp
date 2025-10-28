@@ -46,7 +46,7 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState *, const ConVar &, int
 	if(cbDrawPhysicsEnd.IsValid())
 		cbDrawPhysicsEnd.Remove();
 	//auto *physEnv = pragma::get_cgame()->GetPhysicsEnvironment();
-	Game *game;
+	pragma::Game *game;
 	if(serverside) {
 		auto *nw = pragma::get_cengine()->GetServerNetworkState();
 		game = nw ? nw->GetGameState() : nullptr;
@@ -70,7 +70,7 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState *, const ConVar &, int
 		return;
 	}*/
 	cbDrawPhysics = pragma::get_cgame()->AddCallback("Think", FunctionCallback<>::Create([serverside]() {
-		Game *game;
+		pragma::Game *game;
 		if(serverside) {
 			auto *nw = pragma::get_cengine()->GetServerNetworkState();
 			game = nw ? nw->GetGameState() : nullptr;
@@ -337,7 +337,7 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	// TODO: This isn't a good place for this and particle systems should
 	// only be updated if visible (?)
 	auto &cmd = *drawSceneInfo.commandBuffer;
-	EntityIterator itParticles {*this};
+	pragma::ecs::EntityIterator itParticles {*this};
 	itParticles.AttachFilter<TEntityIteratorFilterComponent<pragma::ecs::CParticleSystemComponent>>();
 	for(auto *ent : itParticles) {
 		auto &tDelta = DeltaTime();

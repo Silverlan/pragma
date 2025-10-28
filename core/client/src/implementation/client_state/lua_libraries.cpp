@@ -109,7 +109,7 @@ static pragma::LuaInputBindingLayerRegister &get_input_binding_layer_register() 
 static std::shared_ptr<InputBindingLayer> create_input_binding_layer()
 {
 	auto layer = std::shared_ptr<InputBindingLayer> {new InputBindingLayer {}, [](InputBindingLayer *layer) {
-		                                                 if(!umath::is_flag_set(pragma::get_cgame()->GetGameFlags(), Game::GameFlags::ClosingGame))
+		                                                 if(!umath::is_flag_set(pragma::get_cgame()->GetGameFlags(), pragma::Game::GameFlags::ClosingGame))
 			                                                 get_input_binding_layer_register().Remove(*layer);
 		                                                 delete layer;
 	                                                 }};
@@ -509,7 +509,7 @@ static void register_gui(Lua::Interface &lua)
 
 	auto wiNineSliceRect = luabind::class_<wgui::WI9SliceRect, ::WIBase>("NineSliceRect");
 	wiNineSliceRect.def("SetMaterial", static_cast<void (wgui::WI9SliceRect ::*)(const std::string &)>(&wgui::WI9SliceRect::SetMaterial));
-	wiNineSliceRect.def("SetMaterial", static_cast<void (wgui::WI9SliceRect ::*)(Material &)>(&wgui::WI9SliceRect::SetMaterial));
+	wiNineSliceRect.def("SetMaterial", static_cast<void (wgui::WI9SliceRect ::*)(msys::Material &)>(&wgui::WI9SliceRect::SetMaterial));
 	wiNineSliceRect.def("GetMaterial", &wgui::WI9SliceRect::GetMaterial);
 	guiMod[wiNineSliceRect];
 

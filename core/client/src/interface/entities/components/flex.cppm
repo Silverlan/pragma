@@ -58,7 +58,7 @@ export namespace pragma {
 		void UpdateEyeFlexes();
 		void UpdateEyeFlexes(Eyeball &eyeball, uint32_t eyeballIdx);
 		void UpdateFlexControllers(float dt);
-		void OnModelChanged(const std::shared_ptr<Model> &mdl);
+		void OnModelChanged(const std::shared_ptr<pragma::Model> &mdl);
 
 		// Flex controllers
 		struct FlexControllerInfo {

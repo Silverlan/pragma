@@ -15,12 +15,12 @@ import pragma.server.server_state;
 
 void Lua::game::Server::set_gravity(const Vector3 &gravity)
 {
-	Game *game = ServerState::Get()->GetGameState();
+	pragma::Game *game = ServerState::Get()->GetGameState();
 	game->SetGravity(const_cast<Vector3 &>(gravity));
 }
 Vector3 Lua::game::Server::get_gravity()
 {
-	Game *game = ServerState::Get()->GetGameState();
+	pragma::Game *game = ServerState::Get()->GetGameState();
 	return game->GetGravity();
 }
 luabind::object Lua::game::Server::load_model(lua_State *l, const std::string &name)
@@ -32,7 +32,7 @@ luabind::object Lua::game::Server::load_model(lua_State *l, const std::string &n
 }
 int Lua::game::Server::create_model(lua_State *l)
 {
-	std::shared_ptr<::Model> mdl = nullptr;
+	std::shared_ptr<pragma::Model> mdl = nullptr;
 	if(!Lua::IsSet(l, 1))
 		mdl = SGame::Get()->CreateModel();
 	else {

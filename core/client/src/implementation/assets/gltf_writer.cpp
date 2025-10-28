@@ -43,12 +43,12 @@ bool pragma::asset::GLTFWriter::Export(const SceneDesc &sceneDesc, const std::st
 	return writer.Export(outErrMsg, outputFileName, optOutPath);
 }
 
-bool pragma::asset::GLTFWriter::Export(::Model &model, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &outputFileName, std::string *optOutPath)
+bool pragma::asset::GLTFWriter::Export(pragma::Model &model, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &outputFileName, std::string *optOutPath)
 {
 	auto fileName = outputFileName.has_value() ? *outputFileName : model.GetName();
 	return Export({{model}}, fileName, exportInfo, outErrMsg, optOutPath);
 }
-bool pragma::asset::GLTFWriter::Export(::Model &model, const std::string &animName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &outputFileName, std::string *optOutPath)
+bool pragma::asset::GLTFWriter::Export(pragma::Model &model, const std::string &animName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &outputFileName, std::string *optOutPath)
 {
 	auto fileName = outputFileName.has_value() ? *outputFileName : model.GetName();
 	return Export({{model}}, fileName, animName, exportInfo, outErrMsg, optOutPath);
@@ -69,7 +69,7 @@ uint32_t pragma::asset::GLTFWriter::AddAccessor(const std::string &name, int com
 	return m_gltfMdl.accessors.size() - 1;
 };
 
-void pragma::asset::GLTFWriter::InitializeMorphSets(::Model &mdl)
+void pragma::asset::GLTFWriter::InitializeMorphSets(pragma::Model &mdl)
 {
 	auto &flexes = mdl.GetFlexes();
 	for(auto flexId = decltype(flexes.size()) {0u}; flexId < flexes.size(); ++flexId) {
@@ -105,14 +105,14 @@ void pragma::asset::GLTFWriter::InitializeMorphSets(::Model &mdl)
 	}
 }
 
-bool pragma::asset::GLTFWriter::IsSkinned(::Model &mdl) const
+bool pragma::asset::GLTFWriter::IsSkinned(pragma::Model &mdl) const
 {
 	if(ShouldExportMeshes() == false)
 		return false;
 	auto &skeleton = mdl.GetSkeleton();
 	return (skeleton.GetBoneCount() > 1 && m_exportInfo.exportSkinnedMeshData);
 }
-bool pragma::asset::GLTFWriter::IsAnimated(::Model &mdl) const
+bool pragma::asset::GLTFWriter::IsAnimated(pragma::Model &mdl) const
 {
 	auto &anims = mdl.GetAnimations();
 	auto &skeleton = mdl.GetSkeleton();
@@ -1030,7 +1030,7 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 	}
 }
 
-void pragma::asset::GLTFWriter::WriteAnimations(::Model &mdl)
+void pragma::asset::GLTFWriter::WriteAnimations(pragma::Model &mdl)
 {
 	if(m_exportInfo.verbose)
 		Con::cout << "Initializing GLTF animations..." << Con::endl;
@@ -1295,7 +1295,7 @@ void pragma::asset::GLTFWriter::WriteAnimations(::Model &mdl)
 	}
 }
 
-void pragma::asset::GLTFWriter::GenerateAO(::Model &mdl)
+void pragma::asset::GLTFWriter::GenerateAO(pragma::Model &mdl)
 {
 	if(m_exportInfo.verbose)
 		Con::cout << "Generating ambient occlusion maps..." << Con::endl;
@@ -1338,7 +1338,7 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 
 	if(m_exportInfo.verbose)
 		Con::cout << "Collecting materials..." << Con::endl;
-	std::vector<Material *> materials {};
+	std::vector<msys::Material *> materials {};
 	for(auto &mdlDesc : m_sceneDesc.modelCollection) {
 		for(auto &hMat : mdlDesc.model.GetMaterials()) {
 			if(!hMat)
@@ -1369,7 +1369,7 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 
 	m_gltfMdl.materials.reserve(materials.size());
 
-	std::unordered_map<Material *, uint32_t> matTranslationTable {};
+	std::unordered_map<msys::Material *, uint32_t> matTranslationTable {};
 	for(auto *mat : materials) {
 		std::string errMsg;
 		auto texturePaths = pragma::asset::export_material(*mat, m_exportInfo.imageFormat, errMsg, &m_exportPath, m_exportInfo.normalizeTextureNames);
@@ -1383,7 +1383,7 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 		gltfMat.name = ufile::get_file_from_filename(mat->GetName());
 		ufile::remove_extension_from_filename(gltfMat.name);
 
-		auto itAlbedo = texturePaths->find(Material::ALBEDO_MAP_IDENTIFIER);
+		auto itAlbedo = texturePaths->find(msys::Material::ALBEDO_MAP_IDENTIFIER);
 		if(itAlbedo != texturePaths->end())
 			gltfMat.pbrMetallicRoughness.baseColorTexture.index = fAddTexture(itAlbedo->second);
 
@@ -1392,13 +1392,13 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 		mat->GetProperty("alpha_factor", &colorFactor.a);
 		gltfMat.pbrMetallicRoughness.baseColorFactor = {colorFactor[0], colorFactor[1], colorFactor[2], colorFactor[3]};
 
-		auto itNormal = texturePaths->find(Material::NORMAL_MAP_IDENTIFIER);
+		auto itNormal = texturePaths->find(msys::Material::NORMAL_MAP_IDENTIFIER);
 		if(itNormal != texturePaths->end())
 			gltfMat.normalTexture.index = fAddTexture(itNormal->second);
 
 		auto metalnessFactor = 0.f;
 		auto roughnessFactor = 0.5f;
-		auto itRMA = texturePaths->find(Material::RMA_MAP_IDENTIFIER);
+		auto itRMA = texturePaths->find(msys::Material::RMA_MAP_IDENTIFIER);
 		if(itRMA != texturePaths->end()) {
 			gltfMat.pbrMetallicRoughness.metallicRoughnessTexture.index = fAddTexture(itRMA->second);
 			metalnessFactor = 1.f;
@@ -1424,7 +1424,7 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 		}
 		gltfMat.alphaCutoff = alphaCutoff;
 
-		auto itEmissive = texturePaths->find(Material::EMISSION_MAP_IDENTIFIER);
+		auto itEmissive = texturePaths->find(msys::Material::EMISSION_MAP_IDENTIFIER);
 		if(itEmissive != texturePaths->end())
 			gltfMat.emissiveTexture.index = fAddTexture(itEmissive->second);
 

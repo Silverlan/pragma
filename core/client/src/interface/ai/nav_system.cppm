@@ -16,7 +16,7 @@ export namespace pragma {
 		class DLLCLIENT CMesh : public Mesh {
 		  public:
 			static std::shared_ptr<CMesh> Create(const std::shared_ptr<RcNavMesh> &rcMesh, const Config &config);
-			static std::shared_ptr<CMesh> Load(Game &game, const std::string &fname);
+			static std::shared_ptr<CMesh> Load(pragma::Game &game, const std::string &fname);
 			using Mesh::Mesh;
 			friend Mesh;
 

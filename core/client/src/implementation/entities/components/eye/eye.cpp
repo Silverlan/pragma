@@ -107,7 +107,7 @@ bool CEyeComponent::FindEyeballIndex(uint32_t skinMatIdx, uint32_t &outEyeballIn
 }
 bool CEyeComponent::FindEyeballIndex(CModelSubMesh &subMesh, uint32_t &outEyeballIndex) const { return FindEyeballIndex(subMesh.GetSkinTextureIndex(), outEyeballIndex); }
 
-void CEyeComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
+void CEyeComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &mdl)
 {
 	m_eyeballData.clear();
 	m_blinkFlexController = std::numeric_limits<uint32_t>::max();

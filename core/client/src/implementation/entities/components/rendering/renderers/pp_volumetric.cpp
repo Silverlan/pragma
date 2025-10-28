@@ -92,7 +92,7 @@ void CRendererPpVolumetricComponent::DoRenderEffect(const util::DrawSceneInfo &d
 	pushConstants.SetResolution(m_renderTarget->GetTexture().GetImage().GetWidth(), m_renderTarget->GetTexture().GetImage().GetHeight());
 	auto &frustumPlanes = cam->GetFrustumPlanes();
 
-	EntityIterator entIt {*pragma::get_cgame(), EntityIterator::FilterFlags::Default};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightSpotVolComponent>>();
 	std::vector<pragma::ecs::BaseEntity *> ents;
 	ents.reserve(entIt.GetCount());

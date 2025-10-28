@@ -25,6 +25,6 @@ export namespace pragma {
 		virtual void SetSkin(unsigned int skin) override;
 		virtual void SetMaxDrawDistance(float maxDist) override;
 	  protected:
-		virtual void OnModelChanged(const std::shared_ptr<Model> &model) override;
+		virtual void OnModelChanged(const std::shared_ptr<pragma::Model> &model) override;
 	};
 };

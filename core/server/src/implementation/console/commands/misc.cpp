@@ -3,6 +3,16 @@
 
 module;
 
+#include <algorithm>
+#include <sstream>
+
+#include <string>
+#include <vector>
+#include <memory>
+#include <functional>
+#include <functional>
+#include <unordered_map>
+
 #include "pragma/console/helper.hpp"
 
 module pragma.server;
@@ -74,7 +84,7 @@ void CMD_kick(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::st
 	pragma::SPlayerComponent *kickTarget = nullptr;
 	auto &identifier = argv.front();
 	auto name = identifier + "*";
-	EntityIterator entIt {*SGame::Get()};
+	pragma::ecs::EntityIterator entIt {*SGame::Get()};
 	entIt.AttachFilter<EntityIteratorFilterName>(name, false, false);
 	auto it = entIt.begin();
 	auto *ent = (it != entIt.end()) ? *it : nullptr;
@@ -350,9 +360,9 @@ void CMD_ent_create(NetworkState *state, pragma::BasePlayerComponent *pl, std::v
 	Vector3 dir = charComponent.valid() ? charComponent->GetViewForward() : pTrComponent->GetForward();
 	TraceData trData;
 	trData.SetSource(origin);
-	trData.SetTarget(origin + dir * static_cast<float>(GameLimits::MaxRayCastRange));
+	trData.SetTarget(origin + dir * static_cast<float>(pragma::GameLimits::MaxRayCastRange));
 	trData.SetFilter(ent);
-	trData.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter | RayCastFlags::IgnoreDynamic);
+	trData.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::InvertFilter | pragma::physics::RayCastFlags::IgnoreDynamic);
 	auto r = SGame::Get()->RayCast(trData);
 	if(r.hitType == pragma::physics::RayCastHitType::None) {
 		Con::cwar << "No place to spawn entity!" << Con::endl;
@@ -450,5 +460,5 @@ void CMD_sv_debug_netmessages(NetworkState *state, pragma::BasePlayerComponent *
 	sv->DebugDump("sv_netmessages.dump", *svMsgs, *clMsgs);
 }
 
-static void CMD_startserver(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv) { Engine::Get()->StartServer(false); }
-static void CMD_closeserver(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { Engine::Get()->CloseServer(); }
+static void CMD_startserver(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv) { pragma::Engine::Get()->StartServer(false); }
+static void CMD_closeserver(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { pragma::Engine::Get()->CloseServer(); }

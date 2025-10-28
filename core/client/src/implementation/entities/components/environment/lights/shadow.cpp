@@ -44,7 +44,7 @@ static void reload_all_shadow_maps()
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
-	EntityIterator entIt {*pragma::get_cgame()};
+	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<CShadowComponent>>();
 	for(auto *ent : entIt) {
 		auto shadowC = ent->GetComponent<pragma::CShadowComponent>();
@@ -311,7 +311,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			  auto &posCam = hCam->GetEntity().GetPosition();
 			  auto vp = hCam->GetProjectionMatrix() * hCam->GetViewMatrix();
 			  std::vector<util::BSPTree::Node *> bspLeafNodes;
-			  EntityIterator entItWorld {*pragma::get_cgame()};
+			  pragma::ecs::EntityIterator entItWorld {*pragma::get_cgame()};
 			  entItWorld.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
 			  bspLeafNodes.reserve(entItWorld.GetCount());
 			  for(auto *entWorld : entItWorld) {

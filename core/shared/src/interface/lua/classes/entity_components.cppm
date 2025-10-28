@@ -10,6 +10,8 @@ module;
 #include <vector>
 #include <functional>
 
+#include <ostream>
+
 export module pragma.shared:scripting.lua.classes.entity_components;
 
 export import :entities.components.base;

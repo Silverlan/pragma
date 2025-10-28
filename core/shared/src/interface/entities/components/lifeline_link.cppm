@@ -10,6 +10,8 @@ module;
 #include <cstring>
 #include "pragma/lua/core.hpp"
 
+#include <ostream>
+
 export module pragma.shared:entities.components.lifeline_link;
 
 export import :entities.components.base;

@@ -9,6 +9,8 @@ module;
 #include <optional>
 #include "pragma/lua/core.hpp"
 
+#include <ostream>
+
 export module pragma.shared:entities.components.environment.lights.base_directional;
 
 export import :entities.components.base;

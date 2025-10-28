@@ -12,6 +12,8 @@ module;
 #include <queue>
 #include "pragma/lua/core.hpp"
 
+#include <ostream>
+
 export module pragma.shared:entities.components.meta_rig;
 
 export import :entities.components.base_animated;

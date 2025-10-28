@@ -19,6 +19,8 @@ module;
 
 #include <cstring>
 
+#include <ostream>
+
 export module pragma.shared:entities.components.base_flex;
 
 export import :entities.components.base;

@@ -13,6 +13,8 @@ module;
 #include <queue>
 #include "pragma/lua/core.hpp"
 
+#include <ostream>
+
 export module pragma.shared:entities.iterator;
 
 import :entities.base_entity;

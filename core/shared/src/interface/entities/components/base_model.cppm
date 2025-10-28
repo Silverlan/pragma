@@ -16,6 +16,8 @@ module;
 #include <optional>
 #include <tuple>
 
+#include <ostream>
+
 export module pragma.shared:entities.components.base_model;
 
 export import :entities.components.base;

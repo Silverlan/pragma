@@ -10,6 +10,8 @@ module;
 #include <optional>
 #include <memory>
 
+#include <ostream>
+
 export module pragma.shared:model.animation.frame;
 
 export import :game.coordinate_system;

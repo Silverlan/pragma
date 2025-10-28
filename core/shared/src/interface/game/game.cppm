@@ -4,6 +4,8 @@ module;
 
 #include <string>
 
+#include <ostream>
+
 export module pragma.shared:game;
 
 export import :game.animation_channel_cache_data;

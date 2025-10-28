@@ -8,6 +8,8 @@ module;
 #include <vector>
 #include <memory>
 
+#include <ostream>
+
 export module pragma.shared:entities.components.liquid.base_surface_simulation;
 
 export import :entities.components.base;

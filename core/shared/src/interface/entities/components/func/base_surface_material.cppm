@@ -5,6 +5,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 
+#include <ostream>
+
 export module pragma.shared:entities.components.func.base_surface_material;
 
 export import :entities.components.base;

@@ -4,6 +4,8 @@ module;
 
 #include <memory>
 
+#include <ostream>
+
 export module pragma.shared:entities;
 
 export import :entities.base_entity;

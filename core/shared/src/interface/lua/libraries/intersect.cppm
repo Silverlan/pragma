@@ -11,6 +11,8 @@ module;
 #include <unordered_map>
 #include <unordered_set>
 
+#include <ostream>
+
 export module pragma.shared:scripting.lua.libraries.intersect;
 
 export import :model;

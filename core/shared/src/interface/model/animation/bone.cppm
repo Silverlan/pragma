@@ -6,6 +6,7 @@ module;
 #include <memory>
 #include <optional>
 #include <string>
+#include <iostream>
 #include <unordered_map>
 
 export module pragma.shared:model.animation.bone;

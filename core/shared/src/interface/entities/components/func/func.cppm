@@ -5,6 +5,8 @@ module;
 #include <functional>
 #include <string>
 
+#include <ostream>
+
 export module pragma.shared:entities.components.func;
 
 export import :entities.components.func.base_brush;

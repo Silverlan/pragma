@@ -12,6 +12,8 @@ module;
 #include <unordered_map>
 #include "pragma/lua/core.hpp"
 
+#include <ostream>
+
 export module pragma.shared:entities.components.func.base_button;
 
 export import :audio.sound;

@@ -13,6 +13,8 @@ module;
 #include <memory>
 #include <functional>
 
+#include <ostream>
+
 export module pragma.shared:model.model_manager;
 
 export import :model.model;

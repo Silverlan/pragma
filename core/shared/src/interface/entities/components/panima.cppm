@@ -18,6 +18,8 @@ module;
 
 #include <optional>
 
+#include <ostream>
+
 export module pragma.shared:entities.components.panima;
 
 export import :entities.components.base;

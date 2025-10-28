@@ -17,6 +17,8 @@ module;
 #include <optional>
 #include <tuple>
 
+#include <ostream>
+
 export module pragma.shared:entities.components.base_lua;
 
 export import :entities.components.base;

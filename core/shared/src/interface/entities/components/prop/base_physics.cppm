@@ -5,6 +5,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <memory>
 
+#include <ostream>
+
 export module pragma.shared:entities.components.props.base_physics;
 
 export import :entities.components.base;

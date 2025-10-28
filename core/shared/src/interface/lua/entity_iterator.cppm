@@ -8,6 +8,8 @@ module;
 #include <vector>
 #include <memory>
 
+#include <ostream>
+
 export module pragma.shared:scripting.lua.entity_iterator;
 
 export import :entities.iterator;

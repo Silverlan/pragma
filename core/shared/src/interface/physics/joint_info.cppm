@@ -7,6 +7,8 @@ module;
 #include <string>
 #include <unordered_map>
 
+#include <ostream>
+
 export module pragma.shared:physics.joint_info;
 
 export import :model.animation.bone;

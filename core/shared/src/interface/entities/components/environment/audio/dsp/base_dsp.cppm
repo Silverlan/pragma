@@ -9,6 +9,8 @@ module;
 #include <cinttypes>
 #include <vector>
 
+#include <ostream>
+
 export module pragma.shared:entities.components.environment.audio.dsp.base_dsp;
 
 export import :entities.components.base;

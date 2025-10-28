@@ -16,6 +16,8 @@ module;
 
 #include <optional>
 
+#include <ostream>
+
 export module pragma.shared:entities.manager;
 
 export import :util.global_string_table;

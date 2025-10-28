@@ -11,6 +11,8 @@ module;
 #include <memory>
 #include <unordered_map>
 
+#include <ostream>
+
 export module pragma.shared:model.animation.animation;
 
 import panima;

@@ -10,6 +10,8 @@ module;
 #include <functional>
 #include <queue>
 
+#include <ostream>
+
 export module pragma.shared:entities.components.base_static_bvh_cache;
 
 export import :entities.components.base_bvh;

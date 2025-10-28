@@ -7,7 +7,7 @@ module;
 #include <memory>
 #include <string>
 #include <unordered_map>
-
+#include <ostream>
 #include <vector>
 
 export module pragma.shared:model.animation.skeleton;

@@ -3,13 +3,15 @@
 module;
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/lua/core.hpp"
 #include <cinttypes>
 #include <optional>
 #include <string>
 #include <vector>
 
 #include <memory>
-#include "pragma/lua/core.hpp"
+
+#include <ostream>
 
 export module pragma.shared:game.rig_config;
 

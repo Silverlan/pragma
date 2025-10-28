@@ -14,6 +14,8 @@ module;
 #include <optional>
 #include <functional>
 
+#include <ostream>
+
 export module pragma.shared:entities.components.base_physics;
 
 export import :entities.components.base;

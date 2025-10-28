@@ -9,6 +9,8 @@ module;
 #include <optional>
 #include <memory>
 
+#include <ostream>
+
 export module pragma.shared:entities.components.base_attachment;
 
 export import :entities.components.base;

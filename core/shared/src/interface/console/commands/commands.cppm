@@ -15,6 +15,8 @@ module;
 #include <unordered_map>
 #include "pragma/lua/core.hpp"
 
+#include <ostream>
+
 export module pragma.shared:console.commands;
 
 export import :entities.components.base_player;

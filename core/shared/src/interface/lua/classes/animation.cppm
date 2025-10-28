@@ -11,6 +11,8 @@ module;
 #include <vector>
 #include <memory>
 
+#include <ostream>
+
 export module pragma.shared:scripting.lua.classes.animation;
 
 export import :model.animation;

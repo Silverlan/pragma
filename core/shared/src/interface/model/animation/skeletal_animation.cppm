@@ -10,6 +10,8 @@ module;
 #include <string>
 #include <unordered_map>
 
+#include <ostream>
+
 export module pragma.shared:model.animation.skeletal_animation;
 
 import panima;

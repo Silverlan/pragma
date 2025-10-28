@@ -4,6 +4,8 @@ module;
 
 #include <string>
 
+#include <ostream>
+
 export module pragma.shared:scripting.lua.libraries;
 
 export import :scripting.lua.libraries.ai;

@@ -10,6 +10,8 @@ module;
 #include <functional>
 #include "pragma/lua/core.hpp"
 
+#include <ostream>
+
 export module pragma.shared:scripting.lua.libraries.debug;
 
 export import :entities.components.base_ai;

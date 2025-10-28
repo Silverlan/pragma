@@ -5,6 +5,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <memory>
 
+#include <ostream>
+
 export module pragma.shared:entities.components.props.base_dynamic;
 
 export import :entities.components.base;

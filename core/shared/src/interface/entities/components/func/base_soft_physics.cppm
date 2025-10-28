@@ -5,6 +5,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 
+#include <ostream>
+
 export module pragma.shared:entities.components.func.base_soft_physics;
 
 export import :entities.components.base;

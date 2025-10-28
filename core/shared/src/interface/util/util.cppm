@@ -13,6 +13,8 @@ module;
 #include <optional>
 #include <queue>
 
+#include <ostream>
+
 export module pragma.shared:util;
 
 export import :util.any;

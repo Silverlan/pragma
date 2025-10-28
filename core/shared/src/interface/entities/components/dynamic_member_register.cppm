@@ -5,7 +5,7 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <string>
 #include <unordered_map>
-
+#include <ostream>
 #include <cinttypes>
 #include <optional>
 #include <vector>

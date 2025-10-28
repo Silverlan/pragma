@@ -11,6 +11,8 @@ module;
 #include <memory>
 #include "pragma/lua/core.hpp"
 
+#include <ostream>
+
 export module pragma.shared:entities.components.liquid.base_control;
 
 export import :entities.components.base;

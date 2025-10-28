@@ -13,6 +13,8 @@ module;
 
 #include <optional>
 
+#include <ostream>
+
 export module pragma.shared:entities.components.animation_driver;
 
 export import :entities.components.base;

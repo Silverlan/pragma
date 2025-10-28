@@ -4,6 +4,8 @@ module;
 
 #include <string>
 
+#include <ostream>
+
 export module pragma.shared;
 
 export import :ai;

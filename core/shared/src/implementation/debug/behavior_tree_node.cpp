@@ -3,6 +3,8 @@
 
 module;
 
+#include <ostream>
+
 #include <string>
 
 module pragma.shared;

@@ -18,6 +18,8 @@ module;
 #include <functional>
 #include <memory>
 
+#include <ostream>
+
 export module pragma.shared:entities.components.base_character;
 
 export import :entities.components.base_actor;

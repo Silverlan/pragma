@@ -13,6 +13,8 @@ module;
 #include <unordered_map>
 #include "pragma/lua/core.hpp"
 
+#include <ostream>
+
 export module pragma.shared:scripting.lua.classes.convar;
 
 export import :console.convar;

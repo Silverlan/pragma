@@ -4,6 +4,8 @@ module;
 
 #include <mathutil/glmutil.h>
 
+#include <ostream>
+
 export module pragma.shared:console;
 
 export import :console.command_options;

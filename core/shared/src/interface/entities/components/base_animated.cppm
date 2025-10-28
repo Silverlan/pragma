@@ -14,6 +14,8 @@ module;
 
 #include <optional>
 
+#include <ostream>
+
 export module pragma.shared:entities.components.base_animated;
 
 export import :entities.components.base;

@@ -12,6 +12,8 @@ module;
 #include <vector>
 #include <memory>
 
+#include <ostream>
+
 export module pragma.shared:model.animation.meta_rig;
 
 export import :game.coordinate_system;

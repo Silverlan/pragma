@@ -9,6 +9,8 @@ module;
 #include <cinttypes>
 #include <memory>
 
+#include <ostream>
+
 export module pragma.shared:scripting.lua.libraries.game;
 
 export import :game;

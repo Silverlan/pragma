@@ -123,7 +123,7 @@ static Vector3 triangle_normal(const Vector3 &n0, const Vector3 &n1, const Vecto
 	uvec::normalize(&n);
 	return n;
 }
-static void generate_sh_normals(const std::vector<util::baking::BakePixel> &bps, const std::vector<util::baking::LightSource> &lights, const std::vector<std::shared_ptr<ModelSubMesh>> meshes, Vector3 *outNormals)
+static void generate_sh_normals(const std::vector<util::baking::BakePixel> &bps, const std::vector<util::baking::LightSource> &lights, const std::vector<std::shared_ptr<pragma::ModelSubMesh>> meshes, Vector3 *outNormals)
 {
 	auto process = [&bps, &meshes, &outNormals, &lights](uint32_t start, uint32_t end) {
 		for(auto idx = start; idx < end; ++idx) {
@@ -164,7 +164,7 @@ static void generate_sh_normals(const std::vector<util::baking::BakePixel> &bps,
 	pool.WaitForCompletion();
 }
 
-static std::shared_ptr<uimg::ImageBuffer> generate_sh_normal_map(const std::vector<util::baking::BakePixel> &bps, const std::vector<util::baking::LightSource> &lights, const std::vector<std::shared_ptr<ModelSubMesh>> meshes, uint32_t width, uint32_t height)
+static std::shared_ptr<uimg::ImageBuffer> generate_sh_normal_map(const std::vector<util::baking::BakePixel> &bps, const std::vector<util::baking::LightSource> &lights, const std::vector<std::shared_ptr<pragma::ModelSubMesh>> meshes, uint32_t width, uint32_t height)
 {
 	auto imgBuf = uimg::ImageBuffer::Create(width, height, uimg::Format::RGB32);
 	generate_sh_normals(bps, lights, meshes, static_cast<Vector3 *>(imgBuf->GetData()));
@@ -192,12 +192,12 @@ static std::shared_ptr<uimg::ImageBuffer> generate_sh_normal_map(const std::vect
 	return imgBuf;
 }
 
-util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directional_lightmap_atlas(const std::vector<::pragma::CLightComponent *> &lights, const std::vector<ModelSubMesh *> meshes, const std::vector<BaseEntity *> &entities, uint32_t width, uint32_t height,
+util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directional_lightmap_atlas(const std::vector<::pragma::CLightComponent *> &lights, const std::vector<pragma::ModelSubMesh *> meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width, uint32_t height,
   ::pragma::LightmapDataCache *optLightmapDataCache)
 {
 	class LightmapBakeJob : public util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> {
 	  public:
-		LightmapBakeJob(uint32_t width, uint32_t height, std::vector<LightSource> &&lights, std::vector<std::shared_ptr<ModelSubMesh>> &&meshes, std::vector<std::string> &&meshEntityUuids, std::vector<umath::ScaledTransform> &&meshEntityPoses,
+		LightmapBakeJob(uint32_t width, uint32_t height, std::vector<LightSource> &&lights, std::vector<std::shared_ptr<pragma::ModelSubMesh>> &&meshes, std::vector<std::string> &&meshEntityUuids, std::vector<umath::ScaledTransform> &&meshEntityPoses,
 		  const std::shared_ptr<::pragma::LightmapDataCache> &lmdCache)
 		    : m_width {width}, m_height {height}, m_lightData {std::move(lights)}, m_meshes {std::move(meshes)}, m_meshEntityUuids {std::move(meshEntityUuids)}, m_lightmapDataCache {lmdCache}, m_meshEntityPoses {std::move(meshEntityPoses)}
 		{
@@ -238,7 +238,7 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directi
 			zspan.span2.resize(zspan.recty);
 
 			for(uint32_t idx = 0; auto &subMesh : m_meshes) {
-				if(subMesh->GetGeometryType() != ModelSubMesh::GeometryType::Triangles) {
+				if(subMesh->GetGeometryType() != pragma::ModelSubMesh::GeometryType::Triangles) {
 					++idx;
 					continue;
 				}
@@ -268,7 +268,7 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directi
 		uint32_t m_width;
 		uint32_t m_height;
 		std::vector<LightSource> m_lightData;
-		std::vector<std::shared_ptr<ModelSubMesh>> m_meshes;
+		std::vector<std::shared_ptr<pragma::ModelSubMesh>> m_meshes;
 		std::vector<std::string> m_meshEntityUuids;
 		std::vector<umath::ScaledTransform> m_meshEntityPoses;
 		std::shared_ptr<::pragma::LightmapDataCache> m_lightmapDataCache;
@@ -301,7 +301,7 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directi
 	}
 
 	auto pLmdc = optLightmapDataCache ? optLightmapDataCache->shared_from_this() : nullptr;
-	std::vector<std::shared_ptr<ModelSubMesh>> meshCopies;
+	std::vector<std::shared_ptr<pragma::ModelSubMesh>> meshCopies;
 	meshCopies.reserve(meshes.size());
 	for(auto *mesh : meshes) {
 		meshCopies.push_back(mesh->Copy(true));

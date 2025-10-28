@@ -123,7 +123,7 @@ export namespace pragma::rendering {
 		CMaterial *m_curMaterial = nullptr;
 		CBaseEntity *m_curEntity = nullptr;
 		pragma::CRenderComponent *m_curRenderC = nullptr;
-		std::vector<std::shared_ptr<ModelSubMesh>> *m_curEntityMeshList = nullptr;
+		std::vector<std::shared_ptr<pragma::ModelSubMesh>> *m_curEntityMeshList = nullptr;
 		const RenderQueue::InstanceSet *m_curInstanceSet = nullptr;
 		ShaderGameWorld::SceneFlags m_baseSceneFlags = ShaderGameWorld::SceneFlags::None;
 

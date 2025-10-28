@@ -12,7 +12,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CLuaBaseEntityComponent final : public BaseLuaBaseEntityComponent, public CBaseSnapshotComponent {
 	  public:
-		CLuaBaseEntityComponent(BaseEntity &ent);
+		CLuaBaseEntityComponent(pragma::ecs::BaseEntity &ent);
 
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;

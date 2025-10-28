@@ -3,7 +3,7 @@
 
 module;
 #include "pragma/serverdefinitions.h"
-
+#include <cinttypes>
 
 export module pragma.server.ai.task_enums;
 

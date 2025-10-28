@@ -15,7 +15,7 @@ export namespace pragma {
 	class DLLSERVER SPhysicsComponent final : public BasePhysicsComponent, public SBaseNetComponent {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		SPhysicsComponent(BaseEntity &ent) : BasePhysicsComponent(ent) {}
+		SPhysicsComponent(pragma::ecs::BaseEntity &ent) : BasePhysicsComponent(ent) {}
 
 		virtual void OnPhysicsInitialized() override;
 		virtual void OnPhysicsDestroyed() override;

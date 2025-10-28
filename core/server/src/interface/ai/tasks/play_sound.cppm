@@ -4,6 +4,9 @@
 module;
 #include "pragma/serverdefinitions.h"
 
+#include <string>
+#include <iostream>
+
 export module pragma.server.ai.tasks.play_sound;
 
 export import pragma.server.ai.schedule;

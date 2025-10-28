@@ -17,7 +17,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SBrushComponent final : public BaseFuncBrushComponent, public SBaseNetComponent {
 		public:
-			SBrushComponent(BaseEntity &ent) : BaseFuncBrushComponent(ent) {}
+			SBrushComponent(pragma::ecs::BaseEntity &ent) : BaseFuncBrushComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void OnEntitySpawn() override;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;

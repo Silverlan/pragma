@@ -36,7 +36,7 @@ void CObserverComponent::RegisterEvents(pragma::EntityComponentManager &componen
 	EVENT_CALC_VIEW = registerEvent("CALC_VIEW", ComponentEventInfo::Type::Explicit);
 	EVENT_CALC_VIEW = registerEvent("CALC_VIEW_OFFSET", ComponentEventInfo::Type::Explicit);
 }
-CObserverComponent::CObserverComponent(BaseEntity &ent) : BaseObserverComponent(ent) {}
+CObserverComponent::CObserverComponent(pragma::ecs::BaseEntity &ent) : BaseObserverComponent(ent) {}
 
 CObserverComponent::~CObserverComponent() {}
 

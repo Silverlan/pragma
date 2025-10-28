@@ -43,5 +43,5 @@ static void debug_render_info(NetworkState *, pragma::BasePlayerComponent *, std
 	std::cout << "-----------------------------------------" << std::endl;
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_render_info", &debug_render_info, ConVarFlags::None, "Prints some timing information to the console.");
+	auto UVN = pragma::console::client::register_command("debug_render_info", &debug_render_info, pragma::console::ConVarFlags::None, "Prints some timing information to the console.");
 }

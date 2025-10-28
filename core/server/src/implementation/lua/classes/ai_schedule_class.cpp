@@ -23,7 +23,7 @@ namespace Lua {
 		static void SetParameterInt(lua_State *l, pragma::ai::Schedule &schedule, uint8_t idx, int32_t i);
 		static void SetParameterFloat(lua_State *l, pragma::ai::Schedule &schedule, uint8_t idx, float f);
 		static void SetParameterString(lua_State *l, pragma::ai::Schedule &schedule, uint8_t idx, const std::string &s);
-		static void SetParameterEntity(lua_State *l, pragma::ai::Schedule &schedule, uint8_t idx, BaseEntity &hEnt);
+		static void SetParameterEntity(lua_State *l, pragma::ai::Schedule &schedule, uint8_t idx, pragma::ecs::BaseEntity &hEnt);
 		static void SetParameterVector(lua_State *l, pragma::ai::Schedule &schedule, uint8_t idx, const Vector3 &v);
 		static void SetParameterQuaternion(lua_State *l, pragma::ai::Schedule &schedule, uint8_t idx, const Quat &rot);
 		static void SetParameterEulerAngles(lua_State *l, pragma::ai::Schedule &schedule, uint8_t idx, const EulerAngles &ang);
@@ -67,7 +67,7 @@ void Lua::AISchedule::register_class(lua_State *l, luabind::module_ &mod)
 	classDef.def("SetParameterInt", static_cast<void (*)(lua_State *, pragma::ai::Schedule &, uint8_t, int32_t)>(&SetParameterInt));
 	classDef.def("SetParameterFloat", static_cast<void (*)(lua_State *, pragma::ai::Schedule &, uint8_t, float)>(&SetParameterFloat));
 	classDef.def("SetParameterString", static_cast<void (*)(lua_State *, pragma::ai::Schedule &, uint8_t, const std::string &)>(&SetParameterString));
-	classDef.def("SetParameterEntity", static_cast<void (*)(lua_State *, pragma::ai::Schedule &, uint8_t, BaseEntity &)>(&SetParameterEntity));
+	classDef.def("SetParameterEntity", static_cast<void (*)(lua_State *, pragma::ai::Schedule &, uint8_t, pragma::ecs::BaseEntity &)>(&SetParameterEntity));
 	classDef.def("SetParameterVector", static_cast<void (*)(lua_State *, pragma::ai::Schedule &, uint8_t, const Vector3 &)>(&SetParameterVector));
 	classDef.def("SetParameterQuaternion", static_cast<void (*)(lua_State *, pragma::ai::Schedule &, uint8_t, const Quat &)>(&SetParameterQuaternion));
 	classDef.def("SetParameterEulerAngles", static_cast<void (*)(lua_State *, pragma::ai::Schedule &, uint8_t, const EulerAngles &)>(&SetParameterEulerAngles));
@@ -115,7 +115,7 @@ void Lua::AISchedule::SetParameterBool(lua_State *, pragma::ai::Schedule &schedu
 void Lua::AISchedule::SetParameterInt(lua_State *, pragma::ai::Schedule &schedule, uint8_t idx, int32_t i) { schedule.SetParameter(idx, i); }
 void Lua::AISchedule::SetParameterFloat(lua_State *, pragma::ai::Schedule &schedule, uint8_t idx, float f) { schedule.SetParameter(idx, f); }
 void Lua::AISchedule::SetParameterString(lua_State *, pragma::ai::Schedule &schedule, uint8_t idx, const std::string &s) { schedule.SetParameter(idx, s); }
-void Lua::AISchedule::SetParameterEntity(lua_State *l, pragma::ai::Schedule &schedule, uint8_t idx, BaseEntity &ent) { schedule.SetParameter(idx, &ent); }
+void Lua::AISchedule::SetParameterEntity(lua_State *l, pragma::ai::Schedule &schedule, uint8_t idx, pragma::ecs::BaseEntity &ent) { schedule.SetParameter(idx, &ent); }
 void Lua::AISchedule::SetParameterVector(lua_State *, pragma::ai::Schedule &schedule, uint8_t idx, const Vector3 &v) { schedule.SetParameter(idx, v); }
 void Lua::AISchedule::SetParameterQuaternion(lua_State *, pragma::ai::Schedule &schedule, uint8_t idx, const Quat &rot) { schedule.SetParameter(idx, rot); }
 void Lua::AISchedule::SetParameterEulerAngles(lua_State *, pragma::ai::Schedule &schedule, uint8_t idx, const EulerAngles &ang) { schedule.SetParameter(idx, ang); }
@@ -155,9 +155,9 @@ void Lua::AISchedule::GetParameterString(lua_State *l, pragma::ai::Schedule &sch
 void Lua::AISchedule::GetParameterEntity(lua_State *l, pragma::ai::Schedule &schedule, uint8_t paramIdx, EntityHandle &def)
 {
 	//LUA_CHECK_ENTITY(l,def);
-	auto *r = get_parameter<const BaseEntity *>(schedule, paramIdx, ::pragma::ai::Schedule::Parameter::Type::Entity, &::pragma::ai::BehaviorParameter::GetEntity, def.get());
+	auto *r = get_parameter<const pragma::ecs::BaseEntity *>(schedule, paramIdx, ::pragma::ai::Schedule::Parameter::Type::Entity, &::pragma::ai::BehaviorParameter::GetEntity, def.get());
 	if(r != nullptr)
-		const_cast<BaseEntity *>(r)->GetLuaObject().push(l);
+		const_cast<pragma::ecs::BaseEntity *>(r)->GetLuaObject().push(l);
 }
 void Lua::AISchedule::GetParameterEntity(lua_State *l, pragma::ai::Schedule &schedule, uint8_t paramIdx)
 {

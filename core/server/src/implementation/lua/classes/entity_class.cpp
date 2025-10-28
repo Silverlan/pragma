@@ -11,7 +11,7 @@ module pragma.server.scripting.lua.classes.entity;
 import pragma.server.entities;
 import pragma.util;
 
-void Lua::Entity::Server::register_class(luabind::class_<SBaseEntity, BaseEntity> &classDef)
+void Lua::Entity::Server::register_class(luabind::class_<SBaseEntity, pragma::ecs::BaseEntity> &classDef)
 {
 	classDef.def("IsShared", &SBaseEntity::IsShared);
 	classDef.def("SetShared", &SBaseEntity::SetShared);

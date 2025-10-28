@@ -14,7 +14,7 @@ export import pragma.shared;
 export namespace pragma {
 	class DLLCLIENT CSoftBodyComponent final : public BaseSoftBodyComponent {
 	  public:
-		CSoftBodyComponent(BaseEntity &ent) : BaseSoftBodyComponent(ent) {}
+		CSoftBodyComponent(pragma::ecs::BaseEntity &ent) : BaseSoftBodyComponent(ent) {}
 
 		virtual void Initialize() override;
 		void UpdateSoftBodyGeometry();

@@ -15,7 +15,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SPropPhysicsComponent final : public BasePropPhysicsComponent {
 		public:
-			SPropPhysicsComponent(BaseEntity &ent) : BasePropPhysicsComponent(ent) {}
+			SPropPhysicsComponent(pragma::ecs::BaseEntity &ent) : BasePropPhysicsComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};

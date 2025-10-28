@@ -63,7 +63,7 @@ export namespace pragma {
 	};
 	class DLLCLIENT CBaseLightComponent : public BaseEnvLightComponent, public CBaseNetComponent {
 	  public:
-		CBaseLightComponent(BaseEntity &ent);
+		CBaseLightComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~CBaseLightComponent() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void Initialize() override;
@@ -107,7 +107,7 @@ export namespace pragma {
 
 		enum class StateFlags : uint32_t { None = 0u, StaticUpdateRequired = 1u, DynamicUpdateRequired = StaticUpdateRequired << 1u, FullUpdateRequired = StaticUpdateRequired << 1u, AddToGameScene = FullUpdateRequired << 1u, EnableMorphTargetsInShadows = AddToGameScene << 1u };
 
-		CLightComponent(BaseEntity &ent);
+		CLightComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~CLightComponent() override;
 		template<typename TCPPM>
 			TCPPM *GetShadowComponent();

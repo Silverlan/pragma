@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CKinematicComponent final : public BaseFuncKinematicComponent, public CBaseNetComponent {
 		public:
-			CKinematicComponent(BaseEntity &ent) : BaseFuncKinematicComponent(ent) {}
+			CKinematicComponent(pragma::ecs::BaseEntity &ent) : BaseFuncKinematicComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void InitializeLuaObject(lua_State *l) override;

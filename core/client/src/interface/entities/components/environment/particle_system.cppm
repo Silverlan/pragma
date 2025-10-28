@@ -120,7 +120,7 @@ export namespace pragma::ecs {
 #pragma pack(pop)
 
 		// Component methods
-		CParticleSystemComponent(BaseEntity &ent) : BaseEnvParticleSystemComponent(ent) {}
+		CParticleSystemComponent(pragma::ecs::BaseEntity &ent) : BaseEnvParticleSystemComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		virtual ~CParticleSystemComponent() override;

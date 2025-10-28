@@ -16,7 +16,7 @@ export namespace pragma {
 	class CRasterizationRendererComponent;
 	class DLLCLIENT CRendererPpToneMappingComponent final : public CRendererPpBaseComponent {
 	  public:
-		CRendererPpToneMappingComponent(BaseEntity &ent);
+		CRendererPpToneMappingComponent(pragma::ecs::BaseEntity &ent);
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual std::string GetIdentifier() const override { return "tone_mapping"; }
 		virtual uint32_t GetPostProcessingWeight() const override { return umath::to_integral(CRendererComponent::StandardPostProcessingWeight::ToneMapping); }

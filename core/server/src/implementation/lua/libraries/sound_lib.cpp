@@ -10,7 +10,7 @@ module pragma.server.scripting.lua.libraries.sound;
 
 import pragma.server.server_state;
 
-std::shared_ptr<::ALSound> Lua::sound::Server::create(lua_State *l, const std::string &snd, ALSoundType type, ALCreateFlags flags)
+std::shared_ptr<::ALSound> Lua::sound::Server::create(lua_State *l, const std::string &snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags)
 {
 	auto *state = Engine::Get()->GetNetworkState(l);
 	auto pAl = state->CreateSound(snd, type, flags);

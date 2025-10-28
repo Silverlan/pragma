@@ -4,6 +4,8 @@
 module;
 #include "pragma/serverdefinitions.h"
 
+#include <iostream>
+
 
 export module pragma.server.ai.tasks.play_activity;
 
@@ -22,7 +24,7 @@ export namespace pragma {
 
 			void SetActivity(Activity activity);
 			void SetFaceTarget(const Vector3 &target);
-			void SetFaceTarget(BaseEntity &target);
+			void SetFaceTarget(pragma::ecs::BaseEntity &target);
 		};
 
 		class DLLSERVER TaskPlayLayeredActivity : public TaskPlayLayeredAnimation {

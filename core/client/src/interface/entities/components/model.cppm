@@ -40,7 +40,7 @@ export namespace pragma {
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
 
-		CModelComponent(BaseEntity &ent);
+		CModelComponent(pragma::ecs::BaseEntity &ent);
 
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
@@ -67,8 +67,8 @@ export namespace pragma {
 
 		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes();
 		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes() const;
-		std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes();
-		const std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes() const;
+		std::vector<std::shared_ptr<pragma::ModelSubMesh>> &GetRenderMeshes();
+		const std::vector<std::shared_ptr<pragma::ModelSubMesh>> &GetRenderMeshes() const;
 		const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(uint32_t idx) const;
 		const rendering::RenderBufferData *GetRenderBufferData(uint32_t idx) const;
 		pragma::GameShaderSpecializationConstantFlag GetPipelineSpecializationFlags(uint32_t idx) const;
@@ -128,7 +128,7 @@ export namespace pragma {
 		StateFlags m_stateFlags = StateFlags::None;
 		std::vector<rendering::RenderBufferData> m_lodMeshRenderBufferData;
 		std::vector<std::shared_ptr<ModelMesh>> m_lodMeshes;
-		std::vector<std::shared_ptr<ModelSubMesh>> m_lodRenderMeshes;
+		std::vector<std::shared_ptr<pragma::ModelSubMesh>> m_lodRenderMeshes;
 		pragma::GameShaderSpecializationConstantFlag m_baseShaderSpecializationConstantFlags;
 		pragma::GameShaderSpecializationConstantFlag m_staticShaderSpecializationConstantFlags;
 

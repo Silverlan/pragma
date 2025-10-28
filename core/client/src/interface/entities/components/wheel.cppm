@@ -15,7 +15,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CWheelComponent final : public BaseWheelComponent, public CBaseSnapshotComponent {
 	  public:
-		CWheelComponent(BaseEntity &ent) : BaseWheelComponent(ent) {}
+		CWheelComponent(pragma::ecs::BaseEntity &ent) : BaseWheelComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void ReceiveSnapshotData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;

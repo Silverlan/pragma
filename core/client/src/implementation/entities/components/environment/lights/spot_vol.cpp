@@ -168,7 +168,7 @@ void CLightSpotVolComponent::ReceiveData(NetPacket &packet)
 {
 	m_coneStartOffset = packet->Read<float>();
 	auto hEnt = GetHandle();
-	nwm::read_unique_entity(packet, [this, hEnt](BaseEntity *ent) {
+	nwm::read_unique_entity(packet, [this, hEnt](pragma::ecs::BaseEntity *ent) {
 		if(hEnt.expired())
 			return;
 		if(ent != nullptr)

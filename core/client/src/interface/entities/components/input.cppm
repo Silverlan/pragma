@@ -15,7 +15,7 @@ export import pragma.shared;
 export namespace pragma {
 	class DLLCLIENT CInputComponent final : public BaseEntityComponent {
 	  public:
-		CInputComponent(BaseEntity &ent);
+		CInputComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual ~CInputComponent() override;
 

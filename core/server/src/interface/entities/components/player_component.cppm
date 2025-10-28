@@ -75,7 +75,7 @@ export namespace pragma {
 	  private:
 		static std::vector<SPlayerComponent *> s_players;
 	  public:
-		SPlayerComponent(BaseEntity &ent);
+		SPlayerComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~SPlayerComponent() override;
 	};
 };

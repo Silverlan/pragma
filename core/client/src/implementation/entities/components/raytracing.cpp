@@ -77,7 +77,7 @@ uint32_t CRaytracingComponent::GetBufferMeshCount() { return m_entityMeshCount; 
 const std::shared_ptr<MaterialDescriptorArrayManager> &CRaytracingComponent::GetMaterialDescriptorArrayManager() { return s_materialDescriptorArrayManager; }
 const std::shared_ptr<prosper::IDescriptorSetGroup> &CRaytracingComponent::GetGameSceneDescriptorSetGroup() { return s_gameSceneDsg; }
 
-CRaytracingComponent::CRaytracingComponent(BaseEntity &ent) : BaseEntityComponent {ent} {}
+CRaytracingComponent::CRaytracingComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent {ent} {}
 CRaytracingComponent::~CRaytracingComponent() { m_subMeshBuffers.clear(); }
 void CRaytracingComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CRaytracingComponent::Initialize()

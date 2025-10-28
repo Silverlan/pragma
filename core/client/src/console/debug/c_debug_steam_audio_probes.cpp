@@ -81,5 +81,5 @@ static void debug_steam_audio_dump_scene(NetworkState *state, pragma::BasePlayer
 #endif
 
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_steam_audio_dump_scene", &debug_steam_audio_dump_scene, ConVarFlags::None, "Saves the steam audio scene as OBJ file.");
+	auto UVN = pragma::console::client::register_command("debug_steam_audio_dump_scene", &debug_steam_audio_dump_scene, pragma::console::ConVarFlags::None, "Saves the steam audio scene as OBJ file.");
 }

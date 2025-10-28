@@ -38,7 +38,7 @@ void choreography::AudioEvent::Start()
 	auto pSoundEmitterComponent = actor->GetComponent<pragma::CSoundEmitterComponent>();
 	if(pSoundEmitterComponent.expired())
 		return;
-	m_sound = pSoundEmitterComponent->CreateSound(m_soundSource, ALSoundType::Voice);
+	m_sound = pSoundEmitterComponent->CreateSound(m_soundSource, pragma::audio::ALSoundType::Voice);
 	if(m_sound == nullptr)
 		return;
 	m_sound->Play();

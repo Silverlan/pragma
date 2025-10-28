@@ -30,14 +30,14 @@ export namespace pragma {
 		};
 #pragma pack(pop)
 
-		CVertexAnimatedComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CVertexAnimatedComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual ~CVertexAnimatedComponent() override;
 		virtual void Initialize() override;
 		void UpdateVertexAnimationDataMT();
 		void UpdateVertexAnimationBuffer(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 		const std::shared_ptr<prosper::IBuffer> &GetVertexAnimationBuffer() const;
 		bool GetVertexAnimationBufferMeshOffset(CModelSubMesh &mesh, uint32_t &offset, uint32_t &animCount) const;
-		bool GetLocalVertexPosition(const ModelSubMesh &subMesh, uint32_t vertexId, Vector3 &pos, Vector3 *optOutNormal = nullptr, float *optOutDelta = nullptr) const;
+		bool GetLocalVertexPosition(const pragma::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 &pos, Vector3 *optOutNormal = nullptr, float *optOutDelta = nullptr) const;
 		virtual void InitializeLuaObject(lua_State *l) override;
 	  protected:
 		// Vertex animations
@@ -50,7 +50,7 @@ export namespace pragma {
 			uint32_t vertexAnimationId = std::numeric_limits<uint32_t>::max();
 			uint32_t frameId = std::numeric_limits<uint32_t>::max();
 			uint32_t nextFrameId = std::numeric_limits<uint32_t>::max();
-			std::weak_ptr<ModelSubMesh> mesh = {};
+			std::weak_ptr<pragma::ModelSubMesh> mesh = {};
 			float blend = 0.f;
 		};
 		std::vector<VertexAnimationSlot> m_vertexAnimationSlots {};

@@ -9,6 +9,8 @@ module;
 
 export module pragma.server.scripting.lua.classes.ai_schedule;
 
+export import luabind;
+
 export namespace Lua {
 	namespace AISchedule {
 		DLLSERVER void register_class(lua_State *l, luabind::module_ &mod);

@@ -23,7 +23,7 @@ int32_t ai::TaskPlayActivity::SelectAnimation(const Schedule *sched, pragma::Bas
 
 void ai::TaskPlayActivity::SetActivity(Activity activity) { SetParameter(umath::to_integral(Parameter::Activity), umath::to_integral(activity)); }
 void ai::TaskPlayActivity::SetFaceTarget(const Vector3 &target) { SetParameter(umath::to_integral(Parameter::FaceTarget), target); }
-void ai::TaskPlayActivity::SetFaceTarget(BaseEntity &target) { SetParameter(umath::to_integral(Parameter::FaceTarget), &target); }
+void ai::TaskPlayActivity::SetFaceTarget(pragma::ecs::BaseEntity &target) { SetParameter(umath::to_integral(Parameter::FaceTarget), &target); }
 
 void ai::TaskPlayActivity::Print(const Schedule *sched, std::ostream &o) const
 {

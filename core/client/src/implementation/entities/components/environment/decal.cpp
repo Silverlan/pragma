@@ -119,7 +119,7 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas, s
 	for(auto &meshData : meshDatas) {
 		auto effectivePose = GetPose().GetInverse() * meshData.pose;
 		for(auto *subMesh : meshData.subMeshes) {
-			if(subMesh->GetGeometryType() != ModelSubMesh::GeometryType::Triangles)
+			if(subMesh->GetGeometryType() != pragma::ModelSubMesh::GeometryType::Triangles)
 				continue;
 			auto &verts = subMesh->GetVertices();
 
@@ -382,7 +382,7 @@ bool CDecalComponent::ApplyDecal()
 
 	pragma::PrimitiveIntersectionInfo bvhIntersectInfo {};
 	std::vector<DecalProjector::MeshData> meshDatas {};
-	std::unordered_set<ModelSubMesh *> coveredMeshes;
+	std::unordered_set<pragma::ModelSubMesh *> coveredMeshes;
 	auto findIntersectionMeshes = [&projectorAABB, &bvhIntersectInfo, &meshDatas, &coveredMeshes](const pragma::BaseBvhComponent &bvhC) {
 		if(!bvhC.IntersectionTestAabb(projectorAABB.first, projectorAABB.second, bvhIntersectInfo)) {
 			bvhIntersectInfo.primitives.clear();

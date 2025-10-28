@@ -28,7 +28,7 @@ export namespace pragma {
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void OnEntitySpawn() override;
 	  protected:
-		CBaseSoundDspComponent(BaseEntity &ent) : BaseEnvSoundDspComponent(ent) {}
+		CBaseSoundDspComponent(pragma::ecs::BaseEntity &ent) : BaseEnvSoundDspComponent(ent) {}
 
 		bool m_bAffectRelative = false;
 		bool m_bApplyGlobal = false;
@@ -36,9 +36,9 @@ export namespace pragma {
 		bool m_bAllSounds = false;
 		std::shared_ptr<al::IEffect> m_dsp = nullptr;
 		std::vector<std::pair<al::SoundSourceHandle, uint32_t>> m_affectedSounds;
-		ALSoundType m_types = ALSoundType::All & ~ALSoundType::GUI;
+		pragma::audio::ALSoundType m_types = pragma::audio::ALSoundType::All & ~pragma::audio::ALSoundType::GUI;
 
-		ALSoundType GetTargetSoundTypes() const;
+		pragma::audio::ALSoundType GetTargetSoundTypes() const;
 		std::vector<std::pair<al::SoundSourceHandle, uint32_t>>::iterator FindSoundSource(al::SoundSource &src);
 		void UpdateSoundSource(al::SoundSource &src, float gain);
 		void DetachSoundSource(al::SoundSource &src);
@@ -47,7 +47,7 @@ export namespace pragma {
 
 	class DLLCLIENT CSoundDspComponent final : public CBaseSoundDspComponent {
 	  public:
-		CSoundDspComponent(BaseEntity &ent) : CBaseSoundDspComponent(ent) {}
+		CSoundDspComponent(pragma::ecs::BaseEntity &ent) : CBaseSoundDspComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };

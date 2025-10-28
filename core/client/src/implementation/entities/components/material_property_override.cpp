@@ -30,7 +30,7 @@ CMaterialPropertyOverrideComponent::ShaderMaterialPropertyInfo::ShaderMaterialPr
 
 static std::vector<CMaterialPropertyOverrideComponent *> g_components;
 static CallbackHandle g_updateRenderBuffersCallback = {};
-CMaterialPropertyOverrideComponent::CMaterialPropertyOverrideComponent(BaseEntity &ent) : BaseEntityComponent(ent)
+CMaterialPropertyOverrideComponent::CMaterialPropertyOverrideComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent)
 {
 	if(g_components.empty()) {
 		g_updateRenderBuffersCallback = GetGame().AddCallback("UpdateRenderBuffers", FunctionCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>::Create([](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {

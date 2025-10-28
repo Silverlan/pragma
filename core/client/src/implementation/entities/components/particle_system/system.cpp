@@ -49,7 +49,7 @@ void ecs::CParticleSystemComponent::Initialize()
 		}
 		return util::EventReply::Unhandled;
 	});
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		return HandleKeyValue(kvData.key, kvData.value);
 	});
@@ -835,7 +835,7 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 	}));
 	defCParticleSystem.def("AddChild", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, pragma::ecs::CParticleSystemComponent &hChild) { hComponent.AddChild(hChild); }));
 	defCParticleSystem.def("SetNodeTarget",
-	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, BaseEntity &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t nodeId, BaseEntity &ent) { hComponent.SetNodeTarget(nodeId, static_cast<CBaseEntity *>(&ent)); }));
+	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, pragma::ecs::BaseEntity &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t nodeId, pragma::ecs::BaseEntity &ent) { hComponent.SetNodeTarget(nodeId, static_cast<CBaseEntity *>(&ent)); }));
 	defCParticleSystem.def("SetNodeTarget", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const Vector3 &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t nodeId, const Vector3 &pos) { hComponent.SetNodeTarget(nodeId, pos); }));
 	defCParticleSystem.def("GetNodeCount", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, hComponent.GetNodeCount()); }));
 	defCParticleSystem.def("GetNodePosition", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t nodeId) { Lua::Push<Vector3>(l, hComponent.GetNodePosition(nodeId)); }));
@@ -1008,7 +1008,7 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 	defCParticleSystem.def("InitializeFromParticleSystemDefinition",
 	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { Lua::PushBool(l, hComponent.SetupParticleSystem(name)); }));
 	defCParticleSystem.def("SetControlPointEntity",
-	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, BaseEntity &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, BaseEntity &ent) { hComponent.SetControlPointEntity(cpIdx, static_cast<CBaseEntity &>(ent)); }));
+	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, pragma::ecs::BaseEntity &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, pragma::ecs::BaseEntity &ent) { hComponent.SetControlPointEntity(cpIdx, static_cast<CBaseEntity &>(ent)); }));
 	defCParticleSystem.def("SetControlPointPosition",
 	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const Vector3 &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, const Vector3 &pos) { hComponent.SetControlPointPosition(cpIdx, pos); }));
 	defCParticleSystem.def("SetControlPointRotation",

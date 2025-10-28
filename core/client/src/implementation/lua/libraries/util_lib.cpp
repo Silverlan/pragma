@@ -55,8 +55,8 @@ int Lua::util::Client::create_particle_tracer(lua_State *l)
 
 int Lua::util::Client::create_muzzle_flash(lua_State *l)
 {
-	if(Lua::IsType<BaseEntity>(l, 1) == true) {
-		auto &ent = Lua::Check<BaseEntity>(l, 1);
+	if(Lua::IsType<pragma::ecs::BaseEntity>(l, 1) == true) {
+		auto &ent = Lua::Check<pragma::ecs::BaseEntity>(l, 1);
 		int32_t attId = -1;
 		std::string att {};
 		if(Lua::IsNumber(l, 2))
@@ -296,7 +296,7 @@ int Lua::util::Client::export_material(lua_State *l)
 std::string Lua::util::Client::get_clipboard_string() { return pragma::get_cengine()->GetWindow()->GetClipboardString(); }
 void Lua::util::Client::set_clipboard_string(const std::string &str) { pragma::get_cengine()->GetWindow()->SetClipboardString(str); }
 
-::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> Lua::util::Client::bake_directional_lightmap_atlas(const std::vector<pragma::CLightComponent *> &lights, const std::vector<::ModelSubMesh *> &meshes, const std::vector<BaseEntity *> &entities, uint32_t width, uint32_t height,
+::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> Lua::util::Client::bake_directional_lightmap_atlas(const std::vector<pragma::CLightComponent *> &lights, const std::vector<pragma::ModelSubMesh *> &meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width, uint32_t height,
   ::pragma::LightmapDataCache *optLightmapDataCache)
 {
 	return ::util::baking::bake_directional_lightmap_atlas(lights, meshes, entities, width, height, optLightmapDataCache);

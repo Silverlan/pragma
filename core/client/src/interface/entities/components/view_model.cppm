@@ -14,7 +14,7 @@ import :entities.base_entity;
 export namespace pragma {
 	class DLLCLIENT CViewModelComponent final : public BaseEntityComponent {
 	  public:
-		CViewModelComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CViewModelComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		void SetViewModelOffset(const Vector3 &offset);
 		const Vector3 &GetViewModelOffset() const;

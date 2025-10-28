@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SInfoLandmarkComponent final : public BaseInfoLandmarkComponent {
 		public:
-			SInfoLandmarkComponent(BaseEntity &ent) : BaseInfoLandmarkComponent(ent) {}
+			SInfoLandmarkComponent(pragma::ecs::BaseEntity &ent) : BaseInfoLandmarkComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};

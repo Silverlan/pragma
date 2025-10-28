@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SLightDirectionalComponent final : public BaseEnvLightDirectionalComponent, public SBaseNetComponent {
 		public:
-			SLightDirectionalComponent(BaseEntity &ent) : BaseEnvLightDirectionalComponent(ent) {};
+			SLightDirectionalComponent(pragma::ecs::BaseEntity &ent) : BaseEnvLightDirectionalComponent(ent) {};
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual void SetAmbientColor(const Color &color) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }

@@ -30,8 +30,8 @@ export namespace pragma {
 			std::shared_ptr<prosper::IBuffer> boneBuffer;
 			std::shared_ptr<prosper::IDescriptorSetGroup> boneDsg;
 		};
-		std::unordered_map<const BaseEntity *, PoseData> prevModelMatrices;
-		std::unordered_map<const BaseEntity *, PoseData> curModelMatrices;
+		std::unordered_map<const pragma::ecs::BaseEntity *, PoseData> prevModelMatrices;
+		std::unordered_map<const pragma::ecs::BaseEntity *, PoseData> curModelMatrices;
 		MotionBlurCameraData cameraData;
 		double lastTick = 0.0;
 	};
@@ -39,7 +39,7 @@ export namespace pragma {
 	DLLCLIENT pragma::ShaderVelocityBuffer *get_velocity_buffer_shader();
 	class DLLCLIENT CMotionBlurDataComponent final : public BaseEntityComponent {
 	  public:
-		CMotionBlurDataComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CMotionBlurDataComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 

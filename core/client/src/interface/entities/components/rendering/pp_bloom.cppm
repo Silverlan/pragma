@@ -18,7 +18,7 @@ export namespace pragma {
 	class DLLCLIENT CRendererPpBloomComponent final : public CRendererPpBaseComponent {
 	  public:
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
-		CRendererPpBloomComponent(BaseEntity &ent);
+		CRendererPpBloomComponent(pragma::ecs::BaseEntity &ent);
 
 		void SetBlurRadius(uint32_t radius);
 		void SetBlurSigma(double sigma);

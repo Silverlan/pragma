@@ -17,9 +17,9 @@ export namespace pragma::ecs {class CParticleSystemComponent;}
 export namespace pragma {
 	class DLLCLIENT CFlammableComponent final : public BaseFlammableComponent, public CBaseNetComponent {
 	  public:
-		CFlammableComponent(BaseEntity &ent) : BaseFlammableComponent(ent) {}
+		CFlammableComponent(pragma::ecs::BaseEntity &ent) : BaseFlammableComponent(ent) {}
 		virtual void Initialize() override;
-		virtual util::EventReply Ignite(float duration, BaseEntity *attacker = nullptr, BaseEntity *inflictor = nullptr) override;
+		virtual util::EventReply Ignite(float duration, pragma::ecs::BaseEntity *attacker = nullptr, pragma::ecs::BaseEntity *inflictor = nullptr) override;
 		virtual void Extinguish() override;
 		virtual void OnTick(double dt) override;
 		virtual void ReceiveData(NetPacket &packet) override;

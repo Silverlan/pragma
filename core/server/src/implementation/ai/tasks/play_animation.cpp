@@ -164,7 +164,7 @@ void ai::TaskPlayAnimation::PlayAnimation(pragma::BaseAIComponent &ent)
 void ai::TaskPlayAnimation::SetAnimation(int32_t animation) { SetParameter(umath::to_integral(Parameter::Animation), animation); }
 void ai::TaskPlayAnimation::SetAnimation(const std::string &animation) { SetParameter(umath::to_integral(Parameter::Animation), animation); }
 void ai::TaskPlayAnimation::SetFaceTarget(const Vector3 &target) { SetParameter(umath::to_integral(Parameter::FaceTarget), target); }
-void ai::TaskPlayAnimation::SetFaceTarget(BaseEntity &ent) { SetParameter(umath::to_integral(Parameter::FaceTarget), &ent); }
+void ai::TaskPlayAnimation::SetFaceTarget(pragma::ecs::BaseEntity &ent) { SetParameter(umath::to_integral(Parameter::FaceTarget), &ent); }
 void ai::TaskPlayAnimation::SetFacePrimaryTarget() { SetParameter(umath::to_integral(Parameter::FaceTarget), true); }
 
 ai::BehaviorNode::Result ai::TaskPlayAnimation::Think(const Schedule *sched, pragma::BaseAIComponent &ent)

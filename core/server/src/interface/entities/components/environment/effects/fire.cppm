@@ -15,7 +15,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SFireComponent final : public BaseEnvFireComponent {
 		public:
-			SFireComponent(BaseEntity &ent) : BaseEnvFireComponent(ent) {}
+			SFireComponent(pragma::ecs::BaseEntity &ent) : BaseEnvFireComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};

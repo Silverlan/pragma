@@ -14,7 +14,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CRadiusComponent final : public BaseRadiusComponent, public CBaseNetComponent {
 	  public:
-		CRadiusComponent(BaseEntity &ent);
+		CRadiusComponent(pragma::ecs::BaseEntity &ent);
 
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;

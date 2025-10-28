@@ -376,7 +376,7 @@ void pragma::LuaShaderWrapperTextured3D::Lua_InitializeGfxPipelineVertexAttribut
 void pragma::LuaShaderWrapperTextured3D::Lua_InitializeGfxPipelinePushConstantRanges() { static_cast<LShaderGameWorldLightingPass *>(m_shader)->BaseInitializeGfxPipelinePushConstantRanges(); }
 void pragma::LuaShaderWrapperTextured3D::Lua_InitializeGfxPipelineDescriptorSets() { static_cast<LShaderGameWorldLightingPass *>(m_shader)->BaseInitializeGfxPipelineDescriptorSets(); }
 void pragma::LuaShaderWrapperTextured3D::Lua_OnBindMaterial(Material &mat) {}
-int32_t pragma::LuaShaderWrapperTextured3D::Lua_OnDraw(ModelSubMesh &mesh) { return umath::to_integral(util::EventReply::Unhandled); }
+int32_t pragma::LuaShaderWrapperTextured3D::Lua_OnDraw(pragma::ModelSubMesh &mesh) { return umath::to_integral(util::EventReply::Unhandled); }
 void pragma::LuaShaderWrapperTextured3D::Lua_OnBindEntity(EntityHandle &hEnt) {}
 void pragma::LuaShaderWrapperTextured3D::Lua_OnBindScene(CRasterizationRendererComponent &renderer, bool bView) {}
 void pragma::LuaShaderWrapperTextured3D::Lua_OnBeginDraw(prosper::ICommandBuffer &drawCmd, const Vector4 &clipPlane, uint32_t pipelineIdx, uint32_t recordFlags) {}
@@ -421,7 +421,7 @@ void pragma::LuaShaderWrapperPbr::Lua_InitializeGfxPipelineVertexAttributes() { 
 void pragma::LuaShaderWrapperPbr::Lua_InitializeGfxPipelinePushConstantRanges() { static_cast<LShaderPbr *>(m_shader)->BaseInitializeGfxPipelinePushConstantRanges(); }
 void pragma::LuaShaderWrapperPbr::Lua_InitializeGfxPipelineDescriptorSets() { static_cast<LShaderPbr *>(m_shader)->BaseInitializeGfxPipelineDescriptorSets(); }
 void pragma::LuaShaderWrapperPbr::Lua_OnBindMaterial(Material &mat) {}
-int32_t pragma::LuaShaderWrapperPbr::Lua_OnDraw(ModelSubMesh &mesh) { return umath::to_integral(util::EventReply::Unhandled); }
+int32_t pragma::LuaShaderWrapperPbr::Lua_OnDraw(pragma::ModelSubMesh &mesh) { return umath::to_integral(util::EventReply::Unhandled); }
 void pragma::LuaShaderWrapperPbr::Lua_OnBindEntity(EntityHandle &hEnt) {}
 void pragma::LuaShaderWrapperPbr::Lua_OnBindScene(CRasterizationRendererComponent &renderer, bool bView) {}
 void pragma::LuaShaderWrapperPbr::Lua_OnBeginDraw(prosper::ICommandBuffer &drawCmd, const Vector4 &clipPlane, uint32_t pipelineIdx, uint32_t recordFlags) {}

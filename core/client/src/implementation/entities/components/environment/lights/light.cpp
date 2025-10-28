@@ -73,7 +73,7 @@ void CLightComponent::ClearBuffers()
 	ShadowDataBufferManager::GetInstance().Reset();
 }
 
-CLightComponent::CLightComponent(BaseEntity &ent) : CBaseLightComponent(ent), m_stateFlags {StateFlags::StaticUpdateRequired | StateFlags::FullUpdateRequired | StateFlags::AddToGameScene} {}
+CLightComponent::CLightComponent(pragma::ecs::BaseEntity &ent) : CBaseLightComponent(ent), m_stateFlags {StateFlags::StaticUpdateRequired | StateFlags::FullUpdateRequired | StateFlags::AddToGameScene} {}
 CLightComponent::~CLightComponent()
 {
 	--s_lightCount;
@@ -748,7 +748,7 @@ static void debug_light_sources(NetworkState *state, pragma::BasePlayerComponent
 	}
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_light_sources", &debug_light_sources, ConVarFlags::None, "Prints debug information about all light sources in the scene.");
+	auto UVN = pragma::console::client::register_command("debug_light_sources", &debug_light_sources, pragma::console::ConVarFlags::None, "Prints debug information about all light sources in the scene.");
 }
 
 /////////////////

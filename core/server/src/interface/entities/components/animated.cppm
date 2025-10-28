@@ -16,7 +16,7 @@ export namespace pragma {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		SAnimatedComponent(BaseEntity &ent) : BaseAnimatedComponent(ent) {}
+		SAnimatedComponent(pragma::ecs::BaseEntity &ent) : BaseAnimatedComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }

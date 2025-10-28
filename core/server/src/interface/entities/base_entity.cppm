@@ -13,7 +13,7 @@ export module pragma.server.entities.base;
 export import pragma.server.networking.recipient_filter;
 export import pragma.shared;
 
-export class DLLSERVER SBaseEntity : public BaseEntity {
+export class DLLSERVER SBaseEntity : public pragma::ecs::BaseEntity {
   public:
 	SBaseEntity();
 	virtual pragma::ComponentHandle<pragma::BaseEntityComponent> AddNetworkedComponent(const std::string &name) override;
@@ -39,7 +39,7 @@ export class DLLSERVER SBaseEntity : public BaseEntity {
 	virtual NetworkState *GetNetworkState() const override final;
 	// Returns the client-side representation of this entity (If the entity isn't serverside only)
 	// This only works for single-player / listen servers!
-	BaseEntity *GetClientsideEntity() const;
+	pragma::ecs::BaseEntity *GetClientsideEntity() const;
 	Bool IsSynchronized() const;
 	void SetSynchronized(Bool b);
 

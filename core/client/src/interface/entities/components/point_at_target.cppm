@@ -14,7 +14,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CPointAtTargetComponent final : public BasePointAtTargetComponent, public CBaseNetComponent {
 	  public:
-		CPointAtTargetComponent(BaseEntity &ent) : BasePointAtTargetComponent(ent) {}
+		CPointAtTargetComponent(pragma::ecs::BaseEntity &ent) : BasePointAtTargetComponent(ent) {}
 
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;

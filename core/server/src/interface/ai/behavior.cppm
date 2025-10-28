@@ -7,6 +7,10 @@ module;
 #include <string>
 #include <vector>
 
+#include <memory>
+
+#include <functional>
+
 export module pragma.server.ai.schedule:behavior;
 
 export import :behavior_parameter;

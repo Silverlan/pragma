@@ -14,7 +14,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CTimeScaleComponent final : public BaseTimeScaleComponent, public CBaseNetComponent {
 	  public:
-		CTimeScaleComponent(BaseEntity &ent) : BaseTimeScaleComponent(ent) {}
+		CTimeScaleComponent(pragma::ecs::BaseEntity &ent) : BaseTimeScaleComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void ReceiveData(NetPacket &packet) override {}
 		virtual bool ShouldTransmitNetData() const override { return true; }

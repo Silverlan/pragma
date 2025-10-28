@@ -15,7 +15,7 @@ export import pragma.shared;
 export namespace pragma {
 	class DLLCLIENT CStaticBvhCacheComponent final : public BaseStaticBvhCacheComponent {
 	  public:
-		CStaticBvhCacheComponent(BaseEntity &ent) : BaseStaticBvhCacheComponent(ent) {}
+		CStaticBvhCacheComponent(pragma::ecs::BaseEntity &ent) : BaseStaticBvhCacheComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void TestRebuildBvh() override;

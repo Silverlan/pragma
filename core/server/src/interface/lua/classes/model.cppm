@@ -5,6 +5,10 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
+#include <memory>
+
+#include <string>
+
 
 
 export module pragma.server.scripting.lua.classes.model;

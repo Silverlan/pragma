@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SSmokeTrailComponent final : public BaseEnvSmokeTrailComponent, public SBaseNetComponent {
 		public:
-			SSmokeTrailComponent(BaseEntity &ent) : BaseEnvSmokeTrailComponent(ent) {}
+			SSmokeTrailComponent(pragma::ecs::BaseEntity &ent) : BaseEnvSmokeTrailComponent(ent) {}
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual void InitializeLuaObject(lua_State *l) override;

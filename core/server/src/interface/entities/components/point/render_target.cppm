@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SRenderTargetComponent final : public BasePointRenderTargetComponent, public SBaseNetComponent {
 		public:
-			SRenderTargetComponent(BaseEntity &ent) : BasePointRenderTargetComponent(ent) {}
+			SRenderTargetComponent(pragma::ecs::BaseEntity &ent) : BasePointRenderTargetComponent(ent) {}
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual void InitializeLuaObject(lua_State *l) override;

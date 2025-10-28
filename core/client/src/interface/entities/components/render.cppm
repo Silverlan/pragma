@@ -69,7 +69,7 @@ export namespace pragma {
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
 
-		CRenderComponent(BaseEntity &ent);
+		CRenderComponent(pragma::ecs::BaseEntity &ent);
 		const prosper::IBuffer *GetRenderBuffer() const;
 		std::optional<RenderBufferIndex> GetRenderBufferIndex() const;
 		bool IsRenderBufferValid() const { return m_renderBuffer != nullptr; }
@@ -83,8 +83,8 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual ~CRenderComponent() override;
 
-		std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes();
-		const std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes() const;
+		std::vector<std::shared_ptr<pragma::ModelSubMesh>> &GetRenderMeshes();
+		const std::vector<std::shared_ptr<pragma::ModelSubMesh>> &GetRenderMeshes() const;
 		std::vector<rendering::RenderBufferData> &GetRenderBufferData();
 		const std::vector<rendering::RenderBufferData> &GetRenderBufferData() const { return const_cast<CRenderComponent *>(this)->GetRenderBufferData(); }
 		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes();

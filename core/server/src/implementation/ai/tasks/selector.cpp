@@ -3,10 +3,15 @@
 
 module;
 
+#include <array>
+#include <vector>
+
 #include "stdafx_server.h"
 #include <random>
 
 module pragma.server.ai.tasks.selector;
+
+import pragma.util;
 
 using namespace pragma;
 

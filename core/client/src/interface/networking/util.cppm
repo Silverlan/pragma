@@ -12,5 +12,5 @@ import :entities.base_entity;
 
 export namespace nwm {
 	DLLCLIENT CBaseEntity *read_unique_entity(NetPacket &packet);
-	DLLCLIENT CallbackHandle read_unique_entity(NetPacket &packet, const std::function<void(BaseEntity *)> &onCreated);
+	DLLCLIENT CallbackHandle read_unique_entity(NetPacket &packet, const std::function<void(pragma::ecs::BaseEntity *)> &onCreated);
 };

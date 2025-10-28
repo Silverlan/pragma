@@ -59,7 +59,7 @@ void ai::Memory::Update()
 	}
 }
 
-void ai::Memory::Memorize(const BaseEntity &ent, MemoryType memType, const Vector3 &pos, float dist, const Vector3 &vel, int idx, ai::Memory::Fragment **out)
+void ai::Memory::Memorize(const pragma::ecs::BaseEntity &ent, MemoryType memType, const Vector3 &pos, float dist, const Vector3 &vel, int idx, ai::Memory::Fragment **out)
 {
 	auto &fragment = fragments[idx];
 	fragment.lastPosition = pos;
@@ -103,7 +103,7 @@ void ai::Memory::Clear()
 	occupiedFragmentCount = 0;
 }
 
-ai::Memory::Fragment *ai::Memory::FindFragment(const BaseEntity &ent)
+ai::Memory::Fragment *ai::Memory::FindFragment(const pragma::ecs::BaseEntity &ent)
 {
 	auto it = std::find_if(fragments.begin(), fragments.end(), [&ent](const ai::Memory::Fragment &fragment) { return (fragment.occupied == true && fragment.hEntity.get() == &ent) ? true : false; });
 	if(it == fragments.end())
@@ -111,7 +111,7 @@ ai::Memory::Fragment *ai::Memory::FindFragment(const BaseEntity &ent)
 	return &(*it);
 }
 
-void ai::Memory::Forget(const BaseEntity &ent)
+void ai::Memory::Forget(const pragma::ecs::BaseEntity &ent)
 {
 	auto *fragment = FindFragment(ent);
 	if(fragment == nullptr)
@@ -120,7 +120,7 @@ void ai::Memory::Forget(const BaseEntity &ent)
 	--occupiedFragmentCount;
 }
 
-bool ai::Memory::Memorize(const BaseEntity &ent, MemoryType memType, const Vector3 &pos, float dist, const Vector3 &vel, ai::Memory::Fragment **out)
+bool ai::Memory::Memorize(const pragma::ecs::BaseEntity &ent, MemoryType memType, const Vector3 &pos, float dist, const Vector3 &vel, ai::Memory::Fragment **out)
 {
 	int32_t freeIndex = -1;
 	for(auto i = decltype(fragments.size()) {0}; i < fragments.size(); ++i) {

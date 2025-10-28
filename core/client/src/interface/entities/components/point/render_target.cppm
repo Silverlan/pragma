@@ -21,7 +21,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CRenderTargetComponent final : public BasePointRenderTargetComponent, public CBaseNetComponent {
 		public:
-			CRenderTargetComponent(BaseEntity &ent) : BasePointRenderTargetComponent(ent) {}
+			CRenderTargetComponent(pragma::ecs::BaseEntity &ent) : BasePointRenderTargetComponent(ent) {}
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void InitializeLuaObject(lua_State *l) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }

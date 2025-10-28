@@ -106,7 +106,7 @@ void CFlammableComponent::UpdateFlameParticlePositions()
 		pTrComponent->SetPosition(pos);
 	}
 }
-util::EventReply CFlammableComponent::Ignite(float duration, BaseEntity *attacker, BaseEntity *inflictor)
+util::EventReply CFlammableComponent::Ignite(float duration, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor)
 {
 	auto bOnFire = IsOnFire();
 	if(BaseFlammableComponent::Ignite(duration, attacker, inflictor) == util::EventReply::Handled)
@@ -117,7 +117,7 @@ util::EventReply CFlammableComponent::Ignite(float duration, BaseEntity *attacke
 		return util::EventReply::Handled;
 	auto pSndComponent = ent.GetComponent<pragma::CSoundEmitterComponent>();
 	if(pSndComponent.valid()) {
-		auto snd = pSndComponent->CreateSound("fx.fire_small", ALSoundType::Effect);
+		auto snd = pSndComponent->CreateSound("fx.fire_small", pragma::audio::ALSoundType::Effect);
 		if(snd != nullptr) {
 			snd->FadeIn(0.6f);
 			snd->SetLooping(true);

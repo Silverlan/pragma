@@ -32,14 +32,14 @@ AISquad::~AISquad()
 		s_squads.erase(it);
 }
 
-void AISquad::Join(BaseEntity *ent)
+void AISquad::Join(pragma::ecs::BaseEntity *ent)
 {
 	auto it = std::find_if(members.begin(), members.end(), [ent](const EntityHandle &hEnt) { return (hEnt.get() == ent) ? true : false; });
 	if(it != members.end())
 		return;
 	members.push_back(ent->GetHandle());
 }
-void AISquad::Leave(BaseEntity *ent)
+void AISquad::Leave(pragma::ecs::BaseEntity *ent)
 {
 	auto it = std::find_if(members.begin(), members.end(), [ent](const EntityHandle &hEnt) { return (hEnt.get() == ent) ? true : false; });
 	if(it == members.end())

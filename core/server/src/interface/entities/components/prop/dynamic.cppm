@@ -15,7 +15,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SPropDynamicComponent final : public BasePropDynamicComponent {
 		public:
-			SPropDynamicComponent(BaseEntity &ent) : BasePropDynamicComponent(ent) {}
+			SPropDynamicComponent(pragma::ecs::BaseEntity &ent) : BasePropDynamicComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};

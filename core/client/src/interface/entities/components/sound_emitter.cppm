@@ -16,10 +16,10 @@ export namespace pragma {
 	  public:
 	    static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
 
-		CSoundEmitterComponent(BaseEntity &ent) : BaseSoundEmitterComponent(ent) {}
+		CSoundEmitterComponent(pragma::ecs::BaseEntity &ent) : BaseSoundEmitterComponent(ent) {}
 		// Sounds
-		virtual std::shared_ptr<ALSound> CreateSound(std::string sndname, ALSoundType type, const SoundInfo &sndInfo = {}) override;
-		virtual std::shared_ptr<ALSound> EmitSound(std::string sndname, ALSoundType type, const SoundInfo &sndInfo = {}) override;
+		virtual std::shared_ptr<ALSound> CreateSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo = {}) override;
+		virtual std::shared_ptr<ALSound> EmitSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo = {}) override;
 		void AddSound(std::shared_ptr<ALSound> snd); // Only to be used from netmessage
 
 		virtual void PrecacheSounds() override;

@@ -4,7 +4,14 @@
 module;
 
 
+#include <string>
+#include <vector>
+
+#include <memory>
+
 export module pragma.server.debug.overlay;
+
+export import pragma.math;
 
 #undef DrawText
 

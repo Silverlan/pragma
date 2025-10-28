@@ -17,7 +17,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SFuncPhysicsComponent final : public BaseFuncPhysicsComponent, public SBaseNetComponent {
 		public:
-			SFuncPhysicsComponent(BaseEntity &ent) : BaseFuncPhysicsComponent(ent) {}
+			SFuncPhysicsComponent(pragma::ecs::BaseEntity &ent) : BaseFuncPhysicsComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }

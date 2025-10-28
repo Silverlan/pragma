@@ -44,7 +44,7 @@ static void debug_audio_aux_effect(NetworkState *state, pragma::BasePlayerCompon
 		Con::cout << "Auxiliary effect '" << dspName << "' has been applied!" << Con::endl;
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_audio_aux_effect", &debug_audio_aux_effect, ConVarFlags::None, "Applies a global DSP effect. Usage: debug_audio_aux_effect <dspName> <gain>");
+	auto UVN = pragma::console::client::register_command("debug_audio_aux_effect", &debug_audio_aux_effect, pragma::console::ConVarFlags::None, "Applies a global DSP effect. Usage: debug_audio_aux_effect <dspName> <gain>");
 }
 
 const std::vector<std::string> &al::get_aux_types()

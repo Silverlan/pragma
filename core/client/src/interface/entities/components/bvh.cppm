@@ -19,8 +19,8 @@ export namespace pragma {
 	struct HitInfo;
 	class DLLCLIENT CBvhComponent final : public BaseBvhComponent {
 	  public:
-		static bool ShouldConsiderMesh(const ModelSubMesh &mesh, const rendering::RenderBufferData &bufferData);
-		CBvhComponent(BaseEntity &ent) : BaseBvhComponent(ent) {}
+		static bool ShouldConsiderMesh(const pragma::ModelSubMesh &mesh, const rendering::RenderBufferData &bufferData);
+		CBvhComponent(pragma::ecs::BaseEntity &ent) : BaseBvhComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnEntitySpawn() override;

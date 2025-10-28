@@ -35,27 +35,27 @@ static void CMD_closeserver(NetworkState *, pragma::BasePlayerComponent *, std::
 
 namespace {
 	using namespace pragma::console::server;
-	auto UVN = register_command("entities", &CMD_entities_sv, ConVarFlags::None, "Prints a list of all current serverside entities in the world.");
-	auto UVN = register_command("list_maps", &CMD_list_maps, ConVarFlags::None, "Prints a list of all available list to the console.");
-	auto UVN = register_command("status", &CMD_status_sv, ConVarFlags::None, "Prints information about the server to the console.");
-	auto UVN = register_command("drop", &CMD_drop, ConVarFlags::None, "Drops the player's active weapon.");
-	auto UVN = register_command("kick", &CMD_kick, ConVarFlags::None, "Kicks the specified player for the given reason. Usage: kick <playerId/playerName> <reason>");
+	auto UVN = register_command("entities", &CMD_entities_sv, pragma::console::ConVarFlags::None, "Prints a list of all current serverside entities in the world.");
+	auto UVN = register_command("list_maps", &CMD_list_maps, pragma::console::ConVarFlags::None, "Prints a list of all available list to the console.");
+	auto UVN = register_command("status", &CMD_status_sv, pragma::console::ConVarFlags::None, "Prints information about the server to the console.");
+	auto UVN = register_command("drop", &CMD_drop, pragma::console::ConVarFlags::None, "Drops the player's active weapon.");
+	auto UVN = register_command("kick", &CMD_kick, pragma::console::ConVarFlags::None, "Kicks the specified player for the given reason. Usage: kick <playerId/playerName> <reason>");
 	#ifdef _DEBUG
-	auto UVN = register_command("sv_dump_netmessages", &CMD_sv_dump_netmessages, ConVarFlags::None, "Prints all registered netmessages to the console.");
+	auto UVN = register_command("sv_dump_netmessages", &CMD_sv_dump_netmessages, pragma::console::ConVarFlags::None, "Prints all registered netmessages to the console.");
 	#endif
 
-	auto UVN = register_command("sv_send", &CMD_sv_send, ConVarFlags::None, "Sends a text message to all connected clients and displays it in the console. Usage: sv_send <message>");
-	auto UVN = register_command("sv_send_udp", &CMD_sv_send_udp, ConVarFlags::None, "Sends a text message to all connected clients via UDP and displays it in the console. Usage: sv_send_udp <message>");
-	auto UVN = register_command("startserver", &CMD_startserver, ConVarFlags::None, "Starts an internet server. Requires a running game.");
-	auto UVN = register_command("closeserver", &CMD_closeserver, ConVarFlags::None, "Closes the server (if active) and drops all connected clients.");
-	auto UVN = register_command("ent_input", &CMD_ent_input, ConVarFlags::None, "Triggers the given input on the specified entity. Usage: ent_input <entityName/entityClass> <input>");
-	auto UVN = register_command("ent_scale", &CMD_ent_scale, ConVarFlags::None, "Changes the scale of the specified entity. Usage: ent_input <entityName/entityClass> <scale>");
-	auto UVN = register_command("ent_remove", &CMD_ent_remove, ConVarFlags::None, "Removes the specified entity, or the entity the player is looking at if no argument is provided. Usage: ent_remove <entityName/className>");
-	auto UVN = register_command("ent_create", &CMD_ent_create, ConVarFlags::None, "Creates and spawns a new entity with the given class name at the position in the world the player is looking at. Usage: ent_create <className>");
-	auto UVN = register_command("nav_generate", &CMD_nav_generate, ConVarFlags::None, "Generates a navigation mesh for the current map and saves it as a navigation file.");
-	auto UVN = register_command("nav_reload", &CMD_nav_reload, ConVarFlags::None, "Reloads the navigation mesh for the current map.");
-	auto UVN = register_command("heartbeat", &CMD_heartbeat, ConVarFlags::None, "Instantly sends a heartbeat to the master server.");
-	auto UVN = register_command("sv_debug_netmessages", &CMD_sv_debug_netmessages, ConVarFlags::None, "Prints out debug information about recent net-messages.");
+	auto UVN = register_command("sv_send", &CMD_sv_send, pragma::console::ConVarFlags::None, "Sends a text message to all connected clients and displays it in the console. Usage: sv_send <message>");
+	auto UVN = register_command("sv_send_udp", &CMD_sv_send_udp, pragma::console::ConVarFlags::None, "Sends a text message to all connected clients via UDP and displays it in the console. Usage: sv_send_udp <message>");
+	auto UVN = register_command("startserver", &CMD_startserver, pragma::console::ConVarFlags::None, "Starts an internet server. Requires a running game.");
+	auto UVN = register_command("closeserver", &CMD_closeserver, pragma::console::ConVarFlags::None, "Closes the server (if active) and drops all connected clients.");
+	auto UVN = register_command("ent_input", &CMD_ent_input, pragma::console::ConVarFlags::None, "Triggers the given input on the specified entity. Usage: ent_input <entityName/entityClass> <input>");
+	auto UVN = register_command("ent_scale", &CMD_ent_scale, pragma::console::ConVarFlags::None, "Changes the scale of the specified entity. Usage: ent_input <entityName/entityClass> <scale>");
+	auto UVN = register_command("ent_remove", &CMD_ent_remove, pragma::console::ConVarFlags::None, "Removes the specified entity, or the entity the player is looking at if no argument is provided. Usage: ent_remove <entityName/className>");
+	auto UVN = register_command("ent_create", &CMD_ent_create, pragma::console::ConVarFlags::None, "Creates and spawns a new entity with the given class name at the position in the world the player is looking at. Usage: ent_create <className>");
+	auto UVN = register_command("nav_generate", &CMD_nav_generate, pragma::console::ConVarFlags::None, "Generates a navigation mesh for the current map and saves it as a navigation file.");
+	auto UVN = register_command("nav_reload", &CMD_nav_reload, pragma::console::ConVarFlags::None, "Reloads the navigation mesh for the current map.");
+	auto UVN = register_command("heartbeat", &CMD_heartbeat, pragma::console::ConVarFlags::None, "Instantly sends a heartbeat to the master server.");
+	auto UVN = register_command("sv_debug_netmessages", &CMD_sv_debug_netmessages, pragma::console::ConVarFlags::None, "Prints out debug information about recent net-messages.");
 }
 
 void CMD_drop(NetworkState *, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
@@ -359,7 +359,7 @@ void CMD_ent_create(NetworkState *state, pragma::BasePlayerComponent *pl, std::v
 		return;
 	}
 	std::string className = argv[0];
-	BaseEntity *entNew = SGame::Get()->CreateEntity(className);
+	pragma::ecs::BaseEntity *entNew = SGame::Get()->CreateEntity(className);
 	if(entNew == NULL)
 		return;
 	auto pTrComponentNew = entNew->GetTransformComponent();

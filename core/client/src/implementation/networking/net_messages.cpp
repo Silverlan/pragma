@@ -365,11 +365,11 @@ void NET_cl_SND_PRECACHE(NetPacket packet)
 void NET_cl_SND_CREATE(NetPacket packet)
 {
 	std::string snd = packet->ReadString();
-	auto type = packet->Read<ALSoundType>();
+	auto type = packet->Read<pragma::audio::ALSoundType>();
 	unsigned int idx = packet->Read<unsigned int>();
-	auto createFlags = packet->Read<ALCreateFlags>();
+	auto createFlags = packet->Read<pragma::audio::ALCreateFlags>();
 	auto *client = pragma::get_client_state();
-	auto as = client->CreateSound(snd, ALSoundType::Generic, createFlags);
+	auto as = client->CreateSound(snd, pragma::audio::ALSoundType::Generic, createFlags);
 	if(as == nullptr)
 		return;
 	client->IndexSound(as, idx);
@@ -431,7 +431,7 @@ void NET_cl_SND_CREATE(NetPacket packet)
 	as->SetDirectFilter({gain, gainHF, gainLF});
 
 	std::weak_ptr<ALSound> wpSnd = as;
-	nwm::read_unique_entity(packet, [wpSnd](BaseEntity *ent) {
+	nwm::read_unique_entity(packet, [wpSnd](pragma::ecs::BaseEntity *ent) {
 		if(ent == nullptr || wpSnd.expired())
 			return;
 		wpSnd.lock()->SetSource(ent);
@@ -588,7 +588,7 @@ void NET_cl_SND_EV(NetPacket packet)
 		}
 	case ALSound::NetEvent::SetType:
 		{
-			auto type = packet->Read<ALSoundType>();
+			auto type = packet->Read<pragma::audio::ALSoundType>();
 			as->SetType(type);
 			break;
 		}
@@ -899,7 +899,7 @@ void NET_cl_FIRE_BULLET(NetPacket packet)
 			if(sndEffect.empty() && surfaceMaterialGeneric != nullptr)
 				sndEffect = surfaceMaterialGeneric->GetBulletImpactSound();
 			if(!sndEffect.empty()) {
-				auto snd = client->CreateSound(sndEffect, ALSoundType::Effect | ALSoundType::Physics, ALCreateFlags::Mono);
+				auto snd = client->CreateSound(sndEffect, pragma::audio::ALSoundType::Effect | pragma::audio::ALSoundType::Physics, pragma::audio::ALCreateFlags::Mono);
 				if(snd != nullptr) {
 					snd->SetPosition(p);
 					snd->Play();
@@ -1057,7 +1057,7 @@ void NET_cl_ENT_SETPARENT(NetPacket packet)
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == NULL)
 		return;
-	BaseEntity *parent = nwm::read_entity(packet);
+	pragma::ecs::BaseEntity *parent = nwm::read_entity(packet);
 	if(parent == NULL)
 		return;
 	auto flags = packet->Read<FAttachmentMode>();
@@ -1433,7 +1433,7 @@ void NET_cl_WEP_DEPLOY(NetPacket packet)
 		return;
 	auto wepComponent = wep->GetWeaponComponent();
 	auto whOwnerComponent = wep->GetComponent<pragma::COwnableComponent>();
-	BaseEntity *owner = whOwnerComponent.valid() ? whOwnerComponent->GetOwner() : nullptr;
+	pragma::ecs::BaseEntity *owner = whOwnerComponent.valid() ? whOwnerComponent->GetOwner() : nullptr;
 	if(owner != NULL && owner->IsCharacter())
 		owner->GetCharacterComponent()->SetActiveWeapon(wep);
 	wepComponent->Deploy();
@@ -1446,7 +1446,7 @@ void NET_cl_WEP_HOLSTER(NetPacket packet)
 		return;
 	auto wepComponent = wep->GetWeaponComponent();
 	auto whOwnerComponent = wep->GetComponent<pragma::COwnableComponent>();
-	BaseEntity *owner = whOwnerComponent.valid() ? whOwnerComponent->GetOwner() : nullptr;
+	pragma::ecs::BaseEntity *owner = whOwnerComponent.valid() ? whOwnerComponent->GetOwner() : nullptr;
 	if(owner != NULL && owner->IsCharacter())
 		owner->GetCharacterComponent()->SetActiveWeapon(NULL);
 	wepComponent->Holster();
@@ -1724,10 +1724,10 @@ void NET_cl_CREATE_EXPLOSION(NetPacket packet)
 		pt->Start();
 	}
 
-	auto snd = client->CreateSound("fx.explosion", ALSoundType::Effect, ALCreateFlags::Mono);
+	auto snd = client->CreateSound("fx.explosion", pragma::audio::ALSoundType::Effect, pragma::audio::ALCreateFlags::Mono);
 	if(snd != nullptr) {
 		snd->SetPosition(origin);
-		snd->SetType(ALSoundType::Effect);
+		snd->SetType(pragma::audio::ALSoundType::Effect);
 		snd->Play();
 	}
 
@@ -1801,7 +1801,7 @@ void NET_cl_DEBUG_AI_NAVIGATION(NetPacket packet)
 
 	auto pGenericComponent = npc->GetComponent<pragma::CGenericComponent>();
 	if(pGenericComponent.valid()) {
-		pGenericComponent->BindEventUnhandled(BaseEntity::EVENT_ON_REMOVE, [pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		pGenericComponent->BindEventUnhandled(pragma::ecs::BaseEntity::EVENT_ON_REMOVE, [pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) {
 			auto it = s_aiNavDebugObjects.find(static_cast<const CBaseEntity *>(&pGenericComponent->GetEntity()));
 			if(it == s_aiNavDebugObjects.end())
 				return;
@@ -1838,7 +1838,7 @@ void CMD_debug_ai_schedule(NetworkState *state, pragma::BasePlayerComponent *pl,
 		return;
 	auto charComponent = ent.GetCharacterComponent();
 	auto ents = command::find_target_entity(state, *charComponent, argv);
-	BaseEntity *npc = nullptr;
+	pragma::ecs::BaseEntity *npc = nullptr;
 	for(auto *ent : ents) {
 		if(ent->IsNPC() == false)
 			continue;
@@ -1913,7 +1913,7 @@ void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, st
 	EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 	std::optional<Intersection::LineMeshResult> closestMesh {};
-	BaseEntity *entClosest = nullptr;
+	pragma::ecs::BaseEntity *entClosest = nullptr;
 	for(auto *ent : entIt) {
 		if(ent == &entPl)
 			continue;
@@ -1959,9 +1959,9 @@ void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, st
 	Con::cout << "Hit Material: " << (b ? mat : "Nothing") << Con::endl;
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_ai_schedule", &CMD_debug_ai_schedule, ConVarFlags::None, "Prints the current schedule behavior tree for the specified NPC on screen.");
-	auto UVN = pragma::console::client::register_command("debug_draw_line", &CMD_debug_draw_line, ConVarFlags::None, "Draws a line from the current camera position to the specified target position");
-	auto UVN = pragma::console::client::register_command("debug_aim_info", &CMD_debug_aim_info, ConVarFlags::None, "Prints information about whatever the local player is looking at.");
+	auto UVN = pragma::console::client::register_command("debug_ai_schedule", &CMD_debug_ai_schedule, pragma::console::ConVarFlags::None, "Prints the current schedule behavior tree for the specified NPC on screen.");
+	auto UVN = pragma::console::client::register_command("debug_draw_line", &CMD_debug_draw_line, pragma::console::ConVarFlags::None, "Draws a line from the current camera position to the specified target position");
+	auto UVN = pragma::console::client::register_command("debug_aim_info", &CMD_debug_aim_info, pragma::console::ConVarFlags::None, "Prints information about whatever the local player is looking at.");
 }
 
 void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
@@ -1971,7 +1971,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 	const auto bUseGraphicVisualization = true;
 	auto updateState = packet->Read<uint8_t>();
 	std::shared_ptr<DebugBehaviorTreeNode> dbgTree = nullptr;
-	BaseEntity *ent = nullptr;
+	pragma::ecs::BaseEntity *ent = nullptr;
 
 	static const auto fGetStateInfo = [](const DebugBehaviorTreeNode &node, Color &col, std::string &text) {
 		col = colors::White;
@@ -2249,7 +2249,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 	auto pGenericComponent = ent->GetComponent<pragma::CGenericComponent>();
 	CallbackHandle cbOnRemove {};
 	if(pGenericComponent.valid()) {
-		cbOnRemove = pGenericComponent->BindEventUnhandled(BaseEntity::EVENT_ON_REMOVE, [](std::reference_wrapper<pragma::ComponentEvent> evData) { dbgAiSchedule = nullptr; });
+		cbOnRemove = pGenericComponent->BindEventUnhandled(pragma::ecs::BaseEntity::EVENT_ON_REMOVE, [](std::reference_wrapper<pragma::ComponentEvent> evData) { dbgAiSchedule = nullptr; });
 	}
 
 	dbgAiSchedule = std::make_unique<DebugGameGUI>([pEl]() { return pEl->GetHandle(); });

@@ -560,5 +560,5 @@ static void debug_render_scene(NetworkState *state, pragma::BasePlayerComponent 
 	}));
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_render_scene", &debug_render_scene, ConVarFlags::None, "Displays scene to screen.");
+	auto UVN = pragma::console::client::register_command("debug_render_scene", &debug_render_scene, pragma::console::ConVarFlags::None, "Displays scene to screen.");
 }

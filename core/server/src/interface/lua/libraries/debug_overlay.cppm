@@ -5,11 +5,14 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
+#include <string>
+
 
 
 export module pragma.server.scripting.lua.libraries.debug_overlay;
 
 export import pragma.shared;
+export import luabind;
 
 #undef DrawText
 

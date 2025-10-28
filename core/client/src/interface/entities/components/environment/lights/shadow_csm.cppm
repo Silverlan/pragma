@@ -44,7 +44,7 @@ export namespace pragma {
 	  public:
 		static constexpr uint32_t MAX_CASCADE_COUNT = 4;
 
-		CShadowCSMComponent(BaseEntity &ent);
+		CShadowCSMComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 
@@ -95,7 +95,7 @@ export namespace pragma {
 		};
 		struct TranslucentEntityInfo {
 			EntityHandle hEntity = {};
-			std::queue<std::weak_ptr<ModelSubMesh>> subMeshes;
+			std::queue<std::weak_ptr<pragma::ModelSubMesh>> subMeshes;
 			;
 		};
 		struct CascadeMeshInfo {

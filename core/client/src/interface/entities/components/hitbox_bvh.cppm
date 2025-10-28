@@ -34,7 +34,7 @@ export namespace pragma {
 		struct DLLCLIENT MeshHitboxBvhCache {
 			using TriangleIndex = uint32_t;
 			std::shared_ptr<pragma::bvh::MeshBvhTree> bvhTree;
-			std::shared_ptr<::ModelSubMesh> mesh;
+			std::shared_ptr<pragma::ModelSubMesh> mesh;
 			std::vector<TriangleIndex> bvhTriToOriginalTri;
 		};
 		struct DLLCLIENT BoneHitboxBvhCache {
@@ -64,7 +64,7 @@ export namespace pragma {
 
 	class DLLCLIENT CHitboxBvhComponent final : public BaseEntityComponent {
 	  public:
-		CHitboxBvhComponent(BaseEntity &ent);
+		CHitboxBvhComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~CHitboxBvhComponent() override;
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;

@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SFogControllerComponent final : public BaseEnvFogControllerComponent, public SBaseNetComponent {
 		public:
-			SFogControllerComponent(BaseEntity &ent) : BaseEnvFogControllerComponent(ent) {}
+			SFogControllerComponent(pragma::ecs::BaseEntity &ent) : BaseEnvFogControllerComponent(ent) {}
 			virtual void SetFogStart(float start) override;
 			virtual void SetFogEnd(float end) override;
 			virtual void SetMaxDensity(float density) override;

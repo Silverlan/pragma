@@ -420,7 +420,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 			static std::shared_ptr<prosper::IBuffer> dbgBuffer = nullptr;
 			static std::shared_ptr<prosper::IBuffer> instBuffer = nullptr;
 			static uint32_t vertCount = 0;
-			static std::shared_ptr<ModelSubMesh> mesh = nullptr;
+			static std::shared_ptr<pragma::ModelSubMesh> mesh = nullptr;
 			if(it != entIt.end()) {
 				auto *ent = *it;
 				auto &subMesh = ent->GetModel()->GetMeshGroups().front()->GetMeshes()[0]->GetSubMeshes()[0];

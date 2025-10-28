@@ -24,7 +24,7 @@ void CMaterialOverrideComponent::RegisterEvents(pragma::EntityComponentManager &
 	EVENT_ON_MATERIAL_OVERRIDE_CHANGED = registerEvent("EVENT_ON_MATERIAL_OVERRIDE_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
 
-CMaterialOverrideComponent::CMaterialOverrideComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+CMaterialOverrideComponent::CMaterialOverrideComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 CMaterialOverrideComponent::~CMaterialOverrideComponent() {}
 void CMaterialOverrideComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

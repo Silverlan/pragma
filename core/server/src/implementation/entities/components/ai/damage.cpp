@@ -16,7 +16,7 @@ void SAIComponent::OnTakenDamage(DamageInfo &info, unsigned short oldHealth, uns
 	auto charComponent = GetEntity().GetCharacterComponent();
 	if(charComponent.valid() && charComponent->IsAlive() == false)
 		return;
-	std::array<BaseEntity *, 2> ents = {info.GetAttacker(), info.GetInflictor()};
+	std::array<pragma::ecs::BaseEntity *, 2> ents = {info.GetAttacker(), info.GetInflictor()};
 	//auto &t = SGame::Get()->CurTime();
 	for(auto *ent : ents) {
 		if(ent == nullptr || (!ent->IsPlayer() && !ent->IsNPC()) || HasCharacterNoTargetEnabled(*ent) == true)

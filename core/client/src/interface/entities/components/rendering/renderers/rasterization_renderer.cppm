@@ -221,7 +221,7 @@ export namespace pragma {
 			CallbackHandle cbExposure {};
 		};
 
-		CRasterizationRendererComponent(BaseEntity &ent);
+		CRasterizationRendererComponent(pragma::ecs::BaseEntity &ent);
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void Initialize() override;
 

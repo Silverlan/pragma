@@ -15,7 +15,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SFilterNameComponent final : public BaseFilterNameComponent {
 		public:
-			SFilterNameComponent(BaseEntity &ent) : BaseFilterNameComponent(ent) {}
+			SFilterNameComponent(pragma::ecs::BaseEntity &ent) : BaseFilterNameComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};

@@ -35,7 +35,7 @@ export namespace pragma {
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		static void DebugPrintProperties();
 
-		CGlobalShaderInputComponent(BaseEntity &ent);
+		CGlobalShaderInputComponent(pragma::ecs::BaseEntity &ent);
 
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;

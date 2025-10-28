@@ -44,7 +44,7 @@ export namespace pragma {
 		enum class Type : uint8_t { Generic = 1, Cube };
 		static prosper::IDescriptorSet *GetDescriptorSet();
 
-		CShadowComponent(BaseEntity &ent);
+		CShadowComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 

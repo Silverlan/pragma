@@ -15,7 +15,7 @@ import :game;
 using namespace pragma;
 
 
-CBaseLightComponent::CBaseLightComponent(BaseEntity &ent) : BaseEnvLightComponent(ent) {}
+CBaseLightComponent::CBaseLightComponent(pragma::ecs::BaseEntity &ent) : BaseEnvLightComponent(ent) {}
 
 CBaseLightComponent::~CBaseLightComponent() {}
 

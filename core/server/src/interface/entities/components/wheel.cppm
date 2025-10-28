@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SWheelComponent final : public BaseWheelComponent, public SBaseSnapshotComponent {
 		public:
-			SWheelComponent(BaseEntity &ent) : BaseWheelComponent(ent) {}
+			SWheelComponent(pragma::ecs::BaseEntity &ent) : BaseWheelComponent(ent) {}
 			virtual ~SWheelComponent() override;
 			virtual void Initialize() override;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;

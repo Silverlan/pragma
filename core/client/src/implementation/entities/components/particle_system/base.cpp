@@ -570,7 +570,7 @@ CBaseEntity *ecs::CParticleSystemComponent::GetControlPointEntity(ControlPointIn
 {
 	if(idx >= m_controlPoints.size())
 		return nullptr;
-	return static_cast<CBaseEntity *>(const_cast<BaseEntity *>(m_controlPoints.at(idx).hEntity.get()));
+	return static_cast<CBaseEntity *>(const_cast<pragma::ecs::BaseEntity *>(m_controlPoints.at(idx).hEntity.get()));
 }
 std::optional<umath::Transform> ecs::CParticleSystemComponent::GetControlPointPose(ControlPointIndex idx, float *optOutTimestamp) const
 {
@@ -1281,7 +1281,7 @@ CBaseEntity *ecs::CParticleSystemComponent::GetNodeTarget(uint32_t node) const
 	--node;
 	if(node >= m_nodes.size())
 		return nullptr;
-	return static_cast<CBaseEntity *>(const_cast<BaseEntity *>(m_nodes[node].hEntity.get()));
+	return static_cast<CBaseEntity *>(const_cast<pragma::ecs::BaseEntity *>(m_nodes[node].hEntity.get()));
 }
 
 CallbackHandle ecs::CParticleSystemComponent::AddRenderCallback(const std::function<void(void)> &cb)
@@ -1518,7 +1518,7 @@ void ecs::CParticleSystemComponent::Simulate(double tDelta)
 			pAttComponent->UpdateAttachmentOffset();
 	}
 
-	auto bMoving = (umath::is_flag_set(m_flags, Flags::MoveWithEmitter) && GetEntity().HasStateFlag(BaseEntity::StateFlags::PositionChanged)) || (umath::is_flag_set(m_flags, Flags::RotateWithEmitter) && GetEntity().HasStateFlag(BaseEntity::StateFlags::RotationChanged));
+	auto bMoving = (umath::is_flag_set(m_flags, Flags::MoveWithEmitter) && GetEntity().HasStateFlag(pragma::ecs::BaseEntity::StateFlags::PositionChanged)) || (umath::is_flag_set(m_flags, Flags::RotateWithEmitter) && GetEntity().HasStateFlag(pragma::ecs::BaseEntity::StateFlags::RotationChanged));
 	umath::set_flag(m_flags, Flags::HasMovingParticles, bMoving);
 	auto &pose = GetEntity().GetPose();
 	auto &posCam = cam->GetEntity().GetPosition();

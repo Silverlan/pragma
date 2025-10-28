@@ -14,7 +14,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CScoreComponent final : public BaseScoreComponent, public CBaseNetComponent {
 	  public:
-		CScoreComponent(BaseEntity &ent) : BaseScoreComponent(ent) {}
+		CScoreComponent(pragma::ecs::BaseEntity &ent) : BaseScoreComponent(ent) {}
 
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;

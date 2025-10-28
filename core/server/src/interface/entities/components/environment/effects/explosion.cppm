@@ -15,7 +15,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SExplosionComponent final : public BaseEnvExplosionComponent {
 		public:
-			SExplosionComponent(BaseEntity &ent) : BaseEnvExplosionComponent(ent) {}
+			SExplosionComponent(pragma::ecs::BaseEntity &ent) : BaseEnvExplosionComponent(ent) {}
 			virtual void Explode() override;
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};

@@ -14,7 +14,7 @@ import pragma.server.entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SGenericComponent final : public BaseGenericComponent {
 	  public:
-		SGenericComponent(BaseEntity &ent) : BaseGenericComponent(ent) {}
+		SGenericComponent(pragma::ecs::BaseEntity &ent) : BaseGenericComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };

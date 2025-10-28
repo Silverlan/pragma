@@ -9,6 +9,8 @@ module;
 
 export module pragma.server.scripting.lua.classes.ai_squad;
 
+export import luabind;
+
 export namespace Lua {
 	namespace AISquad {
 		DLLSERVER void register_class(lua_State *l, luabind::module_ &mod);

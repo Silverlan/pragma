@@ -22,7 +22,7 @@ static constexpr uint64_t GLOBAL_MESH_INDEX_BUFFER_SIZE = MEGABYTE * 32;        
 CModelMesh::CModelMesh() : ModelMesh() {}
 std::shared_ptr<ModelMesh> CModelMesh::Copy() const { return std::make_shared<CModelMesh>(*this); }
 
-void CModelMesh::AddSubMesh(const std::shared_ptr<ModelSubMesh> &subMesh)
+void CModelMesh::AddSubMesh(const std::shared_ptr<pragma::ModelSubMesh> &subMesh)
 {
 	assert(typeid(*subMesh.get()) == typeid(CModelSubMesh));
 	AddSubMesh(std::dynamic_pointer_cast<CModelSubMesh>(subMesh));
@@ -37,17 +37,17 @@ static std::shared_ptr<prosper::IDynamicResizableBuffer> s_vertexBuffer = nullpt
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_vertexWeightBuffer = nullptr;
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_alphaBuffer = nullptr;
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_indexBuffer = nullptr;
-CModelSubMesh::CModelSubMesh() : ModelSubMesh(), m_sceneMesh(std::make_shared<pragma::SceneMesh>()) {}
+CModelSubMesh::CModelSubMesh() : pragma::ModelSubMesh(), m_sceneMesh(std::make_shared<pragma::SceneMesh>()) {}
 
-CModelSubMesh::CModelSubMesh(const CModelSubMesh &other) : ModelSubMesh(other), m_sceneMesh(std::make_shared<pragma::SceneMesh>(*other.m_sceneMesh)) {}
+CModelSubMesh::CModelSubMesh(const CModelSubMesh &other) : pragma::ModelSubMesh(other), m_sceneMesh(std::make_shared<pragma::SceneMesh>(*other.m_sceneMesh)) {}
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalVertexBuffer() { return s_vertexBuffer; }
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalVertexWeightBuffer() { return s_vertexWeightBuffer; }
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalAlphaBuffer() { return s_alphaBuffer; }
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalIndexBuffer() { return s_indexBuffer; }
-std::shared_ptr<ModelSubMesh> CModelSubMesh::Copy(bool fullCopy) const
+std::shared_ptr<pragma::ModelSubMesh> CModelSubMesh::Copy(bool fullCopy) const
 {
 	auto cpy = std::make_shared<CModelSubMesh>(*this);
-	ModelSubMesh::Copy(*cpy, fullCopy);
+	pragma::ModelSubMesh::Copy(*cpy, fullCopy);
 	return cpy;
 }
 
@@ -140,13 +140,13 @@ void CModelSubMesh::UpdateVertexBuffer()
 
 void CModelSubMesh::Centralize(const Vector3 &origin)
 {
-	ModelSubMesh::Centralize(origin);
+	pragma::ModelSubMesh::Centralize(origin);
 	UpdateVertexBuffer();
 }
 
 void CModelSubMesh::Update(ModelUpdateFlags flags)
 {
-	ModelSubMesh::Update(flags);
+	pragma::ModelSubMesh::Update(flags);
 	auto bHasAlphas = (GetAlphaCount() > 0) ? true : false;
 	auto bAnimated = !m_vertexWeights->empty() ? true : false;
 

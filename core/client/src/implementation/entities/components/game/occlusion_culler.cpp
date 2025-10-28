@@ -85,7 +85,7 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 				auto *ent = static_cast<CBaseEntity *>(&pGenericComponent->GetEntity());
 				m_occlusionOctree->UpdateObject(ent);
 			}));
-			it->second.push_back(pGenericComponent->BindEventUnhandled(BaseEntity::EVENT_ON_REMOVE, [this, pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
+			it->second.push_back(pGenericComponent->BindEventUnhandled(pragma::ecs::BaseEntity::EVENT_ON_REMOVE, [this, pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
 				auto *ent = static_cast<CBaseEntity *>(&pGenericComponent->GetEntity());
 				auto it = m_callbacks.find(ent);
 
@@ -231,9 +231,9 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state, pragma:
 	node->DebugPrint();
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_render_octree_static_print", &CMD_debug_render_octree_static_print, ConVarFlags::None, "Prints the octree for static world geometry to the console, or a file if a file name is specified.");
-	auto UVN = pragma::console::client::register_command("debug_render_octree_dynamic_print", &CMD_debug_render_octree_dynamic_print, ConVarFlags::None, "Prints the octree for dynamic objects to the console, or a file if a file name is specified.");
-	auto UVN = pragma::console::client::register_command("debug_render_octree_dynamic_find", &CMD_debug_render_octree_dynamic_find, ConVarFlags::None, "Finds the specified entity in the octree for dynamic objects.");
+	auto UVN = pragma::console::client::register_command("debug_render_octree_static_print", &CMD_debug_render_octree_static_print, pragma::console::ConVarFlags::None, "Prints the octree for static world geometry to the console, or a file if a file name is specified.");
+	auto UVN = pragma::console::client::register_command("debug_render_octree_dynamic_print", &CMD_debug_render_octree_dynamic_print, pragma::console::ConVarFlags::None, "Prints the octree for dynamic objects to the console, or a file if a file name is specified.");
+	auto UVN = pragma::console::client::register_command("debug_render_octree_dynamic_find", &CMD_debug_render_octree_dynamic_find, pragma::console::ConVarFlags::None, "Finds the specified entity in the octree for dynamic objects.");
 }
 
 static void CVAR_CALLBACK_debug_render_octree_static_draw(NetworkState *, const ConVar &, bool, bool val)

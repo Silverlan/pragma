@@ -610,5 +610,5 @@ static void debug_print_shader_material_data(NetworkState *state, pragma::BasePl
 	print_shader_material_data(static_cast<CMaterial &>(*mat));
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_print_shader_material_data", &debug_print_shader_material_data, ConVarFlags::None, "Prints the shader material data for the specified material.");
+	auto UVN = pragma::console::client::register_command("debug_print_shader_material_data", &debug_print_shader_material_data, pragma::console::ConVarFlags::None, "Prints the shader material data for the specified material.");
 }

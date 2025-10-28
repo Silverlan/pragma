@@ -5,6 +5,9 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
+#include <string>
+#include <iostream>
+
 export module pragma.server.ai.tasks.play_animation;
 
 export import pragma.server.ai.schedule;
@@ -48,7 +51,7 @@ export namespace pragma {
 			void SetAnimation(int32_t animation);
 			void SetAnimation(const std::string &animation);
 			void SetFaceTarget(const Vector3 &target);
-			void SetFaceTarget(BaseEntity &ent);
+			void SetFaceTarget(pragma::ecs::BaseEntity &ent);
 			void SetFacePrimaryTarget();
 		};
 

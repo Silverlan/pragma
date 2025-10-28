@@ -40,7 +40,7 @@ void SAIComponent::AIAnimationInfo::SetFaceTarget(const Vector3 &position)
 	umath::set_flag(m_aiAnimFlags, AIAnimFlags::FacePosition, true);
 	m_faceTarget = std::make_shared<Vector3>(position);
 }
-void SAIComponent::AIAnimationInfo::SetFaceTarget(BaseEntity &target)
+void SAIComponent::AIAnimationInfo::SetFaceTarget(pragma::ecs::BaseEntity &target)
 {
 	umath::set_flag(m_aiAnimFlags, AIAnimFlags::FacePosition | AIAnimFlags::FacePrimaryTarget, false);
 	umath::set_flag(m_aiAnimFlags, AIAnimFlags::FaceEntity, true);
@@ -54,7 +54,7 @@ const Vector3 *SAIComponent::AIAnimationInfo::GetFacePosition() const
 		return nullptr;
 	return static_cast<Vector3 *>(m_faceTarget.get());
 }
-BaseEntity *SAIComponent::AIAnimationInfo::GetEntityFaceTarget() const
+pragma::ecs::BaseEntity *SAIComponent::AIAnimationInfo::GetEntityFaceTarget() const
 {
 	if(umath::is_flag_set(m_aiAnimFlags, AIAnimFlags::FaceEntity) == false)
 		return nullptr;

@@ -134,7 +134,7 @@ static void debug_particle_alpha_mode(NetworkState *state, pragma::BasePlayerCom
 	}
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_particle_alpha_mode", &debug_particle_alpha_mode, ConVarFlags::None, "Specifies the blend mode arguments for particle systems that use the \
+	auto UVN = pragma::console::client::register_command("debug_particle_alpha_mode", &debug_particle_alpha_mode, pragma::console::ConVarFlags::None, "Specifies the blend mode arguments for particle systems that use the \
 	'custom' alpha mode. Argument order: <srcColorBlendFactor> <dstColorBlendFactor> <srcAlphaBlendFactor> <dstAlphaBlendFactor> <opColor> <opAlpha>.\n\
 	Blend factor options: zero, one, src_color, one_minus_src_color, dst_color, one_minus_dst_color, src_alpha, one_minus_src_alpha, dst_alpha, one_minus_dst_alpha, constant_color, \
 	one_minus_constant_color, constant_alpha, one_minus_constant_alpha, src_alpha_saturate, src1_color, one_minus_src1_color, src1_alpha, one_minus_src1_alpha\n\

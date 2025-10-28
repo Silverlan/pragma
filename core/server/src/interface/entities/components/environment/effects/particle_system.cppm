@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SParticleSystemComponent final : public BaseEnvParticleSystemComponent, public SBaseNetComponent {
 		public:
-			SParticleSystemComponent(BaseEntity &ent) : BaseEnvParticleSystemComponent(ent) {}
+			SParticleSystemComponent(pragma::ecs::BaseEntity &ent) : BaseEnvParticleSystemComponent(ent) {}
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual void SetContinuous(bool b) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }

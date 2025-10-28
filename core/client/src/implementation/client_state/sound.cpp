@@ -53,7 +53,7 @@ static void cl_steam_audio_reload_scene(NetworkState *state, pragma::BasePlayerC
 #endif
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("cl_steam_audio_reload_scene", &cl_steam_audio_reload_scene, ConVarFlags::None, "Reloads the steam audio scene cache.");
+	auto UVN = pragma::console::client::register_command("cl_steam_audio_reload_scene", &cl_steam_audio_reload_scene, pragma::console::ConVarFlags::None, "Reloads the steam audio scene cache.");
 }
 static void debug_audio_sounds(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
@@ -95,7 +95,7 @@ static void debug_audio_sounds(NetworkState *state, pragma::BasePlayerComponent 
 	}
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_audio_sounds", &debug_audio_sounds, ConVarFlags::None, "Prints information about all active server- and clientside sounds to the console.");
+	auto UVN = pragma::console::client::register_command("debug_audio_sounds", &debug_audio_sounds, pragma::console::ConVarFlags::None, "Prints information about all active server- and clientside sounds to the console.");
 }
 
 static auto cvAudioStreaming = GetClientConVar("cl_audio_streaming_enabled");
@@ -209,7 +209,7 @@ void ClientState::StopSounds()
 
 void ClientState::StopSound(std::shared_ptr<ALSound> pSnd) { pSnd->Stop(); }
 
-std::shared_ptr<ALSound> ClientState::CreateSound(std::string snd, ALSoundType type, ALCreateFlags flags)
+std::shared_ptr<ALSound> ClientState::CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags)
 {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
@@ -221,14 +221,14 @@ std::shared_ptr<ALSound> ClientState::CreateSound(std::string snd, ALSoundType t
 	if(script == nullptr) {
 		auto path = FileManager::GetCanonicalizedPath("sounds\\" + snd);
 		sound::get_full_sound_path(path);
-		auto *buf = soundSys->GetBuffer(path, ((flags & ALCreateFlags::Mono) == ALCreateFlags::None) ? true : false);
-		if((flags & ALCreateFlags::Stream) == ALCreateFlags::None || buf != nullptr) // No point in streaming if the buffer is already in memory
+		auto *buf = soundSys->GetBuffer(path, ((flags & pragma::audio::ALCreateFlags::Mono) == pragma::audio::ALCreateFlags::None) ? true : false);
+		if((flags & pragma::audio::ALCreateFlags::Stream) == pragma::audio::ALCreateFlags::None || buf != nullptr) // No point in streaming if the buffer is already in memory
 		{
 			if(buf == nullptr) {
 				static auto bSkipPrecache = false;
 				if(bSkipPrecache == false) {
 					spdlog::warn("Attempted to create unprecached sound '{}'! Loading asynchronously...", snd);
-					auto channel = ((flags & ALCreateFlags::Mono) != ALCreateFlags::None) ? ALChannel::Mono : ALChannel::Auto;
+					auto channel = ((flags & pragma::audio::ALCreateFlags::Mono) != pragma::audio::ALCreateFlags::None) ? ALChannel::Mono : ALChannel::Auto;
 					if(PrecacheSound(snd, nullptr, channel) == true) {
 						bSkipPrecache = true;
 						auto r = CreateSound(snd, type, flags);
@@ -242,7 +242,7 @@ std::shared_ptr<ALSound> ClientState::CreateSound(std::string snd, ALSoundType t
 			return CreateSound(*buf, type);
 		}
 		else {
-			auto decoder = soundSys->CreateDecoder(path, ((flags & ALCreateFlags::Mono) != ALCreateFlags::None) ? true : false);
+			auto decoder = soundSys->CreateDecoder(path, ((flags & pragma::audio::ALCreateFlags::Mono) != pragma::audio::ALCreateFlags::None) ? true : false);
 			if(decoder == nullptr) {
 				spdlog::warn("Unable to create streaming decoder for sound '{}'!", snd);
 				m_missingSoundCache.insert(normPath);
@@ -251,7 +251,7 @@ std::shared_ptr<ALSound> ClientState::CreateSound(std::string snd, ALSoundType t
 			return CreateSound(*decoder, type);
 		}
 	}
-	auto *as = new ALSoundScript(this, std::numeric_limits<uint32_t>::max(), script, this, (flags & ALCreateFlags::Stream) != ALCreateFlags::None);
+	auto *as = new ALSoundScript(this, std::numeric_limits<uint32_t>::max(), script, this, (flags & pragma::audio::ALCreateFlags::Stream) != pragma::audio::ALCreateFlags::None);
 	std::shared_ptr<ALSound> pAs(as, [](ALSound *snd) {
 		snd->OnRelease();
 		delete snd;
@@ -277,7 +277,7 @@ void ClientState::InitializeSound(CALSound &snd)
 	}
 }
 
-std::shared_ptr<ALSound> ClientState::CreateSound(al::ISoundBuffer &buffer, ALSoundType type)
+std::shared_ptr<ALSound> ClientState::CreateSound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type)
 {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
@@ -292,7 +292,7 @@ std::shared_ptr<ALSound> ClientState::CreateSound(al::ISoundBuffer &buffer, ALSo
 	return snd;
 }
 
-std::shared_ptr<ALSound> ClientState::CreateSound(al::Decoder &decoder, ALSoundType type)
+std::shared_ptr<ALSound> ClientState::CreateSound(al::Decoder &decoder, pragma::audio::ALSoundType type)
 {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
@@ -307,7 +307,7 @@ std::shared_ptr<ALSound> ClientState::CreateSound(al::Decoder &decoder, ALSoundT
 	return snd;
 }
 
-std::shared_ptr<ALSound> ClientState::PlaySound(std::string snd, ALSoundType type, ALCreateFlags flags)
+std::shared_ptr<ALSound> ClientState::PlaySound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags)
 {
 	auto pAl = CreateSound(snd, type, flags);
 	if(pAl == nullptr)
@@ -318,7 +318,7 @@ std::shared_ptr<ALSound> ClientState::PlaySound(std::string snd, ALSoundType typ
 	return pAl;
 }
 
-std::shared_ptr<ALSound> ClientState::PlaySound(al::ISoundBuffer &buffer, ALSoundType type)
+std::shared_ptr<ALSound> ClientState::PlaySound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type)
 {
 	auto pAl = CreateSound(buffer, type);
 	if(pAl == nullptr)
@@ -329,7 +329,7 @@ std::shared_ptr<ALSound> ClientState::PlaySound(al::ISoundBuffer &buffer, ALSoun
 	return pAl;
 }
 
-std::shared_ptr<ALSound> ClientState::PlaySound(al::Decoder &decoder, ALSoundType type)
+std::shared_ptr<ALSound> ClientState::PlaySound(al::Decoder &decoder, pragma::audio::ALSoundType type)
 {
 	auto pAl = CreateSound(decoder, type);
 	if(pAl == nullptr)
@@ -340,7 +340,7 @@ std::shared_ptr<ALSound> ClientState::PlaySound(al::Decoder &decoder, ALSoundTyp
 	return pAl;
 }
 
-std::shared_ptr<ALSound> ClientState::PlayWorldSound(al::ISoundBuffer &buffer, ALSoundType type, const Vector3 &pos)
+std::shared_ptr<ALSound> ClientState::PlayWorldSound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type, const Vector3 &pos)
 {
 	auto ptr = PlaySound(buffer, type);
 	auto *alSnd = ptr.get();
@@ -351,9 +351,9 @@ std::shared_ptr<ALSound> ClientState::PlayWorldSound(al::ISoundBuffer &buffer, A
 	return ptr;
 }
 
-std::shared_ptr<ALSound> ClientState::PlayWorldSound(std::string snd, ALSoundType type, const Vector3 &pos)
+std::shared_ptr<ALSound> ClientState::PlayWorldSound(std::string snd, pragma::audio::ALSoundType type, const Vector3 &pos)
 {
-	auto ptr = PlaySound(snd, type, ALCreateFlags::Mono);
+	auto ptr = PlaySound(snd, type, pragma::audio::ALCreateFlags::Mono);
 	auto *alSnd = ptr.get();
 	if(alSnd == nullptr)
 		return ptr;
@@ -396,21 +396,21 @@ void ClientState::SetMasterSoundVolume(float vol)
 	UpdateSoundVolume();
 }
 float ClientState::GetMasterSoundVolume() { return m_volMaster; }
-void ClientState::SetSoundVolume(ALSoundType type, float vol)
+void ClientState::SetSoundVolume(pragma::audio::ALSoundType type, float vol)
 {
 	auto values = umath::get_power_of_2_values(CUInt64(type));
 	for(auto it = values.begin(); it != values.end(); it++)
-		m_volTypes[static_cast<ALSoundType>(*it)] = vol;
+		m_volTypes[static_cast<pragma::audio::ALSoundType>(*it)] = vol;
 	UpdateSoundVolume();
 }
-float ClientState::GetSoundVolume(ALSoundType type)
+float ClientState::GetSoundVolume(pragma::audio::ALSoundType type)
 {
 	auto it = m_volTypes.find(type);
 	if(it == m_volTypes.end())
 		return 1.f;
 	return it->second;
 }
-std::unordered_map<ALSoundType, float> &ClientState::GetSoundVolumes() { return m_volTypes; }
+std::unordered_map<pragma::audio::ALSoundType, float> &ClientState::GetSoundVolumes() { return m_volTypes; }
 
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<float>("cl_audio_master_volume", +[](NetworkState *, const ConVar &, float, float vol) {
@@ -432,7 +432,7 @@ namespace {
 		auto *client = pragma::get_client_state();
 		if(client == nullptr)
 			return;
-		client->SetSoundVolume(ALSoundType::Effect, vol);
+		client->SetSoundVolume(pragma::audio::ALSoundType::Effect, vol);
 	});
 }
 
@@ -441,7 +441,7 @@ namespace {
 		auto *client = pragma::get_client_state();
 		if(client == nullptr)
 			return;
-		client->SetSoundVolume(ALSoundType::Music, vol);
+		client->SetSoundVolume(pragma::audio::ALSoundType::Music, vol);
 	});
 }
 
@@ -450,7 +450,7 @@ namespace {
 		auto *client = pragma::get_client_state();
 		if(client == nullptr)
 			return;
-		client->SetSoundVolume(ALSoundType::Voice, vol);
+		client->SetSoundVolume(pragma::audio::ALSoundType::Voice, vol);
 	});
 }
 
@@ -459,6 +459,6 @@ namespace {
 		auto *client = pragma::get_client_state();
 		if(client == nullptr)
 			return;
-		client->SetSoundVolume(ALSoundType::GUI, vol);
+		client->SetSoundVolume(pragma::audio::ALSoundType::GUI, vol);
 	});
 }

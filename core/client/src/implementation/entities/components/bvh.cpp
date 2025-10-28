@@ -18,7 +18,7 @@ import :entities.components.model;
 
 using namespace pragma;
 
-bool CBvhComponent::ShouldConsiderMesh(const ModelSubMesh &mesh, const rendering::RenderBufferData &bufferData)
+bool CBvhComponent::ShouldConsiderMesh(const pragma::ModelSubMesh &mesh, const rendering::RenderBufferData &bufferData)
 {
 	return BaseBvhComponent::ShouldConsiderMesh(mesh) && !umath::is_flag_set(bufferData.stateFlags, pragma::rendering::RenderBufferData::StateFlags::ExcludeFromAccelerationStructures);
 }
@@ -87,6 +87,6 @@ void CBvhComponent::DoRebuildBvh()
 		return;
 	auto &renderMeshes = mdlC->GetRenderMeshes();
 	BvhBuildInfo buildInfo {};
-	buildInfo.shouldConsiderMesh = [mdlC](const ModelSubMesh &mesh, uint32_t meshIdx) -> bool { return ShouldConsiderMesh(mesh, *mdlC->GetRenderBufferData(meshIdx)); };
+	buildInfo.shouldConsiderMesh = [mdlC](const pragma::ModelSubMesh &mesh, uint32_t meshIdx) -> bool { return ShouldConsiderMesh(mesh, *mdlC->GetRenderBufferData(meshIdx)); };
 	m_bvhData = BaseBvhComponent::RebuildBvh(renderMeshes, &buildInfo, nullptr, &GetEntity());
 }

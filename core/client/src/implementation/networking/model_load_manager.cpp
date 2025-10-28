@@ -33,7 +33,7 @@ ModelLoadManager::ModelLoadManager()
 	m_hCbTick = pragma::get_cgame()->AddCallback("Tick", FunctionCallback<>::Create([this]() {
 		m_completeMutex.lock();
 		if(!m_completeQueries.empty()) {
-			std::vector<BaseEntity *> *ents;
+			std::vector<pragma::ecs::BaseEntity *> *ents;
 			pragma::get_cgame()->GetEntities(&ents);
 			while(!m_completeQueries.empty()) {
 				auto &query = m_completeQueries.front();

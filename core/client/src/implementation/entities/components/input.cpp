@@ -17,7 +17,7 @@ import :entities.components.input;
 using namespace pragma;
 
 
-CInputComponent::CInputComponent(BaseEntity &ent) : BaseEntityComponent {ent} {}
+CInputComponent::CInputComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent {ent} {}
 CInputComponent::~CInputComponent() {}
 void CInputComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CInputComponent::Initialize() { BaseEntityComponent::Initialize(); }

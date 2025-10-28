@@ -135,7 +135,7 @@ static void debug_render_validation_error_enabled(NetworkState *state, pragma::B
 	pragma::get_cengine()->SetValidationErrorDisabled(id, !enabled);
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_render_validation_error_enabled", &debug_render_validation_error_enabled, ConVarFlags::None, "Enables or disables the specified validation error.");
+	auto UVN = pragma::console::client::register_command("debug_render_validation_error_enabled", &debug_render_validation_error_enabled, pragma::console::ConVarFlags::None, "Enables or disables the specified validation error.");
 }
 
 static void print_component_properties(const pragma::ComponentMemberInfo &memberInfo, pragma::BaseEntityComponent &component)
@@ -252,7 +252,7 @@ static void debug_dump_component_properties(NetworkState *state, pragma::BasePla
 	};
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_dump_component_properties", &debug_dump_component_properties, ConVarFlags::None, "Dumps entity component property values to the console.");
+	auto UVN = pragma::console::client::register_command("debug_dump_component_properties", &debug_dump_component_properties, pragma::console::ConVarFlags::None, "Dumps entity component property values to the console.");
 }
 
 static void debug_render_depth_buffer(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
@@ -306,7 +306,7 @@ static void debug_render_depth_buffer(NetworkState *state, pragma::BasePlayerCom
 	}));
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_render_depth_buffer", &debug_render_depth_buffer, ConVarFlags::None, "Draws the scene depth buffer to screen.");
+	auto UVN = pragma::console::client::register_command("debug_render_depth_buffer", &debug_render_depth_buffer, pragma::console::ConVarFlags::None, "Draws the scene depth buffer to screen.");
 }
 
 static CVar cvDrawScene = GetClientConVar("render_draw_scene");

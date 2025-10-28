@@ -54,7 +54,7 @@ export namespace pragma {
 		static bool ImportLightmapAtlas(const std::string &path);
 		static bool ImportLightmapAtlas(uimg::ImageBuffer &imgBuf);
 
-		CLightMapComponent(BaseEntity &ent);
+		CLightMapComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnEntitySpawn() override;

@@ -22,7 +22,7 @@ export namespace pragma {
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		CMaterialOverrideComponent(BaseEntity &ent);
+		CMaterialOverrideComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~CMaterialOverrideComponent() override;
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;

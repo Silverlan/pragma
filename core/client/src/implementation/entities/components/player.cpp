@@ -62,7 +62,7 @@ std::ostream &CPlayerComponent::print(std::ostream &os)
 	return os;
 }
 
-CPlayerComponent::CPlayerComponent(BaseEntity &ent) : BasePlayerComponent(ent), m_crouchViewOffset(nullptr), m_upDirOffset(nullptr)
+CPlayerComponent::CPlayerComponent(pragma::ecs::BaseEntity &ent) : BasePlayerComponent(ent), m_crouchViewOffset(nullptr), m_upDirOffset(nullptr)
 {
 	s_players.push_back(this);
 
@@ -71,7 +71,7 @@ CPlayerComponent::CPlayerComponent(BaseEntity &ent) : BasePlayerComponent(ent), 
 		auto pSoundEmitterComponent = ent.GetComponent<CSoundEmitterComponent>();
 		if(pSoundEmitterComponent.valid()) {
 			if(m_sndUnderwater == nullptr) {
-				m_sndUnderwater = pragma::get_client_state()->CreateSound("fx.underwater", ALSoundType::Effect, ALCreateFlags::Mono);
+				m_sndUnderwater = pragma::get_client_state()->CreateSound("fx.underwater", pragma::audio::ALSoundType::Effect, pragma::audio::ALCreateFlags::Mono);
 				m_sndUnderwater->SetRelative(true);
 			}
 			if(m_sndUnderwater != nullptr) {
@@ -101,7 +101,7 @@ CPlayerComponent::~CPlayerComponent()
 
 void CPlayerComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void CPlayerComponent::OnDeployWeapon(BaseEntity &ent) {}
+void CPlayerComponent::OnDeployWeapon(pragma::ecs::BaseEntity &ent) {}
 
 void CPlayerComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
@@ -144,7 +144,7 @@ void CPlayerComponent::OnSetUpDirection(const Vector3 &direction)
 	//m_upDirOffset = std::make_unique<DeltaTransform>(Vector3(0,0,0),rot,4);
 }
 
-void CPlayerComponent::OnSetActiveWeapon(BaseEntity *ent)
+void CPlayerComponent::OnSetActiveWeapon(pragma::ecs::BaseEntity *ent)
 {
 	auto charComponent = GetEntity().GetCharacterComponent();
 	auto *prevWeapon = charComponent.valid() ? charComponent->GetActiveWeapon() : nullptr;
@@ -455,7 +455,7 @@ void CPlayerComponent::ReceiveData(NetPacket &packet)
 {
 	m_timeConnected = packet->Read<double>();
 	auto hThis = GetHandle();
-	nwm::read_unique_entity(packet, [hThis, this](BaseEntity *ent) {
+	nwm::read_unique_entity(packet, [hThis, this](pragma::ecs::BaseEntity *ent) {
 		if(ent == nullptr || hThis.expired())
 			return;
 		m_entFlashlight = ent->GetHandle();

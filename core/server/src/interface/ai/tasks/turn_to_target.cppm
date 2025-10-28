@@ -4,6 +4,8 @@
 module;
 #include "pragma/serverdefinitions.h"
 
+#include <iostream>
+
 
 export module pragma.server.ai.tasks.turn_to_target;
 

@@ -23,7 +23,7 @@ export namespace pragma {
 			bool loop = false;
 			float playbackRate = 1.f;
 		};
-		CFlexComponent(BaseEntity &ent) : BaseFlexComponent(ent) {}
+		CFlexComponent(pragma::ecs::BaseEntity &ent) : BaseFlexComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnTick(double dt) override;
 		// Vertex animations

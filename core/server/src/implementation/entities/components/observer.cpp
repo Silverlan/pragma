@@ -17,7 +17,7 @@ namespace pragma {
 	using ::operator<<;
 };
 
-SObserverComponent::SObserverComponent(BaseEntity &ent) : BaseObserverComponent(ent), SBaseNetComponent() {}
+SObserverComponent::SObserverComponent(pragma::ecs::BaseEntity &ent) : BaseObserverComponent(ent), SBaseNetComponent() {}
 
 SObserverComponent::~SObserverComponent() {}
 

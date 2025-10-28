@@ -205,7 +205,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 	auto &renderMeshes = renderC->GetRenderMeshes();
 	auto numClusters = m_bspTree->GetClusterCount();
 
-	std::unordered_map<ModelSubMesh *, ModelMesh *> subMeshToMesh;
+	std::unordered_map<pragma::ModelSubMesh *, ModelMesh *> subMeshToMesh;
 	auto &mdl = mdlC->GetModel();
 	if(!mdl)
 		return;

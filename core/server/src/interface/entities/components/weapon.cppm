@@ -21,7 +21,7 @@ export namespace pragma {
 		static uint32_t GetWeaponCount();
 		static const std::vector<SWeaponComponent *> &GetAll();
 
-		SWeaponComponent(BaseEntity &ent);
+		SWeaponComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~SWeaponComponent() override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual void Initialize() override;
@@ -35,7 +35,7 @@ export namespace pragma {
 		virtual void OnTick(double tDelta) override;
 		virtual void OnRemove() override;
 		void Drop();
-		virtual void OnPickedUp(BaseEntity *ent);
+		virtual void OnPickedUp(pragma::ecs::BaseEntity *ent);
 		// Ammo
 		virtual void SetPrimaryClipSize(UInt16 size) override;
 		virtual void SetSecondaryClipSize(UInt16 size) override;
@@ -58,7 +58,7 @@ export namespace pragma {
 		virtual bool ShouldTransmitNetData() const override { return true; };
 	  protected:
 		void GetTargetRecipients(networking::ClientRecipientFilter &rf);
-		virtual void OnUse(BaseEntity *pl);
+		virtual void OnUse(pragma::ecs::BaseEntity *pl);
 		virtual void OnPhysicsInitialized() override;
 		virtual void OnEntitySpawn() override;
 		virtual void InitializeLuaObject(lua_State *l) override;

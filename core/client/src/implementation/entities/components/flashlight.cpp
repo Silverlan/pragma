@@ -46,12 +46,12 @@ util::EventReply CFlashlightComponent::HandleEvent(ComponentEventId eventId, Com
 	if(eventId == BaseToggleComponent::EVENT_ON_TURN_ON) {
 		auto pSoundEmitterCompnent = ent.GetComponent<pragma::CSoundEmitterComponent>();
 		if(pSoundEmitterCompnent.valid())
-			pSoundEmitterCompnent->EmitSound("fx\\flashlight_on.wav", ALSoundType::Effect, 1.f);
+			pSoundEmitterCompnent->EmitSound("fx\\flashlight_on.wav", pragma::audio::ALSoundType::Effect, 1.f);
 	}
 	else if(eventId == BaseToggleComponent::EVENT_ON_TURN_OFF) {
 		auto pSoundEmitterCompnent = ent.GetComponent<pragma::CSoundEmitterComponent>();
 		if(pSoundEmitterCompnent.valid())
-			pSoundEmitterCompnent->EmitSound("fx\\flashlight_off.wav", ALSoundType::Effect, 1.f);
+			pSoundEmitterCompnent->EmitSound("fx\\flashlight_off.wav", pragma::audio::ALSoundType::Effect, 1.f);
 	}
 	return util::EventReply::Unhandled;
 }

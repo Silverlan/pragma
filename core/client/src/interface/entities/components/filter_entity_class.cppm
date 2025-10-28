@@ -14,7 +14,7 @@ import :entities.base_entity;
 export namespace pragma {
 	class DLLCLIENT CFilterClassComponent final : public BaseFilterClassComponent {
 	  public:
-		CFilterClassComponent(BaseEntity &ent) : BaseFilterClassComponent(ent) {}
+		CFilterClassComponent(pragma::ecs::BaseEntity &ent) : BaseFilterClassComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };

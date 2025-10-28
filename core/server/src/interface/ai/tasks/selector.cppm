@@ -7,6 +7,10 @@ module;
 #include <string>
 #include <vector>
 
+#include <cinttypes>
+
+#include <memory>
+
 export module pragma.server.ai.tasks.selector;
 
 export namespace pragma {

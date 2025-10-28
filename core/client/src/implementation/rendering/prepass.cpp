@@ -190,5 +190,5 @@ static void debug_prepass(NetworkState *state, pragma::BasePlayerComponent *pl, 
 	pEl->SizeToContents();
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_prepass", &debug_prepass, ConVarFlags::None, "Displays prepass buffers to screen.");
+	auto UVN = pragma::console::client::register_command("debug_prepass", &debug_prepass, pragma::console::ConVarFlags::None, "Displays prepass buffers to screen.");
 }

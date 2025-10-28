@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CBotComponent final : public BaseBotComponent {
 		public:
-			CBotComponent(BaseEntity &ent) : BaseBotComponent(ent) {}
+			CBotComponent(pragma::ecs::BaseEntity &ent) : BaseBotComponent(ent) {}
 			virtual void Initialize() override;
 			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 			virtual void InitializeLuaObject(lua_State *l) override;

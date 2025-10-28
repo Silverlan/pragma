@@ -47,7 +47,7 @@ void CExplosionComponent::Explode()
 	}
 	auto pSoundEmitterComponent = ent.GetComponent<pragma::CSoundEmitterComponent>();
 	if(pSoundEmitterComponent.valid())
-		pSoundEmitterComponent->EmitSound("fx.explosion", ALSoundType::Effect, 1.f);
+		pSoundEmitterComponent->EmitSound("fx.explosion", pragma::audio::ALSoundType::Effect, 1.f);
 	auto radius = 500.f;
 	auto *entQuake = pragma::get_cgame()->CreateEntity<CEnvQuake>();
 	if(entQuake != nullptr) {

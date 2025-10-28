@@ -14,7 +14,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CHealthComponent final : public BaseHealthComponent, public CBaseNetComponent {
 	  public:
-		CHealthComponent(BaseEntity &ent) : BaseHealthComponent(ent) {}
+		CHealthComponent(pragma::ecs::BaseEntity &ent) : BaseHealthComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }

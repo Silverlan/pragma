@@ -18,7 +18,7 @@ void STriggerGravityComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "gravity_dir", false)) {
 			EulerAngles ang(kvData.value);
@@ -34,7 +34,7 @@ void STriggerGravityComponent::Initialize()
 	});
 }
 
-void STriggerGravityComponent::OnResetGravity(BaseEntity *ent, GravitySettings &settings)
+void STriggerGravityComponent::OnResetGravity(pragma::ecs::BaseEntity *ent, GravitySettings &settings)
 {
 	BaseEntityTriggerGravityComponent::OnResetGravity(ent, settings);
 	auto &entThis = GetEntity();
@@ -48,7 +48,7 @@ void STriggerGravityComponent::OnResetGravity(BaseEntity *ent, GravitySettings &
 	ServerState::Get()->SendPacket("ent_trigger_gravity_onstarttouch", p, pragma::networking::Protocol::SlowReliable);
 }
 
-void STriggerGravityComponent::OnStartTouch(BaseEntity *ent)
+void STriggerGravityComponent::OnStartTouch(pragma::ecs::BaseEntity *ent)
 {
 	BaseEntityTriggerGravityComponent::OnStartTouch(ent);
 	auto netFlags = pragma::Entity::TriggerGravity::NetFlags::StartTouch;

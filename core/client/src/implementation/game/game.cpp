@@ -478,7 +478,7 @@ bool CGame::IsRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode) c
 void CGame::InitializeLuaScriptWatcher() { m_scriptWatcher = std::make_unique<CLuaDirectoryWatcherManager>(this); }
 
 Material *CGame::GetLoadMaterial() { return m_matLoad.get(); }
-void CGame::OnEntityCreated(BaseEntity *ent)
+void CGame::OnEntityCreated(pragma::ecs::BaseEntity *ent)
 {
 	Game::OnEntityCreated(ent);
 	if(typeid(*ent) == typeid(CGameEntity)) {
@@ -1076,7 +1076,7 @@ const util::WeakHandle<prosper::Shader> &CGame::GetGameShader(GameShader shader)
 LuaCallbackHandler &CGame::GetInputCallbackHandler() { return m_inputCallbackHandler; }
 
 std::shared_ptr<ModelMesh> CGame::CreateModelMesh() const { return std::make_shared<CModelMesh>(); }
-std::shared_ptr<ModelSubMesh> CGame::CreateModelSubMesh() const { return std::make_shared<CModelSubMesh>(); }
+std::shared_ptr<pragma::ModelSubMesh> CGame::CreateModelSubMesh() const { return std::make_shared<CModelSubMesh>(); }
 
 Float CGame::GetHDRExposure() const
 {

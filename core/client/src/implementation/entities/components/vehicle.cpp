@@ -25,7 +25,7 @@ std::vector<CVehicleComponent *> CVehicleComponent::s_vehicles;
 const std::vector<CVehicleComponent *> &CVehicleComponent::GetAll() { return s_vehicles; }
 unsigned int CVehicleComponent::GetVehicleCount() { return CUInt32(s_vehicles.size()); }
 
-CVehicleComponent::CVehicleComponent(BaseEntity &ent) : BaseVehicleComponent(ent), CBaseSnapshotComponent {} { s_vehicles.push_back(this); }
+CVehicleComponent::CVehicleComponent(pragma::ecs::BaseEntity &ent) : BaseVehicleComponent(ent), CBaseSnapshotComponent {} { s_vehicles.push_back(this); }
 
 CVehicleComponent::~CVehicleComponent()
 {
@@ -131,7 +131,7 @@ void CVehicleComponent::ClearDriver()
 	}
 	BaseVehicleComponent::ClearDriver();
 }
-void CVehicleComponent::SetDriver(BaseEntity *ent)
+void CVehicleComponent::SetDriver(pragma::ecs::BaseEntity *ent)
 {
 	if(ent == GetDriver())
 		return;

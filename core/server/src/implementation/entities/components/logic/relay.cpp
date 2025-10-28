@@ -31,7 +31,7 @@ void SLogicRelayComponent::Initialize()
 	ent.AddComponent("io");
 }
 
-void SLogicRelayComponent::Trigger(BaseEntity *activator)
+void SLogicRelayComponent::Trigger(pragma::ecs::BaseEntity *activator)
 {
 	auto &ent = GetEntity();
 	auto ptrToggleComponent = ent.GetComponent<SToggleComponent>();

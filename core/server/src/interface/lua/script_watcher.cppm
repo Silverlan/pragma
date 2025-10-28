@@ -5,6 +5,8 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
+#include <string>
+
 export module pragma.server.scripting.lua.script_watcher;
 
 export import pragma.shared;

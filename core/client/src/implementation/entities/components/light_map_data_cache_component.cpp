@@ -35,7 +35,7 @@ void CLightMapDataCacheComponent::RegisterMembers(pragma::EntityComponentManager
 		registerMember(std::move(memberInfo));
 	}
 }
-CLightMapDataCacheComponent::CLightMapDataCacheComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+CLightMapDataCacheComponent::CLightMapDataCacheComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void CLightMapDataCacheComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void CLightMapDataCacheComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 

@@ -4,6 +4,8 @@
 module;
 #include "pragma/serverdefinitions.h"
 
+#include <string>
+
 
 export module pragma.server.core.resource_watcher;
 

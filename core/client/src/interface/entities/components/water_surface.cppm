@@ -16,7 +16,7 @@ import :model.mesh;
 export namespace pragma {
 	class DLLCLIENT CWaterSurfaceComponent final : public BaseEntityComponent {
 	  public:
-		CWaterSurfaceComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CWaterSurfaceComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 
 		virtual ~CWaterSurfaceComponent() override;

@@ -68,10 +68,10 @@ bool CLiquidControlComponent::OnBulletHit(const BulletInfo &bulletInfo, const Tr
 
 		auto &bulletImpactSnd = surfMat->GetBulletImpactSound();
 		if(bulletImpactSnd.empty() == false) {
-			auto snd = pragma::get_client_state()->CreateSound(bulletImpactSnd, ALSoundType::Effect | ALSoundType::Physics, ALCreateFlags::Mono);
+			auto snd = pragma::get_client_state()->CreateSound(bulletImpactSnd, pragma::audio::ALSoundType::Effect | pragma::audio::ALSoundType::Physics, pragma::audio::ALCreateFlags::Mono);
 			if(snd != nullptr) {
 				snd->SetPosition(hitPos);
-				snd->SetType(ALSoundType::Effect);
+				snd->SetType(pragma::audio::ALSoundType::Effect);
 				snd->Play();
 			}
 		}

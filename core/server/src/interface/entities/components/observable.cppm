@@ -14,7 +14,7 @@ import pragma.server.entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SObservableComponent final : public BaseObservableComponent, public SBaseNetComponent {
 	  public:
-		SObservableComponent(BaseEntity &ent) : BaseObservableComponent(ent) {}
+		SObservableComponent(pragma::ecs::BaseEntity &ent) : BaseObservableComponent(ent) {}
 
 		virtual void SetLocalCameraOrigin(CameraType type, const Vector3 &origin) override;
 		virtual void SetLocalCameraOffset(CameraType type, const Vector3 &offset) override;

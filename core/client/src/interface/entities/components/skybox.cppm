@@ -17,7 +17,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CSkyboxComponent final : public BaseSkyboxComponent, public CBaseNetComponent {
 		public:
-			CSkyboxComponent(BaseEntity &ent) : BaseSkyboxComponent(ent) {}
+			CSkyboxComponent(pragma::ecs::BaseEntity &ent) : BaseSkyboxComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void OnRemove() override;
 			virtual void InitializeLuaObject(lua_State *l) override;

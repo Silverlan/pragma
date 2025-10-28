@@ -14,7 +14,7 @@ import pragma.server.entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SToggleComponent final : public BaseToggleComponent, public SBaseNetComponent {
 	  public:
-		SToggleComponent(BaseEntity &ent) : BaseToggleComponent(ent) {}
+		SToggleComponent(pragma::ecs::BaseEntity &ent) : BaseToggleComponent(ent) {}
 		virtual void TurnOn() override;
 		virtual void TurnOff() override;
 

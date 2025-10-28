@@ -17,7 +17,7 @@ import :model.mesh;
 export namespace pragma {
 	class DLLCLIENT CLightSpotVolComponent final : public BaseEnvLightSpotVolComponent, public CBaseNetComponent {
 	  public:
-		CLightSpotVolComponent(BaseEntity &ent) : BaseEnvLightSpotVolComponent(ent) {}
+		CLightSpotVolComponent(pragma::ecs::BaseEntity &ent) : BaseEnvLightSpotVolComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;

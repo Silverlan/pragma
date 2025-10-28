@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CWindComponent final : public BaseEnvWindComponent, public CBaseNetComponent {
 		public:
-			CWindComponent(BaseEntity &ent) : BaseEnvWindComponent(ent) {}
+			CWindComponent(pragma::ecs::BaseEntity &ent) : BaseEnvWindComponent(ent) {}
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void InitializeLuaObject(lua_State *l) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }

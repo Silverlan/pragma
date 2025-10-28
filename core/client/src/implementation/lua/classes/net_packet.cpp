@@ -23,7 +23,7 @@ void Lua::NetPacket::Client::register_class(luabind::class_<::NetPacket> &classD
 void Lua::NetPacket::Client::ReadUniqueEntity(lua_State *l, ::NetPacket &packet, luabind::object o)
 {
 	Lua::CheckFunction(l, 2);
-	auto cb = FunctionCallback<void, BaseEntity *>::Create([l, o](BaseEntity *ent) {
+	auto cb = FunctionCallback<void, pragma::ecs::BaseEntity *>::Create([l, o](pragma::ecs::BaseEntity *ent) {
 		Lua::CallFunction(
 		  l,
 		  [&o, ent](lua_State *l) {

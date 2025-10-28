@@ -13,7 +13,7 @@ import :entities.components.audio.dsp.base;
 export namespace pragma {
 	class DLLCLIENT CSoundDspFlangerComponent final : public CBaseSoundDspComponent, public BaseEnvSoundDspFlanger {
 	  public:
-		CSoundDspFlangerComponent(BaseEntity &ent) : CBaseSoundDspComponent(ent) {}
+		CSoundDspFlangerComponent(pragma::ecs::BaseEntity &ent) : CBaseSoundDspComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void OnEntitySpawn() override;
 		virtual void InitializeLuaObject(lua_State *l) override;

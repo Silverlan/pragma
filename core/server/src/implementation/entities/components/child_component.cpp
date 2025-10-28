@@ -16,7 +16,7 @@ using namespace pragma;
 void SChildComponent::Initialize() { BaseChildComponent::Initialize(); }
 void SChildComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void SChildComponent::OnParentChanged(BaseEntity *parent)
+void SChildComponent::OnParentChanged(pragma::ecs::BaseEntity *parent)
 {
 	NetPacket p;
 	nwm::write_entity(p, parent);

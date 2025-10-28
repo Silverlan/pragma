@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SEnvTimescaleComponent final : public BaseEnvTimescaleComponent, public SBaseNetComponent {
 		public:
-			SEnvTimescaleComponent(BaseEntity &ent) : BaseEnvTimescaleComponent(ent) {}
+			SEnvTimescaleComponent(pragma::ecs::BaseEntity &ent) : BaseEnvTimescaleComponent(ent) {}
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual void InitializeLuaObject(lua_State *l) override;

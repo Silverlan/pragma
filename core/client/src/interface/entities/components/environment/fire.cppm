@@ -17,7 +17,7 @@ export namespace pragma::ecs {class CParticleSystemComponent;}
 export namespace pragma {
 	class DLLCLIENT CFireComponent final : public BaseEnvFireComponent, public CBaseNetComponent {
 	  public:
-		CFireComponent(BaseEntity &ent) : BaseEnvFireComponent(ent) {}
+		CFireComponent(pragma::ecs::BaseEntity &ent) : BaseEnvFireComponent(ent) {}
 		virtual ~CFireComponent() override;
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;

@@ -25,7 +25,7 @@ import :game;
 
 using namespace pragma;
 
-CLightDirectionalComponent::CLightDirectionalComponent(BaseEntity &ent) : BaseEnvLightDirectionalComponent(ent) {}
+CLightDirectionalComponent::CLightDirectionalComponent(pragma::ecs::BaseEntity &ent) : BaseEnvLightDirectionalComponent(ent) {}
 bool CLightDirectionalComponent::ShouldTransmitNetData() const { return true; }
 void CLightDirectionalComponent::Initialize()
 {

@@ -103,7 +103,7 @@ void CRasterizationRendererComponent::UpdateLightmap()
 	UpdateLightmap(*g_lightmapC);
 }
 
-CRasterizationRendererComponent::CRasterizationRendererComponent(BaseEntity &ent) : BaseEntityComponent {ent}, m_hdrInfo {*this}, m_stateFlags {StateFlags::PrepassEnabled | StateFlags::InitialRender}
+CRasterizationRendererComponent::CRasterizationRendererComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent {ent}, m_hdrInfo {*this}, m_stateFlags {StateFlags::PrepassEnabled | StateFlags::InitialRender}
 {
 	m_whShaderWireframe = pragma::get_cengine()->GetShader("wireframe");
 

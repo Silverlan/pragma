@@ -57,7 +57,7 @@ export namespace pragma {
 		void SetPentagonShapeFeather(float pentagonShapeFeather);
 		float GetPentagonShapeFeather() const;
 
-		COpticalCameraComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+		COpticalCameraComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 	  private:

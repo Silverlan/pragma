@@ -24,7 +24,7 @@ export namespace pragma {
 		using MeshIdx = uint32_t;
 		using BufferIdx = uint32_t;
 
-		CLightMapReceiverComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CLightMapReceiverComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 
@@ -39,13 +39,13 @@ export namespace pragma {
 		const LightmapDataCache *GetLightmapDataCache() const;
 		void SetLightmapDataCache(LightmapDataCache *cache);
 	  protected:
-		const std::vector<Vector2> *FindLightmapUvSet(ModelSubMesh &mesh) const;
+		const std::vector<Vector2> *FindLightmapUvSet(pragma::ModelSubMesh &mesh) const;
 		void UpdateModelMeshes();
 		void UpdateRenderMeshBufferList();
 
 		std::shared_ptr<LightmapDataCache> m_lightmapDataCache;
 		std::unordered_map<MeshIdx, std::vector<Vector2>> m_uvDataPerMesh {};
-		std::unordered_map<MeshIdx, std::shared_ptr<ModelSubMesh>> m_meshes {};
+		std::unordered_map<MeshIdx, std::shared_ptr<pragma::ModelSubMesh>> m_meshes {};
 		std::unordered_map<CModelSubMesh *, MeshIdx> m_meshToMeshIdx {};
 		std::unordered_map<CModelSubMesh *, BufferIdx> m_meshToBufIdx {};
 

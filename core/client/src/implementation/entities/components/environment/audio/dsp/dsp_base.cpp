@@ -46,7 +46,7 @@ void CBaseSoundDspComponent::OnTick(double dt)
 		if(snd.IsPlaying() == false)
 			continue;
 		auto &alSnd = *static_cast<al::SoundSource *>(static_cast<CALSound *>(&snd));
-		if(m_bAllSounds == false && (m_bAllWorldSounds == false || snd.IsRelative() == true) && (snd.GetType() & m_types) == ALSoundType::Generic) {
+		if(m_bAllSounds == false && (m_bAllWorldSounds == false || snd.IsRelative() == true) && (snd.GetType() & m_types) == pragma::audio::ALSoundType::Generic) {
 			DetachSoundSource(alSnd);
 			continue;
 		}
@@ -105,32 +105,32 @@ util::EventReply CBaseSoundDspComponent::HandleEvent(ComponentEventId eventId, C
 		DetachAllSoundSources();
 	return util::EventReply::Unhandled;
 }
-ALSoundType CBaseSoundDspComponent::GetTargetSoundTypes() const
+pragma::audio::ALSoundType CBaseSoundDspComponent::GetTargetSoundTypes() const
 {
-	auto types = ALSoundType::Generic;
+	auto types = pragma::audio::ALSoundType::Generic;
 	auto spawnFlags = static_cast<SpawnFlags>(GetEntity().GetSpawnFlags());
 	if((spawnFlags & SpawnFlags::Effects) != SpawnFlags::None)
-		types |= ALSoundType::Effect;
+		types |= pragma::audio::ALSoundType::Effect;
 	if((spawnFlags & SpawnFlags::Music) != SpawnFlags::None)
-		types |= ALSoundType::Music;
+		types |= pragma::audio::ALSoundType::Music;
 	if((spawnFlags & SpawnFlags::Voices) != SpawnFlags::None)
-		types |= ALSoundType::Voice;
+		types |= pragma::audio::ALSoundType::Voice;
 	if((spawnFlags & SpawnFlags::Weapons) != SpawnFlags::None)
-		types |= ALSoundType::Weapon;
+		types |= pragma::audio::ALSoundType::Weapon;
 	if((spawnFlags & SpawnFlags::NPCs) != SpawnFlags::None)
-		types |= ALSoundType::NPC;
+		types |= pragma::audio::ALSoundType::NPC;
 	if((spawnFlags & SpawnFlags::Players) != SpawnFlags::None)
-		types |= ALSoundType::Player;
+		types |= pragma::audio::ALSoundType::Player;
 	if((spawnFlags & SpawnFlags::Vehicles) != SpawnFlags::None)
-		types |= ALSoundType::Vehicle;
+		types |= pragma::audio::ALSoundType::Vehicle;
 	if((spawnFlags & SpawnFlags::Physics) != SpawnFlags::None)
-		types |= ALSoundType::Physics;
+		types |= pragma::audio::ALSoundType::Physics;
 	if((spawnFlags & SpawnFlags::Environment) != SpawnFlags::None)
-		types |= ALSoundType::Environment;
+		types |= pragma::audio::ALSoundType::Environment;
 	if((spawnFlags & SpawnFlags::GUI) != SpawnFlags::None)
-		types |= ALSoundType::GUI;
+		types |= pragma::audio::ALSoundType::GUI;
 	if((spawnFlags & SpawnFlags::All) != SpawnFlags::None)
-		types |= ALSoundType::All;
+		types |= pragma::audio::ALSoundType::All;
 	return types;
 }
 Bool CBaseSoundDspComponent::ReceiveNetEvent(UInt32 eventId, NetPacket &p)

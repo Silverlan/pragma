@@ -25,7 +25,7 @@ import :rendering.shaders;
 using namespace pragma;
 
 static auto cvToneMapping = GetClientConVar("cl_render_tone_mapping");
-CRendererPpToneMappingComponent::CRendererPpToneMappingComponent(BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
+CRendererPpToneMappingComponent::CRendererPpToneMappingComponent(pragma::ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
 PostProcessingEffectData::Flags CRendererPpToneMappingComponent::GetFlags() const { return m_applyToHdrImage ? PostProcessingEffectData::Flags::None : PostProcessingEffectData::Flags::ToneMapped; }
 void CRendererPpToneMappingComponent::SetApplyToHdrImage(bool applyToHdrImage) { m_applyToHdrImage = applyToHdrImage; }
 void CRendererPpToneMappingComponent::DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo)

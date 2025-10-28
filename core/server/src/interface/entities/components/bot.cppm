@@ -15,7 +15,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SBotComponent final : public BaseBotComponent {
 		public:
-			SBotComponent(BaseEntity &ent) : BaseBotComponent(ent) {}
+			SBotComponent(pragma::ecs::BaseEntity &ent) : BaseBotComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};

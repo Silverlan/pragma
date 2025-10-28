@@ -14,7 +14,7 @@ import pragma.server.entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SScoreComponent final : public BaseScoreComponent, public SBaseNetComponent {
 	  public:
-		SScoreComponent(BaseEntity &ent) : BaseScoreComponent(ent) {}
+		SScoreComponent(pragma::ecs::BaseEntity &ent) : BaseScoreComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 

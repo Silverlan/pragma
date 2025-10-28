@@ -14,7 +14,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CFieldAngleComponent final : public BaseFieldAngleComponent, public CBaseNetComponent {
 	  public:
-		CFieldAngleComponent(BaseEntity &ent) : BaseFieldAngleComponent(ent) {}
+		CFieldAngleComponent(pragma::ecs::BaseEntity &ent) : BaseFieldAngleComponent(ent) {}
 
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;

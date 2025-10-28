@@ -6,6 +6,14 @@ module;
 #include "pragma/serverdefinitions.h"
 #include <functional>
 
+#include <cinttypes>
+
+#include <memory>
+
+#include <vector>
+
+#include <sstream>
+
 export module pragma.server.networking.recipient_filter;
 
 export namespace pragma::networking {

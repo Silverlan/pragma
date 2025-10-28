@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CBrushComponent final : public BaseFuncBrushComponent, public CBaseNetComponent {
 		public:
-			CBrushComponent(BaseEntity &ent) : BaseFuncBrushComponent(ent) {}
+			CBrushComponent(pragma::ecs::BaseEntity &ent) : BaseFuncBrushComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void InitializeLuaObject(lua_State *l) override;

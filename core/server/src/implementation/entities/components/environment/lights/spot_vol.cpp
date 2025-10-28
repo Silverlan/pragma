@@ -24,7 +24,7 @@ void SLightSpotVolComponent::SendData(NetPacket &packet, networking::ClientRecip
 	nwm::write_unique_entity(packet, m_hSpotlightTarget.get());
 }
 
-void SLightSpotVolComponent::SetSpotlightTarget(BaseEntity &ent)
+void SLightSpotVolComponent::SetSpotlightTarget(pragma::ecs::BaseEntity &ent)
 {
 	BaseEnvLightSpotVolComponent::SetSpotlightTarget(ent);
 	NetPacket p {};

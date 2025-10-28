@@ -17,7 +17,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CEnvTimescaleComponent final : public BaseEnvTimescaleComponent, public CBaseNetComponent {
 		public:
-			CEnvTimescaleComponent(BaseEntity &ent) : BaseEnvTimescaleComponent(ent) {}
+			CEnvTimescaleComponent(pragma::ecs::BaseEntity &ent) : BaseEnvTimescaleComponent(ent) {}
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void InitializeLuaObject(lua_State *l) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }

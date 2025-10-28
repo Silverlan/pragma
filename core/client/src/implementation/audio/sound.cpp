@@ -632,7 +632,7 @@ void CALSound::SetEffectParameters(const std::string &effectName, const SoundEff
 	(*this)->SetEffectParameters(*effect, reinterpret_cast<const al::EffectParams &>(params));
 }
 
-void CALSound::SetType(ALSoundType type)
+void CALSound::SetType(pragma::audio::ALSoundType type)
 {
 	if(m_bTerminated == true)
 		return;

@@ -7,7 +7,7 @@ module;
 
 module pragma.server.networking.util;
 
-void nwm::write_unique_entity(NetPacket &packet, const BaseEntity *ent)
+void nwm::write_unique_entity(NetPacket &packet, const pragma::ecs::BaseEntity *ent)
 {
 	packet->Write<util::Uuid>((ent != nullptr) ? ent->GetUuid() : util::Uuid {}); // 0 is an invalid index
 }

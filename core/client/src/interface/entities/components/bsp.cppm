@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CBSPComponent final : public BaseEntityComponent {
 		public:
-			CBSPComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+			CBSPComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua_State *l) override;
 		protected:

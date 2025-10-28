@@ -23,7 +23,7 @@ export namespace pragma {
 	template<class TBaseComponent>
 	class DLLCLIENT TCBaseDebugComponent : public TBaseComponent {
 	  public:
-		TCBaseDebugComponent(BaseEntity &ent);
+		TCBaseDebugComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 		virtual void OnRemove() override;
@@ -46,7 +46,7 @@ export namespace pragma {
 	};
 
     template<class TBaseComponent>
-        TCBaseDebugComponent<TBaseComponent>::TCBaseDebugComponent(BaseEntity &ent) : TBaseComponent(ent) {}
+        TCBaseDebugComponent<TBaseComponent>::TCBaseDebugComponent(pragma::ecs::BaseEntity &ent) : TBaseComponent(ent) {}
     template<class TBaseComponent>
         void TCBaseDebugComponent<TBaseComponent>::Initialize()
     {
@@ -149,7 +149,7 @@ export namespace pragma {
 
 	class DLLCLIENT CDebugTextComponent final : public TCBaseDebugComponent<BaseDebugTextComponent>, public CBaseNetComponent {
 	  public:
-		CDebugTextComponent(BaseEntity &ent) : TCBaseDebugComponent<BaseDebugTextComponent>(ent) {}
+		CDebugTextComponent(pragma::ecs::BaseEntity &ent) : TCBaseDebugComponent<BaseDebugTextComponent>(ent) {}
 		virtual void SetText(const std::string &text) override;
 		virtual void SetSize(float size) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
@@ -173,7 +173,7 @@ export namespace pragma {
 
 	class DLLCLIENT CDebugPointComponent final : public TCBaseDebugComponent<BaseDebugPointComponent>, public CBaseNetComponent {
 	  public:
-		CDebugPointComponent(BaseEntity &ent) : TCBaseDebugComponent<BaseDebugPointComponent>(ent) {}
+		CDebugPointComponent(pragma::ecs::BaseEntity &ent) : TCBaseDebugComponent<BaseDebugPointComponent>(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
@@ -185,7 +185,7 @@ export namespace pragma {
 
 	class DLLCLIENT CDebugLineComponent final : public TCBaseDebugComponent<BaseDebugLineComponent>, public CBaseNetComponent {
 	  public:
-		CDebugLineComponent(BaseEntity &ent) : TCBaseDebugComponent<BaseDebugLineComponent>(ent) {}
+		CDebugLineComponent(pragma::ecs::BaseEntity &ent) : TCBaseDebugComponent<BaseDebugLineComponent>(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
@@ -197,7 +197,7 @@ export namespace pragma {
 
 	class DLLCLIENT CDebugBoxComponent final : public TCBaseDebugComponent<BaseDebugBoxComponent>, public CBaseDebugOutlineComponent {
 	  public:
-		CDebugBoxComponent(BaseEntity &ent) : TCBaseDebugComponent<BaseDebugBoxComponent>(ent) {}
+		CDebugBoxComponent(pragma::ecs::BaseEntity &ent) : TCBaseDebugComponent<BaseDebugBoxComponent>(ent) {}
 		virtual void SetBounds(const Vector3 &min, const Vector3 &max) override;
 
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
@@ -211,7 +211,7 @@ export namespace pragma {
 
 	class DLLCLIENT CDebugSphereComponent final : public TCBaseDebugComponent<BaseDebugSphereComponent>, public CBaseDebugOutlineComponent {
 	  public:
-		CDebugSphereComponent(BaseEntity &ent) : TCBaseDebugComponent<BaseDebugSphereComponent>(ent) {}
+		CDebugSphereComponent(pragma::ecs::BaseEntity &ent) : TCBaseDebugComponent<BaseDebugSphereComponent>(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 	  protected:
@@ -222,7 +222,7 @@ export namespace pragma {
 
 	class DLLCLIENT CDebugConeComponent final : public TCBaseDebugComponent<BaseDebugConeComponent>, public CBaseDebugOutlineComponent {
 	  public:
-		CDebugConeComponent(BaseEntity &ent) : TCBaseDebugComponent<BaseDebugConeComponent>(ent) {}
+		CDebugConeComponent(pragma::ecs::BaseEntity &ent) : TCBaseDebugComponent<BaseDebugConeComponent>(ent) {}
 		virtual void SetConeAngle(float angle) override;
 		virtual void SetStartRadius(float radius) override;
 
@@ -237,7 +237,7 @@ export namespace pragma {
 
 	class DLLCLIENT CDebugCylinderComponent final : public TCBaseDebugComponent<BaseDebugCylinderComponent>, public CBaseDebugOutlineComponent {
 	  public:
-		CDebugCylinderComponent(BaseEntity &ent) : TCBaseDebugComponent<BaseDebugCylinderComponent>(ent) {}
+		CDebugCylinderComponent(pragma::ecs::BaseEntity &ent) : TCBaseDebugComponent<BaseDebugCylinderComponent>(ent) {}
 		virtual void SetLength(float length) override;
 
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
@@ -251,7 +251,7 @@ export namespace pragma {
 
 	class DLLCLIENT CDebugPlaneComponent final : public TCBaseDebugComponent<BaseDebugPlaneComponent>, public CBaseNetComponent {
 	  public:
-		CDebugPlaneComponent(BaseEntity &ent) : TCBaseDebugComponent<BaseDebugPlaneComponent>(ent) {}
+		CDebugPlaneComponent(pragma::ecs::BaseEntity &ent) : TCBaseDebugComponent<BaseDebugPlaneComponent>(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }

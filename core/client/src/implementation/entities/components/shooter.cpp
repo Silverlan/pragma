@@ -84,7 +84,7 @@ void ecs::CShooterComponent::FireBullets(const BulletInfo &bulletInfo, const Vec
 						if(sndEffect.empty() && surfaceMaterialGeneric != nullptr)
 							sndEffect = surfaceMaterialGeneric->GetBulletImpactSound();
 						if(!sndEffect.empty()) {
-							auto snd = pragma::get_client_state()->CreateSound(sndEffect, ALSoundType::Effect | ALSoundType::Physics, ALCreateFlags::Mono);
+							auto snd = pragma::get_client_state()->CreateSound(sndEffect, pragma::audio::ALSoundType::Effect | pragma::audio::ALSoundType::Physics, pragma::audio::ALCreateFlags::Mono);
 							if(snd != nullptr) {
 								snd->SetPosition(result.position);
 								snd->Play();

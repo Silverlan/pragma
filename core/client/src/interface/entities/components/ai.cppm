@@ -27,7 +27,7 @@ export namespace pragma {
 		
 		static unsigned int GetNPCCount();
 		static const std::vector<CAIComponent *> &GetAll();
-		CAIComponent(BaseEntity &ent);
+		CAIComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~CAIComponent() override;
 		virtual void Initialize() override;
 		virtual void UpdateMovementProperties(MovementComponent &movementC) override;

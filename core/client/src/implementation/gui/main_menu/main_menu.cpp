@@ -101,12 +101,12 @@ void WIMainMenu::PlayNextMenuTrack(bool newRound)
 	auto sound = *it;
 	m_menuTracks.erase(it);
 	auto *client = pragma::get_client_state();
-	if(client->PrecacheSound(std::string("ui/") + sound) == false || (m_menuSound = client->PlaySound(std::string("ui/") + sound, ALSoundType::GUI, ALCreateFlags::None)) == nullptr) {
+	if(client->PrecacheSound(std::string("ui/") + sound) == false || (m_menuSound = client->PlaySound(std::string("ui/") + sound, pragma::audio::ALSoundType::GUI, pragma::audio::ALCreateFlags::None)) == nullptr) {
 		if(newRound == false)
 			PlayNextMenuTrack(newRound);
 	}
 	else {
-		m_menuSound->SetType(ALSoundType::Music | ALSoundType::GUI);
+		m_menuSound->SetType(pragma::audio::ALSoundType::Music | pragma::audio::ALSoundType::GUI);
 		// m_menuSound->SetPitch(0.4f);
 		// m_menuSound->SetGain(0.2f);
 		m_cbMenuTrack = FunctionCallback<void, ALState, ALState>::Create([this](ALState, ALState newstate) {

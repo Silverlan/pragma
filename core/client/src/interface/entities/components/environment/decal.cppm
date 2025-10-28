@@ -22,7 +22,7 @@ export {
 		class DLLCLIENT DecalProjector {
 		public:
 			struct DLLCLIENT MeshData {
-				std::vector<ModelSubMesh *> subMeshes {};
+				std::vector<pragma::ModelSubMesh *> subMeshes {};
 				umath::ScaledTransform pose = {};
 			};
 			DecalProjector(const Vector3 &pos, const Quat &rot, float size);
@@ -52,7 +52,7 @@ export {
 
 		class DLLCLIENT CDecalComponent final : public BaseEnvDecalComponent, public CBaseNetComponent {
 		public:
-			CDecalComponent(BaseEntity &ent) : BaseEnvDecalComponent(ent) {}
+			CDecalComponent(pragma::ecs::BaseEntity &ent) : BaseEnvDecalComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua_State *l) override;
 			virtual void OnEntitySpawn() override;

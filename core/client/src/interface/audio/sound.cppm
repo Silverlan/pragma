@@ -99,7 +99,7 @@ export class DLLCLIENT CALSound : public al::SoundSource, public ALSound {
 
 	virtual void Update() override;
 	virtual void PostUpdate() override;
-	virtual void SetType(ALSoundType type) override;
+	virtual void SetType(pragma::audio::ALSoundType type) override;
 	virtual bool IsIdle() const override;
 	void Terminate();
 

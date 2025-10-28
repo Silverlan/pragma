@@ -49,7 +49,7 @@ void SAIComponent::StartControl(pragma::SPlayerComponent &pl)
 	m_controlInfo.actions = Action::None; // We want to overwrite the player's controls, so we need to keep track of them ourselves
 	auto pGenericComponent = plEnt.GetComponent<SGenericComponent>();
 	if(pGenericComponent.valid()) {
-		m_controlInfo.hCbOnRemove = pGenericComponent->BindEventUnhandled(BaseEntity::EVENT_ON_REMOVE, std::bind(&SAIComponent::EndControl, this));
+		m_controlInfo.hCbOnRemove = pGenericComponent->BindEventUnhandled(pragma::ecs::BaseEntity::EVENT_ON_REMOVE, std::bind(&SAIComponent::EndControl, this));
 		m_controlInfo.hCbOnKilled = pGenericComponent->BindEventUnhandled(SCharacterComponent::EVENT_ON_DEATH, std::bind(&SAIComponent::EndControl, this));
 	}
 	auto *actionInputC = pl.GetActionInputController();

@@ -15,7 +15,7 @@ export import pragma.shared;
 export namespace pragma {
 	class DLLCLIENT CBSPLeafComponent final : public BaseEntityComponent {
 	  public:
-		CBSPLeafComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CBSPLeafComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 
 		void SetLeaves(const std::vector<uint16_t> &leaves);

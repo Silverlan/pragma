@@ -14,9 +14,9 @@ import :scripting.lua.classes.model_mesh;
 import :model;
 
 void Lua::ModelMesh::Client::Create(lua_State *l) { Lua::Push<std::shared_ptr<::ModelMesh>>(l, std::make_shared<::CModelMesh>()); }
-void Lua::ModelSubMesh::Client::Create(lua_State *l) { Lua::Push<std::shared_ptr<::ModelSubMesh>>(l, std::make_shared<::CModelSubMesh>()); }
-void Lua::ModelSubMesh::Client::GetVkMesh(lua_State *l, ::ModelSubMesh &mesh) { Lua::Push<std::shared_ptr<::pragma::SceneMesh>>(l, static_cast<CModelSubMesh &>(mesh).GetSceneMesh()); }
-void Lua::ModelSubMesh::Client::GetTangents(lua_State *l, ::ModelSubMesh &mesh)
+void Lua::ModelSubMesh::Client::Create(lua_State *l) { Lua::Push<std::shared_ptr<pragma::ModelSubMesh>>(l, std::make_shared<::CModelSubMesh>()); }
+void Lua::ModelSubMesh::Client::GetVkMesh(lua_State *l, pragma::ModelSubMesh &mesh) { Lua::Push<std::shared_ptr<::pragma::SceneMesh>>(l, static_cast<CModelSubMesh &>(mesh).GetSceneMesh()); }
+void Lua::ModelSubMesh::Client::GetTangents(lua_State *l, pragma::ModelSubMesh &mesh)
 {
 	auto &verts = mesh.GetVertices();
 
@@ -27,7 +27,7 @@ void Lua::ModelSubMesh::Client::GetTangents(lua_State *l, ::ModelSubMesh &mesh)
 		Lua::SetTableValue(l, tTangents);
 	}
 }
-void Lua::ModelSubMesh::Client::GetBiTangents(lua_State *l, ::ModelSubMesh &mesh)
+void Lua::ModelSubMesh::Client::GetBiTangents(lua_State *l, pragma::ModelSubMesh &mesh)
 {
 	auto &verts = mesh.GetVertices();
 
@@ -38,7 +38,7 @@ void Lua::ModelSubMesh::Client::GetBiTangents(lua_State *l, ::ModelSubMesh &mesh
 		Lua::SetTableValue(l, tBiTangents);
 	}
 }
-void Lua::ModelSubMesh::Client::GetVertexBuffer(lua_State *l, ::ModelSubMesh &mesh)
+void Lua::ModelSubMesh::Client::GetVertexBuffer(lua_State *l, pragma::ModelSubMesh &mesh)
 {
 	auto &vkMesh = static_cast<CModelSubMesh &>(mesh).GetSceneMesh();
 	auto &buf = vkMesh->GetVertexBuffer();
@@ -46,7 +46,7 @@ void Lua::ModelSubMesh::Client::GetVertexBuffer(lua_State *l, ::ModelSubMesh &me
 		return;
 	Lua::Push(l, buf);
 }
-void Lua::ModelSubMesh::Client::GetVertexWeightBuffer(lua_State *l, ::ModelSubMesh &mesh)
+void Lua::ModelSubMesh::Client::GetVertexWeightBuffer(lua_State *l, pragma::ModelSubMesh &mesh)
 {
 	auto &vkMesh = static_cast<CModelSubMesh &>(mesh).GetSceneMesh();
 	auto &buf = vkMesh->GetVertexWeightBuffer();
@@ -54,7 +54,7 @@ void Lua::ModelSubMesh::Client::GetVertexWeightBuffer(lua_State *l, ::ModelSubMe
 		return;
 	Lua::Push(l, buf);
 }
-void Lua::ModelSubMesh::Client::GetAlphaBuffer(lua_State *l, ::ModelSubMesh &mesh)
+void Lua::ModelSubMesh::Client::GetAlphaBuffer(lua_State *l, pragma::ModelSubMesh &mesh)
 {
 	auto &vkMesh = static_cast<CModelSubMesh &>(mesh).GetSceneMesh();
 	auto &buf = vkMesh->GetAlphaBuffer();
@@ -62,7 +62,7 @@ void Lua::ModelSubMesh::Client::GetAlphaBuffer(lua_State *l, ::ModelSubMesh &mes
 		return;
 	Lua::Push(l, buf);
 }
-void Lua::ModelSubMesh::Client::GetIndexBuffer(lua_State *l, ::ModelSubMesh &mesh)
+void Lua::ModelSubMesh::Client::GetIndexBuffer(lua_State *l, pragma::ModelSubMesh &mesh)
 {
 	auto &vkMesh = static_cast<CModelSubMesh &>(mesh).GetSceneMesh();
 	auto &buf = vkMesh->GetIndexBuffer();

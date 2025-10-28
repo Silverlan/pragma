@@ -80,7 +80,7 @@ static aiMatrix4x4 to_assimp_matrix(const Mat4 &m)
 	};
 }
 
-static aiNode &add_node(aiNode &parentNode,uint32_t index,const std::string &name,BaseEntity &ent)
+static aiNode &add_node(aiNode &parentNode,uint32_t index,const std::string &name,pragma::ecs::BaseEntity &ent)
 {
 	auto &t = ent.GetPose();
 

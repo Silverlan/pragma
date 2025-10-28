@@ -72,7 +72,7 @@ namespace { auto UVN = pragma::console::client::register_variable_listener<float
 
 static CVar cvCascadeCount = GetClientConVar("cl_render_shadow_pssm_split_count");
 static CVar cvRange = GetClientConVar("render_csm_max_distance");
-CShadowCSMComponent::CShadowCSMComponent(BaseEntity &ent) : BaseEntityComponent {ent}, m_maxDistance {cvRange->GetFloat()}, m_layerUpdate {false}
+CShadowCSMComponent::CShadowCSMComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent {ent}, m_maxDistance {cvRange->GetFloat()}, m_layerUpdate {false}
 {
 	SetSplitCount(cvCascadeCount->GetInt());
 	UpdateSplitDistances(2.f, GetMaxDistance());

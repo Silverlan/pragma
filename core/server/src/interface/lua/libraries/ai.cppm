@@ -5,11 +5,14 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
+#include <memory>
+
 
 
 export module pragma.server.scripting.lua.libraries.ai;
 
 export import pragma.server.ai.schedule;
+export import pragma.lua;
 
 export namespace Lua {
 	namespace ai {

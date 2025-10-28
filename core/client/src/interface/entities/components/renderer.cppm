@@ -42,7 +42,7 @@ export namespace pragma {
 
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		CRendererComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CRendererComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 

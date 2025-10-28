@@ -42,9 +42,9 @@ void CSoundEmitterComponent::ReceiveData(NetPacket &packet)
 	}
 }
 
-std::shared_ptr<ALSound> CSoundEmitterComponent::CreateSound(std::string sndname, ALSoundType type, const SoundInfo &sndInfo)
+std::shared_ptr<ALSound> CSoundEmitterComponent::CreateSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo)
 {
-	std::shared_ptr<ALSound> snd = pragma::get_client_state()->CreateSound(sndname, type, ALCreateFlags::Mono);
+	std::shared_ptr<ALSound> snd = pragma::get_client_state()->CreateSound(sndname, type, pragma::audio::ALCreateFlags::Mono);
 	if(snd == NULL)
 		return snd;
 	InitializeSound(snd);
@@ -53,7 +53,7 @@ std::shared_ptr<ALSound> CSoundEmitterComponent::CreateSound(std::string sndname
 	return snd;
 }
 
-std::shared_ptr<ALSound> CSoundEmitterComponent::EmitSound(std::string sndname, ALSoundType type, const SoundInfo &sndInfo)
+std::shared_ptr<ALSound> CSoundEmitterComponent::EmitSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo)
 {
 	std::shared_ptr<ALSound> snd = CreateSound(sndname, type, sndInfo);
 	if(snd == NULL)
@@ -71,7 +71,7 @@ void CSoundEmitterComponent::MaintainSounds()
 	BaseSoundEmitterComponent::MaintainSounds();
 	auto pFlexComponent = GetEntity().GetComponent<pragma::CFlexComponent>();
 	for(auto &snd : m_sounds) {
-		if(snd->IsPlaying() == false || (snd->GetType() & ALSoundType::Voice) == ALSoundType::Generic)
+		if(snd->IsPlaying() == false || (snd->GetType() & pragma::audio::ALSoundType::Voice) == pragma::audio::ALSoundType::Generic)
 			continue;
 		if(snd->IsSoundScript() == false) {
 			if(pFlexComponent.valid())

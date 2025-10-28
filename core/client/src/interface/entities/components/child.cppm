@@ -15,7 +15,7 @@ export namespace pragma {
 	class CParticleSystemComponent;
 	class DLLCLIENT CChildComponent final : public BaseChildComponent, public CBaseNetComponent {
 	  public:
-		CChildComponent(BaseEntity &ent) : BaseChildComponent(ent) {}
+		CChildComponent(pragma::ecs::BaseEntity &ent) : BaseChildComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 

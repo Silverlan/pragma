@@ -18,7 +18,7 @@ void SPointAtTargetComponent::InitializeLuaObject(lua_State *l) { return BaseEnt
 
 void SPointAtTargetComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { nwm::write_unique_entity(packet, GetPointAtTarget()); }
 
-void SPointAtTargetComponent::SetPointAtTarget(BaseEntity *ent)
+void SPointAtTargetComponent::SetPointAtTarget(pragma::ecs::BaseEntity *ent)
 {
 	BasePointAtTargetComponent::SetPointAtTarget(ent);
 	NetPacket p {};

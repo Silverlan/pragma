@@ -19,7 +19,7 @@ std::vector<SWeaponComponent *> SWeaponComponent::s_weapons;
 const std::vector<SWeaponComponent *> &SWeaponComponent::GetAll() { return s_weapons; }
 unsigned int SWeaponComponent::GetWeaponCount() { return static_cast<uint32_t>(s_weapons.size()); }
 
-SWeaponComponent::SWeaponComponent(BaseEntity &ent) : BaseWeaponComponent(ent) { s_weapons.push_back(this); }
+SWeaponComponent::SWeaponComponent(pragma::ecs::BaseEntity &ent) : BaseWeaponComponent(ent) { s_weapons.push_back(this); }
 
 SWeaponComponent::~SWeaponComponent()
 {
@@ -30,7 +30,7 @@ SWeaponComponent::~SWeaponComponent()
 
 void SWeaponComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void SWeaponComponent::OnUse(BaseEntity *pl)
+void SWeaponComponent::OnUse(pragma::ecs::BaseEntity *pl)
 {
 	auto &ent = GetEntity();
 	auto hEnt = ent.GetHandle();
@@ -43,7 +43,7 @@ void SWeaponComponent::OnUse(BaseEntity *pl)
 		return;
 	OnPickedUp(pl);
 }
-void SWeaponComponent::OnPickedUp(BaseEntity *ent) {}
+void SWeaponComponent::OnPickedUp(pragma::ecs::BaseEntity *ent) {}
 
 void SWeaponComponent::Drop()
 {

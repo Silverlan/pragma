@@ -17,7 +17,7 @@ export namespace pragma {
 	class CRasterizationRendererComponent;
 	class DLLCLIENT CRendererPpVolumetricComponent final : public CRendererPpBaseComponent {
 	  public:
-		CRendererPpVolumetricComponent(BaseEntity &ent);
+		CRendererPpVolumetricComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnEntitySpawn() override;

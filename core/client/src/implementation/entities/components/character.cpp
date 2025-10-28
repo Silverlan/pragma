@@ -23,7 +23,7 @@ import :entities.components.surface;
 using namespace pragma;
 
 void CCharacterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { BaseCharacterComponent::RegisterEvents(componentManager, registerEvent); }
-CCharacterComponent::CCharacterComponent(BaseEntity &ent) : BaseCharacterComponent(ent) {}
+CCharacterComponent::CCharacterComponent(pragma::ecs::BaseEntity &ent) : BaseCharacterComponent(ent) {}
 
 void CCharacterComponent::Initialize()
 {
@@ -76,7 +76,7 @@ void CCharacterComponent::CreateWaterSplash()
 	if(pSoundEmitterComponent.valid() && pTrComponent != nullptr && pSurfC.valid()) {
 		auto pos = pTrComponent->GetPosition();
 		pos = pSurfC->ProjectToSurface(pos);
-		pragma::get_client_state()->PlayWorldSound("fx.water_slosh", ALSoundType::Effect, pos);
+		pragma::get_client_state()->PlayWorldSound("fx.water_slosh", pragma::audio::ALSoundType::Effect, pos);
 		auto *pt = pragma::ecs::CParticleSystemComponent::Create("watersplash");
 		if(pt != nullptr) {
 			auto pTrComponent = pt->GetEntity().GetTransformComponent();

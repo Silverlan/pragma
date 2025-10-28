@@ -41,9 +41,9 @@ export {
 			NPCSTATE newState;
 		};
 		struct DLLSERVER CEOnTargetAcquired : public ComponentEvent {
-			CEOnTargetAcquired(BaseEntity *entity, float distance, bool isFirstNewTarget);
+			CEOnTargetAcquired(pragma::ecs::BaseEntity *entity, float distance, bool isFirstNewTarget);
 			virtual void PushArguments(lua_State *l) override;
-			BaseEntity *entity;
+			pragma::ecs::BaseEntity *entity;
 			float distance;
 			bool isFirstNewTarget;
 		};
@@ -110,7 +110,7 @@ export {
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
 
-			SAIComponent(BaseEntity &ent);
+			SAIComponent(pragma::ecs::BaseEntity &ent);
 			virtual ~SAIComponent() override;
 			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 			const ai::Memory::Fragment *GetPrimaryTarget() const;
@@ -128,15 +128,15 @@ export {
 			NPCSTATE GetNPCState() const;
 			void SetNPCState(NPCSTATE state);
 			const std::shared_ptr<AISquad> &GetSquad() const;
-			void SetRelationship(BaseEntity *ent, DISPOSITION disp, bool revert = true, int priority = 0);
+			void SetRelationship(pragma::ecs::BaseEntity *ent, DISPOSITION disp, bool revert = true, int priority = 0);
 			void SetRelationship(EntityHandle &hEnt, DISPOSITION disp, bool revert = true, int priority = 0);
 			void SetRelationship(std::string className, DISPOSITION disp, int priority = 0);
 			void SetRelationship(Faction &faction, DISPOSITION disp, int priority = 0);
-			void ClearRelationship(BaseEntity *ent);
+			void ClearRelationship(pragma::ecs::BaseEntity *ent);
 			void ClearRelationship(EntityHandle &hEnt);
 			void ClearRelationship(std::string className);
 			void ClearRelationship(Faction &faction);
-			DISPOSITION GetDisposition(BaseEntity *ent, int *priority = nullptr);
+			DISPOSITION GetDisposition(pragma::ecs::BaseEntity *ent, int *priority = nullptr);
 			DISPOSITION GetDisposition(EntityHandle &hEnt, int *priority = nullptr);
 			DISPOSITION GetDisposition(std::string className, int *priority = nullptr);
 			DISPOSITION GetDisposition(Faction &faction, int *priority = nullptr);
@@ -144,15 +144,15 @@ export {
 			void StartSchedule(std::shared_ptr<ai::Schedule> &sched);
 			virtual void OnTick(double tDelta) override;
 			ai::Memory &GetMemory();
-			ai::Memory::Fragment *GetMemory(BaseEntity *ent);
-			ai::Memory::Fragment *Memorize(BaseEntity *ent, ai::Memory::MemoryType memType);
-			ai::Memory::Fragment *Memorize(BaseEntity *ent, ai::Memory::MemoryType memType, const Vector3 &pos, const Vector3 &vel);
-			void Forget(BaseEntity *ent);
+			ai::Memory::Fragment *GetMemory(pragma::ecs::BaseEntity *ent);
+			ai::Memory::Fragment *Memorize(pragma::ecs::BaseEntity *ent, ai::Memory::MemoryType memType);
+			ai::Memory::Fragment *Memorize(pragma::ecs::BaseEntity *ent, ai::Memory::MemoryType memType, const Vector3 &pos, const Vector3 &vel);
+			void Forget(pragma::ecs::BaseEntity *ent);
 			void ClearMemory();
-			bool IsInMemory(BaseEntity *ent);
+			bool IsInMemory(pragma::ecs::BaseEntity *ent);
 			// Returns the number of occupied memory fragments
 			uint32_t GetMemoryFragmentCount() const;
-			bool IsInViewCone(BaseEntity *ent, float *dist = nullptr);
+			bool IsInViewCone(pragma::ecs::BaseEntity *ent, float *dist = nullptr);
 			float GetMemoryDuration();
 			void SetMemoryDuration(float dur);
 			bool CanSee() const;
@@ -176,7 +176,7 @@ export {
 			void EndControl();
 			bool IsControlled() const;
 			pragma::SPlayerComponent *GetController() const;
-			bool IsEnemy(BaseEntity *ent) const;
+			bool IsEnemy(pragma::ecs::BaseEntity *ent) const;
 			bool TriggerScheduleInterrupt(uint32_t interruptFlags);
 
 			virtual void SendSnapshotData(NetPacket &packet, pragma::BasePlayerComponent &pl) override;
@@ -213,13 +213,13 @@ export {
 
 				void SetFaceTarget(bool primaryTarget);
 				void SetFaceTarget(const Vector3 &position);
-				void SetFaceTarget(BaseEntity &target);
+				void SetFaceTarget(pragma::ecs::BaseEntity &target);
 
 				// For internal use only
 				int32_t GetAnimation() const;
 				Activity GetActivity() const;
 				const Vector3 *GetFacePosition() const;
-				BaseEntity *GetEntityFaceTarget() const;
+				pragma::ecs::BaseEntity *GetEntityFaceTarget() const;
 			private:
 				union {
 					int32_t animation;
@@ -247,8 +247,8 @@ export {
 			};
 
 			struct TargetInfo {
-				TargetInfo(BaseEntity *_ent, float _dist) : ent(_ent), dist(_dist) {}
-				BaseEntity *ent = nullptr;
+				TargetInfo(pragma::ecs::BaseEntity *_ent, float _dist) : ent(_ent), dist(_dist) {}
+				pragma::ecs::BaseEntity *ent = nullptr;
 				float dist = 0.f;
 			};
 
@@ -292,21 +292,21 @@ export {
 			virtual void OnTargetVisibilityReacquired(const ai::Memory::Fragment &memFragment);
 			virtual void OnMemoryGained(const ai::Memory::Fragment &memFragment);
 			virtual void OnMemoryLost(const ai::Memory::Fragment &memFragment);
-			virtual void OnTargetAcquired(BaseEntity *ent, float dist, bool bFirst);
+			virtual void OnTargetAcquired(pragma::ecs::BaseEntity *ent, float dist, bool bFirst);
 			virtual bool OnSuspiciousSoundHeared(std::shared_ptr<ALSound> &snd);
 			virtual void OnControllerActionInput(Action action, bool b);
 			virtual void OnStartControl(pragma::SPlayerComponent &pl);
 			virtual void OnEndControl();
 			virtual void OnPathNodeChanged(uint32_t nodeIdx) override;
 			virtual void OnLookTargetChanged() override;
-			virtual bool IsObstruction(const BaseEntity &ent) const override;
+			virtual bool IsObstruction(const pragma::ecs::BaseEntity &ent) const override;
 			virtual void UpdateMovementProperties(MovementComponent &movementC) override;
 			void OnTakenDamage(DamageInfo &info, unsigned short oldHealth, unsigned short newHealth);
 			void OnTakeDamage(DamageInfo &info);
 			void MaintainAnimationMovement(const Vector3 &disp);
-			bool OnInput(std::string input, BaseEntity *activator, BaseEntity *caller, const std::string &data);
+			bool OnInput(std::string input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, const std::string &data);
 			void OnKilled(DamageInfo *damageInfo = nullptr);
-			bool HasCharacterNoTargetEnabled(const BaseEntity &ent) const;
+			bool HasCharacterNoTargetEnabled(const pragma::ecs::BaseEntity &ent) const;
 
 			// Animation
 			bool PlayAnimation(const AIAnimationInfo &info);

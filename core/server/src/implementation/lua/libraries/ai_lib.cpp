@@ -65,7 +65,7 @@ void Lua::ai::server::register_library(Lua::Interface &lua)
 	cdMoveToTarget.add_static_constant("PARAMETER_DISTANCE", umath::to_integral(pragma::ai::TaskMoveToTarget::Parameter::Distance));
 	cdMoveToTarget.add_static_constant("PARAMETER_MOVE_ACTIVITY", umath::to_integral(pragma::ai::TaskMoveToTarget::Parameter::MoveActivity));
 	cdMoveToTarget.def("SetMoveTarget", static_cast<void (*)(lua_State *, TaskWrapperMoveToTarget &, const Vector3 &)>([](lua_State *l, TaskWrapperMoveToTarget &task, const Vector3 &target) { task->SetTarget(target); }));
-	cdMoveToTarget.def("SetMoveTarget", static_cast<void (*)(lua_State *, TaskWrapperMoveToTarget &, BaseEntity &)>([](lua_State *l, TaskWrapperMoveToTarget &task, BaseEntity &ent) { task->SetTarget(ent.GetHandle()); }));
+	cdMoveToTarget.def("SetMoveTarget", static_cast<void (*)(lua_State *, TaskWrapperMoveToTarget &, pragma::ecs::BaseEntity &)>([](lua_State *l, TaskWrapperMoveToTarget &task, pragma::ecs::BaseEntity &ent) { task->SetTarget(ent.GetHandle()); }));
 	cdMoveToTarget.def("SetMoveDistance", static_cast<void (*)(lua_State *, TaskWrapperMoveToTarget &, float)>([](lua_State *l, TaskWrapperMoveToTarget &task, float dist) { task->SetMoveDistance(dist); }));
 	cdMoveToTarget.def("SetMoveActivity",
 	  static_cast<void (*)(lua_State *, TaskWrapperMoveToTarget &, std::underlying_type_t<Activity>)>([](lua_State *l, TaskWrapperMoveToTarget &task, std::underlying_type_t<Activity> activity) { task->SetMoveActivity(static_cast<Activity>(activity)); }));
@@ -89,7 +89,7 @@ void Lua::ai::server::register_library(Lua::Interface &lua)
 	cdPlayAnimation.def("SetAnimation", static_cast<void (*)(lua_State *, TaskWrapperPlayAnimation &, int32_t)>([](lua_State *l, TaskWrapperPlayAnimation &task, int32_t animation) { task->SetAnimation(animation); }));
 	cdPlayAnimation.def("SetAnimation", static_cast<void (*)(lua_State *, TaskWrapperPlayAnimation &, const std::string &)>([](lua_State *l, TaskWrapperPlayAnimation &task, const std::string &animation) { task->SetAnimation(animation); }));
 	cdPlayAnimation.def("SetFaceTarget", static_cast<void (*)(lua_State *, TaskWrapperPlayAnimation &, const Vector3 &)>([](lua_State *l, TaskWrapperPlayAnimation &task, const Vector3 &target) { task->SetFaceTarget(target); }));
-	cdPlayAnimation.def("SetFaceTarget", static_cast<void (*)(lua_State *, TaskWrapperPlayAnimation &, BaseEntity &)>([](lua_State *l, TaskWrapperPlayAnimation &task, BaseEntity &target) { task->SetFaceTarget(target); }));
+	cdPlayAnimation.def("SetFaceTarget", static_cast<void (*)(lua_State *, TaskWrapperPlayAnimation &, pragma::ecs::BaseEntity &)>([](lua_State *l, TaskWrapperPlayAnimation &task, pragma::ecs::BaseEntity &target) { task->SetFaceTarget(target); }));
 	cdPlayAnimation.def("SetFacePrimaryTarget", static_cast<void (*)(lua_State *, TaskWrapperPlayAnimation &)>([](lua_State *l, TaskWrapperPlayAnimation &task) { task->SetFacePrimaryTarget(); }));
 	modAi[cdPlayAnimation];
 
@@ -98,7 +98,7 @@ void Lua::ai::server::register_library(Lua::Interface &lua)
 	cdPlayActivity.add_static_constant("PARAMETER_FACE_TARGET", umath::to_integral(pragma::ai::TaskPlayActivity::Parameter::FaceTarget));
 	cdPlayActivity.def("SetActivity", static_cast<void (*)(lua_State *, TaskWrapperPlayActivity &, std::underlying_type_t<Activity>)>([](lua_State *l, TaskWrapperPlayActivity &task, std::underlying_type_t<Activity> activity) { task->SetActivity(static_cast<Activity>(activity)); }));
 	cdPlayActivity.def("SetFaceTarget", static_cast<void (*)(lua_State *, TaskWrapperPlayActivity &, const Vector3 &)>([](lua_State *l, TaskWrapperPlayActivity &task, const Vector3 &target) { task->SetFaceTarget(target); }));
-	cdPlayActivity.def("SetFaceTarget", static_cast<void (*)(lua_State *, TaskWrapperPlayActivity &, BaseEntity &)>([](lua_State *l, TaskWrapperPlayActivity &task, BaseEntity &target) { task->SetFaceTarget(target); }));
+	cdPlayActivity.def("SetFaceTarget", static_cast<void (*)(lua_State *, TaskWrapperPlayActivity &, pragma::ecs::BaseEntity &)>([](lua_State *l, TaskWrapperPlayActivity &task, pragma::ecs::BaseEntity &target) { task->SetFaceTarget(target); }));
 	cdPlayActivity.def("SetFacePrimaryTarget", static_cast<void (*)(lua_State *, TaskWrapperPlayActivity &)>([](lua_State *l, TaskWrapperPlayActivity &task) { task->SetFacePrimaryTarget(); }));
 	modAi[cdPlayActivity];
 

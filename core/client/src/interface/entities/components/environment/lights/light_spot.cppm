@@ -15,7 +15,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CLightSpotComponent final : public BaseEnvLightSpotComponent, public CBaseNetComponent, public MVPBias<1> {
 	  public:
-		CLightSpotComponent(BaseEntity &ent);
+		CLightSpotComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override;

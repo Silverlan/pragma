@@ -36,13 +36,13 @@ export {
 			static void BuildReflectionProbes(Game &game, std::vector<CReflectionProbeComponent *> &probes, bool rebuild = false);
 			static prosper::IDescriptorSet *FindDescriptorSetForClosestProbe(const CSceneComponent &scene, const Vector3 &origin, float &outIntensity);
 
-			CReflectionProbeComponent(BaseEntity &ent);
+			CReflectionProbeComponent(pragma::ecs::BaseEntity &ent);
 			virtual ~CReflectionProbeComponent() override;
 			virtual void Initialize() override;
 			virtual void OnEntitySpawn() override;
 			virtual void OnRemove() override;
 			virtual void InitializeLuaObject(lua_State *l) override;
-			bool CaptureIBLReflectionsFromScene(const std::vector<BaseEntity *> *optEntityList = nullptr, bool renderJob = false);
+			bool CaptureIBLReflectionsFromScene(const std::vector<pragma::ecs::BaseEntity *> *optEntityList = nullptr, bool renderJob = false);
 			bool GenerateIBLReflectionsFromEnvMap(const std::string &envMapFileName);
 			bool GenerateIBLReflectionsFromCubemap(prosper::Texture &cubemap);
 			bool LoadIBLReflectionsFromFile();
@@ -67,7 +67,7 @@ export {
 			void InitializeDescriptorSet();
 			void ClearDescriptorSet();
 			void ClearIblData();
-			util::ParallelJob<uimg::ImageLayerSet> CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, umath::Degree fov, float exposure, const std::vector<BaseEntity *> *optEntityList = nullptr,
+			util::ParallelJob<uimg::ImageLayerSet> CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, umath::Degree fov, float exposure, const std::vector<pragma::ecs::BaseEntity *> *optEntityList = nullptr,
 			bool renderJob = false);
 			bool FinalizeCubemap(prosper::IImage &imgCubemap);
 			std::string GetCubemapIBLMaterialPath() const;

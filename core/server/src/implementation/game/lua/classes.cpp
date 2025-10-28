@@ -87,10 +87,10 @@ void SGame::RegisterLuaClasses()
 			return {Vector3{1,2,3},Vector3{6,5,4},Vector3{8,7,8}};
 		})),
 
-		luabind::def("test_entity_param",static_cast<void(*)(BaseEntity*)>([](BaseEntity *ent) {
+		luabind::def("test_entity_param",static_cast<void(*)(pragma::ecs::BaseEntity*)>([](pragma::ecs::BaseEntity *ent) {
 			Con::cout<<"Entity: "<<*ent<<Con::endl;
 		})),
-		luabind::def("test_entity_ret",static_cast<BaseEntity*(*)(Game&)>([](Game &game) -> BaseEntity* {
+		luabind::def("test_entity_ret",static_cast<pragma::ecs::BaseEntity*(*)(Game&)>([](Game &game) -> pragma::ecs::BaseEntity* {
 			return &game.GetWorld()->GetEntity();
 		})),
 
@@ -126,31 +126,31 @@ void SGame::RegisterLuaClasses()
 			return game.GetWorld()->GetEntity().GetHandle();
 		})),
 
-		luabind::def("test_entity_const_param",static_cast<void(*)(const BaseEntity*)>([](const BaseEntity *ent) {
-			Con::cout<<"Entity: "<<const_cast<BaseEntity&>(*ent)<<Con::endl;
+		luabind::def("test_entity_const_param",static_cast<void(*)(const pragma::ecs::BaseEntity*)>([](const pragma::ecs::BaseEntity *ent) {
+			Con::cout<<"Entity: "<<const_cast<pragma::ecs::BaseEntity&>(*ent)<<Con::endl;
 		})),
-		luabind::def("test_entity_const_ret",static_cast<const BaseEntity*(*)(Game&)>([](Game &game) -> const BaseEntity* {
+		luabind::def("test_entity_const_ret",static_cast<const pragma::ecs::BaseEntity*(*)(Game&)>([](Game &game) -> const pragma::ecs::BaseEntity* {
 			return &game.GetWorld()->GetEntity();
 		})),
 
-		luabind::def("test_entity_null_param",static_cast<void(*)(BaseEntity*)>([](BaseEntity *ent) {
+		luabind::def("test_entity_null_param",static_cast<void(*)(pragma::ecs::BaseEntity*)>([](pragma::ecs::BaseEntity *ent) {
 			Con::cout<<"Entity: "<<ent<<Con::endl;
 		})),
-		luabind::def("test_entity_null_ret",static_cast<BaseEntity*(*)(Game&)>([](Game &game) -> BaseEntity* {
+		luabind::def("test_entity_null_ret",static_cast<pragma::ecs::BaseEntity*(*)(Game&)>([](Game &game) -> pragma::ecs::BaseEntity* {
 			return nullptr;
 		})),
 
-		luabind::def("test_entity_ref_param",static_cast<void(*)(BaseEntity&)>([](BaseEntity &ent) {
+		luabind::def("test_entity_ref_param",static_cast<void(*)(pragma::ecs::BaseEntity&)>([](pragma::ecs::BaseEntity &ent) {
 			Con::cout<<"Entity: "<<ent<<Con::endl;
 		})),
-		luabind::def("test_entity_ref_ret",static_cast<BaseEntity&(*)(Game&)>([](Game &game) -> BaseEntity& {
+		luabind::def("test_entity_ref_ret",static_cast<pragma::ecs::BaseEntity&(*)(Game&)>([](Game &game) -> pragma::ecs::BaseEntity& {
 			return game.GetWorld()->GetEntity();
 		})),
 
-		luabind::def("test_entity_ref_const_param",static_cast<void(*)(const BaseEntity&)>([](const BaseEntity &ent) {
-			Con::cout<<"Entity: "<<const_cast<BaseEntity&>(ent)<<Con::endl;
+		luabind::def("test_entity_ref_const_param",static_cast<void(*)(const pragma::ecs::BaseEntity&)>([](const pragma::ecs::BaseEntity &ent) {
+			Con::cout<<"Entity: "<<const_cast<pragma::ecs::BaseEntity&>(ent)<<Con::endl;
 		})),
-		luabind::def("test_entity_ref_const_ret",static_cast<const BaseEntity&(*)(Game&)>([](Game &game) -> const BaseEntity& {
+		luabind::def("test_entity_ref_const_ret",static_cast<const pragma::ecs::BaseEntity&(*)(Game&)>([](Game &game) -> const pragma::ecs::BaseEntity& {
 			return game.GetWorld()->GetEntity();
 		})),
 
@@ -217,7 +217,7 @@ void SGame::RegisterLuaClasses()
 	Lua::ModelMesh::register_class(modelMeshClassDef);
 	modelMeshClassDef.scope[luabind::def("Create", &Lua::ModelMesh::Server::Create)];
 
-	auto subModelMeshClassDef = luabind::class_<::ModelSubMesh>("Sub");
+	auto subModelMeshClassDef = luabind::class_<pragma::ModelSubMesh>("Sub");
 	Lua::ModelSubMesh::register_class(subModelMeshClassDef);
 	subModelMeshClassDef.scope[luabind::def("create", &Lua::ModelSubMesh::Server::Create)];
 

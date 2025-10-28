@@ -346,7 +346,7 @@ ConVar *ServerState::SetConVar(std::string scmd, std::string value, bool bApplyI
 	if(cvar == nullptr)
 		return nullptr;
 	auto flags = cvar->GetFlags();
-	if(((flags & ConVarFlags::Replicated) == ConVarFlags::Replicated || (flags & ConVarFlags::Notify) == ConVarFlags::Notify)) {
+	if(((flags & pragma::console::ConVarFlags::Replicated) == pragma::console::ConVarFlags::Replicated || (flags & pragma::console::ConVarFlags::Notify) == pragma::console::ConVarFlags::Notify)) {
 		auto *cl = Engine::Get()->GetClientState();
 		if(cl != nullptr) {
 			// This is a locally hosted game, just inform the client directly
@@ -378,7 +378,7 @@ void ServerState::ClearConCommands()
 
 bool ServerState::IsClientAuthenticationRequired() const { return IsMultiPlayer() && ServerState::Get()->GetConVarBool("sv_require_authentication"); }
 
-ConCommand *ServerState::CreateConCommand(const std::string &scmd, LuaFunction fc, ConVarFlags flags, const std::string &help)
+ConCommand *ServerState::CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags, const std::string &help)
 {
 	auto lscmd = scmd;
 	ustring::to_lower(lscmd);
@@ -437,7 +437,7 @@ Material *ServerState::LoadMaterial(const std::string &path, bool precache, bool
 }
 
 msys::MaterialManager &ServerState::GetMaterialManager() { return *Engine::Get()->GetServerStateInstance().materialManager; }
-ModelSubMesh *ServerState::CreateSubMesh() const { return new ModelSubMesh; }
+pragma::ModelSubMesh *ServerState::CreateSubMesh() const { return new pragma::ModelSubMesh; }
 ModelMesh *ServerState::CreateMesh() const { return new ModelMesh; }
 
 namespace {

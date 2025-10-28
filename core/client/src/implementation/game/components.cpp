@@ -168,7 +168,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 
 	auto *l = GetLuaState();
 	for(auto &evName : {"ON_UPDATE_RENDER_DATA", "ON_RENDER_BUFFERS_INITIALIZED"})
-		componentManager.RegisterEvent(evName, typeid(BaseEntity), pragma::ComponentEventInfo::Type::Broadcast);
+		componentManager.RegisterEvent(evName, typeid(pragma::ecs::BaseEntity), pragma::ComponentEventInfo::Type::Broadcast);
 }
 
-pragma::BaseEntityComponent *CGame::CreateLuaEntityComponent(BaseEntity &ent, std::string classname) { return Game::CreateLuaEntityComponent<pragma::CLuaBaseEntityComponent, pragma::lua::CLuaBaseEntityComponentHolder>(ent, classname); }
+pragma::BaseEntityComponent *CGame::CreateLuaEntityComponent(pragma::ecs::BaseEntity &ent, std::string classname) { return Game::CreateLuaEntityComponent<pragma::CLuaBaseEntityComponent, pragma::lua::CLuaBaseEntityComponentHolder>(ent, classname); }

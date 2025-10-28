@@ -15,7 +15,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SButtonComponent final : public BaseFuncButtonComponent {
 		public:
-			SButtonComponent(BaseEntity &ent) : BaseFuncButtonComponent(ent) {}
+			SButtonComponent(pragma::ecs::BaseEntity &ent) : BaseFuncButtonComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};

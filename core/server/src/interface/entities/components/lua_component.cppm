@@ -12,7 +12,7 @@ import pragma.server.entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SLuaBaseEntityComponent final : public BaseLuaBaseEntityComponent, public SBaseSnapshotComponent {
 	  public:
-		SLuaBaseEntityComponent(BaseEntity &ent);
+		SLuaBaseEntityComponent(pragma::ecs::BaseEntity &ent);
 
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual Bool ReceiveNetEvent(pragma::BasePlayerComponent &pl, pragma::NetEventId, NetPacket &packet) override;

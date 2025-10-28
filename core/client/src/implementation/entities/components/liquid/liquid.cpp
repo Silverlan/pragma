@@ -17,7 +17,7 @@ import :physics;
 
 using namespace pragma;
 
-CLiquidComponent::CLiquidComponent(BaseEntity &ent) : BaseFuncLiquidComponent(ent) { pragma::ecs::CParticleSystemComponent::Precache("water"); }
+CLiquidComponent::CLiquidComponent(pragma::ecs::BaseEntity &ent) : BaseFuncLiquidComponent(ent) { pragma::ecs::CParticleSystemComponent::Precache("water"); }
 CLiquidComponent::~CLiquidComponent() {}
 void CLiquidComponent::Initialize()
 {
@@ -225,5 +225,5 @@ static void debug_water(NetworkState *state, pragma::BasePlayerComponent *pl, st
 		Con::cwar << "No water entity found!" << Con::endl;
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_water", &debug_water, ConVarFlags::None, "Displays the reflection, refraction and refraction depth map for the given water-entity on screen. Call without arguments to turn the display off. Usage: debug_light_water <waterEntityIndex>");
+	auto UVN = pragma::console::client::register_command("debug_water", &debug_water, pragma::console::ConVarFlags::None, "Displays the reflection, refraction and refraction depth map for the given water-entity on screen. Call without arguments to turn the display off. Usage: debug_light_water <waterEntityIndex>");
 }

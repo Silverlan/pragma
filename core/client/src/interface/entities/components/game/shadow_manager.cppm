@@ -74,7 +74,7 @@ export namespace pragma {
 	  public:
 		static CShadowManagerComponent *GetShadowManager();
 
-		CShadowManagerComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CShadowManagerComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void Initialize() override;
 		virtual void OnRemove() override;

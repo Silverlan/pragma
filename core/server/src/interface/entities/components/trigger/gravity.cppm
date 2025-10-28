@@ -15,12 +15,12 @@ export {
 	namespace pragma {
 		class DLLSERVER STriggerGravityComponent final : public BaseEntityTriggerGravityComponent {
 		public:
-			STriggerGravityComponent(BaseEntity &ent) : BaseEntityTriggerGravityComponent(ent) {}
+			STriggerGravityComponent(pragma::ecs::BaseEntity &ent) : BaseEntityTriggerGravityComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua_State *l) override;
 		protected:
-			virtual void OnStartTouch(BaseEntity *ent) override;
-			virtual void OnResetGravity(BaseEntity *ent, GravitySettings &settings) override;
+			virtual void OnStartTouch(pragma::ecs::BaseEntity *ent) override;
+			virtual void OnResetGravity(pragma::ecs::BaseEntity *ent, GravitySettings &settings) override;
 		};
 	};
 

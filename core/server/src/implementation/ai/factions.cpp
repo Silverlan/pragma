@@ -91,7 +91,7 @@ DISPOSITION Faction::GetDisposition(EntityHandle &hEnt, int *priority)
 	}
 	return GetDisposition(hEnt->GetClass(), priority);
 }
-DISPOSITION Faction::GetDisposition(BaseEntity *ent, int *priority)
+DISPOSITION Faction::GetDisposition(pragma::ecs::BaseEntity *ent, int *priority)
 {
 	if(ent == NULL) {
 		if(priority != NULL)

@@ -72,7 +72,7 @@ void CPBRConverterComponent::ProcessQueue()
 	pragma::get_cengine()->AddParallelJob(item.job, "Ambient Occlusion");
 }
 
-void CPBRConverterComponent::UpdateAmbientOcclusion(Model &mdl, const AmbientOcclusionInfo &aoInfo, BaseEntity *optEnt)
+void CPBRConverterComponent::UpdateAmbientOcclusion(Model &mdl, const AmbientOcclusionInfo &aoInfo, pragma::ecs::BaseEntity *optEnt)
 {
 	ConvertMaterialsToPBR(mdl);
 

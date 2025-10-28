@@ -15,7 +15,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CFuncSoftPhysicsComponent final : public BaseFuncSoftPhysicsComponent {
 		public:
-			CFuncSoftPhysicsComponent(BaseEntity &ent) : BaseFuncSoftPhysicsComponent(ent) {}
+			CFuncSoftPhysicsComponent(pragma::ecs::BaseEntity &ent) : BaseFuncSoftPhysicsComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};

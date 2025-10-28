@@ -15,7 +15,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CSoundComponent final : public BaseEnvSoundComponent, public CBaseNetComponent {
 	  public:
-		CSoundComponent(BaseEntity &ent) : BaseEnvSoundComponent(ent) {}
+		CSoundComponent(pragma::ecs::BaseEntity &ent) : BaseEnvSoundComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		float GetMaxDistance() const;
 		virtual void InitializeLuaObject(lua_State *l) override;

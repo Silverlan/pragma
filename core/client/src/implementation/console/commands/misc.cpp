@@ -64,52 +64,52 @@ static void CMD_lua_reload_weapons(NetworkState *state, pragma::BasePlayerCompon
 
 namespace {
 	using namespace pragma::console::client;
-	auto UVN = register_command("cl_entities", &CMD_entities_cl, ConVarFlags::None, "Prints a list of all current clientside entities in the world.");
-	auto UVN = register_command("setpos", &CMD_setpos, ConVarFlags::None, "Changes the position of the local player. Requires cheats to be enabled. Usage: setpos <x> <y> <z>");
-	auto UVN = register_command("getpos", &CMD_getpos, ConVarFlags::None, "Prints the current position of the local player to the console.");
-	auto UVN = register_command("setcampos", &CMD_setcampos, ConVarFlags::None, "Changes the current position of the camera.");
-	auto UVN = register_command("getcampos", &CMD_getcampos, ConVarFlags::None, "Prints the current position of the camera.");
-	auto UVN = register_command("setang", &CMD_setang, ConVarFlags::None, "Changes the angles of the local player. Requires cheats to be enabled. Usage: setang <pitch> <yaw> <roll>");
-	auto UVN = register_command("getang", &CMD_getang, ConVarFlags::None, "Prints the current angles of the local player to the console.");
-	auto UVN = register_command("setcamang", &CMD_setcamang, ConVarFlags::None, "Changes the current angles of the camera to the console.");
-	auto UVN = register_command("getcamang", &CMD_getcamang, ConVarFlags::None, "Prints the current angles of the camera to the console.");
-	auto UVN = register_command("sound_play", &CMD_sound_play, ConVarFlags::None, "Precaches and immediately plays the given sound file. Usage: sound_play <soundFile>");
-	auto UVN = register_command("sound_stop", &CMD_sound_stop, ConVarFlags::None, "Stops all sounds that are currently playing.");
-	auto UVN = register_command("status", &CMD_status_cl, ConVarFlags::None, "Prints information about the current connection to the console.");
-	auto UVN = register_command("screenshot", &CMD_screenshot, ConVarFlags::None,
+	auto UVN = register_command("cl_entities", &CMD_entities_cl, pragma::console::ConVarFlags::None, "Prints a list of all current clientside entities in the world.");
+	auto UVN = register_command("setpos", &CMD_setpos, pragma::console::ConVarFlags::None, "Changes the position of the local player. Requires cheats to be enabled. Usage: setpos <x> <y> <z>");
+	auto UVN = register_command("getpos", &CMD_getpos, pragma::console::ConVarFlags::None, "Prints the current position of the local player to the console.");
+	auto UVN = register_command("setcampos", &CMD_setcampos, pragma::console::ConVarFlags::None, "Changes the current position of the camera.");
+	auto UVN = register_command("getcampos", &CMD_getcampos, pragma::console::ConVarFlags::None, "Prints the current position of the camera.");
+	auto UVN = register_command("setang", &CMD_setang, pragma::console::ConVarFlags::None, "Changes the angles of the local player. Requires cheats to be enabled. Usage: setang <pitch> <yaw> <roll>");
+	auto UVN = register_command("getang", &CMD_getang, pragma::console::ConVarFlags::None, "Prints the current angles of the local player to the console.");
+	auto UVN = register_command("setcamang", &CMD_setcamang, pragma::console::ConVarFlags::None, "Changes the current angles of the camera to the console.");
+	auto UVN = register_command("getcamang", &CMD_getcamang, pragma::console::ConVarFlags::None, "Prints the current angles of the camera to the console.");
+	auto UVN = register_command("sound_play", &CMD_sound_play, pragma::console::ConVarFlags::None, "Precaches and immediately plays the given sound file. Usage: sound_play <soundFile>");
+	auto UVN = register_command("sound_stop", &CMD_sound_stop, pragma::console::ConVarFlags::None, "Stops all sounds that are currently playing.");
+	auto UVN = register_command("status", &CMD_status_cl, pragma::console::ConVarFlags::None, "Prints information about the current connection to the console.");
+	auto UVN = register_command("screenshot", &CMD_screenshot, pragma::console::ConVarFlags::None,
 	"Writes the contents of the screen into a .tga-file in 'screenshots/'. The name of the file will start with the map's name, or '" + engine_info::get_identifier()
 		+ "' if no map is loaded. After the name follows an ID which is incremented each time. You can use 'screenshot 1' to take a screenshot without the GUI (Ingame only).");
-	auto UVN = register_command("thirdperson", &CMD_thirdperson, ConVarFlags::None, "Toggles between first- and third-person mode.");
-	auto UVN = register_command("shader_reload", &CMD_shader_reload, ConVarFlags::None, "Reloads a specific shader, or all registered shaders if no arguments are given. Usage: shader_reload <shaderName>");
-	auto UVN = register_command("shader_list", &CMD_shader_list, ConVarFlags::None, "Prints a list of all currently loaded shaders");
-	auto UVN = register_command("shader_optimize", &CMD_shader_optimize, ConVarFlags::None, "Uses LunarGLASS to optimize the specified shader.");
-	auto UVN = register_command("debug_ai_schedule_print", &CMD_debug_ai_schedule_print, ConVarFlags::None, "Prints the current schedule behavior tree for the specified NPC.");
+	auto UVN = register_command("thirdperson", &CMD_thirdperson, pragma::console::ConVarFlags::None, "Toggles between first- and third-person mode.");
+	auto UVN = register_command("shader_reload", &CMD_shader_reload, pragma::console::ConVarFlags::None, "Reloads a specific shader, or all registered shaders if no arguments are given. Usage: shader_reload <shaderName>");
+	auto UVN = register_command("shader_list", &CMD_shader_list, pragma::console::ConVarFlags::None, "Prints a list of all currently loaded shaders");
+	auto UVN = register_command("shader_optimize", &CMD_shader_optimize, pragma::console::ConVarFlags::None, "Uses LunarGLASS to optimize the specified shader.");
+	auto UVN = register_command("debug_ai_schedule_print", &CMD_debug_ai_schedule_print, pragma::console::ConVarFlags::None, "Prints the current schedule behavior tree for the specified NPC.");
 
-	auto UVN = register_command("flashlight", &CMD_flashlight_toggle, ConVarFlags::None, "Toggles the flashlight.");
-	auto UVN = register_command("reloadmaterial", &CMD_reloadmaterial, ConVarFlags::None, "Reloads the given material (and textures associated with it). Usage: reloadmaterial <materialFile>");
-	auto UVN = register_command("reloadmaterials", &CMD_reloadmaterials, ConVarFlags::None, "Reloads all loaded materials and textures.");
-	auto UVN = register_command("cl_list", &Console::commands::cl_list, ConVarFlags::None, "Prints a list of all clientside console commands to the console.");
-	auto UVN = register_command("cl_find", &Console::commands::cl_find, ConVarFlags::None, "Finds similar console commands to whatever was given as argument.");
-	auto UVN = register_command("fps", &CMD_fps, ConVarFlags::None, "Prints the current fps to the console.");
+	auto UVN = register_command("flashlight", &CMD_flashlight_toggle, pragma::console::ConVarFlags::None, "Toggles the flashlight.");
+	auto UVN = register_command("reloadmaterial", &CMD_reloadmaterial, pragma::console::ConVarFlags::None, "Reloads the given material (and textures associated with it). Usage: reloadmaterial <materialFile>");
+	auto UVN = register_command("reloadmaterials", &CMD_reloadmaterials, pragma::console::ConVarFlags::None, "Reloads all loaded materials and textures.");
+	auto UVN = register_command("cl_list", &Console::commands::cl_list, pragma::console::ConVarFlags::None, "Prints a list of all clientside console commands to the console.");
+	auto UVN = register_command("cl_find", &Console::commands::cl_find, pragma::console::ConVarFlags::None, "Finds similar console commands to whatever was given as argument.");
+	auto UVN = register_command("fps", &CMD_fps, pragma::console::ConVarFlags::None, "Prints the current fps to the console.");
 
-	auto UVN = register_command("vk_dump_limits", &Console::commands::vk_dump_limits, ConVarFlags::None, "Dumps all vulkan limitations to 'vk_limits.txt'.");
-	auto UVN = register_command("vk_dump_features", &Console::commands::vk_dump_features, ConVarFlags::None, "Dumps all vulkan features to 'vk_features.txt'.");
-	auto UVN = register_command("vk_dump_format_properties", &Console::commands::vk_dump_format_properties, ConVarFlags::None, "Dumps all vulkan format properties to 'vk_format_properties.txt'.");
-	auto UVN = register_command("vk_dump_image_format_properties", &Console::commands::vk_dump_image_format_properties, ConVarFlags::None, "Dumps all vulkan image format properties to 'vk_image_format_properties.txt'.");
-	auto UVN = register_command("vk_dump_layers", &Console::commands::vk_dump_layers, ConVarFlags::None, "Dumps all available vulkan layers to 'vk_layers.txt'.");
-	auto UVN = register_command("vk_dump_extensions", &Console::commands::vk_dump_extensions, ConVarFlags::None, "Dumps all available vulkan extensions to 'vk_extensions.txt'.");
-	auto UVN = register_command("vk_dump_memory_stats", &Console::commands::vk_dump_memory_stats, ConVarFlags::None, "Dumps information about currently allocated GPU memory.");
-	auto UVN = register_command("vk_print_memory_stats", &Console::commands::vk_print_memory_stats, ConVarFlags::None, "Prints information about currently allocated GPU memory to the console.");
+	auto UVN = register_command("vk_dump_limits", &Console::commands::vk_dump_limits, pragma::console::ConVarFlags::None, "Dumps all vulkan limitations to 'vk_limits.txt'.");
+	auto UVN = register_command("vk_dump_features", &Console::commands::vk_dump_features, pragma::console::ConVarFlags::None, "Dumps all vulkan features to 'vk_features.txt'.");
+	auto UVN = register_command("vk_dump_format_properties", &Console::commands::vk_dump_format_properties, pragma::console::ConVarFlags::None, "Dumps all vulkan format properties to 'vk_format_properties.txt'.");
+	auto UVN = register_command("vk_dump_image_format_properties", &Console::commands::vk_dump_image_format_properties, pragma::console::ConVarFlags::None, "Dumps all vulkan image format properties to 'vk_image_format_properties.txt'.");
+	auto UVN = register_command("vk_dump_layers", &Console::commands::vk_dump_layers, pragma::console::ConVarFlags::None, "Dumps all available vulkan layers to 'vk_layers.txt'.");
+	auto UVN = register_command("vk_dump_extensions", &Console::commands::vk_dump_extensions, pragma::console::ConVarFlags::None, "Dumps all available vulkan extensions to 'vk_extensions.txt'.");
+	auto UVN = register_command("vk_dump_memory_stats", &Console::commands::vk_dump_memory_stats, pragma::console::ConVarFlags::None, "Dumps information about currently allocated GPU memory.");
+	auto UVN = register_command("vk_print_memory_stats", &Console::commands::vk_print_memory_stats, pragma::console::ConVarFlags::None, "Prints information about currently allocated GPU memory to the console.");
 
 	#ifdef _DEBUG
-	auto UVN = register_command("cl_dump_sounds", &CMD_cl_dump_sounds, ConVarFlags::None, "Prints information about all active sounds to the console.");
-	auto UVN = register_command("cl_dump_netmessages", &CMD_cl_dump_netmessages, ConVarFlags::None, "Prints all registered netmessages to the console.");
+	auto UVN = register_command("cl_dump_sounds", &CMD_cl_dump_sounds, pragma::console::ConVarFlags::None, "Prints information about all active sounds to the console.");
+	auto UVN = register_command("cl_dump_netmessages", &CMD_cl_dump_netmessages, pragma::console::ConVarFlags::None, "Prints all registered netmessages to the console.");
 	#endif
 	
-	auto UVN = register_command("lua_reload_entity", &CMD_lua_reload_entity, ConVarFlags::None, "Reloads the scripts for the given entity class. Usage: lua_reload_entity <className>");
-	auto UVN = register_command("lua_reload_weapon", &CMD_lua_reload_weapon, ConVarFlags::None, "Reloads the scripts for the given weapon class. Usage: lua_reload_weapon <className>");
-	auto UVN = register_command("lua_reload_entities", &CMD_lua_reload_entities, ConVarFlags::None, "Reloads the scripts for all registered lua entity classes.");
-	auto UVN = register_command("lua_reload_weapons", &CMD_lua_reload_weapons, ConVarFlags::None, "Reloads the scripts for all registered lua weapon classes.");
+	auto UVN = register_command("lua_reload_entity", &CMD_lua_reload_entity, pragma::console::ConVarFlags::None, "Reloads the scripts for the given entity class. Usage: lua_reload_entity <className>");
+	auto UVN = register_command("lua_reload_weapon", &CMD_lua_reload_weapon, pragma::console::ConVarFlags::None, "Reloads the scripts for the given weapon class. Usage: lua_reload_weapon <className>");
+	auto UVN = register_command("lua_reload_entities", &CMD_lua_reload_entities, pragma::console::ConVarFlags::None, "Reloads the scripts for all registered lua entity classes.");
+	auto UVN = register_command("lua_reload_weapons", &CMD_lua_reload_weapons, pragma::console::ConVarFlags::None, "Reloads the scripts for all registered lua weapon classes.");
 }
 
 void CMD_lua_reload_entity(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
@@ -334,7 +334,7 @@ void CMD_sound_play(NetworkState *, pragma::BasePlayerComponent *, std::vector<s
 	auto *client = pragma::get_client_state();
 	if(client->PrecacheSound(argv[0]) == false)
 		return;
-	client->PlaySound(argv[0], ALSoundType::GUI, ALCreateFlags::None);
+	client->PlaySound(argv[0], pragma::audio::ALSoundType::GUI, pragma::audio::ALCreateFlags::None);
 }
 
 void CMD_sound_stop(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { pragma::get_client_state()->StopSounds(); }
@@ -637,7 +637,7 @@ void CMD_debug_ai_schedule_print(NetworkState *state, pragma::BasePlayerComponen
 	if(charComponent.expired())
 		return;
 	auto ents = command::find_target_entity(state, *charComponent, argv);
-	BaseEntity *npc = nullptr;
+	pragma::ecs::BaseEntity *npc = nullptr;
 	for(auto *ent : ents) {
 		if(ent->IsNPC() == false)
 			continue;

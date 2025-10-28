@@ -22,7 +22,7 @@ export namespace Lua {
 			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawLine(const Vector3 &start, const Vector3 &end);
 			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawBox(const Vector3 &start, const Vector3 &end, const DebugRenderInfo &renderInfo);
 			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawMeshes(const std::vector<Vector3> &verts, const DebugRenderInfo &renderInfo);
-			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawMesh(const ::ModelSubMesh &mesh, const DebugRenderInfo &renderInfo);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawMesh(const pragma::ModelSubMesh &mesh, const DebugRenderInfo &renderInfo);
 			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawSphere(float radius, const DebugRenderInfo &renderInfo, uint32_t recursionLevel = 1);
 			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawTruncatedCone(float startRadius, const Vector3 &dir, float dist, float endRadius, const DebugRenderInfo &renderInfo, uint32_t segmentCount = 12);
 			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawCylinder(float radius, const Vector3 &dir, float dist, const DebugRenderInfo &renderInfo, uint32_t segmentCount = 12);

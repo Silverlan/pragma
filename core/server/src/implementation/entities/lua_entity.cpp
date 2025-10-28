@@ -17,7 +17,7 @@ SLuaEntity::SLuaEntity() : SBaseEntity {} {}
 void SLuaEntity::Initialize()
 {
 	// We're skipping SBaseEntity on purpose, because it would overwrite our Lua class name
-	BaseEntity::Initialize();
+	pragma::ecs::BaseEntity::Initialize();
 }
 void SLuaEntity::SetupLua(const luabind::object &o, const std::string &className)
 {

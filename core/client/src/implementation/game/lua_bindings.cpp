@@ -225,11 +225,11 @@ void CGame::RegisterLua()
 	    {"create_scene", Lua::game::Client::create_scene}});
 	modEnts[luabind::def("register_component_event", &Lua::ents::register_component_event)];
 
-	auto entityClassDef = luabind::class_<BaseEntity>("BaseEntityBase");
+	auto entityClassDef = luabind::class_<pragma::ecs::BaseEntity>("BaseEntityBase");
 	Lua::Entity::register_class(entityClassDef);
 	modEnts[entityClassDef];
 
-	auto cEntityClassDef = luabind::class_<CBaseEntity, BaseEntity>("Entity");
+	auto cEntityClassDef = luabind::class_<CBaseEntity, pragma::ecs::BaseEntity>("Entity");
 	Lua::Entity::Client::register_class(cEntityClassDef);
 	modEnts[cEntityClassDef];
 

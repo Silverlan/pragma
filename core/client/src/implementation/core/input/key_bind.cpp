@@ -101,7 +101,7 @@ bool KeyBind::Execute(pragma::platform::KeyState inputState, pragma::platform::K
 				pragma::get_cengine()->RunConsoleCommand(info.cmd, info.argv, static_cast<KeyState>(pressState), magnitude, [&info, &bExecutedCmd, pressState, bReleased, bAxisInput, bNegativeAxis, bActionCmd](ConConf *cf, float &magnitude) -> bool {
 					auto cmdReleased = bReleased;
 					auto flags = cf->GetFlags();
-					auto bSingleAxis = ((flags & ConVarFlags::JoystickAxisSingle) != ConVarFlags::None) ? true : false;
+					auto bSingleAxis = ((flags & pragma::console::ConVarFlags::JoystickAxisSingle) != pragma::console::ConVarFlags::None) ? true : false;
 					if(bNegativeAxis == true) {
 						if(bAxisInput == false || bSingleAxis == false)
 							return false;
@@ -114,7 +114,7 @@ bool KeyBind::Execute(pragma::platform::KeyState inputState, pragma::platform::K
 						// invalidKeyState is true if the input is neither pressed, nor released
 						auto invalidKeyState = (pressState == pragma::platform::KeyState::Invalid) ? true : false;
 
-						if((flags & ConVarFlags::JoystickAxisContinuous) != ConVarFlags::None && (cmdReleased == true || invalidKeyState == true))
+						if((flags & pragma::console::ConVarFlags::JoystickAxisContinuous) != pragma::console::ConVarFlags::None && (cmdReleased == true || invalidKeyState == true))
 							cmdReleased = (pragma::get_cengine()->IsValidAxisInput(magnitude) == false) ? true : false; // Input won't count as 'released' unless joystick axis is at home position (near 0)
 						else if(invalidKeyState == true) {
 							bExecutedCmd = true; // Special case; Don't execute other commands

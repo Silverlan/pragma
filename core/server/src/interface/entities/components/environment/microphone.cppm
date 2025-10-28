@@ -15,7 +15,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SMicrophoneComponent final : public BaseEnvMicrophoneComponent {
 		public:
-			SMicrophoneComponent(BaseEntity &ent) : BaseEnvMicrophoneComponent(ent) {}
+			SMicrophoneComponent(pragma::ecs::BaseEntity &ent) : BaseEnvMicrophoneComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};

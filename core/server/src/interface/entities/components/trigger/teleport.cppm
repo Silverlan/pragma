@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLSERVER STriggerTeleportComponent final : public BaseTriggerTeleportComponent {
 		public:
-			STriggerTeleportComponent(BaseEntity &ent) : BaseTriggerTeleportComponent(ent) {}
+			STriggerTeleportComponent(pragma::ecs::BaseEntity &ent) : BaseTriggerTeleportComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};

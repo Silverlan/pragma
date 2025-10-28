@@ -14,7 +14,7 @@ import :entities.base_entity;
 export namespace pragma {
 	class DLLCLIENT CExplosionComponent final : public BaseEnvExplosionComponent {
 	  public:
-		CExplosionComponent(BaseEntity &ent) : BaseEnvExplosionComponent(ent) {}
+		CExplosionComponent(pragma::ecs::BaseEntity &ent) : BaseEnvExplosionComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void Explode() override;
 		virtual void InitializeLuaObject(lua_State *l) override;

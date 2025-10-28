@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SWindComponent final : public BaseEnvWindComponent, public SBaseNetComponent {
 		public:
-			SWindComponent(BaseEntity &ent) : BaseEnvWindComponent(ent) {}
+			SWindComponent(pragma::ecs::BaseEntity &ent) : BaseEnvWindComponent(ent) {}
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual void InitializeLuaObject(lua_State *l) override;

@@ -37,7 +37,7 @@ void CAttachmentComponent::ReceiveData(NetPacket &packet)
 		}
 
 		auto hThis = GetHandle();
-		nwm::read_unique_entity(packet, [this, hThis, att, bone, flags, offset, rot, bBoneMapping, boneMapping](BaseEntity *ent) {
+		nwm::read_unique_entity(packet, [this, hThis, att, bone, flags, offset, rot, bBoneMapping, boneMapping](pragma::ecs::BaseEntity *ent) {
 			if(hThis.expired())
 				return;
 			if(m_attachment == nullptr)
@@ -54,7 +54,7 @@ void CAttachmentComponent::ReceiveData(NetPacket &packet)
 
 void CAttachmentComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseAttachmentComponent)); }
 
-void CAttachmentComponent::UpdateViewAttachmentOffset(BaseEntity *ent, pragma::BaseCharacterComponent &pl, Vector3 &pos, Quat &rot, Bool bYawOnly) const
+void CAttachmentComponent::UpdateViewAttachmentOffset(pragma::ecs::BaseEntity *ent, pragma::BaseCharacterComponent &pl, Vector3 &pos, Quat &rot, Bool bYawOnly) const
 {
 	auto *scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
 	auto cam = scene ? scene->GetActiveCamera() : pragma::ComponentHandle<pragma::CCameraComponent> {};

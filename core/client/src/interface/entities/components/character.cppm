@@ -16,7 +16,7 @@ export namespace pragma {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
-		CCharacterComponent(BaseEntity &ent);
+		CCharacterComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual bool ShouldTransmitNetData() const override { return false; }

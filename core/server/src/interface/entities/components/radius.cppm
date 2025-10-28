@@ -14,7 +14,7 @@ import pragma.server.entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SRadiusComponent final : public BaseRadiusComponent, public SBaseNetComponent {
 	  public:
-		SRadiusComponent(BaseEntity &ent) : BaseRadiusComponent(ent) {}
+		SRadiusComponent(pragma::ecs::BaseEntity &ent) : BaseRadiusComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }

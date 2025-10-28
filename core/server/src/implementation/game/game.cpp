@@ -95,7 +95,7 @@ void SGame::OnRemove()
 
 bool SGame::RunLua(const std::string &lua) { return Game::RunLua(lua, "lua_run"); }
 
-void SGame::OnEntityCreated(BaseEntity *ent) { Game::OnEntityCreated(ent); }
+void SGame::OnEntityCreated(pragma::ecs::BaseEntity *ent) { Game::OnEntityCreated(ent); }
 
 static CVar cvTimescale = GetServerConVar("host_timescale");
 float SGame::GetTimeScale() { return cvTimescale->GetFloat(); }
@@ -148,7 +148,7 @@ void SGame::SetUp()
 }
 
 std::shared_ptr<ModelMesh> SGame::CreateModelMesh() const { return std::make_shared<ModelMesh>(); }
-std::shared_ptr<ModelSubMesh> SGame::CreateModelSubMesh() const { return std::make_shared<ModelSubMesh>(); }
+std::shared_ptr<pragma::ModelSubMesh> SGame::CreateModelSubMesh() const { return std::make_shared<pragma::ModelSubMesh>(); }
 
 bool SGame::LoadMap(const std::string &map, const Vector3 &origin, std::vector<EntityHandle> *entities)
 {
@@ -379,7 +379,7 @@ bool SGame::InitializeGameMode()
 
 CacheInfo *SGame::GetLuaCacheInfo() { return m_luaCache.get(); }
 
-void SGame::CreateExplosion(const Vector3 &origin, Float radius, DamageInfo &dmg, const std::function<bool(BaseEntity *, DamageInfo &)> &callback)
+void SGame::CreateExplosion(const Vector3 &origin, Float radius, DamageInfo &dmg, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback)
 {
 	SplashDamage(origin, radius, dmg, callback);
 
@@ -388,7 +388,7 @@ void SGame::CreateExplosion(const Vector3 &origin, Float radius, DamageInfo &dmg
 	p->Write<float>(radius);
 	ServerState::Get()->SendPacket("create_explosion", p, pragma::networking::Protocol::SlowReliable);
 }
-void SGame::CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force, BaseEntity *attacker, BaseEntity *inflictor, const std::function<bool(BaseEntity *, DamageInfo &)> &callback)
+void SGame::CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback)
 {
 	DamageInfo info;
 	info.SetForce(Vector3(force, 0.f, 0.f));
@@ -398,9 +398,9 @@ void SGame::CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, 
 	info.SetDamageType(DAMAGETYPE::EXPLOSION);
 	CreateExplosion(origin, radius, info, callback);
 }
-void SGame::CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force, const EntityHandle &attacker, const EntityHandle &inflictor, const std::function<bool(BaseEntity *, DamageInfo &)> &callback)
+void SGame::CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force, const EntityHandle &attacker, const EntityHandle &inflictor, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback)
 {
-	CreateExplosion(origin, radius, damage, force, const_cast<BaseEntity *>(attacker.get()), const_cast<BaseEntity *>(inflictor.get()), callback);
+	CreateExplosion(origin, radius, damage, force, const_cast<pragma::ecs::BaseEntity *>(attacker.get()), const_cast<pragma::ecs::BaseEntity *>(inflictor.get()), callback);
 }
 void SGame::OnClientDropped(pragma::networking::IServerClient &client, pragma::networking::DropReason reason)
 {
@@ -535,7 +535,7 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, NetPacke
 		auto &cf = pair.second;
 		if(cf->GetType() == ConType::Var) {
 			auto *cv = static_cast<ConVar *>(cf.get());
-			if((cv->GetFlags() & ConVarFlags::Replicated) != ConVarFlags::None && cv->GetString() != cv->GetDefault()) {
+			if((cv->GetFlags() & pragma::console::ConVarFlags::Replicated) != pragma::console::ConVarFlags::None && cv->GetString() != cv->GetDefault()) {
 				auto id = cv->GetID();
 				packetInf->Write<uint32_t>(id);
 				if(id == 0)
@@ -618,7 +618,7 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, NetPacke
 	auto &sounds = ServerState::Get()->GetSounds();
 	for(auto &sndRef : sounds) {
 		auto *snd = dynamic_cast<SALSound *>(&sndRef.get());
-		if(snd == nullptr || umath::is_flag_set(snd->GetCreateFlags(), ALCreateFlags::DontTransmit))
+		if(snd == nullptr || umath::is_flag_set(snd->GetCreateFlags(), pragma::audio::ALCreateFlags::DontTransmit))
 			continue;
 		ServerState::Get()->SendSoundSourceToClient(*snd, true, &rp);
 	}

@@ -14,7 +14,7 @@ import :scripting.lua.classes.model;
 import :assets;
 import :client_state;
 
-std::shared_ptr<Model> Lua::Model::Client::create_generic_model(Game &game, ::ModelSubMesh &subMesh)
+std::shared_ptr<Model> Lua::Model::Client::create_generic_model(Game &game, pragma::ModelSubMesh &subMesh)
 {
 	auto mesh = game.CreateModelMesh();
 	mesh->AddSubMesh(subMesh.shared_from_this());

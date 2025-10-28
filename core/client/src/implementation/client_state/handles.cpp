@@ -203,7 +203,7 @@ void ClientState::HandleReceiveGameInfo(NetPacket &packet)
 			if(cf != nullptr) {
 				if(cf->GetType() == ConType::Var) {
 					auto *cv = static_cast<ConVar *>(cf);
-					if((cv->GetFlags() & ConVarFlags::Replicated) != ConVarFlags::None)
+					if((cv->GetFlags() & pragma::console::ConVarFlags::Replicated) != pragma::console::ConVarFlags::None)
 						SetConVar(cvar, value);
 				}
 			}
@@ -293,7 +293,7 @@ void ClientState::HandleReceiveGameInfo(NetPacket &packet)
 
 	ReadEntityData(packet);
 
-	BaseEntity *wrld = nwm::read_entity(packet);
+	pragma::ecs::BaseEntity *wrld = nwm::read_entity(packet);
 	if(wrld != NULL) {
 		auto pWorldComponent = wrld->GetComponent<pragma::CWorldComponent>();
 		game->SetWorld(pWorldComponent.get());

@@ -63,7 +63,7 @@ export namespace pragma {
 		};
 #pragma pack(pop)
 
-		CRaytracingComponent(BaseEntity &ent);
+		CRaytracingComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual ~CRaytracingComponent() override;
 

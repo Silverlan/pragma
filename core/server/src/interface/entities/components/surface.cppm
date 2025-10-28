@@ -14,7 +14,7 @@ import pragma.server.entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SSurfaceComponent final : public BaseSurfaceComponent, public SBaseNetComponent {
 	  public:
-		SSurfaceComponent(BaseEntity &ent) : BaseSurfaceComponent(ent) {}
+		SSurfaceComponent(pragma::ecs::BaseEntity &ent) : BaseSurfaceComponent(ent) {}
 		virtual void SetPlane(const umath::Plane &plane) override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }

@@ -22,7 +22,7 @@ namespace {
 	});
 };
 
-SLiquidSurfaceSimulationComponent::SLiquidSurfaceSimulationComponent(BaseEntity &ent) : BaseLiquidSurfaceSimulationComponent(ent) { s_waterEntities.push_back(this); }
+SLiquidSurfaceSimulationComponent::SLiquidSurfaceSimulationComponent(pragma::ecs::BaseEntity &ent) : BaseLiquidSurfaceSimulationComponent(ent) { s_waterEntities.push_back(this); }
 SLiquidSurfaceSimulationComponent::~SLiquidSurfaceSimulationComponent()
 {
 	if(m_cbClientSimulatorUpdate.IsValid())

@@ -83,7 +83,7 @@ void CLightMapReceiverComponent::UpdateLightMapUvData()
 }
 const LightmapDataCache *CLightMapReceiverComponent::GetLightmapDataCache() const { return m_lightmapDataCache.get(); }
 void CLightMapReceiverComponent::SetLightmapDataCache(LightmapDataCache *cache) { m_lightmapDataCache = cache ? cache->shared_from_this() : nullptr; }
-const std::vector<Vector2> *CLightMapReceiverComponent::FindLightmapUvSet(ModelSubMesh &mesh) const
+const std::vector<Vector2> *CLightMapReceiverComponent::FindLightmapUvSet(pragma::ModelSubMesh &mesh) const
 {
 	auto *cache = GetLightmapDataCache();
 	if(cache)

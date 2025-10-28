@@ -13,7 +13,7 @@ import pragma.server.entities;
 
 using namespace pragma;
 
-SLuaBaseEntityComponent::SLuaBaseEntityComponent(BaseEntity &ent) : BaseLuaBaseEntityComponent(ent), SBaseSnapshotComponent() {}
+SLuaBaseEntityComponent::SLuaBaseEntityComponent(pragma::ecs::BaseEntity &ent) : BaseLuaBaseEntityComponent(ent), SBaseSnapshotComponent() {}
 void SLuaBaseEntityComponent::OnMemberValueChanged(uint32_t memberIdx)
 {
 	BaseLuaBaseEntityComponent::OnMemberValueChanged(memberIdx);

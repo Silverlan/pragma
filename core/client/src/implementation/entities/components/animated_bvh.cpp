@@ -26,7 +26,7 @@ static pragma::ThreadPool &get_thread_pool() { return *g_threadPool; }
 static void init_thread_pool() { g_threadPool = std::make_unique<pragma::ThreadPool>(8, "bvh_animated"); }
 static void free_thread_pool() { g_threadPool = nullptr; }
 
-CAnimatedBvhComponent::CAnimatedBvhComponent(BaseEntity &ent) : BaseEntityComponent(ent)
+CAnimatedBvhComponent::CAnimatedBvhComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent)
 {
 	if(g_instanceCount++ == 0)
 		init_thread_pool();
@@ -119,7 +119,7 @@ void CAnimatedBvhComponent::RebuildTemporaryBvhData()
 	Clear();
 
 	CBvhComponent::BvhBuildInfo buildInfo {};
-	buildInfo.shouldConsiderMesh = [mdlC](const ModelSubMesh &mesh, uint32_t meshIdx) -> bool { return CBvhComponent::ShouldConsiderMesh(mesh, *mdlC->GetRenderBufferData(meshIdx)); };
+	buildInfo.shouldConsiderMesh = [mdlC](const pragma::ModelSubMesh &mesh, uint32_t meshIdx) -> bool { return CBvhComponent::ShouldConsiderMesh(mesh, *mdlC->GetRenderBufferData(meshIdx)); };
 	m_tmpBvhData = BaseBvhComponent::RebuildBvh(renderMeshes, &buildInfo, nullptr, &GetEntity());
 }
 

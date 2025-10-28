@@ -62,7 +62,7 @@ export class DLLSERVER ServerState : public NetworkState {
 	// ConVars
 	virtual ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false) override;
 	// Sound
-	virtual std::shared_ptr<ALSound> CreateSound(std::string snd, ALSoundType type, ALCreateFlags flags = ALCreateFlags::None) override;
+	virtual std::shared_ptr<ALSound> CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None) override;
 	virtual std::shared_ptr<ALSound> GetSoundByIndex(unsigned int idx) override;
 	virtual void UpdateSounds() override;
 	virtual bool PrecacheSound(std::string snd, ALChannel mode = ALChannel::Auto) override;
@@ -99,14 +99,14 @@ export class DLLSERVER ServerState : public NetworkState {
 	ServerState();
 	virtual ~ServerState() override;
 	virtual msys::MaterialManager &GetMaterialManager() override;
-	virtual ModelSubMesh *CreateSubMesh() const override;
+	virtual pragma::ModelSubMesh *CreateSubMesh() const override;
 	virtual ModelMesh *CreateMesh() const override;
 	virtual bool IsServer() const override;
 	virtual ConVarMap *GetConVarMap() override;
 	ServerMessageMap *GetNetMessageMap();
 	SVNetMessage *GetNetMessage(unsigned int ID);
 	unsigned int GetClientMessageID(std::string identifier);
-	virtual ConCommand *CreateConCommand(const std::string &scmd, LuaFunction fc, ConVarFlags flags = ConVarFlags::None, const std::string &help = "") override;
+	virtual ConCommand *CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags = pragma::console::ConVarFlags::None, const std::string &help = "") override;
 	void GetLuaConCommands(std::unordered_map<std::string, ConCommand *> **cmds);
 
 	bool IsClientAuthenticationRequired() const;

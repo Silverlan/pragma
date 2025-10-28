@@ -14,7 +14,7 @@ import pragma.server.entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SObserverComponent final : public BaseObserverComponent, public SBaseNetComponent {
 	  public:
-		SObserverComponent(BaseEntity &ent);
+		SObserverComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~SObserverComponent() override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 

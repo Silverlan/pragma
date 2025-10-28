@@ -135,9 +135,9 @@ void CAnimatedComponent::ReceiveData(NetPacket &packet)
 	SetCycle(cycle);
 }
 
-bool CAnimatedComponent::GetVertexTransformMatrix(const ModelSubMesh &subMesh, uint32_t vertexId, umath::ScaledTransform &outPose) const { return BaseAnimatedComponent::GetVertexTransformMatrix(subMesh, vertexId, outPose); }
-std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const ModelSubMesh &subMesh, uint32_t vertexId) const { return GetVertexTransformMatrix(subMesh, vertexId, nullptr, nullptr); }
-std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const ModelSubMesh &subMesh, uint32_t vertexId, Vector3 *optOutNormalOffset, float *optOutDelta) const
+bool CAnimatedComponent::GetVertexTransformMatrix(const pragma::ModelSubMesh &subMesh, uint32_t vertexId, umath::ScaledTransform &outPose) const { return BaseAnimatedComponent::GetVertexTransformMatrix(subMesh, vertexId, outPose); }
+std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const pragma::ModelSubMesh &subMesh, uint32_t vertexId) const { return GetVertexTransformMatrix(subMesh, vertexId, nullptr, nullptr); }
+std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const pragma::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 *optOutNormalOffset, float *optOutDelta) const
 {
 	if(optOutNormalOffset)
 		*optOutNormalOffset = {};
@@ -352,7 +352,7 @@ void CAnimatedComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &mod
 		mats.at(boneIndex) = m;
 	}));
 	defCAnimated.def("GetLocalVertexPosition",
-	  static_cast<std::optional<Vector3> (*)(lua_State *, pragma::CAnimatedComponent &, std::shared_ptr<::ModelSubMesh> &, uint32_t)>([](lua_State *l, pragma::CAnimatedComponent &hAnim, std::shared_ptr<::ModelSubMesh> &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
+	  static_cast<std::optional<Vector3> (*)(lua_State *, pragma::CAnimatedComponent &, std::shared_ptr<pragma::ModelSubMesh> &, uint32_t)>([](lua_State *l, pragma::CAnimatedComponent &hAnim, std::shared_ptr<pragma::ModelSubMesh> &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
 		  Vector3 pos, n;
 		  if(vertexId >= subMesh->GetVertexCount())
 			  return {};

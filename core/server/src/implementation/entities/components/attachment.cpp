@@ -18,7 +18,7 @@ void SAttachmentComponent::InitializeLuaObject(lua_State *l) { return BaseEntity
 
 void SAttachmentComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseAttachmentComponent)); }
 
-AttachmentData *SAttachmentComponent::SetupAttachment(BaseEntity *ent, const AttachmentInfo &attInfo)
+AttachmentData *SAttachmentComponent::SetupAttachment(pragma::ecs::BaseEntity *ent, const AttachmentInfo &attInfo)
 {
 	auto *attData = BaseAttachmentComponent::SetupAttachment(ent, attInfo);
 	auto &entThis = static_cast<SBaseEntity &>(GetEntity());

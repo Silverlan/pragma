@@ -15,7 +15,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SFuncPortalComponent final : public BaseFuncPortalComponent {
 		public:
-			SFuncPortalComponent(BaseEntity &ent) : BaseFuncPortalComponent(ent) {}
+			SFuncPortalComponent(pragma::ecs::BaseEntity &ent) : BaseFuncPortalComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};

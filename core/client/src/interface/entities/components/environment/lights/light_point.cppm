@@ -18,7 +18,7 @@ import :rendering.cube_map_side;
 export namespace pragma {
 	class DLLCLIENT CLightPointComponent final : public BaseEnvLightPointComponent, public MVPBias<6> {
 	  public:
-		CLightPointComponent(BaseEntity &ent);
+		CLightPointComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		const std::array<std::vector<umath::Plane>, 6u> &GetFrustumPlanes() const;

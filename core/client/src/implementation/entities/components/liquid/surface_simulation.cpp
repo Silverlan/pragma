@@ -34,7 +34,7 @@ namespace {
 	});
 }
 
-CLiquidSurfaceSimulationComponent::CLiquidSurfaceSimulationComponent(BaseEntity &ent) : BaseLiquidSurfaceSimulationComponent(ent) { s_waterEntities.push_back(this); }
+CLiquidSurfaceSimulationComponent::CLiquidSurfaceSimulationComponent(pragma::ecs::BaseEntity &ent) : BaseLiquidSurfaceSimulationComponent(ent) { s_waterEntities.push_back(this); }
 CLiquidSurfaceSimulationComponent::~CLiquidSurfaceSimulationComponent()
 {
 	auto it = std::find(s_waterEntities.begin(), s_waterEntities.end(), this);

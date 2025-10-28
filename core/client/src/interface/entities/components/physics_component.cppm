@@ -15,7 +15,7 @@ export namespace pragma {
 	class DLLCLIENT CPhysicsComponent final : public BasePhysicsComponent, public CBaseNetComponent, public nwm::VelocityCorrection {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		CPhysicsComponent(BaseEntity &ent) : BasePhysicsComponent(ent) {}
+		CPhysicsComponent(pragma::ecs::BaseEntity &ent) : BasePhysicsComponent(ent) {}
 		virtual void Initialize() override;
 
 		virtual void PrePhysicsSimulate() override;

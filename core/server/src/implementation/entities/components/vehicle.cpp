@@ -19,7 +19,7 @@ std::vector<SVehicleComponent *> SVehicleComponent::s_vehicles;
 const std::vector<SVehicleComponent *> &SVehicleComponent::GetAll() { return s_vehicles; }
 unsigned int SVehicleComponent::GetVehicleCount() { return CUInt32(s_vehicles.size()); }
 
-SVehicleComponent::SVehicleComponent(BaseEntity &ent) : BaseVehicleComponent(ent), SBaseSnapshotComponent()
+SVehicleComponent::SVehicleComponent(pragma::ecs::BaseEntity &ent) : BaseVehicleComponent(ent), SBaseSnapshotComponent()
 {
 	static_cast<SBaseEntity &>(ent).SetShared(true);
 	s_vehicles.push_back(this);
@@ -33,7 +33,7 @@ SVehicleComponent::~SVehicleComponent()
 }
 void SVehicleComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void SVehicleComponent::OnRemove() { ClearDriver(); }
-void SVehicleComponent::OnUse(BaseEntity *pl)
+void SVehicleComponent::OnUse(pragma::ecs::BaseEntity *pl)
 {
 	if(HasDriver())
 		return;
@@ -81,12 +81,12 @@ void SVehicleComponent::Initialize()
 		return util::EventReply::Handled;
 	});
 	BindEventUnhandled(UsableComponent::EVENT_ON_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnUse(static_cast<CEOnUseData &>(evData.get()).entity); });
-	BindEventUnhandled(BaseEntity::EVENT_ON_POST_SPAWN, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPostSpawn(); });
+	BindEventUnhandled(pragma::ecs::BaseEntity::EVENT_ON_POST_SPAWN, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPostSpawn(); });
 
 	auto &ent = GetEntity();
 	ent.AddComponent<UsableComponent>();
 }
-void SVehicleComponent::SetDriver(BaseEntity *ent)
+void SVehicleComponent::SetDriver(pragma::ecs::BaseEntity *ent)
 {
 	if(ent == GetDriver())
 		return;

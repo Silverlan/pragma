@@ -19,7 +19,7 @@ import :rendering.render_queue;
 export namespace pragma {
 	class DLLCLIENT CWorldComponent final : public BaseWorldComponent {
 	  public:
-		CWorldComponent(BaseEntity &ent) : BaseWorldComponent(ent) {}
+		CWorldComponent(pragma::ecs::BaseEntity &ent) : BaseWorldComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 		void ReloadMeshCache();

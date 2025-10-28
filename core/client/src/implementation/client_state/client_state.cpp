@@ -431,7 +431,7 @@ ConVar *ClientState::SetConVar(std::string scmd, std::string value, bool bApplyI
 	if(cvar == NULL)
 		return NULL;
 	auto flags = cvar->GetFlags();
-	if(((flags & ConVarFlags::Userinfo) == ConVarFlags::Userinfo)) {
+	if(((flags & pragma::console::ConVarFlags::Userinfo) == pragma::console::ConVarFlags::Userinfo)) {
 		NetPacket p;
 		p->WriteString(scmd);
 		p->WriteString(cvar->GetString());
@@ -613,7 +613,7 @@ void ClientState::SendUserInfo()
 		auto &cv = pair.second;
 		if(cv->GetType() == ConType::Var) {
 			auto *cvar = static_cast<ConVar *>(cv.get());
-			if((cvar->GetFlags() & ConVarFlags::Userinfo) == ConVarFlags::Userinfo && cvar->GetString() != cvar->GetDefault()) {
+			if((cvar->GetFlags() & pragma::console::ConVarFlags::Userinfo) == pragma::console::ConVarFlags::Userinfo && cvar->GetString() != cvar->GetDefault()) {
 				packet->WriteString(pair.first);
 				packet->WriteString(cvar->GetString());
 				numUserInfo++;
@@ -653,7 +653,7 @@ bool ClientState::IsMultiPlayer() const { return pragma::get_cengine()->IsMultiP
 bool ClientState::IsSinglePlayer() const { return pragma::get_cengine()->IsSinglePlayer(); }
 
 msys::MaterialManager &ClientState::GetMaterialManager() { return *pragma::get_cengine()->GetClientStateInstance().materialManager; }
-ModelSubMesh *ClientState::CreateSubMesh() const { return new CModelSubMesh; }
+pragma::ModelSubMesh *ClientState::CreateSubMesh() const { return new CModelSubMesh; }
 ModelMesh *ClientState::CreateMesh() const { return new CModelMesh; }
 
 static auto cvMatStreaming = GetClientConVar("cl_material_streaming_enabled");

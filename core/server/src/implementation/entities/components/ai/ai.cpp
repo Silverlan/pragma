@@ -73,7 +73,7 @@ void SAIComponent::RegisterEvents(pragma::EntityComponentManager &componentManag
 	EVENT_ON_SCHEDULE_STARTED = registerEvent("ON_SCHEDULE_STARTED", ComponentEventInfo::Type::Broadcast);
 }
 
-SAIComponent::SAIComponent(BaseEntity &ent) : BaseAIComponent(ent), m_npcState(NPCSTATE::NONE)
+SAIComponent::SAIComponent(pragma::ecs::BaseEntity &ent) : BaseAIComponent(ent), m_npcState(NPCSTATE::NONE)
 {
 	SetMaxViewAngle(70.f);
 	static_cast<SBaseEntity &>(ent).SetShared(true);
@@ -215,7 +215,7 @@ void SAIComponent::OnEntitySpawn()
 		pPhysComponent->DropToFloor();
 }
 
-bool SAIComponent::OnInput(std::string input, BaseEntity *activator, BaseEntity *caller, const std::string &data)
+bool SAIComponent::OnInput(std::string input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, const std::string &data)
 {
 	if constexpr(DEBUG_AI_MOVEMENT) {
 		if(ustring::compare<std::string>(input, "dbg_move", false)) {
@@ -384,7 +384,7 @@ bool SAIComponent::TriggerScheduleInterrupt(uint32_t interruptFlags)
 	return false;
 }
 
-bool SAIComponent::IsEnemy(BaseEntity *ent) const
+bool SAIComponent::IsEnemy(pragma::ecs::BaseEntity *ent) const
 {
 	auto disp = const_cast<SAIComponent *>(this)->GetDisposition(ent);
 	return (disp == DISPOSITION::LIKE || disp == DISPOSITION::NEUTRAL) ? false : true;
@@ -450,7 +450,7 @@ void SAIComponent::SetNPCState(NPCSTATE state)
 	OnNPCStateChanged(oldState, state);
 }
 
-void SAIComponent::OnTargetAcquired(BaseEntity *ent, float dist, bool isFirstNewTarget)
+void SAIComponent::OnTargetAcquired(pragma::ecs::BaseEntity *ent, float dist, bool isFirstNewTarget)
 {
 	CEOnTargetAcquired evData {ent, dist, isFirstNewTarget};
 	BroadcastEvent(EVENT_ON_TARGET_ACQUIRED, evData);
@@ -503,9 +503,9 @@ void SAIComponent::OnNPCStateChanged(NPCSTATE oldState, NPCSTATE newState)
 	BroadcastEvent(EVENT_ON_NPC_STATE_CHANGED, evData);
 }
 
-bool SAIComponent::IsObstruction(const BaseEntity &ent) const
+bool SAIComponent::IsObstruction(const pragma::ecs::BaseEntity &ent) const
 {
-	if(IsEnemy(&const_cast<BaseEntity &>(ent)) == true) // Don't count enemies as movement obstructions (We wouldn't want to move around them...)
+	if(IsEnemy(&const_cast<pragma::ecs::BaseEntity &>(ent)) == true) // Don't count enemies as movement obstructions (We wouldn't want to move around them...)
 		return false;
 	return BaseAIComponent::IsObstruction(ent);
 }
@@ -521,7 +521,7 @@ util::EventReply SAIComponent::HandleEvent(ComponentEventId eventId, ComponentEv
 	return util::EventReply::Unhandled;
 }
 
-bool SAIComponent::HasCharacterNoTargetEnabled(const BaseEntity &ent) const
+bool SAIComponent::HasCharacterNoTargetEnabled(const pragma::ecs::BaseEntity &ent) const
 {
 	auto *charComponent = static_cast<pragma::SCharacterComponent *>(ent.GetCharacterComponent().get());
 	return (charComponent != nullptr) ? charComponent->GetNoTarget() : false;
@@ -530,7 +530,7 @@ bool SAIComponent::HasCharacterNoTargetEnabled(const BaseEntity &ent) const
 namespace Lua {
 	namespace NPC {
 		namespace Server {
-			static Lua::mult<bool, Lua::opt<float>> IsInViewCone(lua_State *l, pragma::SAIComponent &hEnt, BaseEntity &entOther);
+			static Lua::mult<bool, Lua::opt<float>> IsInViewCone(lua_State *l, pragma::SAIComponent &hEnt, pragma::ecs::BaseEntity &entOther);
 			static bool HasPrimaryTarget(lua_State *l, pragma::SAIComponent &hEnt);
 		};
 	};
@@ -547,9 +547,9 @@ void SAIComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
 	def.def("GetSquadName", &pragma::SAIComponent::GetSquadName);
 	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(std::string, DISPOSITION, int32_t)>(&pragma::SAIComponent::SetRelationship));
 	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(std::string, DISPOSITION, int32_t)>(&pragma::SAIComponent::SetRelationship), luabind::default_parameter_policy<4, int32_t {0}> {});
-	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(BaseEntity *, DISPOSITION, bool, int32_t)>(&pragma::SAIComponent::SetRelationship));
-	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(BaseEntity *, DISPOSITION, bool, int32_t)>(&pragma::SAIComponent::SetRelationship), luabind::default_parameter_policy<5, int32_t {0}> {});
-	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(BaseEntity *, DISPOSITION, bool, int32_t)>(&pragma::SAIComponent::SetRelationship), luabind::meta::join_t<luabind::default_parameter_policy<4, true>, luabind::default_parameter_policy<5, int32_t {0}>> {});
+	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(pragma::ecs::BaseEntity *, DISPOSITION, bool, int32_t)>(&pragma::SAIComponent::SetRelationship));
+	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(pragma::ecs::BaseEntity *, DISPOSITION, bool, int32_t)>(&pragma::SAIComponent::SetRelationship), luabind::default_parameter_policy<5, int32_t {0}> {});
+	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(pragma::ecs::BaseEntity *, DISPOSITION, bool, int32_t)>(&pragma::SAIComponent::SetRelationship), luabind::meta::join_t<luabind::default_parameter_policy<4, true>, luabind::default_parameter_policy<5, int32_t {0}>> {});
 	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(Faction &, DISPOSITION, int32_t)>(&pragma::SAIComponent::SetRelationship));
 	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(Faction &, DISPOSITION, int32_t)>(&pragma::SAIComponent::SetRelationship), luabind::default_parameter_policy<4, int32_t {0}> {});
 	def.def("GetMaxViewDistance", &pragma::SAIComponent::GetMaxViewDistance);
@@ -557,11 +557,11 @@ void SAIComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
 	def.def("GetMaxViewAngle", &pragma::SAIComponent::GetMaxViewAngle);
 	def.def("SetMaxViewAngle", &pragma::SAIComponent::SetMaxViewAngle);
 	def.def("GetSquad", &pragma::SAIComponent::GetSquad, luabind::copy_policy<0> {});
-	def.def("ClearRelationship", static_cast<void (pragma::SAIComponent::*)(BaseEntity *)>(&pragma::SAIComponent::ClearRelationship));
+	def.def("ClearRelationship", static_cast<void (pragma::SAIComponent::*)(pragma::ecs::BaseEntity *)>(&pragma::SAIComponent::ClearRelationship));
 	def.def("ClearRelationship", static_cast<void (pragma::SAIComponent::*)(std::string)>(&pragma::SAIComponent::ClearRelationship));
 	def.def("ClearRelationship", static_cast<void (pragma::SAIComponent::*)(Faction &)>(&pragma::SAIComponent::ClearRelationship));
 	def.def(
-	  "GetDisposition", +[](pragma::SAIComponent &c, BaseEntity *ent) -> std::pair<DISPOSITION, int> {
+	  "GetDisposition", +[](pragma::SAIComponent &c, pragma::ecs::BaseEntity *ent) -> std::pair<DISPOSITION, int> {
 		  int priority;
 		  auto disp = c.GetDisposition(ent, &priority);
 		  return {disp, priority};
@@ -579,10 +579,10 @@ void SAIComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
 		  return {disp, priority};
 	  });
 	def.def("GetCurrentSchedule", &pragma::SAIComponent::GetCurrentSchedule);
-	def.def("GetMemory", static_cast<pragma::ai::Memory::Fragment *(pragma::SAIComponent::*)(BaseEntity *)>(&pragma::SAIComponent::GetMemory));
+	def.def("GetMemory", static_cast<pragma::ai::Memory::Fragment *(pragma::SAIComponent::*)(pragma::ecs::BaseEntity *)>(&pragma::SAIComponent::GetMemory));
 	def.def("GetMemory", static_cast<pragma::ai::Memory &(pragma::SAIComponent::*)()>(&pragma::SAIComponent::GetMemory));
-	def.def("Memorize", static_cast<pragma::ai::Memory::Fragment *(pragma::SAIComponent::*)(BaseEntity *, pragma::ai::Memory::MemoryType, const Vector3 &, const Vector3 &)>(&pragma::SAIComponent::Memorize));
-	def.def("Memorize", static_cast<pragma::ai::Memory::Fragment *(pragma::SAIComponent::*)(BaseEntity *, pragma::ai::Memory::MemoryType)>(&pragma::SAIComponent::Memorize));
+	def.def("Memorize", static_cast<pragma::ai::Memory::Fragment *(pragma::SAIComponent::*)(pragma::ecs::BaseEntity *, pragma::ai::Memory::MemoryType, const Vector3 &, const Vector3 &)>(&pragma::SAIComponent::Memorize));
+	def.def("Memorize", static_cast<pragma::ai::Memory::Fragment *(pragma::SAIComponent::*)(pragma::ecs::BaseEntity *, pragma::ai::Memory::MemoryType)>(&pragma::SAIComponent::Memorize));
 	def.def("Forget", &pragma::SAIComponent::Forget);
 	def.def("ClearMemory", &pragma::SAIComponent::ClearMemory);
 	def.def("IsInMemory", &pragma::SAIComponent::IsInMemory);
@@ -634,7 +634,7 @@ void SAIComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
 	defAIAnimInfo.def("SetFacePrimaryTarget", static_cast<void (*)(lua_State *, pragma::SAIComponent::AIAnimationInfo &)>([](lua_State *l, pragma::SAIComponent::AIAnimationInfo &info) { info.SetFaceTarget(true); }));
 	defAIAnimInfo.def("ClearFaceTarget", static_cast<void (*)(lua_State *, pragma::SAIComponent::AIAnimationInfo &)>([](lua_State *l, pragma::SAIComponent::AIAnimationInfo &info) { info.SetFaceTarget(false); }));
 	defAIAnimInfo.def("SetFaceTarget", static_cast<void (pragma::SAIComponent::AIAnimationInfo::*)(const Vector3 &)>(&pragma::SAIComponent::AIAnimationInfo::SetFaceTarget));
-	defAIAnimInfo.def("SetFaceTarget", static_cast<void (pragma::SAIComponent::AIAnimationInfo::*)(BaseEntity &)>(&pragma::SAIComponent::AIAnimationInfo::SetFaceTarget));
+	defAIAnimInfo.def("SetFaceTarget", static_cast<void (pragma::SAIComponent::AIAnimationInfo::*)(pragma::ecs::BaseEntity &)>(&pragma::SAIComponent::AIAnimationInfo::SetFaceTarget));
 	def.scope[defAIAnimInfo];
 
 	def.add_static_constant("EVENT_SELECT_SCHEDULE", pragma::SAIComponent::EVENT_SELECT_SCHEDULE);
@@ -658,7 +658,7 @@ void SAIComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
 	modEnts[def];
 }
 
-Lua::mult<bool, Lua::opt<float>> Lua::NPC::Server::IsInViewCone(lua_State *l, pragma::SAIComponent &hEnt, BaseEntity &entOther)
+Lua::mult<bool, Lua::opt<float>> Lua::NPC::Server::IsInViewCone(lua_State *l, pragma::SAIComponent &hEnt, pragma::ecs::BaseEntity &entOther)
 {
 	auto dist = 0.f;
 	auto r = hEnt.IsInViewCone(&entOther, &dist);
@@ -690,7 +690,7 @@ void CEOnNPCStateChanged::PushArguments(lua_State *l)
 
 //////////////////
 
-CEOnTargetAcquired::CEOnTargetAcquired(BaseEntity *entity, float distance, bool isFirstNewTarget) : entity {entity}, distance {distance}, isFirstNewTarget {isFirstNewTarget} {}
+CEOnTargetAcquired::CEOnTargetAcquired(pragma::ecs::BaseEntity *entity, float distance, bool isFirstNewTarget) : entity {entity}, distance {distance}, isFirstNewTarget {isFirstNewTarget} {}
 void CEOnTargetAcquired::PushArguments(lua_State *l)
 {
 	if(entity != nullptr)

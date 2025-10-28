@@ -18,10 +18,10 @@ export namespace pragma {
 		
 		static unsigned int GetVehicleCount();
 		static const std::vector<SVehicleComponent *> &GetAll();
-		SVehicleComponent(BaseEntity &ent);
+		SVehicleComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~SVehicleComponent() override;
 		virtual void ClearDriver() override;
-		virtual void SetDriver(BaseEntity *ent) override;
+		virtual void SetDriver(pragma::ecs::BaseEntity *ent) override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual void Initialize() override;
 		virtual void OnTick(double tDelta) override;
@@ -37,7 +37,7 @@ export namespace pragma {
 		void OnActionInput(Action action, bool b);
 		virtual void OnRemove() override;
 		void OnPostSpawn();
-		void OnUse(BaseEntity *pl);
+		void OnUse(pragma::ecs::BaseEntity *pl);
 		virtual BaseWheelComponent *CreateWheelEntity(uint8_t wheelIndex) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 	  private:

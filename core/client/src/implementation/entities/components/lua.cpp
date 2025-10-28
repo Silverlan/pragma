@@ -13,7 +13,7 @@ module pragma.client;
 import :entities.components.lua;
 using namespace pragma;
 
-CLuaBaseEntityComponent::CLuaBaseEntityComponent(BaseEntity &ent) : BaseLuaBaseEntityComponent(ent), CBaseSnapshotComponent() {}
+CLuaBaseEntityComponent::CLuaBaseEntityComponent(pragma::ecs::BaseEntity &ent) : BaseLuaBaseEntityComponent(ent), CBaseSnapshotComponent() {}
 
 void CLuaBaseEntityComponent::ReceiveData(NetPacket &packet)
 {

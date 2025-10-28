@@ -33,7 +33,7 @@ export namespace pragma {
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
 
-		CAnimatedComponent(BaseEntity &ent) : BaseAnimatedComponent(ent) {}
+		CAnimatedComponent(pragma::ecs::BaseEntity &ent) : BaseAnimatedComponent(ent) {}
 
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
@@ -51,9 +51,9 @@ export namespace pragma {
 		void UpdateBoneMatricesMT();
 		void UpdateBoneBuffer(prosper::IPrimaryCommandBuffer &commandBuffer, bool flagAsDirty = false);
 		void InitializeBoneBuffer();
-		std::optional<Mat4> GetVertexTransformMatrix(const ModelSubMesh &subMesh, uint32_t vertexId, Vector3 *optOutNormalOffset = nullptr, float *optOutDelta = nullptr) const;
-		virtual std::optional<Mat4> GetVertexTransformMatrix(const ModelSubMesh &subMesh, uint32_t vertexId) const override;
-		virtual bool GetVertexTransformMatrix(const ModelSubMesh &subMesh, uint32_t vertexId, umath::ScaledTransform &outPose) const override;
+		std::optional<Mat4> GetVertexTransformMatrix(const pragma::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 *optOutNormalOffset = nullptr, float *optOutDelta = nullptr) const;
+		virtual std::optional<Mat4> GetVertexTransformMatrix(const pragma::ModelSubMesh &subMesh, uint32_t vertexId) const override;
+		virtual bool GetVertexTransformMatrix(const pragma::ModelSubMesh &subMesh, uint32_t vertexId, umath::ScaledTransform &outPose) const override;
 
 		uint32_t OnSkeletonUpdated();
 		bool MaintainAnimations(double dt) override;

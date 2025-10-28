@@ -60,7 +60,7 @@ static void debug_font(NetworkState *, pragma::BasePlayerComponent *, std::vecto
 	dbg = nullptr;
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_font", &debug_font, ConVarFlags::None, "Displays the glyph map for the specified font. If no arguments are specified, all available fonts will be listed. Usage: debug_font <fontName>");
+	auto UVN = pragma::console::client::register_command("debug_font", &debug_font, pragma::console::ConVarFlags::None, "Displays the glyph map for the specified font. If no arguments are specified, all available fonts will be listed. Usage: debug_font <fontName>");
 }
 
 static void debug_texture_mipmaps(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
@@ -114,5 +114,5 @@ static void debug_texture_mipmaps(NetworkState *, pragma::BasePlayerComponent *,
 	dbg = nullptr;
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_texture_mipmaps", &debug_texture_mipmaps, ConVarFlags::None, "Displays the mipmaps of the given texture. Usage: debug_texture_mipmaps <texturePath>");
+	auto UVN = pragma::console::client::register_command("debug_texture_mipmaps", &debug_texture_mipmaps, pragma::console::ConVarFlags::None, "Displays the mipmaps of the given texture. Usage: debug_texture_mipmaps <texturePath>");
 }

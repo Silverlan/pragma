@@ -14,7 +14,7 @@ import pragma.server.entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SBuoyancyComponent final : public BaseBuoyancyComponent, public SBaseNetComponent {
 	  public:
-		SBuoyancyComponent(BaseEntity &ent) : BaseBuoyancyComponent(ent) {}
+		SBuoyancyComponent(pragma::ecs::BaseEntity &ent) : BaseBuoyancyComponent(ent) {}
 		virtual void Initialize() override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;

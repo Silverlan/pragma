@@ -15,7 +15,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CPointTargetComponent final : public BasePointTargetComponent {
 		public:
-			CPointTargetComponent(BaseEntity &ent) : BasePointTargetComponent(ent) {}
+			CPointTargetComponent(pragma::ecs::BaseEntity &ent) : BasePointTargetComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};

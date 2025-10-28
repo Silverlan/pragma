@@ -15,11 +15,11 @@ export {
 	namespace pragma {
 		class DLLSERVER SLogicRelayComponent final : public BaseLogicRelayComponent {
 		public:
-			SLogicRelayComponent(BaseEntity &ent) : BaseLogicRelayComponent(ent) {}
+			SLogicRelayComponent(pragma::ecs::BaseEntity &ent) : BaseLogicRelayComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua_State *l) override;
 		protected:
-			void Trigger(BaseEntity *activator);
+			void Trigger(pragma::ecs::BaseEntity *activator);
 		};
 	};
 

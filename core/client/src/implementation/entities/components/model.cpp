@@ -33,7 +33,7 @@ void CModelComponent::RegisterEvents(pragma::EntityComponentManager &componentMa
 	EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED = registerEvent("EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED", ComponentEventInfo::Type::Broadcast);
 }
 
-CModelComponent::CModelComponent(BaseEntity &ent) : BaseModelComponent(ent), m_baseShaderSpecializationConstantFlags {pragma::GameShaderSpecializationConstantFlag::None}, m_staticShaderSpecializationConstantFlags {pragma::GameShaderSpecializationConstantFlag::None} {}
+CModelComponent::CModelComponent(pragma::ecs::BaseEntity &ent) : BaseModelComponent(ent), m_baseShaderSpecializationConstantFlags {pragma::GameShaderSpecializationConstantFlag::None}, m_staticShaderSpecializationConstantFlags {pragma::GameShaderSpecializationConstantFlag::None} {}
 
 void CModelComponent::Initialize()
 {
@@ -396,8 +396,8 @@ void CModelComponent::UpdateLOD(const CSceneComponent &scene, const CCameraCompo
 
 std::vector<std::shared_ptr<ModelMesh>> &CModelComponent::GetLODMeshes() { return m_lodMeshes; }
 const std::vector<std::shared_ptr<ModelMesh>> &CModelComponent::GetLODMeshes() const { return const_cast<CModelComponent *>(this)->GetLODMeshes(); }
-std::vector<std::shared_ptr<ModelSubMesh>> &CModelComponent::GetRenderMeshes() { return m_lodRenderMeshes; }
-const std::vector<std::shared_ptr<ModelSubMesh>> &CModelComponent::GetRenderMeshes() const { return const_cast<CModelComponent *>(this)->GetRenderMeshes(); }
+std::vector<std::shared_ptr<pragma::ModelSubMesh>> &CModelComponent::GetRenderMeshes() { return m_lodRenderMeshes; }
+const std::vector<std::shared_ptr<pragma::ModelSubMesh>> &CModelComponent::GetRenderMeshes() const { return const_cast<CModelComponent *>(this)->GetRenderMeshes(); }
 
 RenderMeshGroup &CModelComponent::GetLodMeshGroup(uint32_t lod)
 {
@@ -545,7 +545,7 @@ void CModelComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnt
 	defCModel.def("GetRenderBufferData", +[](pragma::CModelComponent &c) -> std::vector<pragma::rendering::RenderBufferData> { return c.GetRenderBufferData(); });
 	defCModel.def("AddRenderMesh", &pragma::CModelComponent::AddRenderMesh);
 	defCModel.def("AddRenderMesh", &pragma::CModelComponent::AddRenderMesh, luabind::default_parameter_policy<4, pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass> {});
-	defCModel.def("GetRenderMeshes", +[](pragma::CModelComponent &c) -> std::vector<std::shared_ptr<ModelSubMesh>> { return c.GetRenderMeshes(); });
+	defCModel.def("GetRenderMeshes", +[](pragma::CModelComponent &c) -> std::vector<std::shared_ptr<pragma::ModelSubMesh>> { return c.GetRenderMeshes(); });
 	defCModel.def("GetBaseShaderSpecializationFlags", &pragma::CModelComponent::GetBaseShaderSpecializationFlags);
 	defCModel.def("SetBaseShaderSpecializationFlags", &pragma::CModelComponent::SetBaseShaderSpecializationFlags);
 	defCModel.def("SetBaseShaderSpecializationFlag", &pragma::CModelComponent::SetBaseShaderSpecializationFlag);

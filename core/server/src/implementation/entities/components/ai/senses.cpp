@@ -12,7 +12,7 @@ import pragma.server.server_state;
 
 using namespace pragma;
 
-bool SAIComponent::IsInViewCone(BaseEntity *ent, float *dist)
+bool SAIComponent::IsInViewCone(pragma::ecs::BaseEntity *ent, float *dist)
 {
 	auto &entThis = GetEntity();
 	auto charComponent = entThis.GetCharacterComponent();

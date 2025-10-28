@@ -26,8 +26,8 @@ void CStaticBvhCacheComponent::DoRebuildBvh() {}
 
 void CStaticBvhCacheComponent::TestRebuildBvh()
 {
-	std::vector<std::shared_ptr<ModelSubMesh>> meshes;
-	std::vector<BaseEntity *> meshToEntity;
+	std::vector<std::shared_ptr<pragma::ModelSubMesh>> meshes;
+	std::vector<pragma::ecs::BaseEntity *> meshToEntity;
 	std::vector<umath::ScaledTransform> meshPoses;
 	for(auto *c : m_entities) {
 		auto &ent = c->GetEntity();

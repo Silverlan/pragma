@@ -15,7 +15,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SGameComponent final : public BaseGameComponent {
 		public:
-			SGameComponent(BaseEntity &ent) : BaseGameComponent(ent) {}
+			SGameComponent(pragma::ecs::BaseEntity &ent) : BaseGameComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};

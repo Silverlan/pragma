@@ -1456,7 +1456,7 @@ void CGame::RegisterLuaClasses()
 	Lua::ModelMesh::register_class(modelMeshClassDef);
 	modelMeshClassDef.scope[luabind::def("Create", &Lua::ModelMesh::Client::Create)];
 
-	auto subModelMeshClassDef = luabind::class_<ModelSubMesh>("Sub");
+	auto subModelMeshClassDef = luabind::class_<pragma::ModelSubMesh>("Sub");
 	Lua::ModelSubMesh::register_class(subModelMeshClassDef);
 	subModelMeshClassDef.def("GetTangents", &Lua::ModelSubMesh::Client::GetTangents);
 	subModelMeshClassDef.def("GetBiTangents", &Lua::ModelSubMesh::Client::GetBiTangents);
@@ -1465,7 +1465,7 @@ void CGame::RegisterLuaClasses()
 	subModelMeshClassDef.def("GetAlphaBuffer", &Lua::ModelSubMesh::Client::GetAlphaBuffer);
 	subModelMeshClassDef.def("GetIndexBuffer", &Lua::ModelSubMesh::Client::GetIndexBuffer);
 	subModelMeshClassDef.def("GetSceneMesh", &Lua::ModelSubMesh::Client::GetVkMesh);
-	subModelMeshClassDef.def("GetExtensionData", &::ModelSubMesh::GetExtensionData);
+	subModelMeshClassDef.def("GetExtensionData", &pragma::ModelSubMesh::GetExtensionData);
 	subModelMeshClassDef.scope[luabind::def("create", &Lua::ModelSubMesh::Client::Create)];
 
 	auto modelClassDef = luabind::class_<Model>("Model");

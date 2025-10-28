@@ -18,7 +18,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CFogControllerComponent final : public BaseEnvFogControllerComponent, public CBaseNetComponent {
 		public:
-			CFogControllerComponent(BaseEntity &ent) : BaseEnvFogControllerComponent(ent) {}
+			CFogControllerComponent(pragma::ecs::BaseEntity &ent) : BaseEnvFogControllerComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void OnRemove() override;

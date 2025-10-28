@@ -13,7 +13,7 @@ import pragma.shared;
 
 namespace Lua {
 	namespace AIMemoryFragment {
-		static BaseEntity *GetEntity(pragma::ai::Memory::Fragment &fragment);
+		static pragma::ecs::BaseEntity *GetEntity(pragma::ai::Memory::Fragment &fragment);
 		static bool IsInView(const pragma::ai::Memory::Fragment &fragment);
 		static Vector3 GetLastKnownPosition(const pragma::ai::Memory::Fragment &fragment);
 		static Vector3 GetLastVelocity(const pragma::ai::Memory::Fragment &fragment);
@@ -65,7 +65,7 @@ luabind::tableT<pragma::ai::Memory::Fragment> Lua::AIMemory::GetFragments(lua_St
 
 uint32_t Lua::AIMemory::GetFragmentCount(const pragma::ai::Memory &mem) { return mem.occupiedFragmentCount; }
 
-BaseEntity *Lua::AIMemoryFragment::GetEntity(pragma::ai::Memory::Fragment &fragment) { return fragment.hEntity.get(); }
+pragma::ecs::BaseEntity *Lua::AIMemoryFragment::GetEntity(pragma::ai::Memory::Fragment &fragment) { return fragment.hEntity.get(); }
 bool Lua::AIMemoryFragment::IsInView(const pragma::ai::Memory::Fragment &fragment) { return fragment.visible; }
 Vector3 Lua::AIMemoryFragment::GetLastKnownPosition(const pragma::ai::Memory::Fragment &fragment) { return fragment.lastPosition; }
 Vector3 Lua::AIMemoryFragment::GetLastVelocity(const pragma::ai::Memory::Fragment &fragment) { return fragment.lastVelocity; }

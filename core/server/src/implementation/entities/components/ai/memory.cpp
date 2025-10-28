@@ -50,7 +50,7 @@ void SAIComponent::OnTargetVisibilityReacquired(const ai::Memory::Fragment &frag
 	BroadcastEvent(EVENT_ON_TARGET_VISIBILITY_REACQUIRED, evData);
 }
 
-bool SAIComponent::IsInMemory(BaseEntity *ent) { return GetMemory(ent); }
+bool SAIComponent::IsInMemory(pragma::ecs::BaseEntity *ent) { return GetMemory(ent); }
 
 void SAIComponent::OnPrimaryTargetChanged(const ai::Memory::Fragment *fragment)
 {
@@ -86,7 +86,7 @@ void SAIComponent::SelectPrimaryTarget()
 }
 
 ai::Memory &SAIComponent::GetMemory() { return m_memory; }
-ai::Memory::Fragment *SAIComponent::GetMemory(BaseEntity *ent)
+ai::Memory::Fragment *SAIComponent::GetMemory(pragma::ecs::BaseEntity *ent)
 {
 	auto it = std::find_if(m_memory.fragments.begin(), m_memory.fragments.end(), [ent](const ai::Memory::Fragment &fragment) { return (fragment.occupied == true && fragment.hEntity.get() == ent) ? true : false; });
 	if(it == m_memory.fragments.end())
@@ -97,7 +97,7 @@ ai::Memory::Fragment *SAIComponent::GetMemory(BaseEntity *ent)
 float SAIComponent::GetMemoryDuration() { return m_memoryDuration; }
 void SAIComponent::SetMemoryDuration(float dur) { m_memoryDuration = dur; }
 
-ai::Memory::Fragment *SAIComponent::Memorize(BaseEntity *ent, ai::Memory::MemoryType memType, const Vector3 &pos, const Vector3 &vel)
+ai::Memory::Fragment *SAIComponent::Memorize(pragma::ecs::BaseEntity *ent, ai::Memory::MemoryType memType, const Vector3 &pos, const Vector3 &vel)
 {
 	if(&GetEntity() == ent || HasCharacterNoTargetEnabled(*ent) == true)
 		return nullptr;
@@ -109,7 +109,7 @@ ai::Memory::Fragment *SAIComponent::Memorize(BaseEntity *ent, ai::Memory::Memory
 		OnMemoryGained(*fragment);
 	return fragment;
 }
-ai::Memory::Fragment *SAIComponent::Memorize(BaseEntity *ent, ai::Memory::MemoryType memType)
+ai::Memory::Fragment *SAIComponent::Memorize(pragma::ecs::BaseEntity *ent, ai::Memory::MemoryType memType)
 {
 	auto pTrComponent = ent->GetTransformComponent();
 	if(pTrComponent == nullptr)
@@ -117,7 +117,7 @@ ai::Memory::Fragment *SAIComponent::Memorize(BaseEntity *ent, ai::Memory::Memory
 	auto pVelComponent = ent->GetComponent<pragma::VelocityComponent>();
 	return Memorize(ent, memType, pTrComponent->GetEyePosition(), pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {});
 }
-void SAIComponent::Forget(BaseEntity *ent)
+void SAIComponent::Forget(pragma::ecs::BaseEntity *ent)
 {
 	auto *fragment = m_memory.FindFragment(*ent);
 	if(fragment == nullptr)

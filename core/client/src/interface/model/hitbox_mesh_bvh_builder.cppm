@@ -19,7 +19,7 @@ export namespace pragma::bvh {
 		using BoneName = std::string;
 		struct DLLCLIENT BoneMeshInfo {
 			std::string meshUuid;
-			std::shared_ptr<ModelSubMesh> subMesh;
+			std::shared_ptr<pragma::ModelSubMesh> subMesh;
 			std::vector<uint32_t> usedTris;
 			std::unique_ptr<pragma::bvh::MeshBvhTree> meshBvhTree {};
 
@@ -33,8 +33,8 @@ export namespace pragma::bvh {
 	  private:
 		bool Build(Model &mdl, pragma::animation::BoneId boneId, const Hitbox &hitbox, const LODInfo &lodInfo);
 		void Serialize(Model &mdl);
-		void BuildHitboxMesh(Model &mdl, ModelSubMesh &subMesh);
-		void BuildMeshBvh(Model &mdl, ModelSubMesh &subMesh);
+		void BuildHitboxMesh(Model &mdl, pragma::ModelSubMesh &subMesh);
+		void BuildMeshBvh(Model &mdl, pragma::ModelSubMesh &subMesh);
 
 		BS::thread_pool &m_threadPool;
 		std::unordered_map<BoneName, std::vector<std::shared_ptr<BoneMeshInfo>>> m_boneMeshMap;

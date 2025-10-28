@@ -16,7 +16,7 @@ export namespace pragma {
 	class CRasterizationRendererComponent;
 	class DLLCLIENT CRendererPpFogComponent final : public CRendererPpBaseComponent {
 	  public:
-		CRendererPpFogComponent(BaseEntity &ent);
+		CRendererPpFogComponent(pragma::ecs::BaseEntity &ent);
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual std::string GetIdentifier() const override { return "fog"; }
 		virtual uint32_t GetPostProcessingWeight() const override { return umath::to_integral(CRendererComponent::StandardPostProcessingWeight::Fog); }

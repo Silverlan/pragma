@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SSkyboxComponent final : public BaseSkyboxComponent, public SBaseNetComponent {
 		public:
-			SSkyboxComponent(BaseEntity &ent) : BaseSkyboxComponent(ent) {}
+			SSkyboxComponent(pragma::ecs::BaseEntity &ent) : BaseSkyboxComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 			virtual void SetSkyAngles(const EulerAngles &ang) override;
 

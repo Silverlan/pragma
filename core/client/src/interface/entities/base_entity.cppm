@@ -14,7 +14,7 @@ export module pragma.client:entities.base_entity;
 export import pragma.shared;
 
 export namespace pragma {class CRenderComponent; class CSceneComponent;};
-export class DLLCLIENT CBaseEntity : public BaseEntity {
+export class DLLCLIENT CBaseEntity : public pragma::ecs::BaseEntity {
   public:
 	static pragma::ComponentEventId EVENT_ON_SCENE_FLAGS_CHANGED;
 	static void RegisterEvents(pragma::EntityComponentManager &componentManager);
@@ -39,7 +39,7 @@ export class DLLCLIENT CBaseEntity : public BaseEntity {
 
 	// Returns the server-side representation of this entity (If the entity isn't clientside only)
 	// This only works for single-player / listen servers!
-	BaseEntity *GetServersideEntity() const;
+	pragma::ecs::BaseEntity *GetServersideEntity() const;
 
 	pragma::CRenderComponent *GetRenderComponent() const;
 

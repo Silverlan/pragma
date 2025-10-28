@@ -18,18 +18,18 @@ import pragma.server.server_state;
 
 #undef GetClassName;
 
-SBaseEntity::SBaseEntity() : BaseEntity(), m_bShared(false), m_bSynchronized(true) {}
+SBaseEntity::SBaseEntity() : pragma::ecs::BaseEntity(), m_bShared(false), m_bSynchronized(true) {}
 
 void SBaseEntity::DoSpawn()
 {
-	BaseEntity::DoSpawn();
+	pragma::ecs::BaseEntity::DoSpawn();
 	Game *game = ServerState::Get()->GetGameState();
 	game->SpawnEntity(this);
 }
 
 void SBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 {
-	BaseEntity::OnComponentAdded(component);
+	pragma::ecs::BaseEntity::OnComponentAdded(component);
 	if(typeid(component) == typeid(pragma::STransformComponent))
 		m_transformComponent = &static_cast<pragma::STransformComponent &>(component);
 	else if(typeid(component) == typeid(pragma::SPhysicsComponent))
@@ -45,7 +45,7 @@ void SBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 }
 void SBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 {
-	BaseEntity::OnComponentRemoved(component);
+	pragma::ecs::BaseEntity::OnComponentRemoved(component);
 	if(typeid(component) == typeid(pragma::SWorldComponent))
 		umath::set_flag(m_stateFlags, StateFlags::HasWorldComponent, false);
 	else if(typeid(component) == typeid(pragma::STransformComponent))
@@ -60,7 +60,7 @@ void SBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 		m_childComponent = nullptr;
 }
 
-BaseEntity *SBaseEntity::GetClientsideEntity() const
+pragma::ecs::BaseEntity *SBaseEntity::GetClientsideEntity() const
 {
 	if(IsShared() == false)
 		return nullptr;
@@ -78,7 +78,7 @@ void SBaseEntity::SetSynchronized(Bool b) { m_bSynchronized = b; }
 
 void SBaseEntity::Initialize()
 {
-	BaseEntity::Initialize();
+	pragma::ecs::BaseEntity::Initialize();
 
 	auto className = server_entities::ServerEntityRegistry::Instance().GetClassName(typeid(*this));
 	std::string strClassName = className ? std::string{*className} : std::string {};
@@ -137,9 +137,9 @@ pragma::NetEventId SBaseEntity::RegisterNetEvent(const std::string &name) const 
 
 void SBaseEntity::Remove()
 {
-	if(umath::is_flag_set(GetStateFlags(), BaseEntity::StateFlags::Removed))
+	if(umath::is_flag_set(GetStateFlags(), pragma::ecs::BaseEntity::StateFlags::Removed))
 		return;
-	BaseEntity::Remove();
+	pragma::ecs::BaseEntity::Remove();
 	Game *game = ServerState::Get()->GetGameState();
 	game->RemoveEntity(this);
 }

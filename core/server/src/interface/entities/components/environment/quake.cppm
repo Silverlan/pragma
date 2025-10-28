@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SQuakeComponent final : public BaseEnvQuakeComponent, public SBaseNetComponent {
 		public:
-			SQuakeComponent(BaseEntity &ent) : BaseEnvQuakeComponent(ent) {}
+			SQuakeComponent(pragma::ecs::BaseEntity &ent) : BaseEnvQuakeComponent(ent) {}
 			virtual void Initialize() override;
 
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;

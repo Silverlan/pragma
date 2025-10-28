@@ -18,7 +18,7 @@ import :engine;
 
 using namespace pragma;
 
-CRendererPpBaseComponent::CRendererPpBaseComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+CRendererPpBaseComponent::CRendererPpBaseComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void CRendererPpBaseComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

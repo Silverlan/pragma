@@ -5,11 +5,15 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
+#include <string>
+#include <iostream>
+
 
 
 export module pragma.server.scripting.lua.classes.ai_behavior;
 
 import pragma.server.ai;
+export import luabind;
 
 export {
 	/*

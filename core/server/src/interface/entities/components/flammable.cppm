@@ -25,8 +25,8 @@ export {
 				EntityHandle hInflictor;
 			} m_igniteInfo;
 		public:
-			SFlammableComponent(BaseEntity &ent) : BaseFlammableComponent(ent) {}
-			virtual util::EventReply Ignite(float duration, BaseEntity *attacker = nullptr, BaseEntity *inflictor = nullptr) override;
+			SFlammableComponent(pragma::ecs::BaseEntity &ent) : BaseFlammableComponent(ent) {}
+			virtual util::EventReply Ignite(float duration, pragma::ecs::BaseEntity *attacker = nullptr, pragma::ecs::BaseEntity *inflictor = nullptr) override;
 			virtual void Extinguish() override;
 			virtual void SetIgnitable(bool b) override;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;

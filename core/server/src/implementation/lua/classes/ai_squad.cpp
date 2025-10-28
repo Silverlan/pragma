@@ -12,7 +12,7 @@ import pragma.server.ai;
 
 namespace Lua {
 	namespace AISquad {
-		static luabind::tableT<BaseEntity> GetMembers(lua_State *l, ::AISquad &squad);
+		static luabind::tableT<pragma::ecs::BaseEntity> GetMembers(lua_State *l, ::AISquad &squad);
 	};
 };
 
@@ -23,7 +23,7 @@ void Lua::AISquad::register_class(lua_State *l, luabind::module_ &mod)
 	mod[classDef];
 }
 
-luabind::tableT<BaseEntity> Lua::AISquad::GetMembers(lua_State *l, ::AISquad &squad)
+luabind::tableT<pragma::ecs::BaseEntity> Lua::AISquad::GetMembers(lua_State *l, ::AISquad &squad)
 {
 	auto t = luabind::newtable(l);
 	uint32_t idx = 1;

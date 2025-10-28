@@ -30,7 +30,7 @@ export namespace pragma {
 
 		virtual ~CWeaponComponent() override;
 
-		CWeaponComponent(BaseEntity &ent);
+		CWeaponComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual bool HandleViewModelAnimationEvent(CViewModelComponent *vm, const AnimationEvent &ev);
@@ -81,9 +81,9 @@ export namespace pragma {
 		static std::vector<CWeaponComponent *> s_weapons;
 	};
 	struct DLLCLIENT CEAttachToOwner : public ComponentEvent {
-		CEAttachToOwner(BaseEntity &owner, CViewModelComponent *optViewmodel);
+		CEAttachToOwner(pragma::ecs::BaseEntity &owner, CViewModelComponent *optViewmodel);
 		virtual void PushArguments(lua_State *l) override;
-		BaseEntity &owner;
+		pragma::ecs::BaseEntity &owner;
 		CViewModelComponent *viewModel = nullptr;
 	};
 };

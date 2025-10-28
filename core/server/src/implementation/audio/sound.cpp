@@ -16,7 +16,7 @@ void SALSoundBase::SetShared(bool b) { m_bShared = b; }
 SALSoundBase *SALSound::GetBase(ALSound *snd) { return dynamic_cast<SALSoundBase *>(snd); } //(snd->IsSoundScript() == false) ? static_cast<SALSoundBase*>(static_cast<SALSound*>(snd)) : static_cast<SALSoundBase*>(static_cast<SALSoundScript*>(snd));}
 
 #pragma warning(disable : 4056)
-SALSound::SALSound(NetworkState *nw, unsigned int idx, float duration, const std::string &soundName, ALCreateFlags createFlags) : ALSound(nw), SALSoundBase(umath::is_flag_set(createFlags, ALCreateFlags::DontTransmit) == false), m_soundName {soundName}, m_createFlags {createFlags}
+SALSound::SALSound(NetworkState *nw, unsigned int idx, float duration, const std::string &soundName, pragma::audio::ALCreateFlags createFlags) : ALSound(nw), SALSoundBase(umath::is_flag_set(createFlags, pragma::audio::ALCreateFlags::DontTransmit) == false), m_soundName {soundName}, m_createFlags {createFlags}
 {
 	m_index = idx;
 	m_duration = duration;
@@ -34,7 +34,7 @@ SALSound::~SALSound()
 }
 
 const std::string &SALSound::GetSoundName() const { return m_soundName; }
-ALCreateFlags SALSound::GetCreateFlags() const { return m_createFlags; }
+pragma::audio::ALCreateFlags SALSound::GetCreateFlags() const { return m_createFlags; }
 
 void SALSound::SendEvent(NetEvent evId, const std::function<void(NetPacket &)> &write, bool bUDP) const
 {
@@ -296,10 +296,10 @@ void SALSound::SetOuterConeGainHF(float gain)
 	ALSoundBase::SetOuterConeGainHF(gain);
 	SendEvent(NetEvent::SetConeOuterGainHF, [&gain](NetPacket &p) { p->Write<float>(gain); });
 }
-void SALSound::SetType(ALSoundType type)
+void SALSound::SetType(pragma::audio::ALSoundType type)
 {
 	ALSound::SetType(type);
-	SendEvent(NetEvent::SetType, [&type](NetPacket &p) { p->Write<ALSoundType>(type); });
+	SendEvent(NetEvent::SetType, [&type](NetPacket &p) { p->Write<pragma::audio::ALSoundType>(type); });
 }
 
 void SALSound::SetFlags(unsigned int flags)
@@ -308,7 +308,7 @@ void SALSound::SetFlags(unsigned int flags)
 	SendEvent(NetEvent::SetFlags, [&flags](NetPacket &p) { p->Write<unsigned int>(flags); });
 }
 
-void SALSound::SetSource(BaseEntity *ent)
+void SALSound::SetSource(pragma::ecs::BaseEntity *ent)
 {
 	ALSound::SetSource(ent);
 	SendEvent(NetEvent::SetSource, [&ent](NetPacket &p) { nwm::write_entity(p, ent); });

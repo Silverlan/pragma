@@ -9,21 +9,21 @@ module pragma.server.audio.sound_script;
 
 import pragma.server.server_state;
 
-SALSoundScript::SALSoundScript(NetworkState *nw, unsigned int idx, SoundScript *script, NetworkState *state, const std::string &soundName, ALCreateFlags createFlags)
-    : ALSoundScript(nw, idx, script, state, umath::is_flag_set(createFlags, ALCreateFlags::Stream)), SALSound(nw, idx, 0.f, soundName, createFlags), ALSound(nw)
+SALSoundScript::SALSoundScript(NetworkState *nw, unsigned int idx, SoundScript *script, NetworkState *state, const std::string &soundName, pragma::audio::ALCreateFlags createFlags)
+    : ALSoundScript(nw, idx, script, state, umath::is_flag_set(createFlags, pragma::audio::ALCreateFlags::Stream)), SALSound(nw, idx, 0.f, soundName, createFlags), ALSound(nw)
 {
 }
-std::shared_ptr<ALSound> SALSoundScript::CreateSound(const std::string &name, ALChannel channel, ALCreateFlags createFlags)
+std::shared_ptr<ALSound> SALSoundScript::CreateSound(const std::string &name, ALChannel channel, pragma::audio::ALCreateFlags createFlags)
 {
-	auto flags = ALCreateFlags::None;
+	auto flags = pragma::audio::ALCreateFlags::None;
 	if(channel == ALChannel::Mono)
-		flags |= ALCreateFlags::Mono;
+		flags |= pragma::audio::ALCreateFlags::Mono;
 	if(m_bStream == true)
-		flags |= ALCreateFlags::Stream;
+		flags |= pragma::audio::ALCreateFlags::Stream;
 
 	//if(IsShared() == false)
 	// Child sounds are never transmitted to clients as they will be handled by the client's sound-script object independently
-	flags |= ALCreateFlags::DontTransmit;
+	flags |= pragma::audio::ALCreateFlags::DontTransmit;
 
 	flags |= createFlags;
 	return ServerState::Get()->CreateSound(name, GetType(), flags);
@@ -237,7 +237,7 @@ void SALSoundScript::SetEffectParameters(const std::string &effectName, const So
 	SALSound::SetEffectParameters(effectName, params);
 }
 
-void SALSoundScript::SetType(ALSoundType type)
+void SALSoundScript::SetType(pragma::audio::ALSoundType type)
 {
 	ALSoundScript::SetType(type);
 	SALSound::SetType(type);
@@ -247,7 +247,7 @@ void SALSoundScript::SetFlags(unsigned int flags)
 	ALSoundScript::SetFlags(flags);
 	SALSound::SetFlags(flags);
 }
-void SALSoundScript::SetSource(BaseEntity *ent)
+void SALSoundScript::SetSource(pragma::ecs::BaseEntity *ent)
 {
 	ALSoundScript::SetSource(ent);
 	SALSound::SetSource(ent);

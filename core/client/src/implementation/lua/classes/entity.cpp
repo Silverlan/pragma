@@ -13,7 +13,7 @@ import :scripting.lua.classes.entity;
 import :engine;
 
 
-void Lua::Entity::Client::register_class(luabind::class_<CBaseEntity, BaseEntity> &classDef)
+void Lua::Entity::Client::register_class(luabind::class_<CBaseEntity, pragma::ecs::BaseEntity> &classDef)
 {
 	classDef.add_static_constant("EVENT_ON_SCENE_FLAGS_CHANGED", CBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED);
 	classDef.def("IsClientsideOnly", &CBaseEntity::IsClientsideOnly);

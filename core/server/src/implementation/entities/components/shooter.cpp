@@ -25,7 +25,7 @@ Bool ecs::SShooterComponent::ReceiveNetEvent(pragma::BasePlayerComponent &pl, pr
 	return true;
 }
 void ecs::SShooterComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void ecs::SShooterComponent::FireBullets(const BulletInfo &bulletInfo, const std::function<bool(DamageInfo &, BaseEntity *)> &fCallback, std::vector<TraceResult> &outHitTargets, bool bMaster)
+void ecs::SShooterComponent::FireBullets(const BulletInfo &bulletInfo, const std::function<bool(DamageInfo &, pragma::ecs::BaseEntity *)> &fCallback, std::vector<TraceResult> &outHitTargets, bool bMaster)
 {
 	DamageInfo dmg;
 	dmg.SetAttacker(bulletInfo.hAttacker.valid() ? bulletInfo.hAttacker.get() : &GetEntity());
@@ -59,7 +59,7 @@ void ecs::SShooterComponent::FireBullets(const BulletInfo &bulletInfo, const std
 }
 void ecs::SShooterComponent::FireBullets(const BulletInfo &bulletInfo, std::vector<TraceResult> &results, bool bMaster) { FireBullets(bulletInfo, nullptr, results, bMaster); }
 
-void ecs::SShooterComponent::FireBullets(const BulletInfo &bulletInfo, DamageInfo &dmgInfo, std::vector<TraceResult> &outHitTargets, const std::function<bool(DamageInfo &, BaseEntity *)> &fCallback, bool bMaster)
+void ecs::SShooterComponent::FireBullets(const BulletInfo &bulletInfo, DamageInfo &dmgInfo, std::vector<TraceResult> &outHitTargets, const std::function<bool(DamageInfo &, pragma::ecs::BaseEntity *)> &fCallback, bool bMaster)
 {
 	pragma::BasePlayerComponent *pl = nullptr;
 	if(bMaster == false) {

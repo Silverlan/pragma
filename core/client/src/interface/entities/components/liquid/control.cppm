@@ -14,7 +14,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CLiquidControlComponent final : public BaseLiquidControlComponent, public CBaseNetComponent {
 	  public:
-		CLiquidControlComponent(BaseEntity &ent) : BaseLiquidControlComponent(ent) {}
+		CLiquidControlComponent(pragma::ecs::BaseEntity &ent) : BaseLiquidControlComponent(ent) {}
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;

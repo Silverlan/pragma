@@ -18,7 +18,7 @@ export namespace pragma {
 		static ComponentEventId EVENT_CALC_VIEW_OFFSET;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		CObserverComponent(BaseEntity &ent);
+		CObserverComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~CObserverComponent() override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;

@@ -16,7 +16,7 @@ import :entities.base_entity;
 export namespace pragma {
 	class DLLCLIENT CCameraComponent final : public BaseEnvCameraComponent {
 	  public:
-		CCameraComponent(BaseEntity &ent) : BaseEnvCameraComponent(ent) {}
+		CCameraComponent(pragma::ecs::BaseEntity &ent) : BaseEnvCameraComponent(ent) {}
 		virtual ~CCameraComponent() override;
 		virtual void Initialize() override;
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;

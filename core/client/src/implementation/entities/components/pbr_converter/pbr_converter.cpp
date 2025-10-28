@@ -80,7 +80,7 @@ void CPBRConverterComponent::ConvertMaterialsToPBR(Model &mdl)
 
 void CPBRConverterComponent::GenerateAmbientOcclusionMaps(Model &mdl, uint32_t w, uint32_t h, uint32_t samples, bool rebuild) { ScheduleModelUpdate(mdl, false, AmbientOcclusionInfo {w, h, samples, rebuild}); }
 
-void CPBRConverterComponent::GenerateAmbientOcclusionMaps(BaseEntity &ent, uint32_t w, uint32_t h, uint32_t samples, bool rebuild)
+void CPBRConverterComponent::GenerateAmbientOcclusionMaps(pragma::ecs::BaseEntity &ent, uint32_t w, uint32_t h, uint32_t samples, bool rebuild)
 {
 	auto mdl = ent.GetModel();
 	if(mdl == nullptr)
@@ -88,7 +88,7 @@ void CPBRConverterComponent::GenerateAmbientOcclusionMaps(BaseEntity &ent, uint3
 	ScheduleModelUpdate(*mdl, false, AmbientOcclusionInfo {w, h, samples, rebuild}, &ent);
 }
 
-void CPBRConverterComponent::UpdateModel(Model &mdl, ModelUpdateInfo &updateInfo, BaseEntity *optEnt)
+void CPBRConverterComponent::UpdateModel(Model &mdl, ModelUpdateInfo &updateInfo, pragma::ecs::BaseEntity *optEnt)
 {
 	if(updateInfo.updateMetalness)
 		UpdateMetalness(mdl);
@@ -101,7 +101,7 @@ void CPBRConverterComponent::UpdateModel(Model &mdl, ModelUpdateInfo &updateInfo
 		m_scheduledModelUpdates.erase(it);
 }
 
-void CPBRConverterComponent::ScheduleModelUpdate(Model &mdl, bool updateMetalness, std::optional<AmbientOcclusionInfo> updateAOInfo, BaseEntity *optEnt)
+void CPBRConverterComponent::ScheduleModelUpdate(Model &mdl, bool updateMetalness, std::optional<AmbientOcclusionInfo> updateAOInfo, pragma::ecs::BaseEntity *optEnt)
 {
 	auto itUpdateInfo = m_scheduledModelUpdates.find(&mdl);
 	if(itUpdateInfo == m_scheduledModelUpdates.end())
@@ -112,7 +112,7 @@ void CPBRConverterComponent::ScheduleModelUpdate(Model &mdl, bool updateMetalnes
 	if(updateAOInfo.has_value())
 		updateInfo.updateAmbientOcclusion = *updateAOInfo;
 	auto hEnt = optEnt ? optEnt->GetHandle() : EntityHandle {};
-	auto cb = mdl.CallOnMaterialsLoaded([this, &mdl, &updateInfo, hEnt]() { UpdateModel(mdl, updateInfo, const_cast<BaseEntity *>(hEnt.get())); });
+	auto cb = mdl.CallOnMaterialsLoaded([this, &mdl, &updateInfo, hEnt]() { UpdateModel(mdl, updateInfo, const_cast<pragma::ecs::BaseEntity *>(hEnt.get())); });
 	if(cb.IsValid())
 		updateInfo.cbOnMaterialsLoaded = cb;
 }

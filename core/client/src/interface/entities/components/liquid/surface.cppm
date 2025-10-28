@@ -44,7 +44,7 @@ export namespace pragma {
 
 	class DLLCLIENT CLiquidSurfaceComponent final : public BaseLiquidSurfaceComponent, public CBaseNetComponent {
 	  public:
-		CLiquidSurfaceComponent(BaseEntity &ent) : BaseLiquidSurfaceComponent(ent) {}
+		CLiquidSurfaceComponent(pragma::ecs::BaseEntity &ent) : BaseLiquidSurfaceComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnRemove() override;

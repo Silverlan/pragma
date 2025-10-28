@@ -11,7 +11,7 @@ import pragma.server.entities.components;
 
 using namespace pragma;
 
-const BaseEntity *ai::TaskTarget::GetTargetEntity(const Schedule *sched, pragma::BaseAIComponent &ent) const
+const pragma::ecs::BaseEntity *ai::TaskTarget::GetTargetEntity(const Schedule *sched, pragma::BaseAIComponent &ent) const
 {
 	auto *target = GetParameter(sched, umath::to_integral(Parameter::Target));
 	auto type = (target != nullptr) ? target->GetType() : ai::Schedule::Parameter::Type::None;

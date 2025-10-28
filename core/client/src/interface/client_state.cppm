@@ -78,7 +78,7 @@ export {
 		void InitializeSound(CALSound &snd);
 		std::vector<std::shared_ptr<ALSound>> m_soundScripts; // 'Regular' sounds are already handled by sound engine, but we still have to take care of sound-scripts
 		float m_volMaster;
-		std::unordered_map<ALSoundType, float> m_volTypes;
+		std::unordered_map<pragma::audio::ALSoundType, float> m_volTypes;
 
 		WIHandle m_hMainMenu;
 		WIHandle m_hFps;
@@ -119,7 +119,7 @@ export {
 		void AddGUILuaWrapperFactory(const std::function<luabind::object(lua_State *, WIBase &)> &f);
 		std::vector<std::function<luabind::object(lua_State *, WIBase &)>> &GetGUILuaWrapperFactories();
 		virtual msys::MaterialManager &GetMaterialManager() override;
-		virtual ModelSubMesh *CreateSubMesh() const override;
+		virtual pragma::ModelSubMesh *CreateSubMesh() const override;
 		virtual ModelMesh *CreateMesh() const override;
 		virtual util::FileAssetManager *GetAssetManager(pragma::asset::Type type) override;
 		virtual void Initialize() override;
@@ -162,24 +162,24 @@ export {
 		bool PrecacheSound(std::string snd, std::pair<al::ISoundBuffer *, al::ISoundBuffer *> *buffers, ALChannel mode = ALChannel::Auto, bool bLoadInstantly = false);
 		virtual bool PrecacheSound(std::string snd, ALChannel mode = ALChannel::Auto) override;
 		virtual bool LoadSoundScripts(const char *file, bool bPrecache = false) override;
-		virtual std::shared_ptr<ALSound> CreateSound(std::string snd, ALSoundType type, ALCreateFlags flags = ALCreateFlags::None) override;
-		std::shared_ptr<ALSound> CreateSound(al::ISoundBuffer &buffer, ALSoundType type);
-		std::shared_ptr<ALSound> CreateSound(al::Decoder &decoder, ALSoundType type);
+		virtual std::shared_ptr<ALSound> CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None) override;
+		std::shared_ptr<ALSound> CreateSound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type);
+		std::shared_ptr<ALSound> CreateSound(al::Decoder &decoder, pragma::audio::ALSoundType type);
 		void IndexSound(std::shared_ptr<ALSound> snd, unsigned int idx);
-		std::shared_ptr<ALSound> PlaySound(std::string snd, ALSoundType type, ALCreateFlags flags = ALCreateFlags::None);
-		std::shared_ptr<ALSound> PlaySound(al::ISoundBuffer &buffer, ALSoundType type);
-		std::shared_ptr<ALSound> PlaySound(al::Decoder &buffer, ALSoundType type);
-		std::shared_ptr<ALSound> PlayWorldSound(al::ISoundBuffer &buffer, ALSoundType type, const Vector3 &pos);
-		std::shared_ptr<ALSound> PlayWorldSound(al::Decoder &buffer, ALSoundType type, const Vector3 &pos);
-		std::shared_ptr<ALSound> PlayWorldSound(std::string snd, ALSoundType type, const Vector3 &pos);
+		std::shared_ptr<ALSound> PlaySound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None);
+		std::shared_ptr<ALSound> PlaySound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type);
+		std::shared_ptr<ALSound> PlaySound(al::Decoder &buffer, pragma::audio::ALSoundType type);
+		std::shared_ptr<ALSound> PlayWorldSound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type, const Vector3 &pos);
+		std::shared_ptr<ALSound> PlayWorldSound(al::Decoder &buffer, pragma::audio::ALSoundType type, const Vector3 &pos);
+		std::shared_ptr<ALSound> PlayWorldSound(std::string snd, pragma::audio::ALSoundType type, const Vector3 &pos);
 		virtual std::shared_ptr<ALSound> GetSoundByIndex(unsigned int idx) override;
 		virtual void UpdateSounds() override;
 		void SetMasterSoundVolume(float vol);
 		float GetMasterSoundVolume();
-		void SetSoundVolume(ALSoundType type, float vol);
-		float GetSoundVolume(ALSoundType type);
+		void SetSoundVolume(pragma::audio::ALSoundType type, float vol);
+		float GetSoundVolume(pragma::audio::ALSoundType type);
 		void UpdateSoundVolume();
-		std::unordered_map<ALSoundType, float> &GetSoundVolumes();
+		std::unordered_map<pragma::audio::ALSoundType, float> &GetSoundVolumes();
 
 		// Handles
 		void LoadLuaCache(std::string cache, unsigned int cacheSize);

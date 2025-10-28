@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CPointConstraintDoFComponent final : public BasePointConstraintDoFComponent, public CBaseNetComponent {
 		public:
-			CPointConstraintDoFComponent(BaseEntity &ent) : BasePointConstraintDoFComponent(ent) {}
+			CPointConstraintDoFComponent(pragma::ecs::BaseEntity &ent) : BasePointConstraintDoFComponent(ent) {}
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void InitializeLuaObject(lua_State *l) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }

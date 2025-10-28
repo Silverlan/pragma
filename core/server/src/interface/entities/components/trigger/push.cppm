@@ -15,7 +15,7 @@ export {
 	namespace pragma {
 		class DLLSERVER STriggerPushComponent final : public BaseTriggerPushComponent {
 		public:
-			STriggerPushComponent(BaseEntity &ent) : BaseTriggerPushComponent(ent) {}
+			STriggerPushComponent(pragma::ecs::BaseEntity &ent) : BaseTriggerPushComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};

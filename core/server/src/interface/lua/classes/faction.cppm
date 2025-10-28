@@ -5,11 +5,14 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
+#include <string>
+
 
 
 export module pragma.server.scripting.lua.classes.faction;
 
 import pragma.server.ai;
+export import luabind;
 
 export namespace Lua {
 	namespace Faction {
@@ -31,6 +34,6 @@ export namespace Lua {
 		DLLSERVER void SetFearsomeFaction(lua_State *l, ::Faction &faction, ::Faction &factionTgt);
 		DLLSERVER void GetDisposition(lua_State *l, ::Faction &faction, ::Faction &factionTgt);
 		DLLSERVER void GetDisposition(lua_State *l, ::Faction &faction, const std::string &className);
-		DLLSERVER void GetDisposition(lua_State *l, ::Faction &faction, BaseEntity &ent);
+		DLLSERVER void GetDisposition(lua_State *l, ::Faction &faction, pragma::ecs::BaseEntity &ent);
 	};
 };

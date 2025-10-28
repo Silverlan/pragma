@@ -24,6 +24,6 @@ export class DLLSERVER AISquad : public std::enable_shared_from_this<AISquad> {
 	~AISquad();
 	std::string name;
 	std::vector<EntityHandle> members;
-	void Join(BaseEntity *ent);
-	void Leave(BaseEntity *ent);
+	void Join(pragma::ecs::BaseEntity *ent);
+	void Leave(pragma::ecs::BaseEntity *ent);
 };

@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SSpriteComponent final : public BaseEnvSpriteComponent, public SBaseNetComponent {
 		public:
-			SSpriteComponent(BaseEntity &ent) : BaseEnvSpriteComponent(ent) {}
+			SSpriteComponent(pragma::ecs::BaseEntity &ent) : BaseEnvSpriteComponent(ent) {}
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual void InitializeLuaObject(lua_State *l) override;

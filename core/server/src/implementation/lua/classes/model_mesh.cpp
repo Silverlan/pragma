@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+#include <string>
+#include <iostream>
+
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_server.h"
@@ -12,4 +15,4 @@ import pragma.shared;
 
 void Lua::ModelMesh::Server::Create(lua_State *l) { Lua::Push<std::shared_ptr<::ModelMesh>>(l, std::make_shared<::ModelMesh>()); }
 
-void Lua::ModelSubMesh::Server::Create(lua_State *l) { Lua::Push<std::shared_ptr<::ModelSubMesh>>(l, std::make_shared<::ModelSubMesh>()); }
+void Lua::ModelSubMesh::Server::Create(lua_State *l) { Lua::Push<std::shared_ptr<pragma::ModelSubMesh>>(l, std::make_shared<pragma::ModelSubMesh>()); }

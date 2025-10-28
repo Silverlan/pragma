@@ -17,9 +17,9 @@ void ServerState::SendSoundSourceToClient(SALSound &sound, bool sendFullUpdate, 
 {
 	NetPacket p;
 	p->WriteString(sound.GetSoundName());
-	p->Write<ALSoundType>(sound.GetType());
+	p->Write<pragma::audio::ALSoundType>(sound.GetType());
 	p->Write<unsigned int>(sound.GetIndex());
-	p->Write<ALCreateFlags>(sound.GetCreateFlags());
+	p->Write<pragma::audio::ALCreateFlags>(sound.GetCreateFlags());
 	p->Write<bool>(sendFullUpdate);
 	if(sendFullUpdate) {
 		p->Write<ALState>(sound.GetState());
@@ -82,7 +82,7 @@ void ServerState::SendSoundSourceToClient(SALSound &sound, bool sendFullUpdate, 
 	else
 		SendPacket("snd_create", p, pragma::networking::Protocol::FastUnreliable);
 }
-std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd, ALSoundType type, ALCreateFlags flags)
+std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags)
 {
 	std::transform(snd.begin(), snd.end(), snd.begin(), ::tolower);
 	snd = FileManager::GetNormalizedPath(snd);
@@ -97,7 +97,7 @@ std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd, ALSoundType t
 			static auto bSkipPrecache = false;
 			if(bSkipPrecache == false) {
 				Con::cwar << "Attempted to create unprecached sound '" << snd << "'! Precaching now..." << Con::endl;
-				auto channel = ((flags & ALCreateFlags::Mono) != ALCreateFlags::None) ? ALChannel::Mono : ALChannel::Auto;
+				auto channel = ((flags & pragma::audio::ALCreateFlags::Mono) != pragma::audio::ALCreateFlags::None) ? ALChannel::Mono : ALChannel::Auto;
 				if(PrecacheSound(snd, channel) == true) {
 					bSkipPrecache = true;
 					auto r = CreateSound(snd, type, flags);
@@ -110,11 +110,11 @@ std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd, ALSoundType t
 		}
 		else {
 			auto &inf = it->second;
-			if((flags & ALCreateFlags::Mono) != ALCreateFlags::None && inf->mono == false) {
+			if((flags & pragma::audio::ALCreateFlags::Mono) != pragma::audio::ALCreateFlags::None && inf->mono == false) {
 				static auto bSkipPrecache = false;
 				if(bSkipPrecache == false) {
 					Con::cwar << "Attempted to create sound '" << snd << "' as unprecached mono! Precaching now..." << Con::endl;
-					auto channel = ((flags & ALCreateFlags::Mono) != ALCreateFlags::None) ? ALChannel::Mono : ALChannel::Auto;
+					auto channel = ((flags & pragma::audio::ALCreateFlags::Mono) != pragma::audio::ALCreateFlags::None) ? ALChannel::Mono : ALChannel::Auto;
 					if(PrecacheSound(snd, channel) == true) {
 						bSkipPrecache = true;
 						auto r = CreateSound(snd, type, flags);
@@ -164,7 +164,7 @@ std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd, ALSoundType t
 		game->CallCallbacks<void, ALSound *>("OnSoundCreated", as);
 		game->CallLuaCallbacks<void, std::shared_ptr<ALSound>>("OnSoundCreated", pAs);
 	}
-	if(umath::is_flag_set(flags, ALCreateFlags::DontTransmit) == false)
+	if(umath::is_flag_set(flags, pragma::audio::ALCreateFlags::DontTransmit) == false)
 		SendSoundSourceToClient(dynamic_cast<SALSound &>(*pAs), false);
 	return pAs;
 }

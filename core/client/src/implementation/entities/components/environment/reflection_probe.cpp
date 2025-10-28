@@ -90,7 +90,7 @@ static void map_build_reflection_probes(NetworkState *state, pragma::BasePlayerC
 	CReflectionProbeComponent::BuildAllReflectionProbes(*pragma::get_cgame(), rebuild);
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("map_build_reflection_probes", &map_build_reflection_probes, ConVarFlags::None,
+	auto UVN = pragma::console::client::register_command("map_build_reflection_probes", &map_build_reflection_probes, pragma::console::ConVarFlags::None,
 	"Build all reflection probes in the map. Use the '-rebuild' argument to clear all current IBL textures first. Use 'debug_pbr_ibl' to check the probes after they have been built.");
 }
 static void print_status(const uint32_t i, const uint32_t count)
@@ -101,7 +101,7 @@ static void print_status(const uint32_t i, const uint32_t count)
 
 ////////////////
 
-CReflectionProbeComponent::CReflectionProbeComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+CReflectionProbeComponent::CReflectionProbeComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 CReflectionProbeComponent::~CReflectionProbeComponent()
 {
 	m_raytracingJobManager = nullptr;
@@ -314,7 +314,7 @@ prosper::IDescriptorSet *CReflectionProbeComponent::FindDescriptorSetForClosestP
 	EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CReflectionProbeComponent>>();
 	auto dClosest = std::numeric_limits<float>::max();
-	BaseEntity *entClosest = nullptr;
+	pragma::ecs::BaseEntity *entClosest = nullptr;
 	for(auto *ent : entIt) {
 		if(static_cast<CBaseEntity *>(ent)->IsInScene(scene) == false)
 			continue;
@@ -349,7 +349,7 @@ void CReflectionProbeComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	GetEntity().AddComponent<CTransformComponent>();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "env_map", false))
 			m_srcEnvMap = kvData.value;
@@ -474,7 +474,7 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	return result;
 }
 
-util::ParallelJob<uimg::ImageLayerSet> CReflectionProbeComponent::CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, umath::Degree fov, float exposure, const std::vector<BaseEntity *> *optEntityList,
+util::ParallelJob<uimg::ImageLayerSet> CReflectionProbeComponent::CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, umath::Degree fov, float exposure, const std::vector<pragma::ecs::BaseEntity *> *optEntityList,
   bool renderJob)
 {
 	rendering::cycles::SceneInfo sceneInfo {};
@@ -514,7 +514,7 @@ util::ParallelJob<uimg::ImageLayerSet> CReflectionProbeComponent::CaptureRaytrac
 	if(optEntityList)
 		renderImgInfo.entityList = optEntityList;
 	else {
-		renderImgInfo.entityFilter = [](BaseEntity &ent) -> bool { return ent.IsMapEntity(); };
+		renderImgInfo.entityFilter = [](pragma::ecs::BaseEntity &ent) -> bool { return ent.IsMapEntity(); };
 	}
 	auto job = rendering::cycles::render_image(*pragma::get_client_state(), sceneInfo, renderImgInfo);
 	if(job.IsValid() == false)
@@ -544,7 +544,7 @@ std::shared_ptr<prosper::IImage> CReflectionProbeComponent::CreateCubemapImage()
 	return pragma::get_cengine()->GetRenderContext().CreateImage(createInfo);
 }
 
-bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector<BaseEntity *> *optEntityList, bool renderJob)
+bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector<pragma::ecs::BaseEntity *> *optEntityList, bool renderJob)
 {
 	umath::set_flag(m_stateFlags, StateFlags::BakingFailed, true); // Mark as failed until complete
 	auto pos = GetEntity().GetPosition();
@@ -952,7 +952,7 @@ static void debug_pbr_ibl(NetworkState *state, pragma::BasePlayerComponent *pl, 
 
 	auto origin = pl->GetEntity().GetPosition();
 	auto dClosest = std::numeric_limits<float>::max();
-	BaseEntity *entClosest = nullptr;
+	pragma::ecs::BaseEntity *entClosest = nullptr;
 	for(auto *ent : entIt) {
 		auto trC = ent->GetTransformComponent();
 		if(!trC)
@@ -1068,5 +1068,5 @@ static void debug_pbr_ibl(NetworkState *state, pragma::BasePlayerComponent *pl, 
 	}
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_pbr_ibl", &debug_pbr_ibl, ConVarFlags::None, "Displays the irradiance, prefilter and brdf map for the closest cubemap.");
+	auto UVN = pragma::console::client::register_command("debug_pbr_ibl", &debug_pbr_ibl, pragma::console::ConVarFlags::None, "Displays the irradiance, prefilter and brdf map for the closest cubemap.");
 }

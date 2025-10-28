@@ -20,7 +20,7 @@ DISPOSITION SAIComponent::GetDefaultDisposition()
 		return DISPOSITION::NEUTRAL;
 	return faction->GetDefaultDisposition();
 }
-void SAIComponent::SetRelationship(BaseEntity *ent, DISPOSITION disp, bool revert, int priority)
+void SAIComponent::SetRelationship(pragma::ecs::BaseEntity *ent, DISPOSITION disp, bool revert, int priority)
 {
 	if(ent == nullptr)
 		return;
@@ -58,7 +58,7 @@ void SAIComponent::ClearRelationships()
 		m_factionRelationships[i].clear();
 	}
 }
-void SAIComponent::ClearRelationship(BaseEntity *ent)
+void SAIComponent::ClearRelationship(pragma::ecs::BaseEntity *ent)
 {
 	if(ent == nullptr)
 		return;
@@ -106,7 +106,7 @@ DISPOSITION SAIComponent::GetDisposition(EntityHandle &hEnt, int *priority)
 		return GetDefaultDisposition();
 	return GetDisposition(hEnt.get(), priority);
 }
-DISPOSITION SAIComponent::GetDisposition(BaseEntity *ent, int *priority)
+DISPOSITION SAIComponent::GetDisposition(pragma::ecs::BaseEntity *ent, int *priority)
 {
 	if(ent == &GetEntity()) {
 		if(priority != nullptr)

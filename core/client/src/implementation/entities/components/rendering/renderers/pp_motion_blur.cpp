@@ -86,7 +86,7 @@ void CRendererPpMotionBlurComponent::RegisterMembers(pragma::EntityComponentMana
 		registerMember(std::move(memberInfo));
 	}
 }
-CRendererPpMotionBlurComponent::CRendererPpMotionBlurComponent(BaseEntity &ent) : CRendererPpBaseComponent(ent)
+CRendererPpMotionBlurComponent::CRendererPpMotionBlurComponent(pragma::ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent)
 {
 	static auto g_shadersRegistered = false;
 	if(!g_shadersRegistered) {

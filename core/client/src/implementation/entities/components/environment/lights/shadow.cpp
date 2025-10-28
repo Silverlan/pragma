@@ -29,7 +29,7 @@ import :rendering.render_queue_instancer;
 using namespace pragma;
 
 
-CShadowComponent::CShadowComponent(BaseEntity &ent) : BaseEntityComponent {ent} {}
+CShadowComponent::CShadowComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent {ent} {}
 
 void CShadowComponent::Initialize()
 {

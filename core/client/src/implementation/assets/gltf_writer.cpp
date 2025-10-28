@@ -119,7 +119,7 @@ bool pragma::asset::GLTFWriter::IsAnimated(::Model &mdl) const
 	return (skeleton.GetBoneCount() > 1 && anims.empty() == false && (m_exportInfo.exportAnimations || m_animName.has_value()));
 }
 bool pragma::asset::GLTFWriter::ShouldExportMeshes() const { return m_animName.has_value() == false; }
-void pragma::asset::GLTFWriter::WriteMorphTargets(ModelSubMesh &mesh, tinygltf::Mesh &gltfMesh, tinygltf::Primitive &primitive, const std::vector<uint32_t> &nodeIndices)
+void pragma::asset::GLTFWriter::WriteMorphTargets(pragma::ModelSubMesh &mesh, tinygltf::Mesh &gltfMesh, tinygltf::Primitive &primitive, const std::vector<uint32_t> &nodeIndices)
 {
 	auto itMorphSets = m_meshMorphSets.find(&mesh);
 	if(itMorphSets != m_meshMorphSets.end()) {
@@ -189,17 +189,17 @@ void pragma::asset::GLTFWriter::MergeSplitMeshes(ExportMeshList &meshList)
 {
 	if(m_exportInfo.verbose)
 		Con::cout << "Merging meshes by materials..." << Con::endl;
-	std::unordered_map<uint32_t, std::vector<std::shared_ptr<ModelSubMesh>>> groupedMeshes {};
+	std::unordered_map<uint32_t, std::vector<std::shared_ptr<pragma::ModelSubMesh>>> groupedMeshes {};
 	for(auto &mesh : meshList) {
 		auto texIdx = mesh->GetSkinTextureIndex();
 		auto it = groupedMeshes.find(texIdx);
 		if(it == groupedMeshes.end())
-			it = groupedMeshes.insert(std::make_pair(texIdx, std::vector<std::shared_ptr<ModelSubMesh>> {})).first;
+			it = groupedMeshes.insert(std::make_pair(texIdx, std::vector<std::shared_ptr<pragma::ModelSubMesh>> {})).first;
 		it->second.push_back(mesh);
 	}
 
 	uint32_t numMerged = 0;
-	std::vector<std::shared_ptr<ModelSubMesh>> mergedMeshes {};
+	std::vector<std::shared_ptr<pragma::ModelSubMesh>> mergedMeshes {};
 	mergedMeshes.reserve(groupedMeshes.size());
 	for(auto &pair : groupedMeshes) {
 		auto &meshes = pair.second;
@@ -576,13 +576,13 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 
 			auto geometryType = mesh->GetGeometryType();
 			switch(geometryType) {
-			case ModelSubMesh::GeometryType::Triangles:
+			case pragma::ModelSubMesh::GeometryType::Triangles:
 				primitive.mode = TINYGLTF_MODE_TRIANGLES;
 				break;
-			case ModelSubMesh::GeometryType::Lines:
+			case pragma::ModelSubMesh::GeometryType::Lines:
 				primitive.mode = TINYGLTF_MODE_LINE;
 				break;
-			case ModelSubMesh::GeometryType::Points:
+			case pragma::ModelSubMesh::GeometryType::Points:
 				primitive.mode = TINYGLTF_MODE_POINTS;
 				break;
 			}

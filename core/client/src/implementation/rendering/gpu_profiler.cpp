@@ -122,5 +122,5 @@ static void cl_gpu_timer_queries_dump(NetworkState *state, pragma::BasePlayerCom
 	Con::cout << "--------------------------------------------" << Con::endl;
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("cl_gpu_timer_queries_dump", &cl_gpu_timer_queries_dump, ConVarFlags::None, "Prints all timer query results to the console.");
+	auto UVN = pragma::console::client::register_command("cl_gpu_timer_queries_dump", &cl_gpu_timer_queries_dump, pragma::console::ConVarFlags::None, "Prints all timer query results to the console.");
 }

@@ -119,7 +119,7 @@ CSceneComponent *CSceneComponent::Create(const CreateInfo &createInfo, CSceneCom
 }
 
 static uint32_t g_numScenes = 0;
-CSceneComponent::CSceneComponent(BaseEntity &ent) : BaseEntityComponent {ent}, m_sceneRenderDesc {*this} { ++g_numScenes; }
+CSceneComponent::CSceneComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent {ent}, m_sceneRenderDesc {*this} { ++g_numScenes; }
 CSceneComponent::~CSceneComponent()
 {
 	ClearWorldEnvironment();
@@ -287,7 +287,7 @@ TCPPM *CSceneComponent::FindOcclusionCuller()
 {
 	EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::COcclusionCullerComponent>>();
-	entIt.AttachFilter<EntityIteratorFilterUser>([this](BaseEntity &ent, std::size_t index) -> bool { return static_cast<CBaseEntity &>(ent).IsInScene(*this); });
+	entIt.AttachFilter<EntityIteratorFilterUser>([this](pragma::ecs::BaseEntity &ent, std::size_t index) -> bool { return static_cast<CBaseEntity &>(ent).IsInScene(*this); });
 	auto it = entIt.begin();
 	auto *ent = (it != entIt.end()) ? *it : nullptr;
 	return ent ? ent->GetComponent<pragma::COcclusionCullerComponent>().get() : nullptr;

@@ -14,7 +14,7 @@ import pragma.server.entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SRenderComponent final : public BaseRenderComponent, public SBaseNetComponent {
 	  public:
-		SRenderComponent(BaseEntity &ent) : BaseRenderComponent(ent) {}
+		SRenderComponent(pragma::ecs::BaseEntity &ent) : BaseRenderComponent(ent) {}
 		virtual void SetUnlit(bool b) override;
 		virtual void SetCastShadows(bool b) override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;

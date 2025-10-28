@@ -5,6 +5,9 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
+#include <string>
+#include <iostream>
+
 
 
 export module pragma.server.entities.components.character;
@@ -17,12 +20,12 @@ export namespace pragma {
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
 
-		SCharacterComponent(BaseEntity &ent);
+		SCharacterComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
-		virtual void SetActiveWeapon(BaseEntity *ent) override;
+		virtual void SetActiveWeapon(pragma::ecs::BaseEntity *ent) override;
 		void DropActiveWeapon();
 		void DropWeapon(std::string className);
-		void DropWeapon(BaseEntity *ent);
+		void DropWeapon(pragma::ecs::BaseEntity *ent);
 		void SelectNextWeapon();
 		void SelectPreviousWeapon();
 		virtual void OnTick(double tDelta) override;

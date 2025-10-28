@@ -15,7 +15,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SWorldComponent final : public BaseWorldComponent {
 		public:
-			SWorldComponent(BaseEntity &ent) : BaseWorldComponent(ent) {}
+			SWorldComponent(pragma::ecs::BaseEntity &ent) : BaseWorldComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};

@@ -7,6 +7,10 @@ module;
 #include <string>
 #include <vector>
 
+#include <memory>
+
+#include <array>
+
 export module pragma.server.ai.factions;
 
 import pragma.server.ai.disposition;
@@ -34,7 +38,7 @@ export {
 		DISPOSITION GetDisposition(Faction &faction, int *priority = nullptr);
 		DISPOSITION GetDisposition(std::string className, int *priority = nullptr);
 		DISPOSITION GetDisposition(EntityHandle &hEnt, int *priority = nullptr);
-		DISPOSITION GetDisposition(BaseEntity *ent, int *priority = nullptr);
+		DISPOSITION GetDisposition(pragma::ecs::BaseEntity *ent, int *priority = nullptr);
 		bool HasClass(std::string className);
 		void SetDefaultDisposition(DISPOSITION disp);
 		DISPOSITION GetDefaultDisposition();

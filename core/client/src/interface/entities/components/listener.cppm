@@ -15,7 +15,7 @@ import :entities.base_entity;
 export namespace pragma {
 	class DLLCLIENT CListenerComponent final : public BaseEntityComponent {
 	  public:
-		CListenerComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CListenerComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		CListenerComponent();
 		virtual void Initialize() override;
 		virtual void OnTick(double dt) override;

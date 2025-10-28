@@ -117,7 +117,7 @@ export namespace pragma {
 		static const std::shared_ptr<rendering::EntityInstanceIndexBuffer> &GetEntityInstanceIndexBuffer();
 		static void UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, const rendering::RenderQueue &renderQueue, RenderPassStats *optStats = nullptr);
 
-		CSceneComponent(BaseEntity &ent);
+		CSceneComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		virtual ~CSceneComponent() override;

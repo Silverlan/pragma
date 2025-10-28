@@ -27,7 +27,7 @@ export namespace pragma {
 			BehaviorParameter(int32_t i);
 			BehaviorParameter(float f);
 			BehaviorParameter(const std::string &s);
-			BehaviorParameter(const BaseEntity *ent);
+			BehaviorParameter(const pragma::ecs::BaseEntity *ent);
 			BehaviorParameter(const Vector3 &vec);
 			BehaviorParameter(const Quat &rot);
 			BehaviorParameter(const EulerAngles &ang);
@@ -36,7 +36,7 @@ export namespace pragma {
 			int32_t GetInt() const;
 			float GetFloat() const;
 			const std::string *GetString() const;
-			const BaseEntity *GetEntity() const;
+			const pragma::ecs::BaseEntity *GetEntity() const;
 			const Vector3 *GetVector() const;
 			const Quat *GetQuaternion() const;
 			const EulerAngles *GetEulerAngles() const;
@@ -64,7 +64,7 @@ export namespace pragma {
 			void SetParameter(uint8_t idx, int32_t i);
 			void SetParameter(uint8_t idx, float f);
 			void SetParameter(uint8_t idx, const std::string &s);
-			void SetParameter(uint8_t idx, const BaseEntity *ent);
+			void SetParameter(uint8_t idx, const pragma::ecs::BaseEntity *ent);
 			void SetParameter(uint8_t idx, const Vector3 &vec);
 			void SetParameter(uint8_t idx, const Quat &rot);
 			void SetParameter(uint8_t idx, const EulerAngles &ang);

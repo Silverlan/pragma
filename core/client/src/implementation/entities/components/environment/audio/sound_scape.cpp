@@ -77,7 +77,7 @@ void CSoundScapeComponent::OnEntitySpawn()
 	auto &ent = GetEntity();
 	auto pSoundEmitterComponent = ent.GetComponent<pragma::CSoundEmitterComponent>();
 	if(pSoundEmitterComponent.valid()) {
-		std::shared_ptr<ALSound> snd = pSoundEmitterComponent->CreateSound(m_kvSoundScape, ALSoundType::Environment);
+		std::shared_ptr<ALSound> snd = pSoundEmitterComponent->CreateSound(m_kvSoundScape, pragma::audio::ALSoundType::Environment);
 		if(snd.get() == NULL) {
 			Con::cwar << "Invalid soundscape '" << m_kvSoundScape << "' for entity " << this << Con::endl;
 			return;

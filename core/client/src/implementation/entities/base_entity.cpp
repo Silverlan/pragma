@@ -33,7 +33,7 @@ import pragma.shared;
 
 void CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 {
-	BaseEntity::OnComponentAdded(component);
+	pragma::ecs::BaseEntity::OnComponentAdded(component);
 	auto typeIndex = std::type_index(typeid(component));
 	if(typeid(component) == typeid(pragma::CRenderComponent))
 		m_renderComponent = &static_cast<pragma::CRenderComponent &>(component);
@@ -64,7 +64,7 @@ void CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 }
 void CBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 {
-	BaseEntity::OnComponentRemoved(component);
+	pragma::ecs::BaseEntity::OnComponentRemoved(component);
 	if(typeid(component) == typeid(pragma::CWorldComponent))
 		umath::set_flag(m_stateFlags, StateFlags::HasWorldComponent, false);
 	else if(typeid(component) == typeid(pragma::CRenderComponent))
@@ -86,11 +86,11 @@ void CBaseEntity::InitializeLuaObject(lua_State *lua) { pragma::BaseLuaHandle::I
 //////////////////////////////////
 
 pragma::ComponentEventId CBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED = pragma::INVALID_COMPONENT_ID;
-void CBaseEntity::RegisterEvents(pragma::EntityComponentManager &componentManager) { EVENT_ON_SCENE_FLAGS_CHANGED = componentManager.RegisterEvent("ON_SCENE_FLAGS_CHANGED", typeid(BaseEntity), pragma::ComponentEventInfo::Type::Broadcast); }
+void CBaseEntity::RegisterEvents(pragma::EntityComponentManager &componentManager) { EVENT_ON_SCENE_FLAGS_CHANGED = componentManager.RegisterEvent("ON_SCENE_FLAGS_CHANGED", typeid(pragma::ecs::BaseEntity), pragma::ComponentEventInfo::Type::Broadcast); }
 
-CBaseEntity::CBaseEntity() : BaseEntity(), m_sceneFlags {util::UInt32Property::Create(0)} {}
+CBaseEntity::CBaseEntity() : pragma::ecs::BaseEntity(), m_sceneFlags {util::UInt32Property::Create(0)} {}
 
-BaseEntity *CBaseEntity::GetServersideEntity() const
+pragma::ecs::BaseEntity *CBaseEntity::GetServersideEntity() const
 {
 	if(IsClientsideOnly() == true)
 		return nullptr;
@@ -146,7 +146,7 @@ std::vector<pragma::CSceneComponent *> CBaseEntity::GetScenes() const
 void CBaseEntity::Construct(unsigned int idx, unsigned int clientIdx)
 {
 	m_clientIdx = clientIdx;
-	BaseEntity::Construct(idx);
+	pragma::ecs::BaseEntity::Construct(idx);
 }
 
 unsigned int CBaseEntity::GetClientIndex() { return m_clientIdx; }
@@ -154,7 +154,7 @@ uint32_t CBaseEntity::GetLocalIndex() const { return const_cast<CBaseEntity *>(t
 
 void CBaseEntity::Initialize()
 {
-	BaseEntity::Initialize();
+	pragma::ecs::BaseEntity::Initialize();
 	auto className = client_entities::ClientEntityRegistry::Instance().GetClassName(typeid(*this));
 	std::string strClassName = className ? std::string{*className} : std::string {};
 	m_className = pragma::ents::register_class_name(strClassName);
@@ -162,7 +162,7 @@ void CBaseEntity::Initialize()
 
 void CBaseEntity::DoSpawn()
 {
-	BaseEntity::DoSpawn();
+	pragma::ecs::BaseEntity::DoSpawn();
 	pragma::get_cgame()->SpawnEntity(this);
 }
 
@@ -234,14 +234,14 @@ void CBaseEntity::OnRemove()
 	auto mdlComponent = GetModelComponent();
 	if(mdlComponent)
 		mdlComponent->SetModel(std::shared_ptr<Model>(nullptr)); // Make sure to clear all clientside model mesh references
-	BaseEntity::OnRemove();
+	pragma::ecs::BaseEntity::OnRemove();
 }
 
 void CBaseEntity::Remove()
 {
-	if(umath::is_flag_set(GetStateFlags(), BaseEntity::StateFlags::Removed))
+	if(umath::is_flag_set(GetStateFlags(), pragma::ecs::BaseEntity::StateFlags::Removed))
 		return;
-	BaseEntity::Remove();
+	pragma::ecs::BaseEntity::Remove();
 	SceneRenderDesc::AssertRenderQueueThreadInactive();
 	Game *game = pragma::get_client_state()->GetGameState();
 	game->RemoveEntity(this);

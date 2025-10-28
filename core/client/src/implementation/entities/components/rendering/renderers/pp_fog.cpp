@@ -21,7 +21,7 @@ import :rendering.shaders;
 
 using namespace pragma;
 
-CRendererPpFogComponent::CRendererPpFogComponent(BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
+CRendererPpFogComponent::CRendererPpFogComponent(pragma::ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
 void CRendererPpFogComponent::DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.renderStats)

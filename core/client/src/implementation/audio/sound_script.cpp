@@ -21,7 +21,7 @@ CSoundScript::~CSoundScript() {}
 //////////////////////////////////////
 
 CSSEPlaySound::CSSEPlaySound(SoundScriptManager *manager) : SSEPlaySound(manager), m_dspEffect(NULL) {}
-SSESound *CSSEPlaySound::CreateSound(double tStart, const std::function<std::shared_ptr<ALSound>(const std::string &, ALChannel, ALCreateFlags)> &createSound)
+SSESound *CSSEPlaySound::CreateSound(double tStart, const std::function<std::shared_ptr<ALSound>(const std::string &, ALChannel, pragma::audio::ALCreateFlags)> &createSound)
 {
 	auto *s = SSEPlaySound::CreateSound(tStart, createSound);
 	if(s == nullptr)

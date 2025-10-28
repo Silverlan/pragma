@@ -17,7 +17,7 @@ export namespace pragma::ecs {class CParticleSystemComponent;}
 export namespace pragma {
 	class DLLCLIENT CSmokeTrailComponent final : public BaseEnvSmokeTrailComponent, public CBaseNetComponent {
 	  public:
-		CSmokeTrailComponent(BaseEntity &ent) : BaseEnvSmokeTrailComponent(ent) {}
+		CSmokeTrailComponent(pragma::ecs::BaseEntity &ent) : BaseEnvSmokeTrailComponent(ent) {}
 		virtual ~CSmokeTrailComponent() override;
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;

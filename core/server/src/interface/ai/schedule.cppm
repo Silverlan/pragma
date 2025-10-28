@@ -6,6 +6,8 @@ module;
 #include "pragma/serverdefinitions.h"
 #include <vector>
 
+#include <sstream>
+
 export module pragma.server.ai.schedule;
 
 export import :behavior;

@@ -37,5 +37,5 @@ static void debug_hitboxes(NetworkState *state, pragma::BasePlayerComponent *pl,
 		ent->AddComponent<pragma::CDebugHitboxComponent>();
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_hitboxes", &debug_hitboxes, ConVarFlags::None, "Displays the hitboxes for the entity under the crosshair, or the entity with the given name (If it was specified.).");
+	auto UVN = pragma::console::client::register_command("debug_hitboxes", &debug_hitboxes, pragma::console::ConVarFlags::None, "Displays the hitboxes for the entity under the crosshair, or the entity with the given name (If it was specified.).");
 }

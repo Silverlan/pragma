@@ -60,7 +60,7 @@ void CRendererPpBloomComponent::RegisterMembers(pragma::EntityComponentManager &
 	}
 }
 
-CRendererPpBloomComponent::CRendererPpBloomComponent(BaseEntity &ent) : CRendererPpBaseComponent(ent) { SetPipelineDirty(); }
+CRendererPpBloomComponent::CRendererPpBloomComponent(pragma::ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent) { SetPipelineDirty(); }
 void CRendererPpBloomComponent::SetBloomThreshold(float threshold)
 {
 	m_bloomThreshold = threshold;

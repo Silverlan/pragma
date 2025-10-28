@@ -57,12 +57,12 @@ void SGame::RegisterLua()
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "ents", {{"COMPONENT_FLAG_NONE", umath::to_integral(pragma::ComponentFlags::None)}, {"COMPONENT_FLAG_BIT_NETWORKED", umath::to_integral(pragma::ComponentFlags::Networked)}});
 
-	auto entityClassDef = luabind::class_<BaseEntity>("BaseEntityBase");
+	auto entityClassDef = luabind::class_<pragma::ecs::BaseEntity>("BaseEntityBase");
 	Lua::Entity::register_class(entityClassDef);
 	modEnts[entityClassDef];
 	RegisterLuaGameClasses(gameMod);
 
-	auto sEntityClassDef = luabind::class_<SBaseEntity, BaseEntity>("Entity");
+	auto sEntityClassDef = luabind::class_<SBaseEntity, pragma::ecs::BaseEntity>("Entity");
 	Lua::Entity::Server::register_class(sEntityClassDef);
 	modEnts[sEntityClassDef];
 

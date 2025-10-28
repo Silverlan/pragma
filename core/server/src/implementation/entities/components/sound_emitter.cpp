@@ -45,11 +45,11 @@ void SSoundEmitterComponent::UpdateSoundTransform(ALSound &snd) const
 	if(pVelComponent.valid())
 		baseSnd->SetVelocity(pVelComponent->GetVelocity(), true);
 }
-std::shared_ptr<ALSound> SSoundEmitterComponent::CreateSound(std::string sndname, ALSoundType type, const SoundInfo &sndInfo)
+std::shared_ptr<ALSound> SSoundEmitterComponent::CreateSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo)
 {
-	auto flags = ALCreateFlags::Mono;
+	auto flags = pragma::audio::ALCreateFlags::Mono;
 	if(sndInfo.transmit == false)
-		flags |= ALCreateFlags::DontTransmit;
+		flags |= pragma::audio::ALCreateFlags::DontTransmit;
 	auto ptrSnd = ServerState::Get()->CreateSound(sndname, type, flags);
 	auto *snd = static_cast<ALSound *>(ptrSnd.get());
 	if(snd == nullptr)
@@ -66,7 +66,7 @@ std::shared_ptr<ALSound> SSoundEmitterComponent::CreateSound(std::string sndname
 	}
 	return ptrSnd;
 }
-std::shared_ptr<ALSound> SSoundEmitterComponent::EmitSound(std::string sndname, ALSoundType type, const SoundInfo &sndInfo)
+std::shared_ptr<ALSound> SSoundEmitterComponent::EmitSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo)
 {
 	std::shared_ptr<ALSound> snd = CreateSound(sndname, type, sndInfo);
 	ALSound *al = snd.get();

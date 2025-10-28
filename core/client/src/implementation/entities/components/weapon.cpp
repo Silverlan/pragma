@@ -30,7 +30,7 @@ const std::vector<CWeaponComponent *> &CWeaponComponent::GetAll() { return s_wea
 unsigned int CWeaponComponent::GetWeaponCount() { return CUInt32(s_weapons.size()); }
 
 
-CWeaponComponent::CWeaponComponent(BaseEntity &ent) : BaseWeaponComponent(ent), CBaseNetComponent() { s_weapons.push_back(this); }
+CWeaponComponent::CWeaponComponent(pragma::ecs::BaseEntity &ent) : BaseWeaponComponent(ent), CBaseNetComponent() { s_weapons.push_back(this); }
 
 CWeaponComponent::~CWeaponComponent()
 {
@@ -359,7 +359,7 @@ Activity CWeaponComponent::TranslateViewActivity(Activity act) { return act; }
 
 pragma::CViewModelComponent *CWeaponComponent::GetViewModel()
 {
-	BaseEntity *parent = m_hTarget.get();
+	pragma::ecs::BaseEntity *parent = m_hTarget.get();
 	if(parent == NULL)
 		return NULL;
 	CGame *game = pragma::get_client_state()->GetGameState();
@@ -397,7 +397,7 @@ void CWeaponComponent::TertiaryAttack() { BaseWeaponComponent::TertiaryAttack();
 void CWeaponComponent::Attack4() { BaseWeaponComponent::Attack4(); }
 void CWeaponComponent::Reload() { BaseWeaponComponent::Reload(); }
 
-CEAttachToOwner::CEAttachToOwner(BaseEntity &owner, CViewModelComponent *optViewmodel) : owner {owner}, viewModel {optViewmodel} {}
+CEAttachToOwner::CEAttachToOwner(pragma::ecs::BaseEntity &owner, CViewModelComponent *optViewmodel) : owner {owner}, viewModel {optViewmodel} {}
 void CEAttachToOwner::PushArguments(lua_State *l)
 {
 	owner.GetLuaObject().push(l);

@@ -46,9 +46,9 @@ export class DLLSERVER SGame : public Game {
 	void GetVehicles(std::vector<T *> *ents);
 
 	virtual bool InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject) override;
-	virtual void OnEntityCreated(BaseEntity *ent) override;
+	virtual void OnEntityCreated(pragma::ecs::BaseEntity *ent) override;
 	virtual unsigned int GetFreeEntityIndex() override;
-	virtual void SetupEntity(BaseEntity *ent, unsigned int idx) override;
+	virtual void SetupEntity(pragma::ecs::BaseEntity *ent, unsigned int idx) override;
 	virtual void InitializeLuaScriptWatcher() override;
 	virtual std::shared_ptr<pragma::EntityComponentManager> InitializeEntityComponentManager() override;
 	virtual void InitializeEntityComponents(pragma::EntityComponentManager &componentManager) override;
@@ -88,13 +88,13 @@ export class DLLSERVER SGame : public Game {
 	void SendSnapshot();
 	void SendSnapshot(pragma::SPlayerComponent *pl);
 	virtual std::shared_ptr<ModelMesh> CreateModelMesh() const override;
-	virtual std::shared_ptr<ModelSubMesh> CreateModelSubMesh() const override;
+	virtual std::shared_ptr<pragma::ModelSubMesh> CreateModelSubMesh() const override;
 	virtual void GetRegisteredEntities(std::vector<std::string> &classes, std::vector<std::string> &luaClasses) const override;
 	virtual bool RunLua(const std::string &lua) override;
 	void RegisterGameResource(const std::string &fileName);
 	bool IsValidGameResource(const std::string &fileName);
 	virtual void CreateGiblet(const GibletCreateInfo &info) override;
-	virtual pragma::BaseEntityComponent *CreateLuaEntityComponent(BaseEntity &ent, std::string classname) override;
+	virtual pragma::BaseEntityComponent *CreateLuaEntityComponent(pragma::ecs::BaseEntity &ent, std::string classname) override;
 
 	std::vector<std::string> &GetNetEventIds();
 	const std::vector<std::string> &GetNetEventIds() const;
@@ -124,14 +124,14 @@ export class DLLSERVER SGame : public Game {
 	T *CreateEntity();
 	template<class T>
 	T *CreateEntity(unsigned int idx);
-	virtual void RemoveEntity(BaseEntity *ent) override;
+	virtual void RemoveEntity(pragma::ecs::BaseEntity *ent) override;
 	pragma::SPlayerComponent *GetPlayer(pragma::networking::IServerClient &session);
-	virtual void SpawnEntity(BaseEntity *ent) override;
+	virtual void SpawnEntity(pragma::ecs::BaseEntity *ent) override;
 	void GetEntities(std::vector<SBaseEntity *> **ents);
-	void GetPlayers(std::vector<BaseEntity *> *ents) override;
-	void GetNPCs(std::vector<BaseEntity *> *ents) override;
-	void GetWeapons(std::vector<BaseEntity *> *ents) override;
-	void GetVehicles(std::vector<BaseEntity *> *ents) override;
+	void GetPlayers(std::vector<pragma::ecs::BaseEntity *> *ents) override;
+	void GetNPCs(std::vector<pragma::ecs::BaseEntity *> *ents) override;
+	void GetWeapons(std::vector<pragma::ecs::BaseEntity *> *ents) override;
+	void GetVehicles(std::vector<pragma::ecs::BaseEntity *> *ents) override;
 
 	void GetPlayers(std::vector<SBaseEntity *> *ents);
 	void GetNPCs(std::vector<SBaseEntity *> *ents);
@@ -169,9 +169,9 @@ export class DLLSERVER SGame : public Game {
 
 	void SpawnPlayer(pragma::BasePlayerComponent &pl);
 
-	void CreateExplosion(const Vector3 &origin, Float radius, DamageInfo &dmg, const std::function<bool(BaseEntity *, DamageInfo &)> &callback = nullptr);
-	void CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force = 0.f, BaseEntity *attacker = nullptr, BaseEntity *inflictor = nullptr, const std::function<bool(BaseEntity *, DamageInfo &)> &callback = nullptr);
-	void CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force = 0.f, const EntityHandle &attacker = EntityHandle(), const EntityHandle &inflictor = EntityHandle(), const std::function<bool(BaseEntity *, DamageInfo &)> &callback = nullptr);
+	void CreateExplosion(const Vector3 &origin, Float radius, DamageInfo &dmg, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback = nullptr);
+	void CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force = 0.f, pragma::ecs::BaseEntity *attacker = nullptr, pragma::ecs::BaseEntity *inflictor = nullptr, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback = nullptr);
+	void CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force = 0.f, const EntityHandle &attacker = EntityHandle(), const EntityHandle &inflictor = EntityHandle(), const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback = nullptr);
 
 	void WriteEntityData(NetPacket &packet, SBaseEntity **ents, uint32_t entCount, pragma::networking::ClientRecipientFilter &rp);
 };

@@ -14,7 +14,7 @@ import :entities.base_entity;
 export namespace pragma {
 	class DLLCLIENT CGamemodeComponent final : public BaseGamemodeComponent {
 	  public:
-		CGamemodeComponent(BaseEntity &ent) : BaseGamemodeComponent(ent) {}
+		CGamemodeComponent(pragma::ecs::BaseEntity &ent) : BaseGamemodeComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };

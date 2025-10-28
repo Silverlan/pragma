@@ -14,7 +14,7 @@ import :entities.components.entity;
 export namespace pragma::ecs {
 	class DLLCLIENT CShooterComponent final : public BaseShooterComponent, public CBaseNetComponent {
 	  public:
-		CShooterComponent(BaseEntity &ent) : BaseShooterComponent(ent) {}
+		CShooterComponent(pragma::ecs::BaseEntity &ent) : BaseShooterComponent(ent) {}
 
 		virtual void FireBullets(const BulletInfo &bulletInfo, std::vector<TraceResult> &outHitTargets, bool bMaster = true) override final;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;

@@ -31,5 +31,5 @@ void CMD_debug_hdr_bloom(NetworkState *, pragma::BasePlayerComponent *, std::vec
 	pEl->Update();
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_hdr_bloom", &CMD_debug_hdr_bloom, ConVarFlags::None, "Displays the scene bloom texture on screen. Usage: debug_hdr_bloom <1/0>");
+	auto UVN = pragma::console::client::register_command("debug_hdr_bloom", &CMD_debug_hdr_bloom, pragma::console::ConVarFlags::None, "Displays the scene bloom texture on screen. Usage: debug_hdr_bloom <1/0>");
 }

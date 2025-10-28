@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SCameraComponent final : public BaseEnvCameraComponent {
 		public:
-			SCameraComponent(BaseEntity &ent) : BaseEnvCameraComponent(ent) {}
+			SCameraComponent(pragma::ecs::BaseEntity &ent) : BaseEnvCameraComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		protected:
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;

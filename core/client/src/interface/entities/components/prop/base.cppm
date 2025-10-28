@@ -16,7 +16,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CPropComponent final : public BasePropComponent, public CBaseNetComponent {
 		public:
-			CPropComponent(BaseEntity &ent) : BasePropComponent(ent) {}
+			CPropComponent(pragma::ecs::BaseEntity &ent) : BasePropComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void OnEntitySpawn() override;

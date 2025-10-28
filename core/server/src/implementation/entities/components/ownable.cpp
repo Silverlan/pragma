@@ -17,7 +17,7 @@ void SOwnableComponent::InitializeLuaObject(lua_State *l) { return BaseEntityCom
 
 void SOwnableComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { nwm::write_entity(packet, *m_owner); }
 
-void SOwnableComponent::SetOwner(BaseEntity *owner)
+void SOwnableComponent::SetOwner(pragma::ecs::BaseEntity *owner)
 {
 	BaseOwnableComponent::SetOwner(owner);
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());

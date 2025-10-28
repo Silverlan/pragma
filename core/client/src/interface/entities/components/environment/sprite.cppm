@@ -19,7 +19,7 @@ export namespace pragma::ecs {class CParticleSystemComponent;}
 export namespace pragma {
 	class DLLCLIENT CSpriteComponent final : public BaseEnvSpriteComponent, public CBaseNetComponent {
 	  public:
-		CSpriteComponent(BaseEntity &ent) : BaseEnvSpriteComponent(ent) {}
+		CSpriteComponent(pragma::ecs::BaseEntity &ent) : BaseEnvSpriteComponent(ent) {}
 		virtual void Initialize() override;
 		virtual ~CSpriteComponent() override;
 		virtual void ReceiveData(NetPacket &packet) override;

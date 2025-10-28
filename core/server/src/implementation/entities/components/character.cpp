@@ -17,7 +17,7 @@ import pragma.server.entities.components.weapon;
 using namespace pragma;
 
 void SCharacterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { BaseCharacterComponent::RegisterEvents(componentManager, registerEvent); }
-SCharacterComponent::SCharacterComponent(BaseEntity &ent) : BaseCharacterComponent(ent), m_faction(nullptr), m_bNoTarget(false), m_bGodMode(false) {}
+SCharacterComponent::SCharacterComponent(pragma::ecs::BaseEntity &ent) : BaseCharacterComponent(ent), m_faction(nullptr), m_bNoTarget(false), m_bGodMode(false) {}
 void SCharacterComponent::Initialize()
 {
 	BaseCharacterComponent::Initialize();
@@ -55,7 +55,7 @@ void SCharacterComponent::SetAmmoCount(UInt32 ammoType, UInt16 count)
 	}
 }
 
-void SCharacterComponent::SetActiveWeapon(BaseEntity *ent)
+void SCharacterComponent::SetActiveWeapon(pragma::ecs::BaseEntity *ent)
 {
 	BaseCharacterComponent::SetActiveWeapon(ent);
 	auto &entThis = static_cast<SBaseEntity &>(GetEntity());
@@ -71,13 +71,13 @@ void SCharacterComponent::DropWeapon(std::string className)
 	for(unsigned int i = 0; i < m_weapons.size(); i++) {
 		EntityHandle &hEnt = m_weapons[i];
 		if(hEnt.valid()) {
-			BaseEntity *ent = hEnt.get();
+			pragma::ecs::BaseEntity *ent = hEnt.get();
 			if(ent->GetClass() == className)
 				DropWeapon(ent);
 		}
 	}
 }
-void SCharacterComponent::DropWeapon(BaseEntity *ent)
+void SCharacterComponent::DropWeapon(pragma::ecs::BaseEntity *ent)
 {
 	if(m_weapons.empty())
 		return;
@@ -175,7 +175,7 @@ void SCharacterComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &mo
 	BaseCharacterComponent::RegisterLuaBindings(l, modEnts);
 
 	auto def = pragma::lua::create_entity_component_class<pragma::SCharacterComponent, pragma::BaseCharacterComponent>("CharacterComponent");
-	def.def("GiveWeapon", static_cast<BaseEntity *(pragma::SCharacterComponent::*)(std::string)>(&pragma::SCharacterComponent::GiveWeapon));
+	def.def("GiveWeapon", static_cast<pragma::ecs::BaseEntity *(pragma::SCharacterComponent::*)(std::string)>(&pragma::SCharacterComponent::GiveWeapon));
 	def.def("DropActiveWeapon", &pragma::SCharacterComponent::DropActiveWeapon);
 	def.def("DropWeapon", static_cast<void (pragma::SCharacterComponent::*)(std::string)>(&pragma::SCharacterComponent::DropWeapon));
 	def.def("DropWeapon", &Lua::Character::Server::DropWeapon);

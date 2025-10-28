@@ -20,10 +20,10 @@ struct CyclesModuleInterface {
 		bake_ao_ent = FindSymbolAddress<decltype(bake_ao_ent)>(lib, "pr_cycles_bake_ao_ent");
 		bake_lightmaps = FindSymbolAddress<decltype(bake_lightmaps)>(lib, "pr_cycles_bake_lightmaps");
 	}
-	void (*render_image)(const pragma::rendering::cycles::SceneInfo &sceneInfo, const pragma::rendering::cycles::RenderImageInfo &renderImageInfo, const std::function<bool(BaseEntity &)> &entFilter, util::ParallelJob<uimg::ImageLayerSet> &outJob) = nullptr;
+	void (*render_image)(const pragma::rendering::cycles::SceneInfo &sceneInfo, const pragma::rendering::cycles::RenderImageInfo &renderImageInfo, const std::function<bool(pragma::ecs::BaseEntity &)> &entFilter, util::ParallelJob<uimg::ImageLayerSet> &outJob) = nullptr;
 
 	void (*bake_ao)(const pragma::rendering::cycles::SceneInfo &sceneInfo, Model &mdl, uint32_t materialIndex, util::ParallelJob<uimg::ImageLayerSet> &outJob) = nullptr;
-	void (*bake_ao_ent)(const pragma::rendering::cycles::SceneInfo &sceneInfo, BaseEntity &ent, uint32_t materialIndex, util::ParallelJob<uimg::ImageLayerSet> &outJob) = nullptr;
+	void (*bake_ao_ent)(const pragma::rendering::cycles::SceneInfo &sceneInfo, pragma::ecs::BaseEntity &ent, uint32_t materialIndex, util::ParallelJob<uimg::ImageLayerSet> &outJob) = nullptr;
 	void (*bake_lightmaps)(const pragma::rendering::cycles::SceneInfo &sceneInfo, util::ParallelJob<uimg::ImageLayerSet> &outJob) = nullptr;
 
 	bool IsValid() const { return m_bValid; }
@@ -56,14 +56,14 @@ util::ParallelJob<uimg::ImageLayerSet> cycles::render_image(ClientState &client,
 	auto cyclesInterface = initialize_library(client);
 	if(cyclesInterface.has_value() == false)
 		return {};
-	auto fEntityFilter = renderImageInfo.entityFilter ? renderImageInfo.entityFilter : [](BaseEntity &ent) -> bool { return true; };
+	auto fEntityFilter = renderImageInfo.entityFilter ? renderImageInfo.entityFilter : [](pragma::ecs::BaseEntity &ent) -> bool { return true; };
 	util::ParallelJob<uimg::ImageLayerSet> job = {};
 	cyclesInterface->render_image(sceneInfo, renderImageInfo, fEntityFilter, job);
 	if(job.IsValid() == false)
 		return {};
 	return job;
 }
-util::ParallelJob<uimg::ImageLayerSet> cycles::bake_ambient_occlusion(ClientState &client, const SceneInfo &sceneInfo, BaseEntity &ent, uint32_t materialIndex)
+util::ParallelJob<uimg::ImageLayerSet> cycles::bake_ambient_occlusion(ClientState &client, const SceneInfo &sceneInfo, pragma::ecs::BaseEntity &ent, uint32_t materialIndex)
 {
 	auto cyclesInterface = initialize_library(client);
 	if(cyclesInterface.has_value() == false)

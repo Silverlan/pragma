@@ -137,10 +137,10 @@ export class DLLCLIENT CGame : public Game {
 	void SendUserInput();
 	template<typename TCPPM>
 		void CreateGiblet(const GibletCreateInfo &info, TCPPM **particle);
-	virtual pragma::BaseEntityComponent *CreateLuaEntityComponent(BaseEntity &ent, std::string classname) override;
+	virtual pragma::BaseEntityComponent *CreateLuaEntityComponent(pragma::ecs::BaseEntity &ent, std::string classname) override;
 	virtual void CreateGiblet(const GibletCreateInfo &info) override;
 	virtual std::shared_ptr<ModelMesh> CreateModelMesh() const override;
-	virtual std::shared_ptr<ModelSubMesh> CreateModelSubMesh() const override;
+	virtual std::shared_ptr<pragma::ModelSubMesh> CreateModelSubMesh() const override;
 	virtual void GetRegisteredEntities(std::vector<std::string> &classes, std::vector<std::string> &luaClasses) const override;
 
 	bool StartGPUProfilingStage(const char *stage);
@@ -183,10 +183,10 @@ export class DLLCLIENT CGame : public Game {
 	virtual CBaseEntity *GetEntity(unsigned int idx) override;
 	virtual CBaseEntity *GetEntityByLocalIndex(uint32_t idx) override;
 	CBaseEntity *GetEntityByClientIndex(unsigned int idx);
-	virtual void GetPlayers(std::vector<BaseEntity *> *ents) override;
-	virtual void GetNPCs(std::vector<BaseEntity *> *ents) override;
-	virtual void GetWeapons(std::vector<BaseEntity *> *ents) override;
-	virtual void GetVehicles(std::vector<BaseEntity *> *ents) override;
+	virtual void GetPlayers(std::vector<pragma::ecs::BaseEntity *> *ents) override;
+	virtual void GetNPCs(std::vector<pragma::ecs::BaseEntity *> *ents) override;
+	virtual void GetWeapons(std::vector<pragma::ecs::BaseEntity *> *ents) override;
+	virtual void GetVehicles(std::vector<pragma::ecs::BaseEntity *> *ents) override;
 
 	virtual void GetPlayers(std::vector<EntityHandle> *ents) override;
 	virtual void GetNPCs(std::vector<EntityHandle> *ents) override;
@@ -202,17 +202,17 @@ export class DLLCLIENT CGame : public Game {
 	T *CreateEntity();
 	template<class T>
 	T *CreateEntity(unsigned int idx);
-	virtual void RemoveEntity(BaseEntity *ent) override;
+	virtual void RemoveEntity(pragma::ecs::BaseEntity *ent) override;
 	template<typename TCPPM>
 	    TCPPM *GetListener();
 	pragma::CPlayerComponent *GetLocalPlayer();
 	void GetPrimaryCameraRenderMask(::pragma::rendering::RenderMask &inclusionMask, ::pragma::rendering::RenderMask &exclusionMask) const;
 	void SetLocalPlayer(pragma::CPlayerComponent *pl);
-	virtual void SpawnEntity(BaseEntity *ent) override;
+	virtual void SpawnEntity(pragma::ecs::BaseEntity *ent) override;
 	void GetEntities(std::vector<CBaseEntity *> **ents);
-	virtual void GetEntities(std::vector<BaseEntity *> **ents) override;
+	virtual void GetEntities(std::vector<pragma::ecs::BaseEntity *> **ents) override;
 	void GetSharedEntities(std::vector<CBaseEntity *> **ents);
-	void GetSharedEntities(std::vector<BaseEntity *> **ents);
+	void GetSharedEntities(std::vector<pragma::ecs::BaseEntity *> **ents);
 
 	// Sockets
 	void ReceiveSnapshot(NetPacket &packet);
@@ -394,9 +394,9 @@ export class DLLCLIENT CGame : public Game {
 	void GetVehicles(std::vector<T *> *ents);
 
 	virtual void UpdateTime() override;
-	virtual void OnEntityCreated(BaseEntity *ent) override;
+	virtual void OnEntityCreated(pragma::ecs::BaseEntity *ent) override;
 	virtual unsigned int GetFreeEntityIndex() override;
-	virtual void SetupEntity(BaseEntity *ent, unsigned int idx) override;
+	virtual void SetupEntity(pragma::ecs::BaseEntity *ent, unsigned int idx) override;
 	virtual void InitializeLuaScriptWatcher() override;
 	virtual std::shared_ptr<pragma::EntityComponentManager> InitializeEntityComponentManager() override;
   private:
@@ -492,7 +492,7 @@ export class DLLCLIENT CGame : public Game {
 	std::vector<CBaseEntity *> m_ents;
 	std::vector<CBaseEntity *> m_shEnts;
 	std::vector<CBaseEntity *> m_entsOccluded;
-	std::vector<BaseEntity *> m_shBaseEnts;
+	std::vector<pragma::ecs::BaseEntity *> m_shBaseEnts;
 	util::TWeakSharedHandle<pragma::BaseEnvLightDirectionalComponent> m_hEnvLight = util::TWeakSharedHandle<pragma::BaseEnvLightDirectionalComponent> {};
 	util::TWeakSharedHandle<pragma::BaseEntityComponent> m_listener = util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
 	util::TWeakSharedHandle<pragma::CPlayerComponent> m_plLocal = util::TWeakSharedHandle<pragma::CPlayerComponent> {};

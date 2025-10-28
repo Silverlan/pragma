@@ -27,10 +27,10 @@ namespace Lua {
 		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, ::Model &mdl, uint32_t width, uint32_t height) { hComponent.GenerateAmbientOcclusionMaps(mdl, width, height); }
 		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, ::Model &mdl) { hComponent.GenerateAmbientOcclusionMaps(mdl); }
 
-		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, BaseEntity &ent, uint32_t width, uint32_t height, uint32_t samples, bool rebuild) { hComponent.GenerateAmbientOcclusionMaps(ent, width, height, samples, rebuild); }
-		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, BaseEntity &ent, uint32_t width, uint32_t height, uint32_t samples) { hComponent.GenerateAmbientOcclusionMaps(ent, width, height, samples); }
-		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, BaseEntity &ent, uint32_t width, uint32_t height) { hComponent.GenerateAmbientOcclusionMaps(ent, width, height); }
-		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, BaseEntity &ent) { hComponent.GenerateAmbientOcclusionMaps(ent); }
+		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, pragma::ecs::BaseEntity &ent, uint32_t width, uint32_t height, uint32_t samples, bool rebuild) { hComponent.GenerateAmbientOcclusionMaps(ent, width, height, samples, rebuild); }
+		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, pragma::ecs::BaseEntity &ent, uint32_t width, uint32_t height, uint32_t samples) { hComponent.GenerateAmbientOcclusionMaps(ent, width, height, samples); }
+		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, pragma::ecs::BaseEntity &ent, uint32_t width, uint32_t height) { hComponent.GenerateAmbientOcclusionMaps(ent, width, height); }
+		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, pragma::ecs::BaseEntity &ent) { hComponent.GenerateAmbientOcclusionMaps(ent); }
 	};
 	namespace Decal {
 		static void create_from_projection(lua_State *l, pragma::CDecalComponent &hComponent, luabind::object tMeshes, const umath::ScaledTransform &pose)
@@ -64,7 +64,7 @@ namespace Lua {
 				for(auto j = decltype(numSubMeshes) {0u}; j < numSubMeshes; ++j) {
 					Lua::PushInt(l, j + 1);            /* 1 */
 					Lua::GetTableValue(l, tSubMeshes); /* 1 */
-					auto &mesh = Lua::Check<::ModelSubMesh>(l, -1);
+					auto &mesh = Lua::Check<pragma::ModelSubMesh>(l, -1);
 					meshData.subMeshes.push_back(&mesh);
 					Lua::Pop(l, 1); /* 0 */
 				}
@@ -81,7 +81,7 @@ namespace Lua {
 static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l, pragma::CReflectionProbeComponent &hRp, luabind::table<> tEnts, bool renderJob)
 {
 
-	std::vector<BaseEntity *> ents {};
+	std::vector<pragma::ecs::BaseEntity *> ents {};
 	ents.reserve(Lua::GetObjectLength(l, 2));
 	for(auto it = luabind::iterator {tEnts}, end = luabind::iterator {}; it != end; ++it) {
 		auto val = luabind::object_cast_nothrow<EntityHandle>(*it, EntityHandle {});
@@ -760,10 +760,10 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, ::Model &, uint32_t, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
 	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, ::Model &, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
 	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, ::Model &)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, BaseEntity &, uint32_t, uint32_t, uint32_t, bool)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, BaseEntity &, uint32_t, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, BaseEntity &, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, BaseEntity &)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, pragma::ecs::BaseEntity &, uint32_t, uint32_t, uint32_t, bool)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, pragma::ecs::BaseEntity &, uint32_t, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, pragma::ecs::BaseEntity &, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, pragma::ecs::BaseEntity &)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
 	entsMod[defCPBRConverter];
 
 	auto defShadow = pragma::lua::create_entity_component_class<pragma::CShadowComponent, pragma::BaseEntityComponent>("ShadowMapComponent");

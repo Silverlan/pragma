@@ -16,11 +16,11 @@ static void CMD_unbindall(NetworkState *state, pragma::BasePlayerComponent *pl, 
 static void CMD_keymappings(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 namespace {
 	using namespace pragma::console::client;
-	auto UVN = register_command("bind_keys", &CMD_bind_keys, ConVarFlags::None, "Prints a list of all bindable keys to the console.");
-	auto UVN = register_command("bind", &CMD_bind, ConVarFlags::None, "Binds a key to a command string. Usage: bind <key> <command>");
-	auto UVN = register_command("unbind", &CMD_unbind, ConVarFlags::None, "Unbinds the given key.");
-	auto UVN = register_command("unbindall", &CMD_unbindall, ConVarFlags::None, "Unbinds all keys.");
-	auto UVN = register_command("keymappings", &CMD_keymappings, ConVarFlags::None, "Prints a list of all active key bindings to the console.");
+	auto UVN = register_command("bind_keys", &CMD_bind_keys, pragma::console::ConVarFlags::None, "Prints a list of all bindable keys to the console.");
+	auto UVN = register_command("bind", &CMD_bind, pragma::console::ConVarFlags::None, "Binds a key to a command string. Usage: bind <key> <command>");
+	auto UVN = register_command("unbind", &CMD_unbind, pragma::console::ConVarFlags::None, "Unbinds the given key.");
+	auto UVN = register_command("unbindall", &CMD_unbindall, pragma::console::ConVarFlags::None, "Unbinds all keys.");
+	auto UVN = register_command("keymappings", &CMD_keymappings, pragma::console::ConVarFlags::None, "Prints a list of all active key bindings to the console.");
 }
 
 ////////////////////////////

@@ -17,7 +17,7 @@ import :client_state;
 CModel::CModel(NetworkState *nw, unsigned int numBones, const std::string &name) : Model(nw, numBones, name) {}
 
 std::shared_ptr<ModelMesh> CModel::CreateMesh() const { return std::make_shared<CModelMesh>(); }
-std::shared_ptr<ModelSubMesh> CModel::CreateSubMesh() const { return std::make_shared<CModelSubMesh>(); }
+std::shared_ptr<pragma::ModelSubMesh> CModel::CreateSubMesh() const { return std::make_shared<CModelSubMesh>(); }
 
 void CModel::PrecacheTextureGroup(uint32_t i) { Model::PrecacheTextureGroup(i); }
 

@@ -27,7 +27,7 @@ import :rendering.shaders;
 
 using namespace pragma;
 
-CRendererPpVolumetricComponent::CRendererPpVolumetricComponent(BaseEntity &ent) : CRendererPpBaseComponent(ent)
+CRendererPpVolumetricComponent::CRendererPpVolumetricComponent(pragma::ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent)
 {
 	static auto g_shadersRegistered = false;
 	if(!g_shadersRegistered) {
@@ -94,7 +94,7 @@ void CRendererPpVolumetricComponent::DoRenderEffect(const util::DrawSceneInfo &d
 
 	EntityIterator entIt {*pragma::get_cgame(), EntityIterator::FilterFlags::Default};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightSpotVolComponent>>();
-	std::vector<BaseEntity *> ents;
+	std::vector<pragma::ecs::BaseEntity *> ents;
 	ents.reserve(entIt.GetCount());
 	for(auto *ent : entIt) {
 		auto renderC = ent->GetComponent<CRenderComponent>();

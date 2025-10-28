@@ -17,12 +17,12 @@ export namespace pragma {
 	  public:
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
 		
-		CVehicleComponent(BaseEntity &ent);
+		CVehicleComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~CVehicleComponent() override;
 		static unsigned int GetVehicleCount();
 		static const std::vector<CVehicleComponent *> &GetAll();
 		virtual void ClearDriver() override;
-		virtual void SetDriver(BaseEntity *ent) override;
+		virtual void SetDriver(pragma::ecs::BaseEntity *ent) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;

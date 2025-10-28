@@ -19,7 +19,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CSkyCameraComponent final : public BaseEntityComponent {
 		public:
-			CSkyCameraComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+			CSkyCameraComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void OnRemove() override;
 			virtual void OnEntitySpawn() override;

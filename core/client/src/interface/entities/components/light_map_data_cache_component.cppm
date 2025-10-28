@@ -16,7 +16,7 @@ export namespace pragma {
 	class DLLCLIENT CLightMapDataCacheComponent final : public BaseEntityComponent {
 	  public:
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
-		CLightMapDataCacheComponent(BaseEntity &ent);
+		CLightMapDataCacheComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 

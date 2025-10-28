@@ -20,7 +20,7 @@ import :model.hitbox_mesh_bvh_builder;
 
 static spdlog::logger &LOGGER = pragma::register_logger("bvh");
 
-static std::unique_ptr<pragma::bvh::MeshBvhTree> generate_mesh_bvh(ModelSubMesh &mesh, const std::vector<uint32_t> &triIndices, const umath::ScaledTransform &invPose)
+static std::unique_ptr<pragma::bvh::MeshBvhTree> generate_mesh_bvh(pragma::ModelSubMesh &mesh, const std::vector<uint32_t> &triIndices, const umath::ScaledTransform &invPose)
 {
 	auto &verts = mesh.GetVertices();
 
@@ -80,7 +80,7 @@ static bool generate_mesh_bvh(Model &mdl, const std::string &boneName, pragma::b
 	return true;
 }
 
-static bool calc_bone_mesh_info(pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo, pragma::animation::BoneId boneId, std::shared_ptr<ModelSubMesh> subMesh, std::array<umath::Plane, 6> planes, Vector3 hbMin, Vector3 hbMax, umath::ScaledTransform pose, util::Uuid uuid)
+static bool calc_bone_mesh_info(pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo, pragma::animation::BoneId boneId, std::shared_ptr<pragma::ModelSubMesh> subMesh, std::array<umath::Plane, 6> planes, Vector3 hbMin, Vector3 hbMax, umath::ScaledTransform pose, util::Uuid uuid)
 {
 	Vector3 smMin, smMax;
 	subMesh->GetBounds(smMin, smMax);

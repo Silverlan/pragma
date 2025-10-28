@@ -107,7 +107,7 @@ std::shared_future<void> pragma::bvh::HitboxBvhCache::GenerateModelCache(const M
 	return mdlCache->task;
 }
 
-CHitboxBvhComponent::CHitboxBvhComponent(BaseEntity &ent) : BaseEntityComponent(ent)
+CHitboxBvhComponent::CHitboxBvhComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent)
 {
 	if(g_hbBvhCount++ == 0) {
 		g_hbThreadPool = std::make_unique<BS::thread_pool>(10);
@@ -291,7 +291,7 @@ void CHitboxBvhComponent::InitializeHitboxMeshBvhs()
 	if(numLods == 0)
 		return;
 	auto &lastLod = mdl->GetLODs().back();
-	std::vector<std::shared_ptr<ModelSubMesh>> lodMeshes;
+	std::vector<std::shared_ptr<pragma::ModelSubMesh>> lodMeshes;
 	mdl->GetBodyGroupMeshes(mdlC->GetBodyGroups(), lastLod.lod, lodMeshes);
 
 	std::unordered_set<std::string> renderMeshUuids;
@@ -392,7 +392,7 @@ bool CHitboxBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3
 				auto *outMeshIntersectionInfo = static_cast<MeshIntersectionInfo *>(outIntersectionInfo);
 				if(outMeshIntersectionInfo->meshInfos.size() == outMeshIntersectionInfo->meshInfos.capacity())
 					outMeshIntersectionInfo->meshInfos.reserve(outMeshIntersectionInfo->meshInfos.size() * 2 + 10);
-				outMeshIntersectionInfo->meshInfos.push_back({hitboxBvhInfo->mesh.get(), const_cast<BaseEntity *>(&GetEntity())});
+				outMeshIntersectionInfo->meshInfos.push_back({hitboxBvhInfo->mesh.get(), const_cast<pragma::ecs::BaseEntity *>(&GetEntity())});
 				hasHit = true;
 				continue;
 			}
@@ -482,7 +482,7 @@ bool CHitboxBvhComponent::IntersectionTestKDop(const std::vector<umath::Plane> &
 				auto *outMeshIntersectionInfo = static_cast<MeshIntersectionInfo *>(outIntersectionInfo);
 				if(outMeshIntersectionInfo->meshInfos.size() == outMeshIntersectionInfo->meshInfos.capacity())
 					outMeshIntersectionInfo->meshInfos.reserve(outMeshIntersectionInfo->meshInfos.size() * 2 + 10);
-				outMeshIntersectionInfo->meshInfos.push_back({hitboxBvhInfo->mesh.get(), const_cast<BaseEntity *>(&GetEntity())});
+				outMeshIntersectionInfo->meshInfos.push_back({hitboxBvhInfo->mesh.get(), const_cast<pragma::ecs::BaseEntity *>(&GetEntity())});
 				hasHit = true;
 				continue;
 			}

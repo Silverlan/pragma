@@ -66,7 +66,7 @@ void CLightMapComponent::RegisterMembers(pragma::EntityComponentManager &compone
 		registerMember(std::move(memberInfo));
 	}
 }
-CLightMapComponent::CLightMapComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_lightMapExposure {util::FloatProperty::Create(0.f)} {}
+CLightMapComponent::CLightMapComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_lightMapExposure {util::FloatProperty::Create(0.f)} {}
 
 void CLightMapComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CLightMapComponent::Initialize() { BaseEntityComponent::Initialize(); }
@@ -328,7 +328,7 @@ std::shared_ptr<prosper::Texture> CLightMapComponent::CreateLightmapTexture(uimg
 	return pragma::get_cengine()->GetRenderContext().CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
 }
 
-static void generate_lightmap_uv_atlas(BaseEntity &ent, uint32_t width, uint32_t height, const std::function<void(bool)> &callback)
+static void generate_lightmap_uv_atlas(pragma::ecs::BaseEntity &ent, uint32_t width, uint32_t height, const std::function<void(bool)> &callback)
 {
 	Con::cout << "Generating lightmap uv atlas... This may take a few minutes!" << Con::endl;
 	auto lightmapC = ent.GetComponent<pragma::CLightMapComponent>();
@@ -583,7 +583,7 @@ static void map_rebuild_lightmaps(NetworkState *state, pragma::BasePlayerCompone
 	CLightMapComponent::BakeLightmaps(bakeSettings);
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("map_rebuild_lightmaps", &map_rebuild_lightmaps, ConVarFlags::None, "Rebuilds the lightmaps for the current map. Note that this will only work if the map was compiled with lightmap uvs.");
+	auto UVN = pragma::console::client::register_command("map_rebuild_lightmaps", &map_rebuild_lightmaps, pragma::console::ConVarFlags::None, "Rebuilds the lightmaps for the current map. Note that this will only work if the map was compiled with lightmap uvs.");
 }
 
 static void set_lightmap_texture(lua_State *l, pragma::CLightMapComponent &hLightMapC, const std::string &path, bool directional)

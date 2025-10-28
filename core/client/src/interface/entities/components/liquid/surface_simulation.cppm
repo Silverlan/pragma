@@ -15,7 +15,7 @@ import :entities.components.water_surface;
 export namespace pragma {
 	class DLLCLIENT CLiquidSurfaceSimulationComponent final : public BaseLiquidSurfaceSimulationComponent, public CBaseNetComponent {
 	  public:
-		CLiquidSurfaceSimulationComponent(BaseEntity &ent);
+		CLiquidSurfaceSimulationComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~CLiquidSurfaceSimulationComponent() override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void ReceiveData(NetPacket &packet) override;

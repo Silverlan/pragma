@@ -14,7 +14,7 @@ import pragma.server.entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SAttachmentComponent final : public BaseAttachmentComponent, public SBaseNetComponent {
 	  public:
-		SAttachmentComponent(BaseEntity &ent) : BaseAttachmentComponent(ent) {}
+		SAttachmentComponent(pragma::ecs::BaseEntity &ent) : BaseAttachmentComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual void SetAttachmentFlags(FAttachmentMode flags) override;
@@ -23,6 +23,6 @@ export namespace pragma {
 		virtual void InitializeLuaObject(lua_State *l) override;
 	  protected:
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
-		virtual AttachmentData *SetupAttachment(BaseEntity *ent, const AttachmentInfo &attInfo) override;
+		virtual AttachmentData *SetupAttachment(pragma::ecs::BaseEntity *ent, const AttachmentInfo &attInfo) override;
 	};
 };

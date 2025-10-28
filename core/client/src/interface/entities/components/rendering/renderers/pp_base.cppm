@@ -15,7 +15,7 @@ import :entities.components.renderer;
 export namespace pragma {
 	class DLLCLIENT CRendererPpBaseComponent : public BaseEntityComponent {
 	  public:
-		CRendererPpBaseComponent(BaseEntity &ent);
+		CRendererPpBaseComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnRemove() override;

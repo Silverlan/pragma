@@ -61,7 +61,7 @@ export {
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-			CEyeComponent(BaseEntity &ent);
+			CEyeComponent(pragma::ecs::BaseEntity &ent);
 
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua_State *l) override;

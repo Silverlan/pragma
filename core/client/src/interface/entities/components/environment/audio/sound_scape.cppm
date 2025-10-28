@@ -15,7 +15,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CSoundScapeComponent final : public BaseEnvSoundScapeComponent, public CBaseNetComponent {
 	  public:
-		CSoundScapeComponent(BaseEntity &ent) : BaseEnvSoundScapeComponent(ent) {}
+		CSoundScapeComponent(pragma::ecs::BaseEntity &ent) : BaseEnvSoundScapeComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnTick(double dt) override;
 		virtual ~CSoundScapeComponent() override;

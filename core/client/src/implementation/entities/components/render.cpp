@@ -79,7 +79,7 @@ void CRenderComponent::RegisterMembers(pragma::EntityComponentManager &component
 		registerMember(std::move(memberInfo));
 	}
 }
-CRenderComponent::CRenderComponent(BaseEntity &ent)
+CRenderComponent::CRenderComponent(pragma::ecs::BaseEntity &ent)
     : BaseRenderComponent(ent), m_renderGroups {util::TEnumProperty<pragma::rendering::RenderGroup>::Create(pragma::rendering::RenderGroup::None)}, m_renderPass {util::TEnumProperty<pragma::rendering::SceneRenderPass>::Create(rendering::SceneRenderPass::World)}
 {
 }
@@ -298,7 +298,7 @@ void CRenderComponent::SetLocalRenderBounds(Vector3 min, Vector3 max)
 	if(min == m_localRenderBounds.min && max == m_localRenderBounds.max)
 		return;
 	umath::set_flag(m_stateFlags, StateFlags::RenderBoundsDirty);
-	GetEntity().SetStateFlag(BaseEntity::StateFlags::RenderBoundsChanged);
+	GetEntity().SetStateFlag(pragma::ecs::BaseEntity::StateFlags::RenderBoundsChanged);
 
 	if(uvec::distance_sqr(min, max) > 0.001f) {
 		// If the render bounds form a plane, we'll add a slight width to it to
@@ -751,8 +751,8 @@ void CRenderComponent::UpdateAncestorHiddenState()
 void CRenderComponent::PropagateHiddenState()
 {
 	auto hidden = IsHidden();
-	std::function<void(BaseEntity &)> propagate = nullptr;
-	propagate = [&propagate, hidden](BaseEntity &ent) {
+	std::function<void(pragma::ecs::BaseEntity &)> propagate = nullptr;
+	propagate = [&propagate, hidden](pragma::ecs::BaseEntity &ent) {
 		auto parentC = ent.GetComponent<ParentComponent>();
 		if(parentC.expired())
 			return;
@@ -891,12 +891,12 @@ RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod)
 	return static_cast<pragma::CModelComponent &>(*pMdlComponent).GetLodMeshGroup(lod);
 }
 const RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod) const { return const_cast<CRenderComponent *>(this)->GetLodMeshGroup(lod); }
-const std::vector<std::shared_ptr<ModelSubMesh>> &CRenderComponent::GetRenderMeshes() const { return const_cast<CRenderComponent *>(this)->GetRenderMeshes(); }
-std::vector<std::shared_ptr<ModelSubMesh>> &CRenderComponent::GetRenderMeshes()
+const std::vector<std::shared_ptr<pragma::ModelSubMesh>> &CRenderComponent::GetRenderMeshes() const { return const_cast<CRenderComponent *>(this)->GetRenderMeshes(); }
+std::vector<std::shared_ptr<pragma::ModelSubMesh>> &CRenderComponent::GetRenderMeshes()
 {
 	auto *pMdlComponent = GetModelComponent();
 	if(!pMdlComponent) {
-		static std::vector<std::shared_ptr<ModelSubMesh>> meshes {};
+		static std::vector<std::shared_ptr<pragma::ModelSubMesh>> meshes {};
 		return meshes;
 	}
 	return static_cast<pragma::CModelComponent &>(*pMdlComponent).GetRenderMeshes();
@@ -1077,7 +1077,7 @@ static void debug_entity_render_buffer(NetworkState *state, pragma::BasePlayerCo
 	}
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_entity_render_buffer", &debug_entity_render_buffer, ConVarFlags::None, "Prints debug information about an entity's render buffer.");
+	auto UVN = pragma::console::client::register_command("debug_entity_render_buffer", &debug_entity_render_buffer, pragma::console::ConVarFlags::None, "Prints debug information about an entity's render buffer.");
 }
 namespace Lua::Render {
     void CalcRayIntersection(lua_State *l, pragma::CRenderComponent &hComponent, const Vector3 &start, const Vector3 &dir, bool precise)

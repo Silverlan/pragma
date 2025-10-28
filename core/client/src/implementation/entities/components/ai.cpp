@@ -17,7 +17,7 @@ std::vector<CAIComponent *> CAIComponent::s_npcs;
 const std::vector<CAIComponent *> &CAIComponent::GetAll() { return s_npcs; }
 unsigned int CAIComponent::GetNPCCount() { return CUInt32(s_npcs.size()); }
 
-CAIComponent::CAIComponent(BaseEntity &ent) : BaseAIComponent(ent) { s_npcs.push_back(this); }
+CAIComponent::CAIComponent(pragma::ecs::BaseEntity &ent) : BaseAIComponent(ent) { s_npcs.push_back(this); }
 
 CAIComponent::~CAIComponent()
 {

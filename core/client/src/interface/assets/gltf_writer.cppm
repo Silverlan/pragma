@@ -91,7 +91,7 @@ export namespace pragma::asset {
 			BufferViewIndex weights = std::numeric_limits<uint32_t>::max();
 			BufferViewIndex inverseBindMatrices = std::numeric_limits<uint32_t>::max();
 		};
-		using ExportMeshList = std::vector<std::shared_ptr<ModelSubMesh>>;
+		using ExportMeshList = std::vector<std::shared_ptr<pragma::ModelSubMesh>>;
 		struct ModelExportData {
 			ModelExportData(Model &model) : model {model} {}
 
@@ -121,7 +121,7 @@ export namespace pragma::asset {
 		void GenerateUniqueModelExportList();
 		void WriteSkeleton(ModelExportData &mdlData);
 		void WriteAnimations(::Model &mdl);
-		void WriteMorphTargets(ModelSubMesh &mesh, tinygltf::Mesh &gltfMesh, tinygltf::Primitive &primitive, const std::vector<uint32_t> &nodeIndices);
+		void WriteMorphTargets(pragma::ModelSubMesh &mesh, tinygltf::Mesh &gltfMesh, tinygltf::Primitive &primitive, const std::vector<uint32_t> &nodeIndices);
 		void WriteMaterials();
 		void WriteLightSources();
 		void ToGLTFPose(const umath::Transform &pose, std::vector<double> &outPos, std::vector<double> &outRot) const;
@@ -148,8 +148,8 @@ export namespace pragma::asset {
 		SceneDesc m_sceneDesc {};
 		std::unordered_map<Material *, uint32_t> m_materialToGltfIndex {};
 		UniqueModelExportList m_uniqueModelExportList {};
-		std::unordered_map<ModelSubMesh *, std::vector<MorphSet>> m_meshMorphSets {};
-		std::unordered_map<ModelSubMesh *, std::vector<uint32_t>> m_meshesWithMorphTargets {};
+		std::unordered_map<pragma::ModelSubMesh *, std::vector<MorphSet>> m_meshMorphSets {};
+		std::unordered_map<pragma::ModelSubMesh *, std::vector<uint32_t>> m_meshesWithMorphTargets {};
 		std::unordered_map<uint32_t, uint32_t> m_boneIdxToNodeIdx {};
 		tinygltf::Model m_gltfMdl = {};
 	};

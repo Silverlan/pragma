@@ -14,7 +14,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CTransformComponent final : public BaseTransformComponent, public CBaseNetComponent {
 	  public:
-		CTransformComponent(BaseEntity &ent) : BaseTransformComponent(ent) {}
+		CTransformComponent(pragma::ecs::BaseEntity &ent) : BaseTransformComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;

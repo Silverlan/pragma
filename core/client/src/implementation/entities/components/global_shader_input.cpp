@@ -160,7 +160,7 @@ void CGlobalShaderInputComponent::DebugPrintProperties()
 	Con::cout << ss.str() << Con::endl;
 }
 
-CGlobalShaderInputComponent::CGlobalShaderInputComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+CGlobalShaderInputComponent::CGlobalShaderInputComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void CGlobalShaderInputComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 

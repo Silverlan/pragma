@@ -272,7 +272,7 @@ void NET_sv_CMD_CALL(pragma::networking::IServerClient &session, NetPacket packe
 		if(bReleased == false || bActionCmd == true)
 			return true;
 		auto flags = cf->GetFlags();
-		if((flags & (ConVarFlags::JoystickAxisContinuous | ConVarFlags::JoystickAxisSingle)) == ConVarFlags::None)
+		if((flags & (pragma::console::ConVarFlags::JoystickAxisContinuous | pragma::console::ConVarFlags::JoystickAxisSingle)) == pragma::console::ConVarFlags::None)
 			return false;
 		return true;
 	});

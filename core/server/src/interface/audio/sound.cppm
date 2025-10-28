@@ -5,6 +5,19 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
+#include <string>
+
+#include <array>
+#include <vector>
+
+#include <memory>
+
+#include <functional>
+
+#include <optional>
+
+#include <sstream>
+
 export module pragma.server.audio.sound;
 
 export import pragma.shared;
@@ -30,10 +43,10 @@ export {
 		void SendEvent(NetEvent evId, const std::function<void(NetPacket &)> &write = nullptr, bool bUDP = true) const;
 		uint32_t m_entityIndex = std::numeric_limits<uint32_t>::max();
 	  public:
-		SALSound(NetworkState *nw, unsigned int idx, float duration, const std::string &soundName, ALCreateFlags createFlags);
+		SALSound(NetworkState *nw, unsigned int idx, float duration, const std::string &soundName, pragma::audio::ALCreateFlags createFlags);
 		virtual ~SALSound() override;
 		const std::string &GetSoundName() const;
-		ALCreateFlags GetCreateFlags() const;
+		pragma::audio::ALCreateFlags GetCreateFlags() const;
 		virtual ALState GetState() const override;
 		virtual unsigned int GetIndex() const override;
 		virtual void FadeIn(float time) override;
@@ -105,9 +118,9 @@ export {
 		virtual void RemoveEffect(const std::string &effectName) override;
 		virtual void SetEffectParameters(const std::string &effectName, const SoundEffectParams &params = {}) override;
 
-		virtual void SetType(ALSoundType type) override;
+		virtual void SetType(pragma::audio::ALSoundType type) override;
 		virtual void SetFlags(unsigned int flags) override;
-		virtual void SetSource(BaseEntity *ent) override;
+		virtual void SetSource(pragma::ecs::BaseEntity *ent) override;
 		virtual void Update() override;
 		virtual void PostUpdate() override;
 		virtual void SetRange(float start, float end) override;
@@ -119,6 +132,6 @@ export {
 		void SetEntityMapIndex(uint32_t idx);
 	  private:
 		std::string m_soundName = "";
-		ALCreateFlags m_createFlags = ALCreateFlags::None;
+		pragma::audio::ALCreateFlags m_createFlags = pragma::audio::ALCreateFlags::None;
 	};
 };

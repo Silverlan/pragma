@@ -16,7 +16,7 @@ import :entities.components.lights.shadow_csm;
 export namespace pragma {
 	class DLLCLIENT CLightDirectionalComponent final : public BaseEnvLightDirectionalComponent, public CBaseNetComponent, public MVPBias<1> {
 	  public:
-		CLightDirectionalComponent(BaseEntity &ent);
+		CLightDirectionalComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;

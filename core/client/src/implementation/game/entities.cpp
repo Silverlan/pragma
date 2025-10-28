@@ -60,11 +60,11 @@ CBaseEntity *CGame::CreateEntity(std::string classname)
 	return factory(pragma::get_client_state());
 }
 
-void CGame::RemoveEntity(BaseEntity *ent)
+void CGame::RemoveEntity(pragma::ecs::BaseEntity *ent)
 {
-	if(umath::is_flag_set(ent->GetStateFlags(), BaseEntity::StateFlags::Removed))
+	if(umath::is_flag_set(ent->GetStateFlags(), pragma::ecs::BaseEntity::StateFlags::Removed))
 		return;
-	ent->SetStateFlag(BaseEntity::StateFlags::Removed);
+	ent->SetStateFlag(pragma::ecs::BaseEntity::StateFlags::Removed);
 	if(ent->IsPlayer())
 		m_numPlayers--;
 	unsigned int cIdx = static_cast<CBaseEntity *>(ent)->GetClientIndex();
@@ -98,16 +98,16 @@ void CGame::RemoveEntity(BaseEntity *ent)
 
 void CGame::UpdateEntityModel(CBaseEntity *ent) { CallCallbacks<void, CBaseEntity *>("UpdateEntityModel", ent); }
 
-void CGame::SpawnEntity(BaseEntity *ent)
+void CGame::SpawnEntity(pragma::ecs::BaseEntity *ent)
 {
 	Game::SpawnEntity(ent);
-	CallCallbacks<void, BaseEntity *>("OnEntitySpawned", ent);
+	CallCallbacks<void, pragma::ecs::BaseEntity *>("OnEntitySpawned", ent);
 }
 
 void CGame::GetEntities(std::vector<CBaseEntity *> **ents) { *ents = &m_ents; }
-void CGame::GetEntities(std::vector<BaseEntity *> **ents) { *ents = &m_baseEnts; }
+void CGame::GetEntities(std::vector<pragma::ecs::BaseEntity *> **ents) { *ents = &m_baseEnts; }
 void CGame::GetSharedEntities(std::vector<CBaseEntity *> **ents) { *ents = &m_shEnts; }
-void CGame::GetSharedEntities(std::vector<BaseEntity *> **ents) { *ents = &m_shBaseEnts; }
+void CGame::GetSharedEntities(std::vector<pragma::ecs::BaseEntity *> **ents) { *ents = &m_shBaseEnts; }
 
 CBaseEntity *CGame::GetEntity(unsigned int idx)
 {
@@ -147,7 +147,7 @@ CBaseEntity *CGame::CreateLuaEntity(std::string classname, unsigned int idx, boo
 
 CBaseEntity *CGame::CreateLuaEntity(std::string classname, bool bLoadIfNotExists) { return CreateLuaEntity(classname, GetFreeEntityIndex(), bLoadIfNotExists); }
 
-void CGame::SetupEntity(BaseEntity *ent, unsigned int idx)
+void CGame::SetupEntity(pragma::ecs::BaseEntity *ent, unsigned int idx)
 {
 	if(idx < m_shEnts.size()) {
 		if(m_shEnts[idx] != nullptr) {
@@ -234,10 +234,10 @@ void CGame::GetVehicles(std::vector<T *> *ents)
 		ents->push_back(&vhc->GetEntity());
 }
 
-void CGame::GetPlayers(std::vector<BaseEntity *> *ents) { GetPlayers<BaseEntity>(ents); }
-void CGame::GetNPCs(std::vector<BaseEntity *> *ents) { GetNPCs<BaseEntity>(ents); }
-void CGame::GetWeapons(std::vector<BaseEntity *> *ents) { GetWeapons<BaseEntity>(ents); }
-void CGame::GetVehicles(std::vector<BaseEntity *> *ents) { GetVehicles<BaseEntity>(ents); }
+void CGame::GetPlayers(std::vector<pragma::ecs::BaseEntity *> *ents) { GetPlayers<pragma::ecs::BaseEntity>(ents); }
+void CGame::GetNPCs(std::vector<pragma::ecs::BaseEntity *> *ents) { GetNPCs<pragma::ecs::BaseEntity>(ents); }
+void CGame::GetWeapons(std::vector<pragma::ecs::BaseEntity *> *ents) { GetWeapons<pragma::ecs::BaseEntity>(ents); }
+void CGame::GetVehicles(std::vector<pragma::ecs::BaseEntity *> *ents) { GetVehicles<pragma::ecs::BaseEntity>(ents); }
 
 void CGame::GetPlayers(std::vector<EntityHandle> *ents)
 {

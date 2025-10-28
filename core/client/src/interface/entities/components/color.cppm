@@ -14,7 +14,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CColorComponent final : public BaseColorComponent, public CBaseNetComponent {
 	  public:
-		CColorComponent(BaseEntity &ent) : BaseColorComponent(ent) {}
+		CColorComponent(pragma::ecs::BaseEntity &ent) : BaseColorComponent(ent) {}
 
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;

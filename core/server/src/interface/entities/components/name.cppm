@@ -14,7 +14,7 @@ import pragma.server.entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SNameComponent final : public BaseNameComponent, public SBaseNetComponent {
 	  public:
-		SNameComponent(BaseEntity &ent) : BaseNameComponent(ent) {}
+		SNameComponent(pragma::ecs::BaseEntity &ent) : BaseNameComponent(ent) {}
 		virtual void SetName(std::string name) override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }

@@ -14,7 +14,7 @@ import pragma.server.entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SNetworkedComponent final : public BaseNetworkedComponent, public SBaseNetComponent {
 	  public:
-		SNetworkedComponent(BaseEntity &ent) : BaseNetworkedComponent(ent) {}
+		SNetworkedComponent(pragma::ecs::BaseEntity &ent) : BaseNetworkedComponent(ent) {}
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual void SetNetworkFlags(NetworkFlags flags) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }

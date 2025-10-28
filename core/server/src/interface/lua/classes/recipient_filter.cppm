@@ -10,6 +10,7 @@ module;
 export module pragma.server.scripting.lua.classes.recipient_filter;
 
 import pragma.server.entities.components;
+export import luabind;
 
 export {;
 	namespace Lua {

@@ -14,7 +14,7 @@ import pragma.server.game;
 
 using namespace pragma;
 
-SLiquidComponent::SLiquidComponent(BaseEntity &ent) : BaseFuncLiquidComponent(ent) {}
+SLiquidComponent::SLiquidComponent(pragma::ecs::BaseEntity &ent) : BaseFuncLiquidComponent(ent) {}
 SLiquidComponent::~SLiquidComponent()
 {
 	if(m_cbGameInitialized.IsValid())

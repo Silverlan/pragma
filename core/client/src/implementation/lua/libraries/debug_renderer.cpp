@@ -39,9 +39,9 @@ std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawLine(
 }
 std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawBox(const ::Vector3 &start, const ::Vector3 &end, const DebugRenderInfo &renderInfo) { return get_dbg_object(::DebugRenderer::DrawBox(start, end, renderInfo), renderInfo.duration); }
 std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawMeshes(const std::vector<::Vector3> &verts, const DebugRenderInfo &renderInfo) { return get_dbg_object(::DebugRenderer::DrawMesh(verts, renderInfo), renderInfo.duration); }
-std::shared_ptr<::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawMesh(const ::ModelSubMesh &mesh, const DebugRenderInfo &renderInfo)
+std::shared_ptr<::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawMesh(const pragma::ModelSubMesh &mesh, const DebugRenderInfo &renderInfo)
 {
-	if(mesh.GetGeometryType() != ::ModelSubMesh::GeometryType::Triangles)
+	if(mesh.GetGeometryType() != pragma::ModelSubMesh::GeometryType::Triangles)
 		return nullptr;
 	std::vector<::Vector3> dbgVerts;
 	auto &verts = mesh.GetVertices();

@@ -140,7 +140,7 @@ static void debug_ssao(NetworkState *state, pragma::BasePlayerComponent *pl, std
 	pEl->SizeToContents();
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_ssao", &debug_ssao, ConVarFlags::None, "Displays the ssao buffers to screen.");
+	auto UVN = pragma::console::client::register_command("debug_ssao", &debug_ssao, pragma::console::ConVarFlags::None, "Displays the ssao buffers to screen.");
 }
 
 static void cl_render_ssao_callback(NetworkState *, const ConVar &, bool, bool val)

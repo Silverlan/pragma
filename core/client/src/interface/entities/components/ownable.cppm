@@ -14,7 +14,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT COwnableComponent final : public BaseOwnableComponent, public CBaseNetComponent {
 	  public:
-		COwnableComponent(BaseEntity &ent) : BaseOwnableComponent(ent) {}
+		COwnableComponent(pragma::ecs::BaseEntity &ent) : BaseOwnableComponent(ent) {}
 
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;

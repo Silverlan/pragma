@@ -21,7 +21,7 @@ export namespace pragma {
 	  public:
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
 		
-		CPlayerComponent(BaseEntity &ent);
+		CPlayerComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~CPlayerComponent() override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
@@ -53,8 +53,8 @@ export namespace pragma {
 		void OnWaterSubmerged();
 		void OnWaterEmerged();
 		void OnUpdateMatrices(Mat4 &transformMatrix);
-		void OnDeployWeapon(BaseEntity &ent);
-		void OnSetActiveWeapon(BaseEntity *ent);
+		void OnDeployWeapon(pragma::ecs::BaseEntity &ent);
+		void OnSetActiveWeapon(pragma::ecs::BaseEntity *ent);
 		void OnSetUpDirection(const Vector3 &direction);
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		void OnSetCharacterOrientation(const Vector3 &up);

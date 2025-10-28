@@ -269,7 +269,7 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 				continue;
 			SceneStats sceneStats {};
 			std::stringstream ss;
-			const_cast<BaseEntity &>(drawSceneInfo.scene->GetEntity()).print(ss);
+			const_cast<pragma::ecs::BaseEntity &>(drawSceneInfo.scene->GetEntity()).print(ss);
 			sceneStats.sceneName = ss.str();
 			sceneStats.stats = std::move(drawSceneInfo.renderStats);
 			frameStats.stats.push_back(sceneStats);

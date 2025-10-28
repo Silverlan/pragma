@@ -4,11 +4,6 @@
 module;
 
 #include "pragma/console/helper.hpp"
-#include "util_image.hpp"
-#include "util_image_buffer.hpp"
-#include "sharedutils/util_file.h"
-#include "fsys/filesystem.h"
-#include "fsys/vfileptr.h"
 #include "prosper_window.hpp"
 
 module pragma.client;

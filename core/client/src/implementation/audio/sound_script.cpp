@@ -4,10 +4,8 @@
 module;
 
 #include "stdafx_client.h"
-#include <sharedutils/util_string.h>
 #include <alsoundsystem.hpp>
 #include <algorithm>
-#include <udm.hpp>
 
 module pragma.client;
 

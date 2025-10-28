@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <sharedutils/util_hash.hpp>
 
 export module pragma.client:rendering.render_queue_instancer;
 

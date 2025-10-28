@@ -2,20 +2,16 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/magic_enum.hpp"
 
-#include "sharedutils/magic_enum.hpp"
 
 
 #include "pragma/logging.hpp"
 
-#include "sharedutils/util_path.hpp"
 
 #include "mathutil/transform.hpp"
 
-#include "fsys/filesystem.h"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
@@ -26,13 +22,9 @@ module;
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_sampler.hpp>
-#include <util_image_buffer.hpp>
-#include <util_image.hpp>
 #include <util_texture_info.hpp>
-#include <fsys/ifile.hpp>
 #include <texturemanager/texturemanager.h>
 #include <cmaterialmanager.h>
-#include <cmaterial_manager2.hpp>
 #include "cmaterialmanager.h"
 
 module pragma.client;

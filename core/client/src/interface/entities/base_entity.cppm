@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "mathutil/umath_geometry.hpp"
 #include <format>
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 export module pragma.client:entities.base_entity;

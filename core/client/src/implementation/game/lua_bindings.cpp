@@ -4,28 +4,21 @@
 module;
 #include "pragma/lua/lua_call.hpp"
 
-#include "sharedutils/functioncallback.h"
 
-#include "sharedutils/util_weak_handle.hpp"
 
-#include "fsys/filesystem.h"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include "alsound_types.hpp"
 #include <mathutil/glmutil.h>
-#include "luasystem.h"
 #include "cmaterialmanager.h"
-#include <sharedutils/util_string.h>
-#include <luainterface.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>
 #include <image/prosper_render_target.hpp>
-#include <udm.hpp>
 
 #undef LEFT
 #undef RIGHT

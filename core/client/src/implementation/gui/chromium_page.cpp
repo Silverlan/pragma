@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include <memory>
-#include <sharedutils/util_library.hpp>
 #ifdef PRAGMA_CHROMIUM_ENABLED
 #include <../../../modules/pr_chromium/include/util_javascript.hpp>
 #endif

@@ -3,10 +3,6 @@
 
 module;
 
-#include <mathutil/glmutil.h>
-#include <mathutil/plane.hpp>
-#include <mathutil/color.h>
-#include <mathutil/eulerangles.h>
 
 export module pragma.server.debug.overlay;
 

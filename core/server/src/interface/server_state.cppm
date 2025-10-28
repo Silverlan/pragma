@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include <sharedutils/chronoutil.h>
-#include "wmserverdata.h"
 
 export module pragma.server.server_state;
 

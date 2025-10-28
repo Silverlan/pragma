@@ -7,9 +7,7 @@ module;
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <cmaterial_manager2.hpp>
 #include <prosper_command_buffer.hpp>
-#include <cmaterial.h>
 
 module pragma.client;
 

@@ -5,8 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <prosper_util.hpp>
-#include "sharedutils/util_weak_handle.hpp"
-#include "sharedutils/functioncallback.h"
 
 
 

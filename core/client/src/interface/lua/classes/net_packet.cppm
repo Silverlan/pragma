@@ -3,7 +3,7 @@
 
 module;
 #include "pragma/clientdefinitions.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 export module pragma.client:scripting.lua.classes.net_packet;
 

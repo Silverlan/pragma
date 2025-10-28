@@ -8,8 +8,7 @@ module;
 #include <shader/prosper_descriptor_array_manager.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include "mathutil/umath.h"
-#include "sharedutils/functioncallback.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 

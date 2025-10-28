@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
-#include "util_image_buffer.hpp"
 
 export module pragma.client:rendering.shaders.compose_rma;
 

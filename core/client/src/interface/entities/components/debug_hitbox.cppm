@@ -3,7 +3,7 @@
 
 module;
 #include "pragma/clientdefinitions.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include "mathutil/color.h"
 
 

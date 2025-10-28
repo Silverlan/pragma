@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include <sharedutils/util_clock.hpp>
 
 module pragma.server.networking.local_host;
 

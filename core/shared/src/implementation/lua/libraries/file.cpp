@@ -238,23 +238,23 @@ DLLNETWORK void Lua_LFile_IgnoreComments(lua_State *, LFile &f, std::string star
 DLLNETWORK void Lua_LFile_IgnoreComments(lua_State *, LFile &f, std::string start, std::string end) { f.IgnoreComments(start, end); }
 void Lua_LFile_Read(lua_State *l, LFile &f, uint32_t size)
 {
-	DataStream ds;
+	util::DataStream ds;
 	ds->Resize(size);
 	f.Read(ds->GetData(), size);
-	Lua::Push<DataStream>(l, ds);
+	Lua::Push<::util::DataStream>(l, ds);
 }
-void Lua_LFile_Read(lua_State *, LFile &f, ::DataStream &ds, uint32_t size)
+void Lua_LFile_Read(lua_State *, LFile &f, util::DataStream &ds, uint32_t size)
 {
 	auto offset = ds->GetOffset();
 	ds->Resize(offset + size);
 	f.Read(ds->GetData() + offset, size);
 }
-void Lua_LFile_Write(lua_State *, LFile &f, ::DataStream &ds)
+void Lua_LFile_Write(lua_State *, LFile &f, util::DataStream &ds)
 {
 	auto offset = ds->GetOffset();
 	f.Write(ds->GetData() + offset, ds->GetInternalSize() - offset);
 }
-void Lua_LFile_Write(lua_State *, LFile &f, ::DataStream &ds, uint32_t size)
+void Lua_LFile_Write(lua_State *, LFile &f, util::DataStream &ds, uint32_t size)
 {
 	auto offset = ds->GetOffset();
 	f.Write(ds->GetData() + offset, size - offset);

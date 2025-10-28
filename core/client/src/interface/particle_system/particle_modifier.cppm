@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <unordered_map>
-#include <cmaterial.h>
 
 export module pragma.client:particle_system.modifier;
 

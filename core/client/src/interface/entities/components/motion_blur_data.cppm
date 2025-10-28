@@ -8,7 +8,7 @@ module;
 #include <mathutil/transform.hpp>
 #include <unordered_set>
 #include "mathutil/umath.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 

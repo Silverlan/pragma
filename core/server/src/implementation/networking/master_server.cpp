@@ -3,7 +3,6 @@
 
 module;
 
-#include <sharedutils/util_library.hpp>
 
 module pragma.server.networking.master_server;
 

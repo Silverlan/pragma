@@ -2,27 +2,20 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "material.h"
 
-#include "sharedutils/util_weak_handle.hpp"
 
-#include "fsys/filesystem.h"
 
-#include "udm.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include "cmaterialmanager.h"
-#include "luasystem.h"
 #include <texturemanager/texturemanager.h>
 #include "textureinfo.h"
-#include <cmaterial_manager2.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_window.hpp>
-#include <fsys/ifile.hpp>
 
 module pragma.client;
 

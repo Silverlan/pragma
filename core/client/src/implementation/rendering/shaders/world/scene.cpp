@@ -11,7 +11,6 @@ module;
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
-#include <cmaterial.h>
 
 module pragma.client;
 

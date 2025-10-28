@@ -4,14 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include <udm.hpp>
 #include <vector>
 #include <unordered_map>
 #include <string>
 #include <optional>
-#include <mathutil/color.h>
-#include <sharedutils/datastream.h>
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 export module pragma.server.game;

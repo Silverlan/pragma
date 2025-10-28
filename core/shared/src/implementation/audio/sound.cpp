@@ -36,7 +36,7 @@ import :audio.sound;
 
 SoundEffectParams::SoundEffectParams(float pgain, float pgainHF, float pgainLF) : gain(pgain), gainHF(pgainHF), gainLF(pgainLF) {}
 
-ALSound::ALSound(NetworkState *nw) : util::inheritable_enable_shared_from_this<ALSound>(), CallbackHandler(), LuaCallbackHandler(), m_type(pragma::audio::ALSoundType::Generic), m_networkState(nw)
+ALSound::ALSound(NetworkState *nw) : util::inheritable_enable_shared_from_this<ALSound>(), util::CallbackHandler(), LuaCallbackHandler(), m_type(pragma::audio::ALSoundType::Generic), m_networkState(nw)
 {
 	RegisterCallback<void>("OnDestroyed");
 	RegisterCallback<void, ALState, ALState>("OnStateChanged");

@@ -6,7 +6,6 @@ module;
 
 #include "stdafx_client.h"
 #include <cmaterialmanager.h>
-#include <cmaterial_manager2.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_texture.hpp>
 #include <image/prosper_sampler.hpp>

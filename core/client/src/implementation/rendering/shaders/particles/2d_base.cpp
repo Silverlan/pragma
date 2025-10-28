@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "material.h"
 
 #include "mathutil/umath.h"
 
@@ -15,7 +14,6 @@ module;
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 #include <datasystem_vector.h>
-#include <cmaterial.h>
 
 module pragma.client;
 

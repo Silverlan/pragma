@@ -5,8 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include <shader/prosper_pipeline_create_info.hpp>
-#include <cmaterial_manager2.hpp>
-#include <cmaterial.h>
 
 module pragma.client;
 

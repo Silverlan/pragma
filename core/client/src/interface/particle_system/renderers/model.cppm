@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "prosper_descriptor_set_group.hpp"
-#include "sharedutils/util_weak_handle.hpp"
 
 
 export module pragma.client:particle_system.renderer_model;

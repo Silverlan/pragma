@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <udm.hpp>
 
 export module pragma.client:rendering.shader_input_data;
 

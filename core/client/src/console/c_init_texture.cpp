@@ -11,7 +11,6 @@
 #include <texturemanager/texturemanager.h>
 #include <texturemanager/load/texture_loader.hpp>
 #include <cmaterialmanager.h>
-#include <cmaterial_manager2.hpp>
 #include <image/prosper_sampler.hpp>
 
 import pragma.client;

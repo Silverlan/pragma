@@ -5,11 +5,9 @@ module;
 
 #include "mathutil/umath_geometry.hpp"
 
-#include "sharedutils/util_event_reply.hpp"
 
-#include "sharedutils/util_pragma.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 

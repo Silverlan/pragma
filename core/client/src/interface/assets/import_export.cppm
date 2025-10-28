@@ -5,13 +5,8 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "image/prosper_image.hpp"
-#include "sharedutils/alpha_mode.hpp"
 #include "prosper_enums.hpp"
-#include <cmaterial.h>
 #include <util_texture_info.hpp>
-#include <sharedutils/util_path.hpp>
-#include "sharedutils/util_pragma.hpp"
-#include "material.h"
 
 
 

@@ -3,9 +3,8 @@
 
 module;
 #include "pragma/clientdefinitions.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include "mathutil/color.h"
-#include "sharedutils/util_event_reply.hpp"
 
 
 

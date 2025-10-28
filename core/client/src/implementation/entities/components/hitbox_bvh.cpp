@@ -8,12 +8,11 @@ module;
 
 #include "mathutil/transform.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <sharedutils/BS_thread_pool.hpp>
 #include <mathutil/boundingvolume.h>
 #include "mathutil/umath_geometry.hpp"
 #include <bvh/v2/stack.h>

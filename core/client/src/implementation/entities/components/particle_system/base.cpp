@@ -4,32 +4,25 @@
 module;
 #include "pragma/cxxmodules.hpp"
 
-#include "sharedutils/util_event_reply.hpp"
 
 #include "mathutil/color.h"
 
 #include "mathutil/transform.hpp"
 
-#include "sharedutils/functioncallback.h"
 
-#include "material.h"
 
-#include "fsys/filesystem.h"
 
 #include "stdafx_client.h"
 #include <mathutil/umath.h>
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/norm.hpp>
 #include <algorithm>
-#include <sharedutils/util_weak_handle.hpp>
 #include <sprite_sheet_animation.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
-#include <sharedutils/util_file.h>
 #include <datasystem_vector.h>
-#include <udm.hpp>
 
 module pragma.client;
 

@@ -6,31 +6,17 @@ module;
 
 #include "mathutil/transform.hpp"
 
-#include "material.h"
 
-#include "sharedutils/util_pragma.hpp"
 
-#include "fsys/filesystem.h"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include "prosper_util.hpp"
-#include <cmaterial_manager2.hpp>
 #include <datasystem_t.hpp>
 #include <texturemanager/texture_manager2.hpp>
-#include <sharedutils/util_file.h>
-#include <sharedutils/alpha_mode.hpp>
-#include <sharedutils/util_path.hpp>
-#include <sharedutils/util_parallel_job.hpp>
-#include <sharedutils/util_library.hpp>
-#include <util_image_buffer.hpp>
-#include <fsys/ifile.hpp>
 #include <image/prosper_sampler.hpp>
-#include <util_image.hpp>
 #include <cmaterialmanager.h>
-#include <cmaterial.h>
-#include <udm.hpp>
 #include <tiny_gltf.h>
 #include <image/prosper_image.hpp>
 

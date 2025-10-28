@@ -3,10 +3,8 @@
 
 module;
 
-#include "pragma/lua/luaapi.h"
-#include "udm.hpp"
+#include "pragma/lua/core.hpp"
 #include "mathutil/color.h"
-#include "sharedutils/datastream.h"
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_image_view.hpp>
 #include <buffers/prosper_buffer.hpp>

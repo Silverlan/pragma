@@ -2,12 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "stdafx_server.h"
-#include <fsys/filesystem.h>
-#include <mathutil/umath.h>
-#include <sharedutils/util_file.h>
 
 module pragma.server.networking.resource_manager;
 

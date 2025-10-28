@@ -7,7 +7,6 @@ module;
 #include "stdafx_client.h"
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
-#include "sharedutils/util_event_reply.hpp"
 
 
 export module pragma.client:gui.frame;

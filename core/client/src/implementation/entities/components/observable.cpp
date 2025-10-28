@@ -3,7 +3,7 @@
 
 module;
 #include "stdafx_client.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 

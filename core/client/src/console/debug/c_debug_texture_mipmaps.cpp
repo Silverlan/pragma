@@ -1,7 +1,5 @@
 
-#include "sharedutils/magic_enum.hpp"
 
-#include "sharedutils/magic_enum.hpp"
 #include "pragma/console/helper.hpp"
 
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
@@ -10,9 +8,7 @@
 #include "stdafx_client.h"
 #include <texturemanager/texture.h>
 #include <texture_type.h>
-#include <sharedutils/magic_enum.hpp>
 #include <cmaterialmanager.h>
-#include <cmaterial_manager2.hpp>
 
 import pragma.client;
 

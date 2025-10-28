@@ -3,21 +3,15 @@
 
 module;
 
-#include "sharedutils/util_path.hpp"
 
-#include "fsys/filesystem.h"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include <texture_load_flags.hpp>
-#include <sharedutils/util_file.h>
 #include <cmaterialmanager.h>
 #include <textureinfo.h>
 #include <prosper_glsl.hpp>
-#include <material_property_block_view.hpp>
-#include <cmaterial_manager2.hpp>
-#include <cmaterial.h>
 
 module pragma.client;
 

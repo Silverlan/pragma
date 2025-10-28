@@ -6,8 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <string>
 #include <unordered_map>
-#include "pragma/lua/luaapi.h"
-#include "udm.hpp"
+#include "pragma/lua/core.hpp"
 
 
 

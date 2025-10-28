@@ -2,26 +2,20 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/magic_enum.hpp"
 
-#include "sharedutils/magic_enum.hpp"
 
 #include "pragma/logging.hpp"
 
 #include "pragma/clientdefinitions.h"
 
-#include "sharedutils/functioncallback.h"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <sharedutils/magic_enum.hpp>
 #include <prosper_framebuffer.hpp>
 #include <prosper_command_buffer.hpp>
-#include <cmaterial_manager2.hpp>
-#include <cmaterial.h>
 
 module pragma.client;
 

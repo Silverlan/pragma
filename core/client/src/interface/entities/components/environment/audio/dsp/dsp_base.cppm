@@ -5,8 +5,7 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <alsound_source.hpp>
-#include "pragma/lua/luaapi.h"
-#include "sharedutils/util_event_reply.hpp"
+#include "pragma/lua/core.hpp"
 #include "alsound_types.hpp"
 
 

@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "buffers/prosper_buffer.hpp"
-#include "sharedutils/util_weak_handle.hpp"
 #include "mathutil/color.h"
 
 

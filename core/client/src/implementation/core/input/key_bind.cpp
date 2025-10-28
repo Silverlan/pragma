@@ -4,10 +4,9 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "stdafx_cengine.h"
-#include <sharedutils/util_string.h>
 
 module pragma.client;
 

@@ -5,8 +5,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "mathutil/umath.h"
 #include <condition_variable>
-#include "sharedutils/functioncallback.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include "mathutil/transform.hpp"
 
 

@@ -7,19 +7,15 @@ module;
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <sharedutils/util_file.h>
 #include <image/prosper_image.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
-#include <sharedutils/util_library.hpp>
 #include <util_texture_info.hpp>
 #include <datasystem_t.hpp>
 #include <cmaterialmanager.h>
-#include <cmaterial_manager2.hpp>
-#include <cmaterial.h>
 
 module pragma.client;
 

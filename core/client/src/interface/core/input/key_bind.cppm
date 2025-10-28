@@ -7,7 +7,7 @@ module;
 #include <string>
 #include <memory>
 #include <vector>
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 export module pragma.client:core.key_bind;

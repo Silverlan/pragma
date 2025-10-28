@@ -6,8 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 
 #include "mathutil/umath_geometry.hpp"
-#include "sharedutils/util_shared_handle.hpp"
-#include "sharedutils/functioncallback.h"
 
 #include "mathutil/umath.h"
 

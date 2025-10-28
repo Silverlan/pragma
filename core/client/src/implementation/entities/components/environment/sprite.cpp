@@ -4,9 +4,8 @@
 module;
 #include "mathutil/color.h"
 
-#include "sharedutils/util_event_reply.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 

@@ -2,16 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/functioncallback.h"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
-#include <cmaterial.h>
 
 module pragma.client;
 

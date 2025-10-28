@@ -3,7 +3,6 @@
 
 module;
 
-#include "sharedutils/util_weak_handle.hpp"
 
 #include "mathutil/umath.h"
 

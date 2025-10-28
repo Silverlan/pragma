@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/util_parallel_job.hpp"
 
 #include "mathutil/transform.hpp"
 
-#include "fsys/filesystem.h"
 
 #include "mathutil/umath.h"
 
@@ -16,9 +14,6 @@ module;
 #include <image/prosper_image.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <mathutil/umath_lighting.hpp>
-#include <sharedutils/util_baking.hpp>
-#include <util_image.hpp>
-#include <fsys/ifile.hpp>
 
 module pragma.client;
 

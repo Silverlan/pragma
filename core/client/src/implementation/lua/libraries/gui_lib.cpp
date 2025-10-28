@@ -4,10 +4,9 @@
 module;
 #include "pragma/lua/lua_call.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "stdafx_client.h"
-#include "luasystem.h"
 #include <prosper_window.hpp>
 #include <prosper_render_pass.hpp>
 

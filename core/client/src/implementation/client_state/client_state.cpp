@@ -5,28 +5,19 @@ module;
 
 #include "pragma/logging.hpp"
 
-#include "material.h"
 
-#include "sharedutils/util_weak_handle.hpp"
 
-#include "fsys/filesystem.h"
 
-#include "udm.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include "pragma/console/helper.hpp"
 #include "stdafx_client.h"
 #include "cmaterialmanager.h"
-#include <cmaterial_manager2.hpp>
-#include "luasystem.h"
 #include <texturemanager/texturemanager.h>
 #include <luasystem_file.h>
 #include <image/prosper_render_target.hpp>
-#include <luainterface.hpp>
 #include <alsoundsystem.hpp>
 #include <shader/prosper_pipeline_loader.hpp>
-#include <sharedutils/util_shaderinfo.hpp>
-#include <sharedutils/util_library.hpp>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_window.hpp>

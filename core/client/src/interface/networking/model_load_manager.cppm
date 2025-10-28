@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "sharedutils/functioncallback.h"
 #include <mutex>
 #include <queue>
 #include <thread>

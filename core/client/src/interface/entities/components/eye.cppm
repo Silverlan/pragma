@@ -7,7 +7,7 @@ module;
 #include <mathutil/transform.hpp>
 #include <mathutil/uvec.h>
 #include "mathutil/umath.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 

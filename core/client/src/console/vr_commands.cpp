@@ -1,6 +1,5 @@
 
 
-#include "sharedutils/functioncallback.h"
 
 #include "mathutil/umath.h"
 #include "mathutil/color.h"
@@ -10,8 +9,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include <sharedutils/scope_guard.h>
-#include <sharedutils/util_library.hpp>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 

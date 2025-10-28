@@ -8,7 +8,6 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <shader/prosper_shader_blur.hpp>
 #include <image/prosper_render_target.hpp>
-#include <cmaterial.h>
 
 module pragma.client;
 

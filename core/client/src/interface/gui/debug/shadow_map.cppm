@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <sharedutils/util_shared_handle.hpp>
 
 export module pragma.client:gui.debug_shadow_map;
 

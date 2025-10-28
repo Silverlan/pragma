@@ -11,7 +11,6 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <image/prosper_msaa_texture.hpp>
-#include <sharedutils/scope_guard.h>
 
 module pragma.client;
 

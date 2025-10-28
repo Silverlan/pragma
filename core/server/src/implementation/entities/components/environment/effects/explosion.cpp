@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "stdafx_server.h"
-#include <sharedutils/util_string.h>
 
 module pragma.server.entities.components.effects.explosion;
 

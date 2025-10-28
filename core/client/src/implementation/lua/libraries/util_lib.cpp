@@ -2,18 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/util_path.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include "luasystem.h"
 #include <util_texture_info.hpp>
-#include <util_image_buffer.hpp>
 #include <prosper_window.hpp>
-#include <fsys/ifile.hpp>
 
 module pragma.client;
 

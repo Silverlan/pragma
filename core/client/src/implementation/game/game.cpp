@@ -8,22 +8,15 @@ module;
 #include "pragma/console/helper.hpp"
 #include "mathutil/color.h"
 
-#include "sharedutils/functioncallback.h"
 
-#include "material.h"
 
-#include "sharedutils/util_weak_handle.hpp"
 
-#include "fsys/filesystem.h"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
-#include "sharedutils/util_clock.hpp"
 #include "stdafx_client.h"
-#include "luasystem.h"
 #include "cmaterialmanager.h"
-#include <cmaterial_manager2.hpp>
 //#include "shader_screen.h" // prosper TODO
 #include <texturemanager/texturemanager.h>
 #include "textureinfo.h"
@@ -32,11 +25,7 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_sampler.hpp>
-#include <sharedutils/util_library.hpp>
 #include <shader/prosper_pipeline_loader.hpp>
-#include <util_image.hpp>
-#include <util_image_buffer.hpp>
-#include <udm.hpp>
 #include <prosper_window.hpp>
 
 module pragma.client;

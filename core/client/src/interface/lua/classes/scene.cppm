@@ -3,15 +3,12 @@
 
 module;
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include "prosper_render_pass.hpp"
 #include "prosper_command_buffer.hpp"
 #include <image/prosper_texture.hpp>
-#include "cmaterial.h"
 #include <mathutil/glmutil.h>
-#include "luasystem.h"
 #include <prosper_descriptor_set_group.hpp>
-#include <sharedutils/util_shaderinfo.hpp>
 #include "mathutil/umath.h"
 #include "pragma/lua/policies/shared_from_this_policy.hpp"
 

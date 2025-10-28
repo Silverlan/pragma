@@ -9,7 +9,6 @@ module;
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
-#include <cmaterial.h>
 
 module pragma.client;
 

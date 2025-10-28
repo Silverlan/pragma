@@ -4,9 +4,7 @@
 module;
 #include "mathutil/transform.hpp"
 
-#include "sharedutils/util_pragma.hpp"
 
-#include "fsys/filesystem.h"
 
 #include "mathutil/umath.h"
 
@@ -15,9 +13,6 @@ module;
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <sharedutils/alpha_mode.hpp>
-#include <sharedutils/util_path.hpp>
-#include <sharedutils/util_file.h>
 #include <mathutil/umath_lighting.hpp>
 #include <datasystem_color.h>
 #include <datasystem_vector.h>

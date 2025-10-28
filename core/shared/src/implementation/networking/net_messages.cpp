@@ -10,7 +10,7 @@ import :engine.version;
 import :networking.net_message_map;
 import :networking.net_messages;
 
-static void register_server_net_messages(IBaseNetMessageMap &netMessageMap)
+static void register_server_net_messages(pragma::networking::IBaseNetMessageMap &netMessageMap)
 {
     using namespace pragma::networking::net_messages;
     netMessageMap.RegisterNetMessage(server::RESOURCEINFO_RESPONSE);
@@ -47,7 +47,7 @@ static void register_server_net_messages(IBaseNetMessageMap &netMessageMap)
     
     netMessageMap.RegisterNetMessage(server::CL_SEND);
 }
-static void register_client_net_messages(IBaseNetMessageMap &netMessageMap)
+static void register_client_net_messages(pragma::networking::IBaseNetMessageMap &netMessageMap)
 {
     using namespace pragma::networking::net_messages;
     netMessageMap.RegisterNetMessage(client::RESOURCEINFO);

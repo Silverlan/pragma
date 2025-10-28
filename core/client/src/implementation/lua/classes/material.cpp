@@ -2,14 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "stdafx_client.h"
-#include "luasystem.h"
 #include "cmaterialmanager.h"
 #include "textureinfo.h"
-#include <cmaterial.h>
-#include <cmaterial_manager2.hpp>
 
 module pragma.client;
 

@@ -3,15 +3,12 @@
 
 module;
 
-#include "sharedutils/functioncallback.h"
 
 #include "mathutil/umath_geometry.hpp"
 
-#include "sharedutils/util_event_reply.hpp"
 
-#include "sharedutils/datastream.h"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include "pragma/console/helper.hpp"
 #include "mathutil/umath.h"
 

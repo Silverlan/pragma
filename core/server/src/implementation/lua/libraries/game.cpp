@@ -2,13 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/functioncallback.h"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "stdafx_server.h"
-#include "luasystem.h"
-#include <sharedutils/scope_guard.h>
 
 module pragma.server.scripting.lua.libraries.game;
 

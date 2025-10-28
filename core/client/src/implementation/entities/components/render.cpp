@@ -2,18 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/magic_enum.hpp"
 
-#include "sharedutils/magic_enum.hpp"
 
 
 #include "mathutil/umath_geometry.hpp"
 
-#include "sharedutils/util_event_reply.hpp"
 
 #include "mathutil/transform.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
@@ -23,7 +20,6 @@ module;
 #include <buffers/prosper_swap_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
-#include <util_image.hpp>
 
 module pragma.client;
 

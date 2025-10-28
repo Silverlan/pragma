@@ -3,14 +3,12 @@
 
 module;
 
-#include "sharedutils/util_event_reply.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <sharedutils/util_shaderinfo.hpp>
 #include "mathutil/umath_geometry.hpp"
 #include <prosper_util.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>

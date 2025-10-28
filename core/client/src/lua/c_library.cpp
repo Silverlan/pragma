@@ -1,11 +1,8 @@
 
-#include "pragma/lua/policies/default_parameter_policy.hpp"
 
-#include "sharedutils/util_parallel_job.hpp"
 
-#include "fsys/filesystem.h"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
@@ -14,20 +11,13 @@
 
 #include "stdafx_client.h"
 #include "texture_load_flags.hpp"
-#include <sharedutils/util_file.h>
-#include <sharedutils/util_path.hpp>
-#include <util_image.hpp>
-#include <util_image_buffer.hpp>
 #include <util_texture_info.hpp>
 #include <alsoundsystem.hpp>
-#include <luainterface.hpp>
 #include <cmaterialmanager.h>
-#include <cmaterial_manager2.hpp>
 #include <impl_texture_formats.h>
 #include <prosper_window.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_prepared_command_buffer.hpp>
-#include <fsys/ifile.hpp>
 #include "texturemanager/texture.h"
 
 import pragma.audio.util;

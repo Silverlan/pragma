@@ -8,18 +8,15 @@ module;
 #include <unordered_set>
 #include <prosper_swap_command_buffer.hpp>
 #include <mathutil/plane.hpp>
-#include <sharedutils/util_weak_handle.hpp>
 #include <string>
 #include <vector>
 #include "image/prosper_render_target.hpp"
 #include "prosper_command_buffer.hpp"
 #include <cinttypes>
 #include <memory>
-#include <sharedutils/util_weak_handle.hpp>
-#include <sharedutils/functioncallback.h>
 #include <mathutil/uvec.h>
 #include "mathutil/umath.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #define DEBUG_RENDER_PERFORMANCE_TEST_ENABLED 0
 

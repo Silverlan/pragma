@@ -4,7 +4,6 @@
 module;
 
 #include <ofbx.h>
-#include <sharedutils/util_path.hpp>
 #include <mathutil/vertex.hpp>
 #include <string>
 #include <memory>

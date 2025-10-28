@@ -4,19 +4,15 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "luasystem.h"
 #include "mathutil/color.h"
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>
 #include <prosper_swap_command_buffer.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
-#include <sharedutils/util_hash.hpp>
 #include <util_formatted_text.hpp>
 #include <prosper_window.hpp>
-#include "pragma/lua/luaapi.h"
-#include "sharedutils/functioncallback.h"
-#include "sharedutils/util_event_reply.hpp"
+#include "pragma/lua/core.hpp"
 
 #undef DrawState
 

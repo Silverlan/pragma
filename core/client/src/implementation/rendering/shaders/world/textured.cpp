@@ -19,11 +19,6 @@ module;
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
-#include <sharedutils/magic_enum.hpp>
-#include <sharedutils/util_path.hpp>
-#include <util_image.hpp>
-#include <cmaterial.h>
-#include <cmaterial_manager2.hpp>
 
 module pragma.client;
 

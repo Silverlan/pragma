@@ -6,33 +6,26 @@ module;
 
 #include "pragma/lua/lua_call.hpp"
 
-#include "pragma/lua/policies/default_parameter_policy.hpp"
 
-#include "sharedutils/util_path.hpp"
 
 #include "pragma/clientdefinitions.h"
 
-#include "sharedutils/util_event_reply.hpp"
 
 #include "mathutil/color.h"
 
 #include "mathutil/transform.hpp"
 
-#include "sharedutils/functioncallback.h"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include "luasystem.h"
-#include "cmaterial.h"
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>
 #include <prosper_swap_command_buffer.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
-#include <sharedutils/util_hash.hpp>
 #include <util_formatted_text.hpp>
 #include <prosper_window.hpp>
 

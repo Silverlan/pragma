@@ -4,9 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <cmaterial.h>
-#include "sharedutils/functioncallback.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 

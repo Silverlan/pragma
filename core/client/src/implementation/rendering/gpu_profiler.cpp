@@ -9,7 +9,6 @@ module;
 #include <queries/prosper_timer_query.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
-#include "sharedutils/util_clock.hpp"
 
 module pragma.client;
 

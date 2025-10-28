@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <sharedutils/util_clock.hpp>
 #include "image/prosper_render_target.hpp"
 #include "queries/prosper_timer_query.hpp"
 #include "queries/prosper_query_pool.hpp"
@@ -12,12 +11,7 @@ module;
 #include <unordered_map>
 #include "alsoundsystem.hpp"
 #include "alsound_effect.hpp"
-#include "pragma/lua/luaapi.h"
-#include "fsys/filesystem.h"
-#include "sharedutils/util_weak_handle.hpp"
-#include "sharedutils/functioncallback.h"
-#include "sharedutils/util_clock.hpp"
-#include "sharedutils/util_clock.hpp"
+#include "pragma/lua/core.hpp"
 
 
 

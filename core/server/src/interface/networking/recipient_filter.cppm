@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "sharedutils/util_weak_handle.hpp"
 #include <functional>
 
 export module pragma.server.networking.recipient_filter;

@@ -6,10 +6,9 @@ module;
 
 #include "mathutil/color.h"
 
-#include "sharedutils/functioncallback.h"
 
 #include "pragma/console/helper.hpp"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include "pragma/logging.hpp"
 
 #include "mathutil/umath.h"

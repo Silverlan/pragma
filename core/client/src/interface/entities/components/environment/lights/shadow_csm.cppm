@@ -8,8 +8,7 @@ module;
 #include <mathutil/boundingvolume.h>
 #include <mathutil/plane.hpp>
 #include "mathutil/umath.h"
-#include "sharedutils/util_weak_handle.hpp"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 

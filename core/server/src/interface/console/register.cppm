@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "sharedutils/util.h"
-#include "udm.hpp"
 #include <string>
 
 export module pragma.server.console.register_commands;

@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include <mathutil/umath.h>
 
 module pragma.server.ai.schedule;
 

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "fsys/filesystem.h"
 
 #include "stdafx_client.h"
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -11,9 +10,6 @@ module;
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
-#include <util_image.hpp>
-#include <util_image_buffer.hpp>
-#include <fsys/ifile.hpp>
 
 module pragma.client;
 

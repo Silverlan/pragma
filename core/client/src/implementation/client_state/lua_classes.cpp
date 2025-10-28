@@ -2,34 +2,25 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/magic_enum.hpp"
 
-#include "sharedutils/magic_enum.hpp"
 
 #include "pragma/lua/lua_call.hpp"
 
 #include "pragma/logging.hpp"
 
-#include "pragma/lua/policies/default_parameter_policy.hpp"
 
 #include "mathutil/color.h"
 
-#include "sharedutils/datastream.h"
-#include "sharedutils/util_shaderinfo.hpp"
 #include "mathutil/transform.hpp"
 
-#include "material.h"
 
-#include "fsys/filesystem.h"
 
-#include "udm.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include "luasystem.h"
 #include "textureinfo.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_flip_image.hpp>
@@ -38,11 +29,7 @@ module;
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_render_pass.hpp>
 #include <shader/prosper_shader_t.hpp>
-#include <luainterface.hpp>
-#include <material_property_block_view.hpp>
 #include <cmaterialmanager.h>
-#include <cmaterial_manager2.hpp>
-#include "cmaterial.h"
 
 #undef DrawState
 

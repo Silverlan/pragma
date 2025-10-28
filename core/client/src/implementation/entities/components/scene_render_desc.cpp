@@ -2,18 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/magic_enum.hpp"
 
-#include "sharedutils/magic_enum.hpp"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <sharedutils/util_shaderinfo.hpp>
-#include <sharedutils/alpha_mode.hpp>
-#include <sharedutils/util_hash.hpp>
 #include "mathutil/umath_geometry.hpp"
-#include <cmaterial.h>
 
 #undef AddJob
 

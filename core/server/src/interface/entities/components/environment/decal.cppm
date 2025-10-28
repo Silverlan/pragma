@@ -4,7 +4,7 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 export module pragma.server.entities.components.decal;

@@ -2,13 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/functioncallback.h"
 
 #include "mathutil/color.h"
 
-#include "sharedutils/util_event_reply.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include "pragma/lua/lua_error_handling.hpp"
 #include "stdafx_client.h"
 
@@ -19,6 +17,7 @@ import :gui.console;
 import :gui.frame;
 import :gui.scroll_container;
 import :gui.snap_area;
+import :locale;
 
 import :client_state;
 import :engine;

@@ -3,27 +3,19 @@
 
 module;
 
-#include "sharedutils/util_path.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include "pragma/console/helper.hpp"
-#include "fsys/filesystem.h"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <sharedutils/util_file.h>
-#include <util_image_buffer.hpp>
 #include <util_texture_info.hpp>
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_image.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
-#include <cmaterial.h>
-#include <cmaterial_manager2.hpp>
 #include <texturemanager/texture_manager2.hpp>
-#include <util_image.hpp>
-#include <fsys/ifile.hpp>
 
 module pragma.client;
 

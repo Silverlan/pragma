@@ -8,8 +8,7 @@ module;
 #include <mathutil/plane.hpp>
 #include <cinttypes>
 #include "mathutil/umath.h"
-#include "sharedutils/functioncallback.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 

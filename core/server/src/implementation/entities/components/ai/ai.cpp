@@ -2,12 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/util_event_reply.hpp"
 
 #include "pragma/logging.hpp"
 
-#include "pragma/lua/luaapi.h"
-#include "pragma/lua/policies/default_parameter_policy.hpp"
+#include "pragma/lua/core.hpp"
 #include "stdafx_server.h"
 
 module pragma.server.entities.components.ai;

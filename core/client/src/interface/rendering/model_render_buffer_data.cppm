@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <prosper_context.hpp>
-#include <material.h>
 
 export module pragma.client:rendering.model_render_buffer_data;
 

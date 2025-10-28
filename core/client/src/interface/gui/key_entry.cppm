@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <unordered_map>
-#include "sharedutils/util_event_reply.hpp"
 
 
 export module pragma.client:gui.key_entry;

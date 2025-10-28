@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include <mathutil/glmutil.h>
 
 export module pragma.server.ai.memory;
 

@@ -7,17 +7,10 @@ module;
 #include "buffers/prosper_dynamic_resizable_buffer.hpp"
 #include "sprite_sheet_animation.hpp"
 #include <mathutil/transform.hpp>
-#include <udm.hpp>
-#include <fsys/vfileptr.h>
 #include <optional>
 #include "mathutil/umath.h"
-#include "pragma/lua/luaapi.h"
-#include "fsys/filesystem.h"
-#include "sharedutils/util_weak_handle.hpp"
-#include "material.h"
-#include "sharedutils/functioncallback.h"
+#include "pragma/lua/core.hpp"
 #include "mathutil/color.h"
-#include "sharedutils/util_event_reply.hpp"
 
 
 

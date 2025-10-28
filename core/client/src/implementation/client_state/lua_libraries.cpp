@@ -4,21 +4,17 @@
 module;
 #include "pragma/lua/policies/core_policies.hpp"
 
-#include "pragma/lua/policies/default_parameter_policy.hpp"
 
 #include "pragma/logging.hpp"
 
-#include "sharedutils/functioncallback.h"
 
-#include "udm.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include <alsound_effect.hpp>
-#include <luainterface.hpp>
 #include <prosper_window.hpp>
 #include <prosper_command_buffer.hpp>
 #include <alsoundsystem.hpp>

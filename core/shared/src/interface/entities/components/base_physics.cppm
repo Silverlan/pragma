@@ -7,6 +7,7 @@ module;
 #include <cinttypes>
 #include <vector>
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include "pragma/lua/core.hpp"
 

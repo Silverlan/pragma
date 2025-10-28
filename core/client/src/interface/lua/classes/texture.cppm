@@ -7,7 +7,7 @@ module;
 #include <mathutil/glmutil.h>
 #include "textureinfo.h"
 #include <texturemanager/texture.h>
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 export module pragma.client:scripting.lua.classes.texture;

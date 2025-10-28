@@ -5,8 +5,6 @@
 #define __GUI_ELEMENT_POLICY_HPP__
 
 #if 0
-#include <sharedutils/util.h>
-#include <sharedutils/util_shared_handle.hpp>
 
 namespace luabind {
 	namespace detail {

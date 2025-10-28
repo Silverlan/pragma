@@ -2,20 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/functioncallback.h"
 
-#include "sharedutils/util_event_reply.hpp"
 
-#include "sharedutils/datastream.h"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include "wms_shared.h"
 #include "wms_request_filter.h"
-#include "wms_message.h"
-#include <sharedutils/util_library.hpp>
-#include "wmserverdata.h"
 
 module pragma.client;
 

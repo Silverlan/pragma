@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/console/helper.hpp"
-#include "udm.hpp"
 
 module pragma.server.console.register_commands;
 

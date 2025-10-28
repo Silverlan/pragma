@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "stdafx_client.h"
 #include <mathutil/uquat.h>
-#include "luasystem.h"
 
 module pragma.client;
 

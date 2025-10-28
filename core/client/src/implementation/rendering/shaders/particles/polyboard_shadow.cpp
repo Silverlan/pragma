@@ -7,7 +7,6 @@ module;
 #include "cmaterialmanager.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <textureinfo.h>
-#include <cmaterial.h>
 
 module pragma.client;
 

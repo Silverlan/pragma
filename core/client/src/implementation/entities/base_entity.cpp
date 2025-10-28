@@ -4,17 +4,14 @@
 module;
 #include "pragma/logging.hpp"
 
-#include "sharedutils/util_event_reply.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include "cmaterialmanager.h"
 #include <materialmanager.h>
-#include "luasystem.h"
-#include <sharedutils/scope_guard.h>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>

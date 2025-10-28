@@ -5,10 +5,7 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <image/prosper_texture.hpp>
-#include <sharedutils/asset_loader/asset_load_info.hpp>
-#include "pragma/lua/luaapi.h"
-#include "udm.hpp"
-#include "material.h"
+#include "pragma/lua/core.hpp"
 
 
 

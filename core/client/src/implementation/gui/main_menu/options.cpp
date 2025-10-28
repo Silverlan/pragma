@@ -2,30 +2,21 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/util_clock.hpp"
 
-#include "sharedutils/util_clock.hpp"
 
-#include "sharedutils/functioncallback.h"
 
-#include "sharedutils/util_event_reply.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
-#include "fsys/filesystem.h"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <sharedutils/util_string.h>
 #include <prosper_util.hpp>
 #include <rapidxml.hpp>
 #include <rapidxml_utils.hpp>
 #include <rapidxml_print.hpp>
 #include <alsoundsystem.hpp>
-#include <sharedutils/util_file.h>
-#include <sharedutils/util_clock.hpp>
-#include <fsys/fsys_package.hpp>
 #include <prosper_window.hpp>
 
 module pragma.client;

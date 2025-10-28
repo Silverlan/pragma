@@ -22,7 +22,7 @@ UInt8 NetworkState::STATE_COUNT = 0;
 
 decltype(NetworkState::s_loadedLibraries) NetworkState::s_loadedLibraries = {};
 
-NetworkState::NetworkState() : CallbackHandler(), CVarHandler()
+NetworkState::NetworkState() : util::CallbackHandler(), CVarHandler()
 {
 	m_ctReal.Reset(static_cast<int64_t>(pragma::Engine::Get()->GetTickCount()));
 	m_tReal = CDouble(m_ctReal());

@@ -5,8 +5,6 @@ module;
 #include "pragma/logging.hpp"
 
 #include "stdafx_server.h"
-#include "wmserverdata.h"
-#include <wms_shared.h>
 
 module pragma.server.server_state;
 

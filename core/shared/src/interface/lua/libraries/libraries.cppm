@@ -18,7 +18,7 @@ export import :scripting.lua.libraries.file;
 export import :scripting.lua.libraries.game;
 export import :scripting.lua.libraries.geometry;
 export import :scripting.lua.libraries.global;
-//export import :scripting.lua.libraries.import;
+export import :scripting.lua.libraries.import;
 export import :scripting.lua.libraries.intersect;
 export import :scripting.lua.libraries.math;
 export import :scripting.lua.libraries.matrix;

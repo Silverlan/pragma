@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <cmaterial.h>
-#include <udm.hpp>
 
 export module pragma.client:rendering.shader_material;
 

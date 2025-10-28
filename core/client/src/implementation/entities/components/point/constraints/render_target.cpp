@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
-#include "material.h"
 
 #include "stdafx_client.h"
 #include <cmaterialmanager.h>

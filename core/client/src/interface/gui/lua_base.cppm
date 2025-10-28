@@ -5,9 +5,8 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <prosper_prepared_command_buffer.hpp>
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include <mutex>
-#include "sharedutils/util_event_reply.hpp"
 #include "pragma/lua/lua_call.hpp"
 
 #undef DrawState

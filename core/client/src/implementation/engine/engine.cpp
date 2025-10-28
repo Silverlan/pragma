@@ -4,31 +4,22 @@
 module;
 #include "pragma/lua/lua_error_handling.hpp"
 
-#include "sharedutils/util_clock.hpp"
 
-#include "sharedutils/magic_enum.hpp"
 
-#include "sharedutils/magic_enum.hpp"
 #include "pragma/console/helper.hpp"
 #include "pragma/logging.hpp"
 
-#include "sharedutils/util_path.hpp"
 
 #include "pragma/clientdefinitions.h"
 
 #include "mathutil/color.h"
 
-#include "sharedutils/functioncallback.h"
 
-#include "material.h"
 
-#include "sharedutils/util_weak_handle.hpp"
 
-#include "fsys/filesystem.h"
 
-#include "udm.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
@@ -36,23 +27,16 @@ module;
 #include "cmaterialmanager.h"
 #include <texturemanager/texturemanager.h>
 #include <cmaterialmanager.h>
-#include <cmaterial_manager2.hpp>
 #include <cctype>
-#include <sharedutils/util_debug.h>
-#include <fsys/directory_watcher.h>
-#include <sharedutils/util_file.h>
 #include <prosper_util.hpp>
 #include <shader/prosper_pipeline_loader.hpp>
 #include <image/prosper_render_target.hpp>
 #include <debug/prosper_debug.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_swap_command_buffer.hpp>
-#include <util_image.hpp>
-#include <util_image_buffer.hpp>
 #include <queries/prosper_query_pool.hpp>
 #include <queries/prosper_timer_query.hpp>
 #include <prosper_window.hpp>
-#include <fsys/ifile.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>

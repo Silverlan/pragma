@@ -4,12 +4,10 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <sharedutils/util_library.hpp>
 #include <prosper_context.hpp>
 #include <unordered_set>
 #include <memory>
 #include <optional>
-#include "sharedutils/util_weak_handle.hpp"
 
 
 export module pragma.client:rendering.render_context;

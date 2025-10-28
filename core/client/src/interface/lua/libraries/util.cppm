@@ -4,10 +4,8 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <util_image_buffer.hpp>
-#include <sharedutils/util_parallel_job.hpp>
 #include <mathutil/uvec.h>
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 export module pragma.client:scripting.lua.libraries.util;

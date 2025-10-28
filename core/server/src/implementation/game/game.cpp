@@ -4,14 +4,9 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "stdafx_server.h"
-#include <fsys/filesystem.h>
-#include "luasystem.h"
-#include <mathutil/umath.h>
-#include <sharedutils/util_file.h>
-#include <udm.hpp>
 
 module pragma.server.game;
 

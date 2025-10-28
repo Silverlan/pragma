@@ -5,7 +5,7 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <mathutil/glmutil.h>
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 export module pragma.client:scripting.lua.classes.entity;

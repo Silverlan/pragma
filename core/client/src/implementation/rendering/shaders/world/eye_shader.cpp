@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <cmaterial.h>
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_command_buffer.hpp>
 

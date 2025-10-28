@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "shader/prosper_shader.hpp"
-#include "sharedutils/util_weak_handle.hpp"
 
 
 export module pragma.client:particle_system.renderer_animated_sprites;

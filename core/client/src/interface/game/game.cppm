@@ -6,21 +6,15 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "alsound_effect.hpp"
 #include "alsound_effect.hpp"
-#include <cmaterial.h>
-#include "util_image_buffer.hpp"
 #include "image/prosper_image.hpp"
 #include "prosper_command_buffer.hpp"
 #include <mathutil/color.h>
 #include "prosper_descriptor_set_group.hpp"
 #include <queue>
-#include <sharedutils/util_shared_handle.hpp>
 #include <alsoundsystem.hpp>
 #include <alsoundsystem_create_effect.hpp>
 #include "mathutil/umath.h"
-#include "pragma/lua/luaapi.h"
-#include "sharedutils/util_weak_handle.hpp"
-#include "material.h"
-#include "sharedutils/functioncallback.h"
+#include "pragma/lua/core.hpp"
 
 
 

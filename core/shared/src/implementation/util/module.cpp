@@ -7,7 +7,7 @@ module;
 
 module pragma.shared;
 
-import :util.module;
+import :util.umodule;
 
 std::string util::get_normalized_module_path(const std::string &lib, std::optional<bool> checkForClientSide)
 {

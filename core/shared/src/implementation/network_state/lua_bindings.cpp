@@ -469,7 +469,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defImageBuffer->add_static_constant("TONE_MAPPING_ACES", umath::to_integral(uimg::ToneMapping::Aces));
 	defImageBuffer->add_static_constant("TONE_MAPPING_GRAN_TURISMO", umath::to_integral(uimg::ToneMapping::GranTurismo));
 
-	defImageBuffer->scope[luabind::def("Create", static_cast<void (*)(lua_State *, uint32_t, uint32_t, uint32_t, DataStream &)>([](lua_State *l, uint32_t width, uint32_t height, uint32_t format, DataStream &ds) {
+	defImageBuffer->scope[luabind::def("Create", static_cast<void (*)(lua_State *, uint32_t, uint32_t, uint32_t, ::util::DataStream &)>([](lua_State *l, uint32_t width, uint32_t height, uint32_t format, ::util::DataStream &ds) {
 		auto imgBuffer = uimg::ImageBuffer::Create(ds->GetData(), width, height, static_cast<uimg::Format>(format));
 		if(imgBuffer == nullptr)
 			return;
@@ -506,7 +506,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defImageBuffer->def("GetData", static_cast<void (*)(lua_State *, uimg::ImageBuffer &)>([](lua_State *l, uimg::ImageBuffer &imgBuffer) {
 		auto *data = imgBuffer.GetData();
 		auto dataSize = imgBuffer.GetSize();
-		DataStream ds {data, static_cast<uint32_t>(dataSize)};
+		::util::DataStream ds {data, static_cast<uint32_t>(dataSize)};
 		ds->SetOffset(0);
 		Lua::Push(l, ds);
 	}));
@@ -679,8 +679,8 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defStringParallelJob.def("GetResult", static_cast<void (*)(lua_State *, util::ParallelJob<const std::string &> &)>([](lua_State *l, util::ParallelJob<const std::string &> &job) { Lua::Push(l, job.GetResult()); }));
 	modUtil[defStringParallelJob];
 
-	auto defDataStreamJob = luabind::class_<util::ParallelJob<const DataStream &>, util::BaseParallelJob>("ParallelJobData");
-	defDataStreamJob.def("GetResult", static_cast<void (*)(lua_State *, util::ParallelJob<const DataStream &> &)>([](lua_State *l, util::ParallelJob<const DataStream &> &job) { Lua::Push(l, job.GetResult()); }));
+	auto defDataStreamJob = luabind::class_<util::ParallelJob<const ::util::DataStream &>, util::BaseParallelJob>("ParallelJobData");
+	defDataStreamJob.def("GetResult", static_cast<void (*)(lua_State *, util::ParallelJob<const ::util::DataStream &> &)>([](lua_State *l, util::ParallelJob<const ::util::DataStream &> &job) { Lua::Push(l, job.GetResult()); }));
 	modUtil[defDataStreamJob];
 
 	auto defDataBlock = luabind::class_<ds::Block>("DataBlock");

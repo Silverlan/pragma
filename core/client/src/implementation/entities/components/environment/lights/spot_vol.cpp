@@ -4,16 +4,13 @@
 module;
 #include "mathutil/umath_geometry.hpp"
 
-#include "sharedutils/util_event_reply.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <sharedutils/alpha_mode.hpp>
 #include <datasystem_t.hpp>
-#include <cmaterial.h>
 
 module pragma.client;
 

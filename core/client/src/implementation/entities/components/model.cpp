@@ -2,17 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/policies/default_parameter_policy.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include <shader/prosper_pipeline_loader.hpp>
 #include <buffers/prosper_render_buffer.hpp>
-#include <cmaterial_manager2.hpp>
-#include <cmaterial.h>
 #include <prosper_command_buffer.hpp>
 
 module pragma.client;

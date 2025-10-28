@@ -6,7 +6,7 @@ module;
 
 #include "mathutil/transform.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 

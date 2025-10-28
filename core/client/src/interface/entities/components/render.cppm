@@ -11,8 +11,7 @@ module;
 #include <mathutil/boundingvolume.h>
 #include <mathutil/transform.hpp>
 #include "mathutil/umath.h"
-#include "pragma/lua/luaapi.h"
-#include "sharedutils/util_event_reply.hpp"
+#include "pragma/lua/core.hpp"
 
 #define ENTITY_RENDER_BUFFER_USE_STORAGE_BUFFER 1
 

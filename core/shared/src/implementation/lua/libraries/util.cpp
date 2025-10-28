@@ -1387,7 +1387,7 @@ Lua::var<bool, ::util::ParallelJob<luabind::object>> Lua::util::pack_zip_archive
 		return luabind::object {l, false};
 	std::unordered_map<std::string, std::string> files {};
 	std::unordered_map<std::string, std::string> customTextFiles {};
-	std::unordered_map<std::string, ::DataStream> customBinaryFiles {};
+	std::unordered_map<std::string, ::util::DataStream> customBinaryFiles {};
 	auto numFiles = Lua::GetObjectLength(l, t);
 	if(numFiles > 0) {
 		// Table format: t{[1] = diskFileName/zipFileName,...}
@@ -1403,7 +1403,7 @@ Lua::var<bool, ::util::ParallelJob<luabind::object>> Lua::util::pack_zip_archive
 			auto zipFileName = luabind::object_cast<std::string>(i.key());
 			auto value = *i;
 			if(luabind::type(value) == LUA_TTABLE) {
-				auto *ds = luabind::object_cast_nothrow<::DataStream *>(value["contents"], static_cast<::DataStream *>(nullptr));
+				auto *ds = luabind::object_cast_nothrow<::util::DataStream *>(value["contents"], static_cast<::util::DataStream *>(nullptr));
 				if(ds)
 					customBinaryFiles[zipFileName] = *ds;
 				else

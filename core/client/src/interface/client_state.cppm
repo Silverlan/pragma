@@ -6,9 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "alsound_buffer.hpp"
 #include "image/prosper_render_target.hpp"
-#include "pragma/lua/luaapi.h"
-#include "fsys/filesystem.h"
-#include "material.h"
+#include "pragma/lua/core.hpp"
 
 #undef PlaySound
 

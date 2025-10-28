@@ -6,8 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "matsysdefinitions.h"
 #include <texturemanager/texturemanager.h>
-#include "pragma/lua/luaapi.h"
-#include "material.h"
+#include "pragma/lua/core.hpp"
 
 
 export module pragma.client:scripting.lua.classes.material;

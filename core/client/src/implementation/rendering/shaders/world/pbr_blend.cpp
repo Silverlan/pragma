@@ -9,9 +9,7 @@ module;
 #include <image/prosper_sampler.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
-#include <cmaterial_manager2.hpp>
 #include <texture_type.h>
-#include <cmaterial.h>
 
 module pragma.client;
 

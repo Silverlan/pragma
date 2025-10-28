@@ -4,8 +4,7 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "material.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 export module pragma.server.scripting.lua.libraries.engine;

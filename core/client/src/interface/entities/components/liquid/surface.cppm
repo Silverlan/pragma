@@ -4,14 +4,11 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <cmaterial.h>
 #include <image/prosper_texture.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <mathutil/umath_geometry.hpp>
 #include "mathutil/umath.h"
-#include "sharedutils/util_weak_handle.hpp"
-#include "sharedutils/functioncallback.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 

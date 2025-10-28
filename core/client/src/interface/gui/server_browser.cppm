@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "wmserverdata.h"
 
 export module pragma.client:gui.server_browser;
 

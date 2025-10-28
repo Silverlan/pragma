@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include "stdafx_server.h"
-#include "luasystem.h"
 
 module pragma.server.scripting.lua.classes.ai_behavior;
 

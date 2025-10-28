@@ -4,9 +4,8 @@
 module;
 #include "mathutil/color.h"
 
-#include "udm.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
@@ -25,9 +24,6 @@ module;
 #include <prosper_swap_command_buffer.hpp>
 #include <prosper_event.hpp>
 #include "prosper_util.hpp"
-#include <sharedutils/datastream.h>
-#include <luainterface.hpp>
-#include <sharedutils/util.h>
 
 module pragma.client;
 

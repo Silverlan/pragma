@@ -4,9 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <material_manager2.hpp>
-#include "pragma/lua/luaapi.h"
-#include "sharedutils/util_event_reply.hpp"
+#include "pragma/lua/core.hpp"
 
 
 

@@ -21,6 +21,7 @@ module;
 module pragma.shared;
 
 import :engine;
+import :locale;
 
 import :debug.intel_vtune;
 import :locale;

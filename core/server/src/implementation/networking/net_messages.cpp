@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include "material_manager2.hpp"
-#include <material_property_block_view.hpp>
 
 module pragma.server.networking.net_messages;
 

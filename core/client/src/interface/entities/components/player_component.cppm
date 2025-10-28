@@ -3,9 +3,7 @@
 
 module;
 #include "pragma/clientdefinitions.h"
-#include "pragma/lua/luaapi.h"
-#include "sharedutils/functioncallback.h"
-#include "sharedutils/util_event_reply.hpp"
+#include "pragma/lua/core.hpp"
 
 
 

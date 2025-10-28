@@ -10,13 +10,13 @@ module pragma.shared;
 
 import :networking.net_message_map;
 
-ClientMessageMap *GetClientMessageMap()
+pragma::networking::ClientMessageMap *GetClientMessageMap()
 {
-	static ClientMessageMap g_clientMessageMap;
+	static pragma::networking::ClientMessageMap g_clientMessageMap;
 	return &g_clientMessageMap;
 }
-ServerMessageMap *GetServerMessageMap()
+pragma::networking::ServerMessageMap *GetServerMessageMap()
 {
-	static ServerMessageMap g_serverMessageMap;
+	static pragma::networking::ServerMessageMap g_serverMessageMap;
 	return &g_serverMessageMap;
 }

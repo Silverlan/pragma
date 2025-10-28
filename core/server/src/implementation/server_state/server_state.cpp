@@ -2,17 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "fsys/filesystem.h"
 
 #include "pragma/logging.hpp"
 
 #include "stdafx_server.h"
 #include "pragma/serverdefinitions.h"
-#include "wmserverdata.h"
-#include "luasystem.h"
-#include <material_manager2.hpp>
-#include <sharedutils/util_file.h>
-#include <sharedutils/util_library.hpp>
 
 module pragma.server.server_state;
 

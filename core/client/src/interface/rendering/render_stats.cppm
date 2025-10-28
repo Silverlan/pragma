@@ -5,8 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <queries/prosper_timer_query.hpp>
-#include <material.h>
-#include <sharedutils/util_weak_handle.hpp>
 #include <vector>
 #include <chrono>
 #include <unordered_set>

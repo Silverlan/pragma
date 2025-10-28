@@ -5,7 +5,7 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <unordered_set>
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 export module pragma.client:entities.components.bsp_leaf;

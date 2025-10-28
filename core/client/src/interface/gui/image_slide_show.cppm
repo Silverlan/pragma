@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <sharedutils/chronotime.h>
 #include <deque>
 #include <mathutil/umath.h>
 #include "image/prosper_texture.hpp"

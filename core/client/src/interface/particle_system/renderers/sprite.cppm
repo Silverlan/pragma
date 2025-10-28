@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <sharedutils/util_weak_handle.hpp>
 #include "shader/prosper_shader.hpp"
 
 export module pragma.client:particle_system.renderer_sprite;

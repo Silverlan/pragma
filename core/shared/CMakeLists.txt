@@ -36,6 +36,8 @@ if(UNIX)
 	pr_add_dependency(${PROJ_NAME} linenoise TARGET)
 endif()
 
+target_link_options(${PROJ_NAME} PRIVATE "/FORCE:UNRESOLVED")
+
 # Required by lnoise.cpp
 pr_add_dependency(${PROJ_NAME} noise-static TARGET)
 pr_add_dependency(${PROJ_NAME} noiseutils-static TARGET)

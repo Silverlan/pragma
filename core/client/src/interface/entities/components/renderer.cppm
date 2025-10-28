@@ -5,8 +5,7 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <unordered_set>
-#include "sharedutils/functioncallback.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 

@@ -4,7 +4,7 @@
 module;
 
 #include "stdafx_server.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 module pragma.server.scripting.lua.script_watcher;
 

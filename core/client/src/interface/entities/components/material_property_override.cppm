@@ -6,13 +6,8 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "prosper_command_buffer.hpp"
 #include "buffers/prosper_buffer.hpp"
-#include <sharedutils/util_heterogenous_lookup.hpp>
-#include <material_manager2.hpp>
-#include "cmaterial.h"
-#include <udm.hpp>
 #include <queue>
-#include "pragma/lua/luaapi.h"
-#include "material.h"
+#include "pragma/lua/core.hpp"
 
 
 

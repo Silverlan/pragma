@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include <sharedutils/util_string.h>
 
 module pragma.server.model_manager;
 

@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <sharedutils/alpha_mode.hpp>
 
 module pragma.client;
 

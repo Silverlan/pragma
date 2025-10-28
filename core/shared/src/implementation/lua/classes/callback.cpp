@@ -18,15 +18,14 @@ module pragma.shared;
 import :scripting.lua.classes.callback;
 
 namespace util {
-	static std::ostream &operator<<(std::ostream &out, const CallbackHandler &)
+	static std::ostream &operator<<(std::ostream &out, const ::util::CallbackHandler &)
 	{
 		out << "CallbackHandler";
 		return out;
 	}
 
-	static bool operator==(const CallbackHandler &a, const CallbackHandler &b) { return (&a == &b) ? true : false; }
+	static bool operator==(const ::util::CallbackHandler &a, const ::util::CallbackHandler &b) { return (&a == &b) ? true : false; }
 }
-
 void Lua::CallbackHandler::register_class(luabind::class_<::util::CallbackHandler> &classDef)
 {
 	classDef.def(luabind::constructor<>());

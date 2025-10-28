@@ -2,12 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "stdafx_server.h"
-#include <sharedutils/asset_loader/file_asset_manager.hpp>
-#include <luainterface.hpp>
-#include <fsys/ifile.hpp>
 
 module pragma.server.game;
 

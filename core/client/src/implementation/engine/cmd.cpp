@@ -4,24 +4,19 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-#include "fsys/filesystem.h"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_cengine.h"
-#include <sharedutils/util_file.h>
-#include <sharedutils/util_library.hpp>
 #include <cmaterialmanager.h>
-#include <cmaterial_manager2.hpp>
 #include <texturemanager/texture.h>
 #include <buffers/prosper_buffer.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <image/prosper_render_target.hpp>
 #include <shader/prosper_shader_blur.hpp>
 #include <prosper_window.hpp>
-#include <fsys/directory_watcher.h>
 
 module pragma.client;
 

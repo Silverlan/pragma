@@ -8,7 +8,6 @@ module;
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
-#include <cmaterial.h>
 
 module pragma.client;
 

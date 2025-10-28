@@ -6,7 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <queue>
 #include <string_view>
-#include "sharedutils/functioncallback.h"
 
 
 export module pragma.client:gui.console;

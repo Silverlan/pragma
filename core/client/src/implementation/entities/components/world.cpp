@@ -2,15 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/util_event_reply.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "stdafx_client.h"
 #include <buffers/prosper_buffer.hpp>
-#include <sharedutils/BS_thread_pool.hpp>
 #include <prosper_util.hpp>
-#include <cmaterial.h>
 
 module pragma.client;
 

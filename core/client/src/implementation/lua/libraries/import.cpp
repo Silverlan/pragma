@@ -2,19 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/util_path.hpp"
 
-#include "sharedutils/util_pragma.hpp"
 
-#include "fsys/filesystem.h"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
 #include <image/prosper_texture.hpp>
 #include <mathutil/transform.hpp>
-#include <sharedutils/util_file.h>
 //#include <assimp/Importer.hpp>
 //#include <assimp/Exporter.hpp>
 //#include <assimp/scene.h>

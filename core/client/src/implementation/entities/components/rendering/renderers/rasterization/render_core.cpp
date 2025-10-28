@@ -12,7 +12,6 @@ module;
 #include <shader/prosper_shader_blur.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_msaa_texture.hpp>
-#include <sharedutils/util_shaderinfo.hpp>
 
 module pragma.client;
 

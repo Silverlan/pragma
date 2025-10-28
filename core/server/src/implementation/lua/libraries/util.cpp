@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/luaapi.h"
-#include "mathutil/color.h"
+#include "pragma/lua/core.hpp"
 #include "stdafx_server.h"
 
 module pragma.server.scripting.lua.libraries.util;

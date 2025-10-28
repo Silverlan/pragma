@@ -5,9 +5,7 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <texturemanager/texture.h>
-#include "sharedutils/util_weak_handle.hpp"
-#include "material.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 

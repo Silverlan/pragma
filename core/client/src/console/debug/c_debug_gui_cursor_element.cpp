@@ -1,8 +1,7 @@
 
 
-#include "sharedutils/functioncallback.h"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include "pragma/console/helper.hpp"
 #include "mathutil/umath.h"
 
@@ -11,9 +10,7 @@
 
 #include "stdafx_client.h"
 #include "prosper_util.hpp"
-#include <util_image.hpp>
 #include <prosper_window.hpp>
-#include <fsys/ifile.hpp>
 
 import pragma.client;
 

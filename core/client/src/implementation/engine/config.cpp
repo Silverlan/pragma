@@ -2,17 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/magic_enum.hpp"
 
-#include "sharedutils/magic_enum.hpp"
 
 #include "pragma/logging.hpp"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_cengine.h"
-#include <sharedutils/util_debug.h>
-#include <fsys/filesystem.h>
 
 module pragma.client;
 

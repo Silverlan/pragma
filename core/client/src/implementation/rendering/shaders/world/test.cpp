@@ -11,8 +11,6 @@ module;
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 #include <texture_type.h>
-#include <cmaterial_manager2.hpp>
-#include <cmaterial.h>
 
 module pragma.client;
 

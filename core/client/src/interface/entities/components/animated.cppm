@@ -8,7 +8,7 @@ module;
 #include "prosper_descriptor_set_group.hpp"
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include "mathutil/umath.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include "mathutil/transform.hpp"
 
 

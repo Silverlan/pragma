@@ -5,12 +5,10 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "buffers/prosper_dynamic_resizable_buffer.hpp"
-#include <cmaterial_manager2.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <image/prosper_texture.hpp>
 #include "mathutil/umath.h"
-#include "pragma/lua/luaapi.h"
-#include "fsys/filesystem.h"
+#include "pragma/lua/core.hpp"
 #include "pragma/logging.hpp"
 
 

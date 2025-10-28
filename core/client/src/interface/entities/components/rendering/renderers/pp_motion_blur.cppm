@@ -7,7 +7,7 @@ module;
 #include <image/prosper_render_target.hpp>
 #include <mathutil/transform.hpp>
 #include "mathutil/umath.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #define MOTION_BLUR_DEBUG_ELEMENT_ENABLED 0
 

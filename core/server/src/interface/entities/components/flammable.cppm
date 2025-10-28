@@ -4,8 +4,7 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include "pragma/lua/luaapi.h"
-#include "sharedutils/util_event_reply.hpp"
+#include "pragma/lua/core.hpp"
 
 
 

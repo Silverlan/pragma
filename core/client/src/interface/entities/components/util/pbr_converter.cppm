@@ -4,10 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <sharedutils/util_parallel_job.hpp>
 #include "image/prosper_texture.hpp"
-#include "util_image_buffer.hpp"
-#include <cmaterial.h>
 #include <memory>
 #include <optional>
 #include <thread>
@@ -15,10 +12,7 @@ module;
 #include <atomic>
 #include <mutex>
 #include <unordered_set>
-#include "sharedutils/util_weak_handle.hpp"
-#include "material.h"
-#include "sharedutils/functioncallback.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 

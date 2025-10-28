@@ -4,12 +4,11 @@
 module;
 #include "mathutil/color.h"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include "luasystem.h"
 
 module pragma.client;
 

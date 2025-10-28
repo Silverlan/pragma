@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include <fsys/filesystem.h>
 
 module pragma.server.networking.resource;
 

@@ -9,7 +9,6 @@ module;
 #include <shader/prosper_shader_t.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
-#include <cmaterial.h>
 
 module pragma.client;
 

@@ -258,9 +258,3 @@ std::shared_ptr<pragma::Model> PolyMesh::GenerateModel()
 	return mdl;*/
 	return nullptr; // TODO
 }
-
-void PolyMesh::GetBounds(Vector3 *min, Vector3 *max)
-{
-	*min = m_min;
-	*max = m_max;
-}

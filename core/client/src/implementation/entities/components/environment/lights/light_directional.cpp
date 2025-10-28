@@ -4,11 +4,10 @@
 module;
 #include "mathutil/umath_geometry.hpp"
 
-#include "sharedutils/util_event_reply.hpp"
 
 #include "mathutil/color.h"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 

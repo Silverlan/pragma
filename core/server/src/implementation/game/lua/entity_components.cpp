@@ -4,7 +4,7 @@
 module;
 #include "pragma/lua/ostream_operator_alias.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 #include "stdafx_server.h"
 
 

@@ -4,10 +4,9 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "cmaterial.h"
 #include <vector>
 #include <optional>
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 export module pragma.client:entities.components.model;

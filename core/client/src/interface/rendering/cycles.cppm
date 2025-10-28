@@ -5,8 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <mathutil/transform.hpp>
-#include <sharedutils/util_parallel_job.hpp>
-#include "util_image_buffer.hpp"
 #include <functional>
 #include "mathutil/umath.h"
 #include "mathutil/color.h"

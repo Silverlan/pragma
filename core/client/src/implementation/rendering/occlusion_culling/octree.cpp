@@ -6,7 +6,6 @@ module;
 
 #include "mathutil/color.h"
 
-#include "sharedutils/functioncallback.h"
 
 #include "mathutil/umath.h"
 

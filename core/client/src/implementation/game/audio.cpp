@@ -3,7 +3,6 @@
 
 module;
 
-#include "fsys/filesystem.h"
 
 #include "mathutil/umath.h"
 
@@ -150,7 +149,6 @@ void CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cacheFlags,
 								mat.highFreqTransmission = surfMat->GetAudioHighFrequencyTransmission();
 							}
 							else
-								mat = {0.10f, 0.20f, 0.30f, 0.05f, 0.100f, 0.050f, 0.030f}; // These should correspond to the values specified in "surfacematerial.h"
 							auto matId = iplScene->AddMaterial(mat);
 							it = surfMatToIplMat.insert(std::make_pair(surfMatId, matId)).first;
 						}

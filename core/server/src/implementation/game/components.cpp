@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include <luainterface.hpp>
 // --template-include-location
 
 module pragma.server.game;

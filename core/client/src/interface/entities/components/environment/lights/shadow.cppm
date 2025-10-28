@@ -5,8 +5,7 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "image/prosper_render_target.hpp"
-#include "sharedutils/functioncallback.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 

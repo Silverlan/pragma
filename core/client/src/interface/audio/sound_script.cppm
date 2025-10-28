@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <alsound_effect.hpp>
-#include "udm.hpp"
 
 
 export module pragma.client:audio.sound_script;

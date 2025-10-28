@@ -2,24 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/util_path.hpp"
 
 #include "mathutil/transform.hpp"
 
-#include "fsys/filesystem.h"
 
-#include "udm.hpp"
 
 #include <mathutil/umath.h>
 #include <glm/gtx/euler_angles.hpp>
-#include "sharedutils/util_pragma.hpp"
-#include <cmaterial.h>
 #include <ofbx.h>
 #include <span>
-#include <util_image.hpp>
-#include <util_image_buffer.hpp>
-#include <fsys/ifile.hpp>
-#include <cmaterial_manager2.hpp>
 #include <texturemanager/texture_manager2.hpp>
 
 module pragma.client;

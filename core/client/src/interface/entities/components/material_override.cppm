@@ -4,10 +4,8 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "cmaterial.h"
-#include <material_manager2.hpp>
 #include <queue>
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 export module pragma.client:entities.components.material_override;

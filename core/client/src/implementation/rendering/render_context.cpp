@@ -4,11 +4,8 @@
 module;
 #include "pragma/logging.hpp"
 
-#include "sharedutils/util_path.hpp"
 
-#include "sharedutils/util_weak_handle.hpp"
 
-#include "fsys/filesystem.h"
 
 #include "mathutil/umath.h"
 #include "mathutil/color.h"
@@ -17,12 +14,8 @@ module;
 #include <prosper_util.hpp>
 #include <debug/prosper_debug.hpp>
 #include <shader/prosper_shader.hpp>
-#include <sharedutils/util_library.hpp>
-#include <sharedutils/util_debug.h>
 #include <prosper_window.hpp>
 #include <spdlog/pattern_formatter.h>
-#include <sharedutils/magic_enum.hpp>
-#include <cmaterial_manager2.hpp>
 
 module pragma.client;
 

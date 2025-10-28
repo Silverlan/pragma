@@ -2,17 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/functioncallback.h"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <fsys/filesystem.h>
-#include <sharedutils/util_file.h>
-#include <sharedutils/scope_guard.h>
-#include <sharedutils/util_library.hpp>
 
 #define RESOURCE_TRANSFER_VERBOSE 0
 

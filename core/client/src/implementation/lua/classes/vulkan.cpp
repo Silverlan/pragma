@@ -4,18 +4,15 @@
 module;
 #include "pragma/lua/policies/shared_from_this_policy.hpp"
 
-#include "pragma/lua/policies/default_parameter_policy.hpp"
 
-#include "sharedutils/datastream.h"
 
 #include "mathutil/color.h"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <luainterface.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_image_view.hpp>
@@ -30,7 +27,6 @@ module;
 #include <prosper_render_pass.hpp>
 #include <prosper_fence.hpp>
 #include <prosper_descriptor_set_group.hpp>
-#include <util_image_buffer.hpp>
 #include <prosper_event.hpp>
 #include <prosper_window.hpp>
 #include <prosper_swap_command_buffer.hpp>

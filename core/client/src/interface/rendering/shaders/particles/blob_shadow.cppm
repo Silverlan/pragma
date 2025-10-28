@@ -15,7 +15,6 @@ export namespace Shader {
 #if 0
 #include "pragma/clientdefinitions.h"
 #include "c_shader_particle_blob.h"
-#include <cmaterial.h>
 
 namespace Shader
 {

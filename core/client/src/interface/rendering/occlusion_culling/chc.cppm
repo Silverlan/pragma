@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <sharedutils/functioncallback.h>
-#include "sharedutils/util_shared_handle.hpp"
 #include <queue>
 #include "mathutil/umath.h"
 

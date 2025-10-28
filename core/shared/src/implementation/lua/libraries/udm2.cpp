@@ -276,7 +276,7 @@ static luabind::object get_children(lua_State *l, const ::udm::PropertyWrapper &
 	}
 	return t;
 }
-static ::udm::Blob data_stream_to_blob(DataStream &ds)
+static ::udm::Blob data_stream_to_blob(util::DataStream &ds)
 {
 	auto offset = ds->GetOffset();
 	ds->SetOffset(0);
@@ -287,7 +287,7 @@ static ::udm::Blob data_stream_to_blob(DataStream &ds)
 	return ::udm::Blob {std::move(data)};
 }
 
-static ::udm::BlobLz4 data_stream_to_lz4_blob(DataStream &ds, uint64_t uncompressedSize)
+static ::udm::BlobLz4 data_stream_to_lz4_blob(util::DataStream &ds, uint64_t uncompressedSize)
 {
 	auto offset = ds->GetOffset();
 	ds->SetOffset(0);
@@ -298,7 +298,7 @@ static ::udm::BlobLz4 data_stream_to_lz4_blob(DataStream &ds, uint64_t uncompres
 	return ::udm::BlobLz4 {std::move(data), uncompressedSize};
 }
 
-static ::udm::Utf8String data_stream_to_utf8(DataStream &ds)
+static ::udm::Utf8String data_stream_to_utf8(util::DataStream &ds)
 {
 	auto offset = ds->GetOffset();
 	ds->SetOffset(0);
@@ -336,7 +336,7 @@ static void set_property_value(lua_State *l, ::udm::LinkedPropertyWrapper p, ::u
 		p = static_cast<::udm::String>(Lua::CheckString(l, idx));
 		break;
 	case ::udm::Type::Utf8String:
-		p = data_stream_to_utf8(Lua::Check<DataStream>(l, idx));
+		p = data_stream_to_utf8(Lua::Check<util::DataStream>(l, idx));
 		break;
 	case ::udm::Type::Reference:
 		p = Lua::Check<::udm::Reference>(l, idx);
@@ -345,14 +345,14 @@ static void set_property_value(lua_State *l, ::udm::LinkedPropertyWrapper p, ::u
 		p = Lua::Check<::udm::Struct>(l, idx);
 		break;
 	case ::udm::Type::Blob:
-		p = data_stream_to_blob(Lua::Check<DataStream>(l, idx));
+		p = data_stream_to_blob(Lua::Check<util::DataStream>(l, idx));
 		break;
 	case ::udm::Type::BlobLz4:
 		{
 			Lua::CheckTable(l, idx);
 			luabind::table<> t {luabind::from_stack(l, idx)};
 			uint64_t uncompressedSize = luabind::object_cast_nothrow<uint64_t>(t[1], uint64_t {});
-			DataStream ds = luabind::object_cast_nothrow<DataStream>(t[2], DataStream {});
+			util::DataStream ds = luabind::object_cast_nothrow<util::DataStream>(t[2], util::DataStream {});
 			p = data_stream_to_lz4_blob(ds, uncompressedSize);
 			break;
 		}
@@ -465,7 +465,7 @@ static void set_array_values(lua_State *l, udm::PropertyWrapper &p, const std::s
 	set_array_values(l, a.GetValue<udm::Array>(), type, t, 4, arrayType);
 }
 
-static void set_array_values(udm::PropertyWrapper &p, const std::string &name, ::udm::StructDescription &strct, uint32_t count, DataStream &ds, ::udm::ArrayType arrayType)
+static void set_array_values(udm::PropertyWrapper &p, const std::string &name, ::udm::StructDescription &strct, uint32_t count, util::DataStream &ds, ::udm::ArrayType arrayType)
 {
 	remove_array(p, name);
 	p.AddArray(name, strct, ds->GetData(), count, arrayType);
@@ -500,13 +500,13 @@ static luabind::object get_property_value(lua_State *l, ::udm::Type type, void *
 	case ::udm::Type::Utf8String:
 		{
 			auto &utf8String = *static_cast<udm::Utf8String *>(ptr);
-			DataStream ds {utf8String.data.data(), static_cast<uint32_t>(utf8String.data.size())};
+			util::DataStream ds {utf8String.data.data(), static_cast<uint32_t>(utf8String.data.size())};
 			return luabind::object {l, ds};
 		}
 	case ::udm::Type::Blob:
 		{
 			auto &blob = *static_cast<udm::Blob *>(ptr);
-			DataStream ds {blob.data.data(), static_cast<uint32_t>(blob.data.size())};
+			util::DataStream ds {blob.data.data(), static_cast<uint32_t>(blob.data.size())};
 			return luabind::object {l, ds};
 		}
 	case ::udm::Type::BlobLz4:
@@ -514,7 +514,7 @@ static luabind::object get_property_value(lua_State *l, ::udm::Type type, void *
 			auto &blobLz4 = *static_cast<udm::BlobLz4 *>(ptr);
 			auto t = luabind::newtable(l);
 			t[1] = blobLz4.uncompressedSize;
-			t[2] = DataStream {blobLz4.compressedData.data(), static_cast<uint32_t>(blobLz4.compressedData.size())};
+			t[2] = util::DataStream {blobLz4.compressedData.data(), static_cast<uint32_t>(blobLz4.compressedData.size())};
 			return t;
 		}
 	}
@@ -638,7 +638,7 @@ void register_property_methods(TClassDef &classDef)
 			    blob = ::udm::visit_ng(type, vs);
 		    else if(::udm::is_non_trivial_type(type))
 			    return; // TODO
-		    DataStream ds {static_cast<uint32_t>(blob.data.size())};
+		    util::DataStream ds {static_cast<uint32_t>(blob.data.size())};
 		    ds->Write(blob.data.data(), blob.data.size());
 		    ds->SetOffset(0);
 		    Lua::Push(l, ds);
@@ -746,7 +746,7 @@ void register_property_methods(TClassDef &classDef)
 	    })
 	  .def(
 	    "SetArrayValues",
-	    +[](lua_State *l, T &p, const std::string &name, ::udm::StructDescription &strct, uint32_t count, DataStream &ds, ::udm::Type arrayType) {
+	    +[](lua_State *l, T &p, const std::string &name, ::udm::StructDescription &strct, uint32_t count, util::DataStream &ds, ::udm::Type arrayType) {
 		    if(arrayType != ::udm::Type::Array && arrayType != ::udm::Type::ArrayLz4)
 			    Lua::Error(l, "Invalid array type '" + std::string {::udm::enum_type_to_ascii(arrayType)} + "'!");
 		    TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
@@ -901,7 +901,7 @@ void register_property_methods(TClassDef &classDef)
 	  .def("Set", &prop_set_basic_type<TPropertyWrapper, T, ::udm::Reference>)
 	  .def(
 	    "Set",
-	    +[](lua_State *l, T &p, int32_t idx, DataStream &ds) {
+	    +[](lua_State *l, T &p, int32_t idx, util::DataStream &ds) {
 		    auto offset = ds->GetOffset();
 		    ds->SetOffset(0);
 		    std::vector<uint8_t> data {};
@@ -912,7 +912,7 @@ void register_property_methods(TClassDef &classDef)
 	    })
 	  .def(
 	    "Set",
-	    +[](lua_State *l, T &p, const std::string &key, DataStream &ds) {
+	    +[](lua_State *l, T &p, const std::string &key, util::DataStream &ds) {
 		    auto offset = ds->GetOffset();
 		    ds->SetOffset(0);
 		    std::vector<uint8_t> data {};

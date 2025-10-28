@@ -1,5 +1,5 @@
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT

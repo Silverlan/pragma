@@ -6,7 +6,7 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <mathutil/plane.hpp>
 #include "mathutil/umath.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 

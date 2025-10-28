@@ -2,18 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "sharedutils/functioncallback.h"
 
-#include "sharedutils/util_path.hpp"
 
 #include "pragma/clientdefinitions.h"
 
-#include "fsys/filesystem.h"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 #include "stdafx_client.h"
-#include "luasystem.h"
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_texture.hpp>
@@ -21,7 +17,6 @@ module;
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_util.hpp>
-#include <cmaterial.h>
 
 
 // #define ENABLE_DEPRECATED_PHYSICS

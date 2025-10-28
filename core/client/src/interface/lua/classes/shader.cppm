@@ -5,9 +5,7 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "prosper_prepared_command_buffer.hpp"
-#include "pragma/lua/luaapi.h"
-#include "udm.hpp"
-#include "sharedutils/datastream.h"
+#include "pragma/lua/core.hpp"
 
 
 

@@ -5,15 +5,11 @@ module;
 
 #include "pragma/logging.hpp"
 
-#include "sharedutils/functioncallback.h"
 #include "pragma/console/helper.hpp"
-#include "sharedutils/util_event_reply.hpp"
 
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
-#include "material.h"
 
-#include "fsys/filesystem.h"
 
 #include "mathutil/umath.h"
 
@@ -23,13 +19,8 @@ module;
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_image_view.hpp>
-#include <sharedutils/util_library.hpp>
-#include <sharedutils/util_file.h>
-#include <sharedutils/util_path.hpp>
-#include <util_image_buffer.hpp>
 #include <util_texture_info.hpp>
 #include <cmaterialmanager.h>
-#include <cmaterial_manager2.hpp>
 #include <texturemanager/texturemanager.h>
 #include <texture_type.h>
 #include <spdlog/logger.h>

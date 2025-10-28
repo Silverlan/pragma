@@ -5,7 +5,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include <sharedutils/util.h>
 
 import pragma.client;
 

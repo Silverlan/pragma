@@ -4,13 +4,10 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "sharedutils/util_parallel_job.hpp"
 #include <image/prosper_texture.hpp>
-#include <util_image_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include "mathutil/umath.h"
-#include "material.h"
-#include "pragma/lua/luaapi.h"
+#include "pragma/lua/core.hpp"
 
 
 

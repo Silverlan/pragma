@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include "noiseutils.h"
+
+#include <cmath>
+
 #include <vector>
 
 #include "pragma/lua/core.hpp"
@@ -176,13 +180,15 @@ static void register_string_to_vector_type_constructor(lua_State *l)
 // DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, Transform);
 // DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, ScaledTransform);
 
-// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, BaseParallelJob);
-// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, Path);
+#ifdef __linux__
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, BaseParallelJob);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(uimg, ImageBuffer);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, Version);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, Path);
+#endif
 // #ifdef __linux__
-// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, Version);
 // #endif
 
-// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(uimg, ImageBuffer);
 // DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(uimg, ImageLayerSet);
 
 // DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Vector3i);

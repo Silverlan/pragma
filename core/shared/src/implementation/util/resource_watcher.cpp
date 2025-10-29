@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <optional>
+#include <mutex>
+
 #include <vector>
 #include <functional>
 #include <unordered_set>

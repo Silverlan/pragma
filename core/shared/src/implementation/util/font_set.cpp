@@ -2,6 +2,13 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <algorithm>
+
+#include <optional>
+#include <vector>
+#include <memory>
+#include <mutex>
+
 #include <cinttypes>
 
 #include <string>

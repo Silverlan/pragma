@@ -1,14 +1,21 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
+module;
 
-#include "pragma/lua/core.hpp"
-#include "pragma/logging.hpp"
-#include "pragma/networkdefinitions.h"
-#include "lualib.h"
+#include <cinttypes>
 #include <cstring>
 
+#include <vector>
 
-import pragma.shared;
+#include "pragma/networkdefinitions.h"
+#include "pragma/lua/core.hpp"
+#include "pragma/lua/ldefinitions.h"
+#include "spdlog/spdlog.h"
+#include "lualib.h"
+
+module pragma.shared;
+
+import :scripting.lua.api;
 
 static auto s_bExtendedModules = false;
 void Lua::set_extended_lua_modules_enabled(bool b) { s_bExtendedModules = b; }

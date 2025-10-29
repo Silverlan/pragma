@@ -26,6 +26,7 @@
 #include <string>
 #include <math.h>
 #include <float.h> //FLT_EPSILON, DBL_EPSILON
+#include <cinttypes>
 
 #define loopi(start_l, end_l) for(int64_t i = start_l; i < end_l; ++i)
 #define loopi(start_l, end_l) for(int64_t i = start_l; i < end_l; ++i)

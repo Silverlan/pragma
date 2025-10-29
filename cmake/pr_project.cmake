@@ -23,7 +23,7 @@ function(pr_setup_default_project_settings TARGET_NAME)
         target_link_options(${TARGET_NAME} PRIVATE --no-undefined)
     endif()
 
-    target_compile_features(${TARGET_NAME} PRIVATE cxx_std_20)
+    target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
     set_target_properties(${TARGET_NAME} PROPERTIES LINKER_LANGUAGE CXX)
     set_target_properties(${TARGET_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endfunction()

@@ -4,7 +4,7 @@ module;
 
 #include <optional>
 #include <mutex>
-
+#include <ostream>
 #include <vector>
 #include <functional>
 #include <unordered_set>

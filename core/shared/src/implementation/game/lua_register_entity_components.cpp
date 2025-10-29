@@ -73,6 +73,7 @@ using ComponentMemberReferencePolicy = luabind::generic_policy<N, pragma::Compon
 	}>;
 */
 
+#ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, EntityURef);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, EntityUComponentRef);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, EntityUComponentMemberRef);
@@ -81,6 +82,7 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, MultiEntityUComponentRef);
 
 // DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, ValueDriver);
+#endif
 
 namespace pragma {
 	enum class BvhIntersectionFlags : uint32_t {

@@ -8,7 +8,7 @@ module;
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
-
+#include <ostream>
 #include <algorithm>
 #include <string>
 

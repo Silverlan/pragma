@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <ostream>
+
 #include <cinttypes>
 
 #include <vector>
@@ -16,7 +18,9 @@ module pragma.shared;
 
 import :scripting.lua.classes.collision_mesh;
 
+#ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::physics, CollisionMesh);
+#endif
 
 void Lua::CollisionMesh::register_class(luabind::class_<::pragma::physics::CollisionMesh> &classDef)
 {

@@ -6,6 +6,8 @@
 */
 module;
 
+#include <ostream>
+
 #include <cinttypes>
 #include <vector>
 #include <unordered_map>

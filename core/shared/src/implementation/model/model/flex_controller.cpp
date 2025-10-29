@@ -4,7 +4,7 @@ module;
 
 #include <cinttypes>
 #include <vector>
-
+#include <ostream>
 #include <algorithm>
 #include <stack>
 #include <stdexcept>

@@ -8,7 +8,7 @@ module;
 #include <vector>
 #include <memory>
 #include <mutex>
-
+#include <ostream>
 #include <cinttypes>
 
 #include <string>

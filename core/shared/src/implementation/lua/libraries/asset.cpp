@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <ostream>
+
 #include <functional>
 #include <cinttypes>
 

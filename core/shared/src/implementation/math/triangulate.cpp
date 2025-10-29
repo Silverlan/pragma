@@ -12,6 +12,8 @@
 // Source: http://www.flipcode.com/archives/Efficient_Polygon_Triangulation.shtml
 module;
 
+#include <ostream>
+
 #include <cinttypes>
 #include <vector>
 

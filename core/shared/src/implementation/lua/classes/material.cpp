@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <ostream>
+
 #include "pragma/lua/core.hpp"
 #include <functional>
 #include <memory>
@@ -13,7 +15,9 @@ module pragma.shared;
 
 import :scripting.lua.classes.material;
 
+#ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(msys, Material);
+#endif
 
 void Lua::Material::register_class(luabind::class_<msys::Material> &classDef)
 {

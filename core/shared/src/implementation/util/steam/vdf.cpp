@@ -3,7 +3,7 @@
 module;
 
 #include <vector>
-
+#include <ostream>
 #include <algorithm>
 #include <memory>
 #include <string>

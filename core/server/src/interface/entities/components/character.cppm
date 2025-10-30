@@ -8,6 +8,8 @@ module;
 #include <string>
 #include <iostream>
 
+#include <typeindex>
+
 
 
 export module pragma.server.entities.components.character;

@@ -6,6 +6,9 @@ module;
 
 #include <iostream>
 
+#include <cinttypes>
+#include <memory>
+
 
 export module pragma.server.ai.tasks.turn_to_target;
 

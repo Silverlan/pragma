@@ -18,6 +18,8 @@ module;
 
 #include <sstream>
 
+#include <cinttypes>
+
 export module pragma.server.audio.sound;
 
 export import pragma.shared;

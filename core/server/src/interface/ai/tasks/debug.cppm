@@ -7,6 +7,9 @@ module;
 #include <string>
 #include <iostream>
 
+#include <cinttypes>
+#include <memory>
+
 export module pragma.server.ai.tasks.debug;
 
 export import pragma.shared;

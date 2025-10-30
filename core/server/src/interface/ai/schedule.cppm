@@ -8,6 +8,9 @@ module;
 
 #include <sstream>
 
+#include <cinttypes>
+#include <memory>
+
 export module pragma.server.ai.schedule;
 
 export import :behavior;

@@ -8,6 +8,9 @@ module;
 #include <string>
 #include <iostream>
 
+#include <cinttypes>
+#include <memory>
+
 export module pragma.server.ai.tasks.play_animation;
 
 export import pragma.server.ai.schedule;

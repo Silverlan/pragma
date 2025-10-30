@@ -6,6 +6,9 @@ module;
 
 #include <iostream>
 
+#include <cinttypes>
+#include <memory>
+
 export module pragma.server.ai.tasks.random;
 
 export import pragma.server.ai.schedule;

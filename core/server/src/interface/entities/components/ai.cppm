@@ -10,6 +10,8 @@ module;
 
 #include <string>
 
+#include <vector>
+
 
 
 export module pragma.server.entities.components.ai;

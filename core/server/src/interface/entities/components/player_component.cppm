@@ -8,6 +8,9 @@ module;
 #include <string>
 #include <iostream>
 
+#include <vector>
+#include <typeindex>
+
 
 
 export module pragma.server.entities.components.player;

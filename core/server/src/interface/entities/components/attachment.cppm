@@ -6,6 +6,9 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
+#include <vector>
+#include <typeindex>
+
 
 export module pragma.server.entities.components.attachment;
 

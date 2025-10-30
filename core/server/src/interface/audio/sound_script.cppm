@@ -7,6 +7,11 @@ module;
 #include <string>
 #include <iostream>
 
+#include <cinttypes>
+#include <memory>
+
+#include <typeindex>
+
 
 export module pragma.server.audio.sound_script;
 

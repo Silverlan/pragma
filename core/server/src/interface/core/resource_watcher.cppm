@@ -6,6 +6,10 @@ module;
 
 #include <string>
 
+#include <cinttypes>
+
+#include <memory>
+
 
 export module pragma.server.core.resource_watcher;
 

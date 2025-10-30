@@ -287,12 +287,19 @@ if platform == "linux" and (c_compiler == "clang-21" or c_compiler == "clang++-2
 
 		copy_preserving_symlink(Path(clang20_root +"/bin/clang"), Path(clang_staging_path +"/bin"))
 		copy_preserving_symlink(Path(clang20_root +"/bin/clang++"), Path(clang_staging_path +"/bin"))
+		copy_preserving_symlink(Path(clang20_root +"/bin/clang-21"), Path(clang_staging_path +"/bin"))
 		copy_preserving_symlink(Path(clang20_root +"/bin/clang-scan-deps"), Path(clang_staging_path +"/bin"))
 
 		copytree(clang20_root +"/include/c++", clang_staging_path +"/include/c++")
 		copytree(clang20_root +"/include/clang", clang_staging_path +"/include/clang")
 		copytree(clang20_root +"/include/clang-c", clang_staging_path +"/include/clang-c")
+		copytree(clang20_root +"/include/x86_64-unknown-linux-gnu", clang_staging_path +"/include/x86_64-unknown-linux-gnu")
+
 		copytree(clang20_root +"/lib/clang", clang_staging_path +"/lib/clang")
+		copytree(clang20_root +"/lib/x86_64-unknown-linux-gnu", clang_staging_path +"/lib/x86_64-unknown-linux-gnu")
+
+		copytree(clang20_root +"/libexec", clang_staging_path +"/libexec")
+		copytree(clang20_root +"/share", clang_staging_path +"/share")
 
 	if c_compiler == "clang-21":
 		c_compiler = clang_staging_path +"/bin/clang"

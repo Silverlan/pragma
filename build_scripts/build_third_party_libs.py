@@ -262,7 +262,7 @@ copy_prebuilt_headers(luajit_root +"src/", "luajit")
 
 ########## GeometricTools ##########
 os.chdir(deps_dir)
-commit_sha = "979d94e"
+commit_sha = "7cac1e1"
 geometric_tools_root = normalize_path(os.getcwd() +"/GeometricTools")
 if not check_repository_commit(geometric_tools_root, commit_sha, "GeometricTools"):
 	if not Path(geometric_tools_root).is_dir():

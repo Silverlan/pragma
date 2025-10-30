@@ -712,13 +712,13 @@ if with_pfm:
 	if with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_chromium",
-			commitSha="0b1163b2518f55da5120da46147f14d10a7a565d",
+			commitSha="e5f14a1a96de682bde056a40801139c81480ab4e",
 			repositoryUrl="https://github.com/Silverlan/pr_chromium.git",
 			branch="feat/cxx_module"
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="da8b23a345cc548785609091b9900f706ce55f22",
+			commitSha="3422329da7e03b1f31bcbc8ad34bc68e748fb379",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git",
 			branch="feat/cxx_modules"
 		)

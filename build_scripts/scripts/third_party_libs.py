@@ -17,12 +17,12 @@ get_submodule("eigen","https://gitlab.com/libeigen/eigen.git","b66188b5") # v3.4
 get_submodule("exprtk","https://github.com/ArashPartow/exprtk.git","f46bffcd6966d38a09023fb37ba9335214c9b959")
 get_submodule("freetype","https://github.com/aseprite/freetype2.git","9a2d6d97b2d8a5d22d02948b783df12b764afa2d")
 get_submodule("glfw","https://github.com/Silverlan/glfw.git","8d6f5d9bc8477057dccc1190d46b0945219e2f33", "feat/drag-callback")
-get_submodule("gli","https://github.com/Silverlan/gli.git","49f9baee8272d102d739482b97ba411fa955f814", "feat/cxx_module")
+get_submodule("gli","https://github.com/Silverlan/gli.git","ff3bb7897c45645b9a19c464b1167262a987ee84", "feat/cxx_module")
 get_submodule("libnoise","https://github.com/qknight/libnoise.git","9ce0737b55812f7de907e86dc633724524e3a8e8")
 get_submodule("libsamplerate","https://github.com/libsndfile/libsamplerate.git","15c392d")
 if platform == "linux":
     get_submodule("linenoise.cpp","https://github.com/Silverlan/linenoise.cpp.git","74ae32ebf22d18a7e22afe1eeecf04171311ebcf")
-get_submodule("luabind","https://github.com/Silverlan/luabind-deboostified.git","df2eb23d48d86d5a4b96a80f952c64be806abc7d", "feat/cxx_module")
+get_submodule("luabind","https://github.com/Silverlan/luabind-deboostified.git","874e775637e3e606a26218a754c9c22e89731e29", "feat/cxx_module")
 get_submodule("luajit","https://github.com/Silverlan/LuaJIT.git","cb42653","v2.1")
 get_submodule("lunasvg","https://github.com/sammycage/lunasvg.git","7b6970f") # v3.4.0
 get_submodule("miniball","https://github.com/Silverlan/miniball.git","609fbf16e7a9cc3dc8f88e4d1c7a1d8ead842bb1")

@@ -4,8 +4,6 @@ module;
 
 #include "pragma/lua/core.hpp"
 #include <cassert>
-#include <memory>
-#include <stdexcept>
 
 export module pragma.shared:scripting.lua.custom_constructor;
 

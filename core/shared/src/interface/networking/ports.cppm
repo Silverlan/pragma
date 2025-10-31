@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <string>
 
 export module pragma.shared:networking.ports;
+
+export import std;
 
 export namespace sci {
 	const std::string DEFAULT_PORT_TCP = "29150";

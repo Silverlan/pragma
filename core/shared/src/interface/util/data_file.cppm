@@ -3,9 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
-#include <unordered_map>
-#include <vector>
 
 export module pragma.shared:util.data_file;
 

@@ -5,10 +5,6 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "pragma/buss_ik/Jacobian.h"
 
-#include <vector>
-#include <memory>
-#include <unordered_map>
-#include <cstring>
 #include "pragma/lua/core.hpp"
 
 export module pragma.shared:entities.components.ik;

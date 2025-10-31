@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <cinttypes>
 
 #ifndef DLLSPEC_ISTEAMWORKS
 #define DLLSPEC_ISTEAMWORKS

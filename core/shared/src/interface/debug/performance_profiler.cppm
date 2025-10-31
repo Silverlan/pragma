@@ -4,27 +4,14 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <spdlog/spdlog.h>
-#include <array>
-#include <chrono>
-#include <memory>
-#include <optional>
-#include <set>
-#include <stack>
-#include <unordered_map>
 
-#include <cinttypes>
 
 #include "pragma/lua/core.hpp"
 
-#include <vector>
 
-#include <tuple>
 
-#include <string>
 
-#include <functional>
 
-#include <cstring>
 
 export module pragma.shared:debug.performance_profiler;
 

@@ -5,9 +5,6 @@ module;
 #include "pragma/logging.hpp"
 #include "pragma/lua/core.hpp"
 #include <cassert>
-#include <cstring>
-#include <memory>
-#include <string_view>
 
 module pragma.shared;
 
@@ -510,7 +507,7 @@ void pragma::Game::GetSpawnedEntities(std::vector<pragma::ecs::BaseEntity *> *en
 	GetEntities(&baseEnts);
 	for(unsigned int i = 0; i < baseEnts->size(); i++) {
 		pragma::ecs::BaseEntity *ent = (*baseEnts)[i];
-		if(ent != NULL && ent->IsSpawned())
+		if(ent != nullptr && ent->IsSpawned())
 			ents->push_back(ent);
 	}
 }

@@ -3,7 +3,6 @@
 module;
 
 #include "pragma/lua/core.hpp"
-#include <sstream>
 
 export module pragma.shared:scripting.lua.util_entity_component;
 
@@ -27,5 +26,5 @@ export namespace pragma {
 			return def;
 		}
 	};
-	export DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::BaseEntityComponent &component);
+	DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::BaseEntityComponent &component);
 };

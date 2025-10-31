@@ -3,9 +3,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
-#include <vector>
 
 export module pragma.shared:networking.resource;
+
+export import std;
 
 export DLLNETWORK bool IsValidResource(std::string res);

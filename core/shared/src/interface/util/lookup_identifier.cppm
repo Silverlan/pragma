@@ -3,12 +3,11 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <optional>
-#include <string>
 
-#include <cinttypes>
 
 export module pragma.shared:util.lookup_identifier;
+
+export import std.compat;
 
 export namespace pragma {
 	struct DLLNETWORK LookupIdentifier {

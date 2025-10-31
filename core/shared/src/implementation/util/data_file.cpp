@@ -2,13 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <vector>
-#include <unordered_map>
 
-#include <cstdio>
-#include <string>
 
 module pragma.shared;
 
@@ -49,7 +44,7 @@ DataFileBlock *DataFile::ReadBlock(VFilePtr f)
 					char c;
 					do
 						c = static_cast<char>(f->ReadChar());
-					while(c != '{' && c != EOF);
+					while(c != '{' && c != std::char_traits<char>::eof());
 					std::unordered_map<std::string, std::vector<DataFileBlock *> *>::iterator i = block->blocks.find(sbuf);
 					std::vector<DataFileBlock *> *blocks;
 					if(i == block->blocks.end()) {

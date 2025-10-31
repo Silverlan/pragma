@@ -30,10 +30,6 @@ subject to the following restrictions:
 //Alterations:
 //Remove register keyword to fix compile errors with some linux compilers (clang)
 
-#include <stdlib.h>
-#include <math.h>
-#include <assert.h>
-#include <iostream>
 using namespace std;
 
 

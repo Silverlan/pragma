@@ -3,11 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <vector>
 
-#include <optional>
-#include <unordered_map>
 #include "pragma/lua/core.hpp"
 
 export module pragma.shared:physics.constraint;

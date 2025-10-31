@@ -3,10 +3,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <cinttypes>
-#include <unordered_map>
 
 export module pragma.shared:physics.soft_body_info;
+
+export import std.compat;
 
 export {
 	#pragma pack(push, 1)

@@ -2,20 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <cinttypes>
-#include <vector>
-#include <memory>
-#include <map>
-#include <unordered_set>
-#include <cstring>
 
 #include "pragma/networkdefinitions.h"
 #include <spdlog/logger.h>
-#include <functional>
-#include <iostream>
-#include <sstream>
-#include <string_view>
-#include <thread>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -70,21 +59,21 @@ void Con::disable_ansi_color_codes()
 
 int Con::GetLogLevel()
 {
-	if(pragma::Engine::Get() == NULL || !pragma::Engine::Get()->IsRunning())
+	if(pragma::Engine::Get() == nullptr || !pragma::Engine::Get()->IsRunning())
 		return 0;
 	return cvLog->GetInt();
 }
 
 void Con::WriteToLog(std::stringstream &ss)
 {
-	if(pragma::Engine::Get() == NULL)
+	if(pragma::Engine::Get() == nullptr)
 		return;
 	WriteToLog(ss.str());
 }
 
 void Con::WriteToLog(std::string str)
 {
-	if(pragma::Engine::Get() == NULL)
+	if(pragma::Engine::Get() == nullptr)
 		return;
 	pragma::Engine::Get()->WriteToLog(str);
 }

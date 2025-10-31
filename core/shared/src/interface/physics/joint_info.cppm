@@ -3,11 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <cinttypes>
-#include <string>
-#include <unordered_map>
 
-#include <ostream>
 
 export module pragma.shared:physics.joint_info;
 

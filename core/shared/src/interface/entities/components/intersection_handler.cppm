@@ -4,17 +4,9 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
-#include <vector>
-#include <memory>
-#include <unordered_map>
-#include <cstring>
 #include "pragma/lua/core.hpp"
 
-#include <array>
-#include <cinttypes>
-#include <optional>
 
-#include <ostream>
 
 export module pragma.shared:entities.components.intersection_handler;
 

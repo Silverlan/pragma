@@ -3,13 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <optional>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
-#include <cinttypes>
-#include <limits>
 
 export module pragma.shared:locale;
 

@@ -3,17 +3,15 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
-#include <unordered_map>
 
-#include <optional>
-#include <functional>
 
 export module pragma.shared:networking.net_message_map;
 
 #define COMMA ,
 
 export import pragma.network_manager;
+
+export import std;
 
 export {
 	using ServerClientHandle = void*;
@@ -78,7 +76,7 @@ export {
 		{
 			typename std::unordered_map<unsigned int, T>::iterator i = m_netMessages.find(ID);
 			if(i == m_netMessages.end())
-				return NULL;
+				return nullptr;
 			return &i->second;
 		}
 
@@ -87,7 +85,7 @@ export {
 		{
 			unsigned int ID = GetNetMessageID(identifier);
 			if(ID == 0)
-				return NULL;
+				return nullptr;
 			return GetNetMessage(ID);
 		}
 

@@ -2,19 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <cinttypes>
-#include <vector>
-#include <map>
-#include <unordered_set>
-#include <cstring>
 
 #include "pragma/logging.hpp"
 #include <sharedutils/magic_enum.hpp>
-#include <algorithm>
 #include <cassert>
-#include <memory>
-#include <sstream>
-#include <string_view>
 
 module pragma.shared;
 

@@ -4,9 +4,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <functional>
-#include <string>
-#include <vector>
 
 export module pragma.shared:console.find_entities;
 

@@ -17,8 +17,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <cinttypes>
-#include <vector>
 
 // Source: http://www.flipcode.com/archives/Efficient_Polygon_Triangulation.shtml
 

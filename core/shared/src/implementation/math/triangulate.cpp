@@ -12,16 +12,8 @@
 // Source: http://www.flipcode.com/archives/Efficient_Polygon_Triangulation.shtml
 module;
 
-#include <ostream>
 
-#include <cinttypes>
-#include <vector>
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-#include <string.h>
 
 module pragma.shared;
 

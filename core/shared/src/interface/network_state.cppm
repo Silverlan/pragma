@@ -3,18 +3,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
-#include <unordered_set>
 
-#include <vector>
-#include <functional>
-#include <memory>
-#include <map>
-#include <unordered_map>
 #include "pragma/lua/core.hpp"
 
-#include <optional>
-#include <queue>
 
 export module pragma.shared:network_state;
 

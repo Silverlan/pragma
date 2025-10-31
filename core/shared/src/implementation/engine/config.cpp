@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <map>
 
 #include "pragma/logging.hpp"
 #include <cassert>
-#include <memory>
 
 module pragma.shared;
 
@@ -61,7 +59,7 @@ bool pragma::Engine::ExecConfig(const std::string &cfg, const std::function<void
 		path += ".cfg";
 	path = "cfg\\" + FileManager::GetCanonicalizedPath(path);
 	auto f = FileManager::OpenFile(path.c_str(), "r");
-	if(f == NULL) {
+	if(f == nullptr) {
 		spdlog::warn("'{}' not present; not executing.", cfg);
 		return false;
 	}
@@ -93,7 +91,7 @@ void pragma::Engine::SaveServerConfig()
 	FileManager::CreatePath("cfg");
 	std::string path = "cfg\\server.cfg";
 	auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(), "w");
-	if(f == NULL) {
+	if(f == nullptr) {
 		spdlog::warn("Unable to save server.cfg");
 		return;
 	}
@@ -105,7 +103,7 @@ void pragma::Engine::SaveEngineConfig()
 	FileManager::CreatePath("cfg");
 	std::string path = "cfg\\engine.cfg";
 	auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(), "w");
-	if(f == NULL) {
+	if(f == nullptr) {
 		spdlog::warn("Unable to save engine.cfg");
 		return;
 	}

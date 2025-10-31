@@ -3,11 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <optional>
-#include <string>
-#include <vector>
 
-#include <cinttypes>
 
 export module pragma.shared:engine.info;
 

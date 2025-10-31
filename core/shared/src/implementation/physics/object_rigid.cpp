@@ -2,11 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <vector>
 
-#include <string>
 
 module pragma.shared;
 
@@ -81,11 +78,11 @@ void RigidPhysObj::UpdateVelocity()
 		return;
 	m_velocity = body->GetLinearVelocity();
 	/*PhysRigidBody *body = GetRigidBody();
-	if(body == NULL)
+	if(body == nullptr)
 		return Vector3(0.f,0.f,0.f);
 	return body->GetLinearVelocity();*/
 	// m_velocity =
-	/*if(m_owner == NULL || !m_owner->IsValid())
+	/*if(m_owner == nullptr || !m_owner->IsValid())
 		return;
 	NetworkState *state = (*m_owner)->GetNetworkState();
 	Game *game = state->GetGameState();

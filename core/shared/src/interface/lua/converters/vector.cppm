@@ -3,13 +3,8 @@
 module;
 
 #include "pragma/lua/core.hpp"
-#include <array>
 #include <cassert>
-#include <map>
-#include <unordered_map>
-#include <vector>
 
-#include <cinttypes>
 
 export module pragma.shared:scripting.lua.converters.vector;
 

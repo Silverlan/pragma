@@ -4,8 +4,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
-#include <cinttypes>
-#include <vector>
 #include "pragma/lua/core.hpp"
 
 export module pragma.shared:physics.contact;

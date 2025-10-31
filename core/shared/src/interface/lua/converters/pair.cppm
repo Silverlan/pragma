@@ -3,7 +3,6 @@
 module;
 
 #include "pragma/lua/core.hpp"
-#include <tuple>
 
 export module pragma.shared:scripting.lua.converters.pair;
 

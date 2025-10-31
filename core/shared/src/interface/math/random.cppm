@@ -3,9 +3,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <random>
 
 export module pragma.shared:math.random;
+
+export import std.compat;
 
 export namespace util {
 	DLLNETWORK void to_random_float(const std::string &s, float &outF0, float &outF1);

@@ -3,11 +3,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <cinttypes>
-#include <optional>
-#include <string>
 
 export module pragma.shared:util.python;
+
+export import std.compat;
 
 export namespace pragma::python {
 	DLLNETWORK bool run(const char *code);

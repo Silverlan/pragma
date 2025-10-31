@@ -3,11 +3,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <iostream>
-#include <string>
-#include <string_view>
 
 export module pragma.shared:util.global_string_table;
+
+export import std.compat;
 
 export {
 	namespace pragma {

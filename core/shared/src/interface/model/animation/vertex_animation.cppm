@@ -3,18 +3,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <array>
-#include <memory>
-#include <string>
-#include <vector>
 
-#include <cinttypes>
 
-#include <optional>
 
-#include <unordered_map>
 
-#include <functional>
 
 export module pragma.shared:model.animation.vertex_animation;
 
@@ -113,6 +105,8 @@ export {
 
 	class DLLNETWORK VertexAnimation : public std::enable_shared_from_this<VertexAnimation> {
 	public:
+		static constexpr std::uint32_t layout_version = 1;
+		
 		static constexpr uint32_t FORMAT_VERSION = 1u;
 		static constexpr auto PMORPHANI_IDENTIFIER = "PMORPHANI";
 		static std::shared_ptr<VertexAnimation> Create();

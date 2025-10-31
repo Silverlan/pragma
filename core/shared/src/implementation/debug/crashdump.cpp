@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <cstring>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -15,8 +14,6 @@ module;
 
 #include "crashdump_helper.hpp"
 #include "pragma/logging.hpp"
-#include <exception>
-#include <iostream>
 
 module pragma.shared;
 

@@ -2,13 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <vector>
-#include <functional>
-#include <memory>
 
 #include <sharedutils/magic_enum.hpp>
-#include <algorithm>
-#include <iostream>
 
 module pragma.shared;
 

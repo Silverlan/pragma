@@ -2,16 +2,11 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <vector>
 #include "pragma/lua/core.hpp"
 #include "pragma/buss_ik/Node.h"
 #include "pragma/buss_ik/Tree.h"
 #include "pragma/buss_ik/Jacobian.h"
-#include <unordered_map>
 #include <sharedutils/magic_enum.hpp>
-#include <algorithm>
-#include <memory>
-#include <sstream>
 
 module pragma.shared;
 
@@ -78,7 +73,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 
 	const auto *libName = "phys";
 	auto &modPhys = lua.RegisterLibrary(libName);
-	modPhys[
+	modPhys[(
 	  //luabind::def("create_character_controller",create_character_controller},
 	  luabind::def("create_convex_shape", static_cast<std::shared_ptr<pragma::physics::IConvexShape> (*)(pragma::physics::IEnvironment *, const std::vector<Vector3> &, const std::vector<uint16_t> &, pragma::physics::IMaterial &)>(create_convex_shape)),
 	  luabind::def("create_convex_shape", static_cast<std::shared_ptr<pragma::physics::IConvexShape> (*)(pragma::physics::IEnvironment *, const std::vector<Vector3> &, pragma::physics::IMaterial &)>(create_convex_shape)), luabind::def("create_triangle_shape", create_triangle_shape),
@@ -119,7 +114,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	  luabind::def("raycast", raycast), luabind::def("sweep", sweep), luabind::def("overlap", overlap),
 
 	  luabind::def("calc_torque_from_angular_velocity", calc_torque_from_angular_velocity), luabind::def("calc_angular_velocity_from_torque", calc_angular_velocity_from_torque), luabind::def("calc_force_from_linear_velocity", calc_force_from_linear_velocity),
-	  luabind::def("calc_linear_velocity_from_force", calc_linear_velocity_from_force)];
+	  luabind::def("calc_linear_velocity_from_force", calc_linear_velocity_from_force))];
 
 	Lua::RegisterLibraryEnums(l, libName,
 	  {{"ACTIVATION_STATE_ACTIVE", umath::to_integral(pragma::physics::ICollisionObject::ActivationState::Active)}, {"ACTIVATION_STATE_ALWAYS_ACTIVE", umath::to_integral(pragma::physics::ICollisionObject::ActivationState::AlwaysActive)},

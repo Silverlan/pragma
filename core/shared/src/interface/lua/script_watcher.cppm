@@ -3,10 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <functional>
-#include <memory>
-#include <string>
-#include <unordered_map>
 
 export module pragma.shared:scripting.lua.script_watcher;
 

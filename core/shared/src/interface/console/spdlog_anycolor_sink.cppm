@@ -12,22 +12,13 @@ module;
 #include <Windows.h>
 #endif
 
-#include <cinttypes>
 
-#include <memory>
 #include "pragma/lua/core.hpp"
 
-#include <optional>
-#include <vector>
 
-#include <unordered_map>
-#include <tuple>
 
-#include <array>
 
-#include <string>
 
-#include <functional>
 
 export module pragma.shared:console.spdlog_anycolor_sink;
 

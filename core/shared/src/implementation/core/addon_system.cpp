@@ -2,15 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <cinttypes>
-#include <vector>
-#include <map>
-#include <unordered_set>
-#include <cstring>
 
 #include "pragma/logging.hpp"
-#include <algorithm>
-#include <memory>
 
 #ifdef _WIN32
 #endif
@@ -160,8 +153,8 @@ void AddonSystem::MountAddons()
 {
 	std::vector<std::string> resFiles;
 	std::vector<std::string> resDirs;
-	FileManager::FindFiles("addons\\*", NULL, &resDirs);
-	FileManager::FindFiles("addons\\*.pad", &resFiles, NULL);
+	FileManager::FindFiles("addons\\*", nullptr, &resDirs);
+	FileManager::FindFiles("addons\\*.pad", &resFiles, nullptr);
 	m_addons.reserve(resFiles.size() + resDirs.size());
 
 	// Make sure that the "converted" addon is always the first in the mount order!
@@ -180,7 +173,7 @@ void AddonSystem::MountAddons()
 
 #ifdef _WIN32
 	std::vector<std::string> resLinks;
-	FileManager::FindFiles("addons\\*.lnk", &resLinks, NULL);
+	FileManager::FindFiles("addons\\*.lnk", &resLinks, nullptr);
 	for(auto &pathLink : resLinks)
 		mount_linked_addon(pathLink, m_addons);
 #endif

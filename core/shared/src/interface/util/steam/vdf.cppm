@@ -3,13 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
-#include <unordered_map>
-#include <vector>
 
-#include <cinttypes>
-#include <thread>
-#include <condition_variable>
 
 export module pragma.shared:util.steam.vdf;
 

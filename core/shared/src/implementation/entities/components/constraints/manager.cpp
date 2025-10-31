@@ -5,7 +5,6 @@ module;
 #include "pragma/lua/core.hpp"
 
 #include "pragma/logging.hpp"
-#include <algorithm>
 #include <cassert>
 
 module pragma.shared;

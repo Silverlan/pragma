@@ -2,12 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
 #include "pragma/lua/core.hpp"
-#include <functional>
-#include <memory>
-#include <string>
 
 module pragma.shared;
 
@@ -18,7 +14,7 @@ lua_registercheck(NavConfig, pragma::nav::Config);
 void Lua::nav::register_library(Lua::Interface &lua)
 {
 	auto &modNav = lua.RegisterLibrary("nav");
-	modNav[luabind::def("generate", static_cast<void (*)(lua_State *)>([](lua_State *l) {
+	modNav[(luabind::def("generate", static_cast<void (*)(lua_State *)>([](lua_State *l) {
 		auto &nw = *pragma::Engine::Get()->GetNetworkState(l);
 		auto &game = *nw.GetGameState();
 		std::string err;
@@ -115,7 +111,7 @@ void Lua::nav::register_library(Lua::Interface &lua)
 		  if(mesh == nullptr)
 			  return nil;
 		  return {l, pragma::nav::Mesh::Create(mesh, config)};
-	  }))];
+	  })))];
 	Lua::RegisterLibraryEnums(lua.GetState(), "nav",
 	  {{"POLY_TYPE_BIT_NONE", umath::to_integral(pragma::nav::PolyFlags::None)}, {"POLY_TYPE_BIT_WALK", umath::to_integral(pragma::nav::PolyFlags::Walk)}, {"POLY_TYPE_BIT_SWIM", umath::to_integral(pragma::nav::PolyFlags::Swim)},
 	    {"POLY_TYPE_BIT_DOOR", umath::to_integral(pragma::nav::PolyFlags::Door)}, {"POLY_TYPE_BIT_JUMP", umath::to_integral(pragma::nav::PolyFlags::Jump)}, {"POLY_TYPE_BIT_DISABLED", umath::to_integral(pragma::nav::PolyFlags::Disabled)},

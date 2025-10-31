@@ -4,18 +4,9 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "mathutil/glmutil.h"
-#include <string>
-#include <vector>
 
-#include <cinttypes>
-#include <optional>
-#include <memory>
-#include <functional>
-#include <thread>
-#include <unordered_map>
 #include "pragma/lua/core.hpp"
 
-#include <ostream>
 
 export module pragma.shared:console.commands;
 

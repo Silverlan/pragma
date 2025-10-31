@@ -3,11 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <limits>
-#include <string>
 
-#include <cinttypes>
-#include <memory>
 #include "pragma/lua/core.hpp"
 
 export module pragma.shared:game.bullet_info;

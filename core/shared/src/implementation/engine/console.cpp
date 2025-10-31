@@ -2,16 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <thread>
 
-#include <algorithm>
-#include <atomic>
-#include <functional>
-#include <iostream>
-#include <memory>
-#include <string>
-#include <string_view>
-#include <mutex>
 
 #ifdef __linux__
 
@@ -20,6 +11,7 @@ module;
 #include <fcntl.h>
 #include <signal.h>
 #include <poll.h>
+#include <cerrno>
 #elif _WIN32
 #include <Windows.h>
 #endif
@@ -40,7 +32,7 @@ static int getline_async_thread_safe(std::string &str, const int &fd = 0, char d
 		pollfd fd_stdin {0, POLLIN, 0};
 
 		//sigemptyset(&signalset);
-		ppoll(&fd_stdin, 1, NULL, nullptr);
+		ppoll(&fd_stdin, 1, nullptr, nullptr);
 		chars_read = (int)read(fd, buf, 1);
 		if(chars_read == 1) {
 			if(*buf == delim) {
@@ -168,7 +160,7 @@ void pragma::Engine::CloseConsole()
 	m_consoleInfo = nullptr;
 }
 
-bool pragma::Engine::IsConsoleOpen() const { return m_consoleInfo != NULL; }
+bool pragma::Engine::IsConsoleOpen() const { return m_consoleInfo != nullptr; }
 DebugConsole *pragma::Engine::GetConsole() { return m_consoleInfo ? m_consoleInfo->console.get() : nullptr; }
 
 void pragma::Engine::ProcessConsoleInput(KeyState pressState)
@@ -244,7 +236,7 @@ bool pragma::Engine::RunConsoleCommand(std::string cmd, std::vector<std::string>
 	auto *stateSv = GetServerNetworkState();
 	if(stateSv == nullptr)
 		return RunEngineConsoleCommand(cmd, argv, pressState, magnitude, callback);
-	if(stateSv == NULL || !stateSv->RunConsoleCommand(cmd, argv, nullptr, pressState, magnitude, callback)) {
+	if(stateSv == nullptr || !stateSv->RunConsoleCommand(cmd, argv, nullptr, pressState, magnitude, callback)) {
 		Con::cwar << "Unknown console command '" << cmd << "'!" << Con::endl;
 		auto similar = (stateSv != nullptr) ? stateSv->FindSimilarConVars(cmd) : FindSimilarConVars(cmd);
 		if(similar.empty() == true)

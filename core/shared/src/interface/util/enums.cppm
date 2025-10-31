@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <cinttypes>
 
 export module pragma.shared:util.enums;
+
+export import std.compat;
 
 export {
 	namespace util {

@@ -22,10 +22,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <array>
-#include <cinttypes>
 
 export module pragma.shared:math.noise;
+
+export import std.compat;
 
 // Source: https://github.com/threerings/clyde/blob/207d235ae1f7ba03ddcc6406febb6b7f306593bd/core/src/main/java/com/threerings/util/NoiseUtil.java
 export namespace util {

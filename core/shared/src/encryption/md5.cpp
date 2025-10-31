@@ -34,8 +34,6 @@ documentation and/or software.
 #include "pragma/encryption/md5.h"
 
 /* system implementation headers */
-#include <stdio.h>
-#include <cstring>
 
 
 // Constants for MD5Transform routine.

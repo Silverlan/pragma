@@ -5,8 +5,6 @@ module;
 #include <bvh/v2/default_builder.h>
 #include <bvh/v2/reinsertion_optimizer.h>
 #include <bvh/v2/stack.h>
-#include <memory>
-#include <sstream>
 
 module pragma.shared;
 
@@ -179,12 +177,19 @@ void pragma::bvh::BvhTree::InitializeBvh()
 		executor = {};
 }
 
+template<typename T>
+	static std::unique_ptr<pragma::bvh::Executor> make_executor()
+	{
+		std::unique_ptr<pragma::bvh::Executor> executor;
+		if constexpr(std::is_same_v<T, ::bvh::v2::ParallelExecutor>)
+			executor = std::make_unique<T>(*g_threadPool);
+		else
+			executor = std::make_unique<T>();
+		return executor;
+	}
 ::bvh::v2::DefaultBuilder<pragma::bvh::Node>::Config pragma::bvh::BvhTree::InitializeExecutor()
 {
-	if constexpr(std::is_same_v<Executor, ::bvh::v2::ParallelExecutor>)
-		executor = std::make_unique<Executor>(*g_threadPool);
-	else
-		executor = std::make_unique<Executor>();
+	executor = make_executor<Executor>();
 	::bvh::v2::DefaultBuilder<Node>::Config config;
 	config.quality = ::bvh::v2::DefaultBuilder<Node>::Quality::High;
 	return config;

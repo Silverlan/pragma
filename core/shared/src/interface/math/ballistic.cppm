@@ -3,8 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <array>
-#include <cinttypes>
 
 export module pragma.shared:math.ballistic;
 

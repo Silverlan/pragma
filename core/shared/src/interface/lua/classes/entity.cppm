@@ -4,9 +4,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <string>
 
-#include <ostream>
 
 export module pragma.shared:scripting.lua.classes.entity;
 

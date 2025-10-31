@@ -3,8 +3,6 @@
 
 #if 0
 
-#include "string_view"
-#include "memory"
 
 static void test_pair_policy_param(const std::pair<float,std::string> &pair)
 {

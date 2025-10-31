@@ -2,13 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <cmath>
 
-#include <functional>
-#include <memory>
-#include <string>
 
 module pragma.shared;
 
@@ -194,7 +189,7 @@ bool PolyMesh::HasVertex(const PolyVertex &v, Vector3 *vThis)
 			Vector3 diff(posThis);
 			uvec::sub(&diff, pos);
 			if(diff.x <= EPSILON && diff.x >= -EPSILON && diff.y <= EPSILON && diff.y >= -EPSILON && diff.z <= EPSILON && diff.z >= -EPSILON) {
-				if(vThis != NULL) {
+				if(vThis != nullptr) {
 					vThis->x = posThis.x;
 					vThis->y = posThis.y;
 					vThis->z = posThis.z;

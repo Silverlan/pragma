@@ -3,10 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <vector>
 
-#include <cinttypes>
-#include <unordered_map>
 #include "pragma/lua/core.hpp"
 
 export module pragma.shared:entities.components.triggers.base_push;

@@ -4,12 +4,8 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include <cmath>
 
 #include "pragma/logging.hpp"
-#include <sstream>
-#include <unordered_map>
-#include <vector>
 
 module pragma.shared;
 
@@ -155,7 +151,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 	//if(phys->IsSleeping())
 	//	return;
 	auto *o = phys->GetCollisionObject();
-	if(o == NULL)
+	if(o == nullptr)
 		return;
 	phys->UpdateVelocity();
 	if(pVelComponent.valid()) {
@@ -238,7 +234,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 		Model *mdl = GetModel();
 		Frame *frame;
 		Skeleton *skeleton;
-		if(mdl != NULL)
+		if(mdl != nullptr)
 		{
 			Animation *ref = mdl->GetAnimation(0);
 			frame = ref->GetFrame(0);
@@ -255,7 +251,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 			Vector3 posActor = Vector3(t.p.x,t.p.y,t.p.z);
 			Quat rotActor = Quat(t.q.w,t.q.x,t.q.y,t.q.z);
 
-			if(mdl != NULL)
+			if(mdl != nullptr)
 			{
 				Vector3 posBind = *frame->GetBonePosition(boneID);
 				Quat rotBind = *frame->GetBoneOrientation(boneID);
@@ -328,7 +324,7 @@ bool BasePhysicsComponent::GetSimulationEnabled() const { return umath::is_flag_
 bool BasePhysicsComponent::IsTrigger() const
 {
 	pragma::physics::PhysObj *phys = GetPhysicsObject();
-	if(phys == NULL)
+	if(phys == nullptr)
 		return false;
 	return phys->IsTrigger();
 }
@@ -338,7 +334,7 @@ void BasePhysicsComponent::SetCollisionFilter(pragma::physics::CollisionMask fil
 	m_collisionFilterGroup = filterGroup;
 	m_collisionFilterMask = filterMask;
 	pragma::physics::PhysObj *phys = GetPhysicsObject();
-	if(phys == NULL)
+	if(phys == nullptr)
 		return;
 	phys->SetCollisionFilter(filterGroup, filterMask);
 }
@@ -368,7 +364,7 @@ void BasePhysicsComponent::GetCollisionFilter(pragma::physics::CollisionMask *fi
 }
 float BasePhysicsComponent::GetCollisionRadius(Vector3 *center) const
 {
-	if(center != NULL)
+	if(center != nullptr)
 		*center = GetCollisionCenter();
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(!pTrComponent)
@@ -399,7 +395,7 @@ void BasePhysicsComponent::SetMoveType(pragma::physics::MOVETYPE movetype) { m_m
 bool BasePhysicsComponent::IsOnGround() const
 {
 	pragma::physics::PhysObj *phys = GetPhysicsObject();
-	if(phys == NULL || !phys->IsController())
+	if(phys == nullptr || !phys->IsController())
 		return false;
 	ControllerPhysObj *physController = static_cast<ControllerPhysObj *>(phys);
 	return physController->IsOnGround();
@@ -407,7 +403,7 @@ bool BasePhysicsComponent::IsOnGround() const
 bool BasePhysicsComponent::IsGroundWalkable() const
 {
 	pragma::physics::PhysObj *phys = GetPhysicsObject();
-	if(phys == NULL || !phys->IsController())
+	if(phys == nullptr || !phys->IsController())
 		return false;
 	ControllerPhysObj *physController = static_cast<ControllerPhysObj *>(phys);
 	return physController->IsGroundWalkable();
@@ -489,7 +485,7 @@ void BasePhysicsComponent::PhysicsUpdate(double tDelta)
 	pragma::physics::PhysObj *phys = GetPhysicsObject();
 	CEPhysicsUpdateData evData {tDelta};
 	auto movetype = GetMoveType();
-	if(phys != NULL && m_physObject->IsStatic() == false) {
+	if(phys != nullptr && m_physObject->IsStatic() == false) {
 		m_physObject->Simulate(tDelta, (movetype != pragma::physics::MOVETYPE::WALK && movetype != pragma::physics::MOVETYPE::PHYSICS) ? true : false);
 		InvokeEventCallbacks(EVENT_ON_DYNAMIC_PHYSICS_UPDATED, evData);
 	}
@@ -500,7 +496,7 @@ void BasePhysicsComponent::PrePhysicsSimulate()
 {
 	pragma::physics::PhysObj *phys = GetPhysicsObject();
 	InvokeEventCallbacks(EVENT_ON_PRE_PHYSICS_SIMULATE);
-	if(phys == NULL || phys->IsStatic())
+	if(phys == nullptr || phys->IsStatic())
 		return;
 	dynamic_cast<PhysObjDynamic *>(phys)->PreSimulate();
 }
@@ -729,7 +725,7 @@ bool BasePhysicsComponent::PostPhysicsSimulate()
 	pragma::physics::PhysObj *phys = GetPhysicsObject();
 	CEPostPhysicsSimulate evData {};
 	InvokeEventCallbacks(EVENT_ON_POST_PHYSICS_SIMULATE, evData);
-	if(phys == NULL || phys->IsStatic())
+	if(phys == nullptr || phys->IsStatic())
 		return evData.keepAwake;
 	dynamic_cast<PhysObjDynamic *>(phys)->PostSimulate();
 	UpdateRagdollPose();
@@ -739,14 +735,14 @@ bool BasePhysicsComponent::PostPhysicsSimulate()
 Vector3 BasePhysicsComponent::GetPhysicsSimulationOffset()
 {
 	pragma::physics::PhysObj *phys = GetPhysicsObject();
-	if(phys == NULL || phys->IsStatic())
+	if(phys == nullptr || phys->IsStatic())
 		return Vector3(0, 0, 0);
 	return dynamic_cast<PhysObjDynamic *>(phys)->GetSimulationOffset();
 }
 Quat BasePhysicsComponent::GetPhysicsSimulationRotation()
 {
 	pragma::physics::PhysObj *phys = GetPhysicsObject();
-	if(phys == NULL || phys->IsStatic())
+	if(phys == nullptr || phys->IsStatic())
 		return uquat::identity();
 	return dynamic_cast<PhysObjDynamic *>(phys)->GetSimulationRotation();
 }

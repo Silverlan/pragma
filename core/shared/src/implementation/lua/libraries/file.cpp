@@ -2,16 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <optional>
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <functional>
-#include <memory>
-#include <string>
-#include <string_view>
 
 module pragma.shared;
 
@@ -38,7 +32,7 @@ LFile::~LFile() { Close(); }
 std::shared_ptr<ufile::IFile> LFile::GetHandle()
 {
 	if(!IsValid())
-		return NULL;
+		return nullptr;
 	return m_file;
 }
 
@@ -49,14 +43,14 @@ bool LFile::Eof()
 	return (m_file->Eof() != 0) ? true : false;
 }
 
-bool LFile::IsValid() const { return (m_file != NULL) ? true : false; }
+bool LFile::IsValid() const { return (m_file != nullptr) ? true : false; }
 
 void LFile::Close()
 {
 	if(!IsValid())
 		return;
 	m_file.reset();
-	m_file = NULL;
+	m_file = nullptr;
 }
 
 unsigned long long LFile::Size()
@@ -545,7 +539,7 @@ void Lua::file::Find(lua_State *l, const std::string &path, fsys::SearchFlags se
 luabind::object Lua::file::Read(lua_State *l, const std::string &path)
 {
 	auto f = FileManager::OpenFile(path.c_str(), "rb");
-	if(f == NULL)
+	if(f == nullptr)
 		return {};
 	std::string str = f->ReadString();
 	return luabind::object {l, str};
@@ -562,7 +556,7 @@ bool Lua::file::Write(lua_State *l, std::string strPath, const std::string &cont
 	FileManager::CreatePath(path.data());
 
 	auto f = FileManager::OpenFile(fullPath.GetString().c_str(), "w");
-	if(f == NULL || f->GetType() != EVFile::Local)
+	if(f == nullptr || f->GetType() != EVFile::Local)
 		return false;
 	auto freal = std::static_pointer_cast<VFilePtrInternalReal>(f);
 	freal->Write(content.c_str(), content.length());

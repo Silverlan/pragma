@@ -3,7 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <vector>
 
 export module pragma.shared:entities.components.triggers.base_hurt;
 

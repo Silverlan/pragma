@@ -3,11 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <optional>
 
-#include <vector>
-#include <string>
-#include <functional>
 
 export module pragma.shared:util.steam;
 

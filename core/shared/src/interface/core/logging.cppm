@@ -4,7 +4,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/logging.hpp"
-#include <optional>
 
 export module pragma.shared:core.logging;
 

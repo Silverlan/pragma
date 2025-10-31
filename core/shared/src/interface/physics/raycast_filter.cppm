@@ -3,8 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <cinttypes>
-#include <functional>
 
 export module pragma.shared:physics.raycast_filter;
 

@@ -4,18 +4,12 @@ module;
 
 #include "noiseutils.h"
 
-#include <cmath>
 
-#include <vector>
 
 #include "pragma/lua/core.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include <sharedutils/magic_enum.hpp>
 #include <cassert>
-#include <cstring>
-#include <memory>
-#include <sstream>
-#include <string_view>
 
 module pragma.shared;
 
@@ -335,7 +329,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 {
 	auto modString = luabind::module_(lua.GetState(), "string");
 	register_utf8_string(lua.GetState(), modString);
-	modString[luabind::def("snake_case_to_camel_case", Lua::string::snake_case_to_camel_case), luabind::def("camel_case_to_snake_case", Lua::string::camel_case_to_snake_case), luabind::def("calc_levenshtein_distance", Lua::string::calc_levenshtein_distance),
+	modString[(luabind::def("snake_case_to_camel_case", Lua::string::snake_case_to_camel_case), luabind::def("camel_case_to_snake_case", Lua::string::camel_case_to_snake_case), luabind::def("calc_levenshtein_distance", Lua::string::calc_levenshtein_distance),
 	  luabind::def("calc_levenshtein_similarity", Lua::string::calc_levenshtein_similarity),
 	  luabind::def("find_longest_common_substring", Lua::string::find_longest_common_substring, luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>, luabind::pure_out_value<5>>::type {}),
 	  luabind::def("find_similar_elements", Lua::string::find_similar_elements, luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}), luabind::def("is_integer", ustring::is_integer), luabind::def("is_number", ustring::is_number),
@@ -348,10 +342,10 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	  })),
 	  luabind::def("fill_zeroes", ustring::fill_zeroes), luabind::def("compare", static_cast<bool (*)(const char *, const char *, bool, size_t)>(ustring::compare)), luabind::def("compare", static_cast<bool (*)(const std::string &, const std::string &, bool)>(ustring::compare)),
 	  luabind::def("compare", static_cast<bool (*)(const std::string &, const std::string &)>([](const std::string &a, const std::string &b) -> bool { return ustring::compare(a, b, true); })),
-	  luabind::def("hash", static_cast<std::string (*)(const std::string &)>([](const std::string &str) -> std::string { return std::to_string(std::hash<std::string> {}(str)); }))];
+	  luabind::def("hash", static_cast<std::string (*)(const std::string &)>([](const std::string &str) -> std::string { return std::to_string(std::hash<std::string> {}(str)); })))];
 
 	auto modLight = luabind::module_(lua.GetState(), "light");
-	modLight[luabind::def("get_color_temperature", static_cast<void (*)(ulighting::NaturalLightType, Kelvin &, Kelvin &)>([](ulighting::NaturalLightType type, Kelvin &outMin, Kelvin &outMax) {
+	modLight[(luabind::def("get_color_temperature", static_cast<void (*)(ulighting::NaturalLightType, Kelvin &, Kelvin &)>([](ulighting::NaturalLightType type, Kelvin &outMin, Kelvin &outMax) {
 		auto colTemp = ulighting::get_color_temperature(type);
 		outMin = colTemp.first;
 		outMax = colTemp.second;
@@ -391,7 +385,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 			    break;
 		    }
 		    return result;
-	    })];
+	    }))];
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "light",
 	  {{"NATURAL_LIGHT_TYPE_MATCH_FLAME", umath::to_integral(ulighting::NaturalLightType::MatchFlame)}, {"NATURAL_LIGHT_TYPE_CANDLE", umath::to_integral(ulighting::NaturalLightType::Candle)}, {"NATURAL_LIGHT_TYPE_FLAME", umath::to_integral(ulighting::NaturalLightType::Flame)},

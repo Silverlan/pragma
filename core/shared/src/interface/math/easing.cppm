@@ -3,9 +3,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <cinttypes>
 
 export module pragma.shared:math.easing;
+
+export import std.compat;
 
 export namespace umath {
 	enum class EaseType : uint32_t { Back = 0u, Bounce, Circular, Cubic, Elastic, Exponential, Linear, Quadratic, Quartic, Quintic, Sine };

@@ -3,16 +3,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <string>
 
-#include <optional>
-#include <vector>
-#include <functional>
-#include <queue>
 #include "pragma/lua/core.hpp"
 
-#include <ostream>
 
 export module pragma.shared:entities.components.meta_rig;
 

@@ -2,10 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <sstream>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
 module pragma.shared;
 
@@ -34,13 +30,13 @@ void LaunchParaMap::RegisterParameterHelp(std::string name, const LaunchParamete
 	LAUNCHPARAMETERS_HELP << pre.str() << sp << descHelp << "\n";
 }
 
-static LaunchParaMap *g_LaunchParameters = NULL;
+static LaunchParaMap *g_LaunchParameters = nullptr;
 
 LaunchParaMap *GetLaunchParaMap() { return g_LaunchParameters; }
 
 void RegisterLaunchParameter(std::string name, const LaunchParameterFunc &function)
 {
-	if(g_LaunchParameters == NULL) {
+	if(g_LaunchParameters == nullptr) {
 		static LaunchParaMap map;
 		g_LaunchParameters = &map;
 	}

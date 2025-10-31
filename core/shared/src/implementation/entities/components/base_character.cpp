@@ -2,14 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <optional>
-#include <unordered_map>
 #include "pragma/lua/core.hpp"
 
-#include <memory>
-#include <string>
 
 module pragma.shared;
 
@@ -21,7 +16,7 @@ void BaseCharacterComponent::InitializeController()
 {
 	//auto &ent = GetEntity();
 	//PhysObj *phys = ent.GetPhysicsObject();
-	//if(phys == NULL || !phys->IsController())
+	//if(phys == nullptr || !phys->IsController())
 	//	return;
 }
 
@@ -109,7 +104,7 @@ void BaseCharacterComponent::SetSlopeLimit(float limit)
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
-	if(phys != NULL && phys->IsController()) {
+	if(phys != nullptr && phys->IsController()) {
 		ControllerPhysObj *physController = static_cast<ControllerPhysObj *>(phys);
 		physController->SetSlopeLimit(limit);
 	}
@@ -121,7 +116,7 @@ void BaseCharacterComponent::SetStepOffset(float offset)
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
-	if(phys != NULL && phys->IsController()) {
+	if(phys != nullptr && phys->IsController()) {
 		ControllerPhysObj *physController = static_cast<ControllerPhysObj *>(phys);
 		physController->SetStepOffset(offset);
 	}
@@ -233,7 +228,7 @@ void BaseCharacterComponent::SetViewOrientation(const Quat &orientation)
 		if(m_pitchController != -1)
 			animComponent->SetBlendController(m_pitchController, pitchDelta);
 		BlendController *yaw = hMdl->GetBlendController(m_yawController);
-		if(yaw != NULL) {
+		if(yaw != nullptr) {
 			float yawDelta = umath::get_angle_difference(angView.y, angCur.y);
 			if(yawDelta >= yaw->min && yawDelta <= yaw->max) {
 				animComponent->SetBlendController(m_yawController, yawDelta);

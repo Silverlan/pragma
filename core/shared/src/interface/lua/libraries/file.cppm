@@ -4,19 +4,10 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <memory>
-#include <optional>
-#include <string>
-#include <vector>
 
-#include <cinttypes>
 
-#include <unordered_map>
-#include <tuple>
 
-#include <array>
 
-#include <functional>
 
 export module pragma.shared:scripting.lua.libraries.file;
 

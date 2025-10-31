@@ -2,14 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <optional>
-#include <vector>
 #include "pragma/lua/core.hpp"
 
-#include <memory>
-#include <string>
 
 module pragma.shared;
 
@@ -209,7 +204,7 @@ Int32 BaseModelComponent::LookupBone(const std::string &name) const
 }
 std::string BaseModelComponent::GetModelName() const
 {
-	if(m_modelName == NULL)
+	if(m_modelName == nullptr)
 		return "";
 	return *m_modelName;
 }
@@ -326,7 +321,7 @@ void BaseModelComponent::SetModel(const std::shared_ptr<pragma::Model> &mdl)
 	m_bMaterialsLoaded = true;
 	if(m_onModelMaterialsLoaded.IsValid())
 		m_onModelMaterialsLoaded.Remove();
-	if(mdl == NULL) {
+	if(mdl == nullptr) {
 		if(GetEntity().IsRemoved())
 			return;
 		m_modelName = nullptr;
@@ -357,7 +352,7 @@ void BaseModelComponent::SetModel(const std::shared_ptr<pragma::Model> &mdl)
 	}
 	OnMembersChanged();
 
-	/*if(skeleton == NULL)
+	/*if(skeleton == nullptr)
 	{
 		UpdateChildParentInfo();
 		return;

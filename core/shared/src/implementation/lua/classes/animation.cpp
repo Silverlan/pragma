@@ -2,16 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <vector>
-#include <functional>
-#include <cstring>
 
 #include "pragma/lua/core.hpp"
 #include <cassert>
-#include <memory>
-#include <string>
 
 module pragma.shared;
 
@@ -373,7 +367,7 @@ void Lua::Frame::GetBoneMatrix(lua_State *l, ::Frame &frame, unsigned int boneID
 void Lua::Frame::GetBonePosition(lua_State *l, ::Frame &frame, unsigned int boneID)
 {
 	Vector3 *pos = frame.GetBonePosition(boneID);
-	if(pos == NULL)
+	if(pos == nullptr)
 		return;
 	auto *rot = frame.GetBoneOrientation(boneID);
 	auto *scale = frame.GetBoneScale(boneID);

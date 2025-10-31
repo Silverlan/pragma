@@ -5,20 +5,12 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "DetourNavMeshQuery.h"
 #include "Recast.h"
-#include <memory>
-#include <string>
-#include <vector>
 
-#include <cinttypes>
 
-#include <limits>
 
-#include <optional>
 
 #include "pragma/lua/core.hpp"
 
-#include <unordered_map>
-#include <tuple>
 
 export module pragma.shared:ai.nav_system;
 

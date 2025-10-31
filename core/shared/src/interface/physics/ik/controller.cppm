@@ -3,9 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <string>
-#include <unordered_map>
 
 export module pragma.shared:physics.ik.controller;
 

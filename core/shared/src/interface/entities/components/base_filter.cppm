@@ -3,10 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
-#include <vector>
 
-#include <ostream>
 
 export module pragma.shared:entities.components.base_filter;
 

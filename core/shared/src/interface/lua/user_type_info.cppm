@@ -4,26 +4,13 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include <optional>
-#include <vector>
-#include <memory>
-#include <unordered_map>
-#include <tuple>
 
-#include <cinttypes>
 
-#include <array>
 
-#include <string>
 
-#include <functional>
 
-#include <thread>
-#include <condition_variable>
 
-#include <map>
 
-#include <queue>
 
 export module pragma.shared:scripting.lua.user_type_info;
 

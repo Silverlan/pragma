@@ -3,8 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
-#include <unordered_map>
 
 export module pragma.shared:model.animation.phoneme_map;
 

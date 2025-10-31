@@ -3,7 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
 
 export module pragma.shared:physics.surface_type_manager;
 

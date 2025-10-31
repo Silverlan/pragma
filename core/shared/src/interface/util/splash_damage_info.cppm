@@ -3,17 +3,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <functional>
-#include <optional>
 
-#include <cinttypes>
-#include <thread>
-#include <condition_variable>
 
-#include <vector>
-#include <memory>
 
-#include <string>
 
 export module pragma.shared:util.splash_damage_info;
 

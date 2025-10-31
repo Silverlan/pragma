@@ -3,14 +3,13 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <optional>
-#include <string>
 
-#undef GetMessage
-
-#include <cinttypes>
 
 export module pragma.shared:networking.error;
+
+export import std.compat;
+
+#undef GetMessage
 
 export namespace pragma::networking {
 	enum class ErrorCode : uint32_t;

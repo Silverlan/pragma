@@ -2,18 +2,12 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <vector>
 
 #include "DetourNavMesh.h"
 #include "DetourNavMeshBuilder.h"
 #include "DetourNavMeshQuery.h"
 #include "Recast.h"
-#include <algorithm>
-#include <memory>
-#include <string>
-#include <thread>
 
 module pragma.shared;
 

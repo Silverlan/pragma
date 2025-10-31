@@ -31,7 +31,6 @@ subject to the following restrictions:
 // VectorRn:  Vector over Rn  (Variable length vector)
 //
 
-#include <iostream>
 using namespace std;
 
 

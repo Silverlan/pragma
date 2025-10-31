@@ -3,9 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <optional>
-#include <string>
-#include <unordered_map>
 
 export module pragma.shared:physics.tire_type_manager;
 

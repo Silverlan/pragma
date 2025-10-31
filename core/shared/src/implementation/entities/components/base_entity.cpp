@@ -2,17 +2,13 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <typeindex>
 
-#include <cstring>
 #include "pragma/lua/core.hpp"
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/logging.hpp"
 #include <sharedutils/magic_enum.hpp>
 #include <cassert>
-#include <memory>
-#include <variant>
 
 module pragma.shared;
 

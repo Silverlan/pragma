@@ -3,12 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <cinttypes>
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <ostream>
-#include <vector>
 
 export module pragma.shared:model.animation.skeleton;
 

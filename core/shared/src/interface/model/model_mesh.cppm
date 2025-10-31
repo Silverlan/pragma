@@ -3,15 +3,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <optional>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
-#include <cinttypes>
 
-#include <functional>
 
 export module pragma.shared:model.model_mesh;
 
@@ -31,6 +24,8 @@ export {
 	namespace pragma {
 		class DLLNETWORK ModelSubMesh : public std::enable_shared_from_this<pragma::ModelSubMesh> {
 		public:
+			static constexpr std::uint32_t layout_version = 1;
+			
 			static constexpr auto PMESH_IDENTIFIER = "PMESH";
 			static constexpr udm::Version PMESH_VERSION = 1;
 			enum class ShareMode : uint32_t { None = 0, Vertices = 1, Alphas = 2, Triangles = 4, VertexWeights = 8, All = Vertices | Alphas | Triangles | VertexWeights };
@@ -216,6 +211,8 @@ export {
 
 	class DLLNETWORK ModelMesh : public std::enable_shared_from_this<ModelMesh> {
 	public:
+		static constexpr std::uint32_t layout_version = 1;
+
 		ModelMesh();
 		ModelMesh(const ModelMesh &other);
 		ModelMesh &operator=(const ModelMesh &) = delete;

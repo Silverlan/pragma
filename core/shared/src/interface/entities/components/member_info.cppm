@@ -4,22 +4,11 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include <sharedutils/magic_enum.hpp>
-#include <functional>
-#include <optional>
-#include <stdexcept>
-#include <string>
-#include <typeindex>
 
-#include <memory>
 
-#include <cinttypes>
 
-#include <vector>
 
-#include <unordered_map>
-#include <tuple>
 
-#include <array>
 
 export module pragma.shared:entities.member_info;
 

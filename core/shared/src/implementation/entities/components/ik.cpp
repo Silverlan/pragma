@@ -5,11 +5,7 @@ module;
 #include "pragma/lua/core.hpp"
 #include "pragma/buss_ik/Tree.h"
 #include "pragma/buss_ik/Jacobian.h"
-#include <algorithm>
 #include <cassert>
-#include <functional>
-#include <memory>
-#include <string>
 
 module pragma.shared;
 

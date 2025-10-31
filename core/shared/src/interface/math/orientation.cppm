@@ -3,8 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <iostream>
-#include <vector>
 
 export module pragma.shared:math.orientation;
 

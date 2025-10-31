@@ -4,7 +4,6 @@ module;
 
 #include "pragma/logging.hpp"
 #include <cassert>
-#include <iostream>
 
 module pragma.shared;
 
@@ -111,7 +110,7 @@ void BasePlayerComponent::OnTick(double tDelta)
 				m_tCrouch = 0.f;
 				if(m_crouchTransition == CrouchTransition::Crouching) {
 					m_bCrouching = true;
-					if(phys != NULL && phys->IsController()) {
+					if(phys != nullptr && phys->IsController()) {
 						auto *controller = static_cast<ControllerPhysObj *>(phys);
 						if(controller->IsCapsule()) {
 							auto *capsule = static_cast<CapsuleControllerPhysObj *>(controller);
@@ -122,7 +121,7 @@ void BasePlayerComponent::OnTick(double tDelta)
 				}
 				else {
 					m_bCrouching = false;
-					if(phys != NULL && phys->IsController()) {
+					if(phys != nullptr && phys->IsController()) {
 						auto *controller = static_cast<ControllerPhysObj *>(phys);
 						if(controller->IsCapsule()) {
 							auto *capsule = static_cast<CapsuleControllerPhysObj *>(controller);
@@ -232,7 +231,7 @@ BasePlayerComponent::BasePlayerComponent(pragma::ecs::BaseEntity &ent)
 
 BasePlayerComponent::~BasePlayerComponent()
 {
-	//if(m_sprite != NULL)
+	//if(m_sprite != nullptr)
 	//	ServerState::Get()->RemoveSprite(m_sprite); // WEAVETODO
 	if(m_entFlashlight.valid())
 		m_entFlashlight->Remove();
@@ -420,7 +419,7 @@ pragma::ecs::BaseEntity *BasePlayerComponent::FindUseEntity() const
 	float dotClosest = 1.f;
 	float maxDist = 96.f;
 	float distClosest = std::numeric_limits<float>::max();
-	pragma::ecs::BaseEntity *entClosest = NULL;
+	pragma::ecs::BaseEntity *entClosest = nullptr;
 	pragma::ecs::EntityIterator it {*game};
 	it.AttachFilter<TEntityIteratorFilterComponent<pragma::UsableComponent>>();
 	for(auto *entOther : it) {
@@ -465,7 +464,7 @@ pragma::ecs::BaseEntity *BasePlayerComponent::FindUseEntity() const
 void BasePlayerComponent::Use()
 {
 	pragma::ecs::BaseEntity *ent = FindUseEntity();
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	auto pUsableComponent = ent->GetComponent<pragma::UsableComponent>();
 	if(pUsableComponent.valid())

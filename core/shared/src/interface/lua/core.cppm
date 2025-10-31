@@ -3,12 +3,7 @@
 module;
 
 #include "pragma/lua/core.hpp"
-#include <functional>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
-#include <cinttypes>
 
 export module pragma.shared:scripting.lua.core;
 

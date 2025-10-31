@@ -5,9 +5,6 @@ module;
 #include "pragma/lua/core.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include <cassert>
-#include <functional>
-#include <iostream>
-#include <memory>
 
 module pragma.shared;
 
@@ -17,7 +14,7 @@ import :game.value_driver;
 Lua::opt<Lua::type<CallbackHandle>> Lua::game::add_callback(lua_State *l, const std::string &identifier, const func<void> &function)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
-	if(state == NULL)
+	if(state == nullptr)
 		return nil;
 	if(!state->IsGameActive())
 		return nil;
@@ -340,7 +337,7 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, pragma::ValueDriverDescriptor);
 #endif
 void Lua::game::register_shared_functions(lua_State *l, luabind::module_ &modGame)
 {
-	modGame[luabind::def("add_callback", Lua::game::add_callback),
+	modGame[(luabind::def("add_callback", Lua::game::add_callback),
 	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua_State *, pragma::Game &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
 	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua_State *, pragma::Game &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
 	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua_State *, pragma::Game &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
@@ -373,7 +370,7 @@ void Lua::game::register_shared_functions(lua_State *l, luabind::module_ &modGam
 	  luabind::def(
 	    "load_nav_mesh", +[](lua_State *l) { return Lua::game::load_nav_mesh(l); }),
 	  luabind::def("is_map_loaded", Lua::game::is_map_loaded), luabind::def("get_map_name", Lua::game::get_map_name), luabind::def("is_game_initialized", &pragma::Game::IsGameInitialized), luabind::def("is_game_ready", &pragma::Game::IsGameReady),
-	  luabind::def("is_map_initialized", &pragma::Game::IsMapInitialized), luabind::def("get_game_state_flags", Lua::game::get_game_state_flags), luabind::def("update_animations", +[](pragma::Game &game, float dt) { game.UpdateAnimations(dt); })];
+	  luabind::def("is_map_initialized", &pragma::Game::IsMapInitialized), luabind::def("get_game_state_flags", Lua::game::get_game_state_flags), luabind::def("update_animations", +[](pragma::Game &game, float dt) { game.UpdateAnimations(dt); }))];
 
 	auto classDefDescriptor = pragma::lua::register_class<pragma::ValueDriverDescriptor>(l, "ValueDriverDescriptor");
 	classDefDescriptor->def(luabind::constructor<lua_State *, std::string, std::unordered_map<std::string, std::string>, std::unordered_map<std::string, ::udm::PProperty>>());

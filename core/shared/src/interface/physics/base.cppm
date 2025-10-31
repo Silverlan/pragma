@@ -4,8 +4,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <memory>
-#include <vector>
 
 export module pragma.shared:physics.base;
 

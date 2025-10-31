@@ -2,13 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <unordered_set>
 #include "pragma/lua/core.hpp"
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/logging.hpp"
-#include <algorithm>
-#include <memory>
 
 module pragma.shared;
 
@@ -292,7 +289,7 @@ void NetworkState::Close()
 lua_State *NetworkState::GetLuaState()
 {
 	if(!IsGameActive())
-		return NULL;
+		return nullptr;
 	return GetGameState()->GetLuaState();
 }
 
@@ -593,7 +590,7 @@ std::shared_ptr<util::Library> NetworkState::InitializeLibrary(std::string libra
 		auto additionalSearchDirectories = util::get_default_additional_library_search_directories(libAbs);
 		dllHandle = LoadLibraryModule(libAbs.substr(8), additionalSearchDirectories, err);
 		m_lastModuleHandle = dllHandle;
-		if(dllHandle != NULL) {
+		if(dllHandle != nullptr) {
 			std::string errMsg;
 			std::function<bool(std::string &)> attach = nullptr;
 			auto *ptrAttachPragma = dllHandle->FindSymbolAddress<bool (*)(std::string &)>("pragma_attach");
@@ -601,13 +598,13 @@ std::shared_ptr<util::Library> NetworkState::InitializeLibrary(std::string libra
 				attach = ptrAttachPragma;
 			if(attach != nullptr) {
 				/*bool *dllServer = (bool*)GetProcAddress(dllHandle,"SERVER");
-				if(dllServer != NULL)
+				if(dllServer != nullptr)
 					*dllServer = IsServer();
 				bool *dllClient = (bool*)GetProcAddress(dllHandle,"CLIENT");
-				if(dllClient != NULL)
+				if(dllClient != nullptr)
 					*dllClient = IsClient();
 				char *dllState = (char*)GetProcAddress(dllHandle,"WEAVE_MODULE_STATE");
-				if(dllState != NULL)
+				if(dllState != nullptr)
 					*dllState = IsServer() ? 2 : 1;*/
 
 				auto bSuccess = attach(errMsg);
@@ -750,7 +747,7 @@ void NetworkState::Think()
 	StopProfilingStage(); // UpdateSounds
 	CallCallbacks<void>("Think");
 	pragma::Game *game = GetGameState();
-	if(game != NULL)
+	if(game != nullptr)
 		game->Think();
 	m_resourceWatcher->Poll();
 	m_tLast = m_tReal;
@@ -780,7 +777,7 @@ void NetworkState::Tick()
 
 	CallCallbacks<void>("Tick");
 	pragma::Game *game = GetGameState();
-	if(game != NULL)
+	if(game != nullptr)
 		game->Tick();
 	for(unsigned int i = 0; i < m_tickCallbacks.size(); i++)
 		m_tickCallbacks[i]();

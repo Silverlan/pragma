@@ -3,10 +3,6 @@
 module;
 
 #include "pragma/lua/core.hpp"
-#include <functional>
-#include <iostream>
-#include <string>
-#include <typeindex>
 
 module pragma.shared;
 

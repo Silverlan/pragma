@@ -4,7 +4,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
-#include <optional>
 #include "pragma/lua/core.hpp"
 
 export module pragma.shared:entities.components.submergible;

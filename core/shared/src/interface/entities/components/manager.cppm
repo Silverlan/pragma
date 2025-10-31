@@ -5,18 +5,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
 #include <sharedutils/magic_enum.hpp>
-#include <cinttypes>
-#include <functional>
-#include <memory>
-#include <queue>
-#include <string>
-#include <typeindex>
-#include <unordered_map>
-#include <vector>
 
-#include <optional>
 
-#include <ostream>
 
 export module pragma.shared:entities.manager;
 

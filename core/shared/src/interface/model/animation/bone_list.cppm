@@ -3,15 +3,11 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <iostream>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
-#include <cinttypes>
-#include <memory>
 
 export module pragma.shared:model.animation.bone_list;
+
+export import std.compat;
 
 export struct DLLNETWORK BoneList // Simplified Skeleton without an hierarchy
 {

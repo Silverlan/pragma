@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <cinttypes>
 
 export module pragma.shared:physics.ik.method;
+
+export import std.compat;
 
 // See http://math.ucsd.edu/~sbuss/ResearchWeb/ikmethods/index.html for more information
 export namespace util {

@@ -6,8 +6,6 @@ module;
 
 #include "pragma/logging.hpp"
 #include <sharedutils/magic_enum.hpp>
-#include <sstream>
-#include <string>
 
 module pragma.shared;
 

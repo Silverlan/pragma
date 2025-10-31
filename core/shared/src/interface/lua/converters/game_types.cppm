@@ -4,16 +4,8 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <array>
-#include <map>
-#include <unordered_map>
-#include <vector>
 
-#include <optional>
-#include <memory>
-#include <tuple>
 
-#include <cinttypes>
 
 export module pragma.shared:scripting.lua.converters.game_types;
 

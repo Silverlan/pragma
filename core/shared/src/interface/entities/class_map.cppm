@@ -2,19 +2,14 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <string>
-#include <typeindex>
-#include <unordered_map>
 
-#include <cinttypes>
 
-#include <memory>
 #include "pragma/lua/core.hpp"
 
-#include <optional>
-#include <vector>
 
 export module pragma.shared:entities.class_map;
+
+export import std;
 
 export {
 	template<class T>
@@ -44,7 +39,7 @@ export {
 		{
 			typename std::unordered_map<std::string, T *(*)()>::iterator i = m_factories.find(classname);
 			if(i == m_factories.end())
-				return NULL;
+				return nullptr;
 			return i->second;
 		}
 	};

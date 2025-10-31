@@ -4,12 +4,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <algorithm>
-#include <string>
 
-#include <cinttypes>
-#include <vector>
-#include <memory>
 
 export module pragma.shared:scripting.lua.libraries.ents;
 

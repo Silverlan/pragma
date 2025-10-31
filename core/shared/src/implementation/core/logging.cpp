@@ -2,11 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <cinttypes>
-#include <vector>
-#include <map>
-#include <unordered_set>
-#include <cstring>
 
 #include "pragma/logging.hpp"
 #include <sharedutils/magic_enum.hpp>
@@ -15,9 +10,6 @@ module;
 #include <spdlog/pattern_formatter.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
-#include <atomic>
-#include <memory>
-#include <string_view>
 
 module pragma.shared;
 

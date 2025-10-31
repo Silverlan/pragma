@@ -3,9 +3,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
 
 export module pragma.shared:audio.util;
+
+export import std;
 
 export namespace sound {
 	// Returns the full path, including extension (if the file was found)

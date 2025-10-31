@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <functional>
-#include <cinttypes>
 
 #include <clip2tri/clip2tri.h>
 #include "pragma/lua/core.hpp"

@@ -4,14 +4,9 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include <string>
 
 #include <sharedutils/magic_enum.hpp>
-#include <algorithm>
 #include <cassert>
-#include <functional>
-#include <iostream>
-#include <memory>
 
 module pragma.shared;
 
@@ -231,14 +226,14 @@ void pragma::physics::PhysObj::SetOrientation(const Quat &q)
 Quat pragma::physics::PhysObj::GetOrientation() const
 {
 	auto *o = GetCollisionObject();
-	if(o == NULL)
+	if(o == nullptr)
 		return uquat::identity();
 	return o->GetRotation();
 }
 Vector3 pragma::physics::PhysObj::GetPosition() const
 {
 	auto *o = GetCollisionObject();
-	if(o == NULL)
+	if(o == nullptr)
 		return Vector3(0, 0, 0);
 	auto r = o->GetPos();
 	//return r;

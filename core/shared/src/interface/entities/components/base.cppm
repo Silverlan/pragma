@@ -5,10 +5,6 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "pragma/logging.hpp"
 #include "pragma/lua/core.hpp"
-#include <iostream>
-#include <typeindex>
-#include <unordered_map>
-#include <variant>
 
 #ifdef _WIN32
 #if __cpp_lib_format >= 202207L
@@ -17,15 +13,9 @@ module;
 #endif
 #endif
 
-#include <optional>
 
-#include <cinttypes>
-#include <string>
-#include <memory>
 
-#include <functional>
 
-#include <vector>
 
 export module pragma.shared:entities.components.base;
 

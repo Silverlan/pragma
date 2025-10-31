@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <variant>
 
 export module pragma.shared:entities.member_type;
 

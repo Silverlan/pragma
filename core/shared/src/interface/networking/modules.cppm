@@ -3,11 +3,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
-#include <string_view>
-#include <vector>
 
 export module pragma.shared:networking.modules;
+
+export import std;
 
 export namespace pragma::networking {
 	constexpr std::string_view NET_LIBRARY_MODULE_LOCATION = "networking";

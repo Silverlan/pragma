@@ -4,12 +4,12 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <memory>
-#include <system_error>
-
-#undef GetMessage
 
 export module pragma.shared:scripting.lua.classes.error_code;
+
+export import std.compat;
+
+#undef GetMessage
 
 export {
 	class DLLNETWORK ErrorCode {

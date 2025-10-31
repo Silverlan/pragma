@@ -2,13 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
 #include "pragma/networkdefinitions.h"
 #include <cassert>
-#include <functional>
-#include <memory>
-#include <string>
 
 module pragma.shared;
 
@@ -953,7 +949,7 @@ void pragma::asset::WmdFormatHandler::LoadLODData(unsigned short version, pragma
 	// Obsolete, because incompatible with new format (LODs won't work for these models)
 	/*unsigned char numLODs = Read<unsigned char>();
 	auto &baseMeshes = mdl.GetBaseMeshes();
-	LODInfo *lodBase = NULL;
+	LODInfo *lodBase = nullptr;
 	for(unsigned char i=0;i<numLODs;i++)
 	{
 		unsigned char lod = Read<unsigned char>();
@@ -976,7 +972,7 @@ void pragma::asset::WmdFormatHandler::LoadLODData(unsigned short version, pragma
 			LODInfo *info = mdl.AddLODInfo(lod,meshIDs);
 			lodBase = info;
 		}
-		else if(lodBase != NULL)
+		else if(lodBase != nullptr)
 		{
 			for(unsigned int j=0;j<lodBase->meshIDs.size();j++)
 			{

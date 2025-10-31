@@ -3,7 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <unordered_set>
 
 export module pragma.shared:entities.components.base_static_bvh_user;
 

@@ -3,12 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <deque>
-#include <mutex>
 
-#include <memory>
-#include <string>
-#include <unordered_map>
 
 export module pragma.shared:networking.message_tracker;
 

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <cinttypes>
 
 export module pragma.shared:scripting.lua.handle_holder;
 

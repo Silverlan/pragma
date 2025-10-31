@@ -3,15 +3,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <optional>
-#include <string>
-#include <vector>
 
-#include <cinttypes>
-#include <memory>
-#include <unordered_map>
 
-#include <ostream>
 
 export module pragma.shared:model.animation.animation;
 

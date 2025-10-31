@@ -3,11 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
-#include <unordered_map>
 
-#include <cinttypes>
-#include <vector>
 
 export module pragma.shared:model.animation.animation_event;
 

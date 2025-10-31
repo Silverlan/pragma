@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <memory>
-#include <string>
 
 module pragma.shared;
 
@@ -193,7 +190,7 @@ void ControllerPhysObj::Simulate(double tDelta, bool bIgnoreGravity)
 	if(IsDisabled() || IsKinematic())
 		return;
 	auto *owner = GetOwner();
-	if(owner == NULL || m_collisionObject == nullptr)
+	if(owner == nullptr || m_collisionObject == nullptr)
 		return;
 	//NetworkState *state = owner->GetNetworkState();
 	//Game *game = state->GetGameState();

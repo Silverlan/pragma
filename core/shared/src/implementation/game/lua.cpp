@@ -2,14 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <functional>
-#include <unordered_map>
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <chrono>
-#include <memory>
-#include <sstream>
 
 module pragma.shared;
 
@@ -110,7 +105,7 @@ void pragma::Game::LoadLuaEntities(std::string subPath)
 	path += subPath;
 	path += "\\*";
 	std::vector<std::string> dirs;
-	FileManager::FindFiles(path.c_str(), NULL, &dirs);
+	FileManager::FindFiles(path.c_str(), nullptr, &dirs);
 	for(unsigned int i = 0; i < dirs.size(); i++)
 		LoadLuaEntity(subPath, dirs[1]);
 }

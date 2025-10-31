@@ -4,7 +4,6 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <string_view>
 
 export module pragma.shared:scripting.lua.converters.utf8_string;
 

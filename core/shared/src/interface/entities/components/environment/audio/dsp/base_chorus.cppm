@@ -3,9 +3,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
 
 export module pragma.shared:entities.components.environment.audio.dsp.base_chorus;
+
+export import std.compat;
 
 export class DLLNETWORK BaseEnvSoundDspChorus {
   protected:

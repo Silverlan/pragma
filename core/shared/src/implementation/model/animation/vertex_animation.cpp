@@ -2,15 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <vector>
-#include <cmath>
 
-#include <algorithm>
-#include <memory>
-#include <set>
-#include <string>
 
 module pragma.shared;
 
@@ -242,7 +235,7 @@ VertexAnimation::VertexAnimation(const VertexAnimation &other) : m_name(other.m_
 	m_meshAnims.reserve(other.m_meshAnims.size());
 	for(auto &anim : m_meshAnims)
 		m_meshAnims.push_back(std::make_shared<MeshVertexAnimation>(*anim));
-	static_assert(sizeof(VertexAnimation) == 80, "Update this function when making changes to this class!");
+	static_assert(VertexAnimation::layout_version == 1, "Update this function when making changes to this class!");
 }
 
 bool VertexAnimation::operator==(const VertexAnimation &other) const
@@ -253,7 +246,7 @@ bool VertexAnimation::operator==(const VertexAnimation &other) const
 		if(*m_meshAnims[i] != *other.m_meshAnims[i])
 			return false;
 	}
-	static_assert(sizeof(VertexAnimation) == 80, "Update this function when making changes to this class!");
+	static_assert(VertexAnimation::layout_version == 1, "Update this function when making changes to this class!");
 	return true;
 }
 

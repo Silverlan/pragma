@@ -3,8 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <optional>
-#include <string>
 
 export module pragma.shared:entities.member_reference;
 

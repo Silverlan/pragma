@@ -2,19 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <optional>
-#include <vector>
-#include <mutex>
-#include <cstring>
-#include <condition_variable>
 
 #include "pragma/lua/core.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
-#include <functional>
-#include <memory>
-#include <sstream>
 
 module pragma.shared;
 
@@ -351,7 +342,7 @@ static Lua::var<bool, Lua::opt<std::string>, ::util::FunctionalParallelWorker> e
 }
 void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 {
-	mod[luabind::def("is_valid", static_cast<bool (*)(lua_State *)>(Lua::util::is_valid)), luabind::def("is_valid", static_cast<bool (*)(lua_State *, const luabind::object &)>(Lua::util::is_valid)),
+	mod[(luabind::def("is_valid", static_cast<bool (*)(lua_State *)>(Lua::util::is_valid)), luabind::def("is_valid", static_cast<bool (*)(lua_State *, const luabind::object &)>(Lua::util::is_valid)),
 	  luabind::def("remove", static_cast<void (*)(lua_State *, const luabind::object &)>(remove)), luabind::def("remove", static_cast<void (*)(lua_State *, const luabind::object &, bool)>(remove)),
 	  luabind::def(
 	    "remove", +[]() {}),
@@ -420,7 +411,7 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 		    ::util::HairGenerator gen {};
 		    gen.SetMeshDataInterface(std::move(meshInterface));
 		    return gen.Generate(hairPerArea);
-	    })];
+	    }))];
 	Lua::util::register_world_data(l, mod);
 	auto defHairStrandData = luabind::class_<::util::HairStrandData>("HairStrandData");
 	defHairStrandData.def(
@@ -521,10 +512,10 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 void Lua::util::register_shared(lua_State *l, luabind::module_ &mod)
 {
 	register_shared_generic(l, mod);
-	mod[luabind::def("is_valid_entity", static_cast<bool (*)(lua_State *)>(Lua::util::is_valid_entity)), luabind::def("is_valid_entity", static_cast<bool (*)(lua_State *, const luabind::object &)>(Lua::util::is_valid_entity)),
+	mod[(luabind::def("is_valid_entity", static_cast<bool (*)(lua_State *)>(Lua::util::is_valid_entity)), luabind::def("is_valid_entity", static_cast<bool (*)(lua_State *, const luabind::object &)>(Lua::util::is_valid_entity)),
 	  luabind::def("shake_screen", static_cast<void (*)(lua_State *, const Vector3 &, float, float, float, float, float, float)>(Lua::util::shake_screen)), luabind::def("shake_screen", static_cast<void (*)(lua_State *, float, float, float, float, float)>(Lua::util::shake_screen)),
 	  luabind::def("read_scene_file", Lua::util::read_scene_file), luabind::def("is_cli_only", &pragma::Engine::IsCLIOnly), luabind::def("is_sandboxed", &pragma::Engine::IsSandboxed), luabind::def("is_managed_by_package_manager", &pragma::Engine::IsManagedByPackageManager),
-	  luabind::def("get_program_path", +[]() { return ::util::Path::CreatePath(::util::get_program_path()).GetString(); }), luabind::def("get_program_write_path", +[]() { return ::util::Path::CreatePath(filemanager::get_program_write_path()).GetString(); })];
+	  luabind::def("get_program_path", +[]() { return ::util::Path::CreatePath(::util::get_program_path()).GetString(); }), luabind::def("get_program_write_path", +[]() { return ::util::Path::CreatePath(filemanager::get_program_write_path()).GetString(); }))];
 }
 static Lua::mult<bool, Lua::opt<std::string>> exec_python(lua_State *l, const std::string &fileName, const std::vector<std::string> &args)
 {
@@ -546,7 +537,7 @@ static Lua::mult<bool, Lua::opt<std::string>> exec_python(lua_State *l, const st
 void Lua::util::register_library(lua_State *l)
 {
 	auto pythonMod = luabind::module(l, "python");
-	pythonMod[luabind::def(
+	pythonMod[(luabind::def(
 	            "run",
 	            +[](lua_State *l, const std::string &code) -> Lua::mult<bool, Lua::opt<std::string>> {
 		            auto res = pragma::python::run(code.c_str());
@@ -559,7 +550,7 @@ void Lua::util::register_library(lua_State *l)
 		            return luabind::object {l, res};
 	            }),
 	  luabind::def("exec", static_cast<Lua::mult<bool, Lua::opt<std::string>> (*)(lua_State *, const std::string &)>(&exec_python)),
-	  luabind::def("exec", static_cast<Lua::mult<bool, Lua::opt<std::string>> (*)(lua_State *, const std::string &, const std::vector<std::string> &)>(&exec_python)), luabind::def("init_blender", &pragma::python::init_blender), luabind::def("reload", &pragma::python::reload)];
+	  luabind::def("exec", static_cast<Lua::mult<bool, Lua::opt<std::string>> (*)(lua_State *, const std::string &, const std::vector<std::string> &)>(&exec_python)), luabind::def("init_blender", &pragma::python::init_blender), luabind::def("reload", &pragma::python::reload))];
 	auto utilMod = luabind::module(l, "util");
 	auto defRigConfig = luabind::class_<pragma::ik::RigConfig>("IkRigConfig");
 	defRigConfig.def(luabind::constructor<>());
@@ -648,7 +639,7 @@ void Lua::util::register_library(lua_State *l)
 	defRenderTile.def_readwrite("w", &pragma::rendering::Tile::w);
 	defRenderTile.def_readwrite("h", &pragma::rendering::Tile::h);
 	utilMod[defRenderTile];
-	utilMod[luabind::def("splash_damage", splash_damage), luabind::def("get_date_time", static_cast<std::string (*)(const std::string &)>(Lua::util::date_time)), luabind::def("get_date_time", static_cast<std::string (*)()>(Lua::util::date_time)),
+	utilMod[(luabind::def("splash_damage", splash_damage), luabind::def("get_date_time", static_cast<std::string (*)(const std::string &)>(Lua::util::date_time)), luabind::def("get_date_time", static_cast<std::string (*)()>(Lua::util::date_time)),
 	  luabind::def("is_table", static_cast<bool (*)(luabind::argument)>(Lua::util::is_table)), luabind::def("is_table", static_cast<bool (*)()>(Lua::util::is_table)),
 	  luabind::def("get_faded_time_factor", static_cast<float (*)(float, float, float, float)>(Lua::util::get_faded_time_factor)), luabind::def("get_faded_time_factor", static_cast<float (*)(float, float, float)>(Lua::util::get_faded_time_factor)),
 	  luabind::def("get_scale_factor", static_cast<float (*)(float, float, float)>(Lua::util::get_scale_factor)), luabind::def("get_scale_factor", static_cast<float (*)(float, float)>(Lua::util::get_scale_factor)),
@@ -665,7 +656,7 @@ void Lua::util::register_library(lua_State *l)
 		    auto seed = std::hash<std::string> {}(str);
 		    return util::Uuid {::util::generate_uuid_v4(seed)};
 	    }),
-	  luabind::def("run_updater", +[](pragma::Engine &engine) { engine.SetRunUpdaterOnClose(true); })];
+	  luabind::def("run_updater", +[](pragma::Engine &engine) { engine.SetRunUpdaterOnClose(true); }))];
 	auto defUuid = luabind::class_<util::Uuid>("Uuid");
 	defUuid.def("__tostring", +[](const util::Uuid &uuid) { return ::util::uuid_to_string(uuid.value); });
 	defUuid.def(

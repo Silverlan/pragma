@@ -3,17 +3,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <functional>
-#include <iostream>
-#include <vector>
 
-#include <memory>
-#include <string>
-#include <unordered_map>
 
-#include <optional>
 
-#include <cinttypes>
 
 #include "pragma/lua/core.hpp"
 
@@ -43,7 +35,7 @@ export {
 		Vector3 m_centerOfMass = {};
 		std::vector<Vector3> m_vertices;
 		bool m_bValid = true;
-		bool HasVertex(const PolyVertex &v, Vector3 *vThis = NULL);
+		bool HasVertex(const PolyVertex &v, Vector3 *vThis = nullptr);
 		void Localize();
 		void Localize(const Vector3 &center);
 	public:

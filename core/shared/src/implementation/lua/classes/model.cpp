@@ -2,13 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <optional>
 
 #include "pragma/lua/core.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
-#include <functional>
-#include <memory>
-#include <sstream>
 
 module pragma.shared;
 
@@ -927,14 +923,14 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<pragma::Model> &cl
 			                           Lua::PushBool(l, result);
 	                           }));
 
-	classDefAnimation.scope[luabind::def("Create", static_cast<std::shared_ptr<::pragma::animation::Animation> (*)()>(&::pragma::animation::Animation::Create)),
+	classDefAnimation.scope[(luabind::def("Create", static_cast<std::shared_ptr<::pragma::animation::Animation> (*)()>(&::pragma::animation::Animation::Create)),
 	  luabind::def("Create", static_cast<std::shared_ptr<::pragma::animation::Animation> (*)(const ::pragma::animation::Animation &, ::pragma::animation::Animation::ShareMode)>(&::pragma::animation::Animation::Create)),
 	  luabind::def("Create", static_cast<std::shared_ptr<::pragma::animation::Animation> (*)(const ::pragma::animation::Animation &, ::pragma::animation::Animation::ShareMode)>(&::pragma::animation::Animation::Create),
-	    luabind::default_parameter_policy<2, ::pragma::animation::Animation::ShareMode::None> {})];
-	classDefAnimation.scope[luabind::def("Load", &Lua::Animation::Load), luabind::def("RegisterActivity", &Lua::Animation::RegisterActivityEnum), luabind::def("RegisterEvent", &Lua::Animation::RegisterEventEnum), luabind::def("GetActivityEnums", &Lua::Animation::GetActivityEnums),
+	    luabind::default_parameter_policy<2, ::pragma::animation::Animation::ShareMode::None> {}))];
+	classDefAnimation.scope[(luabind::def("Load", &Lua::Animation::Load), luabind::def("RegisterActivity", &Lua::Animation::RegisterActivityEnum), luabind::def("RegisterEvent", &Lua::Animation::RegisterEventEnum), luabind::def("GetActivityEnums", &Lua::Animation::GetActivityEnums),
 	  luabind::def("GetEventEnums", &Lua::Animation::GetEventEnums), luabind::def("GetActivityEnumName", &Lua::Animation::GetActivityEnumName), luabind::def("GetEventEnumName", &Lua::Animation::GetEventEnumName), luabind::def("FindActivityId", &Lua::Animation::FindActivityId),
-	  luabind::def("FindEventId", &Lua::Animation::FindEventId), classDefFrame];
-	classDefAnimation.scope[luabind::def("Load", static_cast<void (*)(lua_State *, ::udm::AssetData &)>([](lua_State *l, ::udm::AssetData &assetData) {
+	  luabind::def("FindEventId", &Lua::Animation::FindEventId), classDefFrame)];
+	classDefAnimation.scope[(luabind::def("Load", static_cast<void (*)(lua_State *, ::udm::AssetData &)>([](lua_State *l, ::udm::AssetData &assetData) {
 		std::string err;
 		auto anim = pragma::animation::Animation::Load(assetData, err);
 		if(anim == nullptr) {
@@ -943,7 +939,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<pragma::Model> &cl
 			return;
 		}
 		Lua::Push(l, anim);
-	}))];
+	})))];
 	//for(auto &pair : ANIMATION_EVENT_NAMES)
 	//	classDefAnimation.add_static_constant(pair.second.c_str(),pair.first);
 
@@ -973,7 +969,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<pragma::Model> &cl
 	classDef.scope[defBlendShapeInfo];
 
 	auto defRig = luabind::class_<pragma::animation::MetaRig>("MetaRig");
-	defRig.scope[luabind::def(
+	defRig.scope[(luabind::def(
 	  "load", +[](lua_State *l, const std::string &fileName, const pragma::animation::Skeleton &skeleton) -> Lua::variadic<std::shared_ptr<pragma::animation::MetaRig>, std::pair<bool, std::string>> {
 		  auto udmData = ::udm::Data::Load(fileName);
 		  if(!udmData)
@@ -984,7 +980,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<pragma::Model> &cl
 		  if(!res)
 			  return luabind::object {l, std::pair<bool, std::string> {false, err}};
 		  return luabind::object {l, metaRig};
-	  })];
+	  }))];
 	defRig.def_readwrite("rigType", &pragma::animation::MetaRig::rigType);
 	defRig.def_readwrite("forwardFacingRotationOffset", &pragma::animation::MetaRig::forwardFacingRotationOffset);
 	defRig.def_readwrite("forwardAxis", &pragma::animation::MetaRig::forwardAxis);

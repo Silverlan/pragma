@@ -3,8 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <cinttypes>
-#include <type_traits>
 
 export module pragma.shared:assets.vtf_info;
 

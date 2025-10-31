@@ -3,9 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <exception>
-#include <memory>
-#include <string>
 
 export module pragma.shared:core.engine_init;
 

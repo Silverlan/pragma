@@ -3,9 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
 
-#include <ostream>
 
 export module pragma.shared:entities.components.base_point_at_target;
 

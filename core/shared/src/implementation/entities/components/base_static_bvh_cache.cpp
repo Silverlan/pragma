@@ -3,8 +3,6 @@
 module;
 
 #include "pragma/logging.hpp"
-#include <algorithm>
-#include <memory>
 
 module pragma.shared;
 

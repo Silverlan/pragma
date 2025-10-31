@@ -3,10 +3,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <iostream>
-#include <limits>
 
 export module pragma.shared:math.pid_controller;
+
+export import std;
 
 export {
 	namespace util {

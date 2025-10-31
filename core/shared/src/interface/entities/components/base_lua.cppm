@@ -5,19 +5,9 @@ module;
 #include "pragma/networkdefinitions.h"
 #include <any>
 #include "pragma/lua/core.hpp"
-#include <string>
 
-#include <cinttypes>
-#include <vector>
-#include <memory>
-#include <functional>
-#include <unordered_map>
 
-#include <array>
-#include <optional>
-#include <tuple>
 
-#include <ostream>
 
 export module pragma.shared:entities.components.base_lua;
 

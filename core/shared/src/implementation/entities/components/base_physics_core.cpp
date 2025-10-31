@@ -2,12 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <algorithm>
-#include <functional>
-#include <memory>
-#include <string>
 
 module pragma.shared;
 
@@ -712,7 +707,7 @@ void BasePhysicsComponent::SetKinematic(bool b)
 {
 	umath::set_flag(m_stateFlags, StateFlags::Kinematic, b);
 	pragma::physics::PhysObj *phys = GetPhysicsObject();
-	if(phys == NULL || phys->IsStatic())
+	if(phys == nullptr || phys->IsStatic())
 		return;
 	PhysObjKinematic *kinematic = dynamic_cast<PhysObjKinematic *>(phys);
 	kinematic->SetKinematic(b);

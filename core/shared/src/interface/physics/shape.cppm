@@ -3,8 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <vector>
 
 #include "pragma/lua/core.hpp"
 

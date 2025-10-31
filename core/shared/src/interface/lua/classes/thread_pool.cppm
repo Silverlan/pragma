@@ -4,17 +4,12 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <string>
 
-#include <cinttypes>
-#include <vector>
-#include <functional>
-#include <memory>
-#include <unordered_map>
 
 export module pragma.shared:scripting.lua.classes.thread_pool;
 
 export import :util.thread_pool;
+export import std.compat;
 
 export namespace pragma::lua {
 	struct DLLNETWORK LuaThreadTask {

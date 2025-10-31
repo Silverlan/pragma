@@ -3,11 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <optional>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
 export module pragma.shared:map.entity_data;
 

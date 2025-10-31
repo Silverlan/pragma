@@ -2,13 +2,11 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
 #include "pragma/lua/core.hpp"
 
 #include "noise/noise.h"
 #include "noiseutils.h"
-#include <memory>
 
 module pragma.shared;
 

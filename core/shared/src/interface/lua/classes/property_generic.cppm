@@ -2,16 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <functional>
-#include <memory>
 
-#include <cinttypes>
 
-#include <vector>
 
-#include <optional>
-#include <unordered_map>
-#include <tuple>
 
 export module pragma.shared:scripting.lua.classes.property_generic;
 

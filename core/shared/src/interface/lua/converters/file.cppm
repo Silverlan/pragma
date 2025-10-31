@@ -3,11 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
 
-#include <cinttypes>
-#include <optional>
-#include <vector>
 #include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.converters.file;

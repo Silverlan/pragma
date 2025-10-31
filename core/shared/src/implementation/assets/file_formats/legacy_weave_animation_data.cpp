@@ -2,12 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <algorithm>
-#include <functional>
-#include <memory>
-#include <string>
 
 module pragma.shared;
 
@@ -177,9 +172,9 @@ std::shared_ptr<pragma::animation::Animation> FWAD::Load(unsigned short version,
 	path += animation;
 	const char *cPath = path.c_str();
 	auto f = FileManager::OpenFile(cPath, "rb");
-	if(f == NULL) {
+	if(f == nullptr) {
 		Con::cout << "WARNING: Unable to open animation '" << animation << "': File not found!" << Con::endl;
-		return NULL;
+		return nullptr;
 	}
 	fsys::File fp {f};
 	auto anim = ReadData(version, fp);

@@ -3,7 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
 
 export module pragma.shared:audio.effect_params;
 

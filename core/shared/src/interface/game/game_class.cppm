@@ -5,18 +5,8 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "pragma/encryption/md5.h"
 #include "pragma/lua/ldefinitions.h"
-#include <deque>
-#include <vector>
 
-#include <cinttypes>
-#include <optional>
-#include <string>
-#include <functional>
-#include <memory>
-#include <unordered_map>
 
-#include <queue>
-#include <cstring>
 
 export module pragma.shared:game.game;
 
@@ -192,7 +182,7 @@ export {
 			bool m_bCollisionsEnabled = true;
 			bool CollisionTest();
 			bool CollisionTest(Vector3 *pos);
-			bool CollisionTest(pragma::BasePlayerComponent &pl, float *distance, Vector3 *hitnormal = NULL);
+			bool CollisionTest(pragma::BasePlayerComponent &pl, float *distance, Vector3 *hitnormal = nullptr);
 			void CollisionTest(pragma::ecs::BaseEntity *a, pragma::ecs::BaseEntity *b);
 			void EnableCollisions(bool b);
 			//
@@ -400,8 +390,8 @@ export {
 		T *Game::GetConVar(const std::string &scmd)
 		{
 			ConConf *cv = GetConVar(scmd);
-			if(cv == NULL)
-				return NULL;
+			if(cv == nullptr)
+				return nullptr;
 			return static_cast<T *>(cv);
 		}
 

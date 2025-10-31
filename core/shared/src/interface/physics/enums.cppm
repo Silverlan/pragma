@@ -3,10 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <cinttypes>
-#include <limits>
 
-#include <vector>
 
 export module pragma.shared:physics.enums;
 

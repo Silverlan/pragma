@@ -4,9 +4,6 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include <iostream>
-#include <memory>
-#include <string>
 
 module pragma.shared;
 

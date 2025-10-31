@@ -3,17 +3,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
 
-#include <cinttypes>
-#include <optional>
-#include <memory>
-#include <functional>
-#include <thread>
-#include <unordered_map>
 #include "pragma/lua/core.hpp"
 
-#include <ostream>
 
 export module pragma.shared:scripting.lua.classes.convar;
 

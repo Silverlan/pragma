@@ -4,14 +4,9 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <optional>
-#include <string>
-#include <unordered_map>
 
 #undef RegisterClass
 
-#include <cinttypes>
-#include <vector>
 
 export module pragma.shared:scripting.lua.class_manager;
 

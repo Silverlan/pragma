@@ -3,16 +3,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
 
-#include <cinttypes>
-#include <vector>
-#include <functional>
-#include <memory>
-#include <unordered_map>
 #include "pragma/lua/core.hpp"
 
-#include <ostream>
 
 export module pragma.shared:entities.components.environment.audio.base_sound;
 

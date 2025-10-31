@@ -3,15 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <vector>
-#include <cmath>
-#include <cinttypes>
-#include <optional>
-#include <functional>
-#include <thread>
 #include "pragma/lua/core.hpp"
 
 export module pragma.shared:model.model;
@@ -39,6 +30,8 @@ export {
 	namespace pragma {
 		class DLLNETWORK ModelMeshGroup : public std::enable_shared_from_this<pragma::ModelMeshGroup> {
 		public:
+			static constexpr std::uint32_t layout_version = 1;
+
 			static std::shared_ptr<pragma::ModelMeshGroup> Create(const std::string &name);
 			static std::shared_ptr<pragma::ModelMeshGroup> Create(const pragma::ModelMeshGroup &other);
 			bool operator==(const pragma::ModelMeshGroup &other) const;
@@ -116,6 +109,8 @@ export {
 
 	#pragma pack(push, 1)
 	struct DLLNETWORK Eyeball {
+		static constexpr std::uint32_t layout_version = 1;
+		
 		std::string name = "";
 		int32_t boneIndex = -1;
 		Vector3 origin = {};
@@ -129,6 +124,8 @@ export {
 
 		float irisScale = 0.f;
 		struct LidFlexDesc {
+			static constexpr std::uint32_t layout_version = 1;
+
 			int32_t lidFlexIndex = -1;
 			int32_t raiserFlexIndex = -1;
 			int32_t neutralFlexIndex = -1;
@@ -177,6 +174,8 @@ export {
 	namespace pragma {
 		class DLLNETWORK Model : public std::enable_shared_from_this<pragma::Model> {
 		public:
+			static constexpr std::uint32_t layout_version = 1;
+			
 			Model();
 			virtual void Remove();
 			enum class Flags : uint32_t {
@@ -201,6 +200,8 @@ export {
 			enum class StateFlags : uint32_t { None = 0u, Valid = 1u, AllMaterialsLoaded = Valid << 1u, MaterialsLoadInitiated = AllMaterialsLoaded << 1u };
 
 			struct DLLNETWORK MetaInfo {
+				static constexpr std::uint32_t layout_version = 1;
+
 				MetaInfo();
 				std::vector<std::string> includes;
 				std::vector<std::string> texturePaths;

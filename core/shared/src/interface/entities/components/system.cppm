@@ -3,16 +3,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <string>
-#include <typeindex>
-#include <vector>
 
-#include <cinttypes>
-#include <unordered_map>
 #include "pragma/lua/core.hpp"
 
-#include <ostream>
 
 export module pragma.shared:entities.system;
 

@@ -3,17 +3,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <optional>
-#include <string>
-#include <typeindex>
-#include <vector>
 
-#include <functional>
-#include <queue>
 #include "pragma/lua/core.hpp"
 
-#include <ostream>
 
 export module pragma.shared:entities.iterator;
 

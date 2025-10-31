@@ -29,7 +29,6 @@ subject to the following restrictions:
 
 #include "pragma/buss_ik/LinearR4.h"
 
-#include <assert.h>
 const VectorR4 VectorR4::Zero(0.0, 0.0, 0.0, 0.0);
 const VectorR4 VectorR4::UnitX( 1.0, 0.0, 0.0, 0.0);
 const VectorR4 VectorR4::UnitY( 0.0, 1.0, 0.0, 0.0);

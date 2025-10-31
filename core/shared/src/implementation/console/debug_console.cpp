@@ -3,7 +3,6 @@
 module;
 
 #include "pragma/logging.hpp"
-#include <iostream>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -11,7 +10,6 @@ module;
 #include <unistd.h>
 #include <fcntl.h>
 #include <termios.h>
-#include <cstdio>
 #endif
 
 module pragma.shared;

@@ -3,10 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <cinttypes>
-#include <memory>
-#include <string>
-#include <vector>
 
 export module pragma.shared:util.tga;
 

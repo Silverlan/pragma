@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <memory>
-#include <string>
 
 export module pragma.shared:game.savegame;
 

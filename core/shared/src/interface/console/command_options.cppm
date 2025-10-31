@@ -3,11 +3,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
-#include <unordered_map>
-#include <vector>
 
 export module pragma.shared:console.command_options;
+
+export import std;
 
 export namespace pragma::console {
 	struct DLLNETWORK CommandOption {

@@ -2,13 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <cmath>
 
-#include <functional>
-#include <memory>
-#include <string>
 
 module pragma.shared;
 
@@ -296,7 +291,7 @@ void Poly::RemoveDisplacement()
 void Poly::SetDisplacement(std::shared_ptr<DispInfo> disp) { m_displacement = disp; }
 
 std::shared_ptr<DispInfo> Poly::GetDisplacement() { return m_displacement; }
-bool Poly::IsDisplacement() { return (m_displacement == NULL) ? false : true; }
+bool Poly::IsDisplacement() { return (m_displacement == nullptr) ? false : true; }
 
 static void build_displacement_triangles(std::vector<glm::vec3> &sideVerts, unsigned int start, glm::vec3 &nu, glm::vec3 &nv, float sw, float sh, float ou, float ov, float su, float sv, unsigned char power, std::vector<std::vector<glm::vec3>> &normals,
   std::vector<std::vector<glm::vec3>> &offsets, std::vector<std::vector<float>> &distances, unsigned char numAlpha, std::vector<std::vector<glm::vec2>> &alphas, std::vector<glm::vec3> &outVertices, std::vector<glm::vec2> &outUvs, std::vector<unsigned int> &outTriangles,
@@ -328,7 +323,7 @@ static void build_displacement_triangles(std::vector<glm::vec3> &sideVerts, unsi
 	glm::vec3 cur = sortedSideVerts[0];
 	for(int col = 0; col < rows; col++) {
 		std::vector<glm::vec3> &cNormals = normals[col];
-		std::vector<glm::vec2> *cAlphas = (numAlpha > 0) ? &alphas[col] : NULL;
+		std::vector<glm::vec2> *cAlphas = (numAlpha > 0) ? &alphas[col] : nullptr;
 		std::vector<float> &cDistances = distances[col];
 		std::vector<glm::vec3> &cOffsets = offsets[col];
 

@@ -5,13 +5,6 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-#include <cinttypes>
-#include <optional>
-#include <memory>
-#include <string>
-#include <functional>
-#include <thread>
-#include <unordered_map>
 
 export module pragma.shared:scripting.lua.classes.collision_mesh;
 

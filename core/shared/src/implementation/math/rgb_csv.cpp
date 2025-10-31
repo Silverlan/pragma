@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <cmath>
-#include <string>
 
 module pragma.shared;
 
@@ -38,7 +35,7 @@ util::HSV util::rgb_to_hsv(const Color &inC)
 		// if max is 0, then r = g = b = 0
 		// s = 0, h is undefined
 		out.s = 0.0;
-		out.h = NAN; // its now undefined
+		out.h = std::numeric_limits<double>::quiet_NaN(); // its now undefined
 		return out;
 	}
 	if(in.r >= max)                    // > is bogus, just keeps compilor happy

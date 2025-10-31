@@ -3,14 +3,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <unordered_set>
 
-#include <vector>
-#include <memory>
-#include <functional>
-#include <queue>
 
-#include <ostream>
 
 export module pragma.shared:entities.components.base_static_bvh_cache;
 

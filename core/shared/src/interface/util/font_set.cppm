@@ -3,11 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <cinttypes>
-#include <optional>
-#include <string>
-#include <string_view>
-#include <vector>
 
 export module pragma.shared:util.font_set;
 

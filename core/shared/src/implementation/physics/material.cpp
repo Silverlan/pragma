@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
 #include "pragma/lua/core.hpp"
 
-#include <string>
 
 module pragma.shared;
 

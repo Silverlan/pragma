@@ -3,16 +3,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <array>
-#include <string>
-#include <unordered_map>
 
-#include <cinttypes>
-#include <optional>
-#include <vector>
-#include <memory>
 
-#include <ostream>
 
 export module pragma.shared:model.animation.meta_rig;
 

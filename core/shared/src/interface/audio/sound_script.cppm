@@ -3,13 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <string>
 
-#include <vector>
-#include <functional>
-#include <map>
-#include <unordered_map>
 #include "pragma/lua/core.hpp"
 
 export module pragma.shared:audio.sound_script;

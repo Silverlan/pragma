@@ -4,11 +4,6 @@ module;
 
 #include "pragma/lua/core.hpp"
 #include <sharedutils/magic_enum.hpp>
-#include <functional>
-#include <memory>
-#include <sstream>
-#include <thread>
-#include <mutex>
 
 module pragma.shared;
 

@@ -2,12 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <vector>
 
-#include <algorithm>
-#include <string>
 
 module pragma.shared;
 
@@ -86,10 +82,10 @@ void BasePointConstraintComponent::InitializeConstraint()
 	GetTargetEntities(entsTgt);
 	auto pPhysComponentSrc = entSrc->GetPhysicsComponent();
 	RigidPhysObj *physSrc = pPhysComponentSrc ? dynamic_cast<RigidPhysObj *>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
-	if(physSrc == NULL)
+	if(physSrc == nullptr)
 		return;
 	auto *bodySrc = physSrc->GetRigidBody();
-	if(bodySrc == NULL)
+	if(bodySrc == nullptr)
 		return;
 	for(unsigned int i = 0; i < entsTgt.size(); i++)
 		InitializeConstraint(entSrc, entsTgt[i]);

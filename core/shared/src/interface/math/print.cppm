@@ -3,8 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <functional>
-#include <iostream>
 
 export module pragma.shared:math.print;                                                                                                                                                                                                                                                          \
 

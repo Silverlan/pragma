@@ -3,7 +3,6 @@
 module;
 
 #include <sharedutils/magic_enum.hpp>
-#include <iostream>
 
 module pragma.shared;
 

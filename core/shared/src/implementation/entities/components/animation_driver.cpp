@@ -7,7 +7,6 @@ module;
 #include "pragma/logging.hpp"
 #include <sharedutils/magic_enum.hpp>
 #include <cassert>
-#include <memory>
 
 module pragma.shared;
 

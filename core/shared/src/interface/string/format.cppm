@@ -3,9 +3,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sstream>
-#include <string>
 
 export module pragma.shared:string.format;
+
+export import std;
 
 export std::string DLLNETWORK FormatTime(double dtm);

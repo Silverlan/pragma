@@ -4,12 +4,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <condition_variable>
-#include <mutex>
-#include <queue>
 
-#include <optional>
-#include <functional>
 
 export module pragma.shared:scripting.lua.classes.parallel_job;
 

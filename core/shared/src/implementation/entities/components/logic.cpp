@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
 #include "pragma/lua/core.hpp"
 
-#include <string>
 
 module pragma.shared;
 
@@ -26,7 +24,7 @@ void LogicComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::
 
 void LogicComponent::OnTick(double dt)
 {
-	//if(contact != NULL)
+	//if(contact != nullptr)
 	//{
 	/*if(contact->actor->isRigidDynamic())
 		{
@@ -45,7 +43,7 @@ void LogicComponent::OnTick(double dt)
 			std::cout<<"CONTACT!"<<std::endl;
 		}
 		delete contact;
-		contact = NULL;*/
+		contact = nullptr;*/
 	//}
 
 	auto hThis = GetHandle();

@@ -3,9 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <stdint.h>
-#include <unordered_map>
-#include <vector>
 
 export module pragma.shared:math.ico_sphere;
 

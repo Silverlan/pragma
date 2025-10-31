@@ -3,10 +3,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <fstream>
-#include <streambuf>
 
 export module pragma.shared:console.debug_console;
+
+export import std;
 
 export class DLLNETWORK DebugConsole {
   public:

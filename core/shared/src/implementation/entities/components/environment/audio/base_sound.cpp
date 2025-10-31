@@ -2,11 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <functional>
-#include <memory>
-#include <string>
 
 module pragma.shared;
 
@@ -98,17 +94,17 @@ void BaseEnvSoundComponent::Initialize()
 	});
 	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
-		ALSound *snd = (m_sound != NULL) ? m_sound.get() : NULL;
+		ALSound *snd = (m_sound != nullptr) ? m_sound.get() : nullptr;
 		if(ustring::compare<std::string>(inputData.input, "play", false)) {
-			if(snd != NULL)
+			if(snd != nullptr)
 				snd->Play();
 		}
 		else if(ustring::compare<std::string>(inputData.input, "stop", false)) {
-			if(snd != NULL)
+			if(snd != nullptr)
 				snd->Stop();
 		}
 		else if(ustring::compare<std::string>(inputData.input, "toggle", false)) {
-			if(snd != NULL) {
+			if(snd != nullptr) {
 				if(snd->IsPlaying())
 					snd->Pause();
 				else
@@ -116,81 +112,81 @@ void BaseEnvSoundComponent::Initialize()
 			}
 		}
 		else if(ustring::compare<std::string>(inputData.input, "fadein", false)) {
-			if(snd != NULL) {
+			if(snd != nullptr) {
 				snd->FadeIn(util::to_float(inputData.data));
 			}
 			else if(ustring::compare<std::string>(inputData.input, "fadeout", false)) {
-				if(snd != NULL) {
+				if(snd != nullptr) {
 					snd->FadeOut(util::to_float(inputData.data));
 				}
 			}
 			else if(ustring::compare<std::string>(inputData.input, "rewind", false)) {
-				if(snd != NULL) {
+				if(snd != nullptr) {
 					snd->Rewind();
 				}
 			}
 			else if(ustring::compare<std::string>(inputData.input, "pause", false)) {
-				if(snd != NULL) {
+				if(snd != nullptr) {
 					snd->Pause();
 				}
 			}
 			else if(ustring::compare<std::string>(inputData.input, "setpitch", false)) {
-				if(snd != NULL) {
+				if(snd != nullptr) {
 					snd->SetPitch(util::to_float(inputData.data));
 				}
 			}
 			else if(ustring::compare<std::string>(inputData.input, "setlooping", false)) {
-				if(snd != NULL) {
+				if(snd != nullptr) {
 					snd->SetLooping(util::to_boolean(inputData.data));
 				}
 			}
 			else if(ustring::compare<std::string>(inputData.input, "setgain", false)) {
-				if(snd != NULL) {
+				if(snd != nullptr) {
 					snd->SetGain(util::to_float(inputData.data));
 				}
 			}
 			else if(ustring::compare<std::string>(inputData.input, "setrelativetolistener", false)) {
-				if(snd != NULL) {
+				if(snd != nullptr) {
 					snd->SetRelative(util::to_boolean(inputData.data));
 				}
 			}
 			else if(ustring::compare<std::string>(inputData.input, "setoffset", false)) {
-				if(snd != NULL) {
+				if(snd != nullptr) {
 					snd->SetOffset(util::to_float(inputData.data));
 				}
 			}
 			else if(ustring::compare<std::string>(inputData.input, "setsecoffset", false)) {
-				if(snd != NULL) {
+				if(snd != nullptr) {
 					snd->SetTimeOffset(util::to_float(inputData.data));
 				}
 			}
 			else if(ustring::compare<std::string>(inputData.input, "setrollofffactor", false)) {
-				if(snd != NULL) {
+				if(snd != nullptr) {
 					snd->SetRolloffFactor(util::to_float(inputData.data));
 				}
 			}
 			else if(ustring::compare<std::string>(inputData.input, "setmaxdistance", false)) {
-				if(snd != NULL) {
+				if(snd != nullptr) {
 					snd->SetMaxDistance(util::to_float(inputData.data));
 				}
 			}
 			else if(ustring::compare<std::string>(inputData.input, "setmingain", false)) {
-				if(snd != NULL) {
+				if(snd != nullptr) {
 					snd->SetMinGain(util::to_float(inputData.data));
 				}
 			}
 			else if(ustring::compare<std::string>(inputData.input, "setmaxgain", false)) {
-				if(snd != NULL) {
+				if(snd != nullptr) {
 					snd->SetMaxGain(util::to_float(inputData.data));
 				}
 			}
 			else if(ustring::compare<std::string>(inputData.input, "setconeinnerangle", false)) {
-				if(snd != NULL) {
+				if(snd != nullptr) {
 					snd->SetInnerConeAngle(util::to_float(inputData.data));
 				}
 			}
 			else if(ustring::compare<std::string>(inputData.input, "setconeouterangle", false)) {
-				if(snd != NULL) {
+				if(snd != nullptr) {
 					snd->SetOuterConeAngle(util::to_float(inputData.data));
 				}
 				else {
@@ -407,7 +403,7 @@ void BaseEnvSoundComponent::InitializeSound()
 	m_sound = nw->CreateSound(m_kvSoundName, type, createFlags);
 
 	auto *snd = m_sound.get();
-	if(snd != NULL) {
+	if(snd != nullptr) {
 		snd->SetSource(&ent);
 
 		snd->AddCallback("OnStateChanged", FunctionCallback<void, ALState, ALState>::Create(std::bind(&BaseEnvSoundComponent::InjectStateChange, this, std::placeholders::_1, std::placeholders::_2)));

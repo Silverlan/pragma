@@ -26,7 +26,6 @@
 #include "pragma/buss_ik/LinearR2.h"
 
 
-#include <assert.h>
 
 // ******************************************************
 // * VectorR2 class - math library functions			*

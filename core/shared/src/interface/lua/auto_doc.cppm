@@ -3,20 +3,16 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sstream>
-#include <string>
-#include <vector>
 
 #ifdef _WIN32
 #define ENABLE_LAD 1
 #endif
 
-#include <cinttypes>
-#include <optional>
 
 export module pragma.shared:scripting.lua.auto_doc;
 
 export import pragma.doc;
+export import std.compat;
 
 export namespace Lua {
 	namespace doc {

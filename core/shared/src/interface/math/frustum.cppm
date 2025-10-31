@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <cinttypes>
 
 export module pragma.shared:math.frustum;
+
+export import std.compat;
 
 export {
 	enum class FrustumPlane : uint32_t {

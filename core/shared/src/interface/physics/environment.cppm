@@ -3,14 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
-#include <string_view>
-#include <unordered_map>
-#include <vector>
 
-#include <cinttypes>
-#include <memory>
-#include <functional>
 #include "pragma/lua/core.hpp"
 
 export module pragma.shared:physics.environment;

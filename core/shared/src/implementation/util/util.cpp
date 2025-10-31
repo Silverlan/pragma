@@ -2,14 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <optional>
-#include <cmath>
 
-#include <functional>
-#include <memory>
-#include <string>
 
 module pragma.shared;
 
@@ -49,7 +43,7 @@ static bool print_code_snippet(ufile::IFile &f, uint32_t lineIdx, uint32_t charI
 			++curLine;
 			continue;
 		}
-		if(c == EOF)
+		if(c == std::char_traits<char>::eof())
 			return false;
 	}
 

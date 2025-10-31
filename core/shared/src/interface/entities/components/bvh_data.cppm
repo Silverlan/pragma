@@ -10,13 +10,7 @@ module;
 #include <bvh/v2/thread_pool.h>
 #include <bvh/v2/tri.h>
 #include <bvh/v2/vec.h>
-#include <memory>
 
-#include <cinttypes>
-#include <vector>
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
 #include "pragma/lua/core.hpp"
 
 export module pragma.shared:entities.components.bvh_data;

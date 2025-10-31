@@ -3,14 +3,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
 
-#include <cinttypes>
-#include <memory>
-#include <functional>
 #include "pragma/lua/core.hpp"
 
-#include <ostream>
 
 export module pragma.shared:scripting.lua.libraries.debug;
 

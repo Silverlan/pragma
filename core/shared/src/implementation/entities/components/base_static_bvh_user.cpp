@@ -2,11 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <typeinfo>
 
-#include <string>
 
 module pragma.shared;
 

@@ -3,15 +3,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
 #undef CreateEvent
 
-#include <optional>
-#include <functional>
 
 export module pragma.shared:audio.sound_script_manager;
 
@@ -34,17 +28,17 @@ export {
 		std::unordered_map<std::string, std::shared_ptr<SoundScript>> m_soundScripts;
 		std::vector<std::string> m_soundScriptFiles;
 		template<class TSoundScript>
-		bool Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts = NULL)
+		bool Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts = nullptr)
 		{
 			return Load(
 			fname, [this](const std::string &name) -> std::shared_ptr<SoundScript> { return std::make_shared<TSoundScript>(this, name); }, scripts);
 		}
-		bool Load(const char *fname, const std::function<std::shared_ptr<SoundScript>(const std::string &)> fCreateSoundScript, std::vector<std::shared_ptr<SoundScript>> *scripts = NULL);
+		bool Load(const char *fname, const std::function<std::shared_ptr<SoundScript>(const std::string &)> fCreateSoundScript, std::vector<std::shared_ptr<SoundScript>> *scripts = nullptr);
 	public:
 		static const std::string &GetSoundScriptPath();
 		SoundScriptManager();
 		virtual ~SoundScriptManager();
-		virtual bool Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts = NULL);
+		virtual bool Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts = nullptr);
 		SoundScript *FindScript(const char *name);
 		void Clear();
 		virtual SoundScriptEvent *CreateEvent(std::string name);

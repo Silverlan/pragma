@@ -3,20 +3,10 @@
 module;
 
 #include <cassert>
-#include <functional>
-#include <mutex>
-#include <optional>
 
-#include <cinttypes>
-#include <string>
-#include <memory>
 
-#include <unordered_map>
 
-#include <vector>
 
-#include <thread>
-#include <condition_variable>
 
 export module pragma.shared:util.functional_parallel_worker;
 

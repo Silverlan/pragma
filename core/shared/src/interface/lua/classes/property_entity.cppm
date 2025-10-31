@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <memory>
 
 export module pragma.shared:scripting.lua.classes.property_entity;
 

@@ -3,7 +3,6 @@
 module;
 
 #include "pragma/lua/core.hpp"
-#include <memory>
 
 export module pragma.shared:scripting.lua.policies.shared_from_this;
 

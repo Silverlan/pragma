@@ -4,10 +4,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <optional>
-#include <string>
 
-#include <cinttypes>
 
 export module pragma.shared:scripting.lua.error_handling;
 

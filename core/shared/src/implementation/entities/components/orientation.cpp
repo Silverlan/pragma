@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
 #include "pragma/lua/core.hpp"
 
-#include <string>
 
 module pragma.shared;
 
@@ -47,6 +45,6 @@ void OrientationComponent::SetUpDirection(const Vector3 &direction)
 
 	//auto &ent = GetEntity();
 	//PhysObj *phys = ent.GetPhysicsObject();
-	//if(phys == NULL || !phys->IsController())
+	//if(phys == nullptr || !phys->IsController())
 	//	return;
 }

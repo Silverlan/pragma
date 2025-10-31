@@ -4,7 +4,6 @@ module;
 
 #include "pragma/logging.hpp"
 #include "pragma/lua/core.hpp"
-#include <sstream>
 
 module pragma.shared;
 
@@ -25,7 +24,7 @@ bool Lua::lua_value_to_string(lua_State *L, int arg, int *r, std::string *val)
 	lua_pushvalue(L, arg); /* value to print */
 	lua_call(L, 1, 1);
 	s = lua_tolstring(L, -1, &l); /* get result */
-	if(s == NULL) {
+	if(s == nullptr) {
 		*r = luaL_error(L, "'tostring' must return a string to 'print'");
 		return false;
 	}
@@ -104,7 +103,7 @@ int Lua::console::msg(lua_State *l, int st)
 	int argc = lua_gettop(l);
 	if(argc > 0) {
 		NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
-		if(state == NULL)
+		if(state == nullptr)
 			::util::set_console_color(::pragma::console::ConsoleColorFlags::White | ::pragma::console::ConsoleColorFlags::Intensity);
 		else if(state->IsServer())
 			::util::set_console_color(::pragma::console::ConsoleColorFlags::Cyan | ::pragma::console::ConsoleColorFlags::Intensity);

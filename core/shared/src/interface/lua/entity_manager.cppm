@@ -3,11 +3,7 @@
 module;
 
 #include "pragma/lua/core.hpp"
-#include <optional>
-#include <string>
-#include <unordered_map>
 
-#include <vector>
 
 export module pragma.shared:scripting.lua.entity_manager;
 

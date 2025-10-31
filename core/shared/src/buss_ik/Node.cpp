@@ -20,7 +20,6 @@ subject to the following restrictions:
 *
 */
 
-#include <math.h>
 
 
 #include "pragma/buss_ik/LinearR3.h"

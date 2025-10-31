@@ -3,8 +3,6 @@
 module;
 
 #include "pragma/lua/core.hpp"
-#include <string>
-#include <typeinfo>
 
 export module pragma.shared:scripting.lua.class_wrapper;
 

@@ -3,9 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <optional>
-#include <vector>
 
 export module pragma.shared:math.intersection;
 

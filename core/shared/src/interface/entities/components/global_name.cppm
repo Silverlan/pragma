@@ -3,12 +3,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
 
-#include <cinttypes>
 #include "pragma/lua/core.hpp"
 
-#include <ostream>
 
 export module pragma.shared:entities.components.global_name;
 

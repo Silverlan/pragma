@@ -3,11 +3,7 @@
 module;
 
 #include "pragma/logging.hpp"
-#include <algorithm>
 #include <cassert>
-#include <memory>
-#include <set>
-#include <sstream>
 
 module pragma.shared;
 
@@ -137,7 +133,7 @@ std::shared_ptr<pragma::Model> pragma::Model::Copy(pragma::Game *game, CopyFlags
 		auto copyVertexData = umath::is_flag_set(copyFlags, CopyFlags::CopyVertexData);
 		for(auto &meshGroup : mdl->m_meshGroups) {
 			auto newMeshGroup = pragma::ModelMeshGroup::Create(meshGroup->GetName());
-			static_assert(sizeof(pragma::ModelMeshGroup) == 72, "Update this function when making changes to this class!");
+			static_assert(pragma::ModelMeshGroup::layout_version == 1, "Update this function when making changes to this class!");
 			newMeshGroup->GetMeshes() = meshGroup->GetMeshes();
 			for(auto &mesh : newMeshGroup->GetMeshes()) {
 				auto newMesh = mesh->Copy();
@@ -199,9 +195,7 @@ std::shared_ptr<pragma::Model> pragma::Model::Copy(pragma::Game *game, CopyFlags
 	mdl->m_extensions->Read(extStreamFileIn);
 	//
 
-#ifdef _WIN32
-	static_assert(sizeof(pragma::Model) == 1024, "Update this function when making changes to this class!");
-#endif
+	static_assert(pragma::Model::layout_version == 1, "Update this function when making changes to this class!");
 	return mdl;
 }
 

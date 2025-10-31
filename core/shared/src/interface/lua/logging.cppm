@@ -6,7 +6,6 @@ module;
 #include <format>
 #include "pragma/logging.hpp"
 #include "pragma/lua/core.hpp"
-#include <string>
 
 export module pragma.shared:scripting.lua.logging;
 

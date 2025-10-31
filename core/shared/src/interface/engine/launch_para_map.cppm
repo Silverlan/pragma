@@ -3,12 +3,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <sstream>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
 export module pragma.shared:engine.launch_para_map;
+
+export import std.compat;
 
 export {
 	#pragma warning(push)

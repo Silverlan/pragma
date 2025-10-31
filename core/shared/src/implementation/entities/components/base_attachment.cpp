@@ -2,13 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <optional>
-#include <vector>
 
-#include <memory>
-#include <string>
 
 module pragma.shared;
 
@@ -150,7 +145,7 @@ AttachmentData *BaseAttachmentComponent::SetupAttachment(pragma::ecs::BaseEntity
 {
 	if(m_parentModelChanged.IsValid())
 		m_parentModelChanged.Remove();
-	if(m_attachment != NULL) {
+	if(m_attachment != nullptr) {
 		m_attachment = nullptr;
 		SetTickPolicy(TickPolicy::Never);
 		if(m_poseChangeCallback.IsValid())
@@ -290,7 +285,7 @@ AttachmentData *BaseAttachmentComponent::AttachToBone(pragma::ecs::BaseEntity *e
 AttachmentData *BaseAttachmentComponent::AttachToAttachment(pragma::ecs::BaseEntity *ent, uint32_t attachmentID, const AttachmentInfo &attInfo)
 {
 	SetupAttachment(ent, attInfo);
-	if(m_attachment == NULL)
+	if(m_attachment == nullptr)
 		return nullptr;
 	m_attachment->attachment = attachmentID;
 	if((attInfo.flags & pragma::FAttachmentMode::SnapToOrigin) != pragma::FAttachmentMode::None) {
@@ -334,34 +329,34 @@ AttachmentData *BaseAttachmentComponent::AttachToAttachment(pragma::ecs::BaseEnt
 }
 void BaseAttachmentComponent::SetAttachmentFlags(pragma::FAttachmentMode flags)
 {
-	if(m_attachment == NULL)
+	if(m_attachment == nullptr)
 		return;
 	m_attachment->flags = flags;
 	UpdateAttachmentData();
 }
 void BaseAttachmentComponent::AddAttachmentFlags(pragma::FAttachmentMode flags)
 {
-	if(m_attachment == NULL)
+	if(m_attachment == nullptr)
 		return;
 	m_attachment->flags |= flags;
 	UpdateAttachmentData();
 }
 void BaseAttachmentComponent::RemoveAttachmentFlags(pragma::FAttachmentMode flags)
 {
-	if(m_attachment == NULL)
+	if(m_attachment == nullptr)
 		return;
 	m_attachment->flags &= ~flags;
 	UpdateAttachmentData();
 }
 pragma::FAttachmentMode BaseAttachmentComponent::GetAttachmentFlags() const
 {
-	if(m_attachment == NULL)
+	if(m_attachment == nullptr)
 		return pragma::FAttachmentMode::None;
 	return m_attachment->flags;
 }
 bool BaseAttachmentComponent::HasAttachmentFlag(pragma::FAttachmentMode flag) const
 {
-	if(m_attachment == NULL)
+	if(m_attachment == nullptr)
 		return (flag == pragma::FAttachmentMode::None) ? true : false;
 	return ((m_attachment->flags & flag) == flag) ? true : false;
 }

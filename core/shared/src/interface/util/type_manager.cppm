@@ -3,16 +3,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <cinttypes>
-#include <string>
-#include <type_traits>
-#include <unordered_map>
-#include <vector>
 
-#include <memory>
 
-#include <optional>
-#include <functional>
 
 export module pragma.shared:util.type_manager;
 

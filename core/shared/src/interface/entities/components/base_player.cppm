@@ -3,11 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <iostream>
 
-#include <optional>
-#include <memory>
-#include <unordered_map>
 #include "pragma/lua/core.hpp"
 
 export module pragma.shared:entities.components.base_player;

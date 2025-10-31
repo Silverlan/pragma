@@ -2,21 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <cmath>
 
-#include <cinttypes>
-#include <functional>
-#include <unordered_set>
 
-#include <algorithm>
 #include <cassert>
-#include <memory>
-#include <optional>
-#include <sstream>
-#include <stack>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
 module pragma.shared;
 
@@ -40,7 +28,7 @@ void pragma::ModelMeshGroup::AddMesh(const std::shared_ptr<ModelMesh> &mesh) { m
 uint32_t pragma::ModelMeshGroup::GetMeshCount() const { return static_cast<uint32_t>(m_meshes.size()); }
 bool pragma::ModelMeshGroup::IsEqual(const pragma::ModelMeshGroup &other) const
 {
-	static_assert(sizeof(pragma::ModelMeshGroup) == 72, "Update this function when making changes to this class!");
+	static_assert(ModelMeshGroup::layout_version == 1, "Update this function when making changes to this class!");
 	if(!(m_name == other.m_name && m_meshes.size() == other.m_meshes.size()))
 		return false;
 	for(auto i = decltype(m_meshes.size()) {0u}; i < m_meshes.size(); ++i) {
@@ -54,14 +42,14 @@ bool pragma::ModelMeshGroup::IsEqual(const pragma::ModelMeshGroup &other) const
 
 bool Eyeball::LidFlexDesc::operator==(const LidFlexDesc &other) const
 {
-	static_assert(sizeof(LidFlexDesc) == 28, "Update this function when making changes to this class!");
+	static_assert(LidFlexDesc::layout_version == 1, "Update this function when making changes to this class!");
 	return lidFlexIndex == other.lidFlexIndex && raiserFlexIndex == other.raiserFlexIndex && neutralFlexIndex == other.neutralFlexIndex && lowererFlexIndex == other.lowererFlexIndex && umath::abs(raiserValue - other.raiserValue) < 0.001f
 	  && umath::abs(neutralValue - other.neutralValue) < 0.001f && umath::abs(lowererValue - other.lowererValue) < 0.001f;
 }
 
 bool Eyeball::operator==(const Eyeball &other) const
 {
-	static_assert(sizeof(Eyeball) == 152, "Update this function when making changes to this class!");
+	static_assert(Eyeball::layout_version == 1, "Update this function when making changes to this class!");
 	return name == other.name && boneIndex == other.boneIndex && uvec::cmp(origin, other.origin) && umath::abs(zOffset - other.zOffset) < 0.001f && umath::abs(radius - other.radius) < 0.001f && uvec::cmp(up, other.up) && uvec::cmp(forward, other.forward)
 	  && irisMaterialIndex == other.irisMaterialIndex && umath::abs(maxDilationFactor - other.maxDilationFactor) < 0.001f && umath::abs(irisUvRadius - other.irisUvRadius) < 0.001f && umath::abs(irisScale - other.irisScale) < 0.001f && upperLid == other.upperLid
 	  && lowerLid == other.lowerLid;
@@ -71,7 +59,7 @@ bool Eyeball::operator==(const Eyeball &other) const
 
 bool pragma::Model::MetaInfo::operator==(const MetaInfo &other) const
 {
-	static_assert(sizeof(MetaInfo) == 80, "Update this function when making changes to this class!");
+	static_assert(MetaInfo::layout_version == 1, "Update this function when making changes to this class!");
 	return includes == other.includes && texturePaths == other.texturePaths && textures == other.textures && flags == other.flags;
 }
 
@@ -186,9 +174,7 @@ bool pragma::Model::IsEqual(const pragma::Model &other) const
 		return false;
 	if(m_skeleton && *m_skeleton != *other.m_skeleton)
 		return false;
-#ifdef _WIN32
-	static_assert(sizeof(pragma::Model) == 1024, "Update this function when making changes to this class!");
-#endif
+	static_assert(pragma::Model::layout_version == 1, "Update this function when making changes to this class!");
 	return true;
 }
 bool pragma::Model::operator==(const pragma::Model &other) const { return this == &other; }

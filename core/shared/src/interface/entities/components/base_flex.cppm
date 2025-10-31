@@ -3,23 +3,12 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
 
-#include <cinttypes>
-#include <optional>
-#include <memory>
 #include "pragma/lua/core.hpp"
 
-#include <vector>
-#include <functional>
-#include <unordered_map>
 
-#include <array>
-#include <tuple>
 
-#include <cstring>
 
-#include <ostream>
 
 export module pragma.shared:entities.components.base_flex;
 

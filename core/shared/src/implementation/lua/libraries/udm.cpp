@@ -2,13 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <functional>
 
 #include "pragma/lua/core.hpp"
 #include <sharedutils/magic_enum.hpp>
 #include <cassert>
-#include <memory>
-#include <sstream>
 
 module pragma.shared;
 
@@ -463,7 +460,7 @@ static bool compare_numeric_values(const Lua::udm_ng &ov0, const Lua::udm_ng &ov
 void Lua::udm::register_library(Lua::Interface &lua)
 {
 	auto modUdm = luabind::module(lua.GetState(), "udm");
-	modUdm[
+	modUdm[(
 		luabind::def("load",+[](lua_State *l,const std::string &fileName) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
 			std::string err;
 			auto udmData = ::util::load_udm_asset(fileName,&err);
@@ -793,7 +790,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			return panima::is_animatable_type(type);
 		})
 		// luabind::def("compare_numeric_values",&compare_numeric_values,luabind::default_parameter_policy<4,0.0001>{}) // Currently not supported by clang compiler
-	];
+	)];
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "udm",
 	  {

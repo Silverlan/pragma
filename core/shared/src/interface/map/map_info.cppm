@@ -3,10 +3,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <cinttypes>
-#include <string>
 
 export module pragma.shared:map.map_info;
+
+export import std.compat;
 
 export {
 	constexpr uint32_t WLD_VERSION = 12;

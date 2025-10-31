@@ -2,25 +2,15 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <cinttypes>
-#include <vector>
-#include <functional>
-#include <map>
-#include <unordered_map>
 
-#include <algorithm>
-#include <cstring>
-#include <memory>
-#include <string>
 
 module pragma.shared;
 
 import :console.convar;
 import :console.cvar_handler;
 
-static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
+static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = nullptr;
 std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &CVarHandler::GetConVarPtrs() { return *conVarPtrs; }
 ConVarHandle CVarHandler::GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ptrs, std::string scvar)
 {
@@ -48,7 +38,7 @@ void CVarHandler::ClearCommands()
 void CVarHandler::Initialize()
 {
 	ConVarMap *map = GetConVarMap();
-	if(map != NULL) {
+	if(map != nullptr) {
 		auto &cvars = map->GetConVars();
 		for(auto &pair : cvars) {
 			auto *cf = pair.second->Copy();
@@ -191,7 +181,7 @@ ConConf *CVarHandler::GetConVar(std::string scmd)
 bool CVarHandler::GetConVarInt(std::string scmd, int32_t &outVal)
 {
 	ConConf *cv = GetConVar(scmd);
-	if(cv == NULL || cv->GetType() != ConType::Var)
+	if(cv == nullptr || cv->GetType() != ConType::Var)
 		return false;
 	ConVar *cvar = static_cast<ConVar *>(cv);
 	outVal = cvar->GetInt();
@@ -200,7 +190,7 @@ bool CVarHandler::GetConVarInt(std::string scmd, int32_t &outVal)
 bool CVarHandler::GetConVarString(std::string scmd, std::string &outVal)
 {
 	ConConf *cv = GetConVar(scmd);
-	if(cv == NULL || cv->GetType() != ConType::Var)
+	if(cv == nullptr || cv->GetType() != ConType::Var)
 		return false;
 	ConVar *cvar = static_cast<ConVar *>(cv);
 	outVal = cvar->GetString();
@@ -209,7 +199,7 @@ bool CVarHandler::GetConVarString(std::string scmd, std::string &outVal)
 bool CVarHandler::GetConVarFloat(std::string scmd, float &outVal)
 {
 	ConConf *cv = GetConVar(scmd);
-	if(cv == NULL || cv->GetType() != ConType::Var)
+	if(cv == nullptr || cv->GetType() != ConType::Var)
 		return false;
 	ConVar *cvar = static_cast<ConVar *>(cv);
 	outVal = cvar->GetFloat();
@@ -218,7 +208,7 @@ bool CVarHandler::GetConVarFloat(std::string scmd, float &outVal)
 bool CVarHandler::GetConVarBool(std::string scmd, bool &outVal)
 {
 	ConConf *cv = GetConVar(scmd);
-	if(cv == NULL || cv->GetType() != ConType::Var)
+	if(cv == nullptr || cv->GetType() != ConType::Var)
 		return false;
 	ConVar *cvar = static_cast<ConVar *>(cv);
 	outVal = cvar->GetBool();
@@ -227,7 +217,7 @@ bool CVarHandler::GetConVarBool(std::string scmd, bool &outVal)
 bool CVarHandler::GetConVarFlags(std::string scmd, pragma::console::ConVarFlags &outVal)
 {
 	ConConf *cv = GetConVar(scmd);
-	if(cv == NULL || cv->GetType() != ConType::Var)
+	if(cv == nullptr || cv->GetType() != ConType::Var)
 		return false;
 	ConVar *cvar = static_cast<ConVar *>(cv);
 	outVal = cvar->GetFlags();
@@ -270,7 +260,7 @@ unsigned int CVarHandler::GetConVarID(std::string scmd)
 	if(i != m_conCommandIDs.end())
 		return i->second;
 	ConVarMap *map = GetConVarMap();
-	if(map == NULL)
+	if(map == nullptr)
 		return 0;
 	return map->GetConVarID(scmd);
 }
@@ -278,7 +268,7 @@ unsigned int CVarHandler::GetConVarID(std::string scmd)
 std::map<std::string, std::shared_ptr<ConConf>> &CVarHandler::GetConVars() { return m_conVars; }
 const std::map<std::string, std::shared_ptr<ConConf>> &CVarHandler::GetConVars() const { return const_cast<CVarHandler *>(this)->GetConVars(); }
 
-ConVarMap *CVarHandler::GetConVarMap() { return NULL; }
+ConVarMap *CVarHandler::GetConVarMap() { return nullptr; }
 
 void CVarHandler::FindSimilarConVars(const std::string &input, const std::map<std::string, std::shared_ptr<ConConf>> &cvars, std::vector<SimilarCmdInfo> &similarCmds) const
 {

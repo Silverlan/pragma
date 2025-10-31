@@ -2,11 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
 #include "pragma/networkdefinitions.h"
-#include <cstring>
-#include <string>
 
 module pragma.shared;
 

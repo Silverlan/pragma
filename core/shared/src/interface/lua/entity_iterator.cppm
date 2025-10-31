@@ -3,12 +3,8 @@
 module;
 
 #include "pragma/lua/core.hpp"
-#include <string>
 
-#include <vector>
-#include <memory>
 
-#include <ostream>
 
 export module pragma.shared:scripting.lua.entity_iterator;
 

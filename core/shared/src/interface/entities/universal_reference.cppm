@@ -3,13 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <string>
-#include <variant>
-#include <vector>
 
-#include <cinttypes>
-#include <optional>
 
 export module pragma.shared:entities.universal_reference;
 

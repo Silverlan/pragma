@@ -3,9 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <atomic>
-#include <optional>
-#include <string>
 
 #ifdef _WIN32
 #include <tchar.h>
@@ -14,6 +11,8 @@ module;
 #endif
 
 export module pragma.shared:debug.crashdump;
+
+export import std;
 
 export namespace pragma::debug {
 	DLLNETWORK const std::string &get_exception_message();

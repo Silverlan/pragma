@@ -3,11 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <functional>
-#include <string>
 
-#include <cinttypes>
-#include <memory>
 
 export module pragma.shared:map.world_data;
 

@@ -4,13 +4,8 @@ module;
 
 #include "pragma/networkdefinitions.h"
 
-#include <cinttypes>
-#include <memory>
-#include <functional>
-#include <unordered_map>
 #include "pragma/lua/core.hpp"
 
-#include <ostream>
 
 export module pragma.shared:entities.components.base_flammable;
 

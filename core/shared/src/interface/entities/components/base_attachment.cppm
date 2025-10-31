@@ -3,13 +3,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
 
-#include <cinttypes>
-#include <optional>
-#include <memory>
 
-#include <ostream>
 
 export module pragma.shared:entities.components.base_attachment;
 

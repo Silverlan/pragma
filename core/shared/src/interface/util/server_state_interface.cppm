@@ -3,8 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <optional>
 
 export module pragma.shared:util.server_state_interface;
 

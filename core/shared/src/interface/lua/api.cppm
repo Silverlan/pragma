@@ -5,7 +5,6 @@ module;
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
 #include "pragma/lua/ldefinitions.h"
-#include <stdexcept>
 
 export module pragma.shared:scripting.lua.api;
 

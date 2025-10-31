@@ -3,19 +3,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <atomic>
-#include <mutex>
-#include <queue>
-#include <thread>
 
-#include <vector>
-#include <functional>
-#include <memory>
-#include <map>
-#include <unordered_map>
 #include "pragma/lua/core.hpp"
 
-#include <optional>
 
 export module pragma.shared:engine;
 
@@ -372,8 +362,8 @@ export {
 		T *Engine::GetConVar(const std::string &scvar)
 		{
 			ConConf *cv = GetConVar(scvar);
-			if(cv == NULL)
-				return NULL;
+			if(cv == nullptr)
+				return nullptr;
 			return static_cast<T *>(cv);
 		}
 	};

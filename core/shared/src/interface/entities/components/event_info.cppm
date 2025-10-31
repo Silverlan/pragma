@@ -3,12 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <functional>
-#include <optional>
-#include <string>
-#include <typeindex>
 
-#include <cinttypes>
 
 export module pragma.shared:entities.components.events.event_info;
 

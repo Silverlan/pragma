@@ -2,14 +2,12 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/logging.hpp"
 #include "pragma/lua/core.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include "sharedutils/magic_enum.hpp"
-#include <algorithm>
 
 module pragma.shared;
 
@@ -2100,7 +2098,7 @@ namespace Lua::Physics {
 	void InitializePhysics(lua_State *l, pragma::BasePhysicsComponent &hEnt, ::util::TSharedHandle<pragma::physics::IConvexShape> &shape, uint32_t flags)
 	{
 		auto *phys = hEnt.InitializePhysics(*shape, static_cast<pragma::BasePhysicsComponent::PhysFlags>(flags));
-		if(phys != NULL)
+		if(phys != nullptr)
 			luabind::object(l, phys->GetHandle()).push(l);
 	}
 	void InitializePhysics(lua_State *l, pragma::BasePhysicsComponent &hEnt, ::util::TSharedHandle<pragma::physics::IConvexShape> &shape) { InitializePhysics(l, hEnt, shape, umath::to_integral(pragma::BasePhysicsComponent::PhysFlags::None)); }
@@ -2125,18 +2123,18 @@ void pragma::lua::base_physics_component::register_class(luabind::module_ &mod)
 	def.def("SetMoveType", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, int)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, int moveType) { hEnt.SetMoveType(pragma::physics::MOVETYPE(moveType)); }));
 	def.def("GetPhysicsObject", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt) {
 		pragma::physics::PhysObj *phys = hEnt.GetPhysicsObject();
-		if(phys == NULL)
+		if(phys == nullptr)
 			return;
 		luabind::object(l, phys->GetHandle()).push(l);
 	}));
 	def.def("InitializePhysics", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, uint32_t, uint32_t)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, uint32_t type, uint32_t physFlags) {
 		pragma::physics::PhysObj *phys = hEnt.InitializePhysics(pragma::physics::PHYSICSTYPE(type), static_cast<pragma::BasePhysicsComponent::PhysFlags>(physFlags));
-		if(phys != NULL)
+		if(phys != nullptr)
 			luabind::object(l, phys->GetHandle()).push(l);
 	}));
 	def.def("InitializePhysics", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, uint32_t)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, uint32_t type) {
 		pragma::physics::PhysObj *phys = hEnt.InitializePhysics(pragma::physics::PHYSICSTYPE(type));
-		if(phys != NULL)
+		if(phys != nullptr)
 			luabind::object(l, phys->GetHandle()).push(l);
 	}));
 	def.def("InitializePhysics",
@@ -3329,9 +3327,9 @@ void pragma::lua::base_io_component::register_class(luabind::module_ &mod)
 	def.def("Input", static_cast<void (*)(lua_State *, pragma::BaseIOComponent &, std::string, pragma::ecs::BaseEntity &, pragma::ecs::BaseEntity &, std::string)>([](lua_State *l, pragma::BaseIOComponent &hIo, std::string input, pragma::ecs::BaseEntity &activator, pragma::ecs::BaseEntity &caller, std::string data) {
 		hIo.Input(input, &activator, &caller, data);
 	}));
-	def.def("Input", static_cast<void (*)(lua_State *, pragma::BaseIOComponent &, std::string, pragma::ecs::BaseEntity &, std::string)>([](lua_State *l, pragma::BaseIOComponent &hIo, std::string input, pragma::ecs::BaseEntity &activator, std::string data) { hIo.Input(input, &activator, NULL, data); }));
-	def.def("Input", static_cast<void (*)(lua_State *, pragma::BaseIOComponent &, std::string, std::string)>([](lua_State *l, pragma::BaseIOComponent &hIo, std::string input, std::string data) { hIo.Input(input, NULL, NULL, data); }));
-	def.def("Input", static_cast<void (*)(lua_State *, pragma::BaseIOComponent &, std::string)>([](lua_State *l, pragma::BaseIOComponent &hIo, std::string input) { hIo.Input(input, NULL, NULL, ""); }));
+	def.def("Input", static_cast<void (*)(lua_State *, pragma::BaseIOComponent &, std::string, pragma::ecs::BaseEntity &, std::string)>([](lua_State *l, pragma::BaseIOComponent &hIo, std::string input, pragma::ecs::BaseEntity &activator, std::string data) { hIo.Input(input, &activator, nullptr, data); }));
+	def.def("Input", static_cast<void (*)(lua_State *, pragma::BaseIOComponent &, std::string, std::string)>([](lua_State *l, pragma::BaseIOComponent &hIo, std::string input, std::string data) { hIo.Input(input, nullptr, nullptr, data); }));
+	def.def("Input", static_cast<void (*)(lua_State *, pragma::BaseIOComponent &, std::string)>([](lua_State *l, pragma::BaseIOComponent &hIo, std::string input) { hIo.Input(input, nullptr, nullptr, ""); }));
 	def.def("StoreOutput",
 	  static_cast<void (*)(lua_State *, pragma::BaseIOComponent &, const std::string &, const std::string &, const std::string &, const std::string &, float, int32_t)>(
 	    [](lua_State *l, pragma::BaseIOComponent &hIo, const std::string &name, const std::string &entities, const std::string &input, const std::string &param, float delay, int32_t times) { hIo.StoreOutput(name, entities, input, param, delay, times); }));

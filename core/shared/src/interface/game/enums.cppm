@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <cinttypes>
-#include <type_traits>
 
 export module pragma.shared:game.enums;
 

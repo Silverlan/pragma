@@ -3,17 +3,8 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
 
-#include <cinttypes>
-#include <optional>
-#include <memory>
-#include <functional>
 
-#include <ostream>
 
 export module pragma.shared:model.model_manager;
 

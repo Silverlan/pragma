@@ -2,17 +2,11 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
 #include "pragma/lua/core.hpp"
 
-#include <vector>
-#include <functional>
-#include <unordered_map>
-#include <cmath>
 
 #include <sharedutils/magic_enum.hpp>
-#include <memory>
 
 module pragma.shared;
 
@@ -370,7 +364,7 @@ float BaseAnimatedComponent::GetAnimationDuration() const
 	if(hModel == nullptr)
 		return 0.f;
 	auto anim = hModel->GetAnimation(seq);
-	if(anim == NULL)
+	if(anim == nullptr)
 		return 0.f;
 	return (1.f - m_baseAnim.cycle) * anim->GetDuration();
 }
@@ -394,7 +388,7 @@ void BaseAnimatedComponent::SetBlendController(unsigned int controller, float va
 	if(it == m_blendControllers.end())
 		return;
 	BlendController *blend = hModel->GetBlendController(it->first);
-	if(blend == NULL)
+	if(blend == nullptr)
 		return;
 	//if(it->second != val)
 	//	std::cout<<"Changed from "<<it->second<<" to "<<val<<std::endl;
@@ -935,7 +929,7 @@ void BaseAnimatedComponent::PlayAnimation(int animation, FPlayAnim flags)
 		auto &hModel = GetEntity().GetModel();
 		if(hModel != nullptr) {
 			auto anim = hModel->GetAnimation(animation);
-			if(anim != NULL && anim->HasFlag(pragma::FAnim::Loop))
+			if(anim != nullptr && anim->HasFlag(pragma::FAnim::Loop))
 				return;
 		}
 	}
@@ -1068,7 +1062,7 @@ pragma::Activity BaseAnimatedComponent::GetActivity() const
 	if(hModel == nullptr)
 		return pragma::Activity::Invalid;
 	auto anim = hModel->GetAnimation(m_baseAnim.animation);
-	if(anim == NULL)
+	if(anim == nullptr)
 		return pragma::Activity::Invalid;
 	return anim->GetActivity();
 }

@@ -2,16 +2,12 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <map>
 #include "pragma/lua/core.hpp"
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/logging.hpp"
 #include <spdlog/pattern_formatter.h>
 #include <cassert>
-#include <memory>
-#include <sstream>
-#include <string_view>
 
 #ifdef __linux__
 #include <pthread.h>
@@ -67,11 +63,11 @@ void DLLNETWORK RunEngine(int argc, char *argv[])
 }
 }
 
-static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
+static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = nullptr;
 std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &pragma::Engine::GetConVarPtrs() { return *conVarPtrs; }
 ConVarHandle pragma::Engine::GetConVarHandle(std::string scvar)
 {
-	if(conVarPtrs == NULL) {
+	if(conVarPtrs == nullptr) {
 		static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> ptrs;
 		conVarPtrs = &ptrs;
 	}
@@ -567,7 +563,7 @@ void pragma::Engine::Tick()
 	StartProfilingStage("Tick");
 	StartProfilingStage("ServerTick");
 	auto *sv = GetServerNetworkState();
-	if(sv != NULL)
+	if(sv != nullptr)
 		sv->Tick();
 	StopProfilingStage(); // ServerTick
 	StopProfilingStage(); // Tick
@@ -896,11 +892,11 @@ Lua::Interface *pragma::Engine::GetLuaInterface(lua_State *l)
 NetworkState *pragma::Engine::GetNetworkState(lua_State *l)
 {
 	auto *sv = GetServerNetworkState();
-	if(sv == NULL)
-		return NULL;
+	if(sv == nullptr)
+		return nullptr;
 	if(sv->GetLuaState() == l)
 		return sv;
-	return NULL;
+	return nullptr;
 }
 
 bool pragma::Engine::IsMultiPlayer() const
@@ -915,7 +911,7 @@ bool pragma::Engine::IsSinglePlayer() const { return !IsMultiPlayer(); }
 void pragma::Engine::StartServer(bool singlePlayer)
 {
 	auto *sv = GetServerNetworkState();
-	if(sv == NULL)
+	if(sv == nullptr)
 		return;
 	GetServerStateInterface().start_server(singlePlayer);
 }
@@ -923,7 +919,7 @@ void pragma::Engine::StartServer(bool singlePlayer)
 void pragma::Engine::CloseServer()
 {
 	auto *sv = GetServerNetworkState();
-	if(sv == NULL)
+	if(sv == nullptr)
 		return;
 	GetServerStateInterface().close_server();
 }
@@ -933,7 +929,7 @@ bool pragma::Engine::IsClientConnected() { return false; }
 bool pragma::Engine::IsServerRunning()
 {
 	auto *sv = GetServerNetworkState();
-	if(sv == NULL)
+	if(sv == nullptr)
 		return false;
 	return GetServerStateInterface().is_server_running();
 }
@@ -1145,7 +1141,7 @@ void pragma::Engine::Think()
 	UpdateTickCount();
 	CallCallbacks<void>("Think");
 	auto *sv = GetServerNetworkState();
-	if(sv != NULL)
+	if(sv != nullptr)
 		sv->Think();
 }
 
@@ -1171,7 +1167,7 @@ void pragma::Engine::CloseServerState()
 	GetServerStateInterface().clear_server_state();
 }
 
-NetworkState *pragma::Engine::GetClientState() const { return NULL; }
+NetworkState *pragma::Engine::GetClientState() const { return nullptr; }
 
 NetworkState *pragma::Engine::GetActiveState() { return GetServerNetworkState(); }
 

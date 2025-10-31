@@ -3,9 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <cinttypes>
-#include <optional>
-#include <string>
 
 export module pragma.shared:networking.game_server_info;
 

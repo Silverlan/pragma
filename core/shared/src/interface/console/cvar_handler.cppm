@@ -3,26 +3,13 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <map>
-#include <memory>
-#include <string>
-#include <vector>
 
-#include <functional>
-#include <unordered_map>
 
-#include <cinttypes>
-#include <thread>
-#include <condition_variable>
 
 #include "pragma/lua/core.hpp"
 
-#include <optional>
 
-#include <array>
-#include <tuple>
 
-#include <cstring>
 
 export module pragma.shared:console.cvar_handler;
 
@@ -61,8 +48,8 @@ export {
 		T *GetConVar(std::string scmd)
 		{
 			ConConf *cv = GetConVar(scmd);
-			if(cv == NULL)
-				return NULL;
+			if(cv == nullptr)
+				return nullptr;
 			return static_cast<T *>(cv);
 		}
 		ConConf *GetConVar(std::string scmd);

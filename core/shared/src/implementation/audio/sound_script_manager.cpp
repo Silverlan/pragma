@@ -2,23 +2,11 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <unordered_set>
 
-#include <functional>
-#include <map>
 
-#include <cinttypes>
-#include <optional>
-#include <vector>
-#include <cstring>
-#include <unordered_map>
-#include <cmath>
 #include "pragma/lua/core.hpp"
 
-#include <memory>
-#include <string>
 
 module pragma.shared;
 
@@ -58,7 +46,7 @@ SoundScript *SoundScriptManager::FindScript(const char *name)
 	auto it = m_soundScripts.find(sname);
 	if(it != m_soundScripts.end())
 		return it->second.get();
-	return NULL;
+	return nullptr;
 }
 
 bool SoundScriptManager::Load(const char *fname, const std::function<std::shared_ptr<SoundScript>(const std::string &)> fCreateSoundScript, std::vector<std::shared_ptr<SoundScript>> *scripts)
@@ -80,12 +68,12 @@ bool SoundScriptManager::Load(const char *fname, const std::function<std::shared
 		auto it = m_soundScripts.find(name);
 		if(it == m_soundScripts.end()) {
 			m_soundScripts.insert(std::make_pair(name, script));
-			if(scripts != NULL)
+			if(scripts != nullptr)
 				scripts->push_back(script);
 		}
 		else {
 			script = nullptr;
-			if(scripts != NULL)
+			if(scripts != nullptr)
 				scripts->push_back(it->second);
 		}
 	}

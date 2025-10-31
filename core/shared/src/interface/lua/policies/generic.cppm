@@ -4,7 +4,6 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include <cinttypes>
 
 export module pragma.shared:scripting.lua.policies.generic;
 

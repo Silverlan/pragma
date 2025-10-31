@@ -3,13 +3,7 @@
 module;
 
 #include <cassert>
-#include <cinttypes>
-#include <cstring>
 
-#include <array>
-#include <vector>
-#include <memory>
-#include <unordered_map>
 #include "pragma/lua/core.hpp"
 
 export module pragma.shared:entities.components.panima_channel_submitter;

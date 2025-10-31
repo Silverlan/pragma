@@ -2,23 +2,11 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <unordered_set>
 
-#include <functional>
-#include <map>
 
-#include <cinttypes>
-#include <optional>
-#include <vector>
-#include <unordered_map>
-#include <cmath>
 #include "pragma/lua/core.hpp"
 
-#include <cstring>
-#include <memory>
-#include <string>
 
 // Sound duration for mp3 files
 //

@@ -5,15 +5,6 @@ module;
 #include "pragma/lua/core.hpp"
 
 #include <sharedutils/magic_enum.hpp>
-#include <algorithm>
-#include <chrono>
-#include <functional>
-#include <iomanip>
-#include <memory>
-#include <sstream>
-#include <string_view>
-#include <thread>
-#include <unordered_set>
 
 #undef CreateFile
 
@@ -512,7 +503,7 @@ void pragma::Engine::RegisterConsoleCommands()
 		  ConConf *cv = cl ? cl->GetConVar(argv[0]) : nullptr;
 		  if(!cv)
 			  cv = sv->GetConVar(argv[0]);
-		  if(cv == NULL) {
+		  if(cv == nullptr) {
 			  Con::cout << "help: no cvar or command named " << argv[0] << Con::endl;
 			  return;
 		  }

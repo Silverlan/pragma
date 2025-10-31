@@ -2,12 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <cinttypes>
 
-#include <cstdio>
-#include <string>
 
 // #include <windows.h>
 // #include <tlhelp32.h>

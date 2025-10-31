@@ -4,13 +4,6 @@ module;
 
 #include "pragma/model/simplify.h"
 #include <sharedutils/magic_enum.hpp>
-#include <cmath>
-#include <cstring>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
 module pragma.shared;
 
@@ -19,13 +12,13 @@ import :model.model_mesh;
 ModelMesh::ModelMesh() : std::enable_shared_from_this<ModelMesh>(), m_numVerts(0), m_numIndices(0) {}
 ModelMesh::ModelMesh(const ModelMesh &other) : m_min(other.m_min), m_max(other.m_max), m_numVerts(other.m_numVerts), m_numIndices(other.m_numIndices), m_center(other.m_center), m_subMeshes(other.m_subMeshes), m_referenceId {other.m_referenceId}
 {
-	static_assert(sizeof(ModelMesh) == 104, "Update this function when making changes to this class!");
+	static_assert(ModelMesh::layout_version == 1, "Update this function when making changes to this class!");
 }
 bool ModelMesh::operator==(const ModelMesh &other) const { return this == &other; }
 bool ModelMesh::operator!=(const ModelMesh &other) const { return !operator==(other); }
 bool ModelMesh::IsEqual(const ModelMesh &other) const
 {
-	static_assert(sizeof(ModelMesh) == 104, "Update this function when making changes to this class!");
+	static_assert(ModelMesh::layout_version == 1, "Update this function when making changes to this class!");
 	if(!(uvec::cmp(m_min, other.m_min) && uvec::cmp(m_max, other.m_max) && m_numVerts == other.m_numVerts && m_numIndices == other.m_numIndices && uvec::cmp(m_center, other.m_center) && m_referenceId == other.m_referenceId && m_subMeshes.size() == other.m_subMeshes.size()))
 		return false;
 	for(auto i = decltype(m_subMeshes.size()) {0u}; i < m_subMeshes.size(); ++i) {
@@ -171,7 +164,7 @@ pragma::ModelSubMesh::ModelSubMesh(const pragma::ModelSubMesh &other)
 	m_extensions->Read(extStreamFileIn);
 	//
 
-	static_assert(sizeof(pragma::ModelSubMesh) == 280, "Update this function when making changes to this class!");
+	static_assert(pragma::ModelSubMesh::layout_version == 1, "Update this function when making changes to this class!");
 }
 std::shared_ptr<pragma::ModelSubMesh> pragma::ModelSubMesh::Load(pragma::Game &game, const udm::AssetData &data, std::string &outErr)
 {
@@ -188,7 +181,7 @@ bool pragma::ModelSubMesh::operator==(const pragma::ModelSubMesh &other) const {
 bool pragma::ModelSubMesh::operator!=(const pragma::ModelSubMesh &other) const { return !operator==(other); }
 bool pragma::ModelSubMesh::IsEqual(const pragma::ModelSubMesh &other) const
 {
-	static_assert(sizeof(pragma::ModelSubMesh) == 280, "Update this function when making changes to this class!");
+	static_assert(pragma::ModelSubMesh::layout_version == 1, "Update this function when making changes to this class!");
 	if(!(m_skinTextureIndex == other.m_skinTextureIndex && uvec::cmp(m_center, other.m_center) && m_numAlphas == other.m_numAlphas && uvec::cmp(m_min, other.m_min) && uvec::cmp(m_max, other.m_max) && m_geometryType == other.m_geometryType && m_referenceId == other.m_referenceId
 	     && static_cast<bool>(m_vertices) == static_cast<bool>(other.m_vertices) && static_cast<bool>(m_alphas) == static_cast<bool>(other.m_alphas) && static_cast<bool>(m_uvSets) == static_cast<bool>(other.m_uvSets) && static_cast<bool>(m_indexData) == static_cast<bool>(other.m_indexData)
 	     && static_cast<bool>(m_vertexWeights) == static_cast<bool>(other.m_vertexWeights) && static_cast<bool>(m_extendedVertexWeights) == static_cast<bool>(other.m_extendedVertexWeights)))
@@ -277,7 +270,7 @@ void pragma::ModelSubMesh::Copy(pragma::ModelSubMesh &cpy, bool fullCopy) const
 		cpy.m_extensions->Read(extStreamFileIn);
 		//
 	}
-	static_assert(sizeof(pragma::ModelSubMesh) == 280, "Update this function when making changes to this class!");
+	static_assert(pragma::ModelSubMesh::layout_version == 1, "Update this function when making changes to this class!");
 }
 std::shared_ptr<pragma::ModelSubMesh> pragma::ModelSubMesh::Copy(bool fullCopy) const
 {

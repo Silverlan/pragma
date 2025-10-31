@@ -3,8 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <functional>
-#include <memory>
 
 export module pragma.shared:game.scene_snapshot;
 

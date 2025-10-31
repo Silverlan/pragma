@@ -3,8 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <string>
 
 export module pragma.shared:console.convar_handle;
 

@@ -3,15 +3,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <optional>
-#include <vector>
 
 #ifdef __linux__
 #endif
 
-#include <cinttypes>
-#include <functional>
 #include "pragma/lua/core.hpp"
 
 export module pragma.shared:physics.object;

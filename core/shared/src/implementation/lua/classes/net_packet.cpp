@@ -2,13 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <functional>
-#include <memory>
-#include <string>
 
 module pragma.shared;
 
@@ -126,7 +122,7 @@ void Lua::NetPacket::ReadALSound(lua_State *l, ::NetPacket &packet)
 	unsigned int idx = packet->Read<unsigned int>();
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	std::shared_ptr<::ALSound> als = state->GetSoundByIndex(idx);
-	if(als == NULL)
+	if(als == nullptr)
 		return;
 	luabind::object(l, als).push(l);
 }

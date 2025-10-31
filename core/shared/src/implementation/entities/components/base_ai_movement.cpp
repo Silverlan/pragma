@@ -2,14 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <vector>
 
 #include <cassert>
-#include <cmath>
-#include <memory>
-#include <string>
 
 module pragma.shared;
 
@@ -274,7 +269,7 @@ void BaseAIComponent::BlendAnimationMovementMT(std::vector<umath::Transform> &bo
 	if(animIdle == nullptr)
 		return;
 	auto frame = animIdle->GetFrame(0);
-	if(frame == NULL)
+	if(frame == nullptr)
 		return;
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
 	auto vel = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {};

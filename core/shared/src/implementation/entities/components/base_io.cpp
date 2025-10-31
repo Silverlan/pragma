@@ -2,14 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <cinttypes>
 #include "pragma/lua/core.hpp"
 
-#include <cstring>
-#include <functional>
-#include <string>
 
 module pragma.shared;
 
@@ -151,7 +146,7 @@ bool BaseIOComponent::FireSingleOutput(Output &output, pragma::ecs::BaseEntity *
 				      auto *pIoComponent = static_cast<BaseIOComponent *>(ent->FindComponent("io").get());
 				      if(pIoComponent == nullptr)
 					      return;
-				      pragma::ecs::BaseEntity *entActivator = NULL;
+				      pragma::ecs::BaseEntity *entActivator = nullptr;
 				      if(activator.valid())
 					      entActivator = activator.get();
 				      pIoComponent->Input(output.input, entActivator, ent, output.param);

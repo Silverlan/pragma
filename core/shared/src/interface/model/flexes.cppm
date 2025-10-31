@@ -3,12 +3,7 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <string>
-#include <vector>
 
-#include <cinttypes>
-#include <optional>
-#include <memory>
 #include "pragma/lua/core.hpp"
 
 export module pragma.shared:model.flexes;

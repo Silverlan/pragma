@@ -2,21 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
-
-#include <cinttypes>
-#include <vector>
-#include <memory>
-#include <map>
-#include <unordered_set>
-#include <cstring>
-
-#include <algorithm>
-#include <string>
-#include <string_view>
-
 #ifdef __linux__
 #include <linenoise.h>
+#include <errno.h>
 #endif
 
 module pragma.shared;
@@ -71,7 +59,7 @@ void pragma::console::impl::update_linenoise()
 	tv.tv_sec = 0; // 1 sec timeout
 	tv.tv_usec = 0;
 
-	retval = select(ls.ifd + 1, &readfds, NULL, NULL, &tv);
+	retval = select(ls.ifd + 1, &readfds, nullptr, nullptr, &tv);
 	if(retval == -1)
 		return; // Error of some kind?
 	if(retval) {

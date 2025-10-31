@@ -86,11 +86,8 @@
 
 #include "StackWalker.h"
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <tchar.h>
 #include <windows.h>
-#include <new>
 
 #pragma comment(lib, "version.lib") // for "VerQueryValue"
 

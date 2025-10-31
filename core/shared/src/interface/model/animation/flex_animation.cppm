@@ -3,9 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <string>
-#include <vector>
 
 export module pragma.shared:model.animation.flex_animation;
 

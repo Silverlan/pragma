@@ -4,14 +4,7 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <optional>
-#include <string>
 
-#include <cinttypes>
-#include <vector>
-#include <functional>
-#include <memory>
-#include <unordered_map>
 
 export module pragma.shared:scripting.lua.libraries.sound;
 

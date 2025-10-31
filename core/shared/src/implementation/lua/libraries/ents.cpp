@@ -2,31 +2,16 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <typeindex>
 
-#include <map>
-#include <cmath>
 
-#include <unordered_map>
-#include <random>
 
-#include <mutex>
-#include <condition_variable>
 
-#include <vector>
 
-#include <cinttypes>
 
-#include <optional>
 
-#include <cstring>
 
 #include "pragma/lua/core.hpp"
 #include <sharedutils/magic_enum.hpp>
-#include <algorithm>
-#include <functional>
-#include <memory>
-#include <sstream>
 
 module pragma.shared;
 
@@ -112,7 +97,7 @@ void Lua::ents::register_library(lua_State *l)
 {
 	//test_lua_policies(l);
 	auto entsMod = luabind::module(l, "ents");
-	entsMod[
+	entsMod[(
 		luabind::def("create",create),
 
 		luabind::def("get_all",static_cast<tb<type<pragma::ecs::BaseEntity>>(*)(lua_State*)>(get_all)),
@@ -284,7 +269,7 @@ void Lua::ents::register_library(lua_State *l)
 		luabind::def("string_to_member_type",+[](const std::string &memberType) -> std::optional<pragma::ents::EntityMemberType> {
 			return magic_enum::enum_cast<pragma::ents::EntityMemberType>(memberType);
 			})
-	];
+	)];
 	static_assert(umath::to_integral(pragma::ents::EntityMemberType::VersionIndex) == 0);
 	Lua::RegisterLibraryEnums(l, "ents",
 	  {
@@ -617,7 +602,7 @@ Lua::type<pragma::ecs::BaseEntity> Lua::ents::create(lua_State *l, const std::st
 	pragma::Game *game = state->GetGameState();
 
 	auto *ent = game->CreateEntity(classname);
-	if(ent == NULL)
+	if(ent == nullptr)
 		return nil;
 	return ent->GetLuaObject();
 }
@@ -960,7 +945,7 @@ Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_by_index(lua_State *
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
 	pragma::ecs::BaseEntity *ent = game->GetEntity(idx);
-	if(ent == NULL)
+	if(ent == nullptr)
 		return nil;
 	return ent->GetLuaObject();
 }
@@ -970,7 +955,7 @@ Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_by_local_index(lua_S
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
 	pragma::ecs::BaseEntity *ent = game->GetEntityByLocalIndex(idx);
-	if(ent == NULL)
+	if(ent == nullptr)
 		return nil;
 	return ent->GetLuaObject();
 }

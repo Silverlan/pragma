@@ -3,10 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <optional>
-#include <string>
-#include <vector>
 
 export module pragma.shared:assets.common;
 

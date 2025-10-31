@@ -2,16 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <unordered_set>
 
-#include <map>
 
-#include <cinttypes>
-#include <optional>
-#include <vector>
-#include <cstring>
-#include <unordered_map>
-#include <cmath>
 #include "pragma/lua/core.hpp"
 
 #include "DetourNavMesh.h"
@@ -19,10 +11,6 @@ module;
 #include "DetourNavMeshQuery.h"
 #include "Recast.h"
 #include <cassert>
-#include <functional>
-#include <iostream>
-#include <memory>
-#include <string>
 
 module pragma.shared;
 
@@ -618,31 +606,31 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 	rcCalcGridSize(cfg.bmin,cfg.bmax,cfg.cs,&cfg.width,&cfg.height);
 
 	rcHeightfield *hf = rcAllocHeightfield();
-	if(hf == NULL)
+	if(hf == nullptr)
 	{
 		delete context;
-		if(err != NULL)
+		if(err != nullptr)
 			*err = "Unable to allocate heightfield: Out of memory!";
-		return NULL;
+		return nullptr;
 	}
 	if(!rcCreateHeightfield(context,*hf,cfg.width,cfg.height,cfg.bmin,cfg.bmax,cfg.cs,cfg.ch))
 	{
 		delete context;
 		rcFreeHeightField(hf);
-		if(err != NULL)
+		if(err != nullptr)
 			*err = "Unable to create solid heightfield!";
-		return NULL;
+		return nullptr;
 	}
 	unsigned int numVerts = static_cast<unsigned int>(vertices.size());
 	unsigned int numTriangles = static_cast<unsigned int>(triangles.size()) /3;
 	unsigned char *triAreas = new unsigned char[numTriangles];
-	if(triAreas == NULL)
+	if(triAreas == nullptr)
 	{
 		delete context;
 		rcFreeHeightField(hf);
-		if(err != NULL)
+		if(err != nullptr)
 			*err = "Out of memory!";
-		return NULL;
+		return nullptr;
 	}
 	memset(&triAreas[0],0,numTriangles *sizeof(unsigned char));
 	rcMarkWalkableTriangles(
@@ -665,59 +653,59 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 	rcFilterWalkableLowHeightSpans(context,cfg.walkableHeight,*hf);
 
 	rcCompactHeightfield *chf = rcAllocCompactHeightfield();
-	if(chf == NULL)
+	if(chf == nullptr)
 	{
 		delete context;
 		rcFreeHeightField(hf);
-		if(err != NULL)
+		if(err != nullptr)
 			*err = "Unable to allocate compact heightfield: Out of memory!";
-		return NULL;
+		return nullptr;
 	}
 	if(!rcBuildCompactHeightfield(context,cfg.walkableHeight,cfg.walkableClimb,*hf,*chf))
 	{
 		delete context;
 		rcFreeHeightField(hf);
 		rcFreeCompactHeightfield(chf);
-		if(err != NULL)
+		if(err != nullptr)
 			*err = "Unable to create compact heightfield!";
-		return NULL;
+		return nullptr;
 	}
 	if(!rcErodeWalkableArea(context,cfg.walkableRadius,*chf))
 	{
 		delete context;
 		rcFreeHeightField(hf);
 		rcFreeCompactHeightfield(chf);
-		if(err != NULL)
+		if(err != nullptr)
 			*err = "Unable to erode walkable area!";
-		return NULL;
+		return nullptr;
 	}
 	if(!rcBuildDistanceField(context,*chf))
 	{
 		delete context;
 		rcFreeHeightField(hf);
 		rcFreeCompactHeightfield(chf);
-		if(err != NULL)
+		if(err != nullptr)
 			*err = "Unable to build distance field!";
-		return NULL;
+		return nullptr;
 	}
 	if(!rcBuildRegions(context,*chf,cfg.borderSize,cfg.minRegionArea,cfg.mergeRegionArea))
 	{
 		delete context;
 		rcFreeHeightField(hf);
 		rcFreeCompactHeightfield(chf);
-		if(err != NULL)
+		if(err != nullptr)
 			*err = "Unable to build regions!";
-		return NULL;
+		return nullptr;
 	}
 	rcContourSet *cset = rcAllocContourSet();
-	if(cset == NULL)
+	if(cset == nullptr)
 	{
 		delete context;
 		rcFreeHeightField(hf);
 		rcFreeCompactHeightfield(chf);
-		if(err != NULL)
+		if(err != nullptr)
 			*err = "Unable to allocate contour set: Out of memory!";
-		return NULL;
+		return nullptr;
 	}
 	if(!rcBuildContours(context,*chf,cfg.maxSimplificationError,cfg.maxEdgeLen,*cset))
 	{
@@ -725,9 +713,9 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 		rcFreeHeightField(hf);
 		rcFreeCompactHeightfield(chf);
 		rcFreeContourSet(cset);
-		if(err != NULL)
+		if(err != nullptr)
 			*err = "Unable to build contours!!";
-		return NULL;
+		return nullptr;
 	}
 	if(cset->nconts == 0)
 	{
@@ -735,20 +723,20 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 		rcFreeHeightField(hf);
 		rcFreeCompactHeightfield(chf);
 		rcFreeContourSet(cset);
-		if(err != NULL)
+		if(err != nullptr)
 			*err = "No contours were built!";
-		return NULL;
+		return nullptr;
 	}
 	rcPolyMesh *polyMesh = rcAllocPolyMesh();
-	if(polyMesh == NULL)
+	if(polyMesh == nullptr)
 	{
 		delete context;
 		rcFreeHeightField(hf);
 		rcFreeCompactHeightfield(chf);
 		rcFreeContourSet(cset);
-		if(err != NULL)
+		if(err != nullptr)
 			*err = "Unable to allocate poly mesh: Out of memory!";
-		return NULL;
+		return nullptr;
 	}
 	if(!rcBuildPolyMesh(context,*cset,cfg.maxVertsPerPoly,*polyMesh))
 	{
@@ -757,21 +745,21 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 		rcFreeCompactHeightfield(chf);
 		rcFreeContourSet(cset);
 		rcFreePolyMesh(polyMesh);
-		if(err != NULL)
+		if(err != nullptr)
 			*err = "Unable to build poly mesh!";
-		return NULL;
+		return nullptr;
 	}
 	rcPolyMeshDetail *detailMesh = rcAllocPolyMeshDetail();
-	if(detailMesh == NULL)
+	if(detailMesh == nullptr)
 	{
 		delete context;
 		rcFreeHeightField(hf);
 		rcFreeCompactHeightfield(chf);
 		rcFreeContourSet(cset);
 		rcFreePolyMesh(polyMesh);
-		if(err != NULL)
+		if(err != nullptr)
 			*err = "Unable to allocate detail mesh: Out of memory!";
-		return NULL;
+		return nullptr;
 	}
 	if(!rcBuildPolyMeshDetail(context,*polyMesh,*chf,cfg.detailSampleDist,cfg.detailSampleMaxError,*detailMesh))
 	{
@@ -781,9 +769,9 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 		rcFreeContourSet(cset);
 		rcFreePolyMesh(polyMesh);
 		rcFreePolyMeshDetail(detailMesh);
-		if(err != NULL)
+		if(err != nullptr)
 			*err = "Unable to build poly mesh detail!";
-		return NULL;
+		return nullptr;
 	}
 	context->stopTimer(RC_TIMER_TOTAL);
 	delete context;
@@ -798,14 +786,14 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 	}
 
 	dtNavMesh *dtMesh = InitializeDetourMesh(polyMesh,detailMesh,err);
-	if(dtMesh == NULL)
+	if(dtMesh == nullptr)
 	{
 		rcFreeHeightField(hf);
 		rcFreeCompactHeightfield(chf);
 		rcFreeContourSet(cset);
 		rcFreePolyMesh(polyMesh);
 		rcFreePolyMeshDetail(detailMesh);
-		return NULL;
+		return nullptr;
 	}
 
 	rcFreeHeightField(hf);

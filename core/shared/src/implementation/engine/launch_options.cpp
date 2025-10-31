@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <unordered_set>
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/logging.hpp"
-#include <sstream>
 
 module pragma.shared;
 
@@ -196,7 +194,7 @@ DLLNETWORK void LPARAM_help(const std::vector<std::string> &argv)
 {
 	pragma::Engine::Get()->OpenConsole();
 	LaunchParaMap *map = GetLaunchParaMap();
-	if(map == NULL)
+	if(map == nullptr)
 		return;
 	Con::cout << "Available parameters:" << Con::endl << map->LAUNCHPARAMETERS_HELP.str() << Con::endl;
 }

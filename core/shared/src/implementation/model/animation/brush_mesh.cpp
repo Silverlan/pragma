@@ -2,11 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <algorithm>
-#include <functional>
-#include <iostream>
-#include <memory>
-#include <string>
 
 module pragma.shared;
 
@@ -28,7 +23,7 @@ std::ostream &operator<<(std::ostream &os, const BrushMesh &mesh)
 	return os;
 }
 
-BrushMesh::BrushMesh() : m_bConvex(true), m_shape(NULL)
+BrushMesh::BrushMesh() : m_bConvex(true), m_shape(nullptr)
 {
 	uvec::zero(&m_min);
 	uvec::zero(&m_max);
@@ -37,8 +32,8 @@ BrushMesh::BrushMesh() : m_bConvex(true), m_shape(NULL)
 std::shared_ptr<pragma::physics::IShape> BrushMesh::GetShape() { return m_shape; }
 void BrushMesh::UpdateHullShape(pragma::physics::IEnvironment &env, const std::vector<SurfaceMaterial> *surfaceMaterials)
 {
-	if(m_shape != NULL)
-		m_shape = NULL;
+	if(m_shape != nullptr)
+		m_shape = nullptr;
 	pragma::physics::IMaterial *mat = nullptr;
 	if(surfaceMaterials == nullptr || surfaceMaterials->empty())
 		mat = &env.GetGenericMaterial();

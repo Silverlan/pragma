@@ -3,7 +3,6 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <vector>
 
 export module pragma.shared:game.animation_update_manager;
 

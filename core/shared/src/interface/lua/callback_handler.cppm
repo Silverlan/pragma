@@ -4,16 +4,8 @@ module;
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include <queue>
-#include <string>
-#include <unordered_map>
 
-#include <cinttypes>
-#include <vector>
-#include <memory>
-#include <functional>
 
-#include <optional>
 
 export module pragma.shared:scripting.lua.callback_handler;
 

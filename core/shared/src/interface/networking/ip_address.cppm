@@ -3,10 +3,10 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <cinttypes>
-#include <string>
 
 export module pragma.shared:networking.ip_address;
+
+export import std.compat;
 
 export namespace pragma::networking {
 	class DLLNETWORK IPAddress {

@@ -2,18 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <ostream>
 
-#include <functional>
-#include <cinttypes>
 
-#include <optional>
 
-#include <cstring>
 
-#include <vector>
-#include <unordered_map>
-#include <unordered_set>
 
 #include "pragma/lua/core.hpp"
 #include <sharedutils/magic_enum.hpp>
@@ -66,7 +58,7 @@ static std::optional<std::string> get_asset_identifier_from_type(pragma::asset::
 void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 {
 	auto modAsset = luabind::module_(lua.GetState(), "asset");
-	modAsset[
+	modAsset[(
 		luabind::def("clear_unused",+[](NetworkState &nw,pragma::asset::Type type) -> std::optional<uint32_t> {
 			auto *assetManager = nw.GetAssetManager(type);
 			if(!assetManager)
@@ -264,7 +256,7 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 		luabind::def("type_to_string",+[](pragma::asset::Type type) -> std::string {
 		return std::string { magic_enum::enum_name(type)};
 		})
-	];
+	)];
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "asset",
 	  {

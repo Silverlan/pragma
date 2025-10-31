@@ -3,14 +3,11 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <memory>
-#include <string>
-#include <vector>
 
-#include <cinttypes>
-#include <limits>
 
 export module pragma.shared:debug.behavior_tree_node;
+
+export import std.compat;
 
 export {
 	struct DLLNETWORK DebugBehaviorTreeNode {

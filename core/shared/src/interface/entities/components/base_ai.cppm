@@ -3,20 +3,9 @@
 module;
 
 #include "pragma/networkdefinitions.h"
-#include <atomic>
-#include <mutex>
-#include <queue>
 
-#include <cinttypes>
-#include <optional>
-#include <memory>
-#include <string>
-#include <functional>
-#include <thread>
-#include <unordered_map>
 #include "pragma/lua/core.hpp"
 
-#include <ostream>
 
 export module pragma.shared:entities.components.base_ai;
 

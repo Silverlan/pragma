@@ -7,10 +7,6 @@ module;
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_client.h"
-#include <mathutil/umath.h>
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/euler_angles.hpp>
-#include <mathutil/uquat.h>
 
 module pragma.client;
 
@@ -399,7 +395,7 @@ void CPlayerComponent::OnTick(double tDelta)
 {
 	BasePlayerComponent::OnTick(tDelta);
 
-	if(m_crouchViewOffset != NULL) {
+	if(m_crouchViewOffset != nullptr) {
 		DeltaOffset &doffset = *m_crouchViewOffset;
 		if(doffset.time <= 0)
 			m_crouchViewOffset = nullptr;
@@ -416,7 +412,7 @@ void CPlayerComponent::OnTick(double tDelta)
 				m_crouchViewOffset = nullptr;
 		}
 	}
-	if(m_upDirOffset != NULL) {
+	if(m_upDirOffset != nullptr) {
 		DeltaTransform &dtrans = *m_upDirOffset;
 		if(dtrans.time <= 0)
 			m_upDirOffset = nullptr;

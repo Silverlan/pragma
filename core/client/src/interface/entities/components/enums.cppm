@@ -5,6 +5,8 @@ module;
 
 export module pragma.client:entities.components.enums;
 
+export import std.compat;
+
 export namespace pragma {
 	using RenderMeshIndex = uint32_t;
 	using RenderBufferIndex = uint32_t;

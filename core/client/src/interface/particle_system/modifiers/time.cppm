@@ -4,11 +4,11 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <mathutil/umath_random.hpp>
 
 export module pragma.client:particle_system.modifier_time;
 
-import :particle_system.particle;
+export import :particle_system.particle;
+export import pragma.util;
 
 export class DLLCLIENT CParticleModifierComponentTime {
   protected:

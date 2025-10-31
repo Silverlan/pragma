@@ -5,7 +5,7 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-export module pragma.client:rendering.shader_graph.module;
+export module pragma.client:rendering.shader_graph.sg_module;
 
 import :entities.components.rasterization_renderer;
 import :entities.components.scene;

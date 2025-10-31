@@ -4,13 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "buffers/prosper_uniform_resizable_buffer.hpp"
-#include "prosper_descriptor_set_group.hpp"
-#include "buffers/prosper_buffer.hpp"
-#include <mathutil/uvec.h>
-#include <mathutil/boundingvolume.h>
-#include <mathutil/transform.hpp>
-#include "mathutil/umath.h"
 #include "pragma/lua/core.hpp"
 
 #define ENTITY_RENDER_BUFFER_USE_STORAGE_BUFFER 1
@@ -294,7 +287,11 @@ export namespace pragma {
 		const Vector3 &max;
 		const Sphere &sphere;
 	};
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::CRenderComponent::StateFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::CRenderComponent::StateFlags> : std::true_type {};
+	}
 };

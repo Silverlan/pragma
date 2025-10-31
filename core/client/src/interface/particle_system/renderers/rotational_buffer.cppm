@@ -4,10 +4,10 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "buffers/prosper_buffer.hpp"
 
 export module pragma.client:particle_system.renderer_rotational_buffer;
 
+export import pragma.prosper;
 export import pragma.shared;
 
 export namespace pragma::ecs {class CParticleSystemComponent;}

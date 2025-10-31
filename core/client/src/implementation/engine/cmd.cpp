@@ -7,16 +7,8 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_cengine.h"
-#include <cmaterialmanager.h>
-#include <texturemanager/texture.h>
-#include <buffers/prosper_buffer.hpp>
-#include <buffers/prosper_dynamic_resizable_buffer.hpp>
-#include <image/prosper_render_target.hpp>
-#include <shader/prosper_shader_blur.hpp>
-#include <prosper_window.hpp>
 
 module pragma.client;
 
@@ -136,7 +128,7 @@ void CEngine::RegisterConsoleCommands()
 			  throw std::runtime_error {"Crash!"};
 			  return;
 		  }
-		  volatile int *a = reinterpret_cast<volatile int *>(NULL);
+		  volatile int *a = reinterpret_cast<volatile int *>(nullptr);
 		  *a = 1;
 	  },
 	  pragma::console::ConVarFlags::None, "Forces the engine to crash.");
@@ -272,7 +264,7 @@ void CEngine::RegisterConsoleCommands()
 	  "debug_textures",
 	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  auto &texManager = static_cast<msys::CMaterialManager &>(static_cast<ClientState *>(GetClientState())->GetMaterialManager()).GetTextureManager();
-		  std::vector<std::shared_ptr<Texture>> textures;
+		  std::vector<std::shared_ptr<msys::Texture>> textures;
 		  auto &cache = texManager.GetCache();
 		  textures.reserve(cache.size());
 		  for(auto &pair : cache) {

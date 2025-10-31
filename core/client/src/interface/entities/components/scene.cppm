@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <shader/prosper_descriptor_array_manager.hpp>
-#include <mathutil/plane.hpp>
-#include "mathutil/umath.h"
 #include "pragma/lua/core.hpp"
 
 
@@ -259,10 +256,16 @@ export namespace pragma {
 		virtual void PushArguments(lua_State *l) override;
 		const ::util::DrawSceneInfo &drawSceneInfo;
 	};
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::CSceneComponent::FRenderSetting);
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::CSceneComponent::StateFlags);
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::CSceneComponent::FRenderSetting> : std::true_type {};
+
+		template<>
+		struct enable_bitwise_operators<ppragma::CSceneComponent::StateFlags> : std::true_type {};
+	}
 };
 
 export class DLLCLIENT CScene : public CBaseEntity {

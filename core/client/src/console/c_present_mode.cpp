@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include <prosper_window.hpp>
 
 import pragma.client;
 

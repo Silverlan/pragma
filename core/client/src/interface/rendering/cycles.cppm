@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <mathutil/transform.hpp>
-#include "mathutil/umath.h"
-#include "mathutil/color.h"
 
 
 
@@ -60,7 +57,11 @@ export namespace pragma::rendering::cycles {
 	util::ParallelJob<uimg::ImageLayerSet> bake_ambient_occlusion(ClientState &client, const SceneInfo &sceneInfo, pragma::Model &mdl, uint32_t materialIndex);
 	util::ParallelJob<uimg::ImageLayerSet> bake_ambient_occlusion(ClientState &client, const SceneInfo &sceneInfo, pragma::ecs::BaseEntity &ent, uint32_t materialIndex);
 	util::ParallelJob<uimg::ImageLayerSet> bake_lightmaps(ClientState &client, const SceneInfo &sceneInfo);
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::rendering::cycles::SceneInfo::SceneFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::rendering::cycles::SceneInfo::SceneFlags> : std::true_type {};
+	}
 };

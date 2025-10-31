@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "image/prosper_render_target.hpp"
 
 
 export module pragma.client:gui.debug_hdr_bloom;

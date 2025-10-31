@@ -5,12 +5,6 @@ module;
 
 
 #include "pragma/clientdefinitions.h"
-#include <prosper_swap_command_buffer.hpp>
-#include <mathutil/plane.hpp>
-#include "image/prosper_render_target.hpp"
-#include "prosper_command_buffer.hpp"
-#include <mathutil/uvec.h>
-#include "mathutil/umath.h"
 #include "pragma/lua/core.hpp"
 
 #define DEBUG_RENDER_PERFORMANCE_TEST_ENABLED 0
@@ -391,10 +385,16 @@ export namespace pragma {
 		virtual void PushArguments(lua_State *l) override;
 		const util::DrawSceneInfo &drawSceneInfo;
 	};
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::CRasterizationRendererComponent::StateFlags)
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::RendererData::Flags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::CRasterizationRendererComponent::StateFlags> : std::true_type {};
+
+		template<>
+		struct enable_bitwise_operators<pragma::RendererData::Flags> : std::true_type {};
+	}
 
 	class DLLCLIENT CRasterizationRenderer : public CBaseEntity {
 	public:

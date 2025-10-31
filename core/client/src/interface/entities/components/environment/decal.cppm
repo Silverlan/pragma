@@ -4,10 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <mathutil/vertex.hpp>
-#include "mathutil/umath.h"
 #include "pragma/lua/core.hpp"
-#include "mathutil/transform.hpp"
 
 
 

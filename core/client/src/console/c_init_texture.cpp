@@ -1,17 +1,11 @@
 
 
-#include "mathutil/umath.h"
 
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "textureinfo.h"
 #include "pragma/console/helper.hpp"
-#include <texturemanager/texturemanager.h>
-#include <texturemanager/load/texture_loader.hpp>
-#include <cmaterialmanager.h>
-#include <image/prosper_sampler.hpp>
 
 import pragma.client;
 

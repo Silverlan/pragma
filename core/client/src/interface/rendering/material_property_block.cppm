@@ -6,6 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 
 export module pragma.client:rendering.material_property_block;
+
+export import pragma.udm;
+
 export namespace pragma::rendering {
 	class DLLCLIENT MaterialPropertyBlock {
 	  public:

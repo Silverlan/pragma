@@ -11,20 +11,9 @@ module;
 
 
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <prosper_command_buffer.hpp>
-#include <prosper_descriptor_set_group.hpp>
-#include <image/prosper_sampler.hpp>
-#include <image/prosper_render_target.hpp>
-#include <image/prosper_image_view.hpp>
-#include <util_texture_info.hpp>
-#include <cmaterialmanager.h>
-#include <texturemanager/texturemanager.h>
-#include <texture_type.h>
 #include <spdlog/logger.h>
-#include "prosper_util.hpp"
 
 module pragma.client;
 
@@ -756,8 +745,8 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromCubemap(prosper::Textu
 			if(pair.first.find("skybox") == std::string::npos)
 				continue;
 			auto *texInfo = pair.second.get()->GetTextureInfo("skybox");
-			std::static_pointer_cast<Texture>(texInfo->texture)->texture = m_iblData->prefilterMap;
-			pragma::get_cgame()->ReloadMaterialShader(static_cast<CMaterial*>(pair.second.get()));
+			std::static_pointer_cast<msys::Texture>(texInfo->texture)->texture = m_iblData->prefilterMap;
+			pragma::get_cgame()->ReloadMaterialShader(static_cast<msys::CMaterial*>(pair.second.get()));
 			break;
 		}
 	}*/
@@ -821,9 +810,9 @@ bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
 		LogWarn("Material has no brdf texture!");
 		return false;
 	}
-	auto texPrefilter = std::static_pointer_cast<Texture>(pPrefilter->texture);
-	auto texIrradiance = std::static_pointer_cast<Texture>(pIrradiance->texture);
-	auto texBrdf = std::static_pointer_cast<Texture>(pBrdf->texture);
+	auto texPrefilter = std::static_pointer_cast<msys::Texture>(pPrefilter->texture);
+	auto texIrradiance = std::static_pointer_cast<msys::Texture>(pIrradiance->texture);
+	auto texBrdf = std::static_pointer_cast<msys::Texture>(pBrdf->texture);
 	if(!texPrefilter || !texPrefilter->HasValidVkTexture()) {
 		LogWarn("Prefilter texture is invalid!");
 		return false;

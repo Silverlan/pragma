@@ -3,10 +3,6 @@
 
 module;
 
-#include <image/prosper_msaa_texture.hpp>
-#include <prosper_util.hpp>
-#include <prosper_descriptor_set_group.hpp>
-#include <prosper_command_buffer.hpp>
 
 module pragma.client;
 

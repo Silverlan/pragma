@@ -3,9 +3,7 @@
 
 module;
 
-#include "mathutil/color.h"
 
-#include "datasystem.h"
 #include "stdafx_client.h"
 
 module pragma.client;

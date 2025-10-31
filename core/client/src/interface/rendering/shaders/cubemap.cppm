@@ -4,10 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <mathutil/umath.h>
-#include <mathutil/umat.h>
-#include <image/prosper_render_target.hpp>
-#include <shader/prosper_shader.hpp>
 
 export module pragma.client:rendering.shaders.cubemap;
 

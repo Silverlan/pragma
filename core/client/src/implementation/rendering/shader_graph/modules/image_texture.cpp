@@ -4,9 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <texturemanager/texture_manager2.hpp>
-#include <texturemanager/texture.h>
-#include <prosper_command_buffer.hpp>
 
 module pragma.client;
 

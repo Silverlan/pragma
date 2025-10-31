@@ -4,15 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "alsound_effect.hpp"
-#include "alsound_effect.hpp"
-#include "image/prosper_image.hpp"
-#include "prosper_command_buffer.hpp"
-#include <mathutil/color.h>
-#include "prosper_descriptor_set_group.hpp"
-#include <alsoundsystem.hpp>
-#include <alsoundsystem_create_effect.hpp>
-#include "mathutil/umath.h"
 #include "pragma/lua/core.hpp"
 
 
@@ -108,7 +99,7 @@ export class DLLCLIENT CGame : public pragma::Game {
 	void SetRenderClipPlane(const Vector4 &clipPlane);
 	const Vector4 &GetRenderClipPlane() const;
 
-	void ReloadMaterialShader(CMaterial *mat);
+	void ReloadMaterialShader(msys::CMaterial *mat);
 	void SetRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode, bool bEnabled);
 	void EnableRenderMode(pragma::rendering::SceneRenderPass renderMode);
 	void DisableRenderMode(pragma::rendering::SceneRenderPass renderMode);
@@ -306,10 +297,10 @@ export class DLLCLIENT CGame : public pragma::Game {
 	Float GetMaxHDRExposure() const;
 	void SetMaxHDRExposure(Float exposure);
 
-	WIBase *CreateGUIElement(std::string name, WIBase *parent = NULL);
+	WIBase *CreateGUIElement(std::string name, WIBase *parent = nullptr);
 	WIBase *CreateGUIElement(std::string name, WIHandle *hParent);
 	template<class TElement>
-	TElement *CreateGUIElement(WIBase *parent = NULL);
+	TElement *CreateGUIElement(WIBase *parent = nullptr);
 	template<class TElement>
 	TElement *CreateGUIElement(WIHandle *parent);
 	virtual void Initialize() override;
@@ -511,9 +502,16 @@ export class DLLCLIENT CGame : public pragma::Game {
 	void InitializeWorldEnvironment();
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(CGame::SoundCacheFlags)
-	REGISTER_BASIC_BITWISE_OPERATORS(CGame::GameShader)
-	REGISTER_BASIC_BITWISE_OPERATORS(CGame::StateFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<CGame::SoundCacheFlags> : std::true_type {};
+
+		template<>
+		struct enable_bitwise_operators<CGame::GameShader> : std::true_type {};
+
+		template<>
+		struct enable_bitwise_operators<CGame::StateFlags> : std::true_type {};
+	}
 
 	namespace pragma {
 		DLLCLIENT CGame *get_cgame();

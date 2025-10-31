@@ -6,10 +6,6 @@ module;
 
 
 #include "stdafx_client.h"
-#include <cmaterialmanager.h>
-#include <mathutil/umat.h>
-#include <texturemanager/texturemanager.h>
-#include "textureinfo.h"
 
 module pragma.client;
 

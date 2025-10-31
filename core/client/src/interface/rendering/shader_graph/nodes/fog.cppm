@@ -1,14 +1,13 @@
-#include "pragma/clientdefinitions.h"
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __PRAGMA_SHADER_GRAPH_NODES_FOG_HPP__
-#define __PRAGMA_SHADER_GRAPH_NODES_FOG_HPP__
+module;
 
+#include "pragma/clientdefinitions.h"
 
 export module pragma.client:rendering.shader_graph.node_fog;
 
-import pragma.shadergraph;
+export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {
 	class DLLCLIENT FogNode : public pragma::shadergraph::Node {
@@ -23,5 +22,3 @@ export namespace pragma::rendering::shader_graph {
 		virtual std::string DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const override;
 	};
 };
-
-#endif

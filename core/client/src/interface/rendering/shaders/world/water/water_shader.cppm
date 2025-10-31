@@ -39,7 +39,7 @@ export namespace pragma {
 #pragma pack(pop)
 
 		ShaderWater(prosper::IPrContext &context, const std::string &identifier);
-		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
+		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(msys::CMaterial &mat) override;
 
 		virtual bool RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const override;
 		virtual GameShaderSpecializationConstantFlag GetBaseSpecializationFlags() const override;

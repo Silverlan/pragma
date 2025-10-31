@@ -4,32 +4,19 @@
 module;
 
 
-#include "pragma/lua/lua_call.hpp"
 
 #include "pragma/logging.hpp"
 
 
-#include "mathutil/color.h"
 
-#include "mathutil/transform.hpp"
 
 
 
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include "textureinfo.h"
-#include <shader/prosper_pipeline_create_info.hpp>
-#include <shader/prosper_shader_flip_image.hpp>
-#include <prosper_prepared_command_buffer.hpp>
-#include <prosper_command_buffer.hpp>
-#include <prosper_descriptor_set_group.hpp>
-#include <prosper_render_pass.hpp>
-#include <shader/prosper_shader_t.hpp>
-#include <cmaterialmanager.h>
 
 #undef DrawState
 
@@ -42,7 +29,7 @@ import pragma.shadergraph;
 
 static spdlog::logger &LOGGER_SG = pragma::register_logger("shadergraph");
 
-static void reload_textures(CMaterial &mat)
+static void reload_textures(msys::CMaterial &mat)
 {
 	std::unordered_map<std::string, std::string> textureMappings;
 	for(auto &name : msys::MaterialPropertyBlockView {mat}) {
@@ -394,7 +381,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	modEngine[defFontInfo];
 
 	auto &modUtil = lua.RegisterLibrary("util");
-	auto defTexture = luabind::class_<Texture>("Texture");
+	auto defTexture = luabind::class_<msys::Texture>("Texture");
 	defTexture.def(
 	  "__tostring", +[](const Texture &tex) -> std::string {
 		  std::stringstream ss;
@@ -485,9 +472,9 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	materialClassDef.def("ReloadTextures", &reload_textures);
 	materialClassDef.def("InitializeShaderDescriptorSet", static_cast<void (*)(lua_State *, msys::Material *, bool)>(&Lua::Material::Client::InitializeShaderData));
 	materialClassDef.def("InitializeShaderDescriptorSet", static_cast<void (*)(lua_State *, msys::Material *)>(&Lua::Material::Client::InitializeShaderData));
-	materialClassDef.def("ClearSpriteSheetAnimation", static_cast<void (*)(lua_State *, msys::Material &)>([](lua_State *l, msys::Material &mat) { static_cast<CMaterial &>(mat).ClearSpriteSheetAnimation(); }));
+	materialClassDef.def("ClearSpriteSheetAnimation", static_cast<void (*)(lua_State *, msys::Material &)>([](lua_State *l, msys::Material &mat) { static_cast<msys::CMaterial &>(mat).ClearSpriteSheetAnimation(); }));
 	materialClassDef.def("GetSpriteSheetAnimation", static_cast<void (*)(lua_State *, msys::Material &)>([](lua_State *l, msys::Material &mat) {
-		auto *spriteSheetAnim = static_cast<CMaterial &>(mat).GetSpriteSheetAnimation();
+		auto *spriteSheetAnim = static_cast<msys::CMaterial &>(mat).GetSpriteSheetAnimation();
 		if(spriteSheetAnim == nullptr)
 			return;
 		Lua::Push<SpriteSheetAnimation *>(l, spriteSheetAnim);
@@ -497,16 +484,16 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		if(db == nullptr)
 			return;
 		auto shaderInfo = pragma::get_cengine()->GetShaderManager().PreRegisterShader(shader);
-		static_cast<CMaterial &>(mat).ClearDescriptorSets();
+		static_cast<msys::CMaterial &>(mat).ClearDescriptorSets();
 		mat.Initialize(shaderInfo, db);
 		mat.SetUserData2(nullptr);
 		mat.SetLoaded(true);
 		mat.UpdateTextures(true);
-		pragma::get_cgame()->ReloadMaterialShader(static_cast<CMaterial *>(&mat));
+		pragma::get_cgame()->ReloadMaterialShader(static_cast<msys::CMaterial *>(&mat));
 	}));
 	materialClassDef.def(
 	  "GetPrimaryShader", +[](lua_State *l, msys::Material &mat) -> luabind::object {
-		  auto *shader = static_cast<CMaterial &>(mat).GetPrimaryShader();
+		  auto *shader = static_cast<msys::CMaterial &>(mat).GetPrimaryShader();
 		  if(!shader)
 			  return Lua::nil;
 		  Lua::shader::push_shader(l, *shader);

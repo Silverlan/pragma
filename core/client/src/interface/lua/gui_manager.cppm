@@ -8,6 +8,10 @@ module;
 
 
 export module pragma.client:scripting.lua.gui_manager;
+
+export import luabind;
+export import std;
+
 export {
 	#pragma warning(push)
 	#pragma warning(disable : 4251)

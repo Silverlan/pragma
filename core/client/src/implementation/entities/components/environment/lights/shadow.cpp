@@ -4,19 +4,13 @@
 module;
 
 
-#include "mathutil/umath_geometry.hpp"
 
 
 
 #include "pragma/lua/core.hpp"
 #include "pragma/console/helper.hpp"
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <prosper_render_pass.hpp>
-#include <prosper_framebuffer.hpp>
-#include <prosper_command_buffer.hpp>
-#include <image/prosper_render_target.hpp>
 
 module pragma.client;
 

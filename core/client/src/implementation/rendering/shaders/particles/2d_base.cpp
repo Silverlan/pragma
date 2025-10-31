@@ -3,17 +3,8 @@
 
 module;
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <shader/prosper_pipeline_create_info.hpp>
-#include <shader/prosper_shader_t.hpp>
-#include <buffers/prosper_buffer.hpp>
-#include <prosper_util.hpp>
-#include <image/prosper_msaa_texture.hpp>
-#include <prosper_descriptor_set_group.hpp>
-#include <prosper_command_buffer.hpp>
-#include <datasystem_vector.h>
 
 module pragma.client;
 
@@ -129,11 +120,11 @@ std::optional<uint32_t> ShaderParticle2DBase::RecordBeginDraw(prosper::ShaderBin
 uint32_t ShaderParticle2DBase::GetRenderSettingsDescriptorSetIndex() const { return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex; }
 uint32_t ShaderParticle2DBase::GetCameraDescriptorSetIndex() const { return DESCRIPTOR_SET_SCENE.setIndex; }
 
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticle2DBase::InitializeMaterialDescriptorSet(CMaterial &mat)
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticle2DBase::InitializeMaterialDescriptorSet(msys::CMaterial &mat)
 {
 	auto *diffuseMap = mat.GetDiffuseMap();
 	if(diffuseMap != nullptr && diffuseMap->texture != nullptr) {
-		auto texture = std::static_pointer_cast<Texture>(diffuseMap->texture);
+		auto texture = std::static_pointer_cast<msys::Texture>(diffuseMap->texture);
 		if(texture->HasValidVkTexture()) {
 			auto descSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
 			mat.SetDescriptorSetGroup(*this, descSetGroup);
@@ -233,7 +224,7 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, 
 prosper::DescriptorSetInfo &ShaderParticle2DBase::GetAnimationDescriptorSetInfo() const { return DESCRIPTOR_SET_ANIMATION; }
 bool ShaderParticle2DBase::RecordParticleMaterial(prosper::ShaderBindState &bindState, const CRasterizationRendererComponent &renderer, const pragma::ecs::CParticleSystemComponent &ps) const
 {
-	auto *mat = static_cast<CMaterial *>(ps.GetMaterial());
+	auto *mat = static_cast<msys::CMaterial *>(ps.GetMaterial());
 	if(mat == nullptr)
 		return false;
 	auto descSetGroupMat = mat->GetDescriptorSetGroup(const_cast<ShaderParticle2DBase &>(*this));

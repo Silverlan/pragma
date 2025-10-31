@@ -106,24 +106,21 @@ export
 		virtual void OnChildAdded(WIBase *child) override;
 		void UpdateCell(const WITableCell &cell);
 		template<class TRow>
-		TRow *AddRow();
+		TRow *AddRow()
+		{
+			WIBase *parent = this;
+			if(m_bScrollable == true && m_hScrollContainer.IsValid())
+				parent = m_hScrollContainer.get();
+			auto *pRow = WGUI::GetInstance().Create<TRow>(parent);
+			auto hRow = pRow->GetHandle();
+			pRow->AddStyleClass("table_row");
+			m_rows.push_back(hRow);
+			InitializeRow(pRow, false);
+			return pRow;
+		}
 		friend void WITableCell::SetRowSpan(int32_t span);
 		friend void WITableCell::SetColSpan(int32_t span);
 	};
-
-	template<class TRow>
-	TRow *WITable::AddRow()
-	{
-		WIBase *parent = this;
-		if(m_bScrollable == true && m_hScrollContainer.IsValid())
-			parent = m_hScrollContainer.get();
-		auto *pRow = WGUI::GetInstance().Create<TRow>(parent);
-		auto hRow = pRow->GetHandle();
-		pRow->AddStyleClass("table_row");
-		m_rows.push_back(hRow);
-		InitializeRow(pRow, false);
-		return pRow;
-	}
 
 	class WITableCell;
 	class DLLCLIENT WITableRow : public WIContainer {

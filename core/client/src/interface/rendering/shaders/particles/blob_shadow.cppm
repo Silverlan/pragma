@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 
 export module pragma.client:rendering.shaders.particle_blob_shadow;

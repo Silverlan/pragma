@@ -6,15 +6,6 @@ module;
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_client.h"
-#include <image/prosper_image.hpp>
-#include <image/prosper_render_target.hpp>
-#include <image/prosper_sampler.hpp>
-#include <prosper_util.hpp>
-#include <prosper_command_buffer.hpp>
-#include <prosper_descriptor_set_group.hpp>
-#include <util_texture_info.hpp>
-#include <datasystem_t.hpp>
-#include <cmaterialmanager.h>
 
 module pragma.client;
 
@@ -71,10 +62,10 @@ void CPBRConverterComponent::ConvertMaterialsToPBR(pragma::Model &mdl)
 	for(auto hMat : mdl.GetMaterials()) {
 		if(!hMat)
 			continue;
-		auto &mat = static_cast<CMaterial &>(*hMat.get());
+		auto &mat = static_cast<msys::CMaterial &>(*hMat.get());
 		if(ShouldConvertMaterial(mat) == false)
 			continue;
-		ConvertToPBR(static_cast<CMaterial &>(*hMat.get()));
+		ConvertToPBR(static_cast<msys::CMaterial &>(*hMat.get()));
 	}
 }
 
@@ -123,7 +114,7 @@ void CPBRConverterComponent::OnEntitySpawn()
 
 	auto *client = pragma::get_client_state();
 	m_cbOnModelLoaded = pragma::get_cgame()->AddCallback("OnModelLoaded", FunctionCallback<void, std::reference_wrapper<std::shared_ptr<pragma::Model>>>::Create([this](std::reference_wrapper<std::shared_ptr<pragma::Model>> mdl) { ScheduleModelUpdate(*mdl.get(), true); }));
-	m_cbOnMaterialLoaded = client->AddCallback("OnMaterialLoaded", FunctionCallback<void, CMaterial *>::Create([this](CMaterial *mat) {
+	m_cbOnMaterialLoaded = client->AddCallback("OnMaterialLoaded", FunctionCallback<void, msys::CMaterial *>::Create([this](msys::CMaterial *mat) {
 		if(ShouldConvertMaterial(*mat) == false)
 			return;
 		ConvertToPBR(*mat);
@@ -135,9 +126,9 @@ void CPBRConverterComponent::OnEntitySpawn()
 		if(!asset)
 			continue;
 		auto hMat = msys::CMaterialManager::GetAssetObject(*asset);
-		if(!hMat || hMat.get()->IsLoaded() == false || ShouldConvertMaterial(static_cast<CMaterial &>(*hMat.get())) == false)
+		if(!hMat || hMat.get()->IsLoaded() == false || ShouldConvertMaterial(static_cast<msys::CMaterial &>(*hMat.get())) == false)
 			continue;
-		ConvertToPBR(static_cast<CMaterial &>(*hMat.get()));
+		ConvertToPBR(static_cast<msys::CMaterial &>(*hMat.get()));
 	}
 
 	auto &mdlManager = client->GetModelManager();
@@ -151,14 +142,14 @@ void CPBRConverterComponent::OnEntitySpawn()
 		//UpdateAmbientOcclusion(*mdl);
 	}
 }
-bool CPBRConverterComponent::ShouldConvertMaterial(CMaterial &mat) const
+bool CPBRConverterComponent::ShouldConvertMaterial(msys::CMaterial &mat) const
 {
 	if(m_convertedMaterials.find(mat.GetName()) != m_convertedMaterials.end() || IsPBR(mat) == false)
 		return false;
 	return mat.GetTextureInfo(msys::Material::RMA_MAP_IDENTIFIER) == nullptr;
 }
 
-bool CPBRConverterComponent::IsPBR(CMaterial &mat) const
+bool CPBRConverterComponent::IsPBR(msys::CMaterial &mat) const
 {
 	auto shader = mat.GetShaderIdentifier();
 	ustring::to_lower(shader);
@@ -167,7 +158,7 @@ bool CPBRConverterComponent::IsPBR(CMaterial &mat) const
 
 void CPBRConverterComponent::PollEvents() { ProcessQueue(); }
 
-void CPBRConverterComponent::ApplyMiscMaterialProperties(CMaterial &mat, const SurfaceMaterial &surfMat, const std::string &surfMatName)
+void CPBRConverterComponent::ApplyMiscMaterialProperties(msys::CMaterial &mat, const SurfaceMaterial &surfMat, const std::string &surfMatName)
 {
 	auto ior = surfMat.GetIOR();
 	if(ior.has_value() == false)
@@ -179,7 +170,7 @@ void CPBRConverterComponent::ApplyMiscMaterialProperties(CMaterial &mat, const S
 		mat.SetProperty<std::string>("cycles/shader", "glass");
 }
 
-bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
+bool CPBRConverterComponent::ConvertToPBR(msys::CMaterial &matTraditional)
 {
 	if(!matTraditional.HasPropertyBlock("rma_info"))
 		return false;
@@ -195,7 +186,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	auto hasSurfaceMaterial = matTraditional.GetProperty("surfacematerial", &surfMatName);
 	auto *surfMat = hasSurfaceMaterial ? pragma::get_cgame()->GetSurfaceMaterial(surfMatName) : nullptr;
 
-	auto fSetMaterialValue = [&matTraditional]<typename T>(CMaterial &mat, const std::string &path, const T &value) {
+	auto fSetMaterialValue = [&matTraditional]<typename T>(msys::CMaterial &mat, const std::string &path, const T &value) {
 		if(mat.GetPropertyType(path) == msys::PropertyType::None)
 			return;
 		mat.SetProperty(path, value);
@@ -218,8 +209,8 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 
 	auto fGetTexture = [&matTraditional](const std::string &name) -> prosper::Texture * {
 		auto *map = matTraditional.GetTextureInfo(name);
-		if(map && map->texture && std::static_pointer_cast<Texture>(map->texture)->HasValidVkTexture())
-			return std::static_pointer_cast<Texture>(map->texture)->GetVkTexture().get();
+		if(map && map->texture && std::static_pointer_cast<msys::Texture>(map->texture)->HasValidVkTexture())
+			return std::static_pointer_cast<msys::Texture>(map->texture)->GetVkTexture().get();
 		return nullptr;
 	};
 

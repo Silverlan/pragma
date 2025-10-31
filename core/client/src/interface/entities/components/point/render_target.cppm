@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <texturemanager/texture.h>
 #include "pragma/lua/core.hpp"
 
 
@@ -48,7 +47,7 @@ export {
 			unsigned int GetTextureBuffer();
 			void Render(pragma::rendering::SceneRenderPass renderMode);
 
-			std::unique_ptr<Texture> m_texture = nullptr;
+			std::unique_ptr<msys::Texture> m_texture = nullptr;
 			msys::Material *m_matRender = nullptr;
 			float m_refreshRate = 0.f;
 			double m_tLastRefresh;

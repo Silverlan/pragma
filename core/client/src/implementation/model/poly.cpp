@@ -30,15 +30,15 @@ void CPoly::SetTextureData(std::string texture, Vector3 nu, Vector3 nv, float ou
 void CPoly::CalculateTextureAxes()
 {
 	auto &texData = m_texData;
-	if(texData == NULL)
+	if(texData == nullptr)
 		return;
 
 	msys::Material *mat = GetMaterial();
-	TextureInfo *tex = NULL;
-	if(mat != NULL)
+	TextureInfo *tex = nullptr;
+	if(mat != nullptr)
 		tex = mat->GetTextureInfo("diffusemap");
 	int w, h;
-	if(tex != NULL) {
+	if(tex != nullptr) {
 		w = tex->width;
 		h = tex->height;
 	}

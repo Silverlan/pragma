@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <queries/prosper_pipeline_statistics_query.hpp>
 
 export module pragma.client:rendering.gpu_profiler;
 

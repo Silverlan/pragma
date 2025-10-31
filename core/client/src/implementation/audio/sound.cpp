@@ -7,10 +7,8 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include "alsound_types.hpp";
 
 module pragma.client;
 

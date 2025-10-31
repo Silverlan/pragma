@@ -4,17 +4,23 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <mathutil/umath.h>
 
 export module pragma.client:rendering.enums;
+
+export import pragma.math;
+
 export {
 	enum class ShadowType : uint8_t { None = 0, StaticOnly = 1, Full = StaticOnly | 2 };
-	REGISTER_BASIC_ARITHMETIC_OPERATORS(ShadowType);
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<ShadowType> : std::true_type {};
+	}
 
     namespace pragma::rendering {
         DLLCLIENT bool VERBOSE_RENDER_OUTPUT_ENABLED = false;
 
         enum class ShadowMapType : uint8_t { Static = 0, Dynamic };
+		using namespace umath::scoped_enum::bitwise;
     };
 
 	enum class RenderFlags : uint32_t {
@@ -35,7 +41,10 @@ export {
 		HDR = Reflection << 1,
 		ParticleDepth = HDR << 1
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(RenderFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<RenderFlags> : std::true_type {};
+	}
 
 	namespace pragma::rendering {
 		enum class SceneRenderPass : uint8_t { None = 0, World, View, Sky, Count };
@@ -43,7 +52,10 @@ export {
 		enum class RenderMask : uint64_t { None = 0u };
 		using RenderGroup = RenderMask;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS_2WAY(pragma::rendering::RenderMask)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::rendering::RenderMask> : std::true_type {};
+	}
 
 	namespace pragma::rendering {
 		enum class AntiAliasing : uint8_t { None = 0u, MSAA, FXAA };

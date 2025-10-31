@@ -7,15 +7,8 @@ module;
 #include "pragma/lua/core.hpp"
 #include "pragma/console/helper.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <util_texture_info.hpp>
-#include <prosper_command_buffer.hpp>
-#include <image/prosper_image.hpp>
-#include <prosper_util.hpp>
-#include <buffers/prosper_buffer.hpp>
-#include <texturemanager/texture_manager2.hpp>
 
 module pragma.client;
 
@@ -102,7 +95,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 		auto *diffuseMapSide = matSide->GetDiffuseMap();
 		if(diffuseMapSide == nullptr || diffuseMapSide->texture == nullptr)
 			return false;
-		auto texture = std::static_pointer_cast<Texture>(diffuseMapSide->texture);
+		auto texture = std::static_pointer_cast<msys::Texture>(diffuseMapSide->texture);
 		if(texture->HasValidVkTexture() == false || texture->IsError())
 			return false;
 		auto &img = texture->GetVkTexture()->GetImage();
@@ -258,7 +251,7 @@ void CSkyboxComponent::ValidateMaterials()
 	if(texInfo) {
 		// Skybox is valid; Skip the material
 		if(texInfo->texture) {
-			auto &tex = *static_cast<Texture *>(texInfo->texture.get());
+			auto &tex = *static_cast<msys::Texture *>(texInfo->texture.get());
 			auto &vkTex = tex.GetVkTexture();
 			if(vkTex) {
 				auto &img = vkTex->GetImage();
@@ -269,8 +262,8 @@ void CSkyboxComponent::ValidateMaterials()
 						constexpr uint32_t resolution = 1024;
 						auto tex = shader->EquirectangularTextureToCubemap(*vkTex, resolution);
 						if(tex) {
-							static_cast<CMaterial *>(mat)->SetTexture("skybox", *tex);
-							static_cast<CMaterial *>(mat)->UpdateTextures();
+							static_cast<msys::CMaterial *>(mat)->SetTexture("skybox", *tex);
+							static_cast<msys::CMaterial *>(mat)->UpdateTextures();
 						}
 					}
 				}
@@ -294,7 +287,7 @@ void CSkyboxComponent::SetSkyMaterial(msys::Material *mat)
 		return;
 	if(mat) {
 		auto overrideC = ent.AddComponent<CMaterialOverrideComponent>();
-		overrideC->SetMaterialOverride(0, static_cast<CMaterial &>(*mat));
+		overrideC->SetMaterialOverride(0, static_cast<msys::CMaterial &>(*mat));
 	}
 	else {
 		auto overrideC = ent.GetComponent<CMaterialOverrideComponent>();
@@ -315,9 +308,9 @@ static void sky_override(NetworkState *, const ConVar &, std::string, std::strin
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
-	CMaterial *matSky = nullptr;
+	msys::CMaterial *matSky = nullptr;
 	if(skyMat.empty() == false)
-		matSky = static_cast<CMaterial *>(pragma::get_client_state()->LoadMaterial(skyMat, nullptr, false, true));
+		matSky = static_cast<msys::CMaterial *>(pragma::get_client_state()->LoadMaterial(skyMat, nullptr, false, true));
 	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CSkyboxComponent>>();
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CModelComponent>>();

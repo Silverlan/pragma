@@ -24,15 +24,15 @@ bool CEngine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv,
 {
 	std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::tolower);
 	ClientState *stateCl = static_cast<ClientState *>(GetClientState());
-	pragma::BasePlayerComponent *pl = NULL;
-	if(stateCl != NULL) {
+	pragma::BasePlayerComponent *pl = nullptr;
+	if(stateCl != nullptr) {
 		CGame *game = stateCl->GetGameState();
-		if(game != NULL)
+		if(game != nullptr)
 			pl = game->GetLocalPlayer();
 	}
 	if(stateCl == nullptr)
 		return RunEngineConsoleCommand(cmd, argv, pressState, magnitude, callback);
-	if(stateCl == NULL || !stateCl->RunConsoleCommand(cmd, argv, pl, pressState, magnitude, callback)) {
+	if(stateCl == nullptr || !stateCl->RunConsoleCommand(cmd, argv, pl, pressState, magnitude, callback)) {
 		Con::cwar << "Unknown console command '" << cmd << "'!" << Con::endl;
 		auto similar = (stateCl != nullptr) ? stateCl->FindSimilarConVars(cmd) : FindSimilarConVars(cmd);
 		if(similar.empty() == true)

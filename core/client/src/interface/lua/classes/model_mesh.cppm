@@ -17,7 +17,7 @@ export namespace Lua {
 			DLLCLIENT void Create(lua_State *l);
 		};
 	};
-	namespace pragma::ModelSubMesh {
+	namespace ModelSubMesh {
 		namespace Client {
 			DLLCLIENT void Create(lua_State *l);
 			DLLCLIENT void GetVkMesh(lua_State *l, pragma::ModelSubMesh &mesh);

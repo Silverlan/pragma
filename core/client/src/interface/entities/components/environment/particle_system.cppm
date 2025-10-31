@@ -4,12 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "buffers/prosper_dynamic_resizable_buffer.hpp"
-#include "sprite_sheet_animation.hpp"
-#include <mathutil/transform.hpp>
-#include "mathutil/umath.h"
 #include "pragma/lua/core.hpp"
-#include "mathutil/color.h"
 
 
 
@@ -398,8 +393,13 @@ export namespace pragma::ecs {
 	};
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::ecs::CParticleSystemComponent::Flags)
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::ecs::ParticleRenderFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::ecs::CParticleSystemComponent::Flags> : std::true_type {};
+
+		template<>
+		struct enable_bitwise_operators<pragma::ecs::ParticleRenderFlags> : std::true_type {};
+	}
 
 	template<class TInitializer>
 	void pragma::ecs::CParticleSystemComponent::GetInitializers(std::vector<TInitializer *> &initializers)

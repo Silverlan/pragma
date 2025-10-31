@@ -7,14 +7,8 @@ module;
 
 
 
-#include "mathutil/umath.h"
-#include "mathutil/color.h"
 
 #include "stdafx_cengine.h"
-#include <prosper_util.hpp>
-#include <debug/prosper_debug.hpp>
-#include <shader/prosper_shader.hpp>
-#include <prosper_window.hpp>
 #include <spdlog/pattern_formatter.h>
 
 module pragma.client;

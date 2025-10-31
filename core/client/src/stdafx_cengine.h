@@ -8,11 +8,6 @@
 #define _WIN32_WINNT 0x0501
 #include <Windows.h>
 #endif
-#include <mathutil/glmutil.h>
-#include <mathutil/eulerangles.h>
-#include <mathutil/uquat.h>
-#include <mathutil/uvec.h>
-#include <mathutil/umath.h>
 #include <algorithm>
 #include <vector>
 #include <string>

@@ -2,13 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <shader/prosper_pipeline_create_info.hpp>
-#include <shader/prosper_shader_t.hpp>
-#include <prosper_command_buffer.hpp>
-#include <prosper_util.hpp>
 
 module pragma.client;
 
@@ -64,12 +59,12 @@ void ShaderPrepassBase::OnPipelinesInitialized() { ShaderGameWorld::OnPipelinesI
 
 void ShaderPrepassBase::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { CreateCachedRenderPass<ShaderPrepassBase>({{get_depth_render_pass_attachment_info(GetSampleCount(pipelineIdx))}}, outRenderPass, pipelineIdx); }
 
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPrepassBase::InitializeMaterialDescriptorSet(CMaterial &mat)
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPrepassBase::InitializeMaterialDescriptorSet(msys::CMaterial &mat)
 {
 	auto *diffuseMap = mat.GetDiffuseMap();
 	if(diffuseMap == nullptr || diffuseMap->texture == nullptr)
 		return nullptr;
-	auto diffuseTexture = std::static_pointer_cast<Texture>(diffuseMap->texture);
+	auto diffuseTexture = std::static_pointer_cast<msys::Texture>(diffuseMap->texture);
 	if(diffuseTexture->HasValidVkTexture() == false)
 		return nullptr;
 	auto descSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
@@ -145,7 +140,7 @@ void ShaderPrepassBase::RecordAlphaCutoff(rendering::ShaderProcessor &shaderProc
 	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, offsetof(PushConstants, alphaCutoff), sizeof(alphaCutoff), &alphaCutoff);
 }
 
-bool ShaderPrepassBase::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, CMaterial &mat) const
+bool ShaderPrepassBase::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, msys::CMaterial &mat) const
 {
 	if(mat.GetAlphaMode() == AlphaMode::Opaque)
 		return false;

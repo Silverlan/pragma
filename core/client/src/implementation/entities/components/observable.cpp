@@ -5,7 +5,6 @@ module;
 #include "stdafx_client.h"
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 
 module pragma.client;

@@ -2,14 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
+
 #include "pragma/clientdefinitions.h"
-#include "mathutil/umath.h"
 #include "pragma/lua/core.hpp"
-#include "mathutil/transform.hpp"
-
-
-
-
+#include <bvh/v2/default_builder.h>
 
 export module pragma.client:entities.components.hitbox_bvh;
 
@@ -125,9 +121,11 @@ export namespace pragma {
 		DLLCLIENT bool test_bvh_intersection_with_aabb(const ObbBvhTree &bvhData, const std::vector<umath::ScaledTransform> &effectivePoses, const Vector3 &min, const Vector3 &max, size_t nodeIdx = 0, IntersectionInfo *outIntersectionInfo = nullptr);
 		DLLCLIENT bool test_bvh_intersection_with_obb(const ObbBvhTree &bvhData, const std::vector<umath::ScaledTransform> &effectivePoses, const Vector3 &origin, const Quat &rot, const Vector3 &min, const Vector3 &max, size_t nodeIdx = 0, IntersectionInfo *outIntersectionInfo = nullptr);
 		DLLCLIENT bool test_bvh_intersection_with_kdop(const ObbBvhTree &bvhData, const std::vector<umath::ScaledTransform> &effectivePoses, const std::vector<umath::Plane> &kdop, size_t nodeIdx = 0, IntersectionInfo *outIntersectionInfo = nullptr);
-
 	};
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::bvh::DebugDrawInfo::Flags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::bvh::DebugDrawInfo::Flags> : std::true_type {};
+	}
 };

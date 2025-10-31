@@ -34,7 +34,7 @@ void CWeatherComponent::OnEntitySpawn()
 {
 	BaseEnvWeatherComponent::OnEntitySpawn();
 	auto *pl = pragma::get_cgame()->GetLocalPlayer();
-	if(pl != NULL) {
+	if(pl != nullptr) {
 		auto *pt = pragma::ecs::CParticleSystemComponent::Create({{"particle", "snow"}});
 		if(pt != nullptr) {
 			auto &plEnt = pl->GetEntity();

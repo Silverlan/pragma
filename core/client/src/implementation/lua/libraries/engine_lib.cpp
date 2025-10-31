@@ -8,14 +8,8 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include "cmaterialmanager.h"
-#include <texturemanager/texturemanager.h>
-#include "textureinfo.h"
-#include <image/prosper_render_target.hpp>
-#include <prosper_window.hpp>
 
 module pragma.client;
 
@@ -28,7 +22,7 @@ import :entities.components.particle_system;
 import :game;
 
 
-std::shared_ptr<const FontInfo> Lua::engine::create_font(lua_State *l, const std::string &identifier, const std::string &fontSetName, FontSetFlag features, uint32_t size, bool reload)
+std::shared_ptr<const FontInfo> Lua::engine::create_font(lua_State *l, const std::string &identifier, const std::string &fontSetName, pragma::FontSetFlag features, uint32_t size, bool reload)
 {
 	auto *fontSet = pragma::get_cengine()->FindFontSet(fontSetName);
 	if(!fontSet)
@@ -42,14 +36,14 @@ std::shared_ptr<const FontInfo> Lua::engine::create_font(lua_State *l, const std
 	settings.fontSize = size;
 	return FontManager::LoadFont(identifier.c_str(), fontFileData->fileName, settings, reload);
 }
-std::shared_ptr<const FontInfo> Lua::engine::create_font(lua_State *l, const std::string &identifier, const std::string &fontSetName, FontSetFlag features, uint32_t size) { return create_font(l, identifier, fontSetName, features, size, false); }
+std::shared_ptr<const FontInfo> Lua::engine::create_font(lua_State *l, const std::string &identifier, const std::string &fontSetName, pragma::FontSetFlag features, uint32_t size) { return create_font(l, identifier, fontSetName, features, size, false); }
 std::shared_ptr<const FontInfo> Lua::engine::get_font(lua_State *l, const std::string &identifier) { return FontManager::GetFont(identifier); }
 
 void Lua::engine::register_library(lua_State *l)
 {
 	auto modEngine = luabind::module_(l, "engine");
-	modEngine[luabind::def("create_font", static_cast<std::shared_ptr<const FontInfo> (*)(lua_State *, const std::string &, const std::string &, FontSetFlag, uint32_t, bool)>(Lua::engine::create_font)),
-	  luabind::def("create_font", static_cast<std::shared_ptr<const FontInfo> (*)(lua_State *, const std::string &, const std::string &, FontSetFlag, uint32_t)>(Lua::engine::create_font)), luabind::def("get_font", Lua::engine::get_font),
+	modEngine[luabind::def("create_font", static_cast<std::shared_ptr<const FontInfo> (*)(lua_State *, const std::string &, const std::string &, pragma::FontSetFlag, uint32_t, bool)>(Lua::engine::create_font)),
+	  luabind::def("create_font", static_cast<std::shared_ptr<const FontInfo> (*)(lua_State *, const std::string &, const std::string &, pragma::FontSetFlag, uint32_t)>(Lua::engine::create_font)), luabind::def("get_font", Lua::engine::get_font),
 	  luabind::def("set_fixed_frame_delta_time_interpretation", Lua::engine::set_fixed_frame_delta_time_interpretation), luabind::def("clear_fixed_frame_delta_time_interpretation", Lua::engine::clear_fixed_frame_delta_time_interpretation),
 	  luabind::def("set_tick_delta_time_tied_to_frame_rate", Lua::engine::set_tick_delta_time_tied_to_frame_rate), luabind::def("get_window_resolution", Lua::engine::get_window_resolution), luabind::def("get_render_resolution", Lua::engine::get_render_resolution),
 	  luabind::def("get_staging_render_target", Lua::engine::get_staging_render_target), luabind::def("get_current_frame_index", &Lua::engine::get_current_frame_index), luabind::def("get_default_font_set_name", &CEngine::GetDefaultFontSetName),
@@ -77,8 +71,8 @@ void Lua::engine::register_library(lua_State *l)
 	Lua::engine::register_shared_functions(l, modEngine);
 
 	Lua::RegisterLibraryEnums(l, "engine",
-	  {{"FONT_FEATURE_FLAG_NONE", umath::to_integral(FontSetFlag::None)}, {"FONT_FEATURE_FLAG_BOLD_BIT", umath::to_integral(FontSetFlag::Bold)}, {"FONT_FEATURE_FLAG_ITALIC_BIT", umath::to_integral(FontSetFlag::Italic)}, {"FONT_FEATURE_FLAG_MONO_BIT", umath::to_integral(FontSetFlag::Mono)},
-	    {"FONT_FEATURE_FLAG_SERIF_BIT", umath::to_integral(FontSetFlag::Serif)}, {"FONT_FEATURE_FLAG_SANS_BIT", umath::to_integral(FontSetFlag::Sans)}});
+	  {{"FONT_FEATURE_FLAG_NONE", umath::to_integral(pragma::FontSetFlag::None)}, {"FONT_FEATURE_FLAG_BOLD_BIT", umath::to_integral(pragma::FontSetFlag::Bold)}, {"FONT_FEATURE_FLAG_ITALIC_BIT", umath::to_integral(pragma::FontSetFlag::Italic)}, {"FONT_FEATURE_FLAG_MONO_BIT", umath::to_integral(pragma::FontSetFlag::Mono)},
+	    {"FONT_FEATURE_FLAG_SERIF_BIT", umath::to_integral(pragma::FontSetFlag::Serif)}, {"FONT_FEATURE_FLAG_SANS_BIT", umath::to_integral(pragma::FontSetFlag::Sans)}});
 }
 
 Vector2i Lua::engine::get_text_size(lua_State *l, const std::string &text, const std::string &font)
@@ -221,7 +215,7 @@ int Lua::engine::create_particle_system(lua_State *l)
 		bRecordKeyvalues = Lua::CheckBool(l, 3);
 	if(Lua::IsString(l, 1)) {
 		std::string name = Lua::CheckString(l, 1);
-		pragma::ecs::CParticleSystemComponent *parent = NULL;
+		pragma::ecs::CParticleSystemComponent *parent = nullptr;
 		if(Lua::IsSet(l, 2)) {
 			auto &hParent = Lua::Check<pragma::ecs::CParticleSystemComponent>(l, 2);
 			parent = &hParent;
@@ -294,7 +288,7 @@ int Lua::engine::create_particle_system(lua_State *l)
 			else
 				Lua::Pop(l, 2);
 		}
-		pragma::ecs::CParticleSystemComponent *parent = NULL;
+		pragma::ecs::CParticleSystemComponent *parent = nullptr;
 		if(Lua::IsSet(l, 2)) {
 			auto &hParent = Lua::Check<pragma::ecs::CParticleSystemComponent>(l, 2);
 			parent = &hParent;
@@ -325,7 +319,7 @@ int Lua::engine::create_particle_system(lua_State *l)
 			Lua::Pop(l, 1); /* 0 */
 		}
 	}
-	if(particle == NULL)
+	if(particle == nullptr)
 		return 0;
 	for(unsigned int i = 0; i < children.size(); i++)
 		pragma::ecs::CParticleSystemComponent::Create(children[i], particle, bRecordKeyvalues);
@@ -395,7 +389,7 @@ int Lua::engine::save_particle_system(lua_State *l)
 
 			FileManager::CreatePath(ufile::get_path_from_filename(name).c_str());
 			auto f = FileManager::OpenFile<VFilePtrReal>(name.c_str(), "wb");
-			if(f != NULL)
+			if(f != nullptr)
 				Lua::PushBool(l, pragma::ecs::CParticleSystemComponent::Save(f, particleSystems));
 			else
 				Lua::PushBool(l, false);

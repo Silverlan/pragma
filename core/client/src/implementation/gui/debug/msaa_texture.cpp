@@ -4,9 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <image/prosper_msaa_texture.hpp>
-#include <prosper_util.hpp>
-#include <image/prosper_sampler.hpp>
 
 module pragma.client;
 

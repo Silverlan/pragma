@@ -5,8 +5,6 @@ module;
 #include "pragma/logging.hpp"
 
 #include "stdafx_cengine.h"
-#include <alsoundsystem.hpp>
-#include <alsound_coordinate_system.hpp>
 
 module pragma.client;
 

@@ -10,13 +10,6 @@ module;
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_client.h"
-#include <prosper_command_buffer.hpp>
-#include <image/prosper_render_target.hpp>
-#include <image/prosper_texture.hpp>
-#include <image/prosper_image.hpp>
-#include <buffers/prosper_buffer.hpp>
-#include <prosper_descriptor_set_group.hpp>
-#include <prosper_util.hpp>
 
 
 // #define ENABLE_DEPRECATED_PHYSICS
@@ -935,14 +928,14 @@ int Lua::game::Client::set_debug_render_filter(lua_State *l)
 	}
 	if(t["materialFilter"]) {
 		auto materialFilter = luabind::object {t["materialFilter"]};
-		filter->materialFilter = [materialFilter](CMaterial &mat) mutable -> bool {
+		filter->materialFilter = [materialFilter](msys::CMaterial &mat) mutable -> bool {
 			auto r = materialFilter(static_cast<msys::Material *>(&mat));
 			return luabind::object_cast<bool>(r);
 		};
 	}
 	if(t["entityFilter"]) {
 		auto entityFilter = luabind::object {t["entityFilter"]};
-		filter->entityFilter = [entityFilter](CBaseEntity &ent, CMaterial &mat) mutable -> bool {
+		filter->entityFilter = [entityFilter](CBaseEntity &ent, msys::CMaterial &mat) mutable -> bool {
 			auto &oEnt = ent.GetLuaObject();
 			auto r = entityFilter(oEnt, static_cast<msys::Material *>(&mat));
 			return luabind::object_cast<bool>(r);
@@ -950,7 +943,7 @@ int Lua::game::Client::set_debug_render_filter(lua_State *l)
 	}
 	if(t["meshFilter"]) {
 		auto meshFilter = luabind::object {t["meshFilter"]};
-		filter->meshFilter = [meshFilter](CBaseEntity &ent, CMaterial *mat, CModelSubMesh &mesh, pragma::RenderMeshIndex meshIdx) mutable -> bool {
+		filter->meshFilter = [meshFilter](CBaseEntity &ent, msys::CMaterial *mat, CModelSubMesh &mesh, pragma::RenderMeshIndex meshIdx) mutable -> bool {
 			auto &oEnt = ent.GetLuaObject();
 			auto r = meshFilter(oEnt, mat ? static_cast<msys::Material *>(mat) : nullptr, mesh.shared_from_this(), meshIdx);
 			return luabind::object_cast<bool>(r);

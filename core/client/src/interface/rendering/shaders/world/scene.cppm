@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <shader/prosper_shader.hpp>
 
 export module pragma.client:rendering.shaders.scene;
 
@@ -237,9 +236,17 @@ export namespace pragma {
 		SceneFlags m_sceneFlags = SceneFlags::None;
 		std::unique_ptr<prosper::DescriptorSetInfo> m_materialDescSetInfo;
 	};
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::rendering::InstanceData::RenderFlags);
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderScene::DebugFlags);
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderGameWorld::SceneFlags);
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::rendering::InstanceData::RenderFlags> : std::true_type {};
+
+		template<>
+		struct enable_bitwise_operators<pragma::ShaderScene::DebugFlags> : std::true_type {};
+
+		template<>
+		struct enable_bitwise_operators<pragma::ShaderGameWorld::SceneFlags> : std::true_type {};
+	}
 };

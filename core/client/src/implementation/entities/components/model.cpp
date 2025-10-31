@@ -5,12 +5,8 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <shader/prosper_pipeline_loader.hpp>
-#include <buffers/prosper_render_buffer.hpp>
-#include <prosper_command_buffer.hpp>
 
 module pragma.client;
 
@@ -80,7 +76,7 @@ void CModelComponent::UpdateBaseShaderSpecializationFlags()
 
 CMaterialOverrideComponent *CModelComponent::GetMaterialOverrideComponent() { return m_materialOverrideComponent; }
 
-CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx, uint32_t skin) const
+msys::CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx, uint32_t skin) const
 {
 	// TODO: Move this to Model class
 	auto &mdl = GetModel();
@@ -97,10 +93,10 @@ CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx, uint32_t skin) const
 		if(matOverride)
 			return matOverride;
 	}
-	auto *mat = static_cast<CMaterial *>(mdl->GetMaterial(idx));
-	return mat ? mat : static_cast<CMaterial *>(pragma::get_client_state()->GetMaterialManager().GetErrorMaterial());
+	auto *mat = static_cast<msys::CMaterial *>(mdl->GetMaterial(idx));
+	return mat ? mat : static_cast<msys::CMaterial *>(pragma::get_client_state()->GetMaterialManager().GetErrorMaterial());
 }
-CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx) const { return GetRenderMaterial(idx, GetSkin()); }
+msys::CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx) const { return GetRenderMaterial(idx, GetSkin()); }
 
 Bool CModelComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
@@ -172,7 +168,7 @@ void CModelComponent::SetDepthPrepassEnabled(bool enabled) { umath::set_flag(m_s
 
 void CModelComponent::SetRenderBufferData(const std::vector<rendering::RenderBufferData> &renderBufferData) { m_lodMeshRenderBufferData = renderBufferData; }
 
-void CModelComponent::AddRenderMesh(CModelSubMesh &mesh, CMaterial &mat, pragma::rendering::RenderBufferData::StateFlags stateFlags)
+void CModelComponent::AddRenderMesh(CModelSubMesh &mesh, msys::CMaterial &mat, pragma::rendering::RenderBufferData::StateFlags stateFlags)
 {
 	if(m_lodRenderMeshGroups.empty())
 		return;
@@ -526,8 +522,8 @@ void CModelComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnt
 	defCModel.add_static_constant("EVENT_ON_RENDER_MESHES_UPDATED", pragma::CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED);
 	defCModel.add_static_constant("EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED", pragma::CModelComponent::EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED);
 	//Lua::register_base_model_component_methods<luabind::class_<CModelHandle,BaseEntityComponentHandle>,CModelHandle>(l,defCModel);
-	defCModel.def("GetRenderMaterial", static_cast<CMaterial *(pragma::CModelComponent::*)(uint32_t, uint32_t) const>(&pragma::CModelComponent::GetRenderMaterial));
-	defCModel.def("GetRenderMaterial", static_cast<CMaterial *(pragma::CModelComponent::*)(uint32_t) const>(&pragma::CModelComponent::GetRenderMaterial));
+	defCModel.def("GetRenderMaterial", static_cast<msys::CMaterial *(pragma::CModelComponent::*)(uint32_t, uint32_t) const>(&pragma::CModelComponent::GetRenderMaterial));
+	defCModel.def("GetRenderMaterial", static_cast<msys::CMaterial *(pragma::CModelComponent::*)(uint32_t) const>(&pragma::CModelComponent::GetRenderMaterial));
 	defCModel.def("GetLOD", &pragma::CModelComponent::GetLOD);
 	defCModel.def("IsAutoLodEnabled", &pragma::CModelComponent::IsAutoLodEnabled);
 	defCModel.def("SetAutoLodEnabled", &pragma::CModelComponent::SetAutoLodEnabled);

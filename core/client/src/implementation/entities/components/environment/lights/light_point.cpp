@@ -2,15 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath_geometry.hpp"
 
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include "prosper_includes.hpp"
 
 module pragma.client;
 

@@ -4,10 +4,11 @@
 module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
-#include "alsoundsystem.hpp"
-#include "alsound_effect.hpp"
 
 export module pragma.client:scripting.lua.libraries.sound;
+
+export import pragma.soundsystem;
+
 export namespace Lua {
 	namespace sound {
 		DLLCLIENT al::PEffect register_aux_effect(const std::string &name, const al::EfxEaxReverbProperties &props);

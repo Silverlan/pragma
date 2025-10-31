@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "prosper_command_buffer.hpp"
-#include <mathutil/color.h>
 
 export module pragma.client:rendering.draw_scene_info;
 
@@ -63,7 +61,11 @@ export namespace util {
 		const DrawSceneInfo &drawSceneInfo;
 		mutable std::shared_ptr<prosper::ICommandBuffer> commandBuffer = nullptr;
 	};
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(util::DrawSceneInfo::Flags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<util::DrawSceneInfo::Flags> : std::true_type {};
+	}
 };

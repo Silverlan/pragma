@@ -5,16 +5,8 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <alsound_buffer.hpp>
-#include <prosper_util.hpp>
-#include <buffers/prosper_buffer.hpp>
-#include <buffers/prosper_swap_buffer.hpp>
-#include <buffers/prosper_dynamic_resizable_buffer.hpp>
-#include <prosper_command_buffer.hpp>
-#include <prosper_descriptor_set_group.hpp>
 
 module pragma.client;
 

@@ -4,10 +4,8 @@
 module;
 #include "pragma/logging.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <prosper_command_buffer.hpp>
 
 module pragma.client;
 
@@ -86,7 +84,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindLight(CLightComponent &light,
 	m_curShader->RecordBindLight(*this, light, layerId);
 	return true;
 }
-bool pragma::rendering::ShaderProcessor::RecordBindMaterial(CMaterial &mat)
+bool pragma::rendering::ShaderProcessor::RecordBindMaterial(msys::CMaterial &mat)
 {
 	if(m_curShader->RecordBindMaterial(*this, mat) == false) {
 		if(!m_materialDescSetBound) {
@@ -95,7 +93,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindMaterial(CMaterial &mat)
 			if(!errMat)
 				return false;
 			// Bind a dummy material
-			if(!m_curShader->ShaderGameWorld::RecordBindMaterial(*this, static_cast<CMaterial &>(*errMat)))
+			if(!m_curShader->ShaderGameWorld::RecordBindMaterial(*this, static_cast<msys::CMaterial &>(*errMat)))
 				return false;
 		}
 		return true; // TODO: This should only return true if we're doing a depth pre-pass and the material isn't transparent

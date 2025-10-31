@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 
@@ -15,7 +14,6 @@ import :engine;
 
 // prosper TODO
 #if 0
-#include <shader/prosper_pipeline_create_info.hpp>
 
 using namespace Shader;
 

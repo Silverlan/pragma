@@ -5,23 +5,12 @@ module;
 #include "pragma/cxxmodules.hpp"
 
 
-#include "mathutil/color.h"
 
-#include "mathutil/transform.hpp"
 
 
 
 
 #include "stdafx_client.h"
-#include <mathutil/umath.h>
-#include <glm/gtx/euler_angles.hpp>
-#include <glm/gtx/norm.hpp>
-#include <sprite_sheet_animation.hpp>
-#include <buffers/prosper_dynamic_resizable_buffer.hpp>
-#include <buffers/prosper_uniform_resizable_buffer.hpp>
-#include <prosper_util.hpp>
-#include <prosper_descriptor_set_group.hpp>
-#include <datasystem_vector.h>
 
 module pragma.client;
 
@@ -979,7 +968,7 @@ void ecs::CParticleSystemComponent::Start()
 		m_flags |= pragma::ecs::CParticleSystemComponent::Flags::MaterialDescriptorSetInitialized;
 		// Material descriptor set has to be initialized on main thread, before rendering
 		auto &renderers = GetRenderers();
-		auto *mat = static_cast<CMaterial *>(GetMaterial());
+		auto *mat = static_cast<msys::CMaterial *>(GetMaterial());
 		if(mat && !renderers.empty()) {
 			auto *texBase = dynamic_cast<pragma::ShaderTexturedBase *>(renderers.front()->GetShader());
 			if(texBase) {
@@ -1030,7 +1019,7 @@ void ecs::CParticleSystemComponent::Start()
 			if(IsTextureScrollingEnabled()) {
 			}
 			else if(pragma::ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION.IsValid()) {
-				auto *spriteSheetAnim = static_cast<CMaterial *>(m_material.get())->GetSpriteSheetAnimation();
+				auto *spriteSheetAnim = static_cast<msys::CMaterial *>(m_material.get())->GetSpriteSheetAnimation();
 				m_spriteSheetAnimationData = spriteSheetAnim ? std::make_unique<SpriteSheetAnimation>(*spriteSheetAnim) : nullptr;
 
 				if(!m_spriteSheetAnimationData) {

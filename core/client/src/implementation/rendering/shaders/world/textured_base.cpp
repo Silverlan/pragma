@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <shader/prosper_pipeline_create_info.hpp>
 
 module pragma.client;
 
@@ -13,7 +12,7 @@ import :rendering.shaders.textured_base;
 
 using namespace pragma;
 
-std::shared_ptr<prosper::IDescriptorSetGroup> pragma::ShaderTexturedBase::InitializeMaterialDescriptorSet(CMaterial &mat, bool bReload)
+std::shared_ptr<prosper::IDescriptorSetGroup> pragma::ShaderTexturedBase::InitializeMaterialDescriptorSet(msys::CMaterial &mat, bool bReload)
 {
 	auto &shader = *dynamic_cast<prosper::Shader *>(this);
 	auto descSetGroup = mat.GetDescriptorSetGroup(shader);
@@ -25,4 +24,4 @@ std::shared_ptr<prosper::IDescriptorSetGroup> pragma::ShaderTexturedBase::Initia
 	return InitializeMaterialDescriptorSet(mat);
 }
 
-std::shared_ptr<prosper::IDescriptorSetGroup> pragma::ShaderTexturedBase::InitializeMaterialDescriptorSet(CMaterial &mat) { return nullptr; }
+std::shared_ptr<prosper::IDescriptorSetGroup> pragma::ShaderTexturedBase::InitializeMaterialDescriptorSet(msys::CMaterial &mat) { return nullptr; }

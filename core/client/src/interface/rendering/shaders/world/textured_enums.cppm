@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 
 export module pragma.client:rendering.shaders.textured_enums;
@@ -37,7 +36,11 @@ export namespace pragma {
 		EnableDynamicShadows
 	};
 	enum class GameShaderSpecialization : uint32_t { Generic = 0, Lightmapped, Animated, Count };
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::GameShaderSpecializationConstantFlag)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::GameShaderSpecializationConstantFlag> : std::true_type {};
+	}
 };

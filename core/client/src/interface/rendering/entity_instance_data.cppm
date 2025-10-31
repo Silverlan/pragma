@@ -3,9 +3,11 @@
 
 module;
 
-#include "mathutil/umath.h"
 
 export module pragma.client:rendering.entity_instance_data;
+
+export import pragma.math;
+export import std.compat;
 
 export namespace pragma::rendering {
 #pragma pack(push, 1)

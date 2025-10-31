@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <alsoundsystem.hpp>
 
 module pragma.client;
 
@@ -19,7 +18,7 @@ CSoundScript::~CSoundScript() {}
 
 //////////////////////////////////////
 
-CSSEPlaySound::CSSEPlaySound(SoundScriptManager *manager) : SSEPlaySound(manager), m_dspEffect(NULL) {}
+CSSEPlaySound::CSSEPlaySound(SoundScriptManager *manager) : SSEPlaySound(manager), m_dspEffect(nullptr) {}
 SSESound *CSSEPlaySound::CreateSound(double tStart, const std::function<std::shared_ptr<ALSound>(const std::string &, ALChannel, pragma::audio::ALCreateFlags)> &createSound)
 {
 	auto *s = SSEPlaySound::CreateSound(tStart, createSound);

@@ -4,10 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <shader/prosper_pipeline_create_info.hpp>
-#include <buffers/prosper_buffer.hpp>
-#include <prosper_util.hpp>
-#include <prosper_descriptor_set_group.hpp>
 
 module pragma.client;
 

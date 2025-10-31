@@ -2,13 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include "pragma/console/helper.hpp"
 //#include "shader.h" // prosper TODO
 //#include "shader_screen.h" // prosper TODO
-#include <buffers/prosper_buffer.hpp>
 
 module pragma.client;
 

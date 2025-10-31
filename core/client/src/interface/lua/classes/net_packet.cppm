@@ -7,6 +7,7 @@ module;
 
 export module pragma.client:scripting.lua.classes.net_packet;
 
+export import luabind;
 export import pragma.util;
 
 export namespace Lua {

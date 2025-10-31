@@ -4,13 +4,12 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <mathutil/uvec.h>
-#include <mathutil/vertex.hpp>
-#include "mathutil/umath.h"
 
 #define ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 
 export module pragma.client:model.vertex_buffer_data;
+
+export import pragma.math;
 
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 #pragma pack(push, 1)

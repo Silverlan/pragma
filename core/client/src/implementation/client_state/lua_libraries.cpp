@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/policies/core_policies.hpp"
 
 
 #include "pragma/logging.hpp"
@@ -11,13 +10,8 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <alsound_effect.hpp>
-#include <prosper_window.hpp>
-#include <prosper_command_buffer.hpp>
-#include <alsoundsystem.hpp>
 
 module pragma.client;
 

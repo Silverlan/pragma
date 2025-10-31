@@ -2,13 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <shader/prosper_pipeline_create_info.hpp>
-#include <shader/prosper_shader_t.hpp>
-#include <prosper_command_buffer.hpp>
-#include <datasystem_vector.h>
 
 module pragma.client;
 
@@ -55,7 +50,7 @@ void ShaderParticleBlob::GetShaderPreprocessorDefinitions(std::unordered_map<std
 		outPrefixCode += m_shaderMaterial->ToGlslStruct();
 }
 
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticleBlob::InitializeMaterialDescriptorSet(CMaterial &mat)
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticleBlob::InitializeMaterialDescriptorSet(msys::CMaterial &mat)
 {
 	auto descSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(*m_materialDescSetInfo);
 	if(!descSetGroup)
@@ -70,7 +65,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticleBlob::InitializeMate
 
 bool ShaderParticleBlob::RecordParticleMaterial(prosper::ShaderBindState &bindState, const CRasterizationRendererComponent &renderer, const pragma::ecs::CParticleSystemComponent &ps) const
 {
-	auto *mat = static_cast<CMaterial *>(ps.GetMaterial());
+	auto *mat = static_cast<msys::CMaterial *>(ps.GetMaterial());
 	if(mat == nullptr)
 		return false;
 	auto descSetGroupMat = mat->GetDescriptorSetGroup(const_cast<ShaderParticleBlob &>(*this));

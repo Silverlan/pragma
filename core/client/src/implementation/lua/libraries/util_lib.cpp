@@ -5,11 +5,8 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <util_texture_info.hpp>
-#include <prosper_window.hpp>
 
 module pragma.client;
 

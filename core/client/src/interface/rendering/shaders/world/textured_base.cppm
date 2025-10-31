@@ -4,15 +4,14 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "prosper_descriptor_set_group.hpp"
 
 export module pragma.client:rendering.shaders.textured_base;
 
 export namespace pragma {
 	class DLLCLIENT ShaderTexturedBase {
 	  public:
-		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat, bool bReload);
+		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(msys::CMaterial &mat, bool bReload);
 	  protected:
-		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat);
+		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(msys::CMaterial &mat);
 	};
 };

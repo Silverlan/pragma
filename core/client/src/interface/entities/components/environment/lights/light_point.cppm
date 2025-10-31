@@ -4,16 +4,15 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <mathutil/plane.hpp>
-#include "mathutil/umath.h"
 #include "pragma/lua/core.hpp"
 
 
 
 export module pragma.client:entities.components.lights.point;
 
-import :entities.base_entity;
-import :rendering.cube_map_side;
+export import :entities.base_entity;
+export import :rendering.cube_map_side;
+export import :math.mvp_bias;
 
 export namespace pragma {
 	class DLLCLIENT CLightPointComponent final : public BaseEnvLightPointComponent, public MVPBias<6> {

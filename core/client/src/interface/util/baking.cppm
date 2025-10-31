@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <mathutil/umath_lighting.hpp>
-#include "mathutil/umath.h"
 
 
 export module pragma.client:util.baking;

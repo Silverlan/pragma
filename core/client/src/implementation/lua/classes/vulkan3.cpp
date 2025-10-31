@@ -2,25 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/color.h"
 
 
 #include "pragma/lua/core.hpp"
 #include "stdafx_client.h"
-#include <prosper_framebuffer.hpp>
-#include <prosper_fence.hpp>
-#include <prosper_command_buffer.hpp>
-#include <prosper_descriptor_set_group.hpp>
-#include <prosper_window.hpp>
-#include <prosper_render_pass.hpp>
-#include <prosper_prepared_command_buffer.hpp>
-#include <image/prosper_render_target.hpp>
-#include <queries/prosper_timestamp_query.hpp>
-#include <queries/prosper_timer_query.hpp>
-#include <buffers/prosper_buffer.hpp>
-#include <buffers/prosper_swap_buffer.hpp>
-#include <prosper_swap_command_buffer.hpp>
-#include <prosper_event.hpp>
 
 module pragma.client;
 

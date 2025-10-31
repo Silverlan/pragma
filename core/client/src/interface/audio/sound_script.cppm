@@ -4,12 +4,12 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <alsound_effect.hpp>
 
 
 export module pragma.client:audio.sound_script;
 
 export import pragma.shared;
+export import pragma.soundsystem;
 
 #undef CreateEvent
 
@@ -29,7 +29,7 @@ export {
 	public:
 		CSoundScriptManager();
 		virtual ~CSoundScriptManager() override;
-		virtual bool Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts = NULL) override;
+		virtual bool Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts = nullptr) override;
 		virtual SoundScriptEvent *CreateEvent(std::string name) override;
 	};
 

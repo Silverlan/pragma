@@ -4,19 +4,14 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <prosper_util.hpp>
-#include <prosper_prepared_command_buffer.hpp>
-#include <prosper_command_buffer.hpp>
-#include <image/prosper_render_target.hpp>
-#include <image/prosper_sampler.hpp>
 #include "pragma/lua/core.hpp"
-#include "mathutil/color.h"
 
 
 
 
 export module pragma.client:scripting.lua.libraries.vulkan;
 
+export import pragma.prosper;
 export import pragma.shared;
 
 export namespace Lua {

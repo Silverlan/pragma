@@ -52,7 +52,7 @@ util::EventReply WIMainMenuBase::KeyboardCallback(pragma::platform::Key key, int
 {
 	if(key == pragma::platform::Key::Enter) {
 		WIMainMenuElement *el = GetSelectedElement();
-		if(el == NULL)
+		if(el == nullptr)
 			return util::EventReply::Handled;
 		if(state == pragma::platform::KeyState::Press)
 			el->Activate();
@@ -91,10 +91,10 @@ void WIMainMenuBase::SelectItem(int i)
 WIMainMenuElement *WIMainMenuBase::GetSelectedElement()
 {
 	if(m_selected == -1 || m_selected >= m_elements.size())
-		return NULL;
+		return nullptr;
 	auto &hElement = m_elements[m_selected];
 	if(!hElement.IsValid())
-		return NULL;
+		return nullptr;
 	return static_cast<WIMainMenuElement *>(hElement.get());
 }
 void WIMainMenuBase::SelectNextItem()
@@ -117,7 +117,7 @@ void WIMainMenuBase::OnElementSelected(WIMainMenuElement *el)
 {
 	for(unsigned int i = 0; i < m_elements.size(); i++) {
 		WIMainMenuElement *elCur = GetElement(i);
-		if(elCur != NULL) {
+		if(elCur != nullptr) {
 			if(elCur == el)
 				m_selected = i;
 			else
@@ -128,13 +128,13 @@ void WIMainMenuBase::OnElementSelected(WIMainMenuElement *el)
 void WIMainMenuBase::UpdateElement(int i)
 {
 	WIMainMenuElement *el = GetElement(i);
-	if(el == NULL)
+	if(el == nullptr)
 		return;
 	if(i == 0)
 		el->SetPos(0, 0);
 	else {
 		WIMainMenuElement *prev = GetElement(i - 1);
-		if(prev != NULL) {
+		if(prev != nullptr) {
 			int yGap = 5;
 			el->SetPos(0, prev->GetPos().y + prev->GetHeight() + yGap);
 		}
@@ -179,10 +179,10 @@ void WIMainMenuBase::AddMenuItem(int pos, std::string name, const CallbackHandle
 WIMainMenuElement *WIMainMenuBase::GetElement(int i)
 {
 	if(i >= m_elements.size())
-		return NULL;
+		return nullptr;
 	auto &hElement = m_elements[i];
 	if(!hElement.IsValid())
-		return NULL;
+		return nullptr;
 	return static_cast<WIMainMenuElement *>(hElement.get());
 }
 void WIMainMenuBase::RemoveMenuItem(int i)
@@ -268,7 +268,7 @@ void WIMainMenuElement::Initialize()
 		pPrefix->SetAnchor(0.f, 0.f, 0.f, 1.f);
 	}
 	WIText *pText = WGUI::GetInstance().Create<WIText>(this);
-	if(pText != NULL) {
+	if(pText != nullptr) {
 		m_hText = pText->GetHandle();
 		m_hText->SetX(21);
 		/*pText->SetFont("MainMenu_Regular");

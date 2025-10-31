@@ -9,11 +9,8 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <prosper_command_buffer.hpp>
-#include <buffers/prosper_buffer.hpp>
 
 module pragma.client;
 
@@ -63,21 +60,21 @@ msys::Material *CMaterialPropertyOverrideComponent::GetTargetMaterial(uint32_t m
 	return mats[matIdx].get();
 }
 
-CMaterial *CMaterialPropertyOverrideComponent::GetRenderMaterial(uint32_t idx) const
+msys::CMaterial *CMaterialPropertyOverrideComponent::GetRenderMaterial(uint32_t idx) const
 {
 	if(idx >= m_materialOverrides.size())
 		return nullptr;
-	return static_cast<CMaterial *>(m_materialOverrides[idx].material.get());
+	return static_cast<msys::CMaterial *>(m_materialOverrides[idx].material.get());
 }
 
-std::string CMaterialPropertyOverrideComponent::GetPropertyName(const CMaterial &mat, const char *key, bool texture) { return util::FilePath("material", GetNormalizedMaterialName(mat), texture ? "textures" : "properties", key).GetString(); }
+std::string CMaterialPropertyOverrideComponent::GetPropertyName(const msys::CMaterial &mat, const char *key, bool texture) { return util::FilePath("material", GetNormalizedMaterialName(mat), texture ? "textures" : "properties", key).GetString(); }
 
 CMaterialPropertyOverrideComponent::PropertyInfo *CMaterialPropertyOverrideComponent::InitializeMaterialProperty(uint32_t matIdx, const char *key)
 {
 	auto *mat = GetTargetMaterial(matIdx);
 	if(!mat)
 		return nullptr;
-	auto *shaderMat = GetShaderMaterial(static_cast<CMaterial &>(*mat));
+	auto *shaderMat = GetShaderMaterial(static_cast<msys::CMaterial &>(*mat));
 	if(!shaderMat)
 		return nullptr;
 	auto *smProp = shaderMat->FindProperty(key);
@@ -85,7 +82,7 @@ CMaterialPropertyOverrideComponent::PropertyInfo *CMaterialPropertyOverrideCompo
 	if(!smProp && !tex)
 		return nullptr;
 	if(matIdx >= m_materialOverrides.size()) {
-		UpdateMaterialOverride(matIdx, static_cast<CMaterial &>(*mat), true);
+		UpdateMaterialOverride(matIdx, static_cast<msys::CMaterial &>(*mat), true);
 		if(matIdx >= m_materialOverrides.size())
 			return nullptr;
 	}
@@ -95,7 +92,7 @@ CMaterialPropertyOverrideComponent::PropertyInfo *CMaterialPropertyOverrideCompo
 		return &it->second;
 	auto udmType = tex ? udm::Type::String : pragma::shadergraph::to_udm_type((*smProp)->type);
 	auto prop = udm::Property::Create(udmType);
-	auto *memberInfo = FindMemberInfo(GetPropertyName(static_cast<CMaterial &>(*mat), key, tex ? true : false));
+	auto *memberInfo = FindMemberInfo(GetPropertyName(static_cast<msys::CMaterial &>(*mat), key, tex ? true : false));
 	auto res = udm::visit(udmType, [&prop, memberInfo, key](auto tag) -> bool {
 		using T = typename decltype(tag)::type;
 		if constexpr(msys::is_property_type<T>) {
@@ -126,7 +123,7 @@ void CMaterialPropertyOverrideComponent::ClearMaterialProperty(uint32_t matIdx, 
 	if(matData.material) {
 		auto valType = matData.material->GetPropertyValueType(key);
 		matData.material->ClearProperty(key);
-		auto *shaderMat = GetShaderMaterial(static_cast<CMaterial &>(*matData.material));
+		auto *shaderMat = GetShaderMaterial(static_cast<msys::CMaterial &>(*matData.material));
 		if(shaderMat) {
 			udm::visit(propType, [this, &matData, &key, shaderMat](auto tag) {
 				using T = typename decltype(tag)::type;
@@ -146,8 +143,8 @@ void CMaterialPropertyOverrideComponent::ClearMaterialProperty(uint32_t matIdx, 
 			if(matIdx < m_materialOverrides.size()) {
 				auto &matInfo = m_materialOverrides[matIdx];
 				if(matInfo.material) {
-					UpdateMaterialOverride(static_cast<CMaterial &>(*matInfo.material));
-					//UpdateMaterialOverride(matIdx, static_cast<CMaterial &>(*matInfo.material), true);
+					UpdateMaterialOverride(static_cast<msys::CMaterial &>(*matInfo.material));
+					//UpdateMaterialOverride(matIdx, static_cast<msys::CMaterial &>(*matInfo.material), true);
 				}
 			}
 		}
@@ -266,7 +263,7 @@ void CMaterialPropertyOverrideComponent::ApplyMaterialProperty(uint32_t matIdx, 
 					if(propInfo->texture)
 						UpdateMaterialOverride(*matInfo.material);
 					else {
-						auto *shaderMat = GetShaderMaterial(static_cast<CMaterial &>(*matInfo.material));
+						auto *shaderMat = GetShaderMaterial(static_cast<msys::CMaterial &>(*matInfo.material));
 						if(shaderMat) {
 							udm::visit(propInfo->property->type, [this, mat, &matInfo, shaderMat, key](auto tag) {
 								using T = typename decltype(tag)::type;
@@ -314,11 +311,11 @@ std::string CMaterialPropertyOverrideComponent::GetNormalizedMaterialName(std::s
 	ustring::to_lower(name);
 	return name;
 }
-std::string CMaterialPropertyOverrideComponent::GetNormalizedMaterialName(const CMaterial &mat) { return GetNormalizedMaterialName(std::string {util::FilePath(const_cast<CMaterial &>(mat).GetName()).GetBack()}); }
+std::string CMaterialPropertyOverrideComponent::GetNormalizedMaterialName(const msys::CMaterial &mat) { return GetNormalizedMaterialName(std::string {util::FilePath(const_cast<msys::CMaterial &>(mat).GetName()).GetBack()}); }
 
-const rendering::shader_material::ShaderMaterial *CMaterialPropertyOverrideComponent::GetShaderMaterial(const CMaterial &mat)
+const rendering::shader_material::ShaderMaterial *CMaterialPropertyOverrideComponent::GetShaderMaterial(const msys::CMaterial &mat)
 {
-	auto *shader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(const_cast<CMaterial &>(mat).GetPrimaryShader());
+	auto *shader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(const_cast<msys::CMaterial &>(mat).GetPrimaryShader());
 	if(!shader)
 		return nullptr;
 	return shader->GetShaderMaterial();
@@ -351,10 +348,10 @@ void CMaterialPropertyOverrideComponent::ReloadMaterialOverride(uint32_t matIdx)
 	auto *mat = GetTargetMaterial(matIdx);
 	if(!mat)
 		return;
-	UpdateMaterialOverride(matIdx, static_cast<CMaterial &>(*mat), true);
+	UpdateMaterialOverride(matIdx, static_cast<msys::CMaterial &>(*mat), true);
 }
 
-void CMaterialPropertyOverrideComponent::UpdateMaterialOverride(uint32_t idx, const CMaterial &mat, bool forceInitialize)
+void CMaterialPropertyOverrideComponent::UpdateMaterialOverride(uint32_t idx, const msys::CMaterial &mat, bool forceInitialize)
 {
 	// TODO: If not base material index, skip!
 	if(idx >= m_materialOverrides.size()) {
@@ -372,9 +369,9 @@ void CMaterialPropertyOverrideComponent::UpdateMaterialOverride(uint32_t idx, co
 	if(matInfo.shaderOverrideEnabled) {
 		auto shaderOverride = pragma::get_cengine()->GetShader(matInfo.shaderOverride);
 		if(shaderOverride.valid())
-			static_cast<CMaterial &>(*newMat).SetPrimaryShader(*shaderOverride);
+			static_cast<msys::CMaterial &>(*newMat).SetPrimaryShader(*shaderOverride);
 	}
-	newMat->SetBaseMaterial(&const_cast<CMaterial &>(mat));
+	newMat->SetBaseMaterial(&const_cast<msys::CMaterial &>(mat));
 	matInfo.material = newMat;
 	for(auto &[name, propInfo] : matInfo.properties) {
 		if(!propInfo.enabled)
@@ -420,7 +417,7 @@ void CMaterialPropertyOverrideComponent::UpdateMaterialOverride(msys::Material &
 	auto *mdlC = static_cast<CModelComponent *>(GetEntity().GetModelComponent());
 	if(mdlC)
 		mdlC->SetRenderBufferListUpdateRequired();
-	static_cast<CMaterial &>(mat).LoadTextures(false, true);
+	static_cast<msys::CMaterial &>(mat).LoadTextures(false, true);
 	mat.UpdateTextures(true); // Ensure all textures have been fully loaded
 	if(mdlC)
 		mdlC->UpdateRenderBufferList();
@@ -511,7 +508,7 @@ void CMaterialPropertyOverrideComponent::UpdateShaderOverride(uint32_t matIdx)
 	auto *matTarget = GetTargetMaterial(matIdx);
 	auto *matRender = GetRenderMaterial(matIdx);
 	if(matTarget && matRender)
-		PopulateProperties(std::string {util::FilePath(matTarget->GetName()).GetFileName()}, static_cast<CMaterial &>(*matRender), matIdx);
+		PopulateProperties(std::string {util::FilePath(matTarget->GetName()).GetFileName()}, static_cast<msys::CMaterial &>(*matRender), matIdx);
 	OnMembersChanged();
 }
 
@@ -696,7 +693,7 @@ void CMaterialPropertyOverrideComponent::ClearProperties(uint32_t matIdx)
 	matData.properties.clear();
 }
 
-void CMaterialPropertyOverrideComponent::PopulateProperties(std::string matName, CMaterial &mat, uint32_t matIdx)
+void CMaterialPropertyOverrideComponent::PopulateProperties(std::string matName, msys::CMaterial &mat, uint32_t matIdx)
 {
 	auto *shaderMat = GetShaderMaterial(mat);
 	if(!shaderMat)
@@ -788,7 +785,7 @@ void CMaterialPropertyOverrideComponent::PopulateProperties()
 		auto &mat = mats[matIdx];
 		if(!mat)
 			continue;
-		PopulateProperties(std::string {util::FilePath(mat->GetName()).GetFileName()}, static_cast<CMaterial &>(*mat), matIdx);
+		PopulateProperties(std::string {util::FilePath(mat->GetName()).GetFileName()}, static_cast<msys::CMaterial &>(*mat), matIdx);
 	}
 }
 
@@ -815,7 +812,7 @@ template<typename T>
 void CMaterialPropertyOverrideComponent::SetMaterialPropertyBufferValue(msys::Material &mat, const pragma::rendering::shader_material::ShaderMaterial &shaderMat, const char *keyName, const T &newVal)
 {
 	auto &descriptor = shaderMat;
-	auto *buf = static_cast<CMaterial &>(mat).GetSettingsBuffer();
+	auto *buf = static_cast<msys::CMaterial &>(mat).GetSettingsBuffer();
 	if(!buf)
 		return;
 	auto range = descriptor.GetPropertyDataRange(keyName);

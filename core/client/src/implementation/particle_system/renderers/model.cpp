@@ -2,15 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath_geometry.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <prosper_util.hpp>
-#include <buffers/prosper_buffer.hpp>
-#include <prosper_descriptor_set_group.hpp>
-#include <prosper_command_buffer.hpp>
 
 module pragma.client;
 
@@ -225,7 +219,7 @@ void CParticleRendererModel::RecordRender(prosper::ICommandBuffer &drawCmd, prag
 					}
 					if(mat == nullptr)
 						continue;
-					shader->BindMaterial(static_cast<CMaterial&>(*mat));
+					shader->BindMaterial(static_cast<msys::CMaterial&>(*mat));
 					shader->Draw(*static_cast<CModelSubMesh*>(subMesh.get()),bAnimated ? 1u : instanceCount,instanceIdx); // TODO: Bloom?
 				}
 			}

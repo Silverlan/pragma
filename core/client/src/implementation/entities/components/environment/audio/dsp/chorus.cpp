@@ -5,9 +5,6 @@ module;
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_client.h"
-#include "alsound_effect.hpp"
-#include <alsoundsystem.hpp>
-#include <alsoundsystem.hpp>
 
 module pragma.client;
 

@@ -5,8 +5,6 @@ module;
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_client.h"
-#include <texturemanager/texturemanager.h>
-#include <buffers/prosper_uniform_resizable_buffer.hpp>
 
 module pragma.client;
 

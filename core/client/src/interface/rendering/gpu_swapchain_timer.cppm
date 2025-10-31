@@ -4,11 +4,10 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <queries/prosper_timer_query.hpp>
-#include <queries/prosper_pipeline_statistics_query.hpp>
 
 export module pragma.client:rendering.gpu_swapchain_timer;
 
+export import pragma.prosper;
 export import pragma.shared;
 
 export namespace pragma {

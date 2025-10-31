@@ -4,14 +4,8 @@
 module;
 #include "pragma/logging.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <shader/prosper_pipeline_create_info.hpp>
-#include <shader/prosper_shader_t.hpp>
-#include <mathutil/vertex.hpp>
-#include <buffers/prosper_buffer.hpp>
-#include <prosper_command_buffer.hpp>
 
 module pragma.client;
 

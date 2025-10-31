@@ -3,11 +3,9 @@
 
 module;
 
-#include "mathutil/color.h"
 
 
 #include "pragma/lua/core.hpp"
-#include "pragma/lua/lua_error_handling.hpp"
 #include "stdafx_client.h"
 
 module pragma.client;

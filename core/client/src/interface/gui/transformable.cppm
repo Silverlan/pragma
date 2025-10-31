@@ -95,5 +95,8 @@ export {
 		void UpdateResizeRect();
 		void UpdateResizeRectPos();
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(WITransformable::StateFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<WITransformable::StateFlags> : std::true_type {};
+	}
 };

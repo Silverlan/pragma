@@ -1,9 +1,9 @@
-#include "pragma/clientdefinitions.h"
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-export;
+module;
 
+#include "pragma/clientdefinitions.h"
 
 export module pragma.client:gui.silk_icon;
 

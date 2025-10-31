@@ -12,7 +12,6 @@ import :rendering.shaders.particle_shadow;
 
 // prosper TODO
 #if 0
-#include <shader/prosper_pipeline_create_info.hpp>
 
 using namespace Shader;
 
@@ -26,7 +25,7 @@ ParticleShadow::ParticleShadow()
 void ParticleShadow::Draw(CParticleSystem *particle,CLightBase *light,uint32_t layerId)
 {
 	auto *mat = particle->GetMaterial();
-	auto &descTexture = static_cast<CMaterial*>(mat)->GetDescriptorSet();
+	auto &descTexture = static_cast<msys::CMaterial*>(mat)->GetDescriptorSet();
 	if(!descTexture.IsValid())
 		return;
 	auto *shadow = light->GetShadowMap();

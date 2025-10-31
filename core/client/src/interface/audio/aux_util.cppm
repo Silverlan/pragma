@@ -4,9 +4,12 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "alsound_effect.hpp"
 
 export module pragma.client:audio.aux_util;
+
+export import pragma.soundsystem;
+export import pragma.udm;
+export import std;
 
 export namespace al {
 	DLLCLIENT std::shared_ptr<al::IEffect> create_aux_effect(const std::string &type, udm::LinkedPropertyWrapper &prop);

@@ -2,15 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include "cmaterialmanager.h"
-#include <shader/prosper_pipeline_create_info.hpp>
-#include <image/prosper_sampler.hpp>
-#include <prosper_descriptor_set_group.hpp>
-#include <prosper_command_buffer.hpp>
-#include <texture_type.h>
 
 module pragma.client;
 
@@ -141,9 +134,9 @@ static bool bind_texture(msys::Material &mat, prosper::IDescriptorSet &ds, Textu
 	auto &matManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 
-	std::shared_ptr<Texture> tex = nullptr;
+	std::shared_ptr<msys::Texture> tex = nullptr;
 	if(texInfo && texInfo->texture)
-		tex = std::static_pointer_cast<Texture>(texInfo->texture);
+		tex = std::static_pointer_cast<msys::Texture>(texInfo->texture);
 	else if(optDefaultTex == nullptr)
 		return false;
 	else
@@ -170,9 +163,9 @@ static bool bind_texture(msys::Material &mat, prosper::IDescriptorSet &ds, Textu
 	auto &matManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 
-	std::shared_ptr<Texture> tex = nullptr;
+	std::shared_ptr<msys::Texture> tex = nullptr;
 	if(texInfo && texInfo->texture) {
-		tex = std::static_pointer_cast<Texture>(texInfo->texture);
+		tex = std::static_pointer_cast<msys::Texture>(texInfo->texture);
 		if(tex->HasValidVkTexture()) {
 			ds.SetBindingTexture(*tex->GetVkTexture(), bindingIndex);
 			return true;

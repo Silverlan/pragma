@@ -4,11 +4,11 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <prosper_context.hpp>
 
 
 export module pragma.client:rendering.render_context;
-import pragma.platform;
+export import pragma.platform;
+export import pragma.prosper;
 
 #undef CreateWindow
 
@@ -68,8 +68,12 @@ namespace pragma {
 		std::unique_ptr<pragma::platform::Monitor> m_monitor = nullptr;
 		std::string m_renderAPI;
 	};
+	using namespace umath::scoped_enum::bitwise;
 }
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::RenderContext::StateFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::RenderContext::StateFlags> : std::true_type {};
+	}
 };
 #pragma warning(pop)

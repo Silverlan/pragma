@@ -4,10 +4,8 @@
 module;
 
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <shader/prosper_shader_blur.hpp>
 
 module pragma.client;
 

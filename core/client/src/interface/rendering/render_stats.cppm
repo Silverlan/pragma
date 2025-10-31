@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <queries/prosper_timer_query.hpp>
-#include "mathutil/umath.h"
 
 
 export module pragma.client:rendering.render_stats;

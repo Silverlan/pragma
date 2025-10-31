@@ -3,14 +3,10 @@
 
 module;
 
-#include "mathutil/umath_geometry.hpp"
 
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <image/prosper_render_target.hpp>
-#include <prosper_command_buffer.hpp>
 
 module pragma.client;
 
@@ -232,7 +228,7 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(std::shared_ptr<
 					if(bTranslucent == true)
 					{
 						auto &shaderTranslucent = static_cast<pragma::ShaderShadowTransparent&>(shader);
-						if(info.material == prevMat || shaderTranslucent.BindMaterial(static_cast<CMaterial&>(*info.material)) == true)
+						if(info.material == prevMat || shaderTranslucent.BindMaterial(static_cast<msys::CMaterial&>(*info.material)) == true)
 						{
 							shaderTranslucent.Draw(*const_cast<CModelSubMesh*>(info.mesh));
 							prevMat = info.material;

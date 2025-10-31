@@ -3,11 +3,8 @@
 
 module;
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <buffers/prosper_dynamic_resizable_buffer.hpp>
-#include <prosper_command_buffer.hpp>
 
 module pragma.client;
 

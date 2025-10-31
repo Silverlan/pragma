@@ -4,15 +4,15 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <mathutil/glmutil.h>
-#include "textureinfo.h"
-#include <texturemanager/texture.h>
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.client:scripting.lua.classes.texture;
+
+export import pragma.cmaterialsystem;
+export import pragma.prosper;
+
 export namespace Lua {
 	namespace Texture {
-		DLLCLIENT std::shared_ptr<prosper::Texture> GetVkTexture(lua_State *l, ::Texture &tex);
+		DLLCLIENT std::shared_ptr<prosper::Texture> GetVkTexture(lua_State *l, msys::Texture &tex);
 	};
 };

@@ -2,13 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <shader/prosper_shader_t.hpp>
-#include <shader/prosper_pipeline_create_info.hpp>
-#include <prosper_util.hpp>
-#include <prosper_command_buffer.hpp>
 
 module pragma.client;
 

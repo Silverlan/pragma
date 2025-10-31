@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <prosper_enums.hpp>
-#include <image/prosper_image.hpp>
 
 export module pragma.client:util.image;
 export namespace util {

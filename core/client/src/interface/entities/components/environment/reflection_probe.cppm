@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <image/prosper_texture.hpp>
-#include <prosper_descriptor_set_group.hpp>
-#include "mathutil/umath.h"
 #include "pragma/lua/core.hpp"
 
 
@@ -91,8 +88,12 @@ export {
 			std::string m_iblMat = "";
 			std::optional<float> m_strength = {};
 		};
+		using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::CReflectionProbeComponent::StateFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::CReflectionProbeComponent::StateFlags> : std::true_type {};
+	}
 
 	class DLLCLIENT CEnvReflectionProbe : public CBaseEntity {
 	public:

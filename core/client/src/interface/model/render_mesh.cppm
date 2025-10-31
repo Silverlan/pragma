@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <prosper_context.hpp>
 
 export module pragma.client:model.render_mesh;
 

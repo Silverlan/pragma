@@ -6,6 +6,9 @@ module;
 #include "pragma/clientdefinitions.h"
 
 export module pragma.client:rendering.game_world_shader_settings;
+
+export import std.compat;
+
 export namespace pragma {
 	namespace rendering {
 		struct DLLCLIENT GameWorldShaderSettings {

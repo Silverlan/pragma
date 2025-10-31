@@ -7,10 +7,7 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
-#include <image/prosper_texture.hpp>
-#include <mathutil/transform.hpp>
 //#include <assimp/Importer.hpp>
 //#include <assimp/Exporter.hpp>
 //#include <assimp/scene.h>

@@ -8,7 +8,6 @@ module;
 #include "pragma/lua/core.hpp"
 #include "pragma/console/helper.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 
@@ -188,7 +187,7 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_print(NetworkState *state, pragma
 
 DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	if(pragma::get_client_state() == NULL || pl == NULL)
+	if(pragma::get_client_state() == nullptr || pl == nullptr)
 		return;
 	auto &entPl = pl->GetEntity();
 	if(entPl.IsCharacter() == false)

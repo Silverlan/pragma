@@ -4,14 +4,13 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <mathutil/umath_lighting.hpp>
-#include <mathutil/umat.h>
 
 export module pragma.client:math;
 import :entities.components.color;
 import :entities.components.lights.directional;
 import :entities.components.lights.point;
 import :entities.components.lights.spot;
+export import :math.mvp_bias;
 
 export namespace pragma::math {
 	DLLCLIENT const std::array<Mat4, 6> &get_cubemap_view_matrices();

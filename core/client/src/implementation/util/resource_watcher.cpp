@@ -5,13 +5,8 @@ module;
 
 
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <texture_load_flags.hpp>
-#include <cmaterialmanager.h>
-#include <textureinfo.h>
-#include <prosper_glsl.hpp>
 
 module pragma.client;
 
@@ -53,8 +48,8 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 			ext = '.' + ext;
 		ufile::remove_extension_from_filename(pathNoExt);
 
-		std::function<void(CMaterial &, const util::Path &path)> fLookForTextureAndUpdate = nullptr;
-		fLookForTextureAndUpdate = [&fLookForTextureAndUpdate, &pathNoExt](CMaterial &mat, const util::Path &path) {
+		std::function<void(msys::CMaterial &, const util::Path &path)> fLookForTextureAndUpdate = nullptr;
+		fLookForTextureAndUpdate = [&fLookForTextureAndUpdate, &pathNoExt](msys::CMaterial &mat, const util::Path &path) {
 			for(auto &name : msys::MaterialPropertyBlockView {mat, path}) {
 				auto propType = mat.GetPropertyType(name);
 				switch(propType) {
@@ -75,7 +70,7 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 						auto &identifier = name;
 						auto &texture = texInfo->texture;
 						mat.CallOnLoaded([&mat, identifier, texture]() {
-							auto &tex = *static_cast<Texture *>(texture.get());
+							auto &tex = *static_cast<msys::Texture *>(texture.get());
 							mat.SetTexture(std::string {identifier}, &tex);
 						});
 						break;
@@ -92,7 +87,7 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 			auto hMat = msys::CMaterialManager::GetAssetObject(*asset);
 			if(!hMat)
 				continue;
-			fLookForTextureAndUpdate(static_cast<CMaterial &>(*hMat.get()), {});
+			fLookForTextureAndUpdate(static_cast<msys::CMaterial &>(*hMat.get()), {});
 		}
 	};
 	texManager.LoadAsset(path, std::move(loadInfo));

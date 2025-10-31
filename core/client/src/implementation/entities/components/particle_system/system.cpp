@@ -5,19 +5,13 @@ module;
 #include "pragma/cxxmodules.hpp"
 
 
-#include "mathutil/color.h"
 
-#include "mathutil/transform.hpp"
 
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <prosper_command_buffer.hpp>
-#include <prosper_descriptor_set_group.hpp>
-#include <buffers/prosper_buffer.hpp>
 
 module pragma.client;
 

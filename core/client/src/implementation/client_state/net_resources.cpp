@@ -5,7 +5,6 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 
@@ -55,7 +54,7 @@ void ClientState::HandleClientResource(NetPacket &packet)
 	auto f = FileManager::OpenFile(file.c_str(), "rb"); //,fsys::SearchFlags::Local);
 	NetPacket response;
 	bool bSkip = false;
-	if(f != NULL) {
+	if(f != nullptr) {
 		if(f->GetSize() == size) {
 			bSkip = true;
 			Con::ccl << "File '" << file << "' doesn't differ from server's. Skipping..." << Con::endl;
@@ -68,7 +67,7 @@ void ClientState::HandleClientResource(NetPacket &packet)
 	if(bSkip == false)
 		f = FileManager::OpenFile((fileDst + ".part").c_str(), "wb");
 	if(!bSkip) {
-		if(f == NULL) {
+		if(f == nullptr) {
 			response->Write<bool>(false);
 			Con::cwar << Con::PREFIX_CLIENT << "[ResourceManager] Unable to write file '" << fileDst << "'. Skipping..." << Con::endl;
 		}
@@ -82,7 +81,7 @@ void ClientState::HandleClientResource(NetPacket &packet)
 
 void ClientState::HandleClientResourceFragment(NetPacket &packet)
 {
-	if(m_resDownload == NULL)
+	if(m_resDownload == nullptr)
 		return;
 	std::array<uint8_t, RESOURCE_TRANSFER_FRAGMENT_SIZE> buf;
 	unsigned int read = packet->Read<unsigned int>();

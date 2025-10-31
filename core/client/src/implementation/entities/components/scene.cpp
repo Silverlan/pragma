@@ -4,15 +4,11 @@
 module;
 
 
-#include "mathutil/color.h"
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <prosper_command_buffer.hpp>
-#include "buffers/prosper_buffer_create_info.hpp"
 
 module pragma.client;
 

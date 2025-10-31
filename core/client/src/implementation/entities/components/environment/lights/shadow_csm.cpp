@@ -8,9 +8,6 @@ module;
 
 #include "stdafx_client.h"
 #include "pragma/console/helper.hpp"
-#include <image/prosper_sampler.hpp>
-#include <image/prosper_render_target.hpp>
-#include <prosper_command_buffer.hpp>
 
 module pragma.client;
 
@@ -404,7 +401,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 									auto *mat = matIdx.has_value() ? mdl->GetMaterial(*matIdx) : nullptr;
 									if(mat != nullptr)
 									{
-										if(mat == prevMat || shaderCsmTransparent->BindMaterial(static_cast<CMaterial&>(*mat)) == true)
+										if(mat == prevMat || shaderCsmTransparent->BindMaterial(static_cast<msys::CMaterial&>(*mat)) == true)
 										{
 											shaderCsmTransparent->Draw(*cSubMesh);
 											prevMat = mat;

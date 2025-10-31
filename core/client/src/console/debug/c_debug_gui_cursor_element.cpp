@@ -3,14 +3,11 @@
 
 #include "pragma/lua/core.hpp"
 #include "pragma/console/helper.hpp"
-#include "mathutil/umath.h"
 
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "prosper_util.hpp"
-#include <prosper_window.hpp>
 
 import pragma.client;
 

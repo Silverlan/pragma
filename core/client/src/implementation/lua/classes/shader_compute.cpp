@@ -6,9 +6,6 @@ module;
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_client.h"
-#include <shader/prosper_pipeline_create_info.hpp>
-#include <buffers/prosper_buffer.hpp>
-#include <prosper_command_buffer.hpp>
 
 module pragma.client;
 

@@ -4,12 +4,11 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <mathutil/glmutil.h>
-#include <alsound_source.hpp>
 
 export module pragma.client:audio.sound;
 
 export import pragma.shared;
+export import pragma.soundsystem;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)

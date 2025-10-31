@@ -6,15 +6,8 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <image/prosper_render_target.hpp>
-#include <prosper_command_buffer.hpp>
-#include <buffers/prosper_buffer_create_info.hpp>
-#include <buffers/prosper_swap_buffer.hpp>
-#include <buffers/prosper_uniform_resizable_buffer.hpp>
-#include <prosper_descriptor_set_group.hpp>
 #if MOTION_BLUR_DEBUG_ELEMENT_ENABLED == 1
 #endif
 

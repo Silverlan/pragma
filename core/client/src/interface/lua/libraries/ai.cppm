@@ -5,9 +5,10 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:scripting.lua.libraries.ai;
+
+export import pragma.lua;
+
 export namespace Lua {
 	namespace ai {
 		namespace client {

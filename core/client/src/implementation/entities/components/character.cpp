@@ -5,7 +5,6 @@ module;
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_client.h"
-#include <mathutil/uquat.h>
 
 module pragma.client;
 

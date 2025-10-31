@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <image/prosper_render_target.hpp>
-#include <prosper_enums.hpp>
 
 export module pragma.client:rendering.prepass;
 // Not yet fully implemented.

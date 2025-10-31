@@ -5,9 +5,7 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-#include "mathutil/umath_geometry.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 
@@ -104,7 +102,7 @@ void CHC::OnRenderNodeCreated(std::reference_wrapper<const BaseOcclusionOctree::
 void CHC::OnRenderNodeDestroyed(std::reference_wrapper<const BaseOcclusionOctree::Node> node)
 {
 	auto idx = node.get().GetIndex();
-	if(idx >= m_nodes.size() || m_nodes[idx] == NULL)
+	if(idx >= m_nodes.size() || m_nodes[idx] == nullptr)
 		return;
 	m_nodes[idx] = nullptr;
 }
@@ -263,7 +261,7 @@ void CHC::SetDrawDebugTexture(bool b)
 
 			m_debugFrustumBuffer = OpenGL::GenerateBuffer();
 			OpenGL::BindBuffer(m_debugFrustumBuffer,GL_ARRAY_BUFFER);
-			OpenGL::BindBufferData(sizeof(Vector3) *4,NULL,GL_DYNAMIC_DRAW,GL_ARRAY_BUFFER);
+			OpenGL::BindBufferData(sizeof(Vector3) *4,nullptr,GL_DYNAMIC_DRAW,GL_ARRAY_BUFFER);
 			OpenGL::BindBuffer(0,GL_ARRAY_BUFFER);
 			//
 
@@ -299,7 +297,7 @@ void CHC::SetDrawDebugTexture(bool b)
 
 			m_debugMeshVertexBuffer = OpenGL::GenerateBuffer();
 			OpenGL::BindBuffer(m_debugMeshVertexBuffer);
-			OpenGL::BindBufferData(sizeof(Vector3) *8,NULL,GL_STREAM_DRAW);
+			OpenGL::BindBufferData(sizeof(Vector3) *8,nullptr,GL_STREAM_DRAW);
 			OpenGL::BindBuffer(0);
 
 			m_debugCallback = FunctionCallback<>::Create(
@@ -355,7 +353,7 @@ void CHC::TraverseNode(CHCNode *cNode)
 	//{
 	for(unsigned int i = 0; i < cNode->GetChildCount(); i++) {
 		auto *child = cNode->GetChild(i);
-		if(child != NULL)
+		if(child != nullptr)
 			m_distanceQueue.push(child->GetHandle());
 	}
 	if(!cNode->IsLeaf()) // TODO (Originally no condition)

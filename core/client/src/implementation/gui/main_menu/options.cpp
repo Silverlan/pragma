@@ -9,15 +9,11 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <prosper_util.hpp>
 #include <rapidxml.hpp>
 #include <rapidxml_utils.hpp>
 #include <rapidxml_print.hpp>
-#include <alsoundsystem.hpp>
-#include <prosper_window.hpp>
 
 module pragma.client;
 

@@ -7,8 +7,9 @@ module;
 
 export module pragma.client:particle_system.modifier;
 
-import :particle_system.enums;
-import :particle_system.particle;
+export import :particle_system.enums;
+export import :particle_system.particle;
+export import pragma.prosper;
 export import pragma.shared;
 
 #pragma warning(push)

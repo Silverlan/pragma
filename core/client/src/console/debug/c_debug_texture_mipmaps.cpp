@@ -6,9 +6,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include <texturemanager/texture.h>
-#include <texture_type.h>
-#include <cmaterialmanager.h>
 
 import pragma.client;
 
@@ -74,7 +71,7 @@ static void debug_texture_mipmaps(NetworkState *, pragma::BasePlayerComponent *,
 	auto &textureManager = materialManager.GetTextureManager();
 	auto a = textureManager.FindCachedAsset(texPath);
 	auto asset = a ? msys::TextureManager::GetAssetObject(*a) : nullptr;
-	std::shared_ptr<Texture> texture = nullptr;
+	std::shared_ptr<msys::Texture> texture = nullptr;
 	if(asset && asset->HasValidVkTexture())
 		texture = asset;
 	else {
@@ -85,11 +82,11 @@ static void debug_texture_mipmaps(NetworkState *, pragma::BasePlayerComponent *,
 			return;
 		}
 		auto *diffuseMap = mat->GetDiffuseMap();
-		if(diffuseMap == nullptr || diffuseMap->texture == nullptr || static_cast<Texture *>(diffuseMap->texture.get())->HasValidVkTexture() == false) {
+		if(diffuseMap == nullptr || diffuseMap->texture == nullptr || static_cast<msys::Texture *>(diffuseMap->texture.get())->HasValidVkTexture() == false) {
 			Con::cwar << "Material '" << texPath << "' has no valid albedo map!" << Con::endl;
 			return;
 		}
-		texture = std::static_pointer_cast<Texture>(diffuseMap->texture);
+		texture = std::static_pointer_cast<msys::Texture>(diffuseMap->texture);
 	}
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
 	if(dbg == nullptr) {

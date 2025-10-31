@@ -12,15 +12,6 @@ module;
 #include "pragma/lua/core.hpp"
 #include "pragma/console/helper.hpp"
 #include "stdafx_client.h"
-#include "cmaterialmanager.h"
-#include <texturemanager/texturemanager.h>
-#include <luasystem_file.h>
-#include <image/prosper_render_target.hpp>
-#include <alsoundsystem.hpp>
-#include <shader/prosper_pipeline_loader.hpp>
-#include <prosper_util.hpp>
-#include <prosper_command_buffer.hpp>
-#include <prosper_window.hpp>
 
 module pragma.client;
 
@@ -38,11 +29,11 @@ import :util;
 
 #undef GetMessage
 
-static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
+static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = nullptr;
 std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ClientState::GetConVarPtrs() { return *conVarPtrs; }
 ConVarHandle ClientState::GetConVarHandle(std::string scvar)
 {
-	if(conVarPtrs == NULL) {
+	if(conVarPtrs == nullptr) {
 		static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> ptrs;
 		conVarPtrs = &ptrs;
 	}
@@ -54,7 +45,7 @@ static ClientState *g_client = nullptr;
 ClientState *pragma::get_client_state() { return g_client; }
 
 std::vector<std::string> &get_required_game_textures();
-ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo(nullptr), m_resDownload(nullptr), m_volMaster(1.f), m_hMainMenu(), m_luaGUI(NULL)
+ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo(nullptr), m_resDownload(nullptr), m_volMaster(1.f), m_hMainMenu(), m_luaGUI(nullptr)
 {
 	register_client_net_messages();
 
@@ -295,28 +286,28 @@ std::vector<std::function<luabind::object(lua_State *, WIBase &)>> &ClientState:
 WIMainMenu *ClientState::GetMainMenu()
 {
 	if(!m_hMainMenu.IsValid())
-		return NULL;
+		return nullptr;
 	return m_hMainMenu.get<WIMainMenu>();
 }
 
 bool ClientState::IsMainMenuOpen()
 {
 	WIMainMenu *menu = GetMainMenu();
-	if(menu == NULL)
+	if(menu == nullptr)
 		return false;
 	return menu->IsVisible();
 }
 void ClientState::CloseMainMenu()
 {
 	WIMainMenu *menu = GetMainMenu();
-	if(menu == NULL || !menu->IsVisible())
+	if(menu == nullptr || !menu->IsVisible())
 		return;
 	menu->SetVisible(false);
 }
 void ClientState::OpenMainMenu()
 {
 	WIMainMenu *menu = GetMainMenu();
-	if(menu == NULL)
+	if(menu == nullptr)
 		return;
 	auto &window = pragma::get_cengine()->GetWindow();
 	window->SetCursorInputMode(pragma::platform::CursorMode::Normal);
@@ -325,7 +316,7 @@ void ClientState::OpenMainMenu()
 void ClientState::ToggleMainMenu()
 {
 	WIMainMenu *menu = GetMainMenu();
-	if(menu == NULL)
+	if(menu == nullptr)
 		return;
 	if(menu->IsVisible()) {
 		if(!IsGameActive())
@@ -359,7 +350,7 @@ void ClientState::Close()
 	std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &conVarPtrs = GetConVarPtrs();
 	std::unordered_map<std::string, std::shared_ptr<PtrConVar>>::iterator itHandles;
 	for(itHandles = conVarPtrs.begin(); itHandles != conVarPtrs.end(); itHandles++)
-		itHandles->second->set(NULL);
+		itHandles->second->set(nullptr);
 	StopSounds();
 	g_client = nullptr;
 	m_modelManager->Clear();
@@ -428,8 +419,8 @@ bool ClientState::RunConsoleCommand(std::string scmd, std::vector<std::string> &
 ConVar *ClientState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
 {
 	ConVar *cvar = NetworkState::SetConVar(scmd, value, bApplyIfEqual);
-	if(cvar == NULL)
-		return NULL;
+	if(cvar == nullptr)
+		return nullptr;
 	auto flags = cvar->GetFlags();
 	if(((flags & pragma::console::ConVarFlags::Userinfo) == pragma::console::ConVarFlags::Userinfo)) {
 		NetPacket p;
@@ -680,7 +671,7 @@ msys::MaterialHandle ClientState::CreateMaterial(const std::string &path, const 
 	auto mat = GetMaterialManager().CreateMaterial(path, shader, std::make_shared<ds::Block>(*settings));
 	if(mat == nullptr)
 		return mat;
-	static_cast<CMaterial *>(mat.get())->SetOnLoadedCallback(std::bind(init_shader, mat.get()));
+	static_cast<msys::CMaterial *>(mat.get())->SetOnLoadedCallback(std::bind(init_shader, mat.get()));
 	return mat;
 }
 
@@ -690,7 +681,7 @@ msys::MaterialHandle ClientState::CreateMaterial(const std::string &shader)
 	auto mat = GetMaterialManager().CreateMaterial(shader, std::make_shared<ds::Block>(*settings));
 	if(mat == nullptr)
 		return mat;
-	static_cast<CMaterial *>(mat.get())->SetOnLoadedCallback(std::bind(init_shader, mat.get()));
+	static_cast<msys::CMaterial *>(mat.get())->SetOnLoadedCallback(std::bind(init_shader, mat.get()));
 	return mat;
 }
 
@@ -760,7 +751,7 @@ msys::Material *ClientState::LoadMaterial(const std::string &path, const std::fu
 		if(bShaderInitialized == nullptr || bShaderInitialized.use_count() > 1) // Callback has been called immediately
 			init_shader(mat.get());
 		bShaderInitialized = nullptr;
-		CallCallbacks<void, CMaterial *>("OnMaterialLoaded", static_cast<CMaterial *>(mat.get()));
+		CallCallbacks<void, CMaterial *>("OnMaterialLoaded", static_cast<msys::CMaterial *>(mat.get()));
 		if(onLoaded != nullptr)
 			onLoaded(mat.get());
 		// Material has been fully loaded!

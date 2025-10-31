@@ -4,19 +4,15 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "buffers/prosper_buffer.hpp"
-#include "prosper_descriptor_set_group.hpp"
-#include <buffers/prosper_uniform_resizable_buffer.hpp>
-#include "mathutil/umath.h"
 #include "pragma/lua/core.hpp"
-#include "mathutil/transform.hpp"
 
 
 
 
 export module pragma.client:entities.components.animated;
 
-import :entities.components.entity;
+export import :entities.components.entity;
+export import pragma.prosper;
 
 export namespace pragma {
 	void initialize_articulated_buffers();
@@ -86,7 +82,11 @@ export namespace pragma {
 		virtual void PushArguments(lua_State *l) override;
 		std::shared_ptr<prosper::IBuffer> buffer;
 	};
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::CAnimatedComponent::StateFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::CAnimatedComponent::StateFlags> : std::true_type {};
+	}
 };

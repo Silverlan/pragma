@@ -4,10 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "prosper_command_buffer.hpp"
-#include <mathutil/boundingvolume.h>
-#include <mathutil/plane.hpp>
-#include "mathutil/umath.h"
 #include "pragma/lua/core.hpp"
 
 

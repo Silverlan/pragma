@@ -5,11 +5,9 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:scripting.lua.libraries.net_messages;
 
-export import pragma.network_manager;
+export import pragma.shared;
 
 export {
 	namespace Lua::net::client {

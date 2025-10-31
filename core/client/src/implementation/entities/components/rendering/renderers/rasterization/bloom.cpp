@@ -2,12 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
-#include <prosper_util.hpp>
-#include <prosper_command_buffer.hpp>
-#include <shader/prosper_shader_blur.hpp>
-#include <image/prosper_render_target.hpp>
 
 module pragma.client;
 
@@ -87,7 +82,7 @@ void pragma::CRasterizationRendererComponent::RenderGlowMeshes(std::shared_ptr<p
 		for(auto &matContainer : renderInfo->glowMeshes)
 		{
 			auto *mat = matContainer->material;
-			if(shader->BindGlowMaterial(static_cast<CMaterial&>(*mat)) == true)
+			if(shader->BindGlowMaterial(static_cast<msys::CMaterial&>(*mat)) == true)
 			{
 				for(auto &pair : matContainer->containers)
 				{

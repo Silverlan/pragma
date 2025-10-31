@@ -4,12 +4,9 @@
 module;
 #include "pragma/logging.hpp"
 
-#include "mathutil/umath_geometry.hpp"
-
-#include "mathutil/transform.hpp"
 
 
-#include "mathutil/umath.h"
+
 
 #include "stdafx_client.h"
 #include <bvh/v2/stream.h>

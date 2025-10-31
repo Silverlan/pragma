@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "mathutil/color.h"
-#include "mathutil/uvec.h"
-#include "mathutil/umath.h"
 #include "pragma/lua/core.hpp"
 
 

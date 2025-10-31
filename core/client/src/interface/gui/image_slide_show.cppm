@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <mathutil/umath.h>
-#include "image/prosper_texture.hpp"
-#include "texturemanager/texture.h"
 
 export module pragma.client:gui.image_slide_show;
 
@@ -18,7 +15,7 @@ export {
 		struct PreloadImage {
 			PreloadImage();
 			Int32 image;
-			std::shared_ptr<Texture> texture;
+			std::shared_ptr<msys::Texture> texture;
 			bool ready;
 			bool loading;
 		};

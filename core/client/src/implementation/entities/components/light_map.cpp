@@ -8,24 +8,13 @@ module;
 #include "pragma/logging.hpp"
 
 
-#include "mathutil/transform.hpp"
 
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 #include <GuillotineBinPack.h>
-#include <texturemanager/texture.h>
-#include <prosper_util.hpp>
-#include <buffers/prosper_dynamic_resizable_buffer.hpp>
-#include <prosper_command_buffer.hpp>
-#include <image/prosper_sampler.hpp>
-#include <util_texture_info.hpp>
-#include <texturemanager/texturemanager.h>
-#include <cmaterialmanager.h>
-#include "cmaterialmanager.h"
 
 module pragma.client;
 
@@ -129,7 +118,7 @@ void CLightMapComponent::InitializeFromMaterial()
 	m_textures[umath::to_integral(Texture::DominantDirectionMap)] = getTexture("dominant_direction_map");
 
 	for(auto i = decltype(m_textures.size()) {0u}; i < m_textures.size(); ++i) {
-		auto e = static_cast<Texture>(i);
+		auto e = static_cast<msys::Texture>(i);
 		auto &tex = m_textures[i];
 		LOGGER.info("Texture state for '{}': {}", magic_enum::enum_name(e), tex ? "loaded" : "not loaded");
 	}
@@ -426,7 +415,7 @@ bool CLightMapComponent::ImportLightmapAtlas(uimg::ImageBuffer &imgBuffer)
 	loadInfo.flags = TextureLoadFlags::LoadInstantly;
 	std::shared_ptr<void> ptrTex;
 	static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(*c_engine,"lightmaps_medium.dds",loadInfo,&ptrTex);
-	tex = std::static_pointer_cast<Texture>(ptrTex)->texture;
+	tex = std::static_pointer_cast<msys::Texture>(ptrTex)->texture;
 	}*/
 
 	uimg::TextureSaveInfo texSaveInfo {};
@@ -594,7 +583,7 @@ static void set_lightmap_texture(lua_State *l, pragma::CLightMapComponent &hLigh
 	auto texture = texManager.LoadAsset(path);
 	if(texture == nullptr)
 		return;
-	auto &vkTex = std::static_pointer_cast<Texture>(texture)->GetVkTexture();
+	auto &vkTex = std::static_pointer_cast<msys::Texture>(texture)->GetVkTexture();
 	if(vkTex == nullptr)
 		return;
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};

@@ -3,10 +3,6 @@
 
 module;
 
-#include <mathutil/transform.hpp>
-#include <util_texture_info.hpp>
-#include <prosper_util.hpp>
-#include <image/prosper_sampler.hpp>
 
 module pragma.client;
 
@@ -66,7 +62,7 @@ void CPBRConverterComponent::ProcessQueue()
 		if(hMat == nullptr || hMdl.expired())
 			return;
 		auto imgBuffer = worker.GetResult().images.begin()->second;
-		WriteAOMap(*hMdl.get(), static_cast<CMaterial &>(*hMat.get()), *imgBuffer, imgBuffer->GetWidth(), imgBuffer->GetHeight());
+		WriteAOMap(*hMdl.get(), static_cast<msys::CMaterial &>(*hMat.get()), *imgBuffer, imgBuffer->GetWidth(), imgBuffer->GetHeight());
 	});
 	item.job.Start();
 	pragma::get_cengine()->AddParallelJob(item.job, "Ambient Occlusion");
@@ -82,7 +78,7 @@ void CPBRConverterComponent::UpdateAmbientOcclusion(pragma::Model &mdl, const Am
 	if(texGroup == nullptr)
 		return;
 	for(auto texId : texGroup->textures) {
-		auto *mat = static_cast<CMaterial *>(mdl.GetMaterial(texId));
+		auto *mat = static_cast<msys::CMaterial *>(mdl.GetMaterial(texId));
 		if(mat == nullptr)
 			continue;
 		// Make sure it's a PBR material and it doesn't already have an ao map
@@ -99,7 +95,7 @@ void CPBRConverterComponent::UpdateAmbientOcclusion(pragma::Model &mdl, const Am
 	}
 	SetTickPolicy(TickPolicy::Always);
 }
-void CPBRConverterComponent::WriteAOMap(pragma::Model &mdl, CMaterial &mat, uimg::ImageBuffer &imgBuffer, uint32_t w, uint32_t h) const
+void CPBRConverterComponent::WriteAOMap(pragma::Model &mdl, msys::CMaterial &mat, uimg::ImageBuffer &imgBuffer, uint32_t w, uint32_t h) const
 {
 	Con::cout << "Ambient occlusion map has been generated for material '" << mat.GetName() << "' of model '" << mdl.GetName() << "'! Combining with RMA map..." << Con::endl;
 

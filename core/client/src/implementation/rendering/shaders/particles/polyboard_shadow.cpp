@@ -4,9 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include "cmaterialmanager.h"
-#include <shader/prosper_pipeline_create_info.hpp>
-#include <textureinfo.h>
 
 module pragma.client;
 
@@ -38,7 +35,7 @@ void ParticlePolyboardShadow::InitializePipelineLayout(const Vulkan::Context &co
 void ParticlePolyboardShadow::Draw(CParticleSystem *particle,const Vulkan::Buffer &vertexBuffer,const Vulkan::Buffer &indexBuffer,uint32_t indexCount,float radius,float curvature,CLightBase *light,uint32_t layerId)
 {
 	auto *mat = particle->GetMaterial();
-	auto &descTexture = static_cast<CMaterial*>(mat)->GetDescriptorSet();
+	auto &descTexture = static_cast<msys::CMaterial*>(mat)->GetDescriptorSet();
 	if(!descTexture.IsValid())
 		return;
 	auto *shadow = light->GetShadowMap();

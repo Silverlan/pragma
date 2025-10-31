@@ -122,7 +122,11 @@ export namespace pragma::rendering {
 	  private:
 		const ShaderInputDescriptor &m_inputDescriptor;
 	};
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::rendering::Property::Flags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::rendering::Property::Flags> : std::true_type {};
+	}
 };

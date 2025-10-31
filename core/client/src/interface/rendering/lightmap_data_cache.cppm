@@ -4,13 +4,14 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "mathutil/umath.h"
-#include "mathutil/transform.hpp"
 
 
 
 
 export module pragma.client:rendering.lightmap_data_cache;
+
+export import pragma.udm;
+
 export namespace pragma {
 	struct DLLCLIENT LmUuid {
 		util::Uuid uuid;

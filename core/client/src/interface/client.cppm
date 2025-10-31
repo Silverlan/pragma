@@ -14,6 +14,7 @@ export import :entities;
 export import :entities.components;
 export import :game;
 export import :gui;
+export import :math;
 export import :model;
 export import :networking;
 export import :particle_system;

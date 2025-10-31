@@ -3,12 +3,8 @@
 
 module;
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <alsoundsystem.hpp>
-#include <alsoundsystem_create_effect.hpp>
-#include <alsound_effect.hpp>
 
 module pragma.client;
 

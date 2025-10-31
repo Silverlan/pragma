@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "mathutil/umath.h"
 #include "pragma/lua/core.hpp"
 
 
@@ -85,7 +84,12 @@ export namespace pragma {
 		pragma::ecs::BaseEntity &owner;
 		CViewModelComponent *viewModel = nullptr;
 	};
+	
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::CWeaponComponent::StateFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::CWeaponComponent::StateFlags> : std::true_type {};
+	}
 };

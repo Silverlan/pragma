@@ -5,8 +5,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/console/helper.hpp"
-#include <alsoundsystem.hpp>
-#include <steam_audio/alsound_steam_audio.hpp>
 
 import pragma.client;
 

@@ -4,7 +4,6 @@
 module;
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 
@@ -19,7 +18,7 @@ namespace pragma {
 	using ::operator<<;
 };
 
-CSoundScapeComponent *CSoundScapeComponent::s_active = NULL;
+CSoundScapeComponent *CSoundScapeComponent::s_active = nullptr;
 
 
 CSoundScapeComponent::~CSoundScapeComponent()
@@ -37,7 +36,7 @@ void CSoundScapeComponent::Initialize()
 
 void CSoundScapeComponent::OnTick(double dt)
 {
-	if(m_sound.get() == NULL)
+	if(m_sound.get() == nullptr)
 		return;
 	auto &entThis = GetEntity();
 	auto pTrComponent = entThis.GetTransformComponent();
@@ -78,12 +77,12 @@ void CSoundScapeComponent::OnEntitySpawn()
 	auto pSoundEmitterComponent = ent.GetComponent<pragma::CSoundEmitterComponent>();
 	if(pSoundEmitterComponent.valid()) {
 		std::shared_ptr<ALSound> snd = pSoundEmitterComponent->CreateSound(m_kvSoundScape, pragma::audio::ALSoundType::Environment);
-		if(snd.get() == NULL) {
+		if(snd.get() == nullptr) {
 			Con::cwar << "Invalid soundscape '" << m_kvSoundScape << "' for entity " << this << Con::endl;
 			return;
 		}
 		ALSoundScript *al = dynamic_cast<ALSoundScript *>(snd.get());
-		if(al == NULL) {
+		if(al == nullptr) {
 			Con::cwar << "Invalid soundscape '" << m_kvSoundScape << "' for entity " << this << Con::endl;
 			return;
 		}
@@ -107,7 +106,7 @@ void CSoundScapeComponent::ReceiveData(NetPacket &packet)
 
 void CSoundScapeComponent::UpdateTargetPositions()
 {
-	if(m_sound.get() == NULL)
+	if(m_sound.get() == nullptr)
 		return;
 	ALSoundScript *al = dynamic_cast<ALSoundScript *>(m_sound.get());
 	std::unordered_map<unsigned int, EntityHandle>::iterator it;
@@ -125,7 +124,7 @@ void CSoundScapeComponent::StartSoundScape()
 {
 	if(s_active == this)
 		return;
-	if(s_active != NULL) {
+	if(s_active != nullptr) {
 		if(s_active->IsPlayerInRange())
 			return;
 		s_active->StopSoundScape();
@@ -139,14 +138,14 @@ void CSoundScapeComponent::StopSoundScape()
 {
 	if(s_active != this)
 		return;
-	s_active = NULL;
+	s_active = nullptr;
 	m_sound->FadeOut(2);
 }
 
 bool CSoundScapeComponent::IsPlayerInRange()
 {
 	auto *pl = pragma::get_cgame()->GetLocalPlayer();
-	if(pl == NULL)
+	if(pl == nullptr)
 		return false;
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();

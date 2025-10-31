@@ -4,12 +4,8 @@
 module;
 
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <alsoundsystem.hpp>
-#include <steam_audio/alsound_steam_audio.hpp>
-#include <alsound_coordinate_system.hpp>
 
 module pragma.client;
 

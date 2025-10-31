@@ -77,7 +77,7 @@ void CLiquidComponent::SetupWater()
 		auto &hMat = *it;
 		if(hMat.IsValid() == false)
 			continue;
-		auto *mat = static_cast<CMaterial*>(hMat.get());
+		auto *mat = static_cast<msys::CMaterial*>(hMat.get());
 		auto hShader = mat->GetShader();
 		if(hShader.IsValid() == false || dynamic_cast<Shader::Water*>(hShader.get()) == nullptr)
 			continue;
@@ -117,7 +117,7 @@ void CLiquidComponent::SetupWater()
 		return;
 	auto *meshSurface = static_cast<CModelSubMesh *>(mesh);
 	auto matIdx = mdl->GetMaterialIndex(*meshSurface);
-	auto *mat = matIdx.has_value() ? static_cast<CMaterial *>(mats.at(*matIdx).get()) : nullptr;
+	auto *mat = matIdx.has_value() ? static_cast<msys::CMaterial *>(mats.at(*matIdx).get()) : nullptr;
 	Vector3 min, max;
 	mdl->GetCollisionBounds(min, max);
 	renderC->InitializeWaterScene(meshSurface->GetVertexPosition(0), meshSurface->GetVertexNormal(0), min, max);

@@ -3,12 +3,7 @@
 
 module;
 
-#include <mathutil/uvec.h>
 #include <tiny_gltf.h>
-#include <mathutil/umath_lighting.hpp>
-#include "mathutil/umath.h"
-#include "mathutil/transform.hpp"
-#include "mathutil/color.h"
 
 
 

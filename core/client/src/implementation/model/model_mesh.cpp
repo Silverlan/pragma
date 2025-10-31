@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <mathutil/umath.h>
-#include <buffers/prosper_dynamic_resizable_buffer.hpp>
 
 module pragma.client;
 

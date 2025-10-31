@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "buffers/prosper_uniform_resizable_buffer.hpp"
 #include "pragma/lua/core.hpp"
 
 
@@ -215,9 +214,13 @@ export namespace pragma {
 			void InitializeShadowMap(TCPPM &sm);
 		virtual void InitializeShadowMap();
 	};
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::CLightComponent::StateFlags);
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::CLightComponent::StateFlags> : std::true_type {};
+	}
 };
 
 export class DLLCLIENT CEnvLight : public CBaseEntity {

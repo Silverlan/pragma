@@ -2,15 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath_geometry.hpp"
 
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <datasystem_t.hpp>
 
 module pragma.client;
 
@@ -208,7 +205,7 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 	auto group = mdl->AddMeshGroup("reference");
 
 	auto mat = pragma::get_client_state()->CreateMaterial("lightcone", "noop");
-	auto *cmat = static_cast<CMaterial *>(mat.get());
+	auto *cmat = static_cast<msys::CMaterial *>(mat.get());
 	cmat->SetProperty("alpha_mode", AlphaMode::Blend);
 	cmat->SetProperty("cone_height", CalcEndRadius());
 	cmat->SetTexture("albedo_map", "error");

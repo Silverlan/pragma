@@ -133,7 +133,12 @@ export namespace pragma {
 	};
 	using CEGetPresentationTexture = CEGetSceneTexture;
 	using CEGetHdrPresentationTexture = CEGetSceneTexture;
+
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::PostProcessingEffectData::Flags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::PostProcessingEffectData::Flags> : std::true_type {};
+	}
 };

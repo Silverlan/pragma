@@ -4,10 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <material_descriptor_array.hpp>
-#include <shader/prosper_descriptor_array_manager.hpp>
-#include <buffers/prosper_buffer.hpp>
-#include "mathutil/umath.h"
 #include "pragma/lua/core.hpp"
 
 
@@ -79,8 +75,14 @@ export namespace pragma {
 		CallbackHandle m_cbUpdateBuffers = {};
 		StateFlags m_stateFlags = StateFlags::None;
 	};
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::CRaytracingComponent::StateFlags)
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::CRaytracingComponent::StateFlags> : std::true_type {};
+
+		template<>
+		struct enable_bitwise_operators<pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags> : std::true_type {};
+	}
 };

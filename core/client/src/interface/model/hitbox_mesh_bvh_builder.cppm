@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
+#include <sharedutils/BS_thread_pool.hpp>
 
 export module pragma.client:model.hitbox_mesh_bvh_builder;
 

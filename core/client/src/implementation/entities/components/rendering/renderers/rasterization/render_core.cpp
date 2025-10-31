@@ -3,15 +3,8 @@
 
 module;
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <prosper_command_buffer.hpp>
-#include <prosper_descriptor_set_group.hpp>
-#include <queries/prosper_timer_query.hpp>
-#include <shader/prosper_shader_blur.hpp>
-#include <image/prosper_render_target.hpp>
-#include <image/prosper_msaa_texture.hpp>
 
 module pragma.client;
 

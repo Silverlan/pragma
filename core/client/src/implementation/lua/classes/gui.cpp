@@ -2,32 +2,20 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/policies/shared_from_this_policy.hpp"
 
-#include "pragma/lua/lua_call.hpp"
 
 
 
 #include "pragma/clientdefinitions.h"
 
 
-#include "mathutil/color.h"
 
-#include "mathutil/transform.hpp"
 
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <buffers/prosper_buffer.hpp>
-#include <prosper_command_buffer.hpp>
-#include <prosper_render_pass.hpp>
-#include <prosper_swap_command_buffer.hpp>
-#include <shader/prosper_shader_copy_image.hpp>
-#include <util_formatted_text.hpp>
-#include <prosper_window.hpp>
 
 module pragma.client;
 
@@ -1104,7 +1092,7 @@ void Lua::WIBase::GetChildren(lua_State *l, ::WIBase &hPanel, std::string classN
 void Lua::WIBase::GetChild(lua_State *l, ::WIBase &hPanel, unsigned int idx)
 {
 	auto *el = hPanel.GetChild(idx);
-	if(el == NULL)
+	if(el == nullptr)
 		return;
 	auto oChild = WGUILuaInterface::GetLuaObject(l, *el);
 	oChild.push(l);
@@ -1112,7 +1100,7 @@ void Lua::WIBase::GetChild(lua_State *l, ::WIBase &hPanel, unsigned int idx)
 void Lua::WIBase::GetChild(lua_State *l, ::WIBase &hPanel, std::string className, unsigned int idx)
 {
 	auto *el = hPanel.GetChild(className, idx);
-	if(el == NULL)
+	if(el == nullptr)
 		return;
 	auto oChild = WGUILuaInterface::GetLuaObject(l, *el);
 	oChild.push(l);

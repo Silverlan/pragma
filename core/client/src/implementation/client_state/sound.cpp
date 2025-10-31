@@ -6,12 +6,8 @@ module;
 
 #include "pragma/logging.hpp"
 #include "pragma/console/helper.hpp"
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <alsoundsystem.hpp>
-#include <alsound_buffer.hpp>
-#include <steam_audio/alsound_steam_audio.hpp>
 
 #undef PlaySound
 
@@ -259,7 +255,7 @@ std::shared_ptr<ALSound> ClientState::CreateSound(std::string snd, pragma::audio
 	m_soundScripts.push_back(pAs);
 	as->Initialize();
 	pragma::Game *game = GetGameState();
-	if(game != NULL) {
+	if(game != nullptr) {
 		game->CallCallbacks<void, ALSound *>("OnSoundCreated", as);
 		game->CallLuaCallbacks<void, std::shared_ptr<ALSound>>("OnSoundCreated", pAs);
 	}

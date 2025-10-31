@@ -67,5 +67,8 @@ export
 		static void OnChildReleased(WIBase *child);
 		static void OnChildSetSize(WIBase *child);
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(WIScrollContainer::StateFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<WIScrollContainer::StateFlags> : std::true_type {};
+	}
 };

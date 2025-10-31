@@ -4,7 +4,6 @@
 module;
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 
@@ -22,14 +21,14 @@ template<typename TCPPM>
 TCPPM *CGame::GetListener()
 {
 	if(m_listener.expired())
-		return NULL;
+		return nullptr;
 	return static_cast<pragma::CListenerComponent*>(m_listener.get());
 }
 template pragma::CListenerComponent* CGame::GetListener<pragma::CListenerComponent>();
 pragma::CPlayerComponent *CGame::GetLocalPlayer()
 {
 	if(m_plLocal.expired())
-		return NULL;
+		return nullptr;
 	return m_plLocal.get();
 }
 
@@ -43,7 +42,7 @@ CBaseEntity *CGame::CreateEntity(std::string classname)
 	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 	CBaseEntity *entlua = CreateLuaEntity(classname);
-	if(entlua != NULL)
+	if(entlua != nullptr)
 		return entlua;
 	auto factory = client_entities::ClientEntityRegistry::Instance().FindFactory(classname);
 	if(!factory) {
@@ -55,7 +54,7 @@ CBaseEntity *CGame::CreateEntity(std::string classname)
 			return r;
 		}
 		Con::cwar << "Unable to create entity '" << classname << "': Factory not found!" << Con::endl;
-		return NULL;
+		return nullptr;
 	}
 	return factory(pragma::get_client_state());
 }
@@ -78,15 +77,15 @@ void CGame::RemoveEntity(pragma::ecs::BaseEntity *ent)
 	debug::get_domain().EndTask();
 #endif
 	if(idx > 0) {
-		m_shEnts[idx] = NULL;
-		m_shBaseEnts[idx] = NULL;
+		m_shEnts[idx] = nullptr;
+		m_shBaseEnts[idx] = nullptr;
 		if(idx == m_shEnts.size() - 1) {
 			m_shEnts.erase(m_shEnts.begin() + idx);
 			m_shBaseEnts.erase(m_shBaseEnts.begin() + idx);
 		}
 	}
-	m_ents[cIdx] = NULL;
-	m_baseEnts[cIdx] = NULL;
+	m_ents[cIdx] = nullptr;
+	m_baseEnts[cIdx] = nullptr;
 	if(cIdx == m_ents.size() - 1) {
 		m_ents.erase(m_ents.begin() + cIdx);
 		m_baseEnts.erase(m_baseEnts.begin() + cIdx);
@@ -112,7 +111,7 @@ void CGame::GetSharedEntities(std::vector<pragma::ecs::BaseEntity *> **ents) { *
 CBaseEntity *CGame::GetEntity(unsigned int idx)
 {
 	if(idx >= m_shEnts.size())
-		return NULL;
+		return nullptr;
 	return m_shEnts[idx];
 }
 
@@ -121,7 +120,7 @@ CBaseEntity *CGame::GetEntityByLocalIndex(uint32_t idx) { return GetEntityByClie
 CBaseEntity *CGame::GetEntityByClientIndex(unsigned int idx)
 {
 	if(idx >= m_ents.size())
-		return NULL;
+		return nullptr;
 	return m_ents[idx];
 }
 

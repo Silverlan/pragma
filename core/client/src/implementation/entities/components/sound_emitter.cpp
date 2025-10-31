@@ -5,7 +5,6 @@ module;
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_client.h"
-#include <prosper_command_buffer.hpp>
 
 module pragma.client;
 
@@ -45,7 +44,7 @@ void CSoundEmitterComponent::ReceiveData(NetPacket &packet)
 std::shared_ptr<ALSound> CSoundEmitterComponent::CreateSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo)
 {
 	std::shared_ptr<ALSound> snd = pragma::get_client_state()->CreateSound(sndname, type, pragma::audio::ALCreateFlags::Mono);
-	if(snd == NULL)
+	if(snd == nullptr)
 		return snd;
 	InitializeSound(snd);
 	snd->SetGain(sndInfo.gain);
@@ -56,7 +55,7 @@ std::shared_ptr<ALSound> CSoundEmitterComponent::CreateSound(std::string sndname
 std::shared_ptr<ALSound> CSoundEmitterComponent::EmitSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo)
 {
 	std::shared_ptr<ALSound> snd = CreateSound(sndname, type, sndInfo);
-	if(snd == NULL)
+	if(snd == nullptr)
 		return snd;
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	ALSound *al = snd.get();

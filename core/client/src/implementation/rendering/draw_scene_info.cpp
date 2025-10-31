@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <prosper_command_buffer.hpp>
 
 module pragma.client;
 

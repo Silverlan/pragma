@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/color.h"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 

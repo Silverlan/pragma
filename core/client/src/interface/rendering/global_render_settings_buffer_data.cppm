@@ -3,13 +3,15 @@
 
 module;
 
-#include <buffers/prosper_buffer.hpp>
-#include <prosper_descriptor_set_group.hpp>
-#include <udm_enums.hpp>
 
 // #define PRAGMA_ENABLE_SHADER_DEBUG_PRINT
 
 export module pragma.client:rendering.global_render_settings_buffer_data;
+
+export import pragma.prosper;
+export import pragma.udm;
+export import std.compat;
+
 export namespace pragma::rendering {
 	// These have to match the enums in shaders/debug/debug_print.glsl
 	enum class GlslType : uint32_t {

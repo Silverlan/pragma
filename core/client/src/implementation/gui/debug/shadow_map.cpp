@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <image/prosper_render_target.hpp>
 
 module pragma.client;
 

@@ -21,7 +21,7 @@ void CGame::HandleLuaNetPacket(NetPacket &packet)
 	if(ID == 0)
 		return;
 	std::string *ident = GetNetMessageIdentifier(ID);
-	if(ident == NULL)
+	if(ident == nullptr)
 		return;
 	std::unordered_map<std::string, int>::iterator i = m_luaNetMessages.find(*ident);
 	if(i == m_luaNetMessages.end()) {

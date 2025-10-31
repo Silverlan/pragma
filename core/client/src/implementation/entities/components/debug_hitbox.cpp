@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/color.h"
 
 #include "pragma/lua/core.hpp"
 

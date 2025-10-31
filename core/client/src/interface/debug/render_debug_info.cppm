@@ -4,9 +4,11 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <mathutil/umath.h>
 
 export module pragma.client:debug.render_debug_info;
+
+export import std.compat;
+
 export {
 	class DLLCLIENT RenderDebugInfo {
 	public:

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <mathutil/glmutil.h>
 #include "pragma/lua/core.hpp"
 
 

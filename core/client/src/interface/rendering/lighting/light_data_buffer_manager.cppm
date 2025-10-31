@@ -3,8 +3,6 @@
 
 module;
 
-#include <buffers/prosper_uniform_resizable_buffer.hpp>
-#include <mathutil/uvec.h>
 
 #define USE_LIGHT_SOURCE_UNIFORM_BUFFER 1
 

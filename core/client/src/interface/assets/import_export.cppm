@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "image/prosper_image.hpp"
-#include "prosper_enums.hpp"
-#include <util_texture_info.hpp>
 
 
 
@@ -90,7 +87,7 @@ export namespace pragma::asset {
 	DLLCLIENT bool import_texture(std::unique_ptr<ufile::IFile> &&f, const TextureImportInfo &texInfo, const std::string &outputPath, std::string &outErrMsg);
 	DLLCLIENT bool import_texture(prosper::IImage &img, const TextureImportInfo &texInfo, const std::string &outputPath, std::string &outErrMsg);
 
-	DLLCLIENT void assign_texture(CMaterial &mat, const std::string &textureRootPath, const std::string &matIdentifier, const std::string &texName, prosper::IImage &img, bool greyScale, bool normalMap, AlphaMode alphaMode = AlphaMode::Opaque);
+	DLLCLIENT void assign_texture(msys::CMaterial &mat, const std::string &textureRootPath, const std::string &matIdentifier, const std::string &texName, prosper::IImage &img, bool greyScale, bool normalMap, AlphaMode alphaMode = AlphaMode::Opaque);
 
 	DLLCLIENT bool export_model(pragma::Model &model, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName = {}, std::string *optOutPath = nullptr);
 	DLLCLIENT bool export_animation(pragma::Model &model, const std::string &animName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName = {});

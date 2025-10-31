@@ -4,11 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "buffers/prosper_buffer.hpp"
-#include <mathutil/color.h>
-#include <mathutil/glmutil.h>
-#include <mathutil/transform.hpp>
-#include "mathutil/umath.h"
 
 
 
@@ -161,7 +156,12 @@ export namespace DebugRenderer {
 	std::array<std::shared_ptr<DebugRenderer::BaseObject>, 3> DrawAxis(const DebugRenderInfo &renderInfo);
 	void ClearObjects();
 	void Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pragma::CCameraComponent &cam);
+	
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(DebugRenderer::BaseObject::Flags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<DebugRenderer::BaseObject::Flags> : std::true_type {};
+	}
 };

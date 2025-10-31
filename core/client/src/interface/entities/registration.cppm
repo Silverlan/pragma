@@ -69,8 +69,8 @@ export namespace client_entities {
     uint32_t register_networked_entity() {
         return ClientEntityRegistry::Instance().RegisterNetworkedEntity([](ClientState *client, uint32_t idx) -> CBaseEntity* {
             CGame *game = client->GetGameState();                                                                                                                                                                                                                                                    \
-            if(game == NULL)                                                                                                                                                                                                                                                                         \
-                return NULL;                                                                                                                                                                                                                                                                         \
+            if(game == nullptr)                                                                                                                                                                                                                                                                         \
+                return nullptr;                                                                                                                                                                                                                                                                         \
             return static_cast<CBaseEntity *>(game->CreateEntity<T>(idx));
         });
     }

@@ -4,13 +4,12 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <buffers/prosper_buffer.hpp>
-#include "mathutil/color.h"
 
 
 export module pragma.client:physics.visual_debugger;
 
-import :entities.components.camera;
+export import :entities.components.camera;
+export import pragma.prosper;
 
 #undef DrawText
 

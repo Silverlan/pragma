@@ -141,5 +141,11 @@ export namespace pragma {
 		virtual void PushArguments(lua_State *l) override;
 		bool requireBoundingVolumeUpdate = true;
 	};
+	using namespace umath::scoped_enum::bitwise;
 };
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::CModelComponent::StateFlags)
+export {
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::CModelComponent::StateFlags> : std::true_type {};
+	}
+}

@@ -2,15 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include "cmaterialmanager.h"
-#include <shader/prosper_pipeline_create_info.hpp>
-#include <image/prosper_sampler.hpp>
-#include <prosper_descriptor_set_group.hpp>
-#include <prosper_command_buffer.hpp>
-#include <texture_type.h>
 
 module pragma.client;
 
@@ -44,7 +37,7 @@ void ShaderPBR::InitializeGfxPipelineDescriptorSets()
 	AddDescriptorSetGroup(DESCRIPTOR_SET_PBR);
 }
 
-void ShaderPBR::InitializeMaterialData(const CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
+void ShaderPBR::InitializeMaterialData(const msys::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
 {
 	ShaderGameWorldLightingPass::InitializeMaterialData(mat, shaderMat, inOutMatData);
 	float specularFactor;
@@ -67,9 +60,9 @@ void ShaderPBR::InitializeMaterialData(const CMaterial &mat, const rendering::sh
 		}
 
 		if(hasGlowmap || emissionFactor) {
-			std::shared_ptr<Texture> texture;
+			std::shared_ptr<msys::Texture> texture;
 			if(hasGlowmap)
-				texture = std::static_pointer_cast<Texture>(glowMap->texture);
+				texture = std::static_pointer_cast<msys::Texture>(glowMap->texture);
 			if(emissionFactor) {
 				matFlags |= MaterialFlags::GlowSRGB;
 				if(!texture) {
@@ -113,7 +106,7 @@ void ShaderPBR::InitializeMaterialData(const CMaterial &mat, const rendering::sh
 #endif
 }
 
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo) { return ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(mat, descSetInfo); }
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(msys::CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo) { return ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(mat, descSetInfo); }
 void ShaderPBR::OnPipelinesInitialized()
 {
 	ShaderGameWorldLightingPass::OnPipelinesInitialized();

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <shader/prosper_shader_base_image_processing.hpp>
 
 export module pragma.client:rendering.shaders.compose_rma;
 
@@ -38,7 +37,11 @@ export namespace pragma {
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 		virtual void InitializeShaderResources() override;
 	};
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderComposeRMA::Flags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::ShaderComposeRMA::Flags> : std::true_type {};
+	}
 };

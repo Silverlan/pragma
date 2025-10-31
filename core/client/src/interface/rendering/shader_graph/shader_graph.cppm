@@ -4,7 +4,7 @@
 export module pragma.client:rendering.shader_graph;
 export import :rendering.shader_graph.manager;
 
-export import :rendering.shader_graph.module;
+export import :rendering.shader_graph.sg_module;
 export import :rendering.shader_graph.module_image_texture;
 export import :rendering.shader_graph.module_input_data;
 export import :rendering.shader_graph.module_pbr;

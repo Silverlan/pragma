@@ -6,11 +6,8 @@
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include <debug/api_dump_recorder.hpp>
 
 #ifdef PR_DEBUG_API_DUMP
-#include <prosper_context.hpp>
-#include <prosper_command_buffer.hpp>
 
 import :console.output;
 import :engine;

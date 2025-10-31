@@ -156,14 +156,14 @@ static SilkIcon icons[] = {SilkIcon("accept", 0, 0), SilkIcon("add", 0, 1), Silk
 void WISilkIcon::SetIcon(std::string icon)
 {
 	ustring::to_lower(icon);
-	SilkIcon *info = NULL;
+	SilkIcon *info = nullptr;
 	for(unsigned int i = 0; i < (sizeof(icons) / sizeof(SilkIcon)); i++) {
 		if(icons[i].name == icon) {
 			info = &icons[i];
 			break;
 		}
 	}
-	if(info == NULL)
+	if(info == nullptr)
 		return;
 	auto xIcon = info->col * 16 + info->col * 1;
 	auto yIcon = info->row * 16 + info->row * 1;

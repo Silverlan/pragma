@@ -5,10 +5,6 @@ module;
 
 
 #include "stdafx_cengine.h"
-#include <queries/prosper_query_pool.hpp>
-#include <queries/prosper_timer_query.hpp>
-#include <prosper_command_buffer.hpp>
-#include <prosper_util.hpp>
 
 module pragma.client;
 

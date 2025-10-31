@@ -3,17 +3,10 @@
 
 module;
 
-#include "mathutil/transform.hpp"
 
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <mathutil/umath_geometry.hpp>
-#include <prosper_command_buffer.hpp>
-#include <image/prosper_image.hpp>
-#include <buffers/prosper_buffer.hpp>
-#include <mathutil/umath_lighting.hpp>
 
 module pragma.client;
 

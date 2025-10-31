@@ -4,21 +4,11 @@
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
-#include "texture_load_flags.hpp"
-#include <util_texture_info.hpp>
-#include <alsoundsystem.hpp>
-#include <cmaterialmanager.h>
-#include <impl_texture_formats.h>
-#include <prosper_window.hpp>
-#include <prosper_command_buffer.hpp>
-#include <prosper_prepared_command_buffer.hpp>
-#include "texturemanager/texture.h"
 
 import pragma.audio.util;
 import pragma.client;

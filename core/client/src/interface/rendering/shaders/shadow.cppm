@@ -70,7 +70,7 @@ export namespace pragma {
 		virtual void RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor, SceneFlags sceneFlags) const override;
 		virtual void RecordBindLight(rendering::ShaderProcessor &shaderProcessor, CLightComponent &light, uint32_t layerId) const override;
 		virtual void RecordAlphaCutoff(rendering::ShaderProcessor &shaderProcessor, float alphaCutoff) const override;
-		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, CMaterial &mat) const override;
+		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, msys::CMaterial &mat) const override;
 		virtual void RecordClipPlane(rendering::ShaderProcessor &shaderProcessor, const Vector4 &clipPlane) const override {}
 		virtual void RecordDrawOrigin(rendering::ShaderProcessor &shaderProcessor, const Vector4 &drawOrigin) const override {}
 		virtual void RecordDepthBias(rendering::ShaderProcessor &shaderProcessor, const Vector2 &depthBias) const override {}
@@ -91,7 +91,7 @@ export namespace pragma {
 
 	class DLLCLIENT ShaderShadowTransparent : public ShaderShadow {
 	  public:
-		//bool BindMaterial(CMaterial &mat);
+		//bool BindMaterial(msys::CMaterial &mat);
 	};
 
 	//////////////////
@@ -114,6 +114,6 @@ export namespace pragma {
 
 	class DLLCLIENT ShaderShadowCSMTransparent : public ShaderShadowCSM {
 	  public:
-		//bool BindMaterial(CMaterial &mat);
+		//bool BindMaterial(msys::CMaterial &mat);
 	};
 };

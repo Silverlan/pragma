@@ -4,20 +4,19 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "matsysdefinitions.h"
-#include <texturemanager/texturemanager.h>
 #include "pragma/lua/core.hpp"
 
 
 export module pragma.client:scripting.lua.classes.material;
 
-import :scripting.lua.libraries.vulkan;
+export import :scripting.lua.libraries.vulkan;
+export import pragma.cmaterialsystem;
 
 export namespace Lua {
-	namespace msys::Material {
+	namespace Material {
 		namespace Client {
 			DLLCLIENT void SetTexture(lua_State *l, msys::Material *mat, const std::string &textureID, const std::string &tex);
-			DLLCLIENT void SetTexture(lua_State *l, msys::Material *mat, const std::string &textureID, ::Texture &tex);
+			DLLCLIENT void SetTexture(lua_State *l, msys::Material *mat, const std::string &textureID, msys::Texture &tex);
 			DLLCLIENT void SetTexture(lua_State *l, msys::Material *mat, const std::string &textureID, Lua::Vulkan::Texture &hTex);
 			DLLCLIENT void SetTexture(lua_State *l, msys::Material *mat, const std::string &textureID, Lua::Vulkan::Texture &hTex, const std::string &name);
 			DLLCLIENT void GetTexture(lua_State *l, msys::Material *mat, const std::string &textureID);
@@ -26,7 +25,7 @@ export namespace Lua {
 		};
 	};
 	namespace TextureInfo {
-		DLLCLIENT std::shared_ptr<Texture> GetTexture(lua_State *l, ::TextureInfo *tex);
+		DLLCLIENT std::shared_ptr<msys::Texture> GetTexture(lua_State *l, ::TextureInfo *tex);
 		DLLCLIENT std::pair<uint32_t, uint32_t> GetSize(lua_State *l, ::TextureInfo *tex);
 		DLLCLIENT uint32_t GetWidth(lua_State *l, ::TextureInfo *tex);
 		DLLCLIENT uint32_t GetHeight(lua_State *l, ::TextureInfo *tex);

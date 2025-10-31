@@ -4,21 +4,13 @@
 module;
 #include "pragma/logging.hpp"
 
-#include "mathutil/transform.hpp"
 
 
 
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include "prosper_util.hpp"
-#include <datasystem_t.hpp>
-#include <texturemanager/texture_manager2.hpp>
-#include <image/prosper_sampler.hpp>
-#include <cmaterialmanager.h>
 #include <tiny_gltf.h>
-#include <image/prosper_image.hpp>
 
 module pragma.client;
 
@@ -243,7 +235,7 @@ static bool load_image(tinygltf::Image *image, const int imageIdx, std::string *
 	}
 	if(imageIdx >= inputData.textures.size())
 		inputData.textures.resize(imageIdx + 1);
-	inputData.textures.at(imageIdx) = std::static_pointer_cast<Texture>(texture)->GetVkTexture();
+	inputData.textures.at(imageIdx) = std::static_pointer_cast<msys::Texture>(texture)->GetVkTexture();
 	return true;
 }
 
@@ -278,7 +270,7 @@ uimg::TextureInfo pragma::asset::get_texture_info(bool isGreyScale, bool isNorma
 	return texInfo;
 }
 
-void pragma::asset::assign_texture(CMaterial &mat, const std::string &textureRootPath, const std::string &matIdentifier, const std::string &texName, prosper::IImage &img, bool greyScale, bool normalMap, AlphaMode alphaMode)
+void pragma::asset::assign_texture(msys::CMaterial &mat, const std::string &textureRootPath, const std::string &matIdentifier, const std::string &texName, prosper::IImage &img, bool greyScale, bool normalMap, AlphaMode alphaMode)
 {
 	auto texInfo = pragma::asset::get_texture_info(greyScale, normalMap, alphaMode);
 	pragma::get_cgame()->SaveImage(img, textureRootPath + texName, texInfo);
@@ -440,7 +432,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		matPathRelative.PopFront();
 
 		auto mat = pragma::get_client_state()->CreateMaterial(matPathRelative.GetString(), "pbr");
-		auto *cmat = static_cast<CMaterial *>(mat.get());
+		auto *cmat = static_cast<msys::CMaterial *>(mat.get());
 		mat->SetProperty("alpha_mode", alphaMode);
 		mat->SetProperty("alpha_cutoff", gltfMat.alphaCutoff);
 
@@ -1374,11 +1366,11 @@ bool pragma::asset::import_texture(const std::string &fileName, const TextureImp
 		outErrMsg = "Unable to load texture!";
 		return false;
 	}
-	if(std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false) {
+	if(std::static_pointer_cast<msys::Texture>(tex)->HasValidVkTexture() == false) {
 		outErrMsg = "Invalid texture!";
 		return false;
 	}
-	return import_texture(std::static_pointer_cast<Texture>(tex)->GetVkTexture()->GetImage(), texInfo, outputPath, outErrMsg);
+	return import_texture(std::static_pointer_cast<msys::Texture>(tex)->GetVkTexture()->GetImage(), texInfo, outputPath, outErrMsg);
 }
 bool pragma::asset::import_texture(std::unique_ptr<ufile::IFile> &&f, const TextureImportInfo &texInfo, const std::string &outputPath, std::string &outErrMsg)
 {
@@ -1394,11 +1386,11 @@ bool pragma::asset::import_texture(std::unique_ptr<ufile::IFile> &&f, const Text
 		outErrMsg = "Unable to load texture!";
 		return false;
 	}
-	if(std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false) {
+	if(std::static_pointer_cast<msys::Texture>(tex)->HasValidVkTexture() == false) {
 		outErrMsg = "Invalid texture!";
 		return false;
 	}
-	return import_texture(std::static_pointer_cast<Texture>(tex)->GetVkTexture()->GetImage(), texInfo, outputPath, outErrMsg);
+	return import_texture(std::static_pointer_cast<msys::Texture>(tex)->GetVkTexture()->GetImage(), texInfo, outputPath, outErrMsg);
 }
 bool pragma::asset::import_texture(prosper::IImage &img, const TextureImportInfo &texInfo, const std::string &outputPath, std::string &outErrMsg)
 {
@@ -1668,7 +1660,7 @@ bool pragma::asset::export_texture(const std::string &texturePath, ModelExportIn
 		outErrMsg = "Unable to load texture '" + texturePath + "'!";
 		return false;
 	}
-	auto texture = std::static_pointer_cast<Texture>(pTexture);
+	auto texture = std::static_pointer_cast<msys::Texture>(pTexture);
 	auto &vkImg = texture->GetVkTexture()->GetImage();
 
 	auto imgPath = optFileNameOverride.has_value() ? *optFileNameOverride : ufile::get_file_from_filename(texturePath);
@@ -1860,11 +1852,11 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::Model 
 	if(forceRebuild == false && requiresAOUpdate == false)
 		return AOResult::NoAOGenerationRequired;
 	auto *rmaTexInfo = mat.GetRMAMap();
-	if(rmaTexInfo == nullptr || std::static_pointer_cast<Texture>(rmaTexInfo->texture) == nullptr) {
+	if(rmaTexInfo == nullptr || std::static_pointer_cast<msys::Texture>(rmaTexInfo->texture) == nullptr) {
 		outErrMsg = "Material has no RMA texture assigned!";
 		return AOResult::FailedToCreateAOJob; // This is not a valid pbr material?
 	}
-	auto rmaTex = std::static_pointer_cast<Texture>(rmaTexInfo->texture);
+	auto rmaTex = std::static_pointer_cast<msys::Texture>(rmaTexInfo->texture);
 	auto rmaPath = rmaTex->GetName();
 	auto *shaderComposeRMA = static_cast<pragma::ShaderComposeRMA *>(pragma::get_cengine()->GetShader("compose_rma").get());
 	if(shaderComposeRMA == nullptr) {
@@ -1895,9 +1887,9 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::Model 
 	}
 
 	auto *texInfoAo = mat.GetTextureInfo("ao_map");
-	if(texInfoAo && texInfoAo->texture && std::static_pointer_cast<Texture>(texInfoAo->texture)->HasValidVkTexture()) {
+	if(texInfoAo && texInfoAo->texture && std::static_pointer_cast<msys::Texture>(texInfoAo->texture)->HasValidVkTexture()) {
 		// Material already has a separate ambient occlusion map, just use that one
-		auto &img = std::static_pointer_cast<Texture>(texInfoAo->texture)->GetVkTexture()->GetImage();
+		auto &img = std::static_pointer_cast<msys::Texture>(texInfoAo->texture)->GetVkTexture()->GetImage();
 		std::string errMsg;
 		auto result = save_ambient_occlusion<prosper::IImage>(mat, rmaPath, img, errMsg);
 		if(result)

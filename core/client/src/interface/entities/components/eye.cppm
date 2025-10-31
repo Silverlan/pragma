@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <mathutil/transform.hpp>
-#include <mathutil/uvec.h>
-#include "mathutil/umath.h"
 #include "pragma/lua/core.hpp"
 
 
@@ -120,6 +117,10 @@ export {
 			float m_tNextBlink = 0.f;
 			uint32_t m_blinkFlexController = std::numeric_limits<uint32_t>::max();
 		};
+		using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::CEyeComponent::StateFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::CEyeComponent::StateFlags> : std::true_type {};
+	}
 };

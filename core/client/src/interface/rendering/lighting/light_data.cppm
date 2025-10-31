@@ -3,13 +3,13 @@
 
 module;
 
-#include <buffers/prosper_uniform_resizable_buffer.hpp>
-#include <mathutil/uvec.h>
-#include <mathutil/umath_lighting.hpp>
-#include "mathutil/umath.h"
 
 
 export module pragma.client:rendering.light_data;
+
+export import pragma.math;
+export import std.compat;
+
 export namespace pragma {
 #pragma pack(push, 1)
 	struct LightBufferData {
@@ -38,7 +38,11 @@ export namespace pragma {
 		Mat4 projection = umat::identity();
 	};
 #pragma pack(pop)
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::LightBufferData::BufferFlags);
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::LightBufferData::BufferFlags> : std::true_type {};
+	}
 };

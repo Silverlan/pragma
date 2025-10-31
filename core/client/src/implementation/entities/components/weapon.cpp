@@ -6,7 +6,6 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 
@@ -349,7 +348,7 @@ void CWeaponComponent::Holster()
 {
 	BaseWeaponComponent::Holster();
 	auto *vm = GetViewModel();
-	if(vm == NULL)
+	if(vm == nullptr)
 		return;
 	CGame *game = pragma::get_client_state()->GetGameState();
 	PlayViewActivity(pragma::Activity::VmHolster);
@@ -360,12 +359,12 @@ pragma::Activity CWeaponComponent::TranslateViewActivity(pragma::Activity act) {
 pragma::CViewModelComponent *CWeaponComponent::GetViewModel()
 {
 	pragma::ecs::BaseEntity *parent = m_hTarget.get();
-	if(parent == NULL)
-		return NULL;
+	if(parent == nullptr)
+		return nullptr;
 	CGame *game = pragma::get_client_state()->GetGameState();
 	auto *vm = game->GetViewModel<pragma::CViewModelComponent>();
 	if(vm == nullptr || &vm->GetEntity() != parent)
-		return NULL;
+		return nullptr;
 	return vm;
 }
 

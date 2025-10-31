@@ -2,22 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/color.h"
 
 
 
 
-#include "mathutil/umath.h"
 #include "pragma/console/helper.hpp"
 #include "stdafx_client.h"
-#include <mathutil/uquat.h>
 //#include "shader_gaussianblur.h" // prosper TODO
-#include <image/prosper_msaa_texture.hpp>
-#include <image/prosper_render_target.hpp>
-#include <prosper_util.hpp>
-#include <prosper_command_buffer.hpp>
-#include <prosper_window.hpp>
-#include <textureinfo.h>
 
 module pragma.client;
 

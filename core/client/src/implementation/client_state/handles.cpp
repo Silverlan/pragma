@@ -20,7 +20,7 @@ void ClientState::HandlePacket(NetPacket &packet)
 	CallCallbacks<void, std::reference_wrapper<NetPacket>>("OnReceivePacket", packet);
 	unsigned int ID = packet.GetMessageID();
 	CLNetMessage *msg = GetNetMessage(ID);
-	if(msg == NULL) {
+	if(msg == nullptr) {
 		Con::cwar << "(CLIENT) Unhandled net message: " << ID << Con::endl;
 		return;
 	}
@@ -112,7 +112,7 @@ void ClientState::LoadLuaCache(std::string cache, unsigned int cacheSize)
 #if 0
 	std::string path = "cache\\" + cache + ".cache";
 	auto f = FileManager::OpenFile(path.c_str(), "rb");
-	if(f == NULL) {
+	if(f == nullptr) {
 		Con::cwar << "Unable to open lua-cache '" << cache << "' file!" << Con::endl;
 		return;
 	}
@@ -226,7 +226,7 @@ void ClientState::HandleReceiveGameInfo(NetPacket &packet)
 	scriptWatcher.MountDirectory(luaPath);
 	resourceWatcher.MountDirectory("downloads\\");
 
-	//if(game == NULL)
+	//if(game == nullptr)
 	//	return;
 	std::string map = packet->ReadString();
 	auto svGameFlags = packet->Read<pragma::Game::GameFlags>();
@@ -294,7 +294,7 @@ void ClientState::HandleReceiveGameInfo(NetPacket &packet)
 	ReadEntityData(packet);
 
 	pragma::ecs::BaseEntity *wrld = nwm::read_entity(packet);
-	if(wrld != NULL) {
+	if(wrld != nullptr) {
 		auto pWorldComponent = wrld->GetComponent<pragma::CWorldComponent>();
 		game->SetWorld(pWorldComponent.get());
 	}

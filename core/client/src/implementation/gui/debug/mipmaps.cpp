@@ -4,10 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <prosper_util.hpp>
-#include <image/prosper_sampler.hpp>
-#include <image/prosper_image_view.hpp>
-#include <prosper_command_buffer.hpp>
 
 module pragma.client;
 

@@ -4,12 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "image/prosper_render_target.hpp"
-#include "queries/prosper_timer_query.hpp"
-#include "queries/prosper_query_pool.hpp"
-#include "prosper_command_buffer.hpp"
-#include "alsoundsystem.hpp"
-#include "alsound_effect.hpp"
 #include "pragma/lua/core.hpp"
 
 
@@ -293,7 +287,10 @@ export {
 		void Input(int key, pragma::platform::KeyState inputState, pragma::platform::KeyState pressState, pragma::platform::Modifier mods, float magnitude = 1.f);
 		void UpdateFPS(float t);
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(CEngine::StateFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<CEngine::StateFlags> : std::true_type {};
+	}
 
 	template<class TEfxProperties>
 	std::shared_ptr<al::IEffect> CEngine::CreateAuxEffect(const std::string &name, const TEfxProperties &props)

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "prosper_descriptor_set_group.hpp"
 
 export module pragma.client:rendering.shaders.particle_base;
 
@@ -33,7 +32,11 @@ export namespace pragma {
 	  private:
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_dummyAnimDescSetGroup = nullptr;
 	};
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderParticleBase::RenderFlags);
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::ShaderParticleBase::RenderFlags> : std::true_type {};
+	}
 };

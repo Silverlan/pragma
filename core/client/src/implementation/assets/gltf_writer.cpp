@@ -2,20 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/transform.hpp"
 
 
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <mathutil/umath_lighting.hpp>
-#include <datasystem_color.h>
-#include <datasystem_vector.h>
 #include <tiny_gltf.h>
 
 module pragma.client;

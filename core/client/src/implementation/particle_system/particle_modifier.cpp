@@ -4,10 +4,8 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-#include "mathutil/color.h"
 
 #include "stdafx_client.h"
-#include <mathutil/umath.h>
 
 module pragma.client;
 
@@ -204,10 +202,10 @@ std::pair<Vector3, Vector3> CParticleRenderer::GetRenderBounds() const { return 
 
 ///////////////////////
 
-DLLCLIENT ParticleModifierMap *g_ParticleModifierFactories = NULL;
+DLLCLIENT ParticleModifierMap *g_ParticleModifierFactories = nullptr;
 DLLCLIENT void LinkParticleInitializerToFactory(std::string name, const TParticleModifierFactory<CParticleInitializer> &fc)
 {
-	if(g_ParticleModifierFactories == NULL) {
+	if(g_ParticleModifierFactories == nullptr) {
 		static ParticleModifierMap map;
 		g_ParticleModifierFactories = &map;
 	}
@@ -215,7 +213,7 @@ DLLCLIENT void LinkParticleInitializerToFactory(std::string name, const TParticl
 }
 DLLCLIENT void LinkParticleOperatorToFactory(std::string name, const TParticleModifierFactory<CParticleOperator> &fc)
 {
-	if(g_ParticleModifierFactories == NULL) {
+	if(g_ParticleModifierFactories == nullptr) {
 		static ParticleModifierMap map;
 		g_ParticleModifierFactories = &map;
 	}
@@ -223,7 +221,7 @@ DLLCLIENT void LinkParticleOperatorToFactory(std::string name, const TParticleMo
 }
 DLLCLIENT void LinkParticleRendererToFactory(std::string name, const TParticleModifierFactory<CParticleRenderer> &fc)
 {
-	if(g_ParticleModifierFactories == NULL) {
+	if(g_ParticleModifierFactories == nullptr) {
 		static ParticleModifierMap map;
 		g_ParticleModifierFactories = &map;
 	}
@@ -266,21 +264,21 @@ TParticleModifierFactory<CParticleInitializer> ParticleModifierMap::FindInitiali
 {
 	auto it = m_initializers.find(classname);
 	if(it == m_initializers.end())
-		return NULL;
+		return nullptr;
 	return it->second;
 }
 TParticleModifierFactory<CParticleOperator> ParticleModifierMap::FindOperator(std::string classname)
 {
 	auto it = m_operators.find(classname);
 	if(it == m_operators.end())
-		return NULL;
+		return nullptr;
 	return it->second;
 }
 TParticleModifierFactory<CParticleRenderer> ParticleModifierMap::FindRenderer(std::string classname)
 {
 	auto it = m_renderers.find(classname);
 	if(it == m_renderers.end())
-		return NULL;
+		return nullptr;
 	return it->second;
 }
 const std::unordered_map<std::string, TParticleModifierFactory<CParticleInitializer>> &ParticleModifierMap::GetInitializers() const { return m_initializers; }

@@ -4,11 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <shader/prosper_pipeline_create_info.hpp>
-#include <shader/prosper_shader_copy_image.hpp>
-#include <shader/prosper_shader_t.hpp>
-#include <prosper_util.hpp>
-#include <prosper_descriptor_set_group.hpp>
 
 module pragma.client;
 
@@ -46,7 +41,7 @@ void ShaderPPWater::InitializeShaderResources()
 }
 void ShaderPPWater::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { prosper::ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
 
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPPWater::InitializeMaterialDescriptorSet(CMaterial &mat)
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPPWater::InitializeMaterialDescriptorSet(msys::CMaterial &mat)
 {
 	auto *dudvMap = mat.GetTextureInfo(msys::Material::DUDV_MAP_IDENTIFIER);
 	if(dudvMap == nullptr || dudvMap->texture == nullptr)
@@ -54,13 +49,13 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPPWater::InitializeMaterialD
 	auto descSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_REFRACTION_MAP);
 	mat.SetDescriptorSetGroup(*this, descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
-	auto texture = std::static_pointer_cast<Texture>(dudvMap->texture);
+	auto texture = std::static_pointer_cast<msys::Texture>(dudvMap->texture);
 	if(texture->HasValidVkTexture())
 		descSet.SetBindingTexture(*texture->GetVkTexture(), 0u);
 	return descSetGroup;
 }
 
-bool ShaderPPWater::RecordRefractionMaterial(prosper::ShaderBindState &bindState, CMaterial &mat) const
+bool ShaderPPWater::RecordRefractionMaterial(prosper::ShaderBindState &bindState, msys::CMaterial &mat) const
 {
 	auto descSetGroup = mat.GetDescriptorSetGroup(const_cast<ShaderPPWater &>(*this));
 	//if(descSetGroup == nullptr)

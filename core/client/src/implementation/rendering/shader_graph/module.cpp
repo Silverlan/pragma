@@ -7,7 +7,7 @@ module;
 
 module pragma.client;
 
-import :rendering.shader_graph.module;
+import :rendering.shader_graph.sg_module;
 
 using namespace pragma::rendering;
 

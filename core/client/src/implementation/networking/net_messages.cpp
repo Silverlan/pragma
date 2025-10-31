@@ -2,16 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath_geometry.hpp"
 
-#include "mathutil/color.h"
 
 
 #include "pragma/console/helper.hpp"
 #include "pragma/lua/core.hpp"
 #include "pragma/logging.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
 
@@ -457,7 +454,7 @@ void NET_cl_SND_EV(NetPacket packet)
 	unsigned char ev = packet->Read<unsigned char>();
 	unsigned int idx = packet->Read<unsigned int>();
 	std::shared_ptr<ALSound> as = pragma::get_client_state()->GetSoundByIndex(idx);
-	if(as == NULL)
+	if(as == nullptr)
 		return;
 	switch(static_cast<ALSound::NetEvent>(ev)) {
 	case ALSound::NetEvent::Play:
@@ -735,13 +732,13 @@ CBaseEntity *NET_cl_ENT_CREATE(NetPacket &packet, bool bSpawn, bool bIgnoreMapIn
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
-		return NULL;
+		return nullptr;
 	CGame *game = client->GetGameState();
 	unsigned int factoryID = packet->Read<unsigned int>();
 	auto *factory = client_entities::ClientEntityRegistry::Instance().GetNetworkedFactory(factoryID);
 	if(factory == nullptr) {
 		Con::cwar << "Unable to create entity with factory ID '" << factoryID << "': Factory not found!" << Con::endl;
-		return NULL;
+		return nullptr;
 	}
 	unsigned int idx = packet->Read<unsigned int>();
 	unsigned int mapIdx = packet->Read<unsigned int>();
@@ -754,7 +751,7 @@ CBaseEntity *NET_cl_ENT_CREATE(NetPacket &packet, bool bSpawn, bool bIgnoreMapIn
 	else if(bIgnoreMapInit == false && game->IsMapInitialized()) {
 		Con::cwar << "Map-entity created after map initialization. Removing..." << Con::endl;
 		ent->RemoveSafely();
-		return NULL;
+		return nullptr;
 	}
 	else {
 		auto pMapComponent = ent->AddComponent<pragma::MapComponent>();
@@ -771,7 +768,7 @@ void NET_cl_ENT_REMOVE(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	ent->Remove();
 }
@@ -787,7 +784,7 @@ CBaseEntity *NET_cl_ENT_CREATE_LUA(NetPacket &packet, bool bSpawn, bool bIgnoreM
 	unsigned int idx = packet->Read<unsigned int>();
 	unsigned int mapIdx = packet->Read<unsigned int>();
 	CBaseEntity *ent = game->CreateLuaEntity(classname, idx, true);
-	if(ent == NULL) {
+	if(ent == nullptr) {
 		Con::cwar << "Attempted to create unregistered entity '" << classname << "'!" << Con::endl;
 		return nullptr;
 	}
@@ -800,7 +797,7 @@ CBaseEntity *NET_cl_ENT_CREATE_LUA(NetPacket &packet, bool bSpawn, bool bIgnoreM
 	else if(bIgnoreMapInit == false && game->IsMapInitialized()) {
 		Con::cwar << "Map-entity created after map initialization. Removing..." << Con::endl;
 		ent->RemoveSafely();
-		return NULL;
+		return nullptr;
 	}
 	else {
 		auto pMapComponent = ent->AddComponent<pragma::MapComponent>();
@@ -915,11 +912,11 @@ void NET_cl_ENT_SOUND(NetPacket packet)
 	if(!client->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	unsigned int sndID = packet->Read<unsigned int>();
 	std::shared_ptr<ALSound> snd = client->GetSoundByIndex(sndID);
-	if(snd == NULL)
+	if(snd == nullptr)
 		return;
 	CBaseEntity *cent = static_cast<CBaseEntity *>(ent);
 	auto pSoundEmitterComponent = cent->GetComponent<pragma::CSoundEmitterComponent>();
@@ -932,7 +929,7 @@ void NET_cl_ENT_SETUNLIT(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	auto pRenderComponent = ent->GetRenderComponent();
 	if(!pRenderComponent)
@@ -946,7 +943,7 @@ void NET_cl_ENT_SETCASTSHADOWS(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	auto pRenderComponent = ent->GetRenderComponent();
 	if(!pRenderComponent)
@@ -960,7 +957,7 @@ void NET_cl_ENT_SETHEALTH(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	auto pHealthComponent = ent->GetComponent<pragma::CHealthComponent>();
 	if(pHealthComponent.expired())
@@ -974,7 +971,7 @@ void NET_cl_ENT_SETNAME(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	auto pNameComponent = ent->GetComponent<pragma::CNameComponent>();
 	if(pNameComponent.expired())
@@ -988,7 +985,7 @@ void NET_cl_ENT_MODEL(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	std::string mdl = packet->ReadString();
 	CBaseEntity *cent = static_cast<CBaseEntity *>(ent);
@@ -1002,7 +999,7 @@ void NET_cl_ENT_SKIN(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	unsigned int skin = packet->Read<unsigned int>();
 	auto mdlComponent = ent->GetModelComponent();
@@ -1015,7 +1012,7 @@ void NET_cl_ENT_ANIM_PLAY(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	int anim = packet->Read<int>();
 	auto pAnimComponent = ent->GetAnimatedComponent();
@@ -1028,7 +1025,7 @@ void NET_cl_ENT_ANIM_GESTURE_PLAY(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	int slot = packet->Read<int>();
 	int animation = packet->Read<int>();
@@ -1042,7 +1039,7 @@ void NET_cl_ENT_ANIM_GESTURE_STOP(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	int slot = packet->Read<int>();
 	auto pAnimComponent = ent->GetAnimatedComponent();
@@ -1055,10 +1052,10 @@ void NET_cl_ENT_SETPARENT(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	pragma::ecs::BaseEntity *parent = nwm::read_entity(packet);
-	if(parent == NULL)
+	if(parent == nullptr)
 		return;
 	auto flags = packet->Read<FAttachmentMode>();
 	auto offset = packet->Read<Vector3>();
@@ -1078,7 +1075,7 @@ void NET_cl_ENT_SETPARENTMODE(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	auto flags = packet->Read<FAttachmentMode>();
 	auto pAttComponent = ent->GetComponent<pragma::CAttachmentComponent>();
@@ -1091,7 +1088,7 @@ void NET_cl_ENT_PHYS_INIT(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
@@ -1105,7 +1102,7 @@ void NET_cl_ENT_PHYS_DESTROY(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
@@ -1136,7 +1133,7 @@ void NET_cl_ENT_MOVETYPE(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
@@ -1150,7 +1147,7 @@ void NET_cl_PL_TOGGLE_NOCLIP(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	auto bNoclip = packet->Read<bool>();
 	auto pPhysComponent = ent->GetPhysicsComponent();
@@ -1172,7 +1169,7 @@ void NET_cl_ENT_COLLISIONTYPE(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
@@ -1186,7 +1183,7 @@ void NET_cl_ENT_EYEOFFSET(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	auto pTrComponent = ent->GetTransformComponent();
 	if(pTrComponent == nullptr)
@@ -1245,7 +1242,7 @@ void NET_cl_PL_LOCAL(NetPacket packet)
 	if(!client->IsGameActive())
 		return;
 	auto *pl = static_cast<pragma::CPlayerComponent *>(nwm::read_player(packet));
-	if(pl == NULL)
+	if(pl == nullptr)
 		return;
 	CGame *game = client->GetGameState();
 	game->SetLocalPlayer(pl);
@@ -1314,7 +1311,7 @@ void NET_cl_PLAYERINPUT(NetPacket packet)
 void NET_cl_PL_SPEED_WALK(NetPacket packet)
 {
 	auto *pl = nwm::read_entity(packet);
-	if(pl == NULL || pl->IsPlayer() == false)
+	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float speed = packet->Read<float>();
 	pl->GetPlayerComponent()->SetWalkSpeed(speed);
@@ -1323,7 +1320,7 @@ void NET_cl_PL_SPEED_WALK(NetPacket packet)
 void NET_cl_PL_SLOPELIMIT(NetPacket packet)
 {
 	auto *pl = nwm::read_entity(packet);
-	if(pl == NULL || pl->IsCharacter() == false)
+	if(pl == nullptr || pl->IsCharacter() == false)
 		return;
 	float limit = packet->Read<float>();
 	pl->GetCharacterComponent()->SetSlopeLimit(limit);
@@ -1332,7 +1329,7 @@ void NET_cl_PL_SLOPELIMIT(NetPacket packet)
 void NET_cl_PL_STEPOFFSET(NetPacket packet)
 {
 	auto *pl = nwm::read_entity(packet);
-	if(pl == NULL || pl->IsCharacter() == false)
+	if(pl == nullptr || pl->IsCharacter() == false)
 		return;
 	float offset = packet->Read<float>();
 	pl->GetCharacterComponent()->SetStepOffset(offset);
@@ -1341,7 +1338,7 @@ void NET_cl_PL_STEPOFFSET(NetPacket packet)
 void NET_cl_PL_SPEED_RUN(NetPacket packet)
 {
 	auto *pl = nwm::read_entity(packet);
-	if(pl == NULL || pl->IsPlayer() == false)
+	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float speed = packet->Read<float>();
 	pl->GetPlayerComponent()->SetRunSpeed(speed);
@@ -1350,7 +1347,7 @@ void NET_cl_PL_SPEED_RUN(NetPacket packet)
 void NET_cl_PL_SPEED_SPRINT(NetPacket packet)
 {
 	auto *pl = nwm::read_entity(packet);
-	if(pl == NULL || pl->IsPlayer() == false)
+	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float speed = packet->Read<float>();
 	pl->GetPlayerComponent()->SetSprintSpeed(speed);
@@ -1359,7 +1356,7 @@ void NET_cl_PL_SPEED_SPRINT(NetPacket packet)
 void NET_cl_PL_SPEED_CROUCH_WALK(NetPacket packet)
 {
 	auto *pl = nwm::read_entity(packet);
-	if(pl == NULL || pl->IsPlayer() == false)
+	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float speed = packet->Read<float>();
 	pl->GetPlayerComponent()->SetCrouchedWalkSpeed(speed);
@@ -1368,7 +1365,7 @@ void NET_cl_PL_SPEED_CROUCH_WALK(NetPacket packet)
 void NET_cl_PL_HEIGHT_STAND(NetPacket packet)
 {
 	auto *pl = nwm::read_entity(packet);
-	if(pl == NULL || pl->IsPlayer() == false)
+	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float height = packet->Read<float>();
 	pl->GetPlayerComponent()->SetStandHeight(height);
@@ -1377,7 +1374,7 @@ void NET_cl_PL_HEIGHT_STAND(NetPacket packet)
 void NET_cl_PL_HEIGHT_CROUCH(NetPacket packet)
 {
 	auto *pl = nwm::read_entity(packet);
-	if(pl == NULL || pl->IsPlayer() == false)
+	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float height = packet->Read<float>();
 	pl->GetPlayerComponent()->SetCrouchHeight(height);
@@ -1386,7 +1383,7 @@ void NET_cl_PL_HEIGHT_CROUCH(NetPacket packet)
 void NET_cl_PL_EYELEVEL_STAND(NetPacket packet)
 {
 	auto *pl = nwm::read_entity(packet);
-	if(pl == NULL || pl->IsPlayer() == false)
+	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float eyelevel = packet->Read<float>();
 	pl->GetPlayerComponent()->SetStandEyeLevel(eyelevel);
@@ -1395,7 +1392,7 @@ void NET_cl_PL_EYELEVEL_STAND(NetPacket packet)
 void NET_cl_PL_EYELEVEL_CROUCH(NetPacket packet)
 {
 	auto *pl = nwm::read_entity(packet);
-	if(pl == NULL || pl->IsPlayer() == false)
+	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float eyelevel = packet->Read<float>();
 	pl->GetPlayerComponent()->SetCrouchEyeLevel(eyelevel);
@@ -1404,7 +1401,7 @@ void NET_cl_PL_EYELEVEL_CROUCH(NetPacket packet)
 void NET_cl_PL_UPDIRECTION(NetPacket packet)
 {
 	auto *pl = nwm::read_entity(packet);
-	if(pl == NULL || pl->IsCharacter() == false)
+	if(pl == nullptr || pl->IsCharacter() == false)
 		return;
 	Vector3 direction = nwm::read_vector(packet);
 	auto charC = pl->GetCharacterComponent();
@@ -1429,12 +1426,12 @@ void NET_cl_PL_CHANGEDNAME(NetPacket packet)
 void NET_cl_WEP_DEPLOY(NetPacket packet)
 {
 	auto *wep = nwm::read_entity(packet);
-	if(wep == NULL || wep->IsWeapon() == false)
+	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	auto wepComponent = wep->GetWeaponComponent();
 	auto whOwnerComponent = wep->GetComponent<pragma::COwnableComponent>();
 	pragma::ecs::BaseEntity *owner = whOwnerComponent.valid() ? whOwnerComponent->GetOwner() : nullptr;
-	if(owner != NULL && owner->IsCharacter())
+	if(owner != nullptr && owner->IsCharacter())
 		owner->GetCharacterComponent()->SetActiveWeapon(wep);
 	wepComponent->Deploy();
 }
@@ -1442,20 +1439,20 @@ void NET_cl_WEP_DEPLOY(NetPacket packet)
 void NET_cl_WEP_HOLSTER(NetPacket packet)
 {
 	auto *wep = nwm::read_entity(packet);
-	if(wep == NULL || wep->IsWeapon() == false)
+	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	auto wepComponent = wep->GetWeaponComponent();
 	auto whOwnerComponent = wep->GetComponent<pragma::COwnableComponent>();
 	pragma::ecs::BaseEntity *owner = whOwnerComponent.valid() ? whOwnerComponent->GetOwner() : nullptr;
-	if(owner != NULL && owner->IsCharacter())
-		owner->GetCharacterComponent()->SetActiveWeapon(NULL);
+	if(owner != nullptr && owner->IsCharacter())
+		owner->GetCharacterComponent()->SetActiveWeapon(nullptr);
 	wepComponent->Holster();
 }
 
 void NET_cl_WEP_PRIMARYATTACK(NetPacket packet)
 {
 	auto *wep = nwm::read_entity(packet);
-	if(wep == NULL || wep->IsWeapon() == false)
+	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	wep->GetWeaponComponent()->PrimaryAttack();
 }
@@ -1463,7 +1460,7 @@ void NET_cl_WEP_PRIMARYATTACK(NetPacket packet)
 void NET_cl_WEP_SECONDARYATTACK(NetPacket packet)
 {
 	auto *wep = nwm::read_entity(packet);
-	if(wep == NULL || wep->IsWeapon() == false)
+	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	wep->GetWeaponComponent()->SecondaryAttack();
 }
@@ -1487,7 +1484,7 @@ void NET_cl_WEP_ATTACK4(NetPacket packet)
 void NET_cl_WEP_RELOAD(NetPacket packet)
 {
 	auto *wep = nwm::read_entity(packet);
-	if(wep == NULL || wep->IsWeapon() == false)
+	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	wep->GetWeaponComponent()->Reload();
 }
@@ -1578,7 +1575,7 @@ void NET_cl_ENVLIGHT_SETSTATE(NetPacket packet)
 {
 	auto *light = nwm::read_entity(packet);
 	auto *pToggleComponent = (light != nullptr) ? static_cast<pragma::BaseToggleComponent *>(light->FindComponent("toggle").get()) : nullptr;
-	if(pToggleComponent == NULL)
+	if(pToggleComponent == nullptr)
 		return;
 	bool b = packet->Read<bool>();
 	if(b)
@@ -1591,7 +1588,7 @@ void NET_cl_ENVEXPLOSION_EXPLODE(NetPacket packet)
 {
 	auto *exp = nwm::read_entity(packet);
 	auto *pExplosionComponent = (exp != nullptr) ? static_cast<pragma::CExplosionComponent *>(exp->FindComponent("explosion").get()) : nullptr;
-	if(pExplosionComponent == NULL)
+	if(pExplosionComponent == nullptr)
 		return;
 	pExplosionComponent->Explode();
 }
@@ -1599,11 +1596,11 @@ void NET_cl_ENVEXPLOSION_EXPLODE(NetPacket packet)
 void NET_cl_ENT_TOGGLE(NetPacket packet)
 {
 	auto *ent = nwm::read_entity(packet);
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	bool bOn = packet->Read<bool>();
 	auto *pToggleComponent = static_cast<pragma::BaseToggleComponent *>(ent->FindComponent("toggle").get());
-	if(pToggleComponent == NULL)
+	if(pToggleComponent == nullptr)
 		return;
 	if(bOn == true)
 		pToggleComponent->TurnOn();
@@ -1614,7 +1611,7 @@ void NET_cl_ENT_TOGGLE(NetPacket packet)
 void NET_cl_ENT_SETCOLLISIONFILTER(NetPacket packet)
 {
 	auto *ent = nwm::read_entity(packet);
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
@@ -1627,7 +1624,7 @@ void NET_cl_ENT_SETCOLLISIONFILTER(NetPacket packet)
 void NET_cl_ENT_SETKINEMATIC(NetPacket packet)
 {
 	auto *ent = nwm::read_entity(packet);
-	if(ent == NULL)
+	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
@@ -1640,7 +1637,7 @@ void NET_cl_ENV_FOGCON_SETSTARTDIST(NetPacket packet)
 {
 	auto *fog = nwm::read_entity(packet);
 	auto *pFogComponent = (fog != nullptr) ? static_cast<pragma::BaseEnvFogControllerComponent *>(fog->FindComponent("fog_controller").get()) : nullptr;
-	if(pFogComponent == NULL)
+	if(pFogComponent == nullptr)
 		return;
 	pFogComponent->SetFogStart(packet->Read<float>());
 }
@@ -1649,7 +1646,7 @@ void NET_cl_ENV_FOGCON_SETENDDIST(NetPacket packet)
 {
 	auto *fog = nwm::read_entity(packet);
 	auto *pFogComponent = (fog != nullptr) ? static_cast<pragma::BaseEnvFogControllerComponent *>(fog->FindComponent("fog_controller").get()) : nullptr;
-	if(pFogComponent == NULL)
+	if(pFogComponent == nullptr)
 		return;
 	pFogComponent->SetFogEnd(packet->Read<float>());
 }
@@ -1658,7 +1655,7 @@ void NET_cl_ENV_FOGCON_SETMAXDENSITY(NetPacket packet)
 {
 	auto *fog = nwm::read_entity(packet);
 	auto *pFogComponent = (fog != nullptr) ? static_cast<pragma::BaseEnvFogControllerComponent *>(fog->FindComponent("fog_controller").get()) : nullptr;
-	if(pFogComponent == NULL)
+	if(pFogComponent == nullptr)
 		return;
 	pFogComponent->SetMaxDensity(packet->Read<float>());
 }

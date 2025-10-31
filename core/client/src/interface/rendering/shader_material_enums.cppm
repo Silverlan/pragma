@@ -37,7 +37,11 @@ export namespace pragma::rendering::shader_material {
 		Last = User,
 	};
 	constexpr uint32_t MAX_NUMBER_OF_SRGB_TEXTURES = 4;
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::rendering::shader_material::MaterialFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::rendering::shader_material::MaterialFlags> : std::true_type {};
+	}
 };

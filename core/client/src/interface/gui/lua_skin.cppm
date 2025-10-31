@@ -9,7 +9,8 @@ module;
 
 export module pragma.client:gui.lua_skin;
 
-import pragma.gui;
+export import luabind;
+export import pragma.gui;
 
 export {
 	struct DLLCLIENT WISkinClass {

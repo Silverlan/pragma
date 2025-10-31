@@ -57,8 +57,12 @@ export namespace pragma {
 		virtual void InitializeShaderResources() override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 	};
+	using namespace umath::scoped_enum::bitwise;
 };
 
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderPPDoF::Flags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::ShaderPPDoF::Flags> : std::true_type {};
+	}
 };

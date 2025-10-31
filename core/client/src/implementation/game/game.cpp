@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/util.hpp"
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/console/helper.hpp"
-#include "mathutil/color.h"
 
 
 
@@ -14,19 +12,8 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 #include "stdafx_client.h"
-#include "cmaterialmanager.h"
 //#include "shader_screen.h" // prosper TODO
-#include <texturemanager/texturemanager.h>
-#include "textureinfo.h"
-#include <alsound_effect.hpp>
-#include <alsoundsystem.hpp>
-#include <prosper_command_buffer.hpp>
-#include <prosper_util.hpp>
-#include <image/prosper_sampler.hpp>
-#include <shader/prosper_pipeline_loader.hpp>
-#include <prosper_window.hpp>
 
 module pragma.client;
 
@@ -45,7 +32,7 @@ import :particle_system;
 import :physics;
 import :scripting.lua;
 
-DLLCLIENT pragma::physics::IEnvironment *c_physEnv = NULL;
+DLLCLIENT pragma::physics::IEnvironment *c_physEnv = nullptr;
 
 CGame::MessagePacketTracker::MessagePacketTracker() : lastInMessageId(0), outMessageId(0) { std::fill(messageTimestamps.begin(), messageTimestamps.end(), 0); }
 
@@ -91,8 +78,8 @@ CGame *pragma::get_client_game() { return g_game; }
 CGame *pragma::get_cgame() { return g_game; }
 
 CGame::CGame(NetworkState *state)
-    : pragma::Game(state), m_tServer(0), m_renderScene(util::TWeakSharedHandle<pragma::BaseEntityComponent> {}), m_matOverride(NULL), m_colScale(1, 1, 1, 1),
-      //m_shaderOverride(NULL), // prosper TODO
+    : pragma::Game(state), m_tServer(0), m_renderScene(util::TWeakSharedHandle<pragma::BaseEntityComponent> {}), m_matOverride(nullptr), m_colScale(1, 1, 1, 1),
+      //m_shaderOverride(nullptr), // prosper TODO
       m_matLoad(), m_scene(nullptr),
       /*m_dummyVertexBuffer(nullptr),*/ m_tLastClientUpdate(0.0), // prosper TODO
       m_snapshotTracker {}, m_userInputTracker {}, m_viewFov {util::FloatProperty::Create(pragma::BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV)}, m_luaInputBindingLayerRegister {std::make_unique<pragma::LuaInputBindingLayerRegister>()}
@@ -499,7 +486,7 @@ template<typename TCPPM>
 TCPPM *CGame::GetViewModel()
 {
 	if(m_viewModel.expired())
-		return NULL;
+		return nullptr;
 	return static_cast<TCPPM*>(m_viewModel.get());
 }
 template pragma::CViewModelComponent* CGame::GetViewModel<pragma::CViewModelComponent>();
@@ -508,7 +495,7 @@ template<typename TCPPM>
 TCPPM *CGame::GetViewBody()
 {
 	if(m_viewBody.expired())
-		return NULL;
+		return nullptr;
 	return static_cast<TCPPM*>(m_viewBody.get());
 }
 template pragma::CViewBodyComponent* CGame::GetViewBody<pragma::CViewBodyComponent>();
@@ -521,7 +508,7 @@ static void shader_handler(msys::Material *mat)
 	auto whShader = shaderManager.GetShader(mat->GetShaderIdentifier());
 	if(whShader.expired())
 		return;
-	auto &cmat = *static_cast<CMaterial *>(mat);
+	auto &cmat = *static_cast<msys::CMaterial *>(mat);
 	// Clear descriptor set in case the shader has changed; The new shader will re-create it appropriately
 	cmat.SetDescriptorSetGroup(*whShader.get(), nullptr);
 
@@ -538,7 +525,7 @@ static void shader_handler(msys::Material *mat)
 		prepass->InitializeMaterialDescriptorSet(cmat, false); // TODO: Only if this is a material with masked transparency?
 }
 
-void CGame::ReloadMaterialShader(CMaterial *mat)
+void CGame::ReloadMaterialShader(msys::CMaterial *mat)
 {
 	auto *shader = static_cast<pragma::ShaderTexturedBase *>(mat->GetUserData());
 	if(shader == nullptr)
@@ -911,8 +898,8 @@ void CGame::CreateGiblet(const GibletCreateInfo &info) { CreateGiblet<pragma::ec
 WIBase *CGame::CreateGUIElement(std::string name, WIHandle *hParent)
 {
 	ustring::to_lower(name);
-	WIBase *pParent = NULL;
-	if(hParent != NULL && hParent->IsValid())
+	WIBase *pParent = nullptr;
+	if(hParent != nullptr && hParent->IsValid())
 		pParent = hParent->get();
 	return CreateGUIElement(name, pParent);
 }
@@ -1188,7 +1175,7 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 		auto sampler = pragma::get_cengine()->GetRenderContext().CreateSampler(samplerCreateInfo);
 		texture->GetVkTexture()->SetSampler(*sampler);
 
-		auto &tex = *static_cast<Texture *>(texture.get());
+		auto &tex = *static_cast<msys::Texture *>(texture.get());
 		auto lightmapAtlas = tex.GetVkTexture();
 		//auto lightmapAtlas = pragma::CLightMapComponent::CreateLightmapTexture(img->GetWidth(),img->GetHeight(),static_cast<uint16_t*>(img->GetData()));
 		auto *scene = GetScene<pragma::CSceneComponent>();
@@ -1341,7 +1328,7 @@ const std::string *CGame::FindRenderMaskName(pragma::rendering::RenderMask mask)
 void CGame::SendUserInput()
 {
 	auto *pl = GetLocalPlayer();
-	if(pl == NULL)
+	if(pl == nullptr)
 		return;
 	m_userInputTracker.messageTimestamps[m_userInputTracker.outMessageId] = RealTime();
 
@@ -1418,7 +1405,7 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 		Vector3 angVel = nwm::read_vector(packet);
 		auto orientation = nwm::read_quat(packet);
 		auto entDataSize = packet->Read<UInt8>();
-		if(ent != NULL) {
+		if(ent != nullptr) {
 			pos += vel * tDelta;
 			if(uvec::length_sqr(angVel) > 0.0)
 				orientation = uquat::create(EulerAngles(umath::rad_to_deg(angVel.x), umath::rad_to_deg(angVel.y), umath::rad_to_deg(angVel.z)) * tDelta) * orientation; // TODO: Check if this is correct
@@ -1461,10 +1448,10 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 		auto flags = packet->Read<pragma::SnapshotFlags>();
 		if((flags & pragma::SnapshotFlags::PhysicsData) != pragma::SnapshotFlags::None) {
 			auto numObjs = packet->Read<uint8_t>();
-			if(ent != NULL) {
+			if(ent != nullptr) {
 				auto pPhysComponent = ent->GetPhysicsComponent();
 				pragma::physics::PhysObj *physObj = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
-				if(physObj != NULL && !physObj->IsStatic()) {
+				if(physObj != nullptr && !physObj->IsStatic()) {
 					auto colObjs = physObj->GetCollisionObjects();
 					auto numActualObjs = colObjs.size();
 					for(auto i = decltype(numObjs) {0}; i < numObjs; ++i) {
@@ -1562,7 +1549,7 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 				std::cout<<"Orientation Update: ("<<orientation.w<<","<<orientation.x<<","<<orientation.y<<","<<orientation.z<<")"<<std::endl;
 			}
 		}*/
-		if(plComponent != NULL && pl->IsCharacter()) {
+		if(plComponent != nullptr && pl->IsCharacter()) {
 			auto charComponent = pl->GetCharacterComponent();
 			charComponent->SetViewOrientation(orientation);
 		}
@@ -1598,7 +1585,7 @@ void CGame::SetActionInput(pragma::Action action, bool b, float magnitude) { set
 bool CGame::GetActionInput(pragma::Action action)
 {
 	auto *pl = GetLocalPlayer();
-	if(pl == NULL)
+	if(pl == nullptr)
 		return false;
 	auto *actionInputC = pl->GetActionInputController();
 	if(!actionInputC)

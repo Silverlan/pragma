@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/lua_error_handling.hpp"
 
 
 
@@ -12,7 +11,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-#include "mathutil/color.h"
 
 
 
@@ -21,24 +19,8 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_cengine.h"
-#include "cmaterialmanager.h"
-#include <texturemanager/texturemanager.h>
-#include <cmaterialmanager.h>
-#include <prosper_util.hpp>
-#include <shader/prosper_pipeline_loader.hpp>
-#include <image/prosper_render_target.hpp>
-#include <debug/prosper_debug.hpp>
-#include <prosper_command_buffer.hpp>
-#include <prosper_swap_command_buffer.hpp>
-#include <queries/prosper_query_pool.hpp>
-#include <queries/prosper_timer_query.hpp>
-#include <prosper_window.hpp>
-#include <prosper_util.hpp>
-#include <buffers/prosper_buffer.hpp>
-#include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #ifdef _WIN32
 
 #include <dwmapi.h>
@@ -1023,7 +1005,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 	auto &gui = WGUI::Open(GetRenderContext(), matManager);
 	RegisterUiElementTypes();
 	gui.SetMaterialLoadHandler([this](const std::string &path) -> msys::Material * { return GetClientState()->LoadMaterial(path); });
-	auto *fontData = fontSet.FindFontFileCandidate(FontSetFlag::Sans | FontSetFlag::Bold);
+	auto *fontData = fontSet.FindFontFileCandidate(pragma::FontSetFlag::Sans | pragma::FontSetFlag::Bold);
 	if(!fontData) {
 		spdlog::error("Failed to determine default font for font set '{}'!", defaultFontSet);
 		fail();
@@ -1114,13 +1096,13 @@ bool CEngine::Initialize(int argc, char *argv[])
 #ifdef _WIN32
 	if(GetRenderContext().IsValidationEnabled()) {
 		if(util::is_process_running("bdcam.exe")) {
-			auto r = MessageBox(NULL, "Bandicam is running and vulkan validation mode is enabled. This is NOT recommended, as Bandicam will cause misleading validation errors! Press OK to continue anyway.", "Validation Warning", MB_OK | MB_OKCANCEL);
+			auto r = MessageBox(nullptr, "Bandicam is running and vulkan validation mode is enabled. This is NOT recommended, as Bandicam will cause misleading validation errors! Press OK to continue anyway.", "Validation Warning", MB_OK | MB_OKCANCEL);
 			if(r == IDCANCEL)
 				ShutDown();
 		}
 	}
 	else if(util::is_process_running("bdcam.exe")) {
-		auto r = MessageBox(NULL, "Detected Bandicam running in the background, this can cause crashes and/or freezing! Please close Bandicam and restart Pragma. You can restart Bandicam after Pragma has been started, but it mustn't be running before then.", "Bandicam Warning",
+		auto r = MessageBox(nullptr, "Detected Bandicam running in the background, this can cause crashes and/or freezing! Please close Bandicam and restart Pragma. You can restart Bandicam after Pragma has been started, but it mustn't be running before then.", "Bandicam Warning",
 		  MB_OK | MB_OKCANCEL);
 		if(r == IDCANCEL)
 			ShutDown();
@@ -1647,7 +1629,7 @@ void CEngine::HandleLocalHostPlayerClientPacket(NetPacket &p)
 void CEngine::Connect(const std::string &ip, const std::string &port)
 {
 	auto *cl = static_cast<ClientState *>(GetClientState());
-	if(cl == NULL)
+	if(cl == nullptr)
 		return;
 	cl->Disconnect();
 	if(ip != "localhost")
@@ -1666,7 +1648,7 @@ void CEngine::Connect(const std::string &ip, const std::string &port)
 void CEngine::Connect(uint64_t steamId)
 {
 	auto *cl = static_cast<ClientState *>(GetClientState());
-	if(cl == NULL)
+	if(cl == nullptr)
 		return;
 	cl->Disconnect();
 	pragma::get_cengine()->CloseServerState();
@@ -1736,8 +1718,8 @@ bool CEngine::IsProgramInFocus() const
 NetworkState *CEngine::GetNetworkState(lua_State *l)
 {
 	auto *cl = static_cast<ClientState *>(GetClientState());
-	if(cl == NULL)
-		return NULL;
+	if(cl == nullptr)
+		return nullptr;
 	if(cl->GetLuaState() == l || cl->GetGUILuaState() == l)
 		return cl;
 	return pragma::Engine::GetNetworkState(l);
@@ -2039,7 +2021,7 @@ void CEngine::Think()
 	pragma::Engine::Think();
 
 	auto *cl = GetClientState();
-	if(cl != NULL)
+	if(cl != nullptr)
 		cl->Think(); // Draw?
 
 	StartProfilingStage("DrawFrame");
@@ -2114,13 +2096,13 @@ void CEngine::Tick()
 	// This is to avoid issues in singleplayer, where the client would use data it received from the server and apply the same calculations on the already modified data.
 	StartProfilingStage("ClientTick");
 	auto *cl = GetClientState();
-	if(cl != NULL)
+	if(cl != nullptr)
 		cl->Tick();
 	StopProfilingStage(); // ClientTick
 
 	pragma::Engine::StartProfilingStage("ServerTick");
 	auto *sv = GetServerNetworkState();
-	if(sv != NULL)
+	if(sv != nullptr)
 		sv->Tick();
 	pragma::Engine::StopProfilingStage(); // ServerTick
 	pragma::Engine::StopProfilingStage(); // Tick
@@ -2174,7 +2156,7 @@ uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 				else {
 					auto &cache = texManager.GetCache();
 
-					std::unordered_map<Texture *, std::string> oldCache;
+					std::unordered_map<msys::Texture *, std::string> oldCache;
 					for(auto &pair : cache) {
 						auto asset = texManager.GetAsset(pair.second);
 						if(!asset)
@@ -2185,7 +2167,7 @@ uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 
 					n += texManager.ClearUnused();
 
-					std::unordered_map<Texture *, std::string> newCache;
+					std::unordered_map<msys::Texture *, std::string> newCache;
 					for(auto &pair : cache) {
 						auto asset = texManager.GetAsset(pair.second);
 						if(!asset)

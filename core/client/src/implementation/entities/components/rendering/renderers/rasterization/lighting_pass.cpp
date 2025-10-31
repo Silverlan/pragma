@@ -3,13 +3,7 @@
 
 module;
 
-#include "mathutil/umath.h"
 
-#include <image/prosper_render_target.hpp>
-#include <image/prosper_msaa_texture.hpp>
-#include <prosper_util.hpp>
-#include <prosper_command_buffer.hpp>
-#include <prosper_swap_command_buffer.hpp>
 #if DEBUG_RENDER_PERFORMANCE_TEST_ENABLED == 1
 #endif
 

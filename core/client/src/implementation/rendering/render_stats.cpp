@@ -2,11 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <queries/prosper_query_pool.hpp>
-#include <queries/prosper_timer_query.hpp>
 
 module pragma.client;
 

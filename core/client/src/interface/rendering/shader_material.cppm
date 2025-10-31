@@ -29,7 +29,7 @@ export namespace pragma::rendering::shader_material {
 		static std::string GetTextureUniformVariableName(const std::string &texIdentifier);
 
 		ShaderMaterial(const pragma::GString &name);
-		std::vector<Texture> textures;
+		std::vector<msys::Texture> textures;
 
 		Texture *FindTexture(const char *key)
 		{
@@ -57,7 +57,4 @@ export namespace pragma::rendering::shader_material {
 	};
 	DLLCLIENT ShaderMaterialCache &get_cache();
 	DLLCLIENT void clear_cache();
-};
-export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::rendering::shader_material::MaterialFlags)
 };

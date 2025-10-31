@@ -3,13 +3,8 @@
 
 module;
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <prosper_command_buffer.hpp>
-#include "prosper_enums.hpp"
-#include "prosper_util.hpp"
-#include "buffers/prosper_buffer_create_info.hpp"
 
 module pragma.client;
 

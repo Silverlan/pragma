@@ -3,18 +3,13 @@
 
 module;
 
-#include "mathutil/umath_geometry.hpp"
 
 
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <image/prosper_render_target.hpp>
-#include <buffers/prosper_buffer.hpp>
-#include <prosper_command_buffer.hpp>
 
 module pragma.client;
 
@@ -194,7 +189,7 @@ WaterScene::~WaterScene()
 		hComponentCreationCallback.Remove();
 }
 
-CMaterial *CLiquidSurfaceComponent::GetWaterMaterial() const
+msys::CMaterial *CLiquidSurfaceComponent::GetWaterMaterial() const
 {
 	if(m_surfaceComponent.expired())
 		return nullptr;
@@ -207,7 +202,7 @@ CMaterial *CLiquidSurfaceComponent::GetWaterMaterial() const
 		return nullptr;
 	auto matIdx = mdl->GetMaterialIndex(*mesh);
 	auto &mats = mdl->GetMaterials();
-	return (matIdx.has_value() && matIdx < mats.size()) ? static_cast<CMaterial *>(mats.at(*matIdx).get()) : nullptr;
+	return (matIdx.has_value() && matIdx < mats.size()) ? static_cast<msys::CMaterial *>(mats.at(*matIdx).get()) : nullptr;
 }
 
 void CLiquidSurfaceComponent::ClearWaterScene() { m_waterScene = nullptr; }

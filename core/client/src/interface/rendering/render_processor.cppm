@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "prosper_command_buffer.hpp"
-#include <mathutil/uvec.h>
 
 export module pragma.client:rendering.render_processor;
 
@@ -32,7 +30,7 @@ export namespace pragma::rendering {
 		ShaderProcessor(prosper::ICommandBuffer &cmdBuffer, PassType passType) : m_cmdBuffer {cmdBuffer}, m_passType {passType} {}
 		bool RecordBindShader(const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, bool view, ShaderGameWorld::SceneFlags sceneFlags, pragma::ShaderGameWorld &shader, uint32_t pipelineIdx = 0u);
 		bool RecordBindEntity(CBaseEntity &ent);
-		bool RecordBindMaterial(CMaterial &mat);
+		bool RecordBindMaterial(msys::CMaterial &mat);
 		bool RecordBindLight(CLightComponent &light, uint32_t layerId);
 		bool RecordDraw(CModelSubMesh &mesh, pragma::RenderMeshIndex meshIdx, const pragma::rendering::RenderQueue::InstanceSet *instanceSet = nullptr);
 
@@ -97,7 +95,7 @@ export namespace pragma::rendering {
 		void SetDrawOrigin(const Vector4 &drawOrigin);
 		bool BindShader(prosper::PipelineID pipelineId);
 		virtual bool BindShader(prosper::Shader &shader, uint32_t pipelineIdx = 0u);
-		bool BindMaterial(CMaterial &mat);
+		bool BindMaterial(msys::CMaterial &mat);
 		virtual bool BindEntity(CBaseEntity &ent);
 		void SetDepthBias(float d, float delta);
 		bool Render(CModelSubMesh &mesh, pragma::RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet = nullptr);
@@ -120,7 +118,7 @@ export namespace pragma::rendering {
 		prosper::Shader *m_curShader = nullptr;
 		prosper::PipelineID m_curPipeline = std::numeric_limits<prosper::PipelineID>::max();
 		pragma::ShaderGameWorld *m_shaderScene = nullptr;
-		CMaterial *m_curMaterial = nullptr;
+		msys::CMaterial *m_curMaterial = nullptr;
 		CBaseEntity *m_curEntity = nullptr;
 		pragma::CRenderComponent *m_curRenderC = nullptr;
 		std::vector<std::shared_ptr<pragma::ModelSubMesh>> *m_curEntityMeshList = nullptr;
@@ -154,7 +152,11 @@ export namespace pragma::rendering {
 		using pragma::rendering::BaseRenderProcessor::BaseRenderProcessor;
 		uint32_t Render(const pragma::rendering::RenderQueue &renderQueue, RenderPassStats *optStats = nullptr, std::optional<uint32_t> worldRenderQueueIndex = {});
 	};
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::rendering::BaseRenderProcessor::StateFlags);
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::rendering::BaseRenderProcessor::StateFlags> : std::true_type {};
+	}
 };

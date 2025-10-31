@@ -15,7 +15,7 @@ export namespace pragma {
 	namespace rendering {
 		struct RenderBufferData;
 	};
-	struct HitInfo;
+	
 	class DLLCLIENT CBvhComponent final : public BaseBvhComponent {
 	  public:
 		static bool ShouldConsiderMesh(const pragma::ModelSubMesh &mesh, const rendering::RenderBufferData &bufferData);

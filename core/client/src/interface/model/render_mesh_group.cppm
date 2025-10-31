@@ -6,6 +6,8 @@ module;
 
 export module pragma.client:model.render_mesh_group;
 
+export import std.compat;
+
 export namespace pragma {
 	using RenderMeshIndex = uint32_t;
 	using RenderMeshGroup = std::pair<RenderMeshIndex, RenderMeshIndex>; // Start index +count

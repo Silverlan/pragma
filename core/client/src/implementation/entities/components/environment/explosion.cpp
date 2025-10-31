@@ -36,13 +36,13 @@ void CExplosionComponent::Explode()
 #pragma message("TODO: Leave a scorch mark!")
 	auto &ent = GetEntity();
 	auto *particle = pragma::ecs::CParticleSystemComponent::Create("explosion");
-	if(particle != NULL) {
+	if(particle != nullptr) {
 		auto pTrComponent = ent.GetTransformComponent();
 		auto pTrComponentPt = particle->GetEntity().GetTransformComponent();
 		if(pTrComponent != nullptr && pTrComponentPt)
 			pTrComponentPt->SetPosition(pTrComponent->GetPosition());
 		particle->SetRemoveOnComplete(true);
-		if(particle != NULL)
+		if(particle != nullptr)
 			particle->Start();
 	}
 	auto pSoundEmitterComponent = ent.GetComponent<pragma::CSoundEmitterComponent>();

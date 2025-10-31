@@ -6,7 +6,6 @@ module;
 
 #include "pragma/logging.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_cengine.h"
 
@@ -22,7 +21,7 @@ void CEngine::SaveClientConfig()
 	FileManager::CreatePath("cfg");
 	std::string path = "cfg\\client.cfg";
 	auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(), "w");
-	if(f == NULL) {
+	if(f == nullptr) {
 		spdlog::warn("Unable to save client.cfg");
 		return;
 	}
@@ -57,7 +56,7 @@ void CEngine::WriteClientConfig(VFilePtrReal f)
 	}
 	auto *stateSv = GetServerNetworkState();
 	auto *stateCl = GetClientState();
-	if(stateCl != NULL) {
+	if(stateCl != nullptr) {
 		auto &cvars = stateCl->GetConVars();
 
 		auto &cfg = GetConVarConfig(NwStateType::Client);
@@ -65,7 +64,7 @@ void CEngine::WriteClientConfig(VFilePtrReal f)
 			RestoreConVarsForUnknownCommands(f, *cfg, cvars);
 
 		for(auto &pair : cvars) {
-			if(stateSv == NULL || stateSv->GetConVar(pair.first) == NULL) {
+			if(stateSv == nullptr || stateSv->GetConVar(pair.first) == nullptr) {
 				auto &cf = pair.second;
 				if(cf->GetType() == ConType::Var) {
 					auto *cv = static_cast<ConVar *>(cf.get());

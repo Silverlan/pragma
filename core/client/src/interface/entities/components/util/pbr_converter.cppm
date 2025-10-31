@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "image/prosper_texture.hpp"
 #include "pragma/lua/core.hpp"
 
 
@@ -13,7 +12,8 @@ module;
 
 export module pragma.client:entities.components.util_pbr_converter;
 
-import :entities.base_entity;
+export import :entities.base_entity;
+export import pragma.cmaterialsystem;
 
 export namespace pragma {
 	namespace rendering::cycles {
@@ -42,7 +42,7 @@ export namespace pragma {
 		void GenerateAmbientOcclusionMaps(pragma::Model &mdl, uint32_t w = 512, uint32_t h = 512, uint32_t samples = 512, bool rebuild = false);
 		void GenerateAmbientOcclusionMaps(pragma::ecs::BaseEntity &ent, uint32_t w = 512, uint32_t h = 512, uint32_t samples = 512, bool rebuild = false);
 
-		bool ConvertToPBR(CMaterial &matTraditional);
+		bool ConvertToPBR(msys::CMaterial &matTraditional);
 		void PollEvents();
 	  private:
 		struct AmbientOcclusionInfo {
@@ -62,16 +62,16 @@ export namespace pragma {
 		};
 		void ConvertMaterialsToPBR(pragma::Model &mdl);
 		void UpdateMetalness(pragma::Model &mdl);
-		void UpdateMetalness(pragma::Model &mdl, CMaterial &mat);
+		void UpdateMetalness(pragma::Model &mdl, msys::CMaterial &mat);
 		void UpdateAmbientOcclusion(pragma::Model &mdl, const AmbientOcclusionInfo &aoInfo = {}, pragma::ecs::BaseEntity *optEnt = nullptr);
 		void UpdateModel(pragma::Model &mdl, ModelUpdateInfo &updateInfo, pragma::ecs::BaseEntity *optEnt = nullptr);
-		void ApplyMiscMaterialProperties(CMaterial &mat, const SurfaceMaterial &surfMat, const std::string &surfMatName);
+		void ApplyMiscMaterialProperties(msys::CMaterial &mat, const SurfaceMaterial &surfMat, const std::string &surfMatName);
 		void ScheduleModelUpdate(pragma::Model &mdl, bool updateMetalness, std::optional<AmbientOcclusionInfo> updateAOInfo = {}, pragma::ecs::BaseEntity *optEnt = nullptr);
 
 		void ProcessQueue();
-		void WriteAOMap(pragma::Model &mdl, CMaterial &mat, uimg::ImageBuffer &imgBuffer, uint32_t w, uint32_t h) const;
-		bool ShouldConvertMaterial(CMaterial &mat) const;
-		bool IsPBR(CMaterial &mat) const;
+		void WriteAOMap(pragma::Model &mdl, msys::CMaterial &mat, uimg::ImageBuffer &imgBuffer, uint32_t w, uint32_t h) const;
+		bool ShouldConvertMaterial(msys::CMaterial &mat) const;
+		bool IsPBR(msys::CMaterial &mat) const;
 		std::shared_ptr<prosper::Texture> ConvertSpecularMapToRoughness(prosper::Texture &specularMap);
 
 		std::queue<PBRAOBakeJob> m_workQueue = {};

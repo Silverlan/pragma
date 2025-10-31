@@ -3,17 +3,11 @@
 
 module;
 
-#include "mathutil/transform.hpp"
 
 #include "pragma/lua/core.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <prosper_command_buffer.hpp>
-#include <prosper_render_pass.hpp>
-#include <prosper_descriptor_set_group.hpp>
-#include <image/prosper_render_target.hpp>
 
 module pragma.client;
 

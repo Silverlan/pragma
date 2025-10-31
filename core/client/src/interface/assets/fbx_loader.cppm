@@ -4,9 +4,6 @@
 module;
 
 #include <ofbx.h>
-#include <mathutil/vertex.hpp>
-#include "mathutil/umath.h"
-#include "mathutil/transform.hpp"
 
 
 

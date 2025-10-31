@@ -10,7 +10,8 @@ module;
 
 export module pragma.client:gui.lua_interface;
 
-import pragma.gui;
+export import luabind;
+export import pragma.gui;
 
 export class DLLCLIENT WGUILuaInterface {
   private:

@@ -3,14 +3,10 @@
 
 module;
 
-#include "mathutil/transform.hpp"
 
 
 
-#include <mathutil/umath.h>
-#include <glm/gtx/euler_angles.hpp>
 #include <ofbx.h>
-#include <texturemanager/texture_manager2.hpp>
 
 module pragma.client;
 
@@ -193,7 +189,7 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 	relMatPath.MakeRelative(util::CONVERT_PATH);
 	relMatPath.MakeRelative(std::string {pragma::asset::get_asset_root_directory(pragma::asset::Type::Material)});
 	auto mat = pragma::get_client_state()->CreateMaterial(relMatPath.GetString(), "pbr");
-	auto *cmat = static_cast<CMaterial *>(mat.get());
+	auto *cmat = static_cast<msys::CMaterial *>(mat.get());
 
 	auto importAndAssignTexture = [&importTexture, cmat](ofbx::Texture::TextureType etex, const std::string &matIdentifier) -> std::optional<std::string> {
 		auto texPath = importTexture(etex);

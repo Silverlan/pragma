@@ -6,6 +6,8 @@ module;
 
 export module pragma.client:debug.enums;
 
+export import std.compat;
+
 export namespace pragma {
 	enum class SceneDebugMode : uint32_t {
 		None = 0,

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <buffers/prosper_dynamic_resizable_buffer.hpp>
 
 export module pragma.client:rendering.entity_instance_index_buffer;
 

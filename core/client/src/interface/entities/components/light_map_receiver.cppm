@@ -55,7 +55,11 @@ export namespace pragma {
 		std::string m_modelName; // Uvs are only valid for the model they were built with
 		StateFlags m_stateFlags = StateFlags::RenderMeshBufferIndexTableDirty;
 	};
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::CLightMapReceiverComponent::StateFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::CLightMapReceiverComponent::StateFlags> : std::true_type {};
+	}
 };

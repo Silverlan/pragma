@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "image/prosper_render_target.hpp"
-#include "prosper_command_buffer.hpp"
-#include "prosper_descriptor_set_group.hpp"
 #include "pragma/lua/core.hpp"
 
 
@@ -111,9 +108,13 @@ export namespace pragma {
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroup = nullptr;
 		util::WeakHandle<prosper::Shader> m_whShadowShader = {};
 	};
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShadowRenderer::RenderResultFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::ShadowRenderer::RenderResultFlags> : std::true_type {};
+	}
 };
 
 export class DLLCLIENT CShadowManager : public CBaseEntity {

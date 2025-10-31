@@ -2,23 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/lua_call.hpp"
 
 
 
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include "alsound_types.hpp"
-#include <mathutil/glmutil.h>
-#include "cmaterialmanager.h"
-#include <prosper_descriptor_set_group.hpp>
-#include <prosper_command_buffer.hpp>
-#include <prosper_render_pass.hpp>
-#include <image/prosper_render_target.hpp>
 
 #undef LEFT
 #undef RIGHT
@@ -557,7 +548,7 @@ void CGame::SetupLua()
 void CGame::LoadLuaShaders()
 {
 	std::vector<std::string> files;
-	//FileManager::FindFiles(Lua::SCRIPT_DIRECTORY_SLASH +"shaders\\*.lua",&files,NULL); // Deprecated; Shaders have to be explicitely included now
+	//FileManager::FindFiles(Lua::SCRIPT_DIRECTORY_SLASH +"shaders\\*.lua",&files,nullptr); // Deprecated; Shaders have to be explicitely included now
 	for(unsigned int i = 0; i < files.size(); i++)
 		LoadLuaShader(files[i]);
 }

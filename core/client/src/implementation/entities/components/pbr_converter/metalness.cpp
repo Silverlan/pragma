@@ -2,20 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "mathutil/transform.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <image/prosper_image.hpp>
-#include <image/prosper_render_target.hpp>
-#include <image/prosper_sampler.hpp>
-#include <prosper_util.hpp>
-#include <prosper_command_buffer.hpp>
-#include <prosper_descriptor_set_group.hpp>
-#include <util_texture_info.hpp>
-#include <datasystem_t.hpp>
-#include <cmaterialmanager.h>
 
 module pragma.client;
 
@@ -28,7 +17,7 @@ import :game;
 using namespace pragma;
 
 
-void CPBRConverterComponent::UpdateMetalness(pragma::Model &mdl, CMaterial &mat)
+void CPBRConverterComponent::UpdateMetalness(pragma::Model &mdl, msys::CMaterial &mat)
 {
 	// Material has no surface material. To find out whether it is a metal material,
 	// we'll try to find a collision mesh near the visual mesh that uses this material
@@ -194,7 +183,7 @@ void CPBRConverterComponent::UpdateMetalness(pragma::Model &mdl)
 	for(auto hMat : mdl.GetMaterials()) {
 		if(!hMat)
 			continue;
-		auto &mat = static_cast<CMaterial &>(*hMat.get());
+		auto &mat = static_cast<msys::CMaterial &>(*hMat.get());
 		// Make sure it's a PBR material
 		if(IsPBR(mat) == false)
 			continue;

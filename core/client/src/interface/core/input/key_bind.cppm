@@ -8,7 +8,9 @@ module;
 
 
 export module pragma.client:core.key_bind;
-import pragma.platform;
+
+export import luabind;
+export import pragma.platform;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)

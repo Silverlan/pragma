@@ -5,13 +5,8 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include <prosper_command_buffer.hpp>
-#include <shader/prosper_shader_blur.hpp>
-#include <image/prosper_msaa_texture.hpp>
-#include <image/prosper_render_target.hpp>
 
 module pragma.client;
 

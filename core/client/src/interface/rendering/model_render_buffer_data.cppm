@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <prosper_context.hpp>
 
 export module pragma.client:rendering.model_render_buffer_data;
 
@@ -29,7 +28,11 @@ export namespace pragma::rendering {
 		void SetGlowPassEnabled(bool enabled);
 		bool IsGlowPassEnabled() const;
 	};
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	REGISTER_BASIC_BITWISE_OPERATORS(pragma::rendering::RenderBufferData::StateFlags)
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::rendering::RenderBufferData::StateFlags> : std::true_type {};
+	}
 };

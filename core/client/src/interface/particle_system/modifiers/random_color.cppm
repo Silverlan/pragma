@@ -26,7 +26,10 @@ export {
 		CParticleModifierComponentRandomVariable<std::uniform_int_distribution<int16_t>, int16_t> m_blue;
 		CParticleModifierComponentRandomVariable<std::uniform_int_distribution<int16_t>, int16_t> m_alpha;
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(CParticleModifierComponentRandomColor::ComponentFlags);
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<CParticleModifierComponentRandomColor::ComponentFlags> : std::true_type {};
+	}
 };
 
 CParticleModifierComponentRandomColor::CParticleModifierComponentRandomColor(const std::string &suffix, const std::unordered_map<std::string, std::string> &values) { Initialize(suffix, values); }

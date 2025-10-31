@@ -4,10 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <image/prosper_texture.hpp>
-#include <buffers/prosper_buffer.hpp>
-#include <mathutil/umath_geometry.hpp>
-#include "mathutil/umath.h"
 #include "pragma/lua/core.hpp"
 
 

@@ -6,13 +6,8 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include "mathutil/umath_geometry.hpp"
-#include <prosper_util.hpp>
-#include <buffers/prosper_uniform_resizable_buffer.hpp>
-#include <prosper_command_buffer.hpp>
 
 module pragma.client;
 

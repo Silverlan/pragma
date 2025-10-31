@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "alsound_buffer.hpp"
-#include "image/prosper_render_target.hpp"
 #include "pragma/lua/core.hpp"
 
 #undef PlaySound
@@ -46,7 +44,7 @@ export {
 		}
 		~ResourceDownload()
 		{
-			if(file != NULL)
+			if(file != nullptr)
 				file.reset();
 		}
 		VFilePtrReal file;

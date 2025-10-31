@@ -10,7 +10,7 @@ export module pragma.client:rendering.shader_graph.module_image_texture;
 import :entities.components.scene;
 import :entities.components.rasterization_renderer;
 import :rendering.render_processor;
-import :rendering.shader_graph.module;
+import :rendering.shader_graph.sg_module;
 import :rendering.shaders.world_graph;
 import pragma.shadergraph;
 

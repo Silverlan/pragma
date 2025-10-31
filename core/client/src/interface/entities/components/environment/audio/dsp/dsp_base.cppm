@@ -4,17 +4,16 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <alsound_source.hpp>
 #include "pragma/lua/core.hpp"
-#include "alsound_types.hpp"
 
 
 
 
 export module pragma.client:entities.components.audio.dsp.base;
 
-import :entities.base_entity;
-import :entities.components.entity;
+export import :entities.base_entity;
+export import :entities.components.entity;
+export import pragma.soundsystem;
 
 export namespace pragma {
 	class DLLCLIENT CBaseSoundDspComponent : public BaseEnvSoundDspComponent, public CBaseNetComponent {

@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "buffers/prosper_dynamic_resizable_buffer.hpp"
-#include "mathutil/umath.h"
 
 
 export module pragma.client:model.mesh;

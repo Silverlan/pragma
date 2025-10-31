@@ -4,8 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <prosper_command_buffer.hpp>
-#include <image/prosper_texture.hpp>
 
 module pragma.client;
 
@@ -181,7 +179,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 							if(bTranslucent == true)
 							{
 								auto &shaderTranslucent = static_cast<pragma::ShaderShadowCSMTransparent&>(shader);
-								if(info.material == prevMat || shaderTranslucent.RecordBindMaterial(static_cast<CMaterial &>(*info.material)) == true)
+								if(info.material == prevMat || shaderTranslucent.RecordBindMaterial(static_cast<msys::CMaterial &>(*info.material)) == true)
 								{
 									shaderTranslucent.RecordDraw(*const_cast<CModelSubMesh *>(info.mesh));
 									prevMat = info.material;

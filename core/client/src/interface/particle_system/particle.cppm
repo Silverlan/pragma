@@ -4,10 +4,10 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <mathutil/glmutil.h>
-#include <mathutil/color.h>
 
 export module pragma.client:particle_system.particle;
+
+export import pragma.math;
 
 export {
 	#pragma warning(push)
@@ -118,17 +118,37 @@ export {
 		uint32_t GetSeed() const;
 		// Generates a random int, but gurantees to always return the same int for a specific particle and a specific seed
 		template<typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
-		T PseudoRandomInt(T min, T max, uint32_t seed = 0u) const;
+		T PseudoRandomInt(T min, T max, uint32_t seed = 0u) const
+		{
+			return PseudoRandomInt(std::uniform_int_distribution<T>(min, max), seed);
+		}
 		template<typename T>
-		T PseudoRandomInt(const std::uniform_int_distribution<T> &dis, uint32_t seed = 0u) const;
+		T PseudoRandomInt(const std::uniform_int_distribution<T> &dis, uint32_t seed = 0u) const
+		{
+			m_mt.seed(m_seed + seed);
+			return const_cast<std::uniform_int_distribution<T> &>(dis)(m_mt);
+		}
 		// Generates a random real, but gurantees to always return the same real for a specific particle and a specific seed
 		template<typename T, typename = std::enable_if_t<std::is_floating_point<T>::value>>
-		T PseudoRandomReal(T min, T max, uint32_t seed = 0u) const;
+		T PseudoRandomReal(T min, T max, uint32_t seed = 0u) const
+		{
+			return PseudoRandomReal(std::uniform_real_distribution<T>(min, max), seed);
+		}
 		template<typename T>
-		T PseudoRandomReal(const std::uniform_real_distribution<T> &dis, uint32_t seed = 0u) const;
+		T PseudoRandomReal(const std::uniform_real_distribution<T> &dis, uint32_t seed = 0u) const
+		{
+			m_mt.seed(m_seed + seed);
+			return const_cast<std::uniform_real_distribution<T> &>(dis)(m_mt);
+		}
 
 		template<typename T, typename = std::enable_if_t<std::is_floating_point<T>::value>>
-		T PseudoRandomRealExp(T min, T max, float exp, uint32_t seed = 0u) const;
+		T PseudoRandomRealExp(T min, T max, float exp, uint32_t seed = 0u) const
+		{
+			auto v = PseudoRandomReal(std::uniform_real_distribution<T>(min, max), seed) - min;
+			if(exp != 1.f)
+				v = powf(v, exp);
+			return v + min;
+		}
 	private:
 		Vector3 m_pos = {};
 		Quat m_rot = uquat::identity(); // Only used by model renderer and physics
@@ -169,41 +189,6 @@ export {
 		float m_initialFrameOffset = 0.f;
 	};
 	#pragma warning(pop)
-
-	template<typename T>
-	T CParticle::PseudoRandomInt(const std::uniform_int_distribution<T> &dis, uint32_t seed) const
-	{
-		m_mt.seed(m_seed + seed);
-		return const_cast<std::uniform_int_distribution<T> &>(dis)(m_mt);
-	}
-
-	template<typename T, typename>
-	T CParticle::PseudoRandomInt(T min, T max, uint32_t seed) const
-	{
-		return PseudoRandomInt(std::uniform_int_distribution<T>(min, max), seed);
-	}
-
-	template<typename T>
-	T CParticle::PseudoRandomReal(const std::uniform_real_distribution<T> &dis, uint32_t seed) const
-	{
-		m_mt.seed(m_seed + seed);
-		return const_cast<std::uniform_real_distribution<T> &>(dis)(m_mt);
-	}
-
-	template<typename T, typename>
-	T CParticle::PseudoRandomReal(T min, T max, uint32_t seed) const
-	{
-		return PseudoRandomReal(std::uniform_real_distribution<T>(min, max), seed);
-	}
-
-	template<typename T, typename>
-	T CParticle::PseudoRandomRealExp(T min, T max, float exp, uint32_t seed) const
-	{
-		auto v = PseudoRandomReal(std::uniform_real_distribution<T>(min, max), seed) - min;
-		if(exp != 1.f)
-			v = powf(v, exp);
-		return v + min;
-	}
 
 	inline bool operator<(const CParticle &a, const CParticle &b) { return a.GetCameraDistance() > b.GetCameraDistance(); }
 };

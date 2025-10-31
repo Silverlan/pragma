@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <cmaterialmanager.h>
-#include <shader/prosper_shader.hpp>
 
 export module pragma.client:rendering.render_queue;
 

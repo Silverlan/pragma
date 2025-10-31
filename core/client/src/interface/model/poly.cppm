@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "cmaterialmanager.h"
 
 export module pragma.client:model.poly;
 

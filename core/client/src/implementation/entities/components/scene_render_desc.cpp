@@ -4,10 +4,8 @@
 module;
 
 
-#include "mathutil/umath.h"
 
 #include "stdafx_client.h"
-#include "mathutil/umath_geometry.hpp"
 
 #undef AddJob
 
@@ -91,7 +89,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(pragma::CRasterizationRendere
 		if(fShouldCull && ShouldCull(renderC, meshIdx, fShouldCull))
 			continue;
 		auto &renderMesh = renderMeshes[meshIdx];
-		auto *mat = static_cast<CMaterial *>(renderBufferData[meshIdx].material.get());
+		auto *mat = static_cast<msys::CMaterial *>(renderBufferData[meshIdx].material.get());
 		if(mat == nullptr) {
 			if(pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED) {
 				Con::cwar << "[RenderQueue] WARNING: Entity" << mdlC->GetEntity() << " has invalid render material!" << Con::endl;

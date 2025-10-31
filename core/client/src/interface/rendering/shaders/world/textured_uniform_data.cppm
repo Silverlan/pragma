@@ -3,8 +3,6 @@
 
 module;
 
-#include <mathutil/uvec.h>
-#include "mathutil/umath.h"
 
 
 export module pragma.client:rendering.shaders.textured_uniform_data;

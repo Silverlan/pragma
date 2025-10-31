@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/console/helper.hpp"
-#include "prosper_window.hpp"
 
 module pragma.client;
 
@@ -118,7 +117,7 @@ void CMD_lua_reload_entity(NetworkState *state, pragma::BasePlayerComponent *, s
 		return;
 	ClientState *cstate = static_cast<ClientState *>(state);
 	CGame *game = cstate->GetGameState();
-	if(game == NULL)
+	if(game == nullptr)
 		return;
 	game->LoadLuaEntity("entities", argv[0]);
 }
@@ -129,7 +128,7 @@ void CMD_lua_reload_weapon(NetworkState *state, pragma::BasePlayerComponent *, s
 		return;
 	ClientState *cstate = static_cast<ClientState *>(state);
 	CGame *game = cstate->GetGameState();
-	if(game == NULL)
+	if(game == nullptr)
 		return;
 	game->LoadLuaEntity("weapons", argv[0]);
 }
@@ -138,11 +137,11 @@ void CMD_lua_reload_entities(NetworkState *, pragma::BasePlayerComponent *, std:
 {
 	NetworkState *server = pragma::get_cengine()->GetServerNetworkState();
 	pragma::Game *sgame = server->GetGameState();
-	if(sgame != NULL)
+	if(sgame != nullptr)
 		sgame->LoadLuaEntities("entities");
 	NetworkState *client = pragma::get_cengine()->GetClientState();
 	pragma::Game *cgame = client->GetGameState();
-	if(cgame != NULL)
+	if(cgame != nullptr)
 		cgame->LoadLuaEntities("entities");
 }
 
@@ -150,11 +149,11 @@ void CMD_lua_reload_weapons(NetworkState *, pragma::BasePlayerComponent *, std::
 {
 	NetworkState *server = pragma::get_cengine()->GetServerNetworkState();
 	pragma::Game *sgame = server->GetGameState();
-	if(sgame != NULL)
+	if(sgame != nullptr)
 		sgame->LoadLuaEntities("weapons");
 	NetworkState *client = pragma::get_cengine()->GetClientState();
 	pragma::Game *cgame = client->GetGameState();
-	if(cgame != NULL)
+	if(cgame != nullptr)
 		cgame->LoadLuaEntities("weapons");
 }
 
@@ -222,7 +221,7 @@ void CMD_getpos(NetworkState *state, pragma::BasePlayerComponent *pl, std::vecto
 	if(!state->IsGameActive())
 		return;
 	CGame *game = static_cast<CGame *>(state->GetGameState());
-	if(pl == NULL) {
+	if(pl == nullptr) {
 		Con::cout << "0 0 0" << Con::endl;
 		return;
 	}
@@ -272,7 +271,7 @@ void CMD_setang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vecto
 	ClientState *cstate = static_cast<ClientState *>(state);
 	if(!cstate->IsGameActive())
 		return;
-	if(pl == NULL)
+	if(pl == nullptr)
 		return;
 	if(!check_cheats("setang", cstate))
 		return;
@@ -287,7 +286,7 @@ void CMD_getang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vecto
 {
 	if(!state->IsGameActive())
 		return;
-	if(pl == NULL) {
+	if(pl == nullptr) {
 		Con::cout << "0 0 0" << Con::endl;
 		return;
 	}
@@ -620,9 +619,9 @@ void CMD_shader_list(NetworkState *, pragma::BasePlayerComponent *, std::vector<
 void CMD_flashlight_toggle(NetworkState *, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
 	CGame *game = pragma::get_client_state()->GetGameState();
-	if(game == NULL)
+	if(game == nullptr)
 		return;
-	if(pl == NULL)
+	if(pl == nullptr)
 		return;
 	pl->ToggleFlashlight();
 }

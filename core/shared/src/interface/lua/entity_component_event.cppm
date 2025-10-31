@@ -9,6 +9,7 @@ export module pragma.shared:scripting.lua.entity_component_event;
 
 export import :entities.components.events.event;
 export import luabind;
+export import std;
 
 export struct DLLNETWORK LuaComponentEvent : public pragma::ComponentEvent {
 	std::vector<luabind::object> arguments;

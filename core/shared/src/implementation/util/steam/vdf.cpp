@@ -25,7 +25,7 @@ util::MarkupFile::ResultCode util::steam::vdf::read_vdf_block(util::MarkupFile &
 			return r;
 		if((r = mf.ReadNextToken(token)) != util::MarkupFile::ResultCode::Ok)
 			return r;
-		std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c) { return std::tolower(c); });
+		ustring::to_lower(key);
 		if(token == '{') {
 			mf.IncrementFilePos();
 			auto it = block.children.insert(std::make_pair(key, util::steam::vdf::DataBlock {})).first;

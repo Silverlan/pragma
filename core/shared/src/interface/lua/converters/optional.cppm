@@ -7,6 +7,7 @@ module;
 export module pragma.shared:scripting.lua.converters.optional;
 
 export import luabind;
+export import std;
 
 export namespace luabind {
 	template<typename T>

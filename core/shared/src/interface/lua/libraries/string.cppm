@@ -10,6 +10,8 @@ export module pragma.shared:scripting.lua.libraries.string;
 
 export import luabind;
 
+export import std;
+
 export namespace Lua {
 	namespace string {
 		DLLNETWORK std::string snake_case_to_camel_case(const std::string &str);

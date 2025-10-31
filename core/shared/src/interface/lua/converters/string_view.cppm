@@ -8,6 +8,7 @@ module;
 export module pragma.shared:scripting.lua.converters.string_view;
 
 export import luabind;
+export import std;
 
 export namespace luabind {
 	template<>

@@ -232,7 +232,7 @@ bool pragma::Engine::RunEngineConsoleCommand(std::string scmd, std::vector<std::
 
 bool pragma::Engine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(ConConf *, float &)> &callback)
 {
-	std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::tolower);
+	ustring::to_lower(cmd);
 	auto *stateSv = GetServerNetworkState();
 	if(stateSv == nullptr)
 		return RunEngineConsoleCommand(cmd, argv, pressState, magnitude, callback);

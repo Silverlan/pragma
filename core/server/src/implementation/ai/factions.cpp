@@ -10,7 +10,7 @@ module pragma.server.ai.factions;
 Faction::Faction(const std::string &name) : std::enable_shared_from_this<Faction>(), m_name(name), m_defaultDisp(DISPOSITION::NEUTRAL) {}
 void Faction::AddClass(std::string className)
 {
-	std::transform(className.begin(), className.end(), className.begin(), ::tolower);
+	ustring::to_lower(className);
 	if(HasClass(className))
 		return;
 	m_classes.push_back(className);
@@ -63,7 +63,7 @@ DISPOSITION Faction::GetDisposition(Faction &faction, int *priority)
 }
 DISPOSITION Faction::GetDisposition(std::string className, int *priority)
 {
-	std::transform(className.begin(), className.end(), className.begin(), ::tolower);
+	ustring::to_lower(className);
 	if(HasClass(className))
 		return DISPOSITION::LIKE;
 	for(char i = 0; i < 4; i++) {

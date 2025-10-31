@@ -171,7 +171,7 @@ ConVar *CVarHandler::SetConVar(std::string scmd, std::string value, bool bApplyI
 
 ConConf *CVarHandler::GetConVar(std::string scmd)
 {
-	std::transform(scmd.begin(), scmd.end(), scmd.begin(), ::tolower);
+	ustring::to_lower(scmd);
 	auto it = m_conVars.find(scmd);
 	if(it == m_conVars.end())
 		return nullptr;

@@ -583,7 +583,7 @@ DLLNETWORK bool StringToKey(std::string key, short *c)
 {
 	if(key.length() == 0)
 		return false;
-	std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+	ustring::to_lower(key);
 	static const std::unordered_map<std::string, decltype(GLFW_KEY_SPACE)> keyMap
 	  = {{"space", GLFW_KEY_SPACE}, {"escape", GLFW_KEY_ESCAPE}, {"f1", GLFW_KEY_F1}, {"f2", GLFW_KEY_F2}, {"f3", GLFW_KEY_F3}, {"f4", GLFW_KEY_F4}, {"f5", GLFW_KEY_F5}, {"f6", GLFW_KEY_F6}, {"f7", GLFW_KEY_F7}, {"f8", GLFW_KEY_F8}, {"f9", GLFW_KEY_F9}, {"f10", GLFW_KEY_F10},
 	    {"f11", GLFW_KEY_F11}, {"f12", GLFW_KEY_F12}, {"f13", GLFW_KEY_F13}, {"f14", GLFW_KEY_F14}, {"f15", GLFW_KEY_F15}, {"f16", GLFW_KEY_F16}, {"f17", GLFW_KEY_F17}, {"f18", GLFW_KEY_F18}, {"f19", GLFW_KEY_F19}, {"f20", GLFW_KEY_F20}, {"f21", GLFW_KEY_F21}, {"f22", GLFW_KEY_F22},

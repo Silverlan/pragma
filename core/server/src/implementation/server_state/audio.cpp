@@ -84,7 +84,7 @@ void ServerState::SendSoundSourceToClient(SALSound &sound, bool sendFullUpdate, 
 }
 std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags)
 {
-	std::transform(snd.begin(), snd.end(), snd.begin(), ::tolower);
+	ustring::to_lower(snd);
 	snd = FileManager::GetNormalizedPath(snd);
 	if(m_missingSoundCache.find(snd) != m_missingSoundCache.end())
 		return nullptr;
@@ -181,7 +181,7 @@ void ServerState::StopSound(std::shared_ptr<ALSound> pSnd) {}
 
 bool ServerState::PrecacheSound(std::string snd, ALChannel mode)
 {
-	std::transform(snd.begin(), snd.end(), snd.begin(), ::tolower);
+	ustring::to_lower(snd);
 	snd = FileManager::GetCanonicalizedPath(snd);
 	sound::get_full_sound_path(snd, true);
 

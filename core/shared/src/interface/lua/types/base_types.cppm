@@ -6,6 +6,7 @@ module;
 export module pragma.shared:scripting.lua.types.base_types;
 
 export import luabind;
+export import std;
 
 export namespace luabind {
 	template<typename T, typename U>

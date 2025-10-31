@@ -4,8 +4,7 @@
 module;
 #include "pragma/serverdefinitions.h"
 
-#include <cinttypes>
-
+export import std.compat;
 
 export module pragma.server.ai.disposition;
 

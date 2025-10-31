@@ -5,20 +5,12 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
-#include <string>
 
-#include <array>
-#include <vector>
 
-#include <memory>
 
-#include <functional>
 
-#include <optional>
 
-#include <sstream>
 
-#include <cinttypes>
 
 export module pragma.server.audio.sound;
 

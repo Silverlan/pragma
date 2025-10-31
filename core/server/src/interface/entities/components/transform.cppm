@@ -8,9 +8,6 @@ module;
 
 import pragma.server.entities.components.entity;
 
-#include <unordered_map>
-#include <vector>
-#include <ostream>
 
 export module pragma.server.entities.components.transform;
 

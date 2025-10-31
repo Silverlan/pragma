@@ -6,11 +6,8 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-#include <memory>
 
-#include <string>
 
-#include <vector>
 
 
 

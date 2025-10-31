@@ -4,7 +4,6 @@
 module;
 #include "pragma/serverdefinitions.h"
 
-#include <string>
 
 
 export module pragma.server.entities.components.lua;

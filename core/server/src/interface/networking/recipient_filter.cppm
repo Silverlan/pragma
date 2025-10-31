@@ -4,17 +4,11 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include <functional>
 
-#include <cinttypes>
 
-#include <memory>
 
-#include <vector>
 
-#include <sstream>
 
-#include <string>
 
 export module pragma.server.networking.recipient_filter;
 

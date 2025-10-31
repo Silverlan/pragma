@@ -4,13 +4,9 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include <string>
 
-#include <vector>
 
-#include <memory>
 
-#include <optional>
 
 export module pragma.server.console.register_commands;
 

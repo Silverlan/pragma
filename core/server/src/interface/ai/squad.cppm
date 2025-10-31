@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include <string>
-#include <vector>
-#include <memory>
 
 export module pragma.server.ai.squad;
 

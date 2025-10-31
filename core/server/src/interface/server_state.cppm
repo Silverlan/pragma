@@ -5,8 +5,6 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
-#include <string>
-#include <unordered_map>
 
 export module pragma.server.server_state;
 

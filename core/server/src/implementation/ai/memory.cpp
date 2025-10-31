@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_server.h"
-#include <algorithm>
 
 module pragma.server.ai.memory;
 

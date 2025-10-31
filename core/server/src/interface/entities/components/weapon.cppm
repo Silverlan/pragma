@@ -4,11 +4,8 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include <cinttypes>
-#include <vector>
 #include "pragma/lua/core.hpp"
 
-#include <string>
 
 
 export module pragma.server.entities.components.weapon;

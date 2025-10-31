@@ -4,14 +4,10 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include <string>
-#include <vector>
-
-#include <cinttypes>
-
-#include <memory>
 
 export module pragma.server.ai.tasks.selector;
+
+export import std.compat;
 
 export namespace pragma {
 	namespace ai {

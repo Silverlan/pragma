@@ -4,12 +4,7 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include <cinttypes>
 
-#include <string>
-#include <vector>
-#include <memory>
-#include <optional>
 
 export module pragma.server.networking.iserver_client;
 
@@ -21,7 +16,12 @@ export {
 		class DLLSERVER IServerClient : public std::enable_shared_from_this<IServerClient> {
 		public:
 			template<class TServerClient, typename... TARGS>
-			static std::shared_ptr<TServerClient> Create(TARGS &&...args);
+			static std::shared_ptr<TServerClient> Create(TARGS &&...args)
+			{
+				auto p = std::shared_ptr<TServerClient> {new TServerClient {std::forward<TARGS>(args)...}};
+				p->Initialize();
+				return p;
+			}
 			~IServerClient();
 			virtual void Initialize() {};
 			virtual bool Drop(DropReason reason, pragma::networking::Error &outErr) = 0;
@@ -70,12 +70,4 @@ export {
 			uint64_t m_steamId = 0;
 		};
 	};
-
-	template<class TServerClient, typename... TARGS>
-	std::shared_ptr<TServerClient> pragma::networking::IServerClient::Create(TARGS &&...args)
-	{
-		auto p = std::shared_ptr<TServerClient> {new TServerClient {std::forward<TARGS>(args)...}};
-		p->Initialize();
-		return p;
-	}
 }

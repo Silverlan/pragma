@@ -4,14 +4,8 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include <vector>
-#include <unordered_map>
-#include <string>
-#include <optional>
 #include "pragma/lua/core.hpp"
 
-#include <memory>
-#include <functional>
 
 
 export module pragma.server.game;

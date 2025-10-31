@@ -7,7 +7,6 @@ module;
 #include <format>
 #include "pragma/lua/core.hpp"
 
-#include <sstream>
 
 
 export module pragma.server.entities.base;

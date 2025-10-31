@@ -6,9 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-#include <string>
-#include <memory>
-#include <functional>
 
 
 export module pragma.server.scripting.lua.libraries.net;

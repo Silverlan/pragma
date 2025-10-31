@@ -4,12 +4,8 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include <string>
-#include <vector>
 
-#include <memory>
 
-#include <array>
 
 export module pragma.server.ai.factions;
 

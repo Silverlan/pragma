@@ -3,15 +3,7 @@
 
 module;
 
-#include <algorithm>
-#include <sstream>
 
-#include <string>
-#include <vector>
-#include <memory>
-#include <functional>
-#include <functional>
-#include <unordered_map>
 
 #include "pragma/console/helper.hpp"
 

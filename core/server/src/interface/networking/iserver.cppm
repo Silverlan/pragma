@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include <cinttypes>
-#include <optional>
-#include <functional>
 
 export module pragma.server.networking.iserver;
 
@@ -27,7 +24,14 @@ export {
 		class DLLSERVER IServer : public pragma::networking::MessageTracker {
 		public:
 			template<class TServer, typename... TARGS>
-			static std::unique_ptr<TServer, void (*)(TServer *)> Create(TARGS &&...args);
+			static std::unique_ptr<TServer, void (*)(TServer *)> Create(TARGS &&...args)
+			{
+				std::unique_ptr<TServer, void (*)(TServer *)> r {new TServer {std::forward<TARGS>(args)...}, [](TServer *ptr) {
+																	ptr->Shutdown();
+																	delete ptr;
+																}};
+				return r;
+			}
 			virtual ~IServer() = default;
 			bool Start(Error &outErr, uint16_t port, bool useP2PIfAvailable = false);
 			virtual bool Heartbeat() = 0;
@@ -43,7 +47,14 @@ export {
 			bool SendPacket(Protocol protocol, NetPacket &packet, const ClientRecipientFilter &rf, Error &outErr);
 			void AddClient(const std::shared_ptr<IServerClient> &client);
 			template<class TServerClient, typename... TARGS>
-			std::shared_ptr<TServerClient> AddClient(TARGS &&...args);
+			std::shared_ptr<TServerClient> AddClient(TARGS &&...args)
+			{
+				auto cl = TServerClient::template Create<TServerClient>(std::forward<TARGS>(args)...);
+				AddClient(cl);
+				if(m_eventInterface.onClientConnected)
+					m_eventInterface.onClientConnected(*cl);
+				return cl;
+			}
 			bool DropClient(const IServerClient &client, pragma::networking::DropReason reason, Error &outErr);
 
 			void SetEventInterface(const ServerEventInterface &eventHandler);
@@ -66,24 +77,4 @@ export {
 			ServerEventInterface m_eventInterface = {};
 		};
 	};
-
-	template<class TServerClient, typename... TARGS>
-	std::shared_ptr<TServerClient> pragma::networking::IServer::AddClient(TARGS &&...args)
-	{
-		auto cl = TServerClient::template Create<TServerClient>(std::forward<TARGS>(args)...);
-		AddClient(cl);
-		if(m_eventInterface.onClientConnected)
-			m_eventInterface.onClientConnected(*cl);
-		return cl;
-	}
-
-	template<class TServer, typename... TARGS>
-	std::unique_ptr<TServer, void (*)(TServer *)> pragma::networking::IServer::Create(TARGS &&...args)
-	{
-		std::unique_ptr<TServer, void (*)(TServer *)> r {new TServer {std::forward<TARGS>(args)...}, [](TServer *ptr) {
-															ptr->Shutdown();
-															delete ptr;
-														}};
-		return r;
-	}
 }

@@ -4,8 +4,6 @@
 module;
 #include "pragma/serverdefinitions.h"
 
-#include <cinttypes>
-#include <memory>
 
 export module pragma.server.ai.tasks.target;
 

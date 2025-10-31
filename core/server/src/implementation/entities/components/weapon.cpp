@@ -3,7 +3,6 @@
 
 module;
 
-#include <sstream>
 
 #include "pragma/lua/core.hpp"
 

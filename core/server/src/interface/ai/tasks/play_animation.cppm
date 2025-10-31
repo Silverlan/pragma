@@ -5,11 +5,7 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
-#include <string>
-#include <iostream>
 
-#include <cinttypes>
-#include <memory>
 
 export module pragma.server.ai.tasks.play_animation;
 

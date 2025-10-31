@@ -4,10 +4,7 @@
 module;
 #include "pragma/serverdefinitions.h"
 
-#include <iostream>
 
-#include <cinttypes>
-#include <memory>
 
 
 export module pragma.server.ai.tasks.move_to_target;

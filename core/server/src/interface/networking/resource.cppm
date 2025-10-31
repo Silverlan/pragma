@@ -4,14 +4,9 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include <string>
-#include <memory>
 
-#include <vector>
 
-#include <functional>
 
-#include <sstream>
 
 export module pragma.server.networking.resource;
 

@@ -4,12 +4,8 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include <vector>
 
-#include <sstream>
 
-#include <cinttypes>
-#include <memory>
 
 export module pragma.server.ai.schedule;
 

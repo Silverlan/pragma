@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module;
+
 #include "pragma/serverdefinitions.h"
 
-#include <string>
-
+export import std;
 
 export module pragma.server.core.cache_info;
 

@@ -4,10 +4,10 @@
 module;
 
 #include "pragma/serverdefinitions.h"
-#include <vector>
-#include <string>
 
 export module pragma.server.networking.resource_manager;
+
+export import std;
 
 #undef FindResource
 

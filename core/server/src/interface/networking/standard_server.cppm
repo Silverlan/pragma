@@ -5,9 +5,6 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
-#include <string>
-#include <memory>
-#include <functional>
 
 export module pragma.server.networking.standard_server;
 

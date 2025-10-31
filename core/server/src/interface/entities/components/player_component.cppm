@@ -5,11 +5,7 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-#include <string>
-#include <iostream>
 
-#include <vector>
-#include <typeindex>
 
 
 

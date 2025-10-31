@@ -3,9 +3,10 @@
 
 module;
 #include "pragma/serverdefinitions.h"
-#include <cinttypes>
 
 export module pragma.server.ai.task_enums;
+
+export import std.compat;
 
 // These also have to be registered in SGame constructor!
 export namespace pragma {

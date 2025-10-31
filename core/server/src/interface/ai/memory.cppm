@@ -5,12 +5,8 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
-#include <cinttypes>
 
-#include <memory>
 
-#include <array>
-#include <vector>
 
 export module pragma.server.ai.memory;
 

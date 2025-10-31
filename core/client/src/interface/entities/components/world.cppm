@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "buffers/prosper_buffer.hpp"
-#include <unordered_map>
 #include "pragma/lua/core.hpp"
 
 

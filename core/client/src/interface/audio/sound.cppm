@@ -5,8 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <mathutil/glmutil.h>
-#include <string>
-#include <vector>
 #include <alsound_source.hpp>
 
 export module pragma.client:audio.sound;

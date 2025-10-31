@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <string>
-#include <unordered_set>
 
 export module pragma.client:core.lua_input_binding_layer_register;
 

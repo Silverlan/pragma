@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <atomic>
-#include <mutex>
 
 export module pragma.client:gui.main_menu_mods;
 

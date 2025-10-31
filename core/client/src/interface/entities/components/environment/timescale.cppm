@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <memory>
 #include "pragma/lua/core.hpp"
 
 

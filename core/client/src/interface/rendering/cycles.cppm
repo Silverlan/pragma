@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <mathutil/transform.hpp>
-#include <functional>
 #include "mathutil/umath.h"
 #include "mathutil/color.h"
 

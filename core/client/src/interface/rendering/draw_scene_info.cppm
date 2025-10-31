@@ -5,9 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "prosper_command_buffer.hpp"
-#include <memory>
-#include <optional>
-#include <functional>
 #include <mathutil/color.h>
 
 export module pragma.client:rendering.draw_scene_info;

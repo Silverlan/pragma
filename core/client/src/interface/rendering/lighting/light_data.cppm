@@ -6,8 +6,6 @@ module;
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <mathutil/uvec.h>
 #include <mathutil/umath_lighting.hpp>
-#include <cinttypes>
-#include <array>
 #include "mathutil/umath.h"
 
 

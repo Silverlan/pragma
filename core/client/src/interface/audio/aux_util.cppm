@@ -5,9 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "alsound_effect.hpp"
-#include <vector>
-#include <string>
-#include <memory>
 
 export module pragma.client:audio.aux_util;
 

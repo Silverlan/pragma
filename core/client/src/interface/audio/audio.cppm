@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <vector>
-#include <string>
 
 export module pragma.client:audio;
 

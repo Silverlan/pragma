@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <mathutil/umath.h>
-#include <algorithm>
 
 export module pragma.client:particle_system.operator_world_base;
 

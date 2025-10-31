@@ -10,7 +10,6 @@ module;
 #include "prosper_command_buffer.hpp"
 #include <mathutil/color.h>
 #include "prosper_descriptor_set_group.hpp"
-#include <queue>
 #include <alsoundsystem.hpp>
 #include <alsoundsystem_create_effect.hpp>
 #include "mathutil/umath.h"

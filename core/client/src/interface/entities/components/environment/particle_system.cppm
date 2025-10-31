@@ -7,7 +7,6 @@ module;
 #include "buffers/prosper_dynamic_resizable_buffer.hpp"
 #include "sprite_sheet_animation.hpp"
 #include <mathutil/transform.hpp>
-#include <optional>
 #include "mathutil/umath.h"
 #include "pragma/lua/core.hpp"
 #include "mathutil/color.h"

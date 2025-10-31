@@ -4,10 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <string>
-#include <memory>
-#include <vector>
-#include <unordered_map>
 
 export module pragma.client:model.hitbox_mesh_bvh_builder;
 

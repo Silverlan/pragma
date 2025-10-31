@@ -16,7 +16,6 @@ module;
 #include <mathutil/umath.h>
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/norm.hpp>
-#include <algorithm>
 #include <sprite_sheet_animation.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>

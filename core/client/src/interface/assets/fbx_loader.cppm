@@ -5,10 +5,6 @@ module;
 
 #include <ofbx.h>
 #include <mathutil/vertex.hpp>
-#include <string>
-#include <memory>
-#include <vector>
-#include <cinttypes>
 #include "mathutil/umath.h"
 #include "mathutil/transform.hpp"
 

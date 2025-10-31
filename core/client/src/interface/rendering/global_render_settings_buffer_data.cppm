@@ -3,7 +3,6 @@
 
 module;
 
-#include <memory>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <udm_enums.hpp>

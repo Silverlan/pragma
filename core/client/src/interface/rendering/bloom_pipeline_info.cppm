@@ -3,9 +3,6 @@
 
 module;
 
-#include <memory>
-#include <cinttypes>
-#include <optional>
 
 export module pragma.client:rendering.bloom_pipeline_info;
 

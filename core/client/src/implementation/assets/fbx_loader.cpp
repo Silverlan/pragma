@@ -10,7 +10,6 @@ module;
 #include <mathutil/umath.h>
 #include <glm/gtx/euler_angles.hpp>
 #include <ofbx.h>
-#include <span>
 #include <texturemanager/texture_manager2.hpp>
 
 module pragma.client;

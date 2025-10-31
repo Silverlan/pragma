@@ -6,7 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <mathutil/glmutil.h>
 #include <mathutil/color.h>
-#include <random>
 
 export module pragma.client:particle_system.particle;
 

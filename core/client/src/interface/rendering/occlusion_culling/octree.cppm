@@ -6,13 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "mathutil/umath_geometry.hpp"
 #include <mathutil/uvec.h>
-#include <array>
-#include <vector>
-#include <cinttypes>
-#include <memory>
-#include <queue>
-#include <functional>
-#include <iostream>
 #include "mathutil/umath.h"
 
 #define ENABLE_OCCLUSION_DEBUG_MODE 0

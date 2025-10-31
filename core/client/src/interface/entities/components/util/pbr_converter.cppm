@@ -5,13 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "image/prosper_texture.hpp"
-#include <memory>
-#include <optional>
-#include <thread>
-#include <queue>
-#include <atomic>
-#include <mutex>
-#include <unordered_set>
 #include "pragma/lua/core.hpp"
 
 

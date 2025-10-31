@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <cinttypes>
 
 export module pragma.client:rendering.game_world_shader_settings;
 export namespace pragma {

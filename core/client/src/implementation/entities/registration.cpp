@@ -4,7 +4,6 @@
 module;
 
 #include "stdafx_client.h"
-#include <stdexcept>
 
 #undef GetClassName
 

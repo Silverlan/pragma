@@ -8,7 +8,6 @@ module;
 #include <shader/prosper_shader_t.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 #include <prosper_util.hpp>
-#include <random>
 
 module pragma.client;
 

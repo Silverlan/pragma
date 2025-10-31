@@ -6,7 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include <mathutil/color.h>
 #include <mathutil/glmutil.h>
-#include <memory>
 
 export module pragma.client:rendering.world_environment;
 

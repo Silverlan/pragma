@@ -6,7 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "prosper_command_buffer.hpp"
 #include "buffers/prosper_buffer.hpp"
-#include <queue>
 #include "pragma/lua/core.hpp"
 
 

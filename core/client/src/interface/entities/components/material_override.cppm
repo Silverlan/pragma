@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <queue>
 #include "pragma/lua/core.hpp"
 
 

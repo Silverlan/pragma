@@ -3,9 +3,6 @@
 
 module;
 
-#include <cinttypes>
-#include <string>
-#include <unordered_map>
 #include <mathutil/uvec.h>
 #include <tiny_gltf.h>
 #include <mathutil/umath_lighting.hpp>

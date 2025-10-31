@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <vector>
-#include <atomic>
 
 
 export module pragma.client:core.addon_install_manager;

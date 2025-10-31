@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <string>
-#include <vector>
 
 export module pragma.client:rendering.render_apis;
 export namespace pragma::rendering {

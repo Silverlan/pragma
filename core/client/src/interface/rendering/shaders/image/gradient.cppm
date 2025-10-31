@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
-#include <array>
 
 export module pragma.client:rendering.shaders.gradient;
 

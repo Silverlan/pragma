@@ -5,9 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <prosper_context.hpp>
-#include <unordered_set>
-#include <memory>
-#include <optional>
 
 
 export module pragma.client:rendering.render_context;

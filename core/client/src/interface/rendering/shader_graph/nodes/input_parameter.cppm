@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <cinttypes>
-#include <string_view>
-#include <string>
 #include "mathutil/color.h"
 
 

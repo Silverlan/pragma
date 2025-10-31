@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include "buffers/prosper_dynamic_resizable_buffer.hpp"
-#include <memory>
 #include "mathutil/umath.h"
 
 

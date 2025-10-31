@@ -7,8 +7,6 @@ module;
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_texture.hpp>
 #include <shader/prosper_shader.hpp>
-#include <cinttypes>
-#include <memory>
 
 
 export module pragma.client:rendering.forward_plus;

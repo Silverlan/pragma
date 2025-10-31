@@ -5,15 +5,10 @@ module;
 
 
 #include "pragma/clientdefinitions.h"
-#include <unordered_set>
 #include <prosper_swap_command_buffer.hpp>
 #include <mathutil/plane.hpp>
-#include <string>
-#include <vector>
 #include "image/prosper_render_target.hpp"
 #include "prosper_command_buffer.hpp"
-#include <cinttypes>
-#include <memory>
 #include <mathutil/uvec.h>
 #include "mathutil/umath.h"
 #include "pragma/lua/core.hpp"

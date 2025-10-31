@@ -8,7 +8,6 @@ module;
 #include "queries/prosper_timer_query.hpp"
 #include "queries/prosper_query_pool.hpp"
 #include "prosper_command_buffer.hpp"
-#include <unordered_map>
 #include "alsoundsystem.hpp"
 #include "alsound_effect.hpp"
 #include "pragma/lua/core.hpp"

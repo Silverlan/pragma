@@ -5,7 +5,6 @@ module;
 
 #include "stdafx_client.h"
 #include <alsoundsystem.hpp>
-#include <algorithm>
 
 module pragma.client;
 

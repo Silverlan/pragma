@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <vector>
-#include <optional>
 #include "pragma/lua/core.hpp"
 
 

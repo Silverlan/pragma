@@ -7,7 +7,6 @@ module;
 #include "mathutil/color.h"
 
 #include "stdafx_client.h"
-#include <algorithm>
 #include <mathutil/umath.h>
 
 module pragma.client;

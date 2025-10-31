@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <queue>
-#include <string_view>
 
 
 export module pragma.client:gui.console;

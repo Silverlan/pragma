@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <functional>
 
 export module pragma.client:debug.render_filter;
 

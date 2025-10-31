@@ -27,7 +27,6 @@ module;
 #include "cmaterialmanager.h"
 #include <texturemanager/texturemanager.h>
 #include <cmaterialmanager.h>
-#include <cctype>
 #include <prosper_util.hpp>
 #include <shader/prosper_pipeline_loader.hpp>
 #include <image/prosper_render_target.hpp>

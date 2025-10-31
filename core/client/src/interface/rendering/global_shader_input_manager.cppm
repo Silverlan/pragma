@@ -5,8 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <buffers/prosper_buffer.hpp>
-#include <string>
-#include <vector>
 
 export module pragma.client:rendering.global_shader_input_manager;
 

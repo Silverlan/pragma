@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <cinttypes>
 #include <image/prosper_render_target.hpp>
 #include <prosper_enums.hpp>
 

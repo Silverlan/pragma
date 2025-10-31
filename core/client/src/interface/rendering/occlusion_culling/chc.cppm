@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <queue>
 #include "mathutil/umath.h"
 
 #define CHC_DEBUGGING_ENABLED 0

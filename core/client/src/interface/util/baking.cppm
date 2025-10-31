@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <mathutil/umath_lighting.hpp>
-#include <vector>
 #include "mathutil/umath.h"
 
 

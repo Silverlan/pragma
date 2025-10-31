@@ -7,7 +7,6 @@ module;
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_client.h"
-#include <queue>
 
 module pragma.client;
 

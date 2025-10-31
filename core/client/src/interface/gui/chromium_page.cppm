@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <string>
 #include <mathutil/uvec.h>
 
 export module pragma.client:gui.chromium_page;

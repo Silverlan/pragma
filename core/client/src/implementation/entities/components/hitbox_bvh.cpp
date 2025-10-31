@@ -15,7 +15,6 @@ module;
 #include "stdafx_client.h"
 #include <mathutil/boundingvolume.h>
 #include "mathutil/umath_geometry.hpp"
-#include <bvh/v2/stack.h>
 
 module pragma.client;
 

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <unordered_set>
 #include "pragma/lua/core.hpp"
 
 

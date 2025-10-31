@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 #include <mathutil/glmutil.h>
-#include <memory>
 
 export module pragma.client:ai.nav_system;
 

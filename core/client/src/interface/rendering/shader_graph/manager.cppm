@@ -4,9 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include <string>
-#include <unordered_map>
-#include <memory>
 
 export module pragma.client:rendering.shader_graph.manager;
 

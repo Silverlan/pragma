@@ -1,11 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-export;
+module;
 
 #include "pragma/clientdefinitions.h"
 
 export module pragma.client:rendering.shaders.calc_image_color;
+
+export import pragma.prosper;
 
 export namespace pragma {
 	class DLLCLIENT ShaderCalcImageColor : public prosper::ShaderCompute {

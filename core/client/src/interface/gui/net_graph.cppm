@@ -8,7 +8,7 @@ module;
 
 export module pragma.client:gui.net_graph;
 
-import :gui.line_graph;
+export import :gui.line_graph;
 
 export {
 	class DLLCLIENT WINetGraph : public WIBase {

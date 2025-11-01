@@ -8,8 +8,8 @@ module;
 
 export module pragma.client:gui.console;
 
-import :gui.command_line_entry;
-import :gui.frame;
+export import :gui.command_line_entry;
+export import :gui.frame;
 
 export class DLLCLIENT WIConsole : public WIBase {
   public:

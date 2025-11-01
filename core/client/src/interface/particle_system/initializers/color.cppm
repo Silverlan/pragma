@@ -7,8 +7,8 @@ module;
 
 export module pragma.client:particle_system.initializer_color;
 
-import :particle_system.modifier;
-import :particle_system.modifier_random_color;
+export import :particle_system.modifier;
+export import :particle_system.modifier_random_color;
 
 export class DLLCLIENT CParticleInitializerColor : public CParticleInitializer, public CParticleModifierComponentRandomColor {
   public:

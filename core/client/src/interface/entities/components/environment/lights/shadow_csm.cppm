@@ -11,8 +11,8 @@ module;
 
 export module pragma.client:entities.components.lights.shadow_csm;
 
-import :entities.components.camera;
-import :entities.components.lights.light;
+export import :entities.components.camera;
+export import :entities.components.lights.light;
 
 export namespace pragma {
 	struct DLLCLIENT FrustumSplit {

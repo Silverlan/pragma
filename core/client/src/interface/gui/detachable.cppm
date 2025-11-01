@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:gui.detachable;
 
-import pragma.gui;
+export import pragma.gui;
 
 export class DLLCLIENT WIDetachable : public WIBase {
   public:

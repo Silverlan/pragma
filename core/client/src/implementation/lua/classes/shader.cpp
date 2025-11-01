@@ -157,7 +157,7 @@ void Lua::Shader::RecordPushConstants(lua_State *l, prosper::Shader &shader, pro
 	  },
 	  ::util::make_vector<prosper::util::PreparedCommand::Argument>(Lua::Vulkan::make_pcb_arg(value, type)));
 }
-void Lua::Shader::RecordPushConstants(lua_State *l, prosper::Shader &shader, const LuaShaderRecordTarget &recordTarget, ::DataStream &ds, uint32_t offset)
+void Lua::Shader::RecordPushConstants(lua_State *l, prosper::Shader &shader, const LuaShaderRecordTarget &recordTarget, ::util::DataStream &ds, uint32_t offset)
 {
 	auto *bindState = recordTarget.GetBindState();
 	if(bindState) {

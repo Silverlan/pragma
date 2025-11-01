@@ -425,7 +425,7 @@ pragma::rendering::ShaderInputDescriptor *ShaderMaterial::Import(const std::stri
 static void to_srgb_color(Vector3 &col) { uimg::linear_to_srgb(col); }
 static void to_srgb_color(Vector4 &col) { col = Vector4 {uimg::linear_to_srgb(reinterpret_cast<Vector3 &>(col)), col.w}; }
 
-void ShaderMaterial::PopulateShaderInputDataFromMaterial(ShaderInputData &inputData, const CMaterial &mat)
+void ShaderMaterial::PopulateShaderInputDataFromMaterial(ShaderInputData &inputData, const msys::CMaterial &mat)
 {
 	inputData.data.resize(MAX_MATERIAL_SIZE);
 

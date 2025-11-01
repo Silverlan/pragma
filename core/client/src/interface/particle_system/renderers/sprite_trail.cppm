@@ -8,7 +8,7 @@ module;
 
 export module pragma.client:particle_system.renderer_sprite_trail;
 
-import :particle_system.modifier;
+export import :particle_system.modifier;
 
 export class DLLCLIENT CParticleRendererSpriteTrail : public CParticleRenderer {
   public:

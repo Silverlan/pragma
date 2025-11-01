@@ -7,6 +7,8 @@ module;
 
 export module pragma.client:rendering.shaders.textured_uniform_data;
 
+export import pragma.math;
+
 export namespace pragma {
 #pragma pack(push, 1)
 	struct RenderSettings {

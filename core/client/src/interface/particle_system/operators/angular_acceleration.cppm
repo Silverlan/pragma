@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:particle_system.operator_angular_acceleration;
 
-import :particle_system.modifier;
+export import :particle_system.modifier;
 
 export namespace pragma::ecs {class CParticleSystemComponent;}
 export class DLLCLIENT CParticleOperatorAngularAcceleration : public CParticleOperator {

@@ -9,8 +9,8 @@ module;
 
 
 export module pragma.client:entities.components.pp_bloom;
-import :entities.components.pp_base;
 
+export import :entities.components.pp_base;
 import :rendering;
 
 export namespace pragma {

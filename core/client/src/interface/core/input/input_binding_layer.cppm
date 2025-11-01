@@ -8,7 +8,7 @@ module;
 
 export module pragma.client:core.input_binding_layer;
 
-import :core.key_bind;
+export import :core.key_bind;
 export import pragma.udm;
 
 export struct DLLCLIENT InputBindingLayer {

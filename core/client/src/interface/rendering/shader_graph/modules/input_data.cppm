@@ -7,8 +7,8 @@ module;
 
 export module pragma.client:rendering.shader_graph.module_input_data;
 
-import :rendering.shader_graph.sg_module;
-import pragma.shadergraph;
+export import :rendering.shader_graph.sg_module;
+export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {
 	class DLLCLIENT InputDataModule : public pragma::rendering::ShaderGraphModule {

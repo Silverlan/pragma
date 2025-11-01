@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.shaders.compute_irradiance_map_roughness;
 
-import :rendering.shaders.cubemap;
+export import :rendering.shaders.cubemap;
 
 export namespace pragma {
 	class DLLCLIENT ShaderComputeIrradianceMapRoughness : public ShaderCubemap {

@@ -7,9 +7,7 @@ module;
 
 export module pragma.client:model.poly_mesh;
 
-import :model.poly;
-import :model.brush_mesh;
-import :model.side;
+export import :model.poly;
 
 export {
 	class DLLCLIENT CPolyMesh : public PolyMesh {

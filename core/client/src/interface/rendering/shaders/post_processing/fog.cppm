@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.shaders.pp_fog;
 
-import :rendering.shaders.base;
+export import :rendering.shaders.base;
 
 export namespace pragma {
 	class DLLCLIENT ShaderPPFog : public ShaderPPBase {

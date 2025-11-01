@@ -11,7 +11,7 @@ module pragma.client;
 
 
 import :scripting.lua.classes.shader;
-void Lua::ComputePipelineCreateInfo::AddSpecializationConstant(lua_State *l, prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t constantId, ::DataStream &ds) { Lua::PushBool(l, pipelineInfo.AddSpecializationConstant(constantId, ds->GetSize(), ds->GetData())); }
+void Lua::ComputePipelineCreateInfo::AddSpecializationConstant(lua_State *l, prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t constantId, ::util::DataStream &ds) { Lua::PushBool(l, pipelineInfo.AddSpecializationConstant(constantId, ds->GetSize(), ds->GetData())); }
 
 void Lua::Shader::Compute::RecordDispatch(lua_State *l, prosper::ShaderCompute &shader, prosper::ShaderBindState &bindState, uint32_t x, uint32_t y, uint32_t z) { Lua::PushBool(l, shader.RecordDispatch(bindState, x, y, z)); }
 void Lua::Shader::Compute::RecordBeginCompute(lua_State *l, prosper::ShaderCompute &shader, prosper::ShaderBindState &bindState, uint32_t pipelineIdx) { Lua::PushBool(l, shader.RecordBeginCompute(bindState, pipelineIdx)); }

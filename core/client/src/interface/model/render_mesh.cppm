@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:model.render_mesh;
 
-import :rendering.shaders.scene;
+export import :rendering.shaders.scene;
 export import pragma.shared;
 
 export class CModelSubMesh;

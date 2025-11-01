@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.shaders.pp_bloom_blur;
 
-import :rendering.controlled_blur_settings;
+export import :rendering.controlled_blur_settings;
 
 export namespace pragma {
 	class DLLCLIENT ShaderPPBloomBlurBase : public prosper::ShaderBlurBase {

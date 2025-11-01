@@ -9,7 +9,7 @@ module;
 export module pragma.client:util.baking;
 
 import :entities.components.lights.light;
-import :rendering.lightmap_data_cache;
+export import :rendering.lightmap_data_cache;
 
 export
 {

@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:gui.silk_icon;
 
-import :gui.icon;
+export import :gui.icon;
 
 export {
 	class DLLCLIENT WISilkIcon : public WIIcon {

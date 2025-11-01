@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:gui.message_box;
 
-import pragma.gui;
+export import pragma.gui;
 
 export {
 	class DLLCLIENT WIMessageBox : public WIBase {

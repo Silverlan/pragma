@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.render_processor;
 
-import :entities.components.scene;
+export import :entities.components.scene;
 
 export namespace pragma {
 	class CVertexAnimatedComponent;
@@ -110,7 +110,7 @@ export namespace pragma::rendering {
 		bool BindInstanceSet(pragma::ShaderGameWorld &shaderScene, const RenderQueue::InstanceSet *instanceSet = nullptr);
 		void UnbindMaterial();
 		void UnbindEntity();
-		MaterialIndex m_curMaterialIndex = std::numeric_limits<MaterialIndex>::max();
+		msys::MaterialIndex m_curMaterialIndex = std::numeric_limits<msys::MaterialIndex>::max();
 		EntityIndex m_curEntityIndex = std::numeric_limits<EntityIndex>::max();
 
 		ShaderProcessor m_shaderProcessor;

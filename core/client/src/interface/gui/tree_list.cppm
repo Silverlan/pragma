@@ -8,7 +8,7 @@ module;
 
 export module pragma.client:gui.tree_list;
 
-import :gui.table;
+export import :gui.table;
 
 export
 {

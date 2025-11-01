@@ -8,8 +8,8 @@ module;
 
 export module pragma.client:particle_system.modifier_random_variable;
 
-import :particle_system.particle;
-import pragma.shared;
+export import :particle_system.particle;
+export import pragma.shared;
 
 export {
 	template<class TUniformDis, typename T>

@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:gui.table;
 
-import :gui.container;
+export import :gui.container;
 
 export
 {

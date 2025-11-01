@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:entities.components.sound_emitter;
 
-import :entities.components.entity;
+export import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CSoundEmitterComponent final : public BaseSoundEmitterComponent, public CBaseNetComponent {

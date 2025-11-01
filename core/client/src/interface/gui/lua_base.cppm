@@ -11,7 +11,7 @@ module;
 export module pragma.client:gui.lua_base;
 
 import :gui.lua_interface;
-import pragma.gui;
+export import pragma.gui;
 export import pragma.shared;
 
 #define LUAGUI_CALL_MEMBER(name, numargs, numret, args, ret)                                                                                                                                                                                                                                     \

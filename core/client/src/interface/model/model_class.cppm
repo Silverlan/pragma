@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:model.model_class;
 
-import :model.mesh;
+export import :model.mesh;
 
 export class DLLCLIENT CModel : public pragma::Model {
   public:
@@ -15,7 +15,7 @@ export class DLLCLIENT CModel : public pragma::Model {
 	void AddMesh(const std::string &meshGroup, const std::shared_ptr<CModelMesh> &mesh);
 	virtual void PrecacheTextureGroup(uint32_t i) override;
 	virtual void PrecacheTexture(uint32_t texId, bool bReload = false) override;
-	virtual void Update(ModelUpdateFlags flags = ModelUpdateFlags::AllData) override;
+	virtual void Update(pragma::model::ModelUpdateFlags flags = pragma::model::ModelUpdateFlags::AllData) override;
 
 	virtual std::shared_ptr<ModelMesh> CreateMesh() const override;
 	virtual std::shared_ptr<pragma::ModelSubMesh> CreateSubMesh() const override;

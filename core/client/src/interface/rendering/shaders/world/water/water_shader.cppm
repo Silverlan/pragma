@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.shaders.world_water;
 
-import :rendering.shaders.textured;
+export import :rendering.shaders.textured;
 
 export namespace pragma {
 	class DLLCLIENT ShaderWater : public ShaderGameWorldLightingPass {

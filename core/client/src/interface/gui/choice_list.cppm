@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:gui.choice_list;
 
-import pragma.gui;
+export import pragma.gui;
 
 export {
 	class DLLCLIENT WIChoiceList : public WIBase {

@@ -9,7 +9,8 @@ module;
 
 
 export module pragma.client:entities.components.pp_fxaa;
-import :entities.components.pp_base;
+
+export import :entities.components.pp_base;
 
 export namespace pragma {
 	class CRasterizationRendererComponent;

@@ -8,7 +8,7 @@ module;
 
 export module pragma.client:rendering.shaders.world_test;
 
-import :rendering.shaders.textured;
+export import :rendering.shaders.textured;
 
 export namespace pragma {
 	class DLLCLIENT ShaderTest : public ShaderGameWorldLightingPass {

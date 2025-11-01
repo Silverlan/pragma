@@ -8,7 +8,7 @@ module;
 
 export module pragma.client:physics.water_surface_simulator;
 
-import :model.mesh;
+export import :model.mesh;
 
 export class DLLCLIENT CPhysWaterSurfaceSimulator : public PhysWaterSurfaceSimulator {
   public:

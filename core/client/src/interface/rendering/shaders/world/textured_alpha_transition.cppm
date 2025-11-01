@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.shaders.textured_alpha_transition;
 
-import :rendering.shaders.textured;
+export import :rendering.shaders.textured;
 
 export namespace pragma {
 	class DLLCLIENT ShaderTexturedAlphaTransition : public ShaderGameWorldLightingPass {

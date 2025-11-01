@@ -10,7 +10,7 @@ module;
 
 export module pragma.client:entities.components.audio.sound_probe;
 
-import :entities.base_entity;
+export import :entities.base_entity;
 
 export namespace pragma {
 	class DLLCLIENT CEnvSoundProbeComponent final : public BaseEntityComponent {

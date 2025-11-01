@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:entities.lua;
 
-import :entities.base_entity;
+export import :entities.base_entity;
 
 export {
 	class DLLCLIENT CLuaEntity : public CBaseEntity {

@@ -10,7 +10,9 @@ module;
 
 
 export module pragma.client:entities.components.lights.directional;
-import :entities.components.lights.shadow_csm;
+
+export import :entities.components.lights.shadow_csm;
+export import :math.mvp_bias;
 
 export namespace pragma {
 	class DLLCLIENT CLightDirectionalComponent final : public BaseEnvLightDirectionalComponent, public CBaseNetComponent, public MVPBias<1> {

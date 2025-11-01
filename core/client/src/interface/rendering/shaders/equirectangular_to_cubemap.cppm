@@ -8,7 +8,8 @@ module;
 
 export module pragma.client:rendering.shaders.equirectangular_to_cubemap;
 
-import :rendering.shaders.cubemap;
+export import :rendering.shaders.cubemap;
+export import pragma.filesystem;
 
 export namespace pragma {
 	class DLLCLIENT ShaderEquirectangularToCubemap : public ShaderCubemap {

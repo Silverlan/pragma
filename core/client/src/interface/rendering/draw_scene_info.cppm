@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.draw_scene_info;
 
-import :rendering.enums;
+export import :rendering.enums;
 import :rendering.render_stats;
 
 export {

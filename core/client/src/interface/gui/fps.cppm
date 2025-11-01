@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:gui.fps;
 
-import pragma.gui;
+export import pragma.gui;
 
 export {
 	class DLLCLIENT WIFPS : public WIBase {

@@ -7,8 +7,8 @@ module;
 
 export module pragma.client:rendering.shaders.particle_model;
 
-import :rendering.shaders.particle_base;
-import :rendering.shaders.textured;
+export import :rendering.shaders.particle_base;
+export import :rendering.shaders.textured;
 
 export namespace pragma {
 	class DLLCLIENT ShaderParticleModel : public ShaderGameWorldLightingPass, public ShaderParticleBase {

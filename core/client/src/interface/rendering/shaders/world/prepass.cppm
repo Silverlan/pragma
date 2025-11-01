@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.shaders.prepass;
 
-import :rendering.shaders.scene;
+export import :rendering.shaders.scene;
 
 export namespace pragma {
 	class DLLCLIENT ShaderPrepassBase : public ShaderGameWorld {

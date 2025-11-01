@@ -7,7 +7,8 @@ module;
 
 export module pragma.client:rendering.shaders.pp_water;
 
-import :rendering.shaders.base;
+export import :rendering.shaders.base;
+export import pragma.cmaterialsystem;
 
 export namespace pragma {
 	class DLLCLIENT ShaderPPWater : public ShaderPPBase {

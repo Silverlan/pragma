@@ -10,12 +10,13 @@ module;
 #define DEBUG_RENDER_PERFORMANCE_TEST_ENABLED 0
 
 export module pragma.client:entities.components.rasterization_renderer;
-import :entities.components.light_map;
-import :rendering.draw_scene_info;
-import :rendering.forward_plus;
-import :rendering.prepass;
-import :rendering.render_processor;
-import :rendering.ssao;
+
+export import :entities.components.light_map;
+export import :rendering.draw_scene_info;
+export import :rendering.forward_plus;
+export import :rendering.prepass;
+export import :rendering.render_processor;
+export import :rendering.ssao;
 
 export namespace pragma {
 	class ShaderGameWorldLightingPass;

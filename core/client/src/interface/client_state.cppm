@@ -9,11 +9,11 @@ module;
 #undef PlaySound
 
 export module pragma.client:client_state;
-import :audio;
-import :game;
-import :gui;
-import :networking;
-import pragma.string.unicode;
+export import :audio;
+export import :game;
+export import :gui;
+export import :networking;
+export import pragma.string.unicode;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -149,7 +149,7 @@ export {
 		// Peer-to-peer only!
 		void Connect(uint64_t steamId);
 		CLNetMessage *GetNetMessage(unsigned int ID);
-		ClientMessageMap *GetNetMessageMap();
+		pragma::networking::ClientMessageMap *GetNetMessageMap();
 		void SendUserInfo();
 
 		void InitializeGUIModule();

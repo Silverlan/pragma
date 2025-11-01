@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:entities.components.view_body;
 
-import :entities.base_entity;
+export import :entities.base_entity;
 
 export namespace pragma {
 	class DLLCLIENT CViewBodyComponent final : public BaseEntityComponent {

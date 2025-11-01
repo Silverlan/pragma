@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.entity_mesh_info;
 
-import :model.mesh;
+export import :model.mesh;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)

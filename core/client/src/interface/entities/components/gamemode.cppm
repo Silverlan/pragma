@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:entities.components.gamemode;
 
-import :entities.base_entity;
+export import :entities.base_entity;
 
 export namespace pragma {
 	class DLLCLIENT CGamemodeComponent final : public BaseGamemodeComponent {

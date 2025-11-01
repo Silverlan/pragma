@@ -7,8 +7,8 @@ module;
 
 export module pragma.client:particle_system.operator_random_emission_rate;
 
-import :entities.components.particle_system;
-import :particle_system.modifier;
+export import :entities.components.particle_system;
+export import :particle_system.modifier;
 
 export class DLLCLIENT CParticleOperatorRandomEmissionRate : public CParticleOperator {
   public:

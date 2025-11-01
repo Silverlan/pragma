@@ -10,8 +10,8 @@ module;
 
 export module pragma.client:entities.components.game_occlusion_culler;
 
-import :entities.base_entity;
-import :rendering.occlusion_culling.octree;
+export import :entities.base_entity;
+export import :rendering.occlusion_culling.octree;
 
 export namespace pragma {
 	class DLLCLIENT COcclusionCullerComponent final : public BaseEntityComponent {

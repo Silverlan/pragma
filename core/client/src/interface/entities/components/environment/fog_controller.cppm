@@ -9,8 +9,8 @@ module;
 
 export module pragma.client:entities.components.env_fog_controller;
 
-import :entities.base_entity;
-import :entities.components.entity;
+export import :entities.base_entity;
+export import :entities.components.entity;
 import :rendering.world_environment;
 
 export {

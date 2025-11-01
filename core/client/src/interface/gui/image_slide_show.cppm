@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:gui.image_slide_show;
 
-import pragma.gui;
+export import pragma.gui;
 
 export {
 	class DLLCLIENT WIImageSlideShow : public WIBase {

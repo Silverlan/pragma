@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:gui.scroll_container;
 
-import pragma.gui;
+export import pragma.gui;
 
 export
 {

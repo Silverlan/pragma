@@ -11,7 +11,9 @@ module;
 
 export module pragma.client:entities.components.raytracing;
 
-import :rendering.enums;
+export import :rendering.enums;
+export import pragma.cmaterialsystem;
+export import pragma.prosper;
 export import pragma.shared;
 
 export namespace pragma {

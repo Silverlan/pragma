@@ -721,9 +721,9 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defShader.def(
 	  "RecordBindDescriptorSet",
 	  +[](lua_State *l, prosper::Shader &shader, prosper::util::PreparedCommandBuffer &pcb, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets) { Lua::Shader::RecordBindDescriptorSet(l, shader, pcb, ds, firstSet, dynamicOffsets, 5); });
-	defShader.def("RecordPushConstants", static_cast<void (*)(lua_State *, prosper::Shader &, const LuaShaderRecordTarget &, ::DataStream &, uint32_t)>(&Lua::Shader::RecordPushConstants));
+	defShader.def("RecordPushConstants", static_cast<void (*)(lua_State *, prosper::Shader &, const LuaShaderRecordTarget &, ::util::DataStream &, uint32_t)>(&Lua::Shader::RecordPushConstants));
 	defShader.def("RecordPushConstants", static_cast<void (*)(lua_State *, prosper::Shader &, prosper::util::PreparedCommandBuffer &, udm::Type, const Lua::Vulkan::PreparedCommandLuaArg &, uint32_t)>(&Lua::Shader::RecordPushConstants));
-	defShader.def("RecordPushConstants", static_cast<void (*)(lua_State *, prosper::Shader &, const LuaShaderRecordTarget &, ::DataStream &, uint32_t)>(&Lua::Shader::RecordPushConstants), luabind::default_parameter_policy<5, static_cast<uint32_t>(0)> {});
+	defShader.def("RecordPushConstants", static_cast<void (*)(lua_State *, prosper::Shader &, const LuaShaderRecordTarget &, ::util::DataStream &, uint32_t)>(&Lua::Shader::RecordPushConstants), luabind::default_parameter_policy<5, static_cast<uint32_t>(0)> {});
 	defShader.def("RecordPushConstants", static_cast<void (*)(lua_State *, prosper::Shader &, prosper::util::PreparedCommandBuffer &, udm::Type, const Lua::Vulkan::PreparedCommandLuaArg &, uint32_t)>(&Lua::Shader::RecordPushConstants),
 	  luabind::default_parameter_policy<6, static_cast<uint32_t>(0)> {});
 	defShader.def("GetEntrypointName", &Lua::Shader::GetEntrypointName);

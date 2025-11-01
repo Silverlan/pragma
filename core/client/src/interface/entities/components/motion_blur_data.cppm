@@ -9,6 +9,7 @@ module;
 
 
 export module pragma.client:entities.components.motion_blur_data;
+
 import :rendering.shaders;
 
 export namespace pragma {

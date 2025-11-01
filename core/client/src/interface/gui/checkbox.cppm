@@ -8,7 +8,7 @@ module;
 
 export module pragma.client:gui.checkbox;
 
-import pragma.gui;
+export import pragma.gui;
 
 export {
 	class DLLCLIENT WICheckbox : public WIRect {

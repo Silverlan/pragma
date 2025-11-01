@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:particle_system.renderer_blob;
 
-import :particle_system.modifier;
+export import :particle_system.modifier;
 import :rendering.shaders;
 
 import :debug;

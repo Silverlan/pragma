@@ -218,11 +218,11 @@ void register_vulkan_lua_interface2(Lua::Interface &lua, luabind::module_ &prosp
 	defVkMemory.def("GetSize",&Lua::Vulkan::VKMemory::GetSize);
 	defVkMemory.def("GetStartOffset",&Lua::Vulkan::VKMemory::GetStartOffset);
 	defVkMemory.def("Write",&Lua::Vulkan::VKMemory::Write);
-	defVkMemory.def("Write",static_cast<void(*)(lua_State*,Lua::Vulkan::Memory&,uint32_t,::DataStream&)>([](lua_State *l,Lua::Vulkan::Memory &hMemory,uint32_t offset,::DataStream &ds) {
+	defVkMemory.def("Write",static_cast<void(*)(lua_State*,Lua::Vulkan::Memory&,uint32_t,::util::DataStream&)>([](lua_State *l,Lua::Vulkan::Memory &hMemory,uint32_t offset,::util::DataStream &ds) {
 		Lua::Vulkan::VKMemory::Write(l,hMemory,offset,ds,0u,ds->GetSize());
 	}));
-	defVkMemory.def("Read",static_cast<void(*)(lua_State*,Lua::Vulkan::Memory&,uint32_t,uint32_t,::DataStream&,uint32_t)>(&Lua::Vulkan::VKMemory::Read));
-	defVkMemory.def("Read",static_cast<void(*)(lua_State*,Lua::Vulkan::Memory&,uint32_t,uint32_t,::DataStream&)>([](lua_State *l,Lua::Vulkan::Memory &hMemory,uint32_t offset,uint32_t size,::DataStream &ds) {
+	defVkMemory.def("Read",static_cast<void(*)(lua_State*,Lua::Vulkan::Memory&,uint32_t,uint32_t,::util::DataStream&,uint32_t)>(&Lua::Vulkan::VKMemory::Read));
+	defVkMemory.def("Read",static_cast<void(*)(lua_State*,Lua::Vulkan::Memory&,uint32_t,uint32_t,::util::DataStream&)>([](lua_State *l,Lua::Vulkan::Memory &hMemory,uint32_t offset,uint32_t size,::util::DataStream &ds) {
 		Lua::Vulkan::VKMemory::Read(l,hMemory,offset,size,ds,0u);
 	}));
 	defVkMemory.def("Read",static_cast<void(*)(lua_State*,Lua::Vulkan::Memory&,uint32_t,uint32_t)>(&Lua::Vulkan::VKMemory::Read));
@@ -259,7 +259,7 @@ void register_vulkan_lua_interface2(Lua::Interface &lua, luabind::module_ &prosp
 		return Lua::Vulkan::VKCommandBuffer::RecordCopyBufferToImage(l, hCommandBuffer, bufSrc, imgDst, {});
 	}));
 	defVkCommandBuffer.def("RecordCopyBuffer", &Lua::Vulkan::VKCommandBuffer::RecordCopyBuffer);
-	defVkCommandBuffer.def("RecordUpdateBuffer", static_cast<bool (*)(lua_State *, Lua::Vulkan::CommandBuffer &, Lua::Vulkan::Buffer &, uint32_t, ::DataStream &)>(&Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer));
+	defVkCommandBuffer.def("RecordUpdateBuffer", static_cast<bool (*)(lua_State *, Lua::Vulkan::CommandBuffer &, Lua::Vulkan::Buffer &, uint32_t, ::util::DataStream &)>(&Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer));
 	defVkCommandBuffer.def("RecordUpdateBuffer", static_cast<bool (*)(lua_State *, Lua::Vulkan::CommandBuffer &, Lua::Vulkan::Buffer &, uint32_t, ::udm::Type, Lua::udm_ng)>(&Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer));
 	defVkCommandBuffer.def("RecordBlitImage", &Lua::Vulkan::VKCommandBuffer::RecordBlitImage);
 	defVkCommandBuffer.def("RecordResolveImage", &Lua::Vulkan::VKCommandBuffer::RecordResolveImage);
@@ -390,15 +390,15 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 	devVkBuffer.def("GetCreateInfo", &Lua::Vulkan::Buffer::GetCreateInfo, luabind::copy_policy<0> {});
 	devVkBuffer.def("SetPermanentlyMapped", &Lua::Vulkan::Buffer::SetPermanentlyMapped);
 	devVkBuffer.def("GetParent", static_cast<std::shared_ptr<prosper::IBuffer> (prosper::IBuffer::*)()>(&Lua::Vulkan::Buffer::GetParent));
-	devVkBuffer.def("WriteMemory", static_cast<bool (*)(lua_State *, Lua::Vulkan::Buffer &, uint32_t, ::DataStream &, uint32_t, uint32_t)>(&Lua::Vulkan::VKBuffer::Write));
+	devVkBuffer.def("WriteMemory", static_cast<bool (*)(lua_State *, Lua::Vulkan::Buffer &, uint32_t, ::util::DataStream &, uint32_t, uint32_t)>(&Lua::Vulkan::VKBuffer::Write));
 	devVkBuffer.def("WriteMemory", static_cast<bool (*)(lua_State *, Lua::Vulkan::Buffer &, uint32_t, ::udm::Type, Lua::udm_ng)>(&Lua::Vulkan::VKBuffer::Write));
-	devVkBuffer.def("WriteMemory", static_cast<bool (*)(lua_State *, Lua::Vulkan::Buffer &, uint32_t, ::DataStream &)>([](lua_State *l, Lua::Vulkan::Buffer &hBuffer, uint32_t offset, ::DataStream &ds) { return Lua::Vulkan::VKBuffer::Write(l, hBuffer, offset, ds, 0u, ds->GetSize()); }));
-	devVkBuffer.def("ReadMemory", static_cast<bool (*)(lua_State *, Lua::Vulkan::Buffer &, uint32_t, uint32_t, ::DataStream &, uint32_t)>(&Lua::Vulkan::VKBuffer::Read));
+	devVkBuffer.def("WriteMemory", static_cast<bool (*)(lua_State *, Lua::Vulkan::Buffer &, uint32_t, ::util::DataStream &)>([](lua_State *l, Lua::Vulkan::Buffer &hBuffer, uint32_t offset, ::util::DataStream &ds) { return Lua::Vulkan::VKBuffer::Write(l, hBuffer, offset, ds, 0u, ds->GetSize()); }));
+	devVkBuffer.def("ReadMemory", static_cast<bool (*)(lua_State *, Lua::Vulkan::Buffer &, uint32_t, uint32_t, ::util::DataStream &, uint32_t)>(&Lua::Vulkan::VKBuffer::Read));
 	devVkBuffer.def("ReadMemory",
-	  static_cast<bool (*)(lua_State *, Lua::Vulkan::Buffer &, uint32_t, uint32_t, ::DataStream &)>([](lua_State *l, Lua::Vulkan::Buffer &hBuffer, uint32_t offset, uint32_t size, ::DataStream &ds) { return Lua::Vulkan::VKBuffer::Read(l, hBuffer, offset, size, ds, 0u); }));
+	  static_cast<bool (*)(lua_State *, Lua::Vulkan::Buffer &, uint32_t, uint32_t, ::util::DataStream &)>([](lua_State *l, Lua::Vulkan::Buffer &hBuffer, uint32_t offset, uint32_t size, ::util::DataStream &ds) { return Lua::Vulkan::VKBuffer::Read(l, hBuffer, offset, size, ds, 0u); }));
 	devVkBuffer.def("ReadMemory", static_cast<bool (*)(lua_State *, Lua::Vulkan::Buffer &, uint32_t, ::udm::Type, Lua::udm_ng)>(&Lua::Vulkan::VKBuffer::Read));
-	devVkBuffer.def("ReadMemory", static_cast<Lua::opt<::DataStream> (*)(lua_State *, Lua::Vulkan::Buffer &, uint32_t, uint32_t)>(&Lua::Vulkan::VKBuffer::Read));
-	devVkBuffer.def("ReadMemory", static_cast<Lua::opt<::DataStream> (*)(lua_State *, Lua::Vulkan::Buffer &)>([](lua_State *l, Lua::Vulkan::Buffer &hBuffer) { return Lua::Vulkan::VKBuffer::Read(l, hBuffer, 0u, hBuffer.GetSize()); }));
+	devVkBuffer.def("ReadMemory", static_cast<Lua::opt<::util::DataStream> (*)(lua_State *, Lua::Vulkan::Buffer &, uint32_t, uint32_t)>(&Lua::Vulkan::VKBuffer::Read));
+	devVkBuffer.def("ReadMemory", static_cast<Lua::opt<::util::DataStream> (*)(lua_State *, Lua::Vulkan::Buffer &)>([](lua_State *l, Lua::Vulkan::Buffer &hBuffer) { return Lua::Vulkan::VKBuffer::Read(l, hBuffer, 0u, hBuffer.GetSize()); }));
 	devVkBuffer.def("MapMemory", &Lua::Vulkan::VKBuffer::Map);
 	devVkBuffer.def("MapMemory",
 	  static_cast<bool (*)(lua_State *, Lua::Vulkan::Buffer &, Lua::Vulkan::Buffer::MapFlags)>([](lua_State *l, Lua::Vulkan::Buffer &hBuffer, Lua::Vulkan::Buffer::MapFlags mapFlags) { return Lua::Vulkan::VKBuffer::Map(l, hBuffer, 0u, hBuffer.GetSize(), mapFlags); }));

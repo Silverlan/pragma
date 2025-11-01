@@ -348,7 +348,7 @@ bool CDecalComponent::ApplyDecal(DecalProjector &projector, const std::vector<De
 	meshGroup->AddMesh(mesh);
 	mdl->AddMaterial(0, mat);
 
-	mdl->Update(ModelUpdateFlags::All | ModelUpdateFlags::UpdateChildren);
+	mdl->Update(pragma::model::ModelUpdateFlags::All | pragma::model::ModelUpdateFlags::UpdateChildren);
 
 	//decalRenderC->SetDepthBias(-1'000.f,0.f,-2.f);
 	// TODO

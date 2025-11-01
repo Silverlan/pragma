@@ -11,14 +11,14 @@ module;
 
 export module pragma.client:entities.components.scene;
 
-import :debug.enums;
-import :entities.components.render;
-import :rendering.draw_scene_info;
-import :rendering.entity_instance_index_buffer;
-import :rendering.occlusion_culling.octree;
-import :rendering.render_queue;
-import :rendering.shaders.textured_uniform_data;
-import :rendering.world_environment;
+export import :debug.enums;
+export import :entities.components.render;
+export import :rendering.draw_scene_info;
+export import :rendering.entity_instance_index_buffer;
+export import :rendering.occlusion_culling.octree;
+export import :rendering.render_queue;
+export import :rendering.shaders.textured_uniform_data;
+export import :rendering.world_environment;
 
 export class DLLCLIENT SceneRenderDesc {
   public:
@@ -264,7 +264,7 @@ export {
 		struct enable_bitwise_operators<pragma::CSceneComponent::FRenderSetting> : std::true_type {};
 
 		template<>
-		struct enable_bitwise_operators<ppragma::CSceneComponent::StateFlags> : std::true_type {};
+		struct enable_bitwise_operators<pragma::CSceneComponent::StateFlags> : std::true_type {};
 	}
 };
 

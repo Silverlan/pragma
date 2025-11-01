@@ -58,13 +58,13 @@ namespace luabind {
 namespace Lua {
 	namespace Vulkan {
 		std::vector<pragma::ShaderGradient::Node> get_gradient_nodes(lua_State *l, const luabind::tableT<void> &tNodes);
-		static std::shared_ptr<prosper::IBuffer> create_buffer(prosper::IPrContext &context, prosper::util::BufferCreateInfo &bufCreateInfo, ::DataStream &ds);
+		static std::shared_ptr<prosper::IBuffer> create_buffer(prosper::IPrContext &context, prosper::util::BufferCreateInfo &bufCreateInfo, ::util::DataStream &ds);
 		static std::shared_ptr<prosper::IBuffer> create_buffer(prosper::IPrContext &context, prosper::util::BufferCreateInfo &bufCreateInfo);
 		static std::shared_ptr<prosper::Texture> create_texture(prosper::IImage &img, const prosper::util::TextureCreateInfo &texCreateInfo, const prosper::util::ImageViewCreateInfo &imgViewCreateInfo, const prosper::util::SamplerCreateInfo &samplerCreateInfo);
 		static std::shared_ptr<prosper::Texture> create_texture(prosper::IImage &img, const prosper::util::TextureCreateInfo &texCreateInfo, const prosper::util::ImageViewCreateInfo &imgViewCreateInfo);
 		static std::shared_ptr<prosper::Texture> create_texture(prosper::IImage &img, const prosper::util::TextureCreateInfo &texCreateInfo);
 		static std::shared_ptr<prosper::IDescriptorSetGroup> create_descriptor_set(const pragma::LuaDescriptorSetInfo &ldescSetInfo);
-		static std::shared_ptr<prosper::IImage> create_image(const prosper::util::ImageCreateInfo &imgCreateInfo, ::DataStream &ds);
+		static std::shared_ptr<prosper::IImage> create_image(const prosper::util::ImageCreateInfo &imgCreateInfo, ::util::DataStream &ds);
 		static std::shared_ptr<prosper::IImage> create_image(const prosper::util::ImageCreateInfo &imgCreateInfo);
 		static std::shared_ptr<prosper::IImage> create_image(const std::array<std::shared_ptr<uimg::ImageBuffer>, 6> &imgBuffers);
 		static std::shared_ptr<prosper::IImage> create_image(const std::array<std::shared_ptr<uimg::ImageBuffer>, 6> &imgBuffers, const prosper::util::ImageCreateInfo &imgCreateInfo);
@@ -92,7 +92,7 @@ namespace Lua {
 		static std::shared_ptr<prosper::IBuffer> get_square_vertex_buffer(lua_State *l);
 		static std::shared_ptr<prosper::IBuffer> get_square_uv_buffer(lua_State *l);
 		static std::shared_ptr<prosper::IBuffer> allocate_temporary_buffer(lua_State *l, uint32_t size);
-		static std::shared_ptr<prosper::IBuffer> allocate_temporary_buffer(lua_State *l, ::DataStream &ds);
+		static std::shared_ptr<prosper::IBuffer> allocate_temporary_buffer(lua_State *l, ::util::DataStream &ds);
 		static std::shared_ptr<prosper::IBuffer> get_line_vertex_buffer(lua_State *l);
 		namespace VKTexture {
 			static bool IsValid(lua_State *l, Texture &hTex);
@@ -144,9 +144,9 @@ namespace Lua {
 			static void GetParentMemory(lua_State *l,Memory &hMemory);
 			static void GetSize(lua_State *l,Memory &hMemory);
 			static void GetStartOffset(lua_State *l,Memory &hMemory);
-			static void Write(lua_State *l,Memory &hMemory,uint32_t offset,::DataStream &ds,uint32_t dsOffset,uint32_t dsSize);
+			static void Write(lua_State *l,Memory &hMemory,uint32_t offset,::util::DataStream &ds,uint32_t dsOffset,uint32_t dsSize);
 			static void Read(lua_State *l,Memory &hMemory,uint32_t offset,uint32_t size);
-			static void Read(lua_State *l,Memory &hMemory,uint32_t offset,uint32_t size,::DataStream &ds,uint32_t dsOffset);
+			static void Read(lua_State *l,Memory &hMemory,uint32_t offset,uint32_t size,::util::DataStream &ds,uint32_t dsOffset);
 			static void Map(lua_State *l,Memory &hMemory,uint32_t offset,uint32_t size);
 			static void Unmap(lua_State *l,Memory &hMemory);
 		};
@@ -301,7 +301,7 @@ namespace pragma::platform {
 	}
 };
 
-std::shared_ptr<prosper::IBuffer> Lua::Vulkan::create_buffer(prosper::IPrContext &context, prosper::util::BufferCreateInfo &bufCreateInfo, ::DataStream &ds)
+std::shared_ptr<prosper::IBuffer> Lua::Vulkan::create_buffer(prosper::IPrContext &context, prosper::util::BufferCreateInfo &bufCreateInfo, ::util::DataStream &ds)
 {
 	auto buf = context.CreateBuffer(bufCreateInfo, ds->GetData());
 	if(buf == nullptr)
@@ -407,7 +407,7 @@ std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(const prosper::util::
 	return img;
 }
 
-std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(const prosper::util::ImageCreateInfo &imgCreateInfo, ::DataStream &ds)
+std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(const prosper::util::ImageCreateInfo &imgCreateInfo, ::util::DataStream &ds)
 {
 	auto img = pragma::get_cengine()->GetRenderContext().CreateImage(imgCreateInfo, ds->GetData());
 	if(img)
@@ -512,7 +512,7 @@ std::shared_ptr<prosper::IBuffer> Lua::Vulkan::get_square_vertex_uv_buffer(lua_S
 std::shared_ptr<prosper::IBuffer> Lua::Vulkan::get_square_vertex_buffer(lua_State *l) { return pragma::get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer(); }
 std::shared_ptr<prosper::IBuffer> Lua::Vulkan::get_square_uv_buffer(lua_State *l) { return pragma::get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareUvBuffer(); }
 std::shared_ptr<prosper::IBuffer> Lua::Vulkan::allocate_temporary_buffer(lua_State *l, uint32_t size) { return pragma::get_cengine()->GetRenderContext().AllocateTemporaryBuffer(size); }
-std::shared_ptr<prosper::IBuffer> Lua::Vulkan::allocate_temporary_buffer(lua_State *l, ::DataStream &ds) { return pragma::get_cengine()->GetRenderContext().AllocateTemporaryBuffer(ds->GetSize(), 0u /* alignment */, ds->GetData()); }
+std::shared_ptr<prosper::IBuffer> Lua::Vulkan::allocate_temporary_buffer(lua_State *l, ::util::DataStream &ds) { return pragma::get_cengine()->GetRenderContext().AllocateTemporaryBuffer(ds->GetSize(), 0u /* alignment */, ds->GetData()); }
 
 std::vector<pragma::ShaderGradient::Node> Lua::Vulkan::get_gradient_nodes(lua_State *l, const luabind::tableT<void> &tNodes)
 {
@@ -704,9 +704,9 @@ void register_vulkan_lua_interface2(Lua::Interface &lua, luabind::module_ &prosp
 void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 {
 	auto prosperMod = luabind::module_(lua.GetState(), "prosper");
-	prosperMod[luabind::def("create_buffer", static_cast<std::shared_ptr<prosper::IBuffer> (*)(prosper::IPrContext &, prosper::util::BufferCreateInfo &, ::DataStream &)>(&Lua::Vulkan::create_buffer), luabind::render_context_policy<1> {}),
+	prosperMod[luabind::def("create_buffer", static_cast<std::shared_ptr<prosper::IBuffer> (*)(prosper::IPrContext &, prosper::util::BufferCreateInfo &, ::util::DataStream &)>(&Lua::Vulkan::create_buffer), luabind::render_context_policy<1> {}),
 	  luabind::def("create_buffer", static_cast<std::shared_ptr<prosper::IBuffer> (*)(prosper::IPrContext &, prosper::util::BufferCreateInfo &)>(&Lua::Vulkan::create_buffer), luabind::render_context_policy<1> {}), luabind::def("create_descriptor_set", Lua::Vulkan::create_descriptor_set),
-	  luabind::def("create_image", static_cast<std::shared_ptr<prosper::IImage> (*)(const prosper::util::ImageCreateInfo &, ::DataStream &)>(&Lua::Vulkan::create_image)),
+	  luabind::def("create_image", static_cast<std::shared_ptr<prosper::IImage> (*)(const prosper::util::ImageCreateInfo &, ::util::DataStream &)>(&Lua::Vulkan::create_image)),
 	  luabind::def("create_image", static_cast<std::shared_ptr<prosper::IImage> (*)(const prosper::util::ImageCreateInfo &)>(&Lua::Vulkan::create_image)),
 	  luabind::def("create_image", static_cast<std::shared_ptr<prosper::IImage> (*)(const std::array<std::shared_ptr<uimg::ImageBuffer>, 6> &)>(&Lua::Vulkan::create_image)),
 	  luabind::def("create_image", static_cast<std::shared_ptr<prosper::IImage> (*)(const std::array<std::shared_ptr<uimg::ImageBuffer>, 6> &, const prosper::util::ImageCreateInfo &)>(&Lua::Vulkan::create_image)),
@@ -759,7 +759,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	prosperMod[luabind::namespace_("util")[luabind::def("get_square_vertex_uv_buffer", &Lua::Vulkan::get_square_vertex_uv_buffer), luabind::def("get_square_vertex_buffer", &Lua::Vulkan::get_square_vertex_buffer), luabind::def("get_square_uv_buffer", &Lua::Vulkan::get_square_uv_buffer),
 	  luabind::def("get_square_vertices", &prosper::CommonBufferCache::GetSquareVertices), luabind::def("get_square_uv_coordinates", &prosper::CommonBufferCache::GetSquareUvCoordinates), luabind::def("get_square_vertex_count", &prosper::CommonBufferCache::GetSquareVertexCount),
 	  luabind::def("get_square_vertex_format", &prosper::CommonBufferCache::GetSquareVertexFormat), luabind::def("get_square_uv_format", &prosper::CommonBufferCache::GetSquareUvFormat),
-	  luabind::def("allocate_temporary_buffer", static_cast<std::shared_ptr<prosper::IBuffer> (*)(lua_State *, ::DataStream &)>(&Lua::Vulkan::allocate_temporary_buffer)),
+	  luabind::def("allocate_temporary_buffer", static_cast<std::shared_ptr<prosper::IBuffer> (*)(lua_State *, ::util::DataStream &)>(&Lua::Vulkan::allocate_temporary_buffer)),
 	  luabind::def("allocate_temporary_buffer", static_cast<std::shared_ptr<prosper::IBuffer> (*)(lua_State *, uint32_t)>(&Lua::Vulkan::allocate_temporary_buffer)),
 
 	  luabind::def("get_line_vertex_buffer", &Lua::Vulkan::get_line_vertex_buffer), luabind::def("get_line_vertices", &prosper::CommonBufferCache::GetLineVertices), luabind::def("get_line_vertex_count", &prosper::CommonBufferCache::GetLineVertexCount),

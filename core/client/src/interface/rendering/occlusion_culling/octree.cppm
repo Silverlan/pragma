@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/clientdefinitions.h"
+#include <cassert>
 
 #define ENABLE_OCCLUSION_DEBUG_MODE 0
 

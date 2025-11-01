@@ -7,7 +7,7 @@ module;
 
 
 export module pragma.client:scripting.lua.libraries.debug_renderer;
-import :debug;
+export import :debug;
 
 #undef DrawText
 

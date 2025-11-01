@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:gui.icon;
 
-import pragma.gui;
+export import pragma.gui;
 
 export {
 	class DLLCLIENT WIIcon : public WITexturedRect {

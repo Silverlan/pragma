@@ -7,13 +7,13 @@ module;
 
 export module pragma.client:rendering.shader_graph.sg_module;
 
-import :entities.components.rasterization_renderer;
-import :entities.components.scene;
-import :model.mesh;
-import :rendering.render_processor;
-import pragma.shadergraph;
+export import :entities.components.rasterization_renderer;
+export import :entities.components.scene;
+export import :model.mesh;
+export import :rendering.render_processor;
+export import pragma.shadergraph;
 
-namespace pragma {class ShaderGraph;};
+export namespace pragma {class ShaderGraph;};
 export namespace pragma::rendering {
 	class DLLCLIENT ShaderGraphModule {
 	  public:
@@ -25,7 +25,7 @@ export namespace pragma::rendering {
 		virtual void UpdateRenderFlags(CModelSubMesh &mesh, ShaderGameWorld::SceneFlags &inOutFlags) {}
 		virtual void RecordBindScene(ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const = 0;
 		virtual void RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const {}
-		virtual void RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, CMaterial &mat) const {}
+		virtual void RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, msys::CMaterial &mat) const {}
 		void SetNodes(std::vector<pragma::shadergraph::GraphNode *> &&nodes) { m_nodes = std::move(nodes); }
 	  protected:
 		ShaderGraph &m_shader;

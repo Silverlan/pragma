@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:gui.grid_panel;
 
-import :gui.table;
+export import :gui.table;
 
 export class DLLCLIENT WIGridPanel : public WITable {
   public:

@@ -10,7 +10,7 @@ module;
 
 export module pragma.client:entities.components.water_surface;
 
-import :entities.base_entity;
+export import :entities.base_entity;
 import :model.mesh;
 
 export namespace pragma {
@@ -21,7 +21,7 @@ export namespace pragma {
 
 		virtual ~CWaterSurfaceComponent() override;
 		void SetSurfaceSimulator(const std::shared_ptr<PhysWaterSurfaceSimulator> &simulator);
-		CMaterial *GetWaterMaterial() const;
+		msys::CMaterial *GetWaterMaterial() const;
 		void SetWaterObject(BaseLiquidSurfaceSimulationComponent *ent);
 		CModelSubMesh *GetWaterSurfaceMesh() const;
 		virtual void InitializeLuaObject(lua_State *l) override;

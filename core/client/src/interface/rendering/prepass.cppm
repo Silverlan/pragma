@@ -10,8 +10,8 @@ export module pragma.client:rendering.prepass;
 // See https://aras-p.info/blog/2012/03/02/2012-theory-for-forward-rendering/ for implementation details
 // #define ENABLE_TRANSLUCENT_DEPTH_PREPASS
 
-import :rendering.draw_scene_info;
-import :rendering.shaders.prepass;
+export import :rendering.draw_scene_info;
+export import :rendering.shaders.prepass;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)

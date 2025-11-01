@@ -9,10 +9,10 @@ module;
 
 export module pragma.client:rendering.occlusion_culling.chc;
 
-import :entities.base_entity;
-import :model.mesh;
+export import :entities.base_entity;
+export import :model.mesh;
 import pragma.gui;
-import :rendering.occlusion_culling.octree;
+export import :rendering.occlusion_culling.octree;
 
 export {
 	class CHC;

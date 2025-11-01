@@ -7,6 +7,8 @@ module;
 
 export module pragma.client:rendering.shaders.base_3d;
 
+export import pragma.prosper;
+
 export namespace pragma {
 	class DLLCLIENT Shader3DBase : public prosper::ShaderGraphics {
 	  public:

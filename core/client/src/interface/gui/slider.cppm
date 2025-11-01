@@ -8,7 +8,7 @@ module;
 
 export module pragma.client:gui.slider;
 
-import :gui.progress_bar;
+export import :gui.progress_bar;
 
 export {
 	class DLLCLIENT WISlider : public WIProgressBar {

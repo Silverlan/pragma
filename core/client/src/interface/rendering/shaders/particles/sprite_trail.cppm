@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.shaders.particle_sprite_trail;
 
-import :rendering.shaders.particle_2d_base;
+export import :rendering.shaders.particle_2d_base;
 
 export namespace pragma {
 	class DLLCLIENT ShaderParticleSpriteTrail : public ShaderParticle2DBase {

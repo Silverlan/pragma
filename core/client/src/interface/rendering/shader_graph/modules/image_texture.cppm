@@ -10,9 +10,9 @@ export module pragma.client:rendering.shader_graph.module_image_texture;
 import :entities.components.scene;
 import :entities.components.rasterization_renderer;
 import :rendering.render_processor;
-import :rendering.shader_graph.sg_module;
+export import :rendering.shader_graph.sg_module;
 import :rendering.shaders.world_graph;
-import pragma.shadergraph;
+export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {
 	class DLLCLIENT ImageTextureModule : public pragma::rendering::ShaderGraphModule {

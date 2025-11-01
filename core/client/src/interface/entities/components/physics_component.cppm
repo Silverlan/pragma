@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:entities.components.physics;
 
-import :entities.components.entity;
+export import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CPhysicsComponent final : public BasePhysicsComponent, public CBaseNetComponent, public nwm::VelocityCorrection {

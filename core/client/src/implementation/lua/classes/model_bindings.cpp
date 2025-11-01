@@ -28,7 +28,7 @@ std::shared_ptr<pragma::Model> Lua::Model::Client::create_generic_model(pragma::
 	mdl->AddMaterial(0, mat);
 
 	mdl->GetMeshGroup("reference")->AddMesh(mesh);
-	mdl->Update(ModelUpdateFlags::All);
+	mdl->Update(pragma::model::ModelUpdateFlags::All);
 	return mdl;
 }
 

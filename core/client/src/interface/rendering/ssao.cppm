@@ -7,6 +7,9 @@ module;
 
 
 export module pragma.client:rendering.ssao;
+
+export import pragma.prosper;
+
 #pragma warning(push)
 #pragma warning(disable : 4251)
 export struct DLLCLIENT SSAOInfo {

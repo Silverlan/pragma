@@ -9,11 +9,11 @@ module;
 
 export module pragma.client:entities.components.model;
 
-import :entities.components.entity;
-import :model.render_mesh_group;
+export import :entities.components.entity;
+export import :model.render_mesh_group;
 import :rendering.material_property_block;
-import :rendering.model_render_buffer_data;
-import :rendering.shaders.textured_enums;
+export import :rendering.model_render_buffer_data;
+export import :rendering.shaders.textured_enums;
 
 export class CModelSubMesh;
 export namespace pragma {
@@ -49,8 +49,8 @@ export namespace pragma {
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 
-		CMaterial *GetRenderMaterial(uint32_t idx) const;
-		CMaterial *GetRenderMaterial(uint32_t idx, uint32_t skin) const;
+		msys::CMaterial *GetRenderMaterial(uint32_t idx) const;
+		msys::CMaterial *GetRenderMaterial(uint32_t idx, uint32_t skin) const;
 
 		CMaterialOverrideComponent *GetMaterialOverrideComponent();
 		const CMaterialOverrideComponent *GetMaterialOverrideComponent() const { return const_cast<CModelComponent *>(this)->GetMaterialOverrideComponent(); }
@@ -73,7 +73,7 @@ export namespace pragma {
 		const std::vector<rendering::RenderBufferData> &GetRenderBufferData() const { return const_cast<CModelComponent *>(this)->GetRenderBufferData(); };
 		std::vector<rendering::RenderBufferData> &GetRenderBufferData() { return m_lodMeshRenderBufferData; }
 		void SetRenderBufferData(const std::vector<rendering::RenderBufferData> &renderBufferData);
-		void AddRenderMesh(CModelSubMesh &mesh, CMaterial &mat, pragma::rendering::RenderBufferData::StateFlags stateFlags = pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass);
+		void AddRenderMesh(CModelSubMesh &mesh, msys::CMaterial &mat, pragma::rendering::RenderBufferData::StateFlags stateFlags = pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass);
 
 		RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod);
 		const RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod) const;

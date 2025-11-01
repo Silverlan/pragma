@@ -11,8 +11,8 @@ module;
 
 export module pragma.client:scripting.lua.classes.shader;
 
-import :rendering.shaders.lua;
-import :scripting.lua.libraries.vulkan;
+export import :rendering.shaders.lua;
+export import :scripting.lua.libraries.vulkan;
 
 export {
 	// LuaShaderRecordTarget converter
@@ -140,7 +140,7 @@ export {
 			DLLCLIENT void IsPrimitiveRestartEnabled(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo);
 			DLLCLIENT void IsRasterizerDiscardEnabled(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo);
 			DLLCLIENT void IsSampleMaskEnabled(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo);
-			DLLCLIENT void AddSpecializationConstant(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t shaderStage, uint32_t constantId, ::DataStream &ds);
+			DLLCLIENT void AddSpecializationConstant(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t shaderStage, uint32_t constantId, ::util::DataStream &ds);
 			DLLCLIENT void SetAlphaToCoverageEnabled(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, bool bEnabled);
 			DLLCLIENT void SetAlphaToOneEnabled(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, bool bEnabled);
 			DLLCLIENT void SetDepthBiasProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, bool bEnabled, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor);
@@ -168,7 +168,7 @@ export {
 		};
 
 		namespace ComputePipelineCreateInfo {
-			DLLCLIENT void AddSpecializationConstant(lua_State *l, prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t constantId, ::DataStream &ds);
+			DLLCLIENT void AddSpecializationConstant(lua_State *l, prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t constantId, ::util::DataStream &ds);
 		};
 
 		namespace shader {
@@ -187,7 +187,7 @@ export {
 			DLLCLIENT void GetIdentifier(lua_State *l, prosper::Shader &shader);
 			DLLCLIENT void GetSourceFilePath(lua_State *l, prosper::Shader &shader, uint32_t shaderStage);
 			DLLCLIENT void GetSourceFilePaths(lua_State *l, prosper::Shader &shader);
-			DLLCLIENT void RecordPushConstants(lua_State *l, prosper::Shader &shader, const LuaShaderRecordTarget &recordTarget, ::DataStream &ds, uint32_t offset);
+			DLLCLIENT void RecordPushConstants(lua_State *l, prosper::Shader &shader, const LuaShaderRecordTarget &recordTarget, ::util::DataStream &ds, uint32_t offset);
 			DLLCLIENT void RecordPushConstants(lua_State *l, prosper::Shader &shader, prosper::util::PreparedCommandBuffer &pcb, ::udm::Type type, const Lua::Vulkan::PreparedCommandLuaArg &value, uint32_t offset);
 			DLLCLIENT void RecordBindDescriptorSet(lua_State *l, prosper::Shader &shader, prosper::util::PreparedCommandBuffer &pcb, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets, std::optional<uint32_t> dynamicOffsetIndex = {});
 			DLLCLIENT void RecordBindDescriptorSet(lua_State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets, std::optional<uint32_t> dynamicOffsetIndex = {});

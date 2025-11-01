@@ -455,7 +455,7 @@ static void debug_dump_render_queues(const util::DrawSceneInfo &drawSceneInfo)
 
 	ss << "Render Queues:\n";
 	auto fPrintQueue = [&ss](const pragma::rendering::RenderQueue &queue) {
-		auto curMaterial = std::numeric_limits<MaterialIndex>::max();
+		auto curMaterial = std::numeric_limits<msys::MaterialIndex>::max();
 		auto curPipeline = std::numeric_limits<prosper::PipelineID>::max();
 		auto curEntity = std::numeric_limits<EntityIndex>::max();
 

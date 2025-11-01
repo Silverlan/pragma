@@ -7,10 +7,9 @@ module;
 
 export module pragma.client:gui.main_menu_mods;
 
-import :gui.chromium_page;
-import :gui.main_menu_base;
-
-import :core;
+export import :core;
+export import :gui.chromium_page;
+export import :gui.main_menu_base;
 
 export {
 	class DLLCLIENT WIMainMenuMods : public WIMainMenuBase, public WIChromiumPage {

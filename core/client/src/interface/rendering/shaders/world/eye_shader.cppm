@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.shaders.world_eye;
 
-import :rendering.shaders.pbr;
+export import :rendering.shaders.pbr;
 
 export namespace pragma {
 	class DLLCLIENT ShaderEye : public ShaderPBR {

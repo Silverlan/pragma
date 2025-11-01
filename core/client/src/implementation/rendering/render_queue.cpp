@@ -17,7 +17,7 @@ import :game;
 using namespace pragma::rendering;
 
 
-SortingKey::SortingKey(MaterialIndex material, prosper::ShaderIndex shader, bool instantiable, bool translucentKey)
+SortingKey::SortingKey(msys::MaterialIndex material, prosper::ShaderIndex shader, bool instantiable, bool translucentKey)
 {
 	if(translucentKey) {
 		translucent.material = material;

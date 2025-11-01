@@ -11,8 +11,9 @@ module;
 
 
 export module pragma.client:entities.components.liquid_surface;
-import :entities.components.renderer;
-import :entities.components.surface;
+
+export import :entities.components.renderer;
+export import :entities.components.surface;
 
 export namespace pragma {
 	struct DLLCLIENT WaterScene {
@@ -50,7 +51,7 @@ export namespace pragma {
 		void ClearWaterScene();
 		const WaterScene &GetWaterScene() const;
 		prosper::IDescriptorSet *GetEffectDescriptorSet() const;
-		CMaterial *GetWaterMaterial() const;
+		msys::CMaterial *GetWaterMaterial() const;
 		void InitializeWaterScene(const Vector3 &refPos, const Vector3 &planeNormal, const Vector3 &waterAabbMin, const Vector3 &waterAabbMax);
 		void InitializeWaterScene(const WaterScene &scene);
 		bool IsWaterSceneValid() const;

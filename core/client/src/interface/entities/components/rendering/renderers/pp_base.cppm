@@ -9,7 +9,8 @@ module;
 
 
 export module pragma.client:entities.components.pp_base;
-import :entities.components.rasterization_renderer;
+
+export import :entities.components.rasterization_renderer;
 import :entities.components.renderer;
 
 export namespace pragma {

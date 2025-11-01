@@ -7,7 +7,8 @@ module;
 
 export module pragma.client:rendering.model_render_buffer_data;
 
-import :rendering.shaders.textured_enums;
+export import :rendering.shaders.textured_enums;
+export import pragma.cmaterialsystem;
 
 export namespace pragma::rendering {
 	struct DLLCLIENT RenderBufferData {

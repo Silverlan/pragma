@@ -13,10 +13,11 @@ module;
 
 
 export module pragma.client:engine;
-import :client_state;
-import :rendering.render_context;
-import :rendering.shader_graph.manager;
-import pragma.string.unicode;
+
+export import :client_state;
+export import :rendering.render_context;
+export import :rendering.shader_graph.manager;
+export import pragma.string.unicode;
 export import pragma.shared;
 
 #pragma warning(push)
@@ -135,7 +136,26 @@ export {
 		unsigned int GetMonoSourceCount();
 		unsigned int GetStereoSource(unsigned int idx);
 		template<class TEfxProperties>
-		std::shared_ptr<al::IEffect> CreateAuxEffect(const std::string &name, const TEfxProperties &props);
+		std::shared_ptr<al::IEffect> CreateAuxEffect(const std::string &name, const TEfxProperties &props)
+		{
+			auto lname = name;
+			ustring::to_lower(lname);
+			auto effect = GetAuxEffect(lname);
+			if(effect != nullptr)
+				return effect;
+			auto *soundSys = GetSoundSystem();
+			if(soundSys == nullptr)
+				return nullptr;
+			try {
+				effect = soundSys->CreateEffect(props);
+			}
+			catch(const std::runtime_error &e) {
+				Con::cwar << "Unable to create auxiliary effect '" << name << "': " << e.what() << Con::endl;
+				return nullptr;
+			}
+			m_auxEffects.insert(decltype(m_auxEffects)::value_type(name, effect));
+			return effect;
+		}
 		std::shared_ptr<al::IEffect> GetAuxEffect(const std::string &name);
 		// Lua
 		virtual NetworkState *GetNetworkState(lua_State *l) override;
@@ -290,28 +310,6 @@ export {
 	namespace umath::scoped_enum::bitwise {
 		template<>
 		struct enable_bitwise_operators<CEngine::StateFlags> : std::true_type {};
-	}
-
-	template<class TEfxProperties>
-	std::shared_ptr<al::IEffect> CEngine::CreateAuxEffect(const std::string &name, const TEfxProperties &props)
-	{
-		auto lname = name;
-		ustring::to_lower(lname);
-		auto effect = GetAuxEffect(lname);
-		if(effect != nullptr)
-			return effect;
-		auto *soundSys = GetSoundSystem();
-		if(soundSys == nullptr)
-			return nullptr;
-		try {
-			effect = soundSys->CreateEffect(props);
-		}
-		catch(const std::runtime_error &e) {
-			Con::cwar << "Unable to create auxiliary effect '" << name << "': " << e.what() << Con::endl;
-			return nullptr;
-		}
-		m_auxEffects.insert(decltype(m_auxEffects)::value_type(name, effect));
-		return effect;
 	}
 
 	namespace pragma {

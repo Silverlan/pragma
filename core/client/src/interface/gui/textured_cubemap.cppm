@@ -7,9 +7,8 @@ module;
 
 export module pragma.client:gui.textured_cubemap;
 
-import :rendering.cube_map_side;
-
-import pragma.gui;
+export import :rendering.cube_map_side;
+export import pragma.gui;
 
 export {
 	class DLLCLIENT WITexturedCubemap : public WIBase {

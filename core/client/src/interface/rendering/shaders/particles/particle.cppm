@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:rendering.shaders.particle;
 
-import :rendering.shaders.particle_2d_base;
+export import :rendering.shaders.particle_2d_base;
 
 export namespace pragma {
 	class DLLCLIENT ShaderParticle : public ShaderParticle2DBase {

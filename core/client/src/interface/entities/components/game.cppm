@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:entities.components.game;
 
-import :entities.components.camera;
+export import :entities.components.camera;
 
 export namespace pragma {
 	class DLLCLIENT CGameComponent final : public BaseGameComponent {

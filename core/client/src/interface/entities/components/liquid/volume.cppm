@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:entities.components.liquid_volume;
 
-import :entities.components.entity;
+export import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CLiquidVolumeComponent final : public BaseLiquidVolumeComponent, public CBaseNetComponent {

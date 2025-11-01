@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.world_environment;
 
-import pragma.shared;
+export import pragma.shared;
 
 export class DLLCLIENT WorldEnvironment : public std::enable_shared_from_this<WorldEnvironment> {
   public:

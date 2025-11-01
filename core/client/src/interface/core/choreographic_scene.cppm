@@ -6,8 +6,8 @@ module;
 
 export module pragma.client:core.choreographic_scene;
 
-import :entities.base_entity;
-import timeline_scene;
+export import :entities.base_entity;
+export import timeline_scene;
 
 export namespace choreography {
 	class Event : public uts::Event {

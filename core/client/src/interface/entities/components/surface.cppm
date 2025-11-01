@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:entities.components.surface;
 
-import :entities.components.entity;
+export import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CSurfaceComponent final : public BaseSurfaceComponent, public CBaseNetComponent {

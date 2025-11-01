@@ -412,7 +412,7 @@ void Lua::Shader::Graphics::AttachVertexAttribute(lua_State *l, pragma::LuaShade
 	auto vertexAttributes = Lua::get_table_values<pragma::LuaVertexAttribute>(l, 3u, [](lua_State *l, int32_t idx) { return Lua::Check<pragma::LuaVertexAttribute>(l, idx); });
 	shader.AttachVertexAttribute(binding, vertexAttributes);
 }
-void Lua::GraphicsPipelineCreateInfo::AddSpecializationConstant(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t shaderStage, uint32_t constantId, ::DataStream &ds)
+void Lua::GraphicsPipelineCreateInfo::AddSpecializationConstant(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t shaderStage, uint32_t constantId, ::util::DataStream &ds)
 {
 	Lua::PushBool(l, pipelineInfo.AddSpecializationConstant(static_cast<prosper::ShaderStage>(shaderStage), constantId, ds->GetSize(), ds->GetData()));
 }

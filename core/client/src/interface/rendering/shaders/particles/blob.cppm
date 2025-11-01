@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.shaders.particle_blob;
 
-import :rendering.shaders.particle_2d_base;
+export import :rendering.shaders.particle_2d_base;
 
 export namespace pragma {
 	namespace rendering::shader_material {

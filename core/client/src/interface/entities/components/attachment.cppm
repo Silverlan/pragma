@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:entities.components.attachment;
 
-import :entities.components.entity;
+export import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CAttachmentComponent final : public BaseAttachmentComponent, public CBaseNetComponent {

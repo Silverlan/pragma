@@ -8,7 +8,8 @@ module;
 
 
 export module pragma.client:entities.components.audio.dsp.chorus;
-import :entities.components.audio.dsp.base;
+
+export import :entities.components.audio.dsp.base;
 
 export namespace pragma {
 	class DLLCLIENT CSoundDspChorusComponent final : public CBaseSoundDspComponent, public BaseEnvSoundDspChorus {

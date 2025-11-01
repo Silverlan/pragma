@@ -8,7 +8,7 @@ module;
 
 
 export module pragma.client:scripting.lua.libraries.gui;
-import :game;
+export import :game;
 
 export namespace Lua {
 	namespace gui {

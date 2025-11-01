@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.shader_graph.node_object;
 
-import pragma.shadergraph;
+export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {
 	class DLLCLIENT ObjectNode : public pragma::shadergraph::Node {

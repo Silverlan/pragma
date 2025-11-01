@@ -8,7 +8,7 @@ module;
 
 export module pragma.client:rendering.shaders.world_raytracing;
 
-import :entities.components.raytracing;
+export import :entities.components.raytracing;
 
 export namespace pragma {
 	class DLLCLIENT ShaderRayTracing : public prosper::ShaderCompute {

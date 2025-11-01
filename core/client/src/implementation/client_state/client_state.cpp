@@ -64,7 +64,7 @@ ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo(nullptr
 
 	RegisterCallback<void, CGame *>("OnGameStart");
 	RegisterCallback<void, CGame *>("EndGame");
-	RegisterCallback<void, CMaterial *>("OnMaterialLoaded");
+	RegisterCallback<void, msys::CMaterial *>("OnMaterialLoaded");
 
 	RegisterCallback<void>("Draw");
 	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender");
@@ -150,7 +150,7 @@ import pragma.string.unicode;
 void ClientState::Initialize()
 {
 	/*Con::cwar<<"Client NetMessages:"<<Con::endl;
-	ClientMessageMap *mapMsgs = GetNetMessageMap();
+	auto *mapMsgs = GetNetMessageMap();
 	std::unordered_map<std::string,unsigned int> *msgs;
 	mapMsgs->GetNetMessages(&msgs);
 	std::unordered_map<std::string,unsigned int>::iterator i;
@@ -554,12 +554,12 @@ bool ClientState::IsConnected() const { return (m_client != nullptr) ? true : fa
 
 CLNetMessage *ClientState::GetNetMessage(unsigned int ID)
 {
-	ClientMessageMap *map = GetClientMessageMap();
+	auto *map = GetClientMessageMap();
 	return map->GetNetMessage(ID);
 }
 
-extern DLLNETWORK ClientMessageMap *g_NetMessagesCl;
-ClientMessageMap *ClientState::GetNetMessageMap() { return g_NetMessagesCl; }
+extern DLLNETWORK pragma::networking::ClientMessageMap *g_NetMessagesCl;
+pragma::networking::ClientMessageMap *ClientState::GetNetMessageMap() { return g_NetMessagesCl; }
 
 bool ClientState::IsClient() const { return true; }
 
@@ -751,7 +751,7 @@ msys::Material *ClientState::LoadMaterial(const std::string &path, const std::fu
 		if(bShaderInitialized == nullptr || bShaderInitialized.use_count() > 1) // Callback has been called immediately
 			init_shader(mat.get());
 		bShaderInitialized = nullptr;
-		CallCallbacks<void, CMaterial *>("OnMaterialLoaded", static_cast<msys::CMaterial *>(mat.get()));
+		CallCallbacks<void, msys::CMaterial *>("OnMaterialLoaded", static_cast<msys::CMaterial *>(mat.get()));
 		if(onLoaded != nullptr)
 			onLoaded(mat.get());
 		// Material has been fully loaded!

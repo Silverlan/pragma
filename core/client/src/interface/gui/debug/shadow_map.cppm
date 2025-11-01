@@ -7,9 +7,8 @@ module;
 
 export module pragma.client:gui.debug_shadow_map;
 
-import :entities.components.lights.light;
-
-import pragma.gui;
+export import :entities.components.lights.light;
+export import pragma.gui;
 
 export {
 	class DLLCLIENT WIDebugShadowMap : public WIBase {

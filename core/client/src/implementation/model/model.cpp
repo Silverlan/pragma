@@ -35,9 +35,9 @@ void CModel::AddMesh(const std::string &meshGroup, const std::shared_ptr<ModelMe
 
 void CModel::AddMesh(const std::string &meshGroup, const std::shared_ptr<CModelMesh> &mesh) { pragma::Model::AddMesh(meshGroup, mesh); }
 
-void CModel::Update(ModelUpdateFlags flags)
+void CModel::Update(pragma::model::ModelUpdateFlags flags)
 {
 	pragma::Model::Update(flags);
-	if((flags & ModelUpdateFlags::UpdateVertexAnimationBuffer) != ModelUpdateFlags::None)
+	if((flags & pragma::model::ModelUpdateFlags::UpdateVertexAnimationBuffer) != pragma::model::ModelUpdateFlags::None)
 		UpdateVertexAnimationBuffer();
 }

@@ -8,7 +8,8 @@ module;
 
 
 export module pragma.client:entities.components.audio.dsp.eaxreverb;
-import :entities.components.audio.dsp.base;
+
+export import :entities.components.audio.dsp.base;
 
 export namespace pragma {
 	class DLLCLIENT CSoundDspEAXReverbComponent final : public CBaseSoundDspComponent, public BaseEnvSoundDspEAXReverb {

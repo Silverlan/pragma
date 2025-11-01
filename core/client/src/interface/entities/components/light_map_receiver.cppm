@@ -9,11 +9,11 @@ module;
 
 export module pragma.client:entities.components.light_map_receiver;
 
-import :entities.base_entity;
-import :entities.components.light_map;
-import :entities.components.render;
-import :model.mesh;
-import :rendering.lightmap_data_cache;
+export import :entities.base_entity;
+export import :entities.components.light_map;
+export import :entities.components.render;
+export import :model.mesh;
+export import :rendering.lightmap_data_cache;
 
 export namespace pragma {
 	class DLLCLIENT CLightMapReceiverComponent final : public BaseEntityComponent {

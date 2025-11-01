@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:scripting.lua.classes.world_environment;
 
-import :rendering.world_environment;
+export import :rendering.world_environment;
 
 export namespace Lua {
 	namespace WorldEnvironment {

@@ -262,7 +262,7 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 
 std::optional<std::string> FbxImporter::Finalize(std::string &outErr)
 {
-	m_model->Update(ModelUpdateFlags::All);
+	m_model->Update(pragma::model::ModelUpdateFlags::All);
 	std::string mdlPath = m_mdlName;
 	auto fullMdlPath = util::FilePath(::util::CONVERT_PATH, pragma::asset::get_asset_root_directory(pragma::asset::Type::Model), m_outputPath, mdlPath);
 	if(!m_model->Save(*pragma::get_cgame(), fullMdlPath.GetString(), outErr)) {

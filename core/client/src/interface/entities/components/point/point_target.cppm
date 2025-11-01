@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:entities.components.point_target;
 
-import :entities.base_entity;
+export import :entities.base_entity;
 
 export {
 	namespace pragma {

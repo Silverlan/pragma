@@ -9,8 +9,8 @@ module;
 
 export module pragma.client:entities.components.world;
 
-import :rendering.occlusion_culling;
-import :rendering.render_queue;
+export import :rendering.occlusion_culling;
+export import :rendering.render_queue;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -53,6 +53,4 @@ export namespace pragma {
 export class DLLCLIENT CWorld : public CBaseEntity {
   public:
 	virtual void Initialize() override;
-	virtual Con::c_cout &print(Con::c_cout &) override;
-	virtual std::ostream &print(std::ostream &) override;
 };

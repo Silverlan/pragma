@@ -7,8 +7,8 @@ module;
 
 export module pragma.client:rendering.shader_graph.node_shader_material;
 
-import :rendering.shader_material;
-import pragma.shadergraph;
+export import :rendering.shader_material;
+export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {
 	class DLLCLIENT ShaderMaterialNode : public pragma::shadergraph::Node {

@@ -7,8 +7,8 @@ module;
 
 export module pragma.client:rendering.shader_graph.module_toon;
 
-import :rendering.shader_graph.sg_module;
-import pragma.shadergraph;
+export import :rendering.shader_graph.sg_module;
+export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {
 	class DLLCLIENT ToonModule : public pragma::rendering::ShaderGraphModule {

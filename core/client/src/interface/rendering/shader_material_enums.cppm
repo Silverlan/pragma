@@ -5,6 +5,8 @@ module;
 
 export module pragma.client:rendering.shader_material_enums;
 
+export import pragma.math;
+
 export namespace pragma::rendering::shader_material {
 	constexpr size_t MAX_MATERIAL_SIZE = 128; // Max size per material in bytes
 

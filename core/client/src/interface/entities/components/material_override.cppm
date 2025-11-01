@@ -9,7 +9,8 @@ module;
 
 export module pragma.client:entities.components.material_override;
 
-import :rendering.material_property_block;
+export import :rendering.material_property_block;
+export import pragma.cmaterialsystem;
 export import pragma.shared;
 
 export namespace pragma {
@@ -29,11 +30,11 @@ export namespace pragma {
 		virtual void OnRemove() override;
 
 		void SetMaterialOverride(uint32_t idx, const std::string &matOverride);
-		void SetMaterialOverride(uint32_t idx, CMaterial &mat);
+		void SetMaterialOverride(uint32_t idx, msys::CMaterial &mat);
 		void ClearMaterialOverride(uint32_t idx);
 		void ClearMaterialOverrides();
-		CMaterial *GetMaterialOverride(uint32_t idx) const;
-		CMaterial *GetRenderMaterial(uint32_t idx) const;
+		msys::CMaterial *GetMaterialOverride(uint32_t idx) const;
+		msys::CMaterial *GetRenderMaterial(uint32_t idx) const;
 		size_t GetMaterialOverrideCount() const;
 
 		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
@@ -43,14 +44,14 @@ export namespace pragma {
 		};
 		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
 		void PopulateProperties();
-		void UpdateMaterialOverride(uint32_t matIdx, CMaterial &mat);
+		void UpdateMaterialOverride(uint32_t matIdx, msys::CMaterial &mat);
 		std::vector<MaterialOverride> m_materialOverrides = {};
 	};
 
 	struct DLLCLIENT CEOnMaterialOverrideChanged : public ComponentEvent {
-		CEOnMaterialOverrideChanged(uint32_t idx, CMaterial &mat);
+		CEOnMaterialOverrideChanged(uint32_t idx, msys::CMaterial &mat);
 		virtual void PushArguments(lua_State *l) override;
 		uint32_t materialIndex;
-		CMaterial &material;
+		msys::CMaterial &material;
 	};
 };

@@ -7,8 +7,7 @@ module;
 
 export module pragma.client:gui.main_menu_credits;
 
-import :gui.chromium_page;
-import :gui.main_menu_base;
+export import :gui.main_menu_base;
 
 export {
 	class DLLCLIENT WIMainMenuCredits : public WIMainMenuBase {

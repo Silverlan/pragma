@@ -10,8 +10,8 @@ module;
 
 export module pragma.client:entities.components.effects.fire;
 
-import :entities.base_entity;
-import :entities.components.entity;
+export import :entities.base_entity;
+export import :entities.components.entity;
 
 export namespace pragma::ecs {class CParticleSystemComponent;}
 export namespace pragma {

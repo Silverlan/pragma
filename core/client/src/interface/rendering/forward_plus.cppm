@@ -8,7 +8,7 @@ module;
 
 export module pragma.client:rendering.forward_plus;
 
-import :entities.components.scene;
+export import :entities.components.scene;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)

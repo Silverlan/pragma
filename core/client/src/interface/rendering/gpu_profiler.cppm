@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.gpu_profiler;
 
-import :rendering.gpu_swapchain_timer;
+export import :rendering.gpu_swapchain_timer;
 
 export namespace pragma {
 	namespace debug {

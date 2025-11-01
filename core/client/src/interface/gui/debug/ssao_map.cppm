@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:gui.debug_ssao;
 
-import pragma.gui;
+export import pragma.gui;
 
 export {
 	class DLLCLIENT WIDebugSSAO : public WITexturedRect {

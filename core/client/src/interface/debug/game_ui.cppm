@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:debug.game_ui;
 
-import pragma.gui;
+export import pragma.gui;
 
 export struct DLLCLIENT DebugGameGUI {
   private:

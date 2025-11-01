@@ -7,9 +7,10 @@ module;
 
 export module pragma.client:rendering.shader_material;
 
-import :rendering.shader_input_data;
-import :rendering.shader_material_enums;
-import pragma.shadergraph;
+export import :rendering.shader_input_data;
+export import :rendering.shader_material_enums;
+export import pragma.cmaterialsystem;
+export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_material {
 	struct DLLCLIENT Texture {
@@ -23,13 +24,13 @@ export namespace pragma::rendering::shader_material {
 	struct DLLCLIENT ShaderMaterial : public ShaderInputDescriptor {
 		static constexpr uint32_t PREDEFINED_PROPERTY_COUNT = 6;
 
-		static void PopulateShaderInputDataFromMaterial(ShaderInputData &inputData, const CMaterial &mat);
+		static void PopulateShaderInputDataFromMaterial(ShaderInputData &inputData, const msys::CMaterial &mat);
 		static MaterialFlags GetFlagsFromShaderInputData(const ShaderInputData &inputData);
 		static void SetShaderInputDataFlags(ShaderInputData &inputData, MaterialFlags flags);
 		static std::string GetTextureUniformVariableName(const std::string &texIdentifier);
 
 		ShaderMaterial(const pragma::GString &name);
-		std::vector<msys::Texture> textures;
+		std::vector<Texture> textures;
 
 		Texture *FindTexture(const char *key)
 		{

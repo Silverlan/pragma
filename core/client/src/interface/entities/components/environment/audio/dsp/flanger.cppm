@@ -8,7 +8,8 @@ module;
 
 
 export module pragma.client:entities.components.audio.dsp.flanger;
-import :entities.components.audio.dsp.base;
+
+export import :entities.components.audio.dsp.base;
 
 export namespace pragma {
 	class DLLCLIENT CSoundDspFlangerComponent final : public CBaseSoundDspComponent, public BaseEnvSoundDspFlanger {

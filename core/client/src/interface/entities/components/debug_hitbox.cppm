@@ -9,6 +9,7 @@ module;
 
 
 export module pragma.client:entities.components.debug_hitbox;
+
 import :debug;
 
 export namespace pragma {

@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.shaders.velocity_buffer;
 
-import :rendering.shaders.prepass;
+export import :rendering.shaders.prepass;
 
 export namespace pragma {
 	class DLLCLIENT ShaderVelocityBuffer : public ShaderPrepassBase {

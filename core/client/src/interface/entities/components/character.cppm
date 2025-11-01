@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:entities.components.character;
 
-import :entities.components.entity;
+export import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CCharacterComponent final : public BaseCharacterComponent, public CBaseNetComponent {

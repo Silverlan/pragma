@@ -7,8 +7,9 @@ module;
 
 export module pragma.client:rendering.shaders.particle_base;
 
-import :particle_system.enums;
-import :rendering.enums;
+export import :particle_system.enums;
+export import :rendering.enums;
+export import pragma.prosper;
 
 export namespace pragma::ecs {class CParticleSystemComponent;};
 export namespace pragma {

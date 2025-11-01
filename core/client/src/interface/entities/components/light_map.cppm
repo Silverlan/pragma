@@ -7,13 +7,11 @@ module;
 #include "pragma/lua/core.hpp"
 #include "pragma/logging.hpp"
 
-
-
-
-
 export module pragma.client:entities.components.light_map;
-import :rendering.cycles;
-import :rendering.lightmap_data_cache;
+
+export import :rendering.cycles;
+export import :rendering.lightmap_data_cache;
+export import pragma.prosper;
 import source_engine.bsp;
 
 export namespace pragma {

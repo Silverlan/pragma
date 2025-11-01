@@ -12,19 +12,21 @@ module;
 
 
 export module pragma.client:game;
-import :core.lua_input_binding_layer_register;
-import :entities.base_entity;
-import :entities.components.player;
-import :rendering.enums;
-import :rendering.game_world_shader_settings;
-import :rendering.global_render_settings_buffer_data;
-import :rendering.global_shader_input_manager;
-import :rendering.gpu_profiler;
-import :rendering.render_queue_worker;
-import :rendering.shaders.lua;
-import :scripting.lua.gui_manager;
-import pragma.platform;
-import pragma.string.unicode;
+
+export import :core.lua_input_binding_layer_register;
+export import :entities.base_entity;
+export import :entities.components.player;
+export import :rendering.enums;
+export import :rendering.game_world_shader_settings;
+export import :rendering.global_render_settings_buffer_data;
+export import :rendering.global_shader_input_manager;
+export import :rendering.gpu_profiler;
+export import :rendering.render_queue_worker;
+export import :rendering.shaders.lua;
+export import :scripting.lua.gui_manager;
+export import pragma.soundsystem;
+export import pragma.platform;
+export import pragma.string.unicode;
 
 export {
 	inline constexpr auto LOD_SWAP_DISTANCE = 500.f;
@@ -189,9 +191,21 @@ export class DLLCLIENT CGame : public pragma::Game {
 		const TCPPM *GetGameComponent() const;
 	virtual CBaseEntity *CreateEntity(std::string classname) override;
 	template<class T>
-	T *CreateEntity();
+	T *CreateEntity()
+	{
+		if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
+			return nullptr;
+		return CreateEntity<T>(GetFreeEntityIndex());
+	}
 	template<class T>
-	T *CreateEntity(unsigned int idx);
+	T *CreateEntity(unsigned int idx)
+	{
+		if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
+			return nullptr;
+		T *ent = new T();
+		SetupEntity(ent, idx);
+		return ent;
+	}
 	virtual void RemoveEntity(pragma::ecs::BaseEntity *ent) override;
 	template<typename TCPPM>
 	    TCPPM *GetListener();
@@ -300,9 +314,22 @@ export class DLLCLIENT CGame : public pragma::Game {
 	WIBase *CreateGUIElement(std::string name, WIBase *parent = nullptr);
 	WIBase *CreateGUIElement(std::string name, WIHandle *hParent);
 	template<class TElement>
-	TElement *CreateGUIElement(WIBase *parent = nullptr);
+	TElement *CreateGUIElement(WIBase *parent = nullptr)
+	{
+		TElement *p = WGUI::GetInstance().Create<TElement>(parent);
+		if(p == nullptr)
+			return nullptr;
+		//InitializeGUIElement(p);
+		return p;
+	}
 	template<class TElement>
-	TElement *CreateGUIElement(WIHandle *parent);
+	TElement *CreateGUIElement(WIHandle *hParent)
+	{
+		WIBase *pParent = nullptr;
+		if(hParent != nullptr && hParent->IsValid())
+			pParent = hParent->get();
+		return CreateGUIElement<TElement>(pParent);
+	}
 	virtual void Initialize() override;
 	virtual void InitializeGame() override;
 
@@ -520,42 +547,6 @@ export {
 #pragma warning(pop)
 
 export {
-	template<class T>
-	T *CGame::CreateEntity(unsigned int idx)
-	{
-		if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
-			return nullptr;
-		T *ent = new T();
-		SetupEntity(ent, idx);
-		return ent;
-	}
-
-	template<class T>
-	T *CGame::CreateEntity()
-	{
-		if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
-			return nullptr;
-		return CreateEntity<T>(GetFreeEntityIndex());
-	}
-
-	template<class TElement>
-	TElement *CGame::CreateGUIElement(WIBase *parent)
-	{
-		TElement *p = WGUI::GetInstance().Create<TElement>(parent);
-		if(p == nullptr)
-			return nullptr;
-		//InitializeGUIElement(p);
-		return p;
-	}
-	template<class TElement>
-	TElement *CGame::CreateGUIElement(WIHandle *hParent)
-	{
-		WIBase *pParent = nullptr;
-		if(hParent != nullptr && hParent->IsValid())
-			pParent = hParent->get();
-		return CreateGUIElement<TElement>(pParent);
-	}
-
 	namespace pragma {
 		DLLCLIENT CGame *get_client_game();
 	};

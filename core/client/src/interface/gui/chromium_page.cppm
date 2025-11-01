@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:gui.chromium_page;
 
-import pragma.gui;
+export import pragma.gui;
 
 namespace pragma {
 	class JSValue;

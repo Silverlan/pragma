@@ -6,6 +6,10 @@ module;
 #include "pragma/clientdefinitions.h"
 
 export module pragma.client:util.image;
+
+export import pragma.image;
+export import pragma.prosper;
+
 export namespace util {
 	struct ToImageBufferInfo {
 		bool includeLayers = false;

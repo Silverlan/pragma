@@ -11,7 +11,7 @@ module;
 
 export module pragma.client:entities.components.flammable;
 
-import :entities.components.entity;
+export import :entities.components.entity;
 
 export namespace pragma::ecs {class CParticleSystemComponent;}
 export namespace pragma {

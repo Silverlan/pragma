@@ -1151,7 +1151,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 	}
 #endif
 
-	mdl->Update(ModelUpdateFlags::All);
+	mdl->Update(pragma::model::ModelUpdateFlags::All);
 
 	OutputData outputData {};
 	auto relFileName = outputPath + mdlName;

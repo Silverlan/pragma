@@ -10,11 +10,11 @@ module;
 
 export module pragma.client:rendering.shaders.lua;
 
-import pragma.gui;
-import :rendering.shaders.base;
-import :rendering.shaders.particle_2d_base;
-import :rendering.shaders.pbr;
-import :rendering.shaders.textured;
+export import pragma.gui;
+export import :rendering.shaders.base;
+export import :rendering.shaders.particle_2d_base;
+export import :rendering.shaders.pbr;
+export import :rendering.shaders.textured;
 
 export namespace pragma {
 	class DLLCLIENT LuaShaderManager {
@@ -436,7 +436,7 @@ export namespace pragma {
 		  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(msys::CMaterial &mat) override;
 		virtual void InitializeMaterialData(const msys::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData) override;
-		void SetPushConstants(DataStream dsPushConstants);
+		void SetPushConstants(util::DataStream dsPushConstants);
 
 		void ResetPcb();
 		prosper::util::PreparedCommandBuffer &GetBindPcb() { return m_bindPcb; }
@@ -459,7 +459,7 @@ export namespace pragma {
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 		void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx);
 
-		DataStream m_pushConstants;
+		util::DataStream m_pushConstants;
 
 		prosper::util::PreparedCommandBuffer m_bindPcb;
 		mutable prosper::util::PreparedCommandBufferUserData m_bindUserData;
@@ -513,7 +513,7 @@ export namespace pragma {
 		void Lua_OnEndDraw();
 		static void Lua_default_OnEndDraw(lua_State *l, LuaShaderWrapperTextured3D &shader) { shader.Lua_OnEndDraw(); }
 
-		void SetPushConstants(DataStream dsPushConstants);
+		void SetPushConstants(util::DataStream dsPushConstants);
 		prosper::util::PreparedCommandBuffer &GetBindPcb();
 		void InitializeMaterialBuffer(prosper::IDescriptorSetGroup &descSet, msys::CMaterial &mat, const pragma::rendering::ShaderInputData &matData);
 

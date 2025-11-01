@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:entities.debug;
 
-import :entities.base_entity;
+export import :entities.base_entity;
 
 export class DLLCLIENT CEntDebugText : public CBaseEntity {
   public:

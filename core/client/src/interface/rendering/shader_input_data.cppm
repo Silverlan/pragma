@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.shader_input_data;
 
-import pragma.shadergraph;
+export import pragma.shadergraph;
 export import pragma.shared;
 
 export namespace pragma::rendering {

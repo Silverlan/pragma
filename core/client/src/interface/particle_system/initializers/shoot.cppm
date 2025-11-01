@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:particle_system.initializer_shoot;
 
-import :particle_system.modifier;
+export import :particle_system.modifier;
 import :particle_system.modifier_random_variable;
 
 export namespace pragma::ecs {class CParticleSystemComponent;}

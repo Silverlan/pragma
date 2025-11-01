@@ -10,7 +10,7 @@ module;
 
 export module pragma.client:entities.components.global_shader_input;
 
-import :rendering.global_shader_input_manager;
+export import :rendering.global_shader_input_manager;
 
 export namespace pragma {
 	struct DLLCLIENT UdmPropertyList {

@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.render_queue_instancer;
 
-import :rendering.render_queue;
+export import :rendering.render_queue;
 
 export namespace pragma::rendering {
 	class DLLCLIENT RenderQueueInstancer {

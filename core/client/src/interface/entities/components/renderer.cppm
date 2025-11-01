@@ -10,8 +10,8 @@ module;
 
 export module pragma.client:entities.components.renderer;
 
-import :entities.components.scene;
-import :rendering.draw_scene_info;
+export import :entities.components.scene;
+export import :rendering.draw_scene_info;
 
 export namespace pragma {
 	struct DLLCLIENT PostProcessingEffectData {

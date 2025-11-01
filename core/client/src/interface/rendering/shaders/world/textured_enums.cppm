@@ -6,6 +6,8 @@ module;
 
 export module pragma.client:rendering.shaders.textured_enums;
 
+export import pragma.math;
+
 export namespace pragma {
 	const float DefaultParallaxHeightScale = 0.025f;
 	const uint16_t DefaultParallaxSteps = 16;

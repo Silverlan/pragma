@@ -8,7 +8,7 @@ module;
 
 export module pragma.client:particle_system.renderer_animated_sprites;
 
-import :particle_system.modifier;
+export import :particle_system.modifier;
 
 export class DLLCLIENT CParticleRendererAnimatedSprites : public CParticleRenderer {
   public:

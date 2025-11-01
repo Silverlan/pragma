@@ -142,19 +142,19 @@ void CModelSubMesh::Centralize(const Vector3 &origin)
 	UpdateVertexBuffer();
 }
 
-void CModelSubMesh::Update(ModelUpdateFlags flags)
+void CModelSubMesh::Update(pragma::model::ModelUpdateFlags flags)
 {
 	pragma::ModelSubMesh::Update(flags);
 	auto bHasAlphas = (GetAlphaCount() > 0) ? true : false;
 	auto bAnimated = !m_vertexWeights->empty() ? true : false;
 
-	if((flags & ModelUpdateFlags::CalculateTangents) != ModelUpdateFlags::None)
+	if((flags & pragma::model::ModelUpdateFlags::CalculateTangents) != pragma::model::ModelUpdateFlags::None)
 		ComputeTangentBasis();
 
 	//auto &renderState = pragma::get_cengine()->GetRenderContext();
 	//auto &context = pragma::get_cengine()->GetRenderContext();
 
-	if((flags & ModelUpdateFlags::UpdateIndexBuffer) != ModelUpdateFlags::None) {
+	if((flags & pragma::model::ModelUpdateFlags::UpdateIndexBuffer) != pragma::model::ModelUpdateFlags::None) {
 		auto &indexData = GetIndexData();
 		auto &indexBuffer = m_sceneMesh->GetIndexBuffer();
 		auto newBuffer = true;
@@ -171,7 +171,7 @@ void CModelSubMesh::Update(ModelUpdateFlags flags)
 			m_sceneMesh->SetIndexBuffer(std::move(indexBuffer), GetIndexType());
 		}
 	}
-	if((flags & ModelUpdateFlags::UpdateVertexBuffer) != ModelUpdateFlags::None)
+	if((flags & pragma::model::ModelUpdateFlags::UpdateVertexBuffer) != pragma::model::ModelUpdateFlags::None)
 		UpdateVertexBuffer();
 
 	// Alpha buffer!
@@ -180,7 +180,7 @@ void CModelSubMesh::Update(ModelUpdateFlags flags)
 	//m_biTangents.resize(m_vertices.size());
 	//assert(m_biTangents.size() == m_vertices.size());
 
-	if(bAnimated == true && (flags & ModelUpdateFlags::UpdateWeightBuffer) != ModelUpdateFlags::None) {
+	if(bAnimated == true && (flags & pragma::model::ModelUpdateFlags::UpdateWeightBuffer) != pragma::model::ModelUpdateFlags::None) {
 		if(m_extendedVertexWeights->empty()) {
 			auto weightBuffer = s_vertexWeightBuffer->AllocateBuffer(m_vertexWeights->size() * sizeof(VertexWeightType), m_vertexWeights->data());
 			m_sceneMesh->SetVertexWeightBuffer(std::move(weightBuffer));
@@ -197,7 +197,7 @@ void CModelSubMesh::Update(ModelUpdateFlags flags)
 		}
 	}
 
-	if(bHasAlphas == true && (flags & ModelUpdateFlags::UpdateAlphaBuffer) != ModelUpdateFlags::None) {
+	if(bHasAlphas == true && (flags & pragma::model::ModelUpdateFlags::UpdateAlphaBuffer) != pragma::model::ModelUpdateFlags::None) {
 		auto alphaBuffer = s_alphaBuffer->AllocateBuffer(m_alphas->size() * sizeof(AlphaType), m_alphas->data());
 		m_sceneMesh->SetAlphaBuffer(std::move(alphaBuffer));
 	}

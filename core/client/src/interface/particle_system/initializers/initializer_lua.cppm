@@ -9,10 +9,10 @@ module;
 
 export module pragma.client:particle_system.initializer_lua;
 
-import :entities.components.particle_system;
-import :particle_system.modifier;
-import :particle_system.enums;
-import :particle_system.particle;
+export import :entities.components.particle_system;
+export import :particle_system.modifier;
+export import :particle_system.enums;
+export import :particle_system.particle;
 
 export {
 	class DLLCLIENT CParticleModifierLua : public LuaObjectBase {
@@ -28,11 +28,32 @@ export {
 	template<class TModifier>
 	class TParticleModifierLua : public TModifier, public CParticleModifierLua {
 	public:
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void OnParticleCreated(CParticle &particle) override;
-		virtual void OnParticleDestroyed(CParticle &particle) override;
-		virtual void OnParticleSystemStarted() override;
-		virtual void OnParticleSystemStopped() override;
+		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
+		{
+			TModifier::Initialize(pSystem, values);
+			// RecordKeyValues(values);
+			CallLuaMember("Initialize");
+		}
+		virtual void OnParticleCreated(CParticle &particle) override
+		{
+			TModifier::OnParticleCreated(particle);
+			CallLuaMember<void, std::reference_wrapper<CParticle>>("OnParticleCreated", std::ref(particle));
+		}
+		virtual void OnParticleDestroyed(CParticle &particle) override
+		{
+			TModifier::OnParticleDestroyed(particle);
+			CallLuaMember<void, std::reference_wrapper<CParticle>>("OnParticleDestroyed", std::ref(particle));
+		}
+		virtual void OnParticleSystemStarted() override
+		{
+			TModifier::OnParticleSystemStarted();
+			CallLuaMember<void>("OnParticleSystemStarted");
+		}
+		virtual void OnParticleSystemStopped() override
+		{
+			TModifier::OnParticleSystemStopped();
+			CallLuaMember<void>("OnParticleSystemStopped");
+		}
 
 		void Lua_Initialize() {}
 		static void Lua_default_Initialize(lua_State *l, TParticleModifierLua<TModifier> &mod) { mod.Lua_Initialize(); }
@@ -49,39 +70,6 @@ export {
 		void Lua_OnParticleDestroyed(CParticle &pt) {}
 		static void Lua_default_OnParticleDestroyed(lua_State *l, TParticleModifierLua<TModifier> &mod, CParticle &pt) { mod.Lua_OnParticleDestroyed(pt); }
 	};
-
-	template<class TModifier>
-	void TParticleModifierLua<TModifier>::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
-	{
-		TModifier::Initialize(pSystem, values);
-		// RecordKeyValues(values);
-		CallLuaMember("Initialize");
-	}
-
-	template<class TModifier>
-	void TParticleModifierLua<TModifier>::OnParticleCreated(CParticle &particle)
-	{
-		TModifier::OnParticleCreated(particle);
-		CallLuaMember<void, std::reference_wrapper<CParticle>>("OnParticleCreated", std::ref(particle));
-	}
-	template<class TModifier>
-	void TParticleModifierLua<TModifier>::OnParticleDestroyed(CParticle &particle)
-	{
-		TModifier::OnParticleDestroyed(particle);
-		CallLuaMember<void, std::reference_wrapper<CParticle>>("OnParticleDestroyed", std::ref(particle));
-	}
-	template<class TModifier>
-	void TParticleModifierLua<TModifier>::OnParticleSystemStarted()
-	{
-		TModifier::OnParticleSystemStarted();
-		CallLuaMember<void>("OnParticleSystemStarted");
-	}
-	template<class TModifier>
-	void TParticleModifierLua<TModifier>::OnParticleSystemStopped()
-	{
-		TModifier::OnParticleSystemStopped();
-		CallLuaMember<void>("OnParticleSystemStopped");
-	}
 
 	class DLLCLIENT CParticleInitializerLua : public TParticleModifierLua<CParticleInitializer> {
 	public:

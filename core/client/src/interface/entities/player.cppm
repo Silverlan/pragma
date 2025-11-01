@@ -8,8 +8,8 @@ module;
 
 export module pragma.client:entities.player;
 
-import :entities.components;
-import pragma.shared;
+export import :entities.components;
+export import pragma.shared;
 
 export class DLLCLIENT CPlayer : public CBaseEntity, public BasePlayer {
   public:

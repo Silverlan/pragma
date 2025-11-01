@@ -39,13 +39,13 @@ void pragma::networking::DefaultMasterServerQueryDispatcher::DoPingServer(uint32
 	auto *queryResult = GetQueryResult(serverIdx);
 	if(queryResult == nullptr)
 		return;
-	DataStream header;
+	::util::DataStream header;
 	header->Write<uint16_t>(static_cast<uint16_t>(WVQuery::PING));
 	header->Write<uint16_t>(static_cast<uint16_t>(0)); // Body Size
 
 	m_dispatcher->Dispatch(header, queryResult->ip, queryResult->serverInfo.port, [this, serverIdx](nwm::ErrorCode err, UDPMessageDispatcher::Message *msg) mutable {
 		if(!err) {
-			msg->Receive(sizeof(WMSMessageHeader), [this, serverIdx](nwm::ErrorCode err, DataStream data) {
+			msg->Receive(sizeof(WMSMessageHeader), [this, serverIdx](nwm::ErrorCode err, ::util::DataStream data) {
 				if(!err)
 					OnServerPingResponse(serverIdx, true);
 				else {
@@ -73,7 +73,7 @@ void pragma::networking::DefaultMasterServerQueryDispatcher::DoQueryServers(cons
 	// TODO: What if something's still on m_dispatchQueue or m_waitQueue
 	//if(m_hRefresh.IsValid())
 	//	m_hRefresh.get<WIButton>()->Set
-	DataStream body;
+	::util::DataStream body;
 	auto filterEnums = RequestFilter::AND;
 	if(umath::is_flag_set(filter.flags, IMasterServerQueryDispatcher::Filter::Flags::NotEmpty))
 		filterEnums |= RequestFilter::NOT_EMPTY;
@@ -98,17 +98,17 @@ void pragma::networking::DefaultMasterServerQueryDispatcher::DoQueryServers(cons
 
 	auto msgHeader = WMSMessageHeader(static_cast<unsigned int>(WMSMessage::REQUEST_SERVERS));
 	msgHeader.size = CUInt16(body->GetSize());
-	DataStream header;
+	::util::DataStream header;
 	header->Write<WMSMessageHeader>(msgHeader);
 
 	m_dispatcher->Dispatch(header, GetMasterServerIP(), GetMasterServerPort(), [this, body](nwm::ErrorCode err, UDPMessageDispatcher::Message *) mutable {
 		if(!err) {
 			m_dispatcher->Dispatch(body, GetMasterServerIP(), GetMasterServerPort(), [this](nwm::ErrorCode err, UDPMessageDispatcher::Message *msg) {
 				if(!err) {
-					msg->Receive(sizeof(WMSMessageHeader), [this, msg](nwm::ErrorCode err, DataStream data) {
+					msg->Receive(sizeof(WMSMessageHeader), [this, msg](nwm::ErrorCode err, ::util::DataStream data) {
 						if(!err) {
 							auto header = data->Read<WMSMessageHeader>();
-							msg->Receive(header.size, [this](nwm::ErrorCode err, DataStream data) {
+							msg->Receive(header.size, [this](nwm::ErrorCode err, ::util::DataStream data) {
 								if(!err) {
 									auto numServers = data->Read<unsigned int>();
 									for(unsigned int i = 0; i < numServers; i++) {

@@ -8,8 +8,8 @@ module;
 
 export module pragma.client:particle_system.operator_pause_emission;
 
-import :entities.components.particle_system;
-import :particle_system.modifier;
+export import :entities.components.particle_system;
+export import :particle_system.modifier;
 
 export {
 	class DLLCLIENT CParticleOperatorPauseEmissionBase : public CParticleOperator {

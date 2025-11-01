@@ -89,7 +89,7 @@ export namespace luabind {
 	};
 };
 
-namespace Lua {
+export namespace Lua {
 	using udm_numeric = luabind::udm_type<luabind::object, true, false, false>;
 	using udm_generic = luabind::udm_type<luabind::object, false, true, false>;
 	using udm_non_trivial = luabind::udm_type<luabind::object, false, false, true>;

@@ -7,6 +7,8 @@ module;
 
 export module pragma.client:rendering.shaders.forwardp_light_culling;
 
+export import pragma.prosper;
+
 export namespace pragma {
 	class DLLCLIENT ShaderForwardPLightCulling : public prosper::ShaderCompute {
 	  public:

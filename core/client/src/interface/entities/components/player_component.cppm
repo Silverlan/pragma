@@ -11,7 +11,7 @@ module;
 
 export module pragma.client:entities.components.player;
 
-import :entities.components.entity;
+export import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CPlayerComponent final : public BasePlayerComponent, public CBaseNetComponent {

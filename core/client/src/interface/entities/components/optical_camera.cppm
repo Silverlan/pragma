@@ -8,6 +8,7 @@ module;
 
 
 export module pragma.client:entities.components.optical_camera;
+
 import :rendering.shaders;
 
 export namespace pragma {

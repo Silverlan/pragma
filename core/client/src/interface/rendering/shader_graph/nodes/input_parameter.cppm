@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:rendering.shader_graph.node_input_parameter;
 
-import pragma.shadergraph;
+export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {
 	class DLLCLIENT BaseInputParameterNode : public pragma::shadergraph::Node {
@@ -17,7 +17,7 @@ export namespace pragma::rendering::shader_graph {
 		enum class Scope : uint32_t {
 			Global = 0,
 			Object,
-			msys::Material,
+			Material,
 		};
 
 		static constexpr const char *CONST_NAME = "name";

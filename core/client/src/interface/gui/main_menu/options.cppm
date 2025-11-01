@@ -10,11 +10,8 @@ module;
 
 export module pragma.client:gui.main_menu_options;
 
-import :gui.chromium_page;
 import :gui.checkbox;
-import :gui.main_menu_base;
-
-import pragma.gui;
+export import :gui.main_menu_base;
 
 export {
 	class DLLCLIENT WIMainMenuOptions : public WIMainMenuBase {

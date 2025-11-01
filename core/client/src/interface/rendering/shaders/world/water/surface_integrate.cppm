@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.shaders.world_water_surface_integrate;
 
-import :rendering.shaders.world_water_surface;
+export import :rendering.shaders.world_water_surface;
 
 export namespace pragma {
 	class DLLCLIENT ShaderWaterSurfaceIntegrate : public ShaderWaterSurface {

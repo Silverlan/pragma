@@ -8,9 +8,9 @@ module;
 
 export module pragma.client:model.mesh;
 
-import :model.render_mesh;
-import :model.vertex_buffer_data;
-import :rendering.shaders.scene;
+export import :model.render_mesh;
+export import :model.vertex_buffer_data;
+export import :rendering.shaders.scene;
 export import pragma.shared;
 
 export class DLLCLIENT CModelSubMesh : public pragma::ModelSubMesh {
@@ -18,7 +18,7 @@ export class DLLCLIENT CModelSubMesh : public pragma::ModelSubMesh {
 	CModelSubMesh();
 	CModelSubMesh(const CModelSubMesh &other);
 	const std::shared_ptr<pragma::SceneMesh> &GetSceneMesh() const;
-	virtual void Update(ModelUpdateFlags flags = ModelUpdateFlags::AllData) override;
+	virtual void Update(pragma::model::ModelUpdateFlags flags = pragma::model::ModelUpdateFlags::AllData) override;
 	virtual void Centralize(const Vector3 &origin) override;
 	virtual std::shared_ptr<pragma::ModelSubMesh> Copy(bool fullCopy = false) const override;
 	static void InitializeBuffers();

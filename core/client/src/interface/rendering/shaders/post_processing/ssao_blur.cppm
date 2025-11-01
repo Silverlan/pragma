@@ -7,6 +7,8 @@ module;
 
 export module pragma.client:rendering.shaders.ssao_blur;
 
+export import pragma.prosper;
+
 export namespace pragma {
 	class DLLCLIENT ShaderSSAOBlur : public prosper::ShaderBaseImageProcessing {
 	  public:

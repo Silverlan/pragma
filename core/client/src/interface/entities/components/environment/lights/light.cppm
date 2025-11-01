@@ -10,11 +10,11 @@ module;
 
 export module pragma.client:entities.components.lights.light;
 
-import :entities.base_entity;
-import :entities.components.entity;
-import :model.mesh;
-import :rendering.enums;
-import :rendering.light_data;
+export import :entities.base_entity;
+export import :entities.components.entity;
+export import :model.mesh;
+export import :rendering.enums;
+export import :rendering.light_data;
 
 export namespace pragma {
 	struct DLLCLIENT CEShouldPassEntity : public ComponentEvent {

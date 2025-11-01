@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:entities.components.shooter;
 
-import :entities.components.entity;
+export import :entities.components.entity;
 
 export namespace pragma::ecs {
 	class DLLCLIENT CShooterComponent final : public BaseShooterComponent, public CBaseNetComponent {

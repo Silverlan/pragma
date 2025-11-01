@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:entities.components.effects.explosion;
 
-import :entities.base_entity;
+export import :entities.base_entity;
 
 export namespace pragma {
 	class DLLCLIENT CExplosionComponent final : public BaseEnvExplosionComponent {

@@ -10,8 +10,8 @@ module;
 
 export module pragma.client:entities.components.env_sky_camera;
 
-import :entities.base_entity;
-import :rendering.enums;
+export import :entities.base_entity;
+export import :rendering.enums;
 import :rendering.render_processor;
 import :rendering.render_queue;
 

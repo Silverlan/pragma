@@ -231,7 +231,7 @@ void CLightMapDataCacheComponent::ReloadCache()
 					}
 				}
 			}
-			cpy->Update(ModelUpdateFlags::UpdatePrimitiveCounts | ModelUpdateFlags::UpdateBuffers | ModelUpdateFlags::UpdateChildren);
+			cpy->Update(pragma::model::ModelUpdateFlags::UpdatePrimitiveCounts | pragma::model::ModelUpdateFlags::UpdateBuffers | pragma::model::ModelUpdateFlags::UpdateChildren);
 			cachedModels[cpy->GetName()] = cpy;
 			lmModel = cpy;
 		}

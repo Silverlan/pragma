@@ -864,7 +864,7 @@ void CMaterialPropertyOverrideComponent::RegisterLuaBindings(lua_State *l, luabi
 	//void CMaterialPropertyOverrideComponent::SetMaterialProperty(const char *materialName, const char *key, const T &value)
 
 	//def.def("SetMaterialOverride", static_cast<void (pragma::CMaterialPropertyOverrideComponent::*)(uint32_t, const std::string &)>(&pragma::CMaterialPropertyOverrideComponent::SetMaterialOverride));
-	//def.def("SetMaterialOverride", static_cast<void (pragma::CMaterialPropertyOverrideComponent::*)(uint32_t, CMaterial &)>(&pragma::CMaterialPropertyOverrideComponent::SetMaterialOverride));
+	//def.def("SetMaterialOverride", static_cast<void (pragma::CMaterialPropertyOverrideComponent::*)(uint32_t, msys::CMaterial &)>(&pragma::CMaterialPropertyOverrideComponent::SetMaterialOverride));
 	/*def.def(
 	  "SetMaterialOverride", +[](lua_State *l, pragma::CMaterialPropertyOverrideComponent &hModel, const std::string &matSrc, const std::string &matDst) {
 		  auto &mdl = hModel.GetEntity().GetModel();
@@ -881,7 +881,7 @@ void CMaterialPropertyOverrideComponent::RegisterLuaBindings(lua_State *l, luabi
 		  hModel.SetMaterialOverride(it - mats.begin(), matDst);
 	  });
 	def.def(
-	  "SetMaterialOverride", +[](lua_State *l, pragma::CMaterialPropertyOverrideComponent &hModel, const std::string &matSrc, CMaterial &matDst) {
+	  "SetMaterialOverride", +[](lua_State *l, pragma::CMaterialPropertyOverrideComponent &hModel, const std::string &matSrc, msys::CMaterial &matDst) {
 		  auto &mdl = hModel.GetEntity().GetModel();
 		  if(!mdl)
 			  return;

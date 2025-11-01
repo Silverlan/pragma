@@ -8,7 +8,7 @@ module;
 
 export module pragma.client:rendering.render_stats;
 
-import :model.mesh;
+export import :model.mesh;
 
 export {
 	template<typename TCounter>

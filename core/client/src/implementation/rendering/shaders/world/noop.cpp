@@ -18,7 +18,7 @@ using namespace pragma;
 
 ShaderNoop::ShaderNoop(prosper::IPrContext &context, const std::string &identifier) : ShaderUnlit {context, identifier} {}
 
-bool ShaderNoop::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, CMaterial &mat) const
+bool ShaderNoop::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, msys::CMaterial &mat) const
 {
 	// Fail intentionally
 	return false;

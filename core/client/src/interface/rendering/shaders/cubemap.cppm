@@ -7,6 +7,8 @@ module;
 
 export module pragma.client:rendering.shaders.cubemap;
 
+export import pragma.prosper;
+
 export namespace pragma {
 	class DLLCLIENT ShaderCubemap : public prosper::ShaderGraphics {
 	  public:

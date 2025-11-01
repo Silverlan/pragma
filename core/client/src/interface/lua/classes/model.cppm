@@ -8,10 +8,10 @@ module;
 
 
 export module pragma.client:scripting.lua.classes.model;
-import :assets;
+export import :assets;
 
 export namespace Lua {
-	namespace pragma::Model {
+	namespace Model {
 		namespace Client {
 			DLLCLIENT void AddMaterial(lua_State *l, pragma::Model &mdl, uint32_t textureGroup, const std::string &name);
 			DLLCLIENT void SetMaterial(lua_State *l, pragma::Model &mdl, uint32_t texIdx, const std::string &name);

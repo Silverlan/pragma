@@ -128,7 +128,7 @@ void ShaderShadow::RecordAlphaCutoff(rendering::ShaderProcessor &shaderProcessor
 	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, offsetof(PushConstants, alphaCutoff), sizeof(alphaCutoff), &alphaCutoff);
 }
 
-bool ShaderShadow::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, CMaterial &mat) const
+bool ShaderShadow::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, msys::CMaterial &mat) const
 {
 	if(mat.GetAlphaMode() == AlphaMode::Opaque)
 		return false;

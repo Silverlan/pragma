@@ -8,7 +8,7 @@ module;
 
 export module pragma.client:rendering.shaders.pbr_blend;
 
-import :rendering.shaders.pbr;
+export import :rendering.shaders.pbr;
 
 export namespace pragma {
 	class DLLCLIENT ShaderPBRBlend : public ShaderPBR {

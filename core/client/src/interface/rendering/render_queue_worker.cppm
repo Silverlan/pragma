@@ -8,7 +8,7 @@ module;
 
 export module pragma.client:rendering.render_queue_worker;
 
-import :rendering.render_stats;
+export import :rendering.render_stats;
 
 export namespace pragma::rendering {
 	class RenderQueueWorker;

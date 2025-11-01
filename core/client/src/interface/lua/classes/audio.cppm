@@ -8,8 +8,8 @@ module;
 
 
 export module pragma.client:scripting.lua.bindings.audio;
-import :audio;
-import se_script;
+export import :audio;
+export import se_script;
 
 export namespace pragma::scripting::lua::bindings {
 	void register_audio(lua_State *l);

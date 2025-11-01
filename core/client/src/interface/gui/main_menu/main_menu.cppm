@@ -8,8 +8,8 @@ module;
 
 export module pragma.client:gui.main_menu;
 
-import :gui.chromium_page;
-import pragma.shared;
+export import pragma.gui;
+export import pragma.shared;
 
 export {
 	class DLLCLIENT WIMainMenu : public WIBase {

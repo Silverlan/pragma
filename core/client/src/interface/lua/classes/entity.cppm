@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:scripting.lua.classes.entity;
 
-import :entities.base_entity;
+export import :entities.base_entity;
 
 export namespace Lua {
 	namespace Entity {

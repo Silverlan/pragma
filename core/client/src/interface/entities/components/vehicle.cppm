@@ -10,7 +10,7 @@ module;
 
 export module pragma.client:entities.components.vehicle;
 
-import :entities.components.entity;
+export import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CVehicleComponent final : public BaseVehicleComponent, public CBaseSnapshotComponent {

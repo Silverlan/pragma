@@ -11,7 +11,7 @@ module;
 
 export module pragma.client:entities.components.camera;
 
-import :entities.base_entity;
+export import :entities.base_entity;
 
 export namespace pragma {
 	class DLLCLIENT CCameraComponent final : public BaseEnvCameraComponent {

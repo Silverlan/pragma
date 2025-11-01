@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:particle_system.initializer_initial_angular_velocity;
 
-import :particle_system.modifier;
+export import :particle_system.modifier;
 
 export namespace pragma::ecs {class CParticleSystemComponent;}
 export class DLLCLIENT CParticleInitializerInitialAngularVelocity : public CParticleInitializer {

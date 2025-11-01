@@ -7,8 +7,8 @@ module;
 
 export module pragma.client:rendering.shaders.pp_hdr;
 
-import :rendering.enums;
-import :rendering.shaders.base;
+export import :rendering.enums;
+export import :rendering.shaders.base;
 
 export namespace pragma {
 	class DLLCLIENT ShaderPPHDR : public ShaderPPBase {

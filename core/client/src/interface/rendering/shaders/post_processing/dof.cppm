@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.shaders.pp_dof;
 
-import :rendering.shaders.base;
+export import :rendering.shaders.base;
 
 export namespace pragma {
 	class DLLCLIENT ShaderPPDoF : public ShaderPPBase {

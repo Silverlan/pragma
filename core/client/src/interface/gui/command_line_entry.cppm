@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:gui.command_line_entry;
 
-import pragma.gui;
+export import pragma.gui;
 
 export class DLLCLIENT WICommandLineEntry : public WITextEntry {
   public:

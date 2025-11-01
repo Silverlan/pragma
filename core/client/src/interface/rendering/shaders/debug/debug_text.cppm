@@ -8,7 +8,7 @@ module;
 export module pragma.client:rendering.shaders.debug_text;
 
 import :debug;
-import :rendering.shaders.debug;
+export import :rendering.shaders.debug;
 
 export namespace pragma {
 	class DLLCLIENT ShaderDebugText : public ShaderDebug {

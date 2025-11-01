@@ -7,7 +7,7 @@ module;
 
 
 export module pragma.client:scripting.lua.bindings.scene;
-import :entities.components;
+export import :entities.components;
 
 export namespace pragma::scripting::lua::bindings {
 	void register_renderers(lua_State *l, luabind::module_ &entsMod) {

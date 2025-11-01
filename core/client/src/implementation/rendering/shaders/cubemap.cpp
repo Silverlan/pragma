@@ -9,8 +9,8 @@ module pragma.client;
 
 import :rendering.shaders.cubemap;
 
-import :engine;
-import :math;
+export import :engine;
+export import :math;
 
 
 using namespace pragma;

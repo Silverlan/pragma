@@ -151,7 +151,7 @@ static void NET_cl_DEBUG_DRAWCYLINDER(NetPacket packet);
 #define REGISTER_NET_MSG(NAME) \
     netMessageMap.RegisterNetMessage(client::NAME, &NET_cl_##NAME)
 
-static void register_net_messages(ClientMessageMap &netMessageMap)
+static void register_net_messages(pragma::networking::ClientMessageMap &netMessageMap)
 {
     using namespace pragma::networking::net_messages;
     REGISTER_NET_MSG(RESOURCEINFO);

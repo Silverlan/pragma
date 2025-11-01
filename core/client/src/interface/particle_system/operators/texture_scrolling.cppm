@@ -9,8 +9,8 @@ module;
 
 export module pragma.client:particle_system.operator_texture_scrolling;
 
-import :entities.components.particle_system;
-import :particle_system.modifier;
+export import :entities.components.particle_system;
+export import :particle_system.modifier;
 
 export class DLLCLIENT CParticleOperatorTextureScrolling : public CParticleOperator {
   public:

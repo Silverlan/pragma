@@ -10,7 +10,7 @@ module;
 
 export module pragma.client:entities.components.ai;
 
-import :entities.components.entity;
+export import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CAIComponent final : public BaseAIComponent, public CBaseSnapshotComponent {

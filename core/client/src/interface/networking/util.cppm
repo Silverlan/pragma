@@ -8,7 +8,7 @@ module;
 
 export module pragma.client:networking.util;
 
-import :entities.base_entity;
+export import :entities.base_entity;
 
 export namespace nwm {
 	DLLCLIENT CBaseEntity *read_unique_entity(NetPacket &packet);

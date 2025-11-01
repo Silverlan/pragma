@@ -11,7 +11,7 @@ module;
 export module pragma.client:entities.components.eye;
 import :entities.components.animated;
 import :entities.components.flex;
-import :model.mesh;
+export import :model.mesh;
 
 export {
 	namespace pragma {

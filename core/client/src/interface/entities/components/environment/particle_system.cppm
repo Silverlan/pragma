@@ -6,22 +6,15 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
-
-
-
-
-
 export module pragma.client:entities.components.particle_system;
 
-import :entities.base_entity;
-import :entities.components.entity;
-import :particle_system.enums;
-import :particle_system.modifier;
-import :particle_system.particle;
-import :rendering.enums;
+export import :entities.base_entity;
+export import :entities.components.entity;
+export import :particle_system.enums;
+export import :particle_system.modifier;
+export import :particle_system.particle;
+export import :rendering.enums;
+export import pragma.cmaterialsystem;
 
 export namespace pragma::ecs {
 	struct DLLCLIENT ParticleSystemFileHeader {
@@ -270,11 +263,32 @@ export namespace pragma::ecs {
 		virtual void SetContinuous(bool b) override;
 
 		template<class TInitializer>
-		void GetInitializers(std::vector<TInitializer *> &initializers);
+		void GetInitializers(std::vector<TInitializer *> &initializers)
+		{
+			const std::type_info &info = typeid(TInitializer);
+			for(unsigned int i = 0; i < m_initializers.size(); i++) {
+				if(typeid(*(m_initializers[i])) == info)
+					initializers.push_back(static_cast<TInitializer *>(m_initializers[i].get()));
+			}
+		}
 		template<class TOperator>
-		void GetOperators(std::vector<TOperator *> &operators);
+		void GetOperators(std::vector<TOperator *> &operators)
+		{
+			const std::type_info &info = typeid(TOperator);
+			for(unsigned int i = 0; i < m_operators.size(); i++) {
+				if(typeid(*(m_operators[i])) == info)
+					operators.push_back(static_cast<TOperator *>(m_operators[i].get()));
+			}
+		}
 		template<class TRenderer>
-		void GetRenderers(std::vector<TRenderer *> &renderers);
+		void GetRenderers(std::vector<TRenderer *> &renderers)
+		{
+			const std::type_info &info = typeid(TRenderer);
+			for(unsigned int i = 0; i < m_renderers.size(); i++) {
+				if(typeid(*(m_renderers[i])) == info)
+					renderers.push_back(static_cast<TRenderer *>(m_renderers[i].get()));
+			}
+		}
 
 		void SetControlPointEntity(ControlPointIndex idx, CBaseEntity &ent);
 		void SetControlPointPosition(ControlPointIndex idx, const Vector3 &pos);
@@ -399,34 +413,6 @@ export {
 
 		template<>
 		struct enable_bitwise_operators<pragma::ecs::ParticleRenderFlags> : std::true_type {};
-	}
-
-	template<class TInitializer>
-	void pragma::ecs::CParticleSystemComponent::GetInitializers(std::vector<TInitializer *> &initializers)
-	{
-		const std::type_info &info = typeid(TInitializer);
-		for(unsigned int i = 0; i < m_initializers.size(); i++) {
-			if(typeid(*(m_initializers[i])) == info)
-				initializers.push_back(static_cast<TInitializer *>(m_initializers[i].get()));
-		}
-	}
-	template<class TOperator>
-	void pragma::ecs::CParticleSystemComponent::GetOperators(std::vector<TOperator *> &operators)
-	{
-		const std::type_info &info = typeid(TOperator);
-		for(unsigned int i = 0; i < m_operators.size(); i++) {
-			if(typeid(*(m_operators[i])) == info)
-				operators.push_back(static_cast<TOperator *>(m_operators[i].get()));
-		}
-	}
-	template<class TRenderer>
-	void pragma::ecs::CParticleSystemComponent::GetRenderers(std::vector<TRenderer *> &renderers)
-	{
-		const std::type_info &info = typeid(TRenderer);
-		for(unsigned int i = 0; i < m_renderers.size(); i++) {
-			if(typeid(*(m_renderers[i])) == info)
-				renderers.push_back(static_cast<TRenderer *>(m_renderers[i].get()));
-		}
 	}
 
 	namespace pragma::ecs {

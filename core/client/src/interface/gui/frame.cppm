@@ -9,11 +9,11 @@ module;
 
 export module pragma.client:gui.frame;
 
-import :gui.transformable;
+export import :gui.transformable;
 
-import pragma.gui;
-import pragma.platform;
-import pragma.string.unicode;
+export import pragma.gui;
+export import pragma.platform;
+export import pragma.string.unicode;
 
 export
 {

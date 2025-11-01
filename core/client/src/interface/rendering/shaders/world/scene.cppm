@@ -7,9 +7,9 @@ module;
 
 export module pragma.client:rendering.shaders.scene;
 
-import :rendering.entity_instance_data;
-import :rendering.shaders.base_3d;
-import :rendering.shaders.textured_base;
+export import :rendering.entity_instance_data;
+export import :rendering.shaders.base_3d;
+export import :rendering.shaders.textured_base;
 
 export class CModelSubMesh;
 export namespace pragma {
@@ -221,7 +221,7 @@ export namespace pragma {
 		{
 		}
 		virtual bool RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const;
-		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, CMaterial &mat) const;
+		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, msys::CMaterial &mat) const;
 		virtual void RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor, SceneFlags sceneFlags) const;
 		virtual void RecordBindLight(rendering::ShaderProcessor &shaderProcessor, CLightComponent &light, uint32_t layerId) const {}
 		virtual void RecordAlphaCutoff(rendering::ShaderProcessor &shaderProcessor, float alphaCutoff) const {}

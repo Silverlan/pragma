@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:entities.components.lua;
 
-import :entities.components.entity;
+export import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CLuaBaseEntityComponent final : public BaseLuaBaseEntityComponent, public CBaseSnapshotComponent {

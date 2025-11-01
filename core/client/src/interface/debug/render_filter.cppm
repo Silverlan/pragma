@@ -7,10 +7,10 @@ module;
 
 export module pragma.client:debug.render_filter;
 
-import :entities.base_entity;
-import :model.mesh;
-import :model.render_mesh_group;
-import :rendering.shaders.scene;
+export import :entities.base_entity;
+export import :model.mesh;
+export import :model.render_mesh_group;
+export import :rendering.shaders.scene;
 
 export struct DLLCLIENT DebugRenderFilter {
 	std::function<bool(pragma::ShaderGameWorld &)> shaderFilter = nullptr;

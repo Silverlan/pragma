@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:entities.components.liquid_control;
 
-import :entities.components.entity;
+export import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CLiquidControlComponent final : public BaseLiquidControlComponent, public CBaseNetComponent {

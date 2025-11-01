@@ -10,12 +10,12 @@ module;
 
 export module pragma.client:entities.components.render;
 
-import :entities.components.entity;
+export import :entities.components.entity;
 export import :entities.components.enums;
-import :model.render_mesh_group;
-import :rendering.enums;
+export import :model.render_mesh_group;
+export import :rendering.enums;
 import :rendering.entity_instance_data;
-import :rendering.model_render_buffer_data;
+export import :rendering.model_render_buffer_data;
 
 export class CBaseEntity;
 export namespace pragma {

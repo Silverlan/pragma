@@ -7,12 +7,10 @@ module;
 
 export module pragma.client:gui.options_list;
 
-import :gui.checkbox;
-import :gui.choice_list;
-import :gui.slider;
-import :gui.table;
-
-import pragma.gui;
+export import :gui.checkbox;
+export import :gui.choice_list;
+export import :gui.slider;
+export import :gui.table;
 
 export {
 	class DLLCLIENT WIOptionsList : public WIBase {

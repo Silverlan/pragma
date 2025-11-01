@@ -8,7 +8,7 @@ module;
 export module pragma.client:rendering.entity_instance_index_buffer;
 
 export import :entities.components.enums;
-import :rendering.render_queue;
+export import :rendering.render_queue;
 
 export namespace pragma::rendering {
 	constexpr auto SINGLE_INSTANCE_RENDER_BUFFER_INDEX = std::numeric_limits<RenderBufferIndex>::max();

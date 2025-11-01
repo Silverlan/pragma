@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:gui.snap_area;
 
-import pragma.gui;
+export import pragma.gui;
 
 export class DLLCLIENT WISnapArea : public WIBase {
   public:

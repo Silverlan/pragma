@@ -11,9 +11,9 @@ module;
 
 export module pragma.client:entities.components.effects.sprite;
 
-import :entities.base_entity;
-import :entities.components.entity;
-import :particle_system.enums;
+export import :entities.base_entity;
+export import :entities.components.entity;
+export import :particle_system.enums;
 
 export namespace pragma::ecs {class CParticleSystemComponent;}
 export namespace pragma {

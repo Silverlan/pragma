@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:particle_system.initializer_radius_random;
 
-import :particle_system.modifier;
+export import :particle_system.modifier;
 
 export {
 	class DLLCLIENT CParticleInitializerRadiusRandomBase : public CParticleInitializer {

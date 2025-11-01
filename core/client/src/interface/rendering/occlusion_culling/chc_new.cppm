@@ -9,8 +9,8 @@ module;
 
 export module pragma.client:rendering.occlusion_culling.chc_new;
 
-import :entities.components.camera;
-import :rendering.occlusion_culling.octree;
+export import :entities.components.camera;
+export import :rendering.occlusion_culling.octree;
 
 export namespace pragma {
 #pragma warning(push)

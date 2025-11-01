@@ -7,6 +7,8 @@ module;
 
 export module pragma.client:rendering.shaders.extract_diffuse_ambinet_occlusion;
 
+export import pragma.prosper;
+
 export namespace pragma {
 	class DLLCLIENT ShaderExtractDiffuseAmbientOcclusion : public prosper::ShaderBaseImageProcessing {
 	  public:

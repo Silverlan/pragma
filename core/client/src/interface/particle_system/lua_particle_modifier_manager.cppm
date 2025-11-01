@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:particle_system.lua_particle_modifier_manager;
 
-import :particle_system.initializer_lua;
+export import :particle_system.initializer_lua;
 
 export namespace pragma {
 	class DLLCLIENT LuaParticleModifierManager {

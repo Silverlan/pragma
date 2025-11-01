@@ -8,6 +8,7 @@ module;
 
 
 export module pragma.client:entities.components.flex;
+
 import :audio;
 
 export namespace pragma {

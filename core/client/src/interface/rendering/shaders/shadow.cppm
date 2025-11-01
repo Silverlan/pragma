@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.shaders.shadow;
 
-import :rendering.shaders.scene;
+export import :rendering.shaders.scene;
 
 export namespace pragma {
 	class CSceneComponent;

@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:particle_system.operator_cylindrical_vortex;
 
-import :particle_system.operator_world_base;
+export import :particle_system.operator_world_base;
 
 export class DLLCLIENT CParticleOperatorCylindricalVortex : public CParticleOperatorWorldBase {
   public:

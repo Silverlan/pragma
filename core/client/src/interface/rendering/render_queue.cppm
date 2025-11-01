@@ -7,10 +7,10 @@ module;
 
 export module pragma.client:rendering.render_queue;
 
-import :entities.components.camera;
-import :model.mesh;
-import :model.render_mesh_group;
-import :rendering.render_stats;
+export import :entities.components.camera;
+export import :model.mesh;
+export import :model.render_mesh_group;
+export import :rendering.render_stats;
 
 export namespace pragma::rendering {
 	struct SortingKey {
@@ -18,7 +18,7 @@ export namespace pragma::rendering {
 		// Distance should *not* be set unless necessary (e.g. translucent geometry),
 		// otherwise instancing effectiveness will be reduced
 		SortingKey() = default;
-		SortingKey(MaterialIndex material, prosper::ShaderIndex shader, bool instantiable, bool translucentKey);
+		SortingKey(msys::MaterialIndex material, prosper::ShaderIndex shader, bool instantiable, bool translucentKey);
 		union {
 			struct {
 				// Note: Distance is currently unused and could be used for other purposes in the future.
@@ -44,14 +44,14 @@ export namespace pragma::rendering {
 		static auto constexpr INSTANCED = std::numeric_limits<uint16_t>::max();
 		static auto constexpr UNIQUE = std::numeric_limits<uint16_t>::max() - 1;
 		RenderQueueItem() = default;
-		RenderQueueItem(CBaseEntity &ent, RenderMeshIndex meshIdx, CMaterial &mat, prosper::PipelineID pipelineId, const TranslucencyPassInfo *optTranslucencyPassInfo = nullptr);
+		RenderQueueItem(CBaseEntity &ent, RenderMeshIndex meshIdx, msys::CMaterial &mat, prosper::PipelineID pipelineId, const TranslucencyPassInfo *optTranslucencyPassInfo = nullptr);
 
-		CMaterial *GetMaterial() const;
+		msys::CMaterial *GetMaterial() const;
 		CBaseEntity *GetEntity() const;
 		CModelSubMesh *GetMesh() const;
 		prosper::ShaderGraphics *GetShader(uint32_t &outPipelineIndex) const;
 
-		MaterialIndex material;
+		msys::MaterialIndex material;
 		prosper::PipelineID pipelineId = std::numeric_limits<prosper::PipelineID>::max();
 		EntityIndex entity;
 		pragma::RenderMeshIndex mesh;
@@ -81,7 +81,7 @@ export namespace pragma::rendering {
 		void Reserve();
 		void Add(const std::vector<RenderQueueItem> &items);
 		void Add(const RenderQueueItem &item);
-		void Add(CBaseEntity &ent, RenderMeshIndex meshIdx, CMaterial &mat, prosper::PipelineID pipelineId, const CCameraComponent *optCam = nullptr);
+		void Add(CBaseEntity &ent, RenderMeshIndex meshIdx, msys::CMaterial &mat, prosper::PipelineID pipelineId, const CCameraComponent *optCam = nullptr);
 		void Sort();
 		void Merge(const RenderQueue &other);
 		const std::string &GetName() const { return m_name; }

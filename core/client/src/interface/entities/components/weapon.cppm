@@ -11,8 +11,8 @@ module;
 
 export module pragma.client:entities.components.weapon;
 
-import :entities.components.entity;
-import :entities.components.view_model;
+export import :entities.components.entity;
+export import :entities.components.view_model;
 
 export namespace pragma {
 	class DLLCLIENT CWeaponComponent final : public BaseWeaponComponent, public CBaseNetComponent {

@@ -9,7 +9,7 @@ module;
 export module pragma.client:particle_system.renderer_model;
 
 import :entities.components.animated;
-import :particle_system.modifier;
+export import :particle_system.modifier;
 import :particle_system.renderer_rotational_buffer;
 
 export namespace pragma {

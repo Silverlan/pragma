@@ -7,6 +7,8 @@ module;
 
 export module pragma.client:rendering.shaders.depth_to_rgb;
 
+export import pragma.prosper;
+
 export namespace pragma {
 	class DLLCLIENT ShaderDepthToRGB : public prosper::ShaderGraphics {
 	  public:

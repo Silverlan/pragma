@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.shader_graph.node_vector_transform;
 
-import pragma.shadergraph;
+export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {
 	class DLLCLIENT VectorTransformNode : public pragma::shadergraph::Node {

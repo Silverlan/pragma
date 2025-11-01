@@ -7,6 +7,9 @@ module;
 
 export module pragma.client:rendering.shaders.compose_rma;
 
+export import pragma.image;
+export import pragma.prosper;
+
 export namespace pragma {
 	class DLLCLIENT ShaderComposeRMA : public prosper::ShaderBaseImageProcessing {
 	  public:

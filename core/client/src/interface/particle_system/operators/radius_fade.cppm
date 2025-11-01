@@ -7,8 +7,8 @@ module;
 
 export module pragma.client:particle_system.operator_radius_fade;
 
-import :entities.components.particle_system;
-import :particle_system.modifier;
+export import :entities.components.particle_system;
+export import :particle_system.modifier;
 import :particle_system.modifier_gradual_fade;
 
 export {

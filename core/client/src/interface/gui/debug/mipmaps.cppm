@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:gui.debug_mipmaps;
 
-import pragma.gui;
+export import pragma.gui;
 
 export {
 	class DLLCLIENT WIDebugMipMaps : public WIBase {

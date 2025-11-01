@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:gui.load_screen;
 
-import :gui.main_menu_base;
+export import :gui.main_menu_base;
 
 export {
 	class DLLCLIENT WILoadScreen : public WIMainMenuBase {

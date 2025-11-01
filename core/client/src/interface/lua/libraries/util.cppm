@@ -9,9 +9,9 @@ module;
 
 export module pragma.client:scripting.lua.libraries.util;
 
-import :entities.components.camera;
-import :entities.components.lights.light;
-import :rendering.lightmap_data_cache;
+export import :entities.components.camera;
+export import :entities.components.lights.light;
+export import :rendering.lightmap_data_cache;
 
 export namespace Lua {
 	namespace util {

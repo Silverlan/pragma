@@ -8,7 +8,7 @@ module;
 
 export module pragma.client:gui.main_menu_base;
 
-import :gui.options_list;
+export import :gui.options_list;
 
 export {
 	class WIMainMenuElement;

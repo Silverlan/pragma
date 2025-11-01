@@ -9,7 +9,8 @@ module;
 
 
 export module pragma.client:entities.components.lights.shadow;
-import :entities.components.game_shadow_manager;
+
+export import :entities.components.game_shadow_manager;
 
 export namespace pragma {
 	class DLLCLIENT LightShadowRenderer {

@@ -10,12 +10,12 @@ export module pragma.client:rendering.shaders.textured;
 
 export import :rendering.shaders.textured_enums;
 
-import :debug.enums;
-import :entities.components.rasterization_renderer;
-import :entities.components.scene;
-import :rendering.shader_input_data;
-import :rendering.shader_material_enums;
-import :rendering.shaders.scene;
+export import :debug.enums;
+export import :entities.components.rasterization_renderer;
+export import :entities.components.scene;
+export import :rendering.shader_input_data;
+export import :rendering.shader_material_enums;
+export import :rendering.shaders.scene;
 
 export namespace pragma::rendering::shader_material {struct ShaderMaterial;};
 export namespace pragma {

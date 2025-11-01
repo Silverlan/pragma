@@ -49,8 +49,14 @@ pr_add_compile_definitions(${PROJ_NAME} -DNOISE_STATIC)
 pr_add_dependency(${PROJ_NAME} vorbis TARGET)
 pr_add_dependency(${PROJ_NAME} vorbisfile TARGET)
 
-pr_init_module(${PROJ_NAME})
-pr_add_headers(${PROJ_NAME} "include/")
+if(WIN32)
+    set(SOURCE_EXCLUSION_FILTER)
+else()
+    set(SOURCE_EXCLUSION_FILTER "src/debug/StackWalker/*")
+endif()
+
+pr_init_module(${PROJ_NAME} EXCLUDE "${SOURCE_EXCLUSION_FILTER}")
+pr_add_headers(${PROJ_NAME} "include/" EXCLUDE "${SOURCE_EXCLUSION_FILTER}")
 
 pr_add_compile_definitions(${PROJ_NAME} -DDLLNETWORK_EX -DENGINE_NETWORK)
 

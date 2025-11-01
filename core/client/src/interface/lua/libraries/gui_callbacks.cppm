@@ -10,7 +10,7 @@ module;
 
 export module pragma.client:scripting.lua.libraries.gui_callbacks;
 
-import pragma.gui;
+export import pragma.gui;
 
 export namespace Lua {
 	namespace gui {

@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:entities.components.liquid_buoyancy;
 
-import :entities.components.entity;
+export import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CBuoyancyComponent final : public BaseBuoyancyComponent, public CBaseNetComponent {

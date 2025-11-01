@@ -10,6 +10,7 @@ module;
 
 
 export module pragma.client:entities.components.game_shadow_manager;
+
 import :rendering.shaders;
 
 export namespace pragma {

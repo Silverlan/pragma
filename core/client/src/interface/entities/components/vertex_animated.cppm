@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:entities.components.vertex_animated;
 
-import :model.mesh;
+export import :model.mesh;
 
 export namespace pragma {
 	DLLCLIENT void initialize_vertex_animation_buffer();

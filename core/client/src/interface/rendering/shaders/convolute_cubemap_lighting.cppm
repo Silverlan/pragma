@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:rendering.shaders.convolute_cubemap_lighting;
 
-import :rendering.shaders.cubemap;
+export import :rendering.shaders.cubemap;
 
 export namespace pragma {
 	class DLLCLIENT ShaderConvoluteCubemapLighting : public ShaderCubemap {

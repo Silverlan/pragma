@@ -7,9 +7,9 @@ module;
 
 export module pragma.client:rendering.shaders.world_graph;
 
-import :rendering.shader_graph.sg_module;
-import :rendering.shaders.textured;
-import pragma.shadergraph;
+export import :rendering.shader_graph.sg_module;
+export import :rendering.shaders.textured;
+export import pragma.shadergraph;
 
 export namespace pragma {
 	class DLLCLIENT ShaderGraph : public ShaderGameWorldLightingPass {

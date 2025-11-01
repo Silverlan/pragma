@@ -401,7 +401,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 		// TODO: This could be done more efficiently!
 #if 0
 		// TODO: What if object orientation changed?
-		DataStream ds {};
+		::util::DataStream ds {};
 		ds->SetOffset(0);
 		auto &depthMVP = light.GetTransformationMatrix(0); // If first layer is the same as before, the others should be as well
 		ds<<depthMVP;

@@ -9,7 +9,7 @@ module;
 
 export module pragma.client:entities.components.health;
 
-import :entities.components.entity;
+export import :entities.components.entity;
 
 export namespace pragma {
 	class DLLCLIENT CHealthComponent final : public BaseHealthComponent, public CBaseNetComponent {

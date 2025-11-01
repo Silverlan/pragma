@@ -8,9 +8,9 @@ module;
 
 export module pragma.client:rendering.shaders.particle_2d_base;
 
-import :rendering.shaders.particle_base;
-import :rendering.shaders.scene;
-import pragma.shared;
+export import :rendering.shaders.particle_base;
+export import :rendering.shaders.scene;
+export import pragma.shared;
 
 export namespace pragma {
 	class CRasterizationRendererComponent;

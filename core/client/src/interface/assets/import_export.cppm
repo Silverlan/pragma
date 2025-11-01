@@ -9,9 +9,9 @@ module;
 
 export module pragma.client:assets.import_export;
 
-import :entities.components.camera;
-import :entities.components.lights.light;
-import :rendering.cycles;
+export import :entities.components.camera;
+export import :entities.components.lights.light;
+export import :rendering.cycles;
 export import pragma.shared;
 
 export namespace pragma::asset {

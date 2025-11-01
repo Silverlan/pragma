@@ -7,6 +7,8 @@ module;
 
 export module pragma.client:rendering.shaders.textured_base;
 
+export import pragma.cmaterialsystem;
+
 export namespace pragma {
 	class DLLCLIENT ShaderTexturedBase {
 	  public:

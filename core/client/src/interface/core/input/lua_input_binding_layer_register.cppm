@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:core.lua_input_binding_layer_register;
 
-import :core.input_binding_layer;
+export import :core.input_binding_layer;
 
 export namespace pragma {
 	struct DLLCLIENT LuaInputBindingLayerRegister {

@@ -7,6 +7,8 @@ module;
 
 export module pragma.client:rendering.shaders.hdr;
 
+export import pragma.prosper;
+
 export namespace pragma {
 	class DLLCLIENT ShaderHDR : public prosper::ShaderBaseImageProcessing {
 	  public:

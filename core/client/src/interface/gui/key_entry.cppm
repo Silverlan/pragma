@@ -8,7 +8,7 @@ module;
 
 export module pragma.client:gui.key_entry;
 
-import pragma.gui;
+export import pragma.gui;
 
 export {
 	class DLLCLIENT WIKeyEntry : public WITextEntryBase {

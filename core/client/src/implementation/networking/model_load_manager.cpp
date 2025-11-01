@@ -257,7 +257,7 @@ void ModelLoadManager::Update()
 			mdl->AddCollisionMesh(colMesh);
 		}
 		group->AddMesh(mesh);
-		mdl->Update(ModelUpdateFlags::All);
+		mdl->Update(pragma::model::ModelUpdateFlags::All);
 
 		m_completeMutex.lock();
 		m_completeQueries.push(query);

@@ -7,6 +7,8 @@ module;
 
 export module pragma.client:rendering.shaders.merge_images;
 
+export import pragma.prosper;
+
 export namespace pragma {
 	class DLLCLIENT ShaderMergeImages : public prosper::ShaderBaseImageProcessing {
 	  public:

@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:particle_system.operator_gravity;
 
-import :particle_system.operator_world_base;
+export import :particle_system.operator_world_base;
 
 import :engine;
 import :game;

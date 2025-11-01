@@ -7,6 +7,8 @@ module;
 
 export module pragma.client:rendering.shaders.specular_glossiness_to_metalness_roughness;
 
+export import pragma.prosper;
+
 export namespace pragma {
 	class DLLCLIENT ShaderSpecularGlossinessToMetalnessRoughness : public prosper::ShaderBaseImageProcessing {
 	  public:

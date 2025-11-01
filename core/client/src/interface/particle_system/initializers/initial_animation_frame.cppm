@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:particle_system.initializer_initial_animation_frame;
 
-import :particle_system.modifier;
+export import :particle_system.modifier;
 
 export class DLLCLIENT CParticleInitializerInitialAnimationFrame : public CParticleInitializer {
   private:

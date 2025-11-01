@@ -8,7 +8,7 @@ module;
 
 export module pragma.client:rendering.light_data_buffer_manager;
 
-import :entities.components.lights.light;
+export import :entities.components.lights.light;
 
 export namespace pragma {
 #if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1

@@ -8,7 +8,7 @@ module;
 
 export module pragma.client:gui.transformable;
 
-import :gui.snap_area;
+export import :gui.snap_area;
 
 export {
 	class DLLCLIENT WITransformable : public WIBase {

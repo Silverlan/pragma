@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:gui.server_browser;
 
-import :gui.frame;
+export import :gui.frame;
 export import pragma.shared;
 
 export {

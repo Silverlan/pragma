@@ -143,7 +143,7 @@ void CWaterSurfaceComponent::InitializeSurface()
 	auto mesh = std::make_shared<CModelMesh>();
 	mesh->AddSubMesh(subMesh);
 	meshGroup->AddMesh(mesh);
-	mdl->Update(ModelUpdateFlags::All); // TODO: Don't update vertex and index buffers
+	mdl->Update(pragma::model::ModelUpdateFlags::All); // TODO: Don't update vertex and index buffers
 	auto mdlComponent = GetEntity().GetModelComponent();
 	if(mdlComponent)
 		mdlComponent->SetModel(mdl);

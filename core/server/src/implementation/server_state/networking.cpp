@@ -27,14 +27,14 @@ pragma::networking::MasterServerRegistration *ServerState::GetMasterServerRegist
 bool ServerState::IsServerRunning() const { return m_server && m_server->IsRunning(); }
 unsigned int ServerState::GetClientMessageID(std::string identifier)
 {
-	ClientMessageMap *map = GetClientMessageMap();
+	auto *map = GetClientMessageMap();
 	return map->GetNetMessageID(identifier);
 }
 
-ServerMessageMap *ServerState::GetNetMessageMap() { return GetServerMessageMap(); }
+pragma::networking::ServerMessageMap *ServerState::GetNetMessageMap() { return GetServerMessageMap(); }
 SVNetMessage *ServerState::GetNetMessage(unsigned int ID)
 {
-	ServerMessageMap *map = GetNetMessageMap();
+	auto *map = GetNetMessageMap();
 	return map->GetNetMessage(ID);
 }
 

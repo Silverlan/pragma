@@ -19,11 +19,11 @@ import pragma.server.networking;
 
 #undef GetMessage
 
-static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
+static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = nullptr;
 std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ServerState::GetConVarPtrs() { return *conVarPtrs; }
 ConVarHandle ServerState::GetConVarHandle(std::string scvar)
 {
-	if(conVarPtrs == NULL) {
+	if(conVarPtrs == nullptr) {
 		static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> ptrs;
 		conVarPtrs = &ptrs;
 	}
@@ -60,7 +60,7 @@ ServerState::~ServerState()
 	FileManager::RemoveCustomMountDirectory("cache");
 	auto &conVarPtrs = GetConVarPtrs();
 	for(auto itHandles = conVarPtrs.begin(); itHandles != conVarPtrs.end(); itHandles++)
-		itHandles->second->set(NULL);
+		itHandles->second->set(nullptr);
 	ResourceManager::ClearResources();
 	m_modelManager->Clear();
 	GetMaterialManager().ClearUnused();
@@ -370,7 +370,7 @@ void ServerState::ClearConCommands()
 	m_luaConCommands.clear();
 	m_conCommandIDs.clear();
 	ConVarMap *map = GetConVarMap();
-	if(map == NULL)
+	if(map == nullptr)
 		m_conCommandID = 0;
 	else
 		m_conCommandID = map->GetConVarCount() + 1;

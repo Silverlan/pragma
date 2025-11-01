@@ -246,7 +246,7 @@ void CMD_ent_input(NetworkState *state, pragma::BasePlayerComponent *pl, std::ve
 {
 	if(!check_cheats("ent_input", state))
 		return;
-	if(SGame::Get() == NULL)
+	if(SGame::Get() == nullptr)
 		return;
 	auto *activator = (pl != nullptr) ? &pl->GetEntity() : nullptr;
 	if(argv.size() >= 2) {
@@ -320,7 +320,7 @@ void CMD_ent_remove(NetworkState *state, pragma::BasePlayerComponent *pl, std::v
 {
 	if(!check_cheats("ent_remove", state))
 		return;
-	if(SGame::Get() == NULL || pl == NULL)
+	if(SGame::Get() == nullptr || pl == nullptr)
 		return;
 	auto &ent = pl->GetEntity();
 	if(ent.IsCharacter() == false)
@@ -339,9 +339,9 @@ void CMD_ent_create(NetworkState *state, pragma::BasePlayerComponent *pl, std::v
 {
 	if(!check_cheats("ent_create", state))
 		return;
-	if(SGame::Get() == NULL)
+	if(SGame::Get() == nullptr)
 		return;
-	if(argv.empty() || pl == NULL)
+	if(argv.empty() || pl == nullptr)
 		return;
 	auto &ent = pl->GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
@@ -362,7 +362,7 @@ void CMD_ent_create(NetworkState *state, pragma::BasePlayerComponent *pl, std::v
 	}
 	std::string className = argv[0];
 	pragma::ecs::BaseEntity *entNew = SGame::Get()->CreateEntity(className);
-	if(entNew == NULL)
+	if(entNew == nullptr)
 		return;
 	auto pTrComponentNew = entNew->GetTransformComponent();
 	if(pTrComponentNew) {
@@ -384,14 +384,14 @@ void CMD_ent_create(NetworkState *state, pragma::BasePlayerComponent *pl, std::v
 
 void CMD_nav_reload(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	if(SGame::Get() == NULL)
+	if(SGame::Get() == nullptr)
 		return;
 	SGame::Get()->LoadNavMesh(true);
 }
 
 void CMD_nav_generate(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	if(SGame::Get() == NULL)
+	if(SGame::Get() == nullptr)
 		return;
 	std::string map = SGame::Get()->GetMapName();
 	if(map.empty())

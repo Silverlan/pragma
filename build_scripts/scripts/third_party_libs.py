@@ -26,7 +26,7 @@ get_submodule("luabind","https://github.com/Silverlan/luabind-deboostified.git",
 get_submodule("luajit","https://github.com/Silverlan/LuaJIT.git","cb42653","v2.1")
 get_submodule("lunasvg","https://github.com/sammycage/lunasvg.git","7b6970f") # v3.4.0
 get_submodule("miniball","https://github.com/Silverlan/miniball.git","609fbf16e7a9cc3dc8f88e4d1c7a1d8ead842bb1")
-get_submodule("mpaheader","https://github.com/SlawekNowy/mpaheader.git","275d9d9")
+get_submodule("mpaheader","https://github.com/Silverlan/mpaheader.git","fab7aeeeae4034e42fdb975b580d014514f460d5")
 get_submodule("muparserx","https://github.com/Silverlan/muparserx.git","910f6128494e174c3de81bd34c3d938b47873c08")
 if platform == "win32":
     get_submodule("nvtt","https://github.com/castano/nvidia-texture-tools.git","aeddd65f81d36d8cb7b169b469ef25156666077e")

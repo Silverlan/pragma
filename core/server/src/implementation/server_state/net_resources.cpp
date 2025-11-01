@@ -29,7 +29,7 @@ void ServerState::SendResourceFile(const std::string &f, const std::vector<pragm
 		SendRoughModel(f, clients);
 	for(auto *cl : clients) {
 		auto r = cl->AddResource(f);
-		UNUSED(r);
+		// UNUSED(r);
 		InitResourceTransfer(*cl);
 	}
 }

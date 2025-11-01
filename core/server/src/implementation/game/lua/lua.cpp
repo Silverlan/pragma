@@ -19,11 +19,6 @@ import pragma.server.scripting.lua;
 
 #undef LoadLibrary
 
-namespace pragma {
-	// Has to be in same namespace as class, otherwise luabind can't locate it
-	static std::ostream &operator<<(std::ostream &stream, const pragma::SLuaBaseEntityComponent &component) { return ::operator<<(stream, static_cast<const pragma::BaseEntityComponent &>(component)); }
-};
-
 void SGame::RegisterLua()
 {
 	GetLuaInterface().SetIdentifier("sv");

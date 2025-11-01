@@ -29,7 +29,7 @@ void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 	size_t numEntitiesValid = 0;
 	for(size_t i = 0; i < numEntities; i++) {
 		SBaseEntity *ent = (*entities)[i];
-		if(ent != NULL && ent->IsShared() && ent->IsSynchronized() && ent->IsMarkedForSnapshot()) {
+		if(ent != nullptr && ent->IsShared() && ent->IsSynchronized() && ent->IsMarkedForSnapshot()) {
 			numEntitiesValid++;
 			auto pTrComponent = ent->GetTransformComponent();
 			auto pVelComponent = ent->GetComponent<pragma::VelocityComponent>();
@@ -55,7 +55,7 @@ void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 
 			auto pPhysComponent = ent->GetPhysicsComponent();
 			pragma::physics::PhysObj *physObj = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
-			if(physObj != NULL && !physObj->IsStatic()) {
+			if(physObj != nullptr && !physObj->IsStatic()) {
 				flags |= pragma::SnapshotFlags::PhysicsData;
 				if(physObj->IsController()) {
 					packet->Write<uint8_t>(1u);
@@ -136,7 +136,7 @@ void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 	auto &players = pragma::SPlayerComponent::GetAll();
 	unsigned char numPlayersValid = 0;
 	for(auto *plComponent : players) {
-		if(plComponent != NULL && plComponent != pl) {
+		if(plComponent != nullptr && plComponent != pl) {
 			auto *ent = static_cast<Player *>(plComponent->GetBasePlayer());
 			if(ent != nullptr) {
 				numPlayersValid++;
@@ -172,11 +172,11 @@ void SGame::SendSnapshot()
 	GetEntities(&entities);
 	for(unsigned int i = 0; i < entities->size(); i++) {
 		SBaseEntity *ent = (*entities)[i];
-		if(ent != NULL && ent->IsMarkedForSnapshot())
+		if(ent != nullptr && ent->IsMarkedForSnapshot())
 			ent->MarkForSnapshot(false);
 	}
 	for(auto *plComponent : players) {
-		if(plComponent != NULL)
+		if(plComponent != nullptr)
 			plComponent->ClearKeyStack();
 	}
 }

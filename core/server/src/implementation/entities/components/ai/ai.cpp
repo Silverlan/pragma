@@ -170,7 +170,7 @@ void SAIComponent::Initialize()
 			PlayActivity(pragma::Activity::Idle, info);
 		}
 		/*auto *task = GetCurrentTask();
-		if(task == NULL)
+		if(task == nullptr)
 			return;
 		switch(task->GetID())
 		{
@@ -276,10 +276,10 @@ void SAIComponent::SendSnapshotData(NetPacket &packet, pragma::BasePlayerCompone
 void SAIComponent::SetSquad(std::string squadName)
 {
 	if(squadName.empty()) {
-		if(m_squad == NULL)
+		if(m_squad == nullptr)
 			return;
 		m_squad->Leave(&GetEntity());
-		m_squad = NULL;
+		m_squad = nullptr;
 		return;
 	}
 	ustring::to_lower(squadName);

@@ -12,6 +12,7 @@ import pragma.server.console.register_commands;
 import pragma.server.entities;
 import pragma.server.entities.components;
 import pragma.server.server_state;
+import pragma.wms;
 
 #define DEBUG_SERVER_VERBOSE 1
 
@@ -149,12 +150,12 @@ void pragma::networking::NWMActiveServer::Heartbeat()
 	if(m_dispatcher == nullptr || !ServerState::Get()->IsGameActive())
 		return;
 	auto &data = ServerState::Get()->GetServerData();
-	DataStream body;
+	util::DataStream body;
 	data.Write(body);
 
 	auto msgHeader = WMSMessageHeader(CUInt32(WMSMessage::HEARTBEAT));
 	msgHeader.size = CUInt16(body->GetSize());
-	DataStream header;
+	util::DataStream header;
 	header->Write<WMSMessageHeader>(msgHeader);
 
 	m_dispatcher->Dispatch(header, GetMasterServerIP(), GetMasterServerPort(), [this, body](const nwm::ErrorCode err, UDPMessageDispatcher::Message *) mutable -> void {

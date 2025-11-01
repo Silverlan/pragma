@@ -70,7 +70,7 @@ std::shared_ptr<ALSound> SSoundEmitterComponent::EmitSound(std::string sndname, 
 {
 	std::shared_ptr<ALSound> snd = CreateSound(sndname, type, sndInfo);
 	ALSound *al = snd.get();
-	if(al == NULL)
+	if(al == nullptr)
 		return snd;
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();

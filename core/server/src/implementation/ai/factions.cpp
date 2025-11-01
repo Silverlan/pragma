@@ -49,13 +49,13 @@ DISPOSITION Faction::GetDisposition(Faction &faction, int *priority)
 		for(unsigned int j = 0; j < disps.size(); j++) {
 			auto &disp = disps[j];
 			if(disp->target == faction) {
-				if(priority != NULL)
+				if(priority != nullptr)
 					*priority = disp->priority;
 				return DISPOSITION(i);
 			}
 		}
 	}
-	if(priority != NULL)
+	if(priority != nullptr)
 		*priority = 0;
 	if(&faction == this) // Faction is allied to itself by default (Unless overwritten)
 		return DISPOSITION::LIKE;
@@ -71,20 +71,20 @@ DISPOSITION Faction::GetDisposition(std::string className, int *priority)
 		for(unsigned int j = 0; j < disps.size(); j++) {
 			auto &disp = disps[j];
 			if(disp->target.HasClass(className)) {
-				if(priority != NULL)
+				if(priority != nullptr)
 					*priority = disp->priority;
 				return DISPOSITION(i);
 			}
 		}
 	}
-	if(priority != NULL)
+	if(priority != nullptr)
 		*priority = 0;
 	return GetDefaultDisposition();
 }
 DISPOSITION Faction::GetDisposition(EntityHandle &hEnt, int *priority)
 {
 	if(!hEnt.valid()) {
-		if(priority != NULL)
+		if(priority != nullptr)
 			*priority = 0;
 		return GetDefaultDisposition();
 	}
@@ -92,8 +92,8 @@ DISPOSITION Faction::GetDisposition(EntityHandle &hEnt, int *priority)
 }
 DISPOSITION Faction::GetDisposition(pragma::ecs::BaseEntity *ent, int *priority)
 {
-	if(ent == NULL) {
-		if(priority != NULL)
+	if(ent == nullptr) {
+		if(priority != nullptr)
 			*priority = 0;
 		return GetDefaultDisposition();
 	}

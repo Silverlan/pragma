@@ -90,7 +90,7 @@ std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd, pragma::audio
 		return nullptr;
 	SoundScript *script = m_soundScriptManager->FindScript(snd.c_str());
 	float duration = 0.f;
-	if(script == NULL) {
+	if(script == nullptr) {
 		sound::get_full_sound_path(snd, true);
 		auto it = m_soundsPrecached.find(snd);
 		if(it == m_soundsPrecached.end()) {
@@ -137,9 +137,9 @@ std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd, pragma::audio
 		idx = m_alsoundID;
 		m_alsoundID++;
 	}
-	ALSound *as = NULL;
+	ALSound *as = nullptr;
 	std::shared_ptr<ALSound> pAs;
-	if(script == NULL)
+	if(script == nullptr)
 		as = new SALSound(this, idx, duration, snd, flags);
 	else
 		as = new SALSoundScript(this, idx, script, this, snd, flags);
@@ -160,7 +160,7 @@ std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd, pragma::audio
 	}));
 	as->Initialize();
 	pragma::Game *game = GetGameState();
-	if(game != NULL) {
+	if(game != nullptr) {
 		game->CallCallbacks<void, ALSound *>("OnSoundCreated", as);
 		game->CallLuaCallbacks<void, std::shared_ptr<ALSound>>("OnSoundCreated", pAs);
 	}
@@ -185,7 +185,7 @@ bool ServerState::PrecacheSound(std::string snd, ALChannel mode)
 	snd = FileManager::GetCanonicalizedPath(snd);
 	sound::get_full_sound_path(snd, true);
 
-	SoundCacheInfo *inf = NULL;
+	SoundCacheInfo *inf = nullptr;
 	auto it = m_soundsPrecached.find(snd);
 	if(it != m_soundsPrecached.end()) {
 		inf = it->second.get();
@@ -225,7 +225,7 @@ bool ServerState::PrecacheSound(std::string snd, ALChannel mode)
 		spdlog::warn("Unable to precache sound '{}': Invalid format!", snd);
 		return false;
 	}
-	if(inf == NULL)
+	if(inf == nullptr)
 		inf = new SoundCacheInfo;
 	if(mode == ALChannel::Mono || mode == ALChannel::Both)
 		inf->mono = true;

@@ -29,7 +29,7 @@ SBaseEntity *SGame::CreateEntity(std::string classname)
 	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 	auto *entlua = CreateLuaEntity(classname);
-	if(entlua != NULL)
+	if(entlua != nullptr)
 		return entlua;
 	auto factory = server_entities::ServerEntityRegistry::Instance().FindFactory(classname);
 	if(!factory) {
@@ -41,7 +41,7 @@ SBaseEntity *SGame::CreateEntity(std::string classname)
 			return r;
 		}
 		Con::cwar << "Unable to create entity '" << classname << "': Factory not found!" << Con::endl;
-		return NULL;
+		return nullptr;
 	}
 	return factory(ServerState::Get());
 }
@@ -71,8 +71,8 @@ void SGame::RemoveEntity(pragma::ecs::BaseEntity *ent)
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().EndTask();
 #endif
-	m_ents[idx] = NULL;
-	m_baseEnts[idx] = NULL;
+	m_ents[idx] = nullptr;
+	m_baseEnts[idx] = nullptr;
 	if(idx == m_ents.size() - 1) {
 		m_ents.erase(m_ents.begin() + idx);
 		m_baseEnts.erase(m_baseEnts.begin() + idx);
@@ -209,7 +209,7 @@ SBaseEntity *SGame::CreateLuaEntity(std::string classname, bool bLoadIfNotExists
 	if(!Lua::IsTable(m_lua,-1))
 	{
 		Lua::Pop(m_lua,2);
-		return NULL;
+		return nullptr;
 	}
 	int refType = Lua::PushTable(m_lua,m_luaRefEntityTypes);
 	Lua::PushString(m_lua,classname);

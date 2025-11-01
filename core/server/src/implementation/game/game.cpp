@@ -29,6 +29,8 @@ import pragma.shared;
 
 DLLSERVER pragma::physics::IEnvironment *s_physEnv = nullptr;
 
+#undef CopyFile
+
 static SGame *g_game = nullptr;
 SGame *SGame::Get() { return g_game; }
 SGame::SGame(NetworkState *state) : pragma::Game(state)
@@ -38,8 +40,8 @@ SGame::SGame(NetworkState *state) : pragma::Game(state)
 	RegisterCallback<void, SGame *>("OnGameEnd");
 	s_physEnv = m_physEnvironment.get();
 
-	m_ents.push_back(NULL); // Slot 0 is reserved
-	m_baseEnts.push_back(NULL);
+	m_ents.push_back(nullptr); // Slot 0 is reserved
+	m_baseEnts.push_back(nullptr);
 
 	m_taskManager = std::make_unique<pragma::ai::TaskManager>();
 	m_taskManager->RegisterTask(typeid(pragma::ai::TaskMoveToTarget), []() { return std::make_shared<pragma::ai::TaskMoveToTarget>(); });
@@ -83,7 +85,7 @@ void SGame::OnRemove()
 	CallCallbacks<void, SGame *>("OnGameEnd", this);
 	m_luaCache = nullptr;
 	for(unsigned int i = 0; i < m_ents.size(); i++) {
-		if(m_ents[i] != NULL) {
+		if(m_ents[i] != nullptr) {
 			m_ents[i]->OnRemove();
 			m_ents[i]->Remove();
 		}
@@ -438,7 +440,7 @@ void SGame::WriteEntityData(NetPacket &packet, SBaseEntity **ents, uint32_t entC
 	packet->Write<unsigned int>(numEnts);
 	for(auto i = decltype(entCount) {0}; i < entCount; ++i) {
 		SBaseEntity *ent = ents[i];
-		if(ent != NULL && ent->IsSpawned()) {
+		if(ent != nullptr && ent->IsSpawned()) {
 			auto pMapComponent = ent->GetComponent<pragma::MapComponent>();
 		    auto factoryID = server_entities::ServerEntityRegistry::Instance().GetNetworkFactoryID(typeid(*ent));
 			if(factoryID != std::nullopt) {
@@ -469,7 +471,7 @@ void SGame::WriteEntityData(NetPacket &packet, SBaseEntity **ents, uint32_t entC
 void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, NetPacket &packet)
 {
 	auto *pl = GetPlayer(session);
-	if(pl != NULL)
+	if(pl != nullptr)
 		return;
 	auto plVersion = packet->Read<util::Version>();
 	auto version = get_engine_version();
@@ -593,7 +595,7 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, NetPacke
 
 	// TODO: Is this obsolete?
 	CacheInfo *cache = nullptr; // GetLuaCacheInfo();
-	if(cache == NULL || cache->size == 0)
+	if(cache == nullptr || cache->size == 0)
 		packetInf->Write<unsigned int>((unsigned int)(0));
 	else {
 		packetInf->Write<unsigned int>(cache->size);

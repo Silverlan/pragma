@@ -105,11 +105,11 @@ Node* Tree::SearchJoint(Node* node, int index)
 			if ((ret = SearchJoint(node->right, index))) {
 				return ret;
 			}
-			return NULL;
+			return nullptr;
 		}
 	} 
 	else {
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -134,10 +134,10 @@ Node* Tree::SearchEffector(Node* node, int index)
 			if ((ret = SearchEffector(node->right, index))) {
 				return ret;
 			}
-			return NULL;
+			return nullptr;
 		}
 	} else {
-		return NULL;
+		return nullptr;
 	}
 }
 

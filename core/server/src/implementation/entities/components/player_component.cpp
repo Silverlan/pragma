@@ -58,7 +58,7 @@ std::ostream &SPlayerComponent::print(std::ostream &os)
 	return os;
 }
 
-SPlayerComponent::SPlayerComponent(pragma::ecs::BaseEntity &ent) : BasePlayerComponent(ent), SBaseNetComponent(), m_session(NULL), m_bAuthed(false), m_bGameReady(false) { s_players.push_back(this); }
+SPlayerComponent::SPlayerComponent(pragma::ecs::BaseEntity &ent) : BasePlayerComponent(ent), SBaseNetComponent(), m_session(nullptr), m_bAuthed(false), m_bGameReady(false) { s_players.push_back(this); }
 
 SPlayerComponent::~SPlayerComponent()
 {

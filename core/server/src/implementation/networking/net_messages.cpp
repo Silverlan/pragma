@@ -52,7 +52,7 @@ static void NET_sv_CL_SEND(pragma::networking::IServerClient &session, NetPacket
 #define REGISTER_NET_MSG(NAME) \
     netMessageMap.RegisterNetMessage(server::NAME, +[](ServerClientHandle session, NetPacket packet) {NET_sv_##NAME(*static_cast<pragma::networking::IServerClient*>(session), packet);})
 
-static void register_net_messages(ServerMessageMap &netMessageMap)
+static void register_net_messages(pragma::networking::ServerMessageMap &netMessageMap)
 {
     using namespace pragma::networking::net_messages;
     REGISTER_NET_MSG(RESOURCEINFO_RESPONSE);
@@ -246,7 +246,7 @@ void NET_sv_CMD_SETPOS(pragma::networking::IServerClient &session, NetPacket pac
 	if(!ServerState::Get()->IsGameActive())
 		return;
 	auto *pl = SGame::Get()->GetPlayer(session);
-	if(pl == NULL)
+	if(pl == nullptr)
 		return;
 	auto pTrComponent = pl->GetEntity().GetTransformComponent();
 	if(pTrComponent == nullptr)
@@ -305,7 +305,7 @@ void NET_sv_RCON(pragma::networking::IServerClient &session, NetPacket packet)
 	if(pass.empty() || pass != passCl) {
 		/*Game *game = ServerState::Get()->GetGameState();
 		Player *pl = game->GetPlayer(session);
-		if(pl == NULL)
+		if(pl == nullptr)
 			return;
 		pl->PrintMessage("Bad RCON password",MESSAGE::PRINTCONSOLE);*/ // TODO
 		Con::cerr << "Incorrect RCON Password! (" << passCl << ")" << Con::endl;
@@ -384,7 +384,7 @@ void NET_sv_CVAR_SET(pragma::networking::IServerClient &session, NetPacket packe
 		return;
 	SGame *game = ServerState::Get()->GetGameState();
 	auto *pl = game->GetPlayer(session);
-	if(pl == NULL)
+	if(pl == nullptr)
 		return;
 	std::string cvar = packet->ReadString();
 	std::string val = packet->ReadString();
@@ -399,7 +399,7 @@ void NET_sv_NOCLIP(pragma::networking::IServerClient &session, NetPacket packet)
 	if(!ServerState::Get()->CheatsEnabled())
 		return;
 	auto *pl = ServerState::Get()->GetPlayer(session);
-	if(pl == NULL)
+	if(pl == nullptr)
 		return;
 	auto pPhysComponent = pl->GetEntity().GetPhysicsComponent();
 	if(pPhysComponent == nullptr)

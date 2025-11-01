@@ -28,7 +28,7 @@ SALSound::~SALSound()
 {
 	SendEvent(NetEvent::SetIndex, [](NetPacket &p) { p->Write<uint32_t>(static_cast<uint32_t>(0)); });
 	pragma::Game *game = ServerState::Get()->GetGameState();
-	if(game == NULL)
+	if(game == nullptr)
 		return;
 	//for(int i=0;i<m_luaCallbacks.size();i++)
 	//	lua_removereference(game->GetLuaState(),m_luaCallbacks[i]);

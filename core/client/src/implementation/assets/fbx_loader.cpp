@@ -3,9 +3,7 @@
 
 module;
 
-
-
-
+#include <cassert>
 #include <ofbx.h>
 
 module pragma.client;
@@ -568,7 +566,7 @@ bool FbxImporter::LoadMeshes(std::string &outErr)
 				mva->SetVertexCount(numVerts);
 				auto hasNormals = !shapeData.normDeltas.empty();
 				if(hasNormals)
-					mva->SetFlagEnabled(MeshVertexFrame::Flags::HasNormals);
+					mva->SetFlagEnabled(pragma::MeshVertexFrame::Flags::HasNormals);
 
 				for(size_t i = 0; i < shapeData.posDeltas.size(); ++i) {
 					auto it = fbxIndexToPragmaIndex.find(i);
@@ -1065,22 +1063,22 @@ Quat FbxImporter::GetRotation(const ofbx::DVec3 &o, RotationOrder order)
 	auto r = umath::deg_to_rad(ang.r);
 	switch(order) {
 	case RotationOrder::Xyz:
-		m = glm::eulerAngleXYZ(p, y, r);
+		m = glm::gtx::eulerAngleXYZ(p, y, r);
 		break;
 	case RotationOrder::Xzy:
-		m = glm::eulerAngleXZY(p, y, r);
+		m = glm::gtx::eulerAngleXZY(p, y, r);
 		break;
 	case RotationOrder::Yzx:
-		m = glm::eulerAngleYZX(p, y, r);
+		m = glm::gtx::eulerAngleYZX(p, y, r);
 		break;
 	case RotationOrder::Yxz:
-		m = glm::eulerAngleYXZ(y, p, r);
+		m = glm::gtx::eulerAngleYXZ(y, p, r);
 		break;
 	case RotationOrder::Zxy:
-		m = glm::eulerAngleZXY(p, y, r);
+		m = glm::gtx::eulerAngleZXY(p, y, r);
 		break;
 	case RotationOrder::Zyx:
-		m = glm::eulerAngleZYX(p, y, r);
+		m = glm::gtx::eulerAngleZYX(p, y, r);
 		break;
 	}
 	return glm::quat_cast(m);

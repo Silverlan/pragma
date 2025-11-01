@@ -464,13 +464,13 @@ static void debug_dump_render_queues(const util::DrawSceneInfo &drawSceneInfo)
 			if(item.material != curMaterial) {
 				curMaterial = item.material;
 				auto *mat = item.GetMaterial();
-				ss << util::get_true_color_code(Color::Lime) << "Material" << util::get_reset_color_code() << ": " << (mat ? mat->GetName() : "NULL") << "\n";
+				ss << util::get_true_color_code(colors::Lime) << "Material" << util::get_reset_color_code() << ": " << (mat ? mat->GetName() : "NULL") << "\n";
 			}
 			if(item.pipelineId != curPipeline) {
 				curPipeline = item.pipelineId;
 				uint32_t pipelineIdx;
 				auto *shader = item.GetShader(pipelineIdx);
-				ss << util::get_true_color_code(Color::Aqua) << "Shader" << util::get_reset_color_code() << ": ";
+				ss << util::get_true_color_code(colors::Aqua) << "Shader" << util::get_reset_color_code() << ": ";
 				if(shader)
 					ss << shader->GetIdentifier() << " (" << pipelineIdx << ")\n";
 				else
@@ -506,7 +506,7 @@ static void debug_dump_render_queues(const util::DrawSceneInfo &drawSceneInfo)
 			queue->WaitForCompletion();
 			if(queue->queue.empty())
 				continue;
-			ss << "\n" << util::get_true_color_code(Color::Magenta) << "Scene pass" << util::get_reset_color_code() << ": " << magic_enum::enum_name(static_cast<pragma::rendering::SceneRenderPass>(i));
+			ss << "\n" << util::get_true_color_code(colors::Magenta) << "Scene pass" << util::get_reset_color_code() << ": " << magic_enum::enum_name(static_cast<pragma::rendering::SceneRenderPass>(i));
 			if(translucent)
 				ss << " (translucent)\n";
 			else

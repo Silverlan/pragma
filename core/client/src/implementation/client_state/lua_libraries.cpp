@@ -115,7 +115,7 @@ static void register_gui(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();
 	auto guiMod = luabind::module(l, "gui");
-	guiMod[luabind::def("create", static_cast<::WIBase *(*)(CGame *, const std::string &, ::WIBase &, int32_t, int32_t, uint32_t, uint32_t, float, float, float, float)>(&Lua::gui::create)),
+	guiMod[(luabind::def("create", static_cast<::WIBase *(*)(CGame *, const std::string &, ::WIBase &, int32_t, int32_t, uint32_t, uint32_t, float, float, float, float)>(&Lua::gui::create)),
 	  luabind::def("create", static_cast<::WIBase *(*)(CGame *, const std::string &, ::WIBase &, int32_t, int32_t, uint32_t, uint32_t)>(&Lua::gui::create)), luabind::def("create", static_cast<::WIBase *(*)(CGame *, const std::string &, ::WIBase &, int32_t, int32_t)>(&Lua::gui::create)),
 	  luabind::def("create", static_cast<::WIBase *(*)(CGame *, const std::string &, ::WIBase *)>(&Lua::gui::create)), luabind::def("create", static_cast<::WIBase *(*)(CGame *, const std::string &)>(&Lua::gui::create)),
 
@@ -274,7 +274,7 @@ static void register_gui(Lua::Interface &lua)
 			    updateTextElements(const_cast<WIBase &>(*hEl.get()));
 		    }
 	    })
-		];
+		)];
 
 	//
 	auto videoModeDef = luabind::class_<pragma::platform::Monitor::VideoMode>("VideoMode");
@@ -558,7 +558,7 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
 	register_gui(lua);
 
 	auto inputMod = luabind::module(lua.GetState(), "input");
-	inputMod[luabind::def(
+	inputMod[(luabind::def(
 	           "get_mouse_button_state", +[](pragma::platform::MouseButton mouseButton) -> pragma::platform::KeyState { return pragma::get_cengine()->GetWindow()->GetMouseButtonState(mouseButton); }),
 	  luabind::def(
 	    "get_key_state", +[](pragma::platform::Key key) -> pragma::platform::KeyState { return pragma::get_cengine()->GetWindow()->GetKeyState(key); }),
@@ -643,7 +643,7 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
 		    if(!layer)
 			    return {};
 		    return layer->enabled;
-	    })];
+	    }))];
 
 	auto soundMod = luabind::module(lua.GetState(), "sound");
 	Lua::sound::register_library(soundMod);
@@ -696,7 +696,7 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
 	defInLay.def_readwrite("identifier", &InputBindingLayer::identifier);
 	defInLay.def_readwrite("priority", &InputBindingLayer::priority);
 	defInLay.def_readwrite("enabled", &InputBindingLayer::enabled);
-	defInLay.scope[luabind::def(
+	defInLay.scope[(luabind::def(
 	                 "load",
 	                 +[](lua_State *l, const udm::AssetData &data) -> Lua::var<bool, std::vector<std::shared_ptr<InputBindingLayer>>> {
 		                 std::vector<std::shared_ptr<InputBindingLayer>> layers;
@@ -709,7 +709,7 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
 	    "save", +[](lua_State *l, const udm::AssetData &data, const std::vector<std::shared_ptr<InputBindingLayer>> &layers) {
 		    std::string err;
 		    return InputBindingLayer::Save(layers, data, err);
-	    })];
+	    }))];
 	defInLay.def("ClearKeyMappings", &InputBindingLayer::ClearKeyMappings);
 	defInLay.def("ClearLuaKeyMappings", &InputBindingLayer::ClearLuaKeyMappings);
 	defInLay.def(

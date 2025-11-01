@@ -3,20 +3,10 @@
 
 module;
 
-
-
-#include "pragma/logging.hpp"
-
-
-
-
-
-
-
-#include "pragma/lua/core.hpp"
-
-
 #include "stdafx_client.h"
+#include "pragma/logging.hpp"
+#include "pragma/lua/core.hpp"
+#include <sharedutils/magic_enum.hpp>
 
 #undef DrawState
 
@@ -383,7 +373,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	auto &modUtil = lua.RegisterLibrary("util");
 	auto defTexture = luabind::class_<msys::Texture>("Texture");
 	defTexture.def(
-	  "__tostring", +[](const Texture &tex) -> std::string {
+	  "__tostring", +[](const msys::Texture &tex) -> std::string {
 		  std::stringstream ss;
 		  ss << "Texture";
 		  ss << "[" << tex.GetName() << "]";
@@ -391,9 +381,9 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		  ss << "[" << magic_enum::enum_name(tex.GetFlags()) << "]";
 		  return ss.str();
 	  });
-	defTexture.def("GetName", &Texture::GetName, luabind::copy_policy<0> {});
-	defTexture.def("GetWidth", &Texture::GetWidth);
-	defTexture.def("GetHeight", &Texture::GetHeight);
+	defTexture.def("GetName", &msys::Texture::GetName, luabind::copy_policy<0> {});
+	defTexture.def("GetWidth", &msys::Texture::GetWidth);
+	defTexture.def("GetHeight", &msys::Texture::GetHeight);
 	defTexture.def("GetVkTexture", &Lua::Texture::GetVkTexture);
 	modUtil[defTexture];
 
@@ -465,7 +455,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 
 	Lua::Material::register_class(materialClassDef);
 	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, msys::Material *, const std::string &, const std::string &)>(&Lua::Material::Client::SetTexture));
-	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, msys::Material *, const std::string &, Texture &)>(&Lua::Material::Client::SetTexture));
+	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, msys::Material *, const std::string &, msys::Texture &)>(&Lua::Material::Client::SetTexture));
 	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, msys::Material *, const std::string &, Lua::Vulkan::Texture &)>(&Lua::Material::Client::SetTexture));
 	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, msys::Material *, const std::string &, Lua::Vulkan::Texture &, const std::string &)>(&Lua::Material::Client::SetTexture));
 	materialClassDef.def("GetTextureInfo", &Lua::Material::Client::GetTexture);

@@ -11,16 +11,13 @@ module;
 
 module pragma.client;
 
-
+import :client_state;
+import :engine;
 import :entities.components.lights.shadow_csm;
 import :game;
 import :rendering.shaders;
 
 using namespace pragma;
-
-import :client_state;
-import :engine;
-
 
 static const uint8_t LAYER_UPDATE_FREQUENCY = 3; // Frames
 

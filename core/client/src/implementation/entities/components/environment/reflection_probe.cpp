@@ -722,7 +722,7 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromCubemap(prosper::Textu
 
 	// Load BRDF texture from disk, if it already exists
 	auto loadInfo = std::make_unique<msys::TextureLoadInfo>();
-	loadInfo->mipmapMode = TextureMipmapMode::Ignore;
+	loadInfo->mipmapMode = msys::TextureMipmapMode::Ignore;
 	std::shared_ptr<prosper::Texture> brdfTex = nullptr;
 	auto texInfo = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset("env/brdf.ktx", std::move(loadInfo));
 	if(texInfo)
@@ -960,7 +960,7 @@ static void debug_pbr_ibl(NetworkState *state, pragma::BasePlayerComponent *pl, 
 
 	auto *cam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
 	if(cam)
-		pragma::get_cgame()->DrawLine(cam->GetEntity().GetPosition(), entClosest->GetPosition(), Color::Red, 30.f);
+		pragma::get_cgame()->DrawLine(cam->GetEntity().GetPosition(), entClosest->GetPosition(), colors::Red, 30.f);
 
 	auto reflProbeC = entClosest->GetComponent<CReflectionProbeComponent>();
 	if(reflProbeC.expired())

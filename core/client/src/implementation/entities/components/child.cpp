@@ -1,10 +1,10 @@
-
-#include "pragma/lua/core.hpp"
-
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
+#include "pragma/lua/core.hpp"
 
 module pragma.client;
 

@@ -1,11 +1,9 @@
-
-
-#include "pragma/console/helper.hpp"
-
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
+#include "pragma/console/helper.hpp"
+#include <sharedutils/magic_enum.hpp>
 
 import pragma.client;
 
@@ -97,7 +95,7 @@ static void debug_texture_mipmaps(NetworkState *, pragma::BasePlayerComponent *,
 		if(path.has_value())
 			Con::cout << "File path: " << *path << Con::endl;
 		auto type = texture->GetFileFormatType();
-		if(type != TextureType::Invalid)
+		if(type != msys::TextureType::Invalid)
 			Con::cout << "File image type: " << magic_enum::enum_name(type) << Con::endl;
 		dbg = std::make_unique<DebugGameGUI>([vkTexture]() {
 			auto &wgui = WGUI::GetInstance();

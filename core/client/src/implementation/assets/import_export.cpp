@@ -597,12 +597,12 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		std::string name;
 		umath::ScaledTransform pose;
 	};
-	std::unordered_map<ModelMeshGroup *, std::vector<InstanceInfo>> meshInstances;
+	std::unordered_map<pragma::ModelMeshGroup *, std::vector<InstanceInfo>> meshInstances;
 	for(uint32_t meshIdx = 0; auto &gltfMesh : gltfMeshes) {
 		auto mesh = pragma::get_cgame()->CreateModelMesh();
 		std::string name;
 		auto &nodeMeshData = meshToNodes[meshIdx];
-		std::shared_ptr<ModelMeshGroup> firstMeshGroup = nullptr;
+		std::shared_ptr<pragma::ModelMeshGroup> firstMeshGroup = nullptr;
 		for(auto nodeIdx = decltype(nodeMeshData.size()) {0u}; nodeIdx < nodeMeshData.size(); ++nodeIdx) {
 			auto &nodeData = nodeMeshData[nodeIdx];
 			auto pose = nodeData.pose;
@@ -848,7 +848,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 					auto mva = va.AddMeshFrame(*mesh, *subMesh);
 					mva->SetVertexCount(numVerts);
 					if(normBufData)
-						mva->SetFlagEnabled(MeshVertexFrame::Flags::HasNormals);
+						mva->SetFlagEnabled(pragma::MeshVertexFrame::Flags::HasNormals);
 					for(auto i = decltype(posAccessor.count) {0u}; i < posAccessor.count; ++i) {
 						auto pos = TransformPos(posBufData.GetIndexedValue<Vector3>(i));
 						mva->SetVertexPosition(i, pos);
@@ -1672,7 +1672,7 @@ bool pragma::asset::export_texture(const std::string &texturePath, ModelExportIn
 	auto exportSuccess = false;
 	if(imageFormat == ModelExportInfo::ImageFormat::DDS || imageFormat == ModelExportInfo::ImageFormat::KTX) {
 		std::string ext;
-		auto texWriteInfo = get_texture_write_info(imageFormat, texture->HasFlag(Texture::Flags::NormalMap), texture->HasFlag(Texture::Flags::SRGB), alphaMode, ext);
+		auto texWriteInfo = get_texture_write_info(imageFormat, texture->HasFlag(msys::Texture::Flags::NormalMap), texture->HasFlag(msys::Texture::Flags::SRGB), alphaMode, ext);
 		imgOutputPath += '.' + ext;
 		if(texWriteInfo.containerFormat == uimg::TextureInfo::ContainerFormat::DDS && enableExtendedDDS == false) {
 			auto anvFormat = vkImg.GetFormat();
@@ -1696,7 +1696,7 @@ bool pragma::asset::export_texture(const std::string &texturePath, ModelExportIn
 			return false;
 		}
 		auto &imgBuf = imgBuffers.front().front();
-		exportSuccess = save_image(*imgBuf, imageFormat, imgOutputPath, texture->HasFlag(Texture::Flags::NormalMap), texture->HasFlag(Texture::Flags::SRGB), alphaMode);
+		exportSuccess = save_image(*imgBuf, imageFormat, imgOutputPath, texture->HasFlag(msys::Texture::Flags::NormalMap), texture->HasFlag(msys::Texture::Flags::SRGB), alphaMode);
 	}
 	if(exportSuccess == false) {
 		outErrMsg = "Unable to export texture '" + texturePath + "'!";

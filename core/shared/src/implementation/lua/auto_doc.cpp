@@ -608,12 +608,12 @@ void print_function_documentation(const ::pragma::doc::Function &function, std::
 			{
 				if(bFirst == false)
 				{
-					ss<<util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+					ss<<util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 					ss<<", ";
 				}
 				else
 					bFirst = false;
-				ss<<util::get_ansi_color_code(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Intensity);
+				ss<<util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Green | pragma::console::ConsoleColorFlags::Intensity);
 				ss<<"["<<wrap_link(returnValue.GetFullType())<<"]";
 			}*/
 		}
@@ -633,9 +633,9 @@ void print_function_documentation(const ::pragma::doc::Function &function, std::
 			else
 				bFirst = false;
 
-			ss<<util::get_ansi_color_code(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Intensity);
+			ss<<util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Green | pragma::console::ConsoleColorFlags::Intensity);
 			ss<<"["<<wrap_link(param.GetFullType())<<"]";
-			ss<<util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+			ss<<util::get_ansi_color_code(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 			ss<<" "<<param.GetName();
 			auto &def = param.GetDefault();
 			if(def.has_value())

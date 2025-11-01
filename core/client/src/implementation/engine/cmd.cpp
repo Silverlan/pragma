@@ -19,12 +19,8 @@ import :console.register_commands;
 import :engine;
 import :entities.components;
 import :game;
-import :locale;
 import :rendering.render_apis;
 // import pragma.scripting.lua;
-#ifndef _MSC_VER
-import pragma.string.unicode;
-#endif
 
 DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool continuous);
 extern bool g_dumpRenderQueues;
@@ -128,8 +124,7 @@ void CEngine::RegisterConsoleCommands()
 			  throw std::runtime_error {"Crash!"};
 			  return;
 		  }
-		  volatile int *a = reinterpret_cast<volatile int *>(nullptr);
-		  *a = 1;
+		  std::abort();
 	  },
 	  pragma::console::ConVarFlags::None, "Forces the engine to crash.");
 	conVarMap.RegisterConCommand(
@@ -313,7 +308,7 @@ void CEngine::RegisterConsoleCommands()
 			  Con::cout << std::left << std::setw(35) << imgName;
 
 			  if(useCount == 0)
-				  util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
+				  util::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
 			  Con::cout << std::setw(10) << useCount;
 			  if(useCount == 0)
 				  util::reset_console_color();
@@ -324,7 +319,7 @@ void CEngine::RegisterConsoleCommands()
 
 			  auto numMipmaps = img.GetMipmapCount();
 			  if(numMipmaps <= 1 && perfWarnings)
-				  util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
+				  util::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
 			  Con::cout << std::setw(10) << numMipmaps;
 			  if(numMipmaps <= 1 && perfWarnings)
 				  util::reset_console_color();
@@ -332,7 +327,7 @@ void CEngine::RegisterConsoleCommands()
 			  auto tiling = img.GetTiling();
 			  auto optimal = tiling == prosper::ImageTiling::Optimal;
 			  if(!optimal)
-				  util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
+				  util::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
 			  Con::cout << std::setw(10) << prosper::util::to_string(tiling);
 			  if(!optimal)
 				  util::reset_console_color();
@@ -340,7 +335,7 @@ void CEngine::RegisterConsoleCommands()
 			  auto format = img.GetFormat();
 			  auto isCompressed = prosper::util::is_compressed_format(format);
 			  if(!isCompressed && perfWarnings)
-				  util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
+				  util::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
 			  Con::cout << std::setw(22) << prosper::util::to_string(format);
 			  if(!isCompressed && perfWarnings)
 				  util::reset_console_color();
@@ -352,7 +347,7 @@ void CEngine::RegisterConsoleCommands()
 			  else {
 				  auto time = context.GetLastUsageTime(img);
 				  if(time.has_value() == false)
-					  util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
+					  util::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
 				  Con::cout << std::setw(10);
 				  if(time.has_value()) {
 					  auto t = std::chrono::steady_clock::now();
@@ -369,7 +364,7 @@ void CEngine::RegisterConsoleCommands()
 
 			  /*auto deviceLocal = umath::is_flag_set(img.GetCreateInfo().memoryFeatures, prosper::MemoryFeatureFlags::DeviceLocal);
 			  if(!deviceLocal) {
-				  util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
+				  util::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
 				  Con::cout << "\tPerformance Warning: Image memory is not device local!" << Con::endl;
 				  util::reset_console_color();
 			  }*/

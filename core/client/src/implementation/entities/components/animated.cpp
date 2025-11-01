@@ -3,15 +3,10 @@
 
 module;
 
-
-#include "pragma/logging.hpp"
-
-
-
-#include "pragma/lua/core.hpp"
-
-
 #include "stdafx_client.h"
+#include "pragma/logging.hpp"
+#include "pragma/lua/core.hpp"
+#include <sharedutils/magic_enum.hpp>
 
 module pragma.client;
 

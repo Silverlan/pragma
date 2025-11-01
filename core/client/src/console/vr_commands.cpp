@@ -1,12 +1,9 @@
-
-
-
-#include "pragma/console/helper.hpp"
-
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
 #include "stdafx_client.h"
+#include "pragma/console/helper.hpp"
+#include <cassert>
 
 import pragma.client;
 
@@ -38,7 +35,7 @@ static void show_hmd_message(bool bInit = false)
 	auto &wgui = WGUI::GetInstance();
 	auto *bg = wgui.Create<WIRect>();
 	bg->SetAutoAlignToParent(true);
-	bg->SetColor(Color::Black);
+	bg->SetColor(colors::Black);
 	//bg->SetVisible(false);
 	hHmdViewMessage = bg->GetHandle();
 

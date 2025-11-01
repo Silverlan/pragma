@@ -326,7 +326,7 @@ bool MovementComponent::UpdateMovement()
 		//auto pos = uvec::create((info.controllerIndex == 0u ? info.contactPoint.getPositionWorldOnA() : info.contactPoint.getPositionWorldOnB()) /PhysEnv::WORLD_SCALE);
 		auto n = -*contactNormal;
 		//ent.GetNetworkState()->GetGameState()->DrawLine(
-		//	pos,pos -n *100.f,Color::Red,5.f
+		//	pos,pos -n *100.f,colors::Red,5.f
 		//);
 
 		const auto force = 100.f; // Somewhat arbitrary; The force to apply to the controller to make them stick to the ground

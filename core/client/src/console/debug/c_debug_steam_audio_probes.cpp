@@ -29,7 +29,7 @@ static void debug_steam_audio_probe_boxes(NetworkState *state, ConVar *, bool, b
 	}
 	std::vector<ipl::Scene::ProbeSphere> spheres {};
 	iplScene->GetProbeSpheres(spheres);
-	auto outlineColor = Color::Aqua;
+	auto outlineColor = colors::Aqua;
 	outlineColor.a = 64;
 
 	dbgSoundProbeBoxes = std::make_unique<DebugGameGUI>(nullptr);

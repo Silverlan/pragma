@@ -16,6 +16,7 @@ export import :engine;
 export import :entities;
 export import :game;
 export import :input;
+export import :locale;
 export import :map;
 export import :math;
 export import :model;

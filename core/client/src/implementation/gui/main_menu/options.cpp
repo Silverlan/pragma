@@ -302,9 +302,9 @@ void WIMainMenuOptions::InitializeGeneralSettings()
 			    pSlider->SetMouseInputEnabled(false);
 			    pSlider->GetProgressProperty()->AddCallback([pSlider](std::reference_wrapper<const float> oldVal, std::reference_wrapper<const float> newVal) {
 				    auto percent = newVal.get();
-				    auto &col0 = Color::LimeGreen;
-				    auto &col1 = Color::DarkOrange;
-				    auto &col2 = Color::Crimson;
+				    auto &col0 = colors::LimeGreen;
+				    auto &col1 = colors::DarkOrange;
+				    auto &col2 = colors::Crimson;
 				    Color col {};
 				    if(percent <= 0.75)
 					    col = col0.Lerp(col1, percent / 0.75);
@@ -953,9 +953,9 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		pSlider->SetMouseInputEnabled(false);
 		pSlider->GetProgressProperty()->AddCallback([pSlider](std::reference_wrapper<const float> oldVal,std::reference_wrapper<const float> newVal) {
 			auto percent = newVal.get();
-			auto &col0 = Color::LimeGreen;
-			auto &col1 = Color::DarkOrange;
-			auto &col2 = Color::Crimson;
+			auto &col0 = colors::LimeGreen;
+			auto &col1 = colors::DarkOrange;
+			auto &col2 = colors::Crimson;
 			Color col {};
 			if(percent <= 0.75)
 				col = col0.Lerp(col1,percent /0.75);

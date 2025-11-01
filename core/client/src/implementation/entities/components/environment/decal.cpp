@@ -235,7 +235,7 @@ void DecalProjector::DebugDraw(float duration) const
 	lines.push_back(points.at(4));
 	for(auto &l : lines)
 		l = pose * (l * prismSize);
-	::DebugRenderer::DrawLines(lines, {Color::Black, duration});
+	::DebugRenderer::DrawLines(lines, {colors::Black, duration});
 }
 
 /////////
@@ -375,7 +375,7 @@ bool CDecalComponent::ApplyDecal()
 	projectorAABB.first += projectorOrigin;
 	projectorAABB.second += projectorOrigin;
 
-	// pragma::get_cgame()->DrawBox(projectorAABB.first,projectorAABB.second,{},Color::Red,12.f);
+	// pragma::get_cgame()->DrawBox(projectorAABB.first,projectorAABB.second,{},colors::Red,12.f);
 
 	pragma::PrimitiveIntersectionInfo bvhIntersectInfo {};
 	std::vector<DecalProjector::MeshData> meshDatas {};

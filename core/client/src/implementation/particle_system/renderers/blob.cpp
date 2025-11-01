@@ -69,7 +69,7 @@ void CParticleRendererBlob::ShowDebugNeighborLinks(bool b)
 	m_dbgNeighborLinks.resize(GetParticleSystem().GetMaxParticleCount());
 	for(auto &info : m_dbgNeighborLinks) {
 		//for(auto &o : info.renderObjects) // prosper TODO
-		//	o = DebugRenderer::DrawLine({},{},Color::Lime); // prosper TODO
+		//	o = DebugRenderer::DrawLine({},{},colors::Lime); // prosper TODO
 	}
 }
 
@@ -108,7 +108,7 @@ void CParticleRendererBlob::UpdateDebugNeighborLinks()
 				auto &p1 = particles[m_particleSystem->TranslateParticleIndex(particleIdx1)];
 				newVerts.first = *reinterpret_cast<const Vector3 *>(&p0.position);
 				newVerts.second = *reinterpret_cast<const Vector3 *>(&p1.position);
-				auto col = Color::Lime;
+				auto col = colors::Lime;
 				auto &cLinks1 = m_particleLinks[particleIdx1];
 				auto it = std::find_if(cLinks1.links.begin(), cLinks1.links.end(), [particleIdx0](const Link &link) { return (link.targetParticleIdx == particleIdx0) ? true : false; });
 				if(it == cLinks1.links.end())
@@ -205,7 +205,7 @@ void CParticleRendererBlob::OnParticleSystemStarted()
 	    [this, depthImage, renderTex](std::reference_wrapper<const Vulkan::RenderPass> &rpScene, std::reference_wrapper<const Vulkan::Framebuffer> &fbScene, std::reference_wrapper<const Vulkan::CommandBuffer> &drawCmd) {
 		    renderTex->GetImage()->SetDrawLayout(prosper::ImageLayout::ColorAttachmentOptimal);
 		    depthImage->SetDrawLayout(prosper::ImageLayout::DepthStencilAttachmentOptimal); // TODO: Only once?
-		    //drawCmd.get()->BeginRenderPass(m_rtTransparent,Color::Red,1.f);
+		    //drawCmd.get()->BeginRenderPass(m_rtTransparent,colors::Red,1.f);
 		    drawCmd.get()->BeginRenderPass(m_rtTransparent->GetRenderPass(), m_rtTransparent->GetFramebuffer(), renderTex->GetWidth(), renderTex->GetHeight(),
 		      {
 		        vk::ClearValue {vk::ClearColorValue {std::array<float, 4> {1.f, 0.f, 0.f, 0.f}}}, // Color Attachment

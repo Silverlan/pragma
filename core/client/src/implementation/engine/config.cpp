@@ -4,16 +4,14 @@
 module;
 
 
-#include "pragma/logging.hpp"
-
-
 #include "stdafx_cengine.h"
+#include "pragma/logging.hpp"
+#include <sharedutils/magic_enum.hpp>
 
 module pragma.client;
 
 
 import :engine;
-import :locale;
 import pragma.string.unicode;
 
 void CEngine::SaveClientConfig()

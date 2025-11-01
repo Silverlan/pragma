@@ -1792,7 +1792,7 @@ void NET_cl_DEBUG_AI_NAVIGATION(NetPacket packet)
 		Con::ccl << "#" << (nodeId + 1) << ": " << pos << Con::endl;
 
 		if(nodeId == currentNodeIdx)
-			dbgNode = DebugRenderer::DrawLine(pos, pos + Vector3 {0.f, 100.f, 0.f}, Color::Lime);
+			dbgNode = DebugRenderer::DrawLine(pos, pos + Vector3 {0.f, 100.f, 0.f}, colors::Lime);
 	}
 	Con::ccl << Con::endl;
 
@@ -1805,7 +1805,7 @@ void NET_cl_DEBUG_AI_NAVIGATION(NetPacket packet)
 			s_aiNavDebugObjects.erase(it);
 		});
 	}
-	s_aiNavDebugObjects[npc] = {DebugRenderer::DrawPath(points, Color::Yellow), DebugRenderer::DrawSpline(points, 10, 1.f, {Color::OrangeRed}), dbgNode};
+	s_aiNavDebugObjects[npc] = {DebugRenderer::DrawPath(points, colors::Yellow), DebugRenderer::DrawSpline(points, 10, 1.f, {colors::OrangeRed}), dbgNode};
 }
 
 void NET_cl_DEBUG_AI_SCHEDULE_PRINT(NetPacket packet)
@@ -1976,19 +1976,19 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 		switch(node.state) {
 		case DebugBehaviorTreeNode::State::Pending:
 			//text += "pending";
-			col = Color::Aqua;
+			col = colors::Aqua;
 			break;
 		case DebugBehaviorTreeNode::State::Failed:
 			//text += "failed";
-			col = Color::Maroon;
+			col = colors::Maroon;
 			break;
 		case DebugBehaviorTreeNode::State::Initial:
 			//text += "initial";
-			col = Color::Gray;
+			col = colors::Gray;
 			break;
 		default:
 			//text += "succeeded";
-			col = Color::Lime;
+			col = colors::Lime;
 			break;
 		}
 		//text += ", ";
@@ -2225,7 +2225,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 			if(pText != nullptr) {
 				pText->SetColor(col);
 				pText->EnableShadow(true);
-				pText->SetShadowColor(Color::Black);
+				pText->SetShadowColor(colors::Black);
 				pText->SetShadowOffset(1, 1);
 			}
 			for(auto &dbgChild : node.children)

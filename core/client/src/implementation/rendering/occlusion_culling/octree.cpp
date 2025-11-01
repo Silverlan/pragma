@@ -168,9 +168,9 @@ void BaseOcclusionOctree::Node::DebugDraw(bool b, bool applyToChildren, uint32_t
 		return;
 	}
 	/*if(m_debugObject == nullptr) {
-		const std::array<std::pair<const Color *, const Color *>, 7> colors = {std::pair<const Color *, const Color *> {&Color::Red, &Color::Lime}, std::pair<const Color *, const Color *> {&Color::Lime, &Color::Aqua}, std::pair<const Color *, const Color *> {&Color::Aqua, &Color::Magenta},
-		  std::pair<const Color *, const Color *> {&Color::Magenta, &Color::Yellow}, std::pair<const Color *, const Color *> {&Color::Yellow, &Color::Teal}, std::pair<const Color *, const Color *> {&Color::Teal, &Color::Maroon},
-		  std::pair<const Color *, const Color *> {&Color::Maroon, &Color::Red}};
+		const std::array<std::pair<const Color *, const Color *>, 7> colors = {std::pair<const Color *, const Color *> {&colors::Red, &colors::Lime}, std::pair<const Color *, const Color *> {&colors::Lime, &colors::Aqua}, std::pair<const Color *, const Color *> {&colors::Aqua, &colors::Magenta},
+		  std::pair<const Color *, const Color *> {&colors::Magenta, &colors::Yellow}, std::pair<const Color *, const Color *> {&colors::Yellow, &colors::Teal}, std::pair<const Color *, const Color *> {&colors::Teal, &colors::Maroon},
+		  std::pair<const Color *, const Color *> {&colors::Maroon, &colors::Red}};
 		depth = depth % colors.size();
 		if(HasObjects() == true) {
 			auto &col = colors.at(depth);

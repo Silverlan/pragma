@@ -296,7 +296,7 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(pragma::ecs::BaseEntity &
 						Vector3 min, max;
 						colMesh->GetAABB(&min, &max);
 #if ENABLE_DEBUG_DRAW == 1
-						pragma::get_engine()->GetClientState()->GetGameState()->DrawBox(min, max, EulerAngles {}, Color::Aqua, 0.1f);
+						pragma::get_engine()->GetClientState()->GetGameState()->DrawBox(min, max, EulerAngles {}, colors::Aqua, 0.1f);
 #endif
 						aabbVerts = {
 						  min,                          // 0

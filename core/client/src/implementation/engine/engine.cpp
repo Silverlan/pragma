@@ -5,22 +5,12 @@ module;
 
 
 
+#include "stdafx_cengine.h"
 #include "pragma/console/helper.hpp"
 #include "pragma/logging.hpp"
-
-
 #include "pragma/clientdefinitions.h"
-
-
-
-
-
-
-
 #include "pragma/lua/core.hpp"
-
-
-#include "stdafx_cengine.h"
+#include <sharedutils/magic_enum.hpp>
 #ifdef _WIN32
 
 #include <dwmapi.h>
@@ -38,7 +28,6 @@ import :client_state;
 import :entities.components;
 import :game;
 import :gui;
-import :locale;
 import :model;
 import :networking;
 import :rendering.shader_graph;
@@ -325,7 +314,7 @@ void CEngine::MouseInput(prosper::Window &window, pragma::platform::MouseButton 
 		return;
 	if(WGUI::GetInstance().HandleMouseInput(window, button, state, mods))
 		return;
-	button += static_cast<pragma::platform::MouseButton>(pragma::platform::Key::Last);
+	button = static_cast<pragma::platform::MouseButton>(umath::to_integral(button) +umath::to_integral(pragma::platform::Key::Last));
 	if(client != nullptr && client->MouseInput(button, state, mods) == false)
 		return;
 	Input(static_cast<int>(button), state);

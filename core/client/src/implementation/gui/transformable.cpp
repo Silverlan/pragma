@@ -471,7 +471,7 @@ void WITransformable::InitializeSnapTargetGhost(WISnapArea &snapArea)
 	auto *pOutline = wgui.Create<WIOutlinedRect>(pSnapGhost);
 	pOutline->SetAutoAlignToParent(true);
 	pOutline->SetOutlineWidth(2);
-	pOutline->SetColor(Color::Black);
+	pOutline->SetColor(colors::Black);
 
 	RemoveOnRemoval(pSnapGhost);
 	pSnapGhost->SetZPos(10'000);

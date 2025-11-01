@@ -400,7 +400,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawText(const DebugRe
 	auto color = renderInfo.color;
 	pText->SetColor(color);
 	if(color.r != 0 || color.g != 0 || color.b != 0) {
-		auto colShadow = Color::Black;
+		auto colShadow = colors::Black;
 		colShadow.a = color.a;
 		pText->EnableShadow(true);
 		pText->SetShadowOffset(1, 1);
@@ -422,7 +422,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawText(const DebugRe
 	auto color = renderInfo.color;
 	pText->SetColor(color);
 	if(color.r != 0 || color.g != 0 || color.b != 0) {
-		auto colShadow = Color::Black;
+		auto colShadow = colors::Black;
 		colShadow.a = color.a;
 		pText->EnableShadow(true);
 		pText->SetShadowOffset(1, 1);

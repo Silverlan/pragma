@@ -146,7 +146,7 @@ void ClientState::ResetGameClient()
 }
 
 static auto cvSteamAudioEnabled = GetClientConVar("cl_steam_audio_enabled");
-import pragma.string.unicode;
+
 void ClientState::Initialize()
 {
 	/*Con::cwar<<"Client NetMessages:"<<Con::endl;
@@ -235,7 +235,7 @@ void ClientState::InitializeGUILua()
 	Lua::asset_client::register_library(*m_luaGUI, modAsset);
 
 	auto timeMod = luabind::module(m_luaGUI->GetState(), "time");
-	timeMod[luabind::def("last_think", &Lua::gui::LastThink), luabind::def("real_time", &Lua::gui::RealTime), luabind::def("delta_time", &Lua::gui::DeltaTime)];
+	timeMod[(luabind::def("last_think", &Lua::gui::LastThink), luabind::def("real_time", &Lua::gui::RealTime), luabind::def("delta_time", &Lua::gui::DeltaTime))];
 
 	auto enMod = luabind::module(m_luaGUI->GetState(), "engine");
 	enMod[luabind::def("poll_console_output", &Lua::engine::poll_console_output)];
@@ -670,9 +670,9 @@ msys::MaterialHandle ClientState::CreateMaterial(const std::string &path, const 
 	auto settings = ds::create_data_settings({});
 	auto mat = GetMaterialManager().CreateMaterial(path, shader, std::make_shared<ds::Block>(*settings));
 	if(mat == nullptr)
-		return mat;
+		return {};
 	static_cast<msys::CMaterial *>(mat.get())->SetOnLoadedCallback(std::bind(init_shader, mat.get()));
-	return mat;
+	return mat->GetHandle();
 }
 
 msys::MaterialHandle ClientState::CreateMaterial(const std::string &shader)
@@ -680,9 +680,9 @@ msys::MaterialHandle ClientState::CreateMaterial(const std::string &shader)
 	auto settings = ds::create_data_settings({});
 	auto mat = GetMaterialManager().CreateMaterial(shader, std::make_shared<ds::Block>(*settings));
 	if(mat == nullptr)
-		return mat;
+		return {};
 	static_cast<msys::CMaterial *>(mat.get())->SetOnLoadedCallback(std::bind(init_shader, mat.get()));
-	return mat;
+	return mat->GetHandle();
 }
 
 util::FileAssetManager *ClientState::GetAssetManager(pragma::asset::Type type)
@@ -819,7 +819,7 @@ void ClientState::InitializeGUIModule()
 
 unsigned int ClientState::GetServerMessageID(std::string identifier)
 {
-	ServerMessageMap *map = GetServerMessageMap();
+	auto *map = GetServerMessageMap();
 	return map->GetNetMessageID(identifier);
 }
 

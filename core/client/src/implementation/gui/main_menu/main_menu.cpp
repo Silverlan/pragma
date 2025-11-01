@@ -282,7 +282,7 @@ void WIMainMenu::Initialize()
 	/*m_hRenderAPI = CreateChild<WIText>();
 	auto *pAttributes = m_hRenderAPI.get<WIText>();
 	pAttributes->AddStyleClass("game_version");
-	pAttributes->SetColor(Color::Lime);
+	pAttributes->SetColor(colors::Lime);
 	pAttributes->SetText("[" +pragma::get_cengine()->GetRenderContext().GetAPIAbbreviation() +"]");
 	pAttributes->SizeToContents();*/
 

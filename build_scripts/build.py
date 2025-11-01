@@ -212,6 +212,8 @@ if platform == "win32":
 			"-DCMAKE_MAKE_PROGRAM=ninja.exe"
 		]
 		toolsetCFlags = ["-fexceptions", "-fcxx-exceptions", "--target=x86_64-pc-windows-msvc"]
+		print_warning(f"Toolset {toolset} for platform {platform} is currently not supported!")
+		sys.exit(1)
 	elif toolset == "clang-cl":
 		toolsetArgs = [
 			"-T", "ClangCL",
@@ -219,6 +221,12 @@ if platform == "win32":
 			"-DCMAKE_CXX_SCAN_FOR_MODULES=ON"
 		]
 		toolsetCFlags = ["-Wno-error", "-Wno-unused-command-line-argument", "-Wno-enum-constexpr-conversion", "-fexceptions", "-fcxx-exceptions", "/EHsc"]
+		print_warning(f"Toolset {toolset} for platform {platform} is currently not supported!")
+		sys.exit(1)
+
+	if generator != "Ninja Multi-Config":
+		print_warning(f"Generator {generator} for platform {platform} is currently not supported!")
+		sys.exit(1)
 
 if platform == "linux" and enable_assertions:
 	toolsetCFlags = ["-D_GLIBCXX_ASSERTIONS"]

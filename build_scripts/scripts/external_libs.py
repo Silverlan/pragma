@@ -21,7 +21,7 @@ get_submodule("prosper","https://github.com/Silverlan/prosper.git","62ebb07143bd
 get_submodule("sharedutils","https://github.com/Silverlan/sharedutils.git","01a57de731dde6d7f256bf0b36c12319c5b63d28", "feat/cxx_module")
 get_submodule("util_bsp","https://github.com/Silverlan/util_bsp.git","8b0e95931f6c27b728999d021cea80379abdc0e9", "feat/cxx_module")
 get_submodule("util_formatted_text","https://github.com/Silverlan/util_formatted_text.git","e2035f72d9bb9282e9f0f8d32f08a3bbf4d449dc", "feat/cxx_module")
-get_submodule("util_image","https://github.com/Silverlan/util_image.git","bb8fca347270c2c78e9421b90c78a9fb7eac4e41", "feat/cxx_module")
+get_submodule("util_image","https://github.com/Silverlan/util_image.git","515705a6aec8492fa848eadca773b78be7b50bfc", "feat/cxx_module")
 get_submodule("util_pad","https://github.com/Silverlan/util_pad.git","372d46b250a1d6407f1082ce10cd84fbcc17441c", "feat/cxx_module")
 get_submodule("util_pragma_doc","https://github.com/Silverlan/util_pragma_doc.git","d5a5a2c8df93df38c96c0269db7c27bcedc7c301", "feat/cxx_module")
 get_submodule("util_smdmodel","https://github.com/Silverlan/util_smdmodel.git","18ca447476d72e48885c86993849e97ca0a32a18", "feat/cxx_module")

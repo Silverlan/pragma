@@ -23,7 +23,10 @@ if platform == "linux":
 	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-21')
 	defaultGenerator = "Ninja Multi-Config"
 else:
-	defaultGenerator = "Visual Studio 17 2022"
+	# Note: CMake (v4.2.0) does not support the Visual Studio generator yet when using
+	# C++23 import std. Until CMake adds support, we fall back to the Ninja generator.
+	# defaultGenerator = "Visual Studio 17 2022"
+	defaultGenerator = "Ninja Multi-Config"
 	defaultToolset = "msvc"
 
 parser.add_argument('--generator', help='The generator to use.', default=defaultGenerator)

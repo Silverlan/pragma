@@ -3,7 +3,7 @@
 
 module;
 
-#include "stdafx_client.h"
+#include <cstddef>
 
 module pragma.client;
 

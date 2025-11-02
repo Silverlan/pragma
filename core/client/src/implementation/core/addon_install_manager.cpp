@@ -3,7 +3,6 @@
 
 module;
 
-#include "stdafx_client.h"
 
 module pragma.client;
 
@@ -85,7 +84,7 @@ void pragma::AddonInstallManager::QueryFile(const std::shared_ptr<AddonUpdateQue
 							  updateFile->Seek(0);
 							  auto version = updateFile->Read<util::Version>();
 							  std::vector<uint32_t> newFileIds;
-							  while(updateFile->ReadChar() != EOF) {
+							  while(updateFile->ReadChar() != std::char_traits<char>::eof()) {
 								  updateFile->Seek(updateFile->Tell() - 1);
 								  auto fileId = updateFile->Read<uint32_t>();
 								  auto filePath = updateFile->ReadString();
@@ -232,7 +231,7 @@ void pragma::AddonInstallManager::CheckForUpdates(const std::shared_ptr<AddonInf
 						if(fRead != nullptr) {
 							auto lastUpdateVersion = fRead->Read<util::Version>();
 							if(lastUpdateVersion == webVersion) {
-								while(fRead->ReadChar() != EOF) {
+								while(fRead->ReadChar() != std::char_traits<char>::eof()) {
 									fRead->Seek(fRead->Tell() - 1);
 									auto fileId = fRead->Read<uint32_t>();
 									skipFileIds.insert(std::make_pair(fileId, true));

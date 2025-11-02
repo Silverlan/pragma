@@ -6,7 +6,6 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-#include "stdafx_client.h"
 #include "noise/noise.h"
 
 module pragma.client;

@@ -4,7 +4,6 @@
 module;
 #include "pragma/logging.hpp"
 
-#include "stdafx_cengine.h"
 
 module pragma.client;
 

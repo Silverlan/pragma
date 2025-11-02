@@ -3,7 +3,6 @@
 
 module;
 
-#include "stdafx_client.h"
 #include "pragma/console/helper.hpp"
 #include <sharedutils/magic_enum.hpp>
 

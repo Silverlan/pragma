@@ -4,7 +4,6 @@
 module;
 
 
-#include "stdafx_cengine.h"
 
 module pragma.client;
 

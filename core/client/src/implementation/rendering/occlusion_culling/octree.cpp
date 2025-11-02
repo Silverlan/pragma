@@ -6,7 +6,6 @@ module;
 
 
 
-#include "stdafx_client.h"
 #include <cassert>
 
 module pragma.client;

@@ -3,7 +3,6 @@
 
 module;
 
-#include "stdafx_client.h"
 #include "pragma/console/helper.hpp"
 //#include "shader.h" // prosper TODO
 //#include "shader_screen.h" // prosper TODO

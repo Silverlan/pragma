@@ -3,7 +3,6 @@
 
 module;
 
-#include "stdafx_client.h"
 #include <tiny_gltf.h>
 
 module pragma.client;

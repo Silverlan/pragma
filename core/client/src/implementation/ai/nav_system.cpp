@@ -3,7 +3,6 @@
 
 module;
 
-#include "stdafx_client.h"
 #include "Recast.h"
 #include "DetourNavMesh.h"
 #include "DetourNavMeshBuilder.h"

@@ -12,7 +12,6 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-#include "stdafx_client.h"
 #include <sharedutils/magic_enum.hpp>
 
 module pragma.client;

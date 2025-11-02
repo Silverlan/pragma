@@ -3,7 +3,6 @@
 
 module;
 
-#include "stdafx_client.h"
 // --template-include-location
 
 module pragma.client;

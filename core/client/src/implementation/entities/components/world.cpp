@@ -5,7 +5,6 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include "stdafx_client.h"
 #include <sharedutils/BS_thread_pool.hpp>
 
 module pragma.client;

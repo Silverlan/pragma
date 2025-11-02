@@ -7,7 +7,6 @@ module;
 
 
 #include "pragma/console/helper.hpp"
-#include "stdafx_client.h"
 #include <sharedutils/magic_enum.hpp>
 //#include "shader_gaussianblur.h" // prosper TODO
 

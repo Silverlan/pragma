@@ -12,7 +12,6 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include "stdafx_client.h"
 //#include "shader_screen.h" // prosper TODO
 
 module pragma.client;

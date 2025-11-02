@@ -9,7 +9,6 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include "stdafx_client.h"
 
 
 // #define ENABLE_DEPRECATED_PHYSICS

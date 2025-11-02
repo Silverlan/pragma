@@ -7,7 +7,6 @@ module;
 #include "pragma/logging.hpp"
 #include "pragma/console/helper.hpp"
 
-#include "stdafx_client.h"
 
 #undef PlaySound
 

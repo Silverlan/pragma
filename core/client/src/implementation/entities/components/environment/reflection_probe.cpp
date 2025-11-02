@@ -12,7 +12,6 @@ module;
 
 
 
-#include "stdafx_client.h"
 #include <spdlog/logger.h>
 
 module pragma.client;

@@ -4,7 +4,6 @@
 module;
 
 
-#include "stdafx_cengine.h"
 #include "pragma/logging.hpp"
 #include <sharedutils/magic_enum.hpp>
 

@@ -3,7 +3,6 @@
 
 module;
 
-#include "stdafx_client.h"
 #include "pragma/logging.hpp"
 #include "pragma/lua/core.hpp"
 #include "sharedutils/BS_thread_pool.hpp"

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/clientdefinitions.h"
-#include "stdafx_client.h"
 
 
 export module pragma.client:gui.frame;

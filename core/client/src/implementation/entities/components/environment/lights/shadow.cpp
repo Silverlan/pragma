@@ -10,7 +10,6 @@ module;
 #include "pragma/lua/core.hpp"
 #include "pragma/console/helper.hpp"
 
-#include "stdafx_client.h"
 
 module pragma.client;
 

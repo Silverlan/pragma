@@ -10,7 +10,6 @@ module;
 
 
 
-#include "stdafx_client.h"
 
 module pragma.client;
 

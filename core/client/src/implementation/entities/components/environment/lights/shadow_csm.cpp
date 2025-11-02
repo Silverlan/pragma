@@ -6,7 +6,6 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-#include "stdafx_client.h"
 #include "pragma/console/helper.hpp"
 
 module pragma.client;

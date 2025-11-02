@@ -21,15 +21,11 @@ prebuilt_tag = "2025-08-20"
 if platform == "linux":
 	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-21')
 	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-21')
-	defaultGenerator = "Ninja Multi-Config"
 else:
-	# Note: CMake (v4.2.0) does not support the Visual Studio generator yet when using
-	# C++23 import std. Until CMake adds support, we fall back to the Ninja generator.
-	# defaultGenerator = "Visual Studio 17 2022"
-	defaultGenerator = "Ninja Multi-Config"
 	defaultToolset = "msvc"
 
-parser.add_argument('--generator', help='The generator to use.', default=defaultGenerator)
+# See https://stackoverflow.com/a/43357954/1879228 for boolean args
+parser.add_argument('--generator', help='The generator to use.', default="Default")
 parser.add_argument("--with-essential-client-modules", type=str2bool, nargs='?', const=True, default=True, help="Include essential modules required to run Pragma.")
 parser.add_argument("--with-common-modules", type=str2bool, nargs='?', const=True, default=True, help="Include non-essential but commonly used modules (e.g. audio and physics modules).")
 parser.add_argument("--with-pfm", type=str2bool, nargs='?', const=True, default=False, help="Include the Pragma Filmmaker.")
@@ -66,6 +62,22 @@ else:
 args,unknown = parser.parse_known_args()
 args = vars(args)
 input_args = args
+
+if platform == "linux":
+	if args["generator"] == "Default":
+		args["generator"] = "Ninja Multi-Config"
+else:
+	# Note: CMake (v4.2.0) does not support the Visual Studio generator yet when using
+	# C++23 import std. Until CMake adds support, we fall back to the Ninja generator,
+	# except for third-party dependencies, which are usually designed for
+	# being built with Visual Studio.
+	# Once CMake supports Visual Studio with import std, the default generator should be
+	# changed back to "Visual Studio 17 2022" for all cases.
+	if args["generator"] == "Default":
+		if args["deps_only"]:
+			args["generator"] = "Visual Studio 17 2022"
+		else:
+			args["generator"] = "Ninja Multi-Config"
 
 #log_file = args.log_file
 #if log_file != "":
@@ -228,8 +240,9 @@ if platform == "win32":
 		sys.exit(1)
 
 	if generator != "Ninja Multi-Config":
-		print_warning(f"Generator {generator} for platform {platform} is currently not supported!")
-		sys.exit(1)
+		if not deps_only:
+			print_warning(f"Generator {generator} for platform {platform} is currently not supported!")
+			sys.exit(1)
 
 if platform == "linux" and enable_assertions:
 	toolsetCFlags = ["-D_GLIBCXX_ASSERTIONS"]

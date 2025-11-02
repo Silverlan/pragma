@@ -1,15 +1,13 @@
-
-#include "pragma/lua/core.hpp"
-
-
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
+#include "pragma/lua/core.hpp"
 // --template-include-location
 
-import pragma.client;
-
+module pragma.client;
 
 void RegisterLuaEntityComponents2_cl(lua_State *l, luabind::module_ &entsMod)
 {

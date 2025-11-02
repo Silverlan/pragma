@@ -1,13 +1,13 @@
-
-
-
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 
-import pragma.client;
+module pragma.client;
 
+import :console.commands;
 
 #if ALSYS_STEAM_AUDIO_SUPPORT_ENABLED == 1
 static std::unique_ptr<DebugGameGUI> dbgSoundProbeBoxes = nullptr;

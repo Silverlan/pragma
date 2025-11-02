@@ -1,25 +1,17 @@
-
-
-
-
-#include "pragma/lua/core.hpp"
-
-
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "stdafx_client.h"
+module;
 
-import pragma.audio.util;
-import pragma.client;
-import pragma.platform;
-import pragma.string.unicode;
-import pragma.gui;
+#include "stdafx_client.h"
+#include "pragma/lua/core.hpp"
+
+module pragma.client;
 
 static std::optional<std::string> find_asset_file(const std::string &name, pragma::asset::Type type)
 {
 	if(type == pragma::asset::Type::Texture) {
-		TextureType type;
+		msys::TextureType type;
 		auto found = false;
 		auto filePath = translate_image_path(name, type, nullptr, &found);
 		if(found == false)
@@ -261,7 +253,7 @@ void CGame::RegisterLuaLibraries()
 	svgImageInfoDef.def_readwrite("height", &uimg::SvgImageInfo::height);
 	utilMod[svgImageInfoDef];
 
-	utilMod[luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::calc_world_direction_from_2d_coordinates), luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::Client::calc_world_direction_from_2d_coordinates),
+	utilMod[(luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::calc_world_direction_from_2d_coordinates), luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::Client::calc_world_direction_from_2d_coordinates),
 	  luabind::def("create_particle_tracer", Lua::util::Client::create_particle_tracer), luabind::def("create_muzzle_flash", Lua::util::Client::create_muzzle_flash), luabind::def("fire_bullets", static_cast<luabind::object (*)(lua_State *, BulletInfo &)>(Lua::util::fire_bullets)),
 	  luabind::def("save_image", static_cast<bool (*)(lua_State *, uimg::ImageBuffer &, std::string, uimg::TextureInfo &, bool)>(save_image)),
 	  luabind::def("save_image", static_cast<bool (*)(lua_State *, uimg::ImageBuffer &, std::string, uimg::TextureInfo &, bool)>(save_image), luabind::default_parameter_policy<5, false> {}),
@@ -303,11 +295,11 @@ void CGame::RegisterLuaLibraries()
 		    if(tex == nullptr)
 			    return {};
 		    return {l, tex};
-	    })];
-	utilMod[
+	    }))];
+	utilMod[(
 	  // luabind::def("fire_bullets",static_cast<int32_t(*)(lua_State*)>(Lua::util::fire_bullets)),
 	  luabind::def("get_clipboard_string", Lua::util::Client::get_clipboard_string), luabind::def("set_clipboard_string", Lua::util::Client::set_clipboard_string), luabind::def("create_giblet", Lua::util::Client::create_giblet),
-	  luabind::def("get_image_format_file_extension", uimg::get_file_extension), luabind::def("bake_directional_lightmap_atlas", Lua::util::Client::bake_directional_lightmap_atlas)];
+	  luabind::def("get_image_format_file_extension", uimg::get_file_extension), luabind::def("bake_directional_lightmap_atlas", Lua::util::Client::bake_directional_lightmap_atlas))];
 
 	auto imgWriteInfoDef = luabind::class_<uimg::TextureInfo>("TextureInfo");
 	imgWriteInfoDef.def(luabind::constructor<>());
@@ -489,7 +481,7 @@ void CGame::RegisterLuaLibraries()
 	     })}});
 
 	auto modAsset = luabind::module_(GetLuaState(), "asset");
-	modAsset[luabind::def("clear_unused_textures", static_cast<uint32_t (*)()>([]() -> uint32_t { return static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().ClearUnused(); })),
+	modAsset[(luabind::def("clear_unused_textures", static_cast<uint32_t (*)()>([]() -> uint32_t { return static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().ClearUnused(); })),
 
 	  luabind::def(
 	    "load",
@@ -558,7 +550,7 @@ void CGame::RegisterLuaLibraries()
 	    }),
 	  luabind::def(
 	    "import", +[](NetworkState &nw, const std::string &name, pragma::asset::Type type) -> bool { return asset_import(nw, name, name, type); }),
-	  luabind::def("import", +[](NetworkState &nw, const std::string &name, const std::string &outputName, pragma::asset::Type type) -> bool { return asset_import(nw, name, outputName, type); })];
+	  luabind::def("import", +[](NetworkState &nw, const std::string &name, const std::string &outputName, pragma::asset::Type type) -> bool { return asset_import(nw, name, outputName, type); }))];
 	auto defMapExportInfo = luabind::class_<pragma::asset::MapExportInfo>("MapExportInfo");
 	defMapExportInfo.def(luabind::constructor<>());
 	defMapExportInfo.def_readwrite("includeMapLightSources", &pragma::asset::MapExportInfo::includeMapLightSources);
@@ -577,13 +569,13 @@ void CGame::RegisterLuaLibraries()
 	modAsset[defTexImportInfo];
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "asset",
-	  {{"TEXTURE_LOAD_FLAG_NONE", umath::to_integral(TextureLoadFlags::None)}, {"TEXTURE_LOAD_FLAG_LOAD_INSTANTLY_BIT", umath::to_integral(TextureLoadFlags::LoadInstantly)}, {"TEXTURE_LOAD_FLAG_RELOAD_BIT", umath::to_integral(TextureLoadFlags::Reload)},
-	    {"TEXTURE_LOAD_FLAG_DONT_CACHE_BIT", umath::to_integral(TextureLoadFlags::DontCache)}});
+	  {{"TEXTURE_LOAD_FLAG_NONE", umath::to_integral(msys::TextureLoadFlags::None)}, {"TEXTURE_LOAD_FLAG_LOAD_INSTANTLY_BIT", umath::to_integral(msys::TextureLoadFlags::LoadInstantly)}, {"TEXTURE_LOAD_FLAG_RELOAD_BIT", umath::to_integral(msys::TextureLoadFlags::Reload)},
+	    {"TEXTURE_LOAD_FLAG_DONT_CACHE_BIT", umath::to_integral(msys::TextureLoadFlags::DontCache)}});
 
 	auto &utilImport = GetLuaInterface().RegisterLibrary("import", {{"export_scene", static_cast<int32_t (*)(lua_State *)>(Lua::lib_export::export_scene)}});
 
 	auto modDebug = luabind::module_(GetLuaState(), "debug");
-	modDebug[luabind::def("draw_points", &Lua::DebugRenderer::Client::DrawPoints), luabind::def("draw_lines", &Lua::DebugRenderer::Client::DrawLines), luabind::def("draw_point", &Lua::DebugRenderer::Client::DrawPoint),
+	modDebug[(luabind::def("draw_points", &Lua::DebugRenderer::Client::DrawPoints), luabind::def("draw_lines", &Lua::DebugRenderer::Client::DrawLines), luabind::def("draw_point", &Lua::DebugRenderer::Client::DrawPoint),
 	  luabind::def("draw_line", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const Vector3 &, const Vector3 &, const DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawLine)),
 	  luabind::def("draw_line", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const Vector3 &, const Vector3 &)>(&Lua::DebugRenderer::Client::DrawLine)), luabind::def("draw_box", &Lua::DebugRenderer::Client::DrawBox),
 	  luabind::def("draw_mesh", &Lua::DebugRenderer::Client::DrawMeshes), luabind::def("draw_mesh", &Lua::DebugRenderer::Client::DrawMesh), luabind::def("draw_sphere", &Lua::DebugRenderer::Client::DrawSphere, luabind::default_parameter_policy<3, 1> {}),
@@ -604,5 +596,5 @@ void CGame::RegisterLuaLibraries()
 	  luabind::def("draw_plane", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const Vector3 &, float, const DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawPlane)),
 	  luabind::def("draw_frustum", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(pragma::CCameraComponent &, const DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawFrustum)),
 	  luabind::def("draw_frustum", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const std::vector<Vector3> &, const DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawFrustum)),
-	  luabind::def("create_collection", +[](const std::vector<std::shared_ptr<::DebugRenderer::BaseObject>> &objects) -> std::shared_ptr<::DebugRenderer::BaseObject> { return std::make_shared<::DebugRenderer::CollectionObject>(objects); })];
+	  luabind::def("create_collection", +[](const std::vector<std::shared_ptr<::DebugRenderer::BaseObject>> &objects) -> std::shared_ptr<::DebugRenderer::BaseObject> { return std::make_shared<::DebugRenderer::CollectionObject>(objects); }))];
 }

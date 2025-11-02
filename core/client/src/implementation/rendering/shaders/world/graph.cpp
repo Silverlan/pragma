@@ -4,6 +4,7 @@
 module;
 
 #include "stdafx_client.h"
+#include <cassert>
 
 module pragma.client;
 
@@ -279,7 +280,7 @@ std::shared_ptr<pragma::rendering::shader_material::ShaderMaterial> ShaderGraph:
 		auto alignment = info->alignment;
 		if((offset % alignment) != 0) {
 			auto padding = alignment - (offset % alignment);
-			UTIL_ASSERT((padding % sizeof(float)) == 0);
+			assert((padding % sizeof(float)) == 0);
 			auto paddingName = "padding" + std::to_string(paddingIdx++);
 			it = globalParamNodes.insert(it, {paddingName, nullptr, sizeof(float), sizeof(float)});
 			continue;

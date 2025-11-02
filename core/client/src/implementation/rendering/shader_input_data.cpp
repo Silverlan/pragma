@@ -8,6 +8,7 @@ module;
 
 
 #include <mpParser.h>
+#include <sharedutils/magic_enum.hpp>
 
 module pragma.client;
 

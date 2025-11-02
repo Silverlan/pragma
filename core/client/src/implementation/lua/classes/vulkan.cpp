@@ -81,10 +81,10 @@ namespace Lua {
 		static std::shared_ptr<prosper::IFramebuffer> create_framebuffer(uint32_t width, uint32_t height, const std::vector<prosper::IImageView *> &attachments);
 		static std::shared_ptr<prosper::IRenderPass> create_render_pass(const prosper::util::RenderPassCreateInfo &rpCreateInfo);
 
-		static std::shared_ptr<prosper::RenderTarget> create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, Texture &texture);
-		static std::shared_ptr<prosper::RenderTarget> create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, Texture &texture, Lua::Vulkan::RenderPass &renderPass);
-		static std::shared_ptr<prosper::RenderTarget> create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, const std::vector<std::shared_ptr<msys::Texture>> &textures, Lua::Vulkan::RenderPass &renderPass);
-		static std::shared_ptr<prosper::RenderTarget> create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, const std::vector<std::shared_ptr<msys::Texture>> &textures);
+		static std::shared_ptr<prosper::RenderTarget> create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, prosper::Texture &texture);
+		static std::shared_ptr<prosper::RenderTarget> create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, prosper::Texture &texture, Lua::Vulkan::RenderPass &renderPass);
+		static std::shared_ptr<prosper::RenderTarget> create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, const std::vector<std::shared_ptr<prosper::Texture>> &textures, Lua::Vulkan::RenderPass &renderPass);
+		static std::shared_ptr<prosper::RenderTarget> create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, const std::vector<std::shared_ptr<prosper::Texture>> &textures);
 
 		static ::Vector2i calculate_mipmap_size(uint32_t w, uint32_t h, uint32_t level);
 		static uint32_t calculate_mipmap_size(uint32_t v, uint32_t level);
@@ -128,10 +128,6 @@ namespace Lua {
 			static bool GetAnisotropyEnabled(lua_State *l, Sampler &hSampler);
 			// static void GetUseUnnormalizedCoordinates(lua_State *l,Sampler &hSampler);
 			// static void SetUseUnnormalizedCoordinates(lua_State *l,Sampler &hSampler,bool bUnnormalizedCoordinates);
-		};
-		namespace VKContextObject {
-			static void SetDebugName(lua_State *l, prosper::ContextObject &o, const std::string &name) { o.SetDebugName(name); }
-			static std::string GetDebugName(lua_State *l, const prosper::ContextObject &o) { return o.GetDebugName(); }
 		};
 #if 0
 		namespace VKSemaphore
@@ -464,7 +460,7 @@ std::shared_ptr<prosper::IRenderPass> Lua::Vulkan::create_render_pass(const pros
 	return rp;
 }
 
-std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, Texture &texture)
+std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, prosper::Texture &texture)
 {
 	auto rt = pragma::get_cengine()->GetRenderContext().CreateRenderTarget({texture.shared_from_this()}, nullptr, rtCreateInfo);
 	if(rt == nullptr)
@@ -472,7 +468,7 @@ std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const p
 	rt->SetDebugName("lua_rt");
 	return rt;
 }
-std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, Texture &texture, Lua::Vulkan::RenderPass &renderPass)
+std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, prosper::Texture &texture, Lua::Vulkan::RenderPass &renderPass)
 {
 	auto rt = pragma::get_cengine()->GetRenderContext().CreateRenderTarget({texture.shared_from_this()}, renderPass.shared_from_this(), rtCreateInfo);
 	if(rt == nullptr)
@@ -480,7 +476,7 @@ std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const p
 	rt->SetDebugName("lua_rt");
 	return rt;
 }
-std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, const std::vector<std::shared_ptr<msys::Texture>> &textures, Lua::Vulkan::RenderPass &renderPass)
+std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, const std::vector<std::shared_ptr<prosper::Texture>> &textures, Lua::Vulkan::RenderPass &renderPass)
 {
 	auto rt = pragma::get_cengine()->GetRenderContext().CreateRenderTarget(textures, renderPass.shared_from_this(), rtCreateInfo);
 	if(rt == nullptr)
@@ -488,7 +484,7 @@ std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const p
 	rt->SetDebugName("lua_rt");
 	return rt;
 }
-std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, const std::vector<std::shared_ptr<msys::Texture>> &textures)
+std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, const std::vector<std::shared_ptr<prosper::Texture>> &textures)
 {
 	auto rt = pragma::get_cengine()->GetRenderContext().CreateRenderTarget(textures, nullptr, rtCreateInfo);
 	if(rt == nullptr)
@@ -704,7 +700,7 @@ void register_vulkan_lua_interface2(Lua::Interface &lua, luabind::module_ &prosp
 void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 {
 	auto prosperMod = luabind::module_(lua.GetState(), "prosper");
-	prosperMod[luabind::def("create_buffer", static_cast<std::shared_ptr<prosper::IBuffer> (*)(prosper::IPrContext &, prosper::util::BufferCreateInfo &, ::util::DataStream &)>(&Lua::Vulkan::create_buffer), luabind::render_context_policy<1> {}),
+	prosperMod[(luabind::def("create_buffer", static_cast<std::shared_ptr<prosper::IBuffer> (*)(prosper::IPrContext &, prosper::util::BufferCreateInfo &, ::util::DataStream &)>(&Lua::Vulkan::create_buffer), luabind::render_context_policy<1> {}),
 	  luabind::def("create_buffer", static_cast<std::shared_ptr<prosper::IBuffer> (*)(prosper::IPrContext &, prosper::util::BufferCreateInfo &)>(&Lua::Vulkan::create_buffer), luabind::render_context_policy<1> {}), luabind::def("create_descriptor_set", Lua::Vulkan::create_descriptor_set),
 	  luabind::def("create_image", static_cast<std::shared_ptr<prosper::IImage> (*)(const prosper::util::ImageCreateInfo &, ::util::DataStream &)>(&Lua::Vulkan::create_image)),
 	  luabind::def("create_image", static_cast<std::shared_ptr<prosper::IImage> (*)(const prosper::util::ImageCreateInfo &)>(&Lua::Vulkan::create_image)),
@@ -754,7 +750,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		  uint32_t universalQueueFamilyIndex;
 		  return pragma::get_cengine()->GetRenderContext().AllocateSecondaryLevelCommandBuffer(prosper::QueueFamilyType::Universal, universalQueueFamilyIndex);
 	  })),
-	  luabind::def("create_window", &CEngine::CreateWindow)];
+	  luabind::def("create_window", &CEngine::CreateWindow))];
 
 	prosperMod[luabind::namespace_("util")[(luabind::def("get_square_vertex_uv_buffer", &Lua::Vulkan::get_square_vertex_uv_buffer), luabind::def("get_square_vertex_buffer", &Lua::Vulkan::get_square_vertex_buffer), luabind::def("get_square_uv_buffer", &Lua::Vulkan::get_square_uv_buffer),
 	  luabind::def("get_square_vertices", &prosper::CommonBufferCache::GetSquareVertices), luabind::def("get_square_uv_coordinates", &prosper::CommonBufferCache::GetSquareUvCoordinates), luabind::def("get_square_vertex_count", &prosper::CommonBufferCache::GetSquareVertexCount),

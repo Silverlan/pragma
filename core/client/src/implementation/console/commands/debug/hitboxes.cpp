@@ -1,12 +1,13 @@
-
-
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 
-import pragma.client;
+module pragma.client;
 
+import :console.commands;
 
 static void debug_hitboxes(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {

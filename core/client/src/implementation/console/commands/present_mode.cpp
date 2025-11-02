@@ -1,9 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 
-import pragma.client;
+module pragma.client;
+
+import :console.commands;
 
 namespace {
     auto _ = pragma::console::client::register_variable_listener<int32_t>("cl_render_present_mode",

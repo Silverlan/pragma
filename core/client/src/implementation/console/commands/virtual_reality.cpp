@@ -1,11 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
 #include "pragma/console/helper.hpp"
 #include <cassert>
 
-import pragma.client;
+module pragma.client;
+
+import :console.commands;
 
 const std::string OPENVR_MODULE_PATH = "openvr/pr_openvr";
 

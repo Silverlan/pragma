@@ -7,6 +7,7 @@ module;
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_client.h"
+#include <cassert>
 
 module pragma.client;
 

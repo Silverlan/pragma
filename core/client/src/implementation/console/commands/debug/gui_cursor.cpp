@@ -1,17 +1,15 @@
-
-
-
-#include "pragma/lua/core.hpp"
-#include "pragma/console/helper.hpp"
-
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
 #include "stdafx_client.h"
+#include "pragma/lua/core.hpp"
+#include "pragma/console/helper.hpp"
 
-import pragma.client;
+module pragma.client;
 
-import pragma.string.unicode;
+import :console.commands;
 
 class GUIDebugCursorManager {
   public:

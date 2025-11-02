@@ -23,11 +23,6 @@ import :game;
 
 using namespace pragma;
 
-namespace pragma {
-	using ::operator|=;
-};
-
-
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBuffer = nullptr;
 decltype(CRenderComponent::s_ocExemptEntities) CRenderComponent::s_ocExemptEntities = {};
 ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT = INVALID_COMPONENT_ID;
@@ -78,17 +73,17 @@ void CRenderComponent::InitializeBuffers()
 	prosper::util::BufferCreateInfo createInfo {};
 	if constexpr(USE_HOST_MEMORY_FOR_RENDER_DATA) {
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent;
-		createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
+		createInfo.flags = createInfo.flags | prosper::util::BufferCreateInfo::Flags::Persistent;
 	}
 	else
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 	createInfo.size = instanceSize * instanceCount;
 	createInfo.usageFlags = prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
 #if ENTITY_RENDER_BUFFER_USE_STORAGE_BUFFER == 0
-	createInfo.usageFlags |= prosper::BufferUsageFlags::UniformBufferBit;
+	createInfo.usageFlags = createInfo.usageFlags | prosper::BufferUsageFlags::UniformBufferBit;
 #endif
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
-	createInfo.usageFlags |= prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::StorageBufferBit;
+	createInfo.usageFlags = createInfo.usageFlags | prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::StorageBufferBit;
 #endif
 	constexpr prosper::DeviceSize alignment = 256; // See https://vulkan.gpuinfo.org/displaydevicelimit.php?name=minUniformBufferOffsetAlignment
 	auto internalAlignment = pragma::get_cengine()->GetRenderContext().CalcBufferAlignment(prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::StorageBufferBit);
@@ -346,7 +341,7 @@ void CRenderComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	else if(typeid(component) == typeid(pragma::CAnimatedComponent))
 		m_animComponent = static_cast<CAnimatedComponent *>(&component);
 	else if(typeid(component) == typeid(pragma::CLightMapReceiverComponent)) {
-		m_stateFlags |= StateFlags::RenderBufferDirty;
+		m_stateFlags = m_stateFlags | StateFlags::RenderBufferDirty;
 		m_lightMapReceiverComponent = static_cast<CLightMapReceiverComponent *>(&component);
 	}
 }
@@ -358,7 +353,7 @@ void CRenderComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 	else if(typeid(component) == typeid(pragma::CAnimatedComponent))
 		m_animComponent = nullptr;
 	else if(typeid(component) == typeid(pragma::CLightMapReceiverComponent)) {
-		m_stateFlags &= ~StateFlags::RenderBufferDirty;
+		m_stateFlags = m_stateFlags &~StateFlags::RenderBufferDirty;
 		m_lightMapReceiverComponent = nullptr;
 	}
 }
@@ -630,7 +625,7 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 		// something other than GameShaderSpecialization::Animated, otherwise there may be rendering artifacts.
 		// (Usually z-fighting because the prepass and lighting pass shaders will perform different calculations.)
 		if(bWeighted == true && animC && !m_lightMapReceiverComponent) // && animC->ShouldUpdateBones())
-			renderFlags |= pragma::rendering::InstanceData::RenderFlags::Weighted;
+			renderFlags = renderFlags | pragma::rendering::InstanceData::RenderFlags::Weighted;
 		auto &m = GetTransformationMatrix();
 		m_instanceData.modelMatrix = m;
 		m_instanceData.color = color;

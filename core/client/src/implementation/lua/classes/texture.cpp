@@ -10,7 +10,7 @@ module pragma.client;
 
 
 import :scripting.lua.classes.texture;
-std::shared_ptr<prosper::Texture> Lua::Texture::GetVkTexture(lua_State *l, ::Texture &tex)
+std::shared_ptr<prosper::Texture> Lua::Texture::GetVkTexture(lua_State *l, msys::Texture &tex)
 {
 	if(tex.HasValidVkTexture() == false)
 		return nullptr;

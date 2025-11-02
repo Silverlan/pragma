@@ -89,6 +89,7 @@ static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l, pr
 static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l, pragma::CReflectionProbeComponent &hRp, bool renderJob) { return hRp.CaptureIBLReflectionsFromScene(nullptr, renderJob); }
 static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l, pragma::CReflectionProbeComponent &hRp) { return hRp.CaptureIBLReflectionsFromScene(); }
 
+#ifdef _WIN32
 namespace pragma {
 	template<typename T>
 	    requires(std::is_same_v<T, pragma::CSoundDspChorusComponent> || std::is_same_v<T, pragma::CSoundDspDistortionComponent> || std::is_same_v<T, pragma::CSoundDspEAXReverbComponent> || std::is_same_v<T, pragma::CSoundDspEchoComponent>
@@ -99,6 +100,7 @@ namespace pragma {
 		return ::operator<<(os, static_cast<const pragma::BaseEntityComponent &>(component));
 	}
 };
+#endif
 
 static void bsp_register_class(lua_State *l, luabind::module_ &entsMod, luabind::class_<pragma::CWorldComponent, pragma::BaseWorldComponent> &defWorld)
 {
@@ -172,6 +174,7 @@ static void bsp_register_class(lua_State *l, luabind::module_ &entsMod, luabind:
 	defWorld.scope[defBspTree];
 }
 
+#ifdef _WIN32
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CGamemodeComponent);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CGameComponent);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CInputComponent);
@@ -276,6 +279,7 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CDebugPlaneComponent);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CPointAtTargetComponent);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CBSPComponent);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CGenericComponent);
+#endif
 
 void RegisterLuaEntityComponents2_cl(lua_State *l, luabind::module_ &entsMod);
 void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)

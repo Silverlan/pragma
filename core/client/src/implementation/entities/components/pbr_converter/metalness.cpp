@@ -5,6 +5,7 @@ module;
 
 
 #include "stdafx_client.h"
+#include <cassert>
 
 module pragma.client;
 
@@ -57,7 +58,7 @@ void CPBRConverterComponent::UpdateMetalness(pragma::Model &mdl, msys::CMaterial
 	// Find the closest collision mesh
 	// Then calculate the average metalness of all found collision meshes
 	// via the collision mesh surface material
-	std::vector<CollisionMesh *> matColMeshes {};
+	std::vector<pragma::physics::CollisionMesh *> matColMeshes {};
 	std::vector<std::shared_ptr<ModelMesh>> lodMeshes {};
 	std::vector<uint32_t> bodyGroups {};
 	bodyGroups.resize(mdl.GetBodyGroupCount());

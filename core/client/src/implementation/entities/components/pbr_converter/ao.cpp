@@ -3,6 +3,7 @@
 
 module;
 
+#include <cassert>
 
 module pragma.client;
 
@@ -62,7 +63,7 @@ void CPBRConverterComponent::ProcessQueue()
 		if(hMat == nullptr || hMdl.expired())
 			return;
 		auto imgBuffer = worker.GetResult().images.begin()->second;
-		WriteAOMap(*hMdl.get(), static_cast<msys::CMaterial &>(*hMat.get()), *imgBuffer, imgBuffer->GetWidth(), imgBuffer->GetHeight());
+		WriteAOMap(*hMdl.get(), const_cast<msys::CMaterial&>(static_cast<const msys::CMaterial &>(*hMat.get())), *imgBuffer, imgBuffer->GetWidth(), imgBuffer->GetHeight());
 	});
 	item.job.Start();
 	pragma::get_cengine()->AddParallelJob(item.job, "Ambient Occlusion");

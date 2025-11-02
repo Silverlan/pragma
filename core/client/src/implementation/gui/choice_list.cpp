@@ -9,7 +9,6 @@ module;
 module pragma.client;
 
 import :gui.choice_list;
-import :locale;
 
 import pragma.gui;
 import pragma.string.unicode;

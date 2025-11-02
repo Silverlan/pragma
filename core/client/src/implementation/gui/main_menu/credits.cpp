@@ -8,7 +8,6 @@ module;
 module pragma.client;
 
 import :gui.main_menu_credits;
-import :locale;
 
 import pragma.string.unicode;
 

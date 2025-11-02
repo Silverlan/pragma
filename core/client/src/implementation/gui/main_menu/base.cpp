@@ -12,7 +12,6 @@ import :gui.main_menu_base;
 import :gui.options_list;
 
 import :client_state;
-import :locale;
 import pragma.gui;
 import pragma.string.unicode;
 

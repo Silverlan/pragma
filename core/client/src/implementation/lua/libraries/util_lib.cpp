@@ -83,7 +83,7 @@ int Lua::util::Client::create_muzzle_flash(lua_State *l)
 			AttachmentInfo attInfo {};
 			attInfo.offset = relOffset;
 			attInfo.rotation = relRot;
-			attInfo.flags |= FAttachmentMode::UpdateEachFrame;
+			attInfo.flags |= pragma::FAttachmentMode::UpdateEachFrame;
 			if(att.empty() == false)
 				pAttachableComponent->AttachToAttachment(&ent, att, attInfo);
 			else

@@ -21,7 +21,6 @@ import :gui.main_menu;
 import :client_state;
 import :engine;
 import :game;
-import :locale;
 
 
 WIMainMenu::WIMainMenu() : WIBase(), m_menuType(0), m_tOpen(0.0)

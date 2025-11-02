@@ -19,7 +19,6 @@ import :gui.progress_bar;
 import :client_state;
 import :core;
 import :engine;
-import :locale;
 
 
 /////////////////////////

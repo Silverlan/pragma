@@ -455,7 +455,6 @@ TCPPM *CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &end, flo
 	return reinterpret_cast<TCPPM*>(particle);
 }
 template pragma::ecs::CParticleSystemComponent *CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius, const Color &col, float length, float speed, const std::string &material, float bloomScale);
-template pragma::ecs::CParticleSystemComponent *CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius, const Color &col, float length, float speed, const std::string &material, float bloomScale);
 
 void CGame::SetRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode, bool bEnabled) { m_renderModesEnabled[umath::to_integral(renderMode)] = bEnabled; }
 void CGame::EnableRenderMode(pragma::rendering::SceneRenderPass renderMode) { SetRenderModeEnabled(renderMode, true); }
@@ -729,7 +728,7 @@ TCPPM *CGame::GetRenderCamera() const
 template<typename TCPPM>
 void CGame::SetGameplayControlCamera(TCPPM &cam)
 {
-	m_controlCamera = cam.GetHandle<pragma::BaseEntityComponent>();
+	m_controlCamera = cam.template GetHandle<pragma::BaseEntityComponent>();
 	m_stateFlags &= ~StateFlags::DisableGamplayControlCamera;
 }
 template void CGame::SetGameplayControlCamera(pragma::CCameraComponent&);
@@ -890,7 +889,6 @@ template<typename TCPPM>
 	if(particle != nullptr)
 		*particle = reinterpret_cast<TCPPM*>(pt);
 }
-template void CGame::CreateGiblet(const GibletCreateInfo &info, pragma::ecs::CParticleSystemComponent **particle);
 template void CGame::CreateGiblet(const GibletCreateInfo &info, pragma::ecs::CParticleSystemComponent **particle);
 
 void CGame::CreateGiblet(const GibletCreateInfo &info) { CreateGiblet<pragma::ecs::CParticleSystemComponent>(info, nullptr); }
@@ -1535,10 +1533,10 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 		unsigned char numKeys = packet->Read<unsigned char>();
 		for(int i = 0; i < numKeys; i++) {
 			unsigned short key = packet->Read<unsigned short>();
-			UNUSED(key);
+			// UNUSED(key);
 			char pressed = packet->Read<char>();
 			int action = (pressed == 1) ? KEY_PRESS : KEY_RELEASE;
-			UNUSED(action);
+			// UNUSED(action);
 		}
 		/*if(ent != nullptr)
 		{

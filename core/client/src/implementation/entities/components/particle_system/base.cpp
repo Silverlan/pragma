@@ -767,7 +767,7 @@ float ecs::CParticleSystemComponent::GetExtent() const { return m_extent; }
 
 void ecs::CParticleSystemComponent::SetMaterial(msys::Material *mat) { m_material = mat ? mat->GetHandle() : msys::MaterialHandle {}; }
 void ecs::CParticleSystemComponent::SetMaterial(const char *mat) { SetMaterial(pragma::get_client_state()->LoadMaterial(mat)); }
-msys::Material *ecs::CParticleSystemComponent::GetMaterial() const { return m_material.get(); }
+msys::Material *ecs::CParticleSystemComponent::GetMaterial() const { return const_cast<msys::Material*>(m_material.get()); }
 
 CParticleInitializer *ecs::CParticleSystemComponent::AddInitializer(std::string identifier, const std::unordered_map<std::string, std::string> &values)
 {
@@ -1523,7 +1523,7 @@ void ecs::CParticleSystemComponent::Simulate(double tDelta)
 			if(uvec::length_sqr(velAng) > 0.f) {
 				// Update world rotation
 				auto rotOld = p.GetWorldRotation();
-				auto rotNew = glm::quat_cast(glm::eulerAngleYXZ(velAng.y, velAng.x, velAng.z)) * rotOld;
+				auto rotNew = glm::gtc::quat_cast(glm::gtx::eulerAngleYXZ(velAng.y, velAng.x, velAng.z)) * rotOld;
 				p.SetWorldRotation(rotNew);
 				if(rotOld.w != rotNew.w || rotOld.x != rotNew.x || rotOld.y != rotNew.y || rotOld.z != rotNew.z)
 					umath::set_flag(m_flags, Flags::HasMovingParticles, true);

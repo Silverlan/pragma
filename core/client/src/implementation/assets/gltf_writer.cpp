@@ -3,14 +3,7 @@
 
 module;
 
-
-
-
 #include "stdafx_client.h"
-
-#define TINYGLTF_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <tiny_gltf.h>
 
 module pragma.client;

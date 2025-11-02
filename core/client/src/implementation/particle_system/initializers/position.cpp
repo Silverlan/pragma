@@ -107,7 +107,7 @@ void CParticleInitializerPositionRandomCircle::OnParticleCreated(CParticle &part
 	auto r = m_fMinDist + sqrtf(umath::random(0.f, offset * offset));
 	auto ang = umath::random(0.f, 1.f) * umath::pi * 2.f;
 	auto pos = Vector3(umath::cos(ang) * r, 0.f, umath::sin(ang) * r);
-	auto rot = glm::rotation(Vector3(0.f, 1.f, 0.f), m_vAxis);
+	auto rot = glm::gtx::rotation(Vector3(0.f, 1.f, 0.f), m_vAxis);
 	uvec::rotate(&pos, rot);
 	particle.SetPosition(m_origin + particle.GetPosition() + pos);
 }

@@ -7,6 +7,7 @@ module;
 
 #include "pragma/lua/core.hpp"
 #include "stdafx_client.h"
+#include <cassert>
 
 module pragma.client;
 
@@ -15,11 +16,9 @@ import :gui.console;
 import :gui.frame;
 import :gui.scroll_container;
 import :gui.snap_area;
-import :locale;
 
 import :client_state;
 import :engine;
-import :locale;
 import pragma.gui;
 import pragma.string.unicode;
 

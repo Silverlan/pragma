@@ -1880,8 +1880,8 @@ static void restore_cursor_pos_override(WIRoot *elRoot, const std::optional<Vect
 void Lua::WIBase::InjectMouseMoveInput(lua_State *l, ::WIBase &hPanel, const ::Vector2 &mousePos)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	debug::get_domain().BeginTask("inect_mouse_move_input");
-	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
+	::debug::get_domain().BeginTask("inect_mouse_move_input");
+	::util::ScopeGuard sgVtune {[]() { ::debug::get_domain().EndTask(); }};
 #endif
 	auto *elRoot = hPanel.GetBaseRootElement();
 	auto absPos = hPanel.GetAbsolutePos();

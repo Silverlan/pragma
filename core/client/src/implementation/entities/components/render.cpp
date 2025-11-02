@@ -3,15 +3,9 @@
 
 module;
 
-
-
-
-
-
-#include "pragma/lua/core.hpp"
-
-
 #include "stdafx_client.h"
+#include "pragma/lua/core.hpp"
+#include <sharedutils/magic_enum.hpp>
 
 module pragma.client;
 
@@ -680,7 +674,7 @@ void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene, const CC
 	auto pAttComponent = GetAttachmentComponent();
 	if(pAttComponent) {
 		auto *attInfo = pAttComponent->GetAttachmentData();
-		if(attInfo != nullptr && (attInfo->flags & FAttachmentMode::UpdateEachFrame) != FAttachmentMode::None && GetEntity().GetParent())
+		if(attInfo != nullptr && (attInfo->flags & pragma::FAttachmentMode::UpdateEachFrame) != pragma::FAttachmentMode::None && GetEntity().GetParent())
 			pAttComponent->UpdateAttachmentOffset(false);
 	}
 }

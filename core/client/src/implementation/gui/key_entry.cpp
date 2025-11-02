@@ -9,7 +9,6 @@ module;
 module pragma.client;
 
 import :gui.key_entry;
-import :locale;
 
 // TODO
 // Create full-screen element to capture mouse inputs

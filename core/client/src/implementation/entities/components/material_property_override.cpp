@@ -3,14 +3,9 @@
 
 module;
 
-
-
-
-
-#include "pragma/lua/core.hpp"
-
-
 #include "stdafx_client.h"
+#include "pragma/lua/core.hpp"
+#include <cassert>
 
 module pragma.client;
 
@@ -819,7 +814,7 @@ void CMaterialPropertyOverrideComponent::SetMaterialPropertyBufferValue(msys::Ma
 	if(!range)
 		return;
 	auto [startOffset, size] = *range;
-	UTIL_ASSERT(sizeof(T) == size);
+	assert(sizeof(T) == size);
 	BufferUpdateInfo updateInfo {};
 	updateInfo.buffer = buf->shared_from_this();
 	updateInfo.startOffset = startOffset;

@@ -326,7 +326,7 @@ void WITransformable::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer
 		std::array<bool, 2> bReposition = {(m_resizeMode == ResizeMode::ew || m_resizeMode == ResizeMode::swne || m_resizeMode == ResizeMode::nwse) ? true : false, (m_resizeMode == ResizeMode::nesw || m_resizeMode == ResizeMode::ns || m_resizeMode == ResizeMode::nwse) ? true : false};
 		std::array<bool, 2> bKeepPos = {true, true};
 		std::array<bool, 2> bKeepSize = {true, true};
-		for(glm::length_t i = 0; i < bResize.size(); ++i) {
+		for(size_t i = 0; i < bResize.size(); ++i) {
 			if(bResize[i] == true) {
 				size[i] = cursorPos[i];
 				bChangeSize = true;
@@ -340,7 +340,7 @@ void WITransformable::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer
 
 		auto &minSize = GetMinSize();
 		auto &maxSize = GetMaxSize();
-		for(glm::length_t i = decltype(bKeepSize.size()) {0}; i < bKeepSize.size(); ++i) {
+		for(size_t i = decltype(bKeepSize.size()) {0}; i < bKeepSize.size(); ++i) {
 			if(bKeepSize[i] == true)
 				size[i] = GetSize()[i];
 			else {
@@ -355,7 +355,7 @@ void WITransformable::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer
 			}
 		}
 
-		for(glm::length_t i = decltype(bReposition.size()) {0}; i < bReposition.size(); ++i) {
+		for(size_t i = decltype(bReposition.size()) {0}; i < bReposition.size(); ++i) {
 			if(bReposition[i] == true) {
 				pos[i] += cursorPos[i];
 				bChangePos = true;
@@ -363,7 +363,7 @@ void WITransformable::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer
 			}
 		}
 		CallCallbacks<void, std::reference_wrapper<Vector2i>, bool>("TranslateTransformPosition", std::ref(pos), false);
-		for(glm::length_t i = decltype(bKeepPos.size()) {0}; i < bKeepPos.size(); ++i) {
+		for(size_t i = decltype(bKeepPos.size()) {0}; i < bKeepPos.size(); ++i) {
 			if(bKeepPos[i] == true)
 				pos[i] = GetPos()[i];
 			else {
@@ -379,7 +379,7 @@ void WITransformable::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer
 				}
 			}
 		}
-		for(glm::length_t i = decltype(bReposition.size()) {0}; i < bReposition.size(); ++i) {
+		for(size_t i = decltype(bReposition.size()) {0}; i < bReposition.size(); ++i) {
 			if(bReposition[i] == true) {
 				size[i] -= pos[i] - GetPos()[i];
 				bChangeSize = true;

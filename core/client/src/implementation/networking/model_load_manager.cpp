@@ -180,7 +180,7 @@ void ModelLoadManager::Update()
 		//#endif
 		for(auto i = decltype(numMeshes) {0}; i < numMeshes; ++i) {
 			auto subMesh = std::make_shared<CModelSubMesh>();
-			auto colMesh = CollisionMesh::Create(pragma::get_cgame());
+			auto colMesh = pragma::physics::CollisionMesh::Create(pragma::get_cgame());
 
 			Vector3 origin {};
 			if(type == 0) {

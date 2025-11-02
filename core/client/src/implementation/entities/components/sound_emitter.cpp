@@ -91,9 +91,6 @@ void CSoundEmitterComponent::MaintainSounds()
 	}
 }
 
-namespace Lua::SoundEmitter {
-	DLLNETWORK luabind::class_<pragma::BaseSoundEmitterComponent::SoundInfo> RegisterSoundInfo();
-};
 void CSoundEmitterComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
 {
 	BaseSoundEmitterComponent::RegisterLuaBindings(l, modEnts);

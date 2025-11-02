@@ -12,7 +12,6 @@ import :gui.progress_bar;
 
 import :client_state;
 import :engine;
-import :locale;
 
 WILoadScreen::WILoadScreen() : WIMainMenuBase() {}
 

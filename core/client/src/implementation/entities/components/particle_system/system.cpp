@@ -2,16 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/cxxmodules.hpp"
-
-
-
-
-
-#include "pragma/lua/core.hpp"
-
 
 #include "stdafx_client.h"
+#include "pragma/cxxmodules.hpp"
+#include "pragma/lua/core.hpp"
+#include <cassert>
 
 module pragma.client;
 

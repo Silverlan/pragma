@@ -517,7 +517,7 @@ void CGame::RegisterLuaLibraries()
 		    case pragma::asset::Type::Material:
 			    return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
 		    case pragma::asset::Type::Texture:
-			    return luabind::object {l, std::static_pointer_cast<::Texture>(asset)};
+			    return luabind::object {l, std::static_pointer_cast<msys::Texture>(asset)};
 		    }
 		    return luabind::object {};
 	    }),
@@ -535,7 +535,7 @@ void CGame::RegisterLuaLibraries()
 		    case pragma::asset::Type::Material:
 			    return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
 		    case pragma::asset::Type::Texture:
-			    return luabind::object {l, std::static_pointer_cast<::Texture>(asset)};
+			    return luabind::object {l, std::static_pointer_cast<msys::Texture>(asset)};
 		    }
 		    return luabind::object {};
 	    }),
@@ -552,7 +552,7 @@ void CGame::RegisterLuaLibraries()
 		    case pragma::asset::Type::Material:
 			    return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
 		    case pragma::asset::Type::Texture:
-			    return luabind::object {l, std::static_pointer_cast<::Texture>(asset)};
+			    return luabind::object {l, std::static_pointer_cast<msys::Texture>(asset)};
 		    }
 		    return luabind::object {};
 	    }),

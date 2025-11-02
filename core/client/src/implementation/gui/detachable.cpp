@@ -4,13 +4,13 @@
 module;
 
 #include "stdafx_client.h"
+#include <cassert>
 
 module pragma.client;
 
 import :gui.detachable;
 
 import :engine;
-import :locale;
 import pragma.gui;
 
 #undef CreateWindow

@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/clientdefinitions.h"
-
-#include "pragma/lua/core.hpp"
-
 
 #include "stdafx_client.h"
+#include "pragma/clientdefinitions.h"
+#include "pragma/lua/core.hpp"
+#include <cassert>
+
 #if MOTION_BLUR_DEBUG_ELEMENT_ENABLED == 1
 #endif
 

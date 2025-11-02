@@ -60,7 +60,7 @@ void CExplosionComponent::Explode()
 		auto pAttComponent = entQuake->AddComponent<CAttachmentComponent>();
 		if(pAttComponent.valid()) {
 			AttachmentInfo attInfo {};
-			attInfo.flags |= FAttachmentMode::SnapToOrigin | FAttachmentMode::PositionOnly;
+			attInfo.flags |= pragma::FAttachmentMode::SnapToOrigin | pragma::FAttachmentMode::PositionOnly;
 			pAttComponent->AttachToEntity(&ent, attInfo);
 		}
 		entQuake->SetKeyValue("spawnflags", std::to_string(SF_QUAKE_IN_AIR | SF_QUAKE_REMOVE_ON_COMPLETE));

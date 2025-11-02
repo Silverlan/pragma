@@ -79,7 +79,7 @@ void CWaterSurfaceComponent::SetWaterObject(BaseLiquidSurfaceSimulationComponent
 	//	InitializeWaterScene(ent->GetWaterScene());
 }
 
-CMaterial *CWaterSurfaceComponent::GetWaterMaterial() const
+msys::CMaterial *CWaterSurfaceComponent::GetWaterMaterial() const
 {
 	return nullptr; // TODO
 	                //auto *pFuncWaterComponent = m_hFuncWater.get();

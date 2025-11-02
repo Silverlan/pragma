@@ -5,15 +5,15 @@ module;
 
 
 
+#include "stdafx_client.h"
 #include "pragma/logging.hpp"
 
 
 
 
 #include "pragma/lua/core.hpp"
+#include <sharedutils/magic_enum.hpp>
 
-
-#include "stdafx_client.h"
 #include <GuillotineBinPack.h>
 
 module pragma.client;
@@ -64,8 +64,8 @@ void CLightMapComponent::InitializeLightMapData(const std::shared_ptr<prosper::T
   const std::shared_ptr<prosper::Texture> &directionalLightmap, bool keepCurrentTextures)
 {
 	if(!keepCurrentTextures) {
-		m_textures[umath::to_integral(msys::Texture::DiffuseMap)] = lightMap;
-		m_textures[umath::to_integral(msys::Texture::DominantDirectionMap)] = directionalLightmap;
+		m_textures[umath::to_integral(Texture::DiffuseMap)] = lightMap;
+		m_textures[umath::to_integral(Texture::DominantDirectionMap)] = directionalLightmap;
 	}
 	m_meshLightMapUvBuffer = lightMapUvBuffer;
 	m_meshLightMapUvBuffers = meshUvBuffers;
@@ -109,16 +109,16 @@ void CLightMapComponent::InitializeFromMaterial()
 		auto *map = m_lightMapMaterial->GetTextureInfo(identifier);
 		if(!map || !map->texture)
 			return nullptr;
-		auto *tex = static_cast<::Texture *>(map->texture.get());
+		auto *tex = static_cast<msys::Texture *>(map->texture.get());
 		return tex->GetVkTexture();
 	};
-	m_textures[umath::to_integral(msys::Texture::DiffuseMap)] = getTexture("diffuse_map");
-	m_textures[umath::to_integral(msys::Texture::DiffuseDirectMap)] = getTexture("diffuse_direct_map");
-	m_textures[umath::to_integral(msys::Texture::DiffuseIndirectMap)] = getTexture("diffuse_indirect_map");
-	m_textures[umath::to_integral(msys::Texture::DominantDirectionMap)] = getTexture("dominant_direction_map");
+	m_textures[umath::to_integral(Texture::DiffuseMap)] = getTexture("diffuse_map");
+	m_textures[umath::to_integral(Texture::DiffuseDirectMap)] = getTexture("diffuse_direct_map");
+	m_textures[umath::to_integral(Texture::DiffuseIndirectMap)] = getTexture("diffuse_indirect_map");
+	m_textures[umath::to_integral(Texture::DominantDirectionMap)] = getTexture("dominant_direction_map");
 
 	for(auto i = decltype(m_textures.size()) {0u}; i < m_textures.size(); ++i) {
-		auto e = static_cast<msys::Texture>(i);
+		auto e = static_cast<Texture>(i);
 		auto &tex = m_textures[i];
 		LOGGER.info("Texture state for '{}': {}", magic_enum::enum_name(e), tex ? "loaded" : "not loaded");
 	}
@@ -128,22 +128,22 @@ void CLightMapComponent::InitializeFromMaterial()
 
 void CLightMapComponent::SetLightMapAtlas(const std::shared_ptr<prosper::Texture> &lightMap)
 {
-	m_textures[umath::to_integral(msys::Texture::DiffuseMap)] = lightMap;
+	m_textures[umath::to_integral(Texture::DiffuseMap)] = lightMap;
 
 	// TODO: This method only allows one lightmap atlas globally; Implement this in a way that allows multiple (maybe add to entity descriptor set?)!
 	pragma::CRasterizationRendererComponent::UpdateLightmap(*this);
 }
-const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetLightMapAtlas() const { return m_textures[umath::to_integral(msys::Texture::DiffuseMap)]; }
+const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetLightMapAtlas() const { return m_textures[umath::to_integral(Texture::DiffuseMap)]; }
 void CLightMapComponent::SetDirectionalLightMapAtlas(const std::shared_ptr<prosper::Texture> &lightMap)
 {
-	m_textures[umath::to_integral(msys::Texture::DominantDirectionMap)] = lightMap;
+	m_textures[umath::to_integral(Texture::DominantDirectionMap)] = lightMap;
 
 	// TODO: This method only allows one lightmap atlas globally; Implement this in a way that allows multiple (maybe add to entity descriptor set?)!
 	pragma::CRasterizationRendererComponent::UpdateLightmap(*this);
 }
-const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetDirectionalLightMapAtlas() const { return m_textures[umath::to_integral(msys::Texture::DominantDirectionMap)]; }
+const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetDirectionalLightMapAtlas() const { return m_textures[umath::to_integral(Texture::DominantDirectionMap)]; }
 
-bool CLightMapComponent::HasValidLightMap() const { return m_textures[umath::to_integral(msys::Texture::DiffuseMap)] != nullptr || m_textures[umath::to_integral(msys::Texture::DiffuseDirectMap)]; }
+bool CLightMapComponent::HasValidLightMap() const { return m_textures[umath::to_integral(Texture::DiffuseMap)] != nullptr || m_textures[umath::to_integral(Texture::DiffuseDirectMap)]; }
 
 void CLightMapComponent::SetLightMapMaterial(const std::string &matName)
 {
@@ -169,8 +169,8 @@ void CLightMapComponent::ReloadLightMapData()
 	UpdateLightmapUvBuffers();
 }
 
-const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetLightMap() const { return m_textures[umath::to_integral(msys::Texture::DiffuseMap)]; }
-const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetDirectionalLightMap() const { return m_textures[umath::to_integral(msys::Texture::DominantDirectionMap)]; }
+const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetLightMap() const { return m_textures[umath::to_integral(Texture::DiffuseMap)]; }
+const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetDirectionalLightMap() const { return m_textures[umath::to_integral(Texture::DominantDirectionMap)]; }
 
 prosper::IBuffer *CLightMapComponent::GetMeshLightMapUvBuffer(uint32_t meshIdx) const
 {

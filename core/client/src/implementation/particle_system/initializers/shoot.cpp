@@ -23,7 +23,7 @@ void CParticleInitializerShootCone::Initialize(pragma::BaseEnvParticleSystemComp
 }
 void CParticleInitializerShootCone::OnParticleCreated(CParticle &particle)
 {
-	auto rot = glm::rotation(Vector3(0.f, 1.f, 0.f), m_vDirection);
+	auto rot = glm::gtx::rotation(Vector3(0.f, 1.f, 0.f), m_vDirection);
 
 	// pick an angle off the vertical based on the surface area distribution
 	auto cosa = umath::random(static_cast<float>(umath::cos(umath::deg_to_rad(m_fMinAngle.GetValue(particle)))), static_cast<float>(umath::cos(umath::deg_to_rad(m_fMaxAngle.GetValue(particle)))));

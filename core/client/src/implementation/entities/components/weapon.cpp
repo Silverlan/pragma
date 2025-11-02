@@ -290,7 +290,7 @@ void CWeaponComponent::UpdateOwnerAttachment()
 			auto pMdlComponent = parent->GetModelComponent();
 			auto attId = pMdlComponent ? pMdlComponent->LookupAttachment("weapon") : -1;
 			AttachmentInfo attInfo {};
-			attInfo.flags |= FAttachmentMode::SnapToOrigin | FAttachmentMode::UpdateEachFrame;
+			attInfo.flags |= pragma::FAttachmentMode::SnapToOrigin | pragma::FAttachmentMode::UpdateEachFrame;
 			if(attId != -1)
 				pAttComponent->AttachToAttachment(parent, "weapon", attInfo);
 			else

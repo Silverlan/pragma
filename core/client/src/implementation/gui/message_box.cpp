@@ -10,7 +10,6 @@ module pragma.client;
 
 import :gui.message_box;
 import :gui.frame;
-import :locale;
 
 import pragma.gui;
 

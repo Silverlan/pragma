@@ -6,6 +6,7 @@ module;
 #include "pragma/lua/core.hpp"
 
 #include "stdafx_client.h"
+#include <sharedutils/BS_thread_pool.hpp>
 
 module pragma.client;
 
@@ -377,32 +378,4 @@ void CWorld::Initialize()
 {
 	CBaseEntity::Initialize();
 	AddComponent<CWorldComponent>();
-}
-
-Con::c_cout &CWorld::print(Con::c_cout &os)
-{
-	os << "CWorld[" << m_index << "]"
-	   << "[" << GetClass() << "]"
-	   << "[";
-	auto &mdl = GetModel();
-	if(mdl == nullptr)
-		os << "NULL";
-	else
-		os << mdl->GetName();
-	os << "]";
-	return os;
-}
-
-std::ostream &CWorld::print(std::ostream &os)
-{
-	os << "CWorld[" << m_index << "]"
-	   << "[" << GetClass() << "]"
-	   << "[";
-	auto &mdl = GetModel();
-	if(mdl == nullptr)
-		os << "NULL";
-	else
-		os << mdl->GetName();
-	os << "]";
-	return os;
 }

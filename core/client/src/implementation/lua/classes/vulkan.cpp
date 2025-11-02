@@ -756,7 +756,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	  })),
 	  luabind::def("create_window", &CEngine::CreateWindow)];
 
-	prosperMod[luabind::namespace_("util")[luabind::def("get_square_vertex_uv_buffer", &Lua::Vulkan::get_square_vertex_uv_buffer), luabind::def("get_square_vertex_buffer", &Lua::Vulkan::get_square_vertex_buffer), luabind::def("get_square_uv_buffer", &Lua::Vulkan::get_square_uv_buffer),
+	prosperMod[luabind::namespace_("util")[(luabind::def("get_square_vertex_uv_buffer", &Lua::Vulkan::get_square_vertex_uv_buffer), luabind::def("get_square_vertex_buffer", &Lua::Vulkan::get_square_vertex_buffer), luabind::def("get_square_uv_buffer", &Lua::Vulkan::get_square_uv_buffer),
 	  luabind::def("get_square_vertices", &prosper::CommonBufferCache::GetSquareVertices), luabind::def("get_square_uv_coordinates", &prosper::CommonBufferCache::GetSquareUvCoordinates), luabind::def("get_square_vertex_count", &prosper::CommonBufferCache::GetSquareVertexCount),
 	  luabind::def("get_square_vertex_format", &prosper::CommonBufferCache::GetSquareVertexFormat), luabind::def("get_square_uv_format", &prosper::CommonBufferCache::GetSquareUvFormat),
 	  luabind::def("allocate_temporary_buffer", static_cast<std::shared_ptr<prosper::IBuffer> (*)(lua_State *, ::util::DataStream &)>(&Lua::Vulkan::allocate_temporary_buffer)),
@@ -806,7 +806,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		    auto ds = shader->CreateDescriptorSetGroup(0);
 		    ds->GetDescriptorSet()->SetBindingTexture(tex, 0u);
 		    return ds;
-	    })]];
+	    }))]];
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "prosper",
 	  {{"FORMAT_UNKNOWN", umath::to_integral(prosper::Format::Unknown)}, {"FORMAT_R4G4_UNORM_PACK8", umath::to_integral(prosper::Format::R4G4_UNorm_Pack8)}, {"FORMAT_R4G4B4A4_UNORM_PACK16", umath::to_integral(prosper::Format::R4G4B4A4_UNorm_Pack16)},

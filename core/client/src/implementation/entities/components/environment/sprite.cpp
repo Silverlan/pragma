@@ -129,7 +129,7 @@ void CSpriteComponent::StartParticle()
 	auto whAttComponent = pt->GetEntity().AddComponent<CAttachmentComponent>();
 	if(whAttComponent.valid()) {
 		AttachmentInfo attInfo {};
-		attInfo.flags = FAttachmentMode::SnapToOrigin | FAttachmentMode::UpdateEachFrame;
+		attInfo.flags = pragma::FAttachmentMode::SnapToOrigin | pragma::FAttachmentMode::UpdateEachFrame;
 		whAttComponent->AttachToEntity(&ent, attInfo);
 	}
 	// We need to update the particle system position every frame

@@ -46,7 +46,7 @@ void CWeatherComponent::OnEntitySpawn()
 			auto pAttComponent = ent.AddComponent<CAttachmentComponent>();
 			if(pAttComponent.valid()) {
 				AttachmentInfo attInfo {};
-				attInfo.flags |= FAttachmentMode::PositionOnly;
+				attInfo.flags |= pragma::FAttachmentMode::PositionOnly;
 				pAttComponent->AttachToEntity(&plEnt, attInfo);
 			}
 			ent.Spawn();

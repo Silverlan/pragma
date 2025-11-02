@@ -292,7 +292,7 @@ void CPlayerComponent::UpdateViewModelTransform()
 	auto pAttComponent = vmEnt.AddComponent<CAttachmentComponent>();
 	if(pAttComponent.valid()) {
 		AttachmentInfo attInfo {};
-		attInfo.flags |= FAttachmentMode::PlayerView | FAttachmentMode::UpdateEachFrame;
+		attInfo.flags |= pragma::FAttachmentMode::PlayerView | pragma::FAttachmentMode::UpdateEachFrame;
 		pAttComponent->AttachToEntity(&ent, attInfo);
 	}
 }
@@ -342,7 +342,7 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 		auto pAttComponent = entBody.AddComponent<CAttachmentComponent>();
 		if(pAttComponent.valid()) {
 			AttachmentInfo attInfo {};
-			attInfo.flags |= FAttachmentMode::PlayerViewYaw | FAttachmentMode::BoneMerge | FAttachmentMode::UpdateEachFrame;
+			attInfo.flags |= pragma::FAttachmentMode::PlayerViewYaw | pragma::FAttachmentMode::BoneMerge | pragma::FAttachmentMode::UpdateEachFrame;
 			pAttComponent->AttachToEntity(&ent, attInfo);
 		}
 		//body->SetRenderMode(RenderMode::None);
@@ -361,7 +361,7 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 		auto pAttComponent = entListener.AddComponent<CAttachmentComponent>();
 		if(pAttComponent.valid()) {
 			AttachmentInfo attInfo {};
-			attInfo.flags |= FAttachmentMode::PlayerView;
+			attInfo.flags |= pragma::FAttachmentMode::PlayerView;
 			pAttComponent->AttachToEntity(&ent, attInfo);
 		}
 		if(!entListener.IsSpawned())
@@ -466,7 +466,7 @@ void CPlayerComponent::ReceiveData(NetPacket &packet)
 		auto pAttComponent = ent->AddComponent<CAttachmentComponent>();
 		if(pAttComponent.valid()) {
 			AttachmentInfo attInfo {};
-			attInfo.flags |= FAttachmentMode::PlayerView | FAttachmentMode::UpdateEachFrame;
+			attInfo.flags |= pragma::FAttachmentMode::PlayerView | pragma::FAttachmentMode::UpdateEachFrame;
 			pAttComponent->AttachToEntity(&entThis, attInfo);
 		}
 	});
@@ -505,7 +505,7 @@ void CPlayerComponent::OnSetCharacterOrientation(const Vector3 &up)
 	// to euler angles
 	auto m = glm::mat4_cast(rotDst);
 	EulerAngles ang;
-	glm::extractEulerAngleYXZ(m, ang.y, ang.p, ang.r);
+	glm::gtx::extractEulerAngleYXZ(m, ang.y, ang.p, ang.r);
 	ang.p = umath::rad_to_deg(ang.p);
 	ang.y = umath::rad_to_deg(ang.y);
 	ang.r = umath::rad_to_deg(ang.r);
@@ -513,8 +513,8 @@ void CPlayerComponent::OnSetCharacterOrientation(const Vector3 &up)
 
 	auto fToQuat = [](const EulerAngles &ang) {
 		auto m = umat::identity();
-		m = glm::eulerAngleYXZ(umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.r));
-		auto q = glm::quat_cast(m);
+		m = glm::gtx::eulerAngleYXZ(umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.r));
+		auto q = glm::gtc::quat_cast(m);
 		return q;
 	};
 

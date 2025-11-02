@@ -21,7 +21,7 @@ void Lua::Material::Client::SetTexture(lua_State *, msys::Material *mat, const s
 	cmat->UpdateTextures();
 	pragma::get_cgame()->ReloadMaterialShader(static_cast<msys::CMaterial *>(mat));
 }
-void Lua::Material::Client::SetTexture(lua_State *l, msys::Material *mat, const std::string &textureID, ::Texture &tex)
+void Lua::Material::Client::SetTexture(lua_State *l, msys::Material *mat, const std::string &textureID, msys::Texture &tex)
 {
 	auto *cmat = static_cast<msys::CMaterial *>(mat);
 	cmat->SetTexture(textureID, &tex);
@@ -36,7 +36,7 @@ void Lua::Material::Client::SetTexture(lua_State *l, msys::Material *mat, const 
 	if(texInfo) {
 		texInfo->name = name;
 		if(texInfo->texture)
-			static_cast<::Texture *>(texInfo->texture.get())->SetName(name);
+			static_cast<msys::Texture *>(texInfo->texture.get())->SetName(name);
 	}
 	cmat->UpdateTextures();
 	pragma::get_cgame()->ReloadMaterialShader(static_cast<msys::CMaterial *>(mat));
@@ -70,7 +70,7 @@ std::shared_ptr<msys::Texture> Lua::TextureInfo::GetTexture(lua_State *l, ::Text
 {
 	if(tex->texture == nullptr)
 		return nullptr;
-	return std::static_pointer_cast<::Texture>(tex->texture);
+	return std::static_pointer_cast<msys::Texture>(tex->texture);
 }
 std::pair<uint32_t, uint32_t> Lua::TextureInfo::GetSize(lua_State *l, ::TextureInfo *tex) { return {tex->width, tex->height}; }
 uint32_t Lua::TextureInfo::GetWidth(lua_State *l, ::TextureInfo *tex) { return tex->width; }

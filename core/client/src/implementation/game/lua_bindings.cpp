@@ -20,24 +20,18 @@ module;
 
 module pragma.client;
 
-import :locale;
 import :scripting.lua.libraries.net_messages;
 import pragma.shared;
 import pragma.string.unicode;
 
 #undef LoadLibrary
 
-namespace pragma {
-	// Has to be in same namespace as class, otherwise luabind can't locate it
-	static std::ostream &operator<<(std::ostream &stream, const pragma::CLuaBaseEntityComponent &component) { return ::operator<<(stream, static_cast<const pragma::BaseEntityComponent &>(component)); }
-};
-
 void Lua::register_shared_client_state(lua_State *l)
 {
 	Lua::RegisterLibrary(l, "locale", {{"get_text", Lua::Locale::get_text}, {"get_languages", Lua::Locale::get_languages}});
 	auto modLocale = luabind::module_(l, "locale");
-	modLocale[luabind::def("load", Lua::Locale::load), luabind::def("get_language", Lua::Locale::get_language), luabind::def("change_language", Lua::Locale::change_language), luabind::def("set_text", Lua::Locale::set_localization), luabind::def("localize", Lua::Locale::localize),
-	  luabind::def("relocalize", Lua::Locale::relocalize)];
+	modLocale[(luabind::def("load", Lua::Locale::load), luabind::def("get_language", Lua::Locale::get_language), luabind::def("change_language", Lua::Locale::change_language), luabind::def("set_text", Lua::Locale::set_localization), luabind::def("localize", Lua::Locale::localize),
+	  luabind::def("relocalize", Lua::Locale::relocalize))];
 	modLocale[luabind::def("get_used_characters", +[]() -> std::string { return pragma::locale::get_used_characters().cpp_str(); })];
 	modLocale[luabind::def("load_all", +[]() { pragma::locale::load_all(); })];
 	modLocale[luabind::def("clear", Lua::Locale::clear)];
@@ -59,7 +53,7 @@ void CGame::RegisterLua()
 
 	Lua::engine::register_library(GetLuaState());
 	auto modEngine = luabind::module_(GetLuaState(), "engine");
-	modEngine[luabind::def("get_text_size", static_cast<Vector2i (*)(lua_State *, const std::string &, const std::string &)>(Lua::engine::get_text_size)),
+	modEngine[(luabind::def("get_text_size", static_cast<Vector2i (*)(lua_State *, const std::string &, const std::string &)>(Lua::engine::get_text_size)),
 	  luabind::def("get_text_size", static_cast<Vector2i (*)(lua_State *, const std::string &, const FontInfo &)>(Lua::engine::get_text_size)),
 
 	  luabind::def("get_truncated_text_length", static_cast<std::pair<size_t, size_t> (*)(lua_State *, const std::string &, const std::string &, uint32_t)>(Lua::engine::get_truncated_text_length)),
@@ -71,7 +65,7 @@ void CGame::RegisterLua()
 	    "open_user_data_dir_in_explorer", +[]() {
 		    auto &dir = filemanager::get_absolute_primary_root_path();
 		    util::open_path_in_explorer(dir.GetString());
-	    })];
+	    }))];
 
 	Lua::RegisterLibrary(GetLuaState(), "game",
 	  {
@@ -177,7 +171,7 @@ void CGame::RegisterLua()
 	  });
 	auto modGame = luabind::module_(GetLuaState(), "game");
 	Lua::game::register_shared_functions(GetLuaState(), modGame);
-	modGame[luabind::def("load_material", static_cast<msys::Material *(*)(lua_State *, const std::string &, bool, bool)>(Lua::engine::load_material)), luabind::def("load_material", static_cast<msys::Material *(*)(lua_State *, const std::string &, bool)>(Lua::engine::load_material)),
+	modGame[(luabind::def("load_material", static_cast<msys::Material *(*)(lua_State *, const std::string &, bool, bool)>(Lua::engine::load_material)), luabind::def("load_material", static_cast<msys::Material *(*)(lua_State *, const std::string &, bool)>(Lua::engine::load_material)),
 	  luabind::def("load_material", static_cast<msys::Material *(*)(lua_State *, const std::string &)>(Lua::engine::load_material)),
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua_State *, const std::string &, util::AssetLoadFlags)>(Lua::engine::load_texture)),
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua_State *, const std::string &)>(Lua::engine::load_texture)),
@@ -197,7 +191,7 @@ void CGame::RegisterLua()
 		    auto exclusionMask = ::pragma::rendering::RenderMask::None;
 		    pragma::get_cgame()->GetPrimaryCameraRenderMask(inclusionMask, exclusionMask);
 		    return {inclusionMask, exclusionMask};
-	    })];
+	    }))];
 
 	Lua::ents::register_library(GetLuaState());
 	auto &modEnts = GetLuaInterface().RegisterLibrary("ents",
@@ -236,7 +230,7 @@ void CGame::RegisterLua()
 	modEnts[classDefBase];
 
 	auto modNet = luabind::module(GetLuaState(), "net");
-	modNet[luabind::def("send", &Lua::net::client::send), luabind::def("receive", &Lua::net::client::receive), luabind::def("register_event", &Lua::net::register_event)];
+	modNet[(luabind::def("send", &Lua::net::client::send), luabind::def("receive", &Lua::net::client::receive), luabind::def("register_event", &Lua::net::register_event))];
 
 	auto netPacketClassDef = luabind::class_<NetPacket>("Packet");
 	Lua::NetPacket::Client::register_class(netPacketClassDef);
@@ -267,7 +261,7 @@ void CGame::RegisterLua()
 	lua_setglobal(GetLuaState(), "SERVER");
 
 	auto modTime = luabind::module_(GetLuaState(), "time");
-	modTime[luabind::def("server_time", Lua::ServerTime), luabind::def("frame_time", Lua::FrameTime)];
+	modTime[(luabind::def("server_time", Lua::ServerTime), luabind::def("frame_time", Lua::FrameTime))];
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "sound",
 	  {{"CHANNEL_CONFIG_MONO", umath::to_integral(al::ChannelConfig::Mono)}, {"CHANNEL_CONFIG_STEREO", umath::to_integral(al::ChannelConfig::Stereo)}, {"CHANNEL_CONFIG_REAR", umath::to_integral(al::ChannelConfig::Rear)}, {"CHANNEL_CONFIG_QUAD", umath::to_integral(al::ChannelConfig::Quad)},

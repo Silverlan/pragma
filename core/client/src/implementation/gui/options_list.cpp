@@ -13,7 +13,6 @@ import :gui.scroll_container;
 
 import :client_state;
 import :engine;
-import :locale;
 import pragma.gui;
 import pragma.string.unicode;
 

@@ -1057,7 +1057,7 @@ void NET_cl_ENT_SETPARENT(NetPacket packet)
 	pragma::ecs::BaseEntity *parent = nwm::read_entity(packet);
 	if(parent == nullptr)
 		return;
-	auto flags = packet->Read<FAttachmentMode>();
+	auto flags = packet->Read<pragma::FAttachmentMode>();
 	auto offset = packet->Read<Vector3>();
 	auto rot = packet->Read<Quat>();
 	auto pAttComponent = ent->GetComponent<pragma::CAttachmentComponent>();
@@ -1077,7 +1077,7 @@ void NET_cl_ENT_SETPARENTMODE(NetPacket packet)
 	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
 	if(ent == nullptr)
 		return;
-	auto flags = packet->Read<FAttachmentMode>();
+	auto flags = packet->Read<pragma::FAttachmentMode>();
 	auto pAttComponent = ent->GetComponent<pragma::CAttachmentComponent>();
 	if(pAttComponent.valid())
 		pAttComponent->SetAttachmentFlags(flags);

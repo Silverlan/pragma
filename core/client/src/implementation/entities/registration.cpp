@@ -68,7 +68,7 @@ const NetworkedFactory *ClientEntityRegistry::GetNetworkedFactory(uint32_t ID) c
     return &it->second;
 }
 
-void client_entities::register_entites()
+void client_entities::register_entities()
 {
 	register_entity<CBot>("bot");
 	register_entity<CWaterSurface>("c_water_surface");

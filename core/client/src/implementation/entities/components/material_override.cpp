@@ -104,7 +104,7 @@ void CMaterialOverrideComponent::ClearMaterialOverrides()
 		mdlC->SetRenderBufferListUpdateRequired();
 	BroadcastEvent(EVENT_ON_MATERIAL_OVERRIDES_CLEARED);
 }
-msys::CMaterial *CMaterialOverrideComponent::GetMaterialOverride(uint32_t idx) const { return (idx < m_materialOverrides.size()) ? static_cast<msys::CMaterial *>(m_materialOverrides.at(idx).materialOverride.get()) : nullptr; }
+msys::CMaterial *CMaterialOverrideComponent::GetMaterialOverride(uint32_t idx) const { return (idx < m_materialOverrides.size()) ? const_cast<msys::CMaterial*>(static_cast<const msys::CMaterial *>(m_materialOverrides.at(idx).materialOverride.get())) : nullptr; }
 
 const ComponentMemberInfo *CMaterialOverrideComponent::GetMemberInfo(ComponentMemberIndex idx) const
 {
@@ -192,7 +192,7 @@ msys::CMaterial *CMaterialOverrideComponent::GetRenderMaterial(uint32_t idx) con
 	if(idx >= m_materialOverrides.size())
 		return nullptr;
 	auto &matOverride = m_materialOverrides[idx];
-	return static_cast<msys::CMaterial *>(matOverride.materialOverride.get());
+	return const_cast<msys::CMaterial*>(static_cast<const msys::CMaterial *>(matOverride.materialOverride.get()));
 }
 
 size_t CMaterialOverrideComponent::GetMaterialOverrideCount() const { return m_materialOverrides.size(); }
@@ -212,7 +212,7 @@ void CMaterialOverrideComponent::RegisterLuaBindings(lua_State *l, luabind::modu
 		  auto it = std::find_if(mats.begin(), mats.end(), [&matSrc](const msys::MaterialHandle &hMat) {
 			  if(!hMat)
 				  return false;
-			  return pragma::asset::matches(hMat.get()->GetName(), matSrc, pragma::asset::Type::Material);
+			  return pragma::asset::matches(const_cast<msys::Material*>(hMat.get())->GetName(), matSrc, pragma::asset::Type::Material);
 		  });
 		  if(it == mats.end())
 			  return;
@@ -227,7 +227,7 @@ void CMaterialOverrideComponent::RegisterLuaBindings(lua_State *l, luabind::modu
 		  auto it = std::find_if(mats.begin(), mats.end(), [&matSrc](const msys::MaterialHandle &hMat) {
 			  if(!hMat)
 				  return false;
-			  return pragma::asset::matches(hMat.get()->GetName(), matSrc, pragma::asset::Type::Material);
+			  return pragma::asset::matches(const_cast<msys::Material*>(hMat.get())->GetName(), matSrc, pragma::asset::Type::Material);
 		  });
 		  if(it == mats.end())
 			  return;
@@ -242,7 +242,7 @@ void CMaterialOverrideComponent::RegisterLuaBindings(lua_State *l, luabind::modu
 		  auto it = std::find_if(mats.begin(), mats.end(), [&matSrc](const msys::MaterialHandle &hMat) {
 			  if(!hMat)
 				  return false;
-			  return pragma::asset::matches(hMat.get()->GetName(), matSrc, pragma::asset::Type::Material);
+			  return pragma::asset::matches(const_cast<msys::Material*>(hMat.get())->GetName(), matSrc, pragma::asset::Type::Material);
 		  });
 		  if(it == mats.end())
 			  return;

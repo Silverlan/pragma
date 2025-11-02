@@ -10,6 +10,7 @@ module;
 
 #include "stdafx_client.h"
 #include <bvh/v2/stream.h>
+#include <sharedutils/BS_thread_pool.hpp>
 
 module pragma.client;
 

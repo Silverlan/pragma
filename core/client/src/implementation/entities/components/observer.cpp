@@ -289,7 +289,7 @@ void CObserverComponent::UpdateCameraPose()
 	for(auto *ent : entIt)
 	{
 		auto pAttComponent = ent->GetComponent<pragma::CAttachableComponent>();
-		if((pAttComponent->GetAttachmentFlags() &(FAttachmentMode::PlayerView | FAttachmentMode::PlayerViewYaw)) != FAttachmentMode::None)
+		if((pAttComponent->GetAttachmentFlags() &(pragma::FAttachmentMode::PlayerView | pragma::FAttachmentMode::PlayerViewYaw)) != pragma::FAttachmentMode::None)
 			pAttComponent->UpdateAttachmentOffset();
 	}*/
 

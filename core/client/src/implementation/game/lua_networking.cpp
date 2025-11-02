@@ -12,8 +12,6 @@ module pragma.client;
 
 import :game;
 
-import pragma.client;
-
 void CGame::HandleLuaNetPacket(NetPacket &packet)
 {
 	unsigned int ID = packet->Read<unsigned int>();

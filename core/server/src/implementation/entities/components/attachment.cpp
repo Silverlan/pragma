@@ -27,7 +27,7 @@ AttachmentData *SAttachmentComponent::SetupAttachment(pragma::ecs::BaseEntity *e
 		NetPacket p;
 		nwm::write_entity(p, &entThis);
 		nwm::write_entity(p, ent);
-		p->Write<FAttachmentMode>(attInfo.flags);
+		p->Write<pragma::FAttachmentMode>(attInfo.flags);
 		p->Write<Vector3>(attData->offset);
 		p->Write<Quat>(attData->rotation);
 		ServerState::Get()->SendPacket("ent_setparent", p, pragma::networking::Protocol::SlowReliable);
@@ -35,14 +35,14 @@ AttachmentData *SAttachmentComponent::SetupAttachment(pragma::ecs::BaseEntity *e
 	return attData;
 }
 
-void SAttachmentComponent::SetAttachmentFlags(FAttachmentMode flags)
+void SAttachmentComponent::SetAttachmentFlags(pragma::FAttachmentMode flags)
 {
 	BaseAttachmentComponent::SetAttachmentFlags(flags);
 	auto &entThis = static_cast<SBaseEntity &>(GetEntity());
 	if(entThis.IsShared()) {
 		NetPacket p;
 		nwm::write_entity(p, &entThis);
-		p->Write<FAttachmentMode>(flags);
+		p->Write<pragma::FAttachmentMode>(flags);
 		ServerState::Get()->SendPacket("ent_setparentmode", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
@@ -56,7 +56,7 @@ void SAttachmentComponent::SendData(NetPacket &packet, networking::ClientRecipie
 		packet->Write<Bool>(true);
 		packet->Write<int>(info->attachment);
 		packet->Write<int>(info->bone);
-		packet->Write<FAttachmentMode>(info->flags);
+		packet->Write<pragma::FAttachmentMode>(info->flags);
 		packet->Write<Vector3>(info->offset);
 		packet->Write<Quat>(info->rotation);
 		if(info->boneMapping.empty())

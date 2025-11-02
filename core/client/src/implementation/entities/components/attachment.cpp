@@ -22,7 +22,7 @@ void CAttachmentComponent::ReceiveData(NetPacket &packet)
 	if(bParent == true) {
 		auto att = packet->Read<int>();
 		auto bone = packet->Read<int>();
-		auto flags = packet->Read<FAttachmentMode>();
+		auto flags = packet->Read<pragma::FAttachmentMode>();
 		auto offset = packet->Read<Vector3>();
 		auto rot = packet->Read<Quat>();
 		auto bBoneMapping = packet->Read<Bool>();

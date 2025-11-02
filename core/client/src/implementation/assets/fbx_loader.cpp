@@ -203,7 +203,7 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 	importAndAssignTexture(ofbx::Texture::TextureType::NORMAL, msys::Material::NORMAL_MAP_IDENTIFIER);
 	importAndAssignTexture(ofbx::Texture::TextureType::EMISSIVE, msys::Material::EMISSION_MAP_IDENTIFIER);
 
-	auto applyColorFactor = [&fbxMat, mat](const ofbx::Color &fbxColor, double factor, const std::string &matProp) {
+	auto applyColorFactor = [&fbxMat, mat](const ofbx::Color &fbxColor, double factor, const std::string &matProp) mutable {
 		Vector3 colorFactor {fbxColor.r, fbxColor.g, fbxColor.b};
 		colorFactor *= factor;
 		if(umath::abs(1.f - colorFactor.x) > 0.001f || umath::abs(1.f - colorFactor.y) > 0.001f || umath::abs(1.f - colorFactor.z) > 0.001f)

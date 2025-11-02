@@ -6,7 +6,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.flashlight;
+module pragma.server;
+import :entities.components.flashlight;
 
 using namespace pragma;
 

@@ -8,10 +8,10 @@ module;
 
 
 
-export module pragma.server.entities.components.audio.dsp.echo;
+export module pragma.server:entities.components.audio.dsp.echo;
 
-import pragma.server.entities;
-import pragma.server.entities.components.audio.dsp.base;
+import :entities;
+import :entities.components.audio.dsp.base;
 
 export {
 	namespace pragma {

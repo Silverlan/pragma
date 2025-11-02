@@ -6,11 +6,12 @@ module;
 #include "stdafx_server.h"
 #include "pragma/lua/core.hpp"
 
-module pragma.server.scripting.lua.script_watcher;
+module pragma.server;
+import :scripting.lua.script_watcher;
 
-import pragma.server.game;
-import pragma.server.networking.resource_manager;
-import pragma.server.server_state;
+import :game;
+import :networking.resource_manager;
+import :server_state;
 
 #undef FindResource
 

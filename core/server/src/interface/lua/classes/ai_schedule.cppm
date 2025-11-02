@@ -7,7 +7,7 @@ module;
 
 
 
-export module pragma.server.scripting.lua.classes.ai_schedule;
+export module pragma.server:scripting.lua.classes.ai_schedule;
 
 export import luabind;
 

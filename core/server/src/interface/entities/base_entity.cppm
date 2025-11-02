@@ -9,9 +9,9 @@ module;
 
 
 
-export module pragma.server.entities.base;
+export module pragma.server:entities.base;
 
-export import pragma.server.networking.recipient_filter;
+export import :networking.recipient_filter;
 export import pragma.shared;
 
 export class DLLSERVER SBaseEntity : public pragma::ecs::BaseEntity {

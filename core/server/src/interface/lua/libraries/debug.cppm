@@ -6,9 +6,9 @@ module;
 
 
 
-export module pragma.server.scripting.lua.libraries.debug;
+export module pragma.server:scripting.lua.libraries.debug;
 
-import pragma.server.ai;
+import :ai;
 
 export namespace Lua {
 	namespace debug {

@@ -8,9 +8,9 @@ module;
 
 
 
-export module pragma.server.entities.components.vehicle;
+export module pragma.server:entities.components.vehicle;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SVehicleComponent final : public BaseVehicleComponent, public SBaseSnapshotComponent {

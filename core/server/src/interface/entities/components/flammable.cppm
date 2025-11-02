@@ -9,9 +9,9 @@ module;
 
 
 
-export module pragma.server.entities.components.flammable;
+export module pragma.server:entities.components.flammable;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export {
 	namespace pragma {

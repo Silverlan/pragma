@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.field_angle;
+module pragma.server;
+import :entities.components.field_angle;
 
-import pragma.server.entities;
+import :entities;
 
 using namespace pragma;
 

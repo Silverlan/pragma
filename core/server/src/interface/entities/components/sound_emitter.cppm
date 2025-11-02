@@ -8,9 +8,9 @@ module;
 
 
 
-export module pragma.server.entities.components.sound_emitter;
+export module pragma.server:entities.components.sound_emitter;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SSoundEmitterComponent final : public BaseSoundEmitterComponent, public SBaseNetComponent {

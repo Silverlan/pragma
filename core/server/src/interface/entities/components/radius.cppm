@@ -7,9 +7,9 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-export module pragma.server.entities.components.radius;
+export module pragma.server:entities.components.radius;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SRadiusComponent final : public BaseRadiusComponent, public SBaseNetComponent {

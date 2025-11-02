@@ -8,9 +8,9 @@ module;
 
 
 
-export module pragma.server.entities.components.weapon;
+export module pragma.server:entities.components.weapon;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SWeaponComponent final : public BaseWeaponComponent, public SBaseNetComponent {

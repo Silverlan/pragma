@@ -8,7 +8,7 @@ module;
 
 
 
-export module pragma.server.networking.resource;
+export module pragma.server:networking.resource;
 
 export import pragma.filesystem;
 

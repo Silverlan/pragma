@@ -7,10 +7,11 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.liquid;
+module pragma.server;
+import :entities.components.liquid;
 
-import pragma.server.entities.components;
-import pragma.server.game;
+import :entities.components;
+import :game;
 
 using namespace pragma;
 

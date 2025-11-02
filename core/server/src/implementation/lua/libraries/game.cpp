@@ -7,11 +7,12 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.scripting.lua.libraries.game;
+module pragma.server;
+import :scripting.lua.libraries.game;
 
-import pragma.server.entities;
-import pragma.server.game;
-import pragma.server.server_state;
+import :entities;
+import :game;
+import :server_state;
 
 void Lua::game::Server::set_gravity(const Vector3 &gravity)
 {

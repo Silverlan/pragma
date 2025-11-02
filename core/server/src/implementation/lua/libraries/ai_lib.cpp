@@ -8,16 +8,17 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.scripting.lua.libraries.ai;
+module pragma.server;
+import :scripting.lua.libraries.ai;
 
-import pragma.server.ai;
-import pragma.server.entities.components;
-import pragma.server.game;
-import pragma.server.scripting.lua.classes.ai_behavior;
-import pragma.server.scripting.lua.classes.ai_memory;
-import pragma.server.scripting.lua.classes.ai_schedule;
-import pragma.server.scripting.lua.classes.ai_squad;
-import pragma.server.scripting.lua.classes.faction;
+import :ai;
+import :entities.components;
+import :game;
+import :scripting.lua.classes.ai_behavior;
+import :scripting.lua.classes.ai_memory;
+import :scripting.lua.classes.ai_schedule;
+import :scripting.lua.classes.ai_squad;
+import :scripting.lua.classes.faction;
 
 #undef PlaySound
 

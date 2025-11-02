@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.liquid_control;
+module pragma.server;
+import :entities.components.liquid_control;
 
-import pragma.server.entities;
+import :entities;
 
 using namespace pragma;
 

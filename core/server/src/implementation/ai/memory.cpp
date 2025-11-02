@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.ai.memory;
+module pragma.server;
+import :ai.memory;
 
-import pragma.server.game;
+import :game;
 
 using namespace pragma;
 

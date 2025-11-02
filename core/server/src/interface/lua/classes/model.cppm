@@ -9,7 +9,7 @@ module;
 
 
 
-export module pragma.server.scripting.lua.classes.model;
+export module pragma.server:scripting.lua.classes.model;
 
 export import pragma.shared;
 

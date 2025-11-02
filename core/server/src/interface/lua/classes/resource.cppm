@@ -6,7 +6,7 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-export module pragma.server.scripting.lua.classes.resource;
+export module pragma.server:scripting.lua.classes.resource;
 
 export import pragma.shared;
 

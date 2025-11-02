@@ -7,7 +7,7 @@ module;
 
 
 
-export module pragma.server.scripting.lua.libraries.util;
+export module pragma.server:scripting.lua.libraries.util;
 
 export import pragma.shared;
 export import luabind;

@@ -3,5 +3,5 @@
 
 module;
 
-export module pragma.server.debug;
-export import pragma.server.debug.overlay;
+export module pragma.server:debug;
+export import :debug.overlay;

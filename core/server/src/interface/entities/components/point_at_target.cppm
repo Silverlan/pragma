@@ -7,9 +7,9 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-export module pragma.server.entities.components.point_at_target;
+export module pragma.server:entities.components.point_at_target;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SPointAtTargetComponent final : public BasePointAtTargetComponent, public SBaseNetComponent {

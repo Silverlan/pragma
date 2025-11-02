@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.shooter;
+export module pragma.server:entities.components.shooter;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 import pragma.shared;
 
 export namespace pragma::ecs {

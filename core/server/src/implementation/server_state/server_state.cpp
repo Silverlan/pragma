@@ -8,14 +8,15 @@ module;
 #include "stdafx_server.h"
 #include "pragma/serverdefinitions.h"
 
-module pragma.server.server_state;
+module pragma.server;
+import :server_state;
 
-import pragma.server.console.register_commands;
-import pragma.server.core;
-import pragma.server.entities;
-import pragma.server.game;
-import pragma.server.model_manager;
-import pragma.server.networking;
+import :console.register_commands;
+import :core;
+import :entities;
+import :game;
+import :model_manager;
+import :networking;
 
 #undef GetMessage
 

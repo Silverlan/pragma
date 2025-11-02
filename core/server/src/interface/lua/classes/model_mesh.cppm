@@ -7,7 +7,7 @@ module;
 
 
 
-export module pragma.server.scripting.lua.classes.model_mesh;
+export module pragma.server:scripting.lua.classes.model_mesh;
 
 export namespace Lua {
 	namespace ModelMesh {

@@ -8,9 +8,9 @@ module;
 
 
 
-export module pragma.server.scripting.lua.libraries.net;
+export module pragma.server:scripting.lua.libraries.net;
 
-import pragma.server.entities.components;
+import :entities.components;
 export import luabind;
 
 export namespace Lua::net {

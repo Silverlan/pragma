@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.scripting.lua.classes.resource;
+module pragma.server;
+import :scripting.lua.classes.resource;
 
-import pragma.server.networking.resource_manager;
+import :networking.resource_manager;
 
 bool Lua::resource::add_file(const std::string &res, bool stream) { return ResourceManager::AddResource(res, stream); }
 bool Lua::resource::add_file(const std::string &res) { return add_file(res, true); }

@@ -3,14 +3,14 @@
 
 module;
 
-export module pragma.server.networking;
-export import pragma.server.networking.iserver;
-export import pragma.server.networking.iserver_client;
-export import pragma.server.networking.local_host;
-export import pragma.server.networking.master_server;
-export import pragma.server.networking.net_messages;
-export import pragma.server.networking.recipient_filter;
-export import pragma.server.networking.resource;
-export import pragma.server.networking.resource_manager;
-export import pragma.server.networking.standard_server;
-export import pragma.server.networking.util;
+export module pragma.server:networking;
+export import :networking.iserver;
+export import :networking.iserver_client;
+export import :networking.local_host;
+export import :networking.master_server;
+export import :networking.net_messages;
+export import :networking.recipient_filter;
+export import :networking.resource;
+export import :networking.resource_manager;
+export import :networking.standard_server;
+export import :networking.util;

@@ -8,9 +8,9 @@ module;
 
 
 
-export module pragma.server.entities.components.name;
+export module pragma.server:entities.components.name;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SNameComponent final : public BaseNameComponent, public SBaseNetComponent {

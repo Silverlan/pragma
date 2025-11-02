@@ -6,10 +6,11 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.lights.spot_vol;
+module pragma.server;
+import :entities.components.lights.spot_vol;
 
-import pragma.server.entities;
-import pragma.server.networking.util;
+import :entities;
+import :networking.util;
 
 using namespace pragma;
 

@@ -10,7 +10,7 @@ module;
 
 
 
-export module pragma.server.networking.recipient_filter;
+export module pragma.server:networking.recipient_filter;
 
 export import pragma.util;
 

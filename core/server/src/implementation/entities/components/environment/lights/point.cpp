@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.lights.point;
+module pragma.server;
+import :entities.components.lights.point;
 
-import pragma.server.entities.components.lights.base;
+import :entities.components.lights.base;
 
 using namespace pragma;
 

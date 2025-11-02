@@ -3,6 +3,6 @@
 
 module;
 
-export module pragma.server.console;
-export import pragma.server.console.util;
-export import pragma.server.console.register_commands;
+export module pragma.server:console;
+export import :console.util;
+export import :console.register_commands;

@@ -6,13 +6,14 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.physics;
+module pragma.server;
+import :entities.components.physics;
 
-import pragma.server.entities.base;
-import pragma.server.entities.components;
-import pragma.server.game;
-import pragma.server.model_manager;
-import pragma.server.server_state;
+import :entities.base;
+import :entities.components;
+import :game;
+import :model_manager;
+import :server_state;
 
 using namespace pragma;
 

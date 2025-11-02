@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.observable;
+module pragma.server;
+import :entities.components.observable;
 
-import pragma.server.entities;
+import :entities;
 
 using namespace pragma;
 

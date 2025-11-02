@@ -8,9 +8,9 @@ module;
 
 
 
-export module pragma.server.entities.components.attachment;
+export module pragma.server:entities.components.attachment;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SAttachmentComponent final : public BaseAttachmentComponent, public SBaseNetComponent {

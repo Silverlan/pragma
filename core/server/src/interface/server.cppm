@@ -5,4 +5,4 @@ module;
 
 export module pragma.server;
 
-export import pragma.server.server_state;
+export import :server_state;

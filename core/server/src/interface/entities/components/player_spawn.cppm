@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.player_spawn;
+export module pragma.server:entities.components.player_spawn;
 
-import pragma.server.entities.base;
+import :entities.base;
 
 export {
 	namespace pragma {

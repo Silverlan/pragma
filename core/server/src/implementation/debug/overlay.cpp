@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.debug.overlay;
+module pragma.server;
+import :debug.overlay;
 
-import pragma.server.server_state;
+import :server_state;
 
 #undef DrawText
 

@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.effects.particle_system;
+module pragma.server;
+import :entities.components.effects.particle_system;
 
-import pragma.server.server_state;
+import :server_state;
 
 using namespace pragma;
 

@@ -8,11 +8,12 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.weapon;
+module pragma.server;
+import :entities.components.weapon;
 
-import pragma.server.entities;
-import pragma.server.entities.components;
-import pragma.server.server_state;
+import :entities;
+import :entities.components;
+import :server_state;
 
 using namespace pragma;
 

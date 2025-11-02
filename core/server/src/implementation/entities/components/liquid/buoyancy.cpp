@@ -6,7 +6,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.liquid_buoyancy;
+module pragma.server;
+import :entities.components.liquid_buoyancy;
 
 using namespace pragma;
 

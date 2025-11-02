@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.triggers.touch;
+export module pragma.server:entities.components.triggers.touch;
 
-import pragma.server.entities;
+import :entities;
 
 export {
 	namespace pragma {

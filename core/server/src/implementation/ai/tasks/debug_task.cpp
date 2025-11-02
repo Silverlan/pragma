@@ -6,10 +6,11 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.ai.tasks.debug;
+module pragma.server;
+import :ai.tasks.debug;
 
-import pragma.server.debug;
-import pragma.server.entities.components;
+import :debug;
+import :entities.components;
 
 #undef DrawText
 

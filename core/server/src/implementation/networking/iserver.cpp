@@ -5,10 +5,11 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.networking.iserver;
+module pragma.server;
+import :networking.iserver;
 
-import pragma.server.networking.iserver_client;
-import pragma.server.networking.recipient_filter;
+import :networking.iserver_client;
+import :networking.recipient_filter;
 
 bool pragma::networking::IServer::Shutdown(Error &outErr)
 {

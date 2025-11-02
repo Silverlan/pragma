@@ -7,13 +7,14 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.character;
+module pragma.server;
+import :entities.components.character;
 
-import pragma.server.ai;
-import pragma.server.entities;
-import pragma.server.entities.components.ai;
-import pragma.server.entities.components.player;
-import pragma.server.entities.components.weapon;
+import :ai;
+import :entities;
+import :entities.components.ai;
+import :entities.components.player;
+import :entities.components.weapon;
 
 using namespace pragma;
 

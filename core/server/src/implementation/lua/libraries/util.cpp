@@ -5,10 +5,11 @@ module;
 #include "pragma/lua/core.hpp"
 #include "stdafx_server.h"
 
-module pragma.server.scripting.lua.libraries.util;
+module pragma.server;
+import :scripting.lua.libraries.util;
 
-import pragma.server.game;
-import pragma.server.server_state;
+import :game;
+import :server_state;
 
 luabind::object Lua::util::Server::fire_bullets(lua_State *l, const BulletInfo &bulletInfo) { return fire_bullets(l, bulletInfo, false); }
 luabind::object Lua::util::Server::fire_bullets(lua_State *l, const BulletInfo &bulletInfo, bool hitReport)

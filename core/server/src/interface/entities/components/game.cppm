@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.game;
+export module pragma.server:entities.components.game;
 
-import pragma.server.entities;
+import :entities;
 
 export {
 	namespace pragma {

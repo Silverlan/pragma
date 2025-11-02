@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.audio.sound;
+module pragma.server;
+import :audio.sound;
 
-import pragma.server.server_state;
+import :server_state;
 
 SALSoundBase::SALSoundBase(bool bShared) : m_bShared(bShared) {}
 bool SALSoundBase::IsShared() const { return m_bShared; }

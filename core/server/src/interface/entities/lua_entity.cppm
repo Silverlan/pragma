@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.lua;
+export module pragma.server:entities.lua;
 
-import pragma.server.entities.base;
+import :entities.base;
 
 export {
 	class DLLSERVER SLuaEntity : public SBaseEntity {

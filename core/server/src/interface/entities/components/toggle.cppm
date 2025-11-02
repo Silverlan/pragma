@@ -7,9 +7,9 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-export module pragma.server.entities.components.toggle;
+export module pragma.server:entities.components.toggle;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SToggleComponent final : public BaseToggleComponent, public SBaseNetComponent {

@@ -9,9 +9,9 @@ module;
 
 
 
-export module pragma.server.entities.components.player;
+export module pragma.server:entities.components.player;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SPlayerComponent final : public BasePlayerComponent, public SBaseNetComponent {

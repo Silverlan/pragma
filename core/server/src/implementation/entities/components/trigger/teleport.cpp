@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.triggers.teleport;
+module pragma.server;
+import :entities.components.triggers.teleport;
 
-import pragma.server.game;
+import :game;
 
 using namespace pragma;
 

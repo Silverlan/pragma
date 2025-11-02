@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.networking.recipient_filter;
+module pragma.server;
+import :networking.recipient_filter;
 
-import pragma.server.networking.iserver_client;
+import :networking.iserver_client;
 
 pragma::networking::ClientRecipientFilter::ClientRecipientFilter(const std::function<bool(const IServerClient &)> &filter) : m_filter {filter} {}
 pragma::networking::ClientRecipientFilter::ClientRecipientFilter(const IServerClient &client, FilterType filterType)

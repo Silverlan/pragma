@@ -8,9 +8,9 @@ module;
 
 
 
-export module pragma.server.scripting.lua.classes.ai_behavior;
+export module pragma.server:scripting.lua.classes.ai_behavior;
 
-import pragma.server.ai;
+import :ai;
 export import luabind;
 
 export {

@@ -7,7 +7,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.scripting.lua.classes.model_mesh;
+module pragma.server;
+import :scripting.lua.classes.model_mesh;
 
 import pragma.shared;
 

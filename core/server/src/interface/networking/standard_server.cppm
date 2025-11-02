@@ -6,11 +6,11 @@ module;
 #include "pragma/serverdefinitions.h"
 
 
-export module pragma.server.networking.standard_server;
+export module pragma.server:networking.standard_server;
 
-import pragma.server.entities.components;
-export import pragma.server.networking.iserver;
-export import pragma.server.networking.iserver_client;
+import :entities.components;
+export import :networking.iserver;
+export import :networking.iserver_client;
 export import pragma.server_manager;
 
 namespace pragma::networking {

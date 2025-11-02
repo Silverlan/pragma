@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.ai.tasks.target;
+module pragma.server;
+import :ai.tasks.target;
 
-import pragma.server.entities.components;
+import :entities.components;
 
 using namespace pragma;
 

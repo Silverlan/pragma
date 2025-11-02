@@ -7,10 +7,10 @@ module;
 
 
 
-export module pragma.server.entities.components.triggers.teleport;
+export module pragma.server:entities.components.triggers.teleport;
 
-import pragma.server.entities;
-import pragma.server.entities.components.triggers.touch;
+import :entities;
+import :entities.components.triggers.touch;
 
 export {
 	namespace pragma {

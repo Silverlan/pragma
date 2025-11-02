@@ -6,9 +6,9 @@ module;
 
 
 
-export module pragma.server.ai.tasks.random;
+export module pragma.server:ai.tasks.random;
 
-export import pragma.server.ai.schedule;
+export import :ai.schedule;
 
 export namespace pragma {
 	namespace ai {

@@ -7,7 +7,7 @@ module;
 
 
 
-export module pragma.server.scripting.lua.classes.ai_squad;
+export module pragma.server:scripting.lua.classes.ai_squad;
 
 export import luabind;
 

@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.scripting.lua.classes.ai_memory;
+module pragma.server;
+import :scripting.lua.classes.ai_memory;
 
-import pragma.server.ai.memory;
+import :ai.memory;
 import pragma.shared;
 
 namespace Lua {

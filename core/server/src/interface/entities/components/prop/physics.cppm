@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.prop.physics;
+export module pragma.server:entities.components.prop.physics;
 
-import pragma.server.entities;
+import :entities;
 
 export {
 	namespace pragma {

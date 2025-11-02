@@ -5,7 +5,7 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
-export module pragma.server.networking.resource_manager;
+export module pragma.server:networking.resource_manager;
 
 export import std;
 

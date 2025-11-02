@@ -7,10 +7,10 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-export module pragma.server.entities.components.lights.spot;
+export module pragma.server:entities.components.lights.spot;
 
-import pragma.server.entities;
-import pragma.server.entities.components.entity;
+import :entities;
+import :entities.components.entity;
 
 export {
 	namespace pragma {

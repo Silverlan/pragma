@@ -5,12 +5,13 @@ module;
 #include "pragma/lua/core.hpp"
 #include "stdafx_server.h"
 
-module pragma.server.scripting.lua.libraries.net;
+module pragma.server;
+import :scripting.lua.libraries.net;
 
-import pragma.server.entities;
-import pragma.server.entities.components;
-import pragma.server.game;
-import pragma.server.server_state;
+import :entities;
+import :entities.components;
+import :game;
+import :server_state;
 
 ////////////////////////////
 

@@ -7,9 +7,9 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-export module pragma.server.entities.components.score;
+export module pragma.server:entities.components.score;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SScoreComponent final : public BaseScoreComponent, public SBaseNetComponent {

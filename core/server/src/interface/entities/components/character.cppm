@@ -9,9 +9,9 @@ module;
 
 
 
-export module pragma.server.entities.components.character;
+export module pragma.server:entities.components.character;
 
-import pragma.server.ai;
+import :ai;
 
 export namespace pragma {
 	class DLLSERVER SCharacterComponent final : public BaseCharacterComponent {

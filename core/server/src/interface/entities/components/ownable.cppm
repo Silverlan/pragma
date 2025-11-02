@@ -7,9 +7,9 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-export module pragma.server.entities.components.ownable;
+export module pragma.server:entities.components.ownable;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SOwnableComponent final : public BaseOwnableComponent, public SBaseNetComponent {

@@ -5,12 +5,13 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.ai;
+module pragma.server;
+import :entities.components.ai;
 
-import pragma.server.entities.components;
-import pragma.server.game;
-import pragma.server.scripting.lua;
-import pragma.server.server_state;
+import :entities.components;
+import :game;
+import :scripting.lua;
+import :server_state;
 
 using namespace pragma;
 

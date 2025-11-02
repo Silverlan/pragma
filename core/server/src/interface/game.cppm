@@ -8,12 +8,12 @@ module;
 
 
 
-export module pragma.server.game;
+export module pragma.server:game;
 
-export import pragma.server.ai.schedule;
-export import pragma.server.core.cache_info;
-export import pragma.server.entities;
-export import pragma.server.entities.components;
+export import :ai.schedule;
+export import :core.cache_info;
+export import :entities;
+export import :entities.components;
 export import pragma.shared;
 
 #pragma warning(push)

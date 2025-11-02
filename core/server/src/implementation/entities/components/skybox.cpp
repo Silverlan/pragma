@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.skybox;
+module pragma.server;
+import :entities.components.skybox;
 
-import pragma.server.entities.base;
+import :entities.base;
 
 using namespace pragma;
 

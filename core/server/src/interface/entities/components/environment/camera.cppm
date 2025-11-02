@@ -7,10 +7,10 @@ module;
 
 
 
-export module pragma.server.entities.components.camera;
+export module pragma.server:entities.components.camera;
 
-import pragma.server.entities;
-import pragma.server.entities.components.entity;
+import :entities;
+import :entities.components.entity;
 
 export {
 	namespace pragma {

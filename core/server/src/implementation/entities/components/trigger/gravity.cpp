@@ -7,10 +7,11 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.triggers.gravity;
+module pragma.server;
+import :entities.components.triggers.gravity;
 
-import pragma.server.entities;
-import pragma.server.server_state;
+import :entities;
+import :server_state;
 
 using namespace pragma;
 

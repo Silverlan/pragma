@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.scripting.lua.classes.ai_squad;
+module pragma.server;
+import :scripting.lua.classes.ai_squad;
 
-import pragma.server.ai;
+import :ai;
 
 namespace Lua {
 	namespace AISquad {

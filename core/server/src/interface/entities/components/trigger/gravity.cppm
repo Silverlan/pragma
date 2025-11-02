@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.triggers.gravity;
+export module pragma.server:entities.components.triggers.gravity;
 
-import pragma.server.entities;
+import :entities;
 
 export {
 	namespace pragma {

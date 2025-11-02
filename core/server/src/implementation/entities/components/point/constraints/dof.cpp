@@ -6,7 +6,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.point.constraints.dof;
+module pragma.server;
+import :entities.components.point.constraints.dof;
 
 using namespace pragma;
 

@@ -7,9 +7,9 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-export module pragma.server.scripting.lua.classes.entity;
+export module pragma.server:scripting.lua.classes.entity;
 
-import pragma.server.entities;
+import :entities;
 export import luabind;
 
 export {

@@ -8,7 +8,7 @@ module;
 
 
 
-export module pragma.server.scripting.lua.libraries.engine;
+export module pragma.server:scripting.lua.libraries.engine;
 
 export import pragma.materialsystem;
 

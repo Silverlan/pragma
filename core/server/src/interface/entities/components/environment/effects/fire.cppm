@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.effects.fire;
+export module pragma.server:entities.components.effects.fire;
 
-import pragma.server.entities;
+import :entities;
 
 export {
 	namespace pragma {

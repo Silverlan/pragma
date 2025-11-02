@@ -6,7 +6,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.audio.dsp.chorus;
+module pragma.server;
+import :entities.components.audio.dsp.chorus;
 
 using namespace pragma;
 

@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.networked;
+export module pragma.server:entities.components.networked;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SNetworkedComponent final : public BaseNetworkedComponent, public SBaseNetComponent {

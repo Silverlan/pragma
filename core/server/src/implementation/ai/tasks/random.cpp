@@ -5,7 +5,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.ai.tasks.random;
+module pragma.server;
+import :ai.tasks.random;
 
 using namespace pragma;
 

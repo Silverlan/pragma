@@ -6,10 +6,11 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.toggle;
+module pragma.server;
+import :entities.components.toggle;
 
-import pragma.server.entities;
-import pragma.server.game;
+import :entities;
+import :game;
 
 using namespace pragma;
 

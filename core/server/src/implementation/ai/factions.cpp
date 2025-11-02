@@ -5,7 +5,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.ai.factions;
+module pragma.server;
+import :ai.factions;
 
 Faction::Faction(const std::string &name) : std::enable_shared_from_this<Faction>(), m_name(name), m_defaultDisp(DISPOSITION::NEUTRAL) {}
 void Faction::AddClass(std::string className)

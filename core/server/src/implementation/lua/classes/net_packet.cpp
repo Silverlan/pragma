@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.scripting.lua.classes.net_packet;
+module pragma.server;
+import :scripting.lua.classes.net_packet;
 
-import pragma.server.networking.util;
+import :networking.util;
 
 void Lua::NetPacket::Server::register_class(luabind::class_<::NetPacket> &classDef)
 {

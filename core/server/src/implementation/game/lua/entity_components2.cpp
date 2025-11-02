@@ -11,9 +11,10 @@ module;
 
 // --template-include-location
 
-module pragma.server.game;
+module pragma.server;
+import :game;
 
-import pragma.server.entities.components;
+import :entities.components;
 
 void RegisterLuaEntityComponents2_sv(lua_State *l, luabind::module_ &entsMod)
 {

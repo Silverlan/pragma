@@ -5,8 +5,9 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.console.util;
+module pragma.server;
+import :console.util;
 
-import pragma.server.server_state;
+import :server_state;
 
 ConVarHandle GetServerConVar(std::string scmd) { return ServerState::Get()->GetConVarHandle(scmd); }

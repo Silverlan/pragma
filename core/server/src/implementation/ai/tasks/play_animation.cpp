@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.ai.tasks.play_animation;
+module pragma.server;
+import :ai.tasks.play_animation;
 
-import pragma.server.entities.components;
+import :entities.components;
 
 using namespace pragma;
 

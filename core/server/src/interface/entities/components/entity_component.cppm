@@ -5,9 +5,9 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
-export module pragma.server.entities.components.entity;
+export module pragma.server:entities.components.entity;
 
-export import pragma.server.networking.recipient_filter;
+export import :networking.recipient_filter;
 export import pragma.shared;
 
 export namespace pragma {

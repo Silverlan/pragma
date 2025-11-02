@@ -8,17 +8,18 @@ module;
 #include "pragma/lua/core.hpp"
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.ai;
+module pragma.server;
+import :entities.components.ai;
 
-import pragma.server.ai;
-import pragma.server.entities;
-import pragma.server.entities.components.animated;
-import pragma.server.entities.components.character;
-import pragma.server.entities.components.health;
-import pragma.server.entities.components.model;
-import pragma.server.entities.components.player;
-import pragma.server.entities.components.physics;
-import pragma.server.game;
+import :ai;
+import :entities;
+import :entities.components.animated;
+import :entities.components.character;
+import :entities.components.health;
+import :entities.components.model;
+import :entities.components.player;
+import :entities.components.physics;
+import :game;
 
 using namespace pragma;
 

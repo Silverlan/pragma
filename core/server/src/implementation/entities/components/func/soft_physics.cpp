@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.func.soft_physics;
+module pragma.server;
+import :entities.components.func.soft_physics;
 
-import pragma.server.game;
+import :game;
 
 using namespace pragma;
 

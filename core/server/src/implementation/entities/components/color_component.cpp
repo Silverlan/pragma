@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.color;
+module pragma.server;
+import :entities.components.color;
 
-import pragma.server.entities;
+import :entities;
 
 using namespace pragma;
 

@@ -5,7 +5,7 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
-export module pragma.server.networking.iserver;
+export module pragma.server:networking.iserver;
 
 export import pragma.shared;
 

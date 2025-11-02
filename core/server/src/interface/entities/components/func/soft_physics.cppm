@@ -7,11 +7,11 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-export module pragma.server.entities.components.func.soft_physics;
+export module pragma.server:entities.components.func.soft_physics;
 
-import pragma.server.entities;
+import :entities;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export {
 	namespace pragma {

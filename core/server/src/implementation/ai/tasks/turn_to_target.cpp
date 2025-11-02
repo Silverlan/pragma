@@ -5,10 +5,11 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.ai.tasks.turn_to_target;
+module pragma.server;
+import :ai.tasks.turn_to_target;
 
-import pragma.server.entities.components;
-import pragma.server.game;
+import :entities.components;
+import :game;
 
 using namespace pragma;
 

@@ -9,7 +9,7 @@ module;
 
 
 
-export module pragma.server.scripting.lua.libraries.game;
+export module pragma.server:scripting.lua.libraries.game;
 
 export import luabind;
 export import pragma.math;

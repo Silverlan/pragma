@@ -8,10 +8,11 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.flammable;
+module pragma.server;
+import :entities.components.flammable;
 
-import pragma.server.entities;
-import pragma.server.game;
+import :entities;
+import :game;
 
 using namespace pragma;
 

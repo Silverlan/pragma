@@ -7,10 +7,10 @@ module;
 
 
 
-export module pragma.server.ai.schedule:behavior;
+export module pragma.server:ai.schedule.behavior;
 
-export import :behavior_parameter;
-export import pragma.server.ai.tasks.selector;
+export import :ai.schedule.behavior_parameter;
+export import :ai.tasks.selector;
 
 export namespace pragma {
 	namespace ai {

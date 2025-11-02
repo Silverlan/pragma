@@ -5,7 +5,7 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
-export module pragma.server.console.util;
+export module pragma.server:console.util;
 
 export import pragma.shared;
 

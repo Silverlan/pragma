@@ -6,13 +6,14 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.ai;
+module pragma.server;
+import :entities.components.ai;
 
-import pragma.server.entities.components.character;
-import pragma.server.entities.components.generic;
-import pragma.server.entities.components.player;
-import pragma.server.entities.components.observable;
-import pragma.server.entities.components.observer;
+import :entities.components.character;
+import :entities.components.generic;
+import :entities.components.player;
+import :entities.components.observable;
+import :entities.components.observer;
 
 using namespace pragma;
 

@@ -8,7 +8,7 @@ module;
 
 
 
-export module pragma.server.core.resource_watcher;
+export module pragma.server:core.resource_watcher;
 
 export import pragma.shared;
 

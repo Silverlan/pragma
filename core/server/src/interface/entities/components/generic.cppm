@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.generic;
+export module pragma.server:entities.components.generic;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SGenericComponent final : public BaseGenericComponent {

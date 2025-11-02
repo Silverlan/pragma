@@ -6,7 +6,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.triggers.hurt;
+module pragma.server;
+import :entities.components.triggers.hurt;
 
 using namespace pragma;
 

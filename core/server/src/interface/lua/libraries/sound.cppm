@@ -9,7 +9,7 @@ module;
 
 
 
-export module pragma.server.scripting.lua.libraries.sound;
+export module pragma.server:scripting.lua.libraries.sound;
 
 export import pragma.shared;
 

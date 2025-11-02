@@ -7,9 +7,10 @@ module;
 #include "stdafx_server.h"
 
 
-module pragma.server.game;
+module pragma.server;
+import :game;
 
-import pragma.server.scripting.lua;
+import :scripting.lua;
 
 void SGame::RegisterLuaClasses()
 {

@@ -5,7 +5,7 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
-export module pragma.server.ai.squad;
+export module pragma.server:ai.squad;
 
 export import pragma.shared;
 

@@ -6,7 +6,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.prop.base;
+module pragma.server;
+import :entities.components.prop.base;
 
 using namespace pragma;
 

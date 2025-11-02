@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.func.brush;
+module pragma.server;
+import :entities.components.func.brush;
 
-import pragma.server.game;
+import :game;
 
 using namespace pragma;
 

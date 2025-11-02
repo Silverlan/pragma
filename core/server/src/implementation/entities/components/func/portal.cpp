@@ -6,7 +6,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.func.portal;
+module pragma.server;
+import :entities.components.func.portal;
 
 using namespace pragma;
 

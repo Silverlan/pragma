@@ -4,11 +4,11 @@
 module;
 
 
-export module pragma.server.entities.registration;
+export module pragma.server:entities.registration;
 
-import pragma.server.entities;
-import pragma.server.game;
-import pragma.server.server_state;
+import :entities;
+import :game;
+import :server_state;
 
 #undef GetClassName
 

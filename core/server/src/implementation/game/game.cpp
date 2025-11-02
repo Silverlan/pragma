@@ -11,20 +11,21 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.game;
+module pragma.server;
+import :game;
 
-import pragma.server.ai;
-import pragma.server.audio;
-import pragma.server.console.register_commands;
-import pragma.server.console.util;
-import pragma.server.core.cache_info;
-import pragma.server.debug;
-import pragma.server.entities;
-import pragma.server.entities.components;
-import pragma.server.entities.registration;
-import pragma.server.model_manager;
-import pragma.server.scripting.lua;
-import pragma.server.server_state;
+import :ai;
+import :audio;
+import :console.register_commands;
+import :console.util;
+import :core.cache_info;
+import :debug;
+import :entities;
+import :entities.components;
+import :entities.registration;
+import :model_manager;
+import :scripting.lua;
+import :server_state;
 import pragma.shared;
 
 DLLSERVER pragma::physics::IEnvironment *s_physEnv = nullptr;

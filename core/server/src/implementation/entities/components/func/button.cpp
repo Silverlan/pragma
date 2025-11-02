@@ -7,10 +7,11 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.func.button;
+module pragma.server;
+import :entities.components.func.button;
 
-import pragma.server.game;
-import pragma.server.server_state;
+import :game;
+import :server_state;
 
 using namespace pragma;
 

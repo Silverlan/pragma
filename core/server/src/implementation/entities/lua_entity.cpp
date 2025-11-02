@@ -6,12 +6,13 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.lua;
+module pragma.server;
+import :entities.lua;
 
-import pragma.server.entities.components;
-import pragma.server.game;
-import pragma.server.scripting.lua;
-import pragma.server.server_state;
+import :entities.components;
+import :game;
+import :scripting.lua;
+import :server_state;
 
 SLuaEntity::SLuaEntity() : SBaseEntity {} {}
 void SLuaEntity::Initialize()

@@ -6,7 +6,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.decal;
+module pragma.server;
+import :entities.components.decal;
 
 using namespace pragma;
 

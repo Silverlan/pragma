@@ -6,9 +6,9 @@ module;
 
 
 
-export module pragma.server.ai.tasks.play_sound;
+export module pragma.server:ai.tasks.play_sound;
 
-export import pragma.server.ai.schedule;
+export import :ai.schedule;
 
 export namespace pragma {
 	namespace ai {

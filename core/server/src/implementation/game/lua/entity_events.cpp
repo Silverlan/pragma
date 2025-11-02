@@ -7,10 +7,11 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.game;
+module pragma.server;
+import :game;
 
-import pragma.server.ai;
-import pragma.server.entities.components;
+import :ai;
+import :entities.components;
 
 bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject)
 {

@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.ai.schedule;
+export module pragma.server:ai.schedule;
 
-export import :behavior;
+export import :ai.schedule.behavior;
 
 export namespace pragma {
 	namespace ai {

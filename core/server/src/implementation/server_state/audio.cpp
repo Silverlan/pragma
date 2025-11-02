@@ -7,11 +7,12 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.server_state;
+module pragma.server;
+import :server_state;
 
 import pragma.audio.util;
-import pragma.server.audio;
-import pragma.server.game;
+import :audio;
+import :game;
 
 void ServerState::SendSoundSourceToClient(SALSound &sound, bool sendFullUpdate, const pragma::networking::ClientRecipientFilter *rf)
 {

@@ -5,9 +5,9 @@ module;
 #include "pragma/serverdefinitions.h"
 
 
-export module pragma.server.entities.player;
+export module pragma.server:entities.player;
 
-import pragma.server.entities.base;
+import :entities.base;
 
 export class DLLSERVER Player : public SBaseEntity, public BasePlayer {
   public:

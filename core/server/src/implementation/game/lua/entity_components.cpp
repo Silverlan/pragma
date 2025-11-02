@@ -9,10 +9,11 @@ module;
 #include "stdafx_server.h"
 
 
-module pragma.server.game;
+module pragma.server;
+import :game;
 
-import pragma.server.entities;
-import pragma.server.entities.components;
+import :entities;
+import :entities.components;
 import pragma.shared;
 
 void RegisterLuaEntityComponents2_sv(lua_State *l, luabind::module_ &entsMod);

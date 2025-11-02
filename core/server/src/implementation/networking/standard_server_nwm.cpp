@@ -6,12 +6,13 @@ module;
 #include "stdafx_server.h"
 #include "pragma/console/helper.hpp"
 
-module pragma.server.networking.standard_server;
+module pragma.server;
+import :networking.standard_server;
 
-import pragma.server.console.register_commands;
-import pragma.server.entities;
-import pragma.server.entities.components;
-import pragma.server.server_state;
+import :console.register_commands;
+import :entities;
+import :entities.components;
+import :server_state;
 import pragma.wms;
 
 #define DEBUG_SERVER_VERBOSE 1

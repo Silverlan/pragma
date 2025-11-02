@@ -5,14 +5,15 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.networking.net_messages;
+module pragma.server;
+import :networking.net_messages;
 
-import pragma.server.entities;
-import pragma.server.entities.components;
-import pragma.server.game;
-import pragma.server.model_manager;
-import pragma.server.networking.iserver_client;
-import pragma.server.server_state;
+import :entities;
+import :entities.components;
+import :game;
+import :model_manager;
+import :networking.iserver_client;
+import :server_state;
 import pragma.shared;
 
 static void NET_sv_RESOURCEINFO_RESPONSE(pragma::networking::IServerClient &session, NetPacket packet);

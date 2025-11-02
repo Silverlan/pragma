@@ -11,11 +11,11 @@ module;
 
 
 
-export module pragma.server.entities.components.ai;
+export module pragma.server:entities.components.ai;
 
-import pragma.server.ai;
-import pragma.server.entities.components.entity;
-import pragma.server.entities.components.player;
+import :ai;
+import :entities.components.entity;
+import :entities.components.player;
 
 export {
 	constexpr float AI_NEXT_ENEMY_CHECK_IDLE = 0.25f;

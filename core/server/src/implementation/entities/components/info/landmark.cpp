@@ -6,7 +6,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.info.landmark;
+module pragma.server;
+import :entities.components.info.landmark;
 
 using namespace pragma;
 

@@ -6,9 +6,9 @@ module;
 #include "pragma/serverdefinitions.h"
 
 
-export module pragma.server.networking.iserver_client;
+export module pragma.server:networking.iserver_client;
 
-export import pragma.server.networking.resource;
+export import :networking.resource;
 export import pragma.shared;
 
 export {

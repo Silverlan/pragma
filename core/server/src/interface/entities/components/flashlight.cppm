@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.flashlight;
+export module pragma.server:entities.components.flashlight;
 
-import pragma.server.entities;
+import :entities;
 
 export {
 	namespace pragma {

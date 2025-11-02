@@ -4,7 +4,8 @@
 module;
 
 
-module pragma.server.networking.master_server;
+module pragma.server;
+import :networking.master_server;
 
 std::unique_ptr<pragma::networking::MasterServerRegistration> pragma::networking::MasterServerRegistration::Register(const util::Library &steamworksLibrary, const GameServerInfo &serverInfo)
 {

@@ -6,11 +6,12 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.networking.resource_manager;
+module pragma.server;
+import :networking.resource_manager;
 
-import pragma.server.entities;
-import pragma.server.game;
-import pragma.server.server_state;
+import :entities;
+import :game;
+import :server_state;
 
 #undef FindResource
 

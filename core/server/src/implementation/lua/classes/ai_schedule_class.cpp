@@ -7,11 +7,12 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.scripting.lua.classes.ai_schedule;
+module pragma.server;
+import :scripting.lua.classes.ai_schedule;
 
-import pragma.server.ai.schedule;
-import pragma.server.scripting.lua.classes.ai_behavior;
-import pragma.server.scripting.lua.classes.entity;
+import :ai.schedule;
+import :scripting.lua.classes.ai_behavior;
+import :scripting.lua.classes.entity;
 
 namespace Lua {
 	namespace AISchedule {

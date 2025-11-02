@@ -6,10 +6,11 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.effects.smoke_trail;
+module pragma.server;
+import :entities.components.effects.smoke_trail;
 
-import pragma.server.game;
-import pragma.server.server_state;
+import :game;
+import :server_state;
 
 using namespace pragma;
 

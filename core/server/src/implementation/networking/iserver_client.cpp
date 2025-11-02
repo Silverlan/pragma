@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.networking.iserver_client;
+module pragma.server;
+import :networking.iserver_client;
 
-import pragma.server.entities.components;
+import :entities.components;
 
 pragma::networking::IServerClient::~IServerClient() { ClearResourceTransfer(); }
 bool pragma::networking::IServerClient::Drop(DropReason reason, pragma::networking::Error &outErr) { return false; }

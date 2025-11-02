@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.scripting.lua.libraries.debug_overlay;
+module pragma.server;
+import :scripting.lua.libraries.debug_overlay;
 
-import pragma.server.debug;
+import :debug;
 
 #undef DrawText
 

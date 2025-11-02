@@ -8,11 +8,12 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.vehicle;
+module pragma.server;
+import :entities.components.vehicle;
 
-import pragma.server.entities;
-import pragma.server.entities.components;
-import pragma.server.game;
+import :entities;
+import :entities.components;
+import :game;
 
 using namespace pragma;
 

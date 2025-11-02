@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.core.resource_watcher;
+module pragma.server;
+import :core.resource_watcher;
 
-import pragma.server.game;
+import :game;
 
 decltype(ESResourceWatcherCallbackType::NavMesh) ESResourceWatcherCallbackType::NavMesh = ESResourceWatcherCallbackType {umath::to_integral(E::NavMesh)};
 decltype(ESResourceWatcherCallbackType::Count) ESResourceWatcherCallbackType::Count = ESResourceWatcherCallbackType {umath::to_integral(E::Count)};

@@ -6,7 +6,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.prop.physics;
+module pragma.server;
+import :entities.components.prop.physics;
 
 using namespace pragma;
 

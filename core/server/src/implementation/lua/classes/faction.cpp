@@ -6,7 +6,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.scripting.lua.classes.faction;
+module pragma.server;
+import :scripting.lua.classes.faction;
 
 void Lua::Faction::register_class(lua_State *l, luabind::module_ &mod)
 {

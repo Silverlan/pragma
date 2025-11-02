@@ -5,7 +5,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.ai.schedule;
+module pragma.server;
+import :ai.schedule;
 
 import :behavior_parameter;
 

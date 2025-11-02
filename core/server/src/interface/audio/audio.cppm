@@ -3,6 +3,6 @@
 
 module;
 
-export module pragma.server.audio;
-export import pragma.server.audio.sound;
-export import pragma.server.audio.sound_script;
+export module pragma.server:audio;
+export import :audio.sound;
+export import :audio.sound_script;

@@ -6,11 +6,12 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.model;
+module pragma.server;
+import :entities.components.model;
 
-import pragma.server.entities;
-import pragma.server.model_manager;
-import pragma.server.server_state;
+import :entities;
+import :model_manager;
+import :server_state;
 
 using namespace pragma;
 

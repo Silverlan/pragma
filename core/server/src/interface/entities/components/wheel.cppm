@@ -7,10 +7,10 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-export module pragma.server.entities.components.wheel;
+export module pragma.server:entities.components.wheel;
 
-import pragma.server.entities.components.entity;
-import pragma.server.entities;
+import :entities.components.entity;
+import :entities;
 
 export {
 	namespace pragma {

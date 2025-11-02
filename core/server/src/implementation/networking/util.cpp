@@ -5,7 +5,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.networking.util;
+module pragma.server;
+import :networking.util;
 
 void nwm::write_unique_entity(NetPacket &packet, const pragma::ecs::BaseEntity *ent)
 {

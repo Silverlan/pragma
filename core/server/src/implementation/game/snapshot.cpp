@@ -6,11 +6,12 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.game;
+module pragma.server;
+import :game;
 
-import pragma.server.entities;
-import pragma.server.entities.components;
-import pragma.server.server_state;
+import :entities;
+import :entities.components;
+import :server_state;
 
 void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 {

@@ -7,10 +7,10 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-export module pragma.server.entities.components.lights.base;
+export module pragma.server:entities.components.lights.base;
 
-import pragma.server.entities;
-import pragma.server.entities.components.entity;
+import :entities;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SLightComponent final : public BaseEnvLightComponent, public SBaseNetComponent {

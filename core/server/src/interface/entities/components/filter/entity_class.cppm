@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.filter.entity_class;
+export module pragma.server:entities.components.filter.entity_class;
 
-import pragma.server.entities;
+import :entities;
 
 export {
 	namespace pragma {

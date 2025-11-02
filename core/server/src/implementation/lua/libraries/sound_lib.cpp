@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.scripting.lua.libraries.sound;
+module pragma.server;
+import :scripting.lua.libraries.sound;
 
-import pragma.server.server_state;
+import :server_state;
 
 std::shared_ptr<::ALSound> Lua::sound::Server::create(lua_State *l, const std::string &snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags)
 {

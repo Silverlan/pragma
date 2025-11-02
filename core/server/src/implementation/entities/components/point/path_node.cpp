@@ -6,7 +6,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.point.path_node;
+module pragma.server;
+import :entities.components.point.path_node;
 
 using namespace pragma;
 

@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.ai.tasks.look_at_target;
+export module pragma.server:ai.tasks.look_at_target;
 
-import pragma.server.ai.tasks.target;
+import :ai.tasks.target;
 
 export namespace pragma {
 	namespace ai {

@@ -5,7 +5,8 @@ module;
 
 #include "pragma/console/helper.hpp"
 
-module pragma.server.console.register_commands;
+module pragma.server;
+import :console.register_commands;
 
 namespace {
 	using namespace pragma::console::server;

@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.logic.relay;
+export module pragma.server:entities.components.logic.relay;
 
-import pragma.server.entities;
+import :entities;
 
 export {
 	namespace pragma {

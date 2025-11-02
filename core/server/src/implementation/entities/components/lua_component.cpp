@@ -8,9 +8,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.lua;
+module pragma.server;
+import :entities.components.lua;
 
-import pragma.server.entities;
+import :entities;
 
 using namespace pragma;
 

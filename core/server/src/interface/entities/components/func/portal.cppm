@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.func.portal;
+export module pragma.server:entities.components.func.portal;
 
-import pragma.server.entities;
+import :entities;
 
 export {
 	namespace pragma {

@@ -6,11 +6,12 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.server_state;
+module pragma.server;
+import :server_state;
 
-import pragma.server.entities;
-import pragma.server.game;
-import pragma.server.networking;
+import :entities;
+import :game;
+import :networking;
 
 #undef GetMessage
 

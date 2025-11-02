@@ -5,7 +5,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.ai.squad;
+module pragma.server;
+import :ai.squad;
 
 std::vector<std::shared_ptr<AISquad>> AISquad::s_squads;
 

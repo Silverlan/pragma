@@ -6,10 +6,11 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.surface;
+module pragma.server;
+import :entities.components.surface;
 
-import pragma.server.entities.base;
-import pragma.server.server_state;
+import :entities.base;
+import :server_state;
 
 using namespace pragma;
 

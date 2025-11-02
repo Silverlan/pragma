@@ -6,7 +6,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.effects.fire;
+module pragma.server;
+import :entities.components.effects.fire;
 
 using namespace pragma;
 

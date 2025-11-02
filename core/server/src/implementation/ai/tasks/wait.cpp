@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.ai.tasks.wait;
+module pragma.server;
+import :ai.tasks.wait;
 
-import pragma.server.game;
+import :game;
 
 using namespace pragma;
 

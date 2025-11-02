@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.debug;
+module pragma.server;
+import :entities.debug;
 
-import pragma.server.entities.components;
+import :entities.components;
 
 using namespace pragma;
 

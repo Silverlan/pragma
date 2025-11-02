@@ -5,9 +5,9 @@ module;
 #include "pragma/serverdefinitions.h"
 
 
-export module pragma.server.ai.tasks.target;
+export module pragma.server:ai.tasks.target;
 
-export import pragma.server.ai.schedule;
+export import :ai.schedule;
 
 export namespace pragma {
 	namespace ai {

@@ -6,7 +6,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.wind;
+module pragma.server;
+import :entities.components.wind;
 
 using namespace pragma;
 

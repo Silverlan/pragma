@@ -8,12 +8,13 @@ module;
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include "stdafx_server.h"
 
-module pragma.server.scripting.lua.classes.ai_behavior;
+module pragma.server;
+import :scripting.lua.classes.ai_behavior;
 
-import pragma.server.ai;
-import pragma.server.entities.components;
-import pragma.server.game;
-import pragma.server.scripting.lua.libraries.ai;
+import :ai;
+import :entities.components;
+import :game;
+import :scripting.lua.libraries.ai;
 
 namespace Lua {
 	namespace AIBehaviorNode {

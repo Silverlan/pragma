@@ -6,11 +6,12 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.scripting.lua.classes.recipient_filter;
+module pragma.server;
+import :scripting.lua.classes.recipient_filter;
 
-import pragma.server.entities;
-import pragma.server.entities.components;
-import pragma.server.server_state;
+import :entities;
+import :entities.components;
+import :server_state;
 
 luabind::tableT<pragma::SPlayerComponent> Lua::RecipientFilter::GetRecipients(lua_State *l, pragma::networking::TargetRecipientFilter &rp)
 {

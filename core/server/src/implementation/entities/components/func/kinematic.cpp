@@ -6,10 +6,11 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.func.kinematic;
+module pragma.server;
+import :entities.components.func.kinematic;
 
-import pragma.server.entities;
-import pragma.server.entities.components.point.path_node;
+import :entities;
+import :entities.components.point.path_node;
 
 using namespace pragma;
 

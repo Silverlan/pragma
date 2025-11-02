@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.io;
+export module pragma.server:entities.components.io;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SIOComponent final : public BaseIOComponent {

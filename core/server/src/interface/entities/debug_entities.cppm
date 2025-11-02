@@ -5,10 +5,10 @@ module;
 #include "pragma/serverdefinitions.h"
 
 
-export module pragma.server.entities.debug;
+export module pragma.server:entities.debug;
 
-import pragma.server.entities.base;
-import pragma.server.entities.components.entity;
+import :entities.base;
+import :entities.components.entity;
 
 export {
     class DLLSERVER EntDebugText : public SBaseEntity {

@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.triggers.remove;
+export module pragma.server:entities.components.triggers.remove;
 
-import pragma.server.entities;
+import :entities;
 
 export {
 	namespace pragma {

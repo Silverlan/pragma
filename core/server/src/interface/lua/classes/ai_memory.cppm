@@ -8,7 +8,7 @@ module;
 
 
 
-export module pragma.server.scripting.lua.classes.ai_memory;
+export module pragma.server:scripting.lua.classes.ai_memory;
 
 export import luabind;
 

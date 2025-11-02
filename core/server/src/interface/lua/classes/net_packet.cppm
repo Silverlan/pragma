@@ -8,7 +8,7 @@ module;
 
 
 
-export module pragma.server.scripting.lua.classes.net_packet;
+export module pragma.server:scripting.lua.classes.net_packet;
 
 export import pragma.shared;
 export import pragma.util;

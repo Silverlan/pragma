@@ -4,7 +4,7 @@
 module;
 #include "pragma/serverdefinitions.h"
 
-export module pragma.server.ai.task_enums;
+export module pragma.server:ai.task_enums;
 
 export import std.compat;
 

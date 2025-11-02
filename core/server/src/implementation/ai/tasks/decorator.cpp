@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.ai.tasks.decorator;
+module pragma.server;
+import :ai.tasks.decorator;
 
-import pragma.server.game;
+import :game;
 
 using namespace pragma;
 

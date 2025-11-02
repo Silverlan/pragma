@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.scripting.lua.libraries.debug;
+module pragma.server;
+import :scripting.lua.libraries.debug;
 
-import pragma.server.server_state;
+import :server_state;
 
 #undef PlaySound
 

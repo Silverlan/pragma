@@ -5,7 +5,7 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
-export module pragma.server.ai.schedule:behavior_parameter;
+export module pragma.server:ai.schedule.behavior_parameter;
 
 export import pragma.shared;
 

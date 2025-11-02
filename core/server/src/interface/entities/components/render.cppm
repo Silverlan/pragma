@@ -7,9 +7,9 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-export module pragma.server.entities.components.render;
+export module pragma.server:entities.components.render;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SRenderComponent final : public BaseRenderComponent, public SBaseNetComponent {

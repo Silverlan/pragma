@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.scripting.lua.classes.entity;
+module pragma.server;
+import :scripting.lua.classes.entity;
 
-import pragma.server.entities;
+import :entities;
 import pragma.util;
 
 void Lua::Entity::Server::register_class(luabind::class_<SBaseEntity, pragma::ecs::BaseEntity> &classDef)

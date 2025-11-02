@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.audio.sound_script;
+module pragma.server;
+import :audio.sound_script;
 
-import pragma.server.server_state;
+import :server_state;
 
 SALSoundScript::SALSoundScript(NetworkState *nw, unsigned int idx, SoundScript *script, NetworkState *state, const std::string &soundName, pragma::audio::ALCreateFlags createFlags)
     : ALSoundScript(nw, idx, script, state, umath::is_flag_set(createFlags, pragma::audio::ALCreateFlags::Stream)), SALSound(nw, idx, 0.f, soundName, createFlags), ALSound(nw)

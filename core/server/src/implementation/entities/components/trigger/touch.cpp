@@ -6,7 +6,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.triggers.touch;
+module pragma.server;
+import :entities.components.triggers.touch;
 
 using namespace pragma;
 

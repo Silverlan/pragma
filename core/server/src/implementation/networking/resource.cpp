@@ -5,7 +5,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.networking.resource;
+module pragma.server;
+import :networking.resource;
 
 Resource::Resource(std::string name, bool bStream) : offset(0), stream(bStream)
 {

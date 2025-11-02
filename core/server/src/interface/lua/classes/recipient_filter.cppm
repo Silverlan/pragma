@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.scripting.lua.classes.recipient_filter;
+export module pragma.server:scripting.lua.classes.recipient_filter;
 
-import pragma.server.entities.components;
+import :entities.components;
 export import luabind;
 
 export {;

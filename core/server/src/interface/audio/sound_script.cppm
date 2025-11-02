@@ -8,9 +8,9 @@ module;
 
 
 
-export module pragma.server.audio.sound_script;
+export module pragma.server:audio.sound_script;
 
-import pragma.server.audio.sound;
+import :audio.sound;
 
 export {
 	class DLLSERVER SALSoundScript : public ALSoundScript, virtual public SALSound {

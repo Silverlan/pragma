@@ -6,7 +6,7 @@ module;
 
 
 
-export module pragma.server.model_manager;
+export module pragma.server:model_manager;
 
 export import pragma.shared;
 

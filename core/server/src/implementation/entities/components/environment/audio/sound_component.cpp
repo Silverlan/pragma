@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.audio.sound;
+module pragma.server;
+import :entities.components.audio.sound;
 
-import pragma.server.audio;
+import :audio;
 
 using namespace pragma;
 

@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.time_scale;
+export module pragma.server:entities.components.time_scale;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER STimeScaleComponent final : public BaseTimeScaleComponent {

@@ -7,10 +7,10 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-export module pragma.server.entities.components.point.constraints.dof;
+export module pragma.server:entities.components.point.constraints.dof;
 
-import pragma.server.entities;
-import pragma.server.entities.components.entity;
+import :entities;
+import :entities.components.entity;
 
 export {
 	namespace pragma {

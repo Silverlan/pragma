@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.filter.entity_class;
+module pragma.server;
+import :entities.components.filter.entity_class;
 
-import pragma.server.game;
+import :game;
 
 using namespace pragma;
 

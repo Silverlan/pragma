@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.player_spawn;
+module pragma.server;
+import :entities.components.player_spawn;
 
-import pragma.server.entities.components;
+import :entities.components;
 
 using namespace pragma;
 

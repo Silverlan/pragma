@@ -8,11 +8,12 @@ module;
 
 #undef GetClassName
 
-module pragma.server.entities.registration;
+module pragma.server;
+import :entities.registration;
 
-import pragma.server.entities;
-import pragma.server.game;
-import pragma.server.server_state;
+import :entities;
+import :game;
+import :server_state;
 
 using namespace server_entities;
 

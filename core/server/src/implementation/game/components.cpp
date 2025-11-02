@@ -7,9 +7,10 @@ module;
 #include "stdafx_server.h"
 // --template-include-location
 
-module pragma.server.game;
+module pragma.server;
+import :game;
 
-import pragma.server.entities.components;
+import :entities.components;
 
 void SGame::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
 {

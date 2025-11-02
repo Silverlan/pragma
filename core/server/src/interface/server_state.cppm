@@ -6,12 +6,12 @@ module;
 #include "pragma/serverdefinitions.h"
 
 
-export module pragma.server.server_state;
+export module pragma.server:server_state;
 
-export import pragma.server.audio;
-export import pragma.server.entities.components;
-export import pragma.server.networking;
-export import pragma.server.game;
+export import :audio;
+export import :entities.components;
+export import :networking;
+export import :game;
 export import pragma.shared;
 import pragma.wms;
 

@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.bot;
+export module pragma.server:entities.components.bot;
 
-import pragma.server.entities.base;
+import :entities.base;
 
 export {
 	namespace pragma {

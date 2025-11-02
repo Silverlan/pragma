@@ -3,8 +3,8 @@
 
 module;
 
-export module pragma.server.entities;
-export import pragma.server.entities.base;
-export import pragma.server.entities.debug;
-export import pragma.server.entities.lua;
-export import pragma.server.entities.player;
+export module pragma.server:entities;
+export import :entities.base;
+export import :entities.debug;
+export import :entities.lua;
+export import :entities.player;

@@ -3,6 +3,6 @@
 
 module;
 
-export module pragma.server.core;
-export import pragma.server.core.cache_info;
-export import pragma.server.core.resource_watcher;
+export module pragma.server:core;
+export import :core.cache_info;
+export import :core.resource_watcher;

@@ -8,15 +8,16 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.base;
+module pragma.server;
+import :entities.base;
 
-import pragma.server.audio;
-import pragma.server.entities;
-import pragma.server.entities.components;
-import pragma.server.entities.registration;
-import pragma.server.game;
-import pragma.server.model_manager;
-import pragma.server.server_state;
+import :audio;
+import :entities;
+import :entities.components;
+import :entities.registration;
+import :game;
+import :model_manager;
+import :server_state;
 
 #undef GetClassName;
 

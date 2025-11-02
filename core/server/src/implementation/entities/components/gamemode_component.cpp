@@ -6,7 +6,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.gamemode;
+module pragma.server;
+import :entities.components.gamemode;
 
 using namespace pragma;
 

@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.func.button;
+export module pragma.server:entities.components.func.button;
 
-import pragma.server.entities;
+import :entities;
 
 export {
 	namespace pragma {

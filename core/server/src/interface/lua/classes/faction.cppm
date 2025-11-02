@@ -8,9 +8,9 @@ module;
 
 
 
-export module pragma.server.scripting.lua.classes.faction;
+export module pragma.server:scripting.lua.classes.faction;
 
-import pragma.server.ai;
+import :ai;
 export import luabind;
 
 export namespace Lua {

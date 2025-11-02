@@ -8,7 +8,7 @@ module;
 
 
 
-export module pragma.server.ai.memory;
+export module pragma.server:ai.memory;
 
 export import pragma.shared;
 

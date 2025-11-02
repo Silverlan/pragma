@@ -8,12 +8,13 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.player;
+module pragma.server;
+import :entities.components.player;
 
-import pragma.server.entities;
-import pragma.server.entities.components;
-import pragma.server.game;
-import pragma.server.server_state;
+import :entities;
+import :entities.components;
+import :game;
+import :server_state;
 import pragma.shared;
 
 using namespace pragma;

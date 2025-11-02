@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.effects.explosion;
+module pragma.server;
+import :entities.components.effects.explosion;
 
-import pragma.server.server_state;
+import :server_state;
 
 using namespace pragma;
 

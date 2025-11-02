@@ -7,9 +7,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.logic.relay;
+module pragma.server;
+import :entities.components.logic.relay;
 
-import pragma.server.entities.components;
+import :entities.components;
 
 using namespace pragma;
 

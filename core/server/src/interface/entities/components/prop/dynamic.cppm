@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.prop.dynamic;
+export module pragma.server:entities.components.prop.dynamic;
 
-import pragma.server.entities;
+import :entities;
 
 export {
 	namespace pragma {

@@ -6,9 +6,9 @@ module;
 
 
 
-export module pragma.server.entities.components.lua;
+export module pragma.server:entities.components.lua;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SLuaBaseEntityComponent final : public BaseLuaBaseEntityComponent, public SBaseSnapshotComponent {

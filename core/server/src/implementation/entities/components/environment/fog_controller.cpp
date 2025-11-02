@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.fog_controller;
+module pragma.server;
+import :entities.components.fog_controller;
 
-import pragma.server.server_state;
+import :server_state;
 
 using namespace pragma;
 

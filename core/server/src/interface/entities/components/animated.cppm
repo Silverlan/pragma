@@ -8,9 +8,9 @@ module;
 
 
 
-export module pragma.server.entities.components.animated;
+export module pragma.server:entities.components.animated;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SAnimatedComponent final : public BaseAnimatedComponent, public SBaseNetComponent {

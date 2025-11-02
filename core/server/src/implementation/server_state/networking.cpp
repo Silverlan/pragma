@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.server_state;
+module pragma.server;
+import :server_state;
 
-import pragma.server.entities.components;
+import :entities.components;
 import pragma.shared;
 
 #undef GetMessage

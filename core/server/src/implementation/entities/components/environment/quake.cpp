@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.quake;
+module pragma.server;
+import :entities.components.quake;
 
-import pragma.server.server_state;
+import :server_state;
 
 using namespace pragma;
 

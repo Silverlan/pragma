@@ -6,10 +6,11 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.point_at_target;
+module pragma.server;
+import :entities.components.point_at_target;
 
-import pragma.server.entities.base;
-import pragma.server.networking.util;
+import :entities.base;
+import :networking.util;
 
 using namespace pragma;
 

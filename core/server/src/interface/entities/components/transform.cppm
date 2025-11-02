@@ -6,10 +6,9 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-import pragma.server.entities.components.entity;
+export module pragma.server:entities.components.transform;
 
-
-export module pragma.server.entities.components.transform;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER STransformComponent final : public BaseTransformComponent, public SBaseNetComponent {

@@ -6,9 +6,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.time_scale;
+module pragma.server;
+import :entities.components.time_scale;
 
-import pragma.server.entities.base;
+import :entities.base;
 
 using namespace pragma;
 

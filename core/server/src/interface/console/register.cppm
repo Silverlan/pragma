@@ -8,7 +8,7 @@ module;
 
 
 
-export module pragma.server.console.register_commands;
+export module pragma.server:console.register_commands;
 
 export import pragma.shared;
 

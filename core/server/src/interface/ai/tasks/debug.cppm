@@ -6,11 +6,11 @@ module;
 
 
 
-export module pragma.server.ai.tasks.debug;
+export module pragma.server:ai.tasks.debug;
 
 export import pragma.shared;
 
-export import pragma.server.ai.schedule;
+export import :ai.schedule;
 
 export namespace pragma {
 	namespace ai {

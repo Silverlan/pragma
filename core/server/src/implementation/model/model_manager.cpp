@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.model_manager;
+module pragma.server;
+import :model_manager;
 
-import pragma.server.server_state;
+import :server_state;
 
 /*std::shared_ptr<Model> pragma::asset::SModelManager::LoadModel(const std::string &mdlName,bool bReload,bool *outIsNewModel)
 {

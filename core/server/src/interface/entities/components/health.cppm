@@ -7,9 +7,9 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-export module pragma.server.entities.components.health;
+export module pragma.server:entities.components.health;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SHealthComponent final : public BaseHealthComponent, public SBaseNetComponent {

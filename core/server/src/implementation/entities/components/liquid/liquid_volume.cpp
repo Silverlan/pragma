@@ -6,7 +6,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.liquid_volume;
+module pragma.server;
+import :entities.components.liquid_volume;
 
 using namespace pragma;
 

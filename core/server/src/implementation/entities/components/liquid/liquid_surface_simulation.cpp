@@ -6,11 +6,12 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.liquid_surface_simulation;
+module pragma.server;
+import :entities.components.liquid_surface_simulation;
 
-import pragma.server.console.register_commands;
-import pragma.server.console.util;
-import pragma.server.entities;
+import :console.register_commands;
+import :console.util;
+import :entities;
 
 using namespace pragma;
 

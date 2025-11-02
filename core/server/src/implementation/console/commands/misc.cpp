@@ -9,7 +9,7 @@ module;
 
 module pragma.server;
 
-import pragma.server.console.register_commands;
+import :console.register_commands;
 import pragma.shared;
 
 static void CMD_entities_sv(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);

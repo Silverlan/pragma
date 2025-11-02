@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.player;
+module pragma.server;
+import :entities.player;
 
-import pragma.server.entities.components;
+import :entities.components;
 
 void Player::Initialize()
 {

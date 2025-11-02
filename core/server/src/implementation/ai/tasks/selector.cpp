@@ -6,7 +6,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.ai.tasks.selector;
+module pragma.server;
+import :ai.tasks.selector;
 
 import pragma.util;
 

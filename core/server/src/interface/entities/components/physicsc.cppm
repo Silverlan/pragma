@@ -7,9 +7,9 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-export module pragma.server.entities.components.physics;
+export module pragma.server:entities.components.physics;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SPhysicsComponent final : public BasePhysicsComponent, public SBaseNetComponent {

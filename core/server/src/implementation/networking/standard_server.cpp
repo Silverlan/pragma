@@ -5,9 +5,10 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.networking.standard_server;
+module pragma.server;
+import :networking.standard_server;
 
-import pragma.server.server_state;
+import :server_state;
 
 static void pragma_recipient_filter_to_nwm(const pragma::networking::NWMActiveServer &sv, const pragma::networking::ClientRecipientFilter &inRf, nwm::RecipientFilter &outRf)
 {

@@ -8,9 +8,9 @@ module;
 
 
 
-export module pragma.server.entities.components.debug;
+export module pragma.server:entities.components.debug;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SDebugTextComponent final : public BaseDebugTextComponent, public SBaseNetComponent {

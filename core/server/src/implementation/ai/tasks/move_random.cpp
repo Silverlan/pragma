@@ -5,10 +5,11 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.ai.tasks.move_random;
+module pragma.server;
+import :ai.tasks.move_random;
 
-import pragma.server.entities.components;
-import pragma.server.game;
+import :entities.components;
+import :game;
 
 using namespace pragma;
 

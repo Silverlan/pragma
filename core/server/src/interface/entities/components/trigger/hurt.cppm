@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.entities.components.triggers.hurt;
+export module pragma.server:entities.components.triggers.hurt;
 
-import pragma.server.entities;
+import :entities;
 
 export {
 	namespace pragma {

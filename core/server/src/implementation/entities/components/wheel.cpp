@@ -7,9 +7,10 @@ module;
 #include "stdafx_server.h"
 //#include "ldef_wheel.h"
 
-module pragma.server.entities.components.wheel;
+module pragma.server;
+import :entities.components.wheel;
 
-import pragma.server.game;
+import :game;
 
 using namespace pragma;
 

@@ -7,9 +7,9 @@ module;
 #include "pragma/lua/core.hpp"
 
 
-export module pragma.server.entities.components.observer;
+export module pragma.server:entities.components.observer;
 
-import pragma.server.entities.components.entity;
+import :entities.components.entity;
 
 export namespace pragma {
 	class DLLSERVER SObserverComponent final : public BaseObserverComponent, public SBaseNetComponent {

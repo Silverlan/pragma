@@ -5,7 +5,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.networking.local_host;
+module pragma.server;
+import :networking.local_host;
 
 bool pragma::networking::LocalServer::DoStart(Error &outErr, uint16_t port, bool useP2PIfAvailable) { return true; }
 bool pragma::networking::LocalServer::PollEvents(Error &outErr) { return true; }

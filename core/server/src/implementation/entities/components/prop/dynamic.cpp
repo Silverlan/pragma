@@ -6,7 +6,8 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.entities.components.prop.dynamic;
+module pragma.server;
+import :entities.components.prop.dynamic;
 
 using namespace pragma;
 

@@ -5,11 +5,12 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.server_state;
+module pragma.server;
+import :server_state;
 
-import pragma.server.entities;
-import pragma.server.entities.components;
-import pragma.server.model_manager;
+import :entities;
+import :entities.components;
+import :model_manager;
 
 #define RESOURCE_TRANSFER_VERBOSE 0
 

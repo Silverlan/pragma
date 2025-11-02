@@ -8,7 +8,7 @@ module;
 
 
 
-export module pragma.server.scripting.lua.libraries.debug_overlay;
+export module pragma.server:scripting.lua.libraries.debug_overlay;
 
 export import pragma.shared;
 export import luabind;

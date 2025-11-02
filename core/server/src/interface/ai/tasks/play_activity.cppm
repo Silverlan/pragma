@@ -7,9 +7,9 @@ module;
 
 
 
-export module pragma.server.ai.tasks.play_activity;
+export module pragma.server:ai.tasks.play_activity;
 
-import pragma.server.ai.tasks.play_animation;
+import :ai.tasks.play_animation;
 
 export namespace pragma {
 	namespace ai {

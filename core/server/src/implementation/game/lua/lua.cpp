@@ -9,13 +9,14 @@ module;
 
 #include "stdafx_server.h"
 
-module pragma.server.game;
+module pragma.server;
+import :game;
 
-import pragma.server.ai;
-import pragma.server.entities;
-import pragma.server.entities.components;
-import pragma.server.server_state;
-import pragma.server.scripting.lua;
+import :ai;
+import :entities;
+import :entities.components;
+import :server_state;
+import :scripting.lua;
 
 #undef LoadLibrary
 

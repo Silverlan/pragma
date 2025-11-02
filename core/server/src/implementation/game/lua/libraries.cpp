@@ -8,7 +8,6 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-#include "stdafx_server.h"
 
 module pragma.server;
 import :game;

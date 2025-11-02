@@ -5,7 +5,6 @@ module;
 
 #include "pragma/logging.hpp"
 
-#include "stdafx_server.h"
 #include "pragma/serverdefinitions.h"
 
 module pragma.server;

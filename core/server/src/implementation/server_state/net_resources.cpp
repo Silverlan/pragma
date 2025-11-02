@@ -3,7 +3,7 @@
 
 module;
 
-#include "stdafx_server.h"
+#include <cassert>
 
 module pragma.server;
 import :server_state;

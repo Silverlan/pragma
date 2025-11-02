@@ -4,7 +4,6 @@
 module;
 
 
-#include "stdafx_server.h"
 
 module pragma.server;
 import :ai.tasks.debug;

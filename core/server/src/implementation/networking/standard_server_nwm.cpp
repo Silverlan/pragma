@@ -3,7 +3,6 @@
 
 module;
 
-#include "stdafx_server.h"
 #include "pragma/console/helper.hpp"
 
 module pragma.server;

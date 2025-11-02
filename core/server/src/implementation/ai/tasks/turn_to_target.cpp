@@ -3,7 +3,6 @@
 
 module;
 
-#include "stdafx_server.h"
 
 module pragma.server;
 import :ai.tasks.turn_to_target;

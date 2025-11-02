@@ -488,6 +488,12 @@ print_msg("Building third-party libraries...")
 if build_all:
 	execscript(scripts_dir +"/build_third_party_libs.py")
 
+# Add our CMake to PATH
+new_path = str(Path(get_library_root_dir("cmake") +"bin").resolve())
+paths = os.environ.get('PATH', '').split(os.pathsep)
+if new_path not in paths:
+    os.environ['PATH'] = os.pathsep.join([new_path] + paths)
+
 ########## Modules ##########
 print_msg("Downloading modules...")
 os.chdir(root +"/modules")

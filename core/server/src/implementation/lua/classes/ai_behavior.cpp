@@ -6,7 +6,6 @@ module;
 
 #include "pragma/lua/core.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
-#include "stdafx_server.h"
 
 module pragma.server;
 import :scripting.lua.classes.ai_behavior;

@@ -4,7 +4,6 @@
 module;
 #include "pragma/lua/core.hpp"
 
-#include "stdafx_server.h"
 //#include "ldef_wheel.h"
 
 module pragma.server;

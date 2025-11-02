@@ -3,7 +3,6 @@
 
 module;
 
-#include "stdafx_server.h"
 #include "pragma/lua/core.hpp"
 
 module pragma.server;

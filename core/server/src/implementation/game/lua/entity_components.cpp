@@ -6,7 +6,6 @@ module;
 #include "pragma/lua/ostream_operator_alias.hpp"
 
 #include "pragma/lua/core.hpp"
-#include "stdafx_server.h"
 
 
 module pragma.server;

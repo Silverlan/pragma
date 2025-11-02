@@ -3,7 +3,6 @@
 
 module;
 
-#include "stdafx_server.h"
 
 module pragma.server;
 import :networking.iserver_client;

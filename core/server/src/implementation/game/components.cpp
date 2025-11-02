@@ -4,7 +4,6 @@
 module;
 
 
-#include "stdafx_server.h"
 // --template-include-location
 
 module pragma.server;

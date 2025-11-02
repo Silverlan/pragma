@@ -4,7 +4,6 @@
 module;
 #include "pragma/logging.hpp"
 
-#include "stdafx_server.h"
 
 module pragma.server;
 import :server_state;

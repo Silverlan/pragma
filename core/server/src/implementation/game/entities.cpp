@@ -5,8 +5,8 @@ module;
 
 
 #include "pragma/lua/core.hpp"
+#include <cassert>
 
-#include "stdafx_server.h"
 
 module pragma.server;
 import :game;

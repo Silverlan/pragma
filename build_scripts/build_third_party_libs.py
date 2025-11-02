@@ -16,6 +16,23 @@ build_config_tp = "Release"
 mkpath(config.prebuilt_bin_dir)
 os.chdir(config.prebuilt_bin_dir)
 
+########## CMake ##########
+# We need the latest CMake version for C++20 module and C++23 import std support.
+os.chdir(deps_dir)
+cmake_root = os.getcwd() +"/cmake"
+if not Path(cmake_root).is_dir():
+	print_msg("cmake not found. Downloading...")
+	os.chdir(deps_dir)
+	base_url = "https://github.com/Kitware/CMake/releases/download/v4.1.2/"
+	if platform == "win32":
+		http_extract(base_url +"cmake-4.1.2-windows-x86_64.zip",format="zip")
+		os.rename("cmake-4.1.2-windows-x86_64", "cmake")
+	else:
+		http_extract(base_url +"cmake-4.1.2-linux-x86_64.tar.gz",format="tar.gz")
+		os.rename("cmake-4.1.2-linux-x86_64", "cmake")
+copytree(cmake_root +"/bin/", get_library_root_dir("cmake") +"bin/")
+copytree(cmake_root +"/share/", get_library_root_dir("cmake") +"share/")
+
 ########## libdecor ##########
 # We need the latest version of libdecor for Wayland-support with GLFW
 if platform == "linux":

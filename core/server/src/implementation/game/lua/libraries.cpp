@@ -26,13 +26,12 @@ void SGame::RegisterLuaLibraries()
 
 	auto utilMod = luabind::module(GetLuaState(), "util");
 	Lua::util::register_shared(GetLuaState(), utilMod);
-	utilMod[luabind::def("fire_bullets", static_cast<luabind::object (*)(lua_State *, const BulletInfo &, bool)>(Lua::util::Server::fire_bullets)), luabind::def("fire_bullets", static_cast<luabind::object (*)(lua_State *, const BulletInfo &)>(Lua::util::Server::fire_bullets)),
-	  luabind::def("create_giblet", Lua::util::Server::create_giblet), luabind::def("create_explosion", Lua::util::Server::create_explosion), luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::calc_world_direction_from_2d_coordinates)];
+	utilMod[(luabind::def("fire_bullets", static_cast<luabind::object (*)(lua_State *, const BulletInfo &, bool)>(Lua::util::Server::fire_bullets)), luabind::def("fire_bullets", static_cast<luabind::object (*)(lua_State *, const BulletInfo &)>(Lua::util::Server::fire_bullets)),
+	  luabind::def("create_giblet", Lua::util::Server::create_giblet), luabind::def("create_explosion", Lua::util::Server::create_explosion), luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::calc_world_direction_from_2d_coordinates))];
 
-	LFile;
 	pragma::Game::RegisterLuaLibraries();
 	auto modAsset = luabind::module_(GetLuaState(), "asset");
-	modAsset[luabind::def(
+	modAsset[(luabind::def(
 	           "load",
 	           +[](lua_State *l, LFile &f, pragma::asset::Type type) -> Lua::var<bool, luabind::object> {
 		           // See also core/client/src/lua/c_library.cpp
@@ -89,27 +88,27 @@ void SGame::RegisterLuaLibraries()
 			    return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
 		    }
 		    return luabind::object {};
-	    })];
+	    }))];
 
 	Lua::asset::register_library(GetLuaInterface(), true);
 
 	auto resMod = luabind::module(GetLuaState(), "resource");
-	resMod[luabind::def("add_file", static_cast<bool (*)(const std::string &, bool)>(Lua::resource::add_file)), luabind::def("add_file", static_cast<bool (*)(const std::string &)>(Lua::resource::add_file)), luabind::def("add_lua_file", Lua::resource::add_lua_file),
-	  luabind::def("get_list", Lua::resource::get_list)];
+	resMod[(luabind::def("add_file", static_cast<bool (*)(const std::string &, bool)>(Lua::resource::add_file)), luabind::def("add_file", static_cast<bool (*)(const std::string &)>(Lua::resource::add_file)), luabind::def("add_lua_file", Lua::resource::add_lua_file),
+	  luabind::def("get_list", Lua::resource::get_list))];
 
 	auto utilDebug = luabind::module(GetLuaState(), "debug");
-	utilDebug[luabind::def("draw_point", Lua::DebugRenderer::Server::DrawPoint), luabind::def("draw_line", Lua::DebugRenderer::Server::DrawLine), luabind::def("draw_box", &Lua::DebugRenderer::Server::DrawBox),
+	utilDebug[(luabind::def("draw_point", Lua::DebugRenderer::Server::DrawPoint), luabind::def("draw_line", Lua::DebugRenderer::Server::DrawLine), luabind::def("draw_box", &Lua::DebugRenderer::Server::DrawBox),
 	  luabind::def("draw_sphere", static_cast<void (*)(float, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSphere)), luabind::def("draw_sphere", static_cast<void (*)(float, const DebugRenderInfo &, uint32_t)>(Lua::DebugRenderer::Server::DrawSphere)),
 	  luabind::def("draw_cone", &Lua::DebugRenderer::Server::DrawCone), luabind::def("draw_truncated_cone", &Lua::DebugRenderer::Server::DrawTruncatedCone), luabind::def("draw_cylinder", &Lua::DebugRenderer::Server::DrawCylinder),
 	  luabind::def("draw_pose", &Lua::DebugRenderer::Server::DrawAxis), luabind::def("draw_text", static_cast<void (*)(const std::string &, const Vector2 &, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)),
 	  luabind::def("draw_text", static_cast<void (*)(const std::string &, float, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)), luabind::def("draw_path", &Lua::DebugRenderer::Server::DrawPath),
 	  luabind::def("draw_spline", static_cast<void (*)(lua_State *, luabind::table<>, uint32_t, float, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)),
-	  luabind::def("draw_spline", static_cast<void (*)(lua_State *, luabind::table<>, uint32_t, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)), luabind::def("draw_plane", &Lua::DebugRenderer::Server::DrawPlane), luabind::def("draw_mesh", &SGame::DrawMesh)];
+	  luabind::def("draw_spline", static_cast<void (*)(lua_State *, luabind::table<>, uint32_t, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)), luabind::def("draw_plane", &Lua::DebugRenderer::Server::DrawPlane), luabind::def("draw_mesh", &SGame::DrawMesh))];
 
 	Lua::ai::server::register_library(GetLuaInterface());
 
 	auto soundMod = luabind::module(GetLuaState(), "sound");
-	soundMod[luabind::def("create", &Lua::sound::Server::create)];
+	soundMod[(luabind::def("create", &Lua::sound::Server::create))];
 	Lua::sound::register_library(soundMod);
 	Lua::sound::register_enums(GetLuaState());
 
@@ -117,7 +116,7 @@ void SGame::RegisterLuaLibraries()
 	Lua::ALSound::register_class(alSoundClassDef);
 	soundMod[alSoundClassDef];
 
-	utilDebug[luabind::def("behavior_selector_type_to_string", Lua::debug::Server::behavior_selector_type_to_string), luabind::def("behavior_task_decorator_type_to_string", Lua::debug::Server::behavior_task_decorator_type_to_string),
+	utilDebug[(luabind::def("behavior_selector_type_to_string", Lua::debug::Server::behavior_selector_type_to_string), luabind::def("behavior_task_decorator_type_to_string", Lua::debug::Server::behavior_task_decorator_type_to_string),
 	  luabind::def("behavior_task_result_to_string", Lua::debug::Server::behavior_task_result_to_string), luabind::def("behavior_task_type_to_string", Lua::debug::Server::behavior_task_type_to_string), luabind::def("disposition_to_string", Lua::debug::Server::disposition_to_string),
-	  luabind::def("memory_type_to_string", Lua::debug::Server::memory_type_to_string), luabind::def("npc_state_to_string", Lua::debug::Server::npc_state_to_string), luabind::def("task_to_string", Lua::debug::Server::task_to_string)];
+	  luabind::def("memory_type_to_string", Lua::debug::Server::memory_type_to_string), luabind::def("npc_state_to_string", Lua::debug::Server::npc_state_to_string), luabind::def("task_to_string", Lua::debug::Server::task_to_string))];
 }

@@ -38,9 +38,9 @@ namespace Lua {
 void Lua::ai::server::register_library(Lua::Interface &lua)
 {
 	auto modAi = luabind::module_(lua.GetState(), "ai");
-	modAi[luabind::def("create_schedule", create_schedule), luabind::def("register_faction", register_faction), luabind::def("find_faction_by_name", find_faction_by_name), luabind::def("get_factions", get_factions),
+	modAi[(luabind::def("create_schedule", create_schedule), luabind::def("register_faction", register_faction), luabind::def("find_faction_by_name", find_faction_by_name), luabind::def("get_factions", get_factions),
 	  luabind::def("register_task", static_cast<uint32_t (*)(lua_State *, const LuaClassObject &, ::pragma::ai::BehaviorNode::Type, ::pragma::ai::SelectorType)>(register_task)),
-	  luabind::def("register_task", static_cast<uint32_t (*)(lua_State *, const LuaClassObject &, ::pragma::ai::BehaviorNode::Type)>(register_task)), luabind::def("register_task", static_cast<uint32_t (*)(lua_State *, const LuaClassObject &)>(register_task))];
+	  luabind::def("register_task", static_cast<uint32_t (*)(lua_State *, const LuaClassObject &, ::pragma::ai::BehaviorNode::Type)>(register_task)), luabind::def("register_task", static_cast<uint32_t (*)(lua_State *, const LuaClassObject &)>(register_task)))];
 	Lua::ai::register_library(lua);
 
 	auto *l = lua.GetState();

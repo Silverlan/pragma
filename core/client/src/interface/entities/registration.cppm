@@ -74,4 +74,6 @@ export namespace client_entities {
             return static_cast<CBaseEntity *>(game->CreateEntity<T>(idx));
         });
     }
+
+    void register_entities();
 }

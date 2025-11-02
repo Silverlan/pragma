@@ -68,4 +68,6 @@ export namespace server_entities {
     uint32_t register_networked_entity() {
         return ServerEntityRegistry::Instance().RegisterNetworkedEntity(typeid(T));
     }
+    
+    void register_entities();
 }

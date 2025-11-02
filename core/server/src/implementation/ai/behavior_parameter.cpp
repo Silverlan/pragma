@@ -8,7 +8,7 @@ module;
 module pragma.server;
 import :ai.schedule;
 
-import :behavior_parameter;
+import :ai.schedule.behavior_parameter;
 
 using namespace pragma;
 

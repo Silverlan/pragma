@@ -8,7 +8,7 @@ module;
 module pragma.server;
 import :ai.schedule;
 
-import :behavior;
+import :ai.schedule.behavior;
 import :entities.components;
 import :game;
 

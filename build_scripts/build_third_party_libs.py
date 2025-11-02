@@ -157,11 +157,11 @@ if not Path(icu_root).is_dir():
 	print_msg("icu not found. Downloading...")
 	mkpath(icu_root)
 	os.chdir(icu_root)
-	base_url = "https://github.com/unicode-org/icu/releases/download/release-77-1/"
+	base_url = "https://github.com/unicode-org/icu/releases/download/release-78.1/"
 	if platform == "win32":
-		http_extract(base_url +"icu4c-77_1-Win64-MSVC2022.zip")
+		http_extract(base_url +"icu4c-78.1-Win64-MSVC2022.zip")
 	else:
-		http_extract(base_url +"icu4c-77_1-Ubuntu22.04-x64.tgz",format="tar.gz")
+		http_extract(base_url +"icu4c-78.1-Ubuntu22.04-x64.tgz",format="tar.gz")
 
 if platform == "win32":
 	copy_prebuilt_binaries(icu_root +"/lib64/", "icu")

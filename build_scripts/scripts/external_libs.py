@@ -15,7 +15,7 @@ get_submodule("luasystem","https://github.com/Silverlan/luasystem.git","26a3388a
 get_submodule("materialsystem","https://github.com/Silverlan/materialsystem.git","49bba10d5f97f872ada03222d452a2c4e639b419", "feat/cxx_module")
 get_submodule("mathutil","https://github.com/Silverlan/mathutil.git","244b4bb2c4516d573705042c04c7af9f64f0663c", "feat/cxx_module")
 get_submodule("networkmanager","https://github.com/Silverlan/networkmanager.git","492eb00e2912c2e8a83761dc600ce593382ed003", "feat/cxx_module")
-get_submodule("oskit","https://github.com/Silverlan/oskit.git","a63447b170bfa3474ed6121e6f8bc5a33a7abbdd", "feat/cxx_module")
+get_submodule("oskit","https://github.com/Silverlan/oskit.git","574a522c0968d3dff5fdd70b64a0f2288aa42cbc", "feat/cxx_module")
 get_submodule("panima","https://github.com/Silverlan/panima.git","9c952a8c0b847673648dc683781804f98eb7715d", "feat/cxx_module")
 get_submodule("prosper","https://github.com/Silverlan/prosper.git","62ebb07143bdee5f689096db5d1e55caf0ff7672", "feat/cxx_module")
 get_submodule("sharedutils","https://github.com/Silverlan/sharedutils.git","01a57de731dde6d7f256bf0b36c12319c5b63d28", "feat/cxx_module")
@@ -37,7 +37,7 @@ get_submodule("util_zip","https://github.com/Silverlan/util_zip.git","b0b14206da
 get_submodule("util_shadergraph","https://github.com/Silverlan/util_shadergraph.git","612d32255150568b5fa25e96c3207ad2890251d4")
 get_submodule("vfilesystem","https://github.com/Silverlan/vfilesystem.git","9bc9b86ea330b1e4bdaf112a3452fb9e82a98f35", "feat/cxx_module")
 get_submodule("wgui","https://github.com/Silverlan/wgui.git","efdb2ad79f96c6d796f03668b74d0d925ca8ecf0", "feat/cxx_modules2")
-get_submodule("util_unicode","https://github.com/Silverlan/util_unicode.git","68d0107195067c7f76d3a9a3839b0c213a9b0e29", "feat/cxx_module")
+get_submodule("util_unicode","https://github.com/Silverlan/util_unicode.git","8fc1459fc4a562579725aa45793164520c4f6e66", "feat/cxx_module")
 get_submodule("cppbezierfit","https://github.com/Silverlan/cppbezierfit.git","6c9f1a0111380a02ec08994653e1955d1122693a", "feat/cxx_module")
 
 os.chdir(curDir)

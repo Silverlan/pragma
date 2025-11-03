@@ -12,8 +12,8 @@ import :entities.components.base_sound_emitter;
 
 using namespace pragma;
 
-ComponentEventId BaseSoundEmitterComponent::EVENT_ON_SOUND_CREATED = pragma::INVALID_COMPONENT_ID;
-void BaseSoundEmitterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_SOUND_CREATED = registerEvent("ON_SOUND_CREATED", ComponentEventInfo::Type::Broadcast); }
+ComponentEventId baseSoundEmitterComponent::EVENT_ON_SOUND_CREATED = pragma::INVALID_COMPONENT_ID;
+void BaseSoundEmitterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseSoundEmitterComponent::EVENT_ON_SOUND_CREATED = registerEvent("ON_SOUND_CREATED", ComponentEventInfo::Type::Broadcast); }
 BaseSoundEmitterComponent::BaseSoundEmitterComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 BaseSoundEmitterComponent::~BaseSoundEmitterComponent()
 {
@@ -82,7 +82,7 @@ void BaseSoundEmitterComponent::InitializeSound(const std::shared_ptr<ALSound> &
 	SetTickPolicy(TickPolicy::Always);
 
 	CEOnSoundCreated evData {ptrSnd};
-	BroadcastEvent(EVENT_ON_SOUND_CREATED, evData);
+	BroadcastEvent(baseSoundEmitterComponent::EVENT_ON_SOUND_CREATED, evData);
 }
 
 void BaseSoundEmitterComponent::PrecacheSounds() {}

@@ -18,9 +18,9 @@ BaseBuoyancyComponent::BaseBuoyancyComponent(pragma::ecs::BaseEntity &ent) : Bas
 void BaseBuoyancyComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { SimulateBuoyancy(); });
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { static_cast<CEPostPhysicsSimulate &>(evData.get()).keepAwake = true; });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { SimulateBuoyancy(); });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { static_cast<CEPostPhysicsSimulate &>(evData.get()).keepAwake = true; });
 
 	auto &ent = GetEntity();
 	auto touchC = ent.AddComponent("touch");
@@ -60,7 +60,7 @@ util::EventReply BaseBuoyancyComponent::HandleEvent(ComponentEventId eventId, Co
 {
 	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == BaseTouchComponent::EVENT_CAN_TRIGGER) {
+	if(eventId == baseTouchComponent::EVENT_CAN_TRIGGER) {
 		auto &triggerData = static_cast<CECanTriggerData &>(evData);
 		if(triggerData.entity != nullptr) {
 			auto pPhysComponent = triggerData.entity->GetPhysicsComponent();

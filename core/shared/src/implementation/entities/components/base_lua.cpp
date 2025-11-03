@@ -776,7 +776,7 @@ void BaseLuaBaseEntityComponent::InitializeMembers(const std::vector<BaseLuaBase
 	Lua::Pop(l, 1); /* 0 */
 
 	if((totalMemberFlags & MemberFlags::KeyValueBit) != MemberFlags::None) {
-		BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](const std::reference_wrapper<pragma::ComponentEvent> &evData) -> util::EventReply {
+		BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](const std::reference_wrapper<pragma::ComponentEvent> &evData) -> util::EventReply {
 			auto &kvData = static_cast<pragma::CEKeyValueData &>(evData.get());
 			auto it = m_memberNameToIndex.find(kvData.key);
 			if(it == m_memberNameToIndex.end())
@@ -787,7 +787,7 @@ void BaseLuaBaseEntityComponent::InitializeMembers(const std::vector<BaseLuaBase
 		});
 	}
 	if((totalMemberFlags & MemberFlags::InputBit) != MemberFlags::None) {
-		BindEvent(pragma::BaseIOComponent::EVENT_HANDLE_INPUT, [this](const std::reference_wrapper<pragma::ComponentEvent> &evData) -> util::EventReply {
+		BindEvent(pragma::baseIOComponent::EVENT_HANDLE_INPUT, [this](const std::reference_wrapper<pragma::ComponentEvent> &evData) -> util::EventReply {
 			auto &ioData = static_cast<pragma::CEInputData &>(evData.get());
 			if(strncmp(ioData.input.data(), "set", 3u) != 0)
 				return util::EventReply::Unhandled;
@@ -940,7 +940,7 @@ util::EventReply BaseLuaBaseEntityComponent::HandleEvent(ComponentEventId eventI
 {
 	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == pragma::BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED) {
+	if(eventId == pragma::baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED) {
 		auto &componentAddedData = static_cast<pragma::CEOnEntityComponentAdded &>(evData);
 		auto it = m_initComponentCallbacks.find(componentAddedData.component.GetComponentId());
 		if(it != m_initComponentCallbacks.end()) {

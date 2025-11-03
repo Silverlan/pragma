@@ -13,10 +13,13 @@ export import :entities.components.base_wheel;
 
 export {
 	namespace pragma {
-		class DLLNETWORK BaseVehicleComponent : public BaseEntityComponent {
+				namespace baseVehicleComponent {
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DRIVER_ENTERED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DRIVER_EXITED;
+		}
+class DLLNETWORK BaseVehicleComponent : public BaseEntityComponent {
 		public:
-			static ComponentEventId EVENT_ON_DRIVER_ENTERED;
-			static ComponentEventId EVENT_ON_DRIVER_EXITED;
+
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			enum class StateFlags : uint32_t { None = 0u, HasDriver = 1u, SteeringWheelInitialized = HasDriver << 1u };
 

@@ -11,15 +11,15 @@ import :entities.components.base_attachment;
 
 using namespace pragma;
 
-ComponentEventId BaseAttachmentComponent::EVENT_ON_ATTACHMENT_UPDATE = INVALID_COMPONENT_ID;
-void BaseAttachmentComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_ATTACHMENT_UPDATE = registerEvent("ON_ATTACHMENT_UPDATE", ComponentEventInfo::Type::Explicit); }
+ComponentEventId baseAttachmentComponent::EVENT_ON_ATTACHMENT_UPDATE = INVALID_COMPONENT_ID;
+void BaseAttachmentComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseAttachmentComponent::EVENT_ON_ATTACHMENT_UPDATE = registerEvent("ON_ATTACHMENT_UPDATE", ComponentEventInfo::Type::Explicit); }
 BaseAttachmentComponent::BaseAttachmentComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseAttachmentComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
 	GetEntity().AddComponent("child");
-	BindEvent(BaseAnimatedComponent::EVENT_SHOULD_UPDATE_BONES, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseAnimatedComponent::EVENT_SHOULD_UPDATE_BONES, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		if(m_attachment != nullptr && (m_attachment->flags & pragma::FAttachmentMode::BoneMerge) != pragma::FAttachmentMode::None) {
 			static_cast<CEShouldUpdateBones &>(evData.get()).shouldUpdate = true;
 			return util::EventReply::Handled;
@@ -29,22 +29,22 @@ void BaseAttachmentComponent::Initialize()
 }
 util::EventReply BaseAttachmentComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(eventId == BaseModelComponent::EVENT_ON_MODEL_CHANGED)
+	if(eventId == baseModelComponent::EVENT_ON_MODEL_CHANGED)
 		UpdateAttachmentData(true);
-	else if(eventId == BaseChildComponent::EVENT_ON_PARENT_CHANGED) {
+	else if(eventId == baseChildComponent::EVENT_ON_PARENT_CHANGED) {
 		if(m_parentModelChanged.IsValid())
 			m_parentModelChanged.Remove();
 		auto *childC = GetEntity().GetChildComponent();
 		auto *parent = childC ? childC->GetParentEntity() : nullptr;
 		auto *mdlC = parent ? parent->GetModelComponent() : nullptr;
 		if(mdlC) {
-			m_parentModelChanged = mdlC->AddEventCallback(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			m_parentModelChanged = mdlC->AddEventCallback(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 				UpdateAttachmentData(true);
 				return util::EventReply::Unhandled;
 			});
 		}
 	}
-	else if(eventId == pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE) {
+	else if(eventId == pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE) {
 		auto &kvData = static_cast<CEKeyValueData &>(evData);
 		if(ustring::compare<std::string>(kvData.key, "parent", false) || ustring::compare<std::string>(kvData.key, "parentname", false))
 			m_kvParent = kvData.value;
@@ -196,7 +196,7 @@ AttachmentData *BaseAttachmentComponent::SetupAttachment(pragma::ecs::BaseEntity
 					m_poseChangeCallback.Remove();
 			}
 			else {
-				m_poseChangeCallback = pTrComponent->AddEventCallback(pragma::BaseTransformComponent::EVENT_ON_POSE_CHANGED, [this, pTrComponent](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+				m_poseChangeCallback = pTrComponent->AddEventCallback(pragma::baseTransformComponent::EVENT_ON_POSE_CHANGED, [this, pTrComponent](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 					auto changeFlags = static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags;
 					if(umath::is_flag_set(changeFlags, TransformChangeFlags::PositionChanged) && umath::is_flag_set(m_attachment->flags, pragma::FAttachmentMode::ForceTranslationInPlace) == false) {
 						if(!umath::is_flag_set(m_stateFlags, StateFlags::UpdatingPosition)) {
@@ -517,5 +517,5 @@ void BaseAttachmentComponent::UpdateAttachmentOffset(bool invokeUpdateEvents)
 		}
 	}
 	if(invokeUpdateEvents)
-		InvokeEventCallbacks(EVENT_ON_ATTACHMENT_UPDATE);
+		InvokeEventCallbacks(baseAttachmentComponent::EVENT_ON_ATTACHMENT_UPDATE);
 }

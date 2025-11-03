@@ -12,9 +12,12 @@ export module pragma.shared:entities.components.base_radius;
 export import :entities.components.base;
 
 export namespace pragma {
-	class DLLNETWORK BaseRadiusComponent : public BaseEntityComponent {
+		namespace baseRadiusComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_RADIUS_CHANGED;
+	}
+class DLLNETWORK BaseRadiusComponent : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_ON_RADIUS_CHANGED;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;

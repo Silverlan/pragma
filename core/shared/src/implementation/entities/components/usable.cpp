@@ -12,12 +12,12 @@ import :entities.components.usable;
 
 using namespace pragma;
 
-pragma::ComponentEventId UsableComponent::EVENT_ON_USE = pragma::INVALID_COMPONENT_ID;
-pragma::ComponentEventId UsableComponent::EVENT_CAN_USE = pragma::INVALID_COMPONENT_ID;
+pragma::ComponentEventId usableComponent::EVENT_ON_USE = pragma::INVALID_COMPONENT_ID;
+pragma::ComponentEventId usableComponent::EVENT_CAN_USE = pragma::INVALID_COMPONENT_ID;
 void UsableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_USE = registerEvent("ON_USE", ComponentEventInfo::Type::Broadcast);
-	EVENT_CAN_USE = registerEvent("CAN_USE", ComponentEventInfo::Type::Broadcast);
+	usableComponent::EVENT_ON_USE = registerEvent("ON_USE", ComponentEventInfo::Type::Broadcast);
+	usableComponent::EVENT_CAN_USE = registerEvent("CAN_USE", ComponentEventInfo::Type::Broadcast);
 }
 UsableComponent::UsableComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void UsableComponent::Initialize()
@@ -30,13 +30,13 @@ void UsableComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle:
 bool UsableComponent::CanUse(pragma::ecs::BaseEntity *ent) const
 {
 	pragma::CECanUseData evCanUse {ent};
-	BroadcastEvent(EVENT_CAN_USE, evCanUse);
+	BroadcastEvent(usableComponent::EVENT_CAN_USE, evCanUse);
 	return evCanUse.canUse;
 }
 void UsableComponent::OnUse(pragma::ecs::BaseEntity *ent)
 {
 	pragma::CEOnUseData evData {ent};
-	BroadcastEvent(EVENT_ON_USE, evData);
+	BroadcastEvent(usableComponent::EVENT_ON_USE, evData);
 }
 
 ////////

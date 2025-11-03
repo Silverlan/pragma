@@ -25,7 +25,7 @@ void SLiquidComponent::Initialize()
 {
 	BaseFuncLiquidComponent::Initialize();
 
-	BindEventUnhandled(SModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(sModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		// TODO: Move this to shared
 		auto &ent = GetEntity();
 		if(ent.IsSpawned() == false || m_cbGameInitialized.IsValid() == true)

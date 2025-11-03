@@ -12,10 +12,13 @@ export module pragma.shared:entities.components.base_flammable;
 export import :entities.components.base;
 
 export namespace pragma {
-	class DLLNETWORK BaseFlammableComponent : public BaseEntityComponent {
+		namespace baseFlammableComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_IGNITED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_EXTINGUISHED;
+	}
+class DLLNETWORK BaseFlammableComponent : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_ON_IGNITED;
-		static ComponentEventId EVENT_ON_EXTINGUISHED;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		virtual ~BaseFlammableComponent() override;
 		virtual void Initialize() override;

@@ -16,10 +16,12 @@ export {
 	class ModelMesh;
 	namespace pragma {
 		class ModelSubMesh;
+		namespace baseSurfaceComponent {
+			STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_ON_SURFACE_PLANE_CHANGED;
+			STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_ON_SURFACE_MESH_CHANGED;
+		}
 		class DLLNETWORK BaseSurfaceComponent : public BaseEntityComponent {
 		public:
-			static pragma::ComponentEventId EVENT_ON_SURFACE_PLANE_CHANGED;
-			static pragma::ComponentEventId EVENT_ON_SURFACE_MESH_CHANGED;
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 			virtual void Initialize() override;

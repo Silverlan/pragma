@@ -12,16 +12,16 @@ import :entities.components.base_model;
 
 using namespace pragma;
 
-ComponentEventId BaseModelComponent::EVENT_ON_MODEL_CHANGED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseModelComponent::EVENT_ON_MODEL_MATERIALS_LOADED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseModelComponent::EVENT_ON_SKIN_CHANGED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseModelComponent::EVENT_ON_BODY_GROUP_CHANGED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseModelComponent::EVENT_ON_MODEL_CHANGED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseModelComponent::EVENT_ON_MODEL_MATERIALS_LOADED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseModelComponent::EVENT_ON_SKIN_CHANGED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseModelComponent::EVENT_ON_BODY_GROUP_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseModelComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_MODEL_CHANGED = registerEvent("ON_MODEL_CHANGED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_MODEL_MATERIALS_LOADED = registerEvent("ON_MODEL_MATERIALS_LOADED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_SKIN_CHANGED = registerEvent("ON_SKIN_CHANGED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_BODY_GROUP_CHANGED = registerEvent("ON_BODY_GROUP_CHANGED", ComponentEventInfo::Type::Broadcast);
+	baseModelComponent::EVENT_ON_MODEL_CHANGED = registerEvent("ON_MODEL_CHANGED", ComponentEventInfo::Type::Broadcast);
+	baseModelComponent::EVENT_ON_MODEL_MATERIALS_LOADED = registerEvent("ON_MODEL_MATERIALS_LOADED", ComponentEventInfo::Type::Broadcast);
+	baseModelComponent::EVENT_ON_SKIN_CHANGED = registerEvent("ON_SKIN_CHANGED", ComponentEventInfo::Type::Broadcast);
+	baseModelComponent::EVENT_ON_BODY_GROUP_CHANGED = registerEvent("ON_BODY_GROUP_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
 void BaseModelComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
@@ -56,7 +56,7 @@ void BaseModelComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	m_netEvSetBodyGroup = SetupNetEvent("set_body_group");
 	m_netEvMaxDrawDist = SetupNetEvent("set_max_draw_distance");
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "model", false)) {
 			m_kvModel = kvData.value;
@@ -231,7 +231,7 @@ bool BaseModelComponent::SetBodyGroup(UInt32 groupId, UInt32 id)
 	m_bodyGroups[groupId] = id;
 
 	CEOnBodyGroupChanged evData {groupId, id};
-	BroadcastEvent(EVENT_ON_BODY_GROUP_CHANGED, evData);
+	BroadcastEvent(baseModelComponent::EVENT_ON_BODY_GROUP_CHANGED, evData);
 	return true;
 }
 void BaseModelComponent::SetBodyGroup(const std::string &name, UInt32 id)
@@ -289,7 +289,7 @@ void BaseModelComponent::SetModel(const std::string &mdl)
 void BaseModelComponent::OnModelMaterialsLoaded()
 {
 	m_bMaterialsLoaded = true;
-	BroadcastEvent(EVENT_ON_MODEL_MATERIALS_LOADED);
+	BroadcastEvent(baseModelComponent::EVENT_ON_MODEL_MATERIALS_LOADED);
 }
 const std::shared_ptr<pragma::Model> &BaseModelComponent::GetModel() const { return m_model; }
 unsigned int BaseModelComponent::GetSkin() const { return *m_skin; }
@@ -304,7 +304,7 @@ void BaseModelComponent::SetSkin(unsigned int skin)
 		model->PrecacheTextureGroup(skin);
 
 	CEOnSkinChanged evData {skin};
-	BroadcastEvent(EVENT_ON_SKIN_CHANGED, evData);
+	BroadcastEvent(baseModelComponent::EVENT_ON_SKIN_CHANGED, evData);
 }
 
 void BaseModelComponent::SetModel(const std::shared_ptr<pragma::Model> &mdl)
@@ -365,7 +365,7 @@ void BaseModelComponent::SetModel(const std::shared_ptr<pragma::Model> &mdl)
 void BaseModelComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &model)
 {
 	CEOnModelChanged evData {model};
-	BroadcastEvent(EVENT_ON_MODEL_CHANGED, evData);
+	BroadcastEvent(baseModelComponent::EVENT_ON_MODEL_CHANGED, evData);
 }
 
 const ComponentMemberInfo *BaseModelComponent::GetMemberInfo(ComponentMemberIndex idx) const

@@ -12,8 +12,8 @@ import :entities.components.damageable;
 
 using namespace pragma;
 
-ComponentEventId DamageableComponent::EVENT_ON_TAKE_DAMAGE = pragma::INVALID_COMPONENT_ID;
-void DamageableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_TAKE_DAMAGE = registerEvent("ON_TAKE_DAMAGE", ComponentEventInfo::Type::Broadcast); }
+ComponentEventId damageableComponent::EVENT_ON_TAKE_DAMAGE = pragma::INVALID_COMPONENT_ID;
+void DamageableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { damageableComponent::EVENT_ON_TAKE_DAMAGE = registerEvent("ON_TAKE_DAMAGE", ComponentEventInfo::Type::Broadcast); }
 DamageableComponent::DamageableComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void DamageableComponent::Initialize()
 {
@@ -35,7 +35,7 @@ void DamageableComponent::TakeDamage(DamageInfo &info)
 	OnTakeDamage(info);
 
 	CEOnTakeDamage takeDmgInfo {info};
-	BroadcastEvent(EVENT_ON_TAKE_DAMAGE, takeDmgInfo);
+	BroadcastEvent(damageableComponent::EVENT_ON_TAKE_DAMAGE, takeDmgInfo);
 }
 
 //////////////

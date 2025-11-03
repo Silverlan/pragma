@@ -28,7 +28,18 @@ export {
 			std::vector<AnimationChannelCacheData> channelCache;
 			bool isChannelCacheDirty = false;
 		};
-		class DLLNETWORK PanimaComponent final : public BaseEntityComponent {
+				namespace panimaComponent {
+			STATIC_DLL_COMPAT ComponentEventId EVENT_HANDLE_ANIMATION_EVENT;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAY_ANIMATION;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ANIMATION_COMPLETE;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ANIMATION_START;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_MAINTAIN_ANIMATIONS;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ANIMATIONS_UPDATED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_PLAY_ANIMATION;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_TRANSLATE_ANIMATION;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER;
+		}
+class DLLNETWORK PanimaComponent final : public BaseEntityComponent {
 		public:
 			enum class PropertyFlags : uint8_t {
 				None = 0,
@@ -36,15 +47,6 @@ export {
 				AlwaysDirty = Disabled << 1u,
 			};
 
-			static ComponentEventId EVENT_HANDLE_ANIMATION_EVENT;
-			static ComponentEventId EVENT_ON_PLAY_ANIMATION;
-			static ComponentEventId EVENT_ON_ANIMATION_COMPLETE;
-			static ComponentEventId EVENT_ON_ANIMATION_START;
-			static ComponentEventId EVENT_MAINTAIN_ANIMATIONS;
-			static ComponentEventId EVENT_ON_ANIMATIONS_UPDATED;
-			static ComponentEventId EVENT_PLAY_ANIMATION;
-			static ComponentEventId EVENT_TRANSLATE_ANIMATION;
-			static ComponentEventId EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER;
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			static std::optional<std::pair<std::string, util::Path>> ParseComponentChannelPath(const panima::ChannelPath &path);
 

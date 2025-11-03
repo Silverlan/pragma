@@ -244,7 +244,7 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defActionC.def("SetActionInput", static_cast<void (pragma::ActionInputControllerComponent ::*)(pragma::Action, bool, bool)>(&pragma::ActionInputControllerComponent::SetActionInput));
 	defActionC.def("SetActionInput", static_cast<void (pragma::ActionInputControllerComponent ::*)(pragma::Action, bool, float)>(&pragma::ActionInputControllerComponent::SetActionInput));
 	defActionC.def("SetActionInput", static_cast<void (pragma::ActionInputControllerComponent ::*)(pragma::Action, bool, float)>(&pragma::ActionInputControllerComponent::SetActionInput), luabind::default_parameter_policy<4, 1.f> {});
-	defActionC.add_static_constant("EVENT_HANDLE_ACTION_INPUT", pragma::ActionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT);
+	defActionC.add_static_constant("EVENT_HANDLE_ACTION_INPUT", pragma::actionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT);
 	entsMod[defActionC];
 
 	auto defInputMovementC = pragma::lua::create_entity_component_class<pragma::InputMovementControllerComponent, pragma::BaseEntityComponent>("InputMovementControllerComponent");
@@ -272,14 +272,14 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defBoneMerge = pragma::lua::create_entity_component_class<pragma::BoneMergeComponent, pragma::BaseEntityComponent>("BoneMergeComponent");
 	defBoneMerge.scope[luabind::def("can_merge", &pragma::BoneMergeComponent::can_merge)];
 	defBoneMerge.scope[luabind::def("can_merge", &pragma::BoneMergeComponent::can_merge, luabind::default_parameter_policy<3, false> {})];
-	defBoneMerge.add_static_constant("EVENT_ON_TARGET_CHANGED", pragma::BoneMergeComponent::EVENT_ON_TARGET_CHANGED);
+	defBoneMerge.add_static_constant("EVENT_ON_TARGET_CHANGED", pragma::boneMergeComponent::EVENT_ON_TARGET_CHANGED);
 	defBoneMerge.def("SetTarget", &pragma::BoneMergeComponent::SetTarget);
 	defBoneMerge.def("GetTarget", &pragma::BoneMergeComponent::GetTarget);
 	entsMod[defBoneMerge];
 
 	auto defFlexMerge = pragma::lua::create_entity_component_class<pragma::FlexMergeComponent, pragma::BaseEntityComponent>("FlexMergeComponent");
 	defFlexMerge.scope[luabind::def("can_merge", &pragma::FlexMergeComponent::can_merge)];
-	defFlexMerge.add_static_constant("EVENT_ON_TARGET_CHANGED", pragma::FlexMergeComponent::EVENT_ON_TARGET_CHANGED);
+	defFlexMerge.add_static_constant("EVENT_ON_TARGET_CHANGED", pragma::flexMergeComponent::EVENT_ON_TARGET_CHANGED);
 	defFlexMerge.def("SetTarget", &pragma::FlexMergeComponent::SetTarget);
 	defFlexMerge.def("GetTarget", &pragma::FlexMergeComponent::GetTarget);
 	entsMod[defFlexMerge];
@@ -389,7 +389,7 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defMovement.def("GetDirection", &pragma::MovementComponent::GetDirection);
 	defMovement.def("SetDirectionMagnitude", &pragma::MovementComponent::SetDirectionMagnitude);
 	defMovement.def("GetDirectionMagnitude", &pragma::MovementComponent::GetDirectionMagnitude);
-	defMovement.add_static_constant("EVENT_ON_UPDATE_MOVEMENT", pragma::MovementComponent::EVENT_ON_UPDATE_MOVEMENT);
+	defMovement.add_static_constant("EVENT_ON_UPDATE_MOVEMENT", pragma::movementComponent::EVENT_ON_UPDATE_MOVEMENT);
 	defMovement.add_static_constant("MOVE_DIRECTION_FORWARD", umath::to_integral(pragma::MovementComponent::MoveDirection::Forward));
 	defMovement.add_static_constant("MOVE_DIRECTION_RIGHT", umath::to_integral(pragma::MovementComponent::MoveDirection::Right));
 	defMovement.add_static_constant("MOVE_DIRECTION_BACKWARD", umath::to_integral(pragma::MovementComponent::MoveDirection::Backward));
@@ -555,15 +555,15 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  });
 		  return r;
 	  });
-	defAnimated2.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT", pragma::PanimaComponent::EVENT_HANDLE_ANIMATION_EVENT);
-	defAnimated2.add_static_constant("EVENT_ON_PLAY_ANIMATION", pragma::PanimaComponent::EVENT_ON_PLAY_ANIMATION);
-	defAnimated2.add_static_constant("EVENT_ON_ANIMATION_COMPLETE", pragma::PanimaComponent::EVENT_ON_ANIMATION_COMPLETE);
-	defAnimated2.add_static_constant("EVENT_ON_ANIMATION_START", pragma::PanimaComponent::EVENT_ON_ANIMATION_START);
-	defAnimated2.add_static_constant("EVENT_MAINTAIN_ANIMATIONS", pragma::PanimaComponent::EVENT_MAINTAIN_ANIMATIONS);
-	defAnimated2.add_static_constant("EVENT_ON_ANIMATIONS_UPDATED", pragma::PanimaComponent::EVENT_ON_ANIMATIONS_UPDATED);
-	defAnimated2.add_static_constant("EVENT_PLAY_ANIMATION", pragma::PanimaComponent::EVENT_PLAY_ANIMATION);
-	defAnimated2.add_static_constant("EVENT_TRANSLATE_ANIMATION", pragma::PanimaComponent::EVENT_TRANSLATE_ANIMATION);
-	defAnimated2.add_static_constant("EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER", pragma::PanimaComponent::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER);
+	defAnimated2.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT", pragma::panimaComponent::EVENT_HANDLE_ANIMATION_EVENT);
+	defAnimated2.add_static_constant("EVENT_ON_PLAY_ANIMATION", pragma::panimaComponent::EVENT_ON_PLAY_ANIMATION);
+	defAnimated2.add_static_constant("EVENT_ON_ANIMATION_COMPLETE", pragma::panimaComponent::EVENT_ON_ANIMATION_COMPLETE);
+	defAnimated2.add_static_constant("EVENT_ON_ANIMATION_START", pragma::panimaComponent::EVENT_ON_ANIMATION_START);
+	defAnimated2.add_static_constant("EVENT_MAINTAIN_ANIMATIONS", pragma::panimaComponent::EVENT_MAINTAIN_ANIMATIONS);
+	defAnimated2.add_static_constant("EVENT_ON_ANIMATIONS_UPDATED", pragma::panimaComponent::EVENT_ON_ANIMATIONS_UPDATED);
+	defAnimated2.add_static_constant("EVENT_PLAY_ANIMATION", pragma::panimaComponent::EVENT_PLAY_ANIMATION);
+	defAnimated2.add_static_constant("EVENT_TRANSLATE_ANIMATION", pragma::panimaComponent::EVENT_TRANSLATE_ANIMATION);
+	defAnimated2.add_static_constant("EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER", pragma::panimaComponent::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER);
 	entsMod[defAnimated2];
 
 	auto defDriverC = pragma::lua::create_entity_component_class<pragma::AnimationDriverComponent, pragma::BaseEntityComponent>("AnimationDriverComponent");
@@ -594,7 +594,7 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defIK];
 
 	auto defOrigin = pragma::lua::create_entity_component_class<pragma::OriginComponent, pragma::BaseEntityComponent>("OriginComponent");
-	defOrigin.add_static_constant("EVENT_ON_ORIGIN_CHANGED", pragma::OriginComponent::EVENT_ON_ORIGIN_CHANGED);
+	defOrigin.add_static_constant("EVENT_ON_ORIGIN_CHANGED", pragma::originComponent::EVENT_ON_ORIGIN_CHANGED);
 	defOrigin.def("GetOriginPose", &pragma::OriginComponent::GetOriginPose);
 	defOrigin.def("GetOriginPos", &pragma::OriginComponent::GetOriginPos);
 	defOrigin.def("GetOriginRot", &pragma::OriginComponent::GetOriginRot);
@@ -612,8 +612,8 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defPart.def_readonly("drivenObjectPropertyIndex", &pragma::ConstraintComponent::ConstraintParticipants::drivenObjectPropIdx);
 	defConstraint.scope[defPart];
 
-	defConstraint.add_static_constant("EVENT_ON_ORDER_INDEX_CHANGED", pragma::ConstraintComponent::EVENT_ON_ORDER_INDEX_CHANGED);
-	defConstraint.add_static_constant("EVENT_APPLY_CONSTRAINT", pragma::ConstraintComponent::EVENT_APPLY_CONSTRAINT);
+	defConstraint.add_static_constant("EVENT_ON_ORDER_INDEX_CHANGED", pragma::constraintComponent::EVENT_ON_ORDER_INDEX_CHANGED);
+	defConstraint.add_static_constant("EVENT_APPLY_CONSTRAINT", pragma::constraintComponent::EVENT_APPLY_CONSTRAINT);
 	defConstraint.def("SetInfluence", &pragma::ConstraintComponent::SetInfluence);
 	defConstraint.def("GetInfluence", &pragma::ConstraintComponent::GetInfluence);
 	defConstraint.def("SetDriver", &pragma::ConstraintComponent::SetDriver);
@@ -633,7 +633,7 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defConstraintManager.add_static_constant("COORDINATE_SPACE_WORLD", umath::to_integral(pragma::ConstraintManagerComponent::CoordinateSpace::World));
 	defConstraintManager.add_static_constant("COORDINATE_SPACE_LOCAL", umath::to_integral(pragma::ConstraintManagerComponent::CoordinateSpace::Local));
 	defConstraintManager.add_static_constant("COORDINATE_SPACE_OBJECT", umath::to_integral(pragma::ConstraintManagerComponent::CoordinateSpace::Object));
-	defConstraintManager.add_static_constant("EVENT_APPLY_CONSTRAINT", pragma::ConstraintManagerComponent::EVENT_APPLY_CONSTRAINT);
+	defConstraintManager.add_static_constant("EVENT_APPLY_CONSTRAINT", pragma::constraintManagerComponent::EVENT_APPLY_CONSTRAINT);
 	entsMod[defConstraintManager];
 
 	auto defConstraintSpace = pragma::lua::create_entity_component_class<pragma::ConstraintSpaceComponent, pragma::BaseEntityComponent>("ConstraintSpaceComponent");
@@ -733,12 +733,12 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defLifelineLink];
 
 	auto defLogic = pragma::lua::create_entity_component_class<pragma::LogicComponent, pragma::BaseEntityComponent>("LogicComponent");
-	defLogic.add_static_constant("EVENT_ON_TICK", pragma::LogicComponent::EVENT_ON_TICK);
+	defLogic.add_static_constant("EVENT_ON_TICK", pragma::logicComponent::EVENT_ON_TICK);
 	entsMod[defLogic];
 
 	auto defUsable = pragma::lua::create_entity_component_class<pragma::UsableComponent, pragma::BaseEntityComponent>("UsableComponent");
-	defUsable.add_static_constant("EVENT_ON_USE", pragma::UsableComponent::EVENT_ON_USE);
-	defUsable.add_static_constant("EVENT_CAN_USE", pragma::UsableComponent::EVENT_CAN_USE);
+	defUsable.add_static_constant("EVENT_ON_USE", pragma::usableComponent::EVENT_ON_USE);
+	defUsable.add_static_constant("EVENT_CAN_USE", pragma::usableComponent::EVENT_CAN_USE);
 	entsMod[defUsable];
 
 	auto defParent = pragma::lua::create_entity_component_class<pragma::ParentComponent, pragma::BaseEntityComponent>("ParentComponent");
@@ -762,8 +762,8 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 			  return Lua::nil;
 		  return children[index]->GetLuaObject();
 	  });
-	defParent.add_static_constant("EVENT_ON_CHILD_ADDED", pragma::ParentComponent::EVENT_ON_CHILD_ADDED);
-	defParent.add_static_constant("EVENT_ON_CHILD_REMOVED", pragma::ParentComponent::EVENT_ON_CHILD_REMOVED);
+	defParent.add_static_constant("EVENT_ON_CHILD_ADDED", pragma::parentComponent::EVENT_ON_CHILD_ADDED);
+	defParent.add_static_constant("EVENT_ON_CHILD_REMOVED", pragma::parentComponent::EVENT_ON_CHILD_REMOVED);
 	entsMod[defParent];
 
 	auto defMap = pragma::lua::create_entity_component_class<pragma::MapComponent, pragma::BaseEntityComponent>("MapComponent");
@@ -777,14 +777,14 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defSubmergible.def("IsInWater", &pragma::SubmergibleComponent::IsInWater);
 	defSubmergible.def("GetSubmergedFractionProperty", &pragma::SubmergibleComponent::GetSubmergedFractionProperty);
 	defSubmergible.def("GetWaterEntity", static_cast<pragma::ecs::BaseEntity *(pragma::SubmergibleComponent::*)()>(&pragma::SubmergibleComponent::GetWaterEntity));
-	defSubmergible.add_static_constant("EVENT_ON_WATER_SUBMERGED", pragma::SubmergibleComponent::EVENT_ON_WATER_SUBMERGED);
-	defSubmergible.add_static_constant("EVENT_ON_WATER_EMERGED", pragma::SubmergibleComponent::EVENT_ON_WATER_EMERGED);
-	defSubmergible.add_static_constant("EVENT_ON_WATER_ENTERED", pragma::SubmergibleComponent::EVENT_ON_WATER_ENTERED);
-	defSubmergible.add_static_constant("EVENT_ON_WATER_EXITED", pragma::SubmergibleComponent::EVENT_ON_WATER_EXITED);
+	defSubmergible.add_static_constant("EVENT_ON_WATER_SUBMERGED", pragma::submergibleComponent::EVENT_ON_WATER_SUBMERGED);
+	defSubmergible.add_static_constant("EVENT_ON_WATER_EMERGED", pragma::submergibleComponent::EVENT_ON_WATER_EMERGED);
+	defSubmergible.add_static_constant("EVENT_ON_WATER_ENTERED", pragma::submergibleComponent::EVENT_ON_WATER_ENTERED);
+	defSubmergible.add_static_constant("EVENT_ON_WATER_EXITED", pragma::submergibleComponent::EVENT_ON_WATER_EXITED);
 	entsMod[defSubmergible];
 
 	auto defDamageable = pragma::lua::create_entity_component_class<pragma::DamageableComponent, pragma::BaseEntityComponent>("DamageableComponent");
 	defDamageable.def("TakeDamage", &pragma::DamageableComponent::TakeDamage);
-	defDamageable.add_static_constant("EVENT_ON_TAKE_DAMAGE", pragma::DamageableComponent::EVENT_ON_TAKE_DAMAGE);
+	defDamageable.add_static_constant("EVENT_ON_TAKE_DAMAGE", pragma::damageableComponent::EVENT_ON_TAKE_DAMAGE);
 	entsMod[defDamageable];
 }

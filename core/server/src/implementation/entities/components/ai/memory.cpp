@@ -42,12 +42,12 @@ void SAIComponent::UpdateMemory()
 void SAIComponent::OnTargetVisibilityLost(const ai::Memory::Fragment &fragment)
 {
 	CEMemoryData evData {&fragment};
-	BroadcastEvent(EVENT_ON_TARGET_VISIBILITY_LOST, evData);
+	BroadcastEvent(sAIComponent::EVENT_ON_TARGET_VISIBILITY_LOST, evData);
 }
 void SAIComponent::OnTargetVisibilityReacquired(const ai::Memory::Fragment &fragment)
 {
 	CEMemoryData evData {&fragment};
-	BroadcastEvent(EVENT_ON_TARGET_VISIBILITY_REACQUIRED, evData);
+	BroadcastEvent(sAIComponent::EVENT_ON_TARGET_VISIBILITY_REACQUIRED, evData);
 }
 
 bool SAIComponent::IsInMemory(pragma::ecs::BaseEntity *ent) { return GetMemory(ent); }
@@ -55,7 +55,7 @@ bool SAIComponent::IsInMemory(pragma::ecs::BaseEntity *ent) { return GetMemory(e
 void SAIComponent::OnPrimaryTargetChanged(const ai::Memory::Fragment *fragment)
 {
 	CEMemoryData evData {fragment};
-	BroadcastEvent(EVENT_ON_PRIMARY_TARGET_CHANGED, evData);
+	BroadcastEvent(sAIComponent::EVENT_ON_PRIMARY_TARGET_CHANGED, evData);
 }
 
 void SAIComponent::SelectPrimaryTarget()
@@ -141,12 +141,12 @@ void SAIComponent::ClearMemory()
 void SAIComponent::OnMemoryGained(const ai::Memory::Fragment &fragment)
 {
 	CEMemoryData evData {&fragment};
-	BroadcastEvent(EVENT_ON_MEMORY_GAINED, evData);
+	BroadcastEvent(sAIComponent::EVENT_ON_MEMORY_GAINED, evData);
 }
 void SAIComponent::OnMemoryLost(const ai::Memory::Fragment &fragment)
 {
 	CEMemoryData evData {&fragment};
-	BroadcastEvent(EVENT_ON_MEMORY_LOST, evData);
+	BroadcastEvent(sAIComponent::EVENT_ON_MEMORY_LOST, evData);
 }
 
 const ai::Memory::Fragment *SAIComponent::GetPrimaryTarget() const { return m_primaryTarget; }

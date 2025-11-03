@@ -12,8 +12,8 @@ import :entities.components.origin;
 
 using namespace pragma;
 
-ComponentEventId OriginComponent::EVENT_ON_ORIGIN_CHANGED = pragma::INVALID_COMPONENT_ID;
-void OriginComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_ORIGIN_CHANGED = registerEvent("ON_ORIGIN_CHANGED", ComponentEventInfo::Type::Explicit); }
+ComponentEventId originComponent::EVENT_ON_ORIGIN_CHANGED = pragma::INVALID_COMPONENT_ID;
+void OriginComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { originComponent::EVENT_ON_ORIGIN_CHANGED = registerEvent("ON_ORIGIN_CHANGED", ComponentEventInfo::Type::Explicit); }
 void OriginComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = OriginComponent;
@@ -50,17 +50,17 @@ void OriginComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle:
 void OriginComponent::SetOriginPose(const umath::Transform &pose)
 {
 	m_origin = pose;
-	BroadcastEvent(EVENT_ON_ORIGIN_CHANGED);
+	BroadcastEvent(originComponent::EVENT_ON_ORIGIN_CHANGED);
 }
 void OriginComponent::SetOriginPos(const Vector3 &pos)
 {
 	m_origin.SetOrigin(pos);
-	BroadcastEvent(EVENT_ON_ORIGIN_CHANGED);
+	BroadcastEvent(originComponent::EVENT_ON_ORIGIN_CHANGED);
 }
 void OriginComponent::SetOriginRot(const Quat &rot)
 {
 	m_origin.SetRotation(rot);
-	BroadcastEvent(EVENT_ON_ORIGIN_CHANGED);
+	BroadcastEvent(originComponent::EVENT_ON_ORIGIN_CHANGED);
 }
 
 const umath::Transform &OriginComponent::GetOriginPose() const { return m_origin; }

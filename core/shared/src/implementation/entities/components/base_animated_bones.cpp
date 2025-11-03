@@ -147,7 +147,7 @@ bool BaseAnimatedComponent::SetBonePose(animation::BoneId boneId, const Vector3 
 	umath::set_flag(m_stateFlags, StateFlags::AbsolutePosesDirty);
 
 	CEOnBoneTransformChanged evData {boneId, optPos, optRot, optScale};
-	InvokeEventCallbacks(EVENT_ON_BONE_TRANSFORM_CHANGED, evData);
+	InvokeEventCallbacks(baseAnimatedComponent::EVENT_ON_BONE_TRANSFORM_CHANGED, evData);
 	return true;
 }
 bool BaseAnimatedComponent::GetReferenceBonePose(animation::BoneId boneId, umath::Transform &outPose, umath::CoordinateSpace space) const
@@ -340,7 +340,7 @@ bool BaseAnimatedComponent::ShouldUpdateBones() const
 	if(IsPlayingAnimation())
 		return true;
 	CEShouldUpdateBones evData {};
-	return InvokeEventCallbacks(EVENT_SHOULD_UPDATE_BONES, evData) == util::EventReply::Handled && evData.shouldUpdate;
+	return InvokeEventCallbacks(baseAnimatedComponent::EVENT_SHOULD_UPDATE_BONES, evData) == util::EventReply::Handled && evData.shouldUpdate;
 }
 
 FPlayAnim BaseAnimatedComponent::GetBaseAnimationFlags() const { return m_baseAnim.flags; }
@@ -475,7 +475,7 @@ bool BaseAnimatedComponent::UpdateSkeleton()
 {
 	if(IsSkeletonUpdateListenerEnabled()) {
 		CEOnUpdateSkeleton evData {};
-		if(InvokeEventCallbacks(EVENT_ON_UPDATE_SKELETON, evData) == util::EventReply::Handled)
+		if(InvokeEventCallbacks(baseAnimatedComponent::EVENT_ON_UPDATE_SKELETON, evData) == util::EventReply::Handled)
 			return evData.bonePosesHaveChanged;
 	}
 	if(umath::is_flag_set(m_stateFlags, StateFlags::AbsolutePosesDirty) == false)
@@ -483,7 +483,7 @@ bool BaseAnimatedComponent::UpdateSkeleton()
 	return UpdateBonePoses();
 }
 
-void BaseAnimatedComponent::PostAnimationsUpdated() { InvokeEventCallbacks(EVENT_POST_ANIMATION_UPDATE); }
+void BaseAnimatedComponent::PostAnimationsUpdated() { InvokeEventCallbacks(baseAnimatedComponent::EVENT_POST_ANIMATION_UPDATE); }
 
 void BaseAnimatedComponent::SetPostAnimationUpdateEnabled(bool enabled) { umath::set_flag(m_stateFlags, StateFlags::NeedsPostAnimationUpdate, enabled); }
 bool BaseAnimatedComponent::IsPostAnimationUpdateEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::NeedsPostAnimationUpdate); }

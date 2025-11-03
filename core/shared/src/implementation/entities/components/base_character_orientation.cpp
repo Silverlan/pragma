@@ -16,7 +16,7 @@ void BaseCharacterComponent::SetCharacterOrientation(const Vector3 &up)
 		m_orientationComponent->SetUpDirection(up);
 
 	auto evOnSetCharacterOrientation = CEOnSetCharacterOrientation {up};
-	BroadcastEvent(EVENT_ON_CHARACTER_ORIENTATION_CHANGED, evOnSetCharacterOrientation);
+	BroadcastEvent(baseCharacterComponent::EVENT_ON_CHARACTER_ORIENTATION_CHANGED, evOnSetCharacterOrientation);
 }
 
 void BaseCharacterComponent::UpdateOrientation()

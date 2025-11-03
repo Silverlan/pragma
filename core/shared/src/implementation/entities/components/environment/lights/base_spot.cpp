@@ -48,7 +48,7 @@ void BaseEnvLightSpotComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "outerconeangle", false)) {
 			if(m_fieldAngleComponent.valid())
@@ -96,14 +96,14 @@ Candela BaseEnvLightSpotComponent::CalcIntensityAtPoint(const Vector3 &lightPos,
 }
 util::EventReply BaseEnvLightSpotComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(eventId == BaseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT) {
+	if(eventId == baseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT) {
 		auto &levData = static_cast<CECalcLightDirectionToPoint &>(evData);
 		auto dir = levData.pos - GetEntity().GetPosition();
 		uvec::normalize(&dir);
 		levData.direction = dir;
 		return util::EventReply::Handled;
 	}
-	else if(eventId == BaseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT) {
+	else if(eventId == baseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT) {
 		auto &levData = static_cast<CECalcLightIntensityAtPoint &>(evData);
 		auto *cLight = dynamic_cast<pragma::BaseEnvLightComponent *>(GetEntity().FindComponent("light").get());
 		if(cLight) {

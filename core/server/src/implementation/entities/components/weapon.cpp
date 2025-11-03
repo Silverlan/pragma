@@ -102,13 +102,13 @@ void SWeaponComponent::Initialize()
 {
 	BaseWeaponComponent::Initialize();
 
-	BindEvent(UsableComponent::EVENT_CAN_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(usableComponent::EVENT_CAN_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &bCanUse = static_cast<CECanUseData &>(evData.get()).canUse;
 		auto *pOwnerComponent = GetOwnerComponent();
 		bCanUse = (pOwnerComponent == nullptr || pOwnerComponent->GetOwner() == nullptr);
 		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(UsableComponent::EVENT_ON_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnUse(static_cast<CEOnUseData &>(evData.get()).entity); });
+	BindEventUnhandled(usableComponent::EVENT_ON_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnUse(static_cast<CEOnUseData &>(evData.get()).entity); });
 
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	ent.AddComponent<UsableComponent>();

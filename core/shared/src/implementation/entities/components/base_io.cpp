@@ -12,15 +12,15 @@ import :entities.components.base_io;
 
 using namespace pragma;
 
-ComponentEventId BaseIOComponent::EVENT_HANDLE_INPUT = pragma::INVALID_COMPONENT_ID;
-void BaseIOComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_HANDLE_INPUT = registerEvent("HANDLE_INPUT", ComponentEventInfo::Type::Broadcast); }
+ComponentEventId baseIOComponent::EVENT_HANDLE_INPUT = pragma::INVALID_COMPONENT_ID;
+void BaseIOComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseIOComponent::EVENT_HANDLE_INPUT = registerEvent("HANDLE_INPUT", ComponentEventInfo::Type::Broadcast); }
 
 BaseIOComponent::BaseIOComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseIOComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEventUnhandled(pragma::ecs::BaseEntity::EVENT_ON_REMOVE, [this](std::reference_wrapper<ComponentEvent> evData) { TriggerOutput("OnRemove", &GetEntity()); });
-	BindEventUnhandled(pragma::ecs::BaseEntity::EVENT_ON_SPAWN, [this](std::reference_wrapper<ComponentEvent> evData) { TriggerOutput("OnSpawn", &GetEntity()); });
+	BindEventUnhandled(pragma::ecs::baseEntity::EVENT_ON_REMOVE, [this](std::reference_wrapper<ComponentEvent> evData) { TriggerOutput("OnRemove", &GetEntity()); });
+	BindEventUnhandled(pragma::ecs::baseEntity::EVENT_ON_SPAWN, [this](std::reference_wrapper<ComponentEvent> evData) { TriggerOutput("OnSpawn", &GetEntity()); });
 }
 
 void BaseIOComponent::Save(udm::LinkedPropertyWrapperArg udm)
@@ -165,7 +165,7 @@ void BaseIOComponent::Input(std::string input, pragma::ecs::BaseEntity *activato
 	ustring::to_lower(input);
 
 	pragma::CEInputData inputData {input, activator, caller, data};
-	if(BroadcastEvent(EVENT_HANDLE_INPUT, inputData) == util::EventReply::Handled)
+	if(BroadcastEvent(baseIOComponent::EVENT_HANDLE_INPUT, inputData) == util::EventReply::Handled)
 		return;
 	auto &entThis = GetEntity();
 	if(input == "addoutput") {

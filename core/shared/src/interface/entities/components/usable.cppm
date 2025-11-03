@@ -24,10 +24,12 @@ export namespace pragma {
 		pragma::ecs::BaseEntity *entity;
 		bool canUse = true;
 	};
+	namespace usableComponent {
+		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_ON_USE;
+		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_CAN_USE;
+	}
 	class DLLNETWORK UsableComponent final : public BaseEntityComponent {
 	  public:
-		static pragma::ComponentEventId EVENT_ON_USE;
-		static pragma::ComponentEventId EVENT_CAN_USE;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		UsableComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;

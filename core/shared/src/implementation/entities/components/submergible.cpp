@@ -10,16 +10,16 @@ import :entities.components.submergible;
 
 using namespace pragma;
 
-ComponentEventId SubmergibleComponent::EVENT_ON_WATER_SUBMERGED = INVALID_COMPONENT_ID;
-ComponentEventId SubmergibleComponent::EVENT_ON_WATER_EMERGED = INVALID_COMPONENT_ID;
-ComponentEventId SubmergibleComponent::EVENT_ON_WATER_ENTERED = INVALID_COMPONENT_ID;
-ComponentEventId SubmergibleComponent::EVENT_ON_WATER_EXITED = INVALID_COMPONENT_ID;
+ComponentEventId submergibleComponent::EVENT_ON_WATER_SUBMERGED = INVALID_COMPONENT_ID;
+ComponentEventId submergibleComponent::EVENT_ON_WATER_EMERGED = INVALID_COMPONENT_ID;
+ComponentEventId submergibleComponent::EVENT_ON_WATER_ENTERED = INVALID_COMPONENT_ID;
+ComponentEventId submergibleComponent::EVENT_ON_WATER_EXITED = INVALID_COMPONENT_ID;
 void SubmergibleComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_WATER_SUBMERGED = registerEvent("ON_WATER_SUBMERGED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_WATER_EMERGED = registerEvent("ON_WATER_EMERGED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_WATER_ENTERED = registerEvent("ON_WATER_ENTERED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_WATER_EXITED = registerEvent("ON_WATER_EXITED", ComponentEventInfo::Type::Broadcast);
+	submergibleComponent::EVENT_ON_WATER_SUBMERGED = registerEvent("ON_WATER_SUBMERGED", ComponentEventInfo::Type::Broadcast);
+	submergibleComponent::EVENT_ON_WATER_EMERGED = registerEvent("ON_WATER_EMERGED", ComponentEventInfo::Type::Broadcast);
+	submergibleComponent::EVENT_ON_WATER_ENTERED = registerEvent("ON_WATER_ENTERED", ComponentEventInfo::Type::Broadcast);
+	submergibleComponent::EVENT_ON_WATER_EXITED = registerEvent("ON_WATER_EXITED", ComponentEventInfo::Type::Broadcast);
 }
 SubmergibleComponent::SubmergibleComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_submergedFraction(util::FloatProperty::Create(0.f)) {}
 void SubmergibleComponent::Initialize() { BaseEntityComponent::Initialize(); }
@@ -61,10 +61,10 @@ void SubmergibleComponent::SetSubmergedFraction(pragma::ecs::BaseEntity &waterEn
 	else if(IsSubmerged() == true)
 		OnWaterSubmerged();
 }
-void SubmergibleComponent::OnWaterSubmerged() { BroadcastEvent(EVENT_ON_WATER_SUBMERGED); }
-void SubmergibleComponent::OnWaterEmerged() { BroadcastEvent(EVENT_ON_WATER_EMERGED); }
-void SubmergibleComponent::OnWaterEntered() { BroadcastEvent(EVENT_ON_WATER_ENTERED); }
-void SubmergibleComponent::OnWaterExited() { BroadcastEvent(EVENT_ON_WATER_EXITED); }
+void SubmergibleComponent::OnWaterSubmerged() { BroadcastEvent(submergibleComponent::EVENT_ON_WATER_SUBMERGED); }
+void SubmergibleComponent::OnWaterEmerged() { BroadcastEvent(submergibleComponent::EVENT_ON_WATER_EMERGED); }
+void SubmergibleComponent::OnWaterEntered() { BroadcastEvent(submergibleComponent::EVENT_ON_WATER_ENTERED); }
+void SubmergibleComponent::OnWaterExited() { BroadcastEvent(submergibleComponent::EVENT_ON_WATER_EXITED); }
 
 const util::PFloatProperty &SubmergibleComponent::GetSubmergedFractionProperty() const { return m_submergedFraction; }
 

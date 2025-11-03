@@ -13,10 +13,13 @@ export import :entities.components.base;
 export import :input.enums;
 
 export namespace pragma {
-	class DLLNETWORK ActionInputControllerComponent final : public BaseEntityComponent {
+		namespace actionInputControllerComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_HANDLE_ACTION_INPUT;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ACTION_INPUT_CHANGED;
+	}
+class DLLNETWORK ActionInputControllerComponent final : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_HANDLE_ACTION_INPUT;
-		static ComponentEventId EVENT_ON_ACTION_INPUT_CHANGED;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		ActionInputControllerComponent(pragma::ecs::BaseEntity &ent);

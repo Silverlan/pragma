@@ -16,10 +16,13 @@ export import :types;
 
 export {
 	namespace pragma {
-		class DLLNETWORK BoneMergeComponent final : public BaseEntityComponent {
+				namespace boneMergeComponent {
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TARGET_CHANGED;
+		}
+class DLLNETWORK BoneMergeComponent final : public BaseEntityComponent {
 		  public:
 			static bool can_merge(const pragma::Model &mdl, const pragma::Model &mdlParent, bool includeRootBones = false);
-			static ComponentEventId EVENT_ON_TARGET_CHANGED;
+
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 

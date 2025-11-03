@@ -13,29 +13,29 @@ import :entities.components.base_physics;
 
 using namespace pragma;
 
-ComponentEventId BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED = INVALID_COMPONENT_ID;
-ComponentEventId BasePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED = INVALID_COMPONENT_ID;
-ComponentEventId BasePhysicsComponent::EVENT_ON_PHYSICS_UPDATED = INVALID_COMPONENT_ID;
-ComponentEventId BasePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED = INVALID_COMPONENT_ID;
-ComponentEventId BasePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE = INVALID_COMPONENT_ID;
-ComponentEventId BasePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE = INVALID_COMPONENT_ID;
-ComponentEventId BasePhysicsComponent::EVENT_ON_SLEEP = INVALID_COMPONENT_ID;
-ComponentEventId BasePhysicsComponent::EVENT_ON_WAKE = INVALID_COMPONENT_ID;
-ComponentEventId BasePhysicsComponent::EVENT_HANDLE_RAYCAST = INVALID_COMPONENT_ID;
-ComponentEventId BasePhysicsComponent::EVENT_INITIALIZE_PHYSICS = INVALID_COMPONENT_ID;
+ComponentEventId basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED = INVALID_COMPONENT_ID;
+ComponentEventId basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED = INVALID_COMPONENT_ID;
+ComponentEventId basePhysicsComponent::EVENT_ON_PHYSICS_UPDATED = INVALID_COMPONENT_ID;
+ComponentEventId basePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED = INVALID_COMPONENT_ID;
+ComponentEventId basePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE = INVALID_COMPONENT_ID;
+ComponentEventId basePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE = INVALID_COMPONENT_ID;
+ComponentEventId basePhysicsComponent::EVENT_ON_SLEEP = INVALID_COMPONENT_ID;
+ComponentEventId basePhysicsComponent::EVENT_ON_WAKE = INVALID_COMPONENT_ID;
+ComponentEventId basePhysicsComponent::EVENT_HANDLE_RAYCAST = INVALID_COMPONENT_ID;
+ComponentEventId basePhysicsComponent::EVENT_INITIALIZE_PHYSICS = INVALID_COMPONENT_ID;
 
 void BasePhysicsComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_PHYSICS_INITIALIZED = registerEvent("ON_PHYSICS_INITIALIZED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_PHYSICS_DESTROYED = registerEvent("ON_PHYSICS_DESTROYED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_PHYSICS_UPDATED = registerEvent("ON_PHYSICS_UPDATED", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_DYNAMIC_PHYSICS_UPDATED = registerEvent("ON_DYNAMIC_PHYSICS_UPDATED", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_PRE_PHYSICS_SIMULATE = registerEvent("ON_PRE_PHYSICS_SIMULATE", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_POST_PHYSICS_SIMULATE = registerEvent("ON_POST_PHYSICS_SIMULATE", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_SLEEP = registerEvent("EVENT_ON_SLEEP", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_WAKE = registerEvent("EVENT_ON_WAKE", ComponentEventInfo::Type::Explicit);
-	EVENT_HANDLE_RAYCAST = registerEvent("HANDLE_RAYCAST", ComponentEventInfo::Type::Explicit);
-	EVENT_INITIALIZE_PHYSICS = registerEvent("INITIALIZE_PHYSICS", ComponentEventInfo::Type::Broadcast);
+	basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED = registerEvent("ON_PHYSICS_INITIALIZED", ComponentEventInfo::Type::Broadcast);
+	basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED = registerEvent("ON_PHYSICS_DESTROYED", ComponentEventInfo::Type::Broadcast);
+	basePhysicsComponent::EVENT_ON_PHYSICS_UPDATED = registerEvent("ON_PHYSICS_UPDATED", ComponentEventInfo::Type::Explicit);
+	basePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED = registerEvent("ON_DYNAMIC_PHYSICS_UPDATED", ComponentEventInfo::Type::Explicit);
+	basePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE = registerEvent("ON_PRE_PHYSICS_SIMULATE", ComponentEventInfo::Type::Explicit);
+	basePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE = registerEvent("ON_POST_PHYSICS_SIMULATE", ComponentEventInfo::Type::Explicit);
+	basePhysicsComponent::EVENT_ON_SLEEP = registerEvent("EVENT_ON_SLEEP", ComponentEventInfo::Type::Explicit);
+	basePhysicsComponent::EVENT_ON_WAKE = registerEvent("EVENT_ON_WAKE", ComponentEventInfo::Type::Explicit);
+	basePhysicsComponent::EVENT_HANDLE_RAYCAST = registerEvent("HANDLE_RAYCAST", ComponentEventInfo::Type::Explicit);
+	basePhysicsComponent::EVENT_INITIALIZE_PHYSICS = registerEvent("INITIALIZE_PHYSICS", ComponentEventInfo::Type::Broadcast);
 }
 BasePhysicsComponent::BasePhysicsComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_collisionType(pragma::physics::COLLISIONTYPE::NONE), m_moveType(pragma::physics::MOVETYPE::NONE) {}
 void BasePhysicsComponent::OnRemove()
@@ -52,21 +52,21 @@ void BasePhysicsComponent::Initialize()
 	m_netEvSetCollisionsEnabled = SetupNetEvent("set_collisions_enabled");
 	m_netEvSetSimEnabled = SetupNetEvent("set_simulation_enabled");
 
-	BindEvent(BaseAnimatedComponent::EVENT_SHOULD_UPDATE_BONES, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseAnimatedComponent::EVENT_SHOULD_UPDATE_BONES, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		if(IsRagdoll()) {
 			static_cast<CEShouldUpdateBones &>(evData.get()).shouldUpdate = true;
 			return util::EventReply::Handled;
 		}
 		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_BONE_TRANSFORM_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_BONE_TRANSFORM_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &evDataTransform = static_cast<CEOnBoneTransformChanged &>(evData.get());
 		UpdateBoneCollisionObject(evDataTransform.boneId, evDataTransform.pos != nullptr, evDataTransform.rot != nullptr);
 	});
-	BindEvent(BaseAnimatedComponent::EVENT_MAINTAIN_ANIMATIONS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseAnimatedComponent::EVENT_MAINTAIN_ANIMATIONS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		return IsRagdoll() ? util::EventReply::Handled : util::EventReply::Unhandled; // Don't process animations if we're in ragdoll mode
 	});
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		uvec::zero(&m_colMin);
 		uvec::zero(&m_colMax);
 		auto &mdl = static_cast<CEOnModelChanged &>(evData.get()).model;
@@ -379,7 +379,7 @@ bool BasePhysicsComponent::IsRayResultCallbackEnabled() const { return m_bRayRes
 bool BasePhysicsComponent::RayResultCallback(pragma::physics::CollisionMask rayCollisionGroup, pragma::physics::CollisionMask rayCollisionMask)
 {
 	CEHandleRaycast evData {rayCollisionGroup, rayCollisionMask};
-	InvokeEventCallbacks(EVENT_HANDLE_RAYCAST, evData);
+	InvokeEventCallbacks(basePhysicsComponent::EVENT_HANDLE_RAYCAST, evData);
 	return evData.hit;
 }
 
@@ -487,15 +487,15 @@ void BasePhysicsComponent::PhysicsUpdate(double tDelta)
 	auto movetype = GetMoveType();
 	if(phys != nullptr && m_physObject->IsStatic() == false) {
 		m_physObject->Simulate(tDelta, (movetype != pragma::physics::MOVETYPE::WALK && movetype != pragma::physics::MOVETYPE::PHYSICS) ? true : false);
-		InvokeEventCallbacks(EVENT_ON_DYNAMIC_PHYSICS_UPDATED, evData);
+		InvokeEventCallbacks(basePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED, evData);
 	}
-	InvokeEventCallbacks(EVENT_ON_PHYSICS_UPDATED, evData);
+	InvokeEventCallbacks(basePhysicsComponent::EVENT_ON_PHYSICS_UPDATED, evData);
 }
 
 void BasePhysicsComponent::PrePhysicsSimulate()
 {
 	pragma::physics::PhysObj *phys = GetPhysicsObject();
-	InvokeEventCallbacks(EVENT_ON_PRE_PHYSICS_SIMULATE);
+	InvokeEventCallbacks(basePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE);
 	if(phys == nullptr || phys->IsStatic())
 		return;
 	dynamic_cast<PhysObjDynamic *>(phys)->PreSimulate();
@@ -666,8 +666,8 @@ void BasePhysicsComponent::SetSleepReportEnabled(bool reportEnabled)
 	}
 }
 bool BasePhysicsComponent::IsSleepReportEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::SleepReportEnabled); }
-void BasePhysicsComponent::OnWake() { InvokeEventCallbacks(EVENT_ON_WAKE); }
-void BasePhysicsComponent::OnSleep() { InvokeEventCallbacks(EVENT_ON_SLEEP); }
+void BasePhysicsComponent::OnWake() { InvokeEventCallbacks(basePhysicsComponent::EVENT_ON_WAKE); }
+void BasePhysicsComponent::OnSleep() { InvokeEventCallbacks(basePhysicsComponent::EVENT_ON_SLEEP); }
 
 bool BasePhysicsComponent::IsRagdoll() const { return umath::is_flag_set(m_stateFlags, StateFlags::Ragdoll); }
 
@@ -724,7 +724,7 @@ bool BasePhysicsComponent::PostPhysicsSimulate()
 {
 	pragma::physics::PhysObj *phys = GetPhysicsObject();
 	CEPostPhysicsSimulate evData {};
-	InvokeEventCallbacks(EVENT_ON_POST_PHYSICS_SIMULATE, evData);
+	InvokeEventCallbacks(basePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE, evData);
 	if(phys == nullptr || phys->IsStatic())
 		return evData.keepAwake;
 	dynamic_cast<PhysObjDynamic *>(phys)->PostSimulate();

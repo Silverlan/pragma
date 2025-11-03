@@ -18,9 +18,12 @@ export namespace pragma {
 		pragma::ecs::BaseEntity *oldOwner;
 		pragma::ecs::BaseEntity *newOwner;
 	};
-	class DLLNETWORK BaseOwnableComponent : public BaseEntityComponent {
+		namespace baseOwnableComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_OWNER_CHANGED;
+	}
+class DLLNETWORK BaseOwnableComponent : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_ON_OWNER_CHANGED;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;

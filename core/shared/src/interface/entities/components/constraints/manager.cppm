@@ -11,7 +11,10 @@ export module pragma.shared:entities.components.constraints.manager;
 export import :entities.components.constraints.base;
 
 export namespace pragma {
-	class DLLNETWORK ConstraintManagerComponent final : public BaseEntityComponent {
+		namespace constraintManagerComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_APPLY_CONSTRAINT;
+	}
+class DLLNETWORK ConstraintManagerComponent final : public BaseEntityComponent {
 	  public:
 		struct DLLNETWORK ConstraintInfo {
 			ConstraintComponent *constraint = nullptr;
@@ -22,7 +25,7 @@ export namespace pragma {
 			const ConstraintComponent *operator->() const { return constraint; }
 		};
 		enum class CoordinateSpace : uint8_t { World = umath::to_integral(umath::CoordinateSpace::World), Local = umath::to_integral(umath::CoordinateSpace::Local), Object = umath::to_integral(umath::CoordinateSpace::Object) };
-		static ComponentEventId EVENT_APPLY_CONSTRAINT;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		ConstraintManagerComponent(pragma::ecs::BaseEntity &ent);

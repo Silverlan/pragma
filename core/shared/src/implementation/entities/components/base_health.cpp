@@ -12,12 +12,12 @@ import :entities.components.base_health;
 
 using namespace pragma;
 
-ComponentEventId BaseHealthComponent::EVENT_ON_TAKEN_DAMAGE = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseHealthComponent::EVENT_ON_HEALTH_CHANGED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseHealthComponent::EVENT_ON_TAKEN_DAMAGE = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseHealthComponent::EVENT_ON_HEALTH_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseHealthComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_TAKEN_DAMAGE = registerEvent("ON_TAKEN_DAMAGE", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_HEALTH_CHANGED = registerEvent("ON_HEALTH_CHANGED", ComponentEventInfo::Type::Broadcast);
+	baseHealthComponent::EVENT_ON_TAKEN_DAMAGE = registerEvent("ON_TAKEN_DAMAGE", ComponentEventInfo::Type::Broadcast);
+	baseHealthComponent::EVENT_ON_HEALTH_CHANGED = registerEvent("ON_HEALTH_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
 void BaseHealthComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
@@ -41,7 +41,7 @@ void BaseHealthComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "health", false))
 			*m_health = util::to_int(kvData.value);
@@ -51,7 +51,7 @@ void BaseHealthComponent::Initialize()
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(ustring::compare<std::string>(inputData.input, "sethealth", false))
 			*m_health = util::to_int(inputData.data);
@@ -71,7 +71,7 @@ util::EventReply BaseHealthComponent::HandleEvent(ComponentEventId eventId, Comp
 {
 	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == DamageableComponent::EVENT_ON_TAKE_DAMAGE)
+	if(eventId == damageableComponent::EVENT_ON_TAKE_DAMAGE)
 		OnTakeDamage(static_cast<CEOnTakeDamage &>(evData).damageInfo);
 	return util::EventReply::Unhandled;
 }
@@ -87,7 +87,7 @@ void BaseHealthComponent::OnTakeDamage(DamageInfo &info)
 
 	auto newHealth = GetHealth();
 	CEOnTakenDamage takeDmgInfo {info, health, newHealth};
-	BroadcastEvent(EVENT_ON_TAKEN_DAMAGE, takeDmgInfo);
+	BroadcastEvent(baseHealthComponent::EVENT_ON_TAKEN_DAMAGE, takeDmgInfo);
 }
 
 const util::PUInt16Property &BaseHealthComponent::GetHealthProperty() const { return m_health; }
@@ -106,7 +106,7 @@ void BaseHealthComponent::SetHealth(uint16_t health)
 	game->CallCallbacks<void, pragma::ecs::BaseEntity *, uint16_t, uint16_t>("OnEntityHealthChanged", &ent, old, *m_health);
 
 	CEOnHealthChanged evData {old, *m_health};
-	BroadcastEvent(EVENT_ON_HEALTH_CHANGED, evData);
+	BroadcastEvent(baseHealthComponent::EVENT_ON_HEALTH_CHANGED, evData);
 }
 void BaseHealthComponent::SetMaxHealth(uint16_t maxHealth) { *m_maxHealth = maxHealth; }
 

@@ -37,7 +37,7 @@ void ConstraintLimitDistanceComponent::Initialize()
 	BaseEntityComponent::Initialize();
 
 	GetEntity().AddComponent<ConstraintComponent>();
-	BindEventUnhandled(ConstraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyConstraint(); });
+	BindEventUnhandled(constraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyConstraint(); });
 }
 void ConstraintLimitDistanceComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ConstraintLimitDistanceComponent::OnEntityComponentAdded(BaseEntityComponent &component)

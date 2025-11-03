@@ -25,8 +25,8 @@ bool BoneMergeComponent::can_merge(const pragma::Model &mdl, const pragma::Model
 	return false;
 }
 
-ComponentEventId BoneMergeComponent::EVENT_ON_TARGET_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BoneMergeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_TARGET_CHANGED = registerEvent("ON_TARGET_CHANGED", ComponentEventInfo::Type::Broadcast); }
+ComponentEventId boneMergeComponent::EVENT_ON_TARGET_CHANGED = pragma::INVALID_COMPONENT_ID;
+void BoneMergeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { boneMergeComponent::EVENT_ON_TARGET_CHANGED = registerEvent("ON_TARGET_CHANGED", ComponentEventInfo::Type::Broadcast); }
 void BoneMergeComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BoneMergeComponent;
@@ -41,8 +41,8 @@ BoneMergeComponent::BoneMergeComponent(pragma::ecs::BaseEntity &ent) : BaseEntit
 void BoneMergeComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { SetTargetDirty(); });
-	BindEventUnhandled(BaseAnimatedComponent::EVENT_POST_ANIMATION_UPDATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { MergeBonePoses(); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { SetTargetDirty(); });
+	BindEventUnhandled(baseAnimatedComponent::EVENT_POST_ANIMATION_UPDATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { MergeBonePoses(); });
 }
 void BoneMergeComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void BoneMergeComponent::OnRemove()
@@ -55,7 +55,7 @@ void BoneMergeComponent::SetTarget(const pragma::EntityURef &target)
 {
 	m_target = target;
 	SetTargetDirty();
-	BroadcastEvent(EVENT_ON_TARGET_CHANGED);
+	BroadcastEvent(boneMergeComponent::EVENT_ON_TARGET_CHANGED);
 }
 const pragma::EntityURef &BoneMergeComponent::GetTarget() const { return m_target; }
 

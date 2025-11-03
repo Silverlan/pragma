@@ -11,17 +11,17 @@ module pragma.shared;
 import :entities.components.movement;
 
 using namespace pragma;
-ComponentEventId MovementComponent::EVENT_ON_UPDATE_MOVEMENT = INVALID_COMPONENT_ID;
+ComponentEventId movementComponent::EVENT_ON_UPDATE_MOVEMENT = INVALID_COMPONENT_ID;
 void MovementComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseEntityComponent::RegisterEvents(componentManager, registerEvent);
-	EVENT_ON_UPDATE_MOVEMENT = registerEvent("ON_UPDATE_MOVEMENT", ComponentEventInfo::Type::Explicit);
+	movementComponent::EVENT_ON_UPDATE_MOVEMENT = registerEvent("ON_UPDATE_MOVEMENT", ComponentEventInfo::Type::Explicit);
 }
 MovementComponent::MovementComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void MovementComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovement(); });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovement(); });
 }
 void MovementComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void MovementComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
@@ -128,7 +128,7 @@ bool MovementComponent::UpdateMovement()
 	auto mv = pPhysComponent->GetMoveType();
 	if(mv == pragma::physics::MOVETYPE::NONE || mv == pragma::physics::MOVETYPE::PHYSICS)
 		return false;
-	InvokeEventCallbacks(EVENT_ON_UPDATE_MOVEMENT);
+	InvokeEventCallbacks(movementComponent::EVENT_ON_UPDATE_MOVEMENT);
 	auto *physController = static_cast<ControllerPhysObj *>(phys);
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();

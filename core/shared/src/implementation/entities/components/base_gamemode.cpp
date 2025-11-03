@@ -13,24 +13,24 @@ import :entities.components.base_gamemode;
 
 using namespace pragma;
 
-ComponentEventId BaseGamemodeComponent::EVENT_ON_PLAYER_DEATH = INVALID_COMPONENT_ID;
-ComponentEventId BaseGamemodeComponent::EVENT_ON_PLAYER_SPAWNED = INVALID_COMPONENT_ID;
-ComponentEventId BaseGamemodeComponent::EVENT_ON_PLAYER_DROPPED = INVALID_COMPONENT_ID;
-ComponentEventId BaseGamemodeComponent::EVENT_ON_PLAYER_READY = INVALID_COMPONENT_ID;
-ComponentEventId BaseGamemodeComponent::EVENT_ON_PLAYER_JOINED = INVALID_COMPONENT_ID;
-ComponentEventId BaseGamemodeComponent::EVENT_ON_GAME_INITIALIZED = INVALID_COMPONENT_ID;
-ComponentEventId BaseGamemodeComponent::EVENT_ON_MAP_INITIALIZED = INVALID_COMPONENT_ID;
-ComponentEventId BaseGamemodeComponent::EVENT_ON_GAME_READY = INVALID_COMPONENT_ID;
+ComponentEventId baseGamemodeComponent::EVENT_ON_PLAYER_DEATH = INVALID_COMPONENT_ID;
+ComponentEventId baseGamemodeComponent::EVENT_ON_PLAYER_SPAWNED = INVALID_COMPONENT_ID;
+ComponentEventId baseGamemodeComponent::EVENT_ON_PLAYER_DROPPED = INVALID_COMPONENT_ID;
+ComponentEventId baseGamemodeComponent::EVENT_ON_PLAYER_READY = INVALID_COMPONENT_ID;
+ComponentEventId baseGamemodeComponent::EVENT_ON_PLAYER_JOINED = INVALID_COMPONENT_ID;
+ComponentEventId baseGamemodeComponent::EVENT_ON_GAME_INITIALIZED = INVALID_COMPONENT_ID;
+ComponentEventId baseGamemodeComponent::EVENT_ON_MAP_INITIALIZED = INVALID_COMPONENT_ID;
+ComponentEventId baseGamemodeComponent::EVENT_ON_GAME_READY = INVALID_COMPONENT_ID;
 void BaseGamemodeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_PLAYER_DEATH = registerEvent("ON_PLAYER_DEATH", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_PLAYER_SPAWNED = registerEvent("ON_PLAYER_SPAWNED", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_PLAYER_DROPPED = registerEvent("ON_PLAYER_DROPPED", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_PLAYER_READY = registerEvent("ON_PLAYER_READY", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_PLAYER_JOINED = registerEvent("ON_PLAYER_JOINED", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_GAME_INITIALIZED = registerEvent("ON_GAME_INITIALIZED", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_MAP_INITIALIZED = registerEvent("ON_MAP_INITIALIZED", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_GAME_READY = registerEvent("ON_GAME_READY", ComponentEventInfo::Type::Explicit);
+	baseGamemodeComponent::EVENT_ON_PLAYER_DEATH = registerEvent("ON_PLAYER_DEATH", ComponentEventInfo::Type::Explicit);
+	baseGamemodeComponent::EVENT_ON_PLAYER_SPAWNED = registerEvent("ON_PLAYER_SPAWNED", ComponentEventInfo::Type::Explicit);
+	baseGamemodeComponent::EVENT_ON_PLAYER_DROPPED = registerEvent("ON_PLAYER_DROPPED", ComponentEventInfo::Type::Explicit);
+	baseGamemodeComponent::EVENT_ON_PLAYER_READY = registerEvent("ON_PLAYER_READY", ComponentEventInfo::Type::Explicit);
+	baseGamemodeComponent::EVENT_ON_PLAYER_JOINED = registerEvent("ON_PLAYER_JOINED", ComponentEventInfo::Type::Explicit);
+	baseGamemodeComponent::EVENT_ON_GAME_INITIALIZED = registerEvent("ON_GAME_INITIALIZED", ComponentEventInfo::Type::Explicit);
+	baseGamemodeComponent::EVENT_ON_MAP_INITIALIZED = registerEvent("ON_MAP_INITIALIZED", ComponentEventInfo::Type::Explicit);
+	baseGamemodeComponent::EVENT_ON_GAME_READY = registerEvent("ON_GAME_READY", ComponentEventInfo::Type::Explicit);
 }
 BaseGamemodeComponent::BaseGamemodeComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) { ent.GetNetworkState()->GetGameState()->GetGamemodeComponents().push_back(this); }
 
@@ -53,31 +53,31 @@ void BaseGamemodeComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t ver
 void BaseGamemodeComponent::OnPlayerDeath(BasePlayerComponent &pl, DamageInfo *dmgInfo)
 {
 	CEPlayerDeath evData {pl, dmgInfo};
-	BroadcastEvent(EVENT_ON_PLAYER_DEATH, evData);
+	BroadcastEvent(baseGamemodeComponent::EVENT_ON_PLAYER_DEATH, evData);
 }
 void BaseGamemodeComponent::OnPlayerSpawned(BasePlayerComponent &pl)
 {
 	CEPlayerSpawned evData {pl};
-	BroadcastEvent(EVENT_ON_PLAYER_SPAWNED, evData);
+	BroadcastEvent(baseGamemodeComponent::EVENT_ON_PLAYER_SPAWNED, evData);
 }
 void BaseGamemodeComponent::OnPlayerDropped(BasePlayerComponent &pl, pragma::networking::DropReason reason)
 {
 	CEPlayerDropped evData {pl, reason};
-	BroadcastEvent(EVENT_ON_PLAYER_DROPPED, evData);
+	BroadcastEvent(baseGamemodeComponent::EVENT_ON_PLAYER_DROPPED, evData);
 }
 void BaseGamemodeComponent::OnPlayerReady(BasePlayerComponent &pl)
 {
 	CEPlayerReady evData {pl};
-	BroadcastEvent(EVENT_ON_PLAYER_READY, evData);
+	BroadcastEvent(baseGamemodeComponent::EVENT_ON_PLAYER_READY, evData);
 }
 void BaseGamemodeComponent::OnPlayerJoined(BasePlayerComponent &pl)
 {
 	CEPlayerJoined evData {pl};
-	BroadcastEvent(EVENT_ON_PLAYER_JOINED, evData);
+	BroadcastEvent(baseGamemodeComponent::EVENT_ON_PLAYER_JOINED, evData);
 }
-void BaseGamemodeComponent::OnGameInitialized() { BroadcastEvent(EVENT_ON_GAME_INITIALIZED); }
-void BaseGamemodeComponent::OnMapInitialized() { BroadcastEvent(EVENT_ON_MAP_INITIALIZED); }
-void BaseGamemodeComponent::OnGameReady() { BroadcastEvent(EVENT_ON_GAME_READY); }
+void BaseGamemodeComponent::OnGameInitialized() { BroadcastEvent(baseGamemodeComponent::EVENT_ON_GAME_INITIALIZED); }
+void BaseGamemodeComponent::OnMapInitialized() { BroadcastEvent(baseGamemodeComponent::EVENT_ON_MAP_INITIALIZED); }
+void BaseGamemodeComponent::OnGameReady() { BroadcastEvent(baseGamemodeComponent::EVENT_ON_GAME_READY); }
 
 GameModeInfo *BaseGamemodeComponent::GetGameModeInfo() { return GetEntity().GetNetworkState()->GetGameState()->GetGameMode(); }
 static const std::string empty_string {};

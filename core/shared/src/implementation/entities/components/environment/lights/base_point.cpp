@@ -21,14 +21,14 @@ void BaseEnvLightPointComponent::Initialize()
 }
 util::EventReply BaseEnvLightPointComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(eventId == BaseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT) {
+	if(eventId == baseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT) {
 		auto &levData = static_cast<CECalcLightDirectionToPoint &>(evData);
 		auto dir = levData.pos - GetEntity().GetPosition();
 		uvec::normalize(&dir);
 		levData.direction = dir;
 		return util::EventReply::Handled;
 	}
-	else if(eventId == BaseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT) {
+	else if(eventId == baseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT) {
 		auto &levData = static_cast<CECalcLightIntensityAtPoint &>(evData);
 		auto *cLight = dynamic_cast<pragma::BaseEnvLightComponent *>(GetEntity().FindComponent("light").get());
 		if(cLight) {

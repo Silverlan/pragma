@@ -17,8 +17,8 @@ pragma::ComponentEventId baseShooterComponent::EVENT_ON_BULLETS_FIRED = INVALID_
 using namespace baseShooterComponent;
 void BaseShooterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_FIRE_BULLETS = registerEvent("ON_FIRE_BULLETS", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_BULLETS_FIRED = registerEvent("ON_BULLETS_FIRED", ComponentEventInfo::Type::Broadcast);
+	baseShooterComponent::EVENT_ON_FIRE_BULLETS = registerEvent("ON_FIRE_BULLETS", ComponentEventInfo::Type::Broadcast);
+	baseShooterComponent::EVENT_ON_BULLETS_FIRED = registerEvent("ON_BULLETS_FIRED", ComponentEventInfo::Type::Broadcast);
 }
 BaseShooterComponent::BaseShooterComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseShooterComponent::Initialize()
@@ -66,7 +66,7 @@ void BaseShooterComponent::OnFireBullets(const BulletInfo &bulletInfo, Vector3 &
 		*effectsOrigin = bulletOrigin;
 
 	events::CEOnFireBullets evData {bulletInfo, bulletOrigin, bulletDir, effectsOrigin};
-	BroadcastEvent(EVENT_ON_FIRE_BULLETS, evData);
+	BroadcastEvent(baseShooterComponent::EVENT_ON_FIRE_BULLETS, evData);
 }
 
 pragma::physics::RayCastHitType BaseShooterComponent::OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, pragma::physics::PhysObj &phys, physics::ICollisionObject &col) { return pragma::physics::RayCastHitType::Block; }

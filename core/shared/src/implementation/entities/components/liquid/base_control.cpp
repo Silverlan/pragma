@@ -12,12 +12,12 @@ import :entities.components.liquid.base_control;
 
 using namespace pragma;
 
-ComponentEventId BaseLiquidControlComponent::EVENT_ON_SPLASH = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseLiquidControlComponent::EVENT_ON_PROPERTIES_CHANGED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseLiquidControlComponent::EVENT_ON_SPLASH = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseLiquidControlComponent::EVENT_ON_PROPERTIES_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseLiquidControlComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_SPLASH = registerEvent("ON_SPLASH", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_PROPERTIES_CHANGED = registerEvent("ON_PROPERTIES_CHANGED", ComponentEventInfo::Type::Broadcast);
+	baseLiquidControlComponent::EVENT_ON_SPLASH = registerEvent("ON_SPLASH", ComponentEventInfo::Type::Broadcast);
+	baseLiquidControlComponent::EVENT_ON_PROPERTIES_CHANGED = registerEvent("ON_PROPERTIES_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
 
 void BaseLiquidControlComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
@@ -28,7 +28,7 @@ void BaseLiquidControlComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	m_netEvCreateSplash = SetupNetEvent("create_splash");
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "surface_material", false)) {
 			if(ustring::compare<std::string>(kvData.value, "default", false) == false) {
@@ -40,7 +40,7 @@ void BaseLiquidControlComponent::Initialize()
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(BaseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(baseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &data = static_cast<CEOnSurfaceMeshChanged &>(evData.get());
 		if(data.meshInfo.subMesh && m_kvSurfaceMaterial.empty() == true) {
 			std::string surfaceMatIdentifier;
@@ -79,34 +79,34 @@ void BaseLiquidControlComponent::SetDensity(double density)
 {
 	m_liquid.density = density;
 
-	BroadcastEvent(EVENT_ON_PROPERTIES_CHANGED);
+	BroadcastEvent(baseLiquidControlComponent::EVENT_ON_PROPERTIES_CHANGED);
 }
 
 double BaseLiquidControlComponent::GetLinearDragCoefficient() const { return m_liquid.linearDragCoefficient; }
 void BaseLiquidControlComponent::SetLinearDragCoefficient(double coefficient)
 {
 	m_liquid.linearDragCoefficient = coefficient;
-	BroadcastEvent(EVENT_ON_PROPERTIES_CHANGED);
+	BroadcastEvent(baseLiquidControlComponent::EVENT_ON_PROPERTIES_CHANGED);
 }
 
 double BaseLiquidControlComponent::GetTorqueDragCoefficient() const { return m_liquid.torqueDragCoefficient; }
 void BaseLiquidControlComponent::SetTorqueDragCoefficient(double coefficient)
 {
 	m_liquid.torqueDragCoefficient = coefficient;
-	BroadcastEvent(EVENT_ON_PROPERTIES_CHANGED);
+	BroadcastEvent(baseLiquidControlComponent::EVENT_ON_PROPERTIES_CHANGED);
 }
 
 float BaseLiquidControlComponent::GetStiffness() const { return m_liquid.stiffness; }
 void BaseLiquidControlComponent::SetStiffness(float stiffness)
 {
 	m_liquid.stiffness = stiffness;
-	BroadcastEvent(EVENT_ON_PROPERTIES_CHANGED);
+	BroadcastEvent(baseLiquidControlComponent::EVENT_ON_PROPERTIES_CHANGED);
 }
 float BaseLiquidControlComponent::GetPropagation() const { return m_liquid.propagation; }
 void BaseLiquidControlComponent::SetPropagation(float propagation)
 {
 	m_liquid.propagation = propagation;
-	BroadcastEvent(EVENT_ON_PROPERTIES_CHANGED);
+	BroadcastEvent(baseLiquidControlComponent::EVENT_ON_PROPERTIES_CHANGED);
 }
 
 const Vector3 &BaseLiquidControlComponent::GetLiquidVelocity() const { return m_liquidVelocity; }
@@ -120,7 +120,7 @@ void BaseLiquidControlComponent::CreateSplash(const Vector3 &origin, float radiu
 	splashInfo.radius = radius;
 	splashInfo.force = force;
 
-	BroadcastEvent(EVENT_ON_SPLASH, CEOnSplash {splashInfo});
+	BroadcastEvent(baseLiquidControlComponent::EVENT_ON_SPLASH, CEOnSplash {splashInfo});
 }
 
 bool BaseLiquidControlComponent::OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, pragma::physics::PhysObj *phys, pragma::physics::ICollisionObject *col, const LocalRayResult &result)

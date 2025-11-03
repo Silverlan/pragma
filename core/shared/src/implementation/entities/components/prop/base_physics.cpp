@@ -14,7 +14,7 @@ void BasePropPhysicsComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &ent = GetEntity();
 		auto mdlComponent = ent.GetModelComponent();
 		if(!mdlComponent || mdlComponent->HasModel() == false || !ent.IsSpawned())

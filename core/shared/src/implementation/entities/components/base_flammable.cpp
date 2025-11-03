@@ -12,12 +12,12 @@ import :entities.components.base_flammable;
 
 using namespace pragma;
 
-ComponentEventId BaseFlammableComponent::EVENT_ON_IGNITED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseFlammableComponent::EVENT_ON_EXTINGUISHED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseFlammableComponent::EVENT_ON_IGNITED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseFlammableComponent::EVENT_ON_EXTINGUISHED = pragma::INVALID_COMPONENT_ID;
 void BaseFlammableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_IGNITED = registerEvent("ON_IGNITED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_EXTINGUISHED = registerEvent("ON_EXTINGUISHED", ComponentEventInfo::Type::Broadcast);
+	baseFlammableComponent::EVENT_ON_IGNITED = registerEvent("ON_IGNITED", ComponentEventInfo::Type::Broadcast);
+	baseFlammableComponent::EVENT_ON_EXTINGUISHED = registerEvent("ON_EXTINGUISHED", ComponentEventInfo::Type::Broadcast);
 }
 BaseFlammableComponent::BaseFlammableComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_bIsOnFire(util::BoolProperty::Create(false)), m_bIgnitable(util::BoolProperty::Create(true)) {}
 BaseFlammableComponent::~BaseFlammableComponent() { Extinguish(); }
@@ -25,7 +25,7 @@ void BaseFlammableComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "flammable", false))
 			*m_bIgnitable = util::to_boolean(kvData.value);
@@ -33,7 +33,7 @@ void BaseFlammableComponent::Initialize()
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(ustring::compare<std::string>(inputData.input, "setflammable", false))
 			*m_bIgnitable = util::to_boolean(inputData.data);
@@ -62,7 +62,7 @@ util::EventReply BaseFlammableComponent::HandleEvent(ComponentEventId eventId, C
 {
 	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == pragma::SubmergibleComponent::EVENT_ON_WATER_SUBMERGED)
+	if(eventId == pragma::submergibleComponent::EVENT_ON_WATER_SUBMERGED)
 		Extinguish();
 	return util::EventReply::Unhandled;
 }
@@ -113,7 +113,7 @@ util::EventReply BaseFlammableComponent::Ignite(float duration, pragma::ecs::Bas
 			m_tExtinguishTime = static_cast<float>(tNew);
 	}
 	CEOnIgnited igniteData {duration, attacker, inflictor};
-	return BroadcastEvent(EVENT_ON_IGNITED, igniteData);
+	return BroadcastEvent(baseFlammableComponent::EVENT_ON_IGNITED, igniteData);
 }
 void BaseFlammableComponent::Extinguish()
 {
@@ -122,7 +122,7 @@ void BaseFlammableComponent::Extinguish()
 	*m_bIsOnFire = false;
 	SetTickPolicy(TickPolicy::Never);
 	m_tExtinguishTime = 0.f;
-	BroadcastEvent(EVENT_ON_EXTINGUISHED);
+	BroadcastEvent(baseFlammableComponent::EVENT_ON_EXTINGUISHED);
 }
 void BaseFlammableComponent::SetIgnitable(bool b)
 {

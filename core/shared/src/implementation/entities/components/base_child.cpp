@@ -10,8 +10,8 @@ import :entities.components.base_child;
 
 using namespace pragma;
 
-ComponentEventId BaseChildComponent::EVENT_ON_PARENT_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseChildComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_PARENT_CHANGED = registerEvent("ON_PARENT_CHANGED", ComponentEventInfo::Type::Broadcast); }
+ComponentEventId baseChildComponent::EVENT_ON_PARENT_CHANGED = pragma::INVALID_COMPONENT_ID;
+void BaseChildComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseChildComponent::EVENT_ON_PARENT_CHANGED = registerEvent("ON_PARENT_CHANGED", ComponentEventInfo::Type::Broadcast); }
 void BaseChildComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseChildComponent;
@@ -62,7 +62,7 @@ void BaseChildComponent::SetParent(const pragma::EntityURef &parent)
 		m_parentValid = false;
 
 	OnParentChanged(entParent);
-	BroadcastEvent(EVENT_ON_PARENT_CHANGED);
+	BroadcastEvent(baseChildComponent::EVENT_ON_PARENT_CHANGED);
 }
 const pragma::EntityURef &BaseChildComponent::GetParent() const { return m_parent; }
 pragma::ecs::BaseEntity *BaseChildComponent::GetParentEntity() { return m_parent.GetEntity(GetGame()); }

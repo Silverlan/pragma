@@ -12,12 +12,12 @@ import :entities.components.parent;
 
 using namespace pragma;
 
-ComponentEventId ParentComponent::EVENT_ON_CHILD_ADDED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId ParentComponent::EVENT_ON_CHILD_REMOVED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId parentComponent::EVENT_ON_CHILD_ADDED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId parentComponent::EVENT_ON_CHILD_REMOVED = pragma::INVALID_COMPONENT_ID;
 void ParentComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_CHILD_ADDED = registerEvent("ON_CHILD_ADDED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_CHILD_REMOVED = registerEvent("ON_CHILD_REMOVED", ComponentEventInfo::Type::Broadcast);
+	parentComponent::EVENT_ON_CHILD_ADDED = registerEvent("ON_CHILD_ADDED", ComponentEventInfo::Type::Broadcast);
+	parentComponent::EVENT_ON_CHILD_REMOVED = registerEvent("ON_CHILD_REMOVED", ComponentEventInfo::Type::Broadcast);
 }
 ParentComponent::ParentComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ParentComponent::Initialize() { BaseEntityComponent::Initialize(); }
@@ -39,7 +39,7 @@ void ParentComponent::RemoveChild(BaseChildComponent &child)
 	if(it == m_children.end())
 		return;
 	m_children.erase(it);
-	BroadcastEvent(EVENT_ON_CHILD_REMOVED, CEOnChildRemoved {child});
+	BroadcastEvent(parentComponent::EVENT_ON_CHILD_REMOVED, CEOnChildRemoved {child});
 }
 void ParentComponent::AddChild(BaseChildComponent &child)
 {
@@ -47,7 +47,7 @@ void ParentComponent::AddChild(BaseChildComponent &child)
 	if(it != m_children.end())
 		return;
 	m_children.push_back(child.GetHandle<BaseChildComponent>());
-	BroadcastEvent(EVENT_ON_CHILD_ADDED, CEOnChildAdded {child});
+	BroadcastEvent(parentComponent::EVENT_ON_CHILD_ADDED, CEOnChildAdded {child});
 }
 
 ////////////

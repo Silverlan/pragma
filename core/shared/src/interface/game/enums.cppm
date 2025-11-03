@@ -9,8 +9,8 @@ export import pragma.math;
 
 export {
     // These have to match GLFW_RELEASE and GLFW_PRESS
-	uint32_t KEY_RELEASE = 0;
-	uint32_t KEY_PRESS = 1;
+	CONSTEXPR_COMPAT uint32_t KEY_RELEASE = 0;
+	CONSTEXPR_COMPAT uint32_t KEY_PRESS = 1;
 
     constexpr uint32_t RESOURCE_TRANSFER_FRAGMENT_SIZE = 2'048;
 

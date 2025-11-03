@@ -10,8 +10,8 @@ import :entities.components.base_ownable;
 
 using namespace pragma;
 
-ComponentEventId BaseOwnableComponent::EVENT_ON_OWNER_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseOwnableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_OWNER_CHANGED = registerEvent("ON_OWNER_CHANGED", ComponentEventInfo::Type::Broadcast); }
+ComponentEventId baseOwnableComponent::EVENT_ON_OWNER_CHANGED = pragma::INVALID_COMPONENT_ID;
+void BaseOwnableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseOwnableComponent::EVENT_ON_OWNER_CHANGED = registerEvent("ON_OWNER_CHANGED", ComponentEventInfo::Type::Broadcast); }
 BaseOwnableComponent::BaseOwnableComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_owner(pragma::EntityProperty::Create()) {}
 void BaseOwnableComponent::Initialize()
 {
@@ -29,7 +29,7 @@ void BaseOwnableComponent::SetOwner(pragma::ecs::BaseEntity *owner)
 	auto *oldOwner = m_owner->GetValue().get();
 	*m_owner = (owner != nullptr) ? owner->GetHandle() : EntityHandle {};
 	CEOnOwnerChanged evData {oldOwner, m_owner->GetValue().get()};
-	BroadcastEvent(EVENT_ON_OWNER_CHANGED, evData);
+	BroadcastEvent(baseOwnableComponent::EVENT_ON_OWNER_CHANGED, evData);
 }
 pragma::ecs::BaseEntity *BaseOwnableComponent::GetOwner() { return (*m_owner)->get(); }
 const pragma::ecs::BaseEntity *BaseOwnableComponent::GetOwner() const { return const_cast<BaseOwnableComponent *>(this)->GetOwner(); }

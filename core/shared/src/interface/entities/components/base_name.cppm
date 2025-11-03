@@ -18,9 +18,11 @@ export namespace pragma {
 		const std::string &name;
 	};
 
+	namespace baseNameComponent {
+		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_ON_NAME_CHANGED;
+	}
 	class DLLNETWORK BaseNameComponent : public BaseEntityComponent {
 	  public:
-		static pragma::ComponentEventId EVENT_ON_NAME_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;

@@ -14,7 +14,7 @@ void BaseTriggerPushComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "push_dir", false)) {
 			EulerAngles ang(kvData.value);
@@ -100,7 +100,7 @@ util::EventReply BaseTriggerPushComponent::HandleEvent(ComponentEventId eventId,
 {
 	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == BaseTouchComponent::EVENT_ON_START_TOUCH) {
+	if(eventId == baseTouchComponent::EVENT_ON_START_TOUCH) {
 		auto &entThis = GetEntity();
 		if(entThis.GetSpawnFlags() & umath::to_integral(SpawnFlags::ChangeVelocityDirection)) {
 			auto &touchData = static_cast<const pragma::CETouchData &>(evData);

@@ -12,9 +12,12 @@ export module pragma.shared:entities.components.origin;
 export import :entities.components.base;
 
 export namespace pragma {
-	class DLLNETWORK OriginComponent final : public BaseEntityComponent {
+		namespace originComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ORIGIN_CHANGED;
+	}
+class DLLNETWORK OriginComponent final : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_ON_ORIGIN_CHANGED;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 

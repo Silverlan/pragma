@@ -12,12 +12,12 @@ import :entities.components.base_vehicle;
 
 using namespace pragma;
 
-ComponentEventId BaseVehicleComponent::EVENT_ON_DRIVER_ENTERED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseVehicleComponent::EVENT_ON_DRIVER_EXITED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseVehicleComponent::EVENT_ON_DRIVER_ENTERED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseVehicleComponent::EVENT_ON_DRIVER_EXITED = pragma::INVALID_COMPONENT_ID;
 void BaseVehicleComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_DRIVER_ENTERED = registerEvent("ON_DRIVER_ENTERED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_DRIVER_EXITED = registerEvent("ON_DRIVER_EXITED", ComponentEventInfo::Type::Broadcast);
+	baseVehicleComponent::EVENT_ON_DRIVER_ENTERED = registerEvent("ON_DRIVER_ENTERED", ComponentEventInfo::Type::Broadcast);
+	baseVehicleComponent::EVENT_ON_DRIVER_EXITED = registerEvent("ON_DRIVER_EXITED", ComponentEventInfo::Type::Broadcast);
 }
 BaseVehicleComponent::BaseVehicleComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
@@ -137,7 +137,7 @@ void BaseVehicleComponent::InitializeSteeringWheel()
 	attInfo.flags |= pragma::FAttachmentMode::SnapToOrigin | pragma::FAttachmentMode::UpdateEachFrame;
 	static_cast<BaseAttachmentComponent *>(pAttachableComponent.get())->AttachToAttachment(&GetEntity(), "steering_wheel", attInfo);
 
-	m_cbSteeringWheel = pAttachableComponent->AddEventCallback(BaseAttachmentComponent::EVENT_ON_ATTACHMENT_UPDATE, [this, pAttachableComponent](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	m_cbSteeringWheel = pAttachableComponent->AddEventCallback(baseAttachmentComponent::EVENT_ON_ATTACHMENT_UPDATE, [this, pAttachableComponent](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto pTrComponentSteeringWheel = pAttachableComponent->GetEntity().GetTransformComponent();
 		if(!pTrComponentSteeringWheel)
 			return util::EventReply::Unhandled;
@@ -176,7 +176,7 @@ void BaseVehicleComponent::ClearDriver()
 {
 	if(umath::is_flag_set(m_stateFlags, StateFlags::HasDriver) == false)
 		return;
-	BroadcastEvent(EVENT_ON_DRIVER_EXITED);
+	BroadcastEvent(baseVehicleComponent::EVENT_ON_DRIVER_EXITED);
 	umath::set_flag(m_stateFlags, StateFlags::HasDriver, false);
 	SetTickPolicy(TickPolicy::Never);
 	m_driver = EntityHandle();
@@ -191,7 +191,7 @@ void BaseVehicleComponent::SetDriver(pragma::ecs::BaseEntity *ent)
 	m_driver = ent->GetHandle();
 	umath::set_flag(m_stateFlags, StateFlags::HasDriver, true);
 	SetTickPolicy(TickPolicy::Always);
-	BroadcastEvent(EVENT_ON_DRIVER_ENTERED);
+	BroadcastEvent(baseVehicleComponent::EVENT_ON_DRIVER_ENTERED);
 }
 
 pragma::ecs::BaseEntity *BaseVehicleComponent::GetDriver() { return m_driver.get(); }
@@ -277,7 +277,7 @@ void BaseVehicleComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BasePhysicsComponent::EVENT_INITIALIZE_PHYSICS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(basePhysicsComponent::EVENT_INITIALIZE_PHYSICS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto pPhysComponent = GetEntity().GetPhysicsComponent();
 		if(!pPhysComponent)
 			return util::EventReply::Unhandled;
@@ -287,7 +287,7 @@ void BaseVehicleComponent::Initialize()
 		InitializeVehiclePhysics(physInitData.physicsType, physInitData.flags);
 		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { DestroyVehiclePhysics(); });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { DestroyVehiclePhysics(); });
 
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();

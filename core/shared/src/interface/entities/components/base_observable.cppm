@@ -24,7 +24,10 @@ export namespace pragma {
 		bool rotateWithObservee = false;
 		std::optional<std::pair<EulerAngles, EulerAngles>> angleLimits = {};
 	};
-	class DLLNETWORK BaseObservableComponent : public BaseEntityComponent {
+		namespace baseObservableComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_OBSERVER_CHANGED;
+	}
+class DLLNETWORK BaseObservableComponent : public BaseEntityComponent {
 	  public:
 		enum class CameraType : uint8_t {
 			FirstPerson,
@@ -33,7 +36,6 @@ export namespace pragma {
 			Count
 		};
 
-		static ComponentEventId EVENT_ON_OBSERVER_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		virtual void Initialize() override;
 

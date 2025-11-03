@@ -18,10 +18,13 @@ export import :types;
 
 export {
 	namespace pragma {
-		class DLLNETWORK FlexMergeComponent final : public BaseEntityComponent {
+				namespace flexMergeComponent {
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TARGET_CHANGED;
+		}
+class DLLNETWORK FlexMergeComponent final : public BaseEntityComponent {
 		  public:
 			static bool can_merge(const pragma::Model &mdl, const pragma::Model &mdlParent);
-			static ComponentEventId EVENT_ON_TARGET_CHANGED;
+
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 

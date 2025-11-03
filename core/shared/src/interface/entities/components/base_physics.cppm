@@ -50,6 +50,18 @@ export {
 			pragma::physics::CollisionMask rayCollisionMask;
 			bool hit = false;
 		};
+		namespace basePhysicsComponent {
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PHYSICS_INITIALIZED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PHYSICS_DESTROYED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PHYSICS_UPDATED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DYNAMIC_PHYSICS_UPDATED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PRE_PHYSICS_SIMULATE;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_POST_PHYSICS_SIMULATE;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SLEEP;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_WAKE;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_HANDLE_RAYCAST;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_INITIALIZE_PHYSICS;
+		}
 		class DLLNETWORK BasePhysicsComponent : public BaseEntityComponent {
 		protected:
 			struct DLLNETWORK CollisionInfo {
@@ -81,16 +93,6 @@ export {
 
 			enum class PhysFlags : uint32_t { None = 0u, Dynamic = 1u };
 
-			static ComponentEventId EVENT_ON_PHYSICS_INITIALIZED;
-			static ComponentEventId EVENT_ON_PHYSICS_DESTROYED;
-			static ComponentEventId EVENT_ON_PHYSICS_UPDATED;
-			static ComponentEventId EVENT_ON_DYNAMIC_PHYSICS_UPDATED;
-			static ComponentEventId EVENT_ON_PRE_PHYSICS_SIMULATE;
-			static ComponentEventId EVENT_ON_POST_PHYSICS_SIMULATE;
-			static ComponentEventId EVENT_ON_SLEEP;
-			static ComponentEventId EVENT_ON_WAKE;
-			static ComponentEventId EVENT_HANDLE_RAYCAST;
-			static ComponentEventId EVENT_INITIALIZE_PHYSICS;
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 			virtual void Initialize() override;

@@ -19,8 +19,8 @@ static std::vector<ConstraintManagerComponent::ConstraintInfo> &get_constraints(
 	static std::vector<ConstraintManagerComponent::ConstraintInfo> g_cl;
 	return nw.IsServer() ? g_sv : g_cl;
 }
-ComponentEventId ConstraintManagerComponent::EVENT_APPLY_CONSTRAINT = pragma::INVALID_COMPONENT_ID;
-void ConstraintManagerComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_APPLY_CONSTRAINT = registerEvent("APPLY_CONSTRAINT", ComponentEventInfo::Type::Explicit); }
+ComponentEventId constraintManagerComponent::EVENT_APPLY_CONSTRAINT = pragma::INVALID_COMPONENT_ID;
+void ConstraintManagerComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { constraintManagerComponent::EVENT_APPLY_CONSTRAINT = registerEvent("APPLY_CONSTRAINT", ComponentEventInfo::Type::Explicit); }
 ConstraintManagerComponent::ConstraintManagerComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintManagerComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void ConstraintManagerComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

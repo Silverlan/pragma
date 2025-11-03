@@ -19,19 +19,22 @@ export namespace pragma {
 		UInt16 oldClipSize;
 		UInt16 newClipSize;
 	};
-	class DLLNETWORK BaseWeaponComponent : public BaseEntityComponent {
+		namespace baseWeaponComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DEPLOY;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_HOLSTER;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PRIMARY_ATTACK;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SECONDARY_ATTACK;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TERTIARY_ATTACK;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ATTACK4;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_END_PRIMARY_ATTACK;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_END_SECONDARY_ATTACK;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_RELOAD;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED;
+	}
+class DLLNETWORK BaseWeaponComponent : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_ON_DEPLOY;
-		static ComponentEventId EVENT_ON_HOLSTER;
-		static ComponentEventId EVENT_ON_PRIMARY_ATTACK;
-		static ComponentEventId EVENT_ON_SECONDARY_ATTACK;
-		static ComponentEventId EVENT_ON_TERTIARY_ATTACK;
-		static ComponentEventId EVENT_ON_ATTACK4;
-		static ComponentEventId EVENT_ON_END_PRIMARY_ATTACK;
-		static ComponentEventId EVENT_ON_END_SECONDARY_ATTACK;
-		static ComponentEventId EVENT_ON_RELOAD;
-		static ComponentEventId EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED;
-		static ComponentEventId EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;

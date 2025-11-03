@@ -77,7 +77,27 @@ export {
 			std::shared_ptr<ai::Schedule> schedule;
 			ai::BehaviorNode::Result result;
 		};
-		class DLLSERVER SAIComponent final : public BaseAIComponent, public SBaseSnapshotComponent {
+				namespace sAIComponent {
+			STATIC_DLL_COMPAT ComponentEventId EVENT_SELECT_SCHEDULE;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_SELECT_CONTROLLER_SCHEDULE;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SCHEDULE_COMPLETE;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PRIMARY_TARGET_CHANGED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PATH_CHANGED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_NPC_STATE_CHANGED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TARGET_VISIBILITY_LOST;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TARGET_VISIBILITY_REACQUIRED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_MEMORY_GAINED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_MEMORY_LOST;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TARGET_ACQUIRED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SUSPICIOUS_SOUND_HEARED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_CONTROLLER_ACTION_INPUT;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_START_CONTROL;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_END_CONTROL;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PATH_NODE_CHANGED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_LOOK_TARGET_CHANGED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SCHEDULE_STARTED;
+		}
+class DLLSERVER SAIComponent final : public BaseAIComponent, public SBaseSnapshotComponent {
 		public:
 			void _debugSendNavInfo(pragma::SPlayerComponent &pl);
 			void _debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::shared_ptr<DebugBehaviorTreeNode> &dbgTree, std::shared_ptr<ai::Schedule> &aiSchedule, float &tLastSchedUpdate);
@@ -90,25 +110,6 @@ export {
 		public:
 			static unsigned int GetNPCCount();
 			static const std::vector<SAIComponent *> &GetAll();
-
-			static ComponentEventId EVENT_SELECT_SCHEDULE;
-			static ComponentEventId EVENT_SELECT_CONTROLLER_SCHEDULE;
-			static ComponentEventId EVENT_ON_SCHEDULE_COMPLETE;
-			static ComponentEventId EVENT_ON_PRIMARY_TARGET_CHANGED;
-			static ComponentEventId EVENT_ON_PATH_CHANGED;
-			static ComponentEventId EVENT_ON_NPC_STATE_CHANGED;
-			static ComponentEventId EVENT_ON_TARGET_VISIBILITY_LOST;
-			static ComponentEventId EVENT_ON_TARGET_VISIBILITY_REACQUIRED;
-			static ComponentEventId EVENT_ON_MEMORY_GAINED;
-			static ComponentEventId EVENT_ON_MEMORY_LOST;
-			static ComponentEventId EVENT_ON_TARGET_ACQUIRED;
-			static ComponentEventId EVENT_ON_SUSPICIOUS_SOUND_HEARED;
-			static ComponentEventId EVENT_ON_CONTROLLER_ACTION_INPUT;
-			static ComponentEventId EVENT_ON_START_CONTROL;
-			static ComponentEventId EVENT_ON_END_CONTROL;
-			static ComponentEventId EVENT_ON_PATH_NODE_CHANGED;
-			static ComponentEventId EVENT_ON_LOOK_TARGET_CHANGED;
-			static ComponentEventId EVENT_ON_SCHEDULE_STARTED;
 
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);

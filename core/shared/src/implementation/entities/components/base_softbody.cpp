@@ -16,7 +16,7 @@ void BaseSoftBodyComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent("physics");
 	ent.AddComponent("model");
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { m_softBodyData = nullptr; });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { m_softBodyData = nullptr; });
 }
 bool BaseSoftBodyComponent::InitializeSoftBodyData()
 {
@@ -71,7 +71,7 @@ util::EventReply BaseSoftBodyComponent::HandleEvent(ComponentEventId eventId, Co
 {
 	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == pragma::BasePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED)
+	if(eventId == pragma::basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED)
 		ReleaseSoftBodyData();
 	return util::EventReply::Unhandled;
 }

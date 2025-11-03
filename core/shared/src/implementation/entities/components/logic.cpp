@@ -12,8 +12,8 @@ import :entities.components.logic_component;
 
 using namespace pragma;
 
-ComponentEventId LogicComponent::EVENT_ON_TICK = INVALID_COMPONENT_ID;
-void LogicComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_TICK = registerEvent("ON_TICK", ComponentEventInfo::Type::Explicit); }
+ComponentEventId logicComponent::EVENT_ON_TICK = INVALID_COMPONENT_ID;
+void LogicComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { logicComponent::EVENT_ON_TICK = registerEvent("ON_TICK", ComponentEventInfo::Type::Explicit); }
 
 LogicComponent::LogicComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
@@ -49,7 +49,7 @@ void LogicComponent::OnTick(double dt)
 	auto hThis = GetHandle();
 	auto &ent = GetEntity();
 	CEOnTick evData {dt};
-	InvokeEventCallbacks(EVENT_ON_TICK, evData);
+	InvokeEventCallbacks(logicComponent::EVENT_ON_TICK, evData);
 }
 
 //////////

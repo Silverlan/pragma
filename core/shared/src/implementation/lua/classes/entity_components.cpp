@@ -994,8 +994,8 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	mod[defStaticBvh];
 
 	auto defStaticBvhUser = Lua::create_base_entity_component_class<pragma::BaseStaticBvhUserComponent>("BaseStaticBvhUserComponent");
-	defStaticBvhUser.add_static_constant("EVENT_ON_ACTIVATION_STATE_CHANGED", pragma::BaseStaticBvhUserComponent::EVENT_ON_ACTIVATION_STATE_CHANGED);
-	defStaticBvhUser.add_static_constant("EVENT_ON_STATIC_BVH_COMPONENT_CHANGED", pragma::BaseStaticBvhUserComponent::EVENT_ON_STATIC_BVH_COMPONENT_CHANGED);
+	defStaticBvhUser.add_static_constant("EVENT_ON_ACTIVATION_STATE_CHANGED", pragma::baseStaticBvhUserComponent::EVENT_ON_ACTIVATION_STATE_CHANGED);
+	defStaticBvhUser.add_static_constant("EVENT_ON_STATIC_BVH_COMPONENT_CHANGED", pragma::baseStaticBvhUserComponent::EVENT_ON_STATIC_BVH_COMPONENT_CHANGED);
 	defStaticBvhUser.def("IsActive", &pragma::BaseStaticBvhUserComponent::IsActive);
 	mod[defStaticBvhUser];
 
@@ -1107,7 +1107,7 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 void pragma::lua::base_child_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseChildComponent>("BaseChildComponent");
-	def.add_static_constant("EVENT_ON_PARENT_CHANGED", pragma::BaseChildComponent::EVENT_ON_PARENT_CHANGED);
+	def.add_static_constant("EVENT_ON_PARENT_CHANGED", pragma::baseChildComponent::EVENT_ON_PARENT_CHANGED);
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("ClearParent", &pragma::BaseChildComponent::ClearParent);
 	def.def("SetParent", &pragma::BaseChildComponent::SetParent);
@@ -1163,7 +1163,7 @@ void pragma::lua::base_attachable_component::register_class(luabind::module_ &mo
 	defAttInfo.def_readwrite("flags", reinterpret_cast<std::underlying_type_t<decltype(AttachmentInfo::flags)> AttachmentInfo::*>(&AttachmentInfo::flags));
 	def.scope[defAttInfo];
 
-	def.add_static_constant("EVENT_ON_ATTACHMENT_UPDATE", pragma::BaseAttachmentComponent::EVENT_ON_ATTACHMENT_UPDATE);
+	def.add_static_constant("EVENT_ON_ATTACHMENT_UPDATE", pragma::baseAttachmentComponent::EVENT_ON_ATTACHMENT_UPDATE);
 
 	def.add_static_constant("FATTACHMENT_MODE_POSITION_ONLY", umath::to_integral(pragma::FAttachmentMode::PositionOnly));
 	def.add_static_constant("FATTACHMENT_MODE_BONEMERGE", umath::to_integral(pragma::FAttachmentMode::BoneMerge));
@@ -1547,42 +1547,42 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		  return newRot;
 	  });
 
-	def.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT", pragma::BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT);
-	def.add_static_constant("EVENT_ON_PLAY_ANIMATION", pragma::BaseAnimatedComponent::EVENT_ON_PLAY_ANIMATION);
-	def.add_static_constant("EVENT_ON_PLAY_LAYERED_ANIMATION", pragma::BaseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION);
-	def.add_static_constant("EVENT_ON_PLAY_LAYERED_ACTIVITY", pragma::BaseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ACTIVITY);
-	def.add_static_constant("EVENT_ON_ANIMATION_COMPLETE", pragma::BaseAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE);
-	def.add_static_constant("EVENT_ON_LAYERED_ANIMATION_START", pragma::BaseAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_START);
-	def.add_static_constant("EVENT_ON_LAYERED_ANIMATION_COMPLETE", pragma::BaseAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_COMPLETE);
-	def.add_static_constant("EVENT_ON_ANIMATION_START", pragma::BaseAnimatedComponent::EVENT_ON_ANIMATION_START);
-	def.add_static_constant("EVENT_TRANSLATE_LAYERED_ANIMATION", pragma::BaseAnimatedComponent::EVENT_TRANSLATE_LAYERED_ANIMATION);
-	def.add_static_constant("EVENT_TRANSLATE_ANIMATION", pragma::BaseAnimatedComponent::EVENT_TRANSLATE_ANIMATION);
-	def.add_static_constant("EVENT_TRANSLATE_ACTIVITY", pragma::BaseAnimatedComponent::EVENT_TRANSLATE_ACTIVITY);
+	def.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT", pragma::baseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT);
+	def.add_static_constant("EVENT_ON_PLAY_ANIMATION", pragma::baseAnimatedComponent::EVENT_ON_PLAY_ANIMATION);
+	def.add_static_constant("EVENT_ON_PLAY_LAYERED_ANIMATION", pragma::baseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION);
+	def.add_static_constant("EVENT_ON_PLAY_LAYERED_ACTIVITY", pragma::baseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ACTIVITY);
+	def.add_static_constant("EVENT_ON_ANIMATION_COMPLETE", pragma::baseAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE);
+	def.add_static_constant("EVENT_ON_LAYERED_ANIMATION_START", pragma::baseAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_START);
+	def.add_static_constant("EVENT_ON_LAYERED_ANIMATION_COMPLETE", pragma::baseAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_COMPLETE);
+	def.add_static_constant("EVENT_ON_ANIMATION_START", pragma::baseAnimatedComponent::EVENT_ON_ANIMATION_START);
+	def.add_static_constant("EVENT_TRANSLATE_LAYERED_ANIMATION", pragma::baseAnimatedComponent::EVENT_TRANSLATE_LAYERED_ANIMATION);
+	def.add_static_constant("EVENT_TRANSLATE_ANIMATION", pragma::baseAnimatedComponent::EVENT_TRANSLATE_ANIMATION);
+	def.add_static_constant("EVENT_TRANSLATE_ACTIVITY", pragma::baseAnimatedComponent::EVENT_TRANSLATE_ACTIVITY);
 
-	def.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT", pragma::BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT);
-	def.add_static_constant("EVENT_ON_PLAY_ANIMATION", pragma::BaseAnimatedComponent::EVENT_ON_PLAY_ANIMATION);
-	def.add_static_constant("EVENT_ON_PLAY_LAYERED_ANIMATION", pragma::BaseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION);
-	def.add_static_constant("EVENT_ON_PLAY_LAYERED_ACTIVITY", pragma::BaseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ACTIVITY);
-	def.add_static_constant("EVENT_ON_ANIMATION_COMPLETE", pragma::BaseAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE);
-	def.add_static_constant("EVENT_ON_LAYERED_ANIMATION_START", pragma::BaseAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_START);
-	def.add_static_constant("EVENT_ON_LAYERED_ANIMATION_COMPLETE", pragma::BaseAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_COMPLETE);
-	def.add_static_constant("EVENT_ON_ANIMATION_START", pragma::BaseAnimatedComponent::EVENT_ON_ANIMATION_START);
-	def.add_static_constant("EVENT_TRANSLATE_LAYERED_ANIMATION", pragma::BaseAnimatedComponent::EVENT_TRANSLATE_LAYERED_ANIMATION);
-	def.add_static_constant("EVENT_TRANSLATE_ANIMATION", pragma::BaseAnimatedComponent::EVENT_TRANSLATE_ANIMATION);
-	def.add_static_constant("EVENT_TRANSLATE_ACTIVITY", pragma::BaseAnimatedComponent::EVENT_TRANSLATE_ACTIVITY);
-	def.add_static_constant("EVENT_MAINTAIN_ANIMATIONS", pragma::BaseAnimatedComponent::EVENT_MAINTAIN_ANIMATIONS);
-	def.add_static_constant("EVENT_MAINTAIN_ANIMATION_MOVEMENT", pragma::BaseAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MOVEMENT);
-	def.add_static_constant("EVENT_SHOULD_UPDATE_BONES", pragma::BaseAnimatedComponent::EVENT_SHOULD_UPDATE_BONES);
+	def.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT", pragma::baseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT);
+	def.add_static_constant("EVENT_ON_PLAY_ANIMATION", pragma::baseAnimatedComponent::EVENT_ON_PLAY_ANIMATION);
+	def.add_static_constant("EVENT_ON_PLAY_LAYERED_ANIMATION", pragma::baseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION);
+	def.add_static_constant("EVENT_ON_PLAY_LAYERED_ACTIVITY", pragma::baseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ACTIVITY);
+	def.add_static_constant("EVENT_ON_ANIMATION_COMPLETE", pragma::baseAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE);
+	def.add_static_constant("EVENT_ON_LAYERED_ANIMATION_START", pragma::baseAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_START);
+	def.add_static_constant("EVENT_ON_LAYERED_ANIMATION_COMPLETE", pragma::baseAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_COMPLETE);
+	def.add_static_constant("EVENT_ON_ANIMATION_START", pragma::baseAnimatedComponent::EVENT_ON_ANIMATION_START);
+	def.add_static_constant("EVENT_TRANSLATE_LAYERED_ANIMATION", pragma::baseAnimatedComponent::EVENT_TRANSLATE_LAYERED_ANIMATION);
+	def.add_static_constant("EVENT_TRANSLATE_ANIMATION", pragma::baseAnimatedComponent::EVENT_TRANSLATE_ANIMATION);
+	def.add_static_constant("EVENT_TRANSLATE_ACTIVITY", pragma::baseAnimatedComponent::EVENT_TRANSLATE_ACTIVITY);
+	def.add_static_constant("EVENT_MAINTAIN_ANIMATIONS", pragma::baseAnimatedComponent::EVENT_MAINTAIN_ANIMATIONS);
+	def.add_static_constant("EVENT_MAINTAIN_ANIMATION_MOVEMENT", pragma::baseAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MOVEMENT);
+	def.add_static_constant("EVENT_SHOULD_UPDATE_BONES", pragma::baseAnimatedComponent::EVENT_SHOULD_UPDATE_BONES);
 
-	def.add_static_constant("EVENT_ON_PLAY_ACTIVITY", pragma::BaseAnimatedComponent::EVENT_ON_PLAY_ACTIVITY);
-	def.add_static_constant("EVENT_ON_STOP_LAYERED_ANIMATION", pragma::BaseAnimatedComponent::EVENT_ON_STOP_LAYERED_ANIMATION);
-	def.add_static_constant("EVENT_ON_BONE_TRANSFORM_CHANGED", pragma::BaseAnimatedComponent::EVENT_ON_BONE_TRANSFORM_CHANGED);
-	def.add_static_constant("EVENT_ON_ANIMATIONS_UPDATED", pragma::BaseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED);
-	def.add_static_constant("EVENT_PLAY_ANIMATION", pragma::BaseAnimatedComponent::EVENT_PLAY_ANIMATION);
-	def.add_static_constant("EVENT_ON_ANIMATION_RESET", pragma::BaseAnimatedComponent::EVENT_ON_ANIMATION_RESET);
-	def.add_static_constant("EVENT_ON_UPDATE_SKELETON", pragma::BaseAnimatedComponent::EVENT_ON_UPDATE_SKELETON);
-	def.add_static_constant("EVENT_POST_ANIMATION_UPDATE", pragma::BaseAnimatedComponent::EVENT_POST_ANIMATION_UPDATE);
-	def.add_static_constant("EVENT_ON_RESET_POSE", pragma::BaseAnimatedComponent::EVENT_ON_RESET_POSE);
+	def.add_static_constant("EVENT_ON_PLAY_ACTIVITY", pragma::baseAnimatedComponent::EVENT_ON_PLAY_ACTIVITY);
+	def.add_static_constant("EVENT_ON_STOP_LAYERED_ANIMATION", pragma::baseAnimatedComponent::EVENT_ON_STOP_LAYERED_ANIMATION);
+	def.add_static_constant("EVENT_ON_BONE_TRANSFORM_CHANGED", pragma::baseAnimatedComponent::EVENT_ON_BONE_TRANSFORM_CHANGED);
+	def.add_static_constant("EVENT_ON_ANIMATIONS_UPDATED", pragma::baseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED);
+	def.add_static_constant("EVENT_PLAY_ANIMATION", pragma::baseAnimatedComponent::EVENT_PLAY_ANIMATION);
+	def.add_static_constant("EVENT_ON_ANIMATION_RESET", pragma::baseAnimatedComponent::EVENT_ON_ANIMATION_RESET);
+	def.add_static_constant("EVENT_ON_UPDATE_SKELETON", pragma::baseAnimatedComponent::EVENT_ON_UPDATE_SKELETON);
+	def.add_static_constant("EVENT_POST_ANIMATION_UPDATE", pragma::baseAnimatedComponent::EVENT_POST_ANIMATION_UPDATE);
+	def.add_static_constant("EVENT_ON_RESET_POSE", pragma::baseAnimatedComponent::EVENT_ON_RESET_POSE);
 
 	def.add_static_constant("FPLAYANIM_NONE", umath::to_integral(pragma::FPlayAnim::None));
 	def.add_static_constant("FPLAYANIM_RESET", umath::to_integral(pragma::FPlayAnim::Reset));
@@ -1634,8 +1634,8 @@ void pragma::lua::base_toggle_component::register_class(luabind::module_ &mod)
 	def.def("IsTurnedOff", static_cast<bool (*)(lua_State *, pragma::BaseToggleComponent &)>([](lua_State *l, pragma::BaseToggleComponent &hEnt) { return !hEnt.IsTurnedOn(); }));
 	def.def("SetTurnedOn", &pragma::BaseToggleComponent::SetTurnedOn);
 	def.def("GetTurnedOnProperty", &pragma::BaseToggleComponent::GetTurnedOnProperty);
-	def.add_static_constant("EVENT_ON_TURN_ON", pragma::BaseToggleComponent::EVENT_ON_TURN_ON);
-	def.add_static_constant("EVENT_ON_TURN_OFF", pragma::BaseToggleComponent::EVENT_ON_TURN_OFF);
+	def.add_static_constant("EVENT_ON_TURN_ON", pragma::baseToggleComponent::EVENT_ON_TURN_ON);
+	def.add_static_constant("EVENT_ON_TURN_OFF", pragma::baseToggleComponent::EVENT_ON_TURN_OFF);
 
 	def.add_static_constant("SPAWN_FLAG_START_ON_BIT", umath::to_integral(pragma::BaseToggleComponent::SpawnFlags::StartOn));
 }
@@ -1737,8 +1737,8 @@ void pragma::lua::base_flammable_component::register_class(luabind::module_ &mod
 	def.def("SetIgnitable", static_cast<void (*)(lua_State *, pragma::BaseFlammableComponent &, bool)>([](lua_State *l, pragma::BaseFlammableComponent &hEnt, bool b) { hEnt.SetIgnitable(b); }));
 	def.def("GetOnFireProperty", &pragma::BaseFlammableComponent::GetOnFireProperty);
 	def.def("GetIgnitableProperty", &pragma::BaseFlammableComponent::GetIgnitableProperty);
-	def.add_static_constant("EVENT_ON_IGNITED", pragma::BaseFlammableComponent::EVENT_ON_IGNITED);
-	def.add_static_constant("EVENT_ON_EXTINGUISHED", pragma::BaseFlammableComponent::EVENT_ON_EXTINGUISHED);
+	def.add_static_constant("EVENT_ON_IGNITED", pragma::baseFlammableComponent::EVENT_ON_IGNITED);
+	def.add_static_constant("EVENT_ON_EXTINGUISHED", pragma::baseFlammableComponent::EVENT_ON_EXTINGUISHED);
 }
 
 void pragma::lua::base_health_component::register_class(luabind::module_ &mod)
@@ -1754,8 +1754,8 @@ void pragma::lua::base_health_component::register_class(luabind::module_ &mod)
 	def.def("GetMaxHealth", static_cast<void (*)(lua_State *, pragma::BaseHealthComponent &)>([](lua_State *l, pragma::BaseHealthComponent &hEnt) { Lua::PushInt(l, hEnt.GetMaxHealth()); }));
 	def.def("GetHealthProperty", &pragma::BaseHealthComponent::GetHealthProperty);
 	def.def("GetMaxHealthProperty", &pragma::BaseHealthComponent::GetMaxHealthProperty);
-	def.add_static_constant("EVENT_ON_TAKEN_DAMAGE", pragma::BaseHealthComponent::EVENT_ON_TAKEN_DAMAGE);
-	def.add_static_constant("EVENT_ON_HEALTH_CHANGED", pragma::BaseHealthComponent::EVENT_ON_HEALTH_CHANGED);
+	def.add_static_constant("EVENT_ON_TAKEN_DAMAGE", pragma::baseHealthComponent::EVENT_ON_TAKEN_DAMAGE);
+	def.add_static_constant("EVENT_ON_HEALTH_CHANGED", pragma::baseHealthComponent::EVENT_ON_HEALTH_CHANGED);
 }
 
 void pragma::lua::base_name_component::register_class(luabind::module_ &mod)
@@ -2009,7 +2009,7 @@ void pragma::lua::base_networked_component::register_class(luabind::module_ &mod
 void pragma::lua::base_observable_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseObservableComponent>("BaseObservableComponent");
-	def.add_static_constant("EVENT_ON_OBSERVER_CHANGED", pragma::BaseObservableComponent::EVENT_ON_OBSERVER_CHANGED);
+	def.add_static_constant("EVENT_ON_OBSERVER_CHANGED", pragma::baseObservableComponent::EVENT_ON_OBSERVER_CHANGED);
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetLocalCameraOrigin", static_cast<void (*)(lua_State *, pragma::BaseObservableComponent &, uint32_t, const Vector3 &)>([](lua_State *l, pragma::BaseObservableComponent &hEnt, uint32_t camType, const Vector3 &origin) {
 		hEnt.SetLocalCameraOrigin(static_cast<pragma::BaseObservableComponent::CameraType>(camType), origin);
@@ -2222,16 +2222,16 @@ void pragma::lua::base_physics_component::register_class(luabind::module_ &mod)
 	def.def("ApplyTorque", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, const Vector3 &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, const Vector3 &torque) { hEnt.ApplyTorque(torque); }));
 	def.def("ApplyTorqueImpulse", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, const Vector3 &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, const Vector3 &torque) { hEnt.ApplyTorqueImpulse(torque); }));
 	def.def("GetMass", &pragma::BasePhysicsComponent::GetMass);
-	def.add_static_constant("EVENT_ON_PHYSICS_INITIALIZED", pragma::BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED);
-	def.add_static_constant("EVENT_ON_PHYSICS_DESTROYED", pragma::BasePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED);
-	def.add_static_constant("EVENT_ON_PHYSICS_UPDATED", pragma::BasePhysicsComponent::EVENT_ON_PHYSICS_UPDATED);
-	def.add_static_constant("EVENT_ON_DYNAMIC_PHYSICS_UPDATED", pragma::BasePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED);
-	def.add_static_constant("EVENT_ON_PRE_PHYSICS_SIMULATE", pragma::BasePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE);
-	def.add_static_constant("EVENT_ON_POST_PHYSICS_SIMULATE", pragma::BasePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE);
-	def.add_static_constant("EVENT_ON_WAKE", pragma::BasePhysicsComponent::EVENT_ON_WAKE);
-	def.add_static_constant("EVENT_ON_SLEEP", pragma::BasePhysicsComponent::EVENT_ON_SLEEP);
-	def.add_static_constant("EVENT_HANDLE_RAYCAST", pragma::BasePhysicsComponent::EVENT_HANDLE_RAYCAST);
-	def.add_static_constant("EVENT_INITIALIZE_PHYSICS", pragma::BasePhysicsComponent::EVENT_INITIALIZE_PHYSICS);
+	def.add_static_constant("EVENT_ON_PHYSICS_INITIALIZED", pragma::basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED);
+	def.add_static_constant("EVENT_ON_PHYSICS_DESTROYED", pragma::basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED);
+	def.add_static_constant("EVENT_ON_PHYSICS_UPDATED", pragma::basePhysicsComponent::EVENT_ON_PHYSICS_UPDATED);
+	def.add_static_constant("EVENT_ON_DYNAMIC_PHYSICS_UPDATED", pragma::basePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED);
+	def.add_static_constant("EVENT_ON_PRE_PHYSICS_SIMULATE", pragma::basePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE);
+	def.add_static_constant("EVENT_ON_POST_PHYSICS_SIMULATE", pragma::basePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE);
+	def.add_static_constant("EVENT_ON_WAKE", pragma::basePhysicsComponent::EVENT_ON_WAKE);
+	def.add_static_constant("EVENT_ON_SLEEP", pragma::basePhysicsComponent::EVENT_ON_SLEEP);
+	def.add_static_constant("EVENT_HANDLE_RAYCAST", pragma::basePhysicsComponent::EVENT_HANDLE_RAYCAST);
+	def.add_static_constant("EVENT_INITIALIZE_PHYSICS", pragma::basePhysicsComponent::EVENT_INITIALIZE_PHYSICS);
 
 	def.add_static_constant("MOVETYPE_NONE", umath::to_integral(pragma::physics::MOVETYPE::NONE));
 	def.add_static_constant("MOVETYPE_WALK", umath::to_integral(pragma::physics::MOVETYPE::WALK));
@@ -2287,7 +2287,7 @@ void pragma::lua::base_sound_emitter_component::register_class(luabind::module_ 
 			lua_rawseti(l, top, i + 1);
 		}
 	}));
-	def.add_static_constant("EVENT_ON_SOUND_CREATED", pragma::BaseSoundEmitterComponent::EVENT_ON_SOUND_CREATED);
+	def.add_static_constant("EVENT_ON_SOUND_CREATED", pragma::baseSoundEmitterComponent::EVENT_ON_SOUND_CREATED);
 }
 
 namespace Lua::Transform {
@@ -2419,7 +2419,7 @@ void pragma::lua::base_color_component::register_class(luabind::module_ &mod)
 	def.def("SetColor", static_cast<void (pragma::BaseColorComponent::*)(const Color &)>(&pragma::BaseColorComponent::SetColor));
 	def.def("SetColor", static_cast<void (pragma::BaseColorComponent::*)(const Vector3 &)>(&pragma::BaseColorComponent::SetColor));
 	def.def("SetColor", static_cast<void (pragma::BaseColorComponent::*)(const Vector4 &)>(&pragma::BaseColorComponent::SetColor));
-	def.add_static_constant("EVENT_ON_COLOR_CHANGED", pragma::BaseColorComponent::EVENT_ON_COLOR_CHANGED);
+	def.add_static_constant("EVENT_ON_COLOR_CHANGED", pragma::baseColorComponent::EVENT_ON_COLOR_CHANGED);
 }
 
 
@@ -2463,7 +2463,7 @@ void pragma::lua::base_surface_component::register_class(luabind::module_ &mod)
 	def.def("GetMesh", static_cast<pragma::ModelSubMesh *(pragma::BaseSurfaceComponent::*)()>(&pragma::BaseSurfaceComponent::GetMesh), luabind::shared_from_this_policy<0> {});
 	def.def("FindAndAssignSurfaceMesh", +[](pragma::BaseSurfaceComponent &c, luabind::object oFilter) -> std::optional<std::tuple<std::shared_ptr<ModelMesh>, std::shared_ptr<pragma::ModelSubMesh>, msys::Material *>> { return FindAndAssignSurfaceMesh(c, oFilter); });
 	def.def("FindAndAssignSurfaceMesh", +[](pragma::BaseSurfaceComponent &c) -> std::optional<std::tuple<std::shared_ptr<ModelMesh>, std::shared_ptr<pragma::ModelSubMesh>, msys::Material *>> { return FindAndAssignSurfaceMesh(c, Lua::nil); });
-	def.add_static_constant("EVENT_ON_SURFACE_PLANE_CHANGED", pragma::BaseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED);
+	def.add_static_constant("EVENT_ON_SURFACE_PLANE_CHANGED", pragma::baseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED);
 }
 
 void pragma::lua::base_score_component::register_class(luabind::module_ &mod)
@@ -2475,7 +2475,7 @@ void pragma::lua::base_score_component::register_class(luabind::module_ &mod)
 	def.def("SetScore", &pragma::BaseScoreComponent::SetScore);
 	def.def("AddScore", &pragma::BaseScoreComponent::AddScore);
 	def.def("SubtractScore", &pragma::BaseScoreComponent::SubtractScore);
-	def.add_static_constant("EVENT_ON_SCORE_CHANGED", pragma::BaseScoreComponent::EVENT_ON_SCORE_CHANGED);
+	def.add_static_constant("EVENT_ON_SCORE_CHANGED", pragma::baseScoreComponent::EVENT_ON_SCORE_CHANGED);
 }
 
 void pragma::lua::base_radius_component::register_class(luabind::module_ &mod)
@@ -2485,7 +2485,7 @@ void pragma::lua::base_radius_component::register_class(luabind::module_ &mod)
 	def.def("GetRadiusProperty", &pragma::BaseRadiusComponent::GetRadiusProperty);
 	def.def("GetRadius", &pragma::BaseRadiusComponent::GetRadius);
 	def.def("SetRadius", &pragma::BaseRadiusComponent::SetRadius);
-	def.add_static_constant("EVENT_ON_RADIUS_CHANGED", pragma::BaseRadiusComponent::EVENT_ON_RADIUS_CHANGED);
+	def.add_static_constant("EVENT_ON_RADIUS_CHANGED", pragma::baseRadiusComponent::EVENT_ON_RADIUS_CHANGED);
 }
 
 void pragma::lua::base_field_angle_component::register_class(luabind::module_ &mod)
@@ -2495,7 +2495,7 @@ void pragma::lua::base_field_angle_component::register_class(luabind::module_ &m
 	def.def("GetFieldAngleProperty", &pragma::BaseFieldAngleComponent::GetFieldAngleProperty);
 	def.def("GetFieldAngle", &pragma::BaseFieldAngleComponent::GetFieldAngle);
 	def.def("SetFieldAngle", &pragma::BaseFieldAngleComponent::SetFieldAngle);
-	def.add_static_constant("EVENT_ON_FIELD_ANGLE_CHANGED", pragma::BaseFieldAngleComponent::EVENT_ON_FIELD_ANGLE_CHANGED);
+	def.add_static_constant("EVENT_ON_FIELD_ANGLE_CHANGED", pragma::baseFieldAngleComponent::EVENT_ON_FIELD_ANGLE_CHANGED);
 }
 
 void pragma::lua::base_env_sound_dsp_component::register_class(luabind::module_ &mod)
@@ -2764,7 +2764,7 @@ void pragma::lua::base_env_filter_name_component::register_class(luabind::module
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFilterNameComponent>("BaseFilterNameComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("ShouldPass", &pragma::BaseFilterNameComponent::ShouldPass);
-	def.add_static_constant("EVENT_ON_NAME_CHANGED", pragma::BaseNameComponent::EVENT_ON_NAME_CHANGED);
+	def.add_static_constant("EVENT_ON_NAME_CHANGED", pragma::baseNameComponent::EVENT_ON_NAME_CHANGED);
 }
 
 void pragma::lua::base_env_filter_class_component::register_class(luabind::module_ &mod)
@@ -2945,11 +2945,11 @@ void pragma::lua::base_touch_component::register_class(luabind::module_ &mod)
 		return std::count_if(touchingInfo.begin(), touchingInfo.end(), [](const pragma::BaseTouchComponent::TouchInfo &touchInfo) -> bool { return touchInfo.triggered && touchInfo.touch.entity.valid(); });
 	}));
 
-	def.add_static_constant("EVENT_CAN_TRIGGER", pragma::BaseTouchComponent::EVENT_CAN_TRIGGER);
-	def.add_static_constant("EVENT_ON_START_TOUCH", pragma::BaseTouchComponent::EVENT_ON_START_TOUCH);
-	def.add_static_constant("EVENT_ON_END_TOUCH", pragma::BaseTouchComponent::EVENT_ON_END_TOUCH);
-	def.add_static_constant("EVENT_ON_TRIGGER", pragma::BaseTouchComponent::EVENT_ON_TRIGGER);
-	def.add_static_constant("EVENT_ON_TRIGGER_INITIALIZED", pragma::BaseTouchComponent::EVENT_ON_TRIGGER_INITIALIZED);
+	def.add_static_constant("EVENT_CAN_TRIGGER", pragma::baseTouchComponent::EVENT_CAN_TRIGGER);
+	def.add_static_constant("EVENT_ON_START_TOUCH", pragma::baseTouchComponent::EVENT_ON_START_TOUCH);
+	def.add_static_constant("EVENT_ON_END_TOUCH", pragma::baseTouchComponent::EVENT_ON_END_TOUCH);
+	def.add_static_constant("EVENT_ON_TRIGGER", pragma::baseTouchComponent::EVENT_ON_TRIGGER);
+	def.add_static_constant("EVENT_ON_TRIGGER_INITIALIZED", pragma::baseTouchComponent::EVENT_ON_TRIGGER_INITIALIZED);
 
 	def.add_static_constant("TRIGGER_FLAG_NONE", umath::to_integral(pragma::BaseTouchComponent::TriggerFlags::None));
 	def.add_static_constant("TRIGGER_FLAG_BIT_PLAYERS", umath::to_integral(pragma::BaseTouchComponent::TriggerFlags::Players));
@@ -2973,7 +2973,7 @@ void pragma::lua::base_flashlight_component::register_class(luabind::module_ &mo
 void pragma::lua::base_flex_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFlexComponent>("BaseFlexComponent");
-	def.add_static_constant("EVENT_ON_FLEX_CONTROLLER_CHANGED", pragma::BaseFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED);
+	def.add_static_constant("EVENT_ON_FLEX_CONTROLLER_CHANGED", pragma::baseFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED);
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
@@ -3030,8 +3030,9 @@ void pragma::lua::base_character_component::register_class(luabind::module_ &mod
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	// Actor
 	def.def("GetFrozenProperty", &pragma::BaseCharacterComponent::GetFrozenProperty);
-	def.add_static_constant("EVENT_ON_KILLED", pragma::BaseActorComponent::EVENT_ON_KILLED);
-	def.add_static_constant("EVENT_ON_RESPAWN", pragma::BaseActorComponent::EVENT_ON_RESPAWN);
+	def.add_static_constant("EVENT_ON_KILLED", pragma::baseActorComponent::EVENT_ON_KILLED);
+	def.add_static_constant("EVENT_ON_RESPAWN", pragma::baseActorComponent::EVENT_ON_RESPAWN);
+	def.add_static_constant("EVENT_ON_DEATH", pragma::baseActorComponent::EVENT_ON_DEATH);
 
 	// Character
 	def.def("IsAlive", &pragma::BaseCharacterComponent::IsAlive);
@@ -3122,15 +3123,14 @@ void pragma::lua::base_character_component::register_class(luabind::module_ &mod
 	def.def("Jump", static_cast<bool (pragma::BaseCharacterComponent::*)(const Vector3 &)>(&pragma::BaseCharacterComponent::Jump));
 	def.def("GetJumpPowerProperty", &pragma::BaseCharacterComponent::GetJumpPowerProperty);
 
-	def.add_static_constant("EVENT_ON_FOOT_STEP", pragma::BaseCharacterComponent::EVENT_ON_FOOT_STEP);
-	def.add_static_constant("EVENT_ON_CHARACTER_ORIENTATION_CHANGED", pragma::BaseCharacterComponent::EVENT_ON_CHARACTER_ORIENTATION_CHANGED);
-	def.add_static_constant("EVENT_ON_DEPLOY_WEAPON", pragma::BaseCharacterComponent::EVENT_ON_DEPLOY_WEAPON);
-	def.add_static_constant("EVENT_ON_SET_ACTIVE_WEAPON", pragma::BaseCharacterComponent::EVENT_ON_SET_ACTIVE_WEAPON);
-	def.add_static_constant("EVENT_PLAY_FOOTSTEP_SOUND", pragma::BaseCharacterComponent::EVENT_PLAY_FOOTSTEP_SOUND);
-	def.add_static_constant("EVENT_ON_DEATH", pragma::BaseCharacterComponent::EVENT_ON_DEATH);
-	def.add_static_constant("EVENT_IS_MOVING", pragma::BaseCharacterComponent::EVENT_IS_MOVING);
-	def.add_static_constant("EVENT_HANDLE_VIEW_ROTATION", pragma::BaseCharacterComponent::EVENT_HANDLE_VIEW_ROTATION);
-	def.add_static_constant("EVENT_ON_JUMP", pragma::BaseCharacterComponent::EVENT_ON_JUMP);
+	def.add_static_constant("EVENT_ON_FOOT_STEP", pragma::baseCharacterComponent::EVENT_ON_FOOT_STEP);
+	def.add_static_constant("EVENT_ON_CHARACTER_ORIENTATION_CHANGED", pragma::baseCharacterComponent::EVENT_ON_CHARACTER_ORIENTATION_CHANGED);
+	def.add_static_constant("EVENT_ON_DEPLOY_WEAPON", pragma::baseCharacterComponent::EVENT_ON_DEPLOY_WEAPON);
+	def.add_static_constant("EVENT_ON_SET_ACTIVE_WEAPON", pragma::baseCharacterComponent::EVENT_ON_SET_ACTIVE_WEAPON);
+	def.add_static_constant("EVENT_PLAY_FOOTSTEP_SOUND", pragma::baseCharacterComponent::EVENT_PLAY_FOOTSTEP_SOUND);
+	def.add_static_constant("EVENT_IS_MOVING", pragma::baseCharacterComponent::EVENT_IS_MOVING);
+	def.add_static_constant("EVENT_HANDLE_VIEW_ROTATION", pragma::baseCharacterComponent::EVENT_HANDLE_VIEW_ROTATION);
+	def.add_static_constant("EVENT_ON_JUMP", pragma::baseCharacterComponent::EVENT_ON_JUMP);
 
 	def.add_static_constant("FOOT_LEFT", umath::to_integral(pragma::BaseCharacterComponent::FootType::Left));
 	def.add_static_constant("FOOT_RIGHT", umath::to_integral(pragma::BaseCharacterComponent::FootType::Right));
@@ -3150,8 +3150,8 @@ void pragma::lua::base_vehicle_component::register_class(luabind::module_ &mod)
 	def.def("SetupSteeringWheel", &pragma::BaseVehicleComponent::SetupSteeringWheel);
 	def.def("GetPhysicsVehicle", static_cast<physics::IVehicle *(pragma::BaseVehicleComponent::*)()>(&pragma::BaseVehicleComponent::GetPhysicsVehicle));
 	def.def("SetupPhysics", &pragma::BaseVehicleComponent::SetupVehicle);
-	def.add_static_constant("EVENT_ON_DRIVER_ENTERED", pragma::BaseVehicleComponent::EVENT_ON_DRIVER_ENTERED);
-	def.add_static_constant("EVENT_ON_DRIVER_EXITED", pragma::BaseVehicleComponent::EVENT_ON_DRIVER_EXITED);
+	def.add_static_constant("EVENT_ON_DRIVER_ENTERED", pragma::baseVehicleComponent::EVENT_ON_DRIVER_ENTERED);
+	def.add_static_constant("EVENT_ON_DRIVER_EXITED", pragma::baseVehicleComponent::EVENT_ON_DRIVER_EXITED);
 }
 
 namespace Lua::Weapon {
@@ -3213,17 +3213,17 @@ void pragma::lua::base_weapon_component::register_class(luabind::module_ &mod)
 	def.def("EndPrimaryAttack", &pragma::BaseWeaponComponent::EndPrimaryAttack);
 	def.def("EndSecondaryAttack", &pragma::BaseWeaponComponent::EndSecondaryAttack);
 
-	def.add_static_constant("EVENT_ON_DEPLOY", pragma::BaseWeaponComponent::EVENT_ON_DEPLOY);
-	def.add_static_constant("EVENT_ON_HOLSTER", pragma::BaseWeaponComponent::EVENT_ON_HOLSTER);
-	def.add_static_constant("EVENT_ON_PRIMARY_ATTACK", pragma::BaseWeaponComponent::EVENT_ON_PRIMARY_ATTACK);
-	def.add_static_constant("EVENT_ON_SECONDARY_ATTACK", pragma::BaseWeaponComponent::EVENT_ON_SECONDARY_ATTACK);
-	def.add_static_constant("EVENT_ON_TERTIARY_ATTACK", pragma::BaseWeaponComponent::EVENT_ON_TERTIARY_ATTACK);
-	def.add_static_constant("EVENT_ON_ATTACK4", pragma::BaseWeaponComponent::EVENT_ON_ATTACK4);
-	def.add_static_constant("EVENT_ON_END_PRIMARY_ATTACK", pragma::BaseWeaponComponent::EVENT_ON_END_PRIMARY_ATTACK);
-	def.add_static_constant("EVENT_ON_END_SECONDARY_ATTACK", pragma::BaseWeaponComponent::EVENT_ON_END_SECONDARY_ATTACK);
-	def.add_static_constant("EVENT_ON_RELOAD", pragma::BaseWeaponComponent::EVENT_ON_RELOAD);
-	def.add_static_constant("EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED", pragma::BaseWeaponComponent::EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED);
-	def.add_static_constant("EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED", pragma::BaseWeaponComponent::EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED);
+	def.add_static_constant("EVENT_ON_DEPLOY", pragma::baseWeaponComponent::EVENT_ON_DEPLOY);
+	def.add_static_constant("EVENT_ON_HOLSTER", pragma::baseWeaponComponent::EVENT_ON_HOLSTER);
+	def.add_static_constant("EVENT_ON_PRIMARY_ATTACK", pragma::baseWeaponComponent::EVENT_ON_PRIMARY_ATTACK);
+	def.add_static_constant("EVENT_ON_SECONDARY_ATTACK", pragma::baseWeaponComponent::EVENT_ON_SECONDARY_ATTACK);
+	def.add_static_constant("EVENT_ON_TERTIARY_ATTACK", pragma::baseWeaponComponent::EVENT_ON_TERTIARY_ATTACK);
+	def.add_static_constant("EVENT_ON_ATTACK4", pragma::baseWeaponComponent::EVENT_ON_ATTACK4);
+	def.add_static_constant("EVENT_ON_END_PRIMARY_ATTACK", pragma::baseWeaponComponent::EVENT_ON_END_PRIMARY_ATTACK);
+	def.add_static_constant("EVENT_ON_END_SECONDARY_ATTACK", pragma::baseWeaponComponent::EVENT_ON_END_SECONDARY_ATTACK);
+	def.add_static_constant("EVENT_ON_RELOAD", pragma::baseWeaponComponent::EVENT_ON_RELOAD);
+	def.add_static_constant("EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED", pragma::baseWeaponComponent::EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED);
+	def.add_static_constant("EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED", pragma::baseWeaponComponent::EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED);
 }
 
 void pragma::lua::base_player_component::register_class(luabind::module_ &mod)
@@ -3272,7 +3272,7 @@ void pragma::lua::base_observer_component::register_class(luabind::module_ &mod)
 	def.def("SetObserverTarget", &pragma::BaseObserverComponent::SetObserverTarget);
 	def.def("GetObserverTarget", &pragma::BaseObserverComponent::GetObserverTarget);
 
-	def.add_static_constant("EVENT_ON_OBSERVATION_MODE_CHANGED", pragma::BaseObserverComponent::EVENT_ON_OBSERVATION_MODE_CHANGED);
+	def.add_static_constant("EVENT_ON_OBSERVATION_MODE_CHANGED", pragma::baseObserverComponent::EVENT_ON_OBSERVATION_MODE_CHANGED);
 
 	// Enums
 	def.add_static_constant("OBSERVERMODE_NONE", umath::to_integral(ObserverMode::None));
@@ -3294,23 +3294,23 @@ void pragma::lua::base_gamemode_component::register_class(luabind::module_ &mod)
 	def.def("GetGamemodeVersion", &pragma::BaseGamemodeComponent::GetGamemodeVersion);
 
 	// Enums
-	def.add_static_constant("EVENT_ON_PLAYER_DEATH", pragma::BaseGamemodeComponent::EVENT_ON_PLAYER_DEATH);
-	def.add_static_constant("EVENT_ON_PLAYER_SPAWNED", pragma::BaseGamemodeComponent::EVENT_ON_PLAYER_SPAWNED);
-	def.add_static_constant("EVENT_ON_PLAYER_DROPPED", pragma::BaseGamemodeComponent::EVENT_ON_PLAYER_DROPPED);
-	def.add_static_constant("EVENT_ON_PLAYER_READY", pragma::BaseGamemodeComponent::EVENT_ON_PLAYER_READY);
-	def.add_static_constant("EVENT_ON_PLAYER_JOINED", pragma::BaseGamemodeComponent::EVENT_ON_PLAYER_JOINED);
-	def.add_static_constant("EVENT_ON_GAME_INITIALIZED", pragma::BaseGamemodeComponent::EVENT_ON_GAME_INITIALIZED);
-	def.add_static_constant("EVENT_ON_MAP_INITIALIZED", pragma::BaseGamemodeComponent::EVENT_ON_MAP_INITIALIZED);
-	def.add_static_constant("EVENT_ON_GAME_READY", pragma::BaseGamemodeComponent::EVENT_ON_GAME_READY);
+	def.add_static_constant("EVENT_ON_PLAYER_DEATH", pragma::baseGamemodeComponent::EVENT_ON_PLAYER_DEATH);
+	def.add_static_constant("EVENT_ON_PLAYER_SPAWNED", pragma::baseGamemodeComponent::EVENT_ON_PLAYER_SPAWNED);
+	def.add_static_constant("EVENT_ON_PLAYER_DROPPED", pragma::baseGamemodeComponent::EVENT_ON_PLAYER_DROPPED);
+	def.add_static_constant("EVENT_ON_PLAYER_READY", pragma::baseGamemodeComponent::EVENT_ON_PLAYER_READY);
+	def.add_static_constant("EVENT_ON_PLAYER_JOINED", pragma::baseGamemodeComponent::EVENT_ON_PLAYER_JOINED);
+	def.add_static_constant("EVENT_ON_GAME_INITIALIZED", pragma::baseGamemodeComponent::EVENT_ON_GAME_INITIALIZED);
+	def.add_static_constant("EVENT_ON_MAP_INITIALIZED", pragma::baseGamemodeComponent::EVENT_ON_MAP_INITIALIZED);
+	def.add_static_constant("EVENT_ON_GAME_READY", pragma::baseGamemodeComponent::EVENT_ON_GAME_READY);
 }
 
 void pragma::lua::base_generic_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseGenericComponent>("BaseGenericComponent");
-	def.add_static_constant("EVENT_ON_COMPONENT_ADDED", pragma::BaseGenericComponent::EVENT_ON_ENTITY_COMPONENT_ADDED);
-	def.add_static_constant("EVENT_ON_COMPONENT_REMOVED", pragma::BaseGenericComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED);
-	def.add_static_constant("EVENT_ON_MEMBERS_CHANGED", pragma::BaseGenericComponent::EVENT_ON_MEMBERS_CHANGED);
-	def.add_static_constant("EVENT_ON_ACTIVE_STATE_CHANGED", pragma::BaseGenericComponent::EVENT_ON_ACTIVE_STATE_CHANGED);
+	def.add_static_constant("EVENT_ON_COMPONENT_ADDED", pragma::baseGenericComponent::EVENT_ON_ENTITY_COMPONENT_ADDED);
+	def.add_static_constant("EVENT_ON_COMPONENT_REMOVED", pragma::baseGenericComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED);
+	def.add_static_constant("EVENT_ON_MEMBERS_CHANGED", pragma::baseGenericComponent::EVENT_ON_MEMBERS_CHANGED);
+	def.add_static_constant("EVENT_ON_ACTIVE_STATE_CHANGED", pragma::baseEntityComponent::EVENT_ON_ACTIVE_STATE_CHANGED);
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
@@ -3342,7 +3342,7 @@ void pragma::lua::base_io_component::register_class(luabind::module_ &mod)
 	def.def("StoreOutput", static_cast<void (*)(lua_State *, pragma::BaseIOComponent &, const std::string &, const std::string &)>([](lua_State *l, pragma::BaseIOComponent &hIo, const std::string &name, const std::string &info) { hIo.StoreOutput(name, info); }));
 	def.def("FireOutput", static_cast<void (*)(lua_State *, pragma::BaseIOComponent &, const std::string &, pragma::ecs::BaseEntity &)>([](lua_State *l, pragma::BaseIOComponent &hIo, const std::string &name, pragma::ecs::BaseEntity &ent) { hIo.TriggerOutput(name, &ent); }));
 	def.def("FireOutput", &pragma::BaseIOComponent::TriggerOutput);
-	def.add_static_constant("EVENT_HANDLE_INPUT", pragma::BaseIOComponent::EVENT_HANDLE_INPUT);
+	def.add_static_constant("EVENT_HANDLE_INPUT", pragma::baseIOComponent::EVENT_HANDLE_INPUT);
 
 	def.add_static_constant("IO_FLAG_NONE", umath::to_integral(pragma::BaseIOComponent::IoFlags::None));
 	def.add_static_constant("IO_FLAG_BIT_FORCE_DELAYED_FIRE", umath::to_integral(pragma::BaseIOComponent::IoFlags::ForceDelayedFire));
@@ -3417,8 +3417,8 @@ void pragma::lua::base_model_component::register_class(luabind::module_ &mod)
 		return luabind::mult<Vector3, Quat> {l, offset, rot};
 	}));
 
-	def.add_static_constant("EVENT_ON_MODEL_CHANGED", pragma::BaseModelComponent::EVENT_ON_MODEL_CHANGED);
-	def.add_static_constant("EVENT_ON_MODEL_MATERIALS_LOADED", pragma::BaseModelComponent::EVENT_ON_MODEL_MATERIALS_LOADED);
+	def.add_static_constant("EVENT_ON_MODEL_CHANGED", pragma::baseModelComponent::EVENT_ON_MODEL_CHANGED);
+	def.add_static_constant("EVENT_ON_MODEL_MATERIALS_LOADED", pragma::baseModelComponent::EVENT_ON_MODEL_MATERIALS_LOADED);
 }
 
 void pragma::lua::base_time_scale_component::register_class(luabind::module_ &mod)
@@ -3443,7 +3443,7 @@ void pragma::lua::base_ownable_component::register_class(luabind::module_ &mod)
 	}));
 	def.def("SetOwner", &pragma::BaseOwnableComponent::ClearOwner);
 	def.def("GetOwner", static_cast<pragma::ecs::BaseEntity *(pragma::BaseOwnableComponent::*)()>(&pragma::BaseOwnableComponent::GetOwner));
-	def.add_static_constant("EVENT_ON_OWNER_CHANGED", pragma::BaseOwnableComponent::EVENT_ON_OWNER_CHANGED);
+	def.add_static_constant("EVENT_ON_OWNER_CHANGED", pragma::baseOwnableComponent::EVENT_ON_OWNER_CHANGED);
 }
 
 void pragma::lua::base_debug_text_component::register_class(luabind::module_ &mod)
@@ -3534,7 +3534,7 @@ void pragma::lua::base_liquid_surface_simulation_component::register_class(luabi
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseLiquidSurfaceSimulationComponent>("BaseLiquidSurfaceSimulationComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
-	def.add_static_constant("EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED", pragma::BaseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED);
+	def.add_static_constant("EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED", pragma::baseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED);
 }
 
 // --template-register-definition

@@ -17,8 +17,8 @@ bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t e
 	if(pragma::Game::InvokeEntityEvent(component, eventId, argsIdx, bInject))
 		return true;
 	auto *l = GetLuaState();
-	if(eventId == pragma::SAIComponent::EVENT_ON_PRIMARY_TARGET_CHANGED || eventId == pragma::SAIComponent::EVENT_ON_TARGET_VISIBILITY_LOST || eventId == pragma::SAIComponent::EVENT_ON_TARGET_VISIBILITY_REACQUIRED || eventId == pragma::SAIComponent::EVENT_ON_MEMORY_GAINED
-	  || eventId == pragma::SAIComponent::EVENT_ON_MEMORY_LOST) {
+	if(eventId == pragma::sAIComponent::EVENT_ON_PRIMARY_TARGET_CHANGED || eventId == pragma::sAIComponent::EVENT_ON_TARGET_VISIBILITY_LOST || eventId == pragma::sAIComponent::EVENT_ON_TARGET_VISIBILITY_REACQUIRED || eventId == pragma::sAIComponent::EVENT_ON_MEMORY_GAINED
+	  || eventId == pragma::sAIComponent::EVENT_ON_MEMORY_LOST) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto &memoryFragment = Lua::Check<pragma::ai::Memory::Fragment>(l, -1);
@@ -30,7 +30,7 @@ bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t e
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::SAIComponent::EVENT_ON_NPC_STATE_CHANGED) {
+	else if(eventId == pragma::sAIComponent::EVENT_ON_NPC_STATE_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto oldState = static_cast<NPCSTATE>(Lua::CheckInt(l, -1));
@@ -47,7 +47,7 @@ bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t e
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::SAIComponent::EVENT_ON_TARGET_ACQUIRED) {
+	else if(eventId == pragma::sAIComponent::EVENT_ON_TARGET_ACQUIRED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto &ent = Lua::Check<EntityHandle>(l, -1);
@@ -71,7 +71,7 @@ bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t e
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::SAIComponent::EVENT_ON_SUSPICIOUS_SOUND_HEARED) {
+	else if(eventId == pragma::sAIComponent::EVENT_ON_SUSPICIOUS_SOUND_HEARED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto &sound = Lua::Check<std::shared_ptr<ALSound>>(l, -1);
@@ -83,7 +83,7 @@ bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t e
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::SAIComponent::EVENT_ON_CONTROLLER_ACTION_INPUT) {
+	else if(eventId == pragma::sAIComponent::EVENT_ON_CONTROLLER_ACTION_INPUT) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto action = static_cast<pragma::Action>(Lua::CheckInt(l, -1));
@@ -100,7 +100,7 @@ bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t e
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::SAIComponent::EVENT_ON_START_CONTROL) {
+	else if(eventId == pragma::sAIComponent::EVENT_ON_START_CONTROL) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto &hPl = Lua::Check<pragma::SPlayerComponent>(l, -1);
@@ -112,7 +112,7 @@ bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t e
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::SAIComponent::EVENT_ON_PATH_NODE_CHANGED) {
+	else if(eventId == pragma::sAIComponent::EVENT_ON_PATH_NODE_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto nodeIndex = Lua::CheckInt(l, -1);
@@ -124,7 +124,7 @@ bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t e
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::SAIComponent::EVENT_ON_SCHEDULE_COMPLETE || eventId == pragma::SAIComponent::EVENT_ON_SCHEDULE_STARTED) {
+	else if(eventId == pragma::sAIComponent::EVENT_ON_SCHEDULE_COMPLETE || eventId == pragma::sAIComponent::EVENT_ON_SCHEDULE_STARTED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto schedule = Lua::Check<std::shared_ptr<pragma::ai::Schedule>>(l, -1);

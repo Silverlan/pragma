@@ -74,8 +74,8 @@ void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defSToggle];
 
 	auto defSTransform = pragma::lua::create_entity_component_class<pragma::STransformComponent, pragma::BaseTransformComponent>("TransformComponent");
-	defSTransform.add_static_constant("EVENT_ON_POSE_CHANGED", pragma::STransformComponent::EVENT_ON_POSE_CHANGED);
-	defSTransform.add_static_constant("EVENT_ON_TELEPORT", pragma::STransformComponent::EVENT_ON_TELEPORT);
+	defSTransform.add_static_constant("EVENT_ON_POSE_CHANGED", pragma::sTransformComponent::EVENT_ON_POSE_CHANGED);
+	defSTransform.add_static_constant("EVENT_ON_TELEPORT", pragma::sTransformComponent::EVENT_ON_TELEPORT);
 	defSTransform.def("Teleport", &pragma::STransformComponent::Teleport);
 	entsMod[defSTransform];
 

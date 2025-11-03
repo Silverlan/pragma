@@ -16,37 +16,39 @@ export import pragma.util;
 
 export {
 	namespace pragma {
-		class DLLNETWORK BaseAnimatedComponent : public BaseEntityComponent, public DynamicMemberRegister {
+				namespace baseAnimatedComponent {
+			STATIC_DLL_COMPAT ComponentEventId EVENT_HANDLE_ANIMATION_EVENT;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAY_ANIMATION;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAY_LAYERED_ANIMATION;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAY_LAYERED_ACTIVITY;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ANIMATION_COMPLETE;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_LAYERED_ANIMATION_START;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_LAYERED_ANIMATION_COMPLETE;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ANIMATION_START;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_TRANSLATE_LAYERED_ANIMATION;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_TRANSLATE_ANIMATION;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_TRANSLATE_ACTIVITY;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_MAINTAIN_ANIMATIONS;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_MAINTAIN_ANIMATION_MT;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_MAINTAIN_ANIMATION_MOVEMENT;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_SHOULD_UPDATE_BONES;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAY_ACTIVITY;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_STOP_LAYERED_ANIMATION;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BONE_TRANSFORM_CHANGED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ANIMATIONS_UPDATED_MT;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_UPDATE_BONE_POSES_MT;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BONE_POSES_FINALIZED_MT;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BLEND_ANIMATION_MT;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_PLAY_ANIMATION;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ANIMATION_RESET;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ANIMATIONS_UPDATED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_UPDATE_SKELETON;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_POST_ANIMATION_UPDATE;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_RESET_POSE;
+		}
+class DLLNETWORK BaseAnimatedComponent : public BaseEntityComponent, public DynamicMemberRegister {
 		public:
-			static ComponentEventId EVENT_HANDLE_ANIMATION_EVENT;
-			static ComponentEventId EVENT_ON_PLAY_ANIMATION;
-			static ComponentEventId EVENT_ON_PLAY_LAYERED_ANIMATION;
-			static ComponentEventId EVENT_ON_PLAY_LAYERED_ACTIVITY;
-			static ComponentEventId EVENT_ON_ANIMATION_COMPLETE;
-			static ComponentEventId EVENT_ON_LAYERED_ANIMATION_START;
-			static ComponentEventId EVENT_ON_LAYERED_ANIMATION_COMPLETE;
-			static ComponentEventId EVENT_ON_ANIMATION_START;
-			static ComponentEventId EVENT_TRANSLATE_LAYERED_ANIMATION;
-			static ComponentEventId EVENT_TRANSLATE_ANIMATION;
-			static ComponentEventId EVENT_TRANSLATE_ACTIVITY;
-			static ComponentEventId EVENT_MAINTAIN_ANIMATIONS;
-			static ComponentEventId EVENT_MAINTAIN_ANIMATION_MT;
-			static ComponentEventId EVENT_MAINTAIN_ANIMATION_MOVEMENT;
-			static ComponentEventId EVENT_SHOULD_UPDATE_BONES;
 
-			static ComponentEventId EVENT_ON_PLAY_ACTIVITY;
-			static ComponentEventId EVENT_ON_STOP_LAYERED_ANIMATION;
-			static ComponentEventId EVENT_ON_BONE_TRANSFORM_CHANGED;
-			static ComponentEventId EVENT_ON_ANIMATIONS_UPDATED_MT;
-			static ComponentEventId EVENT_UPDATE_BONE_POSES_MT;
-			static ComponentEventId EVENT_ON_BONE_POSES_FINALIZED_MT;
-			static ComponentEventId EVENT_ON_BLEND_ANIMATION_MT;
-			static ComponentEventId EVENT_PLAY_ANIMATION;
-			static ComponentEventId EVENT_ON_ANIMATION_RESET;
-			static ComponentEventId EVENT_ON_ANIMATIONS_UPDATED;
-			static ComponentEventId EVENT_ON_UPDATE_SKELETON;
-			static ComponentEventId EVENT_POST_ANIMATION_UPDATE;
-			static ComponentEventId EVENT_ON_RESET_POSE;
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 			enum class StateFlags : uint8_t {

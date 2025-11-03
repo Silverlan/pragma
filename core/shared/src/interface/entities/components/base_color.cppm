@@ -19,9 +19,11 @@ export namespace pragma {
 		const Vector4 &oldColor;
 		const Vector4 &color;
 	};
+	namespace baseColorComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_COLOR_CHANGED;
+	}
 	class DLLNETWORK BaseColorComponent : public BaseEntityComponent {
 	  public:
-		static pragma::ComponentEventId EVENT_ON_COLOR_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;

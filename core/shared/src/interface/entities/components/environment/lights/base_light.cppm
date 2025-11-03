@@ -13,13 +13,28 @@ export import :entities.components.base;
 
 export {
 	namespace pragma {
-		class BaseEnvLightSpotComponent;
-		class BaseEnvLightPointComponent;
-		class BaseEnvLightDirectionalComponent;
-		class DLLNETWORK BaseEnvLightComponent : public BaseEntityComponent {
+				namespace baseEnvLightComponent {
+			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_DIRECTION_TO_POINT;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_INTENSITY_AT_POINT;
+		}
+class BaseEnvLightSpotComponent;
+				namespace baseEnvLightComponent {
+			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_DIRECTION_TO_POINT;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_INTENSITY_AT_POINT;
+		}
+class BaseEnvLightPointComponent;
+				namespace baseEnvLightComponent {
+			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_DIRECTION_TO_POINT;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_INTENSITY_AT_POINT;
+		}
+class BaseEnvLightDirectionalComponent;
+				namespace baseEnvLightComponent {
+			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_DIRECTION_TO_POINT;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_INTENSITY_AT_POINT;
+		}
+class DLLNETWORK BaseEnvLightComponent : public BaseEntityComponent {
 		public:
-			static ComponentEventId EVENT_CALC_LIGHT_DIRECTION_TO_POINT;
-			static ComponentEventId EVENT_CALC_LIGHT_INTENSITY_AT_POINT;
+
 			enum class SpawnFlag : uint32_t { DontCastShadows = 512 };
 			enum class LightFlags : uint32_t { None = 0u, BakedLightSource = 1u };
 			enum class ShadowType : uint8_t { None = 0, StaticOnly = 1, Full = StaticOnly | 2 };

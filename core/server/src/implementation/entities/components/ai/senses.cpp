@@ -50,7 +50,7 @@ bool SAIComponent::CanHear() const { return (m_hearingStrength == 0.f) ? false :
 bool SAIComponent::OnSuspiciousSoundHeared(std::shared_ptr<ALSound> &snd)
 {
 	CEOnSuspiciousSoundHeared evData {snd};
-	return BroadcastEvent(EVENT_ON_SUSPICIOUS_SOUND_HEARED, evData) == util::EventReply::Handled;
+	return BroadcastEvent(sAIComponent::EVENT_ON_SUSPICIOUS_SOUND_HEARED, evData) == util::EventReply::Handled;
 }
 
 float SAIComponent::GetMaxViewDistance() const { return m_maxViewDist; }

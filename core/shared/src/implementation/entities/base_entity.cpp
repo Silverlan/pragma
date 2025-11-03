@@ -110,10 +110,10 @@ std::string pragma::ecs::BaseEntity::ToString() const
 	return ss.str();
 }
 
-pragma::ComponentEventId pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE = pragma::INVALID_COMPONENT_ID;
-pragma::ComponentEventId pragma::ecs::BaseEntity::EVENT_ON_SPAWN = pragma::INVALID_COMPONENT_ID;
-pragma::ComponentEventId pragma::ecs::BaseEntity::EVENT_ON_POST_SPAWN = pragma::INVALID_COMPONENT_ID;
-pragma::ComponentEventId pragma::ecs::BaseEntity::EVENT_ON_REMOVE = pragma::INVALID_COMPONENT_ID;
+pragma::ComponentEventId pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE = pragma::INVALID_COMPONENT_ID;
+pragma::ComponentEventId pragma::ecs::baseEntity::EVENT_ON_SPAWN = pragma::INVALID_COMPONENT_ID;
+pragma::ComponentEventId pragma::ecs::baseEntity::EVENT_ON_POST_SPAWN = pragma::INVALID_COMPONENT_ID;
+pragma::ComponentEventId pragma::ecs::baseEntity::EVENT_ON_REMOVE = pragma::INVALID_COMPONENT_ID;
 pragma::ecs::BaseEntity::BaseEntity() : pragma::BaseEntityComponentSystem {}, pragma::BaseLuaHandle {}, m_uuid {util::generate_uuid_v4()} {}
 pragma::NetEventId pragma::ecs::BaseEntity::FindNetEvent(const std::string &name) const { return GetNetworkState()->GetGameState()->FindNetEvent(name); }
 
@@ -137,7 +137,7 @@ pragma::BaseEntityComponent *pragma::ecs::BaseEntity::FindComponentMemberIndex(c
 void pragma::ecs::BaseEntity::OnRemove()
 {
 	BaseEntityComponentSystem::OnRemove();
-	BroadcastEvent(EVENT_ON_REMOVE);
+	BroadcastEvent(baseEntity::EVENT_ON_REMOVE);
 	ClearComponents();
 	pragma::BaseLuaHandle::InvalidateHandle();
 
@@ -175,7 +175,7 @@ void pragma::ecs::BaseEntity::SetKeyValue(std::string key, std::string val)
 {
 	ustring::to_lower(key);
 	pragma::CEKeyValueData inputData {key, val};
-	if(BroadcastEvent(EVENT_HANDLE_KEY_VALUE, inputData) == util::EventReply::Handled)
+	if(BroadcastEvent(baseEntity::EVENT_HANDLE_KEY_VALUE, inputData) == util::EventReply::Handled)
 		return;
 	if(key == "spawnflags")
 		m_spawnFlags = util::to_int(val);
@@ -206,10 +206,10 @@ pragma::NetEventId pragma::ecs::BaseEntity::SetupNetEvent(const std::string &nam
 void pragma::ecs::BaseEntity::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	std::type_index typeIndex = typeid(pragma::ecs::BaseEntity);
-	EVENT_HANDLE_KEY_VALUE = componentManager.RegisterEvent("HANDLE_KEY_VALUE", typeIndex);
-	EVENT_ON_SPAWN = componentManager.RegisterEvent("ON_SPAWN", typeIndex);
-	EVENT_ON_POST_SPAWN = componentManager.RegisterEvent("ON_POST_SPAWN", typeIndex);
-	EVENT_ON_REMOVE = componentManager.RegisterEvent("ON_REMOVE", typeIndex);
+	baseEntity::EVENT_HANDLE_KEY_VALUE = componentManager.RegisterEvent("HANDLE_KEY_VALUE", typeIndex);
+	baseEntity::EVENT_ON_SPAWN = componentManager.RegisterEvent("ON_SPAWN", typeIndex);
+	baseEntity::EVENT_ON_POST_SPAWN = componentManager.RegisterEvent("ON_POST_SPAWN", typeIndex);
+	baseEntity::EVENT_ON_REMOVE = componentManager.RegisterEvent("ON_REMOVE", typeIndex);
 }
 
 void pragma::ecs::BaseEntity::SetUuid(const util::Uuid &uuid)
@@ -356,7 +356,7 @@ void pragma::ecs::BaseEntity::DoSpawn()
 	// Flag has to be set before events are triggered, in case
 	// one of the events relies (directly or indirectly) on :IsSpawned
 	m_stateFlags |= StateFlags::Spawned;
-	BroadcastEvent(EVENT_ON_SPAWN);
+	BroadcastEvent(baseEntity::EVENT_ON_SPAWN);
 }
 
 void pragma::ecs::BaseEntity::Spawn()
@@ -371,7 +371,7 @@ void pragma::ecs::BaseEntity::Spawn()
 
 void pragma::ecs::BaseEntity::OnSpawn() {}
 
-void pragma::ecs::BaseEntity::OnPostSpawn() { BroadcastEvent(EVENT_ON_POST_SPAWN); }
+void pragma::ecs::BaseEntity::OnPostSpawn() { BroadcastEvent(baseEntity::EVENT_ON_POST_SPAWN); }
 
 bool pragma::ecs::BaseEntity::IsSpawned() const { return (m_stateFlags & StateFlags::Spawned) != StateFlags::None && !IsRemoved(); }
 
@@ -408,7 +408,7 @@ CallbackHandle pragma::ecs::BaseEntity::CallOnRemove(const CallbackHandle &hCall
 {
 	auto *pComponent = static_cast<pragma::BaseGenericComponent *>(FindComponent("entity").get());
 	if(pComponent != nullptr)
-		pComponent->BindEventUnhandled(pragma::ecs::BaseEntity::EVENT_ON_REMOVE, hCallback);
+		pComponent->BindEventUnhandled(pragma::ecs::baseEntity::EVENT_ON_REMOVE, hCallback);
 	return hCallback;
 }
 

@@ -11,12 +11,12 @@ import :entities.components.base_toggle;
 
 using namespace pragma;
 
-ComponentEventId BaseToggleComponent::EVENT_ON_TURN_ON = INVALID_COMPONENT_ID;
-ComponentEventId BaseToggleComponent::EVENT_ON_TURN_OFF = INVALID_COMPONENT_ID;
+ComponentEventId baseToggleComponent::EVENT_ON_TURN_ON = INVALID_COMPONENT_ID;
+ComponentEventId baseToggleComponent::EVENT_ON_TURN_OFF = INVALID_COMPONENT_ID;
 void BaseToggleComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_TURN_ON = registerEvent("ON_TURN_ON", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_TURN_OFF = registerEvent("ON_TURN_OFF", ComponentEventInfo::Type::Broadcast);
+	baseToggleComponent::EVENT_ON_TURN_ON = registerEvent("ON_TURN_ON", ComponentEventInfo::Type::Broadcast);
+	baseToggleComponent::EVENT_ON_TURN_OFF = registerEvent("ON_TURN_OFF", ComponentEventInfo::Type::Broadcast);
 }
 void BaseToggleComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
@@ -33,7 +33,7 @@ void BaseToggleComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "startdisabled", false))
 			m_bStartDisabled = util::to_boolean(kvData.value);
@@ -41,7 +41,7 @@ void BaseToggleComponent::Initialize()
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(ustring::compare<std::string>(inputData.input, "enable", false) || ustring::compare<std::string>(inputData.input, "turnon", false))
 			TurnOn();
@@ -102,7 +102,7 @@ void BaseToggleComponent::TurnOn()
 	if(pIoComponent != nullptr)
 		pIoComponent->TriggerOutput("OnActivate", &GetEntity());
 
-	BroadcastEvent(EVENT_ON_TURN_ON);
+	BroadcastEvent(baseToggleComponent::EVENT_ON_TURN_ON);
 }
 void BaseToggleComponent::TurnOff()
 {
@@ -112,7 +112,7 @@ void BaseToggleComponent::TurnOff()
 	if(pIoComponent != nullptr)
 		pIoComponent->TriggerOutput("OnDeactivate", &GetEntity());
 
-	BroadcastEvent(EVENT_ON_TURN_OFF);
+	BroadcastEvent(baseToggleComponent::EVENT_ON_TURN_OFF);
 }
 void BaseToggleComponent::Toggle()
 {

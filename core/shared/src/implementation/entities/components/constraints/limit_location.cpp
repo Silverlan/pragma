@@ -123,7 +123,7 @@ void ConstraintLimitLocationComponent::Initialize()
 	BaseEntityComponent::Initialize();
 
 	GetEntity().AddComponent<ConstraintComponent>();
-	BindEventUnhandled(ConstraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyConstraint(); });
+	BindEventUnhandled(constraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyConstraint(); });
 }
 void ConstraintLimitLocationComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ConstraintLimitLocationComponent::OnEntityComponentAdded(BaseEntityComponent &component)

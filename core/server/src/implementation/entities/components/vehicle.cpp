@@ -76,13 +76,13 @@ void SVehicleComponent::Initialize()
 {
 	BaseVehicleComponent::Initialize();
 
-	BindEvent(UsableComponent::EVENT_CAN_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(usableComponent::EVENT_CAN_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &bCanUse = static_cast<CECanUseData &>(evData.get()).canUse;
 		bCanUse = !HasDriver();
 		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(UsableComponent::EVENT_ON_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnUse(static_cast<CEOnUseData &>(evData.get()).entity); });
-	BindEventUnhandled(pragma::ecs::BaseEntity::EVENT_ON_POST_SPAWN, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPostSpawn(); });
+	BindEventUnhandled(usableComponent::EVENT_ON_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnUse(static_cast<CEOnUseData &>(evData.get()).entity); });
+	BindEventUnhandled(pragma::ecs::baseEntity::EVENT_ON_POST_SPAWN, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPostSpawn(); });
 
 	auto &ent = GetEntity();
 	ent.AddComponent<UsableComponent>();
@@ -98,7 +98,7 @@ void SVehicleComponent::SetDriver(pragma::ecs::BaseEntity *ent)
 		auto plComponent = ent->GetPlayerComponent();
 		auto *actionInputC = plComponent->GetActionInputController();
 		if(actionInputC) {
-			m_playerAction = actionInputC->BindEvent(ActionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			m_playerAction = actionInputC->BindEvent(actionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 				auto &actionData = static_cast<CEHandleActionInput &>(evData.get());
 				if(actionData.action == pragma::Action::Use) {
 					OnActionInput(actionData.action, actionData.pressed);

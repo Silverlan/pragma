@@ -21,7 +21,7 @@ void SAIComponent::OnPathNodeChanged(uint32_t nodeIdx)
 			_debugSendNavInfo(*hPl.get());
 	}
 	CEOnPathNodeChanged evData {nodeIdx};
-	BroadcastEvent(EVENT_ON_PATH_NODE_CHANGED, evData);
+	BroadcastEvent(sAIComponent::EVENT_ON_PATH_NODE_CHANGED, evData);
 }
 
 void SAIComponent::OnPathChanged()
@@ -31,7 +31,7 @@ void SAIComponent::OnPathChanged()
 		if(hPl.expired() == false)
 			_debugSendNavInfo(*hPl.get());
 	}
-	BroadcastEvent(EVENT_ON_PATH_CHANGED);
+	BroadcastEvent(sAIComponent::EVENT_ON_PATH_CHANGED);
 }
 
 void SAIComponent::OnPrePhysicsSimulate()

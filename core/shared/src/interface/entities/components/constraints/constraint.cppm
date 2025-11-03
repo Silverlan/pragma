@@ -15,8 +15,22 @@ export import :game.coordinate_system;
 export import :game.enums;
 
 export namespace pragma {
-	class ConstraintManagerComponent;
-	class DLLNETWORK ConstraintComponent final : public BaseEntityComponent {
+		namespace constraintComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_APPLY_CONSTRAINT;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DRIVER_CHANGED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DRIVEN_OBJECT_CHANGED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ORDER_INDEX_CHANGED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PARTICIPANTS_FLAGGED_DIRTY;
+	}
+class ConstraintManagerComponent;
+		namespace constraintComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_APPLY_CONSTRAINT;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DRIVER_CHANGED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DRIVEN_OBJECT_CHANGED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ORDER_INDEX_CHANGED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PARTICIPANTS_FLAGGED_DIRTY;
+	}
+class DLLNETWORK ConstraintComponent final : public BaseEntityComponent {
 	  public:
 		struct DLLNETWORK ConstraintParticipants {
 			pragma::ComponentHandle<pragma::BaseEntityComponent> driverC;
@@ -25,11 +39,6 @@ export namespace pragma {
 			pragma::ComponentMemberIndex drivenObjectPropIdx;
 		};
 
-		static ComponentEventId EVENT_APPLY_CONSTRAINT;
-		static ComponentEventId EVENT_ON_DRIVER_CHANGED;
-		static ComponentEventId EVENT_ON_DRIVEN_OBJECT_CHANGED;
-		static ComponentEventId EVENT_ON_ORDER_INDEX_CHANGED;
-		static ComponentEventId EVENT_ON_PARTICIPANTS_FLAGGED_DIRTY;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 

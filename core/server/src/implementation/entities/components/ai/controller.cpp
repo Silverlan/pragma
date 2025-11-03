@@ -29,7 +29,7 @@ void SAIComponent::ControlInfo::Clear()
 		hCbOnActionInput.Remove();
 }
 
-void SAIComponent::SelectControllerSchedule() { BroadcastEvent(EVENT_SELECT_CONTROLLER_SCHEDULE); }
+void SAIComponent::SelectControllerSchedule() { BroadcastEvent(sAIComponent::EVENT_SELECT_CONTROLLER_SCHEDULE); }
 
 bool SAIComponent::IsControllable() const { return m_bControllable; }
 void SAIComponent::SetControllable(bool b)
@@ -50,12 +50,12 @@ void SAIComponent::StartControl(pragma::SPlayerComponent &pl)
 	m_controlInfo.actions = pragma::Action::None; // We want to overwrite the player's controls, so we need to keep track of them ourselves
 	auto pGenericComponent = plEnt.GetComponent<SGenericComponent>();
 	if(pGenericComponent.valid()) {
-		m_controlInfo.hCbOnRemove = pGenericComponent->BindEventUnhandled(pragma::ecs::BaseEntity::EVENT_ON_REMOVE, std::bind(&SAIComponent::EndControl, this));
-		m_controlInfo.hCbOnKilled = pGenericComponent->BindEventUnhandled(SCharacterComponent::EVENT_ON_DEATH, std::bind(&SAIComponent::EndControl, this));
+		m_controlInfo.hCbOnRemove = pGenericComponent->BindEventUnhandled(pragma::ecs::baseEntity::EVENT_ON_REMOVE, std::bind(&SAIComponent::EndControl, this));
+		m_controlInfo.hCbOnKilled = pGenericComponent->BindEventUnhandled(sCharacterComponent::EVENT_ON_DEATH, std::bind(&SAIComponent::EndControl, this));
 	}
 	auto *actionInputC = pl.GetActionInputController();
 	if(actionInputC) {
-		m_controlInfo.hCbOnActionInput = actionInputC->BindEvent(ActionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		m_controlInfo.hCbOnActionInput = actionInputC->BindEvent(actionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			auto &actionInputData = static_cast<CEHandleActionInput &>(evData.get());
 			if(actionInputData.pressed == true) {
 				if((m_controlInfo.actions & actionInputData.action) != pragma::Action::None)
@@ -88,14 +88,14 @@ pragma::Action SAIComponent::GetControllerActionInput() const { return m_control
 void SAIComponent::OnControllerActionInput(pragma::Action action, bool pressed)
 {
 	CEOnControllerActionInput evData {action, pressed};
-	BroadcastEvent(EVENT_ON_CONTROLLER_ACTION_INPUT);
+	BroadcastEvent(sAIComponent::EVENT_ON_CONTROLLER_ACTION_INPUT);
 }
 void SAIComponent::OnStartControl(pragma::SPlayerComponent &pl)
 {
 	CEOnStartControl evData {pl};
-	BroadcastEvent(EVENT_ON_START_CONTROL, evData);
+	BroadcastEvent(sAIComponent::EVENT_ON_START_CONTROL, evData);
 }
-void SAIComponent::OnEndControl() { BroadcastEvent(EVENT_ON_END_CONTROL); }
+void SAIComponent::OnEndControl() { BroadcastEvent(sAIComponent::EVENT_ON_END_CONTROL); }
 void SAIComponent::EndControl()
 {
 	if(IsControlled() == false)

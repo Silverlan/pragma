@@ -12,8 +12,8 @@ import :entities.components.base_field_angle;
 
 using namespace pragma;
 
-ComponentEventId BaseFieldAngleComponent::EVENT_ON_FIELD_ANGLE_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseFieldAngleComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_FIELD_ANGLE_CHANGED = registerEvent("ON_FIELD_ANGLE_CHANGED", ComponentEventInfo::Type::Broadcast); }
+ComponentEventId baseFieldAngleComponent::EVENT_ON_FIELD_ANGLE_CHANGED = pragma::INVALID_COMPONENT_ID;
+void BaseFieldAngleComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseFieldAngleComponent::EVENT_ON_FIELD_ANGLE_CHANGED = registerEvent("ON_FIELD_ANGLE_CHANGED", ComponentEventInfo::Type::Broadcast); }
 void BaseFieldAngleComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseFieldAngleComponent;
@@ -30,7 +30,7 @@ void BaseFieldAngleComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "coneAngle", false))
 			SetFieldAngle(util::to_float(kvData.value));
@@ -38,7 +38,7 @@ void BaseFieldAngleComponent::Initialize()
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(ustring::compare<std::string>(inputData.input, "setconeangle", false))
 			SetFieldAngle(util::to_float(inputData.data));
@@ -71,7 +71,7 @@ void BaseFieldAngleComponent::SetFieldAngle(umath::Degree coneAngle)
 	*m_fieldAngle = coneAngle;
 
 	CEOnFieldAngleChanged evData {oldFieldAngle, *m_fieldAngle};
-	BroadcastEvent(EVENT_ON_FIELD_ANGLE_CHANGED, evData);
+	BroadcastEvent(baseFieldAngleComponent::EVENT_ON_FIELD_ANGLE_CHANGED, evData);
 }
 
 //////////////

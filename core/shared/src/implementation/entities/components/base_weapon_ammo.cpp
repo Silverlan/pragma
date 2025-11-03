@@ -46,7 +46,7 @@ void BaseWeaponComponent::SetPrimaryClipSize(UInt16 size)
 	*m_clipPrimary = size;
 
 	CEOnClipSizeChanged evData {oldSize, size};
-	BroadcastEvent(EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED, evData);
+	BroadcastEvent(baseWeaponComponent::EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED, evData);
 }
 void BaseWeaponComponent::SetSecondaryClipSize(UInt16 size)
 {
@@ -57,7 +57,7 @@ void BaseWeaponComponent::SetSecondaryClipSize(UInt16 size)
 	*m_clipSecondary = size;
 
 	CEOnClipSizeChanged evData {oldSize, size};
-	BroadcastEvent(EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED, evData);
+	BroadcastEvent(baseWeaponComponent::EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED, evData);
 }
 UInt16 BaseWeaponComponent::GetPrimaryClipSize() const { return *m_clipPrimary; }
 const util::PUInt16Property &BaseWeaponComponent::GetPrimaryClipSizeProperty() const { return m_clipPrimary; }

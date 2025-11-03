@@ -35,11 +35,11 @@ util::EventReply VelocityComponent::HandleEvent(ComponentEventId eventId, Compon
 {
 	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == DamageableComponent::EVENT_ON_TAKE_DAMAGE) {
+	if(eventId == damageableComponent::EVENT_ON_TAKE_DAMAGE) {
 		auto &force = static_cast<CEOnTakeDamage &>(evData).damageInfo.GetForce();
 		AddVelocity(force);
 	}
-	else if(eventId == BaseTransformComponent::EVENT_ON_TELEPORT) {
+	else if(eventId == baseTransformComponent::EVENT_ON_TELEPORT) {
 		auto &te = static_cast<CETeleport &>(evData);
 		auto vel = GetVelocity();
 		uvec::rotate(&vel, te.deltaPose.GetRotation());

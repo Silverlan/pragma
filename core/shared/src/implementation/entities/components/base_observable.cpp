@@ -15,8 +15,8 @@ pragma::ObserverCameraData::ObserverCameraData() : enabled {util::BoolProperty::
 
 /////////
 
-ComponentEventId BaseObservableComponent::EVENT_ON_OBSERVER_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseObservableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_OBSERVER_CHANGED = registerEvent("ON_OBSERVER_CHANGED", ComponentEventInfo::Type::Broadcast); }
+ComponentEventId baseObservableComponent::EVENT_ON_OBSERVER_CHANGED = pragma::INVALID_COMPONENT_ID;
+void BaseObservableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseObservableComponent::EVENT_ON_OBSERVER_CHANGED = registerEvent("ON_OBSERVER_CHANGED", ComponentEventInfo::Type::Broadcast); }
 BaseObservableComponent::BaseObservableComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_viewOffset(0, 0, 0) {}
 
 void BaseObservableComponent::Initialize()
@@ -31,7 +31,7 @@ void BaseObservableComponent::ClearObserver()
 {
 	if(m_observer.IsValid() == false)
 		return;
-	BroadcastEvent(EVENT_ON_OBSERVER_CHANGED);
+	BroadcastEvent(baseObservableComponent::EVENT_ON_OBSERVER_CHANGED);
 	m_observer = pragma::ComponentHandle<pragma::BaseObserverComponent> {};
 }
 
@@ -42,11 +42,11 @@ void BaseObservableComponent::SetObserver(BaseObserverComponent *observer)
 	ClearObserver();
 	if(!observer) {
 		m_observer = pragma::ComponentHandle<BaseObserverComponent> {};
-		BroadcastEvent(EVENT_ON_OBSERVER_CHANGED);
+		BroadcastEvent(baseObservableComponent::EVENT_ON_OBSERVER_CHANGED);
 		return;
 	}
 	m_observer = observer->GetHandle<BaseObserverComponent>();
-	BroadcastEvent(EVENT_ON_OBSERVER_CHANGED);
+	BroadcastEvent(baseObservableComponent::EVENT_ON_OBSERVER_CHANGED);
 }
 BaseObserverComponent *BaseObservableComponent::GetObserver() { return m_observer.get(); }
 

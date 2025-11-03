@@ -11,9 +11,18 @@ export module pragma.shared:entities.components.movement;
 export import :entities.components.base;
 
 export namespace pragma {
-	class OrientationComponent;
-	class BaseCharacterComponent;
-	class DLLNETWORK MovementComponent final : public BaseEntityComponent {
+		namespace movementComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_UPDATE_MOVEMENT;
+	}
+class OrientationComponent;
+		namespace movementComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_UPDATE_MOVEMENT;
+	}
+class BaseCharacterComponent;
+		namespace movementComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_UPDATE_MOVEMENT;
+	}
+class DLLNETWORK MovementComponent final : public BaseEntityComponent {
 	  public:
 		enum class MoveDirection : uint8_t {
 			Forward = 0,
@@ -23,7 +32,7 @@ export namespace pragma {
 
 			Count,
 		};
-		static ComponentEventId EVENT_ON_UPDATE_MOVEMENT;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		MovementComponent(pragma::ecs::BaseEntity &ent);

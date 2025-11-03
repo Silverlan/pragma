@@ -14,9 +14,12 @@ export import :entities.parent_info;
 
 export {
 	namespace pragma {
-		class DLLNETWORK BaseAttachmentComponent : public BaseEntityComponent {
+				namespace baseAttachmentComponent {
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ATTACHMENT_UPDATE;
+		}
+class DLLNETWORK BaseAttachmentComponent : public BaseEntityComponent {
 		public:
-			static ComponentEventId EVENT_ON_ATTACHMENT_UPDATE;
+
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 			enum class StateFlags : uint32_t { None = 0u, UpdatingPosition = 1u, UpdatingRotation = UpdatingPosition << 1u };

@@ -12,12 +12,12 @@ import :entities.components.environment.lights.base_light;
 
 using namespace pragma;
 
-ComponentEventId BaseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT = pragma::INVALID_COMPONENT_ID;
 void BaseEnvLightComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_CALC_LIGHT_DIRECTION_TO_POINT = registerEvent("CALC_LIGHT_DIRECTION_TO_POINT", ComponentEventInfo::Type::Broadcast);
-	EVENT_CALC_LIGHT_INTENSITY_AT_POINT = registerEvent("CALC_LIGHT_INTENSITY_AT_POINT", ComponentEventInfo::Type::Broadcast);
+	baseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT = registerEvent("CALC_LIGHT_DIRECTION_TO_POINT", ComponentEventInfo::Type::Broadcast);
+	baseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT = registerEvent("CALC_LIGHT_INTENSITY_AT_POINT", ComponentEventInfo::Type::Broadcast);
 }
 void BaseEnvLightComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
@@ -70,7 +70,7 @@ void BaseEnvLightComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "distance", false))
 			GetEntity().SetKeyValue("radius", kvData.value);
@@ -214,13 +214,13 @@ Lumen BaseEnvLightComponent::GetLightIntensityLumen() const
 float BaseEnvLightComponent::CalcLightIntensityAtPoint(const Vector3 &pos) const
 {
 	CECalcLightIntensityAtPoint ev {pos};
-	BroadcastEvent(EVENT_CALC_LIGHT_INTENSITY_AT_POINT, ev);
+	BroadcastEvent(baseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT, ev);
 	return ev.intensity;
 }
 Vector3 BaseEnvLightComponent::CalcLightDirectionToPoint(const Vector3 &pos) const
 {
 	CECalcLightDirectionToPoint ev {pos};
-	BroadcastEvent(EVENT_CALC_LIGHT_DIRECTION_TO_POINT, ev);
+	BroadcastEvent(baseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT, ev);
 	return ev.direction;
 }
 BaseEnvLightComponent::ShadowType BaseEnvLightComponent::GetShadowType() const { return m_shadowType; }

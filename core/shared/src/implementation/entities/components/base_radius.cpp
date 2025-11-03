@@ -12,8 +12,8 @@ import :entities.components.base_radius;
 
 using namespace pragma;
 
-ComponentEventId BaseRadiusComponent::EVENT_ON_RADIUS_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseRadiusComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_RADIUS_CHANGED = registerEvent("ON_RADIUS_CHANGED", ComponentEventInfo::Type::Broadcast); }
+ComponentEventId baseRadiusComponent::EVENT_ON_RADIUS_CHANGED = pragma::INVALID_COMPONENT_ID;
+void BaseRadiusComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseRadiusComponent::EVENT_ON_RADIUS_CHANGED = registerEvent("ON_RADIUS_CHANGED", ComponentEventInfo::Type::Broadcast); }
 void BaseRadiusComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseRadiusComponent;
@@ -29,7 +29,7 @@ void BaseRadiusComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "radius", false))
 			SetRadius(util::to_float(kvData.value));
@@ -37,7 +37,7 @@ void BaseRadiusComponent::Initialize()
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(ustring::compare<std::string>(inputData.input, "setradius", false))
 			SetRadius(util::to_float(inputData.data));
@@ -70,7 +70,7 @@ void BaseRadiusComponent::SetRadius(float radius)
 	*m_radius = radius;
 
 	CEOnRadiusChanged evData {oldRadius, *m_radius};
-	BroadcastEvent(EVENT_ON_RADIUS_CHANGED, evData);
+	BroadcastEvent(baseRadiusComponent::EVENT_ON_RADIUS_CHANGED, evData);
 }
 
 //////////////

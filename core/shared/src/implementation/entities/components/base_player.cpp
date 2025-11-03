@@ -47,11 +47,11 @@ util::EventReply BasePlayerComponent::HandleEvent(ComponentEventId eventId, Comp
 {
 	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == BaseCharacterComponent::EVENT_ON_KILLED)
+	if(eventId == baseActorComponent::EVENT_ON_KILLED)
 		OnKilled(static_cast<const CEOnCharacterKilled &>(evData).damageInfo);
-	else if(eventId == BaseCharacterComponent::EVENT_ON_RESPAWN)
+	else if(eventId == baseActorComponent::EVENT_ON_RESPAWN)
 		OnRespawn();
-	else if(eventId == BaseHealthComponent::EVENT_ON_TAKEN_DAMAGE) {
+	else if(eventId == baseHealthComponent::EVENT_ON_TAKEN_DAMAGE) {
 		auto &healthInfo = static_cast<pragma::CEOnTakenDamage &>(evData);
 		OnTakenDamage(healthInfo.damageInfo, healthInfo.oldHealth, healthInfo.newHealth);
 	}
@@ -268,8 +268,8 @@ void BasePlayerComponent::Initialize()
 		movementControllerC->SetActionInputController(actionInputControllerC.get());
 	m_hBasePlayer = ent.GetHandle();
 
-	BindEventUnhandled(MovementComponent::EVENT_ON_UPDATE_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovementProperties(); });
-	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(movementComponent::EVENT_ON_UPDATE_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovementProperties(); });
+	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &hMdl = GetEntity().GetModel();
 		if(hMdl == nullptr)
 			return util::EventReply::Unhandled;
@@ -280,15 +280,15 @@ void BasePlayerComponent::Initialize()
 			PlaySharedActivity(pragma::Activity::Idle); // A non-looping animation has completed; Switch back to idle
 		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_ANIMATION_RESET, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATION_RESET, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		PlaySharedActivity(pragma::Activity::Idle); // A non-looping animation has completed; Switch back to idle
 		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_ANIMATION_START, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATION_START, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		m_movementActivity = pragma::Activity::Invalid;
 		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(BaseAnimatedComponent::EVENT_TRANSLATE_ACTIVITY, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(baseAnimatedComponent::EVENT_TRANSLATE_ACTIVITY, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		if((IsCrouching() == true && m_crouchTransition != CrouchTransition::Uncrouching) || m_crouchTransition == CrouchTransition::Crouching) {
 			auto &activity = static_cast<CETranslateActivity &>(evData.get()).activity;
 			switch(activity) {
@@ -303,16 +303,16 @@ void BasePlayerComponent::Initialize()
 		}
 		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		OnPhysicsInitialized();
 		return util::EventReply::Unhandled;
 	});
-	BindEvent(BaseCharacterComponent::EVENT_IS_MOVING, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseCharacterComponent::EVENT_IS_MOVING, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		static_cast<CEIsMoving &>(evData.get()).moving = IsMoving();
 		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(BaseCharacterComponent::EVENT_ON_JUMP, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { PlaySharedActivity(pragma::Activity::Jump); });
-	BindEventUnhandled(ActionInputControllerComponent::EVENT_ON_ACTION_INPUT_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(baseCharacterComponent::EVENT_ON_JUMP, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { PlaySharedActivity(pragma::Activity::Jump); });
+	BindEventUnhandled(actionInputControllerComponent::EVENT_ON_ACTION_INPUT_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &evAction = static_cast<CEOnActionInputChanged &>(evData.get());
 		HandleActionInput(evAction.action, evAction.pressed);
 		return util::EventReply::Unhandled;

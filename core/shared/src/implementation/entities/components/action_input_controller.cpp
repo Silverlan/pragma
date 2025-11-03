@@ -12,12 +12,12 @@ import :entities.components.action_input_controller;
 
 using namespace pragma;
 
-ComponentEventId ActionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT = pragma::INVALID_COMPONENT_ID;
-ComponentEventId ActionInputControllerComponent::EVENT_ON_ACTION_INPUT_CHANGED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId actionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT = pragma::INVALID_COMPONENT_ID;
+ComponentEventId actionInputControllerComponent::EVENT_ON_ACTION_INPUT_CHANGED = pragma::INVALID_COMPONENT_ID;
 void ActionInputControllerComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_HANDLE_ACTION_INPUT = registerEvent("HANDLE_ACTION_INPUT", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_ACTION_INPUT_CHANGED = registerEvent("ON_ACTION_INPUT_CHANGED", ComponentEventInfo::Type::Explicit);
+	actionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT = registerEvent("HANDLE_ACTION_INPUT", ComponentEventInfo::Type::Explicit);
+	actionInputControllerComponent::EVENT_ON_ACTION_INPUT_CHANGED = registerEvent("ON_ACTION_INPUT_CHANGED", ComponentEventInfo::Type::Explicit);
 }
 
 ActionInputControllerComponent::ActionInputControllerComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
@@ -64,7 +64,7 @@ void ActionInputControllerComponent::SetActionInput(pragma::Action action, bool 
 		m_rawInputs |= action;
 
 	CEHandleActionInput evData {action, b, magnitude};
-	if(InvokeEventCallbacks(EVENT_HANDLE_ACTION_INPUT, evData) == util::EventReply::Handled)
+	if(InvokeEventCallbacks(actionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT, evData) == util::EventReply::Handled)
 		return;
 	auto &ent = GetEntity();
 	auto *nw = ent.GetNetworkState();
@@ -77,14 +77,14 @@ void ActionInputControllerComponent::SetActionInput(pragma::Action action, bool 
 	if(b == false) {
 		if(GetActionInput(action) == true) {
 			m_actionInputs &= ~action;
-			InvokeEventCallbacks(EVENT_ON_ACTION_INPUT_CHANGED, CEOnActionInputChanged {action, b});
+			InvokeEventCallbacks(actionInputControllerComponent::EVENT_ON_ACTION_INPUT_CHANGED, CEOnActionInputChanged {action, b});
 		}
 		return;
 	}
 	if(GetActionInput(action))
 		return;
 	m_actionInputs |= action;
-	InvokeEventCallbacks(EVENT_ON_ACTION_INPUT_CHANGED, CEOnActionInputChanged {action, b});
+	InvokeEventCallbacks(actionInputControllerComponent::EVENT_ON_ACTION_INPUT_CHANGED, CEOnActionInputChanged {action, b});
 }
 
 //////////////////

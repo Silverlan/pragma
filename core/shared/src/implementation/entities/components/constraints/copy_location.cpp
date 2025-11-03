@@ -18,7 +18,7 @@ void ConstraintCopyLocationComponent::Initialize()
 	BaseEntityComponent::Initialize();
 
 	GetEntity().AddComponent<ConstraintSpaceComponent>();
-	BindEventUnhandled(ConstraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyConstraint(); });
+	BindEventUnhandled(constraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyConstraint(); });
 }
 void ConstraintCopyLocationComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ConstraintCopyLocationComponent::OnEntityComponentAdded(BaseEntityComponent &component)

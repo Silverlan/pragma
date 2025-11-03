@@ -16,7 +16,7 @@ void BaseEnvQuakeComponent::Initialize()
 
 	auto &ent = GetEntity();
 	ent.AddComponent("toggle");
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "frequency", false))
 			m_frequency = util::to_float(kvData.value);
@@ -34,7 +34,7 @@ void BaseEnvQuakeComponent::Initialize()
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(ustring::compare<std::string>(inputData.input, "startshake", false)) {
 			auto whToggleComponent = GetEntity().FindComponent("toggle");
@@ -69,9 +69,9 @@ util::EventReply BaseEnvQuakeComponent::HandleEvent(ComponentEventId eventId, Co
 	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 
-	if(eventId == BaseToggleComponent::EVENT_ON_TURN_ON)
+	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON)
 		StartShake();
-	else if(eventId == BaseToggleComponent::EVENT_ON_TURN_OFF)
+	else if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF)
 		StopShake();
 	return util::EventReply::Unhandled;
 }

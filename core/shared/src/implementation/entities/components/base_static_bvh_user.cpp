@@ -11,12 +11,12 @@ import :entities.components.base_static_bvh_user;
 
 using namespace pragma;
 
-ComponentEventId BaseStaticBvhUserComponent::EVENT_ON_ACTIVATION_STATE_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId BaseStaticBvhUserComponent::EVENT_ON_STATIC_BVH_COMPONENT_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId baseStaticBvhUserComponent::EVENT_ON_ACTIVATION_STATE_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId baseStaticBvhUserComponent::EVENT_ON_STATIC_BVH_COMPONENT_CHANGED = INVALID_COMPONENT_ID;
 void BaseStaticBvhUserComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_ACTIVATION_STATE_CHANGED = registerEvent("ON_ACTIVATION_STATE_CHANGED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_STATIC_BVH_COMPONENT_CHANGED = registerEvent("ON_STATIC_BVH_COMPONENT_CHANGED", ComponentEventInfo::Type::Broadcast);
+	baseStaticBvhUserComponent::EVENT_ON_ACTIVATION_STATE_CHANGED = registerEvent("ON_ACTIVATION_STATE_CHANGED", ComponentEventInfo::Type::Broadcast);
+	baseStaticBvhUserComponent::EVENT_ON_STATIC_BVH_COMPONENT_CHANGED = registerEvent("ON_STATIC_BVH_COMPONENT_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
 
 BaseStaticBvhUserComponent::BaseStaticBvhUserComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
@@ -30,7 +30,7 @@ void BaseStaticBvhUserComponent::Initialize()
 		auto &trC = *pTrComponent;
 		if(m_cbOnPoseChanged.IsValid())
 			m_cbOnPoseChanged.Remove();
-		m_cbOnPoseChanged = pTrComponent->AddEventCallback(BaseTransformComponent::EVENT_ON_POSE_CHANGED, [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		m_cbOnPoseChanged = pTrComponent->AddEventCallback(baseTransformComponent::EVENT_ON_POSE_CHANGED, [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			if(m_staticBvhComponent.valid())
 				m_staticBvhComponent->SetEntityDirty(GetEntity());
 			return util::EventReply::Unhandled;
@@ -47,7 +47,7 @@ void BaseStaticBvhUserComponent::UpdateBvhStatus()
 	if(HasDynamicBvhSubstitute()) {
 		if(m_isActive) {
 			m_isActive = false;
-			BroadcastEvent(EVENT_ON_ACTIVATION_STATE_CHANGED);
+			BroadcastEvent(baseStaticBvhUserComponent::EVENT_ON_ACTIVATION_STATE_CHANGED);
 		}
 		return;
 	}
@@ -59,7 +59,7 @@ void BaseStaticBvhUserComponent::UpdateBvhStatus()
 	if(m_staticBvhComponent.expired()) {
 		if(m_isActive) {
 			m_isActive = false;
-			BroadcastEvent(EVENT_ON_ACTIVATION_STATE_CHANGED);
+			BroadcastEvent(baseStaticBvhUserComponent::EVENT_ON_ACTIVATION_STATE_CHANGED);
 		}
 		return;
 	}
@@ -67,14 +67,14 @@ void BaseStaticBvhUserComponent::UpdateBvhStatus()
 		m_staticBvhComponent->AddEntity(GetEntity());
 		if(!m_isActive) {
 			m_isActive = true;
-			BroadcastEvent(EVENT_ON_ACTIVATION_STATE_CHANGED);
+			BroadcastEvent(baseStaticBvhUserComponent::EVENT_ON_ACTIVATION_STATE_CHANGED);
 		}
 	}
 	else {
 		m_staticBvhComponent->RemoveEntity(GetEntity(), false);
 		if(m_isActive) {
 			m_isActive = false;
-			BroadcastEvent(EVENT_ON_ACTIVATION_STATE_CHANGED);
+			BroadcastEvent(baseStaticBvhUserComponent::EVENT_ON_ACTIVATION_STATE_CHANGED);
 		}
 	}
 }
@@ -97,7 +97,7 @@ void BaseStaticBvhUserComponent::OnEntityComponentRemoved(BaseEntityComponent &c
 bool BaseStaticBvhUserComponent::IsActive() const { return m_isActive; }
 util::EventReply BaseStaticBvhUserComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(eventId == BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED || eventId == BasePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED)
+	if(eventId == basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED || eventId == basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED)
 		UpdateBvhStatus();
 	return BaseEntityComponent::HandleEvent(eventId, evData);
 }
@@ -112,7 +112,7 @@ void BaseStaticBvhUserComponent::OnRemove()
 void BaseStaticBvhUserComponent::SetStaticBvhCacheComponent(BaseStaticBvhCacheComponent *component)
 {
 	m_staticBvhComponent = component ? component->GetHandle<BaseStaticBvhCacheComponent>() : pragma::ComponentHandle<BaseStaticBvhCacheComponent> {};
-	BroadcastEvent(EVENT_ON_STATIC_BVH_COMPONENT_CHANGED);
+	BroadcastEvent(baseStaticBvhUserComponent::EVENT_ON_STATIC_BVH_COMPONENT_CHANGED);
 }
 void BaseStaticBvhUserComponent::InitializeDynamicBvhSubstitute(size_t staticBvhCacheVersion)
 {

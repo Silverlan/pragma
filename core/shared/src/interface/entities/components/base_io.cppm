@@ -22,6 +22,9 @@ export {
 			pragma::ecs::BaseEntity *const caller;
 			const std::string &data;
 		};
+		namespace baseIOComponent {
+			STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_HANDLE_INPUT;
+		}
 		class DLLNETWORK BaseIOComponent : public BaseEntityComponent {
 		public:
 			enum class IoFlags : uint32_t {
@@ -29,7 +32,6 @@ export {
 				ForceDelayedFire = 1u // Never triggers the input/output immediately, even if the delay is set to 0
 			};
 
-			static pragma::ComponentEventId EVENT_HANDLE_INPUT;
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			virtual void Initialize() override;
 

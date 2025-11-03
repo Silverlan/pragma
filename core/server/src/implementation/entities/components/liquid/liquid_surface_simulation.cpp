@@ -36,7 +36,7 @@ SLiquidSurfaceSimulationComponent::~SLiquidSurfaceSimulationComponent()
 void SLiquidSurfaceSimulationComponent::Initialize()
 {
 	BaseLiquidSurfaceSimulationComponent::Initialize();
-	BindEventUnhandled(BaseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateSurfaceSimulator(); });
+	BindEventUnhandled(baseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateSurfaceSimulator(); });
 }
 
 void SLiquidSurfaceSimulationComponent::InitializeLuaObject(lua_State *l) { return BaseLiquidSurfaceSimulationComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

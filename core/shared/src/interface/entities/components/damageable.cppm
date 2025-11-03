@@ -13,9 +13,12 @@ export import :entities.components.base;
 export import :game.damage_info;
 
 export namespace pragma {
-	class DLLNETWORK DamageableComponent final : public BaseEntityComponent {
+		namespace damageableComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TAKE_DAMAGE;
+	}
+class DLLNETWORK DamageableComponent final : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_ON_TAKE_DAMAGE;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		DamageableComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;

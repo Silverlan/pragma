@@ -16,14 +16,14 @@ BaseActorComponent::HitboxData::HitboxData(uint32_t _boneId, const Vector3 &_off
 
 //////////////////
 
-ComponentEventId BaseActorComponent::EVENT_ON_KILLED = INVALID_COMPONENT_ID;
-ComponentEventId BaseActorComponent::EVENT_ON_RESPAWN = INVALID_COMPONENT_ID;
-ComponentEventId BaseActorComponent::EVENT_ON_DEATH = INVALID_COMPONENT_ID;
+ComponentEventId baseActorComponent::EVENT_ON_KILLED = INVALID_COMPONENT_ID;
+ComponentEventId baseActorComponent::EVENT_ON_RESPAWN = INVALID_COMPONENT_ID;
+ComponentEventId baseActorComponent::EVENT_ON_DEATH = INVALID_COMPONENT_ID;
 void BaseActorComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_KILLED = registerEvent("ON_KILLED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_RESPAWN = registerEvent("ON_RESPAWN", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_DEATH = registerEvent("ON_DEATH", ComponentEventInfo::Type::Broadcast);
+	baseActorComponent::EVENT_ON_KILLED = registerEvent("ON_KILLED", ComponentEventInfo::Type::Broadcast);
+	baseActorComponent::EVENT_ON_RESPAWN = registerEvent("ON_RESPAWN", ComponentEventInfo::Type::Broadcast);
+	baseActorComponent::EVENT_ON_DEATH = registerEvent("ON_DEATH", ComponentEventInfo::Type::Broadcast);
 }
 BaseActorComponent::BaseActorComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_bAlive(true), m_bFrozen(util::BoolProperty::Create(false)) {}
 
@@ -31,13 +31,13 @@ void BaseActorComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		InitializeMoveController();
 		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsDestroyed(); });
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { PhysicsUpdate(0.0 /* unused */); });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsDestroyed(); });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { PhysicsUpdate(0.0 /* unused */); });
 
 	auto &ent = GetEntity();
 	ent.AddComponent("gravity");
@@ -204,7 +204,7 @@ void BaseActorComponent::Ragdolize()
 void BaseActorComponent::OnDeath(DamageInfo *dmgInfo)
 {
 	auto evOnDeath = CEOnCharacterKilled {dmgInfo};
-	if(BroadcastEvent(EVENT_ON_DEATH, evOnDeath) == util::EventReply::Handled)
+	if(BroadcastEvent(baseActorComponent::EVENT_ON_DEATH, evOnDeath) == util::EventReply::Handled)
 		return;
 
 	Ragdolize();
@@ -218,7 +218,7 @@ void BaseActorComponent::Kill(DamageInfo *dmgInfo)
 	OnDeath(dmgInfo);
 
 	auto evOnKilled = CEOnCharacterKilled {dmgInfo};
-	BroadcastEvent(EVENT_ON_KILLED, evOnKilled);
+	BroadcastEvent(baseActorComponent::EVENT_ON_KILLED, evOnKilled);
 }
 
 void BaseActorComponent::Respawn()
@@ -236,7 +236,7 @@ void BaseActorComponent::Respawn()
 		pVelComponent->SetVelocity({});
 		pVelComponent->SetAngularVelocity({});
 	}
-	BroadcastEvent(EVENT_ON_RESPAWN);
+	BroadcastEvent(baseActorComponent::EVENT_ON_RESPAWN);
 }
 
 void BaseActorComponent::OnPhysicsInitialized()

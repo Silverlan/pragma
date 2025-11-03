@@ -9,13 +9,28 @@ export module pragma.shared:entities.components.base_static_bvh_user;
 export import :entities.components.base;
 
 export namespace pragma {
-	class BaseBvhComponent;
-	class BaseStaticBvhCacheComponent;
-	class PanimaComponent;
-	class DLLNETWORK BaseStaticBvhUserComponent : public BaseEntityComponent {
+		namespace baseStaticBvhUserComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ACTIVATION_STATE_CHANGED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_STATIC_BVH_COMPONENT_CHANGED;
+	}
+class BaseBvhComponent;
+		namespace baseStaticBvhUserComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ACTIVATION_STATE_CHANGED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_STATIC_BVH_COMPONENT_CHANGED;
+	}
+class BaseStaticBvhCacheComponent;
+		namespace baseStaticBvhUserComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ACTIVATION_STATE_CHANGED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_STATIC_BVH_COMPONENT_CHANGED;
+	}
+class PanimaComponent;
+		namespace baseStaticBvhUserComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ACTIVATION_STATE_CHANGED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_STATIC_BVH_COMPONENT_CHANGED;
+	}
+class DLLNETWORK BaseStaticBvhUserComponent : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_ON_ACTIVATION_STATE_CHANGED;
-		static ComponentEventId EVENT_ON_STATIC_BVH_COMPONENT_CHANGED;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;

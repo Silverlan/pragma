@@ -14,7 +14,7 @@ using namespace pragma;
 void BasePointConstraintComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		return SetKeyValue(kvData.key, kvData.value) ? util::EventReply::Handled : util::EventReply::Unhandled;
 	});
@@ -48,9 +48,9 @@ util::EventReply BasePointConstraintComponent::HandleEvent(ComponentEventId even
 {
 	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == BaseToggleComponent::EVENT_ON_TURN_ON)
+	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON)
 		OnTurnOn();
-	else if(eventId == BaseToggleComponent::EVENT_ON_TURN_OFF)
+	else if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF)
 		OnTurnOff();
 	return util::EventReply::Unhandled;
 }

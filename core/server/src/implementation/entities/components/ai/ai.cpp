@@ -32,45 +32,45 @@ FactionManager &SAIComponent::GetFactionManager() { return s_factionManager; }
 const std::vector<pragma::SAIComponent *> &SAIComponent::GetAll() { return s_npcs; }
 unsigned int SAIComponent::GetNPCCount() { return CUInt32(s_npcs.size()); }
 
-ComponentEventId SAIComponent::EVENT_SELECT_SCHEDULE = INVALID_COMPONENT_ID;
-ComponentEventId SAIComponent::EVENT_SELECT_CONTROLLER_SCHEDULE = INVALID_COMPONENT_ID;
-ComponentEventId SAIComponent::EVENT_ON_SCHEDULE_COMPLETE = INVALID_COMPONENT_ID;
-ComponentEventId SAIComponent::EVENT_ON_PRIMARY_TARGET_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId SAIComponent::EVENT_ON_PATH_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId SAIComponent::EVENT_ON_NPC_STATE_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId SAIComponent::EVENT_ON_TARGET_VISIBILITY_LOST = INVALID_COMPONENT_ID;
-ComponentEventId SAIComponent::EVENT_ON_TARGET_VISIBILITY_REACQUIRED = INVALID_COMPONENT_ID;
-ComponentEventId SAIComponent::EVENT_ON_MEMORY_GAINED = INVALID_COMPONENT_ID;
-ComponentEventId SAIComponent::EVENT_ON_MEMORY_LOST = INVALID_COMPONENT_ID;
-ComponentEventId SAIComponent::EVENT_ON_TARGET_ACQUIRED = INVALID_COMPONENT_ID;
-ComponentEventId SAIComponent::EVENT_ON_SUSPICIOUS_SOUND_HEARED = INVALID_COMPONENT_ID;
-ComponentEventId SAIComponent::EVENT_ON_CONTROLLER_ACTION_INPUT = INVALID_COMPONENT_ID;
-ComponentEventId SAIComponent::EVENT_ON_START_CONTROL = INVALID_COMPONENT_ID;
-ComponentEventId SAIComponent::EVENT_ON_END_CONTROL = INVALID_COMPONENT_ID;
-ComponentEventId SAIComponent::EVENT_ON_PATH_NODE_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId SAIComponent::EVENT_ON_LOOK_TARGET_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId SAIComponent::EVENT_ON_SCHEDULE_STARTED = INVALID_COMPONENT_ID;
+ComponentEventId sAIComponent::EVENT_SELECT_SCHEDULE = INVALID_COMPONENT_ID;
+ComponentEventId sAIComponent::EVENT_SELECT_CONTROLLER_SCHEDULE = INVALID_COMPONENT_ID;
+ComponentEventId sAIComponent::EVENT_ON_SCHEDULE_COMPLETE = INVALID_COMPONENT_ID;
+ComponentEventId sAIComponent::EVENT_ON_PRIMARY_TARGET_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId sAIComponent::EVENT_ON_PATH_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId sAIComponent::EVENT_ON_NPC_STATE_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId sAIComponent::EVENT_ON_TARGET_VISIBILITY_LOST = INVALID_COMPONENT_ID;
+ComponentEventId sAIComponent::EVENT_ON_TARGET_VISIBILITY_REACQUIRED = INVALID_COMPONENT_ID;
+ComponentEventId sAIComponent::EVENT_ON_MEMORY_GAINED = INVALID_COMPONENT_ID;
+ComponentEventId sAIComponent::EVENT_ON_MEMORY_LOST = INVALID_COMPONENT_ID;
+ComponentEventId sAIComponent::EVENT_ON_TARGET_ACQUIRED = INVALID_COMPONENT_ID;
+ComponentEventId sAIComponent::EVENT_ON_SUSPICIOUS_SOUND_HEARED = INVALID_COMPONENT_ID;
+ComponentEventId sAIComponent::EVENT_ON_CONTROLLER_ACTION_INPUT = INVALID_COMPONENT_ID;
+ComponentEventId sAIComponent::EVENT_ON_START_CONTROL = INVALID_COMPONENT_ID;
+ComponentEventId sAIComponent::EVENT_ON_END_CONTROL = INVALID_COMPONENT_ID;
+ComponentEventId sAIComponent::EVENT_ON_PATH_NODE_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId sAIComponent::EVENT_ON_LOOK_TARGET_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId sAIComponent::EVENT_ON_SCHEDULE_STARTED = INVALID_COMPONENT_ID;
 void SAIComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseAIComponent::RegisterEvents(componentManager, registerEvent);
-	EVENT_SELECT_SCHEDULE = registerEvent("SELECT_SCHEDULE", ComponentEventInfo::Type::Broadcast);
-	EVENT_SELECT_CONTROLLER_SCHEDULE = registerEvent("SELECT_CONTROLLER_SCHEDULE", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_SCHEDULE_COMPLETE = registerEvent("ON_SCHEDULE_COMPLETE", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_PRIMARY_TARGET_CHANGED = registerEvent("ON_PRIMARY_TARGET_CHANGED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_PATH_CHANGED = registerEvent("ON_PATH_CHANGED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_NPC_STATE_CHANGED = registerEvent("ON_NPC_STATE_CHANGED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_TARGET_VISIBILITY_LOST = registerEvent("ON_TARGET_VISIBILITY_LOST", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_TARGET_VISIBILITY_REACQUIRED = registerEvent("ON_TARGET_VISIBILITY_REACQUIRED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_MEMORY_GAINED = registerEvent("ON_MEMORY_GAINED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_MEMORY_LOST = registerEvent("ON_MEMORY_LOST", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_TARGET_ACQUIRED = registerEvent("ON_TARGET_ACQUIRED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_SUSPICIOUS_SOUND_HEARED = registerEvent("ON_SUSPICIOUS_SOUND_HEARED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_CONTROLLER_ACTION_INPUT = registerEvent("ON_CONTROLLER_ACTION_INPUT", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_START_CONTROL = registerEvent("ON_START_CONTROL", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_END_CONTROL = registerEvent("ON_END_CONTROL", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_PATH_NODE_CHANGED = registerEvent("ON_PATH_NODE_CHANGED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_LOOK_TARGET_CHANGED = registerEvent("ON_LOOK_TARGET_CHANGED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_SCHEDULE_STARTED = registerEvent("ON_SCHEDULE_STARTED", ComponentEventInfo::Type::Broadcast);
+	sAIComponent::EVENT_SELECT_SCHEDULE = registerEvent("SELECT_SCHEDULE", ComponentEventInfo::Type::Broadcast);
+	sAIComponent::EVENT_SELECT_CONTROLLER_SCHEDULE = registerEvent("SELECT_CONTROLLER_SCHEDULE", ComponentEventInfo::Type::Broadcast);
+	sAIComponent::EVENT_ON_SCHEDULE_COMPLETE = registerEvent("ON_SCHEDULE_COMPLETE", ComponentEventInfo::Type::Broadcast);
+	sAIComponent::EVENT_ON_PRIMARY_TARGET_CHANGED = registerEvent("ON_PRIMARY_TARGET_CHANGED", ComponentEventInfo::Type::Broadcast);
+	sAIComponent::EVENT_ON_PATH_CHANGED = registerEvent("ON_PATH_CHANGED", ComponentEventInfo::Type::Broadcast);
+	sAIComponent::EVENT_ON_NPC_STATE_CHANGED = registerEvent("ON_NPC_STATE_CHANGED", ComponentEventInfo::Type::Broadcast);
+	sAIComponent::EVENT_ON_TARGET_VISIBILITY_LOST = registerEvent("ON_TARGET_VISIBILITY_LOST", ComponentEventInfo::Type::Broadcast);
+	sAIComponent::EVENT_ON_TARGET_VISIBILITY_REACQUIRED = registerEvent("ON_TARGET_VISIBILITY_REACQUIRED", ComponentEventInfo::Type::Broadcast);
+	sAIComponent::EVENT_ON_MEMORY_GAINED = registerEvent("ON_MEMORY_GAINED", ComponentEventInfo::Type::Broadcast);
+	sAIComponent::EVENT_ON_MEMORY_LOST = registerEvent("ON_MEMORY_LOST", ComponentEventInfo::Type::Broadcast);
+	sAIComponent::EVENT_ON_TARGET_ACQUIRED = registerEvent("ON_TARGET_ACQUIRED", ComponentEventInfo::Type::Broadcast);
+	sAIComponent::EVENT_ON_SUSPICIOUS_SOUND_HEARED = registerEvent("ON_SUSPICIOUS_SOUND_HEARED", ComponentEventInfo::Type::Broadcast);
+	sAIComponent::EVENT_ON_CONTROLLER_ACTION_INPUT = registerEvent("ON_CONTROLLER_ACTION_INPUT", ComponentEventInfo::Type::Broadcast);
+	sAIComponent::EVENT_ON_START_CONTROL = registerEvent("ON_START_CONTROL", ComponentEventInfo::Type::Broadcast);
+	sAIComponent::EVENT_ON_END_CONTROL = registerEvent("ON_END_CONTROL", ComponentEventInfo::Type::Broadcast);
+	sAIComponent::EVENT_ON_PATH_NODE_CHANGED = registerEvent("ON_PATH_NODE_CHANGED", ComponentEventInfo::Type::Broadcast);
+	sAIComponent::EVENT_ON_LOOK_TARGET_CHANGED = registerEvent("ON_LOOK_TARGET_CHANGED", ComponentEventInfo::Type::Broadcast);
+	sAIComponent::EVENT_ON_SCHEDULE_STARTED = registerEvent("ON_SCHEDULE_STARTED", ComponentEventInfo::Type::Broadcast);
 }
 
 SAIComponent::SAIComponent(pragma::ecs::BaseEntity &ent) : BaseAIComponent(ent), m_npcState(NPCSTATE::NONE)
@@ -116,7 +116,7 @@ void SAIComponent::OnLookTargetChanged()
 		}
 		ent.SendNetEvent(m_netEvSetLookTarget, p, pragma::networking::Protocol::SlowReliable);
 	}
-	BroadcastEvent(EVENT_ON_LOOK_TARGET_CHANGED);
+	BroadcastEvent(sAIComponent::EVENT_ON_LOOK_TARGET_CHANGED);
 }
 
 bool SAIComponent::IsAIEnabled() const
@@ -146,24 +146,24 @@ void SAIComponent::Initialize()
 {
 	BaseAIComponent::Initialize();
 
-	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(OnInput(inputData.input, inputData.activator, inputData.caller, inputData.data))
 			return util::EventReply::Handled;
 		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(DamageableComponent::EVENT_ON_TAKE_DAMAGE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnTakeDamage(static_cast<CEOnTakeDamage &>(evData.get()).damageInfo); });
-	BindEventUnhandled(SHealthComponent::EVENT_ON_TAKEN_DAMAGE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(damageableComponent::EVENT_ON_TAKE_DAMAGE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnTakeDamage(static_cast<CEOnTakeDamage &>(evData.get()).damageInfo); });
+	BindEventUnhandled(sHealthComponent::EVENT_ON_TAKEN_DAMAGE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &evDataDmg = static_cast<CEOnTakenDamage &>(evData.get());
 		OnTakenDamage(evDataDmg.damageInfo, evDataDmg.oldHealth, evDataDmg.newHealth);
 	});
-	BindEventUnhandled(SPhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPrePhysicsSimulate(); });
-	BindEventUnhandled(SModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(sPhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPrePhysicsSimulate(); });
+	BindEventUnhandled(sModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		pragma::SAIComponent::AIAnimationInfo info {};
 		info.SetPlayAsSchedule(false);
 		PlayActivity(pragma::Activity::Idle, info);
 	});
-	BindEventUnhandled(SAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(sAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		if(m_schedule == nullptr && IsMoving() == false) {
 			pragma::SAIComponent::AIAnimationInfo info {};
 			info.SetPlayAsSchedule(false);
@@ -182,7 +182,7 @@ void SAIComponent::Initialize()
 			}
 		};*/ // TODO
 	});
-	BindEvent(BaseAnimatedComponent::EVENT_ON_PLAY_ANIMATION, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseAnimatedComponent::EVENT_ON_PLAY_ANIMATION, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		if(m_bSkipHandling == true)
 			return util::EventReply::Unhandled;
 		AIAnimationInfo info {};
@@ -191,7 +191,7 @@ void SAIComponent::Initialize()
 		return util::EventReply::Handled;
 	});
 
-	BindEventUnhandled(SAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { MaintainAnimationMovement(static_cast<CEMaintainAnimationMovement &>(evData.get()).displacement); });
+	BindEventUnhandled(sAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { MaintainAnimationMovement(static_cast<CEMaintainAnimationMovement &>(evData.get()).displacement); });
 }
 
 void SAIComponent::UpdateMovementProperties(MovementComponent &movementC)
@@ -349,18 +349,18 @@ void SAIComponent::OnTick(double tDelta)
 		SelectSchedule();
 }
 
-void SAIComponent::SelectSchedule() { BroadcastEvent(EVENT_SELECT_SCHEDULE); }
+void SAIComponent::SelectSchedule() { BroadcastEvent(sAIComponent::EVENT_SELECT_SCHEDULE); }
 
 void SAIComponent::OnScheduleStarted(const std::shared_ptr<ai::Schedule> &schedule, ai::BehaviorNode::Result result)
 {
 	CEOnScheduleStateChanged evData {schedule, result};
-	BroadcastEvent(EVENT_ON_SCHEDULE_STARTED, evData);
+	BroadcastEvent(sAIComponent::EVENT_ON_SCHEDULE_STARTED, evData);
 }
 
 void SAIComponent::OnScheduleComplete(const std::shared_ptr<ai::Schedule> &schedule, ai::BehaviorNode::Result result)
 {
 	CEOnScheduleStateChanged evData {schedule, result};
-	BroadcastEvent(EVENT_ON_SCHEDULE_COMPLETE, evData);
+	BroadcastEvent(sAIComponent::EVENT_ON_SCHEDULE_COMPLETE, evData);
 }
 
 void SAIComponent::CancelSchedule()
@@ -453,7 +453,7 @@ void SAIComponent::SetNPCState(NPCSTATE state)
 void SAIComponent::OnTargetAcquired(pragma::ecs::BaseEntity *ent, float dist, bool isFirstNewTarget)
 {
 	CEOnTargetAcquired evData {ent, dist, isFirstNewTarget};
-	BroadcastEvent(EVENT_ON_TARGET_ACQUIRED, evData);
+	BroadcastEvent(sAIComponent::EVENT_ON_TARGET_ACQUIRED, evData);
 }
 
 void SAIComponent::SelectEnemies()
@@ -500,7 +500,7 @@ void SAIComponent::SelectEnemies()
 void SAIComponent::OnNPCStateChanged(NPCSTATE oldState, NPCSTATE newState)
 {
 	CEOnNPCStateChanged evData {oldState, newState};
-	BroadcastEvent(EVENT_ON_NPC_STATE_CHANGED, evData);
+	BroadcastEvent(sAIComponent::EVENT_ON_NPC_STATE_CHANGED, evData);
 }
 
 bool SAIComponent::IsObstruction(const pragma::ecs::BaseEntity &ent) const

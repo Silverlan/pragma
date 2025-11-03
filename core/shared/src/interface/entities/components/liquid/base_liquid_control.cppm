@@ -17,8 +17,16 @@ export import :physics.surface_material;
 
 export {
 	namespace pragma {
-		namespace physics {class ICollisionObject;};
-		class DLLNETWORK BaseLiquidControlComponent : public BaseEntityComponent {
+		namespace physics {		namespace baseLiquidControlComponent {
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SPLASH;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PROPERTIES_CHANGED;
+		}
+class ICollisionObject;};
+				namespace baseLiquidControlComponent {
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SPLASH;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PROPERTIES_CHANGED;
+		}
+class DLLNETWORK BaseLiquidControlComponent : public BaseEntityComponent {
 		  public:
 			struct DLLNETWORK SplashInfo {
 				Vector3 origin = {};
@@ -26,8 +34,6 @@ export {
 				float force = 0.f;
 			};
 
-			static ComponentEventId EVENT_ON_SPLASH;
-			static ComponentEventId EVENT_ON_PROPERTIES_CHANGED;
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 			virtual void Initialize() override;

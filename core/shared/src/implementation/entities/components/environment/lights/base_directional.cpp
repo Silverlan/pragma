@@ -17,7 +17,7 @@ void BaseEnvLightDirectionalComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "color_ambient", false))
 			*m_ambientColor = Color(kvData.value);
@@ -55,11 +55,11 @@ void BaseEnvLightDirectionalComponent::Load(udm::LinkedPropertyWrapperArg udm, u
 }
 util::EventReply BaseEnvLightDirectionalComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(eventId == BaseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT) {
+	if(eventId == baseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT) {
 		static_cast<CECalcLightDirectionToPoint &>(evData).direction = GetEntity().GetForward();
 		return util::EventReply::Handled;
 	}
-	else if(eventId == BaseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT) {
+	else if(eventId == baseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT) {
 		auto *cLight = dynamic_cast<pragma::BaseEnvLightComponent *>(GetEntity().FindComponent("light").get());
 		if(cLight) {
 			auto intensity = cLight->GetLightIntensityCandela();

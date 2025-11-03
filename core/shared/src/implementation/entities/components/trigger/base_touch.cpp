@@ -12,18 +12,18 @@ import :entities.components.triggers.base_touch;
 
 using namespace pragma;
 
-ComponentEventId BaseTouchComponent::EVENT_CAN_TRIGGER = INVALID_COMPONENT_ID;
-ComponentEventId BaseTouchComponent::EVENT_ON_START_TOUCH = INVALID_COMPONENT_ID;
-ComponentEventId BaseTouchComponent::EVENT_ON_END_TOUCH = INVALID_COMPONENT_ID;
-ComponentEventId BaseTouchComponent::EVENT_ON_TRIGGER = INVALID_COMPONENT_ID;
-ComponentEventId BaseTouchComponent::EVENT_ON_TRIGGER_INITIALIZED = INVALID_COMPONENT_ID;
+ComponentEventId baseTouchComponent::EVENT_CAN_TRIGGER = INVALID_COMPONENT_ID;
+ComponentEventId baseTouchComponent::EVENT_ON_START_TOUCH = INVALID_COMPONENT_ID;
+ComponentEventId baseTouchComponent::EVENT_ON_END_TOUCH = INVALID_COMPONENT_ID;
+ComponentEventId baseTouchComponent::EVENT_ON_TRIGGER = INVALID_COMPONENT_ID;
+ComponentEventId baseTouchComponent::EVENT_ON_TRIGGER_INITIALIZED = INVALID_COMPONENT_ID;
 void BaseTouchComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_CAN_TRIGGER = registerEvent("CAN_TRIGGER", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_START_TOUCH = registerEvent("ON_START_TOUCH", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_END_TOUCH = registerEvent("ON_END_TOUCH", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_TRIGGER = registerEvent("ON_TRIGGER", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_TRIGGER_INITIALIZED = registerEvent("ON_TRIGGER_INITIALIZED", ComponentEventInfo::Type::Broadcast);
+	baseTouchComponent::EVENT_CAN_TRIGGER = registerEvent("CAN_TRIGGER", ComponentEventInfo::Type::Broadcast);
+	baseTouchComponent::EVENT_ON_START_TOUCH = registerEvent("ON_START_TOUCH", ComponentEventInfo::Type::Broadcast);
+	baseTouchComponent::EVENT_ON_END_TOUCH = registerEvent("ON_END_TOUCH", ComponentEventInfo::Type::Broadcast);
+	baseTouchComponent::EVENT_ON_TRIGGER = registerEvent("ON_TRIGGER", ComponentEventInfo::Type::Broadcast);
+	baseTouchComponent::EVENT_ON_TRIGGER_INITIALIZED = registerEvent("ON_TRIGGER_INITIALIZED", ComponentEventInfo::Type::Broadcast);
 }
 BaseTouchComponent::BaseTouchComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) { m_touching.reserve(10); }
 
@@ -31,8 +31,8 @@ void BaseTouchComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		UpdateTouch();
 
 		if(!m_neverDisablePhysicsCallbacks) {
@@ -44,7 +44,7 @@ void BaseTouchComponent::Initialize()
 				pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(false, false);
 		}
 	});
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdatePhysics(); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdatePhysics(); });
 
 	auto &ent = GetEntity();
 
@@ -88,7 +88,7 @@ void BaseTouchComponent::OnPhysicsInitialized()
 				Con::cwar << "Trigger entity has non-trigger physics shapes!" << Con::endl;
 		}
 	}
-	BroadcastEvent(EVENT_ON_TRIGGER_INITIALIZED);
+	BroadcastEvent(baseTouchComponent::EVENT_ON_TRIGGER_INITIALIZED);
 }
 void BaseTouchComponent::UpdatePhysics()
 {
@@ -117,7 +117,7 @@ util::EventReply BaseTouchComponent::HandleEvent(ComponentEventId eventId, Compo
 {
 	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == BaseToggleComponent::EVENT_ON_TURN_OFF) {
+	if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF) {
 		// Fire touch events for all actors that are currently touching the trigger
 		auto num = m_touching.size();
 		for(auto &touchInfo : m_touching) {
@@ -125,7 +125,7 @@ util::EventReply BaseTouchComponent::HandleEvent(ComponentEventId eventId, Compo
 			FireEndTouchEvents(touchInfo, bLastTouch);
 		}
 	}
-	else if(eventId == BaseToggleComponent::EVENT_ON_TURN_ON) {
+	else if(eventId == baseToggleComponent::EVENT_ON_TURN_ON) {
 		// Fire touch events for all actors that are currently touching the trigger
 		auto bFirstTouch = true;
 		for(auto &touchInfo : m_touching) {
@@ -210,7 +210,7 @@ void BaseTouchComponent::Contact(const pragma::physics::ContactInfo &contactInfo
 bool BaseTouchComponent::CanTrigger(pragma::ecs::BaseEntity &ent)
 {
 	auto evCanTriggerData = CECanTriggerData {&ent};
-	if(BroadcastEvent(EVENT_CAN_TRIGGER, evCanTriggerData) == util::EventReply::Handled)
+	if(BroadcastEvent(baseTouchComponent::EVENT_CAN_TRIGGER, evCanTriggerData) == util::EventReply::Handled)
 		return evCanTriggerData.canTrigger;
 	if(evCanTriggerData.canTrigger == false)
 		return false;
@@ -219,7 +219,7 @@ bool BaseTouchComponent::CanTrigger(pragma::ecs::BaseEntity &ent)
 }
 void BaseTouchComponent::OnStartTouch(pragma::ecs::BaseEntity &ent)
 {
-	BroadcastEvent(EVENT_ON_START_TOUCH, CETouchData {ent});
+	BroadcastEvent(baseTouchComponent::EVENT_ON_START_TOUCH, CETouchData {ent});
 
 	auto *l = ent.GetNetworkState()->GetGameState()->GetLuaState();
 	auto &entThis = GetEntity();
@@ -229,7 +229,7 @@ void BaseTouchComponent::OnStartTouch(pragma::ecs::BaseEntity &ent)
 }
 void BaseTouchComponent::OnEndTouch(pragma::ecs::BaseEntity &ent)
 {
-	BroadcastEvent(EVENT_ON_END_TOUCH, CETouchData {ent});
+	BroadcastEvent(baseTouchComponent::EVENT_ON_END_TOUCH, CETouchData {ent});
 
 	auto *l = ent.GetNetworkState()->GetGameState()->GetLuaState();
 	auto &entThis = GetEntity();
@@ -239,7 +239,7 @@ void BaseTouchComponent::OnEndTouch(pragma::ecs::BaseEntity &ent)
 }
 void BaseTouchComponent::OnTrigger(pragma::ecs::BaseEntity &ent)
 {
-	BroadcastEvent(EVENT_ON_TRIGGER, CETouchData {ent});
+	BroadcastEvent(baseTouchComponent::EVENT_ON_TRIGGER, CETouchData {ent});
 
 	auto *l = ent.GetNetworkState()->GetGameState()->GetLuaState();
 	auto &entThis = GetEntity();

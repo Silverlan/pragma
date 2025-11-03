@@ -13,5 +13,5 @@ using namespace pragma;
 void BaseAnimatedComponent::MaintainAnimationMovement(const Vector3 &disp)
 {
 	CEMaintainAnimationMovement evData {disp};
-	InvokeEventCallbacks(EVENT_MAINTAIN_ANIMATION_MOVEMENT, evData);
+	InvokeEventCallbacks(baseAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MOVEMENT, evData);
 }

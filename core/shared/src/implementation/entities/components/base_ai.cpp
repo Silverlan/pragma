@@ -181,13 +181,13 @@ void BaseAIComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	m_netEvSetLookTarget = SetupNetEvent("set_look_target");
 
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> eventData) {
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> eventData) {
 		PathStep(static_cast<float>(static_cast<pragma::CEPhysicsUpdateData &>(eventData.get()).deltaTime));
 		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(MovementComponent::EVENT_ON_UPDATE_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovementProperties(); });
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnModelChanged(static_cast<pragma::CEOnModelChanged &>(evData.get()).model); });
-	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_ANIMATION_START, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(movementComponent::EVENT_ON_UPDATE_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovementProperties(); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnModelChanged(static_cast<pragma::CEOnModelChanged &>(evData.get()).model); });
+	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATION_START, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto animComponent = GetEntity().GetAnimatedComponent();
 		if(animComponent.expired())
 			return;
@@ -200,7 +200,7 @@ void BaseAIComponent::Initialize()
 		m_animMoveInfo.blend = !anim->HasFlag(pragma::FAnim::NoMoveBlend);
 		m_animMoveInfo.moving = (anim->HasFlag(pragma::FAnim::MoveX) || anim->HasFlag(pragma::FAnim::MoveZ)) ? true : false;
 	});
-	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_BLEND_ANIMATION_MT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_BLEND_ANIMATION_MT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto animComponent = GetEntity().GetAnimatedComponent();
 		if(animComponent.expired())
 			return;
@@ -209,8 +209,8 @@ void BaseAIComponent::Initialize()
 		if(&animInfo == &animComponent->GetBaseAnimationInfo()) // Only apply for base animation, not for gestures
 			BaseAIComponent::BlendAnimationMovementMT(evDataBlend.bonePoses, evDataBlend.boneScales);
 	});
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
-	BindEvent(BaseCharacterComponent::EVENT_IS_MOVING, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
+	BindEvent(baseCharacterComponent::EVENT_IS_MOVING, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		static_cast<CEIsMoving &>(evData.get()).moving = IsMoving();
 		return util::EventReply::Handled;
 	});

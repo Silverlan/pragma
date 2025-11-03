@@ -15,7 +15,7 @@ void BasePointAtTargetComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "point_at_target", false))
 			m_kvPointAtTargetName = kvData.value;
@@ -46,7 +46,7 @@ void BasePointAtTargetComponent::OnEntitySpawn()
 	}
 	auto *transformC = dynamic_cast<pragma::BaseTransformComponent *>(GetEntity().AddComponent("transform").get());
 	if(transformC) {
-		m_cbOnPoseChangedThis = transformC->AddEventCallback(BaseTransformComponent::EVENT_ON_POSE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		m_cbOnPoseChangedThis = transformC->AddEventCallback(baseTransformComponent::EVENT_ON_POSE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			UpdatePose();
 			return util::EventReply::Unhandled;
 		});
@@ -66,7 +66,7 @@ void BasePointAtTargetComponent::SetPointAtTarget(pragma::ecs::BaseEntity *ent)
 	auto transformC = static_cast<pragma::BaseTransformComponent *>(ent->AddComponent("transform").get());
 	if(transformC == nullptr)
 		return;
-	m_cbOnPoseChanged = transformC->AddEventCallback(BaseTransformComponent::EVENT_ON_POSE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	m_cbOnPoseChanged = transformC->AddEventCallback(baseTransformComponent::EVENT_ON_POSE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		UpdatePose();
 		return util::EventReply::Unhandled;
 	});

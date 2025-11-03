@@ -20,7 +20,7 @@ void BaseWorldComponent::Initialize()
 	ent.AddComponent("model");
 	ent.AddComponent("physics");
 
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { InitializePhysics(); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { InitializePhysics(); });
 }
 
 void BaseWorldComponent::InitializePhysics()

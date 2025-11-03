@@ -12,30 +12,30 @@ import :entities.components.base_weapon;
 
 using namespace pragma;
 
-ComponentEventId BaseWeaponComponent::EVENT_ON_DEPLOY = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseWeaponComponent::EVENT_ON_HOLSTER = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseWeaponComponent::EVENT_ON_PRIMARY_ATTACK = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseWeaponComponent::EVENT_ON_SECONDARY_ATTACK = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseWeaponComponent::EVENT_ON_TERTIARY_ATTACK = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseWeaponComponent::EVENT_ON_ATTACK4 = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseWeaponComponent::EVENT_ON_END_PRIMARY_ATTACK = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseWeaponComponent::EVENT_ON_END_SECONDARY_ATTACK = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseWeaponComponent::EVENT_ON_RELOAD = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseWeaponComponent::EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseWeaponComponent::EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_DEPLOY = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_HOLSTER = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_PRIMARY_ATTACK = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_SECONDARY_ATTACK = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_TERTIARY_ATTACK = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_ATTACK4 = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_END_PRIMARY_ATTACK = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_END_SECONDARY_ATTACK = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_RELOAD = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseWeaponComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_DEPLOY = registerEvent("ON_DEPLOY", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_HOLSTER = registerEvent("ON_HOLSTER", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_PRIMARY_ATTACK = registerEvent("ON_PRIMARY_ATTACK", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_SECONDARY_ATTACK = registerEvent("ON_SECONDARY_ATTACK", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_TERTIARY_ATTACK = registerEvent("ON_TERTIARY_ATTACK", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_ATTACK4 = registerEvent("ON_ATTACK4", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_END_PRIMARY_ATTACK = registerEvent("ON_END_PRIMARY_ATTACK", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_END_SECONDARY_ATTACK = registerEvent("ON_END_SECONDARY_ATTACK", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_RELOAD = registerEvent("ON_RELOAD", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED = registerEvent("ON_PRIMARY_CLIP_SIZE_CHANGED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED = registerEvent("ON_SECONDARY_CLIP_SIZE_CHANGED", ComponentEventInfo::Type::Broadcast);
+	baseWeaponComponent::EVENT_ON_DEPLOY = registerEvent("ON_DEPLOY", ComponentEventInfo::Type::Broadcast);
+	baseWeaponComponent::EVENT_ON_HOLSTER = registerEvent("ON_HOLSTER", ComponentEventInfo::Type::Broadcast);
+	baseWeaponComponent::EVENT_ON_PRIMARY_ATTACK = registerEvent("ON_PRIMARY_ATTACK", ComponentEventInfo::Type::Broadcast);
+	baseWeaponComponent::EVENT_ON_SECONDARY_ATTACK = registerEvent("ON_SECONDARY_ATTACK", ComponentEventInfo::Type::Broadcast);
+	baseWeaponComponent::EVENT_ON_TERTIARY_ATTACK = registerEvent("ON_TERTIARY_ATTACK", ComponentEventInfo::Type::Broadcast);
+	baseWeaponComponent::EVENT_ON_ATTACK4 = registerEvent("ON_ATTACK4", ComponentEventInfo::Type::Broadcast);
+	baseWeaponComponent::EVENT_ON_END_PRIMARY_ATTACK = registerEvent("ON_END_PRIMARY_ATTACK", ComponentEventInfo::Type::Broadcast);
+	baseWeaponComponent::EVENT_ON_END_SECONDARY_ATTACK = registerEvent("ON_END_SECONDARY_ATTACK", ComponentEventInfo::Type::Broadcast);
+	baseWeaponComponent::EVENT_ON_RELOAD = registerEvent("ON_RELOAD", ComponentEventInfo::Type::Broadcast);
+	baseWeaponComponent::EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED = registerEvent("ON_PRIMARY_CLIP_SIZE_CHANGED", ComponentEventInfo::Type::Broadcast);
+	baseWeaponComponent::EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED = registerEvent("ON_SECONDARY_CLIP_SIZE_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
 BaseWeaponComponent::BaseWeaponComponent(pragma::ecs::BaseEntity &ent)
     : BaseEntityComponent(ent), m_clipPrimary(util::UInt16Property::Create(0)), m_clipSecondary(util::UInt16Property::Create(0)), m_maxPrimaryClipSize(util::UInt16Property::Create(30)), m_maxSecondaryClipSize(util::UInt16Property::Create(10)),
@@ -159,14 +159,14 @@ void BaseWeaponComponent::EndPrimaryAttack()
 	m_bInAttack1 = false;
 	UpdateTickPolicy();
 
-	BroadcastEvent(EVENT_ON_END_PRIMARY_ATTACK);
+	BroadcastEvent(baseWeaponComponent::EVENT_ON_END_PRIMARY_ATTACK);
 }
 void BaseWeaponComponent::EndSecondaryAttack()
 {
 	m_bInAttack2 = false;
 	UpdateTickPolicy();
 
-	BroadcastEvent(EVENT_ON_END_SECONDARY_ATTACK);
+	BroadcastEvent(baseWeaponComponent::EVENT_ON_END_SECONDARY_ATTACK);
 }
 
 void BaseWeaponComponent::SetAutomaticPrimary(bool b)
@@ -209,8 +209,8 @@ void BaseWeaponComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ent = GetEntity();
 		auto mdlComponent = ent.GetModelComponent();
 		m_attMuzzle = mdlComponent ? mdlComponent->LookupAttachment("muzzle") : -1;
@@ -219,7 +219,7 @@ void BaseWeaponComponent::Initialize()
 		auto &evDataOnFireBullets = static_cast<pragma::ecs::events::CEOnFireBullets &>(evData.get());
 		OnFireBullets(evDataOnFireBullets.bulletInfo, evDataOnFireBullets.bulletOrigin, evDataOnFireBullets.bulletDir, evDataOnFireBullets.effectsOrigin);
 	});
-	BindEventUnhandled(BaseOwnableComponent::EVENT_ON_OWNER_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(baseOwnableComponent::EVENT_ON_OWNER_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ownerChangedData = static_cast<pragma::CEOnOwnerChanged &>(evData.get());
 		auto &ent = GetEntity();
 		auto ptrPhysComponent = ent.GetPhysicsComponent();
@@ -248,7 +248,7 @@ void BaseWeaponComponent::Deploy()
 	if(animComponent.valid())
 		animComponent->PlayActivity(pragma::Activity::VmIdle);
 
-	BroadcastEvent(EVENT_ON_DEPLOY);
+	BroadcastEvent(baseWeaponComponent::EVENT_ON_DEPLOY);
 }
 
 void BaseWeaponComponent::Holster()
@@ -256,7 +256,7 @@ void BaseWeaponComponent::Holster()
 	EndAttack();
 	m_bDeployed = false;
 
-	BroadcastEvent(EVENT_ON_HOLSTER);
+	BroadcastEvent(baseWeaponComponent::EVENT_ON_HOLSTER);
 }
 
 void BaseWeaponComponent::PrimaryAttack()
@@ -266,7 +266,7 @@ void BaseWeaponComponent::PrimaryAttack()
 		UpdateTickPolicy();
 	}
 
-	BroadcastEvent(EVENT_ON_PRIMARY_ATTACK);
+	BroadcastEvent(baseWeaponComponent::EVENT_ON_PRIMARY_ATTACK);
 }
 
 void BaseWeaponComponent::SecondaryAttack()
@@ -276,14 +276,14 @@ void BaseWeaponComponent::SecondaryAttack()
 		UpdateTickPolicy();
 	}
 
-	BroadcastEvent(EVENT_ON_SECONDARY_ATTACK);
+	BroadcastEvent(baseWeaponComponent::EVENT_ON_SECONDARY_ATTACK);
 }
 
-void BaseWeaponComponent::TertiaryAttack() { BroadcastEvent(EVENT_ON_TERTIARY_ATTACK); }
+void BaseWeaponComponent::TertiaryAttack() { BroadcastEvent(baseWeaponComponent::EVENT_ON_TERTIARY_ATTACK); }
 
-void BaseWeaponComponent::Attack4() { BroadcastEvent(EVENT_ON_ATTACK4); }
+void BaseWeaponComponent::Attack4() { BroadcastEvent(baseWeaponComponent::EVENT_ON_ATTACK4); }
 
-void BaseWeaponComponent::Reload() { BroadcastEvent(EVENT_ON_RELOAD); }
+void BaseWeaponComponent::Reload() { BroadcastEvent(baseWeaponComponent::EVENT_ON_RELOAD); }
 
 //////////////
 

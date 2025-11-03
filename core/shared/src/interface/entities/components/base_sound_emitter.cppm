@@ -15,9 +15,12 @@ export import :audio.enums;
 export import :audio.sound;
 
 export namespace pragma {
-	class DLLNETWORK BaseSoundEmitterComponent : public BaseEntityComponent {
+		namespace baseSoundEmitterComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SOUND_CREATED;
+	}
+class DLLNETWORK BaseSoundEmitterComponent : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_ON_SOUND_CREATED;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		struct DLLNETWORK SoundInfo {

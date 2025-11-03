@@ -13,11 +13,11 @@ import :entities.components.base_flex;
 
 using namespace pragma;
 
-ComponentEventId BaseFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId baseFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED = INVALID_COMPONENT_ID;
 void BaseFlexComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseEntityComponent::RegisterEvents(componentManager, registerEvent);
-	EVENT_ON_FLEX_CONTROLLER_CHANGED = registerEvent("ON_FLEX_CONTROLLER_CHANGED", ComponentEventInfo::Type::Explicit);
+	baseFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED = registerEvent("ON_FLEX_CONTROLLER_CHANGED", ComponentEventInfo::Type::Explicit);
 }
 void BaseFlexComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
@@ -41,7 +41,7 @@ void BaseFlexComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &changeData = static_cast<CEOnModelChanged &>(evData.get());
 		OnModelChanged(changeData.model);
 	});

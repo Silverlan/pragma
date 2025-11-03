@@ -11,12 +11,15 @@ export module pragma.shared:entities.components.submergible;
 export import :entities.components.base;
 
 export namespace pragma {
-	class DLLNETWORK SubmergibleComponent final : public BaseEntityComponent {
+		namespace submergibleComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_WATER_SUBMERGED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_WATER_EMERGED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_WATER_ENTERED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_WATER_EXITED;
+	}
+class DLLNETWORK SubmergibleComponent final : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_ON_WATER_SUBMERGED;
-		static ComponentEventId EVENT_ON_WATER_EMERGED;
-		static ComponentEventId EVENT_ON_WATER_ENTERED;
-		static ComponentEventId EVENT_ON_WATER_EXITED;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		SubmergibleComponent(pragma::ecs::BaseEntity &ent);

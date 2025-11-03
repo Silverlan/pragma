@@ -13,9 +13,11 @@ export import :entities.components.base;
 export import pragma.util;
 
 export namespace pragma {
+	namespace baseScoreComponent {
+		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_ON_SCORE_CHANGED;
+	}
 	class DLLNETWORK BaseScoreComponent : public BaseEntityComponent {
 	  public:
-		static pragma::ComponentEventId EVENT_ON_SCORE_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		using Score = int32_t;

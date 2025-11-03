@@ -11,8 +11,8 @@ import :entities.components.liquid.base_surface_simulation;
 
 using namespace pragma;
 
-ComponentEventId BaseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseLiquidSurfaceSimulationComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = registerEvent("ON_WATER_SURFACE_SIMULATOR_CHANGED", ComponentEventInfo::Type::Broadcast); }
+ComponentEventId baseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = pragma::INVALID_COMPONENT_ID;
+void BaseLiquidSurfaceSimulationComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = registerEvent("ON_WATER_SURFACE_SIMULATOR_CHANGED", ComponentEventInfo::Type::Broadcast); }
 
 void BaseLiquidSurfaceSimulationComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
 
@@ -21,7 +21,7 @@ BaseLiquidSurfaceSimulationComponent::BaseLiquidSurfaceSimulationComponent(pragm
 void BaseLiquidSurfaceSimulationComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "max_wave_height", false))
 			SetMaxWaveHeight(ustring::to_float(kvData.value));
@@ -29,7 +29,7 @@ void BaseLiquidSurfaceSimulationComponent::Initialize()
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(BaseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(baseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto *surfC = static_cast<BaseSurfaceComponent *>(GetEntity().FindComponent("surface").get());
 		assert(surfC);
 		if(surfC)
@@ -60,7 +60,7 @@ void BaseLiquidSurfaceSimulationComponent::ClearSurfaceSimulator()
 {
 	m_physSurfaceSim = nullptr;
 	m_originalWaterPlaneDistance = 0.f;
-	BroadcastEvent(EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED);
+	BroadcastEvent(baseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED);
 }
 
 bool BaseLiquidSurfaceSimulationComponent::CalcLineSurfaceIntersection(const Vector3 &lineOrigin, const Vector3 &lineDir, double *outT, double *outU, double *outV, bool bCull) const
@@ -116,7 +116,7 @@ void BaseLiquidSurfaceSimulationComponent::ReloadSurfaceSimulator()
 	auto *surfC = GetSurfaceComponent();
 	auto *mesh = surfC ? surfC->GetMesh() : nullptr;
 	if(ShouldSimulateSurface() == false || !mesh) {
-		BroadcastEvent(EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED);
+		BroadcastEvent(baseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED);
 		return;
 	}
 	auto pTrComponent = ent.GetTransformComponent();
@@ -135,5 +135,5 @@ void BaseLiquidSurfaceSimulationComponent::ReloadSurfaceSimulator()
 	m_physSurfaceSim = InitializeSurfaceSimulator(Vector2(min.x, min.z), Vector2(max.x, max.z), (n * static_cast<float>(d)).y); // TODO
 	m_physSurfaceSim->SetMaxWaveHeight(m_kvMaxWaveHeight);
 	m_physSurfaceSim->Initialize();
-	BroadcastEvent(EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED);
+	BroadcastEvent(baseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED);
 }

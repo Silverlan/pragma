@@ -89,7 +89,7 @@ void BaseCharacterComponent::DeployWeapon(pragma::ecs::BaseEntity &ent)
 	SetActiveWeapon(it->get());
 
 	auto evOnDeployWeapon = CEOnDeployWeapon {ent};
-	BroadcastEvent(EVENT_ON_DEPLOY_WEAPON, evOnDeployWeapon);
+	BroadcastEvent(baseCharacterComponent::EVENT_ON_DEPLOY_WEAPON, evOnDeployWeapon);
 }
 void BaseCharacterComponent::SetActiveWeapon(pragma::ecs::BaseEntity *ent)
 {
@@ -99,7 +99,7 @@ void BaseCharacterComponent::SetActiveWeapon(pragma::ecs::BaseEntity *ent)
 		m_weaponActive = ent->GetHandle();
 
 	auto evOnSetActiveWeapon = CEOnSetActiveWeapon {ent};
-	BroadcastEvent(EVENT_ON_SET_ACTIVE_WEAPON, evOnSetActiveWeapon);
+	BroadcastEvent(baseCharacterComponent::EVENT_ON_SET_ACTIVE_WEAPON, evOnSetActiveWeapon);
 }
 void BaseCharacterComponent::HolsterWeapon()
 {

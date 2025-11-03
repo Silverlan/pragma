@@ -17,15 +17,21 @@ export import :model.animation.enums;
 
 export {
 	namespace pragma {
-		class Model;
-		class DLLNETWORK BaseFlexComponent : public BaseEntityComponent, public DynamicMemberRegister {
+				namespace baseFlexComponent {
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_FLEX_CONTROLLER_CHANGED;
+		}
+class Model;
+				namespace baseFlexComponent {
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_FLEX_CONTROLLER_CHANGED;
+		}
+class DLLNETWORK BaseFlexComponent : public BaseEntityComponent, public DynamicMemberRegister {
 		public:
 			enum class StateFlags : uint8_t {
 				None = 0u,
 				EnableFlexControllerLimits = 1u,
 				EnableFlexControllerUpdateListeners = EnableFlexControllerLimits << 1u,
 			};
-			static ComponentEventId EVENT_ON_FLEX_CONTROLLER_CHANGED;
+
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 			virtual void Initialize() override;

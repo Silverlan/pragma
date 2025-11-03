@@ -106,8 +106,8 @@ GravityComponent::GravityComponent(pragma::ecs::BaseEntity &ent) : BaseEntityCom
 void GravityComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyGravity(static_cast<CEPhysicsUpdateData &>(evData.get()).deltaTime); });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyGravity(static_cast<CEPhysicsUpdateData &>(evData.get()).deltaTime); });
 }
 
 void GravityComponent::ApplyGravity(double dt)

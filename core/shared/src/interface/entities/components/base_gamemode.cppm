@@ -17,17 +17,30 @@ export import :game.game_mode_manager;
 export import :networking.enums;
 
 export namespace pragma {
-	class BasePlayerComponent;
-	class DLLNETWORK BaseGamemodeComponent : public BaseEntityComponent {
+		namespace baseGamemodeComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAYER_DEATH;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAYER_SPAWNED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAYER_DROPPED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAYER_READY;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAYER_JOINED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_GAME_INITIALIZED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_MAP_INITIALIZED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_GAME_READY;
+	}
+class BasePlayerComponent;
+		namespace baseGamemodeComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAYER_DEATH;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAYER_SPAWNED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAYER_DROPPED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAYER_READY;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAYER_JOINED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_GAME_INITIALIZED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_MAP_INITIALIZED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_GAME_READY;
+	}
+class DLLNETWORK BaseGamemodeComponent : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_ON_PLAYER_DEATH;
-		static ComponentEventId EVENT_ON_PLAYER_SPAWNED;
-		static ComponentEventId EVENT_ON_PLAYER_DROPPED;
-		static ComponentEventId EVENT_ON_PLAYER_READY;
-		static ComponentEventId EVENT_ON_PLAYER_JOINED;
-		static ComponentEventId EVENT_ON_GAME_INITIALIZED;
-		static ComponentEventId EVENT_ON_MAP_INITIALIZED;
-		static ComponentEventId EVENT_ON_GAME_READY;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;

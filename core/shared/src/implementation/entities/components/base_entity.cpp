@@ -31,10 +31,10 @@ DLLNETWORK std::ostream &operator<<(std::ostream &os, const pragma::BaseEntityCo
 }
 
 decltype(EEntityComponentCallbackEvent::Count) EEntityComponentCallbackEvent::Count = EEntityComponentCallbackEvent {umath::to_integral(E::Count)};
-decltype(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED) BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED = INVALID_COMPONENT_ID;
-decltype(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED) BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED = INVALID_COMPONENT_ID;
-decltype(BaseEntityComponent::EVENT_ON_MEMBERS_CHANGED) BaseEntityComponent::EVENT_ON_MEMBERS_CHANGED = INVALID_COMPONENT_ID;
-decltype(BaseEntityComponent::EVENT_ON_ACTIVE_STATE_CHANGED) BaseEntityComponent::EVENT_ON_ACTIVE_STATE_CHANGED = INVALID_COMPONENT_ID;
+decltype(baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED) baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED = INVALID_COMPONENT_ID;
+decltype(baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED) baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED = INVALID_COMPONENT_ID;
+decltype(baseEntityComponent::EVENT_ON_MEMBERS_CHANGED) baseEntityComponent::EVENT_ON_MEMBERS_CHANGED = INVALID_COMPONENT_ID;
+decltype(baseEntityComponent::EVENT_ON_ACTIVE_STATE_CHANGED) baseEntityComponent::EVENT_ON_ACTIVE_STATE_CHANGED = INVALID_COMPONENT_ID;
 BaseEntityComponent::BaseEntityComponent(pragma::ecs::BaseEntity &ent) : m_entity {ent} {}
 BaseEntityComponent::~BaseEntityComponent()
 {
@@ -57,10 +57,10 @@ BaseEntityComponent::~BaseEntityComponent()
 }
 void BaseEntityComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_ENTITY_COMPONENT_ADDED = registerEvent("ON_ENTITY_COMPONENT_ADDED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_ENTITY_COMPONENT_REMOVED = registerEvent("ON_ENTITY_COMPONENT_REMOVED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_MEMBERS_CHANGED = registerEvent("ON_MEMBERS_CHANGED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_ACTIVE_STATE_CHANGED = registerEvent("ON_ACTIVE_STATE_CHANGED", ComponentEventInfo::Type::Broadcast);
+	baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED = registerEvent("ON_ENTITY_COMPONENT_ADDED", ComponentEventInfo::Type::Broadcast);
+	baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED = registerEvent("ON_ENTITY_COMPONENT_REMOVED", ComponentEventInfo::Type::Broadcast);
+	baseEntityComponent::EVENT_ON_MEMBERS_CHANGED = registerEvent("ON_MEMBERS_CHANGED", ComponentEventInfo::Type::Broadcast);
+	baseEntityComponent::EVENT_ON_ACTIVE_STATE_CHANGED = registerEvent("ON_ACTIVE_STATE_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
 
 spdlog::logger &BaseEntityComponent::InitLogger() const
@@ -176,12 +176,12 @@ void BaseEntityComponent::SetPropertyAnimated(const std::string &property, bool 
 }
 void BaseEntityComponent::OnMembersChanged()
 {
-	BroadcastEvent(EVENT_ON_MEMBERS_CHANGED);
+	BroadcastEvent(baseEntityComponent::EVENT_ON_MEMBERS_CHANGED);
 
 	auto *genericC = GetEntity().GetGenericComponent();
 	if(genericC) {
 		CEOnMembersChanged ev {*this};
-		genericC->InvokeEventCallbacks(BaseGenericComponent::EVENT_ON_MEMBERS_CHANGED, ev);
+		genericC->InvokeEventCallbacks(baseGenericComponent::EVENT_ON_MEMBERS_CHANGED, ev);
 	}
 }
 void BaseEntityComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
@@ -747,9 +747,9 @@ CallbackHandle BaseEntityComponent::BindEvent(ComponentEventId eventId, const st
 }
 util::EventReply BaseEntityComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(eventId == pragma::ecs::BaseEntity::EVENT_ON_SPAWN)
+	if(eventId == pragma::ecs::baseEntity::EVENT_ON_SPAWN)
 		OnEntitySpawn();
-	else if(eventId == pragma::ecs::BaseEntity::EVENT_ON_POST_SPAWN)
+	else if(eventId == pragma::ecs::baseEntity::EVENT_ON_POST_SPAWN)
 		OnEntityPostSpawn();
 
 	if(!m_boundEvents)
@@ -828,8 +828,8 @@ void BaseEntityComponent::OnEntityComponentRemoved(BaseEntityComponent &componen
 	}
 	pragma::CEOnEntityComponentRemoved evData {*this};
 	auto *genericC = GetEntity().GetGenericComponent();
-	if(BroadcastEvent(EVENT_ON_ENTITY_COMPONENT_REMOVED, evData) != util::EventReply::Handled && genericC)
-		genericC->InvokeEventCallbacks(BaseGenericComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED, evData);
+	if(BroadcastEvent(baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED, evData) != util::EventReply::Handled && genericC)
+		genericC->InvokeEventCallbacks(baseGenericComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED, evData);
 }
 pragma::Game &BaseEntityComponent::GetGame() { return *GetNetworkState().GetGameState(); }
 NetworkState &BaseEntityComponent::GetNetworkState() { return *GetEntity().GetNetworkState(); }
@@ -960,7 +960,7 @@ void BaseEntityComponent::SetActive(bool enabled)
 	if(enabled == IsActive())
 		return;
 	umath::set_flag(m_stateFlags, StateFlags::IsInactive, !enabled);
-	BroadcastEvent(EVENT_ON_ACTIVE_STATE_CHANGED);
+	BroadcastEvent(baseEntityComponent::EVENT_ON_ACTIVE_STATE_CHANGED);
 	OnActiveStateChanged(enabled);
 	UpdateTickPolicy();
 }

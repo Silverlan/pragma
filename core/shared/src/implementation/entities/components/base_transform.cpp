@@ -12,12 +12,12 @@ import :entities.components.base_transform;
 
 using namespace pragma;
 
-ComponentEventId BaseTransformComponent::EVENT_ON_POSE_CHANGED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseTransformComponent::EVENT_ON_TELEPORT = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseTransformComponent::EVENT_ON_POSE_CHANGED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseTransformComponent::EVENT_ON_TELEPORT = pragma::INVALID_COMPONENT_ID;
 void BaseTransformComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_POSE_CHANGED = registerEvent("ON_POSE_CHANGED", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_TELEPORT = registerEvent("ON_TELEPORT", ComponentEventInfo::Type::Broadcast);
+	baseTransformComponent::EVENT_ON_POSE_CHANGED = registerEvent("ON_POSE_CHANGED", ComponentEventInfo::Type::Explicit);
+	baseTransformComponent::EVENT_ON_TELEPORT = registerEvent("ON_TELEPORT", ComponentEventInfo::Type::Broadcast);
 }
 void BaseTransformComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
@@ -64,7 +64,7 @@ void BaseTransformComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	m_netEvSetScale = SetupNetEvent("set_scale");
 
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &mdl = static_cast<CEOnModelChanged &>(evData.get()).model;
 		if(mdl.get() == nullptr) {
 			SetEyeOffset({});
@@ -73,7 +73,7 @@ void BaseTransformComponent::Initialize()
 		SetEyeOffset(mdl.get()->GetEyeOffset());
 		return util::EventReply::Unhandled;
 	});
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		/*if(ustring::compare(kvData.key,"origin",false))
 			SetPosition(uvec::create(kvData.value));
@@ -102,7 +102,7 @@ void BaseTransformComponent::Teleport(const umath::Transform &targetPose)
 	umath::Transform curPose = GetPose();
 	auto deltaPose = targetPose * curPose.GetInverse();
 	CETeleport evData {curPose, targetPose, deltaPose};
-	if(BroadcastEvent(EVENT_ON_TELEPORT, evData) == util::EventReply::Handled)
+	if(BroadcastEvent(baseTransformComponent::EVENT_ON_TELEPORT, evData) == util::EventReply::Handled)
 		return;
 	SetPose(targetPose);
 }
@@ -124,7 +124,7 @@ void BaseTransformComponent::OnPoseChanged(TransformChangeFlags changeFlags, boo
 				pPhys->SetOrientation(GetRotation());
 		}
 	}
-	InvokeEventCallbacks(EVENT_ON_POSE_CHANGED, CEOnPoseChanged {changeFlags});
+	InvokeEventCallbacks(baseTransformComponent::EVENT_ON_POSE_CHANGED, CEOnPoseChanged {changeFlags});
 }
 void BaseTransformComponent::SetPose(const umath::ScaledTransform &pose) { SetPose(pose, pragma::CoordinateSpace::World); }
 void BaseTransformComponent::SetPose(const umath::Transform &pose) { SetPose(pose, pragma::CoordinateSpace::World); }

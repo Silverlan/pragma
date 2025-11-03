@@ -29,7 +29,14 @@ export {
 			virtual void PushArguments(lua_State *l) override;
 			pragma::ecs::BaseEntity *entity;
 		};
-		class DLLNETWORK BaseTouchComponent : public BaseEntityComponent {
+				namespace baseTouchComponent {
+			STATIC_DLL_COMPAT ComponentEventId EVENT_CAN_TRIGGER;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_START_TOUCH;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_END_TOUCH;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TRIGGER;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TRIGGER_INITIALIZED;
+		}
+class DLLNETWORK BaseTouchComponent : public BaseEntityComponent {
 		public:
 			enum class TriggerFlags : uint32_t { None = 0u, Players = 1u, NPCs = Players << 1u, Physics = NPCs << 1u, Everything = Players | NPCs | Physics };
 			struct ContactEvent {
@@ -42,11 +49,6 @@ export {
 				bool triggered;
 			};
 
-			static ComponentEventId EVENT_CAN_TRIGGER;
-			static ComponentEventId EVENT_ON_START_TOUCH;
-			static ComponentEventId EVENT_ON_END_TOUCH;
-			static ComponentEventId EVENT_ON_TRIGGER;
-			static ComponentEventId EVENT_ON_TRIGGER_INITIALIZED;
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			using BaseEntityComponent::BaseEntityComponent;
 			// Only called if collision callbacks are enabled (Entity::SetCollisionCallbacksEnabled(true))

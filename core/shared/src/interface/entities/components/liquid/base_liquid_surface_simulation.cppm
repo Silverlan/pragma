@@ -13,9 +13,12 @@ export import :entities.components.base_surface;
 export import :physics.water_surface_simulator;
 
 export namespace pragma {
-	class DLLNETWORK BaseLiquidSurfaceSimulationComponent : public BaseEntityComponent {
+		namespace baseLiquidSurfaceSimulationComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED;
+	}
+class DLLNETWORK BaseLiquidSurfaceSimulationComponent : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		enum class DLLNETWORK SpawnFlags : uint32_t { SurfaceSimulation = 2048 };

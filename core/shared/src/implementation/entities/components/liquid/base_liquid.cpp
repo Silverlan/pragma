@@ -17,7 +17,7 @@ void BaseFuncLiquidComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BasePhysicsComponent::EVENT_HANDLE_RAYCAST, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(basePhysicsComponent::EVENT_HANDLE_RAYCAST, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &raycastData = static_cast<CEHandleRaycast &>(evData.get());
 		auto r = OnRayResultCallback(raycastData.rayCollisionGroup, raycastData.rayCollisionMask);
 		if(r == false) {

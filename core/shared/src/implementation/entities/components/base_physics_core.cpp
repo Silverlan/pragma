@@ -624,7 +624,7 @@ pragma::physics::PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physic
 		ent.AddComponent<pragma::GravityComponent>();
 	}
 	auto evInitPhysics = CEInitializePhysics {type, flags};
-	if(BroadcastEvent(EVENT_INITIALIZE_PHYSICS, evInitPhysics) == util::EventReply::Handled)
+	if(BroadcastEvent(basePhysicsComponent::EVENT_INITIALIZE_PHYSICS, evInitPhysics) == util::EventReply::Handled)
 		return GetPhysicsObject(); // Handled by an external component
 	switch(type) {
 	case pragma::physics::PHYSICSTYPE::BOXCONTROLLER:
@@ -691,7 +691,7 @@ void BasePhysicsComponent::DestroyPhysicsObject()
 }
 void BasePhysicsComponent::OnPhysicsInitialized()
 {
-	BroadcastEvent(EVENT_ON_PHYSICS_INITIALIZED);
+	BroadcastEvent(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED);
 	SetCollisionContactReportEnabled(GetCollisionContactReportEnabled());
 
 	// Note: We always need sleep reports enabled for optimization purposes.
@@ -701,7 +701,7 @@ void BasePhysicsComponent::OnPhysicsInitialized()
 		OnPhysicsWake(m_physObject.get());
 	// SetSleepReportEnabled(IsSleepReportEnabled());
 }
-void BasePhysicsComponent::OnPhysicsDestroyed() { BroadcastEvent(EVENT_ON_PHYSICS_DESTROYED); }
+void BasePhysicsComponent::OnPhysicsDestroyed() { BroadcastEvent(basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED); }
 bool BasePhysicsComponent::IsKinematic() const { return umath::is_flag_set(m_stateFlags, StateFlags::Kinematic); }
 void BasePhysicsComponent::SetKinematic(bool b)
 {

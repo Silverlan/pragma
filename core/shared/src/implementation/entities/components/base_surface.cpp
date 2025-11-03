@@ -13,12 +13,12 @@ import :entities.components.base_surface;
 
 using namespace pragma;
 
-ComponentEventId BaseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId BaseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId baseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId baseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED = INVALID_COMPONENT_ID;
 void BaseSurfaceComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_SURFACE_PLANE_CHANGED = registerEvent("ON_SURFACE_PLANE_CHANGED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_SURFACE_MESH_CHANGED = registerEvent("ON_SURFACE_MESH_CHANGED", ComponentEventInfo::Type::Broadcast);
+	baseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED = registerEvent("ON_SURFACE_PLANE_CHANGED", ComponentEventInfo::Type::Broadcast);
+	baseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED = registerEvent("ON_SURFACE_MESH_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
 
 void BaseSurfaceComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
@@ -76,7 +76,7 @@ void BaseSurfaceComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t vers
 void BaseSurfaceComponent::SetPlane(const umath::Plane &plane)
 {
 	m_plane = plane;
-	BroadcastEvent(EVENT_ON_SURFACE_PLANE_CHANGED);
+	BroadcastEvent(baseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED);
 }
 const umath::Plane &BaseSurfaceComponent::GetPlane() const { return m_plane; }
 umath::Plane BaseSurfaceComponent::GetPlaneWs() const
@@ -192,7 +192,7 @@ std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssig
 		assert(meshInfo.has_value());
 		SetPlane(plane);
 		m_mesh = meshInfo->subMesh->shared_from_this();
-		BroadcastEvent(EVENT_ON_SURFACE_MESH_CHANGED, CEOnSurfaceMeshChanged {*meshInfo});
+		BroadcastEvent(baseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED, CEOnSurfaceMeshChanged {*meshInfo});
 		return meshInfo;
 	}
 	return {};

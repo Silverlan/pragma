@@ -45,16 +45,19 @@ export namespace pragma {
 		virtual void PushArguments(lua_State *l) override;
 		const Quat &rotation;
 	};
-	class DLLNETWORK BaseCharacterComponent : public BaseActorComponent {
+		namespace baseCharacterComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_FOOT_STEP;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_CHARACTER_ORIENTATION_CHANGED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DEPLOY_WEAPON;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SET_ACTIVE_WEAPON;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_PLAY_FOOTSTEP_SOUND;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_IS_MOVING;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_HANDLE_VIEW_ROTATION;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_JUMP;
+	}
+class DLLNETWORK BaseCharacterComponent : public BaseActorComponent {
 	  public:
-		static ComponentEventId EVENT_ON_FOOT_STEP;
-		static ComponentEventId EVENT_ON_CHARACTER_ORIENTATION_CHANGED;
-		static ComponentEventId EVENT_ON_DEPLOY_WEAPON;
-		static ComponentEventId EVENT_ON_SET_ACTIVE_WEAPON;
-		static ComponentEventId EVENT_PLAY_FOOTSTEP_SOUND;
-		static ComponentEventId EVENT_IS_MOVING;
-		static ComponentEventId EVENT_HANDLE_VIEW_ROTATION;
-		static ComponentEventId EVENT_ON_JUMP;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		//

@@ -35,12 +35,15 @@ export {
 			virtual void PushArguments(lua_State *l) override;
 			std::shared_ptr<pragma::Model> model;
 		};
-		class DLLNETWORK BaseModelComponent : public BaseEntityComponent, public DynamicMemberRegister {
+				namespace baseModelComponent {
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_MODEL_CHANGED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_MODEL_MATERIALS_LOADED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SKIN_CHANGED;
+			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BODY_GROUP_CHANGED;
+		}
+class DLLNETWORK BaseModelComponent : public BaseEntityComponent, public DynamicMemberRegister {
 		  public:
-			static ComponentEventId EVENT_ON_MODEL_CHANGED;
-			static ComponentEventId EVENT_ON_MODEL_MATERIALS_LOADED;
-			static ComponentEventId EVENT_ON_SKIN_CHANGED;
-			static ComponentEventId EVENT_ON_BODY_GROUP_CHANGED;
+
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 

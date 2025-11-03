@@ -16,7 +16,7 @@ InputMovementControllerComponent::InputMovementControllerComponent(pragma::ecs::
 void InputMovementControllerComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEventUnhandled(MovementComponent::EVENT_ON_UPDATE_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovementProperties(); });
+	BindEventUnhandled(movementComponent::EVENT_ON_UPDATE_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovementProperties(); });
 }
 void InputMovementControllerComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void InputMovementControllerComponent::OnRemove() { BaseEntityComponent::OnRemove(); }

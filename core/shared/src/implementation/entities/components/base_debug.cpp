@@ -20,7 +20,7 @@ void BaseDebugTextComponent::Initialize()
 	ent.AddComponent("transform");
 	ent.AddComponent("attachment");
 	ent.AddComponent("color");
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "text", false))
 			m_debugText = kvData.value;
@@ -30,7 +30,7 @@ void BaseDebugTextComponent::Initialize()
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &ioData = static_cast<CEInputData &>(evData.get());
 		if(ustring::compare<std::string>(ioData.input, "settext", false))
 			SetText(ioData.data);
@@ -51,7 +51,7 @@ void BaseDebugTextComponent::SetSize(float size) { m_size = size; }
 void BaseDebugOutlineComponent::Initialize(BaseEntityComponent &component)
 {
 	m_netEvSetOutlineColor = component.SetupNetEvent("set_outline_color");
-	component.BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	component.BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "outline_color", false))
 			m_outlineColor = Color {kvData.value};
@@ -59,7 +59,7 @@ void BaseDebugOutlineComponent::Initialize(BaseEntityComponent &component)
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	component.BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	component.BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &ioData = static_cast<CEInputData &>(evData.get());
 		if(ustring::compare<std::string>(ioData.input, "SetOutlineColor", false))
 			m_outlineColor = Color {ioData.data};
@@ -92,7 +92,7 @@ void BaseDebugLineComponent::Initialize()
 	ent.AddComponent("transform");
 	ent.AddComponent("attachment");
 	ent.AddComponent("color");
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "end_target", false))
 			m_targetEntity = kvData.value;
@@ -115,7 +115,7 @@ void BaseDebugBoxComponent::Initialize()
 	ent.AddComponent("transform");
 	ent.AddComponent("attachment");
 	ent.AddComponent("color");
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "min_bounds", false))
 			m_bounds.first = uvec::create(kvData.value);
@@ -142,7 +142,7 @@ void BaseDebugSphereComponent::Initialize()
 	ent.AddComponent("attachment");
 	ent.AddComponent("radius");
 	ent.AddComponent("color");
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "recursion_level", false))
 			m_recursionLevel = util::to_int(kvData.value);
@@ -164,7 +164,7 @@ void BaseDebugConeComponent::Initialize()
 	ent.AddComponent("attachment");
 	ent.AddComponent("radius");
 	ent.AddComponent("color");
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "start_radius", false))
 			m_startRadius = util::to_float(kvData.value);
@@ -197,7 +197,7 @@ void BaseDebugCylinderComponent::Initialize()
 	ent.AddComponent("attachment");
 	ent.AddComponent("color");
 	ent.AddComponent("radius");
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "length", false))
 			m_length = util::to_float(kvData.value);

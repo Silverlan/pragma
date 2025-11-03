@@ -14,26 +14,26 @@ import panima;
 #undef GetCurrentTime
 
 using namespace pragma;
-ComponentEventId PanimaComponent::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
-ComponentEventId PanimaComponent::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
-ComponentEventId PanimaComponent::EVENT_ON_ANIMATION_COMPLETE = pragma::INVALID_COMPONENT_ID;
-ComponentEventId PanimaComponent::EVENT_ON_ANIMATION_START = pragma::INVALID_COMPONENT_ID;
-ComponentEventId PanimaComponent::EVENT_MAINTAIN_ANIMATIONS = pragma::INVALID_COMPONENT_ID;
-ComponentEventId PanimaComponent::EVENT_ON_ANIMATIONS_UPDATED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId PanimaComponent::EVENT_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
-ComponentEventId PanimaComponent::EVENT_TRANSLATE_ANIMATION = pragma::INVALID_COMPONENT_ID;
-ComponentEventId PanimaComponent::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER = pragma::INVALID_COMPONENT_ID;
+ComponentEventId panimaComponent::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
+ComponentEventId panimaComponent::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
+ComponentEventId panimaComponent::EVENT_ON_ANIMATION_COMPLETE = pragma::INVALID_COMPONENT_ID;
+ComponentEventId panimaComponent::EVENT_ON_ANIMATION_START = pragma::INVALID_COMPONENT_ID;
+ComponentEventId panimaComponent::EVENT_MAINTAIN_ANIMATIONS = pragma::INVALID_COMPONENT_ID;
+ComponentEventId panimaComponent::EVENT_ON_ANIMATIONS_UPDATED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId panimaComponent::EVENT_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
+ComponentEventId panimaComponent::EVENT_TRANSLATE_ANIMATION = pragma::INVALID_COMPONENT_ID;
+ComponentEventId panimaComponent::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER = pragma::INVALID_COMPONENT_ID;
 void PanimaComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_HANDLE_ANIMATION_EVENT = registerEvent("A2_HANDLE_ANIMATION_EVENT", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_PLAY_ANIMATION = registerEvent("A2_ON_PLAY_ANIMATION", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_ANIMATION_COMPLETE = registerEvent("A2_ON_ANIMATION_COMPLETE", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_ANIMATION_START = registerEvent("A2_ON_ANIMATION_START", ComponentEventInfo::Type::Broadcast);
-	EVENT_MAINTAIN_ANIMATIONS = registerEvent("A2_MAINTAIN_ANIMATIONS", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_ANIMATIONS_UPDATED = registerEvent("A2_ON_ANIMATIONS_UPDATED", ComponentEventInfo::Type::Broadcast);
-	EVENT_PLAY_ANIMATION = registerEvent("A2_PLAY_ANIMATION", ComponentEventInfo::Type::Broadcast);
-	EVENT_TRANSLATE_ANIMATION = registerEvent("A2_TRANSLATE_ANIMATION", ComponentEventInfo::Type::Broadcast);
-	EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER = registerEvent("A2_INITIALIZE_CHANNEL_VALUE_SUBMITTER", ComponentEventInfo::Type::Broadcast);
+	panimaComponent::EVENT_HANDLE_ANIMATION_EVENT = registerEvent("A2_HANDLE_ANIMATION_EVENT", ComponentEventInfo::Type::Broadcast);
+	panimaComponent::EVENT_ON_PLAY_ANIMATION = registerEvent("A2_ON_PLAY_ANIMATION", ComponentEventInfo::Type::Broadcast);
+	panimaComponent::EVENT_ON_ANIMATION_COMPLETE = registerEvent("A2_ON_ANIMATION_COMPLETE", ComponentEventInfo::Type::Broadcast);
+	panimaComponent::EVENT_ON_ANIMATION_START = registerEvent("A2_ON_ANIMATION_START", ComponentEventInfo::Type::Broadcast);
+	panimaComponent::EVENT_MAINTAIN_ANIMATIONS = registerEvent("A2_MAINTAIN_ANIMATIONS", ComponentEventInfo::Type::Broadcast);
+	panimaComponent::EVENT_ON_ANIMATIONS_UPDATED = registerEvent("A2_ON_ANIMATIONS_UPDATED", ComponentEventInfo::Type::Broadcast);
+	panimaComponent::EVENT_PLAY_ANIMATION = registerEvent("A2_PLAY_ANIMATION", ComponentEventInfo::Type::Broadcast);
+	panimaComponent::EVENT_TRANSLATE_ANIMATION = registerEvent("A2_TRANSLATE_ANIMATION", ComponentEventInfo::Type::Broadcast);
+	panimaComponent::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER = registerEvent("A2_INITIALIZE_CHANNEL_VALUE_SUBMITTER", ComponentEventInfo::Type::Broadcast);
 }
 std::optional<std::pair<std::string, util::Path>> PanimaComponent::ParseComponentChannelPath(const panima::ChannelPath &path)
 {
@@ -75,14 +75,14 @@ panima::PAnimationManager PanimaComponent::AddAnimationManager(std::string name,
 	panima::AnimationPlayerCallbackInterface callbackInteface {};
 	callbackInteface.onPlayAnimation = [this](const panima::AnimationSet &set, panima::AnimationId animId, panima::PlaybackFlags flags) -> bool {
 		CEAnim2OnPlayAnimation evData {set, animId, flags};
-		return InvokeEventCallbacks(EVENT_PLAY_ANIMATION, evData) != util::EventReply::Handled;
+		return InvokeEventCallbacks(panimaComponent::EVENT_PLAY_ANIMATION, evData) != util::EventReply::Handled;
 	};
 	callbackInteface.onStopAnimation = []() {
 
 	};
 	callbackInteface.translateAnimation = [this](const panima::AnimationSet &set, panima::AnimationId &animId, panima::PlaybackFlags &flags) {
 		CEAnim2TranslateAnimation evTranslateAnimData {set, animId, flags};
-		InvokeEventCallbacks(EVENT_TRANSLATE_ANIMATION, evTranslateAnimData);
+		InvokeEventCallbacks(panimaComponent::EVENT_TRANSLATE_ANIMATION, evTranslateAnimData);
 	};
 	auto r = player;
 	auto amData = std::shared_ptr<AnimationManagerData> {new AnimationManagerData {}};
@@ -456,7 +456,7 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(AnimationManager
 		}
 		auto memberPath = memberName;
 		CEAnim2InitializeChannelValueSubmitter evData {memberPath};
-		if(hComponent->InvokeEventCallbacks(EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER, evData) == util::EventReply::Handled) {
+		if(hComponent->InvokeEventCallbacks(panimaComponent::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER, evData) == util::EventReply::Handled) {
 			if(evData.submitter == nullptr)
 				continue;
 			channelValueSubmitters[channelIdx] = std::move(evData.submitter);
@@ -637,8 +637,8 @@ bool PanimaComponent::UpdateAnimations(GlobalAnimationChannelQueueProcessor &cha
 bool PanimaComponent::MaintainAnimations(GlobalAnimationChannelQueueProcessor &channelQueueProcessor, double dt)
 {
 	CEAnim2MaintainAnimations evData {dt};
-	if(InvokeEventCallbacks(EVENT_MAINTAIN_ANIMATIONS, evData) == util::EventReply::Handled) {
-		InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED);
+	if(InvokeEventCallbacks(panimaComponent::EVENT_MAINTAIN_ANIMATIONS, evData) == util::EventReply::Handled) {
+		InvokeEventCallbacks(panimaComponent::EVENT_ON_ANIMATIONS_UPDATED);
 		return true;
 	}
 
@@ -745,7 +745,7 @@ void PanimaComponent::ApplyAnimationValues(GlobalAnimationChannelQueueProcessor 
 			channelQueueProcessor->ApplyValues();
 		}
 	}
-	InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED);
+	InvokeEventCallbacks(panimaComponent::EVENT_ON_ANIMATIONS_UPDATED);
 }
 void PanimaComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
@@ -753,7 +753,7 @@ void PanimaComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(BaseEntityComponent::EVENT_ON_MEMBERS_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { InitializeAnimationChannelValueSubmitters(); });
+	BindEventUnhandled(baseEntityComponent::EVENT_ON_MEMBERS_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { InitializeAnimationChannelValueSubmitters(); });
 }
 
 void PanimaComponent::OnEntitySpawn()

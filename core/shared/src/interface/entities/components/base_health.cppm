@@ -13,10 +13,13 @@ export import :entities.components.base;
 export import :game.damage_info;
 
 export namespace pragma {
-	class DLLNETWORK BaseHealthComponent : public BaseEntityComponent {
+		namespace baseHealthComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TAKEN_DAMAGE;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_HEALTH_CHANGED;
+	}
+class DLLNETWORK BaseHealthComponent : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_ON_TAKEN_DAMAGE;
-		static ComponentEventId EVENT_ON_HEALTH_CHANGED;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;

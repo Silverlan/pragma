@@ -78,11 +78,11 @@ util::EventReply BaseEntityTriggerGravityComponent::HandleEvent(ComponentEventId
 {
 	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == BaseTouchComponent::EVENT_ON_START_TOUCH) {
+	if(eventId == baseTouchComponent::EVENT_ON_START_TOUCH) {
 		auto &touchData = static_cast<const pragma::CETouchData &>(evData);
 		OnStartTouch(touchData.entity);
 	}
-	if(eventId == BaseTouchComponent::EVENT_ON_END_TOUCH) {
+	if(eventId == baseTouchComponent::EVENT_ON_END_TOUCH) {
 		auto &touchData = static_cast<const pragma::CETouchData &>(evData);
 		OnEndTouch(touchData.entity);
 	}

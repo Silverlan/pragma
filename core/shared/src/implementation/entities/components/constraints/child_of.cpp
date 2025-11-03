@@ -79,13 +79,13 @@ void ConstraintChildOfComponent::Initialize()
 	BaseEntityComponent::Initialize();
 
 	GetEntity().AddComponent<ConstraintComponent>();
-	BindEventUnhandled(ConstraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyConstraint(); });
+	BindEventUnhandled(constraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyConstraint(); });
 }
 util::EventReply ConstraintChildOfComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
 	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == ConstraintComponent::EVENT_ON_PARTICIPANTS_FLAGGED_DIRTY)
+	if(eventId == constraintComponent::EVENT_ON_PARTICIPANTS_FLAGGED_DIRTY)
 		SetPropertyInfosDirty();
 	return util::EventReply::Unhandled;
 }

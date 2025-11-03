@@ -15,19 +15,19 @@ import :entities.components.base_bvh;
 
 using namespace pragma;
 
-ComponentEventId BaseBvhComponent::EVENT_ON_CLEAR_BVH = INVALID_COMPONENT_ID;
-ComponentEventId BaseBvhComponent::EVENT_ON_BVH_UPDATE_REQUESTED = INVALID_COMPONENT_ID;
-ComponentEventId BaseBvhComponent::EVENT_ON_BVH_REBUILT = INVALID_COMPONENT_ID;
+ComponentEventId baseBvhComponent::EVENT_ON_CLEAR_BVH = INVALID_COMPONENT_ID;
+ComponentEventId baseBvhComponent::EVENT_ON_BVH_UPDATE_REQUESTED = INVALID_COMPONENT_ID;
+ComponentEventId baseBvhComponent::EVENT_ON_BVH_REBUILT = INVALID_COMPONENT_ID;
 void BaseBvhComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_CLEAR_BVH = registerEvent("EVENT_ON_CLEAR_BVH", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_BVH_UPDATE_REQUESTED = registerEvent("EVENT_ON_BVH_UPDATE_REQUESTED", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_BVH_REBUILT = registerEvent("EVENT_ON_BVH_REBUILT", ComponentEventInfo::Type::Explicit);
+	baseBvhComponent::EVENT_ON_CLEAR_BVH = registerEvent("EVENT_ON_CLEAR_BVH", ComponentEventInfo::Type::Explicit);
+	baseBvhComponent::EVENT_ON_BVH_UPDATE_REQUESTED = registerEvent("EVENT_ON_BVH_UPDATE_REQUESTED", ComponentEventInfo::Type::Explicit);
+	baseBvhComponent::EVENT_ON_BVH_REBUILT = registerEvent("EVENT_ON_BVH_REBUILT", ComponentEventInfo::Type::Explicit);
 }
 
 void BaseBvhComponent::ClearBvh()
 {
-	InvokeEventCallbacks(EVENT_ON_CLEAR_BVH);
+	InvokeEventCallbacks(baseBvhComponent::EVENT_ON_CLEAR_BVH);
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("bvh_mutex_wait");
 #endif
@@ -48,7 +48,7 @@ void BaseBvhComponent::RebuildBvh()
 	}
 	DoRebuildBvh();
 
-	InvokeEventCallbacks(EVENT_ON_BVH_REBUILT);
+	InvokeEventCallbacks(baseBvhComponent::EVENT_ON_BVH_REBUILT);
 }
 
 void BaseBvhComponent::SetStaticCache(BaseStaticBvhCacheComponent *staticCache) { m_staticCache = staticCache ? staticCache->GetHandle<BaseStaticBvhCacheComponent>() : ComponentHandle<BaseStaticBvhCacheComponent> {}; }
@@ -244,7 +244,7 @@ std::vector<pragma::bvh::MeshRange> &BaseBvhComponent::GetMeshRanges() { return 
 const std::shared_ptr<pragma::bvh::MeshBvhTree> &BaseBvhComponent::GetUpdatedBvh() const
 {
 	if(m_sendBvhUpdateRequestOnInteraction)
-		InvokeEventCallbacks(EVENT_ON_BVH_UPDATE_REQUESTED);
+		InvokeEventCallbacks(baseBvhComponent::EVENT_ON_BVH_UPDATE_REQUESTED);
 	return m_bvhData;
 }
 void BaseBvhComponent::SendBvhUpdateRequestOnInteraction() { m_sendBvhUpdateRequestOnInteraction = true; }

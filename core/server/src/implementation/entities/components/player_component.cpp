@@ -84,7 +84,7 @@ void SPlayerComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	auto *pCharComponent = dynamic_cast<BaseCharacterComponent *>(&component);
 	if(pCharComponent != nullptr) {
 		auto &pFrozenProp = pCharComponent->GetFrozenProperty();
-		FlagCallbackForRemoval(pCharComponent->BindEventUnhandled(SCharacterComponent::EVENT_HANDLE_VIEW_ROTATION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnSetViewOrientation(static_cast<CEViewRotation &>(evData.get()).rotation); }), CallbackType::Component,
+		FlagCallbackForRemoval(pCharComponent->BindEventUnhandled(sCharacterComponent::EVENT_HANDLE_VIEW_ROTATION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnSetViewOrientation(static_cast<CEViewRotation &>(evData.get()).rotation); }), CallbackType::Component,
 		  pCharComponent);
 		auto &pSlopeLimitProp = pCharComponent->GetSlopeLimitProperty();
 		FlagCallbackForRemoval(pSlopeLimitProp->AddCallback([this](std::reference_wrapper<const float> oldVal, std::reference_wrapper<const float> newVal) { OnSetSlopeLimit(newVal); }), CallbackType::Component, pCharComponent);
@@ -122,7 +122,7 @@ util::EventReply SPlayerComponent::HandleEvent(ComponentEventId eventId, Compone
 {
 	if(BasePlayerComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == BaseCharacterComponent::EVENT_ON_RESPAWN)
+	if(eventId == baseCharacterComponent::EVENT_ON_RESPAWN)
 		OnRespawn();
 	return util::EventReply::Unhandled;
 }
@@ -249,9 +249,9 @@ void SPlayerComponent::Initialize()
 {
 	BasePlayerComponent::Initialize();
 
-	BindEventUnhandled(DamageableComponent::EVENT_ON_TAKE_DAMAGE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnTakeDamage(static_cast<CEOnTakeDamage &>(evData.get()).damageInfo); });
-	BindEventUnhandled(BaseScoreComponent::EVENT_ON_SCORE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ServerState::Get()->UpdatePlayerScore(*this, static_cast<CEOnScoreChanged &>(evData.get()).score); });
-	BindEventUnhandled(BaseNameComponent::EVENT_ON_NAME_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ServerState::Get()->UpdatePlayerName(*this, static_cast<CEOnNameChanged &>(evData.get()).name); });
+	BindEventUnhandled(damageableComponent::EVENT_ON_TAKE_DAMAGE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnTakeDamage(static_cast<CEOnTakeDamage &>(evData.get()).damageInfo); });
+	BindEventUnhandled(baseScoreComponent::EVENT_ON_SCORE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ServerState::Get()->UpdatePlayerScore(*this, static_cast<CEOnScoreChanged &>(evData.get()).score); });
+	BindEventUnhandled(baseNameComponent::EVENT_ON_NAME_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ServerState::Get()->UpdatePlayerName(*this, static_cast<CEOnNameChanged &>(evData.get()).name); });
 }
 
 void SPlayerComponent::OnSetSlopeLimit(float limit)

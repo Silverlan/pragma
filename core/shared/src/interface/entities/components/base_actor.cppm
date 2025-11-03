@@ -21,11 +21,14 @@ export namespace pragma {
 		virtual void PushArguments(lua_State *l) override;
 		DamageInfo *damageInfo;
 	};
-	class DLLNETWORK BaseActorComponent : public BaseEntityComponent {
+		namespace baseActorComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_KILLED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_RESPAWN;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DEATH;
+	}
+class DLLNETWORK BaseActorComponent : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_ON_KILLED;
-		static ComponentEventId EVENT_ON_RESPAWN;
-		static ComponentEventId EVENT_ON_DEATH;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;

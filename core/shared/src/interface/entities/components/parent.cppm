@@ -13,10 +13,13 @@ export import :entities.components.base;
 export import :entities.components.base_child;
 
 export namespace pragma {
-	class DLLNETWORK ParentComponent final : public BaseEntityComponent {
+		namespace parentComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_CHILD_ADDED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_CHILD_REMOVED;
+	}
+class DLLNETWORK ParentComponent final : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_ON_CHILD_ADDED;
-		static ComponentEventId EVENT_ON_CHILD_REMOVED;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		ParentComponent(pragma::ecs::BaseEntity &ent);

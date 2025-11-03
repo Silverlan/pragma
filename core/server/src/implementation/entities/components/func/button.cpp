@@ -18,7 +18,7 @@ void SButtonComponent::Initialize()
 {
 	BaseFuncButtonComponent::Initialize();
 
-	BindEvent(UsableComponent::EVENT_CAN_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(usableComponent::EVENT_CAN_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &bCanUse = static_cast<CECanUseData &>(evData.get()).canUse;
 		bCanUse = (m_tNextUse - SGame::Get()->CurTime()) <= 0.f;
 		return util::EventReply::Handled;

@@ -18,8 +18,8 @@ void IKComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	GetEntity().AddComponent("animated");
-	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateInverseKinematics(GetEntity().GetNetworkState()->GetGameState()->DeltaTime()); });
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateInverseKinematics(GetEntity().GetNetworkState()->GetGameState()->DeltaTime()); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		m_ikTrees.clear();
 		ClearIKControllers();
 	});

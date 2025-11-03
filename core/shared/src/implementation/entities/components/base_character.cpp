@@ -20,25 +20,25 @@ void BaseCharacterComponent::InitializeController()
 	//	return;
 }
 
-ComponentEventId BaseCharacterComponent::EVENT_ON_FOOT_STEP = INVALID_COMPONENT_ID;
-ComponentEventId BaseCharacterComponent::EVENT_ON_CHARACTER_ORIENTATION_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId BaseCharacterComponent::EVENT_ON_DEPLOY_WEAPON = INVALID_COMPONENT_ID;
-ComponentEventId BaseCharacterComponent::EVENT_ON_SET_ACTIVE_WEAPON = INVALID_COMPONENT_ID;
-ComponentEventId BaseCharacterComponent::EVENT_PLAY_FOOTSTEP_SOUND = INVALID_COMPONENT_ID;
-ComponentEventId BaseCharacterComponent::EVENT_IS_MOVING = INVALID_COMPONENT_ID;
-ComponentEventId BaseCharacterComponent::EVENT_HANDLE_VIEW_ROTATION = INVALID_COMPONENT_ID;
-ComponentEventId BaseCharacterComponent::EVENT_ON_JUMP = INVALID_COMPONENT_ID;
+ComponentEventId baseCharacterComponent::EVENT_ON_FOOT_STEP = INVALID_COMPONENT_ID;
+ComponentEventId baseCharacterComponent::EVENT_ON_CHARACTER_ORIENTATION_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId baseCharacterComponent::EVENT_ON_DEPLOY_WEAPON = INVALID_COMPONENT_ID;
+ComponentEventId baseCharacterComponent::EVENT_ON_SET_ACTIVE_WEAPON = INVALID_COMPONENT_ID;
+ComponentEventId baseCharacterComponent::EVENT_PLAY_FOOTSTEP_SOUND = INVALID_COMPONENT_ID;
+ComponentEventId baseCharacterComponent::EVENT_IS_MOVING = INVALID_COMPONENT_ID;
+ComponentEventId baseCharacterComponent::EVENT_HANDLE_VIEW_ROTATION = INVALID_COMPONENT_ID;
+ComponentEventId baseCharacterComponent::EVENT_ON_JUMP = INVALID_COMPONENT_ID;
 void BaseCharacterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseActorComponent::RegisterEvents(componentManager, registerEvent);
-	EVENT_ON_FOOT_STEP = registerEvent("ON_FOOT_STEP", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_CHARACTER_ORIENTATION_CHANGED = registerEvent("ON_CHARACTER_ORIENTATION_CHANGED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_DEPLOY_WEAPON = registerEvent("ON_DEPLOY_WEAPON", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_SET_ACTIVE_WEAPON = registerEvent("ON_SET_ACTIVE_WEAPON", ComponentEventInfo::Type::Broadcast);
-	EVENT_PLAY_FOOTSTEP_SOUND = registerEvent("PLAY_FOOTSTEP_SOUND", ComponentEventInfo::Type::Broadcast);
-	EVENT_IS_MOVING = registerEvent("IS_MOVING", ComponentEventInfo::Type::Explicit);
-	EVENT_HANDLE_VIEW_ROTATION = registerEvent("HANDLE_VIEW_ROTATION", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_JUMP = registerEvent("ON_JUMP", ComponentEventInfo::Type::Broadcast);
+	baseCharacterComponent::EVENT_ON_FOOT_STEP = registerEvent("ON_FOOT_STEP", ComponentEventInfo::Type::Broadcast);
+	baseCharacterComponent::EVENT_ON_CHARACTER_ORIENTATION_CHANGED = registerEvent("ON_CHARACTER_ORIENTATION_CHANGED", ComponentEventInfo::Type::Broadcast);
+	baseCharacterComponent::EVENT_ON_DEPLOY_WEAPON = registerEvent("ON_DEPLOY_WEAPON", ComponentEventInfo::Type::Broadcast);
+	baseCharacterComponent::EVENT_ON_SET_ACTIVE_WEAPON = registerEvent("ON_SET_ACTIVE_WEAPON", ComponentEventInfo::Type::Broadcast);
+	baseCharacterComponent::EVENT_PLAY_FOOTSTEP_SOUND = registerEvent("PLAY_FOOTSTEP_SOUND", ComponentEventInfo::Type::Broadcast);
+	baseCharacterComponent::EVENT_IS_MOVING = registerEvent("IS_MOVING", ComponentEventInfo::Type::Explicit);
+	baseCharacterComponent::EVENT_HANDLE_VIEW_ROTATION = registerEvent("HANDLE_VIEW_ROTATION", ComponentEventInfo::Type::Explicit);
+	baseCharacterComponent::EVENT_ON_JUMP = registerEvent("ON_JUMP", ComponentEventInfo::Type::Broadcast);
 }
 
 BaseCharacterComponent::BaseCharacterComponent(pragma::ecs::BaseEntity &ent) : BaseActorComponent(ent), m_slopeLimit(util::FloatProperty::Create(CFloat(umath::cos(umath::deg_to_rad(45.0f))))), m_stepOffset(util::FloatProperty::Create(2.f)), m_jumpPower(util::FloatProperty::Create(0.f)) {}
@@ -60,8 +60,8 @@ void BaseCharacterComponent::Initialize()
 	m_netEvSetActiveWeapon = SetupNetEvent("set_active_weapon");
 	m_netEvSetAmmoCount = SetupNetEvent("set_ammo_count");
 
-	BindEvent(BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { return HandleAnimationEvent(static_cast<CEHandleAnimationEvent &>(evData.get()).animationEvent) ? util::EventReply::Handled : util::EventReply::Unhandled; });
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEvent(baseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { return HandleAnimationEvent(static_cast<CEHandleAnimationEvent &>(evData.get()).animationEvent) ? util::EventReply::Handled : util::EventReply::Unhandled; });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto t = GetEntity().GetNetworkState()->GetGameState()->CurTime();
 		if(t >= m_tDetachFromGround)
 			return;
@@ -86,7 +86,7 @@ void BaseCharacterComponent::Initialize()
 			}
 		}
 	});
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateNeckControllers(); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateNeckControllers(); });
 	auto &ent = GetEntity();
 	ent.AddComponent("sound_emitter");
 	ent.AddComponent("physics");
@@ -208,7 +208,7 @@ void BaseCharacterComponent::SetViewOrientation(const Quat &orientation)
 	m_angView.z = orientation.z;
 
 	CEViewRotation evData {orientation};
-	if(InvokeEventCallbacks(EVENT_HANDLE_VIEW_ROTATION, evData) == util::EventReply::Handled)
+	if(InvokeEventCallbacks(baseCharacterComponent::EVENT_HANDLE_VIEW_ROTATION, evData) == util::EventReply::Handled)
 		return;
 
 	auto &ent = GetEntity();
@@ -247,7 +247,7 @@ util::EventReply BaseCharacterComponent::HandleEvent(ComponentEventId eventId, C
 {
 	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == BaseTransformComponent::EVENT_ON_TELEPORT) {
+	if(eventId == baseTransformComponent::EVENT_ON_TELEPORT) {
 		auto &te = static_cast<CETeleport &>(evData);
 		auto rot = GetViewOrientation();
 		rot = te.deltaPose * rot;
@@ -376,7 +376,7 @@ void BaseCharacterComponent::RemoveAmmo(UInt32 ammoType, int16_t count)
 void BaseCharacterComponent::PlayFootStepSound(FootType foot, const SurfaceMaterial &surfMat, float scale)
 {
 	CEPlayFootstepSound footStepInfo {foot, surfMat, scale};
-	if(BroadcastEvent(EVENT_PLAY_FOOTSTEP_SOUND, footStepInfo) == util::EventReply::Handled)
+	if(BroadcastEvent(baseCharacterComponent::EVENT_PLAY_FOOTSTEP_SOUND, footStepInfo) == util::EventReply::Handled)
 		return;
 	auto pSoundEmitterComponent = static_cast<pragma::BaseSoundEmitterComponent *>(GetEntity().FindComponent("sound_emitter").get());
 	if(pSoundEmitterComponent == nullptr)
@@ -410,7 +410,7 @@ bool BaseCharacterComponent::IsCharacter() const { return true; }
 bool BaseCharacterComponent::IsMoving() const
 {
 	CEIsMoving evData {};
-	InvokeEventCallbacks(EVENT_IS_MOVING, evData);
+	InvokeEventCallbacks(baseCharacterComponent::EVENT_IS_MOVING, evData);
 	return evData.moving;
 }
 
@@ -422,7 +422,7 @@ void BaseCharacterComponent::FootStep(FootType foot)
 		return;
 
 	CEOnFootStep footStepInfo {foot};
-	BroadcastEvent(EVENT_ON_FOOT_STEP, footStepInfo);
+	BroadcastEvent(baseCharacterComponent::EVENT_ON_FOOT_STEP, footStepInfo);
 
 	auto moveScale = 1.f;
 	if(IsMoving() == true) {
@@ -520,7 +520,7 @@ bool BaseCharacterComponent::Jump(const Vector3 &velocity)
 	if(pVelComponent.valid())
 		pVelComponent->AddVelocity(velocity);
 	CEOnJump footStepInfo {velocity};
-	if(BroadcastEvent(EVENT_ON_JUMP, footStepInfo) == util::EventReply::Handled)
+	if(BroadcastEvent(baseCharacterComponent::EVENT_ON_JUMP, footStepInfo) == util::EventReply::Handled)
 		return true;
 	return true;
 }

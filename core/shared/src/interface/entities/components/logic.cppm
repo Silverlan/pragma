@@ -11,9 +11,12 @@ export module pragma.shared:entities.components.logic_component;
 export import :entities.components.base;
 
 export namespace pragma {
-	class DLLNETWORK LogicComponent final : public BaseEntityComponent {
+		namespace logicComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TICK;
+	}
+class DLLNETWORK LogicComponent final : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_ON_TICK;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		LogicComponent(pragma::ecs::BaseEntity &ent);

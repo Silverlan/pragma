@@ -484,13 +484,13 @@ void Lua::Entity::register_class(luabind::class_<::pragma::ecs::BaseEntity> &cla
 	classDef.add_static_constant("TYPE_LOCAL", umath::to_integral(LuaEntityType::Default));
 	classDef.add_static_constant("TYPE_SHARED", umath::to_integral(LuaEntityType::Shared));
 
-	classDef.add_static_constant("EVENT_HANDLE_KEY_VALUE", ::pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE);
-	classDef.add_static_constant("EVENT_ON_SPAWN", ::pragma::ecs::BaseEntity::EVENT_ON_SPAWN);
-	classDef.add_static_constant("EVENT_ON_POST_SPAWN", ::pragma::ecs::BaseEntity::EVENT_ON_POST_SPAWN);
-	classDef.add_static_constant("EVENT_ON_REMOVE", ::pragma::ecs::BaseEntity::EVENT_ON_REMOVE);
+	classDef.add_static_constant("EVENT_HANDLE_KEY_VALUE", ::pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE);
+	classDef.add_static_constant("EVENT_ON_SPAWN", ::pragma::ecs::baseEntity::EVENT_ON_SPAWN);
+	classDef.add_static_constant("EVENT_ON_POST_SPAWN", ::pragma::ecs::baseEntity::EVENT_ON_POST_SPAWN);
+	classDef.add_static_constant("EVENT_ON_REMOVE", ::pragma::ecs::baseEntity::EVENT_ON_REMOVE);
 
-	classDef.add_static_constant("EVENT_ON_COMPONENT_ADDED", pragma::BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED);
-	classDef.add_static_constant("EVENT_ON_COMPONENT_REMOVED", pragma::BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED);
+	classDef.add_static_constant("EVENT_ON_COMPONENT_ADDED", pragma::baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED);
+	classDef.add_static_constant("EVENT_ON_COMPONENT_REMOVED", pragma::baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED);
 
 	classDef.def(luabind::const_self == luabind::const_self);
 }

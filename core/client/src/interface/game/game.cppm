@@ -225,8 +225,8 @@ export class DLLCLIENT CGame : public pragma::Game {
 	virtual Float GetRestitutionScale() const override;
 
 	template<typename TCPPM>
-	TCPPM *CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius = BulletInfo::DEFAULT_TRACER_RADIUS, const Color &col = BulletInfo::DEFAULT_TRACER_COLOR, float length = BulletInfo::DEFAULT_TRACER_LENGTH,
-	  float speed = BulletInfo::DEFAULT_TRACER_SPEED, const std::string &material = BulletInfo::DEFAULT_TRACER_MATERIAL, float bloomScale = BulletInfo::DEFAULT_TRACER_BLOOM);
+	TCPPM *CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius = bulletInfo::DEFAULT_TRACER_RADIUS, const Color &col = bulletInfo::DEFAULT_TRACER_COLOR, float length = bulletInfo::DEFAULT_TRACER_LENGTH,
+	  float speed = bulletInfo::DEFAULT_TRACER_SPEED, const std::string &material = bulletInfo::DEFAULT_TRACER_MATERIAL, float bloomScale = bulletInfo::DEFAULT_TRACER_BLOOM);
 
 	virtual bool IsPhysicsSimulationEnabled() const override;
 

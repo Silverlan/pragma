@@ -23,6 +23,18 @@ function(pr_setup_default_project_settings TARGET_NAME)
         target_link_options(${TARGET_NAME} PRIVATE --no-undefined)
     endif()
 
+    # Due to msvc compiler bugs, we introduce a few macros as temporary workarounds.
+    # Once constexpr works with modules under msvc, the macro can be removed.
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "CONSTEXPR_COMPAT=inline const")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "STATIC_CONST_COMPAT=inline const")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "STATIC_DLL_COMPAT=extern __declspec(dllexport)")
+    else()
+        target_compile_definitions(${TARGET_NAME} PRIVATE "CONSTEXPR_COMPAT=constexpr")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "STATIC_CONST_COMPAT=static const")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "STATIC_DLL_COMPAT=static")
+    endif()
+
     target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
     set_target_properties(${TARGET_NAME} PROPERTIES LINKER_LANGUAGE CXX)
     set_target_properties(${TARGET_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)

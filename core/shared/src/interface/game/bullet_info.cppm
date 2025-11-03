@@ -12,14 +12,15 @@ export import :entities.base_entity_handle;
 import :game.enums;
 
 export {
+	namespace bulletInfo {
+		STATIC_CONST_COMPAT float DEFAULT_TRACER_RADIUS;
+		STATIC_CONST_COMPAT Color DEFAULT_TRACER_COLOR;
+		STATIC_CONST_COMPAT float DEFAULT_TRACER_LENGTH;
+		STATIC_CONST_COMPAT float DEFAULT_TRACER_SPEED;
+		STATIC_CONST_COMPAT std::string DEFAULT_TRACER_MATERIAL;
+		STATIC_CONST_COMPAT float DEFAULT_TRACER_BLOOM;
+	}
 	struct DLLNETWORK BulletInfo {
-		static const float DEFAULT_TRACER_RADIUS;
-		static const Color DEFAULT_TRACER_COLOR;
-		static const float DEFAULT_TRACER_LENGTH;
-		static const float DEFAULT_TRACER_SPEED;
-		static const std::string DEFAULT_TRACER_MATERIAL;
-		static const float DEFAULT_TRACER_BLOOM;
-
 		EulerAngles spread = EulerAngles(0, 0, 0);
 		float force = std::numeric_limits<float>::signaling_NaN(); // Overwrite for ammo type?
 		float distance = static_cast<float>(umath::to_integral(pragma::GameLimits::MaxWorldDistance));
@@ -31,12 +32,12 @@ export {
 		EntityHandle hAttacker = {};
 		EntityHandle hInflictor = {};
 		uint32_t tracerCount = 1;
-		float tracerRadius = DEFAULT_TRACER_RADIUS;
-		Color tracerColor = DEFAULT_TRACER_COLOR;
-		float tracerLength = DEFAULT_TRACER_LENGTH;
-		float tracerSpeed = DEFAULT_TRACER_SPEED;
-		std::string tracerMaterial = DEFAULT_TRACER_MATERIAL;
-		float tracerBloom = DEFAULT_TRACER_BLOOM;
+		float tracerRadius = bulletInfo::DEFAULT_TRACER_RADIUS;
+		Color tracerColor = bulletInfo::DEFAULT_TRACER_COLOR;
+		float tracerLength = bulletInfo::DEFAULT_TRACER_LENGTH;
+		float tracerSpeed = bulletInfo::DEFAULT_TRACER_SPEED;
+		std::string tracerMaterial = bulletInfo::DEFAULT_TRACER_MATERIAL;
+		float tracerBloom = bulletInfo::DEFAULT_TRACER_BLOOM;
 		std::string ammoType = "";
 		// TODO Additional Filter
 	};

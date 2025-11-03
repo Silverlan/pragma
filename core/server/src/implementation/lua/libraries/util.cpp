@@ -14,22 +14,22 @@ luabind::object Lua::util::Server::fire_bullets(lua_State *l, const BulletInfo &
 luabind::object Lua::util::Server::fire_bullets(lua_State *l, const BulletInfo &bulletInfo, bool hitReport)
 {
 	uint8_t tracerSettings = 0;
-	if(bulletInfo.tracerRadius != BulletInfo::DEFAULT_TRACER_RADIUS)
+	if(bulletInfo.tracerRadius != bulletInfo::DEFAULT_TRACER_RADIUS)
 		tracerSettings |= 1;
 
-	if(bulletInfo.tracerColor != BulletInfo::DEFAULT_TRACER_COLOR)
+	if(bulletInfo.tracerColor != bulletInfo::DEFAULT_TRACER_COLOR)
 		tracerSettings |= 2;
 
-	if(bulletInfo.tracerLength != BulletInfo::DEFAULT_TRACER_LENGTH)
+	if(bulletInfo.tracerLength != bulletInfo::DEFAULT_TRACER_LENGTH)
 		tracerSettings |= 4;
 
-	if(bulletInfo.tracerSpeed != BulletInfo::DEFAULT_TRACER_SPEED)
+	if(bulletInfo.tracerSpeed != bulletInfo::DEFAULT_TRACER_SPEED)
 		tracerSettings |= 8;
 
-	if(bulletInfo.tracerMaterial != BulletInfo::DEFAULT_TRACER_MATERIAL)
+	if(bulletInfo.tracerMaterial != bulletInfo::DEFAULT_TRACER_MATERIAL)
 		tracerSettings |= 16;
 
-	if(bulletInfo.tracerBloom != BulletInfo::DEFAULT_TRACER_BLOOM)
+	if(bulletInfo.tracerBloom != bulletInfo::DEFAULT_TRACER_BLOOM)
 		tracerSettings |= 32;
 
 	::NetPacket packet;

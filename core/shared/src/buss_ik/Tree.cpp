@@ -36,9 +36,9 @@ using namespace std;
 
 
 
-#include "pragma/buss_ik/LinearR3.h"
-#include "pragma/buss_ik/Tree.h"
-#include "pragma/buss_ik/Node.h"
+#include "buss_ik/LinearR3.h"
+#include "buss_ik/Tree.h"
+#include "buss_ik/Node.h"
 Tree::Tree()
 {
 	root = 0;

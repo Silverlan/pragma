@@ -47,25 +47,6 @@ pr_include_third_party_library(
     "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vkvparser/include")
 #
 
-# spdlog
-set(SPDLOG_BUILD_SHARED
-    ON
-    CACHE BOOL ON FORCE)
-set(SPDLOG_BUILD_PIC
-    ON
-    CACHE BOOL ON FORCE)
-set(SPDLOG_USE_STD_FORMAT
-    ON
-    CACHE BOOL ON FORCE)
-set(SPDLOG_CLOCK_COARSE
-    ON
-    CACHE BOOL ON FORCE)
-set(CMAKE_CXX_STANDARD 20) # bump to c++23 after we change scope ops in luabind.
-pr_include_third_party_library(spdlog)
-pr_set_target_folder(spdlog third_party_libs)
-unset(CMAKE_CXX_STANDARD)
-#
-
 # gli
 unset(BUILD_SHARED_LIBS CACHE)
 add_subdirectory("third_party_libs/gli/gli")

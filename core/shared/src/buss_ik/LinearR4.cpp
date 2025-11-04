@@ -27,7 +27,7 @@ subject to the following restrictions:
 //Alterations:
 //Remove register keyword to fix compile errors with some linux compilers (clang)
 
-#include "pragma/buss_ik/LinearR4.h"
+#include "buss_ik/LinearR4.h"
 
 const VectorR4 VectorR4::Zero(0.0, 0.0, 0.0, 0.0);
 const VectorR4 VectorR4::UnitX( 1.0, 0.0, 0.0, 0.0);

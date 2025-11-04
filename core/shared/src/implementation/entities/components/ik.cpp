@@ -3,8 +3,8 @@
 module;
 
 #include "pragma/lua/core.hpp"
-#include "pragma/buss_ik/Tree.h"
-#include "pragma/buss_ik/Jacobian.h"
+#include "buss_ik/Tree.h"
+#include "buss_ik/Jacobian.h"
 #include <cassert>
 
 module pragma.shared;

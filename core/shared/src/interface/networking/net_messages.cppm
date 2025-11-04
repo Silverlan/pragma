@@ -5,7 +5,7 @@ module;
 export module pragma.shared:networking.net_messages;
 
 #define DECLARE_NET_MSG(NAME) \
-    CONSTEXPR_COMPAT const char *NAME = #NAME
+    CONSTEXPR_DLL_COMPAT const char *NAME = #NAME
 
 export namespace pragma::networking::net_messages
 {

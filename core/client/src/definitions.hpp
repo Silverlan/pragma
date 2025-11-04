@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __CLIENTDEFINITIONS_H__
-#define __CLIENTDEFINITIONS_H__
+#pragma once
+
 #ifdef DLLCLIENT_EX
 #ifdef __linux__
 #define DLLCLIENT __attribute__((visibility("default")))
@@ -14,6 +14,5 @@
 #define DLLCLIENT
 #else
 #define DLLCLIENT __declspec(dllimport) // import DLL information
-#endif
 #endif
 #endif

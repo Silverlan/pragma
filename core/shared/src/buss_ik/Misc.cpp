@@ -20,7 +20,7 @@ subject to the following restrictions:
 *
 */
 
-#include "pragma/buss_ik/LinearR3.h"
+#include "buss_ik/LinearR3.h"
 
 #if 0
 

@@ -22,9 +22,9 @@ subject to the following restrictions:
 
 
 
-#include "pragma/buss_ik/LinearR3.h"
-#include "pragma/buss_ik/MathMisc.h"
-#include "pragma/buss_ik/Node.h"
+#include "buss_ik/LinearR3.h"
+#include "buss_ik/MathMisc.h"
+#include "buss_ik/Node.h"
 
 extern int RotAxesOn;
 Node::Node(const VectorR3& attach, const VectorR3& v, double size, Purpose purpose, double minTheta, double maxTheta, double restAngle)

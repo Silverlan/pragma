@@ -254,7 +254,6 @@ pr_install_targets(
     vorbis
     vorbisfile
     VTFLib13
-    spdlog
     mpaheader
     bz2
     KVParser

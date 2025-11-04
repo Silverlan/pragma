@@ -19,6 +19,10 @@ function(pr_setup_default_project_settings TARGET_NAME)
         target_compile_options(${TARGET_NAME} PUBLIC -Wno-macro-redefined -Wno-potentially-evaluated-expression -Wno-switch)
     endif()
 
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "_WIN32_WINNT=0x0A00") # Windows 10
+    endif()
+
     if(UNIX)
         target_link_options(${TARGET_NAME} PRIVATE --no-undefined)
     endif()

@@ -23,7 +23,7 @@
 //Alterations:
 //Remove register keyword to fix compile errors with some linux compilers (clang)
 
-#include "pragma/buss_ik/LinearR2.h"
+#include "buss_ik/LinearR2.h"
 
 
 

@@ -4,7 +4,6 @@ option(CONFIG_BUILD_WITH_VTUNE_SUPPORT "Build with VTune profiler support?" OFF)
 
 set(PROJ_NAME shared)
 pr_add_library(${PROJ_NAME} SHARED)
-# pr_precompile_headers(${PROJ_NAME} "stdafx_shared.h")
 
 pr_add_dependency(${PROJ_NAME} panima TARGET PUBLIC)
 pr_add_dependency(${PROJ_NAME} materialsystem TARGET PUBLIC)
@@ -22,7 +21,6 @@ pr_add_dependency(${PROJ_NAME} oskit TARGET PRIVATE)
 
 pr_add_dependency(${PROJ_NAME} Recast TARGET)
 pr_add_dependency(${PROJ_NAME} Detour TARGET)
-pr_add_dependency(${PROJ_NAME} spdlog TARGET PUBLIC)
 pr_add_dependency(${PROJ_NAME} clip2tri-static TARGET)
 pr_add_dependency(${PROJ_NAME} poly2tri-static TARGET)
 pr_add_dependency(${PROJ_NAME} clipper-static TARGET)

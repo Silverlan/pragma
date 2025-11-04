@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/buss_ik/Node.h"
+#include "buss_ik/Node.h"
 
 module pragma.shared;
 

@@ -79,7 +79,7 @@ void CBaseEntity::InitializeLuaObject(lua_State *lua) { pragma::BaseLuaHandle::I
 //////////////////////////////////
 
 pragma::ComponentEventId CBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED = pragma::INVALID_COMPONENT_ID;
-void CBaseEntity::RegisterEvents(pragma::EntityComponentManager &componentManager) { EVENT_ON_SCENE_FLAGS_CHANGED = componentManager.RegisterEvent("ON_SCENE_FLAGS_CHANGED", typeid(pragma::ecs::BaseEntity), pragma::ComponentEventInfo::Type::Broadcast); }
+void CBaseEntity::RegisterEvents(pragma::EntityComponentManager &componentManager) { CBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED = componentManager.RegisterEvent("ON_SCENE_FLAGS_CHANGED", typeid(pragma::ecs::BaseEntity), pragma::ComponentEventInfo::Type::Broadcast); }
 
 CBaseEntity::CBaseEntity() : pragma::ecs::BaseEntity(), m_sceneFlags {util::UInt32Property::Create(0)} {}
 

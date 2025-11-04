@@ -1797,7 +1797,7 @@ void NET_cl_DEBUG_AI_NAVIGATION(NetPacket packet)
 
 	auto pGenericComponent = npc->GetComponent<pragma::CGenericComponent>();
 	if(pGenericComponent.valid()) {
-		pGenericComponent->BindEventUnhandled(pragma::ecs::BaseEntity::EVENT_ON_REMOVE, [pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		pGenericComponent->BindEventUnhandled(pragma::ecs::baseEntity::EVENT_ON_REMOVE, [pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) {
 			auto it = s_aiNavDebugObjects.find(static_cast<const CBaseEntity *>(&pGenericComponent->GetEntity()));
 			if(it == s_aiNavDebugObjects.end())
 				return;
@@ -2245,7 +2245,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 	auto pGenericComponent = ent->GetComponent<pragma::CGenericComponent>();
 	CallbackHandle cbOnRemove {};
 	if(pGenericComponent.valid()) {
-		cbOnRemove = pGenericComponent->BindEventUnhandled(pragma::ecs::BaseEntity::EVENT_ON_REMOVE, [](std::reference_wrapper<pragma::ComponentEvent> evData) { dbgAiSchedule = nullptr; });
+		cbOnRemove = pGenericComponent->BindEventUnhandled(pragma::ecs::baseEntity::EVENT_ON_REMOVE, [](std::reference_wrapper<pragma::ComponentEvent> evData) { dbgAiSchedule = nullptr; });
 	}
 
 	dbgAiSchedule = std::make_unique<DebugGameGUI>([pEl]() { return pEl->GetHandle(); });

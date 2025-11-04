@@ -12,6 +12,9 @@ export module pragma.server:entities.components.model;
 import :entities.components.entity;
 
 export namespace pragma {
+	namespace sModelComponent {
+		using namespace baseModelComponent;
+	}
 	class DLLSERVER SModelComponent final : public BaseModelComponent, public SBaseNetComponent {
 	  public:
 		SModelComponent(pragma::ecs::BaseEntity &ent) : BaseModelComponent(ent) {}

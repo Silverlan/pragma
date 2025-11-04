@@ -101,7 +101,7 @@ void CLightComponent::InitializeShadowBuffer()
 		return;
 	m_shadowBufferData = std::make_unique<ShadowBufferData>();
 	m_shadowBuffer = ShadowDataBufferManager::GetInstance().Request(*this, *m_shadowBufferData);
-	BroadcastEvent(EVENT_ON_SHADOW_BUFFER_INITIALIZED, CEOnShadowBufferInitialized {*m_shadowBuffer});
+	BroadcastEvent(cLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED, CEOnShadowBufferInitialized {*m_shadowBuffer});
 }
 
 void CLightComponent::DestroyRenderBuffer(bool freeBuffer)
@@ -146,7 +146,7 @@ bool CLightComponent::ShouldPass(const pragma::Model &mdl, const CModelSubMesh &
 	if(info == nullptr || const_cast<util::ShaderInfo *>(info)->GetShader() == nullptr) // Ignore meshes with nodraw (Or invalid) shaders
 		return false;
 	CEShouldPassMesh evData {mdl, mesh};
-	InvokeEventCallbacks(EVENT_SHOULD_PASS_MESH, evData);
+	InvokeEventCallbacks(cLightComponent::EVENT_SHOULD_PASS_MESH, evData);
 	return evData.shouldPass;
 }
 
@@ -157,7 +157,7 @@ bool CLightComponent::ShouldPass(const CBaseEntity &ent, uint32_t &renderFlags)
 	if(ShouldCastShadows() == false)
 		return false;
 	CEShouldPassEntity evData {ent, renderFlags};
-	if(InvokeEventCallbacks(EVENT_SHOULD_PASS_ENTITY, evData) == util::EventReply::Handled)
+	if(InvokeEventCallbacks(cLightComponent::EVENT_SHOULD_PASS_ENTITY, evData) == util::EventReply::Handled)
 		return evData.shouldPass;
 	return true;
 }
@@ -166,7 +166,7 @@ bool CLightComponent::ShouldPass(const CBaseEntity &ent, const CModelMesh &mesh,
 	if(ShouldCastShadows() == false)
 		return false;
 	CEShouldPassEntityMesh evData {ent, mesh, renderFlags};
-	InvokeEventCallbacks(EVENT_SHOULD_PASS_ENTITY_MESH, evData);
+	InvokeEventCallbacks(cLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH, evData);
 	return evData.shouldPass;
 }
 
@@ -249,7 +249,7 @@ bool CLightComponent::IsInRange(const CBaseEntity &ent, const CModelMesh &mesh) 
 bool CLightComponent::ShouldUpdateRenderPass(rendering::ShadowMapType smType) const
 {
 	CEShouldUpdateRenderPass evData {};
-	if(InvokeEventCallbacks(EVENT_SHOULD_UPDATE_RENDER_PASS, evData) == util::EventReply::Handled)
+	if(InvokeEventCallbacks(cLightComponent::EVENT_SHOULD_UPDATE_RENDER_PASS, evData) == util::EventReply::Handled)
 		return evData.shouldUpdate;
 	return umath::is_flag_set(m_stateFlags, (smType == rendering::ShadowMapType::Static) ? StateFlags::StaticUpdateRequired : StateFlags::DynamicUpdateRequired);
 }
@@ -345,7 +345,7 @@ void CLightComponent::InitializeShadowMap()
 	if(GetEffectiveShadowType() == ShadowType::None)
 		return;
 	CEHandleShadowMap ceData {};
-	if(BroadcastEvent(EVENT_HANDLE_SHADOW_MAP, ceData) == util::EventReply::Unhandled)
+	if(BroadcastEvent(cLightComponent::EVENT_HANDLE_SHADOW_MAP, ceData) == util::EventReply::Unhandled)
 		m_shadowMapStatic = GetEntity().AddComponent<CShadowComponent>(true)->GetHandle();
 	else if(ceData.resultShadow)
 		m_shadowMapStatic = ceData.resultShadow->GetHandle();
@@ -353,7 +353,7 @@ void CLightComponent::InitializeShadowMap()
 		InitializeShadowMap(*m_shadowMapStatic);
 	if(GetEffectiveShadowType() == ShadowType::Full) {
 		CEHandleShadowMap ceData {};
-		if(BroadcastEvent(EVENT_HANDLE_SHADOW_MAP, ceData) == util::EventReply::Unhandled)
+		if(BroadcastEvent(cLightComponent::EVENT_HANDLE_SHADOW_MAP, ceData) == util::EventReply::Unhandled)
 			m_shadowMapDynamic = GetEntity().AddComponent<CShadowComponent>(true)->GetHandle();
 		else if(ceData.resultShadow)
 			m_shadowMapDynamic = ceData.resultShadow->GetHandle();
@@ -591,7 +591,7 @@ bool CLightComponent::HasShadowsEnabled() const { return m_shadowComponent && Ge
 Mat4 &CLightComponent::GetTransformationMatrix(unsigned int j)
 {
 	CEGetTransformationMatrix evData {j};
-	InvokeEventCallbacks(EVENT_GET_TRANSFORMATION_MATRIX, evData);
+	InvokeEventCallbacks(cLightComponent::EVENT_GET_TRANSFORMATION_MATRIX, evData);
 	if(evData.transformation != nullptr)
 		return *evData.transformation;
 	static Mat4 m;

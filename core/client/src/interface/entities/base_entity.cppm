@@ -13,9 +13,11 @@ export module pragma.client:entities.base_entity;
 export import pragma.shared;
 
 export namespace pragma {class CRenderComponent; class CSceneComponent;};
+namespace cBaseEntity {
+	STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_ON_SCENE_FLAGS_CHANGED;
+}
 export class DLLCLIENT CBaseEntity : public pragma::ecs::BaseEntity {
   public:
-	static pragma::ComponentEventId EVENT_ON_SCENE_FLAGS_CHANGED;
 	static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
 	CBaseEntity();

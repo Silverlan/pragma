@@ -83,7 +83,7 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 				auto *ent = static_cast<CBaseEntity *>(&pGenericComponent->GetEntity());
 				m_occlusionOctree->UpdateObject(ent);
 			}));
-			it->second.push_back(pGenericComponent->BindEventUnhandled(pragma::ecs::BaseEntity::EVENT_ON_REMOVE, [this, pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
+			it->second.push_back(pGenericComponent->BindEventUnhandled(pragma::ecs::baseEntity::EVENT_ON_REMOVE, [this, pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
 				auto *ent = static_cast<CBaseEntity *>(&pGenericComponent->GetEntity());
 				auto it = m_callbacks.find(ent);
 

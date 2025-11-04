@@ -18,7 +18,7 @@ import panima;
 
 using namespace pragma;
 
-DLLNETWORK std::ostream &operator<<(std::ostream &os, const pragma::BaseEntityComponent &component)
+DLLNETWORK std::ostream &pragma::operator<<(std::ostream &os, const pragma::BaseEntityComponent &component)
 {
 	auto *info = component.GetEntity().GetNetworkState()->GetGameState()->GetEntityComponentManager().GetComponentInfo(component.GetComponentId());
 	os << "Component[";

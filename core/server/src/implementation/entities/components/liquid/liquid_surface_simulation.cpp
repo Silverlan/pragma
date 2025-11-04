@@ -68,7 +68,7 @@ void SLiquidSurfaceSimulationComponent::UpdateSurfaceSimulator()
 				m_bUsingClientsideSimulation = true;
 				m_physSurfaceSim = surfSim->shared_from_this();
 				auto hEnt = cent->GetHandle();
-				m_cbClientSimulatorUpdate = BindEventUnhandled(EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED, [this, hEnt](std::reference_wrapper<pragma::ComponentEvent> evData) {
+				m_cbClientSimulatorUpdate = BindEventUnhandled(sLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED, [this, hEnt](std::reference_wrapper<pragma::ComponentEvent> evData) {
 					if(hEnt.valid() == false)
 						return;
 					auto *surfSim = GetSurfaceSimulator();

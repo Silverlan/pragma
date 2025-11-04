@@ -108,7 +108,7 @@ bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data,
 	auto activity = udm["activity"];
 	if(activity && activity->IsType(udm::Type::String)) {
 		auto id = pragma::animation::Animation::GetActivityEnumRegister().RegisterEnum(activity->GetValue<udm::String>());
-		m_activity = (id != util::EnumRegister::InvalidEnum) ? static_cast<pragma::Activity>(id) : pragma::Activity::Invalid;
+		m_activity = (id != util::INVALID_ENUM) ? static_cast<pragma::Activity>(id) : pragma::Activity::Invalid;
 	}
 
 	udm["activityWeight"](m_activityWeight);
@@ -369,7 +369,7 @@ bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data,
 			if(name.empty())
 				continue;
 			auto id = pragma::animation::Animation::GetEventEnumRegister().RegisterEnum(name);
-			if(id == util::EnumRegister::InvalidEnum)
+			if(id == util::INVALID_ENUM)
 				continue;
 			auto ev = std::make_shared<pragma::AnimationEvent>();
 			ev->eventID = static_cast<pragma::AnimationEvent::Type>(id);

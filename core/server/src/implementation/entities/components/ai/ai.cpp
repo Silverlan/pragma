@@ -516,7 +516,7 @@ util::EventReply SAIComponent::HandleEvent(ComponentEventId eventId, ComponentEv
 {
 	if(BaseAIComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == BaseCharacterComponent::EVENT_ON_KILLED)
+	if(eventId == sCharacterComponent::EVENT_ON_KILLED)
 		OnKilled(static_cast<const CEOnCharacterKilled &>(evData).damageInfo);
 	return util::EventReply::Unhandled;
 }
@@ -637,24 +637,24 @@ void SAIComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
 	defAIAnimInfo.def("SetFaceTarget", static_cast<void (pragma::SAIComponent::AIAnimationInfo::*)(pragma::ecs::BaseEntity &)>(&pragma::SAIComponent::AIAnimationInfo::SetFaceTarget));
 	def.scope[defAIAnimInfo];
 
-	def.add_static_constant("EVENT_SELECT_SCHEDULE", pragma::SAIComponent::EVENT_SELECT_SCHEDULE);
-	def.add_static_constant("EVENT_SELECT_CONTROLLER_SCHEDULE", pragma::SAIComponent::EVENT_SELECT_CONTROLLER_SCHEDULE);
-	def.add_static_constant("EVENT_ON_SCHEDULE_COMPLETE", pragma::SAIComponent::EVENT_ON_SCHEDULE_COMPLETE);
-	def.add_static_constant("EVENT_ON_PRIMARY_TARGET_CHANGED", pragma::SAIComponent::EVENT_ON_PRIMARY_TARGET_CHANGED);
-	def.add_static_constant("EVENT_ON_PATH_CHANGED", pragma::SAIComponent::EVENT_ON_PATH_CHANGED);
-	def.add_static_constant("EVENT_ON_NPC_STATE_CHANGED", pragma::SAIComponent::EVENT_ON_NPC_STATE_CHANGED);
-	def.add_static_constant("EVENT_ON_TARGET_VISIBILITY_LOST", pragma::SAIComponent::EVENT_ON_TARGET_VISIBILITY_LOST);
-	def.add_static_constant("EVENT_ON_TARGET_VISIBILITY_REACQUIRED", pragma::SAIComponent::EVENT_ON_TARGET_VISIBILITY_REACQUIRED);
-	def.add_static_constant("EVENT_ON_MEMORY_GAINED", pragma::SAIComponent::EVENT_ON_MEMORY_GAINED);
-	def.add_static_constant("EVENT_ON_MEMORY_LOST", pragma::SAIComponent::EVENT_ON_MEMORY_LOST);
-	def.add_static_constant("EVENT_ON_TARGET_ACQUIRED", pragma::SAIComponent::EVENT_ON_TARGET_ACQUIRED);
-	def.add_static_constant("EVENT_ON_SUSPICIOUS_SOUND_HEARED", pragma::SAIComponent::EVENT_ON_SUSPICIOUS_SOUND_HEARED);
-	def.add_static_constant("EVENT_ON_CONTROLLER_ACTION_INPUT", pragma::SAIComponent::EVENT_ON_CONTROLLER_ACTION_INPUT);
-	def.add_static_constant("EVENT_ON_START_CONTROL", pragma::SAIComponent::EVENT_ON_START_CONTROL);
-	def.add_static_constant("EVENT_ON_END_CONTROL", pragma::SAIComponent::EVENT_ON_END_CONTROL);
-	def.add_static_constant("EVENT_ON_PATH_NODE_CHANGED", pragma::SAIComponent::EVENT_ON_PATH_NODE_CHANGED);
-	def.add_static_constant("EVENT_ON_LOOK_TARGET_CHANGED", pragma::SAIComponent::EVENT_ON_LOOK_TARGET_CHANGED);
-	def.add_static_constant("EVENT_ON_SCHEDULE_STARTED", pragma::SAIComponent::EVENT_ON_SCHEDULE_STARTED);
+	def.add_static_constant("EVENT_SELECT_SCHEDULE", pragma::sAIComponent::EVENT_SELECT_SCHEDULE);
+	def.add_static_constant("EVENT_SELECT_CONTROLLER_SCHEDULE", pragma::sAIComponent::EVENT_SELECT_CONTROLLER_SCHEDULE);
+	def.add_static_constant("EVENT_ON_SCHEDULE_COMPLETE", pragma::sAIComponent::EVENT_ON_SCHEDULE_COMPLETE);
+	def.add_static_constant("EVENT_ON_PRIMARY_TARGET_CHANGED", pragma::sAIComponent::EVENT_ON_PRIMARY_TARGET_CHANGED);
+	def.add_static_constant("EVENT_ON_PATH_CHANGED", pragma::sAIComponent::EVENT_ON_PATH_CHANGED);
+	def.add_static_constant("EVENT_ON_NPC_STATE_CHANGED", pragma::sAIComponent::EVENT_ON_NPC_STATE_CHANGED);
+	def.add_static_constant("EVENT_ON_TARGET_VISIBILITY_LOST", pragma::sAIComponent::EVENT_ON_TARGET_VISIBILITY_LOST);
+	def.add_static_constant("EVENT_ON_TARGET_VISIBILITY_REACQUIRED", pragma::sAIComponent::EVENT_ON_TARGET_VISIBILITY_REACQUIRED);
+	def.add_static_constant("EVENT_ON_MEMORY_GAINED", pragma::sAIComponent::EVENT_ON_MEMORY_GAINED);
+	def.add_static_constant("EVENT_ON_MEMORY_LOST", pragma::sAIComponent::EVENT_ON_MEMORY_LOST);
+	def.add_static_constant("EVENT_ON_TARGET_ACQUIRED", pragma::sAIComponent::EVENT_ON_TARGET_ACQUIRED);
+	def.add_static_constant("EVENT_ON_SUSPICIOUS_SOUND_HEARED", pragma::sAIComponent::EVENT_ON_SUSPICIOUS_SOUND_HEARED);
+	def.add_static_constant("EVENT_ON_CONTROLLER_ACTION_INPUT", pragma::sAIComponent::EVENT_ON_CONTROLLER_ACTION_INPUT);
+	def.add_static_constant("EVENT_ON_START_CONTROL", pragma::sAIComponent::EVENT_ON_START_CONTROL);
+	def.add_static_constant("EVENT_ON_END_CONTROL", pragma::sAIComponent::EVENT_ON_END_CONTROL);
+	def.add_static_constant("EVENT_ON_PATH_NODE_CHANGED", pragma::sAIComponent::EVENT_ON_PATH_NODE_CHANGED);
+	def.add_static_constant("EVENT_ON_LOOK_TARGET_CHANGED", pragma::sAIComponent::EVENT_ON_LOOK_TARGET_CHANGED);
+	def.add_static_constant("EVENT_ON_SCHEDULE_STARTED", pragma::sAIComponent::EVENT_ON_SCHEDULE_STARTED);
 	modEnts[def];
 }
 

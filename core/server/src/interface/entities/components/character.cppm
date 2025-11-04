@@ -14,6 +14,10 @@ export module pragma.server:entities.components.character;
 import :ai;
 
 export namespace pragma {
+	namespace sCharacterComponent {
+		using namespace baseActorComponent;
+		using namespace baseCharacterComponent;
+	}
 	class DLLSERVER SCharacterComponent final : public BaseCharacterComponent {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);

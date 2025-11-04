@@ -122,7 +122,7 @@ util::EventReply SPlayerComponent::HandleEvent(ComponentEventId eventId, Compone
 {
 	if(BasePlayerComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == baseCharacterComponent::EVENT_ON_RESPAWN)
+	if(eventId == sCharacterComponent::EVENT_ON_RESPAWN)
 		OnRespawn();
 	return util::EventReply::Unhandled;
 }

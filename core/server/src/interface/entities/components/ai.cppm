@@ -77,7 +77,7 @@ export {
 			std::shared_ptr<ai::Schedule> schedule;
 			ai::BehaviorNode::Result result;
 		};
-				namespace sAIComponent {
+		namespace sAIComponent {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_SELECT_SCHEDULE;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_SELECT_CONTROLLER_SCHEDULE;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SCHEDULE_COMPLETE;
@@ -97,7 +97,7 @@ export {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_LOOK_TARGET_CHANGED;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SCHEDULE_STARTED;
 		}
-class DLLSERVER SAIComponent final : public BaseAIComponent, public SBaseSnapshotComponent {
+	class DLLSERVER SAIComponent final : public BaseAIComponent, public SBaseSnapshotComponent {
 		public:
 			void _debugSendNavInfo(pragma::SPlayerComponent &pl);
 			void _debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::shared_ptr<DebugBehaviorTreeNode> &dbgTree, std::shared_ptr<ai::Schedule> &aiSchedule, float &tLastSchedUpdate);

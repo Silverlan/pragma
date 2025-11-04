@@ -12,6 +12,9 @@ export module pragma.server:entities.components.liquid_surface_simulation;
 import :entities.components.entity;
 
 export namespace pragma {
+	namespace sLiquidSurfaceSimulationComponent {
+		using namespace baseLiquidSurfaceSimulationComponent;
+	}
 	class DLLSERVER SLiquidSurfaceSimulationComponent final : public BaseLiquidSurfaceSimulationComponent, public SBaseNetComponent {
 	  public:
 		SLiquidSurfaceSimulationComponent(pragma::ecs::BaseEntity &ent);

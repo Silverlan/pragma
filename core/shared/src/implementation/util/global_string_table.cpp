@@ -127,7 +127,7 @@ bool pragma::GString::operator!=(const std::string_view &str) const { return !(*
 bool pragma::GString::operator==(const GString &other) const { return *this == other.str; }
 bool pragma::GString::operator!=(const GString &other) const { return !(*this == other); }
 
-std::ostream &operator<<(std::ostream &stream, const pragma::GString &str)
+std::ostream &pragma::operator<<(std::ostream &stream, const pragma::GString &str)
 {
 	if(!str)
 		stream << 0;

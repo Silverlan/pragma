@@ -8,7 +8,6 @@ module;
 #include "pragma/lua/core.hpp"
 #include "pragma/lua/ldefinitions.h"
 #include "spdlog/spdlog.h"
-#include "lualib.h"
 
 module pragma.shared;
 
@@ -25,28 +24,28 @@ void Lua::initialize_lua_state(Lua::Interface &lua)
 	// See http://www.lua.org/source/5.3/linit.c.html
 	auto *l = lua.GetState();
 	std::vector<luaL_Reg> loadedLibs = {
-	  {"_G", luaopen_base},
+	  {"_G", lua::open_base},
 
 #ifndef USE_LUAJIT
-	  {LUA_UTF8LIBNAME, luaopen_utf8},
-	  {LUA_COLIBNAME, luaopen_coroutine},
+	  {lua::LIB_UTF8, lua::open_utf8},
+	  {lua::LIB_COROUTINE, lua::open_coroutine},
 #else
 	  // coroutine already included in base!
-	  {LUA_BITLIBNAME, luaopen_bit},
-	  {LUA_JITLIBNAME, luaopen_jit},
+	  {lua::LIB_BIT, lua::open_bit},
+	  {lua::LIB_JIT, lua::open_jit},
 #endif
-	  {LUA_TABLIBNAME, luaopen_table},
-	  {LUA_OSLIBNAME, luaopen_os},
-	  {LUA_STRLIBNAME, luaopen_string},
-	  {LUA_MATHLIBNAME, luaopen_math},
-	  {LUA_DBLIBNAME, luaopen_debug},
+	  {lua::LIB_TABLE, lua::open_table},
+	  {lua::LIB_OS, lua::open_os},
+	  {lua::LIB_STRING, lua::open_string},
+	  {lua::LIB_MATH, lua::open_math},
+	  {lua::LIB_DEBUG, lua::open_debug},
 #if defined(LUA_COMPAT_BITLIB)
-	  {LUA_BITLIBNAME, luaopen_bit32},
+	  {lua::LIB_BIT, lua::open_bit32},
 #endif
 	};
-	loadedLibs.push_back({LUA_LOADLIBNAME, luaopen_package});
+	loadedLibs.push_back({lua::LIB_PACKAGE, lua::open_package});
 	if(s_bExtendedModules == true) {
-		loadedLibs.push_back({LUA_IOLIBNAME, luaopen_io});
+		loadedLibs.push_back({lua::LIB_IO, lua::open_io});
 	}
 	for(auto &lib : loadedLibs) {
 #ifdef USE_LUAJIT

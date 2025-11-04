@@ -13,6 +13,9 @@ export module pragma.server:entities.components.animated;
 import :entities.components.entity;
 
 export namespace pragma {
+	namespace sAnimatedComponent {
+		using namespace baseAnimatedComponent;
+	}
 	class DLLSERVER SAnimatedComponent final : public BaseAnimatedComponent, public SBaseNetComponent {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);

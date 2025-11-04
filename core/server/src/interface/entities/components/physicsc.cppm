@@ -12,6 +12,9 @@ export module pragma.server:entities.components.physics;
 import :entities.components.entity;
 
 export namespace pragma {
+	namespace sPhysicsComponent {
+		using namespace basePhysicsComponent;
+	}
 	class DLLSERVER SPhysicsComponent final : public BasePhysicsComponent, public SBaseNetComponent {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);

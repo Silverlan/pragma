@@ -64,9 +64,10 @@ static pragma::physics::VehicleCreateInfo create_standard_four_wheel_drive(lua_S
 	return pragma::physics::VehicleCreateInfo::CreateStandardFourWheelDrive(wheelCenterOffsets, handBrakeTorque, maxSteeringAngle);
 }
 
-extern std::ostream &operator<<(std::ostream &out, const umath::Transform &t);
-extern std::ostream &operator<<(std::ostream &out, const umath::ScaledTransform &t);
-
+namespace umath {
+	extern std::ostream &operator<<(std::ostream &out, const umath::Transform &t);
+	extern std::ostream &operator<<(std::ostream &out, const umath::ScaledTransform &t);
+}
 void Lua::physenv::register_library(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();

@@ -37,7 +37,7 @@ void ecs::CParticleSystemComponent::Initialize()
 		}
 		return util::EventReply::Unhandled;
 	});
-	BindEvent(pragma::ecs::BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		return HandleKeyValue(kvData.key, kvData.value);
 	});

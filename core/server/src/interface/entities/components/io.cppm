@@ -12,6 +12,9 @@ export module pragma.server:entities.components.io;
 import :entities.components.entity;
 
 export namespace pragma {
+	namespace sIOComponent {
+		using namespace baseIOComponent;
+	}
 	class DLLSERVER SIOComponent final : public BaseIOComponent {
 	  public:
 		SIOComponent(pragma::ecs::BaseEntity &ent) : BaseIOComponent(ent) {}

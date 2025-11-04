@@ -230,9 +230,15 @@ export {
 			static constexpr udm::Version PMDL_VERSION = 1;
 			static bool Load(pragma::Model &mdl, NetworkState &nw, const udm::AssetData &data, std::string &outErr);
 			template<class TModel>
-			static std::shared_ptr<pragma::Model> Create(NetworkState *nw, uint32_t numBones, const std::string &name = "");
+			static std::shared_ptr<pragma::Model> Create(NetworkState *nw, uint32_t numBones, const std::string &name = "")
+			{
+				return std::shared_ptr<pragma::Model> {new TModel {nw, numBones, name}};
+			}
 			template<class TModel>
-			static std::shared_ptr<pragma::Model> Create(const pragma::Model &other);
+			static std::shared_ptr<pragma::Model> Create(const pragma::Model &other)
+			{
+				return std::shared_ptr<pragma::Model> {new TModel {other}};
+			}
 			template<class TModel>
 			static std::shared_ptr<pragma::Model> Load(NetworkState &nw, const udm::AssetData &data, std::string &outErr)
 			{
@@ -649,17 +655,6 @@ export {
 			std::vector<CallbackHandle> m_onAllMatsLoadedCallbacks;
 			void OnMaterialLoaded();
 		};
-
-		template<class TModel>
-		std::shared_ptr<pragma::Model> Create(NetworkState *nw, uint32_t numBones, const std::string &name)
-		{
-			return std::shared_ptr<pragma::Model> {new TModel {nw, numBones, name}};
-		}
-		template<class TModel>
-		std::shared_ptr<pragma::Model> Create(const pragma::Model &other)
-		{
-			return std::shared_ptr<pragma::Model> {new TModel {other}};
-		}
 
         using namespace umath::scoped_enum::bitwise;
 	}

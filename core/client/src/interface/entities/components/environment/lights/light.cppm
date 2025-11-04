@@ -80,15 +80,17 @@ export namespace pragma {
 
 	using LightBufferIndex = uint32_t;
 	using ShadowBufferIndex = uint32_t;
+	namespace cLightComponent {
+		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_SHOULD_PASS_ENTITY;
+		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_SHOULD_PASS_ENTITY_MESH;
+		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_SHOULD_PASS_MESH;
+		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_SHOULD_UPDATE_RENDER_PASS;
+		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_GET_TRANSFORMATION_MATRIX;
+		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_HANDLE_SHADOW_MAP;
+		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_ON_SHADOW_BUFFER_INITIALIZED;
+	}
 	class DLLCLIENT CLightComponent final : public CBaseLightComponent {
 	  public:
-		static pragma::ComponentEventId EVENT_SHOULD_PASS_ENTITY;
-		static pragma::ComponentEventId EVENT_SHOULD_PASS_ENTITY_MESH;
-		static pragma::ComponentEventId EVENT_SHOULD_PASS_MESH;
-		static pragma::ComponentEventId EVENT_SHOULD_UPDATE_RENDER_PASS;
-		static pragma::ComponentEventId EVENT_GET_TRANSFORMATION_MATRIX;
-		static pragma::ComponentEventId EVENT_HANDLE_SHADOW_MAP;
-		static pragma::ComponentEventId EVENT_ON_SHADOW_BUFFER_INITIALIZED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		static prosper::IUniformResizableBuffer &GetGlobalRenderBuffer();

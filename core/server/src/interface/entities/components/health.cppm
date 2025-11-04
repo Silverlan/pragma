@@ -12,6 +12,9 @@ export module pragma.server:entities.components.health;
 import :entities.components.entity;
 
 export namespace pragma {
+	namespace sHealthComponent {
+		using namespace baseHealthComponent;
+	}
 	class DLLSERVER SHealthComponent final : public BaseHealthComponent, public SBaseNetComponent {
 	  public:
 		SHealthComponent(pragma::ecs::BaseEntity &ent) : BaseHealthComponent(ent) {}

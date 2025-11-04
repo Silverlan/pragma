@@ -11,6 +11,9 @@ export module pragma.server:entities.components.transform;
 import :entities.components.entity;
 
 export namespace pragma {
+	namespace sTransformComponent {
+		using namespace baseTransformComponent;
+	}
 	class DLLSERVER STransformComponent final : public BaseTransformComponent, public SBaseNetComponent {
 	  public:
 		STransformComponent(pragma::ecs::BaseEntity &ent) : BaseTransformComponent(ent) {}

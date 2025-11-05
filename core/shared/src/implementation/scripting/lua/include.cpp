@@ -110,7 +110,7 @@ static Lua::StatusCode execute_file(lua::State *l, const std::string &path, std:
 		  Lua::PushString(l, *newErrMsg);
 		  return 1; // We don't have to pop the original error message
 	  },
-	  LUA_MULTRET,
+	  lua::MultiReturn,
 	  [](lua::State *l, Lua::StatusCode statusCode) {
 		  // File failed to load, most likely a syntax error.
 		  // Possible error codes are: ErrorFile (file not found), ErrorSyntax, ErrorMemory

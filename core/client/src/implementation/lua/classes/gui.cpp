@@ -1256,7 +1256,7 @@ namespace Lua {
 						  }
 						  return Lua::StatusCode::Ok;
 					  },
-					  LUA_MULTRET);
+					  lua::MultiReturn);
 					if(r == Lua::StatusCode::Ok) {
 						auto numResults = Lua::GetStackTop(l) - n;
 						if(numResults > 0)

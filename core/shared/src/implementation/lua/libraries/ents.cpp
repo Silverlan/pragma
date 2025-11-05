@@ -1116,7 +1116,7 @@ void Lua::ents::register_class(lua::State *l, const std::string &className, cons
 	auto &componentManager = game->GetEntityComponentManager();
 	for(auto i = decltype(numComponents) {0}; i < numComponents; ++i) {
 		auto o = tComponents[i + 1];
-		if(luabind::type(o) == LUA_TSTRING) {
+		if(static_cast<Lua::Type>(luabind::type(o)) == Lua::Type::String) {
 			std::string name = luabind::object_cast<std::string>(o);
 			auto id = pragma::INVALID_COMPONENT_ID;
 			if(componentManager.GetComponentTypeId(name, id, false))

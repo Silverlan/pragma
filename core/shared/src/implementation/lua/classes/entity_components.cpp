@@ -351,7 +351,7 @@ bool pragma::LuaCore::set_member_value(lua::State *l, pragma::BaseEntityComponen
 			if constexpr(Lua::is_native_type<T>) {
 				if(memberInfo.IsEnum()) {
 					if constexpr(udm::is_numeric_type(udm::type_to_enum<T>())) {
-						if(luabind::type(value) == LUA_TSTRING) {
+						if(static_cast<Lua::Type>(luabind::type(value)) == Lua::Type::String) {
 							auto e = memberInfo.EnumNameToValue(luabind::object_cast<std::string>(value));
 							if(!e.has_value())
 								return false;
@@ -679,7 +679,7 @@ static CallbackHandle add_event_callback(lua::State *l, pragma::BaseEntityCompon
 			  ev.get().PushArguments(l);
 			  return Lua::StatusCode::Ok;
 		  },
-		  LUA_MULTRET);
+		  lua::MultiReturn);
 		auto numRet = Lua::GetStackTop(l) - nstack;
 		if(c == Lua::StatusCode::Ok && numRet > 0 && Lua::IsNone(lTmp, -1) == false) {
 			auto result = Lua::IsNumber(lTmp, -numRet) ? static_cast<util::EventReply>(Lua::CheckInt(lTmp, -numRet)) : util::EventReply::Unhandled;

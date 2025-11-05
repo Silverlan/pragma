@@ -44,7 +44,7 @@ static luabind::object call_callbacks(lua::State *l, pragma::Game &game, const s
 				  arg.push(l);
 			  return Lua::StatusCode::Ok;
 		  },
-		  LUA_MULTRET);
+		  lua::MultiReturn);
 		if(r == Lua::StatusCode::Ok) {
 			auto numResults = Lua::GetStackTop(l) - top;
 			if(numResults > 0) // Results will be forwarded to caller

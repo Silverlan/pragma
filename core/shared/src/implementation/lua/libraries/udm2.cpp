@@ -373,16 +373,16 @@ static bool is_type(luabind::object &o)
 }
 static void set_property_value(lua::State *l, ::udm::LinkedPropertyWrapper p, luabind::object o)
 {
-	auto type = luabind::type(o);
+	auto type = static_cast<Lua::Type>(luabind::type(o));
 	auto udmType = udm::Type::Nil;
 	switch(type) {
-	case LUA_TBOOLEAN:
+	case Lua::Type::Bool:
 		udmType = udm::Type::Boolean;
 		break;
-	case LUA_TSTRING:
+	case Lua::Type::String:
 		udmType = udm::Type::String;
 		break;
-	case LUA_TNUMBER:
+	case Lua::Type::Number:
 		udmType = udm::Type::Float;
 		break;
 	default:

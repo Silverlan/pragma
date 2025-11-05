@@ -813,7 +813,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 				  o.push(l);
 				  return fPushArgs(l);
 			  },
-			  LUA_MULTRET);
+			  lua::MultiReturn);
 		}));
 	}))];
 	classDefCallback.def("Call", static_cast<void (*)(lua::State *, CallbackHandle &)>([](lua::State *l, CallbackHandle &cb) { call_callback(cb, {}); }));

@@ -20,7 +20,7 @@ void Lua::initialize_lua_state(Lua::Interface &lua)
 {
 	// See http://www.lua.org/source/5.3/linit.c.html
 	auto *l = lua.GetState();
-	std::vector<luaL_Reg> loadedLibs = {
+	std::vector<lua::FunctionRegistration> loadedLibs = {
 	  {"_G", lua::open_base},
 
 #ifndef USE_LUAJIT
@@ -46,11 +46,11 @@ void Lua::initialize_lua_state(Lua::Interface &lua)
 	}
 	for(auto &lib : loadedLibs) {
 #ifdef USE_LUAJIT
-		lua_pushcfunction(l, lib.func);
-		lua_pushlstring(l, lib.name, strlen(lib.name));
-		lua_call(l, 1, 0);
+		Lua::PushCFunction(l, lib.func);
+		lua::push_string(l, lib.name, strlen(lib.name));
+		lua::call(l, 1, 0);
 #else
-		luaL_requiref(l, lib->name, lib->func, 1);
+		lua::require(l, lib->name, lib->func, 1);
 		Lua::Pop(l, 1); // remove lib
 #endif
 	}
@@ -60,7 +60,7 @@ void Lua::initialize_lua_state(Lua::Interface &lua)
 		luabind::bind_function_introspection(l);
 	}
 	Lua::initialize_error_handler();
-	lua_atpanic(l, [](lua::State *l) -> int32_t {
+	lua::at_panic(l, [](lua::State *l) -> int32_t {
 		spdlog::get("lua")->critical("Lua Panic!");
 		::pragma::debug::generate_crash_dump();
 		return 0;

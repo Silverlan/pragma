@@ -748,7 +748,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="c7ae258d2d4198b18ef6ff9b14e28f07686892e2",
+			commitSha="cbe1886c83c0412aac9e9dfbf880d098673189fe",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git",
 			branch="feat/cxx_modules"
 		)
@@ -854,24 +854,6 @@ cmake_args.append("-DPRAGMA_INSTALL_CUSTOM_TARGETS=" +";".join(module_list +addi
 print("Modules:" +', '.join(module_list))
 print("Additional CMake Arguments:" +', '.join(cmake_args))
 print("Additional Build Targets:" +', '.join(additional_build_targets))
-
-
-
-try:
-	result = subprocess.run(["cmake", "--version"], capture_output=True, text=True, check=False)
-	if result.returncode == 0:
-		print(result.stdout.strip())
-	else:
-		print("cmake exited with code", result.returncode)
-		print("stderr:", result.stderr.strip())
-except FileNotFoundError:
-	print("cmake not found — make sure it's installed and on your PATH")
-
-
-
-
-
-
 
 if not deps_only:
 	########## Configure Pragma ##########

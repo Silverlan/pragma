@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
-#include "pragma/logging.hpp"
 
 module pragma.shared;
 
@@ -75,7 +73,7 @@ void ConstraintLimitRotationComponent::Initialize()
 	GetEntity().AddComponent<ConstraintComponent>();
 	BindEventUnhandled(constraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyConstraint(); });
 }
-void ConstraintLimitRotationComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ConstraintLimitRotationComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ConstraintLimitRotationComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);

@@ -4,13 +4,12 @@ module;
 
 
 
-#include "pragma/lua/core.hpp"
 
 module pragma.shared;
 
 import :scripting.lua.libraries.table;
 
-int Lua::table::has_value(lua_State *l)
+int Lua::table::has_value(lua::State *l)
 {
 	Lua::CheckTable(l, 1);
 
@@ -30,7 +29,7 @@ int Lua::table::has_value(lua_State *l)
 	return 1;
 }
 
-int Lua::table::random(lua_State *l)
+int Lua::table::random(lua::State *l)
 {
 	Lua::CheckTable(l, 1);
 	auto n = Lua::GetObjectLength(l, 1);
@@ -42,7 +41,7 @@ int Lua::table::random(lua_State *l)
 	return 1;
 }
 
-int Lua::table::is_empty(lua_State *l)
+int Lua::table::is_empty(lua::State *l)
 {
 	Lua::CheckTable(l, 1);
 	luabind::object t {l, 1};
@@ -52,7 +51,7 @@ int Lua::table::is_empty(lua_State *l)
 	Lua::PushBool(l, !nonEmpty);
 	return 1;
 }
-int Lua::table::count(lua_State *l)
+int Lua::table::count(lua::State *l)
 {
 	Lua::CheckTable(l, 1);
 	luabind::object t {l, 1};

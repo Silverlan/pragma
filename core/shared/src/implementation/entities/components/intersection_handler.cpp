@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -14,7 +13,7 @@ using namespace pragma;
 
 IntersectionHandlerComponent::IntersectionHandlerComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void IntersectionHandlerComponent::Initialize() { BaseEntityComponent::Initialize(); }
-void IntersectionHandlerComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void IntersectionHandlerComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 std::optional<HitInfo> IntersectionHandlerComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, umath::CoordinateSpace space, float minDist, float maxDist) const
 {
 	pragma::HitInfo hitInfo {};

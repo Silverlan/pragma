@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:entities.components.constraints.copy_location;
 
@@ -16,7 +15,7 @@ export namespace pragma {
 		ConstraintCopyLocationComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 	  protected:
 		void ApplyConstraint();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;

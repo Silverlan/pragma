@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.shared:scripting.lua.libraries.engine;
 
@@ -16,24 +15,24 @@ export import :types;
 export {
 	namespace Lua {
 		namespace engine {
-			DLLNETWORK void PrecacheModel_sv(lua_State *l, const std::string &mdlName);
-			DLLNETWORK void LoadSoundScripts(lua_State *l, const std::string &fileName, bool precache);
-			DLLNETWORK void LoadSoundScripts(lua_State *l, const std::string &fileName);
-			DLLNETWORK std::shared_ptr<pragma::Model> get_model(lua_State *l, const std::string &mdlName);
-			DLLNETWORK var<bool, std::string> LoadLibrary(lua_State *l, const std::string &path);
-			DLLNETWORK bool UnloadLibrary(lua_State *l, const std::string &path);
+			DLLNETWORK void PrecacheModel_sv(lua::State *l, const std::string &mdlName);
+			DLLNETWORK void LoadSoundScripts(lua::State *l, const std::string &fileName, bool precache);
+			DLLNETWORK void LoadSoundScripts(lua::State *l, const std::string &fileName);
+			DLLNETWORK std::shared_ptr<pragma::Model> get_model(lua::State *l, const std::string &mdlName);
+			DLLNETWORK var<bool, std::string> LoadLibrary(lua::State *l, const std::string &path);
+			DLLNETWORK bool UnloadLibrary(lua::State *l, const std::string &path);
 			DLLNETWORK bool IsLibraryLoaded(NetworkState &nw, const std::string &path);
-			DLLNETWORK bool LibraryExists(lua_State *l, const std::string &library);
+			DLLNETWORK bool LibraryExists(lua::State *l, const std::string &library);
 			DLLNETWORK uint64_t GetTickCount();
-			DLLNETWORK tb<void> get_info(lua_State *l);
-			DLLNETWORK opt<tb<void>> get_git_info(lua_State *l);
+			DLLNETWORK tb<void> get_info(lua::State *l);
+			DLLNETWORK opt<tb<void>> get_git_info(lua::State *l);
 			DLLNETWORK void exit();
 			DLLNETWORK std::string get_working_directory();
 
 			DLLNETWORK void set_record_console_output(bool record);
-			DLLNETWORK opt<mult<std::string, Con::MessageFlags, opt<Color>>> poll_console_output(lua_State *l);
+			DLLNETWORK opt<mult<std::string, Con::MessageFlags, opt<Color>>> poll_console_output(lua::State *l);
 
-			DLLNETWORK void register_shared_functions(lua_State *l, luabind::module_ &modEn);
+			DLLNETWORK void register_shared_functions(lua::State *l, luabind::module_ &modEn);
 		};
 	};
 };

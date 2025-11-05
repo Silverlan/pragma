@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.types.nil;
 
@@ -15,7 +14,7 @@ export namespace luabind {
 		struct nil_type : object {
 			nil_type(from_stack const &stack_reference) : object(stack_reference) {}
 			nil_type(const object &o) : object(o) {}
-			nil_type(lua_State *l, const T &t) : object(l, t) {}
+			nil_type(lua::State *l, const T &t) : object(l, t) {}
 			using value_type = T;
 		};
 	} // namespace adl
@@ -32,7 +31,7 @@ export namespace luabind {
 
 	template<typename T>
 	struct lua_proxy_traits<adl::nil_type<T>> : lua_proxy_traits<object> {
-		static bool check(lua_State *L, int idx) { return Lua::IsNil(L,idx); }
+		static bool check(lua::State *L, int idx) { return Lua::IsNil(L,idx); }
 	};
 };
 

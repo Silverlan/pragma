@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 
@@ -20,29 +19,29 @@ export import :physics.surface_material;
 export namespace pragma {
 	struct DLLNETWORK CEOnDeployWeapon : public ComponentEvent {
 		CEOnDeployWeapon(pragma::ecs::BaseEntity &entWeapon);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		pragma::ecs::BaseEntity &weapon;
 	};
 	struct DLLNETWORK CEOnSetActiveWeapon : public ComponentEvent {
 		CEOnSetActiveWeapon(pragma::ecs::BaseEntity *entWeapon);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		pragma::ecs::BaseEntity *weapon;
 	};
 	struct DLLNETWORK CEOnSetCharacterOrientation : public ComponentEvent {
 		CEOnSetCharacterOrientation(const Vector3 &up);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		const Vector3 &up;
 	};
 	struct DLLNETWORK CEIsMoving : public ComponentEvent {
 		CEIsMoving();
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		virtual uint32_t GetReturnCount() override;
-		virtual void HandleReturnValues(lua_State *l) override;
+		virtual void HandleReturnValues(lua::State *l) override;
 		bool moving = false;
 	};
 	struct DLLNETWORK CEViewRotation : public ComponentEvent {
 		CEViewRotation(const Quat &rotation);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		const Quat &rotation;
 	};
 		namespace baseCharacterComponent {
@@ -198,19 +197,19 @@ class DLLNETWORK BaseCharacterComponent : public BaseActorComponent {
 	};
 	struct DLLNETWORK CEPlayFootstepSound : public ComponentEvent {
 		CEPlayFootstepSound(BaseCharacterComponent::FootType footType, const SurfaceMaterial &surfaceMaterial, float scale);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		BaseCharacterComponent::FootType footType;
 		const SurfaceMaterial &surfaceMaterial;
 		float scale;
 	};
 	struct DLLNETWORK CEOnFootStep : public ComponentEvent {
 		CEOnFootStep(BaseCharacterComponent::FootType footType);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		BaseCharacterComponent::FootType footType;
 	};
 	struct DLLNETWORK CEOnJump : public ComponentEvent {
 		CEOnJump(const Vector3 &velocity);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		const Vector3 &velocity;
 	};
 };

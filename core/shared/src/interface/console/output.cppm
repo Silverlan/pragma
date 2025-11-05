@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
 #ifdef _WIN32
 #include <Windows.h>

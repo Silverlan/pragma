@@ -2,39 +2,38 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:scripting.lua.policies.generic;
 
-export import luabind;
+export import pragma.lua;
 
 export namespace luabind {
 	namespace detail {
 
-		template<typename T, int (*TFuncMatch)(lua_State *, int), T (*TToCpp)(lua_State *, int), uint32_t TNumConsumed = 1>
+		template<typename T, int (*TFuncMatch)(lua::State *, int), T (*TToCpp)(lua::State *, int), uint32_t TNumConsumed = 1>
 		struct generic_converter {
 			enum { consumed_args = TNumConsumed };
 
 			template<class U>
-			T to_cpp(lua_State *L, U u, int index)
+			T to_cpp(lua::State *L, U u, int index)
 			{
 				return TToCpp(L, index);
 			}
 
 			template<class U>
-			static int match(lua_State *l, U, int index)
+			static int match(lua::State *l, U, int index)
 			{
 				return TFuncMatch(l, index);
 			}
 
 			template<class U>
-			void converter_postcall(lua_State *, U u, int)
+			void converter_postcall(lua::State *, U u, int)
 			{
 			}
 		};
 
-		template<typename TType, int (*TFuncMatch)(lua_State *, int), TType (*TToCpp)(lua_State *, int), uint32_t TNumConsumed = 1>
+		template<typename TType, int (*TFuncMatch)(lua::State *, int), TType (*TToCpp)(lua::State *, int), uint32_t TNumConsumed = 1>
 		struct generic_policy {
 			template<class T, class Direction>
 			struct specialize {
@@ -44,6 +43,6 @@ export namespace luabind {
 
 	} // namespace detail
 
-	template<unsigned int N, typename T, int (*TFuncMatch)(lua_State *, int), T (*TToCpp)(lua_State *, int), uint32_t TNumConsumed = 1>
+	template<unsigned int N, typename T, int (*TFuncMatch)(lua::State *, int), T (*TToCpp)(lua::State *, int), uint32_t TNumConsumed = 1>
 	using generic_policy = meta::type_list<converter_policy_injector<N, detail::generic_policy<T, TFuncMatch, TToCpp, TNumConsumed>>>;
 } // namespace luabind

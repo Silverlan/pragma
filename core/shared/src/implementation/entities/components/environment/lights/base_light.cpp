@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -241,7 +240,7 @@ float BaseEnvLightComponent::CalcDistanceFalloff(const Vector3 &lightPos, const 
 //////////////
 
 CECalcLightDirectionToPoint::CECalcLightDirectionToPoint(const Vector3 &pos) : pos {pos} {}
-void CECalcLightDirectionToPoint::PushArguments(lua_State *l) { Lua::Push<Vector3>(l, pos); }
+void CECalcLightDirectionToPoint::PushArguments(lua::State *l) { Lua::Push<Vector3>(l, pos); }
 
 CECalcLightIntensityAtPoint::CECalcLightIntensityAtPoint(const Vector3 &pos) : pos {pos} {}
-void CECalcLightIntensityAtPoint::PushArguments(lua_State *l) { Lua::Push<Vector3>(l, pos); }
+void CECalcLightIntensityAtPoint::PushArguments(lua::State *l) { Lua::Push<Vector3>(l, pos); }

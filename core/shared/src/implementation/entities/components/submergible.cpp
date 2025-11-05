@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
 module pragma.shared;
 
@@ -23,7 +22,7 @@ void SubmergibleComponent::RegisterEvents(pragma::EntityComponentManager &compon
 }
 SubmergibleComponent::SubmergibleComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_submergedFraction(util::FloatProperty::Create(0.f)) {}
 void SubmergibleComponent::Initialize() { BaseEntityComponent::Initialize(); }
-void SubmergibleComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SubmergibleComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 bool SubmergibleComponent::IsSubmerged() const { return (GetSubmergedFraction() >= 0.6f) ? true : false; }
 bool SubmergibleComponent::IsFullySubmerged() const { return (GetSubmergedFraction() >= 0.99f) ? true : false; }
 bool SubmergibleComponent::IsInWater() const { return (GetSubmergedFraction() > 0.f) ? true : false; }

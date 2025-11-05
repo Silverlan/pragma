@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 
@@ -67,7 +66,7 @@ class DLLNETWORK BaseFlexComponent : public BaseEntityComponent, public DynamicM
 		};
 		struct DLLNETWORK CEOnFlexControllerChanged : public ComponentEvent {
 			CEOnFlexControllerChanged(pragma::animation::FlexControllerId flexControllerId, float value);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			pragma::animation::FlexControllerId flexControllerId;
 			float value;
 		};

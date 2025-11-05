@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.global_name;
@@ -24,7 +23,7 @@ export namespace pragma {
 		const std::string &GetGlobalName() const;
 		void SetGlobalName(const std::string &name);
 
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
 		std::string m_globalName = {};
 	};

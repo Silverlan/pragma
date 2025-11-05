@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.base_flammable;
@@ -46,7 +45,7 @@ class DLLNETWORK BaseFlammableComponent : public BaseEntityComponent {
 	};
 	struct DLLNETWORK CEOnIgnited : public ComponentEvent {
 		CEOnIgnited(float duration, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		float duration;
 		EntityHandle attacker;
 		EntityHandle inflictor;

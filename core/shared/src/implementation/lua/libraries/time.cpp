@@ -2,35 +2,34 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
 
 import :scripting.lua.libraries.time;
 
-double Lua::time::cur_time(lua_State *l)
+double Lua::time::cur_time(lua::State *l)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
 	return game->CurTime();
 }
 
-double Lua::time::real_time(lua_State *l)
+double Lua::time::real_time(lua::State *l)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
 	return game->RealTime();
 }
 
-double Lua::time::delta_time(lua_State *l)
+double Lua::time::delta_time(lua::State *l)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
 	return game->DeltaTickTime();
 }
 
-uint64_t Lua::time::time_since_epoch(lua_State *l)
+uint64_t Lua::time::time_since_epoch(lua::State *l)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();

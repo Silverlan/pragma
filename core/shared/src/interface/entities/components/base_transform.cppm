@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.base_transform;
@@ -17,7 +16,7 @@ export {
 		enum class TransformChangeFlags : uint8_t { None = 0, PositionChanged = 1u, RotationChanged = PositionChanged << 1u, ScaleChanged = RotationChanged << 1u };
 		struct DLLNETWORK CEOnPoseChanged : public ComponentEvent {
 			CEOnPoseChanged(TransformChangeFlags changeFlags);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			TransformChangeFlags changeFlags;
 		};
 		namespace baseTransformComponent {
@@ -117,7 +116,7 @@ export {
 		};
 		struct DLLNETWORK CETeleport : public ComponentEvent {
 			CETeleport(const umath::Transform &originalPose, const umath::Transform &targetPose, const umath::Transform &deltaPose);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			umath::Transform originalPose;
 			umath::Transform targetPose;
 			umath::Transform deltaPose;

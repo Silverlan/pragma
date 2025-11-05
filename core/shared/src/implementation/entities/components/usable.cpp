@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -25,7 +24,7 @@ void UsableComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	GetEntity().AddComponent("transform");
 }
-void UsableComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void UsableComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 bool UsableComponent::CanUse(pragma::ecs::BaseEntity *ent) const
 {
@@ -42,7 +41,7 @@ void UsableComponent::OnUse(pragma::ecs::BaseEntity *ent)
 ////////
 
 CEOnUseData::CEOnUseData(pragma::ecs::BaseEntity *ent) : entity(ent) {}
-void CEOnUseData::PushArguments(lua_State *l)
+void CEOnUseData::PushArguments(lua::State *l)
 {
 	if(entity != nullptr)
 		entity->GetLuaObject().push(l);
@@ -53,7 +52,7 @@ void CEOnUseData::PushArguments(lua_State *l)
 ////////
 
 CECanUseData::CECanUseData(pragma::ecs::BaseEntity *ent) : entity(ent) {}
-void CECanUseData::PushArguments(lua_State *l)
+void CECanUseData::PushArguments(lua::State *l)
 {
 	if(entity != nullptr)
 		entity->GetLuaObject().push(l);
@@ -61,7 +60,7 @@ void CECanUseData::PushArguments(lua_State *l)
 		Lua::PushNil(l);
 }
 uint32_t CECanUseData::GetReturnCount() { return 1u; }
-void CECanUseData::HandleReturnValues(lua_State *l)
+void CECanUseData::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsBool(l, -1))
 		canUse = Lua::CheckBool(l, -1);

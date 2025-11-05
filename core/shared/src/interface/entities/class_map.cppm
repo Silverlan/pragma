@@ -4,7 +4,6 @@ module;
 
 
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.class_map;

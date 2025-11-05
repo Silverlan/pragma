@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 #include "buss_ik/Tree.h"
 #include "buss_ik/Jacobian.h"
 #include <cassert>
@@ -24,7 +23,7 @@ void IKComponent::Initialize()
 		ClearIKControllers();
 	});
 }
-void IKComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void IKComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 {
 	auto it = m_ikTrees.find(ikControllerId);

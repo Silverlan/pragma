@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:entities.components.events.key_value;
 
@@ -14,7 +13,7 @@ export import std;
 export namespace pragma {
 	struct DLLNETWORK CEKeyValueData : public ComponentEvent {
 		CEKeyValueData(const std::string &key, const std::string &value);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		const std::string &key;
 		const std::string &value;
 	};

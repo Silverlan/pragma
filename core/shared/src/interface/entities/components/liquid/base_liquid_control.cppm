@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.liquid.base_control;
@@ -79,7 +78,7 @@ class DLLNETWORK BaseLiquidControlComponent : public BaseEntityComponent {
 		};
 		struct DLLNETWORK CEOnSplash : public ComponentEvent {
 			CEOnSplash(const BaseLiquidControlComponent::SplashInfo &splashInfo);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			const BaseLiquidControlComponent::SplashInfo &splashInfo;
 		};
 	};

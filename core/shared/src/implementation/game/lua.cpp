@@ -3,15 +3,14 @@
 module;
 
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 module pragma.shared;
 
 import :game.game;
 
 Lua::Interface &pragma::Game::GetLuaInterface() { return *m_lua; }
-lua_State *pragma::Game::GetLuaState() { return (m_lua != nullptr) ? m_lua->GetState() : nullptr; }
+lua::State *pragma::Game::GetLuaState() { return (m_lua != nullptr) ? m_lua->GetState() : nullptr; }
 
 void pragma::Game::InitializeLua()
 {
@@ -19,13 +18,13 @@ void pragma::Game::InitializeLua()
 	m_lua = std::make_shared<Lua::Interface>();
 	m_lua->Open();
 
-	m_luaClassManager = std::make_unique<pragma::lua::ClassManager>(*m_lua->GetState());
+	m_luaClassManager = std::make_unique<pragma::LuaCore::ClassManager>(*m_lua->GetState());
 
 	Lua::initialize_lua_state(GetLuaInterface());
 	RegisterLua();
 
 	// Initialize component ids
-	std::unordered_map<std::string, lua_Integer> componentIds;
+	std::unordered_map<std::string, lua::Integer> componentIds;
 	for(auto &componentInfo : m_componentManager->GetRegisteredComponentTypes()) {
 		auto name = std::string {*componentInfo->name};
 		ustring::to_upper(name);
@@ -37,7 +36,7 @@ void pragma::Game::InitializeLua()
 	auto tm = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch();
 	std::stringstream lseed;
 	lseed << "math.randomseed(" << tm.count() << ");";
-	pragma::scripting::lua::run_string(GetLuaState(), lseed.str(), "initialize_random_seed");
+	pragma::scripting::lua_core::run_string(GetLuaState(), lseed.str(), "initialize_random_seed");
 
 	// Add module paths
 	UpdatePackagePaths();
@@ -47,8 +46,8 @@ void pragma::Game::InitializeLua()
 		Lua::debug::enable_remote_debugging(GetLuaState());
 }
 
-const pragma::lua::ClassManager &pragma::Game::GetLuaClassManager() const { return const_cast<pragma::Game *>(this)->GetLuaClassManager(); }
-pragma::lua::ClassManager &pragma::Game::GetLuaClassManager() { return *m_luaClassManager; }
+const pragma::LuaCore::ClassManager &pragma::Game::GetLuaClassManager() const { return const_cast<pragma::Game *>(this)->GetLuaClassManager(); }
+pragma::LuaCore::ClassManager &pragma::Game::GetLuaClassManager() { return *m_luaClassManager; }
 
 void pragma::Game::SetupLua() { GetNetworkState()->InitializeLuaModules(GetLuaState()); }
 
@@ -60,27 +59,27 @@ Lua::StatusCode pragma::Game::LoadLuaFile(std::string &fInOut, fsys::SearchFlags
 	return r;
 }
 
-bool pragma::Game::ExecuteLuaFile(std::string &fInOut, lua_State *optCustomLuaState)
+bool pragma::Game::ExecuteLuaFile(std::string &fInOut, lua::State *optCustomLuaState)
 {
 	auto *l = optCustomLuaState ? optCustomLuaState : GetLuaState();
-	auto r = pragma::scripting::lua::execute_file(l, fInOut);
+	auto r = pragma::scripting::lua_core::execute_file(l, fInOut);
 	return r == Lua::StatusCode::Ok;
 }
 
 void pragma::Game::RunLuaFiles(const std::string &subPath)
 {
 	auto *l = GetLuaState();
-	pragma::scripting::lua::execute_files_in_directory(l, subPath);
+	pragma::scripting::lua_core::execute_files_in_directory(l, subPath);
 }
 
 bool pragma::Game::RunLua(const std::string &lua, const std::string &chunkName)
 {
 	auto *l = GetLuaState();
-	auto r = pragma::scripting::lua::run_string(l, lua, chunkName);
+	auto r = pragma::scripting::lua_core::run_string(l, lua, chunkName);
 	return r == Lua::StatusCode::Ok;
 }
 
-Lua::StatusCode pragma::Game::ProtectedLuaCall(const std::function<Lua::StatusCode(lua_State *)> &pushFuncArgs, int32_t numResults) { return pragma::scripting::lua::protected_call(GetLuaState(), pushFuncArgs, numResults); }
+Lua::StatusCode pragma::Game::ProtectedLuaCall(const std::function<Lua::StatusCode(lua::State *)> &pushFuncArgs, int32_t numResults) { return pragma::scripting::lua_core::protected_call(GetLuaState(), pushFuncArgs, numResults); }
 
 const std::array<std::string, 6> &pragma::Game::GetLuaEntityDirectories() const
 {
@@ -259,7 +258,7 @@ void pragma::Game::RegisterLua()
 	modDebug[luabind::def("stackdump", Lua::debug::stackdump)];
 }
 
-DLLNETWORK void IncludeLuaEntityBaseClasses(lua_State *l, int refEntities, int obj, int data)
+DLLNETWORK void IncludeLuaEntityBaseClasses(lua::State *l, int refEntities, int obj, int data)
 {
 	Lua::PushString(l, "Base");
 	Lua::GetTableValue(l, data);

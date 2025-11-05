@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/logging.hpp"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -11,6 +10,7 @@ module;
 #include <fcntl.h>
 #include <termios.h>
 #endif
+#include <iostream>
 
 module pragma.shared;
 

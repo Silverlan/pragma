@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -63,14 +62,14 @@ static void Transform_Box(const Mat3 &M, const Vector3 &min, const Vector3 &max,
 	outNewMax.z = Bmax[2];
 }
 
-luabind::mult<Vector3, Vector3> Lua::boundingvolume::GetRotatedAABB(lua_State *l, const Vector3 &min, const Vector3 &max, const ::Mat3 &rot)
+luabind::mult<Vector3, Vector3> Lua::boundingvolume::GetRotatedAABB(lua::State *l, const Vector3 &min, const Vector3 &max, const ::Mat3 &rot)
 {
 	Vector3 rmin;
 	Vector3 rmax;
 	Transform_Box(rot, min, max, rmin, rmax);
 	return {l, rmin, rmax};
 }
-luabind::mult<Vector3, Vector3> Lua::boundingvolume::GetRotatedAABB(lua_State *l, const Vector3 &min, const Vector3 &max, const Quat &rot)
+luabind::mult<Vector3, Vector3> Lua::boundingvolume::GetRotatedAABB(lua::State *l, const Vector3 &min, const Vector3 &max, const Quat &rot)
 {
 	Vector3 rmin;
 	Vector3 rmax;

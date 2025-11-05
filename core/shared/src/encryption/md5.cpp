@@ -31,7 +31,7 @@ documentation and/or software.
 */
 
 /* interface header */
-#include "pragma/encryption/md5.h"
+#include "encryption/md5.h"
 
 /* system implementation headers */
 

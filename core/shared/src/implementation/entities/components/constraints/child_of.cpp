@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -135,7 +134,7 @@ std::pair<std::optional<Vector3>, std::optional<Quat>> pragma::ConstraintChildOf
 }
 
 const pragma::ComponentHandle<ConstraintComponent> &ConstraintChildOfComponent::GetConstraint() const { return m_constraintC; }
-void ConstraintChildOfComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ConstraintChildOfComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ConstraintChildOfComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);

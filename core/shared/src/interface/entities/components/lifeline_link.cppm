@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.lifeline_link;
@@ -21,7 +20,7 @@ export namespace pragma {
 		void RemoveEntityOnRemoval(pragma::ecs::BaseEntity *ent, Bool bRemove = true);
 		void RemoveEntityOnRemoval(const EntityHandle &hEnt, Bool bRemove = true);
 
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 	  protected:
 		std::vector<EntityHandle> m_entsRemove; // List of entities that should be removed when this component is removed
 	};

@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.base_sound_emitter;
@@ -51,7 +50,7 @@ class DLLNETWORK BaseSoundEmitterComponent : public BaseEntityComponent {
 
 	struct DLLNETWORK CEOnSoundCreated : public ComponentEvent {
 		CEOnSoundCreated(const std::shared_ptr<ALSound> &sound);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		std::shared_ptr<ALSound> sound;
 	};
 };

@@ -4,7 +4,7 @@ module;
 
 
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 #include "model/mikktspace/mikktspace.h"
 
 module pragma.shared;

@@ -3,14 +3,13 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
 
 import :scripting.lua.classes.phys_soft_body_info;
 
-void Lua::PhysSoftBodyInfo::register_class(lua_State *l, luabind::class_<::PhysSoftBodyInfo> &classDef)
+void Lua::PhysSoftBodyInfo::register_class(lua::State *l, luabind::class_<::PhysSoftBodyInfo> &classDef)
 {
 	classDef.def_readwrite("poseMatchingCoefficient", &::PhysSoftBodyInfo::poseMatchingCoefficient);
 	classDef.def_readwrite("anchorsHardness", &::PhysSoftBodyInfo::anchorsHardness);
@@ -33,7 +32,7 @@ void Lua::PhysSoftBodyInfo::register_class(lua_State *l, luabind::class_<::PhysS
 	classDef.def_readwrite("bendingConstraintsDistance", &::PhysSoftBodyInfo::bendingConstraintsDistance);
 	classDef.def_readwrite("clusterCount", &::PhysSoftBodyInfo::clusterCount);
 	classDef.def_readwrite("maxClusterIterations", &::PhysSoftBodyInfo::maxClusterIterations);
-	classDef.def("SetMaterialStiffnessCoefficients", static_cast<void (*)(lua_State *, ::PhysSoftBodyInfo &, uint32_t, float, float, float)>([](lua_State *l, ::PhysSoftBodyInfo &sbInfo, uint32_t matId, float linear, float angular, float volume) {
+	classDef.def("SetMaterialStiffnessCoefficients", static_cast<void (*)(lua::State *, ::PhysSoftBodyInfo &, uint32_t, float, float, float)>([](lua::State *l, ::PhysSoftBodyInfo &sbInfo, uint32_t matId, float linear, float angular, float volume) {
 		auto it = sbInfo.materialStiffnessCoefficient.find(matId);
 		if(it == sbInfo.materialStiffnessCoefficient.end())
 			it = sbInfo.materialStiffnessCoefficient.insert(std::make_pair(matId, ::PhysSoftBodyInfo::MaterialStiffnessCoefficient {})).first;
@@ -41,7 +40,7 @@ void Lua::PhysSoftBodyInfo::register_class(lua_State *l, luabind::class_<::PhysS
 		it->second.angular = angular;
 		it->second.volume = volume;
 	}));
-	classDef.def("GetMaterialStiffnessCoefficients", static_cast<luabind::optional<luabind::mult<float, float, float>> (*)(lua_State *, ::PhysSoftBodyInfo &, uint32_t)>([](lua_State *l, ::PhysSoftBodyInfo &sbInfo, uint32_t matId) -> luabind::optional<luabind::mult<float, float, float>> {
+	classDef.def("GetMaterialStiffnessCoefficients", static_cast<luabind::optional<luabind::mult<float, float, float>> (*)(lua::State *, ::PhysSoftBodyInfo &, uint32_t)>([](lua::State *l, ::PhysSoftBodyInfo &sbInfo, uint32_t matId) -> luabind::optional<luabind::mult<float, float, float>> {
 		auto it = sbInfo.materialStiffnessCoefficient.find(matId);
 		if(it == sbInfo.materialStiffnessCoefficient.end())
 			return nil;

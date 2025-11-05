@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/ldefinitions.h"
+#include "definitions.hpp"
 
 
 export module pragma.shared:util.timer;

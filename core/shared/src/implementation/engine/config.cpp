@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/logging.hpp"
 #include <cassert>
 
 module pragma.shared;

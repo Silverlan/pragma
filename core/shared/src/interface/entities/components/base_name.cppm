@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.base_name;
@@ -14,7 +13,7 @@ export import :entities.components.base;
 export namespace pragma {
 	struct DLLNETWORK CEOnNameChanged : public ComponentEvent {
 		CEOnNameChanged(const std::string &newName);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		const std::string &name;
 	};
 

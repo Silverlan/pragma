@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include <sharedutils/magic_enum.hpp>
+#include "definitions.hpp"
 
 
 

@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 #if 0
@@ -20,7 +19,7 @@ module pragma.shared;
 
 import :scripting.lua.libraries.lib_import;
 
-int Lua::import::import_wad(lua_State *l)
+int Lua::import::import_wad(lua::State *l)
 {
 	auto &f = Lua::Check<LFile>(l, 1);
 	auto &skeleton = Lua::Check<pragma::animation::Skeleton>(l, 2);
@@ -57,7 +56,7 @@ int Lua::import::import_wad(lua_State *l)
 	Lua::Push<std::shared_ptr<pragma::animation::Animation>>(l, anim);
 	return 1;
 }
-int Lua::import::import_wrci(lua_State *l)
+int Lua::import::import_wrci(lua::State *l)
 {
 	auto &f = Lua::Check<LFile>(l, 1);
 	auto &mdl = Lua::Check<pragma::Model>(l, 2);
@@ -119,7 +118,7 @@ int Lua::import::import_wrci(lua_State *l)
 	Lua::PushBool(l, true);
 	return 1;
 }
-int Lua::import::import_wrmi(lua_State *l)
+int Lua::import::import_wrmi(lua::State *l)
 {
 	auto &f = Lua::Check<LFile>(l, 1);
 	auto &mdl = Lua::Check<pragma::Model>(l, 2);
@@ -268,7 +267,7 @@ int Lua::import::import_wrmi(lua_State *l)
 	return 1;
 }
 
-int Lua::import::import_smd(lua_State *l)
+int Lua::import::import_smd(lua::State *l)
 {
 	auto &nw = *pragma::Engine::Get()->GetNetworkState(l);
 	std::string smdFileName = Lua::CheckString(l, 1);
@@ -303,13 +302,13 @@ int Lua::import::import_smd(lua_State *l)
 	return 1;
 }
 
-int Lua::import::import_obj(lua_State *l)
+int Lua::import::import_obj(lua::State *l)
 {
 	auto &f = Lua::Check<LFile>(l, 1);
 	return import_model_asset(l);
 }
 
-int Lua::import::export_model_asset(lua_State *l)
+int Lua::import::export_model_asset(lua::State *l)
 {
 	return 0;
 }
@@ -324,7 +323,7 @@ bool Lua::import::import_model_asset(NetworkState &nw, const std::string &output
 	return false; //::import_model_asset(nw,f,outFilePath,outErr);
 }
 
-int Lua::import::import_model_asset(lua_State *l)
+int Lua::import::import_model_asset(lua::State *l)
 {
 #if 0
 	auto &f = Lua::Check<LFile>(l,1);

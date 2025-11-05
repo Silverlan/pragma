@@ -21,7 +21,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
 export module pragma.shared:math.noise;
 

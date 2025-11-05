@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/encryption/md5.h"
-#include "pragma/lua/ldefinitions.h"
+#include "definitions.hpp"
+#include "encryption/md5.h"
 
 
 
@@ -209,7 +208,7 @@ export {
 			virtual float GetTimeScale();
 			virtual void SetTimeScale(float t);
 			// Lua
-			lua_State *GetLuaState();
+			lua::State *GetLuaState();
 			Lua::Interface &GetLuaInterface();
 			virtual void RegisterLua();
 			virtual void RegisterLuaGlobals();
@@ -222,13 +221,13 @@ export {
 			bool BroadcastEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx);
 			bool InjectEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx);
 			Lua::StatusCode LoadLuaFile(std::string &fInOut, fsys::SearchFlags includeFlags = fsys::SearchFlags::All, fsys::SearchFlags excludeFlags = fsys::SearchFlags::None);
-			virtual bool ExecuteLuaFile(std::string &fInOut, lua_State *optCustomLuaState = nullptr);
+			virtual bool ExecuteLuaFile(std::string &fInOut, lua::State *optCustomLuaState = nullptr);
 			// Same as ExecuteLuaFile, but uses the last value from the include stack
 			//bool IncludeLuaFile(std::string &fInOut); // Deprecated
 
 			virtual bool RunLua(const std::string &lua) = 0;
 			virtual void RunLuaFiles(const std::string &subPath);
-			Lua::StatusCode ProtectedLuaCall(const std::function<Lua::StatusCode(lua_State *)> &pushFuncArgs, int32_t numResults);
+			Lua::StatusCode ProtectedLuaCall(const std::function<Lua::StatusCode(lua::State *)> &pushFuncArgs, int32_t numResults);
 			template<class TLuaEntity, class THandle>
 			pragma::ecs::BaseEntity *CreateLuaEntity(std::string classname, luabind::object &oClass, bool bLoadIfNotExists = false);
 			virtual pragma::ecs::BaseEntity *CreateLuaEntity(std::string classname, bool bLoadIfNotExists = false) = 0;
@@ -250,8 +249,8 @@ export {
 			bool LoadLuaComponent(const std::string &mainPath, const std::string &componentName);
 			bool LoadLuaEntityByClass(const std::string &className);
 			bool LoadLuaComponentByName(const std::string &componentName);
-			const pragma::lua::ClassManager &GetLuaClassManager() const;
-			pragma::lua::ClassManager &GetLuaClassManager();
+			const pragma::LuaCore::ClassManager &GetLuaClassManager() const;
+			pragma::LuaCore::ClassManager &GetLuaClassManager();
 
 			CallbackHandle AddConVarCallback(const std::string &cvar, LuaFunction function);
 			unsigned int GetNetMessageID(std::string name);
@@ -308,7 +307,7 @@ export {
 			std::vector<pragma::BaseEntityComponent *> m_entityTickComponents;
 			std::vector<pragma::BaseGamemodeComponent *> m_gamemodeComponents;
 			std::shared_ptr<Lua::Interface> m_lua = nullptr;
-			std::unique_ptr<pragma::lua::ClassManager> m_luaClassManager;
+			std::unique_ptr<pragma::LuaCore::ClassManager> m_luaClassManager;
 			std::unique_ptr<LuaDirectoryWatcherManager> m_scriptWatcher = nullptr;
 			std::unique_ptr<SurfaceMaterialManager> m_surfaceMaterialManager = nullptr;
 			std::unordered_map<std::string, std::vector<CvarCallback>> m_cvarCallbacks;
@@ -384,7 +383,7 @@ export {
         struct enable_bitwise_operators<pragma::Game::GameFlags> : std::true_type {};
     }
 
-	DLLNETWORK void IncludeLuaEntityBaseClasses(lua_State *l, int refEntities, int obj, int data);
+	DLLNETWORK void IncludeLuaEntityBaseClasses(lua::State *l, int refEntities, int obj, int data);
 	namespace pragma {
 		template<class T>
 		T *Game::GetConVar(const std::string &scmd)

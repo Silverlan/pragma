@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.action_input_controller;
@@ -38,7 +37,7 @@ class DLLNETWORK ActionInputControllerComponent final : public BaseEntityCompone
 		void SetActionInputs(pragma::Action action, bool bKeepMagnitudes = false);
 		void SetActionInputAxisMagnitude(pragma::Action action, float magnitude);
 	  private:
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 
 		// Inputs
 		pragma::Action m_actionInputs = pragma::Action::None;
@@ -47,14 +46,14 @@ class DLLNETWORK ActionInputControllerComponent final : public BaseEntityCompone
 	};
 	struct DLLNETWORK CEHandleActionInput : public ComponentEvent {
 		CEHandleActionInput(pragma::Action action, bool pressed, float magnitude);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		pragma::Action action;
 		bool pressed;
 		float magnitude;
 	};
 	struct DLLNETWORK CEOnActionInputChanged : public ComponentEvent {
 		CEOnActionInputChanged(pragma::Action action, bool b);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		pragma::Action action;
 		bool pressed;
 	};

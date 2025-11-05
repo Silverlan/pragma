@@ -9,7 +9,7 @@ export import luabind;
 export import pragma.util;
 
 export {
-	namespace pragma::lua {
+	namespace pragma::LuaCore {
 		template<typename T>
 		struct HandleHolder {
 		public:
@@ -55,7 +55,7 @@ export {
 	namespace luabind {
 		namespace detail {
 			template<typename T>
-			struct pointer_traits<pragma::lua::HandleHolder<T>> {
+			struct pointer_traits<pragma::LuaCore::HandleHolder<T>> {
 				enum { is_pointer = true };
 				using value_type = T;
 			};

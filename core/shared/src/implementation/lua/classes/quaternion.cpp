@@ -3,16 +3,15 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
 
 import :scripting.lua.classes.quaternion;
 
-Quat Lua::Quaternion::Copy(lua_State *l, const Quat &rot) { return rot; }
+Quat Lua::Quaternion::Copy(lua::State *l, const Quat &rot) { return rot; }
 
-EulerAngles Lua::Quaternion::ToEulerAngles(lua_State *l, Quat &q, uint32_t rotationOrder)
+EulerAngles Lua::Quaternion::ToEulerAngles(lua::State *l, Quat &q, uint32_t rotationOrder)
 {
 	//EulerAngles ang(*q);
 	//luabind::object(l,ang).push(l);
@@ -62,7 +61,7 @@ EulerAngles Lua::Quaternion::ToEulerAngles(lua_State *l, Quat &q, uint32_t rotat
 	return ang;
 }
 
-luabind::mult<Vector3, float> Lua::Quaternion::ToAxisAngle(lua_State *l, const Quat &rot)
+luabind::mult<Vector3, float> Lua::Quaternion::ToAxisAngle(lua::State *l, const Quat &rot)
 {
 	Vector3 axis {};
 	float angle = 0.f;
@@ -70,38 +69,38 @@ luabind::mult<Vector3, float> Lua::Quaternion::ToAxisAngle(lua_State *l, const Q
 	return {l, axis, angle};
 }
 
-luabind::mult<Vector3, Vector3, Vector3> Lua::Quaternion::GetOrientation(lua_State *l, const Quat &rot)
+luabind::mult<Vector3, Vector3, Vector3> Lua::Quaternion::GetOrientation(lua::State *l, const Quat &rot)
 {
 	Vector3 forward, right, up;
 	uquat::get_orientation(rot, &forward, &right, &up);
 	return {l, forward, right, up};
 }
 
-void Lua::Quaternion::Set(lua_State *, Quat &q, float w, float x, float y, float z)
+void Lua::Quaternion::Set(lua::State *, Quat &q, float w, float x, float y, float z)
 {
 	q.w = w;
 	q.x = x;
 	q.y = y;
 	q.z = z;
 }
-static luabind::mult<Quat, Vector2> approach_direction(lua_State *l, const Quat &rot, const Vector3 &up, const Vector3 &targetDir, const ::Vector2 &rotAmount, const ::Vector2 *pitchLimit = nullptr, const ::Vector2 *yawLimit = nullptr, const Quat *rotPivot = nullptr,
+static luabind::mult<Quat, Vector2> approach_direction(lua::State *l, const Quat &rot, const Vector3 &up, const Vector3 &targetDir, const ::Vector2 &rotAmount, const ::Vector2 *pitchLimit = nullptr, const ::Vector2 *yawLimit = nullptr, const Quat *rotPivot = nullptr,
   const EulerAngles *angOffset = nullptr)
 {
 	Vector2 resAm;
 	auto r = uquat::approach_direction(rot, up, targetDir, rotAmount, &resAm, pitchLimit, yawLimit, rotPivot, angOffset);
 	return {l, r, resAm};
 }
-luabind::mult<Quat, Vector2> Lua::Quaternion::ApproachDirection(lua_State *l, const Quat &rot, const Vector3 &up, const Vector3 &targetDir, const ::Vector2 &rotAmount, const ::Vector2 *pitchLimit, const ::Vector2 *yawLimit, const Quat *rotPivot, const EulerAngles *angOffset)
+luabind::mult<Quat, Vector2> Lua::Quaternion::ApproachDirection(lua::State *l, const Quat &rot, const Vector3 &up, const Vector3 &targetDir, const ::Vector2 &rotAmount, const ::Vector2 *pitchLimit, const ::Vector2 *yawLimit, const Quat *rotPivot, const EulerAngles *angOffset)
 {
 	return approach_direction(l, rot, up, targetDir, rotAmount, pitchLimit, yawLimit, rotPivot, angOffset);
 }
-luabind::mult<Quat, Vector2> Lua::Quaternion::ApproachDirection(lua_State *l, const Quat &rot, const Vector3 &up, const Vector3 &targetDir, const ::Vector2 &rotAmount, const ::Vector2 *pitchLimit, const ::Vector2 *yawLimit, const Quat *rotPivot)
+luabind::mult<Quat, Vector2> Lua::Quaternion::ApproachDirection(lua::State *l, const Quat &rot, const Vector3 &up, const Vector3 &targetDir, const ::Vector2 &rotAmount, const ::Vector2 *pitchLimit, const ::Vector2 *yawLimit, const Quat *rotPivot)
 {
 	return approach_direction(l, rot, up, targetDir, rotAmount, pitchLimit, yawLimit, rotPivot);
 }
-luabind::mult<Quat, Vector2> Lua::Quaternion::ApproachDirection(lua_State *l, const Quat &rot, const Vector3 &up, const Vector3 &targetDir, const ::Vector2 &rotAmount, const ::Vector2 *pitchLimit, const ::Vector2 *yawLimit)
+luabind::mult<Quat, Vector2> Lua::Quaternion::ApproachDirection(lua::State *l, const Quat &rot, const Vector3 &up, const Vector3 &targetDir, const ::Vector2 &rotAmount, const ::Vector2 *pitchLimit, const ::Vector2 *yawLimit)
 {
 	return approach_direction(l, rot, up, targetDir, rotAmount, pitchLimit, yawLimit);
 }
-luabind::mult<Quat, Vector2> Lua::Quaternion::ApproachDirection(lua_State *l, const Quat &rot, const Vector3 &up, const Vector3 &targetDir, const ::Vector2 &rotAmount, const ::Vector2 *pitchLimit) { return approach_direction(l, rot, up, targetDir, rotAmount, pitchLimit); }
-luabind::mult<Quat, Vector2> Lua::Quaternion::ApproachDirection(lua_State *l, const Quat &rot, const Vector3 &up, const Vector3 &targetDir, const ::Vector2 &rotAmount) { return approach_direction(l, rot, up, targetDir, rotAmount); }
+luabind::mult<Quat, Vector2> Lua::Quaternion::ApproachDirection(lua::State *l, const Quat &rot, const Vector3 &up, const Vector3 &targetDir, const ::Vector2 &rotAmount, const ::Vector2 *pitchLimit) { return approach_direction(l, rot, up, targetDir, rotAmount, pitchLimit); }
+luabind::mult<Quat, Vector2> Lua::Quaternion::ApproachDirection(lua::State *l, const Quat &rot, const Vector3 &up, const Vector3 &targetDir, const ::Vector2 &rotAmount) { return approach_direction(l, rot, up, targetDir, rotAmount); }

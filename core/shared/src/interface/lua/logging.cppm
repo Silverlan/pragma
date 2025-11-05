@@ -2,10 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 #include <format>
-#include "pragma/logging.hpp"
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.logging;
 
@@ -13,10 +11,10 @@ export import :core.logging;
 import pragma.lua;
 
 export namespace Lua::logging {
-	DLLNETWORK std::string to_string(lua_State *l, int i);
+	DLLNETWORK std::string to_string(lua::State *l, int i);
 
 	template<size_t N>
-	void log_with_args(const std::string &loggerIdentifier, const char *msg, spdlog::level::level_enum logLevel, lua_State *l, int32_t argOffset)
+	void log_with_args(const std::string &loggerIdentifier, const char *msg, spdlog::level::level_enum logLevel, lua::State *l, int32_t argOffset)
 	{
 		std::array<std::string, N> args;
 		for(size_t i = 0; i < args.size(); ++i)
@@ -27,11 +25,11 @@ export namespace Lua::logging {
 		std::apply(log, args);
 	}
 
-	template<spdlog::level::level_enum TLevel, int LOG_FUNC(lua_State *, spdlog::level::level_enum)>
-	void add_log_func(lua_State *l, luabind::object &oClass, const char *name)
+	template<spdlog::level::level_enum TLevel, int LOG_FUNC(lua::State *, spdlog::level::level_enum)>
+	void add_log_func(lua::State *l, luabind::object &oClass, const char *name)
 	{
 		lua_pushcfunction(
-		  l, +[](lua_State *l) -> int { return LOG_FUNC(l, TLevel); });
+		  l, +[](lua::State *l) -> int { return LOG_FUNC(l, TLevel); });
 		oClass[name] = luabind::object {luabind::from_stack(l, -1)};
 		Lua::Pop(l, 1);
 	}

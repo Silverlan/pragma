@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.triggers.base_touch;
@@ -18,15 +17,15 @@ export {
 	namespace pragma {
 		struct DLLNETWORK CECanTriggerData : public ComponentEvent {
 			CECanTriggerData(pragma::ecs::BaseEntity *ent);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			virtual uint32_t GetReturnCount() override;
-			virtual void HandleReturnValues(lua_State *l) override;
+			virtual void HandleReturnValues(lua::State *l) override;
 			pragma::ecs::BaseEntity *entity;
 			bool canTrigger = true;
 		};
 		struct DLLNETWORK CETouchData : public ComponentEvent {
 			CETouchData(pragma::ecs::BaseEntity &ent);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			pragma::ecs::BaseEntity *entity;
 		};
 				namespace baseTouchComponent {

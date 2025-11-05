@@ -5,7 +5,6 @@ module;
 
 
 
-#include "pragma/lua/core.hpp"
 
 
 // Sound duration for mp3 files

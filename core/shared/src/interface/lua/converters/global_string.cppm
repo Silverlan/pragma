@@ -2,14 +2,13 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 
 export module pragma.shared:scripting.lua.converters.global_string;
 
 export import :util.global_string_table;
-export import luabind;
+export import pragma.lua;
 
 export namespace luabind {
 	template<>
@@ -17,22 +16,22 @@ export namespace luabind {
 		enum { consumed_args = 1 };
 
 		template<typename U>
-		pragma::GString to_cpp(lua_State *L, U u, int index);
+		pragma::GString to_cpp(lua::State *L, U u, int index);
 
 		template<class U>
-		static int match(lua_State *l, U u, int index);
+		static int match(lua::State *l, U u, int index);
 
 		template<class U>
-		void converter_postcall(lua_State *, U u, int)
+		void converter_postcall(lua::State *, U u, int)
 		{
 		}
 
-		void to_lua(lua_State *L, pragma::GString const &x);
-		void to_lua(lua_State *L, pragma::GString *x);
+		void to_lua(lua::State *L, pragma::GString const &x);
+		void to_lua(lua::State *L, pragma::GString *x);
 	  public:
-		static value_type to_cpp_deferred(lua_State *, int) { return {}; }
-		static void to_lua_deferred(lua_State *, param_type) {}
-		static int compute_score(lua_State *, int) { return no_match; }
+		static value_type to_cpp_deferred(lua::State *, int) { return {}; }
+		static void to_lua_deferred(lua::State *, param_type) {}
+		static int compute_score(lua::State *, int) { return no_match; }
 	};
 
 	template<>
@@ -47,14 +46,14 @@ export namespace luabind {
 
 export namespace luabind {
 	template<typename U>
-	pragma::GString default_converter<pragma::GString>::to_cpp(lua_State *L, U u, int index)
+	pragma::GString default_converter<pragma::GString>::to_cpp(lua::State *L, U u, int index)
 	{
-		return {luaL_checkstring(L, index)};
+		return {Lua::CheckString(L, index)};
 	}
 
 	template<class U>
-	int default_converter<pragma::GString>::match(lua_State *l, U u, int index)
+	int default_converter<pragma::GString>::match(lua::State *l, U u, int index)
 	{
-		return lua_isstring(l, index) ? 1 : no_match;
+		return Lua::IsString(l, index) ? 1 : no_match;
 	}
 }

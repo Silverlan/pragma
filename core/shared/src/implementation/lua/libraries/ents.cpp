@@ -10,8 +10,6 @@ module;
 
 
 
-#include "pragma/lua/core.hpp"
-#include <sharedutils/magic_enum.hpp>
 
 module pragma.shared;
 
@@ -41,7 +39,7 @@ std::optional<std::type_index> type_meta_data_to_type_index(TypeMetaData eType)
 	static_assert(umath::to_integral(TypeMetaData::Count) == 7, "Update this implementation when adding news types!");
 	return {};
 }
-luabind::object meta_data_type_to_lua_object(lua_State *l, const pragma::ents::TypeMetaData &metaData, TypeMetaData eType)
+luabind::object meta_data_type_to_lua_object(lua::State *l, const pragma::ents::TypeMetaData &metaData, TypeMetaData eType)
 {
 	switch(eType) {
 	case TypeMetaData::Range:
@@ -92,20 +90,20 @@ pragma::ComponentMemberInfo *Lua::ents::get_lua_component_member_info(pragma::Ga
 	return &*(*memberInfos)[memberIndex].componentMemberInfo;
 }
 
-//void test_lua_policies(lua_State *l);
-void Lua::ents::register_library(lua_State *l)
+//void test_lua_policies(lua::State *l);
+void Lua::ents::register_library(lua::State *l)
 {
 	//test_lua_policies(l);
 	auto entsMod = luabind::module(l, "ents");
 	entsMod[(
 		luabind::def("create",create),
 
-		luabind::def("get_all",static_cast<tb<type<pragma::ecs::BaseEntity>>(*)(lua_State*)>(get_all)),
-		luabind::def("get_all",static_cast<tb<type<pragma::ecs::BaseEntity>>(*)(lua_State*,func<type<pragma::ecs::BaseEntity>>)>(get_all)),
-		luabind::def("get_all",static_cast<tb<type<pragma::ecs::BaseEntity>>(*)(lua_State*,pragma::ecs::EntityIterator::FilterFlags)>(get_all)),
-		luabind::def("get_all",static_cast<tb<type<pragma::ecs::BaseEntity>>(*)(lua_State*,pragma::ecs::EntityIterator::FilterFlags,const tb<LuaEntityIteratorFilterBase>&)>(get_all)),
-		luabind::def("get_all",static_cast<tb<type<pragma::ecs::BaseEntity>>(*)(lua_State*,const tb<LuaEntityIteratorFilterBase>&)>(get_all)),
-		luabind::def("get_all_c",static_cast<tb<type<pragma::BaseEntityComponent>>(*)(lua_State*,func<type<pragma::BaseEntityComponent>>)>(get_all_c)),
+		luabind::def("get_all",static_cast<tb<type<pragma::ecs::BaseEntity>>(*)(lua::State*)>(get_all)),
+		luabind::def("get_all",static_cast<tb<type<pragma::ecs::BaseEntity>>(*)(lua::State*,func<type<pragma::ecs::BaseEntity>>)>(get_all)),
+		luabind::def("get_all",static_cast<tb<type<pragma::ecs::BaseEntity>>(*)(lua::State*,pragma::ecs::EntityIterator::FilterFlags)>(get_all)),
+		luabind::def("get_all",static_cast<tb<type<pragma::ecs::BaseEntity>>(*)(lua::State*,pragma::ecs::EntityIterator::FilterFlags,const tb<LuaEntityIteratorFilterBase>&)>(get_all)),
+		luabind::def("get_all",static_cast<tb<type<pragma::ecs::BaseEntity>>(*)(lua::State*,const tb<LuaEntityIteratorFilterBase>&)>(get_all)),
+		luabind::def("get_all_c",static_cast<tb<type<pragma::BaseEntityComponent>>(*)(lua::State*,func<type<pragma::BaseEntityComponent>>)>(get_all_c)),
 		luabind::def("get_spawned",get_spawned),
 		luabind::def("get_players",get_players),
 		luabind::def("get_npcs",get_npcs),
@@ -123,22 +121,22 @@ void Lua::ents::register_library(lua_State *l)
 		luabind::def("find_in_sphere",find_in_sphere),
 		luabind::def("find_in_aabb",find_in_aabb),
 		luabind::def("find_in_cone",find_in_cone),
-		luabind::def("create_trigger",static_cast<type<pragma::ecs::BaseEntity>(*)(lua_State*,const Vector3&,pragma::physics::IShape&)>(create_trigger)),
-		luabind::def("create_trigger",static_cast<type<pragma::ecs::BaseEntity>(*)(lua_State*,const Vector3&,const Vector3&,const Vector3&,const EulerAngles&)>(create_trigger)),
-		luabind::def("create_trigger",static_cast<type<pragma::ecs::BaseEntity>(*)(lua_State*,const Vector3&,float)>(create_trigger)),
+		luabind::def("create_trigger",static_cast<type<pragma::ecs::BaseEntity>(*)(lua::State*,const Vector3&,pragma::physics::IShape&)>(create_trigger)),
+		luabind::def("create_trigger",static_cast<type<pragma::ecs::BaseEntity>(*)(lua::State*,const Vector3&,const Vector3&,const Vector3&,const EulerAngles&)>(create_trigger)),
+		luabind::def("create_trigger",static_cast<type<pragma::ecs::BaseEntity>(*)(lua::State*,const Vector3&,float)>(create_trigger)),
 		luabind::def("create_prop",&create_prop),
-		luabind::def("create_prop",+[](lua_State *l,const std::string &mdl,const Vector3 *origin,const EulerAngles *angles) -> type<pragma::ecs::BaseEntity> {
+		luabind::def("create_prop",+[](lua::State *l,const std::string &mdl,const Vector3 *origin,const EulerAngles *angles) -> type<pragma::ecs::BaseEntity> {
 			return create_prop(l,mdl,origin,angles,false);
 		}),
-		luabind::def("create_prop",+[](lua_State *l,const std::string &mdl,const Vector3 *origin) -> type<pragma::ecs::BaseEntity> {
+		luabind::def("create_prop",+[](lua::State *l,const std::string &mdl,const Vector3 *origin) -> type<pragma::ecs::BaseEntity> {
 			return create_prop(l,mdl,origin,nullptr,false);
 		}),
-		luabind::def("create_prop",+[](lua_State *l,const std::string &mdl) -> type<pragma::ecs::BaseEntity> {
+		luabind::def("create_prop",+[](lua::State *l,const std::string &mdl) -> type<pragma::ecs::BaseEntity> {
 			return create_prop(l,mdl,nullptr,nullptr,false);
 		}),
-		luabind::def("register",static_cast<void(*)(lua_State*,const std::string&,const Lua::classObject&)>(Lua::ents::register_class)),
-		luabind::def("register",static_cast<void(*)(lua_State*,const std::string&,const luabind::tableT<luabind::variant<std::string,pragma::ComponentId>>&,LuaEntityType)>(Lua::ents::register_class)),
-		luabind::def("register",+[](lua_State *l,const std::string &className,const luabind::tableT<luabind::variant<std::string,pragma::ComponentId>> &tComponents) {
+		luabind::def("register",static_cast<void(*)(lua::State*,const std::string&,const Lua::classObject&)>(Lua::ents::register_class)),
+		luabind::def("register",static_cast<void(*)(lua::State*,const std::string&,const luabind::tableT<luabind::variant<std::string,pragma::ComponentId>>&,LuaEntityType)>(Lua::ents::register_class)),
+		luabind::def("register",+[](lua::State *l,const std::string &className,const luabind::tableT<luabind::variant<std::string,pragma::ComponentId>> &tComponents) {
 			register_class(l,className,tComponents,LuaEntityType::Default);
 		}),
 		luabind::def("get_lua_component_member_count",get_lua_component_member_count),
@@ -150,7 +148,7 @@ void Lua::ents::register_library(lua_State *l)
 		luabind::def("get_component_name",get_component_name),
 		luabind::def("get_component_id",get_component_id),
 		luabind::def("register_component_net_event",register_component_net_event),
-		luabind::def("get_registered_component_types",+[](lua_State *l,pragma::Game &game) -> Lua::tb<pragma::ComponentId> {
+		luabind::def("get_registered_component_types",+[](lua::State *l,pragma::Game &game) -> Lua::tb<pragma::ComponentId> {
 			auto &manager = game.GetEntityComponentManager();
 			auto t = luabind::newtable(l);
 			for(uint32_t idx = 1;auto &componentInfo : manager.GetRegisteredComponentTypes())
@@ -161,11 +159,11 @@ void Lua::ents::register_library(lua_State *l)
 			}
 			return t;
 		}),
-		luabind::def("get_component_info",+[](lua_State *l,pragma::Game &game,pragma::ComponentId componentId) {
+		luabind::def("get_component_info",+[](lua::State *l,pragma::Game &game,pragma::ComponentId componentId) {
 			auto &manager = game.GetEntityComponentManager();
 			return manager.GetComponentInfo(componentId);
 		}),
-		luabind::def("find_component_id",+[](lua_State *l,pragma::Game &game,const std::string &name) -> std::optional<pragma::ComponentId> {
+		luabind::def("find_component_id",+[](lua::State *l,pragma::Game &game,const std::string &name) -> std::optional<pragma::ComponentId> {
 			auto &manager = game.GetEntityComponentManager();
 			pragma::ComponentId componentId;
 			if(manager.GetComponentTypeId(name,componentId) == false)
@@ -173,7 +171,7 @@ void Lua::ents::register_library(lua_State *l)
 			return componentId;
 		}),
 		luabind::def("load_component",&pragma::Game::LoadLuaComponentByName),
-		luabind::def("find_installed_custom_components",+[](lua_State *l,pragma::Game &game) -> Lua::tb<std::string> {
+		luabind::def("find_installed_custom_components",+[](lua::State *l,pragma::Game &game) -> Lua::tb<std::string> {
 			std::vector<std::string> dirs;
 			std::string rootPath {Lua::SCRIPT_DIRECTORY +"/entities/components/"};
 			filemanager::find_files(rootPath +'*',nullptr,&dirs);
@@ -320,11 +318,11 @@ void Lua::ents::register_library(lua_State *l)
 		  ss << "[" << componentInfo.id << "]";
 		  ss << "[" << componentInfo.name << "]";
 		  ss << "[Cat:" << componentInfo.category << "]";
-		  ss << "[Flags:" << magic_enum::flags::enum_name(componentInfo.flags) << "]";
+		  ss << "[Flags:" << magic_enum::enum_flags_name(componentInfo.flags) << "]";
 		  return ss.str();
 	  });
-	componentInfoDef.property("name", +[](lua_State *l, const pragma::ComponentInfo &componentInfo) { return std::string {*componentInfo.name}; });
-	componentInfoDef.property("category", +[](lua_State *l, const pragma::ComponentInfo &componentInfo) { return std::string {*componentInfo.category}; });
+	componentInfoDef.property("name", +[](lua::State *l, const pragma::ComponentInfo &componentInfo) { return std::string {*componentInfo.name}; });
+	componentInfoDef.property("category", +[](lua::State *l, const pragma::ComponentInfo &componentInfo) { return std::string {*componentInfo.category}; });
 	componentInfoDef.def_readonly("id", &pragma::ComponentInfo::id);
 	componentInfoDef.def_readonly("flags", &pragma::ComponentInfo::flags);
 	componentInfoDef.def("GetMemberCount", +[](const pragma::ComponentInfo &componentInfo) { return componentInfo.members.size(); });
@@ -389,34 +387,34 @@ void Lua::ents::register_library(lua_State *l)
 	auto coordinateTypeMetaDataDef = luabind::class_<pragma::ents::CoordinateTypeMetaData, pragma::ents::TypeMetaData>("CoordinateTypeMetaData");
 	coordinateTypeMetaDataDef.def_readwrite("space", &pragma::ents::CoordinateTypeMetaData::space);
 	coordinateTypeMetaDataDef.property(
-	  "parentProperty", +[](lua_State *l, const pragma::ents::CoordinateTypeMetaData &metaData) { Lua::PushString(l, metaData.parentProperty.c_str()); }, +[](lua_State *l, pragma::ents::CoordinateTypeMetaData &metaData, const std::string &prop) { metaData.parentProperty = prop; });
+	  "parentProperty", +[](lua::State *l, const pragma::ents::CoordinateTypeMetaData &metaData) { Lua::PushString(l, metaData.parentProperty.c_str()); }, +[](lua::State *l, pragma::ents::CoordinateTypeMetaData &metaData, const std::string &prop) { metaData.parentProperty = prop; });
 	memberInfoDef.scope[coordinateTypeMetaDataDef];
 
 	auto poseTypeMetaDataDef = luabind::class_<pragma::ents::PoseTypeMetaData, pragma::ents::TypeMetaData>("PoseTypeMetaData");
-	poseTypeMetaDataDef.property("posProperty", +[](lua_State *l, const pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.posProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.posProperty = prop; });
-	poseTypeMetaDataDef.property("rotProperty", +[](lua_State *l, const pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.rotProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.rotProperty = prop; });
+	poseTypeMetaDataDef.property("posProperty", +[](lua::State *l, const pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.posProperty.c_str()); }, +[](lua::State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.posProperty = prop; });
+	poseTypeMetaDataDef.property("rotProperty", +[](lua::State *l, const pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.rotProperty.c_str()); }, +[](lua::State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.rotProperty = prop; });
 	poseTypeMetaDataDef.property(
-	  "scaleProperty", +[](lua_State *l, const pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.scaleProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.scaleProperty = prop; });
+	  "scaleProperty", +[](lua::State *l, const pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.scaleProperty.c_str()); }, +[](lua::State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.scaleProperty = prop; });
 	memberInfoDef.scope[poseTypeMetaDataDef];
 
 	auto poseComponentTypeMetaDataDef = luabind::class_<pragma::ents::PoseComponentTypeMetaData, pragma::ents::TypeMetaData>("PoseComponentTypeMetaData");
 	poseComponentTypeMetaDataDef.property(
-	  "poseProperty", +[](lua_State *l, const pragma::ents::PoseComponentTypeMetaData &metaData) { Lua::PushString(l, metaData.poseProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseComponentTypeMetaData &metaData, const std::string &prop) { metaData.poseProperty = prop; });
+	  "poseProperty", +[](lua::State *l, const pragma::ents::PoseComponentTypeMetaData &metaData) { Lua::PushString(l, metaData.poseProperty.c_str()); }, +[](lua::State *l, pragma::ents::PoseComponentTypeMetaData &metaData, const std::string &prop) { metaData.poseProperty = prop; });
 	memberInfoDef.scope[poseComponentTypeMetaDataDef];
 
 	auto optionalTypeMetaDataDef = luabind::class_<pragma::ents::OptionalTypeMetaData, pragma::ents::TypeMetaData>("OptionalTypeMetaData");
 	optionalTypeMetaDataDef.property(
-	  "enabledProperty", +[](lua_State *l, const pragma::ents::OptionalTypeMetaData &metaData) { Lua::PushString(l, metaData.enabledProperty.c_str()); }, +[](lua_State *l, pragma::ents::OptionalTypeMetaData &metaData, const std::string &prop) { metaData.enabledProperty = prop; });
+	  "enabledProperty", +[](lua::State *l, const pragma::ents::OptionalTypeMetaData &metaData) { Lua::PushString(l, metaData.enabledProperty.c_str()); }, +[](lua::State *l, pragma::ents::OptionalTypeMetaData &metaData, const std::string &prop) { metaData.enabledProperty = prop; });
 	memberInfoDef.scope[optionalTypeMetaDataDef];
 
 	auto parentTypeMetaDataDef = luabind::class_<pragma::ents::ParentTypeMetaData, pragma::ents::TypeMetaData>("ParentTypeMetaData");
 	parentTypeMetaDataDef.property(
-	  "parentProperty", +[](lua_State *l, const pragma::ents::ParentTypeMetaData &metaData) { Lua::PushString(l, metaData.parentProperty.c_str()); }, +[](lua_State *l, pragma::ents::ParentTypeMetaData &metaData, const std::string &prop) { metaData.parentProperty = prop; });
+	  "parentProperty", +[](lua::State *l, const pragma::ents::ParentTypeMetaData &metaData) { Lua::PushString(l, metaData.parentProperty.c_str()); }, +[](lua::State *l, pragma::ents::ParentTypeMetaData &metaData, const std::string &prop) { metaData.parentProperty = prop; });
 	memberInfoDef.scope[parentTypeMetaDataDef];
 
 	auto enablerTypeMetaDataDef = luabind::class_<pragma::ents::EnablerTypeMetaData, pragma::ents::TypeMetaData>("EnablerTypeMetaData");
 	enablerTypeMetaDataDef.property(
-	  "targetProperty", +[](lua_State *l, const pragma::ents::EnablerTypeMetaData &metaData) { Lua::PushString(l, metaData.targetProperty.c_str()); }, +[](lua_State *l, pragma::ents::EnablerTypeMetaData &metaData, const std::string &prop) { metaData.targetProperty = prop; });
+	  "targetProperty", +[](lua::State *l, const pragma::ents::EnablerTypeMetaData &metaData) { Lua::PushString(l, metaData.targetProperty.c_str()); }, +[](lua::State *l, pragma::ents::EnablerTypeMetaData &metaData, const std::string &prop) { metaData.targetProperty = prop; });
 	memberInfoDef.scope[enablerTypeMetaDataDef];
 
 	static_assert(umath::to_integral(TypeMetaData::Count) == 7, "Update these bindings when adding news types!");
@@ -459,7 +457,7 @@ void Lua::ents::register_library(lua_State *l)
 	memberInfoDef.def("SetFlag", &pragma::ComponentMemberInfo::SetFlag);
 	memberInfoDef.def("SetFlag", &pragma::ComponentMemberInfo::SetFlag, luabind::default_parameter_policy<3, true> {});
 	memberInfoDef.def(
-	  "FindTypeMetaData", +[](lua_State *l, const pragma::ComponentMemberInfo &info, TypeMetaData eType) -> luabind::object {
+	  "FindTypeMetaData", +[](lua::State *l, const pragma::ComponentMemberInfo &info, TypeMetaData eType) -> luabind::object {
 		  auto idx = type_meta_data_to_type_index(eType);
 		  if(!idx)
 			  return Lua::nil;
@@ -479,22 +477,22 @@ void Lua::ents::register_library(lua_State *l)
 		  return values;
 	  });
 	memberInfoDef.def_readonly("type", &pragma::ComponentMemberInfo::type);
-	memberInfoDef.property("name", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return std::string {*memInfo.GetName()}; });
-	memberInfoDef.property("nameHash", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetNameHash(); });
-	memberInfoDef.property("specializationType", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetSpecializationType(); });
+	memberInfoDef.property("name", +[](lua::State *l, const pragma::ComponentMemberInfo &memInfo) { return std::string {*memInfo.GetName()}; });
+	memberInfoDef.property("nameHash", +[](lua::State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetNameHash(); });
+	memberInfoDef.property("specializationType", +[](lua::State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetSpecializationType(); });
 	memberInfoDef.property(
-	  "customSpecializationType", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) -> std::optional<std::string> {
+	  "customSpecializationType", +[](lua::State *l, const pragma::ComponentMemberInfo &memInfo) -> std::optional<std::string> {
 		  auto *type = memInfo.GetCustomSpecializationType();
 		  if(!type)
 			  return {};
 		  return *type;
 	  });
-	memberInfoDef.property("minValue", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetMin(); });
-	memberInfoDef.property("maxValue", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetMax(); });
-	memberInfoDef.property("stepSize", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetStepSize(); });
-	memberInfoDef.property("metaData", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) -> ::udm::PProperty { return memInfo.GetMetaData(); });
+	memberInfoDef.property("minValue", +[](lua::State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetMin(); });
+	memberInfoDef.property("maxValue", +[](lua::State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetMax(); });
+	memberInfoDef.property("stepSize", +[](lua::State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetStepSize(); });
+	memberInfoDef.property("metaData", +[](lua::State *l, const pragma::ComponentMemberInfo &memInfo) -> ::udm::PProperty { return memInfo.GetMetaData(); });
 	memberInfoDef.property(
-	  "default", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) -> udm_type {
+	  "default", +[](lua::State *l, const pragma::ComponentMemberInfo &memInfo) -> udm_type {
 		  // Default value is currently only allowed for UDM types. Tag: component-member-udm-default
 		  if(!pragma::ents::is_udm_member_type(memInfo.type))
 			  return nil;
@@ -527,8 +525,8 @@ void Lua::ents::register_library(lua_State *l)
 
 	entsMod[componentInfoDef];
 
-	pragma::lua::define_custom_constructor<pragma::ents::RangeTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::RangeTypeMetaData> { return std::make_shared<pragma::ents::RangeTypeMetaData>(); }>(l);
-	pragma::lua::define_custom_constructor<pragma::ents::RangeTypeMetaData,
+	pragma::LuaCore::define_custom_constructor<pragma::ents::RangeTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::RangeTypeMetaData> { return std::make_shared<pragma::ents::RangeTypeMetaData>(); }>(l);
+	pragma::LuaCore::define_custom_constructor<pragma::ents::RangeTypeMetaData,
 	  +[](std::optional<float> min, std::optional<float> max, std::optional<float> stepSize) -> std::shared_ptr<pragma::ents::RangeTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::RangeTypeMetaData> {new pragma::ents::RangeTypeMetaData {}};
 		  metaData->min = min;
@@ -538,8 +536,8 @@ void Lua::ents::register_library(lua_State *l)
 	  },
 	  std::optional<float>, std::optional<float>, std::optional<float>>(l);
 
-	pragma::lua::define_custom_constructor<pragma::ents::CoordinateTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::CoordinateTypeMetaData> { return std::make_shared<pragma::ents::CoordinateTypeMetaData>(); }>(l);
-	pragma::lua::define_custom_constructor<pragma::ents::CoordinateTypeMetaData,
+	pragma::LuaCore::define_custom_constructor<pragma::ents::CoordinateTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::CoordinateTypeMetaData> { return std::make_shared<pragma::ents::CoordinateTypeMetaData>(); }>(l);
+	pragma::LuaCore::define_custom_constructor<pragma::ents::CoordinateTypeMetaData,
 	  +[](umath::CoordinateSpace space, const std::string &parentProperty) -> std::shared_ptr<pragma::ents::CoordinateTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::CoordinateTypeMetaData> {new pragma::ents::CoordinateTypeMetaData {}};
 		  metaData->space = space;
@@ -548,8 +546,8 @@ void Lua::ents::register_library(lua_State *l)
 	  },
 	  umath::CoordinateSpace, const std::string &>(l);
 
-	pragma::lua::define_custom_constructor<pragma::ents::PoseTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::PoseTypeMetaData> { return std::make_shared<pragma::ents::PoseTypeMetaData>(); }>(l);
-	pragma::lua::define_custom_constructor<pragma::ents::PoseTypeMetaData,
+	pragma::LuaCore::define_custom_constructor<pragma::ents::PoseTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::PoseTypeMetaData> { return std::make_shared<pragma::ents::PoseTypeMetaData>(); }>(l);
+	pragma::LuaCore::define_custom_constructor<pragma::ents::PoseTypeMetaData,
 	  +[](const std::string &posProperty, const std::string &rotProperty, const std::string &scaleProperty) -> std::shared_ptr<pragma::ents::PoseTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::PoseTypeMetaData> {new pragma::ents::PoseTypeMetaData {}};
 		  metaData->posProperty = posProperty;
@@ -559,8 +557,8 @@ void Lua::ents::register_library(lua_State *l)
 	  },
 	  const std::string &, const std::string &, const std::string &>(l);
 
-	pragma::lua::define_custom_constructor<pragma::ents::PoseComponentTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::PoseComponentTypeMetaData> { return std::make_shared<pragma::ents::PoseComponentTypeMetaData>(); }>(l);
-	pragma::lua::define_custom_constructor<pragma::ents::PoseComponentTypeMetaData,
+	pragma::LuaCore::define_custom_constructor<pragma::ents::PoseComponentTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::PoseComponentTypeMetaData> { return std::make_shared<pragma::ents::PoseComponentTypeMetaData>(); }>(l);
+	pragma::LuaCore::define_custom_constructor<pragma::ents::PoseComponentTypeMetaData,
 	  +[](const std::string &poseProperty) -> std::shared_ptr<pragma::ents::PoseComponentTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::PoseComponentTypeMetaData> {new pragma::ents::PoseComponentTypeMetaData {}};
 		  metaData->poseProperty = poseProperty;
@@ -568,24 +566,24 @@ void Lua::ents::register_library(lua_State *l)
 	  },
 	  const std::string &>(l);
 
-	pragma::lua::define_custom_constructor<pragma::ents::OptionalTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::OptionalTypeMetaData> { return std::make_shared<pragma::ents::OptionalTypeMetaData>(); }>(l);
-	pragma::lua::define_custom_constructor<pragma::ents::OptionalTypeMetaData,
+	pragma::LuaCore::define_custom_constructor<pragma::ents::OptionalTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::OptionalTypeMetaData> { return std::make_shared<pragma::ents::OptionalTypeMetaData>(); }>(l);
+	pragma::LuaCore::define_custom_constructor<pragma::ents::OptionalTypeMetaData,
 	  +[](const std::string &enabledProperty) -> std::shared_ptr<pragma::ents::OptionalTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::OptionalTypeMetaData> {new pragma::ents::OptionalTypeMetaData {}};
 		  metaData->enabledProperty = enabledProperty;
 		  return metaData;
 	  },
 	  const std::string &>(l);
-	pragma::lua::define_custom_constructor<pragma::ents::EnablerTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::EnablerTypeMetaData> { return std::make_shared<pragma::ents::EnablerTypeMetaData>(); }>(l);
-	pragma::lua::define_custom_constructor<pragma::ents::EnablerTypeMetaData,
+	pragma::LuaCore::define_custom_constructor<pragma::ents::EnablerTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::EnablerTypeMetaData> { return std::make_shared<pragma::ents::EnablerTypeMetaData>(); }>(l);
+	pragma::LuaCore::define_custom_constructor<pragma::ents::EnablerTypeMetaData,
 	  +[](const std::string &targetProperty) -> std::shared_ptr<pragma::ents::EnablerTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::EnablerTypeMetaData> {new pragma::ents::EnablerTypeMetaData {}};
 		  metaData->targetProperty = targetProperty;
 		  return metaData;
 	  },
 	  const std::string &>(l);
-	pragma::lua::define_custom_constructor<pragma::ents::ParentTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::ParentTypeMetaData> { return std::make_shared<pragma::ents::ParentTypeMetaData>(); }>(l);
-	pragma::lua::define_custom_constructor<pragma::ents::ParentTypeMetaData,
+	pragma::LuaCore::define_custom_constructor<pragma::ents::ParentTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::ParentTypeMetaData> { return std::make_shared<pragma::ents::ParentTypeMetaData>(); }>(l);
+	pragma::LuaCore::define_custom_constructor<pragma::ents::ParentTypeMetaData,
 	  +[](const std::string &parentProperty) -> std::shared_ptr<pragma::ents::ParentTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::ParentTypeMetaData> {new pragma::ents::ParentTypeMetaData {}};
 		  metaData->parentProperty = parentProperty;
@@ -596,7 +594,7 @@ void Lua::ents::register_library(lua_State *l)
 	static_assert(umath::to_integral(TypeMetaData::Count) == 7, "Update this implementation when adding news types!");
 }
 
-Lua::type<pragma::ecs::BaseEntity> Lua::ents::create(lua_State *l, const std::string &classname)
+Lua::type<pragma::ecs::BaseEntity> Lua::ents::create(lua::State *l, const std::string &classname)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
@@ -607,7 +605,7 @@ Lua::type<pragma::ecs::BaseEntity> Lua::ents::create(lua_State *l, const std::st
 	return ent->GetLuaObject();
 }
 
-Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_prop(lua_State *l, const std::string &mdl, const Vector3 *origin, const EulerAngles *angles, bool physicsProp = false)
+Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_prop(lua::State *l, const std::string &mdl, const Vector3 *origin, const EulerAngles *angles, bool physicsProp = false)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
@@ -624,7 +622,7 @@ Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_prop(lua_State *l, const st
 }
 
 namespace Lua::ents {
-	Lua::type<pragma::ecs::BaseEntity> create_trigger(lua_State *l, const Vector3 &origin, const EulerAngles *angles, pragma::physics::IConvexShape *shape)
+	Lua::type<pragma::ecs::BaseEntity> create_trigger(lua::State *l, const Vector3 &origin, const EulerAngles *angles, pragma::physics::IConvexShape *shape)
 	{
 		auto *state = pragma::Engine::Get()->GetNetworkState(l);
 		auto *game = state->GetGameState();
@@ -647,7 +645,7 @@ namespace Lua::ents {
 		return ent->GetLuaObject();
 	}
 };
-Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_trigger(lua_State *l, const Vector3 &origin, float radius)
+Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_trigger(lua::State *l, const Vector3 &origin, float radius)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
@@ -655,7 +653,7 @@ Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_trigger(lua_State *l, const
 	auto shape = phys->CreateSphereShape(radius, phys->GetGenericMaterial());
 	return Lua::ents::create_trigger(l, origin, nullptr, dynamic_cast<pragma::physics::IConvexShape *>(shape.get()));
 }
-Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_trigger(lua_State *l, const Vector3 &origin, pragma::physics::IShape &shape)
+Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_trigger(lua::State *l, const Vector3 &origin, pragma::physics::IShape &shape)
 {
 	if(shape.IsConvex() == false) {
 		Con::cwar << "Cannot create trigger_touch entity with non-convex physics shape!" << Con::endl;
@@ -665,7 +663,7 @@ Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_trigger(lua_State *l, const
 	return Lua::ents::create_trigger(l, origin, nullptr, cvShape.get());
 }
 
-Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_trigger(lua_State *l, const Vector3 &origin, const Vector3 &min, const Vector3 &max, const EulerAngles &angles)
+Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_trigger(lua::State *l, const Vector3 &origin, const Vector3 &min, const Vector3 &max, const EulerAngles &angles)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
@@ -678,7 +676,7 @@ Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_trigger(lua_State *l, const
 	return Lua::ents::create_trigger(l, centerOrigin, &angles, shape.get());
 }
 
-static Lua::tb<Lua::type<pragma::ecs::BaseEntity>> entities_to_table(lua_State *l, std::vector<pragma::ecs::BaseEntity *> &ents)
+static Lua::tb<Lua::type<pragma::ecs::BaseEntity>> entities_to_table(lua::State *l, std::vector<pragma::ecs::BaseEntity *> &ents)
 {
 	auto t = luabind::newtable(l);
 	uint32_t idx = 1;
@@ -690,7 +688,7 @@ static Lua::tb<Lua::type<pragma::ecs::BaseEntity>> entities_to_table(lua_State *
 	return t;
 }
 
-static Lua::tb<Lua::type<pragma::ecs::BaseEntity>> entities_to_table(lua_State *l, pragma::ecs::EntityIterator &entIt)
+static Lua::tb<Lua::type<pragma::ecs::BaseEntity>> entities_to_table(lua::State *l, pragma::ecs::EntityIterator &entIt)
 {
 	auto t = luabind::newtable(l);
 	uint32_t idx = 1;
@@ -699,7 +697,7 @@ static Lua::tb<Lua::type<pragma::ecs::BaseEntity>> entities_to_table(lua_State *
 	return t;
 }
 
-static void iterate_entities(lua_State *l, const std::function<void(pragma::ecs::BaseEntity *)> &fCallback)
+static void iterate_entities(lua::State *l, const std::function<void(pragma::ecs::BaseEntity *)> &fCallback)
 {
 	auto fcIterator = 1;
 	Lua::CheckFunction(l, fcIterator);
@@ -718,7 +716,7 @@ static void iterate_entities(lua_State *l, const std::function<void(pragma::ecs:
 	} while(ent != nullptr);
 }
 
-Lua::opt<Lua::mult<Lua::type<pragma::ecs::BaseEntity>, double>> Lua::ents::get_closest(lua_State *l, const Vector3 &origin)
+Lua::opt<Lua::mult<Lua::type<pragma::ecs::BaseEntity>, double>> Lua::ents::get_closest(lua::State *l, const Vector3 &origin)
 {
 	auto dClosest = std::numeric_limits<float>::max();
 	pragma::ecs::BaseEntity *entClosest = nullptr;
@@ -736,7 +734,7 @@ Lua::opt<Lua::mult<Lua::type<pragma::ecs::BaseEntity>, double>> Lua::ents::get_c
 		return nil;
 	return Lua::mult<Lua::type<pragma::ecs::BaseEntity>, double> {l, entClosest->GetLuaObject(), dClosest};
 }
-Lua::opt<Lua::mult<Lua::type<pragma::ecs::BaseEntity>, double>> Lua::ents::get_farthest(lua_State *l, const Vector3 &origin)
+Lua::opt<Lua::mult<Lua::type<pragma::ecs::BaseEntity>, double>> Lua::ents::get_farthest(lua::State *l, const Vector3 &origin)
 {
 	auto dFarthest = -1.f;
 	pragma::ecs::BaseEntity *entClosest = nullptr;
@@ -754,7 +752,7 @@ Lua::opt<Lua::mult<Lua::type<pragma::ecs::BaseEntity>, double>> Lua::ents::get_f
 		return nil;
 	return Lua::mult<Lua::type<pragma::ecs::BaseEntity>, double> {l, entClosest->GetLuaObject(), dFarthest};
 }
-Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_sorted_by_distance(lua_State *l, const Vector3 &origin)
+Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_sorted_by_distance(lua::State *l, const Vector3 &origin)
 {
 	std::vector<std::pair<pragma::ecs::BaseEntity *, float>> ents {};
 	iterate_entities(l, [&ents, &origin](pragma::ecs::BaseEntity *ent) {
@@ -771,7 +769,7 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_sorted_by_distance(lu
 		t[idx++] = pair.first->GetLuaObject();
 	return t;
 }
-Lua::type<pragma::ecs::BaseEntity> Lua::ents::get_random(lua_State *l)
+Lua::type<pragma::ecs::BaseEntity> Lua::ents::get_random(lua::State *l)
 {
 	std::vector<pragma::ecs::BaseEntity *> ents {};
 	iterate_entities(l, [&ents](pragma::ecs::BaseEntity *ent) { ents.push_back(ent); });
@@ -782,14 +780,14 @@ Lua::type<pragma::ecs::BaseEntity> Lua::ents::get_random(lua_State *l)
 	return ent->GetLuaObject();
 }
 
-Lua::opt<std::string> Lua::ents::get_component_name(lua_State *l, pragma::ComponentId componentId)
+Lua::opt<std::string> Lua::ents::get_component_name(lua::State *l, pragma::ComponentId componentId)
 {
 	auto *info = pragma::Engine::Get()->GetNetworkState(l)->GetGameState()->GetEntityComponentManager().GetComponentInfo(componentId);
 	if(info == nullptr)
 		return nil;
 	return {l, info->name};
 }
-Lua::opt<uint32_t> Lua::ents::get_component_id(lua_State *l, const std::string &componentName)
+Lua::opt<uint32_t> Lua::ents::get_component_id(lua::State *l, const std::string &componentName)
 {
 	pragma::ComponentId componentId;
 	if(pragma::Engine::Get()->GetNetworkState(l)->GetGameState()->GetEntityComponentManager().GetComponentTypeId(componentName, componentId) == false)
@@ -797,7 +795,7 @@ Lua::opt<uint32_t> Lua::ents::get_component_id(lua_State *l, const std::string &
 	return {l, componentId};
 }
 
-Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_all(lua_State *l)
+Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_all(lua::State *l)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
@@ -805,7 +803,7 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_all(lua_State *l)
 	game->GetEntities(&ents);
 	return entities_to_table(l, *ents);
 }
-Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_all(lua_State *l, func<type<pragma::ecs::BaseEntity>> func)
+Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_all(lua::State *l, func<type<pragma::ecs::BaseEntity>> func)
 {
 	std::vector<pragma::ecs::BaseEntity *> ents {};
 	iterate_entities(l, [&ents](pragma::ecs::BaseEntity *ent) { ents.push_back(ent); });
@@ -821,7 +819,7 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_all(lua_State *l, fun
 	}
 	return t;
 }
-static void iterate_entity_components(lua_State *l, const std::function<void(pragma::BaseEntityComponent *)> &fCallback)
+static void iterate_entity_components(lua::State *l, const std::function<void(pragma::BaseEntityComponent *)> &fCallback)
 {
 	auto fcIterator = 1;
 	Lua::CheckFunction(l, fcIterator);
@@ -839,7 +837,7 @@ static void iterate_entity_components(lua_State *l, const std::function<void(pra
 		Lua::Pop(l, 2); /* 0 */
 	} while(ent != nullptr);
 }
-Lua::tb<Lua::type<pragma::BaseEntityComponent>> Lua::ents::get_all_c(lua_State *l, func<type<pragma::BaseEntityComponent>> func)
+Lua::tb<Lua::type<pragma::BaseEntityComponent>> Lua::ents::get_all_c(lua::State *l, func<type<pragma::BaseEntityComponent>> func)
 {
 	std::vector<pragma::BaseEntityComponent *> ents {};
 	iterate_entity_components(l, [&ents](pragma::BaseEntityComponent *ent) { ents.push_back(ent); });
@@ -855,7 +853,7 @@ Lua::tb<Lua::type<pragma::BaseEntityComponent>> Lua::ents::get_all_c(lua_State *
 	}
 	return t;
 }
-Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_all(lua_State *l, pragma::ecs::EntityIterator::FilterFlags filterFlags)
+Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_all(lua::State *l, pragma::ecs::EntityIterator::FilterFlags filterFlags)
 {
 	auto it = create_lua_entity_iterator(l, nil, filterFlags);
 
@@ -866,7 +864,7 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_all(lua_State *l, pra
 	return t;
 }
 
-Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_all(lua_State *l, pragma::ecs::EntityIterator::FilterFlags filterFlags, const tb<LuaEntityIteratorFilterBase> &filters)
+Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_all(lua::State *l, pragma::ecs::EntityIterator::FilterFlags filterFlags, const tb<LuaEntityIteratorFilterBase> &filters)
 {
 	auto it = create_lua_entity_iterator(l, filters, filterFlags);
 	auto t = luabind::newtable(l);
@@ -876,9 +874,9 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_all(lua_State *l, pra
 	return t;
 }
 
-Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_all(lua_State *l, const tb<LuaEntityIteratorFilterBase> &filters) { return get_all(l, pragma::ecs::EntityIterator::FilterFlags::Default, filters); }
+Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_all(lua::State *l, const tb<LuaEntityIteratorFilterBase> &filters) { return get_all(l, pragma::ecs::EntityIterator::FilterFlags::Default, filters); }
 
-Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_spawned(lua_State *l)
+Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_spawned(lua::State *l)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
@@ -887,7 +885,7 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_spawned(lua_State *l)
 	return entities_to_table(l, ents);
 }
 
-Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_players(lua_State *l)
+Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_players(lua::State *l)
 {
 	auto &game = *pragma::Engine::Get()->GetNetworkState(l)->GetGameState();
 	auto t = luabind::newtable(l);
@@ -898,7 +896,7 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_players(lua_State *l)
 	return t;
 }
 
-Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_npcs(lua_State *l)
+Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_npcs(lua::State *l)
 {
 	auto &game = *pragma::Engine::Get()->GetNetworkState(l)->GetGameState();
 	auto t = luabind::newtable(l);
@@ -908,7 +906,7 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_npcs(lua_State *l)
 		t[idx++] = ent->GetAIComponent().get()->GetLuaObject();
 	return t;
 }
-Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_weapons(lua_State *l)
+Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_weapons(lua::State *l)
 {
 	auto &game = *pragma::Engine::Get()->GetNetworkState(l)->GetGameState();
 	auto t = luabind::newtable(l);
@@ -918,7 +916,7 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_weapons(lua_State *l)
 		t[idx++] = ent->GetWeaponComponent().get()->GetLuaObject();
 	return t;
 }
-Lua::tb<Lua::type<pragma::BaseVehicleComponent>> Lua::ents::get_vehicles(lua_State *l)
+Lua::tb<Lua::type<pragma::BaseVehicleComponent>> Lua::ents::get_vehicles(lua::State *l)
 {
 	auto &game = *pragma::Engine::Get()->GetNetworkState(l)->GetGameState();
 	auto t = luabind::newtable(l);
@@ -929,7 +927,7 @@ Lua::tb<Lua::type<pragma::BaseVehicleComponent>> Lua::ents::get_vehicles(lua_Sta
 	return t;
 }
 
-Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_world(lua_State *l)
+Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_world(lua::State *l)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
@@ -940,7 +938,7 @@ Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_world(lua_State *l)
 	return world.GetLuaObject();
 }
 
-Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_by_index(lua_State *l, uint32_t idx)
+Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_by_index(lua::State *l, uint32_t idx)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
@@ -950,7 +948,7 @@ Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_by_index(lua_State *
 	return ent->GetLuaObject();
 }
 
-Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_by_local_index(lua_State *l, uint32_t idx)
+Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_by_local_index(lua::State *l, uint32_t idx)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
@@ -960,7 +958,7 @@ Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_by_local_index(lua_S
 	return ent->GetLuaObject();
 }
 
-Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_unique_index(lua_State *l, const std::string &uuid)
+Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_unique_index(lua::State *l, const std::string &uuid)
 {
 	auto uniqueIndex = ::util::uuid_string_to_bytes(uuid);
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
@@ -973,20 +971,20 @@ Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_unique_index(lua
 
 namespace luabind::detail {
 	template<typename ValueType, typename BaseType>
-	void make_null_value(lua_State *L, ValueType &&val)
+	void make_null_value(lua::State *L, ValueType &&val)
 	{
 		// See luabind/detail/make_instance.hpp
 		detail::class_registry *registry = luabind::detail::class_registry::get_registry(L);
 		auto typeId = type_id {typeid(BaseType)};
 		auto *cls = registry->find_class(typeId);
 		if(!cls) {
-			lua_pushnil(L);
+			Lua::PushNil(L);
 			return;
 		}
 		auto &classIdMap = cls->classes();
 		auto classId = classIdMap.get(typeId);
 		if(classId == unknown_class) {
-			lua_pushnil(L);
+			Lua::PushNil(L);
 			return;
 		}
 
@@ -1002,7 +1000,7 @@ namespace luabind::detail {
 		}
 		catch(...) {
 			instance->deallocate(storage);
-			lua_pop(L, 1);
+			Lua::Pop(L, 1);
 			throw;
 		}
 
@@ -1010,7 +1008,7 @@ namespace luabind::detail {
 	}
 };
 
-Lua::type<EntityHandle> Lua::ents::get_null(lua_State *l)
+Lua::type<EntityHandle> Lua::ents::get_null(lua::State *l)
 {
 	luabind::detail::make_null_value<EntityHandle, pragma::ecs::BaseEntity>(l, EntityHandle {});
 	luabind::object o {luabind::from_stack(l, -1)};
@@ -1018,7 +1016,7 @@ Lua::type<EntityHandle> Lua::ents::get_null(lua_State *l)
 	return o;
 }
 
-Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_filter(lua_State *l, const std::string &name)
+Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_filter(lua::State *l, const std::string &name)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
@@ -1028,7 +1026,7 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_filter(lua_State 
 	return entities_to_table(l, entIt);
 }
 
-Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_class(lua_State *l, const std::string &className)
+Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_class(lua::State *l, const std::string &className)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
@@ -1038,7 +1036,7 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_class(lua_State *
 	return entities_to_table(l, entIt);
 }
 
-Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_name(lua_State *l, const std::string &name)
+Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_name(lua::State *l, const std::string &name)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
@@ -1048,7 +1046,7 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_name(lua_State *l
 	return entities_to_table(l, entIt);
 }
 
-Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_component(lua_State *l, const std::string &componentName)
+Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_component(lua::State *l, const std::string &componentName)
 {
 	auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = nw->GetGameState();
@@ -1060,9 +1058,9 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_component(lua_Sta
 	return t;
 }
 
-Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_in_aabb(lua_State *l, const Vector3 &min, const Vector3 &max) { return find_in_box(l, min, max); }
+Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_in_aabb(lua::State *l, const Vector3 &min, const Vector3 &max) { return find_in_box(l, min, max); }
 
-Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_in_sphere(lua_State *l, const Vector3 &origin, float radius)
+Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_in_sphere(lua::State *l, const Vector3 &origin, float radius)
 {
 	std::vector<pragma::ecs::BaseEntity *> ents;
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
@@ -1072,7 +1070,7 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_in_sphere(lua_State 
 	return entities_to_table(l, entIt);
 }
 
-Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_in_box(lua_State *l, const Vector3 &min, const Vector3 &max)
+Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_in_box(lua::State *l, const Vector3 &min, const Vector3 &max)
 {
 	std::vector<pragma::ecs::BaseEntity *> ents;
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
@@ -1083,7 +1081,7 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_in_box(lua_State *l,
 	return entities_to_table(l, entIt);
 }
 
-Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_in_cone(lua_State *l, const Vector3 &origin, const Vector3 &dir, float radius, float angle)
+Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_in_cone(lua::State *l, const Vector3 &origin, const Vector3 &dir, float radius, float angle)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
@@ -1093,7 +1091,7 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_in_cone(lua_State *l
 	return entities_to_table(l, entIt);
 }
 
-Lua::opt<pragma::ComponentEventId> Lua::ents::get_event_id(lua_State *l, const std::string &name)
+Lua::opt<pragma::ComponentEventId> Lua::ents::get_event_id(lua::State *l, const std::string &name)
 {
 	pragma::ComponentEventId eventId;
 	if(pragma::Engine::Get()->GetNetworkState(l)->GetGameState()->GetEntityComponentManager().GetEventId(name, eventId) == false)
@@ -1101,14 +1099,14 @@ Lua::opt<pragma::ComponentEventId> Lua::ents::get_event_id(lua_State *l, const s
 	return {l, eventId};
 }
 
-void Lua::ents::register_class(lua_State *l, const std::string &className, const Lua::classObject &classObject)
+void Lua::ents::register_class(lua::State *l, const std::string &className, const Lua::classObject &classObject)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto &manager = game->GetLuaEntityManager();
 	manager.RegisterEntity(className, const_cast<Lua::classObject &>(classObject), {});
 }
-void Lua::ents::register_class(lua_State *l, const std::string &className, const luabind::tableT<luabind::variant<std::string, pragma::ComponentId>> &tComponents, LuaEntityType type)
+void Lua::ents::register_class(lua::State *l, const std::string &className, const luabind::tableT<luabind::variant<std::string, pragma::ComponentId>> &tComponents, LuaEntityType type)
 {
 	std::vector<pragma::ComponentId> components;
 	auto numComponents = Lua::GetObjectLength(l, tComponents);
@@ -1147,7 +1145,7 @@ void Lua::ents::register_class(lua_State *l, const std::string &className, const
 	ss << "    BaseEntity.__init(self)\n";
 	ss << "end\n";
 
-	auto r = pragma::scripting::lua::run_string(l, ss.str(), "register_class");
+	auto r = pragma::scripting::lua_core::run_string(l, ss.str(), "register_class");
 	if(r == Lua::StatusCode::Ok) {
 		auto o = luabind::object(luabind::globals(l)[cLuaClassName]);
 		if(o) {
@@ -1162,7 +1160,7 @@ void Lua::ents::register_class(lua_State *l, const std::string &className, const
 	Lua::SetGlobal(l, luaClassName);
 }
 
-Lua::opt<pragma::NetEventId> Lua::ents::register_component_net_event(lua_State *l, pragma::ComponentId componentId, const std::string &name)
+Lua::opt<pragma::NetEventId> Lua::ents::register_component_net_event(lua::State *l, pragma::ComponentId componentId, const std::string &name)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
@@ -1178,7 +1176,7 @@ Lua::opt<pragma::NetEventId> Lua::ents::register_component_net_event(lua_State *
 	return {l, game->SetupNetEvent(netName)};
 }
 
-Lua::opt<pragma::ComponentEventId> Lua::ents::register_component_event(lua_State *l, pragma::ComponentId componentId, const std::string &name)
+Lua::opt<pragma::ComponentEventId> Lua::ents::register_component_event(lua::State *l, pragma::ComponentId componentId, const std::string &name)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();

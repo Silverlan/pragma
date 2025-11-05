@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.base_radius;
@@ -34,7 +33,7 @@ class DLLNETWORK BaseRadiusComponent : public BaseEntityComponent {
 	};
 	struct DLLNETWORK CEOnRadiusChanged : public ComponentEvent {
 		CEOnRadiusChanged(float oldRadius, float newRadius);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		float oldRadius;
 		float newRadius;
 	};

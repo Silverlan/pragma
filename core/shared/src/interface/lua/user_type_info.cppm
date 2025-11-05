@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
 
 
@@ -23,7 +22,7 @@ export {
 			template<class T>                                                                                                                                                                                                                                                                        \
 				requires(util::is_specialization<base_type<T>, TYPE>::value)                                                                                                                                                                                                                         \
 			struct get_user_type_info<T> {                                                                                                                                                                                                                                                           \
-				static void get(lua_State *L, TypeInfo &outTypeInfo)                                                                                                                                                                                                                                 \
+				static void get(lua::State *L, TypeInfo &outTypeInfo)                                                                                                                                                                                                                                 \
 				{                                                                                                                                                                                                                                                                                    \
 					outTypeInfo.typeIdentifier = IDENTIFIER;                                                                                                                                                                                                                                         \
 					CUSTOM                                                                                                                                                                                                                                                                           \
@@ -57,7 +56,7 @@ export {
 		template<class T>
 			requires(util::is_specialization_array<base_type<T>>::value)
 		struct get_user_type_info<T> {
-			static void get(lua_State *L, TypeInfo &outTypeInfo) { outTypeInfo.typeIdentifier = "array"; }
+			static void get(lua::State *L, TypeInfo &outTypeInfo) { outTypeInfo.typeIdentifier = "array"; }
 		};
 	};
 }

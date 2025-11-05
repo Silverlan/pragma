@@ -4,25 +4,24 @@ module;
 
 
 
-#include "pragma/lua/core.hpp"
 
 module pragma.shared;
 
 import :scripting.lua.libraries.ray;
 
-void Lua::TraceData::SetSource(lua_State *l, ::TraceData &data, const pragma::physics::IConvexShape &shape) { data.SetShape(shape); }
-void Lua::TraceData::SetFlags(lua_State *, ::TraceData &data, unsigned int flags) { data.SetFlags(static_cast<pragma::physics::RayCastFlags>(flags)); }
-void Lua::TraceData::SetCollisionFilterMask(lua_State *, ::TraceData &data, unsigned int mask) { data.SetCollisionFilterMask(static_cast<pragma::physics::CollisionMask>(mask)); }
-void Lua::TraceData::SetCollisionFilterGroup(lua_State *, ::TraceData &data, unsigned int group) { data.SetCollisionFilterGroup(static_cast<pragma::physics::CollisionMask>(group)); }
-void Lua::TraceData::GetSourceTransform(lua_State *l, ::TraceData &data) { Lua::Push<umath::Transform>(l, data.GetSource()); }
-void Lua::TraceData::GetTargetTransform(lua_State *l, ::TraceData &data) { Lua::Push<umath::Transform>(l, data.GetTarget()); }
-void Lua::TraceData::GetSourceOrigin(lua_State *l, ::TraceData &data) { Lua::Push<Vector3>(l, data.GetSourceOrigin()); }
-void Lua::TraceData::GetTargetOrigin(lua_State *l, ::TraceData &data) { Lua::Push<Vector3>(l, data.GetTargetOrigin()); }
-void Lua::TraceData::GetSourceRotation(lua_State *l, ::TraceData &data) { Lua::Push<Quat>(l, data.GetSourceRotation()); }
-void Lua::TraceData::GetTargetRotation(lua_State *l, ::TraceData &data) { Lua::Push<Quat>(l, data.GetTargetRotation()); }
-void Lua::TraceData::GetDistance(lua_State *l, ::TraceData &data) { Lua::PushNumber(l, data.GetDistance()); }
-void Lua::TraceData::GetDirection(lua_State *l, ::TraceData &data) { Lua::Push<Vector3>(l, data.GetDirection()); }
-void Lua::TraceData::SetFilter(lua_State *l, ::TraceData &data, luabind::object)
+void Lua::TraceData::SetSource(lua::State *l, ::TraceData &data, const pragma::physics::IConvexShape &shape) { data.SetShape(shape); }
+void Lua::TraceData::SetFlags(lua::State *, ::TraceData &data, unsigned int flags) { data.SetFlags(static_cast<pragma::physics::RayCastFlags>(flags)); }
+void Lua::TraceData::SetCollisionFilterMask(lua::State *, ::TraceData &data, unsigned int mask) { data.SetCollisionFilterMask(static_cast<pragma::physics::CollisionMask>(mask)); }
+void Lua::TraceData::SetCollisionFilterGroup(lua::State *, ::TraceData &data, unsigned int group) { data.SetCollisionFilterGroup(static_cast<pragma::physics::CollisionMask>(group)); }
+void Lua::TraceData::GetSourceTransform(lua::State *l, ::TraceData &data) { Lua::Push<umath::Transform>(l, data.GetSource()); }
+void Lua::TraceData::GetTargetTransform(lua::State *l, ::TraceData &data) { Lua::Push<umath::Transform>(l, data.GetTarget()); }
+void Lua::TraceData::GetSourceOrigin(lua::State *l, ::TraceData &data) { Lua::Push<Vector3>(l, data.GetSourceOrigin()); }
+void Lua::TraceData::GetTargetOrigin(lua::State *l, ::TraceData &data) { Lua::Push<Vector3>(l, data.GetTargetOrigin()); }
+void Lua::TraceData::GetSourceRotation(lua::State *l, ::TraceData &data) { Lua::Push<Quat>(l, data.GetSourceRotation()); }
+void Lua::TraceData::GetTargetRotation(lua::State *l, ::TraceData &data) { Lua::Push<Quat>(l, data.GetTargetRotation()); }
+void Lua::TraceData::GetDistance(lua::State *l, ::TraceData &data) { Lua::PushNumber(l, data.GetDistance()); }
+void Lua::TraceData::GetDirection(lua::State *l, ::TraceData &data) { Lua::Push<Vector3>(l, data.GetDirection()); }
+void Lua::TraceData::SetFilter(lua::State *l, ::TraceData &data, luabind::object)
 {
 	if(Lua::IsType<pragma::ecs::BaseEntity>(l, 2)) {
 		auto &ent = Lua::Check<pragma::ecs::BaseEntity>(l, 2);
@@ -57,7 +56,7 @@ void Lua::TraceData::SetFilter(lua_State *l, ::TraceData &data, luabind::object)
 	data.SetFilter([l, oFc](pragma::physics::IShape &shape, pragma::physics::IRigidBody &body) -> pragma::physics::RayCastHitType {
 		auto c = Lua::CallFunction(
 		  l,
-		  [oFc, &shape, &body](lua_State *l) -> Lua::StatusCode {
+		  [oFc, &shape, &body](lua::State *l) -> Lua::StatusCode {
 			  oFc.push(l);
 			  shape.Push(l);
 			  body.Push(l);

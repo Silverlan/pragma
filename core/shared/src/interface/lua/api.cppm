@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
-#include "pragma/lua/ldefinitions.h"
+#include "definitions.hpp"
 
 export module pragma.shared:scripting.lua.api;
 
@@ -17,7 +15,7 @@ export namespace luabind {
 		struct optional : object {
 			optional(from_stack const &stack_reference) : object(stack_reference) {}
 			optional(const object &o) : object(o) {}
-			optional(lua_State *l, const T &t) : object(l, t) {}
+			optional(lua::State *l, const T &t) : object(l, t) {}
 			using value_type = T;
 		};
 
@@ -72,7 +70,7 @@ export namespace luabind {
 		struct mult : object {
 			mult(from_stack const &stack_reference) : object(stack_reference) {}
 			mult(const object &o) : object(o) {}
-			mult(lua_State *l, T... args) : object()
+			mult(lua::State *l, T... args) : object()
 			{
 				([&](auto &input) { Lua::Push(l, input); }(args), ...);
 			}
@@ -82,7 +80,7 @@ export namespace luabind {
 		struct typehint : object {
 			typehint(from_stack const &stack_reference) : object(stack_reference) {}
 			typehint(const object &o) : object(o) {}
-			typehint(lua_State *l, const T &t) : object(l, t) {}
+			typehint(lua::State *l, const T &t) : object(l, t) {}
 			using value_type = T;
 		};
 
@@ -161,63 +159,63 @@ export namespace luabind {
 
 	template<typename T>
 	struct lua_proxy_traits<adl::optional<T>> : lua_proxy_traits<object> {
-		static bool check(lua_State *L, int idx)
+		static bool check(lua::State *L, int idx)
 		{
 			if constexpr(std::is_fundamental_v<T>)
-				return lua_proxy_traits<object>::check(L, idx) && (lua_isnoneornil(L, idx) || lua_isnumber(L, idx));
+				return lua_proxy_traits<object>::check(L, idx) && (!Lua::IsSet(L, idx) || Lua::IsNumber(L, idx));
 			else
-				return lua_proxy_traits<object>::check(L, idx) && (lua_isnoneornil(L, idx) || luabind::object_cast_nothrow<T *>(luabind::from_stack {L, idx}, static_cast<T *>(nullptr)) != nullptr);
+				return lua_proxy_traits<object>::check(L, idx) && (!Lua::IsSet(L, idx) || luabind::object_cast_nothrow<T *>(luabind::from_stack {L, idx}, static_cast<T *>(nullptr)) != nullptr);
 		}
 	};
 
 	template<typename T>
 	struct lua_proxy_traits<adl::userData<T>> : lua_proxy_traits<object> {
-		static bool check(lua_State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && lua_isuserdata(L, idx); }
+		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && Lua::IsUserData(L, idx); }
 	};
 
 	template<typename T>
 	struct lua_proxy_traits<adl::classObject<T>> : lua_proxy_traits<object> {
-		static bool check(lua_State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && lua_isuserdata(L, idx); }
+		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && Lua::IsUserData(L, idx); }
 	};
 
 	template<typename T>
 	struct lua_proxy_traits<adl::tableT<T>> : lua_proxy_traits<object> {
-		static bool check(lua_State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && lua_istable(L, idx); }
+		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && Lua::IsTable(L, idx); }
 	};
 
 	template<typename TKey, typename TVal>
 	struct lua_proxy_traits<adl::map<TKey, TVal>> : lua_proxy_traits<object> {
-		static bool check(lua_State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && lua_istable(L, idx); }
+		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && Lua::IsTable(L, idx); }
 	};
 
 	template<typename T, typename T2>
 	struct lua_proxy_traits<adl::tableTT<T, T2>> : lua_proxy_traits<object> {
-		static bool check(lua_State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && lua_istable(L, idx); }
+		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && Lua::IsTable(L, idx); }
 	};
 
 	template<typename... T>
 	struct lua_proxy_traits<adl::variant<T...>> : lua_proxy_traits<object> {
-		static bool check(lua_State *L, int idx) { return lua_proxy_traits<object>::check(L, idx); }
+		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx); }
 	};
 
 	template<typename... T>
 	struct lua_proxy_traits<adl::variadic<T...>> : lua_proxy_traits<object> {
-		static bool check(lua_State *L, int idx) { return lua_proxy_traits<object>::check(L, idx); }
+		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx); }
 	};
 
 	template<typename... T>
 	struct lua_proxy_traits<adl::mult<T...>> : lua_proxy_traits<object> {
-		static bool check(lua_State *L, int idx) { return lua_proxy_traits<object>::check(L, idx); }
+		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx); }
 	};
 
 	template<typename T>
 	struct lua_proxy_traits<adl::typehint<T>> : lua_proxy_traits<object> {
-		static bool check(lua_State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && !lua_isnoneornil(L, idx); }
+		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && Lua::IsSet(L, idx); }
 	};
 
 	template<typename TRet, typename... T>
 	struct lua_proxy_traits<adl::functype<TRet, T...>> : lua_proxy_traits<object> {
-		static bool check(lua_State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && lua_isfunction(L, idx); }
+		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && Lua::IsFunction(L, idx); }
 	};
 };
 
@@ -257,9 +255,9 @@ export namespace Lua {
 	DLLNETWORK bool get_extended_lua_modules_enabled();
 };
 
-export namespace pragma::lua {
+export namespace pragma::LuaCore {
 	template<typename T, typename TPush = T>
-	luabind::object raw_object_to_luabind_object(lua_State *l, T v)
+	luabind::object raw_object_to_luabind_object(lua::State *l, T v)
 	{
 		// Using the value_converter will prevent the default_converter from getting triggered, which would cause an infinite recursion in some cases
 		luabind::detail::value_converter c;

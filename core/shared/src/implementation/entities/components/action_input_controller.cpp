@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -22,7 +21,7 @@ void ActionInputControllerComponent::RegisterEvents(pragma::EntityComponentManag
 
 ActionInputControllerComponent::ActionInputControllerComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ActionInputControllerComponent::Initialize() { BaseEntityComponent::Initialize(); }
-void ActionInputControllerComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ActionInputControllerComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ActionInputControllerComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
 
 bool ActionInputControllerComponent::GetActionInput(pragma::Action action) const { return ((m_actionInputs & action) != pragma::Action::None) ? true : false; }
@@ -90,7 +89,7 @@ void ActionInputControllerComponent::SetActionInput(pragma::Action action, bool 
 //////////////////
 
 CEHandleActionInput::CEHandleActionInput(pragma::Action action, bool pressed, float magnitude) : action {action}, pressed {pressed}, magnitude {magnitude} {}
-void CEHandleActionInput::PushArguments(lua_State *l)
+void CEHandleActionInput::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, umath::to_integral(action));
 	Lua::PushBool(l, pressed);
@@ -100,7 +99,7 @@ void CEHandleActionInput::PushArguments(lua_State *l)
 //////////////////
 
 CEOnActionInputChanged::CEOnActionInputChanged(pragma::Action action, bool b) : action {action}, pressed {b} {}
-void CEOnActionInputChanged::PushArguments(lua_State *l)
+void CEOnActionInputChanged::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, umath::to_integral(action));
 	Lua::PushBool(l, pressed);

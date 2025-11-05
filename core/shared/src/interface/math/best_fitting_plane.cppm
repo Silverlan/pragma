@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
 export module pragma.shared:math.best_fitting_plane;
 

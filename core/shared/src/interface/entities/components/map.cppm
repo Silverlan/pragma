@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:entities.components.map;
 
@@ -18,7 +17,7 @@ export namespace pragma {
 		void SetMapIndex(unsigned int idx);
 		unsigned int GetMapIndex() const;
 
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
 		uint32_t m_mapIndex = 0u;
 	};

@@ -3,16 +3,15 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
 
 import :scripting.lua.converters.utf8_string;
 
-void luabind::default_converter<pragma::string::Utf8String>::to_lua(lua_State *L, pragma::string::Utf8String const &x) { luabind::object {L, std::string {x}}.push(L); }
+void luabind::default_converter<pragma::string::Utf8String>::to_lua(lua::State *L, pragma::string::Utf8String const &x) { luabind::object {L, std::string {x}}.push(L); }
 
-void luabind::default_converter<pragma::string::Utf8String>::to_lua(lua_State *L, pragma::string::Utf8String *x)
+void luabind::default_converter<pragma::string::Utf8String>::to_lua(lua::State *L, pragma::string::Utf8String *x)
 {
 	if(!x)
 		Lua::PushNil(L);

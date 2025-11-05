@@ -2,15 +2,13 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 #include <cassert>
 
 export module pragma.shared:scripting.lua.custom_constructor;
 
-export import luabind;
-export import pragma.util;
+export import pragma.lua;
 
-export namespace pragma::lua {
+export namespace pragma::LuaCore {
 	template<typename T>
 	struct function_traits;
 
@@ -55,7 +53,7 @@ export namespace pragma::lua {
 			}
 			catch(...) {
 				self->deallocate(storage);
-				lua_pop(L, 1);
+				Lua::Pop(L, 1);
 				throw;
 			}
 
@@ -64,7 +62,7 @@ export namespace pragma::lua {
 	}
 
 	template<typename T, auto TCnstrct, typename... TArgs>
-	void define_custom_constructor(lua_State *l)
+	void define_custom_constructor(lua::State *l)
 	{
 		auto *registry = luabind::detail::class_registry::get_registry(l);
 		auto *crep = registry->find_class(typeid(T));
@@ -73,6 +71,6 @@ export namespace pragma::lua {
 		crep->get_table(l);
 		auto o = luabind::object {luabind::from_stack(l, -1)};
 		luabind::detail::add_overload(o, "__init", fn);
-		lua_pop(l, 1);
+		Lua::Pop(l, 1);
 	}
 };

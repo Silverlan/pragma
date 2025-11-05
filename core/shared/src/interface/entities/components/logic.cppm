@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:entities.components.logic_component;
 
@@ -25,12 +24,12 @@ class DLLNETWORK LogicComponent final : public BaseEntityComponent {
 
 		virtual void OnTick(double tDelta) override;
 
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnEntitySpawn() override;
 	};
 	struct DLLNETWORK CEOnTick : public ComponentEvent {
 		CEOnTick(double dt);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		double deltaTime;
 	};
 };

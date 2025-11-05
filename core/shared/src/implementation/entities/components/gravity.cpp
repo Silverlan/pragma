@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -203,7 +202,7 @@ void GravityComponent::ApplyGravity(double dt)
 }
 
 void GravityComponent::OnPhysicsInitialized() {}
-void GravityComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void GravityComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 Vector3 GravityComponent::GetGravityDirection() const { return BaseGravity::GetGravityDirection(GetEntity().GetNetworkState()); }
 float GravityComponent::GetGravity() const { return BaseGravity::GetGravity(GetEntity().GetNetworkState()); }
 Vector3 GravityComponent::GetGravityForce() const { return BaseGravity::GetGravityForce(GetEntity().GetNetworkState()); }
@@ -250,11 +249,11 @@ bool GravityComponent::CalcBallisticVelocity(const Vector3 &origin, const Vector
 
 namespace Lua {
 	namespace Gravity {
-		static void CalcBallisticVelocity(lua_State *l, ::pragma::GravityComponent &hEnt, const Vector3 &origin, const Vector3 &destPos, float fireAngle, float maxSpeed, float spread, float maxPitch, float maxYaw);
+		static void CalcBallisticVelocity(lua::State *l, ::pragma::GravityComponent &hEnt, const Vector3 &origin, const Vector3 &destPos, float fireAngle, float maxSpeed, float spread, float maxPitch, float maxYaw);
 	};
 };
 
-void Lua::Gravity::CalcBallisticVelocity(lua_State *l, ::pragma::GravityComponent &hEnt, const Vector3 &origin, const Vector3 &destPos, float fireAngle, float maxSpeed, float spread, float maxPitch, float maxYaw)
+void Lua::Gravity::CalcBallisticVelocity(lua::State *l, ::pragma::GravityComponent &hEnt, const Vector3 &origin, const Vector3 &destPos, float fireAngle, float maxSpeed, float spread, float maxPitch, float maxYaw)
 {
 	Vector3 vel;
 	auto b = hEnt.CalcBallisticVelocity(origin, destPos, fireAngle, maxSpeed, spread, maxPitch, maxYaw, vel);
@@ -263,9 +262,9 @@ void Lua::Gravity::CalcBallisticVelocity(lua_State *l, ::pragma::GravityComponen
 		Lua::Push<Vector3>(l, vel);
 }
 
-void GravityComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+void GravityComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
-	auto def = pragma::lua::create_entity_component_class<pragma::GravityComponent, pragma::BaseEntityComponent>("GravityComponent");
+	auto def = pragma::LuaCore::create_entity_component_class<pragma::GravityComponent, pragma::BaseEntityComponent>("GravityComponent");
 	def.def("SetGravityScale", &pragma::GravityComponent::SetGravityScale);
 	def.def("SetGravityOverride", static_cast<void (pragma::GravityComponent::*)(const Vector3 &, float)>(&pragma::GravityComponent::SetGravityOverride));
 	def.def("SetGravityOverride", static_cast<void (pragma::GravityComponent::*)(const Vector3 &)>(&pragma::GravityComponent::SetGravityOverride));

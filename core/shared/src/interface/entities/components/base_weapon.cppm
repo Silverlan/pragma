@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.base_weapon;
@@ -15,7 +14,7 @@ export import :game.bullet_info;
 export namespace pragma {
 	struct DLLNETWORK CEOnClipSizeChanged : public ComponentEvent {
 		CEOnClipSizeChanged(UInt16 oldClipSize, UInt16 newClipSize);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		UInt16 oldClipSize;
 		UInt16 newClipSize;
 	};

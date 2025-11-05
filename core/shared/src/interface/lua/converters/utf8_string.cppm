@@ -2,13 +2,12 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.shared:scripting.lua.converters.utf8_string;
 
-export import luabind;
-import pragma.string.unicode;
+export import pragma.lua;
+export import pragma.string.unicode;
 
 export namespace luabind {
 	template<>
@@ -16,22 +15,22 @@ export namespace luabind {
 		enum { consumed_args = 1 };
 
 		template<typename U>
-		pragma::string::Utf8String to_cpp(lua_State *L, U u, int index);
+		pragma::string::Utf8String to_cpp(lua::State *L, U u, int index);
 
 		template<class U>
-		static int match(lua_State *l, U u, int index);
+		static int match(lua::State *l, U u, int index);
 
 		template<class U>
-		void converter_postcall(lua_State *, U u, int)
+		void converter_postcall(lua::State *, U u, int)
 		{
 		}
 
-		void to_lua(lua_State *L, pragma::string::Utf8String const &x);
-		void to_lua(lua_State *L, pragma::string::Utf8String *x);
+		void to_lua(lua::State *L, pragma::string::Utf8String const &x);
+		void to_lua(lua::State *L, pragma::string::Utf8String *x);
 	  public:
-		static value_type to_cpp_deferred(lua_State *, int);
-		static void to_lua_deferred(lua_State *, param_type) {}
-		static int compute_score(lua_State *, int) { return no_match; }
+		static value_type to_cpp_deferred(lua::State *, int);
+		static void to_lua_deferred(lua::State *, param_type) {}
+		static int compute_score(lua::State *, int) { return no_match; }
 	};
 
 	template<>
@@ -45,20 +44,20 @@ export namespace luabind {
 }
 
 export namespace luabind {
-	default_converter<pragma::string::Utf8String>::value_type default_converter<pragma::string::Utf8String>::to_cpp_deferred(lua_State *, int)
+	default_converter<pragma::string::Utf8String>::value_type default_converter<pragma::string::Utf8String>::to_cpp_deferred(lua::State *, int)
 	{
 		return {};
 	}
 
 	template<typename U>
-	pragma::string::Utf8String default_converter<pragma::string::Utf8String>::to_cpp(lua_State *L, U u, int index)
+	pragma::string::Utf8String default_converter<pragma::string::Utf8String>::to_cpp(lua::State *L, U u, int index)
 	{
-		return {luaL_checkstring(L, index)};
+		return {Lua::CheckString(L, index)};
 	}
 
 	template<class U>
-	int default_converter<pragma::string::Utf8String>::match(lua_State *l, U u, int index)
+	int default_converter<pragma::string::Utf8String>::match(lua::State *l, U u, int index)
 	{
-		return lua_isstring(l, index) ? 1 : no_match;
+		return Lua::IsString(l, index) ? 1 : no_match;
 	}
 }

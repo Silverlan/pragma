@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -47,6 +46,6 @@ std::ostream &operator<<(std::ostream &out, const ErrorCode &err)
 
 //////////////////////////////
 
-std::string Lua_ErrorCode_GetMessage(lua_State *l, ErrorCode &err) { return err.GetMessage(); }
-int32_t Lua_ErrorCode_GetValue(lua_State *l, ErrorCode &err) { return err.GetValue(); }
-bool Lua_ErrorCode_IsError(lua_State *l, ErrorCode &err) { return err.IsError(); }
+std::string Lua_ErrorCode_GetMessage(lua::State *l, ErrorCode &err) { return err.GetMessage(); }
+int32_t Lua_ErrorCode_GetValue(lua::State *l, ErrorCode &err) { return err.GetValue(); }
+bool Lua_ErrorCode_IsError(lua::State *l, ErrorCode &err) { return err.IsError(); }

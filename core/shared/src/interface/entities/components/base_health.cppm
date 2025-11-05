@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.base_health;
@@ -44,14 +43,14 @@ class DLLNETWORK BaseHealthComponent : public BaseEntityComponent {
 	};
 	struct DLLNETWORK CEOnTakenDamage : public ComponentEvent {
 		CEOnTakenDamage(DamageInfo &damageInfo, uint16_t oldHealth, uint16_t newHealth);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		DamageInfo &damageInfo;
 		uint16_t oldHealth;
 		uint16_t newHealth;
 	};
 	struct DLLNETWORK CEOnHealthChanged : public ComponentEvent {
 		CEOnHealthChanged(uint16_t oldHealth, uint16_t newHealth);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		uint16_t oldHealth;
 		uint16_t newHealth;
 	};

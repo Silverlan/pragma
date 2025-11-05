@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -45,7 +44,7 @@ void OriginComponent::RegisterMembers(pragma::EntityComponentManager &componentM
 }
 OriginComponent::OriginComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void OriginComponent::Initialize() { BaseEntityComponent::Initialize(); }
-void OriginComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void OriginComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void OriginComponent::SetOriginPose(const umath::Transform &pose)
 {

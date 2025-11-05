@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.shared:scripting.lua.libraries.mesh;
 
+export import pragma.lua;
+
 export namespace Lua {
 	namespace mesh {
-		DLLNETWORK int generate_convex_hull(lua_State *l);
-		DLLNETWORK int calc_smallest_enclosing_bbox(lua_State *l);
+		DLLNETWORK int generate_convex_hull(lua::State *l);
+		DLLNETWORK int calc_smallest_enclosing_bbox(lua::State *l);
 	};
 };

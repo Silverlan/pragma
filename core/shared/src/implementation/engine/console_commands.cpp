@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
-#include <sharedutils/magic_enum.hpp>
 
 #undef CreateFile
 
@@ -208,7 +206,7 @@ void pragma::Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 	  pragma::console::ConVarFlags::None, "Finds similar console commands to whatever was given as argument.");
 }
 
-static void compile_lua_file(lua_State *l, pragma::Game &game, std::string f)
+static void compile_lua_file(lua::State *l, pragma::Game &game, std::string f)
 {
 	ustring::to_lower(f);
 	std::string subPath = ufile::get_path_from_filename(f);

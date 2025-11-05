@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
-#include <sharedutils/magic_enum.hpp>
 
 module pragma.shared;
 
@@ -136,7 +134,7 @@ void PanimaComponent::DebugPrint(std::stringstream &ss)
 		ss << "AnimationManager[" << name << "]:\n";
 		ss << "\tCurrent Animation: " << (anim ? anim->GetName() : "NULL") << "\n";
 		if(anim) {
-			ss << "\t\tFlags: " << magic_enum::flags::enum_name(anim->GetFlags()) << "\n";
+			ss << "\t\tFlags: " << magic_enum::enum_flags_name(anim->GetFlags()) << "\n";
 			ss << "\t\tDuration: " << anim->GetDuration() << "\n";
 		}
 		auto &player = manager.GetPlayer();
@@ -747,7 +745,7 @@ void PanimaComponent::ApplyAnimationValues(GlobalAnimationChannelQueueProcessor 
 	}
 	InvokeEventCallbacks(panimaComponent::EVENT_ON_ANIMATIONS_UPDATED);
 }
-void PanimaComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void PanimaComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void PanimaComponent::Initialize()
 {
@@ -781,19 +779,19 @@ void PanimaComponent::ResetAnimation(const std::shared_ptr<pragma::Model> &mdl) 
 /////////////////
 
 CEAnim2MaintainAnimations::CEAnim2MaintainAnimations(double deltaTime) : deltaTime {deltaTime} {}
-void CEAnim2MaintainAnimations::PushArguments(lua_State *l) { Lua::PushNumber(l, deltaTime); }
+void CEAnim2MaintainAnimations::PushArguments(lua::State *l) { Lua::PushNumber(l, deltaTime); }
 
 /////////////////
 
 CEAnim2TranslateAnimation::CEAnim2TranslateAnimation(const panima::AnimationSet &set, panima::AnimationId &animation, panima::PlaybackFlags &flags) : set {set}, animation(animation), flags(flags) {}
-void CEAnim2TranslateAnimation::PushArguments(lua_State *l)
+void CEAnim2TranslateAnimation::PushArguments(lua::State *l)
 {
 	Lua::Push<const panima::AnimationSet *>(l, &set);
 	Lua::PushInt(l, animation);
 	Lua::PushInt(l, umath::to_integral(flags));
 }
 uint32_t CEAnim2TranslateAnimation::GetReturnCount() { return 2; }
-void CEAnim2TranslateAnimation::HandleReturnValues(lua_State *l)
+void CEAnim2TranslateAnimation::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -2))
 		animation = Lua::CheckInt(l, -2);
@@ -804,7 +802,7 @@ void CEAnim2TranslateAnimation::HandleReturnValues(lua_State *l)
 /////////////////
 
 CEAnim2OnAnimationStart::CEAnim2OnAnimationStart(const panima::AnimationSet &set, int32_t animation, pragma::Activity activity, panima::PlaybackFlags flags) : set {set}, animation(animation), activity(activity), flags(flags) {}
-void CEAnim2OnAnimationStart::PushArguments(lua_State *l)
+void CEAnim2OnAnimationStart::PushArguments(lua::State *l)
 {
 	Lua::Push<const panima::AnimationSet *>(l, &set);
 	Lua::PushInt(l, animation);
@@ -815,7 +813,7 @@ void CEAnim2OnAnimationStart::PushArguments(lua_State *l)
 /////////////////
 
 CEAnim2OnAnimationComplete::CEAnim2OnAnimationComplete(const panima::AnimationSet &set, int32_t animation, pragma::Activity activity) : set {set}, animation(animation), activity(activity) {}
-void CEAnim2OnAnimationComplete::PushArguments(lua_State *l)
+void CEAnim2OnAnimationComplete::PushArguments(lua::State *l)
 {
 	Lua::Push<const panima::AnimationSet *>(l, &set);
 	Lua::PushInt(l, animation);
@@ -825,7 +823,7 @@ void CEAnim2OnAnimationComplete::PushArguments(lua_State *l)
 /////////////////
 
 CEAnim2HandleAnimationEvent::CEAnim2HandleAnimationEvent(const pragma::AnimationEvent &animationEvent) : animationEvent(animationEvent) {}
-void CEAnim2HandleAnimationEvent::PushArguments(lua_State *l)
+void CEAnim2HandleAnimationEvent::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, static_cast<int32_t>(animationEvent.eventID));
 
@@ -837,7 +835,7 @@ void CEAnim2HandleAnimationEvent::PushArguments(lua_State *l)
 		Lua::SetTableValue(l, tArgs);
 	}
 }
-void CEAnim2HandleAnimationEvent::PushArgumentVariadic(lua_State *l)
+void CEAnim2HandleAnimationEvent::PushArgumentVariadic(lua::State *l)
 {
 	auto &args = animationEvent.arguments;
 	for(auto &arg : args)
@@ -847,7 +845,7 @@ void CEAnim2HandleAnimationEvent::PushArgumentVariadic(lua_State *l)
 /////////////////
 
 CEAnim2OnPlayAnimation::CEAnim2OnPlayAnimation(const panima::AnimationSet &set, panima::AnimationId animation, panima::PlaybackFlags flags) : set {set}, animation(animation), flags(flags) {}
-void CEAnim2OnPlayAnimation::PushArguments(lua_State *l)
+void CEAnim2OnPlayAnimation::PushArguments(lua::State *l)
 {
 	Lua::Push<const panima::AnimationSet *>(l, &set);
 	Lua::PushInt(l, animation);
@@ -857,6 +855,6 @@ void CEAnim2OnPlayAnimation::PushArguments(lua_State *l)
 /////////////////
 
 CEAnim2InitializeChannelValueSubmitter::CEAnim2InitializeChannelValueSubmitter(util::Path &path) : path {path} {}
-void CEAnim2InitializeChannelValueSubmitter::PushArguments(lua_State *l) {}
+void CEAnim2InitializeChannelValueSubmitter::PushArguments(lua::State *l) {}
 uint32_t CEAnim2InitializeChannelValueSubmitter::GetReturnCount() { return 0; }
-void CEAnim2InitializeChannelValueSubmitter::HandleReturnValues(lua_State *l) {}
+void CEAnim2InitializeChannelValueSubmitter::HandleReturnValues(lua::State *l) {}

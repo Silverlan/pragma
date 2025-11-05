@@ -16,7 +16,7 @@
 /**********************************************************************/
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
 // Source: http://www.flipcode.com/archives/Efficient_Polygon_Triangulation.shtml
 

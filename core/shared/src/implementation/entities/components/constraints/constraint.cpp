@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
-#include "pragma/logging.hpp"
 #include <cassert>
 
 module pragma.shared;
@@ -73,7 +71,7 @@ void ConstraintComponent::RegisterMembers(pragma::EntityComponentManager &compon
 }
 ConstraintComponent::ConstraintComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintComponent::Initialize() { BaseEntityComponent::Initialize(); }
-void ConstraintComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ConstraintComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ConstraintComponent::ApplyConstraint() { InvokeEventCallbacks(constraintComponent::EVENT_APPLY_CONSTRAINT); }
 
 void ConstraintComponent::SetDriverEnabled(bool enabled) { m_hasDriver = enabled; }
@@ -223,7 +221,7 @@ int32_t ConstraintComponent::GetOrderIndex() const { return m_orderIndex; }
 ////////////
 
 CEOnConstraintOrderIndexChanged::CEOnConstraintOrderIndexChanged(int32_t oldOrderIndex, int32_t newOrderIndex) : oldOrderIndex {oldOrderIndex}, newOrderIndex {newOrderIndex} {}
-void CEOnConstraintOrderIndexChanged::PushArguments(lua_State *l)
+void CEOnConstraintOrderIndexChanged::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, oldOrderIndex);
 	Lua::PushInt(l, newOrderIndex);

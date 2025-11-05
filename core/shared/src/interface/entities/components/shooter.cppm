@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.shooter;
@@ -19,20 +18,20 @@ export {
 		namespace events {
 			struct DLLNETWORK CEOnBulletsFired : public ComponentEvent {
 				CEOnBulletsFired(const BulletInfo &bulletInfo, const std::vector<TraceResult> &hitTargets);
-				virtual void PushArguments(lua_State *l) override;
+				virtual void PushArguments(lua::State *l) override;
 				const BulletInfo &bulletInfo;
 				const std::vector<TraceResult> &hitTargets;
 			};
 			struct DLLNETWORK CEOnFireBullets : public ComponentEvent {
 				CEOnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin);
-				virtual void PushArguments(lua_State *l) override;
+				virtual void PushArguments(lua::State *l) override;
 				const BulletInfo &bulletInfo;
 				Vector3 &bulletOrigin;
 				Vector3 &bulletDir;
 				Vector3 *effectsOrigin;
 
 				virtual uint32_t GetReturnCount() override;
-				virtual void HandleReturnValues(lua_State *l) override;
+				virtual void HandleReturnValues(lua::State *l) override;
 			};
 		};
 

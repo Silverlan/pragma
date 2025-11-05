@@ -2,14 +2,13 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 #include "noise/noise.h"
 #include "noiseutils.h"
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.libraries.noise;
 
-export import pragma.math;
+export import pragma.lua;
 
 #define DECLARE_NOISE_MODULE(name)                                                                                                                                                                                                                                                               \
 	class DLLNETWORK Noise##name : public NoiseBaseModule {                                                                                                                                                                                                                                      \
@@ -52,78 +51,78 @@ export {
 	DECLARE_NOISE_MODULE(Voronoi);
 
 	namespace Lua::noise {
-		DLLNETWORK int perlin(lua_State *l);
-		DLLNETWORK int noise_const(lua_State *l);
-		DLLNETWORK int voronoi(lua_State *l);
-		DLLNETWORK int ridged_multi(lua_State *l);
-		DLLNETWORK int billow(lua_State *l);
-		DLLNETWORK int generate_height_map(lua_State *l);
+		DLLNETWORK int perlin(lua::State *l);
+		DLLNETWORK int noise_const(lua::State *l);
+		DLLNETWORK int voronoi(lua::State *l);
+		DLLNETWORK int ridged_multi(lua::State *l);
+		DLLNETWORK int billow(lua::State *l);
+		DLLNETWORK int generate_height_map(lua::State *l);
 	};
 
 	///////////////////////////////////////
 
 	namespace Lua::noise {
 		namespace NoiseModule {
-			DLLNETWORK void GetValue(lua_State *l, NoiseBaseModule &mod, Vector3 &v);
-			DLLNETWORK void SetScale(lua_State *l, NoiseBaseModule &mod, float scale);
+			DLLNETWORK void GetValue(lua::State *l, NoiseBaseModule &mod, Vector3 &v);
+			DLLNETWORK void SetScale(lua::State *l, NoiseBaseModule &mod, float scale);
 		};
 
 		namespace VoronoiNoise {
-			DLLNETWORK void GetDisplacement(lua_State *l, NoiseVoronoi &voronoi);
-			DLLNETWORK void GetFrequency(lua_State *l, NoiseVoronoi &voronoi);
-			DLLNETWORK void GetSeed(lua_State *l, NoiseVoronoi &voronoi);
-			DLLNETWORK void SetDisplacement(lua_State *l, NoiseVoronoi &voronoi, double displacement);
-			DLLNETWORK void SetFrequency(lua_State *l, NoiseVoronoi &voronoi, double frequency);
-			DLLNETWORK void SetSeed(lua_State *l, NoiseVoronoi &voronoi, int seed);
+			DLLNETWORK void GetDisplacement(lua::State *l, NoiseVoronoi &voronoi);
+			DLLNETWORK void GetFrequency(lua::State *l, NoiseVoronoi &voronoi);
+			DLLNETWORK void GetSeed(lua::State *l, NoiseVoronoi &voronoi);
+			DLLNETWORK void SetDisplacement(lua::State *l, NoiseVoronoi &voronoi, double displacement);
+			DLLNETWORK void SetFrequency(lua::State *l, NoiseVoronoi &voronoi, double frequency);
+			DLLNETWORK void SetSeed(lua::State *l, NoiseVoronoi &voronoi, int seed);
 		};
 
 		namespace PerlinNoise {
-			DLLNETWORK void GetFrequency(lua_State *l, NoisePerlin &perlin);
-			DLLNETWORK void GetLacunarity(lua_State *l, NoisePerlin &perlin);
-			DLLNETWORK void GetNoiseQuality(lua_State *l, NoisePerlin &perlin);
-			DLLNETWORK void GetOctaveCount(lua_State *l, NoisePerlin &perlin);
-			DLLNETWORK void GetPersistence(lua_State *l, NoisePerlin &perlin);
-			DLLNETWORK void GetSeed(lua_State *l, NoisePerlin &perlin);
-			DLLNETWORK void SetFrequency(lua_State *l, NoisePerlin &perlin, double frequency);
-			DLLNETWORK void SetLacunarity(lua_State *l, NoisePerlin &perlin, double lacunarity);
-			DLLNETWORK void SetNoiseQuality(lua_State *l, NoisePerlin &perlin, int quality);
-			DLLNETWORK void SetOctaveCount(lua_State *l, NoisePerlin &perlin, int octaveCount);
-			DLLNETWORK void SetPersistence(lua_State *l, NoisePerlin &perlin, double persistence);
-			DLLNETWORK void SetSeed(lua_State *l, NoisePerlin &perlin, int seed);
+			DLLNETWORK void GetFrequency(lua::State *l, NoisePerlin &perlin);
+			DLLNETWORK void GetLacunarity(lua::State *l, NoisePerlin &perlin);
+			DLLNETWORK void GetNoiseQuality(lua::State *l, NoisePerlin &perlin);
+			DLLNETWORK void GetOctaveCount(lua::State *l, NoisePerlin &perlin);
+			DLLNETWORK void GetPersistence(lua::State *l, NoisePerlin &perlin);
+			DLLNETWORK void GetSeed(lua::State *l, NoisePerlin &perlin);
+			DLLNETWORK void SetFrequency(lua::State *l, NoisePerlin &perlin, double frequency);
+			DLLNETWORK void SetLacunarity(lua::State *l, NoisePerlin &perlin, double lacunarity);
+			DLLNETWORK void SetNoiseQuality(lua::State *l, NoisePerlin &perlin, int quality);
+			DLLNETWORK void SetOctaveCount(lua::State *l, NoisePerlin &perlin, int octaveCount);
+			DLLNETWORK void SetPersistence(lua::State *l, NoisePerlin &perlin, double persistence);
+			DLLNETWORK void SetSeed(lua::State *l, NoisePerlin &perlin, int seed);
 		};
 
 		namespace RidgedMultiNoise {
-			DLLNETWORK void GetFrequency(lua_State *l, NoiseRidgedMulti &ridged);
-			DLLNETWORK void GetLacunarity(lua_State *l, NoiseRidgedMulti &ridged);
-			DLLNETWORK void GetNoiseQuality(lua_State *l, NoiseRidgedMulti &ridged);
-			DLLNETWORK void GetOctaveCount(lua_State *l, NoiseRidgedMulti &ridged);
-			DLLNETWORK void GetSeed(lua_State *l, NoiseRidgedMulti &ridged);
-			DLLNETWORK void SetFrequency(lua_State *l, NoiseRidgedMulti &ridged, double frequency);
-			DLLNETWORK void SetLacunarity(lua_State *l, NoiseRidgedMulti &ridged, double lacunarity);
-			DLLNETWORK void SetNoiseQuality(lua_State *l, NoiseRidgedMulti &ridged, int quality);
-			DLLNETWORK void SetOctaveCount(lua_State *l, NoiseRidgedMulti &ridged, int octaveCount);
-			DLLNETWORK void SetSeed(lua_State *l, NoiseRidgedMulti &ridged, int seed);
+			DLLNETWORK void GetFrequency(lua::State *l, NoiseRidgedMulti &ridged);
+			DLLNETWORK void GetLacunarity(lua::State *l, NoiseRidgedMulti &ridged);
+			DLLNETWORK void GetNoiseQuality(lua::State *l, NoiseRidgedMulti &ridged);
+			DLLNETWORK void GetOctaveCount(lua::State *l, NoiseRidgedMulti &ridged);
+			DLLNETWORK void GetSeed(lua::State *l, NoiseRidgedMulti &ridged);
+			DLLNETWORK void SetFrequency(lua::State *l, NoiseRidgedMulti &ridged, double frequency);
+			DLLNETWORK void SetLacunarity(lua::State *l, NoiseRidgedMulti &ridged, double lacunarity);
+			DLLNETWORK void SetNoiseQuality(lua::State *l, NoiseRidgedMulti &ridged, int quality);
+			DLLNETWORK void SetOctaveCount(lua::State *l, NoiseRidgedMulti &ridged, int octaveCount);
+			DLLNETWORK void SetSeed(lua::State *l, NoiseRidgedMulti &ridged, int seed);
 		};
 
 		namespace BillowNoise {
-			DLLNETWORK void GetFrequency(lua_State *l, NoiseBillow &billow);
-			DLLNETWORK void GetLacunarity(lua_State *l, NoiseBillow &billow);
-			DLLNETWORK void GetNoiseQuality(lua_State *l, NoiseBillow &billow);
-			DLLNETWORK void GetOctaveCount(lua_State *l, NoiseBillow &billow);
-			DLLNETWORK void GetPersistence(lua_State *l, NoiseBillow &billow);
-			DLLNETWORK void GetSeed(lua_State *l, NoiseBillow &billow);
-			DLLNETWORK void SetFrequency(lua_State *l, NoiseBillow &billow, double frequency);
-			DLLNETWORK void SetLacunarity(lua_State *l, NoiseBillow &billow, double lacunarity);
-			DLLNETWORK void SetNoiseQuality(lua_State *l, NoiseBillow &billow, int quality);
-			DLLNETWORK void SetOctaveCount(lua_State *l, NoiseBillow &billow, int octaveCount);
-			DLLNETWORK void SetPersistence(lua_State *l, NoiseBillow &billow, double persistence);
-			DLLNETWORK void SetSeed(lua_State *l, NoiseBillow &billow, int seed);
+			DLLNETWORK void GetFrequency(lua::State *l, NoiseBillow &billow);
+			DLLNETWORK void GetLacunarity(lua::State *l, NoiseBillow &billow);
+			DLLNETWORK void GetNoiseQuality(lua::State *l, NoiseBillow &billow);
+			DLLNETWORK void GetOctaveCount(lua::State *l, NoiseBillow &billow);
+			DLLNETWORK void GetPersistence(lua::State *l, NoiseBillow &billow);
+			DLLNETWORK void GetSeed(lua::State *l, NoiseBillow &billow);
+			DLLNETWORK void SetFrequency(lua::State *l, NoiseBillow &billow, double frequency);
+			DLLNETWORK void SetLacunarity(lua::State *l, NoiseBillow &billow, double lacunarity);
+			DLLNETWORK void SetNoiseQuality(lua::State *l, NoiseBillow &billow, int quality);
+			DLLNETWORK void SetOctaveCount(lua::State *l, NoiseBillow &billow, int octaveCount);
+			DLLNETWORK void SetPersistence(lua::State *l, NoiseBillow &billow, double persistence);
+			DLLNETWORK void SetSeed(lua::State *l, NoiseBillow &billow, int seed);
 		};
 
 		namespace NoiseMap {
-			DLLNETWORK void GetValue(lua_State *l, ::noise::utils::NoiseMap &noiseMap, int x, int y);
-			DLLNETWORK void GetHeight(lua_State *l, ::noise::utils::NoiseMap &noiseMap);
-			DLLNETWORK void GetWidth(lua_State *l, ::noise::utils::NoiseMap &noiseMap);
+			DLLNETWORK void GetValue(lua::State *l, ::noise::utils::NoiseMap &noiseMap, int x, int y);
+			DLLNETWORK void GetHeight(lua::State *l, ::noise::utils::NoiseMap &noiseMap);
+			DLLNETWORK void GetWidth(lua::State *l, ::noise::utils::NoiseMap &noiseMap);
 		};
 	};
 };

@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 #include "any"
 #include <cassert>
@@ -69,12 +68,12 @@ std::string util::variable_type_to_string(VarType type)
 }
 
 struct IAnyHandler {
-	virtual std::any GetValue(lua_State *l, int32_t idx) const = 0;
-	virtual void Push(lua_State *l, const std::any &value) const = 0;
-	virtual void PushNewProperty(lua_State *l, const std::any &value) const = 0;
+	virtual std::any GetValue(lua::State *l, int32_t idx) const = 0;
+	virtual void Push(lua::State *l, const std::any &value) const = 0;
+	virtual void PushNewProperty(lua::State *l, const std::any &value) const = 0;
 
-	virtual void SetPropertyValue(lua_State *l, int32_t indexProperty, const std::any &value) const = 0;
-	virtual std::any GetPropertyValue(lua_State *l, int32_t indexProperty) const = 0;
+	virtual void SetPropertyValue(lua::State *l, int32_t indexProperty, const std::any &value) const = 0;
+	virtual std::any GetPropertyValue(lua::State *l, int32_t indexProperty) const = 0;
 
 	virtual void Write(util::DataStream &ds, const std::any &value, uint32_t *pos = nullptr) const = 0;
 	virtual void Write(NetPacket &ds, const std::any &value, uint32_t *pos = nullptr) const = 0;
@@ -87,16 +86,16 @@ struct IAnyHandler {
 	}
 };
 
-template<class T, class TProperty, class TLuaProperty, bool (*TIs)(lua_State *, int32_t), T (*TCheck)(lua_State *, int32_t), void (*TPush)(lua_State *, T)>
+template<class T, class TProperty, class TLuaProperty, bool (*TIs)(lua::State *, int32_t), T (*TCheck)(lua::State *, int32_t), void (*TPush)(lua::State *, T)>
 struct TGenericHandler : public IAnyHandler {
-	virtual std::any GetValue(lua_State *l, int32_t idx) const override
+	virtual std::any GetValue(lua::State *l, int32_t idx) const override
 	{
 		if(TIs(l, idx) == false)
 			return T {};
 		return {static_cast<T>(TCheck(l, idx))};
 	}
-	virtual void Push(lua_State *l, const std::any &value) const override { TPush(l, std::any_cast<T>(value)); }
-	virtual void PushNewProperty(lua_State *l, const std::any &value) const override { Lua::Property::push(l, *TProperty::Create(Get<T>(value))); }
+	virtual void Push(lua::State *l, const std::any &value) const override { TPush(l, std::any_cast<T>(value)); }
+	virtual void PushNewProperty(lua::State *l, const std::any &value) const override { Lua::Property::push(l, *TProperty::Create(Get<T>(value))); }
 	virtual void Write(util::DataStream &ds, const std::any &value, uint32_t *pos = nullptr) const override { ds->Write<T>(Get<T>(value), pos); }
 	virtual void Write(NetPacket &ds, const std::any &value, uint32_t *pos = nullptr) const override { ds->Write<T>(Get<T>(value), pos); }
 	virtual void Read(pragma::Game &game, util::DataStream &ds, std::any &outValue) const override { outValue = ds->Read<T>(); }
@@ -104,26 +103,26 @@ struct TGenericHandler : public IAnyHandler {
 };
 
 template<class T>
-T check_user_class(lua_State *l, int32_t index)
+T check_user_class(lua::State *l, int32_t index)
 {
 	return Lua::Check<T>(l, index);
 }
 
 template<class T>
-void push_user_class(lua_State *l, T value)
+void push_user_class(lua::State *l, T value)
 {
 	Lua::Push<T>(l, value);
 }
 
-template<class T, class TProperty, class TLuaProperty, bool (*TIs)(lua_State *, int32_t), T (*TCheck)(lua_State *, int32_t), void (*TPush)(lua_State *, T)>
+template<class T, class TProperty, class TLuaProperty, bool (*TIs)(lua::State *, int32_t), T (*TCheck)(lua::State *, int32_t), void (*TPush)(lua::State *, T)>
 struct TGenericBasePropertyUserClassHandler : public TGenericHandler<T, TProperty, TLuaProperty, TIs, TCheck, TPush> {
-	virtual void SetPropertyValue(lua_State *l, int32_t indexProperty, const std::any &value) const override
+	virtual void SetPropertyValue(lua::State *l, int32_t indexProperty, const std::any &value) const override
 	{
 		if(Lua::IsType<TLuaProperty>(l, indexProperty) == false)
 			return;
 		*Lua::Check<TLuaProperty>(l, indexProperty) = std::any_cast<T>(value);
 	}
-	virtual std::any GetPropertyValue(lua_State *l, int32_t indexProperty) const override
+	virtual std::any GetPropertyValue(lua::State *l, int32_t indexProperty) const override
 	{
 		if(Lua::IsType<TLuaProperty>(l, indexProperty) == false)
 			return T {};
@@ -131,7 +130,7 @@ struct TGenericBasePropertyUserClassHandler : public TGenericHandler<T, TPropert
 	}
 };
 
-template<class T, class TProperty, class TLuaProperty, T (*TCheck)(lua_State *, int32_t), void (*TPush)(lua_State *, T)>
+template<class T, class TProperty, class TLuaProperty, T (*TCheck)(lua::State *, int32_t), void (*TPush)(lua::State *, T)>
 struct TGenericPropertyUserClassHandler : public TGenericBasePropertyUserClassHandler<T, TProperty, TLuaProperty, Lua::IsType<T>, TCheck, TPush> {};
 
 // Note: This would be 'prettier' than creating a class, but causes compiler errors for some unknown reason
@@ -142,13 +141,13 @@ struct TGenericUserClassHandler : public TGenericPropertyUserClassHandler<T, TPr
 
 template<class T, class TProperty, class TLuaProperty>
 struct TGenericIntegerHandler : public TGenericHandler<T, TProperty, TLuaProperty, Lua::IsNumber, Lua::CheckInt, Lua::PushInt> {
-	virtual void SetPropertyValue(lua_State *l, int32_t indexProperty, const std::any &value) const override
+	virtual void SetPropertyValue(lua::State *l, int32_t indexProperty, const std::any &value) const override
 	{
 		if(Lua::IsType<LGenericIntPropertyWrapper>(l, indexProperty) == false)
 			return;
 		Lua::Check<LGenericIntPropertyWrapper>(l, indexProperty) = std::any_cast<T>(value);
 	}
-	virtual std::any GetPropertyValue(lua_State *l, int32_t indexProperty) const override
+	virtual std::any GetPropertyValue(lua::State *l, int32_t indexProperty) const override
 	{
 		if(Lua::IsType<LGenericIntPropertyWrapper>(l, indexProperty) == false)
 			return T {};
@@ -158,13 +157,13 @@ struct TGenericIntegerHandler : public TGenericHandler<T, TProperty, TLuaPropert
 
 template<class T, class TProperty, class TLuaProperty>
 struct TGenericFloatHandler : public TGenericHandler<T, TProperty, TLuaProperty, Lua::IsNumber, Lua::CheckNumber, Lua::PushNumber> {
-	virtual void SetPropertyValue(lua_State *l, int32_t indexProperty, const std::any &value) const override
+	virtual void SetPropertyValue(lua::State *l, int32_t indexProperty, const std::any &value) const override
 	{
 		if(Lua::IsType<LGenericIntPropertyWrapper>(l, indexProperty) == false)
 			return;
 		Lua::Check<LGenericFloatPropertyWrapper>(l, indexProperty) = std::any_cast<T>(value);
 	}
-	virtual std::any GetPropertyValue(lua_State *l, int32_t indexProperty) const override
+	virtual std::any GetPropertyValue(lua::State *l, int32_t indexProperty) const override
 	{
 		if(Lua::IsType<LGenericIntPropertyWrapper>(l, indexProperty) == false)
 			return T {};
@@ -182,9 +181,9 @@ static TGenericIntegerHandler<int32_t, util::Int32Property, LGenericIntPropertyW
 static TGenericIntegerHandler<int64_t, util::Int64Property, LGenericIntPropertyWrapper> s_int64Handler;
 static TGenericIntegerHandler<long double, util::LongDoubleProperty, LGenericFloatPropertyWrapper> s_longDoubleHandler;
 
-static std::string property_check_string(lua_State *l, int32_t idx) { return Lua::CheckString(l, idx); }
+static std::string property_check_string(lua::State *l, int32_t idx) { return Lua::CheckString(l, idx); }
 
-static void property_push_string(lua_State *l, std::string str) { Lua::PushString(l, str); }
+static void property_push_string(lua::State *l, std::string str) { Lua::PushString(l, str); }
 
 static TGenericPropertyUserClassHandler<std::string, util::StringProperty, LStringProperty, property_check_string, property_push_string> s_stringHandler;
 
@@ -203,14 +202,14 @@ static TGenericUserClassHandler<umath::Transform, util::TransformProperty, LTran
 static TGenericUserClassHandler<umath::ScaledTransform, util::ScaledTransformProperty, LScaledTransformProperty> s_scaledTransformHandler;
 
 struct EntityHandler : public IAnyHandler {
-	virtual std::any GetValue(lua_State *l, int32_t idx) const override
+	virtual std::any GetValue(lua::State *l, int32_t idx) const override
 	{
 		if(Lua::IsType<pragma::EntityURef>(l, idx) == false)
 			return pragma::EntityURef {};
 		return Lua::Check<pragma::EntityURef>(l, idx);
 	}
-	virtual void Push(lua_State *l, const std::any &value) const override { Lua::Push(l, Get<pragma::EntityURef>(value)); }
-	virtual void PushNewProperty(lua_State *l, const std::any &value) const override
+	virtual void Push(lua::State *l, const std::any &value) const override { Lua::Push(l, Get<pragma::EntityURef>(value)); }
+	virtual void PushNewProperty(lua::State *l, const std::any &value) const override
 	{
 		// Lua::Property::push(l,*pragma::EntityProperty::Create(Get<EntityHandle>(value)));
 	}
@@ -264,13 +263,13 @@ struct EntityHandler : public IAnyHandler {
 			return;
 		}
 	}
-	virtual void SetPropertyValue(lua_State *l, int32_t indexProperty, const std::any &value) const override
+	virtual void SetPropertyValue(lua::State *l, int32_t indexProperty, const std::any &value) const override
 	{
 		// if(Lua::IsType<LEntityProperty>(l,indexProperty) == false)
 		// 	return;
 		// *Lua::Check<LEntityProperty>(l,indexProperty) = std::any_cast<EntityHandle>(value);
 	}
-	virtual std::any GetPropertyValue(lua_State *l, int32_t indexProperty) const override
+	virtual std::any GetPropertyValue(lua::State *l, int32_t indexProperty) const override
 	{
 		return pragma::EntityURef {};
 		// if(Lua::IsType<LEntityProperty>(l,indexProperty) == false)
@@ -280,11 +279,11 @@ struct EntityHandler : public IAnyHandler {
 } static s_entityHandler;
 
 struct NilHandler : public IAnyHandler {
-	virtual std::any GetValue(lua_State *l, int32_t idx) const override { return {}; }
-	virtual void Push(lua_State *l, const std::any &value) const override { Lua::PushNil(l); }
-	virtual void PushNewProperty(lua_State *l, const std::any &value) const override { Lua::PushNil(l); }
-	virtual void SetPropertyValue(lua_State *l, int32_t indexProperty, const std::any &value) const override {}
-	virtual std::any GetPropertyValue(lua_State *l, int32_t indexProperty) const override { return {}; }
+	virtual std::any GetValue(lua::State *l, int32_t idx) const override { return {}; }
+	virtual void Push(lua::State *l, const std::any &value) const override { Lua::PushNil(l); }
+	virtual void PushNewProperty(lua::State *l, const std::any &value) const override { Lua::PushNil(l); }
+	virtual void SetPropertyValue(lua::State *l, int32_t indexProperty, const std::any &value) const override {}
+	virtual std::any GetPropertyValue(lua::State *l, int32_t indexProperty) const override { return {}; }
 	virtual void Write(util::DataStream &ds, const std::any &value, uint32_t *pos = nullptr) const override {}
 	virtual void Write(NetPacket &ds, const std::any &value, uint32_t *pos = nullptr) const override {}
 	virtual void Read(pragma::Game &game, util::DataStream &ds, std::any &outValue) const override { outValue = {}; }
@@ -344,11 +343,11 @@ static constexpr const IAnyHandler &get_any_handler(util::VarType varType)
 	return s_nilHandler;
 }
 
-std::any Lua::GetAnyValue(lua_State *l, ::util::VarType varType, int32_t idx) { return get_any_handler(varType).GetValue(l, idx); }
-std::any Lua::GetAnyPropertyValue(lua_State *l, int32_t indexProperty, ::util::VarType varType) { return get_any_handler(varType).GetPropertyValue(l, indexProperty); }
-void Lua::SetAnyPropertyValue(lua_State *l, int32_t indexProperty, ::util::VarType varType, const std::any &value) { get_any_handler(varType).SetPropertyValue(l, indexProperty, value); }
-void Lua::PushAny(lua_State *l, ::util::VarType varType, const std::any &value) { get_any_handler(varType).Push(l, value); }
-void Lua::PushNewAnyProperty(lua_State *l, ::util::VarType varType, const std::any &value) { get_any_handler(varType).PushNewProperty(l, value); }
+std::any Lua::GetAnyValue(lua::State *l, ::util::VarType varType, int32_t idx) { return get_any_handler(varType).GetValue(l, idx); }
+std::any Lua::GetAnyPropertyValue(lua::State *l, int32_t indexProperty, ::util::VarType varType) { return get_any_handler(varType).GetPropertyValue(l, indexProperty); }
+void Lua::SetAnyPropertyValue(lua::State *l, int32_t indexProperty, ::util::VarType varType, const std::any &value) { get_any_handler(varType).SetPropertyValue(l, indexProperty, value); }
+void Lua::PushAny(lua::State *l, ::util::VarType varType, const std::any &value) { get_any_handler(varType).Push(l, value); }
+void Lua::PushNewAnyProperty(lua::State *l, ::util::VarType varType, const std::any &value) { get_any_handler(varType).PushNewProperty(l, value); }
 void Lua::WriteAny(::util::DataStream &ds, ::util::VarType varType, const std::any &value, uint32_t *pos) { get_any_handler(varType).Write(ds, value, pos); }
 void Lua::WriteAny(::NetPacket &ds, ::util::VarType varType, const std::any &value, uint32_t *pos) { get_any_handler(varType).Write(ds, value, pos); }
 void Lua::ReadAny(::pragma::Game &game, ::util::DataStream &ds, ::util::VarType varType, std::any &outValue) { get_any_handler(varType).Read(game, ds, outValue); }

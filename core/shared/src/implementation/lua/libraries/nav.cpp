@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 module pragma.shared;
 
@@ -14,7 +13,7 @@ lua_registercheck(NavConfig, pragma::nav::Config);
 void Lua::nav::register_library(Lua::Interface &lua)
 {
 	auto &modNav = lua.RegisterLibrary("nav");
-	modNav[(luabind::def("generate", static_cast<void (*)(lua_State *)>([](lua_State *l) {
+	modNav[(luabind::def("generate", static_cast<void (*)(lua::State *)>([](lua::State *l) {
 		auto &nw = *pragma::Engine::Get()->GetNetworkState(l);
 		auto &game = *nw.GetGameState();
 		std::string err;
@@ -102,7 +101,7 @@ void Lua::nav::register_library(Lua::Interface &lua)
 		auto navMesh = pragma::nav::Mesh::Create(mesh, navConfig);
 		Lua::Push(l, navMesh);
 	})),
-	  luabind::def("load", static_cast<opt<std::shared_ptr<pragma::nav::Mesh>> (*)(lua_State *)>([](lua_State *l) -> opt<std::shared_ptr<pragma::nav::Mesh>> {
+	  luabind::def("load", static_cast<opt<std::shared_ptr<pragma::nav::Mesh>> (*)(lua::State *)>([](lua::State *l) -> opt<std::shared_ptr<pragma::nav::Mesh>> {
 		  auto &nw = *pragma::Engine::Get()->GetNetworkState(l);
 		  auto &game = *nw.GetGameState();
 		  std::string fname = Lua::CheckString(l, 1);
@@ -140,7 +139,7 @@ void Lua::nav::register_library(Lua::Interface &lua)
 	modNav[classDefConfig];
 
 	auto classDefMesh = luabind::class_<pragma::nav::Mesh>("Mesh");
-	classDefMesh.def("Save", static_cast<void (*)(lua_State *, pragma::nav::Mesh &, const std::string &)>([](lua_State *l, pragma::nav::Mesh &navMesh, const std::string &fname) {
+	classDefMesh.def("Save", static_cast<void (*)(lua::State *, pragma::nav::Mesh &, const std::string &)>([](lua::State *l, pragma::nav::Mesh &navMesh, const std::string &fname) {
 		auto outName = fname;
 		if(Lua::file::validate_write_operation(l, outName) == false) {
 			Lua::PushBool(l, false);
@@ -155,12 +154,12 @@ void Lua::nav::register_library(Lua::Interface &lua)
 		if(r == false)
 			Lua::PushString(l, err);
 	}));
-	/*classDefMesh.def("FindPath",static_cast<void(*)(lua_State*,pragma::nav::Mesh&,const Vector3&,const Vector3&)>([](lua_State *l,pragma::nav::Mesh &navMesh,const Vector3 &start,const Vector3 &end) {
+	/*classDefMesh.def("FindPath",static_cast<void(*)(lua::State*,pragma::nav::Mesh&,const Vector3&,const Vector3&)>([](lua::State *l,pragma::nav::Mesh &navMesh,const Vector3 &start,const Vector3 &end) {
 		auto r = navMesh->FindPath(start,end);
 		Lua::PushBool(l,r != nullptr);
 		// TODO
 	}));*/
-	classDefMesh.def("RayCast", static_cast<void (*)(lua_State *, pragma::nav::Mesh &, const Vector3 &, const Vector3 &)>([](lua_State *l, pragma::nav::Mesh &navMesh, const Vector3 &start, const Vector3 &end) {
+	classDefMesh.def("RayCast", static_cast<void (*)(lua::State *, pragma::nav::Mesh &, const Vector3 &, const Vector3 &)>([](lua::State *l, pragma::nav::Mesh &navMesh, const Vector3 &start, const Vector3 &end) {
 		Vector3 hit;
 		auto r = navMesh.RayCast(start, end, hit);
 		if(r == false)
@@ -168,7 +167,7 @@ void Lua::nav::register_library(Lua::Interface &lua)
 		else
 			Lua::Push<Vector3>(l, hit);
 	}));
-	classDefMesh.def("GetConfig", static_cast<const pragma::nav::Config *(*)(lua_State *, pragma::nav::Mesh &)>([](lua_State *l, pragma::nav::Mesh &navMesh) -> const pragma::nav::Config * {
+	classDefMesh.def("GetConfig", static_cast<const pragma::nav::Config *(*)(lua::State *, pragma::nav::Mesh &)>([](lua::State *l, pragma::nav::Mesh &navMesh) -> const pragma::nav::Config * {
 		auto &config = navMesh.GetConfig();
 		return &config;
 	}));

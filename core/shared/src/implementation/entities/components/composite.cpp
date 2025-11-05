@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -91,7 +90,7 @@ void CompositeComponent::OnRemove()
 
 void CompositeComponent::ClearEntities(bool safely) { m_rootGroup->ClearEntities(safely); }
 
-void CompositeComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CompositeComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 static void write_group(udm::LinkedPropertyWrapperArg udmGroup, const CompositeGroup &group)
 {
@@ -146,7 +145,7 @@ void CompositeComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t versio
 }
 
 pragma::ecs::events::CECompositeEntityChanged::CECompositeEntityChanged(CompositeGroup &group, pragma::ecs::BaseEntity &ent) : ent {ent}, group {group} {}
-void pragma::ecs::events::CECompositeEntityChanged::PushArguments(lua_State *l)
+void pragma::ecs::events::CECompositeEntityChanged::PushArguments(lua::State *l)
 {
 	Lua::Push<CompositeGroup *>(l, &group);
 	ent.GetLuaObject().push(l);

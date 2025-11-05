@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -14,7 +13,7 @@ using namespace pragma;
 
 LifelineLinkComponent::LifelineLinkComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void LifelineLinkComponent::Initialize() { BaseEntityComponent::Initialize(); }
-void LifelineLinkComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void LifelineLinkComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void LifelineLinkComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();

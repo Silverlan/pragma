@@ -2,27 +2,26 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.policies.shared_from_this;
 
-export import luabind;
+export import pragma.lua;
 
 export namespace luabind {
 	namespace detail {
 
 		struct shared_from_this_converter {
 			template<class T>
-			void to_lua(lua_State *L, T const &x)
+			void to_lua(lua::State *L, T const &x)
 			{
 				default_converter<T>().to_lua(L, const_cast<T &>(x).shared_from_this());
 			}
 
 			template<class T>
-			void to_lua(lua_State *L, T *x)
+			void to_lua(lua::State *L, T *x)
 			{
 				if(!x)
-					lua_pushnil(L);
+					Lua::PushNil(L);
 				else
 					to_lua(L, *x);
 			}

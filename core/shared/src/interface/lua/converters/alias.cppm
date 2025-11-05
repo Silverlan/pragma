@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.converters.alias;
 
 export import :scripting.lua.types.base_types;
+export import pragma.lua;
 
 export namespace luabind {
 	template<typename T>
@@ -21,17 +21,17 @@ export namespace luabind {
 		enum { consumed_args = 1 };
 
 		template<size_t I = 0, typename... Tp>
-		bool match_any(lua_State *L, int index);
+		bool match_any(lua::State *L, int index);
 
 		template<class U>
-		TBase to_cpp(lua_State *L, U u, int index);
-		void to_lua(lua_State *L, TBase x);
+		TBase to_cpp(lua::State *L, U u, int index);
+		void to_lua(lua::State *L, TBase x);
 
 		template<class U>
-		int match(lua_State *L, U u, int index);
+		int match(lua::State *L, U u, int index);
 
 		template<class U>
-		void converter_postcall(lua_State *, U u, int)
+		void converter_postcall(lua::State *, U u, int)
 		{
 		}
 	  private:
@@ -56,7 +56,7 @@ export namespace luabind {
 export namespace luabind {
 	template<class TBase, class... T>
 	template<size_t I, typename... Tp>
-	bool alias_converter<TBase, T...>::match_any(lua_State *L, int index)
+	bool alias_converter<TBase, T...>::match_any(lua::State *L, int index)
 	{
 		using T2 = typename std::tuple_element<I, std::tuple<Tp...>>::type;
 		if constexpr(!std::is_same_v<T2, TBase>) // Base type has already been covered by 'match'
@@ -84,7 +84,7 @@ export namespace luabind {
 
 	template<class TBase, class... T>
 	template<class U>
-	int alias_converter<TBase, T...>::match(lua_State *L, U u, int index)
+	int alias_converter<TBase, T...>::match(lua::State *L, U u, int index)
 	{
 		auto res = m_converter.match(L, decorate_type_t<TBase>(), index);
 		if(res != no_match)
@@ -95,7 +95,7 @@ export namespace luabind {
 
 	template<class TBase, class... T>
 	template<class U>
-	TBase alias_converter<TBase, T...>::to_cpp(lua_State *L, U u, int index)
+	TBase alias_converter<TBase, T...>::to_cpp(lua::State *L, U u, int index)
 	{
 		if(m_tmp)
 			return *m_tmp;
@@ -103,7 +103,7 @@ export namespace luabind {
 	}
 
 	template<class TBase, class... T>
-	void alias_converter<TBase, T...>::to_lua(lua_State *L, TBase x)
+	void alias_converter<TBase, T...>::to_lua(lua::State *L, TBase x)
 	{
 		m_converter.to_lua(L, x);
 	}

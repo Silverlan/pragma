@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:entities.components.submergible;
 
@@ -34,7 +33,7 @@ class DLLNETWORK SubmergibleComponent final : public BaseEntityComponent {
 		pragma::ecs::BaseEntity *GetWaterEntity();
 		const pragma::ecs::BaseEntity *GetWaterEntity() const;
 		const util::PFloatProperty &GetSubmergedFractionProperty() const;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
 		util::PFloatProperty m_submergedFraction;
 		EntityHandle m_waterEntity = {};

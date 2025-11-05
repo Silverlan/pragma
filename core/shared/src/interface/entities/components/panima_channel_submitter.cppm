@@ -4,7 +4,6 @@ module;
 
 #include <cassert>
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:entities.components.panima_channel_submitter;
 

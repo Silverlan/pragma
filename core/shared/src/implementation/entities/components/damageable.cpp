@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -22,7 +21,7 @@ void DamageableComponent::Initialize()
 	ent.AddComponent("health");
 }
 
-void DamageableComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void DamageableComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void DamageableComponent::OnTakeDamage(DamageInfo &info) {}
 
@@ -41,4 +40,4 @@ void DamageableComponent::TakeDamage(DamageInfo &info)
 //////////////
 
 CEOnTakeDamage::CEOnTakeDamage(DamageInfo &damageInfo) : damageInfo {damageInfo} {}
-void CEOnTakeDamage::PushArguments(lua_State *l) { Lua::Push<DamageInfo *>(l, &damageInfo); }
+void CEOnTakeDamage::PushArguments(lua::State *l) { Lua::Push<DamageInfo *>(l, &damageInfo); }

@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:entities.components.constraints.child_of;
 
@@ -34,7 +33,7 @@ export namespace pragma {
 
 		const pragma::ComponentHandle<ConstraintComponent> &GetConstraint() const;
 
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 		std::optional<umath::ScaledTransform> CalcInversePose(umath::ScaledTransform &pose) const;
 	  protected:
 		enum class Type : uint8_t { Pose = 0, Position, Rotation };

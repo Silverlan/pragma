@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
-#include "pragma/logging.hpp"
-#include <sharedutils/magic_enum.hpp>
 #include <cassert>
 
 module pragma.shared;
@@ -145,7 +142,7 @@ bool pragma::AnimationDriverComponent::ApplyDriver()
 	return res == pragma::ValueDriver::Result::Success;
 }
 
-void pragma::AnimationDriverComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void pragma::AnimationDriverComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void pragma::AnimationDriverComponent::Save(udm::LinkedPropertyWrapperArg udm) { BaseEntityComponent::Save(udm); }
 
 void pragma::AnimationDriverComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) { BaseEntityComponent::Load(udm, version); }

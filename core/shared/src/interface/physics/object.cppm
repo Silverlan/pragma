@@ -2,12 +2,11 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
 #ifdef __linux__
 #endif
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:physics.object;
 
@@ -56,7 +55,7 @@ export {
 			virtual void SetMass(float mass);
 			virtual bool IsRigid() const;
 			virtual bool IsSoftBody() const;
-			virtual void InitializeLuaObject(lua_State *lua) override;
+			virtual void InitializeLuaObject(lua::State *lua) override;
 			void SetCCDEnabled(bool b);
 
 			PhysObjHandle GetHandle() const;

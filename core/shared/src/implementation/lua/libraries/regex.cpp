@@ -4,9 +4,8 @@ module;
 
 
 
-#include "pragma/lua/core.hpp"
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
 module pragma.shared;
 
@@ -18,7 +17,7 @@ DLLNETWORK std::ostream &operator<<(std::ostream &out, const std::match_results<
 	return out;
 }
 
-int Lua::regex::match(lua_State *l)
+int Lua::regex::match(lua::State *l)
 {
 	auto *s = Lua::CheckString(l, 1);
 	auto e = Lua::CheckString(l, 2);
@@ -35,7 +34,7 @@ int Lua::regex::match(lua_State *l)
 	return 1;
 }
 
-int Lua::regex::search(lua_State *l)
+int Lua::regex::search(lua::State *l)
 {
 	auto *s = Lua::CheckString(l, 1);
 	auto e = Lua::CheckString(l, 2);
@@ -60,9 +59,9 @@ std::string Lua::regex::replace(const std::string &input, const std::string &e, 
 
 ////////////////////////
 
-void Lua::regex::RegexResult::HasMatch(lua_State *l, std::match_results<const char *> &match) { Lua::PushBool(l, match.empty()); }
-void Lua::regex::RegexResult::GetMatchCount(lua_State *l, std::match_results<const char *> &match) { Lua::PushInt(l, match.size()); }
-void Lua::regex::RegexResult::GetLength(lua_State *l, std::match_results<const char *> &match) { Lua::PushInt(l, match.length()); }
-void Lua::regex::RegexResult::GetPosition(lua_State *l, std::match_results<const char *> &match) { Lua::PushInt(l, match.position()); }
-void Lua::regex::RegexResult::GetString(lua_State *l, std::match_results<const char *> &match) { Lua::PushString(l, match.str()); }
-void Lua::regex::RegexResult::SetFormat(lua_State *l, std::match_results<const char *> &match, const std::string &format, int32_t flags) { Lua::PushString(l, match.format(format, static_cast<std::regex_constants::match_flag_type>(flags))); }
+void Lua::regex::RegexResult::HasMatch(lua::State *l, std::match_results<const char *> &match) { Lua::PushBool(l, match.empty()); }
+void Lua::regex::RegexResult::GetMatchCount(lua::State *l, std::match_results<const char *> &match) { Lua::PushInt(l, match.size()); }
+void Lua::regex::RegexResult::GetLength(lua::State *l, std::match_results<const char *> &match) { Lua::PushInt(l, match.length()); }
+void Lua::regex::RegexResult::GetPosition(lua::State *l, std::match_results<const char *> &match) { Lua::PushInt(l, match.position()); }
+void Lua::regex::RegexResult::GetString(lua::State *l, std::match_results<const char *> &match) { Lua::PushString(l, match.str()); }
+void Lua::regex::RegexResult::SetFormat(lua::State *l, std::match_results<const char *> &match, const std::string &format, int32_t flags) { Lua::PushString(l, match.format(format, static_cast<std::regex_constants::match_flag_type>(flags))); }

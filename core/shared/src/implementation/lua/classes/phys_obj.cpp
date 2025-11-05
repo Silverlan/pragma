@@ -3,7 +3,6 @@
 module;
 
 #include "pragma/lua/ostream_operator_alias.hpp"
-#include "pragma/lua/core.hpp"
 
 module pragma.shared;
 
@@ -12,10 +11,10 @@ import :scripting.lua.classes.phys_obj;
 namespace Lua {
 	namespace PhysObj {
 		static bool IsValid(PhysObjHandle &hPhysObj);
-		static luabind::tableT<pragma::physics::ICollisionObject> GetCollisionObjects(lua_State *l, pragma::physics::PhysObj &physObj);
-		static void SetCollisionFilterGroup(lua_State *l, pragma::physics::PhysObj &physObj, int group);
+		static luabind::tableT<pragma::physics::ICollisionObject> GetCollisionObjects(lua::State *l, pragma::physics::PhysObj &physObj);
+		static void SetCollisionFilterGroup(lua::State *l, pragma::physics::PhysObj &physObj, int group);
 
-		static bool IsOnGround(lua_State *l, pragma::physics::PhysObj &physObj);
+		static bool IsOnGround(lua::State *l, pragma::physics::PhysObj &physObj);
 	};
 };
 
@@ -32,7 +31,7 @@ static std::ostream &operator<<(std::ostream &out, const pragma::physics::PhysOb
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::physics, PhysObj);
 #endif
 
-void Lua::PhysObj::register_class(lua_State *l, luabind::module_ &mod)
+void Lua::PhysObj::register_class(lua::State *l, luabind::module_ &mod)
 {
 	auto classDef = luabind::class_<pragma::physics::PhysObj>("Object");
 	classDef.def(luabind::tostring(luabind::self));
@@ -86,37 +85,37 @@ void Lua::PhysObj::register_class(lua_State *l, luabind::module_ &mod)
 	classDef.def("GetSleepingThreshold", &pragma::physics::PhysObj::GetSleepingThreshold);
 
 	classDef.def("IsOnGround", &IsOnGround);
-	classDef.def("IsGroundWalkable", static_cast<bool (*)(lua_State *, pragma::physics::PhysObj &)>([](lua_State *l, pragma::physics::PhysObj &physObj) {
+	classDef.def("IsGroundWalkable", static_cast<bool (*)(lua::State *, pragma::physics::PhysObj &)>([](lua::State *l, pragma::physics::PhysObj &physObj) {
 		if(physObj.IsController() == false)
 			return false;
 		return static_cast<ControllerPhysObj &>(physObj).IsGroundWalkable();
 	}));
-	classDef.def("GetGroundEntity", static_cast<pragma::ecs::BaseEntity *(*)(lua_State *, pragma::physics::PhysObj &)>([](lua_State *l, pragma::physics::PhysObj &physObj) -> pragma::ecs::BaseEntity * {
+	classDef.def("GetGroundEntity", static_cast<pragma::ecs::BaseEntity *(*)(lua::State *, pragma::physics::PhysObj &)>([](lua::State *l, pragma::physics::PhysObj &physObj) -> pragma::ecs::BaseEntity * {
 		if(physObj.IsController() == false)
 			return nullptr;
 		return static_cast<ControllerPhysObj &>(physObj).GetGroundEntity();
 	}));
-	classDef.def("GetGroundPhysObject", static_cast<pragma::physics::PhysObj *(*)(lua_State *, pragma::physics::PhysObj &)>([](lua_State *l, pragma::physics::PhysObj &physObj) -> pragma::physics::PhysObj * {
+	classDef.def("GetGroundPhysObject", static_cast<pragma::physics::PhysObj *(*)(lua::State *, pragma::physics::PhysObj &)>([](lua::State *l, pragma::physics::PhysObj &physObj) -> pragma::physics::PhysObj * {
 		if(physObj.IsController() == false)
 			return nullptr;
 		return static_cast<ControllerPhysObj *>(&physObj)->GetGroundPhysObject();
 	}));
-	classDef.def("GetGroundPhysCollisionObject", static_cast<pragma::physics::ICollisionObject *(*)(lua_State *, pragma::physics::PhysObj &)>([](lua_State *l, pragma::physics::PhysObj &physObj) -> pragma::physics::ICollisionObject * {
+	classDef.def("GetGroundPhysCollisionObject", static_cast<pragma::physics::ICollisionObject *(*)(lua::State *, pragma::physics::PhysObj &)>([](lua::State *l, pragma::physics::PhysObj &physObj) -> pragma::physics::ICollisionObject * {
 		if(physObj.IsController() == false)
 			return nullptr;
 		return static_cast<ControllerPhysObj *>(&physObj)->GetGroundPhysCollisionObject();
 	}));
-	classDef.def("GetGroundSurfaceMaterial", static_cast<int32_t (*)(lua_State *, pragma::physics::PhysObj &)>([](lua_State *l, pragma::physics::PhysObj &physObj) {
+	classDef.def("GetGroundSurfaceMaterial", static_cast<int32_t (*)(lua::State *, pragma::physics::PhysObj &)>([](lua::State *l, pragma::physics::PhysObj &physObj) {
 		if(physObj.IsController() == false)
 			return -1;
 		return static_cast<ControllerPhysObj &>(physObj).GetGroundSurfaceMaterial();
 	}));
-	classDef.def("GetGroundVelocity", static_cast<Vector3 (*)(lua_State *, pragma::physics::PhysObj &)>([](lua_State *l, pragma::physics::PhysObj &physObj) -> Vector3 {
+	classDef.def("GetGroundVelocity", static_cast<Vector3 (*)(lua::State *, pragma::physics::PhysObj &)>([](lua::State *l, pragma::physics::PhysObj &physObj) -> Vector3 {
 		if(physObj.IsController() == false)
 			return {};
 		return static_cast<ControllerPhysObj &>(physObj).GetGroundVelocity();
 	}));
-	classDef.def("GetGroundFriction", static_cast<float (*)(lua_State *, pragma::physics::PhysObj &)>([](lua_State *l, pragma::physics::PhysObj &physObj) {
+	classDef.def("GetGroundFriction", static_cast<float (*)(lua::State *, pragma::physics::PhysObj &)>([](lua::State *l, pragma::physics::PhysObj &physObj) {
 		auto *physMat = physObj.IsController() ? static_cast<ControllerPhysObj &>(physObj).GetController()->GetGroundMaterial() : nullptr;
 		if(physMat == nullptr)
 			return 1.f;
@@ -126,7 +125,7 @@ void Lua::PhysObj::register_class(lua_State *l, luabind::module_ &mod)
 }
 
 bool Lua::PhysObj::IsValid(PhysObjHandle &hPhysObj) { return hPhysObj.IsValid(); }
-luabind::tableT<pragma::physics::ICollisionObject> Lua::PhysObj::GetCollisionObjects(lua_State *l, pragma::physics::PhysObj &physObj)
+luabind::tableT<pragma::physics::ICollisionObject> Lua::PhysObj::GetCollisionObjects(lua::State *l, pragma::physics::PhysObj &physObj)
 {
 	auto &objs = physObj.GetCollisionObjects();
 	auto t = luabind::newtable(l);
@@ -138,8 +137,8 @@ luabind::tableT<pragma::physics::ICollisionObject> Lua::PhysObj::GetCollisionObj
 	}
 	return t;
 }
-void Lua::PhysObj::SetCollisionFilterGroup(lua_State *l, pragma::physics::PhysObj &physObj, int group) { physObj.SetCollisionFilter(physObj.GetCollisionFilter(), static_cast<pragma::physics::CollisionMask>(group)); }
-bool Lua::PhysObj::IsOnGround(lua_State *l, pragma::physics::PhysObj &physObj)
+void Lua::PhysObj::SetCollisionFilterGroup(lua::State *l, pragma::physics::PhysObj &physObj, int group) { physObj.SetCollisionFilter(physObj.GetCollisionFilter(), static_cast<pragma::physics::CollisionMask>(group)); }
+bool Lua::PhysObj::IsOnGround(lua::State *l, pragma::physics::PhysObj &physObj)
 {
 
 	if(physObj.IsController() == false)

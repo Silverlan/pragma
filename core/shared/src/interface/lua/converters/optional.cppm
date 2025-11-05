@@ -2,12 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.converters.optional;
 
-export import luabind;
-export import std;
+export import pragma.lua;
 
 export namespace luabind {
 	template<typename T>
@@ -15,18 +13,18 @@ export namespace luabind {
 		enum { consumed_args = 1 };
 
 		template<typename U>
-		std::optional<T> to_cpp(lua_State *L, U u, int index);
+		std::optional<T> to_cpp(lua::State *L, U u, int index);
 
 		template<class U>
-		int match(lua_State *l, U u, int index);
+		int match(lua::State *l, U u, int index);
 
 		template<class U>
-		void converter_postcall(lua_State *, U u, int)
+		void converter_postcall(lua::State *, U u, int)
 		{
 		}
 
-		void to_lua(lua_State *L, std::optional<T> const &x);
-		void to_lua(lua_State *L, std::optional<T> *x);
+		void to_lua(lua::State *L, std::optional<T> const &x);
+		void to_lua(lua::State *L, std::optional<T> *x);
 	  private:
 		default_converter<T> m_converter;
 	};
@@ -44,36 +42,36 @@ export namespace luabind {
 export namespace luabind {
 	template<typename T>
 	template<typename U>
-	std::optional<T> default_converter<std::optional<T>>::to_cpp(lua_State *L, U u, int index)
+	std::optional<T> default_converter<std::optional<T>>::to_cpp(lua::State *L, U u, int index)
 	{
-		if(lua_isnil(L, index))
+		if(Lua::IsNil(L, index))
 			return {};
 		return m_converter.to_cpp(L, decorate_type_t<T>(), index);
 	}
 
 	template<typename T>
 	template<class U>
-	int default_converter<std::optional<T>>::match(lua_State *l, U u, int index)
+	int default_converter<std::optional<T>>::match(lua::State *l, U u, int index)
 	{
-		if(lua_isnil(l, index))
+		if(Lua::IsNil(l, index))
 			return 1;
 		return m_converter.match(l, decorate_type_t<T>(), index);
 	}
 
 	template<typename T>
-	void default_converter<std::optional<T>>::to_lua(lua_State *L, std::optional<T> const &x)
+	void default_converter<std::optional<T>>::to_lua(lua::State *L, std::optional<T> const &x)
 	{
 		if(!x.has_value())
-			lua_pushnil(L);
+			Lua::PushNil(L);
 		else
 			m_converter.to_lua(L, *x);
 	}
 
 	template<typename T>
-	void default_converter<std::optional<T>>::to_lua(lua_State *L, std::optional<T> *x)
+	void default_converter<std::optional<T>>::to_lua(lua::State *L, std::optional<T> *x)
 	{
 		if(!x || !x->has_value())
-			lua_pushnil(L);
+			Lua::PushNil(L);
 		else
 			to_lua(L, *x);
 	}

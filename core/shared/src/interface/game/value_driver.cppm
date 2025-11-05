@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 
 export module pragma.shared:game.value_driver;
@@ -11,16 +10,16 @@ export module pragma.shared:game.value_driver;
 export import :entities.enums;
 export import :entities.universal_reference;
 export import :entities.member_reference;
-export import luabind;
+export import pragma.lua;
 
 export {
 	namespace pragma {
 		struct DLLNETWORK ValueDriverDescriptor {
 			ValueDriverDescriptor() = default;
-			ValueDriverDescriptor(lua_State *l, std::string expression, std::unordered_map<std::string, std::string> variables, std::unordered_map<std::string, udm::PProperty> constants);
-			ValueDriverDescriptor(lua_State *l, std::string expression, std::unordered_map<std::string, std::string> variables) : ValueDriverDescriptor {l, expression, std::move(variables), {}} {}
-			ValueDriverDescriptor(lua_State *l, std::string expression) : ValueDriverDescriptor {l, expression, {}, {}} {}
-			ValueDriverDescriptor(lua_State *l) : ValueDriverDescriptor {l, {}, {}, {}} {}
+			ValueDriverDescriptor(lua::State *l, std::string expression, std::unordered_map<std::string, std::string> variables, std::unordered_map<std::string, udm::PProperty> constants);
+			ValueDriverDescriptor(lua::State *l, std::string expression, std::unordered_map<std::string, std::string> variables) : ValueDriverDescriptor {l, expression, std::move(variables), {}} {}
+			ValueDriverDescriptor(lua::State *l, std::string expression) : ValueDriverDescriptor {l, expression, {}, {}} {}
+			ValueDriverDescriptor(lua::State *l) : ValueDriverDescriptor {l, {}, {}, {}} {}
 			void SetExpression(const std::string &expression);
 			const luabind::object &GetLuaExpression() const;
 			const std::string &GetExpression() const { return m_expression; }
@@ -44,7 +43,7 @@ export {
 			std::string m_expression;
 			mutable bool m_expressionDirty = true;
 			mutable luabind::object m_luaExpression;
-			lua_State *m_luaState = nullptr;
+			lua::State *m_luaState = nullptr;
 
 			std::unordered_map<std::string, udm::PProperty> m_constants;
 			std::unordered_map<std::string, std::string> m_variables;

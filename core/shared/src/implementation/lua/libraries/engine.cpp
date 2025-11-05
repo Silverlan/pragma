@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 module pragma.shared;
 
@@ -19,7 +18,7 @@ std::string Lua::engine::get_working_directory()
 	return path.GetString();
 }
 
-Lua::tb<void> Lua::engine::get_info(lua_State *l)
+Lua::tb<void> Lua::engine::get_info(lua::State *l)
 {
 	auto t = luabind::newtable(l);
 	t["version"] = get_engine_version();
@@ -34,7 +33,7 @@ Lua::tb<void> Lua::engine::get_info(lua_State *l)
 	return t;
 }
 
-Lua::opt<Lua::tb<void>> Lua::engine::get_git_info(lua_State *l)
+Lua::opt<Lua::tb<void>> Lua::engine::get_git_info(lua::State *l)
 {
 	auto gitInfo = engine_info::get_git_info();
 	if(!gitInfo.has_value())
@@ -46,7 +45,7 @@ Lua::opt<Lua::tb<void>> Lua::engine::get_git_info(lua_State *l)
 	return t;
 }
 
-void Lua::engine::PrecacheModel_sv(lua_State *l, const std::string &mdlName)
+void Lua::engine::PrecacheModel_sv(lua::State *l, const std::string &mdlName)
 {
 	/*auto *nw = ::Engine::Get()->GetNetworkState(l);
 	FWMD wmd(nw->GetGameState());
@@ -57,27 +56,27 @@ void Lua::engine::PrecacheModel_sv(lua_State *l, const std::string &mdlName)
 	);*/
 }
 
-std::shared_ptr<pragma::Model> Lua::engine::get_model(lua_State *l, const std::string &mdlName)
+std::shared_ptr<pragma::Model> Lua::engine::get_model(lua::State *l, const std::string &mdlName)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	return game->LoadModel(mdlName);
 }
 
-void Lua::engine::LoadSoundScripts(lua_State *l, const std::string &fileName, bool precache)
+void Lua::engine::LoadSoundScripts(lua::State *l, const std::string &fileName, bool precache)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	state->LoadSoundScripts(fileName.c_str(), precache);
 }
-void Lua::engine::LoadSoundScripts(lua_State *l, const std::string &fileName) { LoadSoundScripts(l, fileName, false); }
+void Lua::engine::LoadSoundScripts(lua::State *l, const std::string &fileName) { LoadSoundScripts(l, fileName, false); }
 
-bool Lua::engine::LibraryExists(lua_State *l, const std::string &library)
+bool Lua::engine::LibraryExists(lua::State *l, const std::string &library)
 {
 	auto libAbs = ::util::get_normalized_module_path(library, pragma::Engine::Get()->GetNetworkState(l)->IsClient());
 	return FileManager::Exists(libAbs);
 }
 
-bool Lua::engine::UnloadLibrary(lua_State *l, const std::string &path)
+bool Lua::engine::UnloadLibrary(lua::State *l, const std::string &path)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	std::string err;
@@ -86,7 +85,7 @@ bool Lua::engine::UnloadLibrary(lua_State *l, const std::string &path)
 
 bool Lua::engine::IsLibraryLoaded(NetworkState &nw, const std::string &path) { return nw.GetLibraryModule(path) != nullptr; }
 
-Lua::var<bool, std::string> Lua::engine::LoadLibrary(lua_State *l, const std::string &path)
+Lua::var<bool, std::string> Lua::engine::LoadLibrary(lua::State *l, const std::string &path)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	std::string err;
@@ -99,7 +98,7 @@ Lua::var<bool, std::string> Lua::engine::LoadLibrary(lua_State *l, const std::st
 uint64_t Lua::engine::GetTickCount() { return pragma::Engine::Get()->GetTickCount(); }
 
 void Lua::engine::set_record_console_output(bool record) { pragma::Engine::Get()->SetRecordConsoleOutput(record); }
-Lua::opt<Lua::mult<std::string, Con::MessageFlags, Lua::opt<Color>>> Lua::engine::poll_console_output(lua_State *l)
+Lua::opt<Lua::mult<std::string, Con::MessageFlags, Lua::opt<Color>>> Lua::engine::poll_console_output(lua::State *l)
 {
 	auto output = pragma::Engine::Get()->PollConsoleOutput();
 	if(output.has_value() == false)
@@ -110,17 +109,17 @@ Lua::opt<Lua::mult<std::string, Con::MessageFlags, Lua::opt<Color>>> Lua::engine
 	return Lua::mult<std::string, Con::MessageFlags, Lua::opt<::Color>> {l, output->output, output->messageFlags, opt<::Color> {color}};
 }
 
-void Lua::engine::register_shared_functions(lua_State *l, luabind::module_ &modEn)
+void Lua::engine::register_shared_functions(lua::State *l, luabind::module_ &modEn)
 {
 	modEn[(luabind::def("set_record_console_output", Lua::engine::set_record_console_output), luabind::def("get_tick_count", &Lua::engine::GetTickCount), luabind::def("shutdown", &Lua::engine::exit), luabind::def("get_working_directory", Lua::engine::get_working_directory),
 	  luabind::def("get_git_info", Lua::engine::get_git_info), luabind::def("mount_addon", static_cast<bool (*)(const std::string &)>(&AddonSystem::MountAddon)),
 	  luabind::def(
 	    "mount_sub_addon",
-	    +[](lua_State *l, const std::string &subAddon) {
+	    +[](lua::State *l, const std::string &subAddon) {
 		    auto path = ::util::Path::CreatePath(Lua::util::get_addon_path(l));
 		    path.PopFront();
 		    path = path + "addons/" + subAddon;
 		    return AddonSystem::MountAddon(path.GetString());
 	    }),
-	  luabind::def("is_managed_by_package_manager", +[](lua_State *l) { return pragma::get_engine()->IsManagedByPackageManager(); }), luabind::def("is_application_sandboxed", +[](lua_State *l) { return pragma::get_engine()->IsSandboxed(); }))];
+	  luabind::def("is_managed_by_package_manager", +[](lua::State *l) { return pragma::get_engine()->IsManagedByPackageManager(); }), luabind::def("is_application_sandboxed", +[](lua::State *l) { return pragma::get_engine()->IsSandboxed(); }))];
 }

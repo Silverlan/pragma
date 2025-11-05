@@ -5,7 +5,6 @@ module;
 
 #include "noiseutils.h"
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -58,7 +57,7 @@ bool pragma::physics::ICollisionObject::IsSoftBody() const { return false; }
 bool pragma::physics::ICollisionObject::IsAsleep() const { return !IsAwake(); }
 bool pragma::physics::ICollisionObject::IsAwake() const { return umath::is_flag_set(m_stateFlags, StateFlags::Awake); }
 
-void pragma::physics::ICollisionObject::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<ICollisionObject>(lua); }
+void pragma::physics::ICollisionObject::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<ICollisionObject>(lua); }
 
 const pragma::physics::IRigidBody *pragma::physics::ICollisionObject::GetRigidBody() const { return const_cast<ICollisionObject *>(this)->GetRigidBody(); }
 const pragma::physics::ISoftBody *pragma::physics::ICollisionObject::GetSoftBody() const { return const_cast<ICollisionObject *>(this)->GetSoftBody(); }
@@ -174,7 +173,7 @@ pragma::physics::IGhostObject *pragma::physics::ICollisionObject::GetGhostObject
 
 bool pragma::physics::IGhostObject::IsGhost() const { return true; }
 pragma::physics::IGhostObject *pragma::physics::IGhostObject::GetGhostObject() { return this; }
-void pragma::physics::IGhostObject::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<IGhostObject>(lua); }
+void pragma::physics::IGhostObject::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<IGhostObject>(lua); }
 
 //////////////////////////
 
@@ -192,7 +191,7 @@ void pragma::physics::IRigidBody::SetSleepingThresholds(float linear, float angu
 	SetAngularSleepingThreshold(angular);
 }
 std::pair<float, float> pragma::physics::IRigidBody::GetSleepingThreshold() const { return {GetLinearSleepingThreshold(), GetAngularSleepingThreshold()}; }
-void pragma::physics::IRigidBody::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<IRigidBody>(lua); }
+void pragma::physics::IRigidBody::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<IRigidBody>(lua); }
 
 //////////////////////////
 
@@ -202,7 +201,7 @@ pragma::ModelSubMesh *pragma::physics::ISoftBody::GetSubMesh() const { return m_
 bool pragma::physics::ISoftBody::IsSoftBody() const { return true; }
 
 pragma::physics::ISoftBody *pragma::physics::ISoftBody::GetSoftBody() { return this; }
-void pragma::physics::ISoftBody::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<ISoftBody>(lua); }
+void pragma::physics::ISoftBody::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<ISoftBody>(lua); }
 
 //////////////////////////
 

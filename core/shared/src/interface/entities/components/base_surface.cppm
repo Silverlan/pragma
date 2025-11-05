@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.base_surface;
@@ -69,7 +68,7 @@ export {
 
 		struct DLLNETWORK CEOnSurfaceMeshChanged : public ComponentEvent {
 			CEOnSurfaceMeshChanged(const BaseSurfaceComponent::MeshInfo &meshInfo);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			BaseSurfaceComponent::MeshInfo meshInfo;
 		};
 	}

@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.shared:scripting.lua.libraries.debug_overlay;
 
+export import pragma.lua;
+
 export {
-    DLLNETWORK int Lua_debugoverlay_DrawLine(lua_State *l);
-    DLLNETWORK int Lua_debugoverlay_DrawBox(lua_State *l);
+    DLLNETWORK int Lua_debugoverlay_DrawLine(lua::State *l);
+    DLLNETWORK int Lua_debugoverlay_DrawBox(lua::State *l);
 };

@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:entities.components.base_ownable;
 
@@ -14,7 +13,7 @@ export import :entities.property;
 export namespace pragma {
 	struct DLLNETWORK CEOnOwnerChanged : public ComponentEvent {
 		CEOnOwnerChanged(pragma::ecs::BaseEntity *oldOwner, pragma::ecs::BaseEntity *newOwner);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		pragma::ecs::BaseEntity *oldOwner;
 		pragma::ecs::BaseEntity *newOwner;
 	};

@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:entities.components.constraints.manager;
 
@@ -36,7 +35,7 @@ class DLLNETWORK ConstraintManagerComponent final : public BaseEntityComponent {
 
 		static void ApplyConstraints(const NetworkState &nw);
 
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 	  protected:
 		friend ConstraintComponent;
 		std::vector<ConstraintInfo> &GetConstraints();

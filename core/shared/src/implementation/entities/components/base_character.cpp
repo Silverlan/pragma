@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -550,12 +549,12 @@ void BaseCharacterComponent::DetachFromGround(float duration) { m_tDetachFromGro
 //////////////////
 
 CEOnDeployWeapon::CEOnDeployWeapon(pragma::ecs::BaseEntity &entWeapon) : weapon {entWeapon} {}
-void CEOnDeployWeapon::PushArguments(lua_State *l) { weapon.GetLuaObject().push(l); }
+void CEOnDeployWeapon::PushArguments(lua::State *l) { weapon.GetLuaObject().push(l); }
 
 //////////////////
 
 CEOnSetActiveWeapon::CEOnSetActiveWeapon(pragma::ecs::BaseEntity *entWeapon) : weapon {entWeapon} {}
-void CEOnSetActiveWeapon::PushArguments(lua_State *l)
+void CEOnSetActiveWeapon::PushArguments(lua::State *l)
 {
 	if(weapon != nullptr)
 		weapon->GetLuaObject().push(l);
@@ -566,12 +565,12 @@ void CEOnSetActiveWeapon::PushArguments(lua_State *l)
 //////////////////
 
 CEOnSetCharacterOrientation::CEOnSetCharacterOrientation(const Vector3 &up) : up {up} {}
-void CEOnSetCharacterOrientation::PushArguments(lua_State *l) { Lua::Push<Vector3>(l, up); }
+void CEOnSetCharacterOrientation::PushArguments(lua::State *l) { Lua::Push<Vector3>(l, up); }
 
 //////////////////
 
 CEPlayFootstepSound::CEPlayFootstepSound(BaseCharacterComponent::FootType footType, const SurfaceMaterial &surfaceMaterial, float scale) : footType(footType), surfaceMaterial(surfaceMaterial), scale(scale) {}
-void CEPlayFootstepSound::PushArguments(lua_State *l)
+void CEPlayFootstepSound::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, umath::to_integral(footType));
 	Lua::Push<SurfaceMaterial *>(l, const_cast<SurfaceMaterial *>(&surfaceMaterial));
@@ -581,19 +580,19 @@ void CEPlayFootstepSound::PushArguments(lua_State *l)
 //////////////////
 
 CEOnFootStep::CEOnFootStep(BaseCharacterComponent::FootType footType) : footType {footType} {}
-void CEOnFootStep::PushArguments(lua_State *l) { Lua::PushInt(l, umath::to_integral(footType)); }
+void CEOnFootStep::PushArguments(lua::State *l) { Lua::PushInt(l, umath::to_integral(footType)); }
 
 //////////////////
 
 CEOnJump::CEOnJump(const Vector3 &velocity) : velocity {velocity} {}
-void CEOnJump::PushArguments(lua_State *l) { Lua::Push<Vector3>(l, velocity); }
+void CEOnJump::PushArguments(lua::State *l) { Lua::Push<Vector3>(l, velocity); }
 
 //////////////////
 
 CEIsMoving::CEIsMoving() {}
-void CEIsMoving::PushArguments(lua_State *l) { Lua::PushBool(l, moving); }
+void CEIsMoving::PushArguments(lua::State *l) { Lua::PushBool(l, moving); }
 uint32_t CEIsMoving::GetReturnCount() { return 1; }
-void CEIsMoving::HandleReturnValues(lua_State *l)
+void CEIsMoving::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -1))
 		moving = Lua::CheckBool(l, -1);
@@ -602,4 +601,4 @@ void CEIsMoving::HandleReturnValues(lua_State *l)
 //////////////////
 
 CEViewRotation::CEViewRotation(const Quat &rotation) : rotation {rotation} {}
-void CEViewRotation::PushArguments(lua_State *l) { Lua::Push<Quat>(l, rotation); }
+void CEViewRotation::PushArguments(lua::State *l) { Lua::Push<Quat>(l, rotation); }

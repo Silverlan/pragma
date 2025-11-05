@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.converters.file;
 
@@ -18,15 +17,15 @@ export namespace luabind {
 		using is_native = std::false_type;
 
 		template<class U>
-		int match(lua_State *L, U, int index);
+		int match(lua::State *L, U, int index);
 
 		template<class U>
-		std::shared_ptr<ufile::IFile> to_cpp(lua_State *L, U u, int index);
+		std::shared_ptr<ufile::IFile> to_cpp(lua::State *L, U u, int index);
 
-		void to_lua(lua_State *L, std::shared_ptr<ufile::IFile> const &p);
+		void to_lua(lua::State *L, std::shared_ptr<ufile::IFile> const &p);
 
 		template<class U>
-		void converter_postcall(lua_State *, U const &, int)
+		void converter_postcall(lua::State *, U const &, int)
 		{
 		}
 	};
@@ -34,13 +33,13 @@ export namespace luabind {
 
 export namespace luabind {
 	template<class U>
-	int default_converter<std::shared_ptr<ufile::IFile>, void>::match(lua_State *L, U, int index)
+	int default_converter<std::shared_ptr<ufile::IFile>, void>::match(lua::State *L, U, int index)
 	{
 		return Lua::IsType<LFile>(L, index) ? 0 : no_match;
 	}
 
 	template<class U>
-	std::shared_ptr<ufile::IFile> default_converter<std::shared_ptr<ufile::IFile>>::to_cpp(lua_State *L, U u, int index)
+	std::shared_ptr<ufile::IFile> default_converter<std::shared_ptr<ufile::IFile>>::to_cpp(lua::State *L, U u, int index)
 	{
 		auto *f = luabind::object_cast<LFile *>(luabind::object {luabind::from_stack(L, index)});
 		return f->GetHandle();

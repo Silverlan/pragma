@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:entities.components.velocity;
 
@@ -39,7 +38,7 @@ export namespace pragma {
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 
 		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 
 		// Set member variables directly, without any other influences
 		void SetRawVelocity(const Vector3 &vel);

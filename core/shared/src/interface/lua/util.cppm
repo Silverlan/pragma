@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 
 export module pragma.shared:scripting.lua.util;
@@ -11,18 +10,18 @@ export module pragma.shared:scripting.lua.util;
 export import pragma.lua;
 
 export namespace Lua {
-	DLLNETWORK void StackDump(lua_State *lua);
-	DLLNETWORK std::optional<std::string> StackToString(lua_State *lua);
-	DLLNETWORK std::optional<std::string> TableToString(lua_State *lua, int n = -1);
-	DLLNETWORK void TableDump(lua_State *lua, int n = -1);
-	DLLNETWORK void VarDump(lua_State *lua, int n = -1);
-	DLLNETWORK std::optional<std::string> VarToString(lua_State *lua, int n = -1);
+	DLLNETWORK void StackDump(lua::State *lua);
+	DLLNETWORK std::optional<std::string> StackToString(lua::State *lua);
+	DLLNETWORK std::optional<std::string> TableToString(lua::State *lua, int n = -1);
+	DLLNETWORK void TableDump(lua::State *lua, int n = -1);
+	DLLNETWORK void VarDump(lua::State *lua, int n = -1);
+	DLLNETWORK std::optional<std::string> VarToString(lua::State *lua, int n = -1);
 }
 
-export namespace pragma::scripting::lua {
-	DLLNETWORK Lua::StatusCode protected_call(lua_State *l, const std::function<Lua::StatusCode(lua_State *)> &pushFuncArgs, int32_t numResults, std::string *optOutErrMsg = nullptr);
-	DLLNETWORK Lua::StatusCode protected_call(lua_State *l, int32_t numArgs = 0, int32_t numResults = 0, std::string *optOutErrMsg = nullptr);
-	DLLNETWORK Lua::StatusCode run_string(lua_State *l, const std::string &str, const std::string &chunkName, int32_t numResults = 0, std::string *optOutErrMsg = nullptr);
+export namespace pragma::scripting::lua_core {
+	DLLNETWORK Lua::StatusCode protected_call(lua::State *l, const std::function<Lua::StatusCode(lua::State *)> &pushFuncArgs, int32_t numResults, std::string *optOutErrMsg = nullptr);
+	DLLNETWORK Lua::StatusCode protected_call(lua::State *l, int32_t numArgs = 0, int32_t numResults = 0, std::string *optOutErrMsg = nullptr);
+	DLLNETWORK Lua::StatusCode run_string(lua::State *l, const std::string &str, const std::string &chunkName, int32_t numResults = 0, std::string *optOutErrMsg = nullptr);
 
 	namespace util {
 		DLLNETWORK luabind::detail::function_object *get_function_object(luabind::object const &fn);
@@ -35,7 +34,7 @@ export namespace Lua {
 	DLLNETWORK std::optional<std::string> find_script_file(const std::string &fileName);
 
 	template<class T, class TCast>
-	bool get_table_value(lua_State *l, const std::string &name, uint32_t t, TCast &ret, const std::function<T(lua_State *, int32_t)> &check)
+	bool get_table_value(lua::State *l, const std::string &name, uint32_t t, TCast &ret, const std::function<T(lua::State *, int32_t)> &check)
 	{
 		Lua::PushString(l, name); /* 1 */
 		Lua::GetTableValue(l, t);
@@ -48,7 +47,7 @@ export namespace Lua {
 		return r;
 	}
 	template<typename T>
-	void get_table_values(lua_State *l, uint32_t tIdx, std::vector<T> &values, const std::function<T(lua_State *, int32_t)> &tCheck)
+	void get_table_values(lua::State *l, uint32_t tIdx, std::vector<T> &values, const std::function<T(lua::State *, int32_t)> &tCheck)
 	{
 		Lua::CheckTable(l, tIdx);
 		auto numOffsets = Lua::GetObjectLength(l, tIdx);
@@ -62,7 +61,7 @@ export namespace Lua {
 		}
 	}
 	template<typename T>
-	std::vector<T> get_table_values(lua_State *l, uint32_t tIdx, const std::function<T(lua_State *, int32_t)> &tCheck)
+	std::vector<T> get_table_values(lua::State *l, uint32_t tIdx, const std::function<T(lua::State *, int32_t)> &tCheck)
 	{
 		std::vector<T> values;
 		get_table_values(l, tIdx, values, tCheck);
@@ -70,6 +69,6 @@ export namespace Lua {
 	}
 };
 
-export namespace pragma::lua {
-	DLLNETWORK Lua::StatusCode protected_call(lua_State *l, const std::function<Lua::StatusCode(lua_State *)> &pushFuncArgs, int32_t numResults);
+export namespace pragma::LuaCore {
+	DLLNETWORK Lua::StatusCode protected_call(lua::State *l, const std::function<Lua::StatusCode(lua::State *)> &pushFuncArgs, int32_t numResults);
 };

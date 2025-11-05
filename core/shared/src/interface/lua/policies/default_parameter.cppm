@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.policies.default_parameter;
 
-export import luabind;
+export import pragma.lua;
 
 export namespace luabind {
 	namespace detail {
@@ -17,7 +16,7 @@ export namespace luabind {
 
 			using TYPE = decltype(DEF);
 			template<typename U>
-			TYPE to_cpp(lua_State *L, U, int)
+			TYPE to_cpp(lua::State *L, U, int)
 			{
 				return DEF;
 			}
@@ -25,7 +24,7 @@ export namespace luabind {
 			static int match(...) { return 0; }
 
 			template<class U>
-			void converter_postcall(lua_State *, U u, int)
+			void converter_postcall(lua::State *, U u, int)
 			{
 			}
 		};

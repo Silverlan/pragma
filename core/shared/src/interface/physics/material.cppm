@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:physics.material;
 
@@ -26,7 +25,7 @@ export namespace pragma::physics {
 
 		void SetSurfaceMaterial(SurfaceMaterial &surfMat);
 		SurfaceMaterial *GetSurfaceMaterial() const;
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 	  private:
 		uint32_t m_surfMatIdx = std::numeric_limits<uint32_t>::max();
 	};

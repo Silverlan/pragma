@@ -4,7 +4,6 @@ module;
 
 
 
-#include "pragma/lua/core.hpp"
 
 module pragma.shared;
 
@@ -42,7 +41,7 @@ std::string Lua::string::camel_case_to_snake_case(const std::string &str)
 uint32_t Lua::string::calc_levenshtein_distance(const std::string &s0, const std::string &s1) { return ustring::calc_levenshtein_distance(s0, s1); }
 double Lua::string::calc_levenshtein_similarity(const std::string &s0, const std::string &s1) { return ustring::calc_levenshtein_similarity(s0, s1); }
 void Lua::string::find_longest_common_substring(const std::string &s0, const std::string &s1, size_t &outStartIdx, size_t &outLen, size_t &outEndIdx) { outLen = ustring::longest_common_substring(s0, s1, outStartIdx, outEndIdx); }
-void Lua::string::find_similar_elements(lua_State *l, const std::string &baseElement, luabind::table<> inElements, uint32_t limit, luabind::object &outSimilarElements, luabind::object &outSimilarities)
+void Lua::string::find_similar_elements(lua::State *l, const std::string &baseElement, luabind::table<> inElements, uint32_t limit, luabind::object &outSimilarElements, luabind::object &outSimilarities)
 {
 	auto numElements = Lua::GetObjectLength(l, 2);
 	std::vector<std::string> elements {};
@@ -66,7 +65,7 @@ void Lua::string::find_similar_elements(lua_State *l, const std::string &baseEle
 	for(auto &val : similarities)
 		outSimilarities[offset++] = val;
 }
-std::string Lua::string::join(lua_State *l, luabind::table<> values, const std::string &joinChar)
+std::string Lua::string::join(lua::State *l, luabind::table<> values, const std::string &joinChar)
 {
 	std::string r {};
 	auto bFirst = true;
@@ -80,7 +79,7 @@ std::string Lua::string::join(lua_State *l, luabind::table<> values, const std::
 	}
 	return r;
 }
-luabind::object Lua::string::split(lua_State *l, const std::string &str, const std::string &delimiter)
+luabind::object Lua::string::split(lua::State *l, const std::string &str, const std::string &delimiter)
 {
 	if(delimiter.empty())
 		return luabind::newtable(l);

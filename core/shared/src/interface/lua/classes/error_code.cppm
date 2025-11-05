@@ -2,12 +2,11 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.shared:scripting.lua.classes.error_code;
 
-export import std.compat;
+export import pragma.lua;
 
 #undef GetMessage
 
@@ -31,7 +30,7 @@ export {
 
 	//////////////////////////////
 
-	DLLNETWORK std::string Lua_ErrorCode_GetMessage(lua_State *l, ErrorCode &err);
-	DLLNETWORK int32_t Lua_ErrorCode_GetValue(lua_State *l, ErrorCode &err);
-	DLLNETWORK bool Lua_ErrorCode_IsError(lua_State *l, ErrorCode &err);
+	DLLNETWORK std::string Lua_ErrorCode_GetMessage(lua::State *l, ErrorCode &err);
+	DLLNETWORK int32_t Lua_ErrorCode_GetValue(lua::State *l, ErrorCode &err);
+	DLLNETWORK bool Lua_ErrorCode_IsError(lua::State *l, ErrorCode &err);
 };

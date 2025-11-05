@@ -3,9 +3,8 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
 module pragma.shared;
 
@@ -194,7 +193,7 @@ void pragma::ecs::BaseEntity::MarkForSnapshot(bool b)
 }
 bool pragma::ecs::BaseEntity::IsMarkedForSnapshot() const { return (m_stateFlags & StateFlags::SnapshotUpdateRequired) != StateFlags::None; }
 
-lua_State *pragma::ecs::BaseEntity::GetLuaState() const
+lua::State *pragma::ecs::BaseEntity::GetLuaState() const
 {
 	auto *nw = GetNetworkState();
 	auto *game = nw->GetGameState();

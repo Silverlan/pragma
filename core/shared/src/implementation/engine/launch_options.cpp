@@ -3,8 +3,7 @@
 module;
 
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/logging.hpp"
+#include "definitions.hpp"
 
 module pragma.shared;
 

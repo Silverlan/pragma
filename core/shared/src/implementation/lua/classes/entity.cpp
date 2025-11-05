@@ -3,9 +3,7 @@
 module;
 
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
-#include <sharedutils/magic_enum.hpp>
+#include "definitions.hpp"
 
 module pragma.shared;
 
@@ -24,7 +22,7 @@ namespace pragma::ecs {
 }
 
 template<typename T>
-bool set_member_value(lua_State *l, ::pragma::ecs::BaseEntity &ent, const std::string &uri, T value)
+bool set_member_value(lua::State *l, ::pragma::ecs::BaseEntity &ent, const std::string &uri, T value)
 {
 	auto path = pragma::PanimaComponent::ParseComponentChannelPath(panima::ChannelPath {uri});
 	if(!path.has_value())
@@ -36,7 +34,7 @@ bool set_member_value(lua_State *l, ::pragma::ecs::BaseEntity &ent, const std::s
 	auto *info = c->FindMemberInfo(memberPath.GetString());
 	if(!info)
 		return false;
-	return pragma::lua::set_member_value(l, *c, *info, value);
+	return pragma::LuaCore::set_member_value(l, *c, *info, value);
 }
 
 template<typename TValue, auto TSetValue>
@@ -85,9 +83,9 @@ void Lua::Entity::register_class(luabind::class_<::pragma::ecs::BaseEntity> &cla
 	classDef.def("IsMapEntity", &::pragma::ecs::BaseEntity::IsMapEntity);
 	classDef.def("CreateChild", &::pragma::ecs::BaseEntity::CreateChild);
 	classDef.def(
-	  "CallOnRemove", +[](lua_State *l, ::pragma::ecs::BaseEntity &ent, const Lua::func<void> &function) -> CallbackHandle {
+	  "CallOnRemove", +[](lua::State *l, ::pragma::ecs::BaseEntity &ent, const Lua::func<void> &function) -> CallbackHandle {
 		  return ent.CallOnRemove(FunctionCallback<void>::Create([l, function]() {
-			  auto c = Lua::CallFunction(l, [&function](lua_State *l) -> Lua::StatusCode {
+			  auto c = Lua::CallFunction(l, [&function](lua::State *l) -> Lua::StatusCode {
 				  function.push(l);
 				  return Lua::StatusCode::Ok;
 			  });
@@ -208,7 +206,7 @@ void Lua::Entity::register_class(luabind::class_<::pragma::ecs::BaseEntity> &cla
 	classDef.def("ClearComponents", +[](Lua::nil_type) {}); // Don't do anything if component type is nil
 	classDef.def("ClearComponents", &::pragma::ecs::BaseEntity::ClearComponents);
 	classDef.def("HasComponent", +[](Lua::nil_type) -> bool { return false; }); // Return false if no component id was specified
-	classDef.def("HasComponent", static_cast<bool (*)(lua_State *, ::pragma::ecs::BaseEntity &, const std::string &)>([](lua_State *l, ::pragma::ecs::BaseEntity &ent, const std::string &name) {
+	classDef.def("HasComponent", static_cast<bool (*)(lua::State *, ::pragma::ecs::BaseEntity &, const std::string &)>([](lua::State *l, ::pragma::ecs::BaseEntity &ent, const std::string &name) {
 		auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 		auto *game = nw->GetGameState();
 		auto &componentManager = game->GetEntityComponentManager();
@@ -240,7 +238,7 @@ void Lua::Entity::register_class(luabind::class_<::pragma::ecs::BaseEntity> &cla
 		classDef.def("C", static_cast<luabind::optional<pragma::BaseEntityComponent> (*)(::pragma::ecs::BaseEntity &, luabind::object)>([](::pragma::ecs::BaseEntity &ent, luabind::object) -> luabind::optional<pragma::BaseEntityComponent> { return nil; }));
 	}
 	classDef.def(
-	  "GetComponents", +[](lua_State *l, ::pragma::ecs::BaseEntity &ent) -> Lua::tb<pragma::BaseEntityComponent> {
+	  "GetComponents", +[](lua::State *l, ::pragma::ecs::BaseEntity &ent) -> Lua::tb<pragma::BaseEntityComponent> {
 		  auto t = luabind::newtable(l);
 		  for(uint32_t idx = 1; auto &c : ent.GetComponents()) {
 			  if(c.expired())
@@ -262,7 +260,7 @@ void Lua::Entity::register_class(luabind::class_<::pragma::ecs::BaseEntity> &cla
 	classDef.def("GetModelComponent", &::pragma::ecs::BaseEntity::GetModelComponent);
 	classDef.def("GetAnimatedComponent", &::pragma::ecs::BaseEntity::GetAnimatedComponent);
 	classDef.def(
-	  "FindMemberInfo", +[](lua_State *l, ::pragma::ecs::BaseEntity &ent, const std::string &uri) -> Lua::opt<Lua::mult<const pragma::ComponentMemberInfo *, Lua::type<pragma::BaseEntityComponent>>> {
+	  "FindMemberInfo", +[](lua::State *l, ::pragma::ecs::BaseEntity &ent, const std::string &uri) -> Lua::opt<Lua::mult<const pragma::ComponentMemberInfo *, Lua::type<pragma::BaseEntityComponent>>> {
 		  auto path = pragma::PanimaComponent::ParseComponentChannelPath(panima::ChannelPath {uri});
 		  if(!path.has_value())
 			  return Lua::nil;
@@ -273,7 +271,7 @@ void Lua::Entity::register_class(luabind::class_<::pragma::ecs::BaseEntity> &cla
 		  return Lua::mult<const pragma::ComponentMemberInfo *, Lua::type<pragma::BaseEntityComponent>> {l, c->FindMemberInfo(memberPath.GetString()), c->GetLuaObject()};
 	  });
 	classDef.def(
-	  "GetMemberValue", +[](lua_State *l, ::pragma::ecs::BaseEntity &ent, const std::string &uri) -> std::optional<Lua::udm_type> {
+	  "GetMemberValue", +[](lua::State *l, ::pragma::ecs::BaseEntity &ent, const std::string &uri) -> std::optional<Lua::udm_type> {
 		  auto path = pragma::PanimaComponent::ParseComponentChannelPath(panima::ChannelPath {uri});
 		  if(!path.has_value())
 			  return {};
@@ -284,7 +282,7 @@ void Lua::Entity::register_class(luabind::class_<::pragma::ecs::BaseEntity> &cla
 		  auto *info = c->FindMemberInfo(memberPath.GetString());
 		  if(!info)
 			  return {};
-		  return pragma::lua::get_member_value(l, *c, *info);
+		  return pragma::LuaCore::get_member_value(l, *c, *info);
 	  });
 	classDef.def("SetMemberValue", &set_member_value<Lua::udm_type>);
 	classDef.def("SetMemberValue", &set_member_value<const pragma::EntityURef &>);

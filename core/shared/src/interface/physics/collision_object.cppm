@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:physics.collision_object;
 
@@ -61,7 +60,7 @@ export {
 			virtual bool IsGhost() const;
 			virtual bool IsSoftBody() const;
 
-			virtual void InitializeLuaObject(lua_State *lua) override;
+			virtual void InitializeLuaObject(lua::State *lua) override;
 
 			virtual void SetTrigger(bool bTrigger) = 0;
 			virtual bool IsTrigger() const = 0;
@@ -151,14 +150,14 @@ export {
 		public:
 			virtual bool IsGhost() const override;
 			virtual IGhostObject *GetGhostObject() override;
-			virtual void InitializeLuaObject(lua_State *lua) override;
+			virtual void InitializeLuaObject(lua::State *lua) override;
 		protected:
 			using ICollisionObject::ICollisionObject;
 		};
 
 		class DLLNETWORK IRigidBody : virtual public ICollisionObject {
 		public:
-			virtual void InitializeLuaObject(lua_State *lua) override;
+			virtual void InitializeLuaObject(lua::State *lua) override;
 			virtual bool IsRigid() const override;
 			virtual IRigidBody *GetRigidBody() override;
 			virtual void ApplyForce(const Vector3 &force, bool autoWake = true) = 0;
@@ -209,7 +208,7 @@ export {
 
 		class DLLNETWORK ISoftBody : virtual public ICollisionObject {
 		public:
-			virtual void InitializeLuaObject(lua_State *lua) override;
+			virtual void InitializeLuaObject(lua::State *lua) override;
 			virtual bool IsSoftBody() const override;
 			virtual ISoftBody *GetSoftBody() override;
 			virtual void AddVelocity(const Vector3 &vel) = 0;

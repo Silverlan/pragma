@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 #include <cassert>
 
@@ -13,7 +12,7 @@ import :physics.shape;
 
 pragma::physics::IShape::IShape(IEnvironment &env) : IBase {env} {}
 pragma::physics::IShape::~IShape() {}
-void pragma::physics::IShape::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<IShape>(lua); }
+void pragma::physics::IShape::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<IShape>(lua); }
 
 bool pragma::physics::IShape::IsValid() const { return true; }
 bool pragma::physics::IShape::IsConvex() const { return false; }
@@ -58,7 +57,7 @@ float pragma::physics::IShape::GetDensity() const { return m_density; }
 
 pragma::physics::IConvexShape::IConvexShape(IEnvironment &env) : IShape {env} {}
 pragma::physics::IConvexShape::~IConvexShape() {}
-void pragma::physics::IConvexShape::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<IConvexShape>(lua); }
+void pragma::physics::IConvexShape::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<IConvexShape>(lua); }
 
 bool pragma::physics::IConvexShape::IsConvex() const { return true; }
 pragma::physics::IConvexShape *pragma::physics::IConvexShape::GetConvexShape() { return this; }
@@ -72,13 +71,13 @@ pragma::physics::CollisionMesh *pragma::physics::IConvexShape::GetCollisionMesh(
 
 pragma::physics::ICapsuleShape::ICapsuleShape(IEnvironment &env) : IConvexShape {env} {}
 pragma::physics::ICapsuleShape::~ICapsuleShape() {}
-void pragma::physics::ICapsuleShape::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<ICapsuleShape>(lua); }
+void pragma::physics::ICapsuleShape::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<ICapsuleShape>(lua); }
 
 /////////////
 
 pragma::physics::IBoxShape::IBoxShape(IEnvironment &env) : IConvexShape {env} {}
 pragma::physics::IBoxShape::~IBoxShape() {}
-void pragma::physics::IBoxShape::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<IBoxShape>(lua); }
+void pragma::physics::IBoxShape::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<IBoxShape>(lua); }
 
 /////////////
 
@@ -93,7 +92,7 @@ void pragma::physics::IConvexHullShape::Build()
 		return;
 	ApplySurfaceMaterial(pSurfMat->GetPhysicsMaterial());
 }
-void pragma::physics::IConvexHullShape::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<IConvexHullShape>(lua); }
+void pragma::physics::IConvexHullShape::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<IConvexHullShape>(lua); }
 
 /////////////
 
@@ -131,14 +130,14 @@ float pragma::physics::ICompoundShape::GetMass() const
 bool pragma::physics::ICompoundShape::IsCompoundShape() const { return true; }
 pragma::physics::ICompoundShape *pragma::physics::ICompoundShape::GetCompoundShape() { return this; }
 const std::vector<pragma::physics::ICompoundShape::ShapeInfo> &pragma::physics::ICompoundShape::GetShapes() const { return m_shapes; }
-void pragma::physics::ICompoundShape::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<ICompoundShape>(lua); }
+void pragma::physics::ICompoundShape::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<ICompoundShape>(lua); }
 
 /////////////
 
 pragma::physics::IHeightfield::IHeightfield(IEnvironment &env, uint32_t width, uint32_t length, float maxHeight, uint8_t upAxis) : IShape {env}, m_width {width}, m_length {length}, m_maxHeight {maxHeight}, m_upAxis {upAxis} {}
 bool pragma::physics::IHeightfield::IsHeightfield() const { return true; }
 pragma::physics::IHeightfield *pragma::physics::IHeightfield::GetHeightfield() { return this; }
-void pragma::physics::IHeightfield::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<IHeightfield>(lua); }
+void pragma::physics::IHeightfield::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<IHeightfield>(lua); }
 
 /////////////
 
@@ -193,4 +192,4 @@ void pragma::physics::ITriangleShape::AddTriangle(const Vector3 &a, const Vector
 	);*/
 }
 void pragma::physics::ITriangleShape::CalculateLocalInertia(float, Vector3 *localInertia) const { *localInertia = Vector3(0.f, 0.f, 0.f); }
-void pragma::physics::ITriangleShape::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<ITriangleShape>(lua); }
+void pragma::physics::ITriangleShape::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<ITriangleShape>(lua); }

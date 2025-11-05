@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 
 
@@ -15,27 +14,27 @@ export import :scripting.lua.types.base_types;
 export import :types;
 
 export namespace luabind {
-	template<typename T, T (*FUNCTION)(lua_State *)>
+	template<typename T, T (*FUNCTION)(lua::State *)>
 	struct parameter_emplacement_converter {
 		enum { consumed_args = 0 };
 
 		template<class U>
-		T to_cpp(lua_State *L, U, int /*index*/);
+		T to_cpp(lua::State *L, U, int /*index*/);
 
 		template<class U>
-		static int match(lua_State *, U, int /*index*/);
+		static int match(lua::State *, U, int /*index*/);
 
 		template<class U>
-		void converter_postcall(lua_State *, U, int)
+		void converter_postcall(lua::State *, U, int)
 		{
 		}
 	};
 
 	// Game
 	namespace detail {
-		DLLNETWORK pragma::Game *get_game(lua_State *l);
+		DLLNETWORK pragma::Game *get_game(lua::State *l);
 		template<typename T>
-		T get_game(lua_State *l)
+		T get_game(lua::State *l)
 		{
 			if constexpr(std::is_pointer_v<T>)
 				return static_cast<T>(get_game(l));
@@ -49,9 +48,9 @@ export namespace luabind {
 
 	// NetworkState
 	namespace detail {
-		DLLNETWORK NetworkState *get_network_state(lua_State *l);
+		DLLNETWORK NetworkState *get_network_state(lua::State *l);
 		template<typename T>
-		T get_network_state(lua_State *l)
+		T get_network_state(lua::State *l)
 		{
 			if constexpr(std::is_pointer_v<T>)
 				return static_cast<T>(get_network_state(l));
@@ -65,9 +64,9 @@ export namespace luabind {
 
 	// Engine
 	namespace detail {
-		DLLNETWORK pragma::Engine *get_engine(lua_State *l);
+		DLLNETWORK pragma::Engine *get_engine(lua::State *l);
 		template<typename T>
-		T get_engine(lua_State *l)
+		T get_engine(lua::State *l)
 		{
 			if constexpr(std::is_pointer_v<T>)
 				return static_cast<T>(get_engine(l));
@@ -81,9 +80,9 @@ export namespace luabind {
 
 	// Physics Environment
 	namespace detail {
-		DLLNETWORK pragma::physics::IEnvironment *get_physics_environment(lua_State *l);
+		DLLNETWORK pragma::physics::IEnvironment *get_physics_environment(lua::State *l);
 		template<typename T>
-		T get_physics_environment(lua_State *l)
+		T get_physics_environment(lua::State *l)
 		{
 			if constexpr(std::is_pointer_v<T>)
 				return static_cast<T>(get_physics_environment(l));
@@ -102,14 +101,14 @@ export namespace luabind {
 		enum { consumed_args = 1 };
 
 		template<class U>
-		T to_cpp(lua_State *L, U u, int index);
-		void to_lua(lua_State *L, T x);
+		T to_cpp(lua::State *L, U u, int index);
+		void to_lua(lua::State *L, T x);
 
 		template<class U>
-		int match(lua_State *L, U u, int index);
+		int match(lua::State *L, U u, int index);
 
 		template<class U>
-		void converter_postcall(lua_State *, U u, int)
+		void converter_postcall(lua::State *, U u, int)
 		{
 		}
 	  private:
@@ -145,17 +144,17 @@ export namespace luabind {
 };
 
 export namespace luabind {
-	template<typename T, T (*FUNCTION)(lua_State *)>
+	template<typename T, T (*FUNCTION)(lua::State *)>
 	template<class U>
-	T parameter_emplacement_converter<T, FUNCTION>::to_cpp(lua_State *L, U, int /*index*/)
+	T parameter_emplacement_converter<T, FUNCTION>::to_cpp(lua::State *L, U, int /*index*/)
 	{
 		T p = FUNCTION(L);
 		return static_cast<T>(p);
 	}
 
-	template<typename T, T (*FUNCTION)(lua_State *)>
+	template<typename T, T (*FUNCTION)(lua::State *)>
 	template<class U>
-	int parameter_emplacement_converter<T, FUNCTION>::match(lua_State *, U, int /*index*/)
+	int parameter_emplacement_converter<T, FUNCTION>::match(lua::State *, U, int /*index*/)
 	{
 		return 0;
 	}
@@ -164,17 +163,17 @@ export namespace luabind {
 
 	template<typename T, typename TConverter>
 	template<class U>
-	T game_object_converter<T, TConverter>::to_cpp(lua_State *L, U u, int index)
+	T game_object_converter<T, TConverter>::to_cpp(lua::State *L, U u, int index)
 	{
 		return m_converter.to_cpp(L, u, index);
 	}
 
 	template<typename T, typename TConverter>
-	void game_object_converter<T, TConverter>::to_lua(lua_State *L, T x)
+	void game_object_converter<T, TConverter>::to_lua(lua::State *L, T x)
 	{
 		if constexpr(std::is_pointer_v<T>) {
 			if(!x)
-				lua_pushnil(L);
+				Lua::PushNil(L);
 			else
 				const_cast<T>(x)->GetLuaObject(L).push(L);
 		}
@@ -184,7 +183,7 @@ export namespace luabind {
 
 	template<typename T, typename TConverter>
 	template<class U>
-	int game_object_converter<T, TConverter>::match(lua_State *L, U u, int index)
+	int game_object_converter<T, TConverter>::match(lua::State *L, U u, int index)
 	{
 		return m_converter.match(L, u, index);
 	}

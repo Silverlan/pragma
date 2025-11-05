@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -437,7 +436,7 @@ double BaseTransformComponent::GetLastMoveTime() const { return m_tLastMoved; }
 /////////////////
 
 CEOnPoseChanged::CEOnPoseChanged(TransformChangeFlags changeFlags) : changeFlags {changeFlags} {}
-void CEOnPoseChanged::PushArguments(lua_State *l) { Lua::PushInt(l, umath::to_integral(changeFlags)); }
+void CEOnPoseChanged::PushArguments(lua::State *l) { Lua::PushInt(l, umath::to_integral(changeFlags)); }
 
 /////////////////
 
@@ -459,7 +458,7 @@ TraceData util::get_entity_trace_data(BaseTransformComponent &component)
 }
 
 CETeleport::CETeleport(const umath::Transform &originalPose, const umath::Transform &targetPose, const umath::Transform &deltaPose) : originalPose {originalPose}, targetPose {targetPose}, deltaPose {deltaPose} {}
-void CETeleport::PushArguments(lua_State *l)
+void CETeleport::PushArguments(lua::State *l)
 {
 	Lua::Push(l, originalPose);
 	Lua::Push(l, targetPose);

@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 module pragma.shared;
 
@@ -16,14 +15,14 @@ bool pragma::physics::IBase::IsConstraint() const { return false; }
 bool pragma::physics::IBase::IsCollisionObject() const { return false; }
 bool pragma::physics::IBase::IsController() const { return false; }
 
-luabind::object &pragma::physics::IBase::GetLuaObject(lua_State *lua)
+luabind::object &pragma::physics::IBase::GetLuaObject(lua::State *lua)
 {
 	if(!m_luaObj) // Lazy initialization
 		InitializeLuaObject(lua);
 	return *m_luaObj;
 }
-const luabind::object &pragma::physics::IBase::GetLuaObject(lua_State *lua) const { return const_cast<IBase *>(this)->GetLuaObject(lua); }
-void pragma::physics::IBase::Push(lua_State *l) { m_luaObj->push(l); }
+const luabind::object &pragma::physics::IBase::GetLuaObject(lua::State *lua) const { return const_cast<IBase *>(this)->GetLuaObject(lua); }
+void pragma::physics::IBase::Push(lua::State *l) { m_luaObj->push(l); }
 void pragma::physics::IBase::SetUserData(void *userData) const
 {
 	if(m_userData)
@@ -40,7 +39,7 @@ void pragma::physics::IBase::OnRemove()
 	m_handle = decltype(m_handle) {};
 }
 
-void pragma::physics::IBase::InitializeLuaObject(lua_State *lua) { InitializeLuaObject<IBase>(lua); }
+void pragma::physics::IBase::InitializeLuaObject(lua::State *lua) { InitializeLuaObject<IBase>(lua); }
 
 pragma::physics::IBase::IBase(IEnvironment &env) : m_physEnv {env} {}
 void pragma::physics::IBase::InitializeLuaHandle(const util::TWeakSharedHandle<IBase> &handle) { m_handle = handle; }

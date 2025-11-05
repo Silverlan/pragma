@@ -5,7 +5,6 @@ module;
 
 
 #include "noise/noise.h"
-#include "pragma/lua/core.hpp"
 
 // import pragma.scripting.lua;
 
@@ -31,18 +30,18 @@ module pragma.shared;
 
 import :network_state;
 
-static int32_t include(lua_State *l)
+static int32_t include(lua::State *l)
 {
 	std::string path = Lua::CheckString(l, 1);
 	auto ignoreGlobalCache = false;
 	if(Lua::IsSet(l, 2))
 		ignoreGlobalCache = Lua::CheckBool(l, 2);
-	auto flags = pragma::scripting::lua::IncludeFlags::Default;
-	umath::set_flag(flags, pragma::scripting::lua::IncludeFlags::IgnoreGlobalCache, ignoreGlobalCache);
+	auto flags = pragma::scripting::lua_core::IncludeFlags::Default;
+	umath::set_flag(flags, pragma::scripting::lua_core::IncludeFlags::IgnoreGlobalCache, ignoreGlobalCache);
 
-	auto result = pragma::scripting::lua::include(l, path, flags);
+	auto result = pragma::scripting::lua_core::include(l, path, flags);
 	if(result.statusCode != Lua::StatusCode::Ok) {
-		pragma::scripting::lua::raise_error(l, result.errorMessage); // Propagate the error on top of the stack
+		pragma::scripting::lua_core::raise_error(l, result.errorMessage); // Propagate the error on top of the stack
 		// Unreachable
 		return 0;
 	}
@@ -51,14 +50,14 @@ static int32_t include(lua_State *l)
 	return result.numResults;
 }
 
-static int32_t exec(lua_State *l)
+static int32_t exec(lua::State *l)
 {
 	std::string path = Lua::CheckString(l, 1);
 	std::string errMsg;
 	auto stackTop = Lua::GetStackTop(l);
-	auto statusCode = pragma::scripting::lua::execute_file(l, path, &errMsg);
+	auto statusCode = pragma::scripting::lua_core::execute_file(l, path, &errMsg);
 	if(statusCode != Lua::StatusCode::Ok) {
-		pragma::scripting::lua::raise_error(l, errMsg); // Propagate the error on top of the stack
+		pragma::scripting::lua_core::raise_error(l, errMsg); // Propagate the error on top of the stack
 		// Unreachable
 		return 0;
 	}
@@ -76,7 +75,7 @@ void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 	lua_register(lua.GetState(), "exec", &exec);
 
 	luabind::module(lua.GetState())[luabind::def("get_script_path", Lua::global::get_script_path)];
-	lua_register(lua.GetState(), "toboolean", static_cast<int32_t (*)(lua_State *)>([](lua_State *l) -> int32_t {
+	lua_register(lua.GetState(), "toboolean", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
 		if(Lua::IsBool(l, 1)) {
 			Lua::PushBool(l, Lua::CheckBool(l, 1));
 			return 1;
@@ -90,7 +89,7 @@ void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 		Lua::PushBool(l, b);
 		return 1;
 	}));
-	lua_register(lua.GetState(), "toint", static_cast<int32_t (*)(lua_State *)>([](lua_State *l) -> int32_t {
+	lua_register(lua.GetState(), "toint", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
 		if(Lua::IsBool(l, 1)) {
 			Lua::PushInt(l, Lua::CheckBool(l, 1) ? 1 : 0);
 			return 1;
@@ -174,7 +173,7 @@ void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 	  });
 }
 
-static pragma::ecs::BaseEntity *find_entity(lua_State *l, pragma::Game &game, luabind::object o)
+static pragma::ecs::BaseEntity *find_entity(lua::State *l, pragma::Game &game, luabind::object o)
 {
 	pragma::ecs::BaseEntity *ent = nullptr;
 	auto idx = luabind::object_cast_nothrow<int>(o, -1);
@@ -239,7 +238,7 @@ void pragma::Game::RegisterLuaGlobals()
 {
 	NetworkState::RegisterSharedLuaGlobals(GetLuaInterface());
 
-	lua_register(GetLuaState(), "include_component", static_cast<int32_t (*)(lua_State *)>([](lua_State *l) -> int32_t {
+	lua_register(GetLuaState(), "include_component", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
 		std::string componentName = Lua::CheckString(l, 1);
 		auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 		auto *game = nw->GetGameState();
@@ -420,7 +419,7 @@ void pragma::Game::RegisterLuaGlobals()
 
 	auto enableShorthand = Lua::get_extended_lua_modules_enabled();
 	if(enableShorthand) {
-		luabind::globals(l)["ec"] = luabind::make_function(l, static_cast<luabind::object (*)(lua_State *, luabind::object, luabind::object)>([](lua_State *l, luabind::object o, luabind::object o2) -> luabind::object {
+		luabind::globals(l)["ec"] = luabind::make_function(l, static_cast<luabind::object (*)(lua::State *, luabind::object, luabind::object)>([](lua::State *l, luabind::object o, luabind::object o2) -> luabind::object {
 			auto &nw = *pragma::Engine::Get()->GetNetworkState(l);
 			auto *game = nw.GetGameState();
 			if(!game)
@@ -463,7 +462,7 @@ void pragma::Game::RegisterLuaGlobals()
 			}
 			return {};
 		}));
-		luabind::globals(l)["e"] = luabind::make_function(l, static_cast<luabind::object (*)(lua_State *, luabind::object)>([](lua_State *l, luabind::object o) -> luabind::object {
+		luabind::globals(l)["e"] = luabind::make_function(l, static_cast<luabind::object (*)(lua::State *, luabind::object)>([](lua::State *l, luabind::object o) -> luabind::object {
 			auto &nw = *pragma::Engine::Get()->GetNetworkState(l);
 			auto *game = nw.GetGameState();
 			if(!game)

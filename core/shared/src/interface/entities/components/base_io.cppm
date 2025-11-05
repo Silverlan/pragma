@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.base_io;
@@ -16,7 +15,7 @@ export {
 	namespace pragma {
 		struct DLLNETWORK CEInputData : public ComponentEvent {
 			CEInputData(const std::string &input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, const std::string &data);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			const std::string &input;
 			pragma::ecs::BaseEntity *const activator;
 			pragma::ecs::BaseEntity *const caller;

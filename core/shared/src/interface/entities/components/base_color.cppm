@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.base_color;
@@ -15,7 +14,7 @@ export import pragma.util;
 export namespace pragma {
 	struct DLLNETWORK CEOnColorChanged : public ComponentEvent {
 		CEOnColorChanged(const Vector4 &oldColor, const Vector4 &color);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		const Vector4 &oldColor;
 		const Vector4 &color;
 	};

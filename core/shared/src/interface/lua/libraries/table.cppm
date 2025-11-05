@@ -2,16 +2,17 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.shared:scripting.lua.libraries.table;
 
+export import pragma.lua;
+
 export namespace Lua {
 	namespace table {
-		DLLNETWORK int has_value(lua_State *l);
-		DLLNETWORK int random(lua_State *l);
-		DLLNETWORK int is_empty(lua_State *l);
-		DLLNETWORK int count(lua_State *l);
+		DLLNETWORK int has_value(lua::State *l);
+		DLLNETWORK int random(lua::State *l);
+		DLLNETWORK int is_empty(lua::State *l);
+		DLLNETWORK int count(lua::State *l);
 	};
 };

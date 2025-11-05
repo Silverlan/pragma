@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.gravity;
@@ -37,7 +36,7 @@ export namespace pragma {
 
 	class DLLNETWORK GravityComponent final : public BaseEntityComponent, public BaseGravity {
 	  public:
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 		
 		GravityComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
@@ -53,7 +52,7 @@ export namespace pragma {
 		virtual Vector3 GetGravityForce() const override;
 
 		bool CalcBallisticVelocity(const Vector3 &origin, const Vector3 &destPos, float fireAngle, float maxSpeed, float spread, float maxPitch, float maxYaw, Vector3 &vel) const;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  private:
 		void OnPhysicsInitialized();
 		void ApplyGravity(double dt);

@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "sharedutils/ctpl_stl.h"
+#include "definitions.hpp"
 
 export module pragma.shared:util.thread_pool;
+
+export import pragma.lua;
 
 export namespace pragma {
 	class DLLNETWORK ThreadPool {

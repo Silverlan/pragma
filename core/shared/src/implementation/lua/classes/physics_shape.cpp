@@ -3,13 +3,12 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 module pragma.shared;
 
 import :scripting.lua.classes.physics;
 
-void Lua::PhysShape::register_class(lua_State *l, luabind::module_ &mod)
+void Lua::PhysShape::register_class(lua::State *l, luabind::module_ &mod)
 {
 	auto classDef = luabind::class_<pragma::physics::IShape, pragma::physics::IBase>("Shape");
 	classDef.def(
@@ -66,7 +65,7 @@ void Lua::PhysShape::register_class(lua_State *l, luabind::module_ &mod)
 #if 0
 	// Bullet triangle mesh deformation
 	// This is unstable and can cause the game to crash
-	triangleShapeClassDef.def("Test",static_cast<void(*)(lua_State*,LPhysTriangleShape&,EntityHandle&,PhysRigidBodyHandle&,std::shared_ptr<pragma::ModelSubMesh>&,const Vector3&,float,float)>([](lua_State *l,LPhysTriangleShape &shape,EntityHandle &hEnt,PhysRigidBodyHandle &hBody,std::shared_ptr<pragma::ModelSubMesh> &subMesh,const Vector3 &origin,float radius,float power) {
+	triangleShapeClassDef.def("Test",static_cast<void(*)(lua::State*,LPhysTriangleShape&,EntityHandle&,PhysRigidBodyHandle&,std::shared_ptr<pragma::ModelSubMesh>&,const Vector3&,float,float)>([](lua::State *l,LPhysTriangleShape &shape,EntityHandle &hEnt,PhysRigidBodyHandle &hBody,std::shared_ptr<pragma::ModelSubMesh> &subMesh,const Vector3 &origin,float radius,float power) {
 		auto *iva = static_cast<PhysTriangleShape*>(shape.get())->GetBtIndexVertexArray();
 		if(iva == nullptr)
 			return;

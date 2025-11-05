@@ -2,14 +2,12 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
-#include <sharedutils/magic_enum.hpp>
 
 module pragma.shared;
 
 import :scripting.lua.classes.parallel_job;
 
-using namespace pragma::lua;
+using namespace pragma::LuaCore;
 
 LuaWorker::LuaWorker(pragma::Game &game, const std::string &name) : m_workerName {name}
 {
@@ -61,7 +59,7 @@ void LuaWorker::AddTask(const luabind::object &subJob, const Lua::func<bool> &on
 		auto *l = onCompleteTask.interpreter();
 		auto r = Lua::CallFunction(
 		  l,
-		  [this, &onCompleteTask](lua_State *l) -> Lua::StatusCode {
+		  [this, &onCompleteTask](lua::State *l) -> Lua::StatusCode {
 			  onCompleteTask.push(l);
 			  luabind::object o {l, this};
 			  o.push(l);
@@ -114,7 +112,7 @@ void LuaWorker::AddLuaTask(const std::shared_ptr<util::ParallelJob<luabind::obje
 		auto *l = onCompleteTask.interpreter();
 		auto r = Lua::CallFunction(
 		  l,
-		  [this, &onCompleteTask](lua_State *l) -> Lua::StatusCode {
+		  [this, &onCompleteTask](lua::State *l) -> Lua::StatusCode {
 			  onCompleteTask.push(l);
 			  luabind::object o {l, this};
 			  o.push(l);
@@ -141,7 +139,7 @@ void LuaWorker::AddLuaTask(const Lua::func<TaskStatus> &luaFunc, const Lua::func
 		auto *l = luaFunc.interpreter();
 		auto r = Lua::CallFunction(
 		  l,
-		  [this, &luaFunc](lua_State *l) -> Lua::StatusCode {
+		  [this, &luaFunc](lua::State *l) -> Lua::StatusCode {
 			  luaFunc.push(l);
 			  luabind::object o {l, this};
 			  o.push(l);
@@ -178,7 +176,7 @@ void LuaWorker::AddLuaTask(const Lua::func<TaskStatus> &luaFunc, const Lua::func
 		auto *l = cancelFunc.interpreter();
 		auto r = Lua::CallFunction(
 		  l,
-		  [this, &cancelFunc](lua_State *l) -> Lua::StatusCode {
+		  [this, &cancelFunc](lua::State *l) -> Lua::StatusCode {
 			  cancelFunc.push(l);
 			  luabind::object o {l, this};
 			  o.push(l);
@@ -219,7 +217,7 @@ void LuaWorker::CallOnComplete(const Lua::func<void> &func)
 		auto *l = func.interpreter();
 		auto r = Lua::CallFunction(
 		  l,
-		  [this, &func](lua_State *l) -> Lua::StatusCode {
+		  [this, &func](lua::State *l) -> Lua::StatusCode {
 			  func.push(l);
 			  luabind::object o {l, this};
 			  o.push(l);
@@ -286,7 +284,7 @@ void LuaWorker::Update()
 			auto *l = m_progressCallback->interpreter();
 			auto r = Lua::CallFunction(
 			  l,
-			  [this, progress](lua_State *l) -> Lua::StatusCode {
+			  [this, progress](lua::State *l) -> Lua::StatusCode {
 				  m_progressCallback->push(l);
 				  luabind::object o {l, this};
 				  o.push(l);

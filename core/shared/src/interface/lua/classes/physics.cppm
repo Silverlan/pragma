@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.shared:scripting.lua.classes.physics;
 
@@ -15,19 +14,19 @@ export {
 			DLLNETWORK void register_library(Lua::Interface &lua);
 		};
 		namespace PhysShape {
-			DLLNETWORK void register_class(lua_State *l, luabind::module_ &mod);
+			DLLNETWORK void register_class(lua::State *l, luabind::module_ &mod);
 		};
 		namespace PhysCollisionObj {
-			DLLNETWORK void register_class(lua_State *l, luabind::module_ &mod);
+			DLLNETWORK void register_class(lua::State *l, luabind::module_ &mod);
 		};
 		namespace PhysContact {
-			DLLNETWORK void register_class(lua_State *l, luabind::module_ &mod);
+			DLLNETWORK void register_class(lua::State *l, luabind::module_ &mod);
 		};
 	};
 
 	namespace Lua {
 		namespace PhysConstraint {
-			DLLNETWORK void register_class(lua_State *l, luabind::module_ &mod);
+			DLLNETWORK void register_class(lua::State *l, luabind::module_ &mod);
 		};
 	};
 };

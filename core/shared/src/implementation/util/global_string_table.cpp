@@ -5,7 +5,7 @@ module;
 
 
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
 module pragma.shared;
 

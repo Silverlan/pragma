@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -76,7 +75,7 @@ void BaseRadiusComponent::SetRadius(float radius)
 //////////////
 
 CEOnRadiusChanged::CEOnRadiusChanged(float oldRadius, float newRadius) : oldRadius {oldRadius}, newRadius {newRadius} {}
-void CEOnRadiusChanged::PushArguments(lua_State *l)
+void CEOnRadiusChanged::PushArguments(lua::State *l)
 {
 	Lua::PushNumber(l, oldRadius);
 	Lua::PushNumber(l, newRadius);

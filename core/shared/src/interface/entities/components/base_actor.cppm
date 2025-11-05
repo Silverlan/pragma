@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 
@@ -18,7 +17,7 @@ import :physics.object;
 export namespace pragma {
 	struct DLLNETWORK CEOnCharacterKilled : public ComponentEvent {
 		CEOnCharacterKilled(DamageInfo *damageInfo);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		DamageInfo *damageInfo;
 	};
 		namespace baseActorComponent {

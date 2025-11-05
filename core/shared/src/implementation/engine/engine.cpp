@@ -2,12 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/logging.hpp"
-#include <spdlog/pattern_formatter.h>
+#include "definitions.hpp"
 #include <cassert>
+#include <cstdlib>
 
 #ifdef __linux__
 #include <pthread.h>
@@ -696,7 +694,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	if(f) {
 		spdlog::info("Git Info:");
 		auto str = f->ReadString();
-		ustring::replace(str, "\n", spdlog::details::os::default_eol);
+		ustring::replace(str, "\n", spdlog::details::default_eol);
 		spdlog::info(str);
 	}
 
@@ -876,7 +874,7 @@ void pragma::Engine::RunLaunchCommands()
 	m_launchCommands.clear();
 }
 
-Lua::Interface *pragma::Engine::GetLuaInterface(lua_State *l)
+Lua::Interface *pragma::Engine::GetLuaInterface(lua::State *l)
 {
 	auto *sv = GetServerNetworkState();
 	if(sv == nullptr)
@@ -889,7 +887,7 @@ Lua::Interface *pragma::Engine::GetLuaInterface(lua_State *l)
 	return nullptr;
 }
 
-NetworkState *pragma::Engine::GetNetworkState(lua_State *l)
+NetworkState *pragma::Engine::GetNetworkState(lua::State *l)
 {
 	auto *sv = GetServerNetworkState();
 	if(sv == nullptr)
@@ -1107,7 +1105,7 @@ void pragma::Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 	};
 	fWriteConvars(GetConVars(), "cvars_en.txt");
 
-	auto fWriteLuaTraceback = [&zip](lua_State *l, const std::string &identifier) {
+	auto fWriteLuaTraceback = [&zip](lua::State *l, const std::string &identifier) {
 		if(!l)
 			return;
 		std::stringstream ss;

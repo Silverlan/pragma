@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -20,7 +19,7 @@ LogicComponent::LogicComponent(pragma::ecs::BaseEntity &ent) : BaseEntityCompone
 void LogicComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void LogicComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
 void LogicComponent::OnEntitySpawn() { BaseEntityComponent::OnEntitySpawn(); }
-void LogicComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void LogicComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void LogicComponent::OnTick(double dt)
 {
@@ -55,4 +54,4 @@ void LogicComponent::OnTick(double dt)
 //////////
 
 CEOnTick::CEOnTick(double dt) : deltaTime(dt) {}
-void CEOnTick::PushArguments(lua_State *l) { Lua::PushNumber(l, deltaTime); }
+void CEOnTick::PushArguments(lua::State *l) { Lua::PushNumber(l, deltaTime); }

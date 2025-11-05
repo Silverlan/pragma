@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/logging.hpp"
 
 //#define ENABLE_DEPRECATED_PHYSICS
 

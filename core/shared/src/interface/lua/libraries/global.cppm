@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.shared:scripting.lua.libraries.global;
 
-export DLLNETWORK int Lua_RegisterCSLuaFile(lua_State *l);
+export import pragma.lua;
+
+export DLLNETWORK int Lua_RegisterCSLuaFile(lua::State *l);

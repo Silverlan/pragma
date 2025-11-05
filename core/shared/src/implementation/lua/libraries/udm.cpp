@@ -3,8 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
-#include <sharedutils/magic_enum.hpp>
 #include <cassert>
 
 module pragma.shared;
@@ -167,7 +165,7 @@ void Lua::udm::table_to_udm(const Lua::tb<void> &t, ::udm::LinkedPropertyWrapper
 		}
 	}
 }
-luabind::object Lua::udm::udm_to_value(lua_State *l, ::udm::LinkedPropertyWrapperArg udm)
+luabind::object Lua::udm::udm_to_value(lua::State *l, ::udm::LinkedPropertyWrapperArg udm)
 {
 	auto type = udm.GetType();
 	if(::udm::is_array_type(type)) {
@@ -300,7 +298,7 @@ static std::string serialize(::udm::PropertyWrapper &p)
 	return ss.str();
 }
 
-static Lua::var<::udm::PProperty, std::pair<bool, std::string>> deserialize(lua_State *l, const std::string &str)
+static Lua::var<::udm::PProperty, std::pair<bool, std::string>> deserialize(lua::State *l, const std::string &str)
 {
 	auto memFile = std::make_unique<::ufile::MemoryFile>(reinterpret_cast<uint8_t *>(const_cast<char *>(str.data())), str.size());
 	std::shared_ptr<::udm::Data> data = nullptr;
@@ -313,7 +311,7 @@ static Lua::var<::udm::PProperty, std::pair<bool, std::string>> deserialize(lua_
 	return luabind::object {l, data->GetAssetData().GetData().ClaimOwnership()};
 }
 
-static Lua::var<Lua::mult<bool, std::string>, ::udm::Data> create(lua_State *l, ::udm::PProperty rootProp, std::optional<std::string> assetType, std::optional<uint32_t> assetVersion)
+static Lua::var<Lua::mult<bool, std::string>, ::udm::Data> create(lua::State *l, ::udm::PProperty rootProp, std::optional<std::string> assetType, std::optional<uint32_t> assetVersion)
 {
 	try {
 		auto udmData = ::udm::Data::Create(assetType.has_value() ? *assetType : "", assetVersion.has_value() ? *assetVersion : 1);
@@ -362,7 +360,7 @@ static void set_numeric_component(T &value, int32_t idx, lua_udm_underlying_nume
 	udm::set_numeric_component(value, idx, compVal);
 }
 
-static Lua::type<uint32_t> get_numeric_component(lua_State *l, const luabind::object &value, int32_t idx, udm::Type type)
+static Lua::type<uint32_t> get_numeric_component(lua::State *l, const luabind::object &value, int32_t idx, udm::Type type)
 {
 	type = (type != udm::Type::Invalid) ? type : Lua::udm::determine_udm_type(value);
 	if(type == udm::Type::Invalid)
@@ -377,7 +375,7 @@ static Lua::type<uint32_t> get_numeric_component(lua_State *l, const luabind::ob
 	});
 }
 
-static luabind::object set_numeric_component(lua_State *l, const luabind::object &value, int32_t idx, udm::Type type, const Lua::udm_numeric &componentValue)
+static luabind::object set_numeric_component(lua::State *l, const luabind::object &value, int32_t idx, udm::Type type, const Lua::udm_numeric &componentValue)
 {
 	type = (type != udm::Type::Invalid) ? type : Lua::udm::determine_udm_type(value);
 	if(type == udm::Type::Invalid)
@@ -396,7 +394,7 @@ static luabind::object set_numeric_component(lua_State *l, const luabind::object
 	});
 }
 
-static Lua::udm_ng lerp_value(lua_State *l, const luabind::object &value0, const luabind::object &value1, float t, udm::Type type)
+static Lua::udm_ng lerp_value(lua::State *l, const luabind::object &value0, const luabind::object &value1, float t, udm::Type type)
 {
 	type = (type != udm::Type::Invalid) ? type : Lua::udm::determine_udm_type(value0);
 	if(type == udm::Type::Invalid)
@@ -420,7 +418,7 @@ static bool is_supported_array_value_type(::udm::Type valueType, ::udm::ArrayTyp
 	return false;
 }
 
-static bool is_same_element(lua_State *l, ::udm::LinkedPropertyWrapper &prop0, ::udm::LinkedPropertyWrapper &prop1)
+static bool is_same_element(lua::State *l, ::udm::LinkedPropertyWrapper &prop0, ::udm::LinkedPropertyWrapper &prop1)
 {
 	auto *el0 = prop0.GetValuePtr<::udm::Element>();
 	auto *el1 = prop1.GetValuePtr<::udm::Element>();
@@ -461,14 +459,14 @@ void Lua::udm::register_library(Lua::Interface &lua)
 {
 	auto modUdm = luabind::module(lua.GetState(), "udm");
 	modUdm[(
-		luabind::def("load",+[](lua_State *l,const std::string &fileName) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
+		luabind::def("load",+[](lua::State *l,const std::string &fileName) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
 			std::string err;
 			auto udmData = ::util::load_udm_asset(fileName,&err);
 			if(udmData == nullptr)
 				return Lua::mult<bool,std::string>{l,false,std::move(err)};
 			return luabind::object{l,udmData};
 		}),
-		luabind::def("load",+[](lua_State *l,LFile &file) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
+		luabind::def("load",+[](lua::State *l,LFile &file) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
 			if(!file.GetHandle())
 				return Lua::mult<bool,std::string>{l,false,"Invalid file handle!"};
 			std::string err;
@@ -477,7 +475,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 				return Lua::mult<bool,std::string>{l,false,std::move(err)};
 			return luabind::object{l,udmData};
 		}),
-		luabind::def("parse",+[](lua_State *l,const std::string &udmStr) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
+		luabind::def("parse",+[](lua::State *l,const std::string &udmStr) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
 			auto memFile = std::make_unique<ufile::MemoryFile>(reinterpret_cast<uint8_t*>(const_cast<char*>(udmStr.data())),udmStr.length());
 			std::string err;
 			auto udmData = ::util::load_udm_asset(std::move(memFile),&err);
@@ -485,7 +483,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 				return Lua::mult<bool,std::string>{l,false,std::move(err)};
 			return luabind::object{l,udmData};
 		}),
-		luabind::def("open",+[](lua_State *l,const std::string &fileName) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
+		luabind::def("open",+[](lua::State *l,const std::string &fileName) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
 			try
 			{
 				auto udmData = ::udm::Data::Open(fileName);
@@ -496,7 +494,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 				return Lua::mult<bool,std::string>{l,false,e.what()};
 			}
 		}),
-		luabind::def("open",+[](lua_State *l,LFile &file) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
+		luabind::def("open",+[](lua::State *l,LFile &file) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
 			try
 			{
 				auto udmData = ::udm::Data::Open(std::make_unique<ufile::FileWrapper>(file.GetHandle()));
@@ -508,26 +506,26 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			}
 		}),
 		luabind::def("create",&create),
-		luabind::def("create",+[](lua_State *l,::udm::PProperty rootProp,std::optional<std::string> assetType) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
+		luabind::def("create",+[](lua::State *l,::udm::PProperty rootProp,std::optional<std::string> assetType) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
 			return create(l,rootProp,assetType,{});
 		}),
-		luabind::def("create",+[](lua_State *l,::udm::PProperty rootProp) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
+		luabind::def("create",+[](lua::State *l,::udm::PProperty rootProp) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
 			return create(l,rootProp,{},{});
 		}),
-		luabind::def("create",+[](lua_State *l) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
+		luabind::def("create",+[](lua::State *l) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
 			return create(l,nullptr,{},{});
 		}),
-		luabind::def("create",+[](lua_State *l,std::optional<std::string> assetType,std::optional<uint32_t> assetVersion) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
+		luabind::def("create",+[](lua::State *l,std::optional<std::string> assetType,std::optional<uint32_t> assetVersion) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
 			return create(l,nullptr,assetType,assetVersion);
 		}),
-		luabind::def("create",+[](lua_State *l,std::optional<std::string> assetType) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
+		luabind::def("create",+[](lua::State *l,std::optional<std::string> assetType) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
 			return create(l,nullptr,assetType,{});
 		}),
 		luabind::def("create_property",static_cast<::udm::PProperty(*)(::udm::Type)>(&::udm::Property::Create)),
-		luabind::def("create_element",+[](lua_State *l) -> ::udm::PProperty {
+		luabind::def("create_element",+[](lua::State *l) -> ::udm::PProperty {
 			return ::udm::Property::Create(::udm::Type::Element);
 		}),
-		luabind::def("compress_lz4",+[](lua_State *l,::util::DataStream ds) -> ::util::DataStream {
+		luabind::def("compress_lz4",+[](lua::State *l,::util::DataStream ds) -> ::util::DataStream {
 			auto offset = ds->GetOffset();
 			ds->SetOffset(0);
 			auto lz4Blob = ::udm::compress_lz4_blob(ds->GetData(),ds->GetInternalSize());
@@ -596,7 +594,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		luabind::def("deserialize",&::deserialize),
 		luabind::def("is_supported_array_value_type",&is_supported_array_value_type),
 		luabind::def("is_supported_array_value_type",&is_supported_array_value_type,luabind::default_parameter_policy<2,::udm::ArrayType::Raw>{}),
-		luabind::def("convert",+[](lua_State *l,const luabind::object &o0,::udm::Type t0,::udm::Type t1) -> luabind::object {
+		luabind::def("convert",+[](lua::State *l,const luabind::object &o0,::udm::Type t0,::udm::Type t1) -> luabind::object {
 			return ::udm::visit<true,true,true>(t0,[l,&o0,t1](auto tag){
                 using T0 = typename decltype(tag)::type;
 				if constexpr(pragma::is_valid_component_property_type(::udm::type_to_enum<T0>()))
@@ -699,7 +697,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		luabind::def("is_array_type",+[](::udm::Type type) -> bool {
 			return ::udm::is_array_type(type);
 		}),
-		luabind::def("get_class_type",+[](lua_State *l,::udm::Type type) -> luabind::object {
+		luabind::def("get_class_type",+[](lua::State *l,::udm::Type type) -> luabind::object {
 			switch(type)
 			{
 			case ::udm::Type::Vector2:
@@ -734,37 +732,37 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			static_assert(umath::to_integral(::udm::Type::Count) == 36,"Update this when types have been added or removed!");
 			return Lua::nil;
 		}),
-		luabind::def("get_numeric_component",+[](lua_State *l,const luabind::object &value,int32_t idx) -> Lua::type<uint32_t> {
+		luabind::def("get_numeric_component",+[](lua::State *l,const luabind::object &value,int32_t idx) -> Lua::type<uint32_t> {
 			return get_numeric_component(l,value,idx,::udm::Type::Invalid);
 		}),
-		luabind::def("get_numeric_component",static_cast<Lua::type<uint32_t>(*)(lua_State*,const luabind::object&,int32_t,::udm::Type)>(&get_numeric_component)),
-		luabind::def("set_numeric_component",static_cast<luabind::object(*)(lua_State*,const luabind::object&,int32_t,::udm::Type, const Lua::udm_numeric&)>(&set_numeric_component)),
-		luabind::def("lerp",+[](lua_State *l,const luabind::object &value0,const luabind::object &value1,float t) -> Lua::udm_ng {
+		luabind::def("get_numeric_component",static_cast<Lua::type<uint32_t>(*)(lua::State*,const luabind::object&,int32_t,::udm::Type)>(&get_numeric_component)),
+		luabind::def("set_numeric_component",static_cast<luabind::object(*)(lua::State*,const luabind::object&,int32_t,::udm::Type, const Lua::udm_numeric&)>(&set_numeric_component)),
+		luabind::def("lerp",+[](lua::State *l,const luabind::object &value0,const luabind::object &value1,float t) -> Lua::udm_ng {
 			return lerp_value(l,value0,value1,t,::udm::Type::Invalid);
 		}),
-		luabind::def("lerp",static_cast<Lua::udm_ng(*)(lua_State*,const luabind::object&,const luabind::object&,float,::udm::Type)>(&::lerp_value)),
-		luabind::def("get_format_type",+[](lua_State *l,const std::string &fileName) -> Lua::var<::udm::FormatType,Lua::mult<bool,std::string>> {
+		luabind::def("lerp",static_cast<Lua::udm_ng(*)(lua::State*,const luabind::object&,const luabind::object&,float,::udm::Type)>(&::lerp_value)),
+		luabind::def("get_format_type",+[](lua::State *l,const std::string &fileName) -> Lua::var<::udm::FormatType,Lua::mult<bool,std::string>> {
 			std::string err;
 			auto formatType = ::udm::Data::GetFormatType(fileName, err);
 			if(!formatType)
 				return luabind::object{l,std::pair<bool,std::string>{false,err}};
 			return luabind::object{l,*formatType};
 		}),
-		luabind::def("convert_udm_file_to_ascii",+[](lua_State *l,const std::string &fileName) -> Lua::var<std::string,Lua::mult<bool,std::string>> {
+		luabind::def("convert_udm_file_to_ascii",+[](lua::State *l,const std::string &fileName) -> Lua::var<std::string,Lua::mult<bool,std::string>> {
 			std::string err;
 			auto newFileName = ::util::convert_udm_file_to_ascii(fileName, err);
 		    if(!newFileName)
 				return luabind::object{l,std::pair<bool,std::string>{false,err}};
 			return luabind::object{l,*newFileName};
 		}),
-		luabind::def("convert_udm_file_to_binary",+[](lua_State *l,const std::string &fileName) -> Lua::var<std::string,Lua::mult<bool,std::string>> {
+		luabind::def("convert_udm_file_to_binary",+[](lua::State *l,const std::string &fileName) -> Lua::var<std::string,Lua::mult<bool,std::string>> {
 			std::string err;
 			auto newFileName = ::util::convert_udm_file_to_binary(fileName, err);
 		    if(!newFileName)
 				return luabind::object{l,std::pair<bool,std::string>{false,err}};
 			return luabind::object{l,*newFileName};
 		}),
-		luabind::def("get_default_value",+[](lua_State *l,::udm::Type type) -> luabind::object {
+		luabind::def("get_default_value",+[](lua::State *l,::udm::Type type) -> luabind::object {
 			return ::udm::visit<true,true,true>(type,[l,type](auto tag){
                 using T = typename decltype(tag)::type;
 				if constexpr(!::udm::is_non_trivial_type(::udm::type_to_enum<T>()))
@@ -773,7 +771,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 					return Lua::nil;
 			});
 		}),
-		luabind::def("get_underlying_numeric_type",+[](lua_State *l,::udm::Type type) -> ::udm::Type {
+		luabind::def("get_underlying_numeric_type",+[](lua::State *l,::udm::Type type) -> ::udm::Type {
 			return ::udm::visit_ng(type,[l,type](auto tag){
                 using T = typename decltype(tag)::type;
 				return ::udm::type_to_enum<lua_udm_underlying_numeric_type<T>>();

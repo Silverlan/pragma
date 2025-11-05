@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:engine;
@@ -175,8 +174,8 @@ export {
 			void ConsoleInput(const std::string_view &line, bool printLine = true);
 			void ProcessConsoleInput(const std::string_view &line, KeyState pressState = KeyState::Press, float magnitude = 1.f);
 			// Lua
-			virtual NetworkState *GetNetworkState(lua_State *l);
-			virtual Lua::Interface *GetLuaInterface(lua_State *l);
+			virtual NetworkState *GetNetworkState(lua::State *l);
+			virtual Lua::Interface *GetLuaInterface(lua::State *l);
 
 			// Log
 			void WriteToLog(const std::string &str);

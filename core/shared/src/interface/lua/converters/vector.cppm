@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 #include <cassert>
 
 
@@ -16,18 +15,18 @@ export namespace luabind {
 		enum { consumed_args = 1 };
 
 		template<typename U>
-		std::vector<T> to_cpp(lua_State *L, U u, int index);
+		std::vector<T> to_cpp(lua::State *L, U u, int index);
 
 		template<class U>
-		static int match(lua_State *l, U u, int index);
+		static int match(lua::State *l, U u, int index);
 
 		template<class U>
-		void converter_postcall(lua_State *, U u, int)
+		void converter_postcall(lua::State *, U u, int)
 		{
 		}
 
-		void to_lua(lua_State *L, std::vector<T> const &x);
-		void to_lua(lua_State *L, std::vector<T> *x);
+		void to_lua(lua::State *L, std::vector<T> const &x);
+		void to_lua(lua::State *L, std::vector<T> *x);
 	};
 
 	template<typename T>
@@ -48,18 +47,18 @@ export namespace luabind {
 		enum { consumed_args = 1 };
 
 		template<typename U>
-		TMap to_cpp(lua_State *L, U u, int index);
+		TMap to_cpp(lua::State *L, U u, int index);
 
 		template<class U>
-		static int match(lua_State *l, U u, int index);
+		static int match(lua::State *l, U u, int index);
 
 		template<class U>
-		void converter_postcall(lua_State *, U u, int)
+		void converter_postcall(lua::State *, U u, int)
 		{
 		}
 
-		void to_lua(lua_State *L, TMap const &x);
-		void to_lua(lua_State *L, TMap *x);
+		void to_lua(lua::State *L, TMap const &x);
+		void to_lua(lua::State *L, TMap *x);
 	};
 
 	// std::map
@@ -95,17 +94,17 @@ export namespace luabind {
 		enum { consumed_args = 1 };
 
 		template<typename U>
-		std::array<T, SIZE> to_cpp(lua_State *L, U u, int index);
+		std::array<T, SIZE> to_cpp(lua::State *L, U u, int index);
 		template<class U>
-		static int match(lua_State *l, U u, int index);
+		static int match(lua::State *l, U u, int index);
 
 		template<class U>
-		void converter_postcall(lua_State *, U u, int)
+		void converter_postcall(lua::State *, U u, int)
 		{
 		}
 
-		void to_lua(lua_State *L, std::array<T, SIZE> const &x);
-		void to_lua(lua_State *L, std::array<T, SIZE> *x);
+		void to_lua(lua::State *L, std::array<T, SIZE> const &x);
+		void to_lua(lua::State *L, std::array<T, SIZE> *x);
 	};
 
 	template<typename T, size_t SIZE>
@@ -132,7 +131,7 @@ export {
 
 		template<typename T>
 		template<typename U>
-		std::vector<T> default_converter<std::vector<T>>::to_cpp(lua_State *L, U u, int index)
+		std::vector<T> default_converter<std::vector<T>>::to_cpp(lua::State *L, U u, int index)
 		{
 			default_converter<T> converter;
 
@@ -145,20 +144,20 @@ export {
 				o.push(L);
 				if(converter.match(L, decorate_type_t<T>(), -1) != no_match)
 					v.push_back(converter.to_cpp(L, decorate_type_t<T>(), -1));
-				lua_pop(L, 1);
+				Lua::Pop(L, 1);
 			}
 			return v;
 		}
 
 		template<typename T>
 		template<class U>
-		int default_converter<std::vector<T>>::match(lua_State *l, U u, int index)
+		int default_converter<std::vector<T>>::match(lua::State *l, U u, int index)
 		{
-			return lua_istable(l, index) ? 0 : no_match;
+			return Lua::IsTable(l, index) ? 0 : no_match;
 		}
 
 		template<typename T>
-		void default_converter<std::vector<T>>::to_lua(lua_State *L, std::vector<T> const &x)
+		void default_converter<std::vector<T>>::to_lua(lua::State *L, std::vector<T> const &x)
 		{
 			default_converter<T> converter;
 			auto t = newtable(L);
@@ -169,20 +168,20 @@ export {
 				if constexpr(std::is_fundamental_v<decltype(element)>)
 					t[index] = element;
 				else {
-					auto top = lua_gettop(L);
+					auto top = Lua::GetStackTop(L);
 					converter.to_lua(L, element);
 
-					auto num = lua_gettop(L) - top;
+					auto num = Lua::GetStackTop(L) - top;
 					if(num == 1)
-						lua_rawseti(L, -2, index);
+						Lua::SetTableValue(L, -2, index);
 					else {
 						// Multiple values, add as sub-table
 						auto subTable = newtable(L);
 						for(int i = 0; i < num; ++i)
 							subTable[i + 1] = object {from_stack(L, -num + i)};
-						lua_pop(L, num);
+						Lua::Pop(L, num);
 						subTable.push(L);
-						lua_rawseti(L, -2, index); // Add the sub-table to the main table
+						Lua::SetTableValue(L, -2, index); // Add the sub-table to the main table
 					}
 				}
 				++index;
@@ -190,7 +189,7 @@ export {
 		}
 
 		template<typename T>
-		void default_converter<std::vector<T>>::to_lua(lua_State *L, std::vector<T> *x)
+		void default_converter<std::vector<T>>::to_lua(lua::State *L, std::vector<T> *x)
 		{
 			if(!x)
 				newtable(L).push(L);
@@ -200,7 +199,7 @@ export {
 
 		template<class TMap>
 		template<typename U>
-		TMap map_converter<TMap>::to_cpp(lua_State *L, U u, int index)
+		TMap map_converter<TMap>::to_cpp(lua::State *L, U u, int index)
 		{
 			default_converter<T0> converter0;
 			default_converter<T1> converter1;
@@ -218,20 +217,20 @@ export {
 				o.push(L);
 				if(converter0.match(L, decorate_type_t<T0>(), -2) != no_match && converter1.match(L, decorate_type_t<T1>(), -1) != no_match)
 					v[converter0.to_cpp(L, decorate_type_t<T0>(), -2)] = converter1.to_cpp(L, decorate_type_t<T1>(), -1);
-				lua_pop(L, 2);
+				Lua::Pop(L, 2);
 			}
 			return v;
 		}
 
 		template<class TMap>
 		template<class U>
-		int map_converter<TMap>::match(lua_State *l, U u, int index)
+		int map_converter<TMap>::match(lua::State *l, U u, int index)
 		{
-			return lua_istable(l, index) ? 0 : no_match;
+			return Lua::IsTable(l, index) ? 0 : no_match;
 		}
 
 		template<class TMap>
-		void map_converter<TMap>::to_lua(lua_State *L, TMap const &x)
+		void map_converter<TMap>::to_lua(lua::State *L, TMap const &x)
 		{
 			default_converter<T0> converter0;
 			default_converter<T1> converter1;
@@ -244,19 +243,19 @@ export {
 					else {
 						converter1.to_lua(L, pair.second);
 						t[pair.first] = object {from_stack(L, -1)};
-						lua_pop(L, 1);
+						Lua::Pop(L, 1);
 					}
 				}
 				else {
 					converter0.to_lua(L, pair.first);
 					converter1.to_lua(L, pair.second);
-					lua_rawset(L, -3);
+					Lua::SetRaw(L, -3);
 				}
 			}
 		}
 
 		template<class TMap>
-		void map_converter<TMap>::to_lua(lua_State *L, TMap *x)
+		void map_converter<TMap>::to_lua(lua::State *L, TMap *x)
 		{
 			if(!x)
 				newtable(L).push(L);
@@ -266,7 +265,7 @@ export {
 
 		template<typename T, size_t SIZE>
 		template<typename U>
-		std::array<T, SIZE> default_converter<std::array<T, SIZE>>::to_cpp(lua_State *L, U u, int index)
+		std::array<T, SIZE> default_converter<std::array<T, SIZE>>::to_cpp(lua::State *L, U u, int index)
 		{
 			default_converter<T> converter;
 
@@ -282,7 +281,7 @@ export {
 				o.push(L);
 				if(converter.match(L, decorate_type_t<T>(), -1) != no_match)
 					v[i] = converter.to_cpp(L, decorate_type_t<T>(), -1);
-				lua_pop(L, 1);
+				Lua::Pop(L, 1);
 
 				++i;
 			}
@@ -291,9 +290,9 @@ export {
 
 		template<typename T, size_t SIZE>
 		template<class U>
-		int default_converter<std::array<T, SIZE>>::match(lua_State *l, U u, int index)
+		int default_converter<std::array<T, SIZE>>::match(lua::State *l, U u, int index)
 		{
-			if(!lua_istable(l, index))
+			if(!Lua::IsTable(l, index))
 				return no_match;
 			auto n = Lua::GetObjectLength(l, index);
 			if(n != SIZE)
@@ -302,7 +301,7 @@ export {
 		}
 
 		template<typename T, size_t SIZE>
-		void default_converter<std::array<T, SIZE>>::to_lua(lua_State *L, std::array<T, SIZE> const &x)
+		void default_converter<std::array<T, SIZE>>::to_lua(lua::State *L, std::array<T, SIZE> const &x)
 		{
 			default_converter<T> converter;
 			auto t = newtable(L);
@@ -314,14 +313,14 @@ export {
 					t[index] = element;
 				else {
 					converter.to_lua(L, element);
-					lua_rawseti(L, -2, index);
+					Lua::SetTableValue(L, -2, index);
 				}
 				++index;
 			}
 		}
 
 		template<typename T, size_t SIZE>
-		void default_converter<std::array<T, SIZE>>::to_lua(lua_State *L, std::array<T, SIZE> *x)
+		void default_converter<std::array<T, SIZE>>::to_lua(lua::State *L, std::array<T, SIZE> *x)
 		{
 			if(!x)
 				newtable(L).push(L);

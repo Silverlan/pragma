@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 #include <any>
-#include "pragma/lua/core.hpp"
 
 
 
@@ -172,7 +171,7 @@ export {
 			};
 			static MemberIndex RegisterMember(const luabind::object &oClass, const std::string &memberName, ents::EntityMemberType memberType, const std::any &initialValue, MemberFlags memberFlags, const Lua::map<std::string, void> &attributes);
 			static std::vector<MemberInfo> *GetMemberInfos(const luabind::object &oClass);
-			static void ClearMembers(lua_State *l);
+			static void ClearMembers(lua::State *l);
 
 			const MemberInfo *GetLuaMemberInfo(ComponentMemberInfo &memberInfo) const;
 			virtual void Initialize() override;
@@ -225,54 +224,54 @@ export {
 			void UpdateMemberNameMap();
 
 			// These should only be called through Lua
-			CallbackHandle BindInitComponentEvent(lua_State *l, pragma::ComponentId componentId, luabind::object methodNameOrFunction);
-			CallbackHandle BindEvent(lua_State *l, pragma::ComponentId eventId, luabind::object methodNameOrFunction);
-			CallbackHandle BindNetEvent(lua_State *l, pragma::NetEventId eventId, luabind::object methodNameOrFunction);
+			CallbackHandle BindInitComponentEvent(lua::State *l, pragma::ComponentId componentId, luabind::object methodNameOrFunction);
+			CallbackHandle BindEvent(lua::State *l, pragma::ComponentId eventId, luabind::object methodNameOrFunction);
+			CallbackHandle BindNetEvent(lua::State *l, pragma::NetEventId eventId, luabind::object methodNameOrFunction);
 			virtual void OnMemberValueChanged(uint32_t memberIdx);
 
 			void Lua_Initialize() {}
-			static void default_Lua_Initialize(lua_State *l, BaseLuaBaseEntityComponent &hComponent) {}
+			static void default_Lua_Initialize(lua::State *l, BaseLuaBaseEntityComponent &hComponent) {}
 
 			void Lua_OnTick(double dt) {}
-			static void default_Lua_OnTick(lua_State *l, BaseLuaBaseEntityComponent &hComponent, double dt) {}
+			static void default_Lua_OnTick(lua::State *l, BaseLuaBaseEntityComponent &hComponent, double dt) {}
 
 			void Lua_OnRemove() {}
-			static void default_Lua_OnRemove(lua_State *l, BaseLuaBaseEntityComponent &hComponent) {}
+			static void default_Lua_OnRemove(lua::State *l, BaseLuaBaseEntityComponent &hComponent) {}
 
 			void Lua_OnEntitySpawn() {}
-			static void default_Lua_OnEntitySpawn(lua_State *l, BaseLuaBaseEntityComponent &hComponent) {}
+			static void default_Lua_OnEntitySpawn(lua::State *l, BaseLuaBaseEntityComponent &hComponent) {}
 
 			void Lua_OnEntityPostSpawn() {}
-			static void default_Lua_OnEntityPostSpawn(lua_State *l, BaseLuaBaseEntityComponent &hComponent) {}
+			static void default_Lua_OnEntityPostSpawn(lua::State *l, BaseLuaBaseEntityComponent &hComponent) {}
 
 			void Lua_OnActiveStateChanged(bool activate) {}
-			static void default_Lua_OnActiveStateChanged(lua_State *l, BaseLuaBaseEntityComponent &hComponent, bool activate) {}
+			static void default_Lua_OnActiveStateChanged(lua::State *l, BaseLuaBaseEntityComponent &hComponent, bool activate) {}
 
 			void Lua_OnAttachedToEntity() {}
-			static void default_Lua_OnAttachedToEntity(lua_State *l, BaseLuaBaseEntityComponent &hComponent) {}
+			static void default_Lua_OnAttachedToEntity(lua::State *l, BaseLuaBaseEntityComponent &hComponent) {}
 
 			void Lua_OnDetachedToEntity() {}
-			static void default_Lua_OnDetachedToEntity(lua_State *l, BaseLuaBaseEntityComponent &hComponent) {}
+			static void default_Lua_OnDetachedToEntity(lua::State *l, BaseLuaBaseEntityComponent &hComponent) {}
 
 			void Lua_HandleEvent(uint32_t eventId) {}
-			static void default_Lua_HandleEvent(lua_State *l, BaseLuaBaseEntityComponent &hComponent, uint32_t eventId) {}
+			static void default_Lua_HandleEvent(lua::State *l, BaseLuaBaseEntityComponent &hComponent, uint32_t eventId) {}
 
 			void Lua_Save(udm::LinkedPropertyWrapper &udm) {}
-			static void default_Lua_Save(lua_State *l, BaseLuaBaseEntityComponent &hComponent, udm::LinkedPropertyWrapper &udm) {}
+			static void default_Lua_Save(lua::State *l, BaseLuaBaseEntityComponent &hComponent, udm::LinkedPropertyWrapper &udm) {}
 
 			void Lua_Load(udm::LinkedPropertyWrapper &udm, uint32_t version) {}
-			static void default_Lua_Load(lua_State *l, BaseLuaBaseEntityComponent &hComponent, udm::LinkedPropertyWrapper &udm, uint32_t version) {}
+			static void default_Lua_Load(lua::State *l, BaseLuaBaseEntityComponent &hComponent, udm::LinkedPropertyWrapper &udm, uint32_t version) {}
 
 			void Lua_OnEntityComponentAdded(BaseLuaBaseEntityComponent &hComponent) {}
-			static void default_Lua_OnEntityComponentAdded(lua_State *l, BaseLuaBaseEntityComponent &hComponent) {}
+			static void default_Lua_OnEntityComponentAdded(lua::State *l, BaseLuaBaseEntityComponent &hComponent) {}
 
 			void Lua_OnEntityComponentRemoved(BaseLuaBaseEntityComponent &hComponent) {}
-			static void default_Lua_OnEntityComponentRemoved(lua_State *l, BaseLuaBaseEntityComponent &hComponent) {}
+			static void default_Lua_OnEntityComponentRemoved(lua::State *l, BaseLuaBaseEntityComponent &hComponent) {}
 		protected:
 			BaseLuaBaseEntityComponent(pragma::ecs::BaseEntity &ent);
 			luabind::object *GetClassObject();
 			const luabind::object *GetClassObject() const { return const_cast<BaseLuaBaseEntityComponent *>(this)->GetClassObject(); }
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 			virtual void InvokeNetEventHandle(const std::string &methodName, NetPacket &packet, pragma::BasePlayerComponent *pl) = 0;
 			virtual void InitializeMember(const MemberInfo &memberInfo);
 			virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
@@ -311,58 +310,58 @@ export {
 			std::unordered_map<pragma::ComponentId, CallbackHandle> m_initComponentCallbacks;
 		};
 
-		namespace lua {
-			DLLNETWORK std::optional<ComponentMemberInfo> get_component_member_info(lua_State *l, const std::string &functionName, ents::EntityMemberType memberType, const std::any &initialValue, BaseLuaBaseEntityComponent::MemberFlags memberFlags,
+		namespace LuaCore {
+			DLLNETWORK std::optional<ComponentMemberInfo> get_component_member_info(lua::State *l, const std::string &functionName, ents::EntityMemberType memberType, const std::any &initialValue, BaseLuaBaseEntityComponent::MemberFlags memberFlags,
 			const Lua::map<std::string, void> &attributes, luabind::object &outOnChange, bool dynamicMember);
-			DLLNETWORK pragma::BaseLuaBaseEntityComponent::MemberFlags string_to_member_flags(lua_State *l, std::string_view strFlags);
+			DLLNETWORK pragma::BaseLuaBaseEntityComponent::MemberFlags string_to_member_flags(lua::State *l, std::string_view strFlags);
 			template<typename T>
 			void register_shared_lua_component_methods(auto &def)
 			{
 				def.def(
 				"RegisterMember",
-				+[](lua_State *l, T &hComponent, const std::string &memberName, pragma::ents::EntityMemberType memberType, Lua::udm_type oDefault, const Lua::map<std::string, void> &attributes,
+				+[](lua::State *l, T &hComponent, const std::string &memberName, pragma::ents::EntityMemberType memberType, Lua::udm_type oDefault, const Lua::map<std::string, void> &attributes,
 					pragma::BaseLuaBaseEntityComponent::MemberFlags memberFlags) -> std::optional<pragma::ComponentMemberIndex> {
 					luabind::object onChange;
 					auto anyInitialValue = Lua::GetAnyValue(l, pragma::detail::member_type_to_util_type(memberType), 4);
-					auto memberInfo = pragma::lua::get_component_member_info(l, memberName, memberType, anyInitialValue, memberFlags, attributes, onChange, true);
+					auto memberInfo = pragma::LuaCore::get_component_member_info(l, memberName, memberType, anyInitialValue, memberFlags, attributes, onChange, true);
 					if(!memberInfo.has_value())
 						return {};
 					return hComponent.RegisterMember(std::move(*memberInfo), onChange);
 				});
 				def.def(
-				"RegisterMember", +[](lua_State *l, T &hComponent, const std::string &memberName, pragma::ents::EntityMemberType memberType, Lua::udm_type oDefault, const std::string &memberFlags) -> std::optional<pragma::ComponentMemberIndex> {
+				"RegisterMember", +[](lua::State *l, T &hComponent, const std::string &memberName, pragma::ents::EntityMemberType memberType, Lua::udm_type oDefault, const std::string &memberFlags) -> std::optional<pragma::ComponentMemberIndex> {
 					luabind::object onChange;
 					auto anyInitialValue = Lua::GetAnyValue(l, pragma::detail::member_type_to_util_type(memberType), 4);
 					auto t = luabind::newtable(l);
-					auto memberInfo = pragma::lua::get_component_member_info(l, memberName, memberType, anyInitialValue, pragma::lua::string_to_member_flags(l, memberFlags), t, onChange, true);
+					auto memberInfo = pragma::LuaCore::get_component_member_info(l, memberName, memberType, anyInitialValue, pragma::LuaCore::string_to_member_flags(l, memberFlags), t, onChange, true);
 					if(!memberInfo.has_value())
 						return {};
 					return hComponent.RegisterMember(std::move(*memberInfo), onChange);
 				});
 				def.def(
-				"RegisterMember", +[](lua_State *l, T &hComponent, const std::string &memberName, pragma::ents::EntityMemberType memberType, Lua::udm_type oDefault, const Lua::map<std::string, void> &attributes, const std::string &memberFlags) -> std::optional<pragma::ComponentMemberIndex> {
+				"RegisterMember", +[](lua::State *l, T &hComponent, const std::string &memberName, pragma::ents::EntityMemberType memberType, Lua::udm_type oDefault, const Lua::map<std::string, void> &attributes, const std::string &memberFlags) -> std::optional<pragma::ComponentMemberIndex> {
 					luabind::object onChange;
 					auto anyInitialValue = Lua::GetAnyValue(l, pragma::detail::member_type_to_util_type(memberType), 4);
-					auto memberInfo = pragma::lua::get_component_member_info(l, memberName, memberType, anyInitialValue, pragma::lua::string_to_member_flags(l, memberFlags), attributes, onChange, true);
+					auto memberInfo = pragma::LuaCore::get_component_member_info(l, memberName, memberType, anyInitialValue, pragma::LuaCore::string_to_member_flags(l, memberFlags), attributes, onChange, true);
 					if(!memberInfo.has_value())
 						return {};
 					return hComponent.RegisterMember(std::move(*memberInfo), onChange);
 				});
 				def.def(
-				"RegisterMember", +[](lua_State *l, T &hComponent, const std::string &memberName, pragma::ents::EntityMemberType memberType, Lua::udm_type oDefault, const Lua::map<std::string, void> &attributes) -> std::optional<pragma::ComponentMemberIndex> {
+				"RegisterMember", +[](lua::State *l, T &hComponent, const std::string &memberName, pragma::ents::EntityMemberType memberType, Lua::udm_type oDefault, const Lua::map<std::string, void> &attributes) -> std::optional<pragma::ComponentMemberIndex> {
 					luabind::object onChange;
 					auto anyInitialValue = Lua::GetAnyValue(l, pragma::detail::member_type_to_util_type(memberType), 4);
-					auto memberInfo = pragma::lua::get_component_member_info(l, memberName, memberType, anyInitialValue, pragma::BaseLuaBaseEntityComponent::MemberFlags::Default, attributes, onChange, true);
+					auto memberInfo = pragma::LuaCore::get_component_member_info(l, memberName, memberType, anyInitialValue, pragma::BaseLuaBaseEntityComponent::MemberFlags::Default, attributes, onChange, true);
 					if(!memberInfo.has_value())
 						return {};
 					return hComponent.RegisterMember(std::move(*memberInfo), onChange);
 				});
 				def.def(
-				"RegisterMember", +[](lua_State *l, T &hComponent, const std::string &memberName, pragma::ents::EntityMemberType memberType, Lua::udm_type oDefault) -> std::optional<pragma::ComponentMemberIndex> {
+				"RegisterMember", +[](lua::State *l, T &hComponent, const std::string &memberName, pragma::ents::EntityMemberType memberType, Lua::udm_type oDefault) -> std::optional<pragma::ComponentMemberIndex> {
 					luabind::object onChange;
 					auto anyInitialValue = Lua::GetAnyValue(l, pragma::detail::member_type_to_util_type(memberType), 4);
 					auto t = luabind::newtable(l);
-					auto memberInfo = pragma::lua::get_component_member_info(l, memberName, memberType, anyInitialValue, pragma::BaseLuaBaseEntityComponent::MemberFlags::Default, t, onChange, true);
+					auto memberInfo = pragma::LuaCore::get_component_member_info(l, memberName, memberType, anyInitialValue, pragma::BaseLuaBaseEntityComponent::MemberFlags::Default, t, onChange, true);
 					if(!memberInfo.has_value())
 						return {};
 					return hComponent.RegisterMember(std::move(*memberInfo), onChange);

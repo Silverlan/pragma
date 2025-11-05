@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -99,7 +98,7 @@ void BaseShooterComponent::GetBulletTraceData(const BulletInfo &bulletInfo, Trac
 //////////////
 
 events::CEOnFireBullets::CEOnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin) : bulletInfo {bulletInfo}, bulletOrigin {bulletOrigin}, bulletDir {bulletDir}, effectsOrigin {effectsOrigin} {}
-void events::CEOnFireBullets::PushArguments(lua_State *l)
+void events::CEOnFireBullets::PushArguments(lua::State *l)
 {
 	Lua::Push<BulletInfo *>(l, &const_cast<BulletInfo &>(bulletInfo));
 	Lua::Push<Vector3>(l, bulletOrigin);
@@ -110,7 +109,7 @@ void events::CEOnFireBullets::PushArguments(lua_State *l)
 		Lua::PushNil(l);
 }
 uint32_t events::CEOnFireBullets::GetReturnCount() { return 3; }
-void events::CEOnFireBullets::HandleReturnValues(lua_State *l)
+void events::CEOnFireBullets::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -3))
 		bulletOrigin = Lua::Check<Vector3>(l, -3);
@@ -123,7 +122,7 @@ void events::CEOnFireBullets::HandleReturnValues(lua_State *l)
 //////////////
 
 events::CEOnBulletsFired::CEOnBulletsFired(const BulletInfo &bulletInfo, const std::vector<TraceResult> &hitTargets) : bulletInfo {bulletInfo}, hitTargets {hitTargets} {}
-void events::CEOnBulletsFired::PushArguments(lua_State *l)
+void events::CEOnBulletsFired::PushArguments(lua::State *l)
 {
 	Lua::Push<BulletInfo *>(l, &const_cast<BulletInfo &>(bulletInfo));
 

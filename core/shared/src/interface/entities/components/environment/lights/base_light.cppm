@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.environment.lights.base_light;
@@ -98,13 +97,13 @@ class DLLNETWORK BaseEnvLightComponent : public BaseEntityComponent {
 		};
 		struct DLLNETWORK CECalcLightDirectionToPoint : public ComponentEvent {
 			CECalcLightDirectionToPoint(const Vector3 &pos);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			const Vector3 &pos;
 			Vector3 direction = uvec::FORWARD;
 		};
 		struct DLLNETWORK CECalcLightIntensityAtPoint : public ComponentEvent {
 			CECalcLightIntensityAtPoint(const Vector3 &pos);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			const Vector3 &pos;
 			Candela intensity = 0.f;
 		};

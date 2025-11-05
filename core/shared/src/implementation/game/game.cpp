@@ -2,15 +2,13 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/logging.hpp"
-#include "pragma/lua/core.hpp"
 #include <cassert>
 
 module pragma.shared;
 
 import :game.game;
 
-std::optional<std::string> Lua::VarToString(lua_State *lua, int n)
+std::optional<std::string> Lua::VarToString(lua::State *lua, int n)
 {
 	auto t = GetType(lua, n);
 	switch(t) {
@@ -39,14 +37,14 @@ std::optional<std::string> Lua::VarToString(lua_State *lua, int n)
 	}
 	return {};
 }
-void Lua::VarDump(lua_State *lua, int n)
+void Lua::VarDump(lua::State *lua, int n)
 {
 	auto str = VarToString(lua, n);
 	if(str.has_value())
 		Con::cout << *str;
 }
 
-std::optional<std::string> Lua::StackToString(lua_State *lua)
+std::optional<std::string> Lua::StackToString(lua::State *lua)
 {
 	std::string str;
 	int top = GetStackTop(lua);
@@ -63,14 +61,14 @@ std::optional<std::string> Lua::StackToString(lua_State *lua)
 	return str;
 }
 
-void Lua::StackDump(lua_State *lua)
+void Lua::StackDump(lua::State *lua)
 {
 	auto str = StackToString(lua);
 	if(str.has_value())
 		Con::cout << *str << Con::endl;
 }
 
-std::optional<std::string> Lua::TableToString(lua_State *lua, int n)
+std::optional<std::string> Lua::TableToString(lua::State *lua, int n)
 {
 	if(n < 0)
 		n = Lua::GetStackTop(lua) + n + 1;
@@ -105,7 +103,7 @@ std::optional<std::string> Lua::TableToString(lua_State *lua, int n)
 	return str;
 }
 
-void Lua::TableDump(lua_State *lua, int n)
+void Lua::TableDump(lua::State *lua, int n)
 {
 	if(n < 0)
 		n = Lua::GetStackTop(lua) + n + 1;
@@ -146,7 +144,7 @@ pragma::Game::Game(NetworkState *state)
 	RegisterCallback<void>("Tick");
 	RegisterCallback<void>("Think");
 
-	RegisterCallback<void, lua_State *>("OnLuaReleased");
+	RegisterCallback<void, lua::State *>("OnLuaReleased");
 	RegisterCallback<void, pragma::BasePlayerComponent *>("OnPlayerReady");
 	RegisterCallback<void, pragma::BasePlayerComponent *, pragma::networking::DropReason>("OnPlayerDropped");
 	RegisterCallback<void, pragma::BasePlayerComponent *>("OnPlayerJoined");
@@ -164,7 +162,7 @@ pragma::Game::Game(NetworkState *state)
 
 	RegisterCallbackWithOptionalReturn<bool, pragma::ActionInputControllerComponent *, pragma::Action, bool>("OnActionInput");
 
-	RegisterCallback<void, lua_State *>("OnLuaInitialized");
+	RegisterCallback<void, lua::State *>("OnLuaInitialized");
 	RegisterCallback<void, pragma::ecs::BaseEntity *>("OnEntitySpawned");
 	RegisterCallback<void, pragma::Game *>("OnGameInitialized");
 	RegisterCallback<void>("OnMapLoaded");

@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:physics.constraint;
 
@@ -43,7 +42,7 @@ export namespace pragma::physics {
 		virtual void SetBreakForce(float threshold) = 0;
 		virtual float GetBreakTorque() const = 0;
 		virtual void SetBreakTorque(float torque) = 0;
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 
 		virtual void SetSoftness(float softness) = 0;
 		virtual void SetDamping(float damping) = 0;
@@ -66,21 +65,21 @@ export namespace pragma::physics {
 
 	class DLLNETWORK IFixedConstraint : virtual public IConstraint {
 	  public:
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 	  protected:
 		using IConstraint::IConstraint;
 	};
 
 	class DLLNETWORK IBallSocketConstraint : virtual public IConstraint {
 	  public:
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 	  protected:
 		using IConstraint::IConstraint;
 	};
 
 	class DLLNETWORK IHingeConstraint : virtual public IConstraint {
 	  public:
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 		virtual void SetLimit(umath::Radian lowerLimit, umath::Radian upperLimit) = 0;
 		virtual std::pair<umath::Radian, umath::Radian> GetLimit() const = 0;
 		virtual void DisableLimit() = 0;
@@ -90,7 +89,7 @@ export namespace pragma::physics {
 
 	class DLLNETWORK ISliderConstraint : virtual public IConstraint {
 	  public:
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 		virtual void SetLimit(float lowerLimit, float upperLimit) = 0;
 		virtual void DisableLimit() = 0;
 		virtual std::pair<float, float> GetLimit() const = 0;
@@ -105,14 +104,14 @@ export namespace pragma::physics {
 		virtual void SetLimit(const Vector3 &lowerLimits, const Vector3 &upperLimits) = 0;
 		virtual void SetLimit(float swingSpan1, float swingSpan2, float twistSpan) = 0;
 		virtual void GetLimit(float &outSwingSpan1, float &outSwingSpan2, float &outTwistSpan) = 0;
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 	};
 
 	class DLLNETWORK IDoFConstraint : virtual public IConstraint {
 	  protected:
 		using IConstraint::IConstraint;
 	  public:
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 		virtual void SetLinearLimit(const Vector3 &lower, const Vector3 &upper) = 0;
 		virtual void SetLinearLimit(const Vector3 &lim) = 0;
 		virtual void SetLinearLowerLimit(const Vector3 &lim) = 0;
@@ -182,7 +181,7 @@ export namespace pragma::physics {
 	  public:
 		enum class AxisType : uint8_t { Linear = 0u, Angular };
 
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 		virtual void CalculateTransforms() = 0;
 		virtual void CalculateTransforms(const umath::Transform &frameA, const umath::Transform &frameB) = 0;
 		virtual umath::Transform GetCalculatedTransformA() const = 0;

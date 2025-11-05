@@ -4,10 +4,7 @@ module;
 
 
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
-#include "pragma/lua/ldefinitions.h"
-#include "spdlog/spdlog.h"
+#include "definitions.hpp"
 
 module pragma.shared;
 
@@ -54,7 +51,7 @@ void Lua::initialize_lua_state(Lua::Interface &lua)
 		lua_call(l, 1, 0);
 #else
 		luaL_requiref(l, lib->name, lib->func, 1);
-		lua_pop(l, 1); // remove lib
+		Lua::Pop(l, 1); // remove lib
 #endif
 	}
 	luabind::open(l);
@@ -63,7 +60,7 @@ void Lua::initialize_lua_state(Lua::Interface &lua)
 		luabind::bind_function_introspection(l);
 	}
 	Lua::initialize_error_handler();
-	lua_atpanic(l, [](lua_State *l) -> int32_t {
+	lua_atpanic(l, [](lua::State *l) -> int32_t {
 		spdlog::get("lua")->critical("Lua Panic!");
 		::pragma::debug::generate_crash_dump();
 		return 0;
@@ -88,7 +85,7 @@ static void dump_stack(bool cl)
 		return;
 	Lua::StackDump(g->GetLuaState());
 }
-namespace pragma::lua::debug {
+namespace pragma::LuaCore::debug {
 	// These are mainly used in the immediate window for debugging purposes
 	DLLNETWORK void dump_traceback_cl() { ::dump_traceback(true); }
 	DLLNETWORK void dump_traceback_sv() { ::dump_traceback(false); }

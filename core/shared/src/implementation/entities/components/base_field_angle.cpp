@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -77,7 +76,7 @@ void BaseFieldAngleComponent::SetFieldAngle(umath::Degree coneAngle)
 //////////////
 
 CEOnFieldAngleChanged::CEOnFieldAngleChanged(float oldFieldAngle, float newFieldAngle) : oldFieldAngle {oldFieldAngle}, newFieldAngle {newFieldAngle} {}
-void CEOnFieldAngleChanged::PushArguments(lua_State *l)
+void CEOnFieldAngleChanged::PushArguments(lua::State *l)
 {
 	Lua::PushNumber(l, oldFieldAngle);
 	Lua::PushNumber(l, newFieldAngle);

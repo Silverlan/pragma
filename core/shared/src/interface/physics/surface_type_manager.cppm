@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
 export module pragma.shared:physics.surface_type_manager;
 

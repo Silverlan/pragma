@@ -72,9 +72,9 @@ void LuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &fName)
 	auto &luaInterface = m_game->GetLuaInterface();
 	auto &includeCache = luaInterface.GetIncludeCache();
 	if(includeCache.Contains(fName)) {
-		auto res = pragma::scripting::lua::include(luaInterface.GetState(), fName, pragma::scripting::lua::IncludeFlags::IgnoreGlobalCache);
+		auto res = pragma::scripting::lua_core::include(luaInterface.GetState(), fName, pragma::scripting::lua_core::IncludeFlags::IgnoreGlobalCache);
 		if(res.statusCode != Lua::StatusCode::Ok)
-			pragma::scripting::lua::submit_error(luaInterface.GetState(), res.errorMessage);
+			pragma::scripting::lua_core::submit_error(luaInterface.GetState(), res.errorMessage);
 		return;
 	}
 }

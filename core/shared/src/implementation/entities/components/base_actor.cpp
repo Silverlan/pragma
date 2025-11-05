@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -345,7 +344,7 @@ void BaseActorComponent::OnPhysicsDestroyed()
 ///////////////
 
 CEOnCharacterKilled::CEOnCharacterKilled(DamageInfo *damageInfo) : damageInfo(damageInfo) {}
-void CEOnCharacterKilled::PushArguments(lua_State *l)
+void CEOnCharacterKilled::PushArguments(lua::State *l)
 {
 	if(damageInfo != nullptr)
 		Lua::Push<DamageInfo *>(l, damageInfo);

@@ -32,7 +32,7 @@ documentation and/or software.
 
 #ifndef BZF_MD5_H
 #define BZF_MD5_H
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 #include <string>
 #include <iostream>
 

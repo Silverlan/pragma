@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 
 
@@ -68,7 +67,7 @@ export {
 			// TODO: What was this for?
 			/*auto *state = r->interpreter();
 			r->push(state);
-			auto cret = (lua_iscfunction(state, -1) == 0) ? true : false;
+			auto cret = (Lua::IsCFunction(state, -1) == 0) ? true : false;
 			Lua::Pop(state, 1);
 			return cret;*/
 

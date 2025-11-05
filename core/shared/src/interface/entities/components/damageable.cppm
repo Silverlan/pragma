@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.damageable;
@@ -27,11 +26,11 @@ class DLLNETWORK DamageableComponent final : public BaseEntityComponent {
 		virtual void OnTakeDamage(DamageInfo &info);
 
 		virtual void TakeDamage(DamageInfo &info);
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	};
 	struct DLLNETWORK CEOnTakeDamage : public ComponentEvent {
 		CEOnTakeDamage(DamageInfo &damageInfo);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		DamageInfo &damageInfo;
 	};
 };

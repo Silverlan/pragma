@@ -4,14 +4,13 @@ module;
 
 
 
-#include "pragma/lua/core.hpp"
 
 module pragma.shared;
 
 import :scripting.lua.libraries.util;
 
 template<typename T>
-static void register_vector(lua_State *l, const char *name)
+static void register_vector(lua::State *l, const char *name)
 {
 	auto classDefVec = luabind::class_<std::vector<T>>(name);
 	classDefVec.def(luabind::constructor<>());
@@ -36,7 +35,7 @@ static void register_vector(lua_State *l, const char *name)
 	utilMod[classDefVec];
 }
 
-void Lua::util::register_std_vector_types(lua_State *l)
+void Lua::util::register_std_vector_types(lua::State *l)
 {
 	register_vector<char>(l, "CharVector");
 	//register_vector<bool>(l, "BoolVector");

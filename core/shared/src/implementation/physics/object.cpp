@@ -2,10 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
 
-#include <sharedutils/magic_enum.hpp>
 #include <cassert>
 
 module pragma.shared;
@@ -30,7 +28,7 @@ bool pragma::physics::PhysObj::Initialize()
 	InitializeLuaObject(GetNetworkState()->GetLuaState());
 	return true;
 }
-void pragma::physics::PhysObj::InitializeLuaObject(lua_State *lua) { SetLuaObject(pragma::lua::raw_object_to_luabind_object(lua, GetHandle())); }
+void pragma::physics::PhysObj::InitializeLuaObject(lua::State *lua) { SetLuaObject(pragma::LuaCore::raw_object_to_luabind_object(lua, GetHandle())); }
 void pragma::physics::PhysObj::OnCollisionObjectWake(pragma::physics::ICollisionObject &o)
 {
 	if(m_colObjAwakeCount++ == 0)
@@ -334,8 +332,8 @@ Vector3 pragma::physics::PhysObj::GetTotalTorque() const { return Vector3(0.f, 0
 std::ostream &operator<<(std::ostream &out, const pragma::physics::PhysObj &o)
 {
 	out << "PhysObj";
-	out << "[FilterGroup:" << magic_enum::flags::enum_name(o.GetCollisionFilter()) << "]";
-	out << "[FilterMask:" << magic_enum::flags::enum_name(o.GetCollisionFilterMask()) << "]";
+	out << "[FilterGroup:" << magic_enum::enum_flags_name(o.GetCollisionFilter()) << "]";
+	out << "[FilterMask:" << magic_enum::enum_flags_name(o.GetCollisionFilterMask()) << "]";
 	out << "[ColObjs:" << o.GetCollisionObjects().size() << "]";
 	out << "[ColObjsAwake:" << o.GetNumberOfCollisionObjectsAwake() << "]";
 	out << "[Vel:" << o.GetLinearVelocity() << "]";

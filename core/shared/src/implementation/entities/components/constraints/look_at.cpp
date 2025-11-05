@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
-#include "pragma/logging.hpp"
 #include <cassert>
 
 module pragma.shared;
@@ -41,7 +39,7 @@ void ConstraintLookAtComponent::Initialize()
 void ConstraintLookAtComponent::SetUpTarget(const pragma::EntityUComponentMemberRef &drivenObject) { m_upTarget = drivenObject; }
 const pragma::EntityUComponentMemberRef &ConstraintLookAtComponent::GetUpTarget() const { return m_upTarget; }
 void ConstraintLookAtComponent::ResetDrivenRotation() { m_drivenObjectRotationInitialized = false; }
-void ConstraintLookAtComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ConstraintLookAtComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ConstraintLookAtComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);

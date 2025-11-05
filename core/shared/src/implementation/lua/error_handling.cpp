@@ -4,13 +4,12 @@ module;
 
 
 
-#include "pragma/lua/core.hpp"
 
 module pragma.shared;
 
 import :scripting.lua.error_handling;
 
-static void print_lua_error_message(lua_State *l, const std::string &msg) { Con::cerr << Lua::GetErrorMessagePrefix(l) << Con::prefix << Con::PREFIX_LUA << Con::prefix << msg << Con::endl; }
+static void print_lua_error_message(lua::State *l, const std::string &msg) { Con::cerr << Lua::GetErrorMessagePrefix(l) << Con::prefix << Con::PREFIX_LUA << Con::prefix << msg << Con::endl; }
 
 static auto cvOpenEditorOnError = GetConVar("lua_open_editor_on_error");
 std::optional<std::string> Lua::GetLuaFilePath(const std::string &fname)
@@ -93,12 +92,12 @@ static void transform_path(const lua_Debug &d, std::string &errPath, int32_t cur
 			path = "..." + path.substr(path.size() - maxLuaPathLen);
 
 		if(Lua::GetLuaFilePath(Lua::SCRIPT_DIRECTORY_SLASH + path))
-			path = pragma::scripting::lua::util::make_clickable_lua_script_link(path, currentLine);
+			path = pragma::scripting::lua_core::util::make_clickable_lua_script_link(path, currentLine);
 		errPath = ustring::substr(errPath, 0, qt0 + 1) + path + ustring::substr(errPath, qt1);
 	}
 }
 
-bool Lua::get_callstack(lua_State *l, std::stringstream &ss)
+bool Lua::get_callstack(lua::State *l, std::stringstream &ss)
 {
 	int32_t level = 1;
 	lua_Debug d {};
@@ -113,7 +112,7 @@ bool Lua::get_callstack(lua_State *l, std::stringstream &ss)
 				break;
 			}
 			else {
-				auto filename = ::pragma::scripting::lua::util::make_clickable_lua_script_link(get_source(d), d.currentline);
+				auto filename = ::pragma::scripting::lua_core::util::make_clickable_lua_script_link(get_source(d), d.currentline);
 				ss << "\n" << t << level << ": " << (d.name != nullptr ? d.name : "?") << "[" << d.linedefined << ":" << d.lastlinedefined << "] [" << d.what << ":" << d.namewhat << "] : " << filename;
 			}
 		}
@@ -123,7 +122,7 @@ bool Lua::get_callstack(lua_State *l, std::stringstream &ss)
 	return true;
 }
 
-bool Lua::PrintTraceback(lua_State *l, std::stringstream &ssOut, const std::string *pOptErrMsg, std::string *optOutFormattedErrMsg)
+bool Lua::PrintTraceback(lua::State *l, std::stringstream &ssOut, const std::string *pOptErrMsg, std::string *optOutFormattedErrMsg)
 {
 	lua_Debug d {};
 	int32_t level = 1;
@@ -159,13 +158,13 @@ bool Lua::PrintTraceback(lua_State *l, std::stringstream &ssOut, const std::stri
 				//open_lua_file(fname,lineId);
 			}
 			std::stringstream ssErrMsg;
-			auto lineMsg = ::pragma::scripting::lua::util::make_clickable_lua_script_link(shortSrc, d.currentline);
+			auto lineMsg = ::pragma::scripting::lua_core::util::make_clickable_lua_script_link(shortSrc, d.currentline);
 			ssErrMsg << lineMsg << " " << errMsg;
 			errMsg = ssErrMsg.str();
 		}
 		transform_path(d, errMsg, d.currentline);
 		ssOut << errMsg;
-		bNl = ::pragma::scripting::lua::util::get_code_snippet(ssOut, get_source(d), d.currentline, ":");
+		bNl = ::pragma::scripting::lua_core::util::get_code_snippet(ssOut, get_source(d), d.currentline, ":");
 	}
 	else {
 		ssOut << errMsg;
@@ -187,19 +186,19 @@ bool Lua::PrintTraceback(lua_State *l, std::stringstream &ssOut, const std::stri
 	return hasMsg;
 }
 
-void Lua::PrintTraceback(lua_State *l, const std::string *pOptErrMsg)
+void Lua::PrintTraceback(lua::State *l, const std::string *pOptErrMsg)
 {
 	std::stringstream ssTbMsg;
 	Lua::PrintTraceback(l, ssTbMsg, pOptErrMsg);
 	auto tbMsg = ssTbMsg.str();
 
 	std::stringstream ss;
-	::pragma::scripting::lua::util::get_lua_doc_info(ss, tbMsg);
+	::pragma::scripting::lua_core::util::get_lua_doc_info(ss, tbMsg);
 	Con::cout << ss.str();
 	Con::flush();
 }
 
-int Lua::HandleTracebackError(lua_State *l)
+int Lua::HandleTracebackError(lua::State *l)
 {
 	if(!Lua::IsString(l, -1))
 		return 1;
@@ -216,15 +215,15 @@ static std::optional<std::string> format_syntax_error(const std::string &msg, Lu
 {
 	if(r != Lua::StatusCode::ErrorSyntax && r != Lua::StatusCode::ErrorFile)
 		return {};
-	auto errInfo = pragma::scripting::lua::util::parse_syntax_error_message(msg);
+	auto errInfo = pragma::scripting::lua_core::util::parse_syntax_error_message(msg);
 	if(!errInfo)
 		return msg;
 	std::stringstream ssMsg;
-	pragma::scripting::lua::util::get_code_snippet(ssMsg, optFilename ? *optFilename : errInfo->first, errInfo->second, ":");
+	pragma::scripting::lua_core::util::get_code_snippet(ssMsg, optFilename ? *optFilename : errInfo->first, errInfo->second, ":");
 	return ssMsg.str();
 }
 
-static void handle_syntax_error(lua_State *l, Lua::StatusCode r, const std::string *fileName)
+static void handle_syntax_error(lua::State *l, Lua::StatusCode r, const std::string *fileName)
 {
 	if(r != Lua::StatusCode::ErrorSyntax && r != Lua::StatusCode::ErrorFile)
 		return;
@@ -237,20 +236,20 @@ static void handle_syntax_error(lua_State *l, Lua::StatusCode r, const std::stri
 	print_lua_error_message(l, *msg);
 }
 
-void Lua::HandleSyntaxError(lua_State *l, Lua::StatusCode r, const std::string &fileName) { handle_syntax_error(l, r, &fileName); }
+void Lua::HandleSyntaxError(lua::State *l, Lua::StatusCode r, const std::string &fileName) { handle_syntax_error(l, r, &fileName); }
 
-void Lua::HandleSyntaxError(lua_State *l, Lua::StatusCode r) { handle_syntax_error(l, r, nullptr); }
+void Lua::HandleSyntaxError(lua::State *l, Lua::StatusCode r) { handle_syntax_error(l, r, nullptr); }
 
 void Lua::initialize_error_handler()
 {
-	luabind::register_exception_handler<Lua::Exception>(+[](lua_State *L, const Lua::Exception &e) { lua_pushstring(L, e.what()); });
-	luabind::set_pcall_callback([](lua_State *l) -> void {
-		Lua::PushCFunction(l, [](lua_State *l) -> int32_t {
+	luabind::register_exception_handler<Lua::Exception>(+[](lua::State *L, const Lua::Exception &e) { lua_pushstring(L, e.what()); });
+	luabind::set_pcall_callback([](lua::State *l) -> void {
+		Lua::PushCFunction(l, [](lua::State *l) -> int32_t {
 			if(Lua::IsString(l, -1) == false)
 				return 0; // This should never happen
 			std::string errMsg = Lua::CheckString(l, -1);
-			auto formattedMsg = ::pragma::scripting::lua::format_error_message(l, errMsg, Lua::StatusCode::ErrorRun, nullptr);
-			::pragma::scripting::lua::submit_error(l, formattedMsg);
+			auto formattedMsg = ::pragma::scripting::lua_core::format_error_message(l, errMsg, Lua::StatusCode::ErrorRun, nullptr);
+			::pragma::scripting::lua_core::submit_error(l, formattedMsg);
 			return 0;
 		});
 	});

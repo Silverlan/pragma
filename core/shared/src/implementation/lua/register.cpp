@@ -5,12 +5,7 @@ module;
 #include <mpParser.h>
 #include "noise/noise.h"
 #include "pragma/lua/ostream_operator_alias.hpp"
-#include "pragma/debug/debugbreak.hpp"
-#include "pragma/logging.hpp"
-#include "pragma/lua/core.hpp"
-#include <spdlog/common.h>
-#include <spdlog/fmt/fmt.h>
-#include <spdlog/formatter.h>
+#include "debug/debugbreak.hpp"
 
 #ifndef _WIN32
 #include <signal.h>
@@ -47,14 +42,14 @@ static void call_callback(CallbackHandle &cb, std::initializer_list<luabind::obj
 {
 	if(cb.IsValid() == false)
 		return;
-	cb.Call<void, std::function<Lua::StatusCode(lua_State *)>>([&args](lua_State *l) -> Lua::StatusCode {
+	cb.Call<void, std::function<Lua::StatusCode(lua::State *)>>([&args](lua::State *l) -> Lua::StatusCode {
 		for(auto &arg : args)
 			arg.push(l);
 		return Lua::StatusCode::Ok;
 	});
 }
 
-static int32_t parse_math_expression(lua_State *l)
+static int32_t parse_math_expression(lua::State *l)
 {
 	class FunLua : public mup::ICallback {
 	  public:
@@ -153,7 +148,7 @@ static int32_t parse_math_expression(lua_State *l)
 	return 1;
 }
 
-static luabind::object copy_table(lua_State *l, const luabind::object &t, bool deepCopy = false)
+static luabind::object copy_table(lua::State *l, const luabind::object &t, bool deepCopy = false)
 {
 	auto tCpy = luabind::newtable(l);
 	if(deepCopy == false) {
@@ -170,7 +165,7 @@ static luabind::object copy_table(lua_State *l, const luabind::object &t, bool d
 	return tCpy;
 }
 
-bool Lua::util::start_debugger_server(lua_State *l)
+bool Lua::util::start_debugger_server(lua::State *l)
 {
 	std::string fileName = "start_debugger_server.lua";
 	return ::pragma::Engine::Get()->GetNetworkState(l)->GetGameState()->ExecuteLuaFile(fileName);
@@ -186,10 +181,10 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(std, std::match_results<const char *>);
 void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 {
 	// Remove sensitive functions and libraries
-	lua_pushnil(lua.GetState());
+	Lua::PushNil(lua.GetState());
 	lua_setglobal(lua.GetState(), "dofile");
 
-	lua_pushnil(lua.GetState());
+	Lua::PushNil(lua.GetState());
 	lua_setglobal(lua.GetState(), "loadfile");
 
 	std::array<std::string, 7> fRemoveOs = {"execute", "rename", "setlocale" /*, "getenv"*/, "remove", "exit", "tmpname"};
@@ -202,7 +197,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	}
 	Lua::Pop(lua.GetState(), 1); /* 0 */
 
-	//lua_pushnil(lua.GetState());
+	//Lua::PushNil(lua.GetState());
 	//lua_setglobal(lua.GetState(),"os");
 	//
 
@@ -215,9 +210,9 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("to_min_max", static_cast<void (*)(::Vector2 &, ::Vector2 &, const Vector2 &)>(Lua::vector::to_min_max), luabind::meta::join<luabind::out_value<1>, luabind::out_value<2>>::type {}),
 	  luabind::def("to_min_max", static_cast<void (*)(::Vector3 &, ::Vector3 &, const Vector3 &)>(Lua::vector::to_min_max), luabind::meta::join<luabind::out_value<1>, luabind::out_value<2>>::type {}),
 	  luabind::def("to_min_max", static_cast<void (*)(::Vector4 &, ::Vector4 &, const Vector4 &)>(Lua::vector::to_min_max), luabind::meta::join<luabind::out_value<1>, luabind::out_value<2>>::type {}),
-	  luabind::def("get_min_max", static_cast<void (*)(lua_State *, luabind::table<>, ::Vector2 &, ::Vector2 &)>(Lua::vector::get_min_max), luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>>::type {}),
-	  luabind::def("get_min_max", static_cast<void (*)(lua_State *, luabind::table<>, ::Vector3 &, ::Vector3 &)>(Lua::vector::get_min_max), luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>>::type {}),
-	  luabind::def("get_min_max", static_cast<void (*)(lua_State *, luabind::table<>, ::Vector4 &, ::Vector4 &)>(Lua::vector::get_min_max), luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>>::type {}), luabind::def("random", uvec::create_random_unit_vector),
+	  luabind::def("get_min_max", static_cast<void (*)(lua::State *, luabind::table<>, ::Vector2 &, ::Vector2 &)>(Lua::vector::get_min_max), luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>>::type {}),
+	  luabind::def("get_min_max", static_cast<void (*)(lua::State *, luabind::table<>, ::Vector3 &, ::Vector3 &)>(Lua::vector::get_min_max), luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>>::type {}),
+	  luabind::def("get_min_max", static_cast<void (*)(lua::State *, luabind::table<>, ::Vector4 &, ::Vector4 &)>(Lua::vector::get_min_max), luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>>::type {}), luabind::def("random", uvec::create_random_unit_vector),
 	  luabind::def("random2D", Lua::vector::random_2d), luabind::def("create_from_string", static_cast<Vector3 (*)(const std::string &)>(uvec::create)), luabind::def("calc_average", Lua::vector::calc_average),
 	  luabind::def("calc_best_fitting_plane", Lua::vector::calc_best_fitting_plane, luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>>::type {}), luabind::def("calc_linear_velocity_from_angular", util::angular_velocity_to_linear),
 	  luabind::def(
@@ -261,7 +256,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	Lua::RegisterLibraryEnums(lua.GetState(), "noise", {{"QUALITY_FAST", umath::to_integral(noise::NoiseQuality::QUALITY_FAST)}, {"QUALITY_STD", umath::to_integral(noise::NoiseQuality::QUALITY_STD)}, {"QUALITY_BEST", umath::to_integral(noise::NoiseQuality::QUALITY_BEST)}});
 
 	//lua_pushtablecfunction(lua.GetState(),"table","has_value",Lua::table::has_value); // Function is incomplete
-	lua_pushtablecfunction(lua.GetState(), "table", "table_to_map", [](lua_State *l) -> int32_t {
+	lua_pushtablecfunction(lua.GetState(), "table", "table_to_map", [](lua::State *l) -> int32_t {
 		Lua::CheckTable(l, 1);
 		auto t = luabind::object {luabind::from_stack(l, 1)};
 		auto val = luabind::object {luabind::from_stack(l, 2)};
@@ -274,7 +269,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	lua_pushtablecfunction(lua.GetState(), "table", "random", Lua::table::random);
 	lua_pushtablecfunction(lua.GetState(), "table", "count", Lua::table::count);
 	lua_pushtablecfunction(lua.GetState(), "table", "is_empty", Lua::table::is_empty);
-	lua_pushtablecfunction(lua.GetState(), "table", "randomize", static_cast<int32_t (*)(lua_State *)>([](lua_State *l) -> int32_t {
+	lua_pushtablecfunction(lua.GetState(), "table", "randomize", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
 		int32_t t = 1;
 		Lua::CheckTable(l, t);
 		auto n = Lua::GetObjectLength(l, t);
@@ -300,7 +295,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		}
 		return 1;
 	}));
-	lua_pushtablecfunction(lua.GetState(), "table", "merge", static_cast<int32_t (*)(lua_State *)>([](lua_State *l) -> int32_t {
+	lua_pushtablecfunction(lua.GetState(), "table", "merge", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
 		auto t0 = 1;
 		auto t1 = 2;
 		Lua::CheckTable(l, t0);
@@ -334,7 +329,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		Lua::PushValue(l, 1);
 		return 1;
 	}));
-	lua_pushtablecfunction(lua.GetState(), "table", "copy", static_cast<int32_t (*)(lua_State *)>([](lua_State *l) -> int32_t {
+	lua_pushtablecfunction(lua.GetState(), "table", "copy", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
 		Lua::CheckTable(l, 1);
 		auto deepCopy = false;
 		if(Lua::IsSet(l, 2))
@@ -342,7 +337,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		copy_table(l, luabind::object {luabind::from_stack(l, 1)}, deepCopy).push(l);
 		return 1;
 	}));
-	lua_pushtablecfunction(lua.GetState(), "table", "is_empty", static_cast<int32_t (*)(lua_State *)>([](lua_State *l) -> int32_t {
+	lua_pushtablecfunction(lua.GetState(), "table", "is_empty", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
 		Lua::CheckTable(l, 1);
 		luabind::iterator it {luabind::object {luabind::from_stack(l, 1)}};
 		Lua::PushBool(l, it == luabind::iterator {});
@@ -361,24 +356,24 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("calc_ballistic_position", umath::calc_ballistic_position), luabind::def("calc_ballistic_angle_of_reach", umath::approach<double>), luabind::def("get_frustum_plane_center", umath::frustum::get_plane_center),
 	  luabind::def(
 	    "calc_average_rotation",
-	    +[](lua_State *l, luabind::table<> t) -> Quat {
+	    +[](lua::State *l, luabind::table<> t) -> Quat {
 		    auto rotations = Lua::table_to_vector<Quat>(l, t, 1);
 		    return uquat::calc_average(rotations);
 	    }),
 	  luabind::def(
 	    "calc_average_rotation",
-	    +[](lua_State *l, luabind::table<> tRotations, luabind::table<> tWeights) -> Quat {
+	    +[](lua::State *l, luabind::table<> tRotations, luabind::table<> tWeights) -> Quat {
 		    auto rotations = Lua::table_to_vector<Quat>(l, tRotations, 1);
 		    auto weights = Lua::table_to_vector<float>(l, tWeights, 2);
 		    return uquat::calc_average(rotations, weights);
 	    }),
 	  luabind::def("calc_rotation_to_axis", &uquat::get_rotation_to_axis),
-	  luabind::def("map_value_to_fraction", static_cast<float (*)(lua_State *, float, float, float)>([](lua_State *l, float v, float c, float i) -> float {
+	  luabind::def("map_value_to_fraction", static_cast<float (*)(lua::State *, float, float, float)>([](lua::State *l, float v, float c, float i) -> float {
 		  auto pivot = 1 / (c - 1) * i;
 		  auto range = 1 / c;
 		  return umath::clamp(1 - umath::abs((v - pivot) / range), 0.f, 1.f);
 	  })),
-	  luabind::def("map_value_to_range", static_cast<float (*)(lua_State *, float, float, float)>([](lua_State *l, float value, float lower, float upper) -> float { return umath::clamp((value - lower) / (upper - lower), 0.f, 1.f); })),
+	  luabind::def("map_value_to_range", static_cast<float (*)(lua::State *, float, float, float)>([](lua::State *l, float value, float lower, float upper) -> float { return umath::clamp((value - lower) / (upper - lower), 0.f, 1.f); })),
 	  luabind::def("randomf", static_cast<float (*)()>([]() -> float { return umath::random(0.f, 1.f); })), luabind::def("randomf", static_cast<float (*)(float, float)>([](float min, float max) -> float { return umath::random(min, max); })),
 	  luabind::def("normalize_angle", static_cast<float (*)(float)>([](float angle) -> float { return umath::normalize_angle(angle); })),
 	  luabind::def("normalize_angle", static_cast<float (*)(float, float)>([](float angle, float base) -> float { return umath::normalize_angle(angle, base); })), luabind::def("sign", static_cast<int (*)(double)>([](double n) -> int {
@@ -390,10 +385,10 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("round", &Lua::math::round), luabind::def("round", static_cast<int32_t (*)(float)>(&umath::round)), luabind::def("snap_to_grid", static_cast<int32_t (*)(float)>([](float f) -> int32_t { return umath::snap_to_grid(f); })),
 	  luabind::def("snap_to_grid", &umath::snap_to_grid), luabind::def("snap_to_gridf", static_cast<float (*)(float)>([](float f) -> float { return umath::snap_to_gridf(f); })), luabind::def("snap_to_gridf", &umath::snap_to_gridf),
 	  luabind::def("calc_hermite_spline",
-	    static_cast<luabind::object (*)(lua_State *, const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &, uint32_t)>(
-	      [](lua_State *l, const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, uint32_t segmentCount) -> luabind::object { return Lua::math::calc_hermite_spline(l, p0, p1, p2, p3, segmentCount); })),
+	    static_cast<luabind::object (*)(lua::State *, const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &, uint32_t)>(
+	      [](lua::State *l, const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, uint32_t segmentCount) -> luabind::object { return Lua::math::calc_hermite_spline(l, p0, p1, p2, p3, segmentCount); })),
 	  luabind::def("calc_hermite_spline", &Lua::math::calc_hermite_spline),
-	  luabind::def("calc_hermite_spline_position", static_cast<Vector3 (*)(lua_State *, const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &, float)>([](lua_State *l, const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, float s) -> Vector3 {
+	  luabind::def("calc_hermite_spline_position", static_cast<Vector3 (*)(lua::State *, const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &, float)>([](lua::State *l, const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, float s) -> Vector3 {
 		  return Lua::math::calc_hermite_spline_position(l, p0, p1, p2, p3, s);
 	  })),
 	  luabind::def("calc_hermite_spline_position", &Lua::math::calc_hermite_spline_position), luabind::def("is_in_range", &Lua::math::is_in_range), luabind::def("normalize_uv_coordinates", &umath::normalize_uv_coordinates),
@@ -440,14 +435,14 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("calc_ballistic_time_of_flight", static_cast<float (*)(const Vector3 &, const Vector3 &, float, float, float)>(&umath::calc_ballistic_time_of_flight)),
 	  luabind::def("calc_ballistic_time_of_flight", static_cast<float (*)(const Vector3 &, const Vector3 &, const Vector3 &, float)>(&umath::calc_ballistic_time_of_flight)),
 
-	  luabind::def("solve_ballistic_arc", static_cast<luabind::tableT<Vector3> (*)(lua_State *, const Vector3 &, double, const Vector3 &, const Vector3 &, double)>(&Lua::math::solve_ballistic_arc)),
-	  luabind::def("solve_ballistic_arc", static_cast<luabind::tableT<Vector3> (*)(lua_State *, const Vector3 &, double, const Vector3 &, double)>(&Lua::math::solve_ballistic_arc)),
+	  luabind::def("solve_ballistic_arc", static_cast<luabind::tableT<Vector3> (*)(lua::State *, const Vector3 &, double, const Vector3 &, const Vector3 &, double)>(&Lua::math::solve_ballistic_arc)),
+	  luabind::def("solve_ballistic_arc", static_cast<luabind::tableT<Vector3> (*)(lua::State *, const Vector3 &, double, const Vector3 &, double)>(&Lua::math::solve_ballistic_arc)),
 
-	  luabind::def("solve_ballistic_arc_lateral", static_cast<luabind::optional<luabind::mult<Vector3, double, Vector3>> (*)(lua_State *, const Vector3 &, double, const Vector3 &, const Vector3 &, double)>(&Lua::math::solve_ballistic_arc_lateral)),
-	  luabind::def("solve_ballistic_arc_lateral", static_cast<luabind::optional<luabind::mult<Vector3, double>> (*)(lua_State *, const Vector3 &, double, const Vector3 &, double)>(&Lua::math::solve_ballistic_arc_lateral)),
+	  luabind::def("solve_ballistic_arc_lateral", static_cast<luabind::optional<luabind::mult<Vector3, double, Vector3>> (*)(lua::State *, const Vector3 &, double, const Vector3 &, const Vector3 &, double)>(&Lua::math::solve_ballistic_arc_lateral)),
+	  luabind::def("solve_ballistic_arc_lateral", static_cast<luabind::optional<luabind::mult<Vector3, double>> (*)(lua::State *, const Vector3 &, double, const Vector3 &, double)>(&Lua::math::solve_ballistic_arc_lateral)),
 
 	  luabind::def(
-	    "calc_bezier_point", +[](lua_State *l, float time, float cp0Time, float cp0Val, float cp0OutTime, float cp0OutVal, float cp1InTime, float cp1InVal, float cp1Time, float cp1Val) -> float {
+	    "calc_bezier_point", +[](lua::State *l, float time, float cp0Time, float cp0Val, float cp0OutTime, float cp0OutVal, float cp1InTime, float cp1InVal, float cp1Time, float cp1Val) -> float {
 		    if(time - panima::Channel::VALUE_EPSILON <= cp0Time)
 			    return cp0Val;
 		    if(time + panima::Channel::VALUE_EPSILON >= cp1Time)
@@ -581,23 +576,23 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 #if 0
 	auto expressionClassDef = luabind::class_<exprtk::expression<float>>("Expression");
 	expressionClassDef.def(luabind::constructor<>());
-	expressionClassDef.def("RegisterSymbolTable",static_cast<void(*)(lua_State*,exprtk::expression<float>&,exprtk::symbol_table<float>&)>([](lua_State *l,exprtk::expression<float> &expr,exprtk::symbol_table<float> &symbolTable) {
+	expressionClassDef.def("RegisterSymbolTable",static_cast<void(*)(lua::State*,exprtk::expression<float>&,exprtk::symbol_table<float>&)>([](lua::State *l,exprtk::expression<float> &expr,exprtk::symbol_table<float> &symbolTable) {
 		expr.register_symbol_table(symbolTable);
 	}));
-	expressionClassDef.def("GetValue",static_cast<void(*)(lua_State*,exprtk::expression<float>&)>([](lua_State *l,exprtk::expression<float> &expr) {
+	expressionClassDef.def("GetValue",static_cast<void(*)(lua::State*,exprtk::expression<float>&)>([](lua::State *l,exprtk::expression<float> &expr) {
 		Lua::PushNumber(l,expr.value());
 	}));
 
 	auto parserClassDef = luabind::class_<exprtk::parser<float>>("Parser");
 	parserClassDef.def(luabind::constructor<>());
-	parserClassDef.def("RegisterSymbolTable",static_cast<void(*)(lua_State*,exprtk::parser<float>&,const std::string&,exprtk::symbol_table<float>&)>([](lua_State *l,exprtk::parser<float> &parser,const std::string &expressionString,exprtk::symbol_table<float> &symbolTable) {
+	parserClassDef.def("RegisterSymbolTable",static_cast<void(*)(lua::State*,exprtk::parser<float>&,const std::string&,exprtk::symbol_table<float>&)>([](lua::State *l,exprtk::parser<float> &parser,const std::string &expressionString,exprtk::symbol_table<float> &symbolTable) {
 		Lua::Push(l,parser.compile(expressionString,symbolTable));
 	}));
 	expressionClassDef.scope[parserClassDef];
 
 	auto symbolTableClassDef = luabind::class_<exprtk::symbol_table<float>>("SymbolTable");
 	symbolTableClassDef.def(luabind::constructor<>());
-	symbolTableClassDef.def("AddConstant",static_cast<void(*)(lua_State*,exprtk::symbol_table<float>&,const std::string&,float)>([](lua_State *l,exprtk::symbol_table<float> &symbolTable,const std::string &name,float val) {
+	symbolTableClassDef.def("AddConstant",static_cast<void(*)(lua::State*,exprtk::symbol_table<float>&,const std::string&,float)>([](lua::State *l,exprtk::symbol_table<float> &symbolTable,const std::string &name,float val) {
 		symbolTable.add_constant(name,val);
 	}));
 	expressionClassDef.scope[symbolTableClassDef];
@@ -606,11 +601,11 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 #endif
 
 	auto modDebug = luabind::module_(lua.GetState(), "debug");
-	modDebug[(luabind::def("format_error_message", +[](lua_State *l, const std::string &msg) -> std::string { return pragma::scripting::lua::format_error_message(l, msg, Lua::StatusCode::ErrorRun); }))];
+	modDebug[(luabind::def("format_error_message", +[](lua::State *l, const std::string &msg) -> std::string { return pragma::scripting::lua_core::format_error_message(l, msg, Lua::StatusCode::ErrorRun); }))];
 	modDebug[(luabind::def("move_state_to_string", Lua::debug::move_state_to_string), luabind::def("beep", Lua::debug::beep))];
 	lua_pushtablecfunction(lua.GetState(), "debug", "print", Lua::debug::print);
 	lua_pushtablecfunction(
-	  lua.GetState(), "debug", "start_debugger_server", +[](lua_State *l) -> int {
+	  lua.GetState(), "debug", "start_debugger_server", +[](lua::State *l) -> int {
 		  auto res = Lua::util::start_debugger_server(l);
 		  return 1;
 	  });
@@ -632,38 +627,38 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	if(Lua::get_extended_lua_modules_enabled()) {
 		lua_pushtablecfunction(lua.GetState(), "debug", "snapshot", &lua::snapshot);
 		isBreakDefined = true;
-		lua_pushtablecfunction(lua.GetState(), "debug", "breakpoint", static_cast<int (*)(lua_State *)>([](lua_State *l) -> int {
+		lua_pushtablecfunction(lua.GetState(), "debug", "breakpoint", static_cast<int (*)(lua::State *)>([](lua::State *l) -> int {
 			debug_break();
 			return 0;
 		}))
 	}
 	if(isBreakDefined == false) {
-		lua_pushtablecfunction(lua.GetState(), "debug", "breakpoint", static_cast<int (*)(lua_State *)>([](lua_State *l) -> int { return 0; }))
+		lua_pushtablecfunction(lua.GetState(), "debug", "breakpoint", static_cast<int (*)(lua::State *)>([](lua::State *l) -> int { return 0; }))
 	}
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	lua_pushtablecfunction(
 	  lua.GetState(), "debug", "start_profiling_task",
-	  +[](lua_State *l) -> int {
+	  +[](lua::State *l) -> int {
 		  std::string name = Lua::CheckString(l, 1);
 		  debug::get_domain().BeginTask(name);
 		  return 0;
 	  })
 	  lua_pushtablecfunction(
 	    lua.GetState(), "debug", "stop_profiling_task",
-	    +[](lua_State *l) -> int {
+	    +[](lua::State *l) -> int {
 		    debug::get_domain().EndTask();
 		    return 0;
 	    })
 #else
 	lua_pushtablecfunction(
 	  lua.GetState(), "debug", "start_profiling_task",
-	  +[](lua_State *l) -> int {
+	  +[](lua::State *l) -> int {
 		  // Do nothing
 		  return 0;
 	  })
 	  lua_pushtablecfunction(
 	    lua.GetState(), "debug", "stop_profiling_task",
-	    +[](lua_State *l) -> int {
+	    +[](lua::State *l) -> int {
 		    // Do nothing
 		    return 0;
 	    })
@@ -671,12 +666,12 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 
 	    lua_register(lua.GetState(), "print", Lua::console::print);
 	Lua::RegisterLibrary(lua.GetState(), "console",
-	  {{"print", Lua::console::print}, {"printc", Lua::console::msgc}, {"print_table", static_cast<int (*)(lua_State *)>(Lua::console::print_table)}, {"print_message", static_cast<int (*)(lua_State *)>(Lua::console::msg)}, {"print_messageln", Lua::console::msgn},
+	  {{"print", Lua::console::print}, {"printc", Lua::console::msgc}, {"print_table", static_cast<int (*)(lua::State *)>(Lua::console::print_table)}, {"print_message", static_cast<int (*)(lua::State *)>(Lua::console::msg)}, {"print_messageln", Lua::console::msgn},
 	    {"print_color", Lua::console::msgc}, {"print_warning", Lua::console::msgw}, {"print_error", Lua::console::msge},
 
 	    {"run", Lua::console::Run}, {"add_change_callback", Lua::console::AddChangeCallback},
 	    {"invoke_change_callbacks",
-	      +[](lua_State *l) -> int {
+	      +[](lua::State *l) -> int {
 		      std::string cvarName = Lua::CheckString(l, 1);
 		      auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 		      if(nw)
@@ -688,17 +683,17 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 
 	auto consoleMod = luabind::module(lua.GetState(), "console");
 	consoleMod[(luabind::def("register_variable", &Lua::console::CreateConVar),
-	  luabind::def("register_command", static_cast<void (*)(lua_State *, const std::string &, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &, pragma::console::ConVarFlags, const std::string &)>(&Lua::console::CreateConCommand)),
-	  luabind::def("register_command", static_cast<void (*)(lua_State *, const std::string &, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &, pragma::console::ConVarFlags)>(&Lua::console::CreateConCommand)),
-	  luabind::def("register_command", static_cast<void (*)(lua_State *, const std::string &, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &, const std::string &)>(&Lua::console::CreateConCommand)),
+	  luabind::def("register_command", static_cast<void (*)(lua::State *, const std::string &, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &, pragma::console::ConVarFlags, const std::string &)>(&Lua::console::CreateConCommand)),
+	  luabind::def("register_command", static_cast<void (*)(lua::State *, const std::string &, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &, pragma::console::ConVarFlags)>(&Lua::console::CreateConCommand)),
+	  luabind::def("register_command", static_cast<void (*)(lua::State *, const std::string &, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &, const std::string &)>(&Lua::console::CreateConCommand)),
 	  luabind::def("register_command",
-	    static_cast<void (*)(lua_State *, const std::string &, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &)>(
-	      [](lua_State *l, const std::string &name, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &function) { Lua::console::CreateConCommand(l, name, function, ""); })),
+	    static_cast<void (*)(lua::State *, const std::string &, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &)>(
+	      [](lua::State *l, const std::string &name, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &function) { Lua::console::CreateConCommand(l, name, function, ""); })),
 	  luabind::def("get_convar", &Lua::console::GetConVar), luabind::def("get_convar_int", &Lua::console::GetConVarInt), luabind::def("get_convar_float", &Lua::console::GetConVarFloat), luabind::def("get_convar_string", &Lua::console::GetConVarString),
 	  luabind::def("get_convar_bool", &Lua::console::GetConVarBool), luabind::def("get_convar_flags", &Lua::console::GetConVarFlags), luabind::def("register_override", &Lua::console::register_override), luabind::def("clear_override", &Lua::console::clear_override),
 	  luabind::def("is_open", &pragma::Engine::IsConsoleOpen), luabind::def("toggle", &pragma::Engine::ToggleConsole), luabind::def("open", &pragma::Engine::OpenConsole), luabind::def("close", &pragma::Engine::CloseConsole))];
 
-	static const auto fGetConVarName = [](lua_State *l, ConVar &cvar) -> std::string {
+	static const auto fGetConVarName = [](lua::State *l, ConVar &cvar) -> std::string {
 		auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 		auto &conVars = nw->GetConVars();
 		auto it = std::find_if(conVars.begin(), conVars.end(), [&cvar](const std::pair<std::string, std::shared_ptr<ConConf>> &pair) { return pair.second.get() == &cvar; });
@@ -714,10 +709,10 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	classDefConVar.def("GetFlags", &ConVar::GetFlags);
 	classDefConVar.def("GetDefault", &ConVar::GetDefault, luabind::copy_policy<0> {});
 	classDefConVar.def("GetHelpText", &ConVar::GetHelpText);
-	classDefConVar.def("AddChangeCallback", static_cast<void (*)(lua_State *, ConVar &, const Lua::func<void, Lua::var<std::string, int32_t, float, bool>> &)>([](lua_State *l, ConVar &cvar, const Lua::func<void, Lua::var<std::string, int32_t, float, bool>> &function) {
+	classDefConVar.def("AddChangeCallback", static_cast<void (*)(lua::State *, ConVar &, const Lua::func<void, Lua::var<std::string, int32_t, float, bool>> &)>([](lua::State *l, ConVar &cvar, const Lua::func<void, Lua::var<std::string, int32_t, float, bool>> &function) {
 		pragma::Engine::Get()->GetNetworkState(l)->GetGameState()->AddConVarCallback(fGetConVarName(l, cvar), function);
 	}));
-	classDefConVar.def("GetName", static_cast<std::string (*)(lua_State *, ConVar &)>([](lua_State *l, ConVar &cvar) { return fGetConVarName(l, cvar); }));
+	classDefConVar.def("GetName", static_cast<std::string (*)(lua::State *, ConVar &)>([](lua::State *l, ConVar &cvar) { return fGetConVarName(l, cvar); }));
 	consoleMod[classDefConVar];
 
 	// util
@@ -809,75 +804,75 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 
 	auto classDefCallback = luabind::class_<CallbackHandle>("Callback");
 	classDefCallback.def(luabind::tostring(luabind::self));
-	classDefCallback.scope[luabind::def("Create", static_cast<void (*)(lua_State *, luabind::object)>([](lua_State *l, luabind::object o) {
+	classDefCallback.scope[luabind::def("Create", static_cast<void (*)(lua::State *, luabind::object)>([](lua::State *l, luabind::object o) {
 		Lua::CheckFunction(l, 1);
-		Lua::Push<CallbackHandle>(l, FunctionCallback<void, std::function<Lua::StatusCode(lua_State *)>>::Create([o, l](std::function<Lua::StatusCode(lua_State *)> fPushArgs) {
+		Lua::Push<CallbackHandle>(l, FunctionCallback<void, std::function<Lua::StatusCode(lua::State *)>>::Create([o, l](std::function<Lua::StatusCode(lua::State *)> fPushArgs) {
 			Lua::CallFunction(
 			  l,
-			  [fPushArgs, &o](lua_State *l) -> Lua::StatusCode {
+			  [fPushArgs, &o](lua::State *l) -> Lua::StatusCode {
 				  o.push(l);
 				  return fPushArgs(l);
 			  },
 			  LUA_MULTRET);
 		}));
 	}))];
-	classDefCallback.def("Call", static_cast<void (*)(lua_State *, CallbackHandle &)>([](lua_State *l, CallbackHandle &cb) { call_callback(cb, {}); }));
-	classDefCallback.def("Call", static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object)>([](lua_State *l, CallbackHandle &cb, luabind::object arg0) { call_callback(cb, {arg0}); }));
-	classDefCallback.def("Call", static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object)>([](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1) { call_callback(cb, {arg0, arg1}); }));
-	classDefCallback.def("Call", static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object)>([](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2) { call_callback(cb, {arg0, arg1, arg2}); }));
-	classDefCallback.def("Call", static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object)>([](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3) {
+	classDefCallback.def("Call", static_cast<void (*)(lua::State *, CallbackHandle &)>([](lua::State *l, CallbackHandle &cb) { call_callback(cb, {}); }));
+	classDefCallback.def("Call", static_cast<void (*)(lua::State *, CallbackHandle &, luabind::object)>([](lua::State *l, CallbackHandle &cb, luabind::object arg0) { call_callback(cb, {arg0}); }));
+	classDefCallback.def("Call", static_cast<void (*)(lua::State *, CallbackHandle &, luabind::object, luabind::object)>([](lua::State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1) { call_callback(cb, {arg0, arg1}); }));
+	classDefCallback.def("Call", static_cast<void (*)(lua::State *, CallbackHandle &, luabind::object, luabind::object, luabind::object)>([](lua::State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2) { call_callback(cb, {arg0, arg1, arg2}); }));
+	classDefCallback.def("Call", static_cast<void (*)(lua::State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object)>([](lua::State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3) {
 		call_callback(cb, {arg0, arg1, arg2, arg3});
 	}));
 	classDefCallback.def("Call",
-	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
-	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4) { call_callback(cb, {arg0, arg1, arg2, arg3, arg4}); }));
+	  static_cast<void (*)(lua::State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
+	    [](lua::State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4) { call_callback(cb, {arg0, arg1, arg2, arg3, arg4}); }));
 	classDefCallback.def("Call",
-	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
-	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5) { call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5}); }));
+	  static_cast<void (*)(lua::State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
+	    [](lua::State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5) { call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5}); }));
 	classDefCallback.def("Call",
-	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
-	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6) { call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6}); }));
+	  static_cast<void (*)(lua::State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
+	    [](lua::State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6) { call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6}); }));
 	classDefCallback.def("Call",
-	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
-	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7) {
+	  static_cast<void (*)(lua::State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
+	    [](lua::State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7) {
 		    call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7});
 	    }));
 	classDefCallback.def("Call",
-	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
-	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8) {
+	  static_cast<void (*)(lua::State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
+	    [](lua::State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8) {
 		    call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8});
 	    }));
 	classDefCallback.def("Call",
-	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
-	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8, luabind::object arg9) {
+	  static_cast<void (*)(lua::State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
+	    [](lua::State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8, luabind::object arg9) {
 		    call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9});
 	    }));
 	classDefCallback.def("Call",
-	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
-	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8, luabind::object arg9, luabind::object arg10) {
+	  static_cast<void (*)(lua::State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
+	    [](lua::State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8, luabind::object arg9, luabind::object arg10) {
 		    call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10});
 	    }));
 	classDefCallback.def("Call",
-	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
-	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8, luabind::object arg9, luabind::object arg10,
+	  static_cast<void (*)(lua::State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
+	    [](lua::State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8, luabind::object arg9, luabind::object arg10,
 	      luabind::object arg11) { call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11}); }));
 	classDefCallback.def("Call",
-	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
-	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8, luabind::object arg9, luabind::object arg10,
+	  static_cast<void (*)(lua::State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(
+	    [](lua::State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8, luabind::object arg9, luabind::object arg10,
 	      luabind::object arg11, luabind::object arg12) { call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12}); }));
 	classDefCallback.def("Call",
-	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object,
-	    luabind::object)>([](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8, luabind::object arg9,
+	  static_cast<void (*)(lua::State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object,
+	    luabind::object)>([](lua::State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8, luabind::object arg9,
 	                        luabind::object arg10, luabind::object arg11, luabind::object arg12, luabind::object arg13) { call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13}); }));
 	classDefCallback.def("Call",
-	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object,
+	  static_cast<void (*)(lua::State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object,
 	    luabind::object, luabind::object)>(
-	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8, luabind::object arg9, luabind::object arg10,
+	    [](lua::State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8, luabind::object arg9, luabind::object arg10,
 	      luabind::object arg11, luabind::object arg12, luabind::object arg13, luabind::object arg14) { call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14}); }));
 	classDefCallback.def("Call",
-	  static_cast<void (*)(lua_State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object,
+	  static_cast<void (*)(lua::State *, CallbackHandle &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object,
 	    luabind::object, luabind::object, luabind::object)>(
-	    [](lua_State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8, luabind::object arg9, luabind::object arg10,
+	    [](lua::State *l, CallbackHandle &cb, luabind::object arg0, luabind::object arg1, luabind::object arg2, luabind::object arg3, luabind::object arg4, luabind::object arg5, luabind::object arg6, luabind::object arg7, luabind::object arg8, luabind::object arg9, luabind::object arg10,
 	      luabind::object arg11, luabind::object arg12, luabind::object arg13, luabind::object arg14, luabind::object arg15) { call_callback(cb, {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15}); }));
 	classDefCallback.def("IsValid", &Lua_Callback_IsValid);
 	classDefCallback.def("Remove", &Lua_Callback_Remove);
@@ -902,8 +897,8 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	defHSV.def_readwrite("h", &util::HSV::h);
 	defHSV.def_readwrite("s", &util::HSV::s);
 	defHSV.def_readwrite("v", &util::HSV::v);
-	defHSV.def("ToRGBColor", static_cast<void (*)(lua_State *, const util::HSV &)>([](lua_State *l, const util::HSV &hsv) { Lua::Push<Color>(l, util::hsv_to_rgb(hsv)); }));
-	defHSV.def("Lerp", static_cast<void (*)(lua_State *, const util::HSV &, const util::HSV &, float)>([](lua_State *l, const util::HSV &hsv0, const util::HSV &hsv1, float t) { Lua::Push<util::HSV>(l, util::lerp_hsv(hsv0, hsv1, t)); }));
+	defHSV.def("ToRGBColor", static_cast<void (*)(lua::State *, const util::HSV &)>([](lua::State *l, const util::HSV &hsv) { Lua::Push<Color>(l, util::hsv_to_rgb(hsv)); }));
+	defHSV.def("Lerp", static_cast<void (*)(lua::State *, const util::HSV &, const util::HSV &, float)>([](lua::State *l, const util::HSV &hsv0, const util::HSV &hsv1, float t) { Lua::Push<util::HSV>(l, util::lerp_hsv(hsv0, hsv1, t)); }));
 	defHSV.def(
 	  "Distance", +[](const util::HSV &hsv0, const util::HSV &hsv1) {
 		  auto dh = std::min(abs(hsv1.h - hsv0.h), 360 - abs(hsv1.h - hsv0.h)) / 180.0;
@@ -914,7 +909,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	utilMod[defHSV];
 
 	auto defColor = luabind::class_<Color>("Color");
-	defColor.scope[luabind::def("CreateFromHexColor", static_cast<void (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &hexColor) { Lua::Push<Color>(l, Color::CreateFromHexColor(hexColor)); }))];
+	defColor.scope[luabind::def("CreateFromHexColor", static_cast<void (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &hexColor) { Lua::Push<Color>(l, Color::CreateFromHexColor(hexColor)); }))];
 	defColor.def(luabind::constructor<>());
 	defColor.def(luabind::constructor<short, short, short>());
 	defColor.def(luabind::constructor<short, short, short, short>());
@@ -938,12 +933,12 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	defColor.def("Lerp", &Lua::Color::Lerp);
 	defColor.def("ToVector4", &Lua::Color::ToVector4);
 	defColor.def("ToVector", &Lua::Color::ToVector);
-	defColor.def("ToHexColor", static_cast<void (*)(lua_State *, const Color &)>([](lua_State *l, const Color &color) { Lua::PushString(l, color.ToHexColor()); }));
-	defColor.def("ToHexColorRGB", static_cast<void (*)(lua_State *, const Color &)>([](lua_State *l, const Color &color) { Lua::PushString(l, color.ToHexColorRGB()); }));
-	defColor.def("ToHSVColor", static_cast<void (*)(lua_State *, const Color &)>([](lua_State *l, const Color &color) { Lua::Push<util::HSV>(l, util::rgb_to_hsv(color)); }));
-	defColor.def("GetComplementaryColor", static_cast<void (*)(lua_State *, const Color &)>([](lua_State *l, const Color &color) { Lua::Push(l, color.GetComplementaryColor()); }));
-	defColor.def("GetContrastColor", static_cast<void (*)(lua_State *, const Color &)>([](lua_State *l, const Color &color) { Lua::Push(l, color.GetContrastColor()); }));
-	defColor.def("CalcPerceivedLuminance", static_cast<void (*)(lua_State *, const Color &)>([](lua_State *l, const Color &color) { Lua::PushNumber(l, color.CalcPerceivedLuminance()); }));
+	defColor.def("ToHexColor", static_cast<void (*)(lua::State *, const Color &)>([](lua::State *l, const Color &color) { Lua::PushString(l, color.ToHexColor()); }));
+	defColor.def("ToHexColorRGB", static_cast<void (*)(lua::State *, const Color &)>([](lua::State *l, const Color &color) { Lua::PushString(l, color.ToHexColorRGB()); }));
+	defColor.def("ToHSVColor", static_cast<void (*)(lua::State *, const Color &)>([](lua::State *l, const Color &color) { Lua::Push<util::HSV>(l, util::rgb_to_hsv(color)); }));
+	defColor.def("GetComplementaryColor", static_cast<void (*)(lua::State *, const Color &)>([](lua::State *l, const Color &color) { Lua::Push(l, color.GetComplementaryColor()); }));
+	defColor.def("GetContrastColor", static_cast<void (*)(lua::State *, const Color &)>([](lua::State *l, const Color &color) { Lua::Push(l, color.GetContrastColor()); }));
+	defColor.def("CalcPerceivedLuminance", static_cast<void (*)(lua::State *, const Color &)>([](lua::State *l, const Color &color) { Lua::PushNumber(l, color.CalcPerceivedLuminance()); }));
 	utilMod[defColor];
 
 	_G["Color"] = _G["util"]["Color"]; // Add to global table for quicker access
@@ -1120,7 +1115,7 @@ namespace Lua::doc {
 	void register_library(Lua::Interface &lua);
 };
 
-static std::string to_string(lua_State *l, int i)
+static std::string to_string(lua::State *l, int i)
 {
 	auto status = -1;
 	std::string val;
@@ -1130,7 +1125,7 @@ static std::string to_string(lua_State *l, int i)
 }
 
 template<size_t N>
-void log_with_args(spdlog::logger &logger, const char *msg, spdlog::level::level_enum logLevel, lua_State *l, int32_t argOffset)
+void log_with_args(spdlog::logger &logger, const char *msg, spdlog::level::level_enum logLevel, lua::State *l, int32_t argOffset)
 {
 	std::array<std::string, N> args;
 	for(size_t i = 0; i < args.size(); ++i)
@@ -1140,12 +1135,12 @@ void log_with_args(spdlog::logger &logger, const char *msg, spdlog::level::level
 	std::apply(log, args);
 }
 
-static int log(lua_State *l, spdlog::level::level_enum logLevel)
+static int log(lua::State *l, spdlog::level::level_enum logLevel)
 {
 	auto &logger = Lua::Check<spdlog::logger>(l, 1);
 	const char *msg = Lua::CheckString(l, 2);
 	int32_t argOffset = 2;
-	auto n = lua_gettop(l) - argOffset; /* number of arguments */
+	auto n = Lua::GetStackTop(l) - argOffset; /* number of arguments */
 	switch(n) {
 	case 0:
 		logger.log(logLevel, std::string {msg});
@@ -1188,9 +1183,9 @@ static int log(lua_State *l, spdlog::level::level_enum logLevel)
 }
 
 template<spdlog::level::level_enum TLevel>
-static void add_log_func(lua_State *l, luabind::object &oLogger, const char *name)
+static void add_log_func(lua::State *l, luabind::object &oLogger, const char *name)
 {
-	lua_pushcfunction(l, +[](lua_State *l) -> int { return log(l, TLevel); });
+	lua_pushcfunction(l, +[](lua::State *l) -> int { return log(l, TLevel); });
 	oLogger[name] = luabind::object {luabind::from_stack(l, -1)};
 	Lua::Pop(l, 1);
 }
@@ -1202,7 +1197,7 @@ void pragma::Game::RegisterLuaLibraries()
 	auto *l = GetLuaState();
 	Lua::RegisterLibrary(l, "import",
 	  {{"import_wrci", Lua::import::import_wrci}, {"import_wad", Lua::import::import_wad}, {"import_wrmi", Lua::import::import_wrmi}, {"import_smd", Lua::import::import_smd}, {"import_obj", Lua::import::import_obj}, {"import_model_asset", Lua::import::import_model_asset},
-	    {"export_model_asset", Lua::import::export_model_asset}, {"import_file", +[](lua_State *l) {
+	    {"export_model_asset", Lua::import::export_model_asset}, {"import_file", +[](lua::State *l) {
 		                                                              auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 		                                                              std::string path = Lua::CheckString(l, 1);
 		                                                              auto res = util::port_file(nw, path);
@@ -1260,7 +1255,7 @@ void pragma::Game::RegisterLuaLibraries()
 	Lua::nav::register_library(GetLuaInterface());
 
 	auto fileMod = luabind::module(GetLuaState(), "file");
-	fileMod[(luabind::def("open", Lua::file::Open), luabind::def("open", static_cast<std::pair<std::shared_ptr<LFile>, std::optional<std::string>> (*)(lua_State *, std::string, pragma::FileOpenMode)>([](lua_State *l, std::string path, pragma::FileOpenMode openMode) { return Lua::file::Open(l, path, openMode); })),
+	fileMod[(luabind::def("open", Lua::file::Open), luabind::def("open", static_cast<std::pair<std::shared_ptr<LFile>, std::optional<std::string>> (*)(lua::State *, std::string, pragma::FileOpenMode)>([](lua::State *l, std::string path, pragma::FileOpenMode openMode) { return Lua::file::Open(l, path, openMode); })),
 	  luabind::def("create_directory", Lua::file::CreateDir), luabind::def("create_path", Lua::file::CreatePath),
 	  luabind::def(
 	    "create_virtual",
@@ -1277,16 +1272,16 @@ void pragma::Game::RegisterLuaLibraries()
 	  luabind::def("exists", static_cast<bool (*)(std::string)>([](std::string path) { return FileManager::Exists(path); })), luabind::def("delete", Lua::file::Delete), luabind::def("delete_directory", Lua::file::DeleteDir),
 	  luabind::def("find_external_game_asset_files", Lua::file::find_external_game_resource_files, luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>>::type {}),
 	  luabind::def("open_external_asset_file",
-	    static_cast<std::shared_ptr<LFile> (*)(lua_State *, const std::string &, const std::string &)>([](lua_State *l, const std::string &path, const std::string &game) -> std::shared_ptr<LFile> { return Lua::file::open_external_asset_file(l, path, game); })),
-	  luabind::def("open_external_asset_file", static_cast<std::shared_ptr<LFile> (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &path) -> std::shared_ptr<LFile> { return Lua::file::open_external_asset_file(l, path); })),
+	    static_cast<std::shared_ptr<LFile> (*)(lua::State *, const std::string &, const std::string &)>([](lua::State *l, const std::string &path, const std::string &game) -> std::shared_ptr<LFile> { return Lua::file::open_external_asset_file(l, path, game); })),
+	  luabind::def("open_external_asset_file", static_cast<std::shared_ptr<LFile> (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &path) -> std::shared_ptr<LFile> { return Lua::file::open_external_asset_file(l, path); })),
 	  luabind::def("to_relative_path", Lua::file::to_relative_path), luabind::def("is_directory", FileManager::IsDir), luabind::def("is_directory", static_cast<bool (*)(std::string)>([](std::string path) { return FileManager::IsDir(path); })),
 	  luabind::def("find", Lua::file::Find, luabind::meta::join<luabind::pure_out_value<4>, luabind::pure_out_value<5>>::type {}),
-	  luabind::def("find", static_cast<void (*)(lua_State *, const std::string &, luabind::object &, luabind::object &)>([](lua_State *l, const std::string &path, luabind::object &outFiles, luabind::object &outDirs) { Lua::file::Find(l, path, fsys::SearchFlags::All, outFiles, outDirs); }),
+	  luabind::def("find", static_cast<void (*)(lua::State *, const std::string &, luabind::object &, luabind::object &)>([](lua::State *l, const std::string &path, luabind::object &outFiles, luabind::object &outDirs) { Lua::file::Find(l, path, fsys::SearchFlags::All, outFiles, outDirs); }),
 	    luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>>::type {}),
-	  luabind::def("find_lua_files", Lua::file::FindLuaFiles), luabind::def("find_lua_files", static_cast<luabind::object (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &path) { return Lua::file::FindLuaFiles(l, path); })),
+	  luabind::def("find_lua_files", Lua::file::FindLuaFiles), luabind::def("find_lua_files", static_cast<luabind::object (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &path) { return Lua::file::FindLuaFiles(l, path); })),
 	  luabind::def("get_attributes", FileManager::GetFileAttributes), luabind::def("get_flags", static_cast<fsys::FVFile (*)(std::string, fsys::SearchFlags)>(+[](std::string path, fsys::SearchFlags searchFlags) { return FileManager::GetFileFlags(path, searchFlags); })),
 	  luabind::def("get_flags", static_cast<fsys::FVFile (*)(std::string)>(+[](std::string path) { return FileManager::GetFileFlags(path); })),
-	  luabind::def("find_absolute_path", static_cast<luabind::object (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &path) -> luabind::object {
+	  luabind::def("find_absolute_path", static_cast<luabind::object (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &path) -> luabind::object {
 		  std::string rpath;
 		  auto res = FileManager::FindAbsolutePath(path, rpath);
 		  if(res == false)
@@ -1298,7 +1293,7 @@ void pragma::Game::RegisterLuaLibraries()
 			  return luabind::object {l, relPath};
 		  return {};
 	  })),
-	  luabind::def("find_path_on_disk", static_cast<luabind::object (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &path) -> luabind::object {
+	  luabind::def("find_path_on_disk", static_cast<luabind::object (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &path) -> luabind::object {
 		  std::string rpath;
 		  auto res = FileManager::FindAbsolutePath(path, rpath);
 		  if(res == false)
@@ -1314,8 +1309,8 @@ void pragma::Game::RegisterLuaLibraries()
 		    return p.GetString();
 	                                                                }),
 	  luabind::def("read", Lua::file::Read), luabind::def("write", Lua::file::Write), luabind::def("get_canonicalized_path", Lua::file::GetCanonicalizedPath), luabind::def("get_file_path", ufile::get_path_from_filename), luabind::def("get_file_name", ufile::get_file_from_filename),
-	  luabind::def("get_file_extension", static_cast<luabind::object (*)(lua_State *, const std::string &, const std::vector<std::string> &)>(Lua::file::GetFileExtension)),
-	  luabind::def("get_file_extension", static_cast<luabind::object (*)(lua_State *, const std::string &)>(Lua::file::GetFileExtension)), luabind::def("get_size", FileManager::GetFileSize),
+	  luabind::def("get_file_extension", static_cast<luabind::object (*)(lua::State *, const std::string &, const std::vector<std::string> &)>(Lua::file::GetFileExtension)),
+	  luabind::def("get_file_extension", static_cast<luabind::object (*)(lua::State *, const std::string &)>(Lua::file::GetFileExtension)), luabind::def("get_size", FileManager::GetFileSize),
 	  luabind::def("get_size", static_cast<uint64_t (*)(std::string)>(+[](std::string path) { return FileManager::GetFileSize(path); })), luabind::def("compare_path", Lua::file::ComparePath),
 	  luabind::def("get_last_write_time",+[](const std::string &path) -> std::optional<std::string> {
 		    auto ftime = filemanager::get_last_write_time(path);
@@ -1337,7 +1332,7 @@ void pragma::Game::RegisterLuaLibraries()
 	                            }),
 	  luabind::def(
 	    "remove_file_extension",
-	    +[](lua_State *l, std::string path, luabind::table<> t) -> std::
+	    +[](lua::State *l, std::string path, luabind::table<> t) -> std::
 	                                                              pair<std::string, std::optional<std::string>> {
 		    auto exts = Lua::table_to_vector<std::string>(l, t, 2);
 		    auto ext = ufile::remove_extension_from_filename(path, exts);
@@ -1354,12 +1349,12 @@ void pragma::Game::RegisterLuaLibraries()
 		  }
 		  return path;
 	  })),
-	  luabind::def("copy", static_cast<bool (*)(lua_State *, const std::string &, std::string)>([](lua_State *l, const std::string &srcFile, std::string dstFile) -> bool {
+	  luabind::def("copy", static_cast<bool (*)(lua::State *, const std::string &, std::string)>([](lua::State *l, const std::string &srcFile, std::string dstFile) -> bool {
 		  if(Lua::file::validate_write_operation(l, dstFile) == false)
 			  return false;
 		  return FileManager::CopyFile(srcFile.c_str(), dstFile.c_str());
 	  })),
-	  luabind::def("move", static_cast<bool (*)(lua_State *, std::string, std::string)>([](lua_State *l, std::string srcFile, std::string dstFile) -> bool {
+	  luabind::def("move", static_cast<bool (*)(lua::State *, std::string, std::string)>([](lua::State *l, std::string srcFile, std::string dstFile) -> bool {
 		  if(Lua::file::validate_write_operation(l, srcFile) == false)
 			  return false;
 		  if(Lua::file::validate_write_operation(l, dstFile) == false)
@@ -1367,9 +1362,9 @@ void pragma::Game::RegisterLuaLibraries()
 		  return filemanager::move_file(srcFile.c_str(), dstFile.c_str());
 	  })),
 	  luabind::def(
-	    "update_file_index_cache", +[](lua_State *l, const std::string &path) { filemanager::update_file_index_cache(path); }),
+	    "update_file_index_cache", +[](lua::State *l, const std::string &path) { filemanager::update_file_index_cache(path); }),
 	  luabind::def(
-	    "rename", +[](lua_State *l, std::string srcFile, std::string dstFile) -> bool {
+	    "rename", +[](lua::State *l, std::string srcFile, std::string dstFile) -> bool {
 		    if(Lua::file::validate_write_operation(l, srcFile) == false)
 			    return false;
 		    if(Lua::file::validate_write_operation(l, dstFile) == false)
@@ -1431,19 +1426,19 @@ void pragma::Game::RegisterLuaLibraries()
 	classDefFile.def("ReadVector2", &Lua_LFile_ReadVector2);
 	classDefFile.def("ReadVector4", &Lua_LFile_ReadVector4);
 	classDefFile.def("ReadAngles", &Lua_LFile_ReadAngles);
-	classDefFile.def("ReadQuaternion", static_cast<void (*)(lua_State *, LFile &)>([](lua_State *l, LFile &f) { Lua::Push<Quat>(l, f.Read<Quat>()); }));
-	classDefFile.def("ReadColor", static_cast<Color (*)(lua_State *, LFile &)>([](lua_State *l, LFile &f) -> Color { return f.Read<Color>(); }));
-	classDefFile.def("ReadMat2", static_cast<Mat2 (*)(lua_State *, LFile &)>([](lua_State *l, LFile &f) -> Mat2 { return f.Read<Mat2>(); }));
-	classDefFile.def("ReadMat2x3", static_cast<Mat2x3 (*)(lua_State *, LFile &)>([](lua_State *l, LFile &f) -> Mat2x3 { return f.Read<Mat2x3>(); }));
-	classDefFile.def("ReadMat2x4", static_cast<Mat2x4 (*)(lua_State *, LFile &)>([](lua_State *l, LFile &f) -> Mat2x4 { return f.Read<Mat2x4>(); }));
-	classDefFile.def("ReadMat3x2", static_cast<Mat3x2 (*)(lua_State *, LFile &)>([](lua_State *l, LFile &f) -> Mat3x2 { return f.Read<Mat3x2>(); }));
-	classDefFile.def("ReadMat3", static_cast<Mat3 (*)(lua_State *, LFile &)>([](lua_State *l, LFile &f) -> Mat3 { return f.Read<Mat3>(); }));
-	classDefFile.def("ReadMat3x4", static_cast<Mat3x4 (*)(lua_State *, LFile &)>([](lua_State *l, LFile &f) -> Mat3x4 { return f.Read<Mat3x4>(); }));
-	classDefFile.def("ReadMat4x2", static_cast<Mat4x2 (*)(lua_State *, LFile &)>([](lua_State *l, LFile &f) -> Mat4x2 { return f.Read<Mat4x2>(); }));
-	classDefFile.def("ReadMat4x3", static_cast<Mat4x3 (*)(lua_State *, LFile &)>([](lua_State *l, LFile &f) -> Mat4x3 { return f.Read<Mat4x3>(); }));
-	classDefFile.def("ReadMat4", static_cast<Mat4 (*)(lua_State *, LFile &)>([](lua_State *l, LFile &f) -> Mat4 { return f.Read<Mat4>(); }));
-	classDefFile.def("ReadString", static_cast<void (*)(lua_State *, LFile &, uint32_t)>(&Lua_LFile_ReadString));
-	classDefFile.def("ReadString", static_cast<void (*)(lua_State *, LFile &)>(&Lua_LFile_ReadString));
+	classDefFile.def("ReadQuaternion", static_cast<void (*)(lua::State *, LFile &)>([](lua::State *l, LFile &f) { Lua::Push<Quat>(l, f.Read<Quat>()); }));
+	classDefFile.def("ReadColor", static_cast<Color (*)(lua::State *, LFile &)>([](lua::State *l, LFile &f) -> Color { return f.Read<Color>(); }));
+	classDefFile.def("ReadMat2", static_cast<Mat2 (*)(lua::State *, LFile &)>([](lua::State *l, LFile &f) -> Mat2 { return f.Read<Mat2>(); }));
+	classDefFile.def("ReadMat2x3", static_cast<Mat2x3 (*)(lua::State *, LFile &)>([](lua::State *l, LFile &f) -> Mat2x3 { return f.Read<Mat2x3>(); }));
+	classDefFile.def("ReadMat2x4", static_cast<Mat2x4 (*)(lua::State *, LFile &)>([](lua::State *l, LFile &f) -> Mat2x4 { return f.Read<Mat2x4>(); }));
+	classDefFile.def("ReadMat3x2", static_cast<Mat3x2 (*)(lua::State *, LFile &)>([](lua::State *l, LFile &f) -> Mat3x2 { return f.Read<Mat3x2>(); }));
+	classDefFile.def("ReadMat3", static_cast<Mat3 (*)(lua::State *, LFile &)>([](lua::State *l, LFile &f) -> Mat3 { return f.Read<Mat3>(); }));
+	classDefFile.def("ReadMat3x4", static_cast<Mat3x4 (*)(lua::State *, LFile &)>([](lua::State *l, LFile &f) -> Mat3x4 { return f.Read<Mat3x4>(); }));
+	classDefFile.def("ReadMat4x2", static_cast<Mat4x2 (*)(lua::State *, LFile &)>([](lua::State *l, LFile &f) -> Mat4x2 { return f.Read<Mat4x2>(); }));
+	classDefFile.def("ReadMat4x3", static_cast<Mat4x3 (*)(lua::State *, LFile &)>([](lua::State *l, LFile &f) -> Mat4x3 { return f.Read<Mat4x3>(); }));
+	classDefFile.def("ReadMat4", static_cast<Mat4 (*)(lua::State *, LFile &)>([](lua::State *l, LFile &f) -> Mat4 { return f.Read<Mat4>(); }));
+	classDefFile.def("ReadString", static_cast<void (*)(lua::State *, LFile &, uint32_t)>(&Lua_LFile_ReadString));
+	classDefFile.def("ReadString", static_cast<void (*)(lua::State *, LFile &)>(&Lua_LFile_ReadString));
 	classDefFile.def("WriteInt32", &Lua_LFile_WriteInt32);
 	classDefFile.def("WriteUInt32", &Lua_LFile_WriteUInt32);
 	classDefFile.def("WriteInt16", &Lua_LFile_WriteInt16);
@@ -1461,38 +1456,38 @@ void pragma::Game::RegisterLuaLibraries()
 	classDefFile.def("WriteVector2", &Lua_LFile_WriteVector2);
 	classDefFile.def("WriteVector4", &Lua_LFile_WriteVector4);
 	classDefFile.def("WriteAngles", &Lua_LFile_WriteAngles);
-	classDefFile.def("WriteQuaternion", static_cast<void (*)(lua_State *, LFile &, const Quat &)>([](lua_State *l, LFile &f, const Quat &rot) { f.Write<Quat>(rot); }));
-	classDefFile.def("WriteColor", static_cast<void (*)(lua_State *, LFile &, const Color &)>([](lua_State *l, LFile &f, const Color &col) { f.Write<Color>(col); }));
-	classDefFile.def("WriteMat2", static_cast<void (*)(lua_State *, LFile &, const Mat2 &)>([](lua_State *l, LFile &f, const Mat2 &col) { f.Write<Mat2>(col); }));
-	classDefFile.def("WriteMat2x3", static_cast<void (*)(lua_State *, LFile &, const Mat2x3 &)>([](lua_State *l, LFile &f, const Mat2x3 &col) { f.Write<Mat2x3>(col); }));
-	classDefFile.def("WriteMat2x4", static_cast<void (*)(lua_State *, LFile &, const Mat2x4 &)>([](lua_State *l, LFile &f, const Mat2x4 &col) { f.Write<Mat2x4>(col); }));
-	classDefFile.def("WriteMat3x2", static_cast<void (*)(lua_State *, LFile &, const Mat3x2 &)>([](lua_State *l, LFile &f, const Mat3x2 &col) { f.Write<Mat3x2>(col); }));
-	classDefFile.def("WriteMat3", static_cast<void (*)(lua_State *, LFile &, const Mat3 &)>([](lua_State *l, LFile &f, const Mat3 &col) { f.Write<Mat3>(col); }));
-	classDefFile.def("WriteMat3x4", static_cast<void (*)(lua_State *, LFile &, const Mat3x4 &)>([](lua_State *l, LFile &f, const Mat3x4 &col) { f.Write<Mat3x4>(col); }));
-	classDefFile.def("WriteMat4x2", static_cast<void (*)(lua_State *, LFile &, const Mat4x2 &)>([](lua_State *l, LFile &f, const Mat4x2 &col) { f.Write<Mat4x2>(col); }));
-	classDefFile.def("WriteMat4x3", static_cast<void (*)(lua_State *, LFile &, const Mat4x3 &)>([](lua_State *l, LFile &f, const Mat4x3 &col) { f.Write<Mat4x3>(col); }));
-	classDefFile.def("WriteMat4", static_cast<void (*)(lua_State *, LFile &, const Mat4 &)>([](lua_State *l, LFile &f, const Mat4 &col) { f.Write<Mat4>(col); }));
-	classDefFile.def("WriteString", static_cast<void (*)(lua_State *, LFile &, std::string, bool)>(&Lua_LFile_WriteString));
-	classDefFile.def("WriteString", static_cast<void (*)(lua_State *, LFile &, std::string)>(&Lua_LFile_WriteString));
+	classDefFile.def("WriteQuaternion", static_cast<void (*)(lua::State *, LFile &, const Quat &)>([](lua::State *l, LFile &f, const Quat &rot) { f.Write<Quat>(rot); }));
+	classDefFile.def("WriteColor", static_cast<void (*)(lua::State *, LFile &, const Color &)>([](lua::State *l, LFile &f, const Color &col) { f.Write<Color>(col); }));
+	classDefFile.def("WriteMat2", static_cast<void (*)(lua::State *, LFile &, const Mat2 &)>([](lua::State *l, LFile &f, const Mat2 &col) { f.Write<Mat2>(col); }));
+	classDefFile.def("WriteMat2x3", static_cast<void (*)(lua::State *, LFile &, const Mat2x3 &)>([](lua::State *l, LFile &f, const Mat2x3 &col) { f.Write<Mat2x3>(col); }));
+	classDefFile.def("WriteMat2x4", static_cast<void (*)(lua::State *, LFile &, const Mat2x4 &)>([](lua::State *l, LFile &f, const Mat2x4 &col) { f.Write<Mat2x4>(col); }));
+	classDefFile.def("WriteMat3x2", static_cast<void (*)(lua::State *, LFile &, const Mat3x2 &)>([](lua::State *l, LFile &f, const Mat3x2 &col) { f.Write<Mat3x2>(col); }));
+	classDefFile.def("WriteMat3", static_cast<void (*)(lua::State *, LFile &, const Mat3 &)>([](lua::State *l, LFile &f, const Mat3 &col) { f.Write<Mat3>(col); }));
+	classDefFile.def("WriteMat3x4", static_cast<void (*)(lua::State *, LFile &, const Mat3x4 &)>([](lua::State *l, LFile &f, const Mat3x4 &col) { f.Write<Mat3x4>(col); }));
+	classDefFile.def("WriteMat4x2", static_cast<void (*)(lua::State *, LFile &, const Mat4x2 &)>([](lua::State *l, LFile &f, const Mat4x2 &col) { f.Write<Mat4x2>(col); }));
+	classDefFile.def("WriteMat4x3", static_cast<void (*)(lua::State *, LFile &, const Mat4x3 &)>([](lua::State *l, LFile &f, const Mat4x3 &col) { f.Write<Mat4x3>(col); }));
+	classDefFile.def("WriteMat4", static_cast<void (*)(lua::State *, LFile &, const Mat4 &)>([](lua::State *l, LFile &f, const Mat4 &col) { f.Write<Mat4>(col); }));
+	classDefFile.def("WriteString", static_cast<void (*)(lua::State *, LFile &, std::string, bool)>(&Lua_LFile_WriteString));
+	classDefFile.def("WriteString", static_cast<void (*)(lua::State *, LFile &, std::string)>(&Lua_LFile_WriteString));
 	classDefFile.def("GetSize", &LFile::Size);
 	classDefFile.def("Seek", &Lua_LFile_Seek);
 	classDefFile.def("Tell", &Lua_LFile_Tell);
 	classDefFile.def("Eof", &Lua_LFile_Eof);
-	classDefFile.def("IgnoreComments", static_cast<void (*)(lua_State *, LFile &)>(&Lua_LFile_IgnoreComments));
-	classDefFile.def("IgnoreComments", static_cast<void (*)(lua_State *, LFile &, std::string)>(&Lua_LFile_IgnoreComments));
-	classDefFile.def("IgnoreComments", static_cast<void (*)(lua_State *, LFile &, std::string, std::string)>(&Lua_LFile_IgnoreComments));
-	classDefFile.def("Read", static_cast<void (*)(lua_State *, LFile &, uint32_t)>(&Lua_LFile_Read));
-	classDefFile.def("Read", static_cast<void (*)(lua_State *, LFile &, ::util::DataStream &ds, uint32_t)>(&Lua_LFile_Read));
-	classDefFile.def("Write", static_cast<void (*)(lua_State *, LFile &, ::util::DataStream &ds)>(&Lua_LFile_Write));
-	classDefFile.def("Write", static_cast<void (*)(lua_State *, LFile &, ::util::DataStream &ds, uint32_t)>(&Lua_LFile_Write));
+	classDefFile.def("IgnoreComments", static_cast<void (*)(lua::State *, LFile &)>(&Lua_LFile_IgnoreComments));
+	classDefFile.def("IgnoreComments", static_cast<void (*)(lua::State *, LFile &, std::string)>(&Lua_LFile_IgnoreComments));
+	classDefFile.def("IgnoreComments", static_cast<void (*)(lua::State *, LFile &, std::string, std::string)>(&Lua_LFile_IgnoreComments));
+	classDefFile.def("Read", static_cast<void (*)(lua::State *, LFile &, uint32_t)>(&Lua_LFile_Read));
+	classDefFile.def("Read", static_cast<void (*)(lua::State *, LFile &, ::util::DataStream &ds, uint32_t)>(&Lua_LFile_Read));
+	classDefFile.def("Write", static_cast<void (*)(lua::State *, LFile &, ::util::DataStream &ds)>(&Lua_LFile_Write));
+	classDefFile.def("Write", static_cast<void (*)(lua::State *, LFile &, ::util::DataStream &ds, uint32_t)>(&Lua_LFile_Write));
 	classDefFile.def("GetPath", &Lua_LFile_GetPath);
 	fileMod[classDefFile];
 
 	auto timeMod = luabind::module(GetLuaState(), "time");
-	timeMod[(luabind::def("create_timer", static_cast<std::shared_ptr<TimerHandle> (*)(lua_State *, float, int32_t, LuaFunctionObject, TimerType)>(Lua::time::create_timer)),
-	  luabind::def("create_timer", static_cast<std::shared_ptr<TimerHandle> (*)(lua_State *, float, int32_t, LuaFunctionObject)>(Lua::time::create_timer)),
-	  luabind::def("create_simple_timer", static_cast<std::shared_ptr<TimerHandle> (*)(lua_State *, float, LuaFunctionObject, TimerType)>(Lua::time::create_simple_timer)),
-	  luabind::def("create_simple_timer", static_cast<std::shared_ptr<TimerHandle> (*)(lua_State *, float, LuaFunctionObject)>(Lua::time::create_simple_timer)), luabind::def("cur_time", Lua::time::cur_time), luabind::def("real_time", Lua::time::real_time),
+	timeMod[(luabind::def("create_timer", static_cast<std::shared_ptr<TimerHandle> (*)(lua::State *, float, int32_t, LuaFunctionObject, TimerType)>(Lua::time::create_timer)),
+	  luabind::def("create_timer", static_cast<std::shared_ptr<TimerHandle> (*)(lua::State *, float, int32_t, LuaFunctionObject)>(Lua::time::create_timer)),
+	  luabind::def("create_simple_timer", static_cast<std::shared_ptr<TimerHandle> (*)(lua::State *, float, LuaFunctionObject, TimerType)>(Lua::time::create_simple_timer)),
+	  luabind::def("create_simple_timer", static_cast<std::shared_ptr<TimerHandle> (*)(lua::State *, float, LuaFunctionObject)>(Lua::time::create_simple_timer)), luabind::def("cur_time", Lua::time::cur_time), luabind::def("real_time", Lua::time::real_time),
 	  luabind::def("delta_time", Lua::time::delta_time), luabind::def("time_since_epoch", Lua::time::time_since_epoch), luabind::def("convert_duration", Lua::time::convert_duration))];
 
 	auto classDefTimer = luabind::class_<TimerHandle>("Timer");
@@ -1513,58 +1508,58 @@ void pragma::Game::RegisterLuaLibraries()
 	timeMod[classDefTimer];
 
 	auto boundingVolMod = luabind::module(GetLuaState(), "boundingvolume");
-	boundingVolMod[(luabind::def("get_rotated_aabb", static_cast<luabind::mult<Vector3, Vector3> (*)(lua_State *, const Vector3 &, const Vector3 &, const Mat3 &)>(Lua::boundingvolume::GetRotatedAABB)),
-	  luabind::def("get_rotated_aabb", static_cast<luabind::mult<Vector3, Vector3> (*)(lua_State *, const Vector3 &, const Vector3 &, const Quat &)>(Lua::boundingvolume::GetRotatedAABB)))];
+	boundingVolMod[(luabind::def("get_rotated_aabb", static_cast<luabind::mult<Vector3, Vector3> (*)(lua::State *, const Vector3 &, const Vector3 &, const Mat3 &)>(Lua::boundingvolume::GetRotatedAABB)),
+	  luabind::def("get_rotated_aabb", static_cast<luabind::mult<Vector3, Vector3> (*)(lua::State *, const Vector3 &, const Vector3 &, const Quat &)>(Lua::boundingvolume::GetRotatedAABB)))];
 
 	auto intersectMod = luabind::module(GetLuaState(), "intersect");
 	intersectMod[(luabind::def("aabb_with_aabb", static_cast<umath::intersection::Intersect (*)(const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &)>(umath::intersection::aabb_aabb)), luabind::def("sphere_with_sphere", umath::intersection::sphere_sphere),
 	  luabind::def("aabb_with_sphere", umath::intersection::aabb_sphere), luabind::def("line_with_aabb", Lua::intersect::line_aabb, luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>, luabind::pure_out_value<8>>::type {}),
 	  luabind::def("line_with_obb", Lua::intersect::line_obb),
-	  luabind::def("line_with_obb", static_cast<luabind::object (*)(lua_State *, const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &, bool)>([](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, const Vector3 &min, const Vector3 &max, bool precise) {
+	  luabind::def("line_with_obb", static_cast<luabind::object (*)(lua::State *, const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &, bool)>([](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, const Vector3 &min, const Vector3 &max, bool precise) {
 		  return Lua::intersect::line_obb(l, rayStart, rayDir, min, max, precise);
 	  })),
-	  luabind::def("line_with_obb", static_cast<luabind::object (*)(lua_State *, const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &)>([](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, const Vector3 &min, const Vector3 &max) {
+	  luabind::def("line_with_obb", static_cast<luabind::object (*)(lua::State *, const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &)>([](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, const Vector3 &min, const Vector3 &max) {
 		  return Lua::intersect::line_obb(l, rayStart, rayDir, min, max);
 	  })),
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, pragma::ModelSubMesh &, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
+	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::ModelSubMesh &, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
 	  luabind::def("line_with_mesh",
-	    static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, pragma::ModelSubMesh &, luabind::object &, luabind::object &, bool)>(
-	      [](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1, precise); }),
+	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::ModelSubMesh &, luabind::object &, luabind::object &, bool)>(
+	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1, precise); }),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, pragma::ModelSubMesh &, luabind::object &, luabind::object &)>([](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1) {
+	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::ModelSubMesh &, luabind::object &, luabind::object &)>([](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1) {
 		  return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1);
 	  }),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, ModelMesh &, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
+	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, ModelMesh &, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
 	  luabind::def("line_with_mesh",
-	    static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, ModelMesh &, luabind::object &, luabind::object &, bool)>(
-	      [](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, ModelMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1, precise); }),
+	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, ModelMesh &, luabind::object &, luabind::object &, bool)>(
+	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, ModelMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1, precise); }),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, ModelMesh &, luabind::object &, luabind::object &)>([](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, ModelMesh &mesh, luabind::object &r0, luabind::object &r1) {
+	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, ModelMesh &, luabind::object &, luabind::object &)>([](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, ModelMesh &mesh, luabind::object &r0, luabind::object &r1) {
 		  return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1);
 	  }),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, pragma::Model &, uint32_t, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
+	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::Model &, uint32_t, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
 	  luabind::def("line_with_mesh",
-	    static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, pragma::Model &, uint32_t, luabind::object &, luabind::object &, bool)>(
-	      [](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, lod, r0, r1, precise); }),
+	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::Model &, uint32_t, luabind::object &, luabind::object &, bool)>(
+	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, lod, r0, r1, precise); }),
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
 	  luabind::def("line_with_mesh",
-	    static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, pragma::Model &, uint32_t, luabind::object &, luabind::object &)>(
-	      [](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, lod, r0, r1); }),
+	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::Model &, uint32_t, luabind::object &, luabind::object &)>(
+	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, lod, r0, r1); }),
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, pragma::Model &, luabind::table<>, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
-	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
-	  luabind::def("line_with_mesh",
-	    static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, pragma::Model &, luabind::table<>, luabind::object &, luabind::object &, bool)>(
-	      [](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, luabind::table<> bodyGroups, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, bodyGroups, r0, r1, precise); }),
+	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::Model &, luabind::table<>, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
 	  luabind::def("line_with_mesh",
-	    static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, pragma::Model &, luabind::table<>, luabind::object &, luabind::object &)>(
-	      [](lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, luabind::table<> bodyGroups, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, bodyGroups, r0, r1); }),
+	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::Model &, luabind::table<>, luabind::object &, luabind::object &, bool)>(
+	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, luabind::table<> bodyGroups, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, bodyGroups, r0, r1, precise); }),
+	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
+	  luabind::def("line_with_mesh",
+	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::Model &, luabind::table<>, luabind::object &, luabind::object &)>(
+	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, luabind::table<> bodyGroups, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, bodyGroups, r0, r1); }),
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
 	  luabind::def("line_with_plane", Lua::intersect::line_plane),
 	  luabind::def("point_in_aabb", static_cast<bool (*)(const Vector3 &, const Vector3 &, const Vector3 &)>([](const Vector3 &vec, const Vector3 &min, const Vector3 &max) { return umath::intersection::vector_in_bounds(vec, min, max); })),
@@ -1573,11 +1568,11 @@ void pragma::Game::RegisterLuaLibraries()
 	  luabind::def("sphere_with_cone", static_cast<bool (*)(const Vector3 &, float, const Vector3 &, const Vector3 &, float)>(&umath::intersection::sphere_cone)),
 	  luabind::def("line_with_triangle", Lua::intersect::line_triangle, luabind::meta::join<luabind::pure_out_value<7>, luabind::pure_out_value<8>>::type {}),
 	  luabind::def("line_with_triangle",
-	    static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &, luabind::object &, luabind::object &)>(
-	      [](lua_State *l, const Vector3 &lineOrigin, const Vector3 &lineDir, const Vector3 &v0, const Vector3 &v1, const Vector3 &v2, luabind::object &outT, luabind::object &outUv) { Lua::intersect::line_triangle(l, lineOrigin, lineDir, v0, v1, v2, outT, outUv); }),
+	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &, luabind::object &, luabind::object &)>(
+	      [](lua::State *l, const Vector3 &lineOrigin, const Vector3 &lineDir, const Vector3 &v0, const Vector3 &v1, const Vector3 &v2, luabind::object &outT, luabind::object &outUv) { Lua::intersect::line_triangle(l, lineOrigin, lineDir, v0, v1, v2, outT, outUv); }),
 	    luabind::meta::join<luabind::pure_out_value<7>, luabind::pure_out_value<8>>::type {}),
 	  luabind::def("aabb_with_plane", umath::intersection::aabb_plane), luabind::def("aabb_with_triangle", umath::intersection::aabb_triangle), luabind::def("obb_with_plane", umath::intersection::obb_plane), luabind::def("sphere_with_plane", umath::intersection::sphere_plane),
-	  luabind::def("line_with_sphere", static_cast<void (*)(lua_State *, const Vector3 &, const Vector3 &, const Vector3 &, float)>([](lua_State *l, const Vector3 &lineOrigin, const Vector3 &lineDir, const Vector3 &sphereOrigin, float sphereRadius) {
+	  luabind::def("line_with_sphere", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, const Vector3 &, float)>([](lua::State *l, const Vector3 &lineOrigin, const Vector3 &lineDir, const Vector3 &sphereOrigin, float sphereRadius) {
 		  float t;
 		  Vector3 p;
 		  if(umath::intersection::line_sphere(lineOrigin, lineDir, sphereOrigin, sphereRadius, t, p) == false) {
@@ -1601,26 +1596,26 @@ void pragma::Game::RegisterLuaLibraries()
 	  luabind::def("get_triangle_winding_order", static_cast<umath::geometry::WindingOrder (*)(const Vector2 &, const Vector2 &, const Vector2 &)>(::umath::geometry::get_triangle_winding_order)),
 	  luabind::def("generate_truncated_cone_mesh", Lua::geometry::generate_truncated_cone_mesh, luabind::meta::join<luabind::pure_out_value<7>, luabind::pure_out_value<8>, luabind::pure_out_value<9>>::type {}),
 	  luabind::def("generate_truncated_cone_mesh",
-	    static_cast<void (*)(lua_State *, const Vector3 &, float, const Vector3 &, float, float, luabind::object &, luabind::object &, luabind::object &, uint32_t, bool, bool)>(
-	      [](lua_State *l, const Vector3 &origin, float startRadius, const Vector3 &dir, float dist, float endRadius, luabind::object &outVerts, luabind::object &outTris, luabind::object &outNormals, uint32_t segmentCount, bool caps, bool generateTriangles) {
+	    static_cast<void (*)(lua::State *, const Vector3 &, float, const Vector3 &, float, float, luabind::object &, luabind::object &, luabind::object &, uint32_t, bool, bool)>(
+	      [](lua::State *l, const Vector3 &origin, float startRadius, const Vector3 &dir, float dist, float endRadius, luabind::object &outVerts, luabind::object &outTris, luabind::object &outNormals, uint32_t segmentCount, bool caps, bool generateTriangles) {
 		      Lua::geometry::generate_truncated_cone_mesh(l, origin, startRadius, dir, dist, endRadius, outVerts, outTris, outNormals, segmentCount, caps, generateTriangles);
 	      }),
 	    luabind::meta::join<luabind::pure_out_value<7>, luabind::pure_out_value<8>, luabind::pure_out_value<9>>::type {}),
 	  luabind::def("generate_truncated_cone_mesh",
-	    static_cast<void (*)(lua_State *, const Vector3 &, float, const Vector3 &, float, float, luabind::object &, luabind::object &, luabind::object &, uint32_t, bool)>(
-	      [](lua_State *l, const Vector3 &origin, float startRadius, const Vector3 &dir, float dist, float endRadius, luabind::object &outVerts, luabind::object &outTris, luabind::object &outNormals, uint32_t segmentCount, bool caps) {
+	    static_cast<void (*)(lua::State *, const Vector3 &, float, const Vector3 &, float, float, luabind::object &, luabind::object &, luabind::object &, uint32_t, bool)>(
+	      [](lua::State *l, const Vector3 &origin, float startRadius, const Vector3 &dir, float dist, float endRadius, luabind::object &outVerts, luabind::object &outTris, luabind::object &outNormals, uint32_t segmentCount, bool caps) {
 		      Lua::geometry::generate_truncated_cone_mesh(l, origin, startRadius, dir, dist, endRadius, outVerts, outTris, outNormals, segmentCount, caps);
 	      }),
 	    luabind::meta::join<luabind::pure_out_value<7>, luabind::pure_out_value<8>, luabind::pure_out_value<9>>::type {}),
 	  luabind::def("generate_truncated_cone_mesh",
-	    static_cast<void (*)(lua_State *, const Vector3 &, float, const Vector3 &, float, float, luabind::object &, luabind::object &, luabind::object &, uint32_t)>(
-	      [](lua_State *l, const Vector3 &origin, float startRadius, const Vector3 &dir, float dist, float endRadius, luabind::object &outVerts, luabind::object &outTris, luabind::object &outNormals, uint32_t segmentCount) {
+	    static_cast<void (*)(lua::State *, const Vector3 &, float, const Vector3 &, float, float, luabind::object &, luabind::object &, luabind::object &, uint32_t)>(
+	      [](lua::State *l, const Vector3 &origin, float startRadius, const Vector3 &dir, float dist, float endRadius, luabind::object &outVerts, luabind::object &outTris, luabind::object &outNormals, uint32_t segmentCount) {
 		      Lua::geometry::generate_truncated_cone_mesh(l, origin, startRadius, dir, dist, endRadius, outVerts, outTris, outNormals, segmentCount);
 	      }),
 	    luabind::meta::join<luabind::pure_out_value<7>, luabind::pure_out_value<8>, luabind::pure_out_value<9>>::type {}),
 	  luabind::def("generate_truncated_cone_mesh",
-	    static_cast<void (*)(lua_State *, const Vector3 &, float, const Vector3 &, float, float, luabind::object &, luabind::object &, luabind::object &)>(
-	      [](lua_State *l, const Vector3 &origin, float startRadius, const Vector3 &dir, float dist, float endRadius, luabind::object &outVerts, luabind::object &outTris, luabind::object &outNormals) {
+	    static_cast<void (*)(lua::State *, const Vector3 &, float, const Vector3 &, float, float, luabind::object &, luabind::object &, luabind::object &)>(
+	      [](lua::State *l, const Vector3 &origin, float startRadius, const Vector3 &dir, float dist, float endRadius, luabind::object &outVerts, luabind::object &outTris, luabind::object &outNormals) {
 		      Lua::geometry::generate_truncated_cone_mesh(l, origin, startRadius, dir, dist, endRadius, outVerts, outTris, outNormals);
 	      }),
 	    luabind::meta::join<luabind::pure_out_value<7>, luabind::pure_out_value<8>, luabind::pure_out_value<9>>::type {}),
@@ -1661,14 +1656,14 @@ void pragma::Game::RegisterLuaLibraries()
 	auto modMat = luabind::module_(GetLuaState(), "matrix");
 	modMat[(luabind::def("create_from_axis_angle", umat::create_from_axis_angle), luabind::def("create_from_axes", umat::create_from_axes), luabind::def("create_reflection", umat::create_reflection), luabind::def("create_orthogonal_matrix", Lua::matrix::create_orthogonal_matrix),
 	  luabind::def("create_perspective_matrix", Lua::matrix::create_perspective_matrix), luabind::def("create_look_at_matrix", glm::gtc::lookAtRH<float, glm::packed_highp>),
-	  luabind::def("calc_covariance_matrix", static_cast<::Mat3 (*)(lua_State *, luabind::table<>, const Vector3 &)>(Lua::matrix::calc_covariance_matrix)), luabind::def("calc_covariance_matrix", static_cast<::Mat3 (*)(lua_State *, luabind::table<>)>(Lua::matrix::calc_covariance_matrix)),
-	  luabind::def("calc_covariance_matrix", static_cast<::Mat3 (*)(lua_State *, luabind::table<>)>(Lua::matrix::calc_covariance_matrix)), luabind::def("calc_projection_depth_bias_offset", &umat::calc_projection_depth_bias_offset))];
+	  luabind::def("calc_covariance_matrix", static_cast<::Mat3 (*)(lua::State *, luabind::table<>, const Vector3 &)>(Lua::matrix::calc_covariance_matrix)), luabind::def("calc_covariance_matrix", static_cast<::Mat3 (*)(lua::State *, luabind::table<>)>(Lua::matrix::calc_covariance_matrix)),
+	  luabind::def("calc_covariance_matrix", static_cast<::Mat3 (*)(lua::State *, luabind::table<>)>(Lua::matrix::calc_covariance_matrix)), luabind::def("calc_projection_depth_bias_offset", &umat::calc_projection_depth_bias_offset))];
 
 	Lua::RegisterLibrary(GetLuaState(), "mesh", {{"generate_convex_hull", Lua::mesh::generate_convex_hull}, {"calc_smallest_enclosing_bbox", Lua::mesh::calc_smallest_enclosing_bbox}});
 
 	Lua::RegisterLibrary(GetLuaState(), "log",
 	  {{"info", Lua::log::info}, {"warn", Lua::log::warn}, {"error", Lua::log::error}, {"critical", Lua::log::critical}, {"debug", Lua::log::debug}, {"color", Lua::log::color}, {"register_logger", Lua::log::register_logger},
-	    {"prefix", +[](lua_State *l) {
+	    {"prefix", +[](lua::State *l) {
 		     std::string msg = Lua::CheckString(l, 1);
 		     auto colorFlags = static_cast<pragma::console::ConsoleColorFlags>(Lua::CheckInt(l, 2));
 		     auto strColorFlags = util::get_ansi_color_code(colorFlags);

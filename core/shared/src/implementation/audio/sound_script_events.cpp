@@ -4,7 +4,6 @@ module;
 
 
 
-#include "pragma/lua/core.hpp"
 
 
 #undef CreateEvent

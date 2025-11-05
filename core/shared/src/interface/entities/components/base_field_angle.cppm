@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.base_field_angle;
@@ -34,7 +33,7 @@ class DLLNETWORK BaseFieldAngleComponent : public BaseEntityComponent {
 	};
 	struct DLLNETWORK CEOnFieldAngleChanged : public ComponentEvent {
 		CEOnFieldAngleChanged(float oldRadius, float newRadius);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		umath::Degree oldFieldAngle;
 		umath::Degree newFieldAngle;
 	};

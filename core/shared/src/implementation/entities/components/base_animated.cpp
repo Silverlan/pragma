@@ -3,10 +3,8 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
-#include <sharedutils/magic_enum.hpp>
 
 module pragma.shared;
 
@@ -1228,7 +1226,7 @@ static void write_anim_flags(udm::LinkedPropertyWrapperArg udm, FPlayAnim flags)
 	udm::write_flag(udm["flags"], flags, FPlayAnim::Transmit, "transmit");
 	udm::write_flag(udm["flags"], flags, FPlayAnim::SnapTo, "snapTo");
 	udm::write_flag(udm["flags"], flags, FPlayAnim::Loop, "loop");
-	static_assert(magic_enum::flags::enum_count<FPlayAnim>() == 4);
+	static_assert(magic_enum::enum_count<FPlayAnim>() == 5);
 }
 
 static FPlayAnim read_anim_flags(udm::LinkedPropertyWrapperArg &udm)
@@ -1238,7 +1236,7 @@ static FPlayAnim read_anim_flags(udm::LinkedPropertyWrapperArg &udm)
 	udm::read_flag(udm["flags"], flags, FPlayAnim::Transmit, "transmit");
 	udm::read_flag(udm["flags"], flags, FPlayAnim::SnapTo, "snapTo");
 	udm::read_flag(udm["flags"], flags, FPlayAnim::Loop, "loop");
-	static_assert(magic_enum::flags::enum_count<FPlayAnim>() == 4);
+	static_assert(magic_enum::enum_count<FPlayAnim>() == 5);
 	return flags;
 }
 
@@ -1349,7 +1347,7 @@ void BaseAnimatedComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t ver
 /////////////////
 
 CEHandleAnimationEvent::CEHandleAnimationEvent(const pragma::AnimationEvent &animationEvent) : animationEvent(animationEvent) {}
-void CEHandleAnimationEvent::PushArguments(lua_State *l)
+void CEHandleAnimationEvent::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, static_cast<int32_t>(animationEvent.eventID));
 
@@ -1361,7 +1359,7 @@ void CEHandleAnimationEvent::PushArguments(lua_State *l)
 		Lua::SetTableValue(l, tArgs);
 	}
 }
-void CEHandleAnimationEvent::PushArgumentVariadic(lua_State *l)
+void CEHandleAnimationEvent::PushArgumentVariadic(lua::State *l)
 {
 	auto &args = animationEvent.arguments;
 	for(auto &arg : args)
@@ -1371,7 +1369,7 @@ void CEHandleAnimationEvent::PushArgumentVariadic(lua_State *l)
 /////////////////
 
 CEOnPlayAnimation::CEOnPlayAnimation(int32_t previousAnimation, int32_t animation, pragma::FPlayAnim flags) : previousAnimation(previousAnimation), animation(animation), flags(flags) {}
-void CEOnPlayAnimation::PushArguments(lua_State *l)
+void CEOnPlayAnimation::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, previousAnimation);
 	Lua::PushInt(l, animation);
@@ -1381,7 +1379,7 @@ void CEOnPlayAnimation::PushArguments(lua_State *l)
 /////////////////
 
 CEOnPlayLayeredAnimation::CEOnPlayLayeredAnimation(int32_t slot, int32_t previousAnimation, int32_t animation, pragma::FPlayAnim flags) : CEOnPlayAnimation(previousAnimation, animation, flags), slot(slot) {}
-void CEOnPlayLayeredAnimation::PushArguments(lua_State *l)
+void CEOnPlayLayeredAnimation::PushArguments(lua::State *l)
 {
 	CEOnPlayAnimation::PushArguments(l);
 	Lua::PushInt(l, slot);
@@ -1390,14 +1388,14 @@ void CEOnPlayLayeredAnimation::PushArguments(lua_State *l)
 /////////////////
 
 CETranslateLayeredActivity::CETranslateLayeredActivity(int32_t &slot, pragma::Activity &activity, pragma::FPlayAnim &flags) : slot(slot), activity(activity), flags(flags) {}
-void CETranslateLayeredActivity::PushArguments(lua_State *l)
+void CETranslateLayeredActivity::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, slot);
 	Lua::PushInt(l, umath::to_integral(activity));
 	Lua::PushInt(l, umath::to_integral(flags));
 }
 uint32_t CETranslateLayeredActivity::GetReturnCount() { return 3; }
-void CETranslateLayeredActivity::HandleReturnValues(lua_State *l)
+void CETranslateLayeredActivity::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -3))
 		slot = Lua::CheckInt(l, -3);
@@ -1410,7 +1408,7 @@ void CETranslateLayeredActivity::HandleReturnValues(lua_State *l)
 /////////////////
 
 CEOnAnimationComplete::CEOnAnimationComplete(int32_t animation, pragma::Activity activity) : animation(animation), activity(activity) {}
-void CEOnAnimationComplete::PushArguments(lua_State *l)
+void CEOnAnimationComplete::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, animation);
 	Lua::PushInt(l, umath::to_integral(activity));
@@ -1419,7 +1417,7 @@ void CEOnAnimationComplete::PushArguments(lua_State *l)
 /////////////////
 
 CELayeredAnimationInfo::CELayeredAnimationInfo(int32_t slot, int32_t animation, pragma::Activity activity) : slot(slot), animation(animation), activity(activity) {}
-void CELayeredAnimationInfo::PushArguments(lua_State *l)
+void CELayeredAnimationInfo::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, slot);
 	Lua::PushInt(l, animation);
@@ -1429,7 +1427,7 @@ void CELayeredAnimationInfo::PushArguments(lua_State *l)
 /////////////////
 
 CEOnAnimationStart::CEOnAnimationStart(int32_t animation, pragma::Activity activity, pragma::FPlayAnim flags) : animation(animation), activity(activity), flags(flags) {}
-void CEOnAnimationStart::PushArguments(lua_State *l)
+void CEOnAnimationStart::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, animation);
 	Lua::PushInt(l, umath::to_integral(activity));
@@ -1439,14 +1437,14 @@ void CEOnAnimationStart::PushArguments(lua_State *l)
 /////////////////
 
 CETranslateLayeredAnimation::CETranslateLayeredAnimation(int32_t &slot, int32_t &animation, pragma::FPlayAnim &flags) : slot(slot), animation(animation), flags(flags) {}
-void CETranslateLayeredAnimation::PushArguments(lua_State *l)
+void CETranslateLayeredAnimation::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, slot);
 	Lua::PushInt(l, animation);
 	Lua::PushInt(l, umath::to_integral(flags));
 }
 uint32_t CETranslateLayeredAnimation::GetReturnCount() { return 3; }
-void CETranslateLayeredAnimation::HandleReturnValues(lua_State *l)
+void CETranslateLayeredAnimation::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -3))
 		slot = Lua::CheckInt(l, -3);
@@ -1459,13 +1457,13 @@ void CETranslateLayeredAnimation::HandleReturnValues(lua_State *l)
 /////////////////
 
 CETranslateAnimation::CETranslateAnimation(int32_t &animation, pragma::FPlayAnim &flags) : animation(animation), flags(flags) {}
-void CETranslateAnimation::PushArguments(lua_State *l)
+void CETranslateAnimation::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, animation);
 	Lua::PushInt(l, umath::to_integral(flags));
 }
 uint32_t CETranslateAnimation::GetReturnCount() { return 2; }
-void CETranslateAnimation::HandleReturnValues(lua_State *l)
+void CETranslateAnimation::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -2))
 		animation = Lua::CheckInt(l, -2);
@@ -1476,9 +1474,9 @@ void CETranslateAnimation::HandleReturnValues(lua_State *l)
 /////////////////
 
 CETranslateActivity::CETranslateActivity(pragma::Activity &activity) : activity(activity) {}
-void CETranslateActivity::PushArguments(lua_State *l) { Lua::PushInt(l, umath::to_integral(activity)); }
+void CETranslateActivity::PushArguments(lua::State *l) { Lua::PushInt(l, umath::to_integral(activity)); }
 uint32_t CETranslateActivity::GetReturnCount() { return 1; }
-void CETranslateActivity::HandleReturnValues(lua_State *l)
+void CETranslateActivity::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -1))
 		activity = static_cast<pragma::Activity>(Lua::CheckInt(l, -1));
@@ -1487,7 +1485,7 @@ void CETranslateActivity::HandleReturnValues(lua_State *l)
 /////////////////
 
 pragma::CEOnBoneTransformChanged::CEOnBoneTransformChanged(UInt32 boneId, const Vector3 *pos, const Quat *rot, const Vector3 *scale) : boneId {boneId}, pos {pos}, rot {rot}, scale {scale} {}
-void pragma::CEOnBoneTransformChanged::PushArguments(lua_State *l)
+void pragma::CEOnBoneTransformChanged::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, boneId);
 	if(pos != nullptr)
@@ -1509,7 +1507,7 @@ void pragma::CEOnBoneTransformChanged::PushArguments(lua_State *l)
 /////////////////
 
 pragma::CEOnPlayActivity::CEOnPlayActivity(pragma::Activity activity, FPlayAnim flags) : activity {activity}, flags {flags} {}
-void pragma::CEOnPlayActivity::PushArguments(lua_State *l)
+void pragma::CEOnPlayActivity::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, umath::to_integral(activity));
 	Lua::PushInt(l, umath::to_integral(flags));
@@ -1518,7 +1516,7 @@ void pragma::CEOnPlayActivity::PushArguments(lua_State *l)
 /////////////////
 
 pragma::CEOnPlayLayeredActivity::CEOnPlayLayeredActivity(int slot, pragma::Activity activity, FPlayAnim flags) : slot {slot}, activity {activity}, flags {flags} {}
-void pragma::CEOnPlayLayeredActivity::PushArguments(lua_State *l)
+void pragma::CEOnPlayLayeredActivity::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, slot);
 	Lua::PushInt(l, umath::to_integral(activity));
@@ -1528,7 +1526,7 @@ void pragma::CEOnPlayLayeredActivity::PushArguments(lua_State *l)
 /////////////////
 
 pragma::CEOnStopLayeredAnimation::CEOnStopLayeredAnimation(int32_t slot, BaseAnimatedComponent::AnimationSlotInfo &slotInfo) : slot {slot}, slotInfo {slotInfo} {}
-void pragma::CEOnStopLayeredAnimation::PushArguments(lua_State *l)
+void pragma::CEOnStopLayeredAnimation::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, slot);
 	Lua::PushInt(l, slotInfo.animation);
@@ -1538,7 +1536,7 @@ void pragma::CEOnStopLayeredAnimation::PushArguments(lua_State *l)
 /////////////////
 
 pragma::CEOnBlendAnimation::CEOnBlendAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo, pragma::Activity activity, std::vector<umath::Transform> &bonePoses, std::vector<Vector3> *boneScales) : slotInfo {slotInfo}, activity {activity}, bonePoses {bonePoses}, boneScales {boneScales} {}
-void pragma::CEOnBlendAnimation::PushArguments(lua_State *l)
+void pragma::CEOnBlendAnimation::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, slotInfo.animation);
 	Lua::PushInt(l, umath::to_integral(activity));
@@ -1547,12 +1545,12 @@ void pragma::CEOnBlendAnimation::PushArguments(lua_State *l)
 /////////////////
 
 pragma::CEMaintainAnimations::CEMaintainAnimations(double deltaTime) : deltaTime {deltaTime} {}
-void pragma::CEMaintainAnimations::PushArguments(lua_State *l) { Lua::PushNumber(l, deltaTime); }
+void pragma::CEMaintainAnimations::PushArguments(lua::State *l) { Lua::PushNumber(l, deltaTime); }
 
 /////////////////
 
 pragma::CEMaintainAnimation::CEMaintainAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo, double deltaTime) : slotInfo {slotInfo}, deltaTime {deltaTime} {}
-void pragma::CEMaintainAnimation::PushArguments(lua_State *l)
+void pragma::CEMaintainAnimation::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, slotInfo.animation);
 	Lua::PushInt(l, umath::to_integral(slotInfo.activity));
@@ -1562,19 +1560,19 @@ void pragma::CEMaintainAnimation::PushArguments(lua_State *l)
 /////////////////
 
 pragma::CEMaintainAnimationMovement::CEMaintainAnimationMovement(const Vector3 &displacement) : displacement {displacement} {}
-void pragma::CEMaintainAnimationMovement::PushArguments(lua_State *l) { Lua::Push<Vector3>(l, displacement); }
+void pragma::CEMaintainAnimationMovement::PushArguments(lua::State *l) { Lua::Push<Vector3>(l, displacement); }
 
 /////////////////
 
 pragma::CEShouldUpdateBones::CEShouldUpdateBones() {}
-void pragma::CEShouldUpdateBones::PushArguments(lua_State *l) {}
+void pragma::CEShouldUpdateBones::PushArguments(lua::State *l) {}
 
 /////////////////
 
 pragma::CEOnUpdateSkeleton::CEOnUpdateSkeleton() {}
-void pragma::CEOnUpdateSkeleton::PushArguments(lua_State *l) { Lua::PushBool(l, bonePosesHaveChanged); }
+void pragma::CEOnUpdateSkeleton::PushArguments(lua::State *l) { Lua::PushBool(l, bonePosesHaveChanged); }
 uint32_t pragma::CEOnUpdateSkeleton::GetReturnCount() { return 1; }
-void pragma::CEOnUpdateSkeleton::HandleReturnValues(lua_State *l)
+void pragma::CEOnUpdateSkeleton::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -1))
 		bonePosesHaveChanged = Lua::CheckBool(l, -1);

@@ -4,7 +4,6 @@ module;
 
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -134,7 +133,7 @@ float BaseFlexComponent::GetFlexController(const std::string &flexController) co
 /////////////////
 
 CEOnFlexControllerChanged::CEOnFlexControllerChanged(pragma::animation::FlexControllerId flexControllerId, float value) : flexControllerId {flexControllerId}, value {value} {}
-void CEOnFlexControllerChanged::PushArguments(lua_State *l)
+void CEOnFlexControllerChanged::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, flexControllerId);
 	Lua::PushNumber(l, value);

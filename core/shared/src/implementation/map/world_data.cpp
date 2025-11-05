@@ -3,7 +3,6 @@
 module;
 
 
-#include <sharedutils/magic_enum.hpp>
 
 module pragma.shared;
 
@@ -192,7 +191,7 @@ std::ostream &operator<<(std::ostream &out, const pragma::asset::Output &output)
 }
 std::ostream &operator<<(std::ostream &out, const pragma::asset::ComponentData &componentData)
 {
-	out << "ComponentData[Flags:" << magic_enum::flags::enum_name(componentData.GetFlags()) << "]";
+	out << "ComponentData[Flags:" << magic_enum::enum_flags_name(componentData.GetFlags()) << "]";
 	return out;
 }
 std::ostream &operator<<(std::ostream &out, const pragma::asset::EntityData &entityData)
@@ -201,7 +200,7 @@ std::ostream &operator<<(std::ostream &out, const pragma::asset::EntityData &ent
 	out << "EntityData[Class:" << entityData.GetClassName() << "]";
 	if(uuid)
 		out << "[Uuid:" << *uuid << "]";
-	out << "[MapIndex:" << entityData.GetMapIndex() << "] [Flags:" << magic_enum::flags::enum_name(entityData.GetFlags()) << "] ";
+	out << "[MapIndex:" << entityData.GetMapIndex() << "] [Flags:" << magic_enum::enum_flags_name(entityData.GetFlags()) << "] ";
 	auto &pose = entityData.GetPose();
 	if(pose) {
 		auto &pos = pose->GetOrigin();

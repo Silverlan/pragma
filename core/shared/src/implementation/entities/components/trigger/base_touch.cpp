@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -324,12 +323,12 @@ const std::vector<BaseTouchComponent::TouchInfo> &BaseTouchComponent::GetTouchin
 
 CECanTriggerData::CECanTriggerData(pragma::ecs::BaseEntity *ent) : entity(ent) {}
 uint32_t CECanTriggerData::GetReturnCount() { return 1u; }
-void CECanTriggerData::HandleReturnValues(lua_State *l)
+void CECanTriggerData::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -1))
 		canTrigger = Lua::CheckBool(l, -1);
 }
-void CECanTriggerData::PushArguments(lua_State *l)
+void CECanTriggerData::PushArguments(lua::State *l)
 {
 	if(entity != nullptr)
 		entity->GetLuaObject().push(l);
@@ -340,7 +339,7 @@ void CECanTriggerData::PushArguments(lua_State *l)
 ////////////////
 
 CETouchData::CETouchData(pragma::ecs::BaseEntity &ent) : entity(&ent) {}
-void CETouchData::PushArguments(lua_State *l)
+void CETouchData::PushArguments(lua::State *l)
 {
 	if(entity != nullptr)
 		entity->GetLuaObject().push(l);

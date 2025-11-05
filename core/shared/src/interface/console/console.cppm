@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <mathutil/glmutil.h>
 
 
 export module pragma.shared:console;

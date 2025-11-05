@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 #include "buss_ik/Jacobian.h"
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:entities.components.ik;
 
@@ -23,7 +22,7 @@ export namespace pragma {
 		bool IsIKControllerEnabled(uint32_t ikControllerId) const;
 		void SetIKEffectorPos(uint32_t ikControllerId, uint32_t effectorIdx, const Vector3 &pos);
 		const Vector3 *GetIKEffectorPos(uint32_t ikControllerId, uint32_t effectorIdx) const;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
 		struct DLLNETWORK IKTreeInfo {
 			struct DLLNETWORK NodeInfo {

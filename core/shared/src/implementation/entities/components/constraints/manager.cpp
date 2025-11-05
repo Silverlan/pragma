@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
-#include "pragma/logging.hpp"
 #include <cassert>
 
 module pragma.shared;
@@ -23,7 +21,7 @@ ComponentEventId constraintManagerComponent::EVENT_APPLY_CONSTRAINT = pragma::IN
 void ConstraintManagerComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { constraintManagerComponent::EVENT_APPLY_CONSTRAINT = registerEvent("APPLY_CONSTRAINT", ComponentEventInfo::Type::Explicit); }
 ConstraintManagerComponent::ConstraintManagerComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintManagerComponent::Initialize() { BaseEntityComponent::Initialize(); }
-void ConstraintManagerComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ConstraintManagerComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 std::vector<ConstraintManagerComponent::ConstraintInfo> &ConstraintManagerComponent::GetConstraints() { return get_constraints(GetNetworkState()); }
 void ConstraintManagerComponent::ApplyConstraints(const NetworkState &nw)

@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 module pragma.shared;
 
@@ -11,16 +10,16 @@ import :scripting.lua.classes.sound;
 
 namespace Lua {
 	namespace ALSound {
-		static CallbackHandle CallOnStateChanged(lua_State *l, ::ALSound &snd, const func<void, ALState, ALState> &function);
-		static void SetSource(lua_State *l, ::ALSound &snd);
+		static CallbackHandle CallOnStateChanged(lua::State *l, ::ALSound &snd, const func<void, ALState, ALState> &function);
+		static void SetSource(lua::State *l, ::ALSound &snd);
 
-		static void SetDirectFilter(lua_State *l, ::ALSound &snd, float gain, float gainHF, float gainLF);
-		static void SetDirectFilter(lua_State *l, ::ALSound &snd, float gain);
-		static std::tuple<float, float, float> GetDirectFilter(lua_State *l, ::ALSound &snd);
-		static bool AddEffect(lua_State *l, ::ALSound &snd, const std::string &name, float gain, float gainHF, float gainLF);
-		static bool AddEffect(lua_State *l, ::ALSound &snd, const std::string &name, float gain);
-		static void SetEffectParameters(lua_State *l, ::ALSound &snd, const std::string &name, float gain, float gainHF, float gainLF);
-		static void SetEffectParameters(lua_State *l, ::ALSound &snd, const std::string &name, float gain);
+		static void SetDirectFilter(lua::State *l, ::ALSound &snd, float gain, float gainHF, float gainLF);
+		static void SetDirectFilter(lua::State *l, ::ALSound &snd, float gain);
+		static std::tuple<float, float, float> GetDirectFilter(lua::State *l, ::ALSound &snd);
+		static bool AddEffect(lua::State *l, ::ALSound &snd, const std::string &name, float gain, float gainHF, float gainLF);
+		static bool AddEffect(lua::State *l, ::ALSound &snd, const std::string &name, float gain);
+		static void SetEffectParameters(lua::State *l, ::ALSound &snd, const std::string &name, float gain, float gainHF, float gainLF);
+		static void SetEffectParameters(lua::State *l, ::ALSound &snd, const std::string &name, float gain);
 	};
 };
 
@@ -84,7 +83,7 @@ void Lua::ALSound::register_class(luabind::class_<::ALSound> &classDef)
 	classDef.def("GetIntensity", &::ALSound::GetSoundIntensity);
 	classDef.def("GetSource", &::ALSound::GetSource);
 	classDef.def("SetSource", static_cast<void (::ALSound::*)(pragma::ecs::BaseEntity *)>(&::ALSound::SetSource));
-	classDef.def("SetSource", static_cast<void (*)(lua_State *, ::ALSound &)>(&Lua::ALSound::SetSource));
+	classDef.def("SetSource", static_cast<void (*)(lua::State *, ::ALSound &)>(&Lua::ALSound::SetSource));
 	classDef.def("SetRange", &::ALSound::SetRange);
 	classDef.def("ClearRange", &::ALSound::ClearRange);
 	classDef.def("HasRange", &::ALSound::HasRange);
@@ -107,14 +106,14 @@ void Lua::ALSound::register_class(luabind::class_<::ALSound> &classDef)
 	classDef.def("GetAirAbsorptionFactor", &::ALSound::GetAirAbsorptionFactor);
 	classDef.def("SetGainAuto", &::ALSound::SetGainAuto);
 	classDef.def("GetGainAuto", &::ALSound::GetGainAuto);
-	classDef.def("SetDirectFilter", static_cast<void (*)(lua_State *, ::ALSound &, float, float, float)>(&Lua::ALSound::SetDirectFilter));
-	classDef.def("SetDirectFilter", static_cast<void (*)(lua_State *, ::ALSound &, float)>(&Lua::ALSound::SetDirectFilter));
+	classDef.def("SetDirectFilter", static_cast<void (*)(lua::State *, ::ALSound &, float, float, float)>(&Lua::ALSound::SetDirectFilter));
+	classDef.def("SetDirectFilter", static_cast<void (*)(lua::State *, ::ALSound &, float)>(&Lua::ALSound::SetDirectFilter));
 	classDef.def("GetDirectFilter", &Lua::ALSound::GetDirectFilter);
-	classDef.def("AddEffect", static_cast<bool (*)(lua_State *, ::ALSound &, const std::string &, float, float, float)>(&Lua::ALSound::AddEffect));
-	classDef.def("AddEffect", static_cast<bool (*)(lua_State *, ::ALSound &, const std::string &, float)>(&Lua::ALSound::AddEffect));
+	classDef.def("AddEffect", static_cast<bool (*)(lua::State *, ::ALSound &, const std::string &, float, float, float)>(&Lua::ALSound::AddEffect));
+	classDef.def("AddEffect", static_cast<bool (*)(lua::State *, ::ALSound &, const std::string &, float)>(&Lua::ALSound::AddEffect));
 	classDef.def("RemoveEffect", &::ALSound::RemoveEffect);
-	classDef.def("SetEffectParameters", static_cast<bool (*)(lua_State *, ::ALSound &, const std::string &, float, float, float)>(&Lua::ALSound::AddEffect));
-	classDef.def("SetEffectParameters", static_cast<bool (*)(lua_State *, ::ALSound &, const std::string &, float)>(&Lua::ALSound::AddEffect));
+	classDef.def("SetEffectParameters", static_cast<bool (*)(lua::State *, ::ALSound &, const std::string &, float, float, float)>(&Lua::ALSound::AddEffect));
+	classDef.def("SetEffectParameters", static_cast<bool (*)(lua::State *, ::ALSound &, const std::string &, float)>(&Lua::ALSound::AddEffect));
 
 	classDef.def("SetGainRange", &::ALSound::SetGainRange);
 	classDef.def("GetGainRange", &::ALSound::GetGainRange);
@@ -134,17 +133,17 @@ void Lua::ALSound::register_class(luabind::class_<::ALSound> &classDef)
 	classDef.def("SetRolloffFactors", &::ALSound::SetRolloffFactors);
 }
 
-CallbackHandle Lua::ALSound::CallOnStateChanged(lua_State *l, ::ALSound &snd, const func<void, ALState, ALState> &function) { return snd.AddLuaCallback("OnStateChanged", function); }
+CallbackHandle Lua::ALSound::CallOnStateChanged(lua::State *l, ::ALSound &snd, const func<void, ALState, ALState> &function) { return snd.AddLuaCallback("OnStateChanged", function); }
 
-void Lua::ALSound::SetSource(lua_State *, ::ALSound &snd) { snd.SetSource(nullptr); }
-void Lua::ALSound::SetDirectFilter(lua_State *l, ::ALSound &snd, float gain, float gainHF, float gainLF) { snd.SetDirectFilter({gain, gainHF, gainLF}); }
-void Lua::ALSound::SetDirectFilter(lua_State *l, ::ALSound &snd, float gain) { snd.SetDirectFilter({gain}); }
-std::tuple<float, float, float> Lua::ALSound::GetDirectFilter(lua_State *l, ::ALSound &snd)
+void Lua::ALSound::SetSource(lua::State *, ::ALSound &snd) { snd.SetSource(nullptr); }
+void Lua::ALSound::SetDirectFilter(lua::State *l, ::ALSound &snd, float gain, float gainHF, float gainLF) { snd.SetDirectFilter({gain, gainHF, gainLF}); }
+void Lua::ALSound::SetDirectFilter(lua::State *l, ::ALSound &snd, float gain) { snd.SetDirectFilter({gain}); }
+std::tuple<float, float, float> Lua::ALSound::GetDirectFilter(lua::State *l, ::ALSound &snd)
 {
 	auto &filter = snd.GetDirectFilter();
 	return {filter.gain, filter.gainHF, filter.gainLF};
 }
-bool Lua::ALSound::AddEffect(lua_State *l, ::ALSound &snd, const std::string &name, float gain, float gainHF, float gainLF) { return snd.AddEffect(name, {gain, gainHF, gainLF}); }
-bool Lua::ALSound::AddEffect(lua_State *l, ::ALSound &snd, const std::string &name, float gain) { return snd.AddEffect(name, {gain}); }
-void Lua::ALSound::SetEffectParameters(lua_State *l, ::ALSound &snd, const std::string &name, float gain, float gainHF, float gainLF) { snd.SetEffectParameters(name, {gain, gainHF, gainLF}); }
-void Lua::ALSound::SetEffectParameters(lua_State *l, ::ALSound &snd, const std::string &name, float gain) { snd.SetEffectParameters(name, {gain}); }
+bool Lua::ALSound::AddEffect(lua::State *l, ::ALSound &snd, const std::string &name, float gain, float gainHF, float gainLF) { return snd.AddEffect(name, {gain, gainHF, gainLF}); }
+bool Lua::ALSound::AddEffect(lua::State *l, ::ALSound &snd, const std::string &name, float gain) { return snd.AddEffect(name, {gain}); }
+void Lua::ALSound::SetEffectParameters(lua::State *l, ::ALSound &snd, const std::string &name, float gain, float gainHF, float gainLF) { snd.SetEffectParameters(name, {gain, gainHF, gainLF}); }
+void Lua::ALSound::SetEffectParameters(lua::State *l, ::ALSound &snd, const std::string &name, float gain) { snd.SetEffectParameters(name, {gain}); }

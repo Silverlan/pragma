@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -68,4 +67,4 @@ void BaseNameComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version
 /////////////////
 
 CEOnNameChanged::CEOnNameChanged(const std::string &newName) : name {newName} {}
-void CEOnNameChanged::PushArguments(lua_State *l) { Lua::PushString(l, name); }
+void CEOnNameChanged::PushArguments(lua::State *l) { Lua::PushString(l, name); }

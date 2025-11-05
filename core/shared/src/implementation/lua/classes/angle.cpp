@@ -4,22 +4,21 @@ module;
 
 
 
-#include "pragma/lua/core.hpp"
 
 module pragma.shared;
 
 import :scripting.lua.classes.angle;
 
-luabind::mult<Vector3, Vector3, Vector3> Lua::Angle::Orientation(lua_State *l, const EulerAngles &ang)
+luabind::mult<Vector3, Vector3, Vector3> Lua::Angle::Orientation(lua::State *l, const EulerAngles &ang)
 {
 	Vector3 forward, right, up;
 	ang.GetOrientation(&forward, &right, &up);
 	return {l, forward, right, up};
 }
 
-EulerAngles Lua::Angle::Copy(lua_State *l, const EulerAngles &ang) { return ang; }
+EulerAngles Lua::Angle::Copy(lua::State *l, const EulerAngles &ang) { return ang; }
 
-void Lua::Angle::ToQuaternion(lua_State *l, const EulerAngles &ang, uint32_t rotationOrder)
+void Lua::Angle::ToQuaternion(lua::State *l, const EulerAngles &ang, uint32_t rotationOrder)
 {
 	auto m = umat::identity();
 	switch(static_cast<::pragma::RotationOrder>(rotationOrder)) {
@@ -64,7 +63,7 @@ void Lua::Angle::ToQuaternion(lua_State *l, const EulerAngles &ang, uint32_t rot
 	luabind::object(l, q).push(l);
 }
 
-void Lua::Angle::Set(lua_State *, EulerAngles &ang, float p, float y, float r)
+void Lua::Angle::Set(lua::State *, EulerAngles &ang, float p, float y, float r)
 {
 	ang.p = p;
 	ang.y = y;

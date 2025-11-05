@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
 #undef GetClassName
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.base_gamemode;
@@ -70,19 +69,19 @@ class DLLNETWORK BaseGamemodeComponent : public BaseEntityComponent {
 	};
 	struct DLLNETWORK CEPlayerDeath : public ComponentEvent {
 		CEPlayerDeath(BasePlayerComponent &pl, DamageInfo *dmgInfo);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		BasePlayerComponent &player;
 		DamageInfo *dmgInfo = nullptr;
 	};
 	struct DLLNETWORK CEPlayerDropped : public ComponentEvent {
 		CEPlayerDropped(BasePlayerComponent &pl, pragma::networking::DropReason reason);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		BasePlayerComponent &player;
 		pragma::networking::DropReason reason;
 	};
 	struct DLLNETWORK CEPlayerSpawned : public ComponentEvent {
 		CEPlayerSpawned(BasePlayerComponent &pl);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		BasePlayerComponent &player;
 	};
 	using CEPlayerReady = CEPlayerSpawned;

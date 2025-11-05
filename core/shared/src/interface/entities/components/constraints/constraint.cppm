@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.constraints.base;
@@ -73,7 +72,7 @@ class DLLNETWORK ConstraintComponent final : public BaseEntityComponent {
 
 		const std::optional<ConstraintParticipants> &GetConstraintParticipants() const;
 
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 	  protected:
 		void SetConstraintParticipantsDirty();
 		const std::optional<ConstraintParticipants> &UpdateConstraintParticipants();
@@ -91,7 +90,7 @@ class DLLNETWORK ConstraintComponent final : public BaseEntityComponent {
 	};
 	struct DLLNETWORK CEOnConstraintOrderIndexChanged : public ComponentEvent {
 		CEOnConstraintOrderIndexChanged(int32_t oldOrderIndex, int32_t newOrderIndex);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		int32_t oldOrderIndex = 0;
 		int32_t newOrderIndex = 0;
 	};

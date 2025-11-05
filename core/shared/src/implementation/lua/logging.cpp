@@ -3,14 +3,13 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
 
 import :core.logging;
 
-std::string Lua::logging::to_string(lua_State *l, int i)
+std::string Lua::logging::to_string(lua::State *l, int i)
 {
 	auto status = -1;
 	std::string val;

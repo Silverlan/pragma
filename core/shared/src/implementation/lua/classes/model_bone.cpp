@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
 
 module pragma.shared;
@@ -14,7 +13,7 @@ import :scripting.lua.classes.model;
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::animation, Bone);
 #endif
 
-void Lua::Bone::register_class(lua_State *l, luabind::class_<pragma::animation::Skeleton> &classDef)
+void Lua::Bone::register_class(lua::State *l, luabind::class_<pragma::animation::Skeleton> &classDef)
 {
 	auto classDefBone = luabind::class_<pragma::animation::Bone>("Bone");
 	classDefBone.def(luabind::tostring(luabind::self));

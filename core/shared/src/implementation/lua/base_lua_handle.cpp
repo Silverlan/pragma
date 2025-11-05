@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 module pragma.shared;
 
@@ -12,7 +11,7 @@ import :scripting.lua.base_lua_handle;
 pragma::BaseLuaHandle::BaseLuaHandle() : m_handle {this, [](BaseLuaHandle *) {}} {}
 void pragma::BaseLuaHandle::InvalidateHandle() { m_handle = {}; }
 void pragma::BaseLuaHandle::SetLuaObject(const luabind::object &o) { m_luaObj = o; }
-lua_State *pragma::BaseLuaHandle::GetLuaState() const { return m_luaObj.interpreter(); }
+lua::State *pragma::BaseLuaHandle::GetLuaState() const { return m_luaObj.interpreter(); }
 void pragma::BaseLuaHandle::CallLuaMethod(const std::string &name) { CallLuaMethod<void>(name); }
 void pragma::BaseLuaHandle::PushLuaObject()
 {
@@ -21,5 +20,5 @@ void pragma::BaseLuaHandle::PushLuaObject()
 		return;
 	PushLuaObject(l);
 }
-void pragma::BaseLuaHandle::PushLuaObject(lua_State *l) { m_luaObj.push(l); }
+void pragma::BaseLuaHandle::PushLuaObject(lua::State *l) { m_luaObj.push(l); }
 pragma::BaseLuaHandle::~BaseLuaHandle() { InvalidateHandle(); }

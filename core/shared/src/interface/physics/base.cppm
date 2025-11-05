@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.shared:physics.base;
 
@@ -30,10 +29,10 @@ export {
 
 			virtual void OnRemove();
 			virtual void Initialize();
-			virtual void InitializeLuaObject(lua_State *lua);
-			luabind::object &GetLuaObject(lua_State *lua);
-			const luabind::object &GetLuaObject(lua_State *lua) const;
-			void Push(lua_State *l);
+			virtual void InitializeLuaObject(lua::State *lua);
+			luabind::object &GetLuaObject(lua::State *lua);
+			const luabind::object &GetLuaObject(lua::State *lua) const;
+			void Push(lua::State *l);
 
 			void *GetUserData() const;
 			pragma::physics::PhysObj *GetPhysObj() const;
@@ -45,7 +44,7 @@ export {
 			void SetUserData(void *userData) const;
 			virtual void InitializeLuaHandle(const util::TWeakSharedHandle<IBase> &handle);
 			template<class T>
-			void InitializeLuaObject(lua_State *lua);
+			void InitializeLuaObject(lua::State *lua);
 
 			IEnvironment &m_physEnv;
 			util::TWeakSharedHandle<IBase> m_handle = {};
@@ -70,13 +69,13 @@ export {
 		};
 
 		template<class T>
-		void pragma::physics::IBase::InitializeLuaObject(lua_State *lua)
+		void pragma::physics::IBase::InitializeLuaObject(lua::State *lua)
 		{
 			auto handle = ClaimOwnership();
 			if(handle.IsValid())
-				m_luaObj = std::make_unique<luabind::object>(lua, pragma::lua::raw_object_to_luabind_object(lua, util::shared_handle_cast<IBase, T>(handle)));
+				m_luaObj = std::make_unique<luabind::object>(lua, pragma::LuaCore::raw_object_to_luabind_object(lua, util::shared_handle_cast<IBase, T>(handle)));
 			else
-				m_luaObj = std::make_unique<luabind::object>(lua, pragma::lua::raw_object_to_luabind_object(lua, std::dynamic_pointer_cast<T>(shared_from_this())));
+				m_luaObj = std::make_unique<luabind::object>(lua, pragma::LuaCore::raw_object_to_luabind_object(lua, std::dynamic_pointer_cast<T>(shared_from_this())));
 		}
 	};
 };

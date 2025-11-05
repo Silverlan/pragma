@@ -4,7 +4,6 @@ module;
 
 
 #include <clip2tri/clip2tri.h>
-#include "pragma/lua/core.hpp"
 
 //#include <Pinocchio.h>
 //#include <pinocchioApi.h>
@@ -42,13 +41,13 @@ Vector3 Lua::geometry::closest_point_on_triangle_to_point(const Vector3 &a, cons
 	return res;
 }
 
-void Lua::geometry::smallest_enclosing_sphere(lua_State *l, luabind::table<> tVerts, Vector3 &outCenter, float &outRadius)
+void Lua::geometry::smallest_enclosing_sphere(lua::State *l, luabind::table<> tVerts, Vector3 &outCenter, float &outRadius)
 {
 	auto verts = Lua::table_to_vector<Vector3>(l, tVerts, 1);
 	Seb::Calculate(verts, outCenter, outRadius);
 }
 
-void Lua::geometry::generate_truncated_cone_mesh(lua_State *l, const Vector3 &origin, float startRadius, const Vector3 &dir, float dist, float endRadius, luabind::object &outVerts, luabind::object &outTris, luabind::object &outNormals, uint32_t segmentCount, bool caps,
+void Lua::geometry::generate_truncated_cone_mesh(lua::State *l, const Vector3 &origin, float startRadius, const Vector3 &dir, float dist, float endRadius, luabind::object &outVerts, luabind::object &outTris, luabind::object &outNormals, uint32_t segmentCount, bool caps,
   bool generateTriangles, bool generateNormals)
 {
 	std::vector<Vector3> verts;
@@ -65,7 +64,7 @@ void Lua::geometry::generate_truncated_cone_mesh(lua_State *l, const Vector3 &or
 	if(generateNormals == true)
 		*outNext = Lua::vector_to_table(l, normals);
 }
-double Lua::geometry::calc_volume_of_polyhedron(lua_State *l, luabind::table<> tVerts, luabind::table<> tTriangles)
+double Lua::geometry::calc_volume_of_polyhedron(lua::State *l, luabind::table<> tVerts, luabind::table<> tTriangles)
 {
 	auto verts = Lua::table_to_vector<Vector3>(l, tVerts, 1);
 	auto tris = Lua::table_to_vector<uint16_t>(l, tTriangles, 2);
@@ -85,7 +84,7 @@ double Lua::geometry::calc_volume_of_polyhedron(lua_State *l, luabind::table<> t
 		return true;
 	});
 }
-void Lua::geometry::calc_center_of_mass(lua_State *l, luabind::table<> tVerts, luabind::table<> tTriangles, Vector3 &outCom, double &outVolume)
+void Lua::geometry::calc_center_of_mass(lua::State *l, luabind::table<> tVerts, luabind::table<> tTriangles, Vector3 &outCom, double &outVolume)
 {
 	auto verts = Lua::table_to_vector<Vector3>(l, tVerts, 1);
 	auto tris = Lua::table_to_vector<uint16_t>(l, tTriangles, 2);
@@ -120,7 +119,7 @@ void Lua::geometry::calc_center_of_mass(lua_State *l, luabind::table<> tVerts, l
 	return ::Vector2 {b1, b2};
 }
 
-int Lua::geometry::get_outline_vertices(lua_State *l)
+int Lua::geometry::get_outline_vertices(lua::State *l)
 {
 	std::vector<::Vector2> vertices {};
 	Lua::CheckTable(l, 1);
@@ -144,7 +143,7 @@ int Lua::geometry::get_outline_vertices(lua_State *l)
 	return 1;
 }
 
-int Lua::geometry::triangulate_point_cloud(lua_State *l)
+int Lua::geometry::triangulate_point_cloud(lua::State *l)
 {
 	std::vector<c2t::Point> polyMesh = {c2t::Point(15.8477, -35.3979), c2t::Point(16.6043, -35.0729), c2t::Point(17.1424, -35.5665), c2t::Point(17.1984, -35.1103), c2t::Point(15.7691, -35.0203), c2t::Point(15.7247, -35.3819), c2t::Point(15.7332, -35.313), c2t::Point(15.8565, -34.38),
 	  c2t::Point(15.8478, -34.3789), c2t::Point(15.8478, -34.379), c2t::Point(15.8477, -34.3795), c2t::Point(0.149531, -9.97178), c2t::Point(8.05614, -38.5316), c2t::Point(-25.0149, -33.6999), c2t::Point(-23.5553, -34.2234), c2t::Point(-23.5515, -34.1923), c2t::Point(-23.5466, -34.1528),
@@ -270,7 +269,7 @@ class MyListener : public SmartBody::SBSceneListener
 	void OnEvent( const std::string & eventName, const std::string & eventParameters );
 };
 */
-luabind::object Lua::geometry::triangulate(lua_State *l, luabind::table<> tContour)
+luabind::object Lua::geometry::triangulate(lua::State *l, luabind::table<> tContour)
 {
 	auto contour = Lua::table_to_vector<::Vector2>(l, tContour, 1);
 	std::vector<uint16_t> result {};

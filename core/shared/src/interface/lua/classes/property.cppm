@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 
 export module pragma.shared:scripting.lua.classes.property;
@@ -451,51 +450,51 @@ export {
 		namespace Property {
 			DLLNETWORK void register_classes(Lua::Interface &l);
 
-			DLLNETWORK void push(lua_State *l, ::util::Int8Property &prop);
-			DLLNETWORK void push(lua_State *l, ::util::UInt8Property &prop);
-			DLLNETWORK void push(lua_State *l, ::util::Int16Property &prop);
-			DLLNETWORK void push(lua_State *l, ::util::UInt16Property &prop);
-			DLLNETWORK void push(lua_State *l, ::util::Int32Property &prop);
-			DLLNETWORK void push(lua_State *l, ::util::UInt32Property &prop);
-			DLLNETWORK void push(lua_State *l, ::util::Int64Property &prop);
-			DLLNETWORK void push(lua_State *l, ::util::UInt64Property &prop);
-			DLLNETWORK void push(lua_State *l, ::util::FloatProperty &prop);
-			DLLNETWORK void push(lua_State *l, ::util::DoubleProperty &prop);
-			DLLNETWORK void push(lua_State *l, ::util::LongDoubleProperty &prop);
-			DLLNETWORK void push(lua_State *l, ::util::BoolProperty &prop);
-			DLLNETWORK void push(lua_State *l, ::util::ColorProperty &prop);
-			DLLNETWORK void push(lua_State *l, ::util::EulerAnglesProperty &prop);
-			DLLNETWORK void push(lua_State *l, ::util::Vector2Property &prop);
-			DLLNETWORK void push(lua_State *l, ::util::Vector2iProperty &prop);
-			DLLNETWORK void push(lua_State *l, ::util::Vector3Property &prop);
-			DLLNETWORK void push(lua_State *l, ::util::Vector3iProperty &prop);
-			DLLNETWORK void push(lua_State *l, ::util::Vector4Property &prop);
-			DLLNETWORK void push(lua_State *l, ::util::Vector4iProperty &prop);
-			DLLNETWORK void push(lua_State *l, ::util::QuatProperty &prop);
-			DLLNETWORK void push(lua_State *l, ::util::StringProperty &prop);
-			DLLNETWORK void push(lua_State *l, pragma::EntityProperty &prop);
-			DLLNETWORK void push(lua_State *l, ::util::Matrix2Property &prop);
-			DLLNETWORK void push(lua_State *l, ::util::Matrix2x3Property &prop);
-			DLLNETWORK void push(lua_State *l, ::util::Matrix3x2Property &prop);
-			DLLNETWORK void push(lua_State *l, ::util::Matrix3Property &prop);
-			DLLNETWORK void push(lua_State *l, ::util::Matrix3x4Property &prop);
-			DLLNETWORK void push(lua_State *l, ::util::Matrix4x3Property &prop);
-			DLLNETWORK void push(lua_State *l, ::util::Matrix4Property &prop);
-			DLLNETWORK void push(lua_State *l, ::util::BaseProperty &prop);
+			DLLNETWORK void push(lua::State *l, ::util::Int8Property &prop);
+			DLLNETWORK void push(lua::State *l, ::util::UInt8Property &prop);
+			DLLNETWORK void push(lua::State *l, ::util::Int16Property &prop);
+			DLLNETWORK void push(lua::State *l, ::util::UInt16Property &prop);
+			DLLNETWORK void push(lua::State *l, ::util::Int32Property &prop);
+			DLLNETWORK void push(lua::State *l, ::util::UInt32Property &prop);
+			DLLNETWORK void push(lua::State *l, ::util::Int64Property &prop);
+			DLLNETWORK void push(lua::State *l, ::util::UInt64Property &prop);
+			DLLNETWORK void push(lua::State *l, ::util::FloatProperty &prop);
+			DLLNETWORK void push(lua::State *l, ::util::DoubleProperty &prop);
+			DLLNETWORK void push(lua::State *l, ::util::LongDoubleProperty &prop);
+			DLLNETWORK void push(lua::State *l, ::util::BoolProperty &prop);
+			DLLNETWORK void push(lua::State *l, ::util::ColorProperty &prop);
+			DLLNETWORK void push(lua::State *l, ::util::EulerAnglesProperty &prop);
+			DLLNETWORK void push(lua::State *l, ::util::Vector2Property &prop);
+			DLLNETWORK void push(lua::State *l, ::util::Vector2iProperty &prop);
+			DLLNETWORK void push(lua::State *l, ::util::Vector3Property &prop);
+			DLLNETWORK void push(lua::State *l, ::util::Vector3iProperty &prop);
+			DLLNETWORK void push(lua::State *l, ::util::Vector4Property &prop);
+			DLLNETWORK void push(lua::State *l, ::util::Vector4iProperty &prop);
+			DLLNETWORK void push(lua::State *l, ::util::QuatProperty &prop);
+			DLLNETWORK void push(lua::State *l, ::util::StringProperty &prop);
+			DLLNETWORK void push(lua::State *l, pragma::EntityProperty &prop);
+			DLLNETWORK void push(lua::State *l, ::util::Matrix2Property &prop);
+			DLLNETWORK void push(lua::State *l, ::util::Matrix2x3Property &prop);
+			DLLNETWORK void push(lua::State *l, ::util::Matrix3x2Property &prop);
+			DLLNETWORK void push(lua::State *l, ::util::Matrix3Property &prop);
+			DLLNETWORK void push(lua::State *l, ::util::Matrix3x4Property &prop);
+			DLLNETWORK void push(lua::State *l, ::util::Matrix4x3Property &prop);
+			DLLNETWORK void push(lua::State *l, ::util::Matrix4Property &prop);
+			DLLNETWORK void push(lua::State *l, ::util::BaseProperty &prop);
 
 			template<typename TEnum>
-			void push(lua_State *l, ::util::TEnumProperty<TEnum> &prop)
+			void push(lua::State *l, ::util::TEnumProperty<TEnum> &prop)
 			{
 				Lua::Push<LGenericIntPropertyWrapper>(l, LGenericIntPropertyWrapper(std::static_pointer_cast<::util::TEnumProperty<TEnum>>(prop.shared_from_this())));
 			}
 			template<class TProperty, typename T>
-			void add_callback(lua_State *l, TProperty &prop, const luabind::object &oCallback)
+			void add_callback(lua::State *l, TProperty &prop, const luabind::object &oCallback)
 			{
 				Lua::CheckFunction(l, 2);
 				auto cb = prop->AddCallback([l, oCallback](std::reference_wrapper<const T> oldVal, std::reference_wrapper<const T> newVal) {
 					auto c = Lua::CallFunction(
 					l,
-					[&oCallback, &oldVal, &newVal](lua_State *l) -> Lua::StatusCode {
+					[&oCallback, &oldVal, &newVal](lua::State *l) -> Lua::StatusCode {
 						oCallback.push(l);
 						Lua::Push<T>(l, oldVal.get());
 						Lua::Push<T>(l, newVal.get());
@@ -507,13 +506,13 @@ export {
 			}
 
 			template<class TProperty, typename T>
-			void add_modifier(lua_State *l, TProperty &prop, const luabind::object &oCallback)
+			void add_modifier(lua::State *l, TProperty &prop, const luabind::object &oCallback)
 			{
 				Lua::CheckFunction(l, 2);
 				auto cb = prop->AddModifier([l, oCallback](T &val) {
 					auto c = Lua::CallFunction(
 					l,
-					[&oCallback, &val](lua_State *l) -> Lua::StatusCode {
+					[&oCallback, &val](lua::State *l) -> Lua::StatusCode {
 						oCallback.push(l);
 						Lua::Push<T>(l, val);
 						return Lua::StatusCode::Ok;
@@ -526,65 +525,65 @@ export {
 			}
 
 			template<class TProperty, typename T>
-			void unlink(lua_State *l, TProperty &prop)
+			void unlink(lua::State *l, TProperty &prop)
 			{
 				prop->Unlink();
 			}
 
 			template<class TProperty, typename T>
-			void get(lua_State *l, TProperty &prop)
+			void get(lua::State *l, TProperty &prop)
 			{
 				Lua::Push<T>(l, prop->GetValue());
 			}
 
 			template<class TProperty, typename T>
-			void set(lua_State *l, TProperty &prop, const T &val)
+			void set(lua::State *l, TProperty &prop, const T &val)
 			{
 				prop->operator=(val);
 			}
 
 			template<class TProperty, typename T>
-			void set_locked(lua_State *l, TProperty &prop, bool bLocked)
+			void set_locked(lua::State *l, TProperty &prop, bool bLocked)
 			{
 				prop->SetLocked(bLocked);
 			}
 
 			template<class TProperty, typename T>
-			void is_locked(lua_State *l, TProperty &prop)
+			void is_locked(lua::State *l, TProperty &prop)
 			{
 				Lua::PushBool(l, prop->IsLocked());
 			}
 
 			template<class TProperty, typename T>
-			void invoke_callbacks(lua_State *l, TProperty &prop)
+			void invoke_callbacks(lua::State *l, TProperty &prop)
 			{
 				prop->InvokeCallbacks();
 			}
 			template<class TProperty, typename T, class TLuaClass>
 			void add_generic_methods(TLuaClass &classDef)
 			{
-				classDef.def("AddCallback", static_cast<void (*)(lua_State *, TProperty &, const luabind::object &)>(add_callback<TProperty, T>));
-				classDef.def("AddModifier", static_cast<void (*)(lua_State *, TProperty &, const luabind::object &)>(add_modifier<TProperty, T>));
-				classDef.def("Unlink", static_cast<void (*)(lua_State *, TProperty &)>(unlink<TProperty, T>));
-				classDef.def("Get", static_cast<void (*)(lua_State *, TProperty &)>(get<TProperty, T>));
-				classDef.def("Set", static_cast<void (*)(lua_State *, TProperty &, const T &)>(set<TProperty, T>));
-				classDef.def("SetLocked", static_cast<void (*)(lua_State *, TProperty &, bool)>(set_locked<TProperty, T>));
-				classDef.def("IsLocked", static_cast<void (*)(lua_State *, TProperty &)>(is_locked<TProperty, T>));
-				classDef.def("InvokeCallbacks", static_cast<void (*)(lua_State *, TProperty &)>(invoke_callbacks<TProperty, T>));
+				classDef.def("AddCallback", static_cast<void (*)(lua::State *, TProperty &, const luabind::object &)>(add_callback<TProperty, T>));
+				classDef.def("AddModifier", static_cast<void (*)(lua::State *, TProperty &, const luabind::object &)>(add_modifier<TProperty, T>));
+				classDef.def("Unlink", static_cast<void (*)(lua::State *, TProperty &)>(unlink<TProperty, T>));
+				classDef.def("Get", static_cast<void (*)(lua::State *, TProperty &)>(get<TProperty, T>));
+				classDef.def("Set", static_cast<void (*)(lua::State *, TProperty &, const T &)>(set<TProperty, T>));
+				classDef.def("SetLocked", static_cast<void (*)(lua::State *, TProperty &, bool)>(set_locked<TProperty, T>));
+				classDef.def("IsLocked", static_cast<void (*)(lua::State *, TProperty &)>(is_locked<TProperty, T>));
+				classDef.def("InvokeCallbacks", static_cast<void (*)(lua::State *, TProperty &)>(invoke_callbacks<TProperty, T>));
 			}
 			template<class TProperty, typename T, class TLinkProperty>
-			void link_different(lua_State *l, TProperty &prop, TLinkProperty &propOther)
+			void link_different(lua::State *l, TProperty &prop, TLinkProperty &propOther)
 			{
 				prop->Link(*propOther);
 			}
 
 			template<class TProperty, typename T>
-			void link(lua_State *l, TProperty &prop, TProperty &propOther)
+			void link(lua::State *l, TProperty &prop, TProperty &propOther)
 			{
 				link_different<TProperty, T, TProperty>(l, prop, propOther);
 			}
 			template<class TWrapper, class TProperty>
-			void push_property(lua_State *l, TProperty &prop)
+			void push_property(lua::State *l, TProperty &prop)
 			{
 				Lua::Push<TWrapper>(l, TWrapper(std::static_pointer_cast<TProperty>(prop.shared_from_this())));
 			}

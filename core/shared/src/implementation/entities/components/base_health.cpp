@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -130,7 +129,7 @@ void BaseHealthComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t versi
 //////////////
 
 CEOnTakenDamage::CEOnTakenDamage(DamageInfo &damageInfo, uint16_t oldHealth, uint16_t newHealth) : damageInfo {damageInfo}, oldHealth(oldHealth), newHealth(newHealth) {}
-void CEOnTakenDamage::PushArguments(lua_State *l)
+void CEOnTakenDamage::PushArguments(lua::State *l)
 {
 	Lua::Push<DamageInfo *>(l, &damageInfo);
 	Lua::PushInt(l, oldHealth);
@@ -140,7 +139,7 @@ void CEOnTakenDamage::PushArguments(lua_State *l)
 //////////////
 
 CEOnHealthChanged::CEOnHealthChanged(uint16_t oldHealth, uint16_t newHealth) : oldHealth(oldHealth), newHealth(newHealth) {}
-void CEOnHealthChanged::PushArguments(lua_State *l)
+void CEOnHealthChanged::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, oldHealth);
 	Lua::PushInt(l, newHealth);

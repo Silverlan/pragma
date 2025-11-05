@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.flex_merge;
@@ -36,7 +35,7 @@ class DLLNETWORK FlexMergeComponent final : public BaseEntityComponent {
 			void SetTarget(const pragma::EntityURef &target);
 			const pragma::EntityURef &GetTarget() const;
 
-			virtual void InitializeLuaObject(lua_State *lua) override;
+			virtual void InitializeLuaObject(lua::State *lua) override;
 		  private:
 			std::unordered_map<animation::FlexControllerId, animation::FlexControllerId> m_flexControllerMap;
 			pragma::EntityURef m_target;

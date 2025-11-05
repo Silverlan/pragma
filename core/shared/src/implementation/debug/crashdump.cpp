@@ -13,7 +13,6 @@ module;
 #endif
 
 #include "crashdump_helper.hpp"
-#include "pragma/logging.hpp"
 
 module pragma.shared;
 

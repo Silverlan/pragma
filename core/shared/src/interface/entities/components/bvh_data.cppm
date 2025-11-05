@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 #include <bvh/v2/bbox.h>
 #include <bvh/v2/bvh.h>
 #include <bvh/v2/default_builder.h>
@@ -11,7 +11,6 @@ module;
 #include <bvh/v2/tri.h>
 #include <bvh/v2/vec.h>
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:entities.components.bvh_data;
 

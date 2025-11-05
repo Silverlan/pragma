@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.composite;
@@ -61,7 +60,7 @@ export namespace pragma::ecs {
 		const CompositeGroup &GetRootCompositeGroup() const { return const_cast<CompositeComponent *>(this)->GetRootCompositeGroup(); }
 		void ClearEntities(bool safely = true);
 
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
 		std::unique_ptr<CompositeGroup> m_rootGroup = nullptr;
 	};
@@ -69,7 +68,7 @@ export namespace pragma::ecs {
 	namespace events {
 		struct DLLNETWORK CECompositeEntityChanged : public ComponentEvent {
 			CECompositeEntityChanged(CompositeGroup &group, pragma::ecs::BaseEntity &ent);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			CompositeGroup &group;
 			pragma::ecs::BaseEntity &ent;
 		};

@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.orientation;
@@ -26,7 +25,7 @@ export namespace pragma {
 		// Returns the rotation between the world's up vector and the player's up direction
 		const Quat &GetOrientationAxesRotation() const;
 	  protected:
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 		util::PVector3Property m_upDirection = nullptr;
 		Vector3 m_axForward = {0.f, 0.f, 1.f};
 		Vector3 m_axRight = {-1.f, 0.f, 0.f};

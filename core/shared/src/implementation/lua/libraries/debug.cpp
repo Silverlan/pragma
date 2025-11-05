@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 #ifdef __linux__
@@ -22,7 +21,7 @@ import :scripting.lua.libraries.debug;
 
 //import pragma.scripting.lua;
 
-int Lua::debug::collectgarbage(lua_State *l)
+int Lua::debug::collectgarbage(lua::State *l)
 {
 	// Calling twice on purpose: https://stackoverflow.com/a/28320364/2482983
 	std::string err;
@@ -30,7 +29,7 @@ int Lua::debug::collectgarbage(lua_State *l)
 	Lua::RunString(l, "collectgarbage()", "internal", err);
 	return 0;
 }
-void Lua::debug::stackdump(lua_State *l)
+void Lua::debug::stackdump(lua::State *l)
 {
 	int top = lua::get_top(l);
 	Con::cout << "Total in stack: " << top << Con::endl;
@@ -55,7 +54,7 @@ void Lua::debug::stackdump(lua_State *l)
 		Con::cout << Con::endl;
 }
 
-void Lua::debug::beep(lua_State *l)
+void Lua::debug::beep(lua::State *l)
 {
 	int ms = 500;
 	int freq = 523;
@@ -73,7 +72,7 @@ void Lua::debug::beep(lua_State *l)
 #endif
 }
 
-std::string Lua::debug::move_state_to_string(lua_State *l, pragma::BaseAIComponent::MoveResult v)
+std::string Lua::debug::move_state_to_string(lua::State *l, pragma::BaseAIComponent::MoveResult v)
 {
 	switch(v) {
 	case pragma::BaseAIComponent::MoveResult::TargetUnreachable:
@@ -89,7 +88,7 @@ std::string Lua::debug::move_state_to_string(lua_State *l, pragma::BaseAICompone
 	}
 }
 
-void Lua::debug::enable_remote_debugging(lua_State *l)
+void Lua::debug::enable_remote_debugging(lua::State *l)
 {
 	if(get_extended_lua_modules_enabled() == false) {
 		Con::cwar << "Unable to enable remote debugging: Game has to be started with -luaext launch parameter!" << Con::endl;
@@ -99,10 +98,10 @@ void Lua::debug::enable_remote_debugging(lua_State *l)
 	Lua::GetGlobal(l, "require");
 	Lua::PushString(l, "modules/mobdebug"); // Note: This will disable jit!
 	std::string errMsg;
-	auto r = pragma::scripting::lua::protected_call(l, 1, 1, &errMsg);
+	auto r = pragma::scripting::lua_core::protected_call(l, 1, 1, &errMsg);
 	if(r == Lua::StatusCode::Ok) {
 		Lua::GetField(l, -1, "start");
-		r = pragma::scripting::lua::protected_call(l, 0, 0, &errMsg);
+		r = pragma::scripting::lua_core::protected_call(l, 0, 0, &errMsg);
 		Lua::Pop(l, 1); // Pop return value of "require" from stack
 	}
 	if(r != Lua::StatusCode::Ok)

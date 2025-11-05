@@ -2,23 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include <spdlog/fmt/bundled/format.h>
-#include <spdlog/formatter.h>
-#include <spdlog/pattern_formatter.h>
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-
 #ifdef _WIN32
 #include <Windows.h>
 #endif
-
-
-#include "pragma/lua/core.hpp"
-
-
-
-
-
 
 export module pragma.shared:console.spdlog_anycolor_sink;
 
@@ -91,14 +77,14 @@ export namespace pragma::console {
 
 	#ifdef _WIN32
 	template<typename ConsoleMutex>
-	SPDLOG_INLINE anycolor_sink<ConsoleMutex>::anycolor_sink(void *out_handle, spdlog::color_mode mode) : out_handle_(out_handle), mutex_(ConsoleMutex::mutex()), formatter_(spdlog::details::make_unique<spdlog::pattern_formatter>())
+	inline anycolor_sink<ConsoleMutex>::anycolor_sink(void *out_handle, spdlog::color_mode mode) : out_handle_(out_handle), mutex_(ConsoleMutex::mutex()), formatter_(spdlog::details::make_unique<spdlog::pattern_formatter>())
 	{
 
 		set_color_mode_impl(mode);
 	}
 	#else
 	template<typename ConsoleMutex>
-	SPDLOG_INLINE anycolor_sink<ConsoleMutex>::anycolor_sink(FILE *target_file, spdlog::color_mode mode) : target_file_(target_file), mutex_(ConsoleMutex::mutex()), formatter_(spdlog::details::make_unique<spdlog::pattern_formatter>())
+	inline anycolor_sink<ConsoleMutex>::anycolor_sink(FILE *target_file, spdlog::color_mode mode) : target_file_(target_file), mutex_(ConsoleMutex::mutex()), formatter_(spdlog::details::make_unique<spdlog::pattern_formatter>())
 	{
 
 		set_color_mode_impl(mode);
@@ -106,14 +92,14 @@ export namespace pragma::console {
 	#endif
 
 	template<typename ConsoleMutex>
-	SPDLOG_INLINE anycolor_sink<ConsoleMutex>::~anycolor_sink()
+	inline anycolor_sink<ConsoleMutex>::~anycolor_sink()
 	{
 		this->flush();
 	}
 
 	// change the color for the given level
 	template<typename ConsoleMutex>
-	void SPDLOG_INLINE anycolor_sink<ConsoleMutex>::set_color(spdlog::level::level_enum level, const std::string &color)
+	void inline anycolor_sink<ConsoleMutex>::set_color(spdlog::level::level_enum level, const std::string &color)
 	{
 		std::lock_guard<mutex_t> lock(mutex_);
 	#ifdef SPDLOG_USE_STD_FORMAT
@@ -124,7 +110,7 @@ export namespace pragma::console {
 	}
 
 	template<typename ConsoleMutex>
-	void SPDLOG_INLINE anycolor_sink<ConsoleMutex>::log(const spdlog::details::log_msg &msg)
+	void inline anycolor_sink<ConsoleMutex>::log(const spdlog::details::log_msg &msg)
 	{
 	#ifdef _WIN32
 		if(out_handle_ == nullptr || out_handle_ == INVALID_HANDLE_VALUE) {
@@ -165,7 +151,7 @@ export namespace pragma::console {
 	}
 
 	template<typename ConsoleMutex>
-	void SPDLOG_INLINE anycolor_sink<ConsoleMutex>::flush()
+	void inline anycolor_sink<ConsoleMutex>::flush()
 	{
 	#ifndef _WIN32
 		std::lock_guard<mutex_t> lock(mutex_);
@@ -174,28 +160,28 @@ export namespace pragma::console {
 	}
 
 	template<typename ConsoleMutex>
-	void SPDLOG_INLINE anycolor_sink<ConsoleMutex>::set_pattern(const std::string &pattern)
+	void inline anycolor_sink<ConsoleMutex>::set_pattern(const std::string &pattern)
 	{
 		std::lock_guard<mutex_t> lock(mutex_);
 		formatter_ = std::unique_ptr<spdlog::formatter>(new spdlog::pattern_formatter(pattern));
 	}
 
 	template<typename ConsoleMutex>
-	void SPDLOG_INLINE anycolor_sink<ConsoleMutex>::set_formatter(std::unique_ptr<spdlog::formatter> sink_formatter)
+	void inline anycolor_sink<ConsoleMutex>::set_formatter(std::unique_ptr<spdlog::formatter> sink_formatter)
 	{
 		std::lock_guard<mutex_t> lock(mutex_);
 		formatter_ = std::move(sink_formatter);
 	}
 
 	template<typename ConsoleMutex>
-	void SPDLOG_INLINE anycolor_sink<ConsoleMutex>::set_color_mode(spdlog::color_mode mode)
+	void inline anycolor_sink<ConsoleMutex>::set_color_mode(spdlog::color_mode mode)
 	{
 		std::lock_guard<mutex_t> lock(mutex_);
 		set_color_mode_impl(mode);
 	}
 
 	template<typename ConsoleMutex>
-	void SPDLOG_INLINE anycolor_sink<ConsoleMutex>::set_color_mode_impl(spdlog::color_mode mode)
+	void inline anycolor_sink<ConsoleMutex>::set_color_mode_impl(spdlog::color_mode mode)
 	{
 	#ifdef _WIN32
 		if(mode == spdlog::color_mode::automatic) {
@@ -226,7 +212,7 @@ export namespace pragma::console {
 
 	// print a range of formatted message to console
 	template<typename ConsoleMutex>
-	void SPDLOG_INLINE anycolor_sink<ConsoleMutex>::print_range_(const spdlog::memory_buf_t &formatted, size_t start, size_t end)
+	void inline anycolor_sink<ConsoleMutex>::print_range_(const spdlog::memory_buf_t &formatted, size_t start, size_t end)
 	{
 	#ifdef _WIN32
 		if(end > start) {
@@ -241,7 +227,7 @@ export namespace pragma::console {
 
 	#ifdef _WIN32
 	template<typename ConsoleMutex>
-	void SPDLOG_INLINE anycolor_sink<ConsoleMutex>::write_to_file_(const spdlog::memory_buf_t &formatted)
+	void inline anycolor_sink<ConsoleMutex>::write_to_file_(const spdlog::memory_buf_t &formatted)
 	{
 		auto size = static_cast<DWORD>(formatted.size());
 		DWORD bytes_written = 0;
@@ -253,25 +239,25 @@ export namespace pragma::console {
 	#ifdef _WIN32
 	// anycolor_stdout_sink
 	template<typename ConsoleMutex>
-	SPDLOG_INLINE anycolor_stdout_sink<ConsoleMutex>::anycolor_stdout_sink(spdlog::color_mode mode) : anycolor_sink<ConsoleMutex>(::GetStdHandle(STD_OUTPUT_HANDLE), mode)
+	inline anycolor_stdout_sink<ConsoleMutex>::anycolor_stdout_sink(spdlog::color_mode mode) : anycolor_sink<ConsoleMutex>(::GetStdHandle(STD_OUTPUT_HANDLE), mode)
 	{
 	}
 
 	// anycolor_stderr_sink
 	template<typename ConsoleMutex>
-	SPDLOG_INLINE anycolor_stderr_sink<ConsoleMutex>::anycolor_stderr_sink(spdlog::color_mode mode) : anycolor_sink<ConsoleMutex>(::GetStdHandle(STD_ERROR_HANDLE), mode)
+	inline anycolor_stderr_sink<ConsoleMutex>::anycolor_stderr_sink(spdlog::color_mode mode) : anycolor_sink<ConsoleMutex>(::GetStdHandle(STD_ERROR_HANDLE), mode)
 	{
 	}
 	#else
 	// ansicolor_stdout_sink
 	template<typename ConsoleMutex>
-	SPDLOG_INLINE anycolor_stdout_sink<ConsoleMutex>::anycolor_stdout_sink(spdlog::color_mode mode) : anycolor_sink<ConsoleMutex>(stdout, mode)
+	inline anycolor_stdout_sink<ConsoleMutex>::anycolor_stdout_sink(spdlog::color_mode mode) : anycolor_sink<ConsoleMutex>(stdout, mode)
 	{
 	}
 
 	// ansicolor_stderr_sink
 	template<typename ConsoleMutex>
-	SPDLOG_INLINE anycolor_stderr_sink<ConsoleMutex>::anycolor_stderr_sink(spdlog::color_mode mode) : anycolor_sink<ConsoleMutex>(stderr, mode)
+	inline anycolor_stderr_sink<ConsoleMutex>::anycolor_stderr_sink(spdlog::color_mode mode) : anycolor_sink<ConsoleMutex>(stderr, mode)
 	{
 	}
 	#endif

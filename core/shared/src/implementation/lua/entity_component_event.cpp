@@ -3,13 +3,12 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 module pragma.shared;
 
 import :scripting.lua.entity_component_event;
 
-void LuaComponentEvent::PushArguments(lua_State *l)
+void LuaComponentEvent::PushArguments(lua::State *l)
 {
 	for(auto &o : arguments)
 		o.push(l);

@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -41,11 +40,11 @@ pragma::ecs::BaseEntity *pragma::physics::IConstraint::GetEntity() const { retur
 void pragma::physics::IConstraint::SetEntity(pragma::ecs::BaseEntity &ent) { m_hEntity = ent.GetHandle(); }
 
 void pragma::physics::IConstraint::OnBroken() { m_physEnv.OnConstraintBroken(*this); }
-void pragma::physics::IConstraint::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<IConstraint>(lua); }
-void pragma::physics::IFixedConstraint::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<IFixedConstraint>(lua); }
-void pragma::physics::IBallSocketConstraint::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<IBallSocketConstraint>(lua); }
-void pragma::physics::IHingeConstraint::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<IHingeConstraint>(lua); }
-void pragma::physics::ISliderConstraint::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<ISliderConstraint>(lua); }
-void pragma::physics::IConeTwistConstraint::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<IConeTwistConstraint>(lua); }
-void pragma::physics::IDoFConstraint::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<IDoFConstraint>(lua); }
-void pragma::physics::IDoFSpringConstraint::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<IDoFSpringConstraint>(lua); }
+void pragma::physics::IConstraint::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<IConstraint>(lua); }
+void pragma::physics::IFixedConstraint::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<IFixedConstraint>(lua); }
+void pragma::physics::IBallSocketConstraint::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<IBallSocketConstraint>(lua); }
+void pragma::physics::IHingeConstraint::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<IHingeConstraint>(lua); }
+void pragma::physics::ISliderConstraint::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<ISliderConstraint>(lua); }
+void pragma::physics::IConeTwistConstraint::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<IConeTwistConstraint>(lua); }
+void pragma::physics::IDoFConstraint::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<IDoFConstraint>(lua); }
+void pragma::physics::IDoFSpringConstraint::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<IDoFSpringConstraint>(lua); }

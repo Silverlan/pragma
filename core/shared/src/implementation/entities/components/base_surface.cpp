@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
-#include "pragma/logging.hpp"
 #include <cassert>
 
 module pragma.shared;
@@ -227,7 +225,7 @@ bool BaseSurfaceComponent::CalcLineSurfaceIntersection(const Vector3 &lineOrigin
 /////////////////////////////////
 
 CEOnSurfaceMeshChanged::CEOnSurfaceMeshChanged(const BaseSurfaceComponent::MeshInfo &meshInfo) : meshInfo {meshInfo} {}
-void CEOnSurfaceMeshChanged::PushArguments(lua_State *l)
+void CEOnSurfaceMeshChanged::PushArguments(lua::State *l)
 {
 	Lua::Push(l, meshInfo.mesh->shared_from_this());
 	Lua::Push(l, meshInfo.subMesh->shared_from_this());

@@ -3,14 +3,13 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
 
 import :scripting.lua.libraries.mesh;
 
-int Lua::mesh::generate_convex_hull(lua_State *l)
+int Lua::mesh::generate_convex_hull(lua::State *l)
 {
 	Lua::CheckTable(l, 1);
 	int32_t t = 1;
@@ -35,7 +34,7 @@ int Lua::mesh::generate_convex_hull(lua_State *l)
 	return 1;
 }
 
-int Lua::mesh::calc_smallest_enclosing_bbox(lua_State *l)
+int Lua::mesh::calc_smallest_enclosing_bbox(lua::State *l)
 {
 	Lua::CheckTable(l, 1);
 	int32_t t = 1;

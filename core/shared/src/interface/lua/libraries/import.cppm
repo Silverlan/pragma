@@ -2,26 +2,25 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.shared:scripting.lua.libraries.lib_import;
 
-export import std;
+export import pragma.lua;
 
 export {
 	class NetworkState;
 	namespace Lua {
 		namespace import {
-			DLLNETWORK int import_wrci(lua_State *l);
-			DLLNETWORK int import_wad(lua_State *l);
-			DLLNETWORK int import_wrmi(lua_State *l);
-			DLLNETWORK int import_smd(lua_State *l);
-			DLLNETWORK int import_obj(lua_State *l);
-			DLLNETWORK int import_model_asset(lua_State *l);
+			DLLNETWORK int import_wrci(lua::State *l);
+			DLLNETWORK int import_wad(lua::State *l);
+			DLLNETWORK int import_wrmi(lua::State *l);
+			DLLNETWORK int import_smd(lua::State *l);
+			DLLNETWORK int import_obj(lua::State *l);
+			DLLNETWORK int import_model_asset(lua::State *l);
 			DLLNETWORK bool import_model_asset(NetworkState &nw, const std::string &outputPath, std::string &outFilePath, std::string &outErr);
 
-			DLLNETWORK int export_model_asset(lua_State *l);
+			DLLNETWORK int export_model_asset(lua::State *l);
 		};
 	};
 };

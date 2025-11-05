@@ -4,13 +4,12 @@ module;
 
 
 
-#include "pragma/lua/core.hpp"
 
 module pragma.shared;
 
 import :scripting.lua.libraries.intersect;
 
-luabind::object Lua::intersect::line_obb(lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, const Vector3 &min, const Vector3 &max, bool precise, const umath::Transform &pose)
+luabind::object Lua::intersect::line_obb(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, const Vector3 &min, const Vector3 &max, bool precise, const umath::Transform &pose)
 {
 	auto dist = 0.f;
 	float *pDist = nullptr;
@@ -22,7 +21,7 @@ luabind::object Lua::intersect::line_obb(lua_State *l, const Vector3 &rayStart, 
 	return luabind::object {l, dist};
 }
 
-static bool get_line_mesh_result(lua_State *l, const Intersection::LineMeshResult &res, bool precise, luabind::object &r0, luabind::object &r1)
+static bool get_line_mesh_result(lua::State *l, const Intersection::LineMeshResult &res, bool precise, luabind::object &r0, luabind::object &r1)
 {
 	if(precise == false) {
 		r0 = luabind::object {l, res.result == umath::intersection::Result::Intersect};
@@ -40,7 +39,7 @@ static bool get_line_mesh_result(lua_State *l, const Intersection::LineMeshResul
 	return true;
 }
 
-void Lua::intersect::line_mesh(lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
+void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
 {
 	auto &origin = meshPose.GetOrigin();
 	auto &rot = meshPose.GetRotation();
@@ -49,7 +48,7 @@ void Lua::intersect::line_mesh(lua_State *l, const Vector3 &rayStart, const Vect
 	get_line_mesh_result(l, res, precise, r0, r1);
 }
 
-void Lua::intersect::line_mesh(lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, ::ModelMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
+void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, ::ModelMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
 {
 	auto &origin = meshPose.GetOrigin();
 	auto &rot = meshPose.GetRotation();
@@ -61,7 +60,7 @@ void Lua::intersect::line_mesh(lua_State *l, const Vector3 &rayStart, const Vect
 		r1["subMeshIdx"] = res.precise->subMeshIdx;
 }
 
-void Lua::intersect::line_mesh(lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
+void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
 {
 	Intersection::LineMeshResult res {};
 	Intersection::LineMesh(rayStart, rayDir, mdl, res, precise, nullptr, lod, meshPose.GetOrigin(), meshPose.GetRotation());
@@ -74,7 +73,7 @@ void Lua::intersect::line_mesh(lua_State *l, const Vector3 &rayStart, const Vect
 	}
 }
 
-void Lua::intersect::line_mesh(lua_State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, luabind::table<> tBodyGroups, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
+void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, luabind::table<> tBodyGroups, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
 {
 	auto bodyGroups = Lua::table_to_vector<uint32_t>(l, tBodyGroups, 4);
 	Intersection::LineMeshResult res {};
@@ -88,7 +87,7 @@ void Lua::intersect::line_mesh(lua_State *l, const Vector3 &rayStart, const Vect
 	}
 }
 
-void Lua::intersect::line_aabb(lua_State *l, const Vector3 &start, const Vector3 &dir, const Vector3 &min, const Vector3 &max, luabind::object &outMin, luabind::object &outMax)
+void Lua::intersect::line_aabb(lua::State *l, const Vector3 &start, const Vector3 &dir, const Vector3 &min, const Vector3 &max, luabind::object &outMin, luabind::object &outMax)
 {
 	float tMin, tMax;
 	auto res = umath::intersection::line_aabb(start, dir, min, max, &tMin, &tMax) == umath::intersection::Result::Intersect;
@@ -100,7 +99,7 @@ void Lua::intersect::line_aabb(lua_State *l, const Vector3 &start, const Vector3
 	outMax = luabind::object {l, tMax};
 }
 
-luabind::object Lua::intersect::line_plane(lua_State *l, const Vector3 &origin, const Vector3 &dir, const Vector3 &n, float d)
+luabind::object Lua::intersect::line_plane(lua::State *l, const Vector3 &origin, const Vector3 &dir, const Vector3 &n, float d)
 {
 	float t;
 	bool b = umath::intersection::line_plane(origin, dir, n, d, &t) == umath::intersection::Result::Intersect;
@@ -109,25 +108,25 @@ luabind::object Lua::intersect::line_plane(lua_State *l, const Vector3 &origin, 
 	return luabind::object {l, t};
 }
 
-bool Lua::intersect::point_in_plane_mesh(lua_State *l, const Vector3 &vec, luabind::table<> planeTable)
+bool Lua::intersect::point_in_plane_mesh(lua::State *l, const Vector3 &vec, luabind::table<> planeTable)
 {
 	auto planes = Lua::table_to_vector<umath::Plane>(l, planeTable, 2);
 	return umath::intersection::point_in_plane_mesh(vec, planes.begin(), planes.end());
 }
 
-int Lua::intersect::sphere_in_plane_mesh(lua_State *l, const Vector3 &vec, float r, luabind::table<> planeTable)
+int Lua::intersect::sphere_in_plane_mesh(lua::State *l, const Vector3 &vec, float r, luabind::table<> planeTable)
 {
 	auto planes = Lua::table_to_vector<umath::Plane>(l, planeTable, 3);
 	return umath::to_integral(umath::intersection::sphere_in_plane_mesh(vec, r, planes.begin(), planes.end()));
 }
 
-int Lua::intersect::aabb_in_plane_mesh(lua_State *l, const Vector3 &min, const Vector3 &max, luabind::table<> planeTable)
+int Lua::intersect::aabb_in_plane_mesh(lua::State *l, const Vector3 &min, const Vector3 &max, luabind::table<> planeTable)
 {
 	auto planes = Lua::table_to_vector<umath::Plane>(l, planeTable, 3);
 	return umath::to_integral(umath::intersection::aabb_in_plane_mesh(min, max, planes.begin(), planes.end()));
 }
 
-void Lua::intersect::line_triangle(lua_State *l, const Vector3 &lineOrigin, const Vector3 &lineDir, const Vector3 &v0, const Vector3 &v1, const Vector3 &v2, luabind::object &outT, luabind::object &outUv, bool cull)
+void Lua::intersect::line_triangle(lua::State *l, const Vector3 &lineOrigin, const Vector3 &lineDir, const Vector3 &v0, const Vector3 &v1, const Vector3 &v2, luabind::object &outT, luabind::object &outUv, bool cull)
 {
 	double t, u, v;
 	auto bIntersect = umath::intersection::line_triangle(lineOrigin, lineDir, v0, v1, v2, t, u, v, cull);
@@ -139,7 +138,7 @@ void Lua::intersect::line_triangle(lua_State *l, const Vector3 &lineOrigin, cons
 	outUv = luabind::object {l, ::Vector2 {u, v}};
 }
 
-luabind::object Lua::intersect::line_line(lua_State *l, const ::Vector2 &start0, const ::Vector2 &end0, const ::Vector2 &start1, const ::Vector2 &end1)
+luabind::object Lua::intersect::line_line(lua::State *l, const ::Vector2 &start0, const ::Vector2 &end0, const ::Vector2 &start1, const ::Vector2 &end1)
 {
 	auto result = umath::intersection::line_line(start0, end0, start1, end1);
 	if(result.has_value() == false)

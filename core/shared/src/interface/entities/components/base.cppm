@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/logging.hpp"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 #ifdef _WIN32
 #if __cpp_lib_format >= 202207L
@@ -98,7 +96,7 @@ export {
 
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
-			static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+			static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 			template<typename TClass>
 				static spdlog::logger &get_logger();
 			enum class StateFlags : uint32_t {

@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -18,7 +17,7 @@ void InputMovementControllerComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	BindEventUnhandled(movementComponent::EVENT_ON_UPDATE_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovementProperties(); });
 }
-void InputMovementControllerComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void InputMovementControllerComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void InputMovementControllerComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
 
 void InputMovementControllerComponent::SetActionInputController(ActionInputControllerComponent *controller) { m_actionInputController = controller ? controller->GetHandle<ActionInputControllerComponent>() : ComponentHandle<ActionInputControllerComponent> {}; }

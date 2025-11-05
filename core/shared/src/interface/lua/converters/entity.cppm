@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.converters.entity;
 
 export import :scripting.lua.types.base_types;
 export import :types;
+export import pragma.lua;
 
 export namespace luabind {
 	template<typename T>
@@ -17,7 +17,7 @@ export namespace luabind {
 		using is_native = std::false_type;
 
 		template<class U>
-		int match(lua_State *L, U u, int index)
+		int match(lua::State *L, U u, int index)
 		{
 			auto res = type_converter<T>::match(L, u, index);
 			if(res != no_match) {
@@ -29,7 +29,7 @@ export namespace luabind {
 		}
 
 		template<class U>
-		T to_cpp(lua_State *L, U u, int index)
+		T to_cpp(lua::State *L, U u, int index)
 		{
 			if(m_isComponent) {
 				TComponent c = type_converter<T>::to_cpp(L, luabind::decorate_type_t<TComponent> {}, index);
@@ -45,11 +45,11 @@ export namespace luabind {
 				return type_converter<T>::to_cpp(L, u, index);
 		}
 
-		void to_lua(lua_State *L, T const &p)
+		void to_lua(lua::State *L, T const &p)
 		{
 			if constexpr(std::is_pointer_v<T>) {
 				if(!p)
-					lua_pushnil(L);
+					Lua::PushNil(L);
 				else
 					const_cast<T>(p)->GetLuaObject().push(L);
 			}
@@ -58,7 +58,7 @@ export namespace luabind {
 		}
 
 		template<class U>
-		void converter_postcall(lua_State *, U const &, int)
+		void converter_postcall(lua::State *, U const &, int)
 		{
 		}
 	  private:

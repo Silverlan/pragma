@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -21,7 +20,7 @@ void ParentComponent::RegisterEvents(pragma::EntityComponentManager &componentMa
 }
 ParentComponent::ParentComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ParentComponent::Initialize() { BaseEntityComponent::Initialize(); }
-void ParentComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ParentComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ParentComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();
@@ -53,4 +52,4 @@ void ParentComponent::AddChild(BaseChildComponent &child)
 ////////////
 
 CEOnChildAdded::CEOnChildAdded(BaseChildComponent &child) : child {child} {}
-void CEOnChildAdded::PushArguments(lua_State *l) { child.GetLuaObject().push(l); }
+void CEOnChildAdded::PushArguments(lua::State *l) { child.GetLuaObject().push(l); }

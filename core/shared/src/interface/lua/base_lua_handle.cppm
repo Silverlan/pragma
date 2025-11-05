@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 
 
@@ -19,14 +18,14 @@ export {
 			BaseLuaHandle();
 			virtual ~BaseLuaHandle();
 			util::TWeakSharedHandle<BaseLuaHandle> GetHandle() const { return util::TWeakSharedHandle<BaseLuaHandle> {m_handle}; }
-			virtual void InitializeLuaObject(lua_State *lua) = 0;
-			const luabind::object &GetLuaObject(lua_State *lua) const { return const_cast<BaseLuaHandle *>(this)->GetLuaObject(lua); }
-			luabind::object &GetLuaObject(lua_State *lua) { return GetLuaObject(); }
+			virtual void InitializeLuaObject(lua::State *lua) = 0;
+			const luabind::object &GetLuaObject(lua::State *lua) const { return const_cast<BaseLuaHandle *>(this)->GetLuaObject(lua); }
+			luabind::object &GetLuaObject(lua::State *lua) { return GetLuaObject(); }
 			const luabind::object &GetLuaObject() const { return const_cast<BaseLuaHandle *>(this)->GetLuaObject(); }
 			luabind::object &GetLuaObject() { return m_luaObj; }
-			lua_State *GetLuaState() const;
+			lua::State *GetLuaState() const;
 			void PushLuaObject();
-			void PushLuaObject(lua_State *l);
+			void PushLuaObject(lua::State *l);
 
 			void CallLuaMethod(const std::string &name);
 			template<class T, typename... TARGS>
@@ -38,7 +37,7 @@ export {
 			util::TWeakSharedHandle<T> GetHandle() const;
 		protected:
 			template<typename T>
-			void InitializeLuaObject(lua_State *l);
+			void InitializeLuaObject(lua::State *l);
 			void InvalidateHandle();
 			void SetLuaObject(const luabind::object &o);
 		private:
@@ -47,9 +46,9 @@ export {
 		};
 
 		template<typename T>
-		void BaseLuaHandle::InitializeLuaObject(lua_State *l)
+		void BaseLuaHandle::InitializeLuaObject(lua::State *l)
 		{
-			m_luaObj = {l, lua::raw_object_to_luabind_object(l, GetHandle<T>())};
+			m_luaObj = {l, LuaCore::raw_object_to_luabind_object(l, GetHandle<T>())};
 		}
 
 		template<typename T>
@@ -109,7 +108,7 @@ export {
 		#endif
 				auto *state = r.interpreter();
 				r.push(state);
-				auto r = (lua_iscfunction(state, -1) == 0) ? CallbackReturnType::HasReturnValue : CallbackReturnType::NoReturnValue;
+				auto r = (Lua::IsCFunction(state, -1) == 0) ? CallbackReturnType::HasReturnValue : CallbackReturnType::NoReturnValue;
 				Lua::Pop(state, 1);
 				return r;
 			}

@@ -3,8 +3,7 @@
 module;
 
 
-#include "pragma/networkdefinitions.h"
-#include <spdlog/logger.h>
+#include "definitions.hpp"
 
 #ifdef _WIN32
 #include <Windows.h>

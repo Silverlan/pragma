@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 module pragma.shared;
 
@@ -11,7 +10,7 @@ import :scripting.lua.libraries.sound;
 
 import se_script;
 
-void Lua::sound::register_enums(lua_State *l)
+void Lua::sound::register_enums(lua::State *l)
 {
 	Lua::RegisterLibraryEnums(l, "sound",
 	  {{"FCREATE_NONE", umath::to_integral(pragma::audio::ALCreateFlags::None)}, {"FCREATE_MONO", umath::to_integral(pragma::audio::ALCreateFlags::Mono)}, {"FCREATE_STREAM", umath::to_integral(pragma::audio::ALCreateFlags::Stream)}, {"FCREATE_DONT_TRANSMIT", umath::to_integral(pragma::audio::ALCreateFlags::DontTransmit)}});
@@ -27,23 +26,23 @@ void Lua::sound::register_library(luabind::module_ &soundMod)
 	defPlayInfo.def_readwrite("flags", &SoundPlayInfo::flags);
 	soundMod[defPlayInfo];
 
-	soundMod[luabind::def("create", static_cast<std::shared_ptr<::ALSound>(*)(lua_State *, const std::string &, pragma::audio::ALSoundType, pragma::audio::ALCreateFlags)>(&Lua::sound::create))];
-	soundMod[luabind::def("create", static_cast<std::shared_ptr<::ALSound>(*)(lua_State *, const std::string &, pragma::audio::ALSoundType)>(&Lua::sound::create))];
-	soundMod[luabind::def("play", static_cast<std::shared_ptr<::ALSound>(*)(lua_State *, const std::string &, pragma::audio::ALSoundType, const SoundPlayInfo &)>(&Lua::sound::play))];
-	soundMod[luabind::def("play", static_cast<std::shared_ptr<::ALSound>(*)(lua_State *, const std::string &, pragma::audio::ALSoundType)>(&Lua::sound::play))];
+	soundMod[luabind::def("create", static_cast<std::shared_ptr<::ALSound>(*)(lua::State *, const std::string &, pragma::audio::ALSoundType, pragma::audio::ALCreateFlags)>(&Lua::sound::create))];
+	soundMod[luabind::def("create", static_cast<std::shared_ptr<::ALSound>(*)(lua::State *, const std::string &, pragma::audio::ALSoundType)>(&Lua::sound::create))];
+	soundMod[luabind::def("play", static_cast<std::shared_ptr<::ALSound>(*)(lua::State *, const std::string &, pragma::audio::ALSoundType, const SoundPlayInfo &)>(&Lua::sound::play))];
+	soundMod[luabind::def("play", static_cast<std::shared_ptr<::ALSound>(*)(lua::State *, const std::string &, pragma::audio::ALSoundType)>(&Lua::sound::play))];
 	soundMod[luabind::def("get_duration", &Lua::sound::get_duration)];
 	soundMod[luabind::def("get_all", &Lua::sound::get_all)];
 	soundMod[luabind::def("is_music_playing", &Lua::sound::is_music_playing)];
-	soundMod[luabind::def("find_by_type", static_cast<std::vector<std::shared_ptr<::ALSound>>(*)(lua_State *, pragma::audio::ALSoundType, bool)>(&Lua::sound::find_by_type))];
-	soundMod[luabind::def("find_by_type", static_cast<std::vector<std::shared_ptr<::ALSound>>(*)(lua_State *, pragma::audio::ALSoundType)>(&Lua::sound::find_by_type))];
-	soundMod[luabind::def("precache", static_cast<bool(*)(lua_State *, const std::string &, ALChannel)>(&Lua::sound::precache))];
-	soundMod[luabind::def("precache", static_cast<bool(*)(lua_State *, const std::string &)>(&Lua::sound::precache))];
+	soundMod[luabind::def("find_by_type", static_cast<std::vector<std::shared_ptr<::ALSound>>(*)(lua::State *, pragma::audio::ALSoundType, bool)>(&Lua::sound::find_by_type))];
+	soundMod[luabind::def("find_by_type", static_cast<std::vector<std::shared_ptr<::ALSound>>(*)(lua::State *, pragma::audio::ALSoundType)>(&Lua::sound::find_by_type))];
+	soundMod[luabind::def("precache", static_cast<bool(*)(lua::State *, const std::string &, ALChannel)>(&Lua::sound::precache))];
+	soundMod[luabind::def("precache", static_cast<bool(*)(lua::State *, const std::string &)>(&Lua::sound::precache))];
 	soundMod[luabind::def("stop_all", &Lua::sound::stop_all)];
 	soundMod[luabind::def("load_scripts", &Lua::sound::load_scripts)];
 	soundMod[luabind::def("read_wav_phonemes", &Lua::sound::read_wav_phonemes)];
 }
 
-std::shared_ptr<::ALSound> Lua::sound::create(lua_State *l, const std::string &snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags)
+std::shared_ptr<::ALSound> Lua::sound::create(lua::State *l, const std::string &snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto pAl = state->CreateSound(snd, type, flags);
@@ -53,12 +52,12 @@ std::shared_ptr<::ALSound> Lua::sound::create(lua_State *l, const std::string &s
 	return pAl;
 }
 
-std::shared_ptr<::ALSound> Lua::sound::create(lua_State *l, const std::string &snd, pragma::audio::ALSoundType type)
+std::shared_ptr<::ALSound> Lua::sound::create(lua::State *l, const std::string &snd, pragma::audio::ALSoundType type)
 {
 	return create(l, snd, type, pragma::audio::ALCreateFlags::None);
 }
 
-std::shared_ptr<::ALSound> Lua::sound::play(lua_State *l, const std::string &sndName, pragma::audio::ALSoundType type, const SoundPlayInfo &playInfo)
+std::shared_ptr<::ALSound> Lua::sound::play(lua::State *l, const std::string &sndName, pragma::audio::ALSoundType type, const SoundPlayInfo &playInfo)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto snd = state->CreateSound(sndName, type, playInfo.flags);
@@ -76,9 +75,9 @@ std::shared_ptr<::ALSound> Lua::sound::play(lua_State *l, const std::string &snd
 	return snd;
 }
 
-std::shared_ptr<::ALSound> Lua::sound::play(lua_State *l, const std::string &sndName, pragma::audio::ALSoundType type) { return play(l, sndName, type, {}); }
+std::shared_ptr<::ALSound> Lua::sound::play(lua::State *l, const std::string &sndName, pragma::audio::ALSoundType type) { return play(l, sndName, type, {}); }
 
-bool Lua::sound::is_music_playing(lua_State *l)
+bool Lua::sound::is_music_playing(lua::State *l)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto &sounds = state->GetSounds();
@@ -89,13 +88,13 @@ bool Lua::sound::is_music_playing(lua_State *l)
 	return it != sounds.end();
 }
 
-float Lua::sound::get_duration(lua_State *l, const std::string &snd)
+float Lua::sound::get_duration(lua::State *l, const std::string &snd)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	return state->GetSoundDuration(snd);
 }
 
-std::vector<std::shared_ptr<::ALSound>> Lua::sound::get_all(lua_State *l)
+std::vector<std::shared_ptr<::ALSound>> Lua::sound::get_all(lua::State *l)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto &sounds = state->GetSounds();
@@ -108,7 +107,7 @@ std::vector<std::shared_ptr<::ALSound>> Lua::sound::get_all(lua_State *l)
 	return rsounds;
 }
 
-std::vector<std::shared_ptr<::ALSound>> Lua::sound::find_by_type(lua_State *l, pragma::audio::ALSoundType type, bool bExactMatch)
+std::vector<std::shared_ptr<::ALSound>> Lua::sound::find_by_type(lua::State *l, pragma::audio::ALSoundType type, bool bExactMatch)
 {
 	if(type == pragma::audio::ALSoundType::Generic)
 		return get_all(l);
@@ -124,34 +123,34 @@ std::vector<std::shared_ptr<::ALSound>> Lua::sound::find_by_type(lua_State *l, p
 	}
 	return rsounds;
 }
-std::vector<std::shared_ptr<::ALSound>> Lua::sound::find_by_type(lua_State *l, pragma::audio::ALSoundType type)
+std::vector<std::shared_ptr<::ALSound>> Lua::sound::find_by_type(lua::State *l, pragma::audio::ALSoundType type)
 {
 	return find_by_type(l, type, false);
 }
 
-bool Lua::sound::precache(lua_State *l, const std::string &snd, ALChannel mode)
+bool Lua::sound::precache(lua::State *l, const std::string &snd, ALChannel mode)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	return state->PrecacheSound(snd.c_str(), mode);
 }
-bool Lua::sound::precache(lua_State *l, const std::string &snd)
+bool Lua::sound::precache(lua::State *l, const std::string &snd)
 {
 	return precache(l, snd, ALChannel::Auto);
 }
 
-void Lua::sound::stop_all(lua_State *l)
+void Lua::sound::stop_all(lua::State *l)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	state->StopSounds();
 }
 
-void Lua::sound::load_scripts(lua_State *l, const std::string &file)
+void Lua::sound::load_scripts(lua::State *l, const std::string &file)
 {
 	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
 	state->LoadSoundScripts(file.c_str());
 }
 
-luabind::object Lua::sound::read_wav_phonemes(lua_State *l, const std::string &fileName)
+luabind::object Lua::sound::read_wav_phonemes(lua::State *l, const std::string &fileName)
 {
 	auto fname = "sounds\\" + FileManager::GetCanonicalizedPath(fileName);
 	auto f = FileManager::OpenFile(fname.c_str(), "rb");

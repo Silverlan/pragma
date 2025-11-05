@@ -3,13 +3,12 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 module pragma.shared;
 
 import :scripting.lua.converters.file;
 
-void luabind::default_converter<std::shared_ptr<ufile::IFile>>::to_lua(lua_State *L, std::shared_ptr<ufile::IFile> const &p)
+void luabind::default_converter<std::shared_ptr<ufile::IFile>>::to_lua(lua::State *L, std::shared_ptr<ufile::IFile> const &p)
 {
 	auto f = std::make_shared<LFile>();
 	f->Construct(p);

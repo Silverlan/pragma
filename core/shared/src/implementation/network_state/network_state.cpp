@@ -2,10 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/logging.hpp"
+#include "definitions.hpp"
 
 module pragma.shared;
 
@@ -286,7 +284,7 @@ void NetworkState::Close()
 	CallCallbacks("OnClose");
 }
 
-lua_State *NetworkState::GetLuaState()
+lua::State *NetworkState::GetLuaState()
 {
 	if(!IsGameActive())
 		return nullptr;
@@ -469,7 +467,7 @@ bool NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::string> 
 	LuaFunction func = nullptr;
 	cmd->GetFunction(func);
 	game->ProtectedLuaCall(
-	  [&func, &pl, &argv, magnitude, bJoystick](lua_State *l) {
+	  [&func, &pl, &argv, magnitude, bJoystick](lua::State *l) {
 		  func.GetLuaObject().push(l);
 		  if(pl == nullptr)
 			  Lua::PushNil(l);
@@ -513,7 +511,7 @@ std::shared_ptr<util::Library> NetworkState::GetLibraryModule(const std::string 
 	return *it->second.library;
 }
 
-void NetworkState::InitializeLuaModules(lua_State *l)
+void NetworkState::InitializeLuaModules(lua::State *l)
 {
 	for(auto &pair : s_loadedLibraries) {
 		if(!pair.second.WasLoadedInState(*this))
@@ -522,7 +520,7 @@ void NetworkState::InitializeLuaModules(lua_State *l)
 	}
 }
 
-void NetworkState::InitializeDLLModule(lua_State *l, std::shared_ptr<util::Library> module)
+void NetworkState::InitializeDLLModule(lua::State *l, std::shared_ptr<util::Library> module)
 {
 	auto it = m_initializedLibraries.find(l);
 	if(it != m_initializedLibraries.end()) {
@@ -574,7 +572,7 @@ bool NetworkState::UnloadLibrary(const std::string &library)
 	return true;
 }
 
-std::shared_ptr<util::Library> NetworkState::InitializeLibrary(std::string library, std::string *err, lua_State *l)
+std::shared_ptr<util::Library> NetworkState::InitializeLibrary(std::string library, std::string *err, lua::State *l)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("load_library_module_" + library);
@@ -645,7 +643,7 @@ std::shared_ptr<util::Library> NetworkState::InitializeLibrary(std::string libra
 	return nullptr;
 }
 
-void NetworkState::TerminateLuaModules(lua_State *l)
+void NetworkState::TerminateLuaModules(lua::State *l)
 {
 	auto it = m_initializedLibraries.find(l);
 	if(it == m_initializedLibraries.end())
@@ -661,7 +659,7 @@ void NetworkState::TerminateLuaModules(lua_State *l)
 }
 void NetworkState::DeregisterLuaModules(void *l, const std::string &identifier)
 {
-	auto it = m_initializedLibraries.find(reinterpret_cast<lua_State *>(l));
+	auto it = m_initializedLibraries.find(reinterpret_cast<lua::State *>(l));
 	if(it == m_initializedLibraries.end())
 		return;
 	for(auto &dllHandle : it->second) {

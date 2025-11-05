@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "sharedutils/BS_thread_pool.hpp"
+#include "definitions.hpp"
 
 export module pragma.shared:game.global_animation_channel_queue_processor;
 
@@ -26,10 +25,10 @@ export namespace pragma {
 		void ApplyValues();
 		void Reset();
 
-		BS::thread_pool &GetThreadPool() { return m_threadPool; }
+		BS::light_thread_pool &GetThreadPool() { return m_threadPool; }
 	  private:
 		void AddToQueue(const std::vector<AnimationChannelCacheData> &cacheData, size_t start, size_t indexAfterLast);
-		BS::thread_pool m_threadPool;
+		BS::light_thread_pool m_threadPool;
 		std::queue<ChannelRange> m_channelQueue;
 		std::mutex m_channelQueueMutex;
 		std::condition_variable m_channelQueueVar;

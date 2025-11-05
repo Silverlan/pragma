@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 
 export module pragma.shared:scripting.lua.classes.parallel_job;
@@ -13,7 +12,7 @@ export import :scripting.lua.api;
 export import :types;
 
 export {
-	namespace pragma::lua {
+	namespace pragma::LuaCore {
 		class DLLNETWORK LuaWorker : public util::ParallelWorker<luabind::object> {
 		  public:
 			enum class TaskStatus : uint8_t {

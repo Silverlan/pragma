@@ -2,15 +2,14 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 
 export module pragma.shared:scripting.lua.include;
 
 export import pragma.lua;
 
-export namespace pragma::scripting::lua {
+export namespace pragma::scripting::lua_core {
 	struct DLLNETWORK IncludeResult {
 		Lua::StatusCode statusCode;
 		uint32_t numResults;
@@ -29,11 +28,11 @@ export namespace pragma::scripting::lua {
 	};
 	using namespace umath::scoped_enum::bitwise;
 
-	DLLNETWORK IncludeResult include(lua_State *l, const std::string &path, IncludeFlags flags = IncludeFlags::None);
-	DLLNETWORK void execute_files_in_directory(lua_State *l, const std::string &path);
-	DLLNETWORK Lua::StatusCode execute_file(lua_State *l, const std::string &path, std::string *optOutErrMsg = nullptr);
+	DLLNETWORK IncludeResult include(lua::State *l, const std::string &path, IncludeFlags flags = IncludeFlags::None);
+	DLLNETWORK void execute_files_in_directory(lua::State *l, const std::string &path);
+	DLLNETWORK Lua::StatusCode execute_file(lua::State *l, const std::string &path, std::string *optOutErrMsg = nullptr);
 };
 namespace umath::scoped_enum::bitwise {
 	template<>
-	struct enable_bitwise_operators<pragma::scripting::lua::IncludeFlags> : std::true_type {};
+	struct enable_bitwise_operators<pragma::scripting::lua_core::IncludeFlags> : std::true_type {};
 }

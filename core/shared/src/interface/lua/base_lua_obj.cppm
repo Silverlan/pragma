@@ -2,14 +2,12 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 
 export module pragma.shared:scripting.lua.base_lua_obj;
 
-export import luabind;
-export import std;
+export import pragma.lua;
 
 export {
 	class DLLNETWORK BaseLuaObj {
@@ -28,13 +26,13 @@ export {
 		mutable THandle *m_handle;
 		virtual void InitializeHandle() = 0;
 		template<class TCustomHandle>
-		void InitializeLuaObject(lua_State *lua)
+		void InitializeLuaObject(lua::State *lua)
 		{
 			if(m_luaObj != nullptr)
 				return;
 			m_luaObj = std::make_unique<luabind::object>(lua, *(dynamic_cast<TCustomHandle *>(m_handle))); // dynamic_cast required for virtual inheritance
 		}
-		virtual void InitializeLuaObject(lua_State *lua)
+		virtual void InitializeLuaObject(lua::State *lua)
 		{
 			InitializeLuaObject<THandle>(lua);
 		}

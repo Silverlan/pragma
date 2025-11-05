@@ -4,7 +4,7 @@ module;
 
 
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 #include <cassert>
 
 module pragma.shared;

@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -66,7 +65,7 @@ void ConstraintSpaceComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	GetEntity().AddComponent<ConstraintComponent>();
 }
-void ConstraintSpaceComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ConstraintSpaceComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void ConstraintSpaceComponent::SetAxisEnabled(pragma::Axis axis, bool enabled) { m_axisEnabled[umath::to_integral(axis)] = enabled; }
 bool ConstraintSpaceComponent::IsAxisEnabled(pragma::Axis axis) const { return m_axisEnabled[umath::to_integral(axis)]; }

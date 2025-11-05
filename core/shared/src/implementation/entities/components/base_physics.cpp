@@ -2,10 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
 
-#include "pragma/logging.hpp"
 
 module pragma.shared;
 
@@ -896,17 +894,17 @@ void BasePhysicsComponent::UpdateBoneCollisionObject(UInt32 boneId, Bool updateP
 ///////////////
 
 CEPhysicsUpdateData::CEPhysicsUpdateData(double dt) : deltaTime {dt} {}
-void CEPhysicsUpdateData::PushArguments(lua_State *l) { Lua::PushNumber(l, deltaTime); }
+void CEPhysicsUpdateData::PushArguments(lua::State *l) { Lua::PushNumber(l, deltaTime); }
 
 ///////////////
 
 CEHandleRaycast::CEHandleRaycast(pragma::physics::CollisionMask rayCollisionGroup, pragma::physics::CollisionMask rayCollisionMask) : rayCollisionGroup {rayCollisionGroup}, rayCollisionMask {rayCollisionMask} {}
-void CEHandleRaycast::PushArguments(lua_State *l) {}
+void CEHandleRaycast::PushArguments(lua::State *l) {}
 
 ///////////////
 
 CEInitializePhysics::CEInitializePhysics(pragma::physics::PHYSICSTYPE type, BasePhysicsComponent::PhysFlags flags) : physicsType {type}, flags {flags} {}
-void CEInitializePhysics::PushArguments(lua_State *l)
+void CEInitializePhysics::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, umath::to_integral(physicsType));
 	Lua::PushInt(l, umath::to_integral(flags));
@@ -915,9 +913,9 @@ void CEInitializePhysics::PushArguments(lua_State *l)
 ///////////////
 
 CEPostPhysicsSimulate::CEPostPhysicsSimulate() {}
-void CEPostPhysicsSimulate::PushArguments(lua_State *l) {}
+void CEPostPhysicsSimulate::PushArguments(lua::State *l) {}
 uint32_t CEPostPhysicsSimulate::GetReturnCount() { return 1; }
-void CEPostPhysicsSimulate::HandleReturnValues(lua_State *l)
+void CEPostPhysicsSimulate::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -1))
 		keepAwake = Lua::CheckBool(l, -1);

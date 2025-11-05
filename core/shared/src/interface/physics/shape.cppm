@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:physics.shape;
 
@@ -61,7 +60,7 @@ export {
 			float GetDensity() const;
 			virtual void SetMass(float mass) = 0;
 			virtual float GetMass() const = 0;
-			virtual void InitializeLuaObject(lua_State *lua) override;
+			virtual void InitializeLuaObject(lua::State *lua) override;
 
 			void *userData = nullptr;
 		  protected:
@@ -75,7 +74,7 @@ export {
 			virtual ~IConvexShape() override;
 
 			virtual void SetLocalScaling(const Vector3 &scale) = 0;
-			virtual void InitializeLuaObject(lua_State *lua) override;
+			virtual void InitializeLuaObject(lua::State *lua) override;
 
 			void SetCollisionMesh(pragma::physics::CollisionMesh &collisionMesh);
 			void SetCollisionMesh();
@@ -93,7 +92,7 @@ export {
 		class DLLNETWORK ICapsuleShape : virtual public IConvexShape {
 		  public:
 			virtual ~ICapsuleShape() override;
-			virtual void InitializeLuaObject(lua_State *lua) override;
+			virtual void InitializeLuaObject(lua::State *lua) override;
 
 			virtual float GetRadius() const = 0;
 			virtual float GetHalfHeight() const = 0;
@@ -104,7 +103,7 @@ export {
 		class DLLNETWORK IBoxShape : virtual public IConvexShape {
 		  public:
 			virtual ~IBoxShape() override;
-			virtual void InitializeLuaObject(lua_State *lua) override;
+			virtual void InitializeLuaObject(lua::State *lua) override;
 
 			virtual Vector3 GetHalfExtents() const = 0;
 		  protected:
@@ -113,7 +112,7 @@ export {
 
 		class DLLNETWORK IConvexHullShape : virtual public IConvexShape {
 		  public:
-			virtual void InitializeLuaObject(lua_State *lua) override;
+			virtual void InitializeLuaObject(lua::State *lua) override;
 			virtual bool IsConvexHull() const override;
 			virtual IConvexHullShape *GetConvexHullShape() override;
 			virtual void AddPoint(const Vector3 &point) = 0;
@@ -134,7 +133,7 @@ export {
 				std::shared_ptr<pragma::physics::IShape> shape;
 				umath::Transform localPose;
 			};
-			virtual void InitializeLuaObject(lua_State *lua) override;
+			virtual void InitializeLuaObject(lua::State *lua) override;
 			void AddShape(pragma::physics::IShape &shape, const umath::Transform &localPose = {});
 			virtual void GetAABB(Vector3 &min, Vector3 &max) const override;
 
@@ -154,7 +153,7 @@ export {
 
 		class DLLNETWORK IHeightfield : virtual public IShape {
 		  public:
-			virtual void InitializeLuaObject(lua_State *lua) override;
+			virtual void InitializeLuaObject(lua::State *lua) override;
 			virtual bool IsHeightfield() const override;
 			virtual IHeightfield *GetHeightfield() override;
 			virtual float GetHeight(uint32_t x, uint32_t y) const = 0;
@@ -175,7 +174,7 @@ export {
 
 		class DLLNETWORK ITriangleShape : virtual public IShape {
 		  public:
-			virtual void InitializeLuaObject(lua_State *lua) override;
+			virtual void InitializeLuaObject(lua::State *lua) override;
 			virtual bool IsTriangleShape() const override;
 			virtual ITriangleShape *GetTriangleShape() override;
 

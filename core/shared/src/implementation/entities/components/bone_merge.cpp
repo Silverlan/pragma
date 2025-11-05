@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -44,7 +43,7 @@ void BoneMergeComponent::Initialize()
 	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { SetTargetDirty(); });
 	BindEventUnhandled(baseAnimatedComponent::EVENT_POST_ANIMATION_UPDATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { MergeBonePoses(); });
 }
-void BoneMergeComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void BoneMergeComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void BoneMergeComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();

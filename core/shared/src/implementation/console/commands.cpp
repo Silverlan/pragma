@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -11,14 +10,14 @@ module pragma.shared;
 import :console.commands;
 import :console.output;
 
-void pragma::console::commands::lua_run(lua_State *l, const std::string &chunkName, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float)
+void pragma::console::commands::lua_run(lua::State *l, const std::string &chunkName, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float)
 {
 	std::string lua = argv[0];
 	for(auto i = 1; i < argv.size(); i++) {
 		lua += " ";
 		lua += argv[i];
 	}
-	pragma::scripting::lua::run_string(l, lua, chunkName);
+	pragma::scripting::lua_core::run_string(l, lua, chunkName);
 }
 
 void pragma::console::commands::lua_run(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float)
@@ -52,10 +51,10 @@ void pragma::console::commands::lua_exec(NetworkState *state, pragma::BasePlayer
 	}
 
 	auto fname = argv.at(0);
-	auto result = pragma::scripting::lua::include(state->GetLuaState(), fname, pragma::scripting::lua::IncludeFlags::AddToCache);
+	auto result = pragma::scripting::lua_core::include(state->GetLuaState(), fname, pragma::scripting::lua_core::IncludeFlags::AddToCache);
 	Lua::Pop(state->GetLuaState(), result.numResults);
 	if(result.statusCode != Lua::StatusCode::Ok)
-		pragma::scripting::lua::submit_error(state->GetLuaState(), result.errorMessage);
+		pragma::scripting::lua_core::submit_error(state->GetLuaState(), result.errorMessage);
 }
 void pragma::console::commands::lua_exec_autocomplete(const std::string &arg, std::vector<std::string> &autoCompleteOptions)
 {

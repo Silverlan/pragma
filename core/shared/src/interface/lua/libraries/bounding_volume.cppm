@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.shared:scripting.lua.libraries.bounding_volume;
 
@@ -11,6 +10,6 @@ export import :scripting.lua.api;
 export import pragma.math;
 
 export namespace Lua::boundingvolume {
-	DLLNETWORK luabind::mult<Vector3, Vector3> GetRotatedAABB(lua_State *l, const Vector3 &min, const Vector3 &max, const Mat3 &rot);
-	DLLNETWORK luabind::mult<Vector3, Vector3> GetRotatedAABB(lua_State *l, const Vector3 &min, const Vector3 &max, const Quat &rot);
+	DLLNETWORK luabind::mult<Vector3, Vector3> GetRotatedAABB(lua::State *l, const Vector3 &min, const Vector3 &max, const Mat3 &rot);
+	DLLNETWORK luabind::mult<Vector3, Vector3> GetRotatedAABB(lua::State *l, const Vector3 &min, const Vector3 &max, const Quat &rot);
 };

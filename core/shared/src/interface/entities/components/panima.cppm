@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
 #undef GetCurrentTime
 
-#include "pragma/lua/core.hpp"
 
 
 
@@ -96,7 +95,7 @@ class DLLNETWORK PanimaComponent final : public BaseEntityComponent {
 			bool GetRawAnimatedPropertyValue(panima::AnimationManager &manager, const std::string &propName, udm::Type type, void *outValue) const;
 			bool GetRawPropertyValue(panima::AnimationManager &manager, const std::string &propName, udm::Type type, void *outValue) const;
 
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 			virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 			using BaseEntityComponent::Load;
 		protected:
@@ -116,27 +115,27 @@ class DLLNETWORK PanimaComponent final : public BaseEntityComponent {
 
 		struct DLLNETWORK CEAnim2OnAnimationComplete : public ComponentEvent {
 			CEAnim2OnAnimationComplete(const panima::AnimationSet &set, int32_t animation, pragma::Activity activity);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			const panima::AnimationSet &set;
 			int32_t animation;
 			pragma::Activity activity;
 		};
 		struct DLLNETWORK CEAnim2HandleAnimationEvent : public ComponentEvent {
 			CEAnim2HandleAnimationEvent(const pragma::AnimationEvent &animationEvent);
-			virtual void PushArguments(lua_State *l) override;
-			void PushArgumentVariadic(lua_State *l);
+			virtual void PushArguments(lua::State *l) override;
+			void PushArgumentVariadic(lua::State *l);
 			const pragma::AnimationEvent &animationEvent;
 		};
 		struct DLLNETWORK CEAnim2OnPlayAnimation : public ComponentEvent {
 			CEAnim2OnPlayAnimation(const panima::AnimationSet &set, panima::AnimationId animation, panima::PlaybackFlags flags);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			const panima::AnimationSet &set;
 			panima::AnimationId animation;
 			panima::PlaybackFlags flags;
 		};
 		struct DLLNETWORK CEAnim2OnAnimationStart : public ComponentEvent {
 			CEAnim2OnAnimationStart(const panima::AnimationSet &set, int32_t animation, pragma::Activity activity, panima::PlaybackFlags flags);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			const panima::AnimationSet &set;
 			int32_t animation;
 			pragma::Activity activity;
@@ -144,23 +143,23 @@ class DLLNETWORK PanimaComponent final : public BaseEntityComponent {
 		};
 		struct DLLNETWORK CEAnim2TranslateAnimation : public ComponentEvent {
 			CEAnim2TranslateAnimation(const panima::AnimationSet &set, panima::AnimationId &animation, panima::PlaybackFlags &flags);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			virtual uint32_t GetReturnCount() override;
-			virtual void HandleReturnValues(lua_State *l) override;
+			virtual void HandleReturnValues(lua::State *l) override;
 			const panima::AnimationSet &set;
 			panima::AnimationId &animation;
 			panima::PlaybackFlags &flags;
 		};
 		struct DLLNETWORK CEAnim2MaintainAnimations : public ComponentEvent {
 			CEAnim2MaintainAnimations(double deltaTime);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			double deltaTime;
 		};
 		struct DLLNETWORK CEAnim2InitializeChannelValueSubmitter : public ComponentEvent {
 			CEAnim2InitializeChannelValueSubmitter(util::Path &path);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			virtual uint32_t GetReturnCount() override;
-			virtual void HandleReturnValues(lua_State *l) override;
+			virtual void HandleReturnValues(lua::State *l) override;
 			util::Path &path;
 			panima::ChannelValueSubmitter submitter {};
 		};

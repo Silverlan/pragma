@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/model/simplify.h"
-#include <sharedutils/magic_enum.hpp>
+#include "model/simplify.h"
 
 module pragma.shared;
 

@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 
@@ -66,7 +65,7 @@ export {
 			bool IntersectionTestKDop(const std::vector<umath::Plane> &planes) const;
 			bool IntersectionTestKDop(const std::vector<umath::Plane> &planes, IntersectionInfo &outIntersectionInfo) const;
 
-			virtual void InitializeLuaObject(lua_State *lua) override;
+			virtual void InitializeLuaObject(lua::State *lua) override;
 		  protected:
 			mutable IntersectionHandler m_intersectionHandler {};
 		};

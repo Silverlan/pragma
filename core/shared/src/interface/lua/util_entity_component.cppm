@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.shared:scripting.lua.util_entity_component;
 
 export import :entities.components.base;
 
 export namespace pragma {
-	namespace lua {
+	namespace LuaCore {
 		template<typename... Types>
 		luabind::class_<Types...> create_entity_component_class(const char *name)
 		{

@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -13,13 +12,13 @@ import :entities.components.events.event;
 using namespace pragma;
 
 CEOnEntityComponentAdded::CEOnEntityComponentAdded(BaseEntityComponent &component) : component(component) {}
-void CEOnEntityComponentAdded::PushArguments(lua_State *l) { component.PushLuaObject(l); }
+void CEOnEntityComponentAdded::PushArguments(lua::State *l) { component.PushLuaObject(l); }
 
 /////////////
 
 CEOnMembersChanged::CEOnMembersChanged(BaseEntityComponent &component) : component(component) {}
-void CEOnMembersChanged::PushArguments(lua_State *l) { component.PushLuaObject(l); }
+void CEOnMembersChanged::PushArguments(lua::State *l) { component.PushLuaObject(l); }
 
 /////////////
 
-void CEGenericComponentEvent::PushArguments(lua_State *l) {}
+void CEGenericComponentEvent::PushArguments(lua::State *l) {}

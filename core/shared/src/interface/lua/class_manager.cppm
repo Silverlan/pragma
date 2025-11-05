@@ -2,18 +2,17 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 #undef RegisterClass
 
 
 export module pragma.shared:scripting.lua.class_manager;
 
-export import luabind;
+export import pragma.lua;
 export import std;
 
-export namespace pragma::lua {
+export namespace pragma::LuaCore {
 	class DLLNETWORK ClassManager {
 	  public:
 		struct DLLNETWORK ClassRef {
@@ -28,14 +27,14 @@ export namespace pragma::lua {
 			std::string className;
 		};
 
-		ClassManager(lua_State &l);
+		ClassManager(lua::State &l);
 		void RegisterClass(const std::string &className, luabind::object oClass, luabind::object regFc);
 		bool IsClassRegistered(const ClassRef &classRef) const;
 		bool IsClassMethodDefined(const ClassRef &classRef, const std::string &methodName) const;
 		ClassInfo *FindClassInfo(const ClassRef &classRef);
 		const ClassInfo *FindClassInfo(const ClassRef &classRef) const;
 	  private:
-		lua_State &m_luaState;
+		lua::State &m_luaState;
 		std::vector<ClassInfo> m_classes = {};
 		std::unordered_map<std::string, size_t> m_classNameToClassIndex = {};
 	};

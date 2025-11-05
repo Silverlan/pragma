@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.shared:scripting.lua.entity_component_event;
 
@@ -13,5 +12,5 @@ export import std;
 
 export struct DLLNETWORK LuaComponentEvent : public pragma::ComponentEvent {
 	std::vector<luabind::object> arguments;
-	virtual void PushArguments(lua_State *l) override;
+	virtual void PushArguments(lua::State *l) override;
 };

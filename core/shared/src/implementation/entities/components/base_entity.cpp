@@ -3,11 +3,8 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/logging.hpp"
-#include <sharedutils/magic_enum.hpp>
+#include "definitions.hpp"
 #include <cassert>
 
 module pragma.shared;
@@ -25,7 +22,7 @@ DLLNETWORK std::ostream &pragma::operator<<(std::ostream &os, const pragma::Base
 	if(!info)
 		os << "NULL";
 	else
-		os << info->name << "][" << info->id << "][" << magic_enum::flags::enum_name(info->flags);
+		os << info->name << "][" << info->id << "][" << magic_enum::enum_flags_name(info->flags);
 	os << "]";
 	return os;
 }
@@ -185,7 +182,7 @@ void BaseEntityComponent::OnMembersChanged()
 	}
 }
 void BaseEntityComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
-void BaseEntityComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts) {}
+void BaseEntityComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts) {}
 static umath::ScaledTransform get_entity_pose(const pragma::BaseEntityComponent &component) { return component.GetEntity().GetPose(); }
 template<typename TValue>
 TValue get_identity_value()

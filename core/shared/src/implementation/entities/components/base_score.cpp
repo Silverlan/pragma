@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -63,4 +62,4 @@ void BaseScoreComponent::SubtractScore(Score score) { SetScore(GetScore() - scor
 /////////////////
 
 CEOnScoreChanged::CEOnScoreChanged(BaseScoreComponent::Score score) : score {score} {}
-void CEOnScoreChanged::PushArguments(lua_State *l) { Lua::PushInt(l, score); }
+void CEOnScoreChanged::PushArguments(lua::State *l) { Lua::PushInt(l, score); }

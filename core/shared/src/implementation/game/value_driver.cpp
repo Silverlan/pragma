@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/logging.hpp"
-#include "pragma/lua/core.hpp"
-#include <sharedutils/magic_enum.hpp>
 
 module pragma.shared;
 
@@ -14,7 +11,7 @@ import :game.value_driver;
 
 using namespace pragma;
 
-pragma::ValueDriverDescriptor::ValueDriverDescriptor(lua_State *l, std::string expression, std::unordered_map<std::string, std::string> variables, std::unordered_map<std::string, udm::PProperty> constants)
+pragma::ValueDriverDescriptor::ValueDriverDescriptor(lua::State *l, std::string expression, std::unordered_map<std::string, std::string> variables, std::unordered_map<std::string, udm::PProperty> constants)
     : m_luaState {l}, m_expression {std::move(expression)}, m_variables {std::move(variables)}, m_constants {std::move(constants)}
 {
 }
@@ -33,7 +30,7 @@ void pragma::ValueDriverDescriptor::RebuildLuaExpression() const
 
 	auto *l = m_luaState;
 	std::string luaStr = "return function(" + argList + ") " + m_expression + " end";
-	auto r = pragma::scripting::lua::run_string(l, luaStr, "value_driver", 1); /* 1 */
+	auto r = pragma::scripting::lua_core::run_string(l, luaStr, "value_driver", 1); /* 1 */
 	if(r == Lua::StatusCode::Ok) {
 		luabind::object oFunc {luabind::from_stack(l, -1)};
 		m_luaExpression = oFunc;
@@ -222,7 +219,7 @@ pragma::ValueDriver::Result pragma::ValueDriver::Apply(pragma::ecs::BaseEntity &
 		Lua::Pop(l, numPushed);
 		return Result::ErrorInvalidParameterReference;
 	}
-	auto c = pragma::scripting::lua::protected_call(l, numPushed - 1, 1);
+	auto c = pragma::scripting::lua_core::protected_call(l, numPushed - 1, 1);
 	if(c != Lua::StatusCode::Ok) {
 		spdlog::trace("Failed to execute value driver (Expr: '{}') for member '{}' of component {} of driver entity '{}': Failed to execute expression!", expression, m_memberReference.GetMemberName(), m_componentId, ent.ToString());
 		return Result::ErrorExpressionExecutionFailed;

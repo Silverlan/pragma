@@ -4,10 +4,8 @@ module;
 
 
 
-#include "pragma/lua/core.hpp"
 
-#include "pragma/networkdefinitions.h"
-#include "sharedutils/magic_enum.hpp"
+#include "definitions.hpp"
 #include <cassert>
 
 module pragma.shared;
@@ -194,7 +192,7 @@ CvarCallback::CvarCallback(LuaFunction fc) : CvarCallback {}
 				auto prevVal = *static_cast<const T *>(poldVal);
 				auto &newVal = *static_cast<const T *>(pnewVal);
 				game->ProtectedLuaCall(
-				  [&prevVal, &newVal, &fc](lua_State *l) {
+				  [&prevVal, &newVal, &fc](lua::State *l) {
 					  fc.GetLuaObject().push(l);
 					  Lua::Push(l, prevVal);
 					  Lua::Push(l, newVal);

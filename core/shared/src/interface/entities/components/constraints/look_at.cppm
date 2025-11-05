@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:entities.components.constraints.look_at;
 
@@ -25,7 +24,7 @@ export namespace pragma {
 		void SetUpTarget(const pragma::EntityUComponentMemberRef &upTarget);
 		const pragma::EntityUComponentMemberRef &GetUpTarget() const;
 
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 	  protected:
 		void ApplyConstraint();
 		static std::optional<pragma::EntityUComponentMemberRef> FindPoseProperty(const pragma::BaseEntityComponent &c, pragma::ComponentMemberIndex basePropIdx);

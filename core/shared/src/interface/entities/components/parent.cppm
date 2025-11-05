@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.parent;
@@ -24,7 +23,7 @@ class DLLNETWORK ParentComponent final : public BaseEntityComponent {
 
 		ParentComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 		virtual void OnRemove() override;
 
 		const std::vector<pragma::ComponentHandle<BaseChildComponent>> &GetChildren() const;
@@ -38,7 +37,7 @@ class DLLNETWORK ParentComponent final : public BaseEntityComponent {
 	};
 	struct DLLNETWORK CEOnChildAdded : public ComponentEvent {
 		CEOnChildAdded(BaseChildComponent &child);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		BaseChildComponent &child;
 	};
 	using CEOnChildRemoved = CEOnChildAdded;

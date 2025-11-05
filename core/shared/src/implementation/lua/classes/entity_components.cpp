@@ -3,11 +3,8 @@
 module;
 
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/logging.hpp"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
-#include "sharedutils/magic_enum.hpp"
 
 module pragma.shared;
 
@@ -18,13 +15,13 @@ namespace Lua {
 	template<typename... Types>
 	static luabind::class_<Types..., pragma::BaseEntityComponent> create_base_entity_component_class(const char *name)
 	{
-		auto def = pragma::lua::create_entity_component_class<Types..., pragma::BaseEntityComponent>(name);
+		auto def = pragma::LuaCore::create_entity_component_class<Types..., pragma::BaseEntityComponent>(name);
 		def.def(luabind::tostring(luabind::self));
 		return def;
 	}
 };
 
-namespace pragma::lua {
+namespace pragma::LuaCore {
 	namespace base_ai_component {
 		static void register_class(luabind::module_ &mod);
 	};
@@ -327,7 +324,7 @@ namespace pragma::lua {
 	};
 	// --template-namespace-declaration-location
 };
-std::optional<Lua::udm_type> pragma::lua::get_member_value(lua_State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo)
+std::optional<Lua::udm_type> pragma::LuaCore::get_member_value(lua::State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo)
 {
 	return pragma::ents::visit_member(memberInfo.type, [&memberInfo, &component, l](auto tag) -> std::optional<Lua::udm_type> {
 		using T = typename decltype(tag)::type;
@@ -344,7 +341,7 @@ std::optional<Lua::udm_type> pragma::lua::get_member_value(lua_State *l, pragma:
 		}
 	});
 }
-bool pragma::lua::set_member_value(lua_State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo, Lua::udm_type value)
+bool pragma::LuaCore::set_member_value(lua::State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo, Lua::udm_type value)
 {
 	return pragma::ents::visit_member(memberInfo.type, [&memberInfo, &component, l, &value](auto tag) -> bool {
 		using T = typename decltype(tag)::type;
@@ -383,21 +380,21 @@ bool pragma::lua::set_member_value(lua_State *l, pragma::BaseEntityComponent &co
 	});
 }
 static_assert(umath::to_integral(pragma::ents::EntityMemberType::VersionIndex) == 0);
-bool pragma::lua::set_member_value(lua_State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo, const pragma::EntityURef &eref)
+bool pragma::LuaCore::set_member_value(lua::State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo, const pragma::EntityURef &eref)
 {
 	if(memberInfo.type != pragma::ents::EntityMemberType::Entity)
 		return false;
 	memberInfo.setterFunction(memberInfo, component, &eref);
 	return true;
 }
-bool pragma::lua::set_member_value(lua_State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo, const pragma::MultiEntityURef &eref)
+bool pragma::LuaCore::set_member_value(lua::State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo, const pragma::MultiEntityURef &eref)
 {
 	if(memberInfo.type != pragma::ents::EntityMemberType::MultiEntity)
 		return false;
 	memberInfo.setterFunction(memberInfo, component, &eref);
 	return true;
 }
-bool pragma::lua::set_member_value(lua_State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo, const pragma::EntityUComponentMemberRef &eref)
+bool pragma::LuaCore::set_member_value(lua::State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo, const pragma::EntityUComponentMemberRef &eref)
 {
 	if(memberInfo.type != pragma::ents::EntityMemberType::ComponentProperty)
 		return false;
@@ -589,7 +586,7 @@ static std::optional<std::pair<T, umath::CoordinateSpace>> convert_pose_to_membe
 }
 
 template<size_t N>
-void log_with_args(const pragma::BaseEntityComponent &component, const char *msg, spdlog::level::level_enum logLevel, lua_State *l, int32_t argOffset)
+void log_with_args(const pragma::BaseEntityComponent &component, const char *msg, spdlog::level::level_enum logLevel, lua::State *l, int32_t argOffset)
 {
 	std::array<std::string, N> args;
 	for(size_t i = 0; i < args.size(); ++i)
@@ -599,12 +596,12 @@ void log_with_args(const pragma::BaseEntityComponent &component, const char *msg
 	std::apply(log, args);
 }
 
-static int log(lua_State *l, spdlog::level::level_enum logLevel)
+static int log(lua::State *l, spdlog::level::level_enum logLevel)
 {
 	auto &component = Lua::Check<pragma::BaseEntityComponent>(l, 1);
 	const char *msg = Lua::CheckString(l, 2);
 	int32_t argOffset = 2;
-	auto n = lua_gettop(l) - argOffset; /* number of arguments */
+	auto n = Lua::GetStackTop(l) - argOffset; /* number of arguments */
 	switch(n) {
 	case 0:
 		component.Log(logLevel, std::string {msg});
@@ -666,7 +663,7 @@ static int log(lua_State *l, spdlog::level::level_enum logLevel)
 	return 0;
 }
 
-static CallbackHandle add_event_callback(lua_State *l, pragma::BaseEntityComponent &hComponent, uint32_t eventId, const Lua::func<void> &function)
+static CallbackHandle add_event_callback(lua::State *l, pragma::BaseEntityComponent &hComponent, uint32_t eventId, const Lua::func<void> &function)
 {
 	auto hCb = hComponent.AddEventCallback(eventId, [l, function](std::reference_wrapper<pragma::ComponentEvent> ev) -> util::EventReply {
 		// We need to create a copy of the lua-state pointer, since the callback can remove itself, which
@@ -677,7 +674,7 @@ static CallbackHandle add_event_callback(lua_State *l, pragma::BaseEntityCompone
 		auto nstack = Lua::GetStackTop(l);
 		auto c = Lua::CallFunction(
 		  l,
-		  [&oCallbackTmp, &ev](lua_State *l) -> Lua::StatusCode {
+		  [&oCallbackTmp, &ev](lua::State *l) -> Lua::StatusCode {
 			  oCallbackTmp.push(l);
 			  ev.get().PushArguments(l);
 			  return Lua::StatusCode::Ok;
@@ -721,11 +718,11 @@ void register_entity_component_transform_methods(luabind::class_<pragma::BaseEnt
 	entityComponentDef.def("ConvertPoseToMemberSpace", &convert_pose_to_member_space<TMemberIdentifier, umath::ScaledTransform>);
 }
 
-void pragma::lua::register_entity_component_classes(lua_State *l, luabind::module_ &mod)
+void pragma::LuaCore::register_entity_component_classes(lua::State *l, luabind::module_ &mod)
 {
-	auto entityComponentDef = pragma::lua::create_entity_component_class<pragma::BaseEntityComponent>("EntityComponent");
+	auto entityComponentDef = pragma::LuaCore::create_entity_component_class<pragma::BaseEntityComponent>("EntityComponent");
 	entityComponentDef.def("BroadcastEvent", static_cast<util::EventReply (pragma::BaseEntityComponent::*)(pragma::ComponentEventId) const>(&pragma::BaseEntityComponent::BroadcastEvent));
-	entityComponentDef.def("BroadcastEvent", static_cast<util::EventReply (*)(lua_State *, pragma::BaseEntityComponent &, uint32_t, const luabind::tableT<void> &)>([](lua_State *l, pragma::BaseEntityComponent &hComponent, uint32_t eventId, const luabind::tableT<void> &eventArgs) {
+	entityComponentDef.def("BroadcastEvent", static_cast<util::EventReply (*)(lua::State *, pragma::BaseEntityComponent &, uint32_t, const luabind::tableT<void> &)>([](lua::State *l, pragma::BaseEntityComponent &hComponent, uint32_t eventId, const luabind::tableT<void> &eventArgs) {
 		int32_t t = 3;
 		if(pragma::get_engine()->GetNetworkState(l)->GetGameState()->BroadcastEntityEvent(hComponent, eventId, t) == false) {
 			LuaComponentEvent luaEvent {};
@@ -744,7 +741,7 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 		return util::EventReply::Handled;
 	}));
 	entityComponentDef.def("InvokeEventCallbacks", static_cast<util::EventReply (pragma::BaseEntityComponent::*)(pragma::ComponentEventId) const>(&pragma::BaseEntityComponent::InvokeEventCallbacks));
-	entityComponentDef.def("InvokeEventCallbacks", static_cast<util::EventReply (*)(lua_State *, pragma::BaseEntityComponent &, uint32_t, const luabind::tableT<void> &)>([](lua_State *l, pragma::BaseEntityComponent &hComponent, uint32_t eventId, const luabind::tableT<void> &eventArgs) {
+	entityComponentDef.def("InvokeEventCallbacks", static_cast<util::EventReply (*)(lua::State *, pragma::BaseEntityComponent &, uint32_t, const luabind::tableT<void> &)>([](lua::State *l, pragma::BaseEntityComponent &hComponent, uint32_t eventId, const luabind::tableT<void> &eventArgs) {
 		int32_t t = 3;
 
 		LuaComponentEvent luaEvent {};
@@ -788,7 +785,7 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 		  return cMetaData->space;
 	  });
 	entityComponentDef.def(
-	  "GetMemberIndices", +[](lua_State *l, pragma::BaseEntityComponent &component) -> std::vector<pragma::ComponentMemberIndex> {
+	  "GetMemberIndices", +[](lua::State *l, pragma::BaseEntityComponent &component) -> std::vector<pragma::ComponentMemberIndex> {
 		  std::vector<pragma::ComponentMemberIndex> memberIndices;
 		  auto numStaticMembers = component.GetStaticMemberCount();
 		  memberIndices.reserve(numStaticMembers);
@@ -821,61 +818,61 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	  });
 	entityComponentDef.def("GetMemberValue", &get_member_value);
 	entityComponentDef.def(
-	  "GetMemberValue", +[](lua_State *l, pragma::BaseEntityComponent &component, const std::string &memberName) -> std::optional<Lua::udm_type> {
+	  "GetMemberValue", +[](lua::State *l, pragma::BaseEntityComponent &component, const std::string &memberName) -> std::optional<Lua::udm_type> {
 		  auto *info = component.FindMemberInfo(memberName);
 		  if(!info)
 			  return {};
 		  return get_member_value(l, component, *info);
 	  });
 	entityComponentDef.def(
-	  "GetMemberValue", +[](lua_State *l, pragma::BaseEntityComponent &component, uint32_t memberIndex) -> std::optional<Lua::udm_type> {
+	  "GetMemberValue", +[](lua::State *l, pragma::BaseEntityComponent &component, uint32_t memberIndex) -> std::optional<Lua::udm_type> {
 		  auto *info = component.GetMemberInfo(memberIndex);
 		  if(!info)
 			  return {};
 		  return get_member_value(l, component, *info);
 	  });
-	entityComponentDef.def("SetMemberValue", static_cast<bool (*)(lua_State *, pragma::BaseEntityComponent &, const pragma::ComponentMemberInfo &, Lua::udm_type)>(&set_member_value));
-	entityComponentDef.def("SetMemberValue", static_cast<bool (*)(lua_State *, pragma::BaseEntityComponent &, const pragma::ComponentMemberInfo &, const pragma::EntityURef &)>(&set_member_value));
-	entityComponentDef.def("SetMemberValue", static_cast<bool (*)(lua_State *, pragma::BaseEntityComponent &, const pragma::ComponentMemberInfo &, const pragma::MultiEntityURef &)>(&set_member_value));
-	entityComponentDef.def("SetMemberValue", static_cast<bool (*)(lua_State *, pragma::BaseEntityComponent &, const pragma::ComponentMemberInfo &, const pragma::EntityUComponentMemberRef &)>(&set_member_value));
+	entityComponentDef.def("SetMemberValue", static_cast<bool (*)(lua::State *, pragma::BaseEntityComponent &, const pragma::ComponentMemberInfo &, Lua::udm_type)>(&set_member_value));
+	entityComponentDef.def("SetMemberValue", static_cast<bool (*)(lua::State *, pragma::BaseEntityComponent &, const pragma::ComponentMemberInfo &, const pragma::EntityURef &)>(&set_member_value));
+	entityComponentDef.def("SetMemberValue", static_cast<bool (*)(lua::State *, pragma::BaseEntityComponent &, const pragma::ComponentMemberInfo &, const pragma::MultiEntityURef &)>(&set_member_value));
+	entityComponentDef.def("SetMemberValue", static_cast<bool (*)(lua::State *, pragma::BaseEntityComponent &, const pragma::ComponentMemberInfo &, const pragma::EntityUComponentMemberRef &)>(&set_member_value));
 	entityComponentDef.def(
-	  "SetMemberValue", +[](lua_State *l, pragma::BaseEntityComponent &component, uint32_t memberIndex, Lua::udm_type value) -> bool {
+	  "SetMemberValue", +[](lua::State *l, pragma::BaseEntityComponent &component, uint32_t memberIndex, Lua::udm_type value) -> bool {
 		  auto *info = component.GetMemberInfo(memberIndex);
 		  if(!info)
 			  return false;
-		  return pragma::lua::set_member_value(l, component, *info, value);
+		  return pragma::LuaCore::set_member_value(l, component, *info, value);
 	  });
 	entityComponentDef.def(
-	  "SetMemberValue", +[](lua_State *l, pragma::BaseEntityComponent &component, const std::string &memberName, Lua::udm_type value) -> bool {
+	  "SetMemberValue", +[](lua::State *l, pragma::BaseEntityComponent &component, const std::string &memberName, Lua::udm_type value) -> bool {
 		  auto *info = component.FindMemberInfo(memberName);
 		  if(!info)
 			  return false;
-		  return pragma::lua::set_member_value(l, component, *info, value);
+		  return pragma::LuaCore::set_member_value(l, component, *info, value);
 	  });
 	entityComponentDef.def(
-	  "SetMemberValue", +[](lua_State *l, pragma::BaseEntityComponent &component, const std::string &memberName, const pragma::EntityURef &eref) -> bool {
+	  "SetMemberValue", +[](lua::State *l, pragma::BaseEntityComponent &component, const std::string &memberName, const pragma::EntityURef &eref) -> bool {
 		  auto *info = component.FindMemberInfo(memberName);
 		  if(!info)
 			  return false;
-		  return pragma::lua::set_member_value(l, component, *info, eref);
+		  return pragma::LuaCore::set_member_value(l, component, *info, eref);
 	  });
 	entityComponentDef.def(
-	  "SetMemberValue", +[](lua_State *l, pragma::BaseEntityComponent &component, const std::string &memberName, const pragma::MultiEntityURef &eref) -> bool {
+	  "SetMemberValue", +[](lua::State *l, pragma::BaseEntityComponent &component, const std::string &memberName, const pragma::MultiEntityURef &eref) -> bool {
 		  auto *info = component.FindMemberInfo(memberName);
 		  if(!info)
 			  return false;
-		  return pragma::lua::set_member_value(l, component, *info, eref);
+		  return pragma::LuaCore::set_member_value(l, component, *info, eref);
 	  });
 	entityComponentDef.def(
-	  "SetMemberValue", +[](lua_State *l, pragma::BaseEntityComponent &component, const std::string &memberName, const pragma::EntityUComponentMemberRef &eref) -> bool {
+	  "SetMemberValue", +[](lua::State *l, pragma::BaseEntityComponent &component, const std::string &memberName, const pragma::EntityUComponentMemberRef &eref) -> bool {
 		  auto *info = component.FindMemberInfo(memberName);
 		  if(!info)
 			  return false;
-		  return pragma::lua::set_member_value(l, component, *info, eref);
+		  return pragma::LuaCore::set_member_value(l, component, *info, eref);
 	  });
-	entityComponentDef.def("IsValid", static_cast<bool (*)(lua_State *, pragma::BaseEntityComponent *)>([](lua_State *l, pragma::BaseEntityComponent *hComponent) { return hComponent != nullptr; }));
+	entityComponentDef.def("IsValid", static_cast<bool (*)(lua::State *, pragma::BaseEntityComponent *)>([](lua::State *l, pragma::BaseEntityComponent *hComponent) { return hComponent != nullptr; }));
 	entityComponentDef.def(
-	  "RegisterNetEvent", +[](lua_State *l, pragma::BaseEntityComponent &hComponent, const std::string &eventName) {
+	  "RegisterNetEvent", +[](lua::State *l, pragma::BaseEntityComponent &hComponent, const std::string &eventName) {
 		  auto id = hComponent.SetupNetEvent(eventName);
 		  auto *nw = pragma::get_engine()->GetNetworkState(l);
 		  auto *game = nw->GetGameState();
@@ -886,7 +883,7 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 			    Con::endl);
 		  return id;
 	  });
-	entityComponentDef.def("GetComponentName", static_cast<std::string (*)(lua_State *, pragma::BaseEntityComponent &)>([](lua_State *l, pragma::BaseEntityComponent &component) {
+	entityComponentDef.def("GetComponentName", static_cast<std::string (*)(lua::State *, pragma::BaseEntityComponent &)>([](lua::State *l, pragma::BaseEntityComponent &component) {
 		auto *nw = pragma::get_engine()->GetNetworkState(l);
 		auto *game = nw->GetGameState();
 		auto &componentManager = game->GetEntityComponentManager();
@@ -896,7 +893,7 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	entityComponentDef.def("AddEventCallback", &add_event_callback);
 	entityComponentDef.def("AddEventListener", &add_event_callback); // Alias
 	entityComponentDef.def("InjectEvent", static_cast<util::EventReply (pragma::BaseEntityComponent::*)(pragma::ComponentEventId)>(&pragma::BaseEntityComponent::InjectEvent));
-	entityComponentDef.def("InjectEvent", static_cast<void (*)(lua_State *, pragma::BaseEntityComponent &, uint32_t, const luabind::tableT<void> &)>([](lua_State *l, pragma::BaseEntityComponent &hComponent, uint32_t eventId, const luabind::tableT<void> &eventArgs) {
+	entityComponentDef.def("InjectEvent", static_cast<void (*)(lua::State *, pragma::BaseEntityComponent &, uint32_t, const luabind::tableT<void> &)>([](lua::State *l, pragma::BaseEntityComponent &hComponent, uint32_t eventId, const luabind::tableT<void> &eventArgs) {
 		int32_t t = 3;
 		if(pragma::get_engine()->GetNetworkState(l)->GetGameState()->InjectEntityEvent(hComponent, eventId, t) == false) {
 			LuaComponentEvent luaEvent {};
@@ -913,7 +910,7 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	}));
 	entityComponentDef.def("Save", &pragma::BaseEntityComponent::Save);
 	entityComponentDef.def("Load", static_cast<void (pragma::BaseEntityComponent::*)(udm::LinkedPropertyWrapperArg)>(&pragma::BaseEntityComponent::Load));
-	entityComponentDef.def("Copy", static_cast<void (*)(lua_State *, pragma::BaseEntityComponent &, pragma::BaseEntityComponent &)>([](lua_State *l, pragma::BaseEntityComponent &hComponent, pragma::BaseEntityComponent &hComponentOther) {
+	entityComponentDef.def("Copy", static_cast<void (*)(lua::State *, pragma::BaseEntityComponent &, pragma::BaseEntityComponent &)>([](lua::State *l, pragma::BaseEntityComponent &hComponent, pragma::BaseEntityComponent &hComponentOther) {
 		if(hComponent.GetComponentId() != hComponentOther.GetComponentId() || &hComponent == &hComponentOther)
 			return;
 		auto el = udm::Property::Create<udm::Element>();
@@ -921,7 +918,7 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 		hComponent.Save(prop);
 		hComponentOther.Load(prop);
 	}));
-	entityComponentDef.def("GetMemberInfos", static_cast<luabind::tableT<pragma::ComponentMemberInfo> (*)(lua_State *, pragma::BaseEntityComponent &)>([](lua_State *l, pragma::BaseEntityComponent &hComponent) -> luabind::tableT<pragma::ComponentMemberInfo> {
+	entityComponentDef.def("GetMemberInfos", static_cast<luabind::tableT<pragma::ComponentMemberInfo> (*)(lua::State *, pragma::BaseEntityComponent &)>([](lua::State *l, pragma::BaseEntityComponent &hComponent) -> luabind::tableT<pragma::ComponentMemberInfo> {
 		auto t = luabind::newtable(l);
 		uint32_t idx = 0;
 		auto *memberInfo = hComponent.GetMemberInfo(idx++);
@@ -971,7 +968,7 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	defBvh.def("DebugDraw", &pragma::BaseBvhComponent::DebugDraw);
 	defBvh.def("DebugDrawBvhTree", &pragma::BaseBvhComponent::DebugDrawBvhTree);
 	defBvh.def(
-	  "FindPrimitiveMeshInfo", +[](lua_State *l, const pragma::BaseBvhComponent &bvhC, size_t primIdx) -> std::optional<std::pair<EntityHandle, std::shared_ptr<pragma::ModelSubMesh>>> {
+	  "FindPrimitiveMeshInfo", +[](lua::State *l, const pragma::BaseBvhComponent &bvhC, size_t primIdx) -> std::optional<std::pair<EntityHandle, std::shared_ptr<pragma::ModelSubMesh>>> {
 		  auto *range = bvhC.FindPrimitiveMeshInfo(primIdx);
 		  if(!range)
 			  return std::optional<std::pair<EntityHandle, std::shared_ptr<pragma::ModelSubMesh>>> {};
@@ -987,7 +984,7 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	defBvh.scope[defBvhMeshIntersectionInfo];*/
 	mod[defBvh];
 
-	auto defStaticBvh = pragma::lua::create_entity_component_class<pragma::BaseStaticBvhCacheComponent, pragma::BaseBvhComponent>("BaseStaticBvhCacheComponent");
+	auto defStaticBvh = pragma::LuaCore::create_entity_component_class<pragma::BaseStaticBvhCacheComponent, pragma::BaseBvhComponent>("BaseStaticBvhCacheComponent");
 	defStaticBvh.def("SetEntityDirty", &pragma::BaseStaticBvhCacheComponent::SetEntityDirty);
 	defStaticBvh.def("AddEntity", &pragma::BaseStaticBvhCacheComponent::AddEntity);
 	defStaticBvh.def("RemoveEntity", +[](pragma::BaseStaticBvhCacheComponent &component, pragma::ecs::BaseEntity &ent) { component.RemoveEntity(ent); });
@@ -1104,7 +1101,7 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	auto defGameComponent = Lua::create_base_entity_component_class<pragma::BaseGameComponent>("BaseGameComponent");
 	mod[defGameComponent];
 }
-void pragma::lua::base_child_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_child_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseChildComponent>("BaseChildComponent");
 	def.add_static_constant("EVENT_ON_PARENT_CHANGED", pragma::baseChildComponent::EVENT_ON_PARENT_CHANGED);
@@ -1115,7 +1112,7 @@ void pragma::lua::base_child_component::register_class(luabind::module_ &mod)
 	def.def("GetParentEntity", static_cast<pragma::ecs::BaseEntity *(pragma::BaseChildComponent::*)()>(&pragma::BaseChildComponent::GetParentEntity));
 	def.def("HasParent", &pragma::BaseChildComponent::HasParent);
 }
-void pragma::lua::base_attachable_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_attachable_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseAttachmentComponent>("BaseAttachmentComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -1134,18 +1131,18 @@ void pragma::lua::base_attachable_component::register_class(luabind::module_ &mo
 	  luabind::discard_result {});
 	//def.def("AttachToAttachment",std::bind(static_cast<AttachmentData*(pragma::BaseAttachmentComponent::*)(BaseEntity*,std::string,const AttachmentInfo&)>(&pragma::BaseAttachmentComponent::AttachToAttachment),std::placeholders::_1,std::placeholders::_2,AttachmentInfo{}));
 	def.def("AttachToBone",
-	  static_cast<void (*)(lua_State *, pragma::BaseAttachmentComponent &, pragma::ecs::BaseEntity &, std::string, AttachmentInfo &)>([](lua_State *l, pragma::BaseAttachmentComponent &hEnt, pragma::ecs::BaseEntity &parent, std::string bone, AttachmentInfo &attInfo) { hEnt.AttachToBone(&parent, bone, attInfo); }),
+	  static_cast<void (*)(lua::State *, pragma::BaseAttachmentComponent &, pragma::ecs::BaseEntity &, std::string, AttachmentInfo &)>([](lua::State *l, pragma::BaseAttachmentComponent &hEnt, pragma::ecs::BaseEntity &parent, std::string bone, AttachmentInfo &attInfo) { hEnt.AttachToBone(&parent, bone, attInfo); }),
 	  luabind::discard_result {});
-	def.def("AttachToBone", static_cast<void (*)(lua_State *, pragma::BaseAttachmentComponent &, pragma::ecs::BaseEntity &, std::string)>([](lua_State *l, pragma::BaseAttachmentComponent &hEnt, pragma::ecs::BaseEntity &parent, std::string bone) { hEnt.AttachToBone(&parent, bone); }), luabind::discard_result {});
+	def.def("AttachToBone", static_cast<void (*)(lua::State *, pragma::BaseAttachmentComponent &, pragma::ecs::BaseEntity &, std::string)>([](lua::State *l, pragma::BaseAttachmentComponent &hEnt, pragma::ecs::BaseEntity &parent, std::string bone) { hEnt.AttachToBone(&parent, bone); }), luabind::discard_result {});
 	def.def("AttachToBone",
-	  static_cast<void (*)(lua_State *, pragma::BaseAttachmentComponent &, pragma::ecs::BaseEntity &, int, AttachmentInfo &)>([](lua_State *l, pragma::BaseAttachmentComponent &hEnt, pragma::ecs::BaseEntity &parent, int bone, AttachmentInfo &attInfo) { hEnt.AttachToBone(&parent, bone, attInfo); }),
+	  static_cast<void (*)(lua::State *, pragma::BaseAttachmentComponent &, pragma::ecs::BaseEntity &, int, AttachmentInfo &)>([](lua::State *l, pragma::BaseAttachmentComponent &hEnt, pragma::ecs::BaseEntity &parent, int bone, AttachmentInfo &attInfo) { hEnt.AttachToBone(&parent, bone, attInfo); }),
 	  luabind::discard_result {});
-	def.def("AttachToBone", static_cast<void (*)(lua_State *, pragma::BaseAttachmentComponent &, pragma::ecs::BaseEntity &, int)>([](lua_State *l, pragma::BaseAttachmentComponent &hEnt, pragma::ecs::BaseEntity &parent, int bone) { hEnt.AttachToBone(&parent, bone); })), luabind::discard_result {};
+	def.def("AttachToBone", static_cast<void (*)(lua::State *, pragma::BaseAttachmentComponent &, pragma::ecs::BaseEntity &, int)>([](lua::State *l, pragma::BaseAttachmentComponent &hEnt, pragma::ecs::BaseEntity &parent, int bone) { hEnt.AttachToBone(&parent, bone); })), luabind::discard_result {};
 	def.def("GetLocalPose", &pragma::BaseAttachmentComponent::GetLocalPose);
 	def.def("SetLocalPose", &pragma::BaseAttachmentComponent::SetLocalPose);
 	def.def("GetParent", &pragma::BaseAttachmentComponent::GetParent);
 
-	def.def("GetBone", static_cast<luabind::object (*)(lua_State *, pragma::BaseAttachmentComponent &)>([](lua_State *l, pragma::BaseAttachmentComponent &hEnt) -> luabind::object {
+	def.def("GetBone", static_cast<luabind::object (*)(lua::State *, pragma::BaseAttachmentComponent &)>([](lua::State *l, pragma::BaseAttachmentComponent &hEnt) -> luabind::object {
 		auto *data = hEnt.GetAttachmentData();
 		if(data == nullptr)
 			return luabind::object {};
@@ -1156,10 +1153,10 @@ void pragma::lua::base_attachable_component::register_class(luabind::module_ &mo
 
 	auto defAttInfo = luabind::class_<AttachmentInfo>("AttachmentInfo");
 	defAttInfo.def(luabind::constructor<>());
-	defAttInfo.def("SetOffset", static_cast<void (*)(lua_State *, AttachmentInfo &, const Vector3 &)>([](lua_State *l, AttachmentInfo &attInfo, const Vector3 &offset) { attInfo.offset = offset; }));
-	defAttInfo.def("SetOffset", static_cast<void (*)(lua_State *, AttachmentInfo &)>([](lua_State *l, AttachmentInfo &attInfo) { attInfo.offset.reset(); }));
-	defAttInfo.def("SetRotation", static_cast<void (*)(lua_State *, AttachmentInfo &, const Quat &)>([](lua_State *l, AttachmentInfo &attInfo, const Quat &rotation) { attInfo.rotation = rotation; }));
-	defAttInfo.def("SetRotation", static_cast<void (*)(lua_State *, AttachmentInfo &)>([](lua_State *l, AttachmentInfo &attInfo) { attInfo.rotation.reset(); }));
+	defAttInfo.def("SetOffset", static_cast<void (*)(lua::State *, AttachmentInfo &, const Vector3 &)>([](lua::State *l, AttachmentInfo &attInfo, const Vector3 &offset) { attInfo.offset = offset; }));
+	defAttInfo.def("SetOffset", static_cast<void (*)(lua::State *, AttachmentInfo &)>([](lua::State *l, AttachmentInfo &attInfo) { attInfo.offset.reset(); }));
+	defAttInfo.def("SetRotation", static_cast<void (*)(lua::State *, AttachmentInfo &, const Quat &)>([](lua::State *l, AttachmentInfo &attInfo, const Quat &rotation) { attInfo.rotation = rotation; }));
+	defAttInfo.def("SetRotation", static_cast<void (*)(lua::State *, AttachmentInfo &)>([](lua::State *l, AttachmentInfo &attInfo) { attInfo.rotation.reset(); }));
 	defAttInfo.def_readwrite("flags", reinterpret_cast<std::underlying_type_t<decltype(AttachmentInfo::flags)> AttachmentInfo::*>(&AttachmentInfo::flags));
 	def.scope[defAttInfo];
 
@@ -1182,7 +1179,7 @@ namespace pragma {
 
 namespace Lua {
 	DLLNETWORK bool get_bullet_master(pragma::ecs::BaseEntity &ent);
-	DLLNETWORK pragma::AnimationEvent get_animation_event(lua_State *l, int32_t tArgs, uint32_t eventId);
+	DLLNETWORK pragma::AnimationEvent get_animation_event(lua::State *l, int32_t tArgs, uint32_t eventId);
 	namespace Animated {
 		static pragma::animation::BoneId get_bone_id(const pragma::BaseAnimatedComponent &hAnim, uint32_t boneId) { return boneId; }
 		static pragma::animation::BoneId get_bone_id(const pragma::BaseAnimatedComponent &hAnim, const std::string &boneId)
@@ -1329,30 +1326,30 @@ static void register_base_animated_component_bone_methods(luabind::class_<pragma
 		  return true;
 	  });
 }
-void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_animated_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseAnimatedComponent>("BaseAnimatedComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
-	def.def("PlayAnimation", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, int, uint32_t)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim, int anim, uint32_t flags) { hAnim.PlayAnimation(anim, static_cast<pragma::FPlayAnim>(flags)); }));
+	def.def("PlayAnimation", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, int, uint32_t)>([](lua::State *l, pragma::BaseAnimatedComponent &hAnim, int anim, uint32_t flags) { hAnim.PlayAnimation(anim, static_cast<pragma::FPlayAnim>(flags)); }));
 	def.def("PlayAnimation",
-	  static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, std::string, uint32_t)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim, std::string anim, uint32_t flags) { Lua::PushBool(l, hAnim.PlayAnimation(anim, static_cast<pragma::FPlayAnim>(flags))); }));
-	def.def("PlayAnimation", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, int)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim, int anim) { hAnim.PlayAnimation(anim, pragma::FPlayAnim::Default); }));
-	def.def("PlayAnimation", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, std::string)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim, std::string anim) { Lua::PushBool(l, hAnim.PlayAnimation(anim, pragma::FPlayAnim::Default)); }));
+	  static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, std::string, uint32_t)>([](lua::State *l, pragma::BaseAnimatedComponent &hAnim, std::string anim, uint32_t flags) { Lua::PushBool(l, hAnim.PlayAnimation(anim, static_cast<pragma::FPlayAnim>(flags))); }));
+	def.def("PlayAnimation", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, int)>([](lua::State *l, pragma::BaseAnimatedComponent &hAnim, int anim) { hAnim.PlayAnimation(anim, pragma::FPlayAnim::Default); }));
+	def.def("PlayAnimation", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, std::string)>([](lua::State *l, pragma::BaseAnimatedComponent &hAnim, std::string anim) { Lua::PushBool(l, hAnim.PlayAnimation(anim, pragma::FPlayAnim::Default)); }));
 	def.def("GetAnimation", &pragma::BaseAnimatedComponent::GetAnimation);
 	def.def("GetAnimationObject", &pragma::BaseAnimatedComponent::GetAnimationObject, luabind::shared_from_this_policy<0> {});
 	def.def("PlayActivity",
-	  static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, int, uint32_t)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim, int activity, uint32_t flags) { hAnim.PlayActivity(static_cast<pragma::Activity>(activity), static_cast<pragma::FPlayAnim>(flags)); }));
-	def.def("PlayActivity", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, int)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim, int activity) { hAnim.PlayActivity(static_cast<pragma::Activity>(activity), pragma::FPlayAnim::Default); }));
+	  static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, int, uint32_t)>([](lua::State *l, pragma::BaseAnimatedComponent &hAnim, int activity, uint32_t flags) { hAnim.PlayActivity(static_cast<pragma::Activity>(activity), static_cast<pragma::FPlayAnim>(flags)); }));
+	def.def("PlayActivity", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, int)>([](lua::State *l, pragma::BaseAnimatedComponent &hAnim, int activity) { hAnim.PlayActivity(static_cast<pragma::Activity>(activity), pragma::FPlayAnim::Default); }));
 	def.def("GetActivity", &pragma::BaseAnimatedComponent::GetActivity);
 	def.def("ResetPose", &pragma::BaseAnimatedComponent::ResetPose);
-	def.def("PlayLayeredAnimation", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, int, int)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim, int slot, int anim) { hAnim.PlayLayeredAnimation(slot, anim); }));
-	def.def("PlayLayeredAnimation", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, int, std::string)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim, int slot, std::string anim) { hAnim.PlayLayeredAnimation(slot, anim); }));
-	def.def("PlayLayeredActivity", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, int, int)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim, int slot, int activity) { hAnim.PlayLayeredActivity(slot, static_cast<pragma::Activity>(activity)); }));
+	def.def("PlayLayeredAnimation", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, int, int)>([](lua::State *l, pragma::BaseAnimatedComponent &hAnim, int slot, int anim) { hAnim.PlayLayeredAnimation(slot, anim); }));
+	def.def("PlayLayeredAnimation", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, int, std::string)>([](lua::State *l, pragma::BaseAnimatedComponent &hAnim, int slot, std::string anim) { hAnim.PlayLayeredAnimation(slot, anim); }));
+	def.def("PlayLayeredActivity", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, int, int)>([](lua::State *l, pragma::BaseAnimatedComponent &hAnim, int slot, int activity) { hAnim.PlayLayeredActivity(slot, static_cast<pragma::Activity>(activity)); }));
 	def.def("StopLayeredAnimation", &pragma::BaseAnimatedComponent::StopLayeredAnimation);
 	def.def("StopLayeredAnimations", &pragma::BaseAnimatedComponent::StopLayeredAnimations);
 	def.def("GetLayeredAnimation", &pragma::BaseAnimatedComponent::GetLayeredAnimation);
 	def.def("GetLayeredActivity", &pragma::BaseAnimatedComponent::GetLayeredActivity);
-	def.def("GetLayeredAnimations", static_cast<luabind::object (*)(lua_State *, pragma::BaseAnimatedComponent &)>([](lua_State *l, pragma::BaseAnimatedComponent &hAnim) -> luabind::object {
+	def.def("GetLayeredAnimations", static_cast<luabind::object (*)(lua::State *, pragma::BaseAnimatedComponent &)>([](lua::State *l, pragma::BaseAnimatedComponent &hAnim) -> luabind::object {
 		auto t = luabind::newtable(l);
 		for(auto &pair : hAnim.GetAnimationSlotInfos())
 			t[pair.first] = pair.second.animation;
@@ -1383,11 +1380,11 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	def.def("SetCycle", &pragma::BaseAnimatedComponent::SetCycle);
 	def.def("GetCycle", &pragma::BaseAnimatedComponent::GetCycle);
 	def.def("AddAnimationEvent",
-	  static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, uint32_t, uint32_t, uint32_t, const luabind::object &)>([](lua_State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t animId, uint32_t frameId, uint32_t eventId, const luabind::object &args) {
+	  static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, uint32_t, uint32_t, uint32_t, const luabind::object &)>([](lua::State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t animId, uint32_t frameId, uint32_t eventId, const luabind::object &args) {
 		  auto ev = Lua::get_animation_event(l, 5, eventId);
 		  hEnt.AddAnimationEvent(animId, frameId, ev);
 	  }));
-	def.def("AddAnimationEvent", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, uint32_t, uint32_t, const luabind::object &)>([](lua_State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t animId, uint32_t frameId, const luabind::object &f) {
+	def.def("AddAnimationEvent", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, uint32_t, uint32_t, const luabind::object &)>([](lua::State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t animId, uint32_t frameId, const luabind::object &f) {
 		if(Lua::IsFunction(l, 4)) {
 			auto hCb = hEnt.AddAnimationEvent(animId, frameId, CallbackHandle {std::shared_ptr<TCallback>(new LuaCallback(f))});
 			Lua::Push<CallbackHandle>(l, hCb);
@@ -1399,11 +1396,11 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		}
 	}));
 	def.def("AddAnimationEvent",
-	  static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, const std::string &, uint32_t, uint32_t, const luabind::object &)>([](lua_State *l, pragma::BaseAnimatedComponent &hEnt, const std::string &anim, uint32_t frameId, uint32_t eventId, const luabind::object &args) {
+	  static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, const std::string &, uint32_t, uint32_t, const luabind::object &)>([](lua::State *l, pragma::BaseAnimatedComponent &hEnt, const std::string &anim, uint32_t frameId, uint32_t eventId, const luabind::object &args) {
 		  auto ev = Lua::get_animation_event(l, 5, eventId);
 		  hEnt.AddAnimationEvent(anim, frameId, ev);
 	  }));
-	def.def("AddAnimationEvent", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, const std::string &, uint32_t, const luabind::object &)>([](lua_State *l, pragma::BaseAnimatedComponent &hEnt, const std::string &anim, uint32_t frameId, const luabind::object &f) {
+	def.def("AddAnimationEvent", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, const std::string &, uint32_t, const luabind::object &)>([](lua::State *l, pragma::BaseAnimatedComponent &hEnt, const std::string &anim, uint32_t frameId, const luabind::object &f) {
 		if(Lua::IsFunction(l, 4)) {
 			auto hCb = hEnt.AddAnimationEvent(anim, frameId, CallbackHandle {std::shared_ptr<TCallback>(new LuaCallback(f))});
 			Lua::Push<CallbackHandle>(l, hCb);
@@ -1414,25 +1411,25 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 			hEnt.AddAnimationEvent(anim, frameId, ev);
 		}
 	}));
-	def.def("ClearAnimationEvents", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &)>([](lua_State *l, pragma::BaseAnimatedComponent &hEnt) { hEnt.ClearAnimationEvents(); }));
-	def.def("ClearAnimationEvents", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, uint32_t)>([](lua_State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t animId) { hEnt.ClearAnimationEvents(animId); }));
-	def.def("ClearAnimationEvents", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, uint32_t, uint32_t)>([](lua_State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t animId, uint32_t frameId) { hEnt.ClearAnimationEvents(animId, frameId); }));
-	def.def("ClearAnimationEvents", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, const std::string &)>([](lua_State *l, pragma::BaseAnimatedComponent &hEnt, const std::string &anim) { hEnt.ClearAnimationEvents(anim); }));
-	def.def("ClearAnimationEvents", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, const std::string &, uint32_t)>([](lua_State *l, pragma::BaseAnimatedComponent &hEnt, const std::string &anim, uint32_t frameId) { hEnt.ClearAnimationEvents(anim, frameId); }));
+	def.def("ClearAnimationEvents", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &)>([](lua::State *l, pragma::BaseAnimatedComponent &hEnt) { hEnt.ClearAnimationEvents(); }));
+	def.def("ClearAnimationEvents", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, uint32_t)>([](lua::State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t animId) { hEnt.ClearAnimationEvents(animId); }));
+	def.def("ClearAnimationEvents", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, uint32_t, uint32_t)>([](lua::State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t animId, uint32_t frameId) { hEnt.ClearAnimationEvents(animId, frameId); }));
+	def.def("ClearAnimationEvents", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, const std::string &)>([](lua::State *l, pragma::BaseAnimatedComponent &hEnt, const std::string &anim) { hEnt.ClearAnimationEvents(anim); }));
+	def.def("ClearAnimationEvents", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, const std::string &, uint32_t)>([](lua::State *l, pragma::BaseAnimatedComponent &hEnt, const std::string &anim, uint32_t frameId) { hEnt.ClearAnimationEvents(anim, frameId); }));
 
-	def.def("InjectAnimationEvent", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, uint32_t)>([](lua_State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t eventId) {
+	def.def("InjectAnimationEvent", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, uint32_t)>([](lua::State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t eventId) {
 		pragma::AnimationEvent ev {};
 		ev.eventID = static_cast<pragma::AnimationEvent::Type>(eventId);
 		hEnt.InjectAnimationEvent(ev);
 	}));
-	def.def("InjectAnimationEvent", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, uint32_t, const luabind::object &)>([](lua_State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t eventId, const luabind::object &args) {
+	def.def("InjectAnimationEvent", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, uint32_t, const luabind::object &)>([](lua::State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t eventId, const luabind::object &args) {
 		auto ev = Lua::get_animation_event(l, 3, eventId);
 		hEnt.InjectAnimationEvent(ev);
 	}));
-	def.def("BindAnimationEvent", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, uint32_t, luabind::object)>([](lua_State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t eventId, luabind::object function) {
+	def.def("BindAnimationEvent", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, uint32_t, luabind::object)>([](lua::State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t eventId, luabind::object function) {
 		Lua::CheckFunction(l, 3);
 		hEnt.BindAnimationEvent(static_cast<pragma::AnimationEvent::Type>(eventId), [l, function](std::reference_wrapper<const pragma::AnimationEvent> ev) {
-			Lua::CallFunction(l, [&function, &ev](lua_State *l) -> Lua::StatusCode {
+			Lua::CallFunction(l, [&function, &ev](lua::State *l) -> Lua::StatusCode {
 				function.push(l);
 				pragma::CEHandleAnimationEvent evData {ev};
 				evData.PushArgumentVariadic(l);
@@ -1441,7 +1438,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		});
 	}));
 	def.def("BindAnimationEvent",
-	  static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, uint32_t, pragma::BaseEntityComponent &, const std::string &)>([](lua_State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t eventId, pragma::BaseEntityComponent &component, const std::string &methodName) {
+	  static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, uint32_t, pragma::BaseEntityComponent &, const std::string &)>([](lua::State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t eventId, pragma::BaseEntityComponent &component, const std::string &methodName) {
 		  auto hComponent = component.GetHandle();
 		  hEnt.BindAnimationEvent(static_cast<pragma::AnimationEvent::Type>(eventId), [hComponent, methodName](std::reference_wrapper<const pragma::AnimationEvent> ev) {
 			  if(hComponent.expired())
@@ -1452,7 +1449,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 				  auto *l = o.interpreter();
 				  auto c = Lua::CallFunction(
 				    l,
-				    [o, &methodName, &ev](lua_State *l) -> Lua::StatusCode {
+				    [o, &methodName, &ev](lua::State *l) -> Lua::StatusCode {
 					    o.push(l);
 					    Lua::PushString(l, methodName);
 					    Lua::GetTableValue(l, -2);
@@ -1470,7 +1467,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 
 	def.def("GetVertexTransformMatrix", static_cast<std::optional<Mat4> (pragma::BaseAnimatedComponent::*)(const pragma::ModelSubMesh &, uint32_t) const>(&pragma::BaseAnimatedComponent::GetVertexTransformMatrix));
 	def.def(
-	  "GetLocalVertexPosition", +[](lua_State *l, pragma::BaseAnimatedComponent &hEnt, pragma::ModelSubMesh &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
+	  "GetLocalVertexPosition", +[](lua::State *l, pragma::BaseAnimatedComponent &hEnt, pragma::ModelSubMesh &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
 		  Vector3 pos, n;
 		  if(vertexId >= subMesh.GetVertexCount())
 			  return {};
@@ -1482,7 +1479,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		  return pos;
 	  });
 	def.def(
-	  "GetVertexPosition", +[](lua_State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t meshGroupId, uint32_t meshId, uint32_t subMeshId, uint32_t vertexId) -> std::optional<Vector3> {
+	  "GetVertexPosition", +[](lua::State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t meshGroupId, uint32_t meshId, uint32_t subMeshId, uint32_t vertexId) -> std::optional<Vector3> {
 		  auto &mdl = hEnt.GetEntity().GetModel();
 		  if(!mdl)
 			  return {};
@@ -1499,7 +1496,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		  return pos;
 	  });
 	def.def("GetVertexPosition",
-	  static_cast<std::optional<Vector3> (*)(lua_State *, pragma::BaseAnimatedComponent &, const std::shared_ptr<pragma::ModelSubMesh> &, uint32_t)>([](lua_State *l, pragma::BaseAnimatedComponent &hEnt, const std::shared_ptr<pragma::ModelSubMesh> &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
+	  static_cast<std::optional<Vector3> (*)(lua::State *, pragma::BaseAnimatedComponent &, const std::shared_ptr<pragma::ModelSubMesh> &, uint32_t)>([](lua::State *l, pragma::BaseAnimatedComponent &hEnt, const std::shared_ptr<pragma::ModelSubMesh> &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
 		  Vector3 pos;
 		  if(vertexId >= subMesh->GetVertexCount())
 			  return {};
@@ -1509,14 +1506,14 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 			  return {};
 		  return pos;
 	  }));
-	def.def("SetBlendController", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, unsigned int, float)>([](lua_State *l, pragma::BaseAnimatedComponent &hEnt, unsigned int controller, float val) { hEnt.SetBlendController(controller, val); }));
-	def.def("SetBlendController", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, std::string, float)>([](lua_State *l, pragma::BaseAnimatedComponent &hEnt, std::string controller, float val) { hEnt.SetBlendController(controller, val); }));
-	def.def("GetBlendController", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, std::string)>([](lua_State *l, pragma::BaseAnimatedComponent &hEnt, std::string controller) { Lua::PushNumber(l, hEnt.GetBlendController(controller)); }));
-	def.def("GetBlendController", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, unsigned int)>([](lua_State *l, pragma::BaseAnimatedComponent &hEnt, unsigned int controller) { Lua::PushNumber(l, hEnt.GetBlendController(controller)); }));
+	def.def("SetBlendController", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, unsigned int, float)>([](lua::State *l, pragma::BaseAnimatedComponent &hEnt, unsigned int controller, float val) { hEnt.SetBlendController(controller, val); }));
+	def.def("SetBlendController", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, std::string, float)>([](lua::State *l, pragma::BaseAnimatedComponent &hEnt, std::string controller, float val) { hEnt.SetBlendController(controller, val); }));
+	def.def("GetBlendController", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, std::string)>([](lua::State *l, pragma::BaseAnimatedComponent &hEnt, std::string controller) { Lua::PushNumber(l, hEnt.GetBlendController(controller)); }));
+	def.def("GetBlendController", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, unsigned int)>([](lua::State *l, pragma::BaseAnimatedComponent &hEnt, unsigned int controller) { Lua::PushNumber(l, hEnt.GetBlendController(controller)); }));
 	def.def("GetBoneCount", &pragma::BaseAnimatedComponent::GetBoneCount);
 	def.def("GetBaseAnimationFlags", &pragma::BaseAnimatedComponent::GetBaseAnimationFlags);
 	def.def("SetBaseAnimationFlags", &pragma::BaseAnimatedComponent::SetBaseAnimationFlags);
-	def.def("GetLayeredAnimationFlags", static_cast<luabind::object (*)(lua_State *, pragma::BaseAnimatedComponent &, uint32_t)>([](lua_State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t layerIdx) -> luabind::object {
+	def.def("GetLayeredAnimationFlags", static_cast<luabind::object (*)(lua::State *, pragma::BaseAnimatedComponent &, uint32_t)>([](lua::State *l, pragma::BaseAnimatedComponent &hEnt, uint32_t layerIdx) -> luabind::object {
 		auto flags = hEnt.GetLayeredAnimationFlags(layerIdx);
 		if(flags.has_value() == false)
 			return {};
@@ -1592,7 +1589,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("FPLAYANIM_LOOP", umath::to_integral(pragma::FPlayAnim::Loop));
 }
 namespace Lua::FuncWater {
-	void CalcLineSurfaceIntersection(lua_State *l, pragma::BaseFuncLiquidComponent &hEnt, const Vector3 &lineOrigin, const Vector3 &lineDir, bool bCull)
+	void CalcLineSurfaceIntersection(lua::State *l, pragma::BaseFuncLiquidComponent &hEnt, const Vector3 &lineOrigin, const Vector3 &lineDir, bool bCull)
 	{
 		double t, u, v;
 		auto r = hEnt.CalcLineSurfaceIntersection(lineOrigin, lineDir, &t, &u, &v, bCull);
@@ -1602,7 +1599,7 @@ namespace Lua::FuncWater {
 		Lua::PushNumber(l, v);
 	}
 };
-void pragma::lua::base_func_water_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_func_water_component::register_class(luabind::module_ &mod)
 {
 	{
 		auto def = Lua::create_base_entity_component_class<pragma::BaseLiquidSurfaceComponent>("BaseLiquidSurfaceComponent");
@@ -1618,12 +1615,12 @@ void pragma::lua::base_func_water_component::register_class(luabind::module_ &mo
 	}
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncLiquidComponent>("BaseFuncLiquidComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
-	def.def("CalcLineSurfaceIntersection", static_cast<void (*)(lua_State *, pragma::BaseFuncLiquidComponent &, const Vector3 &, const Vector3 &)>([](lua_State *l, pragma::BaseFuncLiquidComponent &hEnt, const Vector3 &lineOrigin, const Vector3 &lineDir) {
+	def.def("CalcLineSurfaceIntersection", static_cast<void (*)(lua::State *, pragma::BaseFuncLiquidComponent &, const Vector3 &, const Vector3 &)>([](lua::State *l, pragma::BaseFuncLiquidComponent &hEnt, const Vector3 &lineOrigin, const Vector3 &lineDir) {
 		Lua::FuncWater::CalcLineSurfaceIntersection(l, hEnt, lineOrigin, lineDir, false);
 	}));
 	def.def("CalcLineSurfaceIntersection", &pragma::BaseFuncLiquidComponent::CalcLineSurfaceIntersection);
 }
-void pragma::lua::base_toggle_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_toggle_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseToggleComponent>("BaseToggleComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -1631,7 +1628,7 @@ void pragma::lua::base_toggle_component::register_class(luabind::module_ &mod)
 	def.def("TurnOff", &pragma::BaseToggleComponent::TurnOff);
 	def.def("Toggle", &pragma::BaseToggleComponent::Toggle);
 	def.def("IsTurnedOn", &pragma::BaseToggleComponent::IsTurnedOn);
-	def.def("IsTurnedOff", static_cast<bool (*)(lua_State *, pragma::BaseToggleComponent &)>([](lua_State *l, pragma::BaseToggleComponent &hEnt) { return !hEnt.IsTurnedOn(); }));
+	def.def("IsTurnedOff", static_cast<bool (*)(lua::State *, pragma::BaseToggleComponent &)>([](lua::State *l, pragma::BaseToggleComponent &hEnt) { return !hEnt.IsTurnedOn(); }));
 	def.def("SetTurnedOn", &pragma::BaseToggleComponent::SetTurnedOn);
 	def.def("GetTurnedOnProperty", &pragma::BaseToggleComponent::GetTurnedOnProperty);
 	def.add_static_constant("EVENT_ON_TURN_ON", pragma::baseToggleComponent::EVENT_ON_TURN_ON);
@@ -1639,20 +1636,20 @@ void pragma::lua::base_toggle_component::register_class(luabind::module_ &mod)
 
 	def.add_static_constant("SPAWN_FLAG_START_ON_BIT", umath::to_integral(pragma::BaseToggleComponent::SpawnFlags::StartOn));
 }
-void pragma::lua::base_wheel_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_wheel_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseWheelComponent>("BaseWheelComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	// TODO
 }
-void pragma::lua::base_decal_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_decal_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvDecalComponent>("BaseEnvDecalComponent");
 	def.def("SetSize", &pragma::BaseEnvDecalComponent::SetSize);
 	def.def("GetSize", &pragma::BaseEnvDecalComponent::GetSize);
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
-void pragma::lua::base_env_light_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_light_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvLightComponent>("BaseEnvLightComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -1687,7 +1684,7 @@ void pragma::lua::base_env_light_component::register_class(luabind::module_ &mod
 	def.add_static_constant("LIGHT_FLAG_NONE", umath::to_integral(pragma::BaseEnvLightComponent::LightFlags::None));
 	def.add_static_constant("LIGHT_FLAG_BAKED_LIGHT_SOURCE_BIT", umath::to_integral(pragma::BaseEnvLightComponent::LightFlags::BakedLightSource));
 }
-void pragma::lua::base_env_light_spot_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_light_spot_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvLightSpotComponent>("BaseEnvLightSpotComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -1703,13 +1700,13 @@ void pragma::lua::base_env_light_spot_component::register_class(luabind::module_
 	def.def("CalcConeFalloff", static_cast<float (pragma::BaseEnvLightSpotComponent::*)(const Vector3 &) const>(&pragma::BaseEnvLightSpotComponent::CalcConeFalloff));
 	def.def("CalcDistanceFalloff", &pragma::BaseEnvLightSpotComponent::CalcDistanceFalloff);
 }
-void pragma::lua::base_env_light_point_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_light_point_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvLightPointComponent>("BaseEnvLightPointComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("CalcDistanceFalloff", &pragma::BaseEnvLightPointComponent::CalcDistanceFalloff);
 }
-void pragma::lua::base_env_light_directional_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_light_directional_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvLightDirectionalComponent>("BaseEnvLightDirectionalComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -1717,72 +1714,72 @@ void pragma::lua::base_env_light_directional_component::register_class(luabind::
 	def.def("GetAmbientColorProperty", &pragma::BaseEnvLightDirectionalComponent::GetAmbientColorProperty);
 	def.def("SetAmbientColor", &pragma::BaseEnvLightDirectionalComponent::SetAmbientColor);
 }
-void pragma::lua::base_env_particle_system_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_particle_system_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvParticleSystemComponent>("BaseEnvParticleSystemComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
-void pragma::lua::base_flammable_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_flammable_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFlammableComponent>("BaseFlammableComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("Ignite",
-	  static_cast<void (*)(lua_State *, pragma::BaseFlammableComponent &, float, pragma::ecs::BaseEntity &, pragma::ecs::BaseEntity &)>([](lua_State *l, pragma::BaseFlammableComponent &hEnt, float duration, pragma::ecs::BaseEntity &attacker, pragma::ecs::BaseEntity &inflictor) { hEnt.Ignite(duration, &attacker, &inflictor); }));
-	def.def("Ignite", static_cast<void (*)(lua_State *, pragma::BaseFlammableComponent &, float, pragma::ecs::BaseEntity &)>([](lua_State *l, pragma::BaseFlammableComponent &hEnt, float duration, pragma::ecs::BaseEntity &attacker) { hEnt.Ignite(duration, &attacker); }));
-	def.def("Ignite", static_cast<void (*)(lua_State *, pragma::BaseFlammableComponent &, float)>([](lua_State *l, pragma::BaseFlammableComponent &hEnt, float duration) { hEnt.Ignite(duration); }));
-	def.def("Ignite", static_cast<void (*)(lua_State *, pragma::BaseFlammableComponent &)>([](lua_State *l, pragma::BaseFlammableComponent &hEnt) { hEnt.Ignite(0.f); }));
-	def.def("IsOnFire", static_cast<void (*)(lua_State *, pragma::BaseFlammableComponent &)>([](lua_State *l, pragma::BaseFlammableComponent &hEnt) { Lua::PushBool(l, hEnt.IsOnFire()); }));
-	def.def("IsIgnitable", static_cast<void (*)(lua_State *, pragma::BaseFlammableComponent &)>([](lua_State *l, pragma::BaseFlammableComponent &hEnt) { Lua::PushBool(l, hEnt.IsIgnitable()); }));
-	def.def("Extinguish", static_cast<void (*)(lua_State *, pragma::BaseFlammableComponent &)>([](lua_State *l, pragma::BaseFlammableComponent &hEnt) { hEnt.Extinguish(); }));
-	def.def("SetIgnitable", static_cast<void (*)(lua_State *, pragma::BaseFlammableComponent &, bool)>([](lua_State *l, pragma::BaseFlammableComponent &hEnt, bool b) { hEnt.SetIgnitable(b); }));
+	  static_cast<void (*)(lua::State *, pragma::BaseFlammableComponent &, float, pragma::ecs::BaseEntity &, pragma::ecs::BaseEntity &)>([](lua::State *l, pragma::BaseFlammableComponent &hEnt, float duration, pragma::ecs::BaseEntity &attacker, pragma::ecs::BaseEntity &inflictor) { hEnt.Ignite(duration, &attacker, &inflictor); }));
+	def.def("Ignite", static_cast<void (*)(lua::State *, pragma::BaseFlammableComponent &, float, pragma::ecs::BaseEntity &)>([](lua::State *l, pragma::BaseFlammableComponent &hEnt, float duration, pragma::ecs::BaseEntity &attacker) { hEnt.Ignite(duration, &attacker); }));
+	def.def("Ignite", static_cast<void (*)(lua::State *, pragma::BaseFlammableComponent &, float)>([](lua::State *l, pragma::BaseFlammableComponent &hEnt, float duration) { hEnt.Ignite(duration); }));
+	def.def("Ignite", static_cast<void (*)(lua::State *, pragma::BaseFlammableComponent &)>([](lua::State *l, pragma::BaseFlammableComponent &hEnt) { hEnt.Ignite(0.f); }));
+	def.def("IsOnFire", static_cast<void (*)(lua::State *, pragma::BaseFlammableComponent &)>([](lua::State *l, pragma::BaseFlammableComponent &hEnt) { Lua::PushBool(l, hEnt.IsOnFire()); }));
+	def.def("IsIgnitable", static_cast<void (*)(lua::State *, pragma::BaseFlammableComponent &)>([](lua::State *l, pragma::BaseFlammableComponent &hEnt) { Lua::PushBool(l, hEnt.IsIgnitable()); }));
+	def.def("Extinguish", static_cast<void (*)(lua::State *, pragma::BaseFlammableComponent &)>([](lua::State *l, pragma::BaseFlammableComponent &hEnt) { hEnt.Extinguish(); }));
+	def.def("SetIgnitable", static_cast<void (*)(lua::State *, pragma::BaseFlammableComponent &, bool)>([](lua::State *l, pragma::BaseFlammableComponent &hEnt, bool b) { hEnt.SetIgnitable(b); }));
 	def.def("GetOnFireProperty", &pragma::BaseFlammableComponent::GetOnFireProperty);
 	def.def("GetIgnitableProperty", &pragma::BaseFlammableComponent::GetIgnitableProperty);
 	def.add_static_constant("EVENT_ON_IGNITED", pragma::baseFlammableComponent::EVENT_ON_IGNITED);
 	def.add_static_constant("EVENT_ON_EXTINGUISHED", pragma::baseFlammableComponent::EVENT_ON_EXTINGUISHED);
 }
 
-void pragma::lua::base_health_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_health_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseHealthComponent>("BaseHealthComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
-	def.def("GetHealth", static_cast<void (*)(lua_State *, pragma::BaseHealthComponent &)>([](lua_State *l, pragma::BaseHealthComponent &hEnt) {
+	def.def("GetHealth", static_cast<void (*)(lua::State *, pragma::BaseHealthComponent &)>([](lua::State *l, pragma::BaseHealthComponent &hEnt) {
 		unsigned short health = hEnt.GetHealth();
 		Lua::PushInt(l, health);
 	}));
-	def.def("SetHealth", static_cast<void (*)(lua_State *, pragma::BaseHealthComponent &, unsigned short)>([](lua_State *l, pragma::BaseHealthComponent &hEnt, unsigned short health) { hEnt.SetHealth(health); }));
-	def.def("SetMaxHealth", static_cast<void (*)(lua_State *, pragma::BaseHealthComponent &, uint16_t)>([](lua_State *l, pragma::BaseHealthComponent &hEnt, uint16_t maxHealth) { hEnt.SetMaxHealth(maxHealth); }));
-	def.def("GetMaxHealth", static_cast<void (*)(lua_State *, pragma::BaseHealthComponent &)>([](lua_State *l, pragma::BaseHealthComponent &hEnt) { Lua::PushInt(l, hEnt.GetMaxHealth()); }));
+	def.def("SetHealth", static_cast<void (*)(lua::State *, pragma::BaseHealthComponent &, unsigned short)>([](lua::State *l, pragma::BaseHealthComponent &hEnt, unsigned short health) { hEnt.SetHealth(health); }));
+	def.def("SetMaxHealth", static_cast<void (*)(lua::State *, pragma::BaseHealthComponent &, uint16_t)>([](lua::State *l, pragma::BaseHealthComponent &hEnt, uint16_t maxHealth) { hEnt.SetMaxHealth(maxHealth); }));
+	def.def("GetMaxHealth", static_cast<void (*)(lua::State *, pragma::BaseHealthComponent &)>([](lua::State *l, pragma::BaseHealthComponent &hEnt) { Lua::PushInt(l, hEnt.GetMaxHealth()); }));
 	def.def("GetHealthProperty", &pragma::BaseHealthComponent::GetHealthProperty);
 	def.def("GetMaxHealthProperty", &pragma::BaseHealthComponent::GetMaxHealthProperty);
 	def.add_static_constant("EVENT_ON_TAKEN_DAMAGE", pragma::baseHealthComponent::EVENT_ON_TAKEN_DAMAGE);
 	def.add_static_constant("EVENT_ON_HEALTH_CHANGED", pragma::baseHealthComponent::EVENT_ON_HEALTH_CHANGED);
 }
 
-void pragma::lua::base_name_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_name_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseNameComponent>("BaseNameComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
-	def.def("SetName", static_cast<void (*)(lua_State *, pragma::BaseNameComponent &, std::string)>([](lua_State *l, pragma::BaseNameComponent &hEnt, std::string name) { hEnt.SetName(name); }));
-	def.def("GetName", static_cast<void (*)(lua_State *, pragma::BaseNameComponent &)>([](lua_State *l, pragma::BaseNameComponent &hEnt) { Lua::PushString(l, hEnt.GetName()); }));
+	def.def("SetName", static_cast<void (*)(lua::State *, pragma::BaseNameComponent &, std::string)>([](lua::State *l, pragma::BaseNameComponent &hEnt, std::string name) { hEnt.SetName(name); }));
+	def.def("GetName", static_cast<void (*)(lua::State *, pragma::BaseNameComponent &)>([](lua::State *l, pragma::BaseNameComponent &hEnt) { Lua::PushString(l, hEnt.GetName()); }));
 	def.def("GetNameProperty", &pragma::BaseNameComponent::GetNameProperty);
 }
 
-void pragma::lua::base_networked_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_networked_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseNetworkedComponent>("BaseNetworkedComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 #if NETWORKED_VARS_ENABLED != 0
-	def.def("GetNetVarProperty", static_cast<void (*)(lua_State *, THandle &, uint32_t)>([](lua_State *l, THandle &hEnt, uint32_t id) {
+	def.def("GetNetVarProperty", static_cast<void (*)(lua::State *, THandle &, uint32_t)>([](lua::State *l, THandle &hEnt, uint32_t id) {
 		auto &prop = hEnt.GetNetworkedVariableProperty(id);
 		if(prop == nullptr)
 			return;
 		Lua::Property::push(l, *prop);
 	}));
-	def.def("CreateNetVar", static_cast<void (*)(lua_State *, THandle &, const std::string &, uint32_t)>([](lua_State *l, THandle &hEnt, const std::string &name, uint32_t type) {
+	def.def("CreateNetVar", static_cast<void (*)(lua::State *, THandle &, const std::string &, uint32_t)>([](lua::State *l, THandle &hEnt, const std::string &name, uint32_t type) {
 		auto id = hEnt.CreateNetworkedVariable(name, static_cast<pragma::BaseNetworkedComponent::NetworkedVariable::Type>(type));
 		Lua::PushInt(l, id);
 	}));
-	def.def("SetNetVarValue", static_cast<void (*)(lua_State *, THandle &, uint32_t, luabind::object)>([](lua_State *l, THandle &hEnt, uint32_t id, luabind::object value) {
+	def.def("SetNetVarValue", static_cast<void (*)(lua::State *, THandle &, uint32_t, luabind::object)>([](lua::State *l, THandle &hEnt, uint32_t id, luabind::object value) {
 		auto type = hEnt.GetNetworkedVariableType(id);
 		if(type == pragma::BaseNetworkedComponent::NetworkedVariable::Type::Invalid)
 			return;
@@ -1910,7 +1907,7 @@ void pragma::lua::base_networked_component::register_class(luabind::module_ &mod
 			}
 		}
 	}));
-	def.def("GetNetVarValue", static_cast<void (*)(lua_State *, THandle &, uint32_t)>([](lua_State *l, THandle &hEnt, uint32_t id) {
+	def.def("GetNetVarValue", static_cast<void (*)(lua::State *, THandle &, uint32_t)>([](lua::State *l, THandle &hEnt, uint32_t id) {
 		auto type = hEnt.GetNetworkedVariableType(id);
 		auto &prop = hEnt.GetNetworkedVariableProperty(id);
 		if(type == pragma::BaseNetworkedComponent::NetworkedVariable::Type::Invalid || prop == nullptr)
@@ -2006,26 +2003,26 @@ void pragma::lua::base_networked_component::register_class(luabind::module_ &mod
 #endif
 }
 
-void pragma::lua::base_observable_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_observable_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseObservableComponent>("BaseObservableComponent");
 	def.add_static_constant("EVENT_ON_OBSERVER_CHANGED", pragma::baseObservableComponent::EVENT_ON_OBSERVER_CHANGED);
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
-	def.def("SetLocalCameraOrigin", static_cast<void (*)(lua_State *, pragma::BaseObservableComponent &, uint32_t, const Vector3 &)>([](lua_State *l, pragma::BaseObservableComponent &hEnt, uint32_t camType, const Vector3 &origin) {
+	def.def("SetLocalCameraOrigin", static_cast<void (*)(lua::State *, pragma::BaseObservableComponent &, uint32_t, const Vector3 &)>([](lua::State *l, pragma::BaseObservableComponent &hEnt, uint32_t camType, const Vector3 &origin) {
 		hEnt.SetLocalCameraOrigin(static_cast<pragma::BaseObservableComponent::CameraType>(camType), origin);
 	}));
 	def.def("GetLocalCameraOrigin",
-	  static_cast<void (*)(lua_State *, pragma::BaseObservableComponent &, uint32_t)>([](lua_State *l, pragma::BaseObservableComponent &hEnt, uint32_t camType) { Lua::Push<Vector3>(l, hEnt.GetLocalCameraOrigin(static_cast<pragma::BaseObservableComponent::CameraType>(camType))); }));
-	def.def("SetLocalCameraOffset", static_cast<void (*)(lua_State *, pragma::BaseObservableComponent &, uint32_t, const Vector3 &)>([](lua_State *l, pragma::BaseObservableComponent &hEnt, uint32_t camType, const Vector3 &offset) {
+	  static_cast<void (*)(lua::State *, pragma::BaseObservableComponent &, uint32_t)>([](lua::State *l, pragma::BaseObservableComponent &hEnt, uint32_t camType) { Lua::Push<Vector3>(l, hEnt.GetLocalCameraOrigin(static_cast<pragma::BaseObservableComponent::CameraType>(camType))); }));
+	def.def("SetLocalCameraOffset", static_cast<void (*)(lua::State *, pragma::BaseObservableComponent &, uint32_t, const Vector3 &)>([](lua::State *l, pragma::BaseObservableComponent &hEnt, uint32_t camType, const Vector3 &offset) {
 		hEnt.SetLocalCameraOffset(static_cast<pragma::BaseObservableComponent::CameraType>(camType), offset);
 	}));
 	def.def("GetLocalCameraOffset",
-	  static_cast<void (*)(lua_State *, pragma::BaseObservableComponent &, uint32_t)>([](lua_State *l, pragma::BaseObservableComponent &hEnt, uint32_t camType) { Lua::Push<Vector3>(l, hEnt.GetLocalCameraOffset(static_cast<pragma::BaseObservableComponent::CameraType>(camType))); }));
-	def.def("GetCameraData", static_cast<void (*)(lua_State *, pragma::BaseObservableComponent &, uint32_t)>([](lua_State *l, pragma::BaseObservableComponent &hEnt, uint32_t camType) {
+	  static_cast<void (*)(lua::State *, pragma::BaseObservableComponent &, uint32_t)>([](lua::State *l, pragma::BaseObservableComponent &hEnt, uint32_t camType) { Lua::Push<Vector3>(l, hEnt.GetLocalCameraOffset(static_cast<pragma::BaseObservableComponent::CameraType>(camType))); }));
+	def.def("GetCameraData", static_cast<void (*)(lua::State *, pragma::BaseObservableComponent &, uint32_t)>([](lua::State *l, pragma::BaseObservableComponent &hEnt, uint32_t camType) {
 		Lua::Push<pragma::ObserverCameraData *>(l, &hEnt.GetCameraData(static_cast<pragma::BaseObservableComponent::CameraType>(camType)));
 	}));
 	def.def("SetCameraEnabled",
-	  static_cast<void (*)(lua_State *, pragma::BaseObservableComponent &, uint32_t, bool)>([](lua_State *l, pragma::BaseObservableComponent &hEnt, uint32_t camType, bool enabled) { hEnt.SetCameraEnabled(static_cast<pragma::BaseObservableComponent::CameraType>(camType), enabled); }));
+	  static_cast<void (*)(lua::State *, pragma::BaseObservableComponent &, uint32_t, bool)>([](lua::State *l, pragma::BaseObservableComponent &hEnt, uint32_t camType, bool enabled) { hEnt.SetCameraEnabled(static_cast<pragma::BaseObservableComponent::CameraType>(camType), enabled); }));
 	def.def("GetCameraEnabledProperty", &pragma::BaseObservableComponent::GetCameraEnabledProperty);
 	def.def("GetCameraOffsetProperty", &pragma::BaseObservableComponent::GetCameraOffsetProperty);
 	def.def(
@@ -2043,29 +2040,29 @@ void pragma::lua::base_observable_component::register_class(luabind::module_ &mo
 	auto defObsCamData = luabind::class_<pragma::ObserverCameraData>("CameraData");
 	defObsCamData.def_readwrite("rotateWithObservee", &pragma::ObserverCameraData::rotateWithObservee);
 	defObsCamData.def("SetAngleLimits",
-	  static_cast<void (*)(lua_State *, pragma::ObserverCameraData &, const EulerAngles &, const EulerAngles &)>([](lua_State *l, pragma::ObserverCameraData &obsCamData, const EulerAngles &min, const EulerAngles &max) { obsCamData.angleLimits = {min, max}; }));
-	defObsCamData.def("GetAngleLimits", static_cast<void (*)(lua_State *, pragma::ObserverCameraData &)>([](lua_State *l, pragma::ObserverCameraData &obsCamData) {
+	  static_cast<void (*)(lua::State *, pragma::ObserverCameraData &, const EulerAngles &, const EulerAngles &)>([](lua::State *l, pragma::ObserverCameraData &obsCamData, const EulerAngles &min, const EulerAngles &max) { obsCamData.angleLimits = {min, max}; }));
+	defObsCamData.def("GetAngleLimits", static_cast<void (*)(lua::State *, pragma::ObserverCameraData &)>([](lua::State *l, pragma::ObserverCameraData &obsCamData) {
 		if(obsCamData.angleLimits.has_value() == false)
 			return;
 		Lua::Push<EulerAngles>(l, obsCamData.angleLimits->first);
 		Lua::Push<EulerAngles>(l, obsCamData.angleLimits->second);
 	}));
-	defObsCamData.def("ClearAngleLimits", static_cast<void (*)(lua_State *, pragma::ObserverCameraData &)>([](lua_State *l, pragma::ObserverCameraData &obsCamData) { obsCamData.angleLimits = {}; }));
-	defObsCamData.property("enabled", static_cast<void (*)(lua_State *, pragma::ObserverCameraData &)>([](lua_State *l, pragma::ObserverCameraData &obsCamData) { Lua::PushBool(l, *obsCamData.enabled); }),
-	  static_cast<void (*)(lua_State *, pragma::ObserverCameraData &, bool)>([](lua_State *l, pragma::ObserverCameraData &obsCamData, bool enabled) { *obsCamData.enabled = enabled; }));
-	defObsCamData.property("localOrigin", static_cast<void (*)(lua_State *, pragma::ObserverCameraData &)>([](lua_State *l, pragma::ObserverCameraData &obsCamData) {
+	defObsCamData.def("ClearAngleLimits", static_cast<void (*)(lua::State *, pragma::ObserverCameraData &)>([](lua::State *l, pragma::ObserverCameraData &obsCamData) { obsCamData.angleLimits = {}; }));
+	defObsCamData.property("enabled", static_cast<void (*)(lua::State *, pragma::ObserverCameraData &)>([](lua::State *l, pragma::ObserverCameraData &obsCamData) { Lua::PushBool(l, *obsCamData.enabled); }),
+	  static_cast<void (*)(lua::State *, pragma::ObserverCameraData &, bool)>([](lua::State *l, pragma::ObserverCameraData &obsCamData, bool enabled) { *obsCamData.enabled = enabled; }));
+	defObsCamData.property("localOrigin", static_cast<void (*)(lua::State *, pragma::ObserverCameraData &)>([](lua::State *l, pragma::ObserverCameraData &obsCamData) {
 		if(obsCamData.localOrigin.has_value() == false)
 			return;
 		Lua::Push<Vector3>(l, *obsCamData.localOrigin);
 	}),
-	  static_cast<void (*)(lua_State *, pragma::ObserverCameraData &, const Vector3 &)>([](lua_State *l, pragma::ObserverCameraData &obsCamData, const Vector3 &origin) { obsCamData.localOrigin = origin; }));
-	defObsCamData.property("offset", static_cast<void (*)(lua_State *, pragma::ObserverCameraData &)>([](lua_State *l, pragma::ObserverCameraData &obsCamData) { Lua::Push<Vector3>(l, *obsCamData.offset); }),
-	  static_cast<void (*)(lua_State *, pragma::ObserverCameraData &, const Vector3 &)>([](lua_State *l, pragma::ObserverCameraData &obsCamData, const Vector3 &offset) { *obsCamData.offset = offset; }));
+	  static_cast<void (*)(lua::State *, pragma::ObserverCameraData &, const Vector3 &)>([](lua::State *l, pragma::ObserverCameraData &obsCamData, const Vector3 &origin) { obsCamData.localOrigin = origin; }));
+	defObsCamData.property("offset", static_cast<void (*)(lua::State *, pragma::ObserverCameraData &)>([](lua::State *l, pragma::ObserverCameraData &obsCamData) { Lua::Push<Vector3>(l, *obsCamData.offset); }),
+	  static_cast<void (*)(lua::State *, pragma::ObserverCameraData &, const Vector3 &)>([](lua::State *l, pragma::ObserverCameraData &obsCamData, const Vector3 &offset) { *obsCamData.offset = offset; }));
 	def.scope[defObsCamData];
 }
 
 namespace Lua::Shooter {
-	void FireBullets(lua_State *l, pragma::ecs::BaseShooterComponent &hEnt, const luabind::object &, bool bHitReport, bool bMaster)
+	void FireBullets(lua::State *l, pragma::ecs::BaseShooterComponent &hEnt, const luabind::object &, bool bHitReport, bool bMaster)
 	{
 		auto &bulletInfo = Lua::Check<BulletInfo>(l, 2);
 
@@ -2080,82 +2077,82 @@ namespace Lua::Shooter {
 		}
 	}
 };
-void pragma::lua::base_shooter_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_shooter_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::ecs::BaseShooterComponent>("BaseShooterComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("FireBullets",
-	  static_cast<void (*)(lua_State *, pragma::ecs::BaseShooterComponent &, const luabind::object &, bool, bool)>([](lua_State *l, pragma::ecs::BaseShooterComponent &hEnt, const luabind::object &o, bool bHitReport, bool bMaster) { Lua::Shooter::FireBullets(l, hEnt, o, bHitReport, bMaster); }));
-	def.def("FireBullets", static_cast<void (*)(lua_State *, pragma::ecs::BaseShooterComponent &, const luabind::object &, bool)>([](lua_State *l, pragma::ecs::BaseShooterComponent &hEnt, const luabind::object &o, bool bHitReport) {
+	  static_cast<void (*)(lua::State *, pragma::ecs::BaseShooterComponent &, const luabind::object &, bool, bool)>([](lua::State *l, pragma::ecs::BaseShooterComponent &hEnt, const luabind::object &o, bool bHitReport, bool bMaster) { Lua::Shooter::FireBullets(l, hEnt, o, bHitReport, bMaster); }));
+	def.def("FireBullets", static_cast<void (*)(lua::State *, pragma::ecs::BaseShooterComponent &, const luabind::object &, bool)>([](lua::State *l, pragma::ecs::BaseShooterComponent &hEnt, const luabind::object &o, bool bHitReport) {
 		Lua::Shooter::FireBullets(l, hEnt, o, bHitReport, Lua::get_bullet_master(hEnt.GetEntity()));
 	}));
 	def.def("FireBullets",
-	  static_cast<void (*)(lua_State *, pragma::ecs::BaseShooterComponent &, const luabind::object &)>([](lua_State *l, pragma::ecs::BaseShooterComponent &hEnt, const luabind::object &o) { Lua::Shooter::FireBullets(l, hEnt, o, false, Lua::get_bullet_master(hEnt.GetEntity())); }));
+	  static_cast<void (*)(lua::State *, pragma::ecs::BaseShooterComponent &, const luabind::object &)>([](lua::State *l, pragma::ecs::BaseShooterComponent &hEnt, const luabind::object &o) { Lua::Shooter::FireBullets(l, hEnt, o, false, Lua::get_bullet_master(hEnt.GetEntity())); }));
 	def.add_static_constant("EVENT_ON_FIRE_BULLETS", pragma::ecs::baseShooterComponent::EVENT_ON_FIRE_BULLETS);
 }
 
 namespace Lua::Physics {
-	void InitializePhysics(lua_State *l, pragma::BasePhysicsComponent &hEnt, ::util::TSharedHandle<pragma::physics::IConvexShape> &shape, uint32_t flags)
+	void InitializePhysics(lua::State *l, pragma::BasePhysicsComponent &hEnt, ::util::TSharedHandle<pragma::physics::IConvexShape> &shape, uint32_t flags)
 	{
 		auto *phys = hEnt.InitializePhysics(*shape, static_cast<pragma::BasePhysicsComponent::PhysFlags>(flags));
 		if(phys != nullptr)
 			luabind::object(l, phys->GetHandle()).push(l);
 	}
-	void InitializePhysics(lua_State *l, pragma::BasePhysicsComponent &hEnt, ::util::TSharedHandle<pragma::physics::IConvexShape> &shape) { InitializePhysics(l, hEnt, shape, umath::to_integral(pragma::BasePhysicsComponent::PhysFlags::None)); }
+	void InitializePhysics(lua::State *l, pragma::BasePhysicsComponent &hEnt, ::util::TSharedHandle<pragma::physics::IConvexShape> &shape) { InitializePhysics(l, hEnt, shape, umath::to_integral(pragma::BasePhysicsComponent::PhysFlags::None)); }
 };
-void pragma::lua::base_physics_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_physics_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePhysicsComponent>("BasePhysicsComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
-	def.def("SetCollisionBounds", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, Vector3, Vector3)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, Vector3 min, Vector3 max) { hEnt.SetCollisionBounds(min, max); }));
-	def.def("GetCollisionBounds", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt) {
+	def.def("SetCollisionBounds", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, Vector3, Vector3)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, Vector3 min, Vector3 max) { hEnt.SetCollisionBounds(min, max); }));
+	def.def("GetCollisionBounds", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) {
 		Vector3 min, max;
 		hEnt.GetCollisionBounds(&min, &max);
 		luabind::object(l, min).push(l);
 		luabind::object(l, max).push(l);
 	}));
-	def.def("GetCollisionExtents", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt) { luabind::object(l, hEnt.GetCollisionExtents()).push(l); }));
-	def.def("GetCollisionCenter", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt) { luabind::object(l, hEnt.GetCollisionCenter()).push(l); }));
-	def.def("GetMoveType", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt) {
+	def.def("GetCollisionExtents", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) { luabind::object(l, hEnt.GetCollisionExtents()).push(l); }));
+	def.def("GetCollisionCenter", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) { luabind::object(l, hEnt.GetCollisionCenter()).push(l); }));
+	def.def("GetMoveType", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) {
 		pragma::physics::MOVETYPE mt = hEnt.GetMoveType();
 		Lua::PushInt(l, int(mt));
 	}));
-	def.def("SetMoveType", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, int)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, int moveType) { hEnt.SetMoveType(pragma::physics::MOVETYPE(moveType)); }));
-	def.def("GetPhysicsObject", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt) {
+	def.def("SetMoveType", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, int)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, int moveType) { hEnt.SetMoveType(pragma::physics::MOVETYPE(moveType)); }));
+	def.def("GetPhysicsObject", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) {
 		pragma::physics::PhysObj *phys = hEnt.GetPhysicsObject();
 		if(phys == nullptr)
 			return;
 		luabind::object(l, phys->GetHandle()).push(l);
 	}));
-	def.def("InitializePhysics", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, uint32_t, uint32_t)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, uint32_t type, uint32_t physFlags) {
+	def.def("InitializePhysics", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, uint32_t, uint32_t)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, uint32_t type, uint32_t physFlags) {
 		pragma::physics::PhysObj *phys = hEnt.InitializePhysics(pragma::physics::PHYSICSTYPE(type), static_cast<pragma::BasePhysicsComponent::PhysFlags>(physFlags));
 		if(phys != nullptr)
 			luabind::object(l, phys->GetHandle()).push(l);
 	}));
-	def.def("InitializePhysics", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, uint32_t)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, uint32_t type) {
+	def.def("InitializePhysics", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, uint32_t)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, uint32_t type) {
 		pragma::physics::PhysObj *phys = hEnt.InitializePhysics(pragma::physics::PHYSICSTYPE(type));
 		if(phys != nullptr)
 			luabind::object(l, phys->GetHandle()).push(l);
 	}));
 	def.def("InitializePhysics",
-	  static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, ::util::TSharedHandle<pragma::physics::IConvexShape> &, uint32_t)>(
-	    [](lua_State *l, pragma::BasePhysicsComponent &hEnt, ::util::TSharedHandle<pragma::physics::IConvexShape> &shape, uint32_t physFlags) { Lua::Physics::InitializePhysics(l, hEnt, shape, physFlags); }));
+	  static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, ::util::TSharedHandle<pragma::physics::IConvexShape> &, uint32_t)>(
+	    [](lua::State *l, pragma::BasePhysicsComponent &hEnt, ::util::TSharedHandle<pragma::physics::IConvexShape> &shape, uint32_t physFlags) { Lua::Physics::InitializePhysics(l, hEnt, shape, physFlags); }));
 	def.def("InitializePhysics",
-	  static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, ::util::TSharedHandle<pragma::physics::IConvexShape> &, uint32_t)>(
-	    [](lua_State *l, pragma::BasePhysicsComponent &hEnt, ::util::TSharedHandle<pragma::physics::IConvexShape> &shape, uint32_t physFlags) { Lua::Physics::InitializePhysics(l, hEnt, shape, physFlags); }));
-	def.def("InitializePhysics", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, ::util::TSharedHandle<pragma::physics::IConvexShape> &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, ::util::TSharedHandle<pragma::physics::IConvexShape> &shape) {
+	  static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, ::util::TSharedHandle<pragma::physics::IConvexShape> &, uint32_t)>(
+	    [](lua::State *l, pragma::BasePhysicsComponent &hEnt, ::util::TSharedHandle<pragma::physics::IConvexShape> &shape, uint32_t physFlags) { Lua::Physics::InitializePhysics(l, hEnt, shape, physFlags); }));
+	def.def("InitializePhysics", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, ::util::TSharedHandle<pragma::physics::IConvexShape> &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, ::util::TSharedHandle<pragma::physics::IConvexShape> &shape) {
 		Lua::Physics::InitializePhysics(l, hEnt, shape, 0);
 	}));
-	def.def("DestroyPhysicsObject", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt) { hEnt.DestroyPhysicsObject(); }));
+	def.def("DestroyPhysicsObject", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) { hEnt.DestroyPhysicsObject(); }));
 	def.def("DropToFloor", &pragma::BasePhysicsComponent::DropToFloor);
 	def.def("IsTrigger", &pragma::BasePhysicsComponent::IsTrigger);
 	def.def("SetKinematic", &pragma::BasePhysicsComponent::SetKinematic);
 	def.def("IsKinematic", &pragma::BasePhysicsComponent::IsKinematic);
 
 	def.def("GetCollisionCallbacksEnabled", &pragma::BasePhysicsComponent::GetCollisionCallbacksEnabled);
-	def.def("SetCollisionCallbacksEnabled", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, bool)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, bool) { hEnt.SetCollisionCallbacksEnabled(true); }));
+	def.def("SetCollisionCallbacksEnabled", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, bool)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, bool) { hEnt.SetCollisionCallbacksEnabled(true); }));
 	def.def("GetCollisionContactReportEnabled", &pragma::BasePhysicsComponent::GetCollisionContactReportEnabled);
-	def.def("SetCollisionContactReportEnabled", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, bool)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, bool) { hEnt.SetCollisionContactReportEnabled(true); }));
+	def.def("SetCollisionContactReportEnabled", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, bool)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, bool) { hEnt.SetCollisionContactReportEnabled(true); }));
 	def.def("SetCollisionFilterMask", &pragma::BasePhysicsComponent::SetCollisionFilterMask);
 	def.def("GetCollisionFilterMask", &pragma::BasePhysicsComponent::GetCollisionFilterMask);
 	def.def("SetCollisionFilterGroup", &pragma::BasePhysicsComponent::SetCollisionFilterGroup);
@@ -2165,13 +2162,13 @@ void pragma::lua::base_physics_component::register_class(luabind::module_ &mod)
 	def.def("DisableCollisions", &pragma::BasePhysicsComponent::DisableCollisions);
 	def.def("SetCollisionsEnabled", static_cast<void (pragma::BasePhysicsComponent::*)(bool)>(&pragma::BasePhysicsComponent::SetCollisionsEnabled));
 	def.def("SetCollisionsEnabled", static_cast<void (pragma::BasePhysicsComponent::*)(pragma::ecs::BaseEntity *, bool)>(&pragma::BasePhysicsComponent::SetCollisionsEnabled));
-	def.def("EnableCollisions", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt) { hEnt.SetCollisionsEnabled(true); }));
-	def.def("DisableCollisions", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt) { hEnt.SetCollisionsEnabled(false); }));
+	def.def("EnableCollisions", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) { hEnt.SetCollisionsEnabled(true); }));
+	def.def("DisableCollisions", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) { hEnt.SetCollisionsEnabled(false); }));
 	def.def("SetSimulationEnabled", &pragma::BasePhysicsComponent::SetSimulationEnabled);
 	def.def("IsSimulationEnabled", &pragma::BasePhysicsComponent::GetSimulationEnabled);
 	def.def("ResetCollisions", &pragma::BasePhysicsComponent::ResetCollisions);
 
-	def.def("GetPhysJointConstraints", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt) {
+	def.def("GetPhysJointConstraints", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) {
 		auto &joints = hEnt.GetPhysConstraints();
 		auto table = Lua::CreateTable(l); /* 1 */
 		auto n = 1;
@@ -2204,23 +2201,23 @@ void pragma::lua::base_physics_component::register_class(luabind::module_ &mod)
 
 	def.def("GetPhysicsType", &pragma::BasePhysicsComponent::GetPhysicsType);
 	def.def("GetCollisionRadius", &pragma::BasePhysicsComponent::GetCollisionRadius);
-	def.def("IsPhysicsProp", static_cast<bool (*)(lua_State *, pragma::BasePhysicsComponent &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt) {
+	def.def("IsPhysicsProp", static_cast<bool (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) {
 		auto physType = hEnt.GetPhysicsType();
 		return (physType != pragma::physics::PHYSICSTYPE::NONE && physType != pragma::physics::PHYSICSTYPE::STATIC && physType != pragma::physics::PHYSICSTYPE::BOXCONTROLLER && physType != pragma::physics::PHYSICSTYPE::CAPSULECONTROLLER) ? true : false;
 	}));
 
-	def.def("GetAABBDistance", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, const Vector3 &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, const Vector3 &p) { Lua::PushNumber(l, hEnt.GetAABBDistance(p)); }));
-	def.def("GetAABBDistance", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, pragma::BasePhysicsComponent &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, pragma::BasePhysicsComponent &hOther) { Lua::PushNumber(l, hEnt.GetAABBDistance(hOther.GetEntity())); }));
-	def.def("GetAABBDistance", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, pragma::ecs::BaseEntity &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, pragma::ecs::BaseEntity &other) { Lua::PushNumber(l, hEnt.GetAABBDistance(other)); }));
+	def.def("GetAABBDistance", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, const Vector3 &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, const Vector3 &p) { Lua::PushNumber(l, hEnt.GetAABBDistance(p)); }));
+	def.def("GetAABBDistance", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, pragma::BasePhysicsComponent &hOther) { Lua::PushNumber(l, hEnt.GetAABBDistance(hOther.GetEntity())); }));
+	def.def("GetAABBDistance", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, pragma::ecs::BaseEntity &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, pragma::ecs::BaseEntity &other) { Lua::PushNumber(l, hEnt.GetAABBDistance(other)); }));
 
 	def.def("IsRagdoll", &pragma::BasePhysicsComponent::IsRagdoll);
 
-	def.def("ApplyForce", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, const Vector3 &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, const Vector3 &force) { hEnt.ApplyForce(force); }));
-	def.def("ApplyForce", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, const Vector3 &, const Vector3 &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, const Vector3 &force, const Vector3 &relPos) { hEnt.ApplyForce(force, relPos); }));
-	def.def("ApplyImpulse", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, const Vector3 &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, const Vector3 &impulse) { hEnt.ApplyImpulse(impulse); }));
-	def.def("ApplyImpulse", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, const Vector3 &, const Vector3 &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, const Vector3 &impulse, const Vector3 &relPos) { hEnt.ApplyImpulse(impulse, relPos); }));
-	def.def("ApplyTorque", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, const Vector3 &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, const Vector3 &torque) { hEnt.ApplyTorque(torque); }));
-	def.def("ApplyTorqueImpulse", static_cast<void (*)(lua_State *, pragma::BasePhysicsComponent &, const Vector3 &)>([](lua_State *l, pragma::BasePhysicsComponent &hEnt, const Vector3 &torque) { hEnt.ApplyTorqueImpulse(torque); }));
+	def.def("ApplyForce", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, const Vector3 &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, const Vector3 &force) { hEnt.ApplyForce(force); }));
+	def.def("ApplyForce", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, const Vector3 &, const Vector3 &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, const Vector3 &force, const Vector3 &relPos) { hEnt.ApplyForce(force, relPos); }));
+	def.def("ApplyImpulse", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, const Vector3 &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, const Vector3 &impulse) { hEnt.ApplyImpulse(impulse); }));
+	def.def("ApplyImpulse", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, const Vector3 &, const Vector3 &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, const Vector3 &impulse, const Vector3 &relPos) { hEnt.ApplyImpulse(impulse, relPos); }));
+	def.def("ApplyTorque", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, const Vector3 &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, const Vector3 &torque) { hEnt.ApplyTorque(torque); }));
+	def.def("ApplyTorqueImpulse", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, const Vector3 &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, const Vector3 &torque) { hEnt.ApplyTorqueImpulse(torque); }));
 	def.def("GetMass", &pragma::BasePhysicsComponent::GetMass);
 	def.add_static_constant("EVENT_ON_PHYSICS_INITIALIZED", pragma::basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED);
 	def.add_static_constant("EVENT_ON_PHYSICS_DESTROYED", pragma::basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED);
@@ -2241,7 +2238,7 @@ void pragma::lua::base_physics_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("MOVETYPE_PHYSICS", umath::to_integral(pragma::physics::MOVETYPE::PHYSICS));
 }
 
-void pragma::lua::base_render_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_render_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseRenderComponent>("BaseRenderComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -2249,7 +2246,7 @@ void pragma::lua::base_render_component::register_class(luabind::module_ &mod)
 	def.def("GetCastShadows", &pragma::BaseRenderComponent::GetCastShadows);
 }
 
-void pragma::lua::base_soft_body_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_soft_body_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseSoftBodyComponent>("BaseSoftBodyComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -2268,7 +2265,7 @@ namespace Lua::SoundEmitter {
 		return defSoundInfo;
 	}
 };
-void pragma::lua::base_sound_emitter_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_sound_emitter_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseSoundEmitterComponent>("BaseSoundEmitterComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -2277,27 +2274,27 @@ void pragma::lua::base_sound_emitter_component::register_class(luabind::module_ 
 	def.def("EmitSound", &pragma::BaseSoundEmitterComponent::EmitSound);
 	def.def("EmitSound", +[](pragma::BaseSoundEmitterComponent &c, std::string snd, pragma::audio::ALSoundType type) { return c.EmitSound(std::move(snd), type); });
 	def.def("StopSounds", &pragma::BaseSoundEmitterComponent::StopSounds);
-	def.def("GetSounds", static_cast<void (*)(lua_State *, pragma::BaseSoundEmitterComponent &)>([](lua_State *l, pragma::BaseSoundEmitterComponent &hEnt) {
+	def.def("GetSounds", static_cast<void (*)(lua::State *, pragma::BaseSoundEmitterComponent &)>([](lua::State *l, pragma::BaseSoundEmitterComponent &hEnt) {
 		std::vector<std::shared_ptr<ALSound>> *sounds;
 		hEnt.GetSounds(&sounds);
 		lua_newtable(l);
-		int top = lua_gettop(l);
+		int top = Lua::GetStackTop(l);
 		for(int i = 0; i < sounds->size(); i++) {
 			luabind::object(l, (*sounds)[i]).push(l);
-			lua_rawseti(l, top, i + 1);
+			Lua::SetTableValue(l, top, i + 1);
 		}
 	}));
 	def.add_static_constant("EVENT_ON_SOUND_CREATED", pragma::baseSoundEmitterComponent::EVENT_ON_SOUND_CREATED);
 }
 
 namespace Lua::Transform {
-	void GetDirection(lua_State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther, bool bIgnoreYAxis) { Lua::Push<Vector3>(l, hEnt.GetDirection(hOther.GetEntity(), bIgnoreYAxis)); }
+	void GetDirection(lua::State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther, bool bIgnoreYAxis) { Lua::Push<Vector3>(l, hEnt.GetDirection(hOther.GetEntity(), bIgnoreYAxis)); }
 
-	void GetAngles(lua_State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther, bool bIgnoreYAxis) { Lua::Push<EulerAngles>(l, hEnt.GetAngles(hOther.GetEntity(), bIgnoreYAxis)); }
+	void GetAngles(lua::State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther, bool bIgnoreYAxis) { Lua::Push<EulerAngles>(l, hEnt.GetAngles(hOther.GetEntity(), bIgnoreYAxis)); }
 
-	void GetDotProduct(lua_State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther, bool bIgnoreYAxis) { Lua::PushNumber(l, hEnt.GetDotProduct(hOther.GetEntity(), bIgnoreYAxis)); }
+	void GetDotProduct(lua::State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther, bool bIgnoreYAxis) { Lua::PushNumber(l, hEnt.GetDotProduct(hOther.GetEntity(), bIgnoreYAxis)); }
 };
-void pragma::lua::base_transform_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_transform_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTransformComponent>("BaseTransformComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -2329,28 +2326,28 @@ void pragma::lua::base_transform_component::register_class(luabind::module_ &mod
 	def.def("GetEyeOffset", &pragma::BaseTransformComponent::GetEyeOffset);
 	def.def("SetEyeOffset", &pragma::BaseTransformComponent::SetEyeOffset);
 
-	def.def("LocalToWorld", static_cast<void (*)(lua_State *, pragma::BaseTransformComponent &, Vector3)>([](lua_State *l, pragma::BaseTransformComponent &hEnt, Vector3 origin) {
+	def.def("LocalToWorld", static_cast<void (*)(lua::State *, pragma::BaseTransformComponent &, Vector3)>([](lua::State *l, pragma::BaseTransformComponent &hEnt, Vector3 origin) {
 		hEnt.LocalToWorld(&origin);
 		Lua::Push<Vector3>(l, origin);
 	}));
-	def.def("LocalToWorld", static_cast<void (*)(lua_State *, pragma::BaseTransformComponent &, Quat)>([](lua_State *l, pragma::BaseTransformComponent &hEnt, Quat rot) {
+	def.def("LocalToWorld", static_cast<void (*)(lua::State *, pragma::BaseTransformComponent &, Quat)>([](lua::State *l, pragma::BaseTransformComponent &hEnt, Quat rot) {
 		hEnt.LocalToWorld(&rot);
 		Lua::Push<Quat>(l, rot);
 	}));
-	def.def("LocalToWorld", static_cast<void (*)(lua_State *, pragma::BaseTransformComponent &, Vector3, Quat)>([](lua_State *l, pragma::BaseTransformComponent &hEnt, Vector3 origin, Quat rot) {
+	def.def("LocalToWorld", static_cast<void (*)(lua::State *, pragma::BaseTransformComponent &, Vector3, Quat)>([](lua::State *l, pragma::BaseTransformComponent &hEnt, Vector3 origin, Quat rot) {
 		hEnt.LocalToWorld(&origin, &rot);
 		Lua::Push<Vector3>(l, origin);
 		Lua::Push<Quat>(l, rot);
 	}));
-	def.def("WorldToLocal", static_cast<void (*)(lua_State *, pragma::BaseTransformComponent &, Vector3)>([](lua_State *l, pragma::BaseTransformComponent &hEnt, Vector3 origin) {
+	def.def("WorldToLocal", static_cast<void (*)(lua::State *, pragma::BaseTransformComponent &, Vector3)>([](lua::State *l, pragma::BaseTransformComponent &hEnt, Vector3 origin) {
 		hEnt.WorldToLocal(&origin);
 		Lua::Push<Vector3>(l, origin);
 	}));
-	def.def("WorldToLocal", static_cast<void (*)(lua_State *, pragma::BaseTransformComponent &, Quat)>([](lua_State *l, pragma::BaseTransformComponent &hEnt, Quat rot) {
+	def.def("WorldToLocal", static_cast<void (*)(lua::State *, pragma::BaseTransformComponent &, Quat)>([](lua::State *l, pragma::BaseTransformComponent &hEnt, Quat rot) {
 		hEnt.WorldToLocal(&rot);
 		Lua::Push<Quat>(l, rot);
 	}));
-	def.def("WorldToLocal", static_cast<void (*)(lua_State *, pragma::BaseTransformComponent &, Vector3, Quat)>([](lua_State *l, pragma::BaseTransformComponent &hEnt, Vector3 origin, Quat rot) {
+	def.def("WorldToLocal", static_cast<void (*)(lua::State *, pragma::BaseTransformComponent &, Vector3, Quat)>([](lua::State *l, pragma::BaseTransformComponent &hEnt, Vector3 origin, Quat rot) {
 		hEnt.WorldToLocal(&origin, &rot);
 		Lua::Push<Vector3>(l, origin);
 		Lua::Push<Quat>(l, rot);
@@ -2380,36 +2377,36 @@ void pragma::lua::base_transform_component::register_class(luabind::module_ &mod
 
 	def.def("GetDistance", static_cast<float (pragma::BaseTransformComponent::*)(const Vector3 &) const>(&pragma::BaseTransformComponent::GetDistance));
 	def.def("GetDistance", static_cast<float (pragma::BaseTransformComponent::*)(const pragma::ecs::BaseEntity &) const>(&pragma::BaseTransformComponent::GetDistance));
-	def.def("GetDistance", static_cast<float (*)(lua_State *, pragma::BaseTransformComponent &, pragma::BaseTransformComponent &)>([](lua_State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther) { return hEnt.GetDistance(hOther.GetEntity()); }));
+	def.def("GetDistance", static_cast<float (*)(lua::State *, pragma::BaseTransformComponent &, pragma::BaseTransformComponent &)>([](lua::State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther) { return hEnt.GetDistance(hOther.GetEntity()); }));
 
 	def.def("GetDirection", static_cast<Vector3 (pragma::BaseTransformComponent::*)(const pragma::ecs::BaseEntity &, bool) const>(&pragma::BaseTransformComponent::GetDirection));
 	def.def("GetDirection", static_cast<Vector3 (pragma::BaseTransformComponent::*)(const pragma::ecs::BaseEntity &, bool) const>(&pragma::BaseTransformComponent::GetDirection), luabind::default_parameter_policy<3, false> {});
 	def.def("GetDirection", static_cast<Vector3 (pragma::BaseTransformComponent::*)(const Vector3 &, bool) const>(&pragma::BaseTransformComponent::GetDirection));
 	def.def("GetDirection", static_cast<Vector3 (pragma::BaseTransformComponent::*)(const Vector3 &, bool) const>(&pragma::BaseTransformComponent::GetDirection), luabind::default_parameter_policy<3, false> {});
-	def.def("GetDirection", static_cast<void (*)(lua_State *, pragma::BaseTransformComponent &, pragma::BaseTransformComponent &, bool)>([](lua_State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther, bool bIgnoreYAxis) {
+	def.def("GetDirection", static_cast<void (*)(lua::State *, pragma::BaseTransformComponent &, pragma::BaseTransformComponent &, bool)>([](lua::State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther, bool bIgnoreYAxis) {
 		Lua::Push<Vector3>(l, hEnt.GetDirection(hOther.GetEntity(), bIgnoreYAxis));
 	}));
 
-	def.def("GetAngles", static_cast<void (*)(lua_State *, pragma::BaseTransformComponent &, pragma::BaseTransformComponent &, bool)>([](lua_State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther, bool bIgnoreYAxis) {
+	def.def("GetAngles", static_cast<void (*)(lua::State *, pragma::BaseTransformComponent &, pragma::BaseTransformComponent &, bool)>([](lua::State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther, bool bIgnoreYAxis) {
 		Lua::Push<EulerAngles>(l, hEnt.GetAngles(hOther.GetEntity(), bIgnoreYAxis));
 	}));
-	def.def("GetAngles", static_cast<void (*)(lua_State *, pragma::BaseTransformComponent &, pragma::ecs::BaseEntity &, bool)>([](lua_State *l, pragma::BaseTransformComponent &hEnt, pragma::ecs::BaseEntity &other, bool bIgnoreYAxis) { Lua::Push<EulerAngles>(l, hEnt.GetAngles(other, bIgnoreYAxis)); }));
-	def.def("GetDotProduct", static_cast<void (*)(lua_State *, pragma::BaseTransformComponent &, const Vector3 &, bool)>([](lua_State *l, pragma::BaseTransformComponent &hEnt, const Vector3 &p, bool bIgnoreYAxis) { Lua::PushNumber(l, hEnt.GetDotProduct(p, bIgnoreYAxis)); }));
-	def.def("GetDotProduct", static_cast<void (*)(lua_State *, pragma::BaseTransformComponent &, pragma::BaseTransformComponent &, bool)>([](lua_State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther, bool bIgnoreYAxis) {
+	def.def("GetAngles", static_cast<void (*)(lua::State *, pragma::BaseTransformComponent &, pragma::ecs::BaseEntity &, bool)>([](lua::State *l, pragma::BaseTransformComponent &hEnt, pragma::ecs::BaseEntity &other, bool bIgnoreYAxis) { Lua::Push<EulerAngles>(l, hEnt.GetAngles(other, bIgnoreYAxis)); }));
+	def.def("GetDotProduct", static_cast<void (*)(lua::State *, pragma::BaseTransformComponent &, const Vector3 &, bool)>([](lua::State *l, pragma::BaseTransformComponent &hEnt, const Vector3 &p, bool bIgnoreYAxis) { Lua::PushNumber(l, hEnt.GetDotProduct(p, bIgnoreYAxis)); }));
+	def.def("GetDotProduct", static_cast<void (*)(lua::State *, pragma::BaseTransformComponent &, pragma::BaseTransformComponent &, bool)>([](lua::State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther, bool bIgnoreYAxis) {
 		Lua::PushNumber(l, hEnt.GetDotProduct(hOther.GetEntity(), bIgnoreYAxis));
 	}));
-	def.def("GetDotProduct", static_cast<void (*)(lua_State *, pragma::BaseTransformComponent &, pragma::ecs::BaseEntity &, bool)>([](lua_State *l, pragma::BaseTransformComponent &hEnt, pragma::ecs::BaseEntity &other, bool bIgnoreYAxis) { Lua::PushNumber(l, hEnt.GetDotProduct(other, bIgnoreYAxis)); }));
+	def.def("GetDotProduct", static_cast<void (*)(lua::State *, pragma::BaseTransformComponent &, pragma::ecs::BaseEntity &, bool)>([](lua::State *l, pragma::BaseTransformComponent &hEnt, pragma::ecs::BaseEntity &other, bool bIgnoreYAxis) { Lua::PushNumber(l, hEnt.GetDotProduct(other, bIgnoreYAxis)); }));
 
-	def.def("GetDirection", static_cast<void (*)(lua_State *, pragma::BaseTransformComponent &, pragma::BaseTransformComponent &)>([](lua_State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther) { Lua::Transform::GetDirection(l, hEnt, hOther, false); }));
-	def.def("GetAngles", static_cast<void (*)(lua_State *, pragma::BaseTransformComponent &, pragma::BaseTransformComponent &)>([](lua_State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther) { Lua::Transform::GetAngles(l, hEnt, hOther, false); }));
-	def.def("GetDotProduct", static_cast<void (*)(lua_State *, pragma::BaseTransformComponent &, pragma::BaseTransformComponent &)>([](lua_State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther) { Lua::Transform::GetDotProduct(l, hEnt, hOther, false); }));
+	def.def("GetDirection", static_cast<void (*)(lua::State *, pragma::BaseTransformComponent &, pragma::BaseTransformComponent &)>([](lua::State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther) { Lua::Transform::GetDirection(l, hEnt, hOther, false); }));
+	def.def("GetAngles", static_cast<void (*)(lua::State *, pragma::BaseTransformComponent &, pragma::BaseTransformComponent &)>([](lua::State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther) { Lua::Transform::GetAngles(l, hEnt, hOther, false); }));
+	def.def("GetDotProduct", static_cast<void (*)(lua::State *, pragma::BaseTransformComponent &, pragma::BaseTransformComponent &)>([](lua::State *l, pragma::BaseTransformComponent &hEnt, pragma::BaseTransformComponent &hOther) { Lua::Transform::GetDotProduct(l, hEnt, hOther, false); }));
 	def.def("GetDotProduct", static_cast<float (pragma::BaseTransformComponent::*)(const pragma::ecs::BaseEntity &, bool) const>(&pragma::BaseTransformComponent::GetDotProduct));
 	def.def("GetDotProduct", static_cast<float (pragma::BaseTransformComponent::*)(const pragma::ecs::BaseEntity &, bool) const>(&pragma::BaseTransformComponent::GetDotProduct), luabind::default_parameter_policy<3, false> {});
 	def.def("GetDotProduct", static_cast<float (pragma::BaseTransformComponent::*)(const Vector3 &, bool) const>(&pragma::BaseTransformComponent::GetDotProduct));
 	def.def("GetDotProduct", static_cast<float (pragma::BaseTransformComponent::*)(const Vector3 &, bool) const>(&pragma::BaseTransformComponent::GetDotProduct), luabind::default_parameter_policy<3, false> {});
 }
 
-void pragma::lua::base_color_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_color_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseColorComponent>("BaseColorComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -2438,7 +2435,7 @@ static std::optional<std::tuple<std::shared_ptr<ModelMesh>, std::shared_ptr<prag
 	return std::tuple<std::shared_ptr<ModelMesh>, std::shared_ptr<pragma::ModelSubMesh>, msys::Material *> {res->mesh->shared_from_this(), res->subMesh->shared_from_this(), res->material};
 }
 
-void pragma::lua::base_surface_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_surface_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseSurfaceComponent>("BaseSurfaceComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -2466,7 +2463,7 @@ void pragma::lua::base_surface_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_SURFACE_PLANE_CHANGED", pragma::baseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED);
 }
 
-void pragma::lua::base_score_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_score_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseScoreComponent>("BaseScoreComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -2478,7 +2475,7 @@ void pragma::lua::base_score_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_SCORE_CHANGED", pragma::baseScoreComponent::EVENT_ON_SCORE_CHANGED);
 }
 
-void pragma::lua::base_radius_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_radius_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseRadiusComponent>("BaseRadiusComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -2488,7 +2485,7 @@ void pragma::lua::base_radius_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_RADIUS_CHANGED", pragma::baseRadiusComponent::EVENT_ON_RADIUS_CHANGED);
 }
 
-void pragma::lua::base_field_angle_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_field_angle_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFieldAngleComponent>("BaseFieldAngleComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -2498,13 +2495,13 @@ void pragma::lua::base_field_angle_component::register_class(luabind::module_ &m
 	def.add_static_constant("EVENT_ON_FIELD_ANGLE_CHANGED", pragma::baseFieldAngleComponent::EVENT_ON_FIELD_ANGLE_CHANGED);
 }
 
-void pragma::lua::base_env_sound_dsp_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_sound_dsp_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvSoundDspComponent>("BaseEnvSoundDspComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_env_camera_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_camera_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvCameraComponent>("BaseEnvCameraComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -2515,7 +2512,7 @@ void pragma::lua::base_env_camera_component::register_class(luabind::module_ &mo
 	def.scope[luabind::def("calc_projection_matrix", +[](umath::Radian fov, float aspectRatio, float nearZ, float farZ, const rendering::Tile *optTile) -> Mat4 { return pragma::BaseEnvCameraComponent::CalcProjectionMatrix(fov, aspectRatio, nearZ, farZ, optTile); })];
 	def.def("GetProjectionMatrix", &pragma::BaseEnvCameraComponent::GetProjectionMatrix, luabind::copy_policy<0> {});
 	def.def("GetViewMatrix", &pragma::BaseEnvCameraComponent::GetViewMatrix, luabind::copy_policy<0> {});
-	def.def("LookAt", static_cast<void (*)(lua_State *, pragma::BaseEnvCameraComponent &, const Vector3 &)>([](lua_State *l, pragma::BaseEnvCameraComponent &hComponent, const Vector3 &lookAtPos) {
+	def.def("LookAt", static_cast<void (*)(lua::State *, pragma::BaseEnvCameraComponent &, const Vector3 &)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent, const Vector3 &lookAtPos) {
 		auto *trComponent = hComponent.GetEntity().GetTransformComponent();
 		if(!trComponent)
 			return;
@@ -2545,7 +2542,7 @@ void pragma::lua::base_env_camera_component::register_class(luabind::module_ &mo
 	def.def("GetFocalDistanceProperty", &pragma::BaseEnvCameraComponent::GetFocalDistanceProperty);
 	def.def("GetFocalDistance", &pragma::BaseEnvCameraComponent::GetFocalDistance);
 	def.def("SetFocalDistance", &pragma::BaseEnvCameraComponent::SetFocalDistance);
-	def.def("GetFrustumPlanes", static_cast<std::vector<umath::Plane> (*)(lua_State *, pragma::BaseEnvCameraComponent &)>([](lua_State *l, pragma::BaseEnvCameraComponent &hComponent) {
+	def.def("GetFrustumPlanes", static_cast<std::vector<umath::Plane> (*)(lua::State *, pragma::BaseEnvCameraComponent &)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent) {
 		std::vector<umath::Plane> planes;
 		hComponent.GetFrustumPlanes(planes);
 		return planes;
@@ -2553,22 +2550,22 @@ void pragma::lua::base_env_camera_component::register_class(luabind::module_ &mo
 	def.def("GetFarPlaneCenter", &pragma::BaseEnvCameraComponent::GetFarPlaneCenter);
 	def.def("GetNearPlaneCenter", &pragma::BaseEnvCameraComponent::GetNearPlaneCenter);
 	def.def("GetPlaneCenter", &pragma::BaseEnvCameraComponent::GetPlaneCenter);
-	def.def("GetFarPlaneBoundaries", static_cast<std::array<Vector3, 4> (*)(lua_State *, pragma::BaseEnvCameraComponent &)>([](lua_State *l, pragma::BaseEnvCameraComponent &hComponent) -> std::array<Vector3, 4> {
+	def.def("GetFarPlaneBoundaries", static_cast<std::array<Vector3, 4> (*)(lua::State *, pragma::BaseEnvCameraComponent &)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent) -> std::array<Vector3, 4> {
 		std::array<Vector3, 4> farBounds;
 		hComponent.GetFarPlaneBoundaries(farBounds);
 		return farBounds;
 	}));
-	def.def("GetNearPlaneBoundaries", static_cast<std::array<Vector3, 4> (*)(lua_State *, pragma::BaseEnvCameraComponent &)>([](lua_State *l, pragma::BaseEnvCameraComponent &hComponent) {
+	def.def("GetNearPlaneBoundaries", static_cast<std::array<Vector3, 4> (*)(lua::State *, pragma::BaseEnvCameraComponent &)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent) {
 		std::array<Vector3, 4> nearBounds;
 		hComponent.GetNearPlaneBoundaries(nearBounds);
 		return nearBounds;
 	}));
-	def.def("GetPlaneBoundaries", static_cast<std::array<Vector3, 4> (*)(lua_State *, pragma::BaseEnvCameraComponent &, float)>([](lua_State *l, pragma::BaseEnvCameraComponent &hComponent, float z) {
+	def.def("GetPlaneBoundaries", static_cast<std::array<Vector3, 4> (*)(lua::State *, pragma::BaseEnvCameraComponent &, float)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent, float z) {
 		std::array<Vector3, 4> bounds;
 		hComponent.GetPlaneBoundaries(z, bounds);
 		return bounds;
 	}));
-	def.def("GetPlaneBoundaries", static_cast<Lua::mult<luabind::tableT<Vector3>, luabind::tableT<Vector3>> (*)(lua_State *, pragma::BaseEnvCameraComponent &)>([](lua_State *l, pragma::BaseEnvCameraComponent &hComponent) -> Lua::mult<luabind::tableT<Vector3>, luabind::tableT<Vector3>> {
+	def.def("GetPlaneBoundaries", static_cast<Lua::mult<luabind::tableT<Vector3>, luabind::tableT<Vector3>> (*)(lua::State *, pragma::BaseEnvCameraComponent &)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent) -> Lua::mult<luabind::tableT<Vector3>, luabind::tableT<Vector3>> {
 		std::array<Vector3, 8> bounds;
 		hComponent.GetPlaneBoundaries(bounds);
 
@@ -2590,7 +2587,7 @@ void pragma::lua::base_env_camera_component::register_class(luabind::module_ &mo
 	def.def("GetNearPlanePoint", &pragma::BaseEnvCameraComponent::GetNearPlanePoint);
 	def.def("GetFarPlanePoint", &pragma::BaseEnvCameraComponent::GetFarPlanePoint);
 	def.def("GetPlanePoint", &pragma::BaseEnvCameraComponent::GetPlanePoint);
-	def.def("GetFrustumNeighbors", static_cast<void (*)(lua_State *, pragma::BaseEnvCameraComponent &, int)>([](lua_State *l, pragma::BaseEnvCameraComponent &hComponent, int planeID) {
+	def.def("GetFrustumNeighbors", static_cast<void (*)(lua::State *, pragma::BaseEnvCameraComponent &, int)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent, int planeID) {
 		if(planeID < 0 || planeID > 5)
 			return;
 		FrustumPlane neighborIDs[4];
@@ -2602,7 +2599,7 @@ void pragma::lua::base_env_camera_component::register_class(luabind::module_ &mo
 			Lua::SetTableValue(l, table);
 		}
 	}));
-	def.def("GetFrustumPlaneCornerPoints", static_cast<void (*)(lua_State *, pragma::BaseEnvCameraComponent &, int, int)>([](lua_State *l, pragma::BaseEnvCameraComponent &hComponent, int planeA, int planeB) {
+	def.def("GetFrustumPlaneCornerPoints", static_cast<void (*)(lua::State *, pragma::BaseEnvCameraComponent &, int, int)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent, int planeA, int planeB) {
 		if(planeA < 0 || planeB < 0 || planeA > 5 || planeB > 5)
 			return;
 
@@ -2613,7 +2610,7 @@ void pragma::lua::base_env_camera_component::register_class(luabind::module_ &mo
 		Lua::PushInt(l, static_cast<int>(cornerPoints[1]));
 	}));
 	def.def("CreateFrustumKDop", static_cast<void (pragma::BaseEnvCameraComponent::*)(const Vector2 &, const Vector2 &, std::vector<umath::Plane> &) const>(&pragma::BaseEnvCameraComponent::CreateFrustumKDop), luabind::out_value<4> {});
-	def.def("CreateFrustumMesh", static_cast<void (*)(lua_State *, pragma::BaseEnvCameraComponent &, const Vector2 &, const Vector2 &)>([](lua_State *l, pragma::BaseEnvCameraComponent &hComponent, const Vector2 &uvStart, const Vector2 &uvEnd) {
+	def.def("CreateFrustumMesh", static_cast<void (*)(lua::State *, pragma::BaseEnvCameraComponent &, const Vector2 &, const Vector2 &)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent, const Vector2 &uvStart, const Vector2 &uvEnd) {
 		std::vector<Vector3> verts;
 		std::vector<uint16_t> indices;
 		hComponent.CreateFrustumMesh(uvStart, uvEnd, verts, indices);
@@ -2633,47 +2630,47 @@ void pragma::lua::base_env_camera_component::register_class(luabind::module_ &mo
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	def.def("ScreenSpaceToWorldSpace", static_cast<Vector3 (*)(lua_State *, pragma::BaseEnvCameraComponent &, const Vector2 &, float, float)>([](lua_State *l, pragma::BaseEnvCameraComponent &hComponent, const Vector2 &uv, float width, float height) -> Vector3 {
+	def.def("ScreenSpaceToWorldSpace", static_cast<Vector3 (*)(lua::State *, pragma::BaseEnvCameraComponent &, const Vector2 &, float, float)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent, const Vector2 &uv, float width, float height) -> Vector3 {
 		auto &ent = hComponent.GetEntity();
 		return uvec::calc_world_direction_from_2d_coordinates(ent.GetForward(), ent.GetRight(), ent.GetUp(), hComponent.GetFOVRad(), hComponent.GetNearZ(), hComponent.GetFarZ(), hComponent.GetAspectRatio(), width, height, uv);
 	}));
-	def.def("WorldSpaceToScreenSpace", static_cast<std::pair<Vector2, float> (*)(lua_State *, pragma::BaseEnvCameraComponent &, const Vector3 &)>([](lua_State *l, pragma::BaseEnvCameraComponent &hComponent, const Vector3 &point) -> std::pair<Vector2, float> {
+	def.def("WorldSpaceToScreenSpace", static_cast<std::pair<Vector2, float> (*)(lua::State *, pragma::BaseEnvCameraComponent &, const Vector3 &)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent, const Vector3 &point) -> std::pair<Vector2, float> {
 		float dist;
 		auto uv = uvec::calc_screenspace_uv_from_worldspace_position(point, hComponent.GetProjectionMatrix() * hComponent.GetViewMatrix(), hComponent.GetNearZ(), hComponent.GetFarZ(), dist);
 		return {uv, dist};
 	}));
-	def.def("WorldSpaceToScreenSpaceDirection", static_cast<Vector2 (*)(lua_State *, pragma::BaseEnvCameraComponent &, const Vector3 &)>([](lua_State *l, pragma::BaseEnvCameraComponent &hComponent, const Vector3 &dir) -> Vector2 {
+	def.def("WorldSpaceToScreenSpaceDirection", static_cast<Vector2 (*)(lua::State *, pragma::BaseEnvCameraComponent &, const Vector3 &)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent, const Vector3 &dir) -> Vector2 {
 		return uvec::calc_screenspace_direction_from_worldspace_direction(dir, hComponent.GetProjectionMatrix() * hComponent.GetViewMatrix());
 	}));
-	def.def("CalcScreenSpaceDistance", static_cast<float (*)(lua_State *, pragma::BaseEnvCameraComponent &, const Vector3 &)>([](lua_State *l, pragma::BaseEnvCameraComponent &hComponent, const Vector3 &point) -> float {
+	def.def("CalcScreenSpaceDistance", static_cast<float (*)(lua::State *, pragma::BaseEnvCameraComponent &, const Vector3 &)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent, const Vector3 &point) -> float {
 		return uvec::calc_screenspace_distance_to_worldspace_position(point, hComponent.GetProjectionMatrix() * hComponent.GetViewMatrix(), hComponent.GetNearZ(), hComponent.GetFarZ());
 	}));
-	def.def("DepthToDistance", static_cast<float (*)(lua_State *, pragma::BaseEnvCameraComponent &, double, float, float)>([](lua_State *l, pragma::BaseEnvCameraComponent &hComponent, double depth, float nearZ, float farZ) -> float { return uvec::depth_to_distance(depth, nearZ, farZ); }));
-	def.def("CalcRayDirection", static_cast<Vector3 (*)(lua_State *, pragma::BaseEnvCameraComponent &, const Vector2 &)>([](lua_State *l, pragma::BaseEnvCameraComponent &hComponent, const Vector2 &uv) -> Vector3 {
+	def.def("DepthToDistance", static_cast<float (*)(lua::State *, pragma::BaseEnvCameraComponent &, double, float, float)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent, double depth, float nearZ, float farZ) -> float { return uvec::depth_to_distance(depth, nearZ, farZ); }));
+	def.def("CalcRayDirection", static_cast<Vector3 (*)(lua::State *, pragma::BaseEnvCameraComponent &, const Vector2 &)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent, const Vector2 &uv) -> Vector3 {
 		auto &ent = hComponent.GetEntity();
 		return uvec::calc_world_direction_from_2d_coordinates(ent.GetForward(), ent.GetRight(), ent.GetUp(), hComponent.GetFOVRad(), hComponent.GetNearZ(), hComponent.GetFarZ(), hComponent.GetAspectRatio(), 0.f, 0.f, uv);
 	}));
 }
 
-void pragma::lua::base_env_explosion_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_explosion_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvExplosionComponent>("BaseEnvExplosionComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_env_fire_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_fire_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvFireComponent>("BaseEnvFireComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_env_fog_controller_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_fog_controller_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvFogControllerComponent>("BaseEnvFogControllerComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_env_light_spot_vol_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_light_spot_vol_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvLightSpotVolComponent>("BaseEnvLightSpotVolComponent");
 	def.def("SetIntensity", &pragma::BaseEnvLightSpotVolComponent::SetIntensityFactor);
@@ -2681,25 +2678,25 @@ void pragma::lua::base_env_light_spot_vol_component::register_class(luabind::mod
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_env_microphone_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_microphone_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvMicrophoneComponent>("BaseEnvMicrophoneComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_env_quake_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_quake_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvQuakeComponent>("BaseEnvQuakeComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_env_smoke_trail_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_smoke_trail_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvSmokeTrailComponent>("BaseEnvSmokeTrailComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_env_sound_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_sound_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvSoundComponent>("BaseEnvSoundComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -2729,37 +2726,37 @@ void pragma::lua::base_env_sound_component::register_class(luabind::module_ &mod
 	def.def("IsPaused", &pragma::BaseEnvSoundComponent::IsPaused);
 }
 
-void pragma::lua::base_env_soundscape_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_soundscape_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvSoundScapeComponent>("BaseEnvSoundScapeComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_env_sprite_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_sprite_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvSpriteComponent>("BaseEnvSpriteComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_env_timescale_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_timescale_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvTimescaleComponent>("BaseEnvTimescaleComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_env_weather_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_weather_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvWeatherComponent>("BaseEnvWeatherComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_env_wind_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_wind_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvWindComponent>("BaseEnvWindComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_env_filter_name_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_filter_name_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFilterNameComponent>("BaseFilterNameComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -2767,170 +2764,170 @@ void pragma::lua::base_env_filter_name_component::register_class(luabind::module
 	def.add_static_constant("EVENT_ON_NAME_CHANGED", pragma::baseNameComponent::EVENT_ON_NAME_CHANGED);
 }
 
-void pragma::lua::base_env_filter_class_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_env_filter_class_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFilterClassComponent>("BaseFilterClassComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("ShouldPass", &pragma::BaseFilterClassComponent::ShouldPass);
 }
 
-void pragma::lua::base_func_brush_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_func_brush_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncBrushComponent>("BaseFuncBrushComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_func_button_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_func_button_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncButtonComponent>("BaseFuncButtonComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_func_kinematic_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_func_kinematic_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncKinematicComponent>("BaseFuncKinematicComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_func_physics_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_func_physics_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncPhysicsComponent>("BaseFuncPhysicsComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_func_portal_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_func_portal_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncPortalComponent>("BaseFuncPortalComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_func_soft_physics_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_func_soft_physics_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncSoftPhysicsComponent>("BaseFuncSoftPhysicsComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_func_surface_material_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_func_surface_material_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncSurfaceMaterialComponent>("BaseFuncSurfaceMaterialComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_logic_relay_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_logic_relay_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseLogicRelayComponent>("BaseLogicRelayComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_bot_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_bot_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseBotComponent>("BaseBotComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_point_path_node_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_point_path_node_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointPathNodeComponent>("BasePointPathNodeComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_point_constraint_ball_socket_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_point_constraint_ball_socket_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointConstraintBallSocketComponent>("BasePointConstraintBallSocketComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_point_constraint_cone_twist_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_point_constraint_cone_twist_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointConstraintConeTwistComponent>("BasePointConstraintConeTwistComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_point_constraint_dof_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_point_constraint_dof_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointConstraintDoFComponent>("BasePointConstraintDoFComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_point_constraint_fixed_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_point_constraint_fixed_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointConstraintFixedComponent>("BasePointConstraintFixedComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_point_constraint_hinge_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_point_constraint_hinge_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointConstraintHingeComponent>("BasePointConstraintHingeComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_point_constraint_slider_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_point_constraint_slider_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointConstraintSliderComponent>("BasePointConstraintSliderComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_point_render_target_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_point_render_target_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointRenderTargetComponent>("BasePointRenderTargetComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_point_target_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_point_target_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointTargetComponent>("BasePointTargetComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_prop_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_prop_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePropComponent>("BasePropComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_prop_dynamic_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_prop_dynamic_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePropDynamicComponent>("BasePropDynamicComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_prop_physics_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_prop_physics_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePropPhysicsComponent>("BasePropPhysicsComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_trigger_hurt_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_trigger_hurt_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTriggerHurtComponent>("BaseTriggerHurtComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_trigger_push_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_trigger_push_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTriggerPushComponent>("BaseTriggerPushComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_trigger_remove_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_trigger_remove_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTriggerRemoveComponent>("BaseTriggerRemoveComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_trigger_teleport_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_trigger_teleport_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTriggerTeleportComponent>("BaseTriggerTeleportComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_touch_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_touch_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTouchComponent>("BaseTouchComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetTriggerFlags", &pragma::BaseTouchComponent::SetTriggerFlags);
 	def.def("GetTriggerFlags", &pragma::BaseTouchComponent::GetTriggerFlags);
-	def.def("GetTouchingEntities", static_cast<luabind::object (*)(lua_State *, pragma::BaseTouchComponent &)>([](lua_State *l, pragma::BaseTouchComponent &hComponent) -> luabind::object {
+	def.def("GetTouchingEntities", static_cast<luabind::object (*)(lua::State *, pragma::BaseTouchComponent &)>([](lua::State *l, pragma::BaseTouchComponent &hComponent) -> luabind::object {
 		auto t = luabind::newtable(l);
 		int32_t idx = 1;
 		for(auto &touchInfo : hComponent.GetTouchingInfo()) {
@@ -2940,7 +2937,7 @@ void pragma::lua::base_touch_component::register_class(luabind::module_ &mod)
 		}
 		return t;
 	}));
-	def.def("GetTouchingEntityCount", static_cast<uint32_t (*)(lua_State *, pragma::BaseTouchComponent &)>([](lua_State *l, pragma::BaseTouchComponent &hComponent) -> uint32_t {
+	def.def("GetTouchingEntityCount", static_cast<uint32_t (*)(lua::State *, pragma::BaseTouchComponent &)>([](lua::State *l, pragma::BaseTouchComponent &hComponent) -> uint32_t {
 		auto &touchingInfo = hComponent.GetTouchingInfo();
 		return std::count_if(touchingInfo.begin(), touchingInfo.end(), [](const pragma::BaseTouchComponent::TouchInfo &touchInfo) -> bool { return touchInfo.triggered && touchInfo.touch.entity.valid(); });
 	}));
@@ -2958,26 +2955,26 @@ void pragma::lua::base_touch_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("TRIGGER_FLAG_EVERYTHING", umath::to_integral(pragma::BaseTouchComponent::TriggerFlags::Everything));
 }
 
-void pragma::lua::base_trigger_gravity_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_trigger_gravity_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEntityTriggerGravityComponent>("BaseEntityTriggerGravityComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_flashlight_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_flashlight_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFlashlightComponent>("BaseFlashlightComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_flex_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_flex_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFlexComponent>("BaseFlexComponent");
 	def.add_static_constant("EVENT_ON_FLEX_CONTROLLER_CHANGED", pragma::baseFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED);
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_skybox_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_skybox_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseSkyboxComponent>("BaseSkyboxComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -2985,26 +2982,26 @@ void pragma::lua::base_skybox_component::register_class(luabind::module_ &mod)
 	def.def("GetSkyAngles", &pragma::BaseSkyboxComponent::GetSkyAngles, luabind::copy_policy<0> {});
 }
 
-void pragma::lua::base_world_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_world_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseWorldComponent>("BaseWorldComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 namespace Lua::AI {
-	void GetMoveSpeed(lua_State *l, pragma::BaseAIComponent &hNPC, uint32_t animId) { Lua::PushNumber(l, hNPC.GetMoveSpeed(animId)); }
+	void GetMoveSpeed(lua::State *l, pragma::BaseAIComponent &hNPC, uint32_t animId) { Lua::PushNumber(l, hNPC.GetMoveSpeed(animId)); }
 
-	void SetLookTarget(lua_State *l, pragma::BaseAIComponent &hNPC, const Vector3 &tgt, float t) { hNPC.SetLookTarget(tgt, t); }
+	void SetLookTarget(lua::State *l, pragma::BaseAIComponent &hNPC, const Vector3 &tgt, float t) { hNPC.SetLookTarget(tgt, t); }
 
-	void SetLookTarget(lua_State *l, pragma::BaseAIComponent &hNPC, pragma::ecs::BaseEntity &ent, float t) { hNPC.SetLookTarget(ent, t); }
+	void SetLookTarget(lua::State *l, pragma::BaseAIComponent &hNPC, pragma::ecs::BaseEntity &ent, float t) { hNPC.SetLookTarget(ent, t); }
 };
-void pragma::lua::base_ai_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_ai_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseAIComponent>("BaseAIComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetMoveSpeed", static_cast<void (pragma::BaseAIComponent::*)(int32_t, float)>(&pragma::BaseAIComponent::SetMoveSpeed));
 	def.def("SetMoveSpeed", static_cast<void (pragma::BaseAIComponent::*)(const std::string &, float)>(&pragma::BaseAIComponent::SetMoveSpeed));
-	def.def("GetMoveSpeed", static_cast<void (*)(lua_State *, pragma::BaseAIComponent &, const std::string &)>([](lua_State *l, pragma::BaseAIComponent &hNPC, const std::string &anim) {
+	def.def("GetMoveSpeed", static_cast<void (*)(lua::State *, pragma::BaseAIComponent &, const std::string &)>([](lua::State *l, pragma::BaseAIComponent &hNPC, const std::string &anim) {
 		auto &mdl = hNPC.GetEntity().GetModel();
 		if(mdl == nullptr)
 			return;
@@ -3013,18 +3010,18 @@ void pragma::lua::base_ai_component::register_class(luabind::module_ &mod)
 			return;
 		Lua::AI::GetMoveSpeed(l, hNPC, animId);
 	}));
-	def.def("GetMoveSpeed", static_cast<void (*)(lua_State *, pragma::BaseAIComponent &, uint32_t)>([](lua_State *l, pragma::BaseAIComponent &hNPC, uint32_t animId) { Lua::AI::GetMoveSpeed(l, hNPC, animId); }));
+	def.def("GetMoveSpeed", static_cast<void (*)(lua::State *, pragma::BaseAIComponent &, uint32_t)>([](lua::State *l, pragma::BaseAIComponent &hNPC, uint32_t animId) { Lua::AI::GetMoveSpeed(l, hNPC, animId); }));
 	def.def("ClearMoveSpeed", static_cast<void (pragma::BaseAIComponent::*)(int32_t)>(&pragma::BaseAIComponent::ClearMoveSpeed));
 	def.def("ClearMoveSpeed", static_cast<void (pragma::BaseAIComponent::*)(const std::string &)>(&pragma::BaseAIComponent::ClearMoveSpeed));
 	def.def("ClearLookTarget", &pragma::BaseAIComponent::ClearLookTarget);
-	def.def("SetLookTarget", static_cast<void (*)(lua_State *, pragma::BaseAIComponent &, const Vector3 &, float)>([](lua_State *l, pragma::BaseAIComponent &hNPC, const Vector3 &tgt, float t) { Lua::AI::SetLookTarget(l, hNPC, tgt, t); }));
-	def.def("SetLookTarget", static_cast<void (*)(lua_State *, pragma::BaseAIComponent &, const Vector3 &)>([](lua_State *l, pragma::BaseAIComponent &hNPC, const Vector3 &tgt) { Lua::AI::SetLookTarget(l, hNPC, tgt, std::numeric_limits<float>::max()); }));
-	def.def("SetLookTarget", static_cast<void (*)(lua_State *, pragma::BaseAIComponent &, pragma::ecs::BaseEntity &, float)>([](lua_State *l, pragma::BaseAIComponent &hNPC, pragma::ecs::BaseEntity &ent, float t) { Lua::AI::SetLookTarget(l, hNPC, ent, t); }));
-	def.def("SetLookTarget", static_cast<void (*)(lua_State *, pragma::BaseAIComponent &, pragma::ecs::BaseEntity &)>([](lua_State *l, pragma::BaseAIComponent &hNPC, pragma::ecs::BaseEntity &ent) { Lua::AI::SetLookTarget(l, hNPC, ent, std::numeric_limits<float>::max()); }));
+	def.def("SetLookTarget", static_cast<void (*)(lua::State *, pragma::BaseAIComponent &, const Vector3 &, float)>([](lua::State *l, pragma::BaseAIComponent &hNPC, const Vector3 &tgt, float t) { Lua::AI::SetLookTarget(l, hNPC, tgt, t); }));
+	def.def("SetLookTarget", static_cast<void (*)(lua::State *, pragma::BaseAIComponent &, const Vector3 &)>([](lua::State *l, pragma::BaseAIComponent &hNPC, const Vector3 &tgt) { Lua::AI::SetLookTarget(l, hNPC, tgt, std::numeric_limits<float>::max()); }));
+	def.def("SetLookTarget", static_cast<void (*)(lua::State *, pragma::BaseAIComponent &, pragma::ecs::BaseEntity &, float)>([](lua::State *l, pragma::BaseAIComponent &hNPC, pragma::ecs::BaseEntity &ent, float t) { Lua::AI::SetLookTarget(l, hNPC, ent, t); }));
+	def.def("SetLookTarget", static_cast<void (*)(lua::State *, pragma::BaseAIComponent &, pragma::ecs::BaseEntity &)>([](lua::State *l, pragma::BaseAIComponent &hNPC, pragma::ecs::BaseEntity &ent) { Lua::AI::SetLookTarget(l, hNPC, ent, std::numeric_limits<float>::max()); }));
 	def.def("GetLookTarget", &pragma::BaseAIComponent::GetLookTarget);
 }
 
-void pragma::lua::base_character_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_character_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseCharacterComponent>("BaseCharacterComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -3051,7 +3048,7 @@ void pragma::lua::base_character_component::register_class(luabind::module_ &mod
 	def.def("GetViewRight", &pragma::BaseCharacterComponent::GetViewRight);
 	def.def("GetViewUp", &pragma::BaseCharacterComponent::GetViewUp);
 	def.def("Ragdolize", &pragma::BaseCharacterComponent::Ragdolize);
-	def.def("SetSlopeLimit", static_cast<void (*)(lua_State *, pragma::BaseCharacterComponent &, float)>([](lua_State *l, pragma::BaseCharacterComponent &hEntity, float slopeLimit) { hEntity.SetSlopeLimit(umath::deg_to_rad(slopeLimit)); }));
+	def.def("SetSlopeLimit", static_cast<void (*)(lua::State *, pragma::BaseCharacterComponent &, float)>([](lua::State *l, pragma::BaseCharacterComponent &hEntity, float slopeLimit) { hEntity.SetSlopeLimit(umath::deg_to_rad(slopeLimit)); }));
 	def.def("SetStepOffset", &pragma::BaseCharacterComponent::SetStepOffset);
 	def.def("SetTurnSpeed", &pragma::BaseCharacterComponent::SetTurnSpeed);
 	def.def("SetViewAngles", &pragma::BaseCharacterComponent::SetViewAngles);
@@ -3059,7 +3056,7 @@ void pragma::lua::base_character_component::register_class(luabind::module_ &mod
 	def.def("NormalizeViewRotation", static_cast<void (pragma::BaseCharacterComponent::*)(Quat &)>(&pragma::BaseCharacterComponent::NormalizeViewOrientation));
 	def.def("NormalizeViewRotation", static_cast<const Quat &(pragma::BaseCharacterComponent::*)()>(&pragma::BaseCharacterComponent::NormalizeViewOrientation), luabind::copy_policy<0> {});
 	def.def("GetHitboxPhysicsObject", &pragma::BaseCharacterComponent::GetHitboxPhysicsObject);
-	def.def("GetWeapons", static_cast<void (*)(lua_State *, pragma::BaseCharacterComponent &)>([](lua_State *l, pragma::BaseCharacterComponent &hEnt) {
+	def.def("GetWeapons", static_cast<void (*)(lua::State *, pragma::BaseCharacterComponent &)>([](lua::State *l, pragma::BaseCharacterComponent &hEnt) {
 		auto &weapons = hEnt.GetWeapons();
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
@@ -3071,7 +3068,7 @@ void pragma::lua::base_character_component::register_class(luabind::module_ &mod
 			}
 		}
 	}));
-	def.def("GetWeapons", static_cast<void (*)(lua_State *, pragma::BaseCharacterComponent &, const std::string &)>([](lua_State *l, pragma::BaseCharacterComponent &hEnt, const std::string &className) {
+	def.def("GetWeapons", static_cast<void (*)(lua::State *, pragma::BaseCharacterComponent &, const std::string &)>([](lua::State *l, pragma::BaseCharacterComponent &hEnt, const std::string &className) {
 		auto weapons = hEnt.GetWeapons(className);
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
@@ -3081,11 +3078,11 @@ void pragma::lua::base_character_component::register_class(luabind::module_ &mod
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	def.def("GetWeaponCount", static_cast<size_t (*)(lua_State *, pragma::BaseCharacterComponent &)>([](lua_State *l, pragma::BaseCharacterComponent &hEnt) -> size_t { return hEnt.GetWeapons().size(); }));
+	def.def("GetWeaponCount", static_cast<size_t (*)(lua::State *, pragma::BaseCharacterComponent &)>([](lua::State *l, pragma::BaseCharacterComponent &hEnt) -> size_t { return hEnt.GetWeapons().size(); }));
 	def.def("GetActiveWeapon", &pragma::BaseCharacterComponent::GetActiveWeapon);
 	def.def("HasWeapon", &pragma::BaseCharacterComponent::HasWeapon);
-	def.def("GetAimRayData", static_cast<void (*)(lua_State *, pragma::BaseCharacterComponent &)>([](lua_State *l, pragma::BaseCharacterComponent &hEnt) { Lua::Push<::TraceData>(l, hEnt.GetAimTraceData()); }));
-	def.def("GetAimRayData", static_cast<void (*)(lua_State *, pragma::BaseCharacterComponent &, float)>([](lua_State *l, pragma::BaseCharacterComponent &hEnt, float maxDist) { Lua::Push<::TraceData>(l, hEnt.GetAimTraceData(maxDist)); }));
+	def.def("GetAimRayData", static_cast<void (*)(lua::State *, pragma::BaseCharacterComponent &)>([](lua::State *l, pragma::BaseCharacterComponent &hEnt) { Lua::Push<::TraceData>(l, hEnt.GetAimTraceData()); }));
+	def.def("GetAimRayData", static_cast<void (*)(lua::State *, pragma::BaseCharacterComponent &, float)>([](lua::State *l, pragma::BaseCharacterComponent &hEnt, float maxDist) { Lua::Push<::TraceData>(l, hEnt.GetAimTraceData(maxDist)); }));
 	def.def("FootStep", &pragma::BaseCharacterComponent::FootStep);
 	def.def("IsMoving", &pragma::BaseCharacterComponent::IsMoving);
 	def.def("SetNeckControllers", &pragma::BaseCharacterComponent::SetNeckControllers);
@@ -3093,7 +3090,7 @@ void pragma::lua::base_character_component::register_class(luabind::module_ &mod
 	def.def("GetNeckPitchController", &pragma::BaseCharacterComponent::GetNeckPitchBlendController);
 	def.def("SetMoveController", static_cast<void (pragma::BaseCharacterComponent::*)(const std::string &)>(&pragma::BaseCharacterComponent::SetMoveController));
 	def.def("SetMoveController", static_cast<void (pragma::BaseCharacterComponent::*)(const std::string &, const std::string &)>(&pragma::BaseCharacterComponent::SetMoveController));
-	def.def("GetMoveController", static_cast<luabind::mult<int32_t, int32_t> (*)(lua_State *, pragma::BaseCharacterComponent &)>([](lua_State *l, pragma::BaseCharacterComponent &hEnt) -> luabind::mult<int32_t, int32_t> { return {l, hEnt.GetMoveController(), hEnt.GetMoveControllerY()}; }));
+	def.def("GetMoveController", static_cast<luabind::mult<int32_t, int32_t> (*)(lua::State *, pragma::BaseCharacterComponent &)>([](lua::State *l, pragma::BaseCharacterComponent &hEnt) -> luabind::mult<int32_t, int32_t> { return {l, hEnt.GetMoveController(), hEnt.GetMoveControllerY()}; }));
 
 	def.def("SetOrientation", &pragma::BaseCharacterComponent::SetCharacterOrientation);
 	def.def("GetLocalOrientationAngles", &pragma::BaseCharacterComponent::GetLocalOrientationAngles);
@@ -3136,7 +3133,7 @@ void pragma::lua::base_character_component::register_class(luabind::module_ &mod
 	def.add_static_constant("FOOT_RIGHT", umath::to_integral(pragma::BaseCharacterComponent::FootType::Right));
 }
 
-void pragma::lua::base_vehicle_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_vehicle_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseVehicleComponent>("BaseVehicleComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -3155,7 +3152,7 @@ void pragma::lua::base_vehicle_component::register_class(luabind::module_ &mod)
 }
 
 namespace Lua::Weapon {
-	void PrimaryAttack(lua_State *l, pragma::BaseWeaponComponent &hEnt, bool bOnce)
+	void PrimaryAttack(lua::State *l, pragma::BaseWeaponComponent &hEnt, bool bOnce)
 	{
 		auto &wep = hEnt;
 		wep.PrimaryAttack();
@@ -3163,7 +3160,7 @@ namespace Lua::Weapon {
 			wep.EndPrimaryAttack();
 	}
 
-	void SecondaryAttack(lua_State *l, pragma::BaseWeaponComponent &hEnt, bool bOnce)
+	void SecondaryAttack(lua::State *l, pragma::BaseWeaponComponent &hEnt, bool bOnce)
 	{
 		auto &wep = hEnt;
 		wep.SecondaryAttack();
@@ -3171,7 +3168,7 @@ namespace Lua::Weapon {
 			wep.EndSecondaryAttack();
 	}
 };
-void pragma::lua::base_weapon_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_weapon_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseWeaponComponent>("BaseWeaponComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -3200,10 +3197,10 @@ void pragma::lua::base_weapon_component::register_class(luabind::module_ &mod)
 	def.def("GetMaxPrimaryClipSizeProperty", &pragma::BaseWeaponComponent::GetMaxPrimaryClipSizeProperty);
 	def.def("GetMaxSecondaryClipSize", &pragma::BaseWeaponComponent::GetMaxSecondaryClipSize);
 	def.def("GetMaxSecondaryClipSizeProperty", &pragma::BaseWeaponComponent::GetMaxSecondaryClipSizeProperty);
-	def.def("PrimaryAttack", static_cast<void (*)(lua_State *, pragma::BaseWeaponComponent &, bool)>([](lua_State *l, pragma::BaseWeaponComponent &hEnt, bool bOnce) { Lua::Weapon::PrimaryAttack(l, hEnt, bOnce); }));
-	def.def("PrimaryAttack", static_cast<void (*)(lua_State *, pragma::BaseWeaponComponent &)>([](lua_State *l, pragma::BaseWeaponComponent &hEnt) { Lua::Weapon::PrimaryAttack(l, hEnt, false); }));
-	def.def("SecondaryAttack", static_cast<void (*)(lua_State *, pragma::BaseWeaponComponent &, bool)>([](lua_State *l, pragma::BaseWeaponComponent &hEnt, bool bOnce) { Lua::Weapon::SecondaryAttack(l, hEnt, bOnce); }));
-	def.def("SecondaryAttack", static_cast<void (*)(lua_State *, pragma::BaseWeaponComponent &)>([](lua_State *l, pragma::BaseWeaponComponent &hEnt) { Lua::Weapon::SecondaryAttack(l, hEnt, false); }));
+	def.def("PrimaryAttack", static_cast<void (*)(lua::State *, pragma::BaseWeaponComponent &, bool)>([](lua::State *l, pragma::BaseWeaponComponent &hEnt, bool bOnce) { Lua::Weapon::PrimaryAttack(l, hEnt, bOnce); }));
+	def.def("PrimaryAttack", static_cast<void (*)(lua::State *, pragma::BaseWeaponComponent &)>([](lua::State *l, pragma::BaseWeaponComponent &hEnt) { Lua::Weapon::PrimaryAttack(l, hEnt, false); }));
+	def.def("SecondaryAttack", static_cast<void (*)(lua::State *, pragma::BaseWeaponComponent &, bool)>([](lua::State *l, pragma::BaseWeaponComponent &hEnt, bool bOnce) { Lua::Weapon::SecondaryAttack(l, hEnt, bOnce); }));
+	def.def("SecondaryAttack", static_cast<void (*)(lua::State *, pragma::BaseWeaponComponent &)>([](lua::State *l, pragma::BaseWeaponComponent &hEnt) { Lua::Weapon::SecondaryAttack(l, hEnt, false); }));
 	def.def("TertiaryAttack", &pragma::BaseWeaponComponent::TertiaryAttack);
 	def.def("Attack4", &pragma::BaseWeaponComponent::Attack4);
 	def.def("Reload", &pragma::BaseWeaponComponent::Reload);
@@ -3226,7 +3223,7 @@ void pragma::lua::base_weapon_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED", pragma::baseWeaponComponent::EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED);
 }
 
-void pragma::lua::base_player_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_player_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePlayerComponent>("BasePlayerComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -3255,14 +3252,14 @@ void pragma::lua::base_player_component::register_class(luabind::module_ &mod)
 	def.def("GetViewPos", &pragma::BasePlayerComponent::GetViewPos, luabind::copy_policy<0> {});
 
 	def.def("ApplyViewRotationOffset", &pragma::BasePlayerComponent::ApplyViewRotationOffset);
-	def.def("ApplyViewRotationOffset", static_cast<void (*)(lua_State *, pragma::BasePlayerComponent &, EulerAngles &)>([](lua_State *l, pragma::BasePlayerComponent &hPl, EulerAngles &ang) { hPl.ApplyViewRotationOffset(ang); }));
+	def.def("ApplyViewRotationOffset", static_cast<void (*)(lua::State *, pragma::BasePlayerComponent &, EulerAngles &)>([](lua::State *l, pragma::BasePlayerComponent &hPl, EulerAngles &ang) { hPl.ApplyViewRotationOffset(ang); }));
 	def.def("PrintMessage", &pragma::BasePlayerComponent::PrintMessage);
 
 	def.add_static_constant("MESSAGE_TYPE_CONSOLE", umath::to_integral(MESSAGE::PRINTCONSOLE));
 	def.add_static_constant("MESSAGE_TYPE_CHAT", umath::to_integral(MESSAGE::PRINTCHAT));
 }
 
-void pragma::lua::base_observer_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_observer_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseObserverComponent>("BaseObserverComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -3283,7 +3280,7 @@ void pragma::lua::base_observer_component::register_class(luabind::module_ &mod)
 	static_assert(umath::to_integral(ObserverMode::Count) == 5, "Update this list when new modes are added!");
 }
 
-void pragma::lua::base_gamemode_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_gamemode_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseGamemodeComponent>("BaseGamemodeComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -3304,7 +3301,7 @@ void pragma::lua::base_gamemode_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_GAME_READY", pragma::baseGamemodeComponent::EVENT_ON_GAME_READY);
 }
 
-void pragma::lua::base_generic_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_generic_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseGenericComponent>("BaseGenericComponent");
 	def.add_static_constant("EVENT_ON_COMPONENT_ADDED", pragma::baseGenericComponent::EVENT_ON_ENTITY_COMPONENT_ADDED);
@@ -3314,33 +3311,33 @@ void pragma::lua::base_generic_component::register_class(luabind::module_ &mod)
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_info_landmark_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_info_landmark_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseInfoLandmarkComponent>("BaseInfoLandmarkComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_io_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_io_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseIOComponent>("BaseIOComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
-	def.def("Input", static_cast<void (*)(lua_State *, pragma::BaseIOComponent &, std::string, pragma::ecs::BaseEntity &, pragma::ecs::BaseEntity &, std::string)>([](lua_State *l, pragma::BaseIOComponent &hIo, std::string input, pragma::ecs::BaseEntity &activator, pragma::ecs::BaseEntity &caller, std::string data) {
+	def.def("Input", static_cast<void (*)(lua::State *, pragma::BaseIOComponent &, std::string, pragma::ecs::BaseEntity &, pragma::ecs::BaseEntity &, std::string)>([](lua::State *l, pragma::BaseIOComponent &hIo, std::string input, pragma::ecs::BaseEntity &activator, pragma::ecs::BaseEntity &caller, std::string data) {
 		hIo.Input(input, &activator, &caller, data);
 	}));
-	def.def("Input", static_cast<void (*)(lua_State *, pragma::BaseIOComponent &, std::string, pragma::ecs::BaseEntity &, std::string)>([](lua_State *l, pragma::BaseIOComponent &hIo, std::string input, pragma::ecs::BaseEntity &activator, std::string data) { hIo.Input(input, &activator, nullptr, data); }));
-	def.def("Input", static_cast<void (*)(lua_State *, pragma::BaseIOComponent &, std::string, std::string)>([](lua_State *l, pragma::BaseIOComponent &hIo, std::string input, std::string data) { hIo.Input(input, nullptr, nullptr, data); }));
-	def.def("Input", static_cast<void (*)(lua_State *, pragma::BaseIOComponent &, std::string)>([](lua_State *l, pragma::BaseIOComponent &hIo, std::string input) { hIo.Input(input, nullptr, nullptr, ""); }));
+	def.def("Input", static_cast<void (*)(lua::State *, pragma::BaseIOComponent &, std::string, pragma::ecs::BaseEntity &, std::string)>([](lua::State *l, pragma::BaseIOComponent &hIo, std::string input, pragma::ecs::BaseEntity &activator, std::string data) { hIo.Input(input, &activator, nullptr, data); }));
+	def.def("Input", static_cast<void (*)(lua::State *, pragma::BaseIOComponent &, std::string, std::string)>([](lua::State *l, pragma::BaseIOComponent &hIo, std::string input, std::string data) { hIo.Input(input, nullptr, nullptr, data); }));
+	def.def("Input", static_cast<void (*)(lua::State *, pragma::BaseIOComponent &, std::string)>([](lua::State *l, pragma::BaseIOComponent &hIo, std::string input) { hIo.Input(input, nullptr, nullptr, ""); }));
 	def.def("StoreOutput",
-	  static_cast<void (*)(lua_State *, pragma::BaseIOComponent &, const std::string &, const std::string &, const std::string &, const std::string &, float, int32_t)>(
-	    [](lua_State *l, pragma::BaseIOComponent &hIo, const std::string &name, const std::string &entities, const std::string &input, const std::string &param, float delay, int32_t times) { hIo.StoreOutput(name, entities, input, param, delay, times); }));
+	  static_cast<void (*)(lua::State *, pragma::BaseIOComponent &, const std::string &, const std::string &, const std::string &, const std::string &, float, int32_t)>(
+	    [](lua::State *l, pragma::BaseIOComponent &hIo, const std::string &name, const std::string &entities, const std::string &input, const std::string &param, float delay, int32_t times) { hIo.StoreOutput(name, entities, input, param, delay, times); }));
 	def.def("StoreOutput",
-	  static_cast<void (*)(lua_State *, pragma::BaseIOComponent &, const std::string &, const std::string &, const std::string &, const std::string &, float)>(
-	    [](lua_State *l, pragma::BaseIOComponent &hIo, const std::string &name, const std::string &entities, const std::string &input, const std::string &param, float delay) { hIo.StoreOutput(name, entities, input, param, delay); }));
+	  static_cast<void (*)(lua::State *, pragma::BaseIOComponent &, const std::string &, const std::string &, const std::string &, const std::string &, float)>(
+	    [](lua::State *l, pragma::BaseIOComponent &hIo, const std::string &name, const std::string &entities, const std::string &input, const std::string &param, float delay) { hIo.StoreOutput(name, entities, input, param, delay); }));
 	def.def("StoreOutput",
-	  static_cast<void (*)(lua_State *, pragma::BaseIOComponent &, const std::string &, const std::string &, const std::string &, const std::string &)>(
-	    [](lua_State *l, pragma::BaseIOComponent &hIo, const std::string &name, const std::string &entities, const std::string &input, const std::string &param) { hIo.StoreOutput(name, entities, input, param); }));
-	def.def("StoreOutput", static_cast<void (*)(lua_State *, pragma::BaseIOComponent &, const std::string &, const std::string &)>([](lua_State *l, pragma::BaseIOComponent &hIo, const std::string &name, const std::string &info) { hIo.StoreOutput(name, info); }));
-	def.def("FireOutput", static_cast<void (*)(lua_State *, pragma::BaseIOComponent &, const std::string &, pragma::ecs::BaseEntity &)>([](lua_State *l, pragma::BaseIOComponent &hIo, const std::string &name, pragma::ecs::BaseEntity &ent) { hIo.TriggerOutput(name, &ent); }));
+	  static_cast<void (*)(lua::State *, pragma::BaseIOComponent &, const std::string &, const std::string &, const std::string &, const std::string &)>(
+	    [](lua::State *l, pragma::BaseIOComponent &hIo, const std::string &name, const std::string &entities, const std::string &input, const std::string &param) { hIo.StoreOutput(name, entities, input, param); }));
+	def.def("StoreOutput", static_cast<void (*)(lua::State *, pragma::BaseIOComponent &, const std::string &, const std::string &)>([](lua::State *l, pragma::BaseIOComponent &hIo, const std::string &name, const std::string &info) { hIo.StoreOutput(name, info); }));
+	def.def("FireOutput", static_cast<void (*)(lua::State *, pragma::BaseIOComponent &, const std::string &, pragma::ecs::BaseEntity &)>([](lua::State *l, pragma::BaseIOComponent &hIo, const std::string &name, pragma::ecs::BaseEntity &ent) { hIo.TriggerOutput(name, &ent); }));
 	def.def("FireOutput", &pragma::BaseIOComponent::TriggerOutput);
 	def.add_static_constant("EVENT_HANDLE_INPUT", pragma::baseIOComponent::EVENT_HANDLE_INPUT);
 
@@ -3348,23 +3345,23 @@ void pragma::lua::base_io_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("IO_FLAG_BIT_FORCE_DELAYED_FIRE", umath::to_integral(pragma::BaseIOComponent::IoFlags::ForceDelayedFire));
 }
 
-void pragma::lua::base_model_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_model_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseModelComponent>("BaseModelComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
-	def.def("SetModel", static_cast<void (*)(lua_State *, pragma::BaseModelComponent &)>([](lua_State *l, pragma::BaseModelComponent &hModel) { hModel.SetModel(std::shared_ptr<pragma::Model> {nullptr}); }));
+	def.def("SetModel", static_cast<void (*)(lua::State *, pragma::BaseModelComponent &)>([](lua::State *l, pragma::BaseModelComponent &hModel) { hModel.SetModel(std::shared_ptr<pragma::Model> {nullptr}); }));
 	def.def("SetModel", static_cast<void (pragma::BaseModelComponent::*)(const std::string &)>(&pragma::BaseModelComponent::SetModel));
 	def.def("SetModel", static_cast<void (pragma::BaseModelComponent::*)(const std::shared_ptr<pragma::Model> &)>(&pragma::BaseModelComponent::SetModel));
 	def.def("SetSkin", &pragma::BaseModelComponent::SetSkin);
 	def.def("GetSkin", &pragma::BaseModelComponent::GetSkin);
 	def.def("GetSkinProperty", &pragma::BaseModelComponent::GetSkinProperty);
-	def.def("SetRandomSkin", static_cast<void (*)(lua_State *, pragma::BaseModelComponent &)>([](lua_State *l, pragma::BaseModelComponent &hModel) {
+	def.def("SetRandomSkin", static_cast<void (*)(lua::State *, pragma::BaseModelComponent &)>([](lua::State *l, pragma::BaseModelComponent &hModel) {
 		auto &mdl = hModel.GetModel();
 		if(mdl == nullptr)
 			return;
 		hModel.SetSkin(umath::random(0, umath::max(mdl->GetTextureGroups().size(), static_cast<size_t>(1)) - 1));
 	}));
-	def.def("GetModel", static_cast<luabind::optional<pragma::Model> (*)(lua_State *, pragma::BaseModelComponent &)>([](lua_State *l, pragma::BaseModelComponent &hModel) -> luabind::optional<pragma::Model> {
+	def.def("GetModel", static_cast<luabind::optional<pragma::Model> (*)(lua::State *, pragma::BaseModelComponent &)>([](lua::State *l, pragma::BaseModelComponent &hModel) -> luabind::optional<pragma::Model> {
 		auto mdl = hModel.GetModel();
 		if(mdl == nullptr)
 			return Lua::nil;
@@ -3374,7 +3371,7 @@ void pragma::lua::base_model_component::register_class(luabind::module_ &mod)
 	def.def("GetBodyGroups", &pragma::BaseModelComponent::GetBodyGroups);
 	def.def("SetBodyGroup", static_cast<bool (pragma::BaseModelComponent::*)(uint32_t, uint32_t)>(&pragma::BaseModelComponent::SetBodyGroup));
 	def.def("SetBodyGroup", static_cast<void (pragma::BaseModelComponent::*)(const std::string &, uint32_t)>(&pragma::BaseModelComponent::SetBodyGroup));
-	def.def("SetBodyGroups", static_cast<void (*)(lua_State *, pragma::BaseModelComponent &, luabind::table<>)>([](lua_State *l, pragma::BaseModelComponent &hModel, luabind::table<> t) {
+	def.def("SetBodyGroups", static_cast<void (*)(lua::State *, pragma::BaseModelComponent &, luabind::table<>)>([](lua::State *l, pragma::BaseModelComponent &hModel, luabind::table<> t) {
 		auto bodyGroups = Lua::table_to_vector<uint32_t>(l, t, 2);
 		for(auto i = decltype(bodyGroups.size()) {0u}; i < bodyGroups.size(); ++i)
 			hModel.SetBodyGroup(i, bodyGroups[i]);
@@ -3386,7 +3383,7 @@ void pragma::lua::base_model_component::register_class(luabind::module_ &mod)
 	def.def("LookupAttachment", &pragma::BaseModelComponent::LookupAttachment);
 	def.def("GetHitboxCount", &pragma::BaseModelComponent::GetHitboxCount);
 	def.def(
-	  "GetHitboxBounds", +[](lua_State *l, pragma::BaseModelComponent &hEnt, uint32_t boneId) -> std::optional<std::tuple<Vector3, Vector3, Vector3, Quat>> {
+	  "GetHitboxBounds", +[](lua::State *l, pragma::BaseModelComponent &hEnt, uint32_t boneId) -> std::optional<std::tuple<Vector3, Vector3, Vector3, Quat>> {
 		  Vector3 min, max, origin;
 		  auto rot = uquat::identity();
 		  if(!hEnt.GetHitboxBounds(boneId, min, max, origin, rot))
@@ -3394,7 +3391,7 @@ void pragma::lua::base_model_component::register_class(luabind::module_ &mod)
 		  return std::tuple<Vector3, Vector3, Vector3, Quat> {min, max, origin, rot};
 	  });
 	def.def(
-	  "GetHitboxBounds", +[](lua_State *l, pragma::BaseModelComponent &hEnt, uint32_t boneId, umath::CoordinateSpace space) -> std::optional<std::tuple<Vector3, Vector3, Vector3, Quat>> {
+	  "GetHitboxBounds", +[](lua::State *l, pragma::BaseModelComponent &hEnt, uint32_t boneId, umath::CoordinateSpace space) -> std::optional<std::tuple<Vector3, Vector3, Vector3, Quat>> {
 		  Vector3 min, max, origin;
 		  auto rot = uquat::identity();
 		  if(!hEnt.GetHitboxBounds(boneId, min, max, origin, rot, space))
@@ -3402,14 +3399,14 @@ void pragma::lua::base_model_component::register_class(luabind::module_ &mod)
 		  return std::tuple<Vector3, Vector3, Vector3, Quat> {min, max, origin, rot};
 	  });
 	def.def("LookupBone", &pragma::BaseModelComponent::LookupBone);
-	def.def("GetAttachmentTransform", static_cast<luabind::optional<luabind::mult<Vector3, Quat>> (*)(lua_State *, pragma::BaseModelComponent &, std::string)>([](lua_State *l, pragma::BaseModelComponent &hEnt, std::string attachment) -> luabind::optional<luabind::mult<Vector3, Quat>> {
+	def.def("GetAttachmentTransform", static_cast<luabind::optional<luabind::mult<Vector3, Quat>> (*)(lua::State *, pragma::BaseModelComponent &, std::string)>([](lua::State *l, pragma::BaseModelComponent &hEnt, std::string attachment) -> luabind::optional<luabind::mult<Vector3, Quat>> {
 		Vector3 offset(0, 0, 0);
 		auto rot = uquat::identity();
 		if(hEnt.GetAttachment(attachment, &offset, &rot) == false)
 			return Lua::nil;
 		return luabind::mult<Vector3, Quat> {l, offset, rot};
 	}));
-	def.def("GetAttachmentTransform", static_cast<luabind::optional<luabind::mult<Vector3, Quat>> (*)(lua_State *, pragma::BaseModelComponent &, int)>([](lua_State *l, pragma::BaseModelComponent &hEnt, int attachment) -> luabind::optional<luabind::mult<Vector3, Quat>> {
+	def.def("GetAttachmentTransform", static_cast<luabind::optional<luabind::mult<Vector3, Quat>> (*)(lua::State *, pragma::BaseModelComponent &, int)>([](lua::State *l, pragma::BaseModelComponent &hEnt, int attachment) -> luabind::optional<luabind::mult<Vector3, Quat>> {
 		Vector3 offset(0, 0, 0);
 		auto rot = uquat::identity();
 		if(hEnt.GetAttachment(attachment, &offset, &rot) == false)
@@ -3421,7 +3418,7 @@ void pragma::lua::base_model_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_MODEL_MATERIALS_LOADED", pragma::baseModelComponent::EVENT_ON_MODEL_MATERIALS_LOADED);
 }
 
-void pragma::lua::base_time_scale_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_time_scale_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTimeScaleComponent>("BaseTimeScaleComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -3430,11 +3427,11 @@ void pragma::lua::base_time_scale_component::register_class(luabind::module_ &mo
 	def.def("GetEffectiveTimeScale", &pragma::BaseTimeScaleComponent::GetEffectiveTimeScale);
 }
 
-void pragma::lua::base_ownable_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_ownable_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseOwnableComponent>("BaseOwnableComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
-	def.def("SetOwner", static_cast<void (*)(lua_State *, pragma::BaseOwnableComponent &, pragma::ecs::BaseEntity *)>([](lua_State *l, pragma::BaseOwnableComponent &hEnt, pragma::ecs::BaseEntity *owner) {
+	def.def("SetOwner", static_cast<void (*)(lua::State *, pragma::BaseOwnableComponent &, pragma::ecs::BaseEntity *)>([](lua::State *l, pragma::BaseOwnableComponent &hEnt, pragma::ecs::BaseEntity *owner) {
 		auto &ownerComponent = hEnt;
 		if(owner)
 			ownerComponent.SetOwner(*owner);
@@ -3446,26 +3443,26 @@ void pragma::lua::base_ownable_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_OWNER_CHANGED", pragma::baseOwnableComponent::EVENT_ON_OWNER_CHANGED);
 }
 
-void pragma::lua::base_debug_text_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_debug_text_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseDebugTextComponent>("BaseDebugTextComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetText", &pragma::BaseDebugTextComponent::SetText);
 }
 
-void pragma::lua::base_debug_point_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_debug_point_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseDebugPointComponent>("BaseDebugPointComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_debug_line_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_debug_line_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseDebugLineComponent>("BaseDebugLineComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_debug_box_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_debug_box_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseDebugBoxComponent>("BaseDebugBoxComponent");
 	def.def("SetBounds", &pragma::BaseDebugBoxComponent::SetBounds);
@@ -3473,35 +3470,35 @@ void pragma::lua::base_debug_box_component::register_class(luabind::module_ &mod
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_debug_sphere_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_debug_sphere_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseDebugSphereComponent>("BaseDebugSphereComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_debug_cone_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_debug_cone_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseDebugConeComponent>("BaseDebugConeComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_debug_cylinder_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_debug_cylinder_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseDebugCylinderComponent>("BaseDebugCylinderComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_debug_plane_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_debug_plane_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseDebugPlaneComponent>("BaseDebugPlaneComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
-void pragma::lua::base_point_at_target_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_point_at_target_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointAtTargetComponent>("BasePointAtTargetComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
-	def.def("SetPointAtTarget", static_cast<void (*)(lua_State *, pragma::BasePointAtTargetComponent &, pragma::ecs::BaseEntity *)>([](lua_State *l, pragma::BasePointAtTargetComponent &hEnt, pragma::ecs::BaseEntity *target) {
+	def.def("SetPointAtTarget", static_cast<void (*)(lua::State *, pragma::BasePointAtTargetComponent &, pragma::ecs::BaseEntity *)>([](lua::State *l, pragma::BasePointAtTargetComponent &hEnt, pragma::ecs::BaseEntity *target) {
 		if(target)
 			hEnt.SetPointAtTarget(*target);
 		else
@@ -3511,7 +3508,7 @@ void pragma::lua::base_point_at_target_component::register_class(luabind::module
 	def.def("GetPointAtTarget", &pragma::BasePointAtTargetComponent::GetPointAtTarget);
 }
 
-void pragma::lua::base_liquid_control_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_liquid_control_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseLiquidControlComponent>("BaseLiquidControlComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
@@ -3530,7 +3527,7 @@ void pragma::lua::base_liquid_control_component::register_class(luabind::module_
 	def.def("SetTorqueDragCoefficient", &pragma::BaseLiquidControlComponent::SetTorqueDragCoefficient);
 }
 
-void pragma::lua::base_liquid_surface_simulation_component::register_class(luabind::module_ &mod)
+void pragma::LuaCore::base_liquid_surface_simulation_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseLiquidSurfaceSimulationComponent>("BaseLiquidSurfaceSimulationComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};

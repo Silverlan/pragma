@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -196,7 +195,7 @@ pragma::physics::IVehicle::IVehicle(IEnvironment &env, const util::TSharedHandle
 pragma::physics::ICollisionObject *pragma::physics::IVehicle::GetCollisionObject() { return m_collisionObject.Get(); }
 const pragma::physics::ICollisionObject *pragma::physics::IVehicle::GetCollisionObject() const { return const_cast<IVehicle *>(this)->GetCollisionObject(); }
 
-void pragma::physics::IVehicle::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<IVehicle>(lua); }
+void pragma::physics::IVehicle::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<IVehicle>(lua); }
 
 void pragma::physics::IVehicle::OnRemove()
 {

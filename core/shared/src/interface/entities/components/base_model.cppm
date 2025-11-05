@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 
@@ -21,18 +20,18 @@ export {
 		class IntersectionHandlerComponent;
 		struct DLLNETWORK CEOnBodyGroupChanged : public ComponentEvent {
 			CEOnBodyGroupChanged(uint32_t groupId, uint32_t typeId);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			uint32_t groupId;
 			uint32_t typeId;
 		};
 		struct DLLNETWORK CEOnSkinChanged : public ComponentEvent {
 			CEOnSkinChanged(uint32_t skinId);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			uint32_t skinId;
 		};
 		struct DLLNETWORK CEOnModelChanged : public ComponentEvent {
 			CEOnModelChanged(const std::shared_ptr<pragma::Model> &model);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			std::shared_ptr<pragma::Model> model;
 		};
 				namespace baseModelComponent {

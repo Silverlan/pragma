@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 
@@ -40,12 +39,12 @@ export {
 		};
 		struct DLLNETWORK CEPhysicsUpdateData : public ComponentEvent {
 			CEPhysicsUpdateData(double deltaTime);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			double deltaTime;
 		};
 		struct DLLNETWORK CEHandleRaycast : public ComponentEvent {
 			CEHandleRaycast(pragma::physics::CollisionMask rayCollisionGroup, pragma::physics::CollisionMask rayCollisionMask);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			pragma::physics::CollisionMask rayCollisionGroup;
 			pragma::physics::CollisionMask rayCollisionMask;
 			bool hit = false;
@@ -253,15 +252,15 @@ export {
 		};
 		struct DLLNETWORK CEInitializePhysics : public ComponentEvent {
 			CEInitializePhysics(pragma::physics::PHYSICSTYPE type, BasePhysicsComponent::PhysFlags flags);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			pragma::physics::PHYSICSTYPE physicsType;
 			BasePhysicsComponent::PhysFlags flags;
 		};
 		struct DLLNETWORK CEPostPhysicsSimulate : public ComponentEvent {
 			CEPostPhysicsSimulate();
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			virtual uint32_t GetReturnCount() override;
-			virtual void HandleReturnValues(lua_State *l) override;
+			virtual void HandleReturnValues(lua::State *l) override;
 			bool keepAwake = true;
 		};
         using namespace umath::scoped_enum::bitwise;

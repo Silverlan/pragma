@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:network_state;
@@ -32,7 +31,7 @@ export {
 	public:
 		// Internal
 		std::vector<CallbackHandle> &GetLuaEnumRegisterCallbacks();
-		void TerminateLuaModules(lua_State *l);
+		void TerminateLuaModules(lua::State *l);
 		void DeregisterLuaModules(void *l, const std::string &identifier);
 		virtual bool ShouldRemoveSound(ALSound &snd);
 
@@ -60,7 +59,7 @@ export {
 		virtual void Think();
 		virtual void Tick();
 		// Lua
-		lua_State *GetLuaState();
+		lua::State *GetLuaState();
 		virtual std::string GetMessagePrefix() const = 0;
 		static void RegisterSharedLuaGlobals(Lua::Interface &lua);
 		static void RegisterSharedLuaClasses(Lua::Interface &lua);
@@ -74,8 +73,8 @@ export {
 		void AddThinkCallback(CallbackHandle callback);
 		void AddTickCallback(CallbackHandle callback);
 
-		void InitializeLuaModules(lua_State *l);
-		virtual std::shared_ptr<util::Library> InitializeLibrary(std::string library, std::string *err = nullptr, lua_State *l = nullptr);
+		void InitializeLuaModules(lua::State *l);
+		virtual std::shared_ptr<util::Library> InitializeLibrary(std::string library, std::string *err = nullptr, lua::State *l = nullptr);
 		bool UnloadLibrary(const std::string &library);
 		std::shared_ptr<util::Library> LoadLibraryModule(const std::string &lib, const std::vector<std::string> &additionalSearchDirectories = {}, std::string *err = nullptr);
 		std::shared_ptr<util::Library> GetLibraryModule(const std::string &lib) const;
@@ -179,9 +178,9 @@ export {
 			bool WasLoadedInState(const NetworkState &nw) const { return (nw.IsClient() && loadedClientside) || (!nw.IsClient() && loadedServerside); }
 		};
 		static std::unordered_map<std::string, LibraryInfo> s_loadedLibraries;
-		std::unordered_map<lua_State *, std::vector<std::shared_ptr<util::Library>>> m_initializedLibraries;
+		std::unordered_map<lua::State *, std::vector<std::shared_ptr<util::Library>>> m_initializedLibraries;
 
-		void InitializeDLLModule(lua_State *l, std::shared_ptr<util::Library> module);
+		void InitializeDLLModule(lua::State *l, std::shared_ptr<util::Library> module);
 
 		virtual void InitializeResourceManager();
 		void ClearGameConVars();

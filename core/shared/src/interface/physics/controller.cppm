@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:physics.controller;
 
@@ -60,7 +59,7 @@ export {
 			const pragma::physics::IConvexShape *GetShape() const;
 			pragma::physics::IConvexShape *GetShape();
 			const Vector3 &GetLastMoveDisplacement() const;
-			virtual void InitializeLuaObject(lua_State *lua) override;
+			virtual void InitializeLuaObject(lua::State *lua) override;
 		protected:
 			virtual void DoMove(Vector3 &disp) = 0;
 			IController(IEnvironment &env, const util::TSharedHandle<ICollisionObject> &collisionObject, const Vector3 &halfExtents, ShapeType shapeType);

@@ -2,12 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.handles;
 
-export import luabind;
-export import pragma.util;
+export import pragma.lua;
 
 // Note: get_const_holder and get_pointer have to be defined
 // in the same namespace as the type!! (luabind namespace will *not* work
@@ -44,12 +42,12 @@ LUA_DEFINE_PTR_TYPE(util, util::WeakHandle, weak_handle);
 		struct default_converter<TClass<T>> : default_converter<T *> {                                                                                                                                                                                                                           \
 			using is_native = std::false_type;                                                                                                                                                                                                                                                   \
 			template<class U>                                                                                                                                                                                                                                                                    \
-			int match(lua_State *L, U, int index)                                                                                                                                                                                                                                                \
+			int match(lua::State *L, U, int index)                                                                                                                                                                                                                                                \
 			{                                                                                                                                                                                                                                                                                    \
 				return default_converter<T *>::match(L, decorate_type_t<T *>(), index);                                                                                                                                                                                                          \
 			}                                                                                                                                                                                                                                                                                    \
 			template<class U>                                                                                                                                                                                                                                                                    \
-			TClass<T> to_cpp(lua_State *L, U, int index)                                                                                                                                                                                                                                         \
+			TClass<T> to_cpp(lua::State *L, U, int index)                                                                                                                                                                                                                                         \
 			{                                                                                                                                                                                                                                                                                    \
 				if constexpr(!enableToCpp)                                                                                                                                                                                                                                                       \
 					return TClass<T>();                                                                                                                                                                                                                                                          \
@@ -64,12 +62,12 @@ LUA_DEFINE_PTR_TYPE(util, util::WeakHandle, weak_handle);
 					}                                                                                                                                                                                                                                                                            \
 				}                                                                                                                                                                                                                                                                                \
 			}                                                                                                                                                                                                                                                                                    \
-			void to_lua(lua_State *L, TClass<T> const &p)                                                                                                                                                                                                                                        \
+			void to_lua(lua::State *L, TClass<T> const &p)                                                                                                                                                                                                                                        \
 			{                                                                                                                                                                                                                                                                                    \
 				default_converter<T *>().to_lua(L, const_cast<TClass<T> &>(p).get());                                                                                                                                                                                                            \
 			}                                                                                                                                                                                                                                                                                    \
 			template<class U>                                                                                                                                                                                                                                                                    \
-			void converter_postcall(lua_State *, U const &, int)                                                                                                                                                                                                                                 \
+			void converter_postcall(lua::State *, U const &, int)                                                                                                                                                                                                                                 \
 			{                                                                                                                                                                                                                                                                                    \
 			}                                                                                                                                                                                                                                                                                    \
 		};                                                                                                                                                                                                                                                                                       \

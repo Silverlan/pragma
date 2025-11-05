@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -119,7 +118,7 @@ void BaseColorComponent::SetColor(const Vector3 &color) { *m_color = Vector4 {co
 /////////////////
 
 CEOnColorChanged::CEOnColorChanged(const Vector4 &oldColor, const Vector4 &color) : oldColor {oldColor}, color {color} {}
-void CEOnColorChanged::PushArguments(lua_State *l)
+void CEOnColorChanged::PushArguments(lua::State *l)
 {
 	Lua::Push<Vector4>(l, oldColor);
 	Lua::Push<Vector4>(l, color);

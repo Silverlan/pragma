@@ -84,7 +84,7 @@ static void test_default_parameter_policy_param(const Vector3 &v={1,2,3},float f
 	std::cout<<"Default float: "<<f<<std::endl;
 }
 
-__declspec(dllexport) void test_lua_policies(lua_State *l)
+__declspec(dllexport) void test_lua_policies(lua::State *l)
 {
 	auto modTest = luabind::module_(l,"test_policies");
 

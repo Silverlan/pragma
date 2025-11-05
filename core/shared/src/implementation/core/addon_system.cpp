@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/logging.hpp"
 
 #ifdef _WIN32
 #endif

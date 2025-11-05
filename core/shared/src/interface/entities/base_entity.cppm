@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 #include <format>
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.base_entity;
@@ -251,7 +250,7 @@ export {
 			virtual void OnPostSpawn();
 			bool IsSpawned() const;
 
-			lua_State *GetLuaState() const;
+			lua::State *GetLuaState() const;
 
 			virtual void Load(udm::LinkedPropertyWrapper &udm);
 			virtual void Save(udm::LinkedPropertyWrapper &udm);

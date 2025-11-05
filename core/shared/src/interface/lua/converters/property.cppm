@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.shared:scripting.lua.converters.property;
 
@@ -17,7 +16,7 @@ export namespace luabind {
 	// this is currently not possible
 
 	template<typename T>
-	void push_property(lua_State *l, T &prop);
+	void push_property(lua::State *l, T &prop);
 
 	template<typename T>
 	    requires(std::derived_from<base_type<T>, util::BaseProperty>)
@@ -25,27 +24,27 @@ export namespace luabind {
 		enum { consumed_args = 1 };
 
 		template<typename U>
-		T to_cpp(lua_State *L, U u, int index)
+		T to_cpp(lua::State *L, U u, int index)
 		{
 			return detail::default_converter_generator<T>::type::to_cpp(L, u, index);
 		}
 
 		template<class U>
-		int match(lua_State *l, U u, int index)
+		int match(lua::State *l, U u, int index)
 		{
 			return detail::default_converter_generator<T>::type::match(l, u, index);
 		}
 
 		template<class U>
-		void converter_postcall(lua_State *, U u, int)
+		void converter_postcall(lua::State *, U u, int)
 		{
 		}
 
-		void to_lua(lua_State *L, T const &x) { push_property(L, const_cast<T &>(x)); }
-		void to_lua(lua_State *L, std::remove_reference_t<T> *x)
+		void to_lua(lua::State *L, T const &x) { push_property(L, const_cast<T &>(x)); }
+		void to_lua(lua::State *L, std::remove_reference_t<T> *x)
 		{
 			if(!x)
-				lua_pushnil(L);
+				Lua::PushNil(L);
 			else
 				to_lua(L, *x);
 		}
@@ -57,22 +56,22 @@ export namespace luabind {
 		using is_native = std::false_type;
 
 		template<class U>
-		int match(lua_State *L, U, int index)
+		int match(lua::State *L, U, int index)
 		{
 			return default_converter<TProp *>::match(L, decorate_type_t<TProp *>(), index);
 		}
 
 		template<class U>
-		std::shared_ptr<TProp> to_cpp(lua_State *L, U, int index)
+		std::shared_ptr<TProp> to_cpp(lua::State *L, U, int index)
 		{
 			TProp *raw_ptr = default_converter<TProp *>::to_cpp(L, decorate_type_t<TProp *>(), index);
 			return std::static_pointer_cast<TProp>(raw_ptr->shared_from_this());
 		}
 
-		void to_lua(lua_State *L, std::shared_ptr<TProp> const &p) { default_converter<TProp>().to_lua(L, p.get()); }
+		void to_lua(lua::State *L, std::shared_ptr<TProp> const &p) { default_converter<TProp>().to_lua(L, p.get()); }
 
 		template<class U>
-		void converter_postcall(lua_State *, U const &, int)
+		void converter_postcall(lua::State *, U const &, int)
 		{
 		}
 	};
@@ -320,7 +319,7 @@ export namespace luabind {
 
 export {
 	template<typename T>
-	void luabind::push_property(lua_State *l, T &prop)
+	void luabind::push_property(lua::State *l, T &prop)
 	{
 		Lua::Property::push(l, prop);
 	}

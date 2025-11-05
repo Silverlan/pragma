@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -23,7 +22,7 @@ void MovementComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovement(); });
 }
-void MovementComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void MovementComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void MovementComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
 
 void MovementComponent::SetSpeed(const Vector2 &speed) { m_movementSpeed = speed; }

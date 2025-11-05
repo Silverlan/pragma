@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.meta_rig;
@@ -31,7 +30,7 @@ export namespace pragma {
 		bool SetBoneRot(animation::MetaRigBoneType bone, const Quat &rot, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
 		bool SetBoneScale(animation::MetaRigBoneType bone, const Vector3 &scale, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
 
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 	  private:
 		BaseAnimatedComponent *m_animC = nullptr;
 		std::shared_ptr<animation::MetaRig> m_metaRig = nullptr;
@@ -156,7 +155,7 @@ void pragma::MetaRigComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	GetEntity().AddComponent("animated");
 }
-void pragma::MetaRigComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void pragma::MetaRigComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void pragma::MetaRigComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
 
 bool pragma::MetaRigComponent::GetBonePose(animation::MetaRigBoneType bone, umath::ScaledTransform &outPose, umath::CoordinateSpace space) const

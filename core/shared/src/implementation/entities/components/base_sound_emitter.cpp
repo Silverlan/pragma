@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -103,4 +102,4 @@ void BaseSoundEmitterComponent::UpdateSoundTransform(ALSound &snd) const
 /////////////////
 
 CEOnSoundCreated::CEOnSoundCreated(const std::shared_ptr<ALSound> &sound) : sound {sound} {}
-void CEOnSoundCreated::PushArguments(lua_State *l) { Lua::Push<std::shared_ptr<ALSound>>(l, sound); }
+void CEOnSoundCreated::PushArguments(lua::State *l) { Lua::Push<std::shared_ptr<ALSound>>(l, sound); }

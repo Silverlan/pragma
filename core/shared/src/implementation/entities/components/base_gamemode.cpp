@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 #include <cassert>
 
@@ -108,7 +107,7 @@ util::Version BaseGamemodeComponent::GetGamemodeVersion() const
 }
 
 CEPlayerDeath::CEPlayerDeath(BasePlayerComponent &pl, DamageInfo *dmgInfo) : player {pl}, dmgInfo {dmgInfo} {}
-void CEPlayerDeath::PushArguments(lua_State *l)
+void CEPlayerDeath::PushArguments(lua::State *l)
 {
 	player.PushLuaObject(l);
 	if(dmgInfo)
@@ -116,11 +115,11 @@ void CEPlayerDeath::PushArguments(lua_State *l)
 }
 
 CEPlayerDropped::CEPlayerDropped(BasePlayerComponent &pl, pragma::networking::DropReason reason) : player {pl}, reason {reason} {}
-void CEPlayerDropped::PushArguments(lua_State *l)
+void CEPlayerDropped::PushArguments(lua::State *l)
 {
 	player.PushLuaObject(l);
 	Lua::PushInt(l, umath::to_integral(reason));
 }
 
 CEPlayerSpawned::CEPlayerSpawned(BasePlayerComponent &pl) : player {pl} {}
-void CEPlayerSpawned::PushArguments(lua_State *l) { player.PushLuaObject(l); }
+void CEPlayerSpawned::PushArguments(lua::State *l) { player.PushLuaObject(l); }

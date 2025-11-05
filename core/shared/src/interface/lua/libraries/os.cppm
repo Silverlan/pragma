@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 
 export module pragma.shared:scripting.lua.libraries.os;
 
+export import pragma.lua;
+
 export namespace Lua {
 	namespace os {
-		DLLNETWORK int64_t time_since_epoch(lua_State *l);
+		DLLNETWORK int64_t time_since_epoch(lua::State *l);
 	};
 };

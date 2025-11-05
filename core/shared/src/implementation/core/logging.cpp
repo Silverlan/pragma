@@ -3,20 +3,13 @@
 module;
 
 
-#include "pragma/logging.hpp"
-#include <sharedutils/magic_enum.hpp>
-#include <spdlog/fmt/bundled/format.h>
-#include <spdlog/formatter.h>
-#include <spdlog/pattern_formatter.h>
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
 
 module pragma.shared;
 
 import :console.enums;
 import :console.output;
 import :core.logging;
-
+#if 0
 const std::string PRAGMA_LOGGER_NAME = "pragma_logger";
 const std::string PRAGMA_FILE_LOGGER_NAME = "pragma_logger_file";
 
@@ -458,3 +451,4 @@ void pragma::detail::initialize_logger(::util::LogSeverity conLogLevel, ::util::
 		init_logger(pair.first, pair.second);
 	get_pre_registered_loggers().clear();
 }
+#endif

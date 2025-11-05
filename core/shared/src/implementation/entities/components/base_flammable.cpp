@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -134,7 +133,7 @@ void BaseFlammableComponent::SetIgnitable(bool b)
 ////////////
 
 CEOnIgnited::CEOnIgnited(float duration, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor) : duration {duration}, attacker {attacker ? attacker->GetHandle() : EntityHandle {}}, inflictor {inflictor ? inflictor->GetHandle() : EntityHandle {}} {}
-void CEOnIgnited::PushArguments(lua_State *l)
+void CEOnIgnited::PushArguments(lua::State *l)
 {
 	Lua::PushNumber(l, duration);
 

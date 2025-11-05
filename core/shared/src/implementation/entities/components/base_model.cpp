@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -508,7 +507,7 @@ void BaseModelComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t versio
 ///////////////
 
 CEOnBodyGroupChanged::CEOnBodyGroupChanged(uint32_t groupId, uint32_t typeId) : groupId {groupId}, typeId {typeId} {}
-void CEOnBodyGroupChanged::PushArguments(lua_State *l)
+void CEOnBodyGroupChanged::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, groupId);
 	Lua::PushInt(l, typeId);
@@ -517,9 +516,9 @@ void CEOnBodyGroupChanged::PushArguments(lua_State *l)
 ///////////////
 
 CEOnSkinChanged::CEOnSkinChanged(uint32_t skinId) : skinId {skinId} {}
-void CEOnSkinChanged::PushArguments(lua_State *l) { Lua::PushInt(l, skinId); }
+void CEOnSkinChanged::PushArguments(lua::State *l) { Lua::PushInt(l, skinId); }
 
 ///////////////
 
 CEOnModelChanged::CEOnModelChanged(const std::shared_ptr<pragma::Model> &model) : model {model} {}
-void CEOnModelChanged::PushArguments(lua_State *l) { Lua::Push<std::shared_ptr<pragma::Model>>(l, model); }
+void CEOnModelChanged::PushArguments(lua::State *l) { Lua::Push<std::shared_ptr<pragma::Model>>(l, model); }

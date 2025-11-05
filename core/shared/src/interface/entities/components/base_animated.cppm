@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 
@@ -327,7 +326,7 @@ class DLLNETWORK BaseAnimatedComponent : public BaseEntityComponent, public Dyna
 
 		struct DLLNETWORK CEOnBoneTransformChanged : public ComponentEvent {
 			CEOnBoneTransformChanged(UInt32 boneId, const Vector3 *pos, const Quat *rot, const Vector3 *scale);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			UInt32 boneId;
 			const Vector3 *pos;
 			const Quat *rot;
@@ -335,97 +334,97 @@ class DLLNETWORK BaseAnimatedComponent : public BaseEntityComponent, public Dyna
 		};
 		struct DLLNETWORK CEOnAnimationComplete : public ComponentEvent {
 			CEOnAnimationComplete(int32_t animation, pragma::Activity activity);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			int32_t animation;
 			pragma::Activity activity;
 		};
 		struct DLLNETWORK CELayeredAnimationInfo : public ComponentEvent {
 			CELayeredAnimationInfo(int32_t slot, int32_t animation, pragma::Activity activity);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			int32_t slot;
 			int32_t animation;
 			pragma::Activity activity;
 		};
 		struct DLLNETWORK CEHandleAnimationEvent : public ComponentEvent {
 			CEHandleAnimationEvent(const pragma::AnimationEvent &animationEvent);
-			virtual void PushArguments(lua_State *l) override;
-			void PushArgumentVariadic(lua_State *l);
+			virtual void PushArguments(lua::State *l) override;
+			void PushArgumentVariadic(lua::State *l);
 			const pragma::AnimationEvent &animationEvent;
 		};
 		struct DLLNETWORK CEOnPlayAnimation : public ComponentEvent {
 			CEOnPlayAnimation(int32_t previousAnimation, int32_t animation, pragma::FPlayAnim flags);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			int32_t previousAnimation;
 			int32_t animation;
 			pragma::FPlayAnim flags;
 		};
 		struct DLLNETWORK CEOnPlayActivity : public ComponentEvent {
 			CEOnPlayActivity(pragma::Activity activity, FPlayAnim flags);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			pragma::Activity activity;
 			pragma::FPlayAnim flags;
 		};
 		struct DLLNETWORK CEOnPlayLayeredActivity : public ComponentEvent {
 			CEOnPlayLayeredActivity(int slot, pragma::Activity activity, FPlayAnim flags);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			int slot;
 			pragma::Activity activity;
 			FPlayAnim flags;
 		};
 		struct DLLNETWORK CEOnPlayLayeredAnimation : public CEOnPlayAnimation {
 			CEOnPlayLayeredAnimation(int32_t slot, int32_t previousAnimation, int32_t animation, pragma::FPlayAnim flags);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			int32_t slot;
 		};
 		struct DLLNETWORK CEOnStopLayeredAnimation : public ComponentEvent {
 			CEOnStopLayeredAnimation(int32_t slot, BaseAnimatedComponent::AnimationSlotInfo &slotInfo);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			int32_t slot;
 			BaseAnimatedComponent::AnimationSlotInfo &slotInfo;
 		};
 		struct DLLNETWORK CETranslateLayeredActivity : public ComponentEvent {
 			CETranslateLayeredActivity(int32_t &slot, pragma::Activity &activity, pragma::FPlayAnim &flags);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			virtual uint32_t GetReturnCount() override;
-			virtual void HandleReturnValues(lua_State *l) override;
+			virtual void HandleReturnValues(lua::State *l) override;
 			int32_t &slot;
 			pragma::Activity &activity;
 			pragma::FPlayAnim &flags;
 		};
 		struct DLLNETWORK CEOnAnimationStart : public ComponentEvent {
 			CEOnAnimationStart(int32_t animation, pragma::Activity activity, pragma::FPlayAnim flags);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			int32_t animation;
 			pragma::Activity activity;
 			pragma::FPlayAnim flags;
 		};
 		struct DLLNETWORK CETranslateLayeredAnimation : public ComponentEvent {
 			CETranslateLayeredAnimation(int32_t &slot, int32_t &animation, pragma::FPlayAnim &flags);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			virtual uint32_t GetReturnCount() override;
-			virtual void HandleReturnValues(lua_State *l) override;
+			virtual void HandleReturnValues(lua::State *l) override;
 			int32_t &slot;
 			int32_t &animation;
 			pragma::FPlayAnim &flags;
 		};
 		struct DLLNETWORK CETranslateAnimation : public ComponentEvent {
 			CETranslateAnimation(int32_t &animation, pragma::FPlayAnim &flags);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			virtual uint32_t GetReturnCount() override;
-			virtual void HandleReturnValues(lua_State *l) override;
+			virtual void HandleReturnValues(lua::State *l) override;
 			int32_t &animation;
 			pragma::FPlayAnim &flags;
 		};
 		struct DLLNETWORK CETranslateActivity : public ComponentEvent {
 			CETranslateActivity(pragma::Activity &activity);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			virtual uint32_t GetReturnCount() override;
-			virtual void HandleReturnValues(lua_State *l) override;
+			virtual void HandleReturnValues(lua::State *l) override;
 			pragma::Activity &activity;
 		};
 		struct DLLNETWORK CEOnBlendAnimation : public ComponentEvent {
 			CEOnBlendAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo, pragma::Activity activity, std::vector<umath::Transform> &bonePoses, std::vector<Vector3> *boneScales);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			BaseAnimatedComponent::AnimationSlotInfo &slotInfo;
 			pragma::Activity activity;
 			std::vector<umath::Transform> &bonePoses;
@@ -433,30 +432,30 @@ class DLLNETWORK BaseAnimatedComponent : public BaseEntityComponent, public Dyna
 		};
 		struct DLLNETWORK CEMaintainAnimations : public ComponentEvent {
 			CEMaintainAnimations(double deltaTime);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			double deltaTime;
 		};
 		struct DLLNETWORK CEMaintainAnimation : public ComponentEvent {
 			CEMaintainAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo, double deltaTime);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			BaseAnimatedComponent::AnimationSlotInfo &slotInfo;
 			double deltaTime;
 		};
 		struct DLLNETWORK CEMaintainAnimationMovement : public ComponentEvent {
 			CEMaintainAnimationMovement(const Vector3 &displacement);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			const Vector3 &displacement;
 		};
 		struct DLLNETWORK CEShouldUpdateBones : public ComponentEvent {
 			CEShouldUpdateBones();
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			bool shouldUpdate = true;
 		};
 		struct DLLNETWORK CEOnUpdateSkeleton : public ComponentEvent {
 			CEOnUpdateSkeleton();
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			virtual uint32_t GetReturnCount() override;
-			virtual void HandleReturnValues(lua_State *l) override;
+			virtual void HandleReturnValues(lua::State *l) override;
 			bool bonePosesHaveChanged = false;
 		};
     	using namespace umath::scoped_enum::bitwise;

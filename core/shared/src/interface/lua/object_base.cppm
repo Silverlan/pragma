@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 
 
@@ -78,7 +77,7 @@ export {
 		#endif
 				auto *state = r.interpreter();
 				r.push(state);
-				auto r = (lua_iscfunction(state, -1) == 0) ? CallbackReturnType::HasReturnValue : CallbackReturnType::NoReturnValue;
+				auto r = (Lua::IsCFunction(state, -1) == 0) ? CallbackReturnType::HasReturnValue : CallbackReturnType::NoReturnValue;
 				Lua::Pop(state, 1);
 				return r;
 			}

@@ -4,8 +4,7 @@ module;
 
 
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 module pragma.shared;
 
@@ -119,17 +118,17 @@ void LFile::IgnoreComments(std::string start, std::string end)
 
 ////////////////////////////////////
 
-DLLNETWORK void Lua_LFile_Close(lua_State *, LFile &f) { f.Close(); }
+DLLNETWORK void Lua_LFile_Close(lua::State *, LFile &f) { f.Close(); }
 
-DLLNETWORK void Lua_LFile_Size(lua_State *l, LFile &f)
+DLLNETWORK void Lua_LFile_Size(lua::State *l, LFile &f)
 {
 	long long size = f.Size();
 	Lua::PushInt<long long>(l, size);
 }
 
-DLLNETWORK void Lua_LFile_ReadLine(lua_State *l, LFile &f) { Lua::PushString(l, f.ReadLine()); }
+DLLNETWORK void Lua_LFile_ReadLine(lua::State *l, LFile &f) { Lua::PushString(l, f.ReadLine()); }
 
-DLLNETWORK void Lua_LFile_ReadString(lua_State *l, LFile &f, uint32_t len)
+DLLNETWORK void Lua_LFile_ReadString(lua::State *l, LFile &f, uint32_t len)
 {
 	if(!f.IsValid())
 		return;
@@ -139,7 +138,7 @@ DLLNETWORK void Lua_LFile_ReadString(lua_State *l, LFile &f, uint32_t len)
 	Lua::PushString(l, out);
 }
 
-DLLNETWORK void Lua_LFile_ReadString(lua_State *l, LFile &f)
+DLLNETWORK void Lua_LFile_ReadString(lua::State *l, LFile &f)
 {
 	if(!f.IsValid())
 		return;
@@ -148,7 +147,7 @@ DLLNETWORK void Lua_LFile_ReadString(lua_State *l, LFile &f)
 	lua_pushstring(l, str.c_str());
 }
 
-DLLNETWORK void Lua_LFile_WriteString(lua_State *, LFile &f, std::string str, bool bNullTerminated)
+DLLNETWORK void Lua_LFile_WriteString(lua::State *, LFile &f, std::string str, bool bNullTerminated)
 {
 	if(!f.IsValid())
 		return;
@@ -159,9 +158,9 @@ DLLNETWORK void Lua_LFile_WriteString(lua_State *, LFile &f, std::string str, bo
 		file->Write(str.data(), str.length());
 }
 
-DLLNETWORK void Lua_LFile_WriteString(lua_State *l, LFile &f, std::string str) { Lua_LFile_WriteString(l, f, str, true); }
+DLLNETWORK void Lua_LFile_WriteString(lua::State *l, LFile &f, std::string str) { Lua_LFile_WriteString(l, f, str, true); }
 
-void Lua_LFile_ReadVector(lua_State *l, LFile &f)
+void Lua_LFile_ReadVector(lua::State *l, LFile &f)
 {
 	float x = f.Read<float>();
 	float y = f.Read<float>();
@@ -169,20 +168,20 @@ void Lua_LFile_ReadVector(lua_State *l, LFile &f)
 	luabind::object(l, Vector3(x, y, z)).push(l);
 }
 
-void Lua_LFile_WriteVector2(lua_State *, LFile &f, const Vector2 &v)
+void Lua_LFile_WriteVector2(lua::State *, LFile &f, const Vector2 &v)
 {
 	f.Write<float>(v.x);
 	f.Write<float>(v.y);
 }
 
-void Lua_LFile_ReadVector2(lua_State *l, LFile &f)
+void Lua_LFile_ReadVector2(lua::State *l, LFile &f)
 {
 	auto x = f.Read<float>();
 	auto y = f.Read<float>();
 	luabind::object(l, Vector2(x, y)).push(l);
 }
 
-void Lua_LFile_WriteVector4(lua_State *, LFile &f, const Vector4 &v)
+void Lua_LFile_WriteVector4(lua::State *, LFile &f, const Vector4 &v)
 {
 	f.Write<float>(v.x);
 	f.Write<float>(v.y);
@@ -190,7 +189,7 @@ void Lua_LFile_WriteVector4(lua_State *, LFile &f, const Vector4 &v)
 	f.Write<float>(v.w);
 }
 
-void Lua_LFile_ReadVector4(lua_State *l, LFile &f)
+void Lua_LFile_ReadVector4(lua::State *l, LFile &f)
 {
 	auto x = f.Read<float>();
 	auto y = f.Read<float>();
@@ -199,14 +198,14 @@ void Lua_LFile_ReadVector4(lua_State *l, LFile &f)
 	luabind::object(l, Vector4(x, y, z, w)).push(l);
 }
 
-void Lua_LFile_WriteVector(lua_State *, LFile &f, const Vector3 &v)
+void Lua_LFile_WriteVector(lua::State *, LFile &f, const Vector3 &v)
 {
 	f.Write<float>(v.x);
 	f.Write<float>(v.y);
 	f.Write<float>(v.z);
 }
 
-DLLNETWORK void Lua_LFile_ReadAngles(lua_State *l, LFile &f)
+DLLNETWORK void Lua_LFile_ReadAngles(lua::State *l, LFile &f)
 {
 	float p = f.Read<float>();
 	float y = f.Read<float>();
@@ -214,50 +213,50 @@ DLLNETWORK void Lua_LFile_ReadAngles(lua_State *l, LFile &f)
 	luabind::object(l, EulerAngles(p, y, r)).push(l);
 }
 
-DLLNETWORK void Lua_LFile_WriteAngles(lua_State *, LFile &f, EulerAngles ang)
+DLLNETWORK void Lua_LFile_WriteAngles(lua::State *, LFile &f, EulerAngles ang)
 {
 	f.Write<float>(ang.p);
 	f.Write<float>(ang.y);
 	f.Write<float>(ang.r);
 }
 
-DLLNETWORK void Lua_LFile_Seek(lua_State *, LFile &f, uint32_t pos) { f.Seek(pos); }
+DLLNETWORK void Lua_LFile_Seek(lua::State *, LFile &f, uint32_t pos) { f.Seek(pos); }
 
-DLLNETWORK void Lua_LFile_Tell(lua_State *l, LFile &f)
+DLLNETWORK void Lua_LFile_Tell(lua::State *l, LFile &f)
 {
 	long long pos = f.Tell();
 	Lua::PushNumber<long long>(l, pos);
 }
 
-DLLNETWORK void Lua_LFile_Eof(lua_State *l, LFile &f) { Lua::PushBool(l, f.Eof()); }
+DLLNETWORK void Lua_LFile_Eof(lua::State *l, LFile &f) { Lua::PushBool(l, f.Eof()); }
 
-DLLNETWORK void Lua_LFile_IgnoreComments(lua_State *, LFile &f) { f.IgnoreComments(); }
-DLLNETWORK void Lua_LFile_IgnoreComments(lua_State *, LFile &f, std::string start) { f.IgnoreComments(start); }
-DLLNETWORK void Lua_LFile_IgnoreComments(lua_State *, LFile &f, std::string start, std::string end) { f.IgnoreComments(start, end); }
-void Lua_LFile_Read(lua_State *l, LFile &f, uint32_t size)
+DLLNETWORK void Lua_LFile_IgnoreComments(lua::State *, LFile &f) { f.IgnoreComments(); }
+DLLNETWORK void Lua_LFile_IgnoreComments(lua::State *, LFile &f, std::string start) { f.IgnoreComments(start); }
+DLLNETWORK void Lua_LFile_IgnoreComments(lua::State *, LFile &f, std::string start, std::string end) { f.IgnoreComments(start, end); }
+void Lua_LFile_Read(lua::State *l, LFile &f, uint32_t size)
 {
 	util::DataStream ds;
 	ds->Resize(size);
 	f.Read(ds->GetData(), size);
 	Lua::Push<::util::DataStream>(l, ds);
 }
-void Lua_LFile_Read(lua_State *, LFile &f, util::DataStream &ds, uint32_t size)
+void Lua_LFile_Read(lua::State *, LFile &f, util::DataStream &ds, uint32_t size)
 {
 	auto offset = ds->GetOffset();
 	ds->Resize(offset + size);
 	f.Read(ds->GetData() + offset, size);
 }
-void Lua_LFile_Write(lua_State *, LFile &f, util::DataStream &ds)
+void Lua_LFile_Write(lua::State *, LFile &f, util::DataStream &ds)
 {
 	auto offset = ds->GetOffset();
 	f.Write(ds->GetData() + offset, ds->GetInternalSize() - offset);
 }
-void Lua_LFile_Write(lua_State *, LFile &f, util::DataStream &ds, uint32_t size)
+void Lua_LFile_Write(lua::State *, LFile &f, util::DataStream &ds, uint32_t size)
 {
 	auto offset = ds->GetOffset();
 	f.Write(ds->GetData() + offset, size - offset);
 }
-void Lua_LFile_GetPath(lua_State *l, LFile &f)
+void Lua_LFile_GetPath(lua::State *l, LFile &f)
 {
 	if(!f.IsValid())
 		return;
@@ -348,7 +347,7 @@ static const std::vector<std::string> pathBlacklist {
   "cfg/client.cfg",
   "cfg/server.cfg",
 };
-bool Lua::file::validate_write_operation(lua_State *l, std::string &path, std::string &outRootPath)
+bool Lua::file::validate_write_operation(lua::State *l, std::string &path, std::string &outRootPath)
 {
 	std::string ext;
 	if(ufile::get_extension(path, &ext) && is_extension_blacklisted(ext))
@@ -393,7 +392,7 @@ bool Lua::file::validate_write_operation(lua_State *l, std::string &path, std::s
 }
 
 // Also used in wv_sqlite module
-bool Lua::file::validate_write_operation(lua_State *l, std::string &path)
+bool Lua::file::validate_write_operation(lua::State *l, std::string &path)
 {
 	std::string prefix;
 	if(validate_write_operation(l, path, prefix) == false)
@@ -402,7 +401,7 @@ bool Lua::file::validate_write_operation(lua_State *l, std::string &path)
 	return true;
 }
 
-std::pair<std::shared_ptr<LFile>, std::optional<std::string>> Lua::file::Open(lua_State *l, std::string path, pragma::FileOpenMode openMode, fsys::SearchFlags searchFlags)
+std::pair<std::shared_ptr<LFile>, std::optional<std::string>> Lua::file::Open(lua::State *l, std::string path, pragma::FileOpenMode openMode, fsys::SearchFlags searchFlags)
 {
 	std::string mode {};
 	if((openMode & pragma::FileOpenMode::Read) != pragma::FileOpenMode::None)
@@ -429,21 +428,21 @@ std::pair<std::shared_ptr<LFile>, std::optional<std::string>> Lua::file::Open(lu
 	return std::pair<std::shared_ptr<LFile>, std::optional<std::string>> {f, {}};
 }
 
-bool Lua::file::CreateDir(lua_State *l, std::string path)
+bool Lua::file::CreateDir(lua::State *l, std::string path)
 {
 	if(validate_write_operation(l, path) == false)
 		return false;
 	return FileManager::CreateDirectory(path.c_str());
 }
 
-bool Lua::file::CreatePath(lua_State *l, std::string path)
+bool Lua::file::CreatePath(lua::State *l, std::string path)
 {
 	if(validate_write_operation(l, path) == false)
 		return false;
 	return FileManager::CreatePath(path.c_str());
 }
 
-bool Lua::file::Delete(lua_State *l, std::string ppath)
+bool Lua::file::Delete(lua::State *l, std::string ppath)
 {
 	auto path = ppath;
 	if(validate_write_operation(l, path) == false)
@@ -453,7 +452,7 @@ bool Lua::file::Delete(lua_State *l, std::string ppath)
 	return filemanager::remove_file(path);
 }
 
-bool Lua::file::DeleteDir(lua_State *l, std::string ppath)
+bool Lua::file::DeleteDir(lua::State *l, std::string ppath)
 {
 	auto path = ppath;
 	if(validate_write_operation(l, path) == false)
@@ -463,7 +462,7 @@ bool Lua::file::DeleteDir(lua_State *l, std::string ppath)
 	return filemanager::remove_directory(path);
 }
 
-std::shared_ptr<LFile> Lua::file::open_external_asset_file(lua_State *l, const std::string &path, const std::optional<std::string> &game)
+std::shared_ptr<LFile> Lua::file::open_external_asset_file(lua::State *l, const std::string &path, const std::optional<std::string> &game)
 {
 	auto dllHandle = ::util::initialize_external_archive_manager(pragma::Engine::Get()->GetNetworkState(l));
 	if(dllHandle == nullptr)
@@ -480,7 +479,7 @@ std::shared_ptr<LFile> Lua::file::open_external_asset_file(lua_State *l, const s
 	return lf;
 }
 
-void Lua::file::find_external_game_resource_files(lua_State *l, const std::string &path, luabind::object &outFiles, luabind::object &outDirs)
+void Lua::file::find_external_game_resource_files(lua::State *l, const std::string &path, luabind::object &outFiles, luabind::object &outDirs)
 {
 	outFiles = luabind::newtable(l);
 	outDirs = luabind::newtable(l);
@@ -503,7 +502,7 @@ void Lua::file::find_external_game_resource_files(lua_State *l, const std::strin
 		outDirs[idx++] = d;
 }
 
-luabind::object Lua::file::FindLuaFiles(lua_State *l, const std::string &path, fsys::SearchFlags searchFlag)
+luabind::object Lua::file::FindLuaFiles(lua::State *l, const std::string &path, fsys::SearchFlags searchFlag)
 {
 	std::vector<std::string> files;
 	FileManager::FindFiles((path + "/*." + Lua::FILE_EXTENSION).c_str(), &files, nullptr, searchFlag);
@@ -519,7 +518,7 @@ luabind::object Lua::file::FindLuaFiles(lua_State *l, const std::string &path, f
 	return t;
 }
 
-void Lua::file::Find(lua_State *l, const std::string &path, fsys::SearchFlags searchFlags, luabind::object &outFiles, luabind::object &outDirs)
+void Lua::file::Find(lua::State *l, const std::string &path, fsys::SearchFlags searchFlags, luabind::object &outFiles, luabind::object &outDirs)
 {
 	std::vector<std::string> files;
 	std::vector<std::string> dirs;
@@ -536,7 +535,7 @@ void Lua::file::Find(lua_State *l, const std::string &path, fsys::SearchFlags se
 		outDirs[idx++] = d;
 }
 
-luabind::object Lua::file::Read(lua_State *l, const std::string &path)
+luabind::object Lua::file::Read(lua::State *l, const std::string &path)
 {
 	auto f = FileManager::OpenFile(path.c_str(), "rb");
 	if(f == nullptr)
@@ -545,7 +544,7 @@ luabind::object Lua::file::Read(lua_State *l, const std::string &path)
 	return luabind::object {l, str};
 }
 
-bool Lua::file::Write(lua_State *l, std::string strPath, const std::string &content)
+bool Lua::file::Write(lua::State *l, std::string strPath, const std::string &content)
 {
 	strPath = FileManager::GetCanonicalizedPath(strPath);
 	if(validate_write_operation(l, strPath) == false)
@@ -570,7 +569,7 @@ std::string Lua::file::GetCanonicalizedPath(const std::string &path)
 	return r;
 }
 
-luabind::object Lua::file::GetFileExtension(lua_State *l, const std::string &path, const std::vector<std::string> &exts)
+luabind::object Lua::file::GetFileExtension(lua::State *l, const std::string &path, const std::vector<std::string> &exts)
 {
 	std::string ext;
 	auto r = ufile::get_extension(path, &ext);
@@ -583,7 +582,7 @@ luabind::object Lua::file::GetFileExtension(lua_State *l, const std::string &pat
 	return {};
 }
 
-luabind::object Lua::file::GetFileExtension(lua_State *l, const std::string &path)
+luabind::object Lua::file::GetFileExtension(lua::State *l, const std::string &path)
 {
 	std::string ext;
 	auto r = ufile::get_extension(path, &ext);

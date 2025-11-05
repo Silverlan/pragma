@@ -2,14 +2,13 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 #include "DetourNavMeshQuery.h"
 #include "Recast.h"
 
 
 
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:ai.nav_system;

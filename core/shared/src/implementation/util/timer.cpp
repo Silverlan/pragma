@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -85,7 +84,7 @@ void Timer::Call(pragma::Game *game)
 {
 	if(m_luaFunction.is_valid()) {
 		game->ProtectedLuaCall(
-		  [this](lua_State *l) {
+		  [this](lua::State *l) {
 			  m_luaFunction.push(l);
 			  Lua::Push(l, CreateHandle());
 			  return Lua::StatusCode::Ok;

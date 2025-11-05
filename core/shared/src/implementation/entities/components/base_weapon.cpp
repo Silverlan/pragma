@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -288,7 +287,7 @@ void BaseWeaponComponent::Reload() { BroadcastEvent(baseWeaponComponent::EVENT_O
 //////////////
 
 CEOnOwnerChanged::CEOnOwnerChanged(pragma::ecs::BaseEntity *oldOwner, pragma::ecs::BaseEntity *newOwner) : oldOwner {oldOwner}, newOwner {newOwner} {}
-void CEOnOwnerChanged::PushArguments(lua_State *l)
+void CEOnOwnerChanged::PushArguments(lua::State *l)
 {
 	if(oldOwner != nullptr)
 		oldOwner->GetLuaObject().push(l);
@@ -304,7 +303,7 @@ void CEOnOwnerChanged::PushArguments(lua_State *l)
 //////////////
 
 CEOnClipSizeChanged::CEOnClipSizeChanged(UInt16 oldClipSize, UInt16 newClipSize) : oldClipSize {oldClipSize}, newClipSize {newClipSize} {}
-void CEOnClipSizeChanged::PushArguments(lua_State *l)
+void CEOnClipSizeChanged::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, oldClipSize);
 	Lua::PushInt(l, newClipSize);

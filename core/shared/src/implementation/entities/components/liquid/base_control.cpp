@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -141,7 +140,7 @@ bool BaseLiquidControlComponent::OnBulletHit(const BulletInfo &bulletInfo, const
 /////////
 
 CEOnSplash::CEOnSplash(const BaseLiquidControlComponent::SplashInfo &splashInfo) : splashInfo {splashInfo} {}
-void CEOnSplash::PushArguments(lua_State *l)
+void CEOnSplash::PushArguments(lua::State *l)
 {
 	Lua::Push<Vector3>(l, splashInfo.origin);
 	Lua::PushNumber(l, splashInfo.radius);

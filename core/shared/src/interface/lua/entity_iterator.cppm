@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/lua/core.hpp"
 
 
 
@@ -32,9 +31,9 @@ export {
 
 	class LuaEntityIterator {
 	public:
-		LuaEntityIterator(lua_State *l, pragma::ecs::EntityIterator::FilterFlags filterFlags = pragma::ecs::EntityIterator::FilterFlags::Default);
-		LuaEntityIterator(lua_State *l, pragma::ComponentId componentId, pragma::ecs::EntityIterator::FilterFlags filterFlags = pragma::ecs::EntityIterator::FilterFlags::Default);
-		LuaEntityIterator(lua_State *l, const std::string &componentName, pragma::ecs::EntityIterator::FilterFlags filterFlags = pragma::ecs::EntityIterator::FilterFlags::Default);
+		LuaEntityIterator(lua::State *l, pragma::ecs::EntityIterator::FilterFlags filterFlags = pragma::ecs::EntityIterator::FilterFlags::Default);
+		LuaEntityIterator(lua::State *l, pragma::ComponentId componentId, pragma::ecs::EntityIterator::FilterFlags filterFlags = pragma::ecs::EntityIterator::FilterFlags::Default);
+		LuaEntityIterator(lua::State *l, const std::string &componentName, pragma::ecs::EntityIterator::FilterFlags filterFlags = pragma::ecs::EntityIterator::FilterFlags::Default);
 		LuaBaseEntityIterator begin() const;
 		LuaBaseEntityIterator end() const;
 		void AttachFilter(LuaEntityIteratorFilterBase &filter);
@@ -121,7 +120,7 @@ export {
 	struct LuaEntityIteratorFilterComponent : public LuaEntityIteratorFilterBase {
 		LuaEntityIteratorFilterComponent(luabind::object);
 		LuaEntityIteratorFilterComponent(pragma::ComponentId componentId);
-		LuaEntityIteratorFilterComponent(lua_State *l, const std::string &componentName);
+		LuaEntityIteratorFilterComponent(lua::State *l, const std::string &componentName);
 		virtual void Attach(pragma::ecs::EntityIterator &iterator) override;
 	private:
 		pragma::ComponentId m_componentId = pragma::INVALID_COMPONENT_ID;
@@ -165,8 +164,8 @@ export {
 
 	class LuaEntityComponentIterator {
 	public:
-		LuaEntityComponentIterator(lua_State *l, pragma::ComponentId componentId, pragma::ecs::EntityIterator::FilterFlags filterFlags = pragma::ecs::EntityIterator::FilterFlags::Default);
-		LuaEntityComponentIterator(lua_State *l, const std::string &componentName, pragma::ecs::EntityIterator::FilterFlags filterFlags = pragma::ecs::EntityIterator::FilterFlags::Default);
+		LuaEntityComponentIterator(lua::State *l, pragma::ComponentId componentId, pragma::ecs::EntityIterator::FilterFlags filterFlags = pragma::ecs::EntityIterator::FilterFlags::Default);
+		LuaEntityComponentIterator(lua::State *l, const std::string &componentName, pragma::ecs::EntityIterator::FilterFlags filterFlags = pragma::ecs::EntityIterator::FilterFlags::Default);
 		LuaBaseEntityComponentIterator begin() const;
 		LuaBaseEntityComponentIterator end() const;
 		void AttachFilter(LuaEntityIteratorFilterBase &filter);

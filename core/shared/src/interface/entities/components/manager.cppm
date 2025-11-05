@@ -2,11 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
-#include "pragma/lua/core.hpp"
-#include <sharedutils/magic_enum.hpp>
-
-
+#include "definitions.hpp"
+#include <cassert>
 
 export module pragma.shared:entities.manager;
 
@@ -16,7 +13,7 @@ export import :entities.enums;
 export import :entities.components.events.event_info;
 export import :entities.member_info;
 export import :entities.member_type;
-export import luabind;
+export import pragma.lua;
 
 export {
 	namespace pragma::ecs {class BaseEntity;}
@@ -125,7 +122,7 @@ export {
 			const std::vector<BaseEntityComponent *> &GetComponents(ComponentId componentId) const;
 			const std::vector<BaseEntityComponent *> &GetComponents(ComponentId componentId, std::size_t &count) const;
 
-			void RegisterLuaBindings(lua_State *l, luabind::module_ &module);
+			void RegisterLuaBindings(lua::State *l, luabind::module_ &module);
 
 			// Automatically called when a component was removed; Don't call this manually!
 			void DeregisterComponent(BaseEntityComponent &component);
@@ -142,7 +139,7 @@ export {
 			std::unordered_map<std::type_index, ComponentId> m_typeIndexToComponentId;
 			std::unordered_map<ComponentId, std::vector<ComponentTypeLinkInfo>> m_linkedComponentTypes;
 			std::vector<std::shared_ptr<std::type_index>> m_componentIdToTypeIndex;
-			std::vector<void (*)(lua_State *, luabind::module_ &)> m_luaBindingRegistrations;
+			std::vector<void (*)(lua::State *, luabind::module_ &)> m_luaBindingRegistrations;
 			ComponentId m_nextComponentId = 0u;
 
 			// List of all created components by component id

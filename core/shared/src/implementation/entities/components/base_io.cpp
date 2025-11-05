@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -215,7 +214,7 @@ void BaseIOComponent::TriggerOutput(std::string name, pragma::ecs::BaseEntity *a
 /////////////////
 
 CEInputData::CEInputData(const std::string &input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, const std::string &data) : input(input), activator(activator), caller(caller), data(data) {}
-void CEInputData::PushArguments(lua_State *l)
+void CEInputData::PushArguments(lua::State *l)
 {
 	Lua::PushString(l, input);
 	if(activator != nullptr)

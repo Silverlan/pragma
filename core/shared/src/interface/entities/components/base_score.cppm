@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "pragma/networkdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 
 export module pragma.shared:entities.components.base_score;
@@ -37,7 +36,7 @@ export namespace pragma {
 	};
 	struct DLLNETWORK CEOnScoreChanged : public ComponentEvent {
 		CEOnScoreChanged(BaseScoreComponent::Score score);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		BaseScoreComponent::Score score;
 	};
 };

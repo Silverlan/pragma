@@ -5,8 +5,6 @@ module;
 
 
 
-#include "pragma/logging.hpp"
-#include <sharedutils/magic_enum.hpp>
 #include <cassert>
 
 //#include <utility>
@@ -149,7 +147,7 @@ bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data,
 	auto udmFlags = udm["flags"];
 	if(udmFlags) {
 		if(udmFlags.IsType(udm::Type::String)) {
-			auto flags = magic_enum::flags::enum_cast<pragma::FAnim>(udmFlags.GetValue<udm::String>());
+			auto flags = magic_enum::enum_flags_cast<pragma::FAnim>(udmFlags.GetValue<udm::String>());
 			if(flags.has_value())
 				m_flags = *flags;
 		}
@@ -567,7 +565,7 @@ bool pragma::animation::Animation::Save(udm::AssetDataArg outData, std::string &
 	writeFlag(FAnim::Gesture,"gesture");
 	writeFlag(FAnim::NoMoveBlend,"noMoveBlend");
 	static_assert(umath::to_integral(FAnim::Count) == 7,"Update this list when new flags have been added!");*/
-	udm["flags"] = magic_enum::flags::enum_name(animFlags);
+	udm["flags"] = magic_enum::enum_flags_name(animFlags);
 
 	std::vector<std::unordered_map<std::string, std::shared_ptr<Channel>>> nodeChannels {};
 	nodeChannels.resize(numNodes);

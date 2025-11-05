@@ -3,7 +3,6 @@
 module;
 
 
-#include "pragma/lua/core.hpp"
 
 
 module pragma.shared;
@@ -27,7 +26,7 @@ void VelocityComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	GetEntity().AddComponent("transform");
 }
-void VelocityComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void VelocityComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 const util::PVector3Property &VelocityComponent::GetVelocityProperty() const { return m_velocity; }
 const util::PVector3Property &VelocityComponent::GetAngularVelocityProperty() const { return m_angVelocity; }
 

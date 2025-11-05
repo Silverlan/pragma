@@ -4,13 +4,10 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :scripting.lua.classes.entity;
 import :engine;
-
 
 void Lua::Entity::Client::register_class(luabind::class_<CBaseEntity, pragma::ecs::BaseEntity> &classDef)
 {

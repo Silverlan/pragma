@@ -3,16 +3,13 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :game;
 import :engine;
 import :entities.components.render;
 import :entities.components.renderer;
 import :rendering.shaders;
-
 
 void CGame::RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, prosper::Texture &texPostHdr, prosper::IImage *optOutImage, uint32_t layerId)
 {

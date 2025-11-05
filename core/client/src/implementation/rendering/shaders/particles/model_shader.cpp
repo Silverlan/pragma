@@ -3,16 +3,13 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.particle_model;
 
 import :engine;
 
 using namespace pragma;
-
 
 decltype(ShaderParticleModel::VERTEX_BINDING_PARTICLE) ShaderParticleModel::VERTEX_BINDING_PARTICLE = {prosper::VertexInputRate::Instance, sizeof(pragma::ecs::CParticleSystemComponent::ParticleData)};
 decltype(ShaderParticleModel::VERTEX_ATTRIBUTE_POSITION) ShaderParticleModel::VERTEX_ATTRIBUTE_POSITION = {pragma::ShaderParticle2DBase::VERTEX_ATTRIBUTE_POSITION, VERTEX_BINDING_PARTICLE};

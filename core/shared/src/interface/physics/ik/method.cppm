@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 export module pragma.shared:physics.ik.method;
 
 export import std.compat;

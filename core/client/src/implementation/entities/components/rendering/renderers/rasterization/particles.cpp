@@ -14,7 +14,6 @@ import :rendering.shaders;
 
 using namespace pragma::rendering;
 
-
 static auto cvDrawParticles = GetClientConVar("render_draw_particles");
 void pragma::CRasterizationRendererComponent::RenderParticles(prosper::ICommandBuffer &cmd, const util::DrawSceneInfo &drawSceneInfo, bool depthPass, prosper::IPrimaryCommandBuffer *primCmdBuffer)
 {

@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.liquid.base_surface_simulation;
 
 export import :entities.components.base;
@@ -13,12 +11,11 @@ export import :entities.components.base_surface;
 export import :physics.water_surface_simulator;
 
 export namespace pragma {
-		namespace baseLiquidSurfaceSimulationComponent {
+	namespace baseLiquidSurfaceSimulationComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED;
 	}
-class DLLNETWORK BaseLiquidSurfaceSimulationComponent : public BaseEntityComponent {
+	class DLLNETWORK BaseLiquidSurfaceSimulationComponent : public BaseEntityComponent {
 	  public:
-
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		enum class DLLNETWORK SpawnFlags : uint32_t { SurfaceSimulation = 2048 };

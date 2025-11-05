@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
 module pragma.shared;
 
 import :entities.iterator;
@@ -208,7 +205,8 @@ bool EntityIteratorFilterBox::ShouldPass(pragma::ecs::BaseEntity &ent, std::size
 
 /////////////////
 
-EntityIteratorFilterCone::EntityIteratorFilterCone(pragma::Game &game, const Vector3 &origin, const Vector3 &dir, float radius, float angle) : EntityIteratorFilterSphere(game, origin, radius), m_direction(dir), m_angle(static_cast<float>(umath::cos(static_cast<float>(umath::deg_to_rad(angle)))))
+EntityIteratorFilterCone::EntityIteratorFilterCone(pragma::Game &game, const Vector3 &origin, const Vector3 &dir, float radius, float angle)
+    : EntityIteratorFilterSphere(game, origin, radius), m_direction(dir), m_angle(static_cast<float>(umath::cos(static_cast<float>(umath::deg_to_rad(angle)))))
 {
 }
 

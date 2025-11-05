@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:particle_system.renderer_sprite_trail;
 
 export import :particle_system.modifier;

@@ -5,9 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
 export module pragma.client:entities.components.bot;
 
 export import :entities.base_entity;
@@ -15,18 +12,18 @@ export import :entities.base_entity;
 export {
 	namespace pragma {
 		class DLLCLIENT CBotComponent final : public BaseBotComponent {
-		public:
+		  public:
 			CBotComponent(pragma::ecs::BaseEntity &ent) : BaseBotComponent(ent) {}
 			virtual void Initialize() override;
 			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 			virtual void InitializeLuaObject(lua_State *l) override;
-		protected:
+		  protected:
 			void OnFootStep(BaseCharacterComponent::FootType foot);
 		};
 	};
 
 	class DLLCLIENT CBot : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

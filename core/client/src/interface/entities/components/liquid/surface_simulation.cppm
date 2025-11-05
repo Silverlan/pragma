@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.liquid_surface_simulation;
 
 export import :entities.components.entity;

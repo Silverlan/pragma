@@ -5,13 +5,10 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
 
 import :entities.components.static_bvh_cache;
 import :engine;
-
 
 using namespace pragma;
 

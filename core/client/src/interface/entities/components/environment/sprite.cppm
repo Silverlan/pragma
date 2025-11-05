@@ -5,17 +5,15 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
-
 export module pragma.client:entities.components.effects.sprite;
 
 export import :entities.base_entity;
 export import :entities.components.entity;
 export import :particle_system.enums;
 
-export namespace pragma::ecs {class CParticleSystemComponent;}
+export namespace pragma::ecs {
+	class CParticleSystemComponent;
+}
 export namespace pragma {
 	class DLLCLIENT CSpriteComponent final : public BaseEnvSpriteComponent, public CBaseNetComponent {
 	  public:

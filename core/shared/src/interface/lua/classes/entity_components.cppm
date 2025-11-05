@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:scripting.lua.classes.entity_components;
 
 export import :entities.components.base;

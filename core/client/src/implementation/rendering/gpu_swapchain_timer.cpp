@@ -3,15 +3,12 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.gpu_profiler;
 import :engine;
 
 using namespace pragma::debug;
-
 
 std::shared_ptr<GPUSwapchainTimer> GPUSwapchainTimer::Create(prosper::IQueryPool &timerQueryPool, prosper::IQueryPool &statsQueryPool, prosper::PipelineStageFlags stage) { return std::shared_ptr<GPUSwapchainTimer>(new GPUSwapchainTimer {timerQueryPool, statsQueryPool, stage}); }
 GPUSwapchainTimer::GPUSwapchainTimer(prosper::IQueryPool &timerQueryPool, prosper::IQueryPool &statsQueryPool, prosper::PipelineStageFlags stage) : m_stage {stage}, m_wpTimerQueryPool {timerQueryPool.shared_from_this()}, m_wpStatsQueryPool {statsQueryPool.shared_from_this()} {}

@@ -3,15 +3,12 @@
 
 module;
 
-
-
 module pragma.client;
 
 import :rendering.shader_graph.manager;
 
 import :engine;
 import :rendering.shaders;
-
 
 using namespace pragma::rendering;
 

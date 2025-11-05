@@ -3,8 +3,6 @@
 
 module;
 
-
-
 module pragma.client;
 
 import :gui.main_menu_new_game;
@@ -15,7 +13,6 @@ import :client_state;
 import :engine;
 import pragma.gui;
 import pragma.string.unicode;
-
 
 WIMainMenuNewGame::WIMainMenuNewGame() : WIMainMenuBase() {}
 

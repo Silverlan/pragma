@@ -121,20 +121,24 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	    {"ACTIVATION_STATE_COUNT", umath::to_integral(pragma::physics::ICollisionObject::ActivationState::Count)}});
 
 	Lua::RegisterLibraryEnums(l, libName,
-	  {{"TYPE_NONE", umath::to_integral(pragma::physics::PHYSICSTYPE::NONE)}, {"TYPE_DYNAMIC", umath::to_integral(pragma::physics::PHYSICSTYPE::DYNAMIC)}, {"TYPE_STATIC", umath::to_integral(pragma::physics::PHYSICSTYPE::STATIC)}, {"TYPE_BOXCONTROLLER", umath::to_integral(pragma::physics::PHYSICSTYPE::BOXCONTROLLER)},
-	    {"TYPE_CAPSULECONTROLLER", umath::to_integral(pragma::physics::PHYSICSTYPE::CAPSULECONTROLLER)}, {"TYPE_SOFTBODY", umath::to_integral(pragma::physics::PHYSICSTYPE::SOFTBODY)},
+	  {{"TYPE_NONE", umath::to_integral(pragma::physics::PHYSICSTYPE::NONE)}, {"TYPE_DYNAMIC", umath::to_integral(pragma::physics::PHYSICSTYPE::DYNAMIC)}, {"TYPE_STATIC", umath::to_integral(pragma::physics::PHYSICSTYPE::STATIC)},
+	    {"TYPE_BOXCONTROLLER", umath::to_integral(pragma::physics::PHYSICSTYPE::BOXCONTROLLER)}, {"TYPE_CAPSULECONTROLLER", umath::to_integral(pragma::physics::PHYSICSTYPE::CAPSULECONTROLLER)}, {"TYPE_SOFTBODY", umath::to_integral(pragma::physics::PHYSICSTYPE::SOFTBODY)},
 
-	    {"COLLISIONMASK_NONE", umath::to_integral(pragma::physics::CollisionMask::None)}, {"COLLISIONMASK_STATIC", umath::to_integral(pragma::physics::CollisionMask::Static)}, {"COLLISIONMASK_DYNAMIC", umath::to_integral(pragma::physics::CollisionMask::Dynamic)}, {"COLLISIONMASK_GENERIC", umath::to_integral(pragma::physics::CollisionMask::Generic)},
-	    {"COLLISIONMASK_PLAYER", umath::to_integral(pragma::physics::CollisionMask::Player)}, {"COLLISIONMASK_NPC", umath::to_integral(pragma::physics::CollisionMask::NPC)}, {"COLLISIONMASK_VEHICLE", umath::to_integral(pragma::physics::CollisionMask::Vehicle)}, {"COLLISIONMASK_ITEM", umath::to_integral(pragma::physics::CollisionMask::Item)},
-	    {"COLLISIONMASK_ALL", umath::to_integral(pragma::physics::CollisionMask::All)}, {"COLLISIONMASK_DEFAULT", umath::to_integral(pragma::physics::CollisionMask::Default)}, {"COLLISIONMASK_PARTICLE", umath::to_integral(pragma::physics::CollisionMask::Particle)}, {"COLLISIONMASK_CHARACTER", umath::to_integral(pragma::physics::CollisionMask::Character)},
+	    {"COLLISIONMASK_NONE", umath::to_integral(pragma::physics::CollisionMask::None)}, {"COLLISIONMASK_STATIC", umath::to_integral(pragma::physics::CollisionMask::Static)}, {"COLLISIONMASK_DYNAMIC", umath::to_integral(pragma::physics::CollisionMask::Dynamic)},
+	    {"COLLISIONMASK_GENERIC", umath::to_integral(pragma::physics::CollisionMask::Generic)}, {"COLLISIONMASK_PLAYER", umath::to_integral(pragma::physics::CollisionMask::Player)}, {"COLLISIONMASK_NPC", umath::to_integral(pragma::physics::CollisionMask::NPC)},
+	    {"COLLISIONMASK_VEHICLE", umath::to_integral(pragma::physics::CollisionMask::Vehicle)}, {"COLLISIONMASK_ITEM", umath::to_integral(pragma::physics::CollisionMask::Item)}, {"COLLISIONMASK_ALL", umath::to_integral(pragma::physics::CollisionMask::All)},
+	    {"COLLISIONMASK_DEFAULT", umath::to_integral(pragma::physics::CollisionMask::Default)}, {"COLLISIONMASK_PARTICLE", umath::to_integral(pragma::physics::CollisionMask::Particle)}, {"COLLISIONMASK_CHARACTER", umath::to_integral(pragma::physics::CollisionMask::Character)},
 	    {"COLLISIONMASK_TRIGGER", umath::to_integral(pragma::physics::CollisionMask::Trigger)}, {"COLLISIONMASK_WATER", umath::to_integral(pragma::physics::CollisionMask::Water)}, {"COLLISIONMASK_WATER_SURFACE", umath::to_integral(pragma::physics::CollisionMask::WaterSurface)},
-	    {"COLLISIONMASK_PLAYER_HITBOX", umath::to_integral(pragma::physics::CollisionMask::PlayerHitbox)}, {"COLLISIONMASK_NPC_HITBOX", umath::to_integral(pragma::physics::CollisionMask::NPCHitbox)}, {"COLLISIONMASK_CHARACTER_HITBOX", umath::to_integral(pragma::physics::CollisionMask::CharacterHitbox)},
-	    {"COLLISIONMASK_ALL_HITBOX", umath::to_integral(pragma::physics::CollisionMask::AllHitbox)}, {"COLLISIONMASK_NO_COLLISION", umath::to_integral(pragma::physics::CollisionMask::NoCollision)},
+	    {"COLLISIONMASK_PLAYER_HITBOX", umath::to_integral(pragma::physics::CollisionMask::PlayerHitbox)}, {"COLLISIONMASK_NPC_HITBOX", umath::to_integral(pragma::physics::CollisionMask::NPCHitbox)},
+	    {"COLLISIONMASK_CHARACTER_HITBOX", umath::to_integral(pragma::physics::CollisionMask::CharacterHitbox)}, {"COLLISIONMASK_ALL_HITBOX", umath::to_integral(pragma::physics::CollisionMask::AllHitbox)},
+	    {"COLLISIONMASK_NO_COLLISION", umath::to_integral(pragma::physics::CollisionMask::NoCollision)},
 
-	    {"RAYCAST_FLAG_BIT_REPORT_HIT_POSITION", umath::to_integral(pragma::physics::RayCastFlags::ReportHitPosition)}, {"RAYCAST_FLAG_BIT_REPORT_HIT_NORMAL", umath::to_integral(pragma::physics::RayCastFlags::ReportHitNormal)}, {"RAYCAST_FLAG_BIT_REPORT_HIT_UV", umath::to_integral(pragma::physics::RayCastFlags::ReportHitUV)},
-	    {"RAYCAST_FLAG_BIT_REPORT_ALL_RESULTS", umath::to_integral(pragma::physics::RayCastFlags::ReportAllResults)}, {"RAYCAST_FLAG_BIT_REPORT_ANY_RESULT", umath::to_integral(pragma::physics::RayCastFlags::ReportAnyResult)}, {"RAYCAST_FLAG_BIT_REPORT_BACK_FACE_HITS", umath::to_integral(pragma::physics::RayCastFlags::ReportBackFaceHits)},
-	    {"RAYCAST_FLAG_BIT_PRECISE", umath::to_integral(pragma::physics::RayCastFlags::Precise)}, {"RAYCAST_FLAG_BIT_IGNORE_DYNAMIC", umath::to_integral(pragma::physics::RayCastFlags::IgnoreDynamic)}, {"RAYCAST_FLAG_BIT_IGNORE_STATIC", umath::to_integral(pragma::physics::RayCastFlags::IgnoreStatic)},
-	    {"RAYCAST_FLAG_BIT_INVERT_FILTER", umath::to_integral(pragma::physics::RayCastFlags::InvertFilter)}, {"RAYCAST_FLAG_DEFAULT", umath::to_integral(pragma::physics::RayCastFlags::Default)}, {"RAYCAST_FLAG_NONE", umath::to_integral(pragma::physics::RayCastFlags::None)}});
+	    {"RAYCAST_FLAG_BIT_REPORT_HIT_POSITION", umath::to_integral(pragma::physics::RayCastFlags::ReportHitPosition)}, {"RAYCAST_FLAG_BIT_REPORT_HIT_NORMAL", umath::to_integral(pragma::physics::RayCastFlags::ReportHitNormal)},
+	    {"RAYCAST_FLAG_BIT_REPORT_HIT_UV", umath::to_integral(pragma::physics::RayCastFlags::ReportHitUV)}, {"RAYCAST_FLAG_BIT_REPORT_ALL_RESULTS", umath::to_integral(pragma::physics::RayCastFlags::ReportAllResults)},
+	    {"RAYCAST_FLAG_BIT_REPORT_ANY_RESULT", umath::to_integral(pragma::physics::RayCastFlags::ReportAnyResult)}, {"RAYCAST_FLAG_BIT_REPORT_BACK_FACE_HITS", umath::to_integral(pragma::physics::RayCastFlags::ReportBackFaceHits)},
+	    {"RAYCAST_FLAG_BIT_PRECISE", umath::to_integral(pragma::physics::RayCastFlags::Precise)}, {"RAYCAST_FLAG_BIT_IGNORE_DYNAMIC", umath::to_integral(pragma::physics::RayCastFlags::IgnoreDynamic)},
+	    {"RAYCAST_FLAG_BIT_IGNORE_STATIC", umath::to_integral(pragma::physics::RayCastFlags::IgnoreStatic)}, {"RAYCAST_FLAG_BIT_INVERT_FILTER", umath::to_integral(pragma::physics::RayCastFlags::InvertFilter)},
+	    {"RAYCAST_FLAG_DEFAULT", umath::to_integral(pragma::physics::RayCastFlags::Default)}, {"RAYCAST_FLAG_NONE", umath::to_integral(pragma::physics::RayCastFlags::None)}});
 
 	auto &physMod = lua.RegisterLibrary(libName);
 	auto classBase = luabind::class_<pragma::physics::IBase>("Base");
@@ -722,7 +726,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classIkController.def("SetMethod", &IKController::SetMethod);
 	classIkController.def("GetMethod", &IKController::GetMethod);
 	classIkController.def("GetKeyValues", static_cast<std::unordered_map<std::string, std::string> &(IKController::*)()>(&IKController::GetKeyValues));
-	classIkController.def("SetKeyValues",+[](lua::State *l, IKController &ikController, std::unordered_map<std::string, std::string> keyValues) { ikController.GetKeyValues() = std::move(keyValues); });
+	classIkController.def("SetKeyValues", +[](lua::State *l, IKController &ikController, std::unordered_map<std::string, std::string> keyValues) { ikController.GetKeyValues() = std::move(keyValues); });
 	classIkController.def("SetKeyValue", static_cast<void (*)(lua::State *, IKController &, const std::string &, const std::string &)>([](lua::State *l, IKController &ikController, const std::string &key, const std::string &value) {
 		auto &ikKeyValues = ikController.GetKeyValues();
 		ikKeyValues[key] = value;

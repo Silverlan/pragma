@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:particle_system.lua_particle_modifier_manager;
 
 export import :particle_system.initializer_lua;

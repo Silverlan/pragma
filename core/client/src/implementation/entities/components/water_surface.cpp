@@ -5,8 +5,6 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
 
 import :entities.components.water_surface;
@@ -16,7 +14,6 @@ import :model;
 import :physics;
 
 using namespace pragma;
-
 
 void CWaterSurfaceComponent::Initialize()
 {

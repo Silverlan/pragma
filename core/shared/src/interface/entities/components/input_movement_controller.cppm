@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.input_movement_controller;
 
 export import :entities.components.base;

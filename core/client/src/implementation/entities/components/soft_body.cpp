@@ -4,13 +4,10 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.soft_body;
 import :engine;
-
 
 using namespace pragma;
 

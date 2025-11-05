@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :rendering.shaders.depth_to_rgb;

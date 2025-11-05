@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
 #ifdef _WIN32
 #include <Windows.h>
 #endif
@@ -137,12 +135,14 @@ bool util::reset_console_color()
 
 pragma::console::ConsoleColorFlags util::get_active_console_color_flags() { return s_activeConsoleColorFlags; }
 
-const std::unordered_map<pragma::console::ConsoleColorFlags, Color> colorMap = {{pragma::console::ConsoleColorFlags::Red | pragma::console::ConsoleColorFlags::Intensity, Color {209, 17, 65}}, {pragma::console::ConsoleColorFlags::Green | pragma::console::ConsoleColorFlags::Intensity, Color {0, 177, 89}},
-  {pragma::console::ConsoleColorFlags::Blue | pragma::console::ConsoleColorFlags::Intensity, Color {0, 174, 219}}, {pragma::console::ConsoleColorFlags::Yellow | pragma::console::ConsoleColorFlags::Intensity, Color {255, 196, 37}}, {pragma::console::ConsoleColorFlags::Cyan | pragma::console::ConsoleColorFlags::Intensity, Color {132, 193, 255}},
+const std::unordered_map<pragma::console::ConsoleColorFlags, Color> colorMap = {{pragma::console::ConsoleColorFlags::Red | pragma::console::ConsoleColorFlags::Intensity, Color {209, 17, 65}},
+  {pragma::console::ConsoleColorFlags::Green | pragma::console::ConsoleColorFlags::Intensity, Color {0, 177, 89}}, {pragma::console::ConsoleColorFlags::Blue | pragma::console::ConsoleColorFlags::Intensity, Color {0, 174, 219}},
+  {pragma::console::ConsoleColorFlags::Yellow | pragma::console::ConsoleColorFlags::Intensity, Color {255, 196, 37}}, {pragma::console::ConsoleColorFlags::Cyan | pragma::console::ConsoleColorFlags::Intensity, Color {132, 193, 255}},
   {pragma::console::ConsoleColorFlags::Magenta | pragma::console::ConsoleColorFlags::Intensity, Color {255, 51, 119}}, {pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity, Color {255, 255, 255}},
 
-  {pragma::console::ConsoleColorFlags::Red, Color {209 / 2, 17 / 2, 65 / 2}}, {pragma::console::ConsoleColorFlags::Green, Color {0 / 2, 177 / 2, 89 / 2}}, {pragma::console::ConsoleColorFlags::Blue, Color {0 / 2, 174 / 2, 219 / 2}}, {pragma::console::ConsoleColorFlags::Yellow, Color {255 / 2, 196 / 2, 37 / 2}},
-  {pragma::console::ConsoleColorFlags::Cyan, Color {132 / 2, 193 / 2, 255 / 2}}, {pragma::console::ConsoleColorFlags::Magenta, Color {255 / 2, 51 / 2, 119 / 2}}, {pragma::console::ConsoleColorFlags::White, Color {255 / 2, 255 / 2, 255 / 2}}};
+  {pragma::console::ConsoleColorFlags::Red, Color {209 / 2, 17 / 2, 65 / 2}}, {pragma::console::ConsoleColorFlags::Green, Color {0 / 2, 177 / 2, 89 / 2}}, {pragma::console::ConsoleColorFlags::Blue, Color {0 / 2, 174 / 2, 219 / 2}},
+  {pragma::console::ConsoleColorFlags::Yellow, Color {255 / 2, 196 / 2, 37 / 2}}, {pragma::console::ConsoleColorFlags::Cyan, Color {132 / 2, 193 / 2, 255 / 2}}, {pragma::console::ConsoleColorFlags::Magenta, Color {255 / 2, 51 / 2, 119 / 2}},
+  {pragma::console::ConsoleColorFlags::White, Color {255 / 2, 255 / 2, 255 / 2}}};
 std::optional<Color> util::console_color_flags_to_color(pragma::console::ConsoleColorFlags flags)
 {
 	auto foregroundFlags = flags & (pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);

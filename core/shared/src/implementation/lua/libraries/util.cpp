@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
 #include "pragma/lua/ostream_operator_alias.hpp"
 
 module pragma.shared;
@@ -359,9 +357,8 @@ void Lua::util::register_shared_generic(lua::State *l, luabind::module_ &mod)
 	  luabind::def("register_class", static_cast<luabind::object (*)(lua::State *, const luabind::table<> &, const std::string &, const luabind::object &, const luabind::object &, const luabind::object &)>(Lua::util::register_class)),
 	  luabind::def("register_class", static_cast<luabind::object (*)(lua::State *, const luabind::table<> &, const std::string &, const luabind::object &, const luabind::object &)>(Lua::util::register_class)),
 	  luabind::def("register_class", static_cast<luabind::object (*)(lua::State *, const luabind::table<> &, const std::string &, const luabind::object &)>(Lua::util::register_class)),
-	  luabind::def("register_class", static_cast<luabind::object (*)(lua::State *, const luabind::table<> &, const std::string &)>(Lua::util::register_class)),
-	  luabind::def("local_to_world", static_cast<Quat (*)(lua::State *, const Quat &, const Quat &)>(local_to_world)), luabind::def("local_to_world", static_cast<Vector3 (*)(lua::State *, const Vector3 &, const Quat &, const Vector3 &)>(local_to_world)),
-	  luabind::def("local_to_world", static_cast<void (*)(lua::State *, const Vector3 &, const Quat &, const Vector3 &, const Quat &)>(local_to_world)),
+	  luabind::def("register_class", static_cast<luabind::object (*)(lua::State *, const luabind::table<> &, const std::string &)>(Lua::util::register_class)), luabind::def("local_to_world", static_cast<Quat (*)(lua::State *, const Quat &, const Quat &)>(local_to_world)),
+	  luabind::def("local_to_world", static_cast<Vector3 (*)(lua::State *, const Vector3 &, const Quat &, const Vector3 &)>(local_to_world)), luabind::def("local_to_world", static_cast<void (*)(lua::State *, const Vector3 &, const Quat &, const Vector3 &, const Quat &)>(local_to_world)),
 	  luabind::def("world_to_local", static_cast<Quat (*)(lua::State *, const Quat &, const Quat &)>(world_to_local)), luabind::def("world_to_local", static_cast<Vector3 (*)(lua::State *, const Vector3 &, const Quat &, const Vector3 &)>(world_to_local)),
 	  luabind::def("world_to_local", static_cast<void (*)(lua::State *, const Vector3 &, const Quat &, const Vector3 &, const Quat &)>(world_to_local)),
 	  luabind::def("get_pretty_duration", static_cast<std::string (*)(lua::State *, uint32_t, uint32_t, bool)>(Lua::util::get_pretty_duration)), luabind::def("get_pretty_duration", static_cast<std::string (*)(lua::State *, uint32_t, uint32_t)>(Lua::util::get_pretty_duration)),
@@ -377,13 +374,12 @@ void Lua::util::register_shared_generic(lua::State *l, luabind::module_ &mod)
 	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LQuatProperty &, const Quat &, float)>(Lua::util::fade_property)),
 	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LEulerAnglesProperty &, const ::EulerAngles &, float)>(Lua::util::fade_property)),
 	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LGenericIntPropertyWrapper &, const int64_t &, float)>(Lua::util::fade_property)),
-	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LGenericFloatPropertyWrapper &, const double &, float)>(Lua::util::fade_property)),
-	  luabind::def("round_string", static_cast<std::string (*)(lua::State *, float, uint32_t)>(Lua::util::round_string)), luabind::def("round_string", static_cast<std::string (*)(lua::State *, float)>(Lua::util::round_string)),
-	  luabind::def("get_type_name", Lua::util::get_type_name), luabind::def("is_same_object", Lua::util::is_same_object), luabind::def("clamp_resolution_to_aspect_ratio", Lua::util::clamp_resolution_to_aspect_ratio), luabind::def("get_class_value", Lua::util::get_class_value),
-	  luabind::def("pack_zip_archive", Lua::util::pack_zip_archive), luabind::def("world_space_point_to_screen_space_uv", static_cast<void (*)(lua::State *, const Vector3 &, const ::Mat4 &, float, float)>(Lua::util::world_space_point_to_screen_space_uv)),
+	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LGenericFloatPropertyWrapper &, const double &, float)>(Lua::util::fade_property)), luabind::def("round_string", static_cast<std::string (*)(lua::State *, float, uint32_t)>(Lua::util::round_string)),
+	  luabind::def("round_string", static_cast<std::string (*)(lua::State *, float)>(Lua::util::round_string)), luabind::def("get_type_name", Lua::util::get_type_name), luabind::def("is_same_object", Lua::util::is_same_object),
+	  luabind::def("clamp_resolution_to_aspect_ratio", Lua::util::clamp_resolution_to_aspect_ratio), luabind::def("get_class_value", Lua::util::get_class_value), luabind::def("pack_zip_archive", Lua::util::pack_zip_archive),
+	  luabind::def("world_space_point_to_screen_space_uv", static_cast<void (*)(lua::State *, const Vector3 &, const ::Mat4 &, float, float)>(Lua::util::world_space_point_to_screen_space_uv)),
 	  luabind::def("world_space_direction_to_screen_space", Lua::util::world_space_direction_to_screen_space), luabind::def("calc_screen_space_distance_to_world_space_position", Lua::util::calc_screenspace_distance_to_worldspace_position),
-	  luabind::def("depth_to_distance", Lua::util::depth_to_distance),
-	  luabind::def("generate_hair_file", &generate_hair_file),
+	  luabind::def("depth_to_distance", Lua::util::depth_to_distance), luabind::def("generate_hair_file", &generate_hair_file),
 	  luabind::def(
 	    "generate_hair_data", +[](float hairPerArea, const pragma::ModelSubMesh &mesh) {
 		    struct MeshInterface : public ::util::HairGenerator::MeshInterface {
@@ -537,17 +533,17 @@ void Lua::util::register_library(lua::State *l)
 {
 	auto pythonMod = luabind::module(l, "python");
 	pythonMod[(luabind::def(
-	            "run",
-	            +[](lua::State *l, const std::string &code) -> Lua::mult<bool, Lua::opt<std::string>> {
-		            auto res = pragma::python::run(code.c_str());
-		            if(res == false) {
-			            auto err = pragma::python::get_last_error();
-			            if(!err.has_value())
-				            err = "Unknown Error";
-			            return luabind::object {l, std::pair<bool, std::string> {res, *err}};
-		            }
-		            return luabind::object {l, res};
-	            }),
+	             "run",
+	             +[](lua::State *l, const std::string &code) -> Lua::mult<bool, Lua::opt<std::string>> {
+		             auto res = pragma::python::run(code.c_str());
+		             if(res == false) {
+			             auto err = pragma::python::get_last_error();
+			             if(!err.has_value())
+				             err = "Unknown Error";
+			             return luabind::object {l, std::pair<bool, std::string> {res, *err}};
+		             }
+		             return luabind::object {l, res};
+	             }),
 	  luabind::def("exec", static_cast<Lua::mult<bool, Lua::opt<std::string>> (*)(lua::State *, const std::string &)>(&exec_python)),
 	  luabind::def("exec", static_cast<Lua::mult<bool, Lua::opt<std::string>> (*)(lua::State *, const std::string &, const std::vector<std::string> &)>(&exec_python)), luabind::def("init_blender", &pragma::python::init_blender), luabind::def("reload", &pragma::python::reload))];
 	auto utilMod = luabind::module(l, "util");
@@ -807,7 +803,8 @@ luabind::object Lua::util::fire_bullets(lua::State *l, BulletInfo &bulletInfo, b
 				return pragma::physics::RayCastHitType::None;
 			auto filterGroup = phys->GetCollisionFilter();
 			auto mdlComponent = ent->GetEntity().GetModelComponent();
-			if(mdlComponent && mdlComponent->GetHitboxCount() > 0 && (filterGroup & pragma::physics::CollisionMask::NPC) != pragma::physics::CollisionMask::None || (filterGroup & pragma::physics::CollisionMask::Player) != pragma::physics::CollisionMask::None) // Filter out player and NPC collision objects, since we only want to check their hitboxes
+			if(mdlComponent && mdlComponent->GetHitboxCount() > 0 && (filterGroup & pragma::physics::CollisionMask::NPC) != pragma::physics::CollisionMask::None
+			  || (filterGroup & pragma::physics::CollisionMask::Player) != pragma::physics::CollisionMask::None) // Filter out player and NPC collision objects, since we only want to check their hitboxes
 				return pragma::physics::RayCastHitType::None;
 			return pragma::physics::RayCastHitType::Block;
 		});
@@ -982,7 +979,7 @@ static luabind::object register_class(lua::State *l, const std::string &pclassNa
 			ss << slibs << "=" << className;
 			r = pragma::scripting::lua_core::run_string(l, ss.str(), "internal", 1);
 			if(r == Lua::StatusCode::Ok)
-				Lua::Pop(l, 1); /* 0 */
+				Lua::Pop(l, 1);           /* 0 */
 			Lua::PushNil(l);              /* 1 */
 			Lua::SetGlobal(l, className); /* 0 */
 		}
@@ -1359,7 +1356,7 @@ std::string Lua::util::get_type_name(lua::State *l, const luabind::object &o)
 	auto *crep = Lua::get_crep(o);
 	if(crep)
 		return crep->name();
-	return lua_typename(l,  Lua::GetType(l, -1));
+	return lua_typename(l, Lua::GetType(l, -1));
 }
 std::string Lua::util::variable_type_to_string(::util::VarType varType) { return ::util::variable_type_to_string(varType); }
 std::string Lua::util::get_string_hash(const std::string &str) { return std::to_string(std::hash<std::string> {}(str)); }

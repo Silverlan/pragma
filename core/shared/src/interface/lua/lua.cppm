@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 export module pragma.shared:scripting.lua;
 
 export import :scripting.lua.api;

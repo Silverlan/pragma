@@ -4,28 +4,22 @@ module;
 
 #include "definitions.hpp"
 
-
-
-
-
-
-
 export module pragma.shared:console.cvar_handler;
 
 export import :console.convar_handle;
 
 export {
 	class NetworkState;
-	#pragma warning(push)
-	#pragma warning(disable : 4251)
+#pragma warning(push)
+#pragma warning(disable : 4251)
 	class DLLNETWORK CVarHandler {
 		// For internal use only! Not to be used directly!
-	protected:
+	  protected:
 		static ConVarHandle GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ptrs, std::string scvar);
-	public:
+	  public:
 		virtual std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &GetConVarPtrs() = 0;
 		//
-	protected:
+	  protected:
 		std::map<std::string, std::shared_ptr<ConConf>> m_conVars;
 		std::unordered_map<std::string, std::vector<CvarCallback>> m_cvarCallbacks; // Engine-Level Callbacks only
 		std::unordered_map<std::string, unsigned int> m_conCommandIDs;
@@ -35,10 +29,10 @@ export {
 		};
 
 		template<typename T>
-			CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, T, T)> &function);
+		CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, T, T)> &function);
 		void FindSimilarConVars(const std::string &input, const std::map<std::string, std::shared_ptr<ConConf>> &cvars, std::vector<SimilarCmdInfo> &similarCmds) const;
 		virtual void Initialize();
-	public:
+	  public:
 		CVarHandler();
 		virtual ~CVarHandler();
 		void ClearCommands();
@@ -76,7 +70,8 @@ export {
 		// These should be avoided, because convars and commands registered this way
 		// cannot be synchronized between server and client
 		std::shared_ptr<ConVar> RegisterConVar(const std::string &scmd, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help = "");
-		std::shared_ptr<ConCommand> RegisterConCommand(const std::string &scmd, const std::function<void(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> &fc, pragma::console::ConVarFlags flags = pragma::console::ConVarFlags::None, const std::string &help = "");
+		std::shared_ptr<ConCommand> RegisterConCommand(const std::string &scmd, const std::function<void(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> &fc, pragma::console::ConVarFlags flags = pragma::console::ConVarFlags::None,
+		  const std::string &help = "");
 		CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, int, int)> &function);
 		CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, std::string, std::string)> &function);
 		CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, float, float)> &function);
@@ -84,5 +79,5 @@ export {
 
 		virtual void implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const;
 	};
-	#pragma warning(pop)
+#pragma warning(pop)
 };

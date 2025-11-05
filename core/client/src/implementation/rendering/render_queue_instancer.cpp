@@ -3,8 +3,6 @@
 
 module;
 
-
-
 module pragma.client;
 
 import :rendering.render_queue_instancer;
@@ -12,7 +10,6 @@ import :entities.components.render;
 import :game;
 
 using namespace pragma;
-
 
 static auto cvInstancingThreshold = GetClientConVar("render_instancing_threshold");
 rendering::RenderQueueInstancer::RenderQueueInstancer(pragma::rendering::RenderQueue &renderQueue) : m_renderQueue {renderQueue}, m_instanceThreshold {static_cast<uint32_t>(umath::max(cvInstancingThreshold->GetInt(), 2))} {}

@@ -3,13 +3,11 @@
 
 module;
 
-
 module pragma.client;
 
 import :rendering.shaders.convolute_cubemap_lighting;
 
 import :engine;
-
 
 using namespace pragma;
 

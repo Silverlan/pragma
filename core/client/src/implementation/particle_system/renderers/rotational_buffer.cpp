@@ -3,19 +3,17 @@
 
 module;
 
-
 module pragma.client;
 
 import :particle_system.renderer_rotational_buffer;
 
 import :client_state;
 
-
 void CParticleRendererRotationalBuffer::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem)
 {
 	m_hParticleSystem = pSystem.GetHandle<pragma::ecs::CParticleSystemComponent>();
 
-	auto maxParticles = static_cast<pragma::ecs::CParticleSystemComponent&>(pSystem).GetMaxParticleCount();
+	auto maxParticles = static_cast<pragma::ecs::CParticleSystemComponent &>(pSystem).GetMaxParticleCount();
 	m_rotations.resize(maxParticles);
 
 	prosper::util::BufferCreateInfo createInfo {};

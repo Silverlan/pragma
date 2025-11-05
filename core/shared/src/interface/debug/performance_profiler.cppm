@@ -4,13 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
-
-
-
-
-
 export module pragma.shared:debug.performance_profiler;
 
 #define ENABLE_DEBUG_HISTORY 0
@@ -25,7 +18,7 @@ export {
 			};
 
 			class DLLNETWORK Timer {
-			public:
+			  public:
 				Timer(const Timer &) = delete;
 				Timer &operator=(const Timer &) = delete;
 				virtual ~Timer() = default;
@@ -38,14 +31,14 @@ export {
 				virtual void ResetCounters() { m_count = 0; }
 				size_t GetCount() const { return m_count; }
 				virtual std::unique_ptr<ProfilerResult> GetResult() const = 0;
-			protected:
+			  protected:
 				Timer() = default;
 				uint32_t m_count = 0;
 			};
 
 			class Profiler;
 			class DLLNETWORK ProfilingStage : public std::enable_shared_from_this<ProfilingStage> {
-			public:
+			  public:
 				using StageId = uint32_t;
 				template<class TProfilingStage>
 				static std::shared_ptr<TProfilingStage> Create(Profiler &profiler, std::thread::id tid, const std::string &name);
@@ -70,11 +63,11 @@ export {
 				const std::vector<std::weak_ptr<ProfilingStage>> &GetChildren() const;
 				const Timer &GetTimer() const;
 				Timer &GetTimer();
-			protected:
+			  protected:
 				ProfilingStage(Profiler &profiler, std::thread::id tid, const std::string &name);
 				virtual void InitializeTimer();
 				std::shared_ptr<Timer> m_timer;
-			private:
+			  private:
 				Profiler &m_profiler;
 				std::weak_ptr<ProfilingStage> m_parent = {};
 				std::vector<std::weak_ptr<ProfilingStage>> m_children = {};
@@ -85,7 +78,7 @@ export {
 
 			class CPUProfiler;
 			class DLLNETWORK Profiler {
-			public:
+			  public:
 				template<class TProfiler>
 				static std::shared_ptr<TProfiler> Create();
 				virtual std::shared_ptr<Timer> CreateTimer() { return nullptr; };
@@ -99,10 +92,10 @@ export {
 				ProfilingStage *GetStage(ProfilingStage::StageId stage);
 				const std::vector<std::weak_ptr<ProfilingStage>> &GetStages() const;
 				void AddStage(ProfilingStage &stage);
-			protected:
+			  protected:
 				Profiler() = default;
 				std::shared_ptr<ProfilingStage> m_rootStage = nullptr;
-			private:
+			  private:
 				ProfilingStage::StageId m_nextStageId = 0u;
 				std::vector<std::weak_ptr<ProfilingStage>> m_stages = {};
 				friend std::shared_ptr<ProfilingStage> ProfilingStage::Create(Profiler &profiler, std::thread::id tid, const std::string &name);
@@ -110,47 +103,47 @@ export {
 
 			template<class TProfilingStage>
 			class ProfilingStageManager {
-			public:
+			  public:
 				TProfilingStage &GetProfilerStage(std::thread::id tid, const char *name);
 				bool StartProfilerStage(const char *name);
 				bool StopProfilerStage();
 				void InitializeProfilingStageManager(Profiler &profiler);
-			protected:
+			  protected:
 				using ProfilingStageMap = std::unordered_map<const char *, std::shared_ptr<TProfilingStage>>;
 				struct ProfilingThreadData {
 					ProfilingStageMap stageMap;
 					std::stack<const char *> stageStack;
-	#if ENABLE_DEBUG_HISTORY == 1
+#if ENABLE_DEBUG_HISTORY == 1
 					struct HistoryItem {
 						std::string name;
 						std::string stackTrace;
 					};
 					std::vector<HistoryItem> history;
-	#endif
+#endif
 				};
 				std::unordered_map<std::thread::id, ProfilingThreadData> m_threadProfilingMap;
 				std::mutex m_profilingStageMutex;
-			private:
+			  private:
 				Profiler *m_profiler = nullptr;
 			};
 
 			////////
 
 			class DLLNETWORK CPUTimer : public Timer {
-			public:
+			  public:
 				static std::shared_ptr<CPUTimer> Create();
 				virtual bool Start() override;
 				virtual bool Stop() override;
 				virtual void ResetCounters() override;
 				virtual std::unique_ptr<ProfilerResult> GetResult() const override;
-			private:
+			  private:
 				CPUTimer() = default;
 				util::Clock::time_point m_startTime = {};
 				util::Clock::duration m_duration = {};
 			};
 
 			class DLLNETWORK CPUProfiler : public Profiler {
-			public:
+			  public:
 				CPUProfiler() = default;
 				virtual std::shared_ptr<Timer> CreateTimer() override;
 			};
@@ -185,12 +178,12 @@ export {
 				auto &profilingStages = threadData.stageMap;
 				auto &stageStack = threadData.stageStack;
 
-			#if ENABLE_DEBUG_HISTORY == 1
+#if ENABLE_DEBUG_HISTORY == 1
 				std::string prefix(stageStack.size() * 2, ' ');
 				threadData.history.push_back({prefix + "Start " + std::string {name}, util::get_formatted_stack_backtrace_string()});
 				while(threadData.history.size() > 1000)
 					threadData.history.erase(threadData.history.begin());
-			#endif
+#endif
 
 				auto it = profilingStages.find(name);
 				if(it == profilingStages.end()) {
@@ -231,10 +224,10 @@ export {
 				if(stageStack.empty())
 					throw std::logic_error {"Attempted to stop profiling stage, but no stage has been started!"};
 
-			#if ENABLE_DEBUG_HISTORY == 1
+#if ENABLE_DEBUG_HISTORY == 1
 				std::string prefix((stageStack.size() - 1) * 2, ' ');
 				threadData.history.push_back({prefix + "Stop " + std::string {stageStack.top()}, util::get_formatted_stack_backtrace_string()});
-			#endif
+#endif
 
 				auto &stage = GetProfilerStage(tid, stageStack.top());
 				stageStack.pop();

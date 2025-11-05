@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
 module pragma.shared;
 
 import :entities.components.constraints.limit_location;

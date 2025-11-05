@@ -4,20 +4,21 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:particle_system.initializer_shoot;
 
 export import :particle_system.modifier;
 import :particle_system.modifier_random_variable;
 
-export namespace pragma::ecs {class CParticleSystemComponent;}
+export namespace pragma::ecs {
+	class CParticleSystemComponent;
+}
 export {
 	class DLLCLIENT CParticleInitializerShootCone : public CParticleInitializer {
-	public:
+	  public:
 		CParticleInitializerShootCone() = default;
 		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void OnParticleCreated(CParticle &particle) override;
-	private:
+	  private:
 		CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fMinAngle;
 		CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fMaxAngle;
 		Vector3 m_vDirection = {1.f, 0.f, 0.f};
@@ -26,11 +27,11 @@ export {
 	/////////////////////////
 
 	class DLLCLIENT CParticleInitializerShootOutward : public CParticleInitializer {
-	public:
+	  public:
 		CParticleInitializerShootOutward() = default;
 		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void OnParticleCreated(CParticle &particle) override;
-	private:
+	  private:
 		Vector3 m_vBias = {};
 	};
 };

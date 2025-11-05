@@ -5,8 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.filter.entity_class;
 
 import :entities;
@@ -14,14 +12,14 @@ import :entities;
 export {
 	namespace pragma {
 		class DLLSERVER SFilterClassComponent final : public BaseFilterClassComponent {
-		public:
+		  public:
 			SFilterClassComponent(pragma::ecs::BaseEntity &ent) : BaseFilterClassComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};
 
 	class DLLSERVER FilterEntityClass : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

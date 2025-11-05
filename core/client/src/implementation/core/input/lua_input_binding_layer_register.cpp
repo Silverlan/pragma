@@ -3,13 +3,10 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :core.lua_input_binding_layer_register;
 import :engine;
-
 
 pragma::LuaInputBindingLayerRegister::~LuaInputBindingLayerRegister() { Clear(); }
 void pragma::LuaInputBindingLayerRegister::Add(InputBindingLayer &layer) { m_layers.insert(&layer); }

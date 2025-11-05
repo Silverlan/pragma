@@ -16,16 +16,18 @@ export import :entities.member_type;
 export import pragma.lua;
 
 export {
-	namespace pragma::ecs {class BaseEntity;}
+	namespace pragma::ecs {
+		class BaseEntity;
+	}
 	namespace pragma {
 		DLLNETWORK std::string get_normalized_component_member_name(const std::string &name);
 		DLLNETWORK size_t get_component_member_name_hash(const std::string &name);
 		DLLNETWORK size_t get_component_member_name_hash(const char *name);
 
 		class DLLNETWORK BaseNetComponent {
-		public:
+		  public:
 			virtual bool ShouldTransmitNetData() const = 0;
-		protected:
+		  protected:
 			BaseNetComponent() = default;
 		};
 
@@ -61,7 +63,7 @@ export {
 		};
 
 		class DLLNETWORK EntityComponentManager {
-		public:
+		  public:
 			EntityComponentManager() = default;
 			EntityComponentManager(const EntityComponentManager &) = delete;
 			EntityComponentManager &operator=(const EntityComponentManager &) = delete;
@@ -104,13 +106,13 @@ export {
 			const std::unordered_map<ComponentEventId, ComponentEventInfo> &GetEvents() const;
 
 			struct DLLNETWORK ComponentContainerInfo {
-			protected:
+			  protected:
 				friend EntityComponentManager;
 				void Push(BaseEntityComponent &component);
 				void Pop(BaseEntityComponent &component);
 				std::size_t GetCount() const;
 				const std::vector<BaseEntityComponent *> &GetComponents() const;
-			private:
+			  private:
 				std::queue<std::size_t> m_freeIndices = {};
 				std::size_t m_count = 0ull;
 				std::vector<BaseEntityComponent *> m_components = {};
@@ -126,7 +128,7 @@ export {
 
 			// Automatically called when a component was removed; Don't call this manually!
 			void DeregisterComponent(BaseEntityComponent &component);
-		private:
+		  private:
 			ComponentId RegisterComponentType(const std::string &name, const std::function<util::TSharedHandle<BaseEntityComponent>(pragma::ecs::BaseEntity &)> &factory, const ComponentRegInfo &regInfo, ComponentFlags flags, const std::type_index *typeIndex);
 			virtual void OnComponentTypeRegistered(const ComponentInfo &componentInfo);
 
@@ -147,12 +149,12 @@ export {
 
 			std::unordered_map<ComponentEventId, ComponentEventInfo> m_componentEvents;
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::ComponentFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::ComponentFlags> : std::true_type {};
+	}
 
 	namespace pragma {
 		template<class TComponent, typename>

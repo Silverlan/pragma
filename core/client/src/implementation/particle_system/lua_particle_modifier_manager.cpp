@@ -4,8 +4,6 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
 
 import :particle_system.lua_particle_modifier_manager;

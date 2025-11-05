@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.iterator;
 
 import :entities.base_entity;
@@ -23,8 +21,8 @@ export {
 		virtual bool ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) = 0;
 	};
 
-	#pragma warning(push)
-	#pragma warning(disable : 4251)
+#pragma warning(push)
+#pragma warning(disable : 4251)
 	struct BaseEntityContainer {
 		BaseEntityContainer(std::size_t count) : count {count} {}
 		virtual ~BaseEntityContainer() {}
@@ -32,7 +30,7 @@ export {
 		std::size_t Count() const { return count; }
 		virtual std::size_t Size() const = 0;
 		virtual pragma::ecs::BaseEntity *At(std::size_t index) = 0;
-	private:
+	  private:
 		std::size_t count = 0ull;
 	};
 	struct EntityContainer : public BaseEntityContainer {
@@ -40,7 +38,7 @@ export {
 		// Returns container size (potentially includes NULL elements)
 		virtual std::size_t Size() const override;
 		virtual pragma::ecs::BaseEntity *At(std::size_t index) override;
-	private:
+	  private:
 		std::vector<pragma::ecs::BaseEntity *> &ents;
 	};
 	struct EntityIteratorData {
@@ -54,7 +52,7 @@ export {
 	};
 
 	class DLLNETWORK BaseEntityIterator {
-	public:
+	  public:
 		using iterator_category = std::forward_iterator_tag;
 		using value_type = pragma::ecs::BaseEntity;
 		using difference_type = pragma::ecs::BaseEntity;
@@ -77,16 +75,16 @@ export {
 		// For internal use only!
 		EntityIteratorData *GetIteratorData() { return m_iteratorData.get(); }
 		std::size_t GetCurrentIndex() const { return m_currentIndex; }
-	protected:
+	  protected:
 		std::shared_ptr<EntityIteratorData> m_iteratorData;
 		std::size_t m_currentIndex = 0ull;
-	private:
+	  private:
 		bool ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) const;
 	};
 
 	namespace pragma::ecs {
 		class DLLNETWORK EntityIterator {
-		public:
+		  public:
 			friend BaseEntityIterator;
 			enum class FilterFlags : uint32_t {
 				None = 0u,
@@ -132,7 +130,7 @@ export {
 
 			// Internal use only!
 			EntityIteratorData *GetIteratorData() { return m_iteratorData.get(); }
-		protected:
+		  protected:
 			EntityIterator() = default;
 			EntityIterator(pragma::Game &game, bool /* dummy */);
 			void SetBaseComponentType(pragma::ComponentId componentId);
@@ -140,7 +138,7 @@ export {
 			void SetBaseComponentType(const std::string &componentName);
 
 			std::shared_ptr<EntityIteratorData> m_iteratorData;
-		private:
+		  private:
 			template<typename T, typename = int>
 			struct HasGetType : std::false_type {};
 
@@ -158,22 +156,22 @@ export {
 			{
 			}
 		};
-    	using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	}
 	namespace umath::scoped_enum::bitwise {
 		template<>
 		struct enable_bitwise_operators<pragma::ecs::EntityIterator::FilterFlags> : std::true_type {};
 	}
-	#pragma warning(pop)
+#pragma warning(pop)
 
 	///////////////
 
-	#pragma warning(push)
-	#pragma warning(disable : 4251)
+#pragma warning(push)
+#pragma warning(disable : 4251)
 	struct DLLNETWORK EntityIteratorFilterName : public IEntityIteratorFilter {
 		EntityIteratorFilterName(pragma::Game &game, const std::string &name, bool caseSensitive = false, bool exactMatch = true);
 		virtual bool ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) override;
-	private:
+	  private:
 		std::string m_name;
 		bool m_bCaseSensitive = false;
 		bool m_bExactMatch = true;
@@ -182,21 +180,21 @@ export {
 	struct DLLNETWORK EntityIteratorFilterModel : public IEntityIteratorFilter {
 		EntityIteratorFilterModel(pragma::Game &game, const std::string &mdlName);
 		virtual bool ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) override;
-	private:
+	  private:
 		std::string m_modelName;
 	};
 
 	struct DLLNETWORK EntityIteratorFilterUuid : public IEntityIteratorFilter {
 		EntityIteratorFilterUuid(pragma::Game &game, const util::Uuid &uuid);
 		virtual bool ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) override;
-	private:
+	  private:
 		util::Uuid m_uuid;
 	};
 
 	struct DLLNETWORK EntityIteratorFilterClass : public IEntityIteratorFilter {
 		EntityIteratorFilterClass(pragma::Game &game, const std::string &name, bool caseSensitive = false, bool exactMatch = true);
 		virtual bool ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) override;
-	private:
+	  private:
 		std::string m_name;
 		bool m_bCaseSensitive = false;
 		bool m_bExactMatch = true;
@@ -205,7 +203,7 @@ export {
 	struct DLLNETWORK EntityIteratorFilterNameOrClass : public IEntityIteratorFilter {
 		EntityIteratorFilterNameOrClass(pragma::Game &game, const std::string &name, bool caseSensitive = false, bool exactMatch = true);
 		virtual bool ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) override;
-	private:
+	  private:
 		std::string m_name;
 		bool m_bCaseSensitive = false;
 		bool m_bExactMatch = true;
@@ -214,7 +212,7 @@ export {
 	struct DLLNETWORK EntityIteratorFilterEntity : public IEntityIteratorFilter {
 		EntityIteratorFilterEntity(pragma::Game &game, const std::string &name);
 		virtual bool ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) override;
-	private:
+	  private:
 		std::vector<util::WeakHandle<pragma::BaseFilterComponent>> m_filterEnts;
 		pragma::ComponentId m_filterNameComponentId = pragma::INVALID_COMPONENT_ID;
 		pragma::ComponentId m_filterClassComponentId = pragma::INVALID_COMPONENT_ID;
@@ -224,7 +222,7 @@ export {
 	struct DLLNETWORK EntityIteratorFilterFlags : public IEntityIteratorFilter {
 		EntityIteratorFilterFlags(pragma::Game &game, pragma::ecs::EntityIterator::FilterFlags flags);
 		virtual bool ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) override;
-	private:
+	  private:
 		pragma::ecs::EntityIterator::FilterFlags m_flags = pragma::ecs::EntityIterator::FilterFlags::None;
 	};
 
@@ -233,7 +231,7 @@ export {
 		EntityIteratorFilterComponent(pragma::Game &game, const std::string &componentName);
 
 		virtual bool ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) override;
-	private:
+	  private:
 		pragma::ComponentId m_componentId = pragma::INVALID_COMPONENT_ID;
 	};
 
@@ -241,7 +239,7 @@ export {
 		EntityIteratorFilterUser(pragma::Game &game, const std::function<bool(pragma::ecs::BaseEntity &, std::size_t)> &fUserFilter);
 
 		virtual bool ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) override;
-	private:
+	  private:
 		std::function<bool(pragma::ecs::BaseEntity &, std::size_t)> m_fUserFilter = nullptr;
 	};
 
@@ -249,7 +247,7 @@ export {
 		EntityIteratorFilterSphere(pragma::Game &game, const Vector3 &origin, float radius);
 
 		virtual bool ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) override;
-	protected:
+	  protected:
 		bool ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index, Vector3 &outClosestPointOnEntityBounds, float &outDistToEntity) const;
 
 		Vector3 m_origin;
@@ -260,7 +258,7 @@ export {
 		EntityIteratorFilterBox(pragma::Game &game, const Vector3 &min, const Vector3 &max);
 
 		virtual bool ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) override;
-	private:
+	  private:
 		Vector3 m_min;
 		Vector3 m_max;
 	};
@@ -269,11 +267,11 @@ export {
 		EntityIteratorFilterCone(pragma::Game &game, const Vector3 &origin, const Vector3 &dir, float radius, float angle);
 
 		virtual bool ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) override;
-	private:
+	  private:
 		Vector3 m_direction;
 		float m_angle = 0.f;
 	};
-	#pragma warning(pop)
+#pragma warning(pop)
 
 	template<class TComponent>
 	struct TEntityIteratorFilterComponent : public IEntityIteratorFilter {
@@ -293,7 +291,7 @@ export {
 
 	template<class TComponent>
 	class BaseEntityComponentIterator : public BaseEntityIterator {
-	public:
+	  public:
 		using iterator_category = std::forward_iterator_tag;
 		using value_type = pragma::ecs::BaseEntity;
 		using difference_type = pragma::ecs::BaseEntity;
@@ -319,13 +317,13 @@ export {
 		TComponent *operator->() { return static_cast<TComponent *>((*m_components)[m_currentIndex]); }
 		bool operator==(const BaseEntityComponentIterator<TComponent> &other) { return BaseEntityIterator::operator==(other); }
 		bool operator!=(const BaseEntityComponentIterator<TComponent> &other) { return BaseEntityIterator::operator!=(other); }
-	private:
+	  private:
 		const std::vector<pragma::BaseEntityComponent *> *m_components = nullptr;
 	};
 
 	template<class TComponent>
 	class EntityCIterator : public pragma::ecs::EntityIterator {
-	public:
+	  public:
 		EntityCIterator(pragma::Game &game, FilterFlags filterFlags = FilterFlags::Default) : pragma::ecs::EntityIterator {game, false} { SetBaseComponentType(std::type_index(typeid(TComponent))); }
 		BaseEntityComponentIterator<TComponent> begin() const { return BaseEntityComponentIterator<TComponent> {m_iteratorData, false}; }
 		BaseEntityComponentIterator<TComponent> end() const { return BaseEntityComponentIterator<TComponent> {m_iteratorData, true}; }
@@ -335,7 +333,7 @@ export {
 
 	template<class TComponent>
 	class EntityComponentIterator {
-	public:
+	  public:
 		EntityComponentIterator() = default;
 		EntityComponentIterator(std::vector<pragma::ecs::BaseEntity *> &ents) : m_ents(&ents) {}
 		EntityComponentIterator &operator++()
@@ -357,18 +355,18 @@ export {
 		TComponent *operator->() { return m_ents->at(m_currentIndex)->GetComponent<TComponent>().get(); }
 		bool operator==(const EntityComponentIterator &other) { return m_ents == other.m_ents && m_currentIndex == other.m_currentIndex; }
 		bool operator!=(const EntityComponentIterator &other) { return !operator==(other); }
-	protected:
+	  protected:
 		std::size_t m_currentIndex = std::numeric_limits<std::size_t>::max(); // Note: Intentional overflow at first iteration
 		std::vector<pragma::ecs::BaseEntity *> *m_ents = nullptr;
 	};
 
 	template<class TComponent>
 	class TEntityIterator {
-	public:
+	  public:
 		TEntityIterator(pragma::Game &game) : m_game(game) {}
 		EntityComponentIterator<TComponent> begin() { return EntityComponentIterator<TComponent> {m_game.GetBaseEntities()}; }
 		EntityComponentIterator<TComponent> end() { return EntityComponentIterator<TComponent> {}; }
-	private:
+	  private:
 		pragma::Game &m_game;
 	};
 

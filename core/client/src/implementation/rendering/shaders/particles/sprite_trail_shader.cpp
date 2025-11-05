@@ -3,16 +3,12 @@
 
 module;
 
-
-
 module pragma.client;
-
 
 import :rendering.shaders.particle_sprite_trail;
 
 import :engine;
 import :particle_system;
-
 
 using namespace pragma;
 

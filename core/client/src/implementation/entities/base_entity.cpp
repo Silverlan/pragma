@@ -4,10 +4,7 @@
 module;
 #include "pragma/logging.hpp"
 
-
 #include "pragma/lua/core.hpp"
-
-
 
 #undef GetClassName
 
@@ -22,7 +19,6 @@ import :model;
 import :game;
 import :util;
 import pragma.shared;
-
 
 void CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 {
@@ -149,7 +145,7 @@ void CBaseEntity::Initialize()
 {
 	pragma::ecs::BaseEntity::Initialize();
 	auto className = client_entities::ClientEntityRegistry::Instance().GetClassName(typeid(*this));
-	std::string strClassName = className ? std::string{*className} : std::string {};
+	std::string strClassName = className ? std::string {*className} : std::string {};
 	m_className = pragma::ents::register_class_name(strClassName);
 }
 

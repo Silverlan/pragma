@@ -3,15 +3,9 @@
 
 module;
 
-
-
-
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
-
 
 import :scripting.lua.classes.vulkan;
 import :client_state;
@@ -19,7 +13,6 @@ import :engine;
 import :model;
 import :rendering.shaders;
 import :util;
-
 
 namespace luabind {
 	namespace detail {

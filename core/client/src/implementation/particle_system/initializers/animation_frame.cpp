@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :particle_system.initializer_initial_animation_frame;

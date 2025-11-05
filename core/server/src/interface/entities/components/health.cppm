@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.health;
 
 import :entities.components.entity;

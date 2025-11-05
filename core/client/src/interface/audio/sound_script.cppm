@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:audio.sound_script;
 
 export import pragma.shared;
@@ -15,10 +14,10 @@ export import pragma.soundsystem;
 
 export {
 	class DLLCLIENT CSSEPlaySound : public SSEPlaySound {
-	protected:
+	  protected:
 		std::shared_ptr<al::IEffect> m_dspEffect = nullptr;
 		virtual void PrecacheSound(const char *name) override;
-	public:
+	  public:
 		CSSEPlaySound(SoundScriptManager *manager);
 		std::vector<std::shared_ptr<al::IEffect>> effects;
 		virtual void Initialize(udm::LinkedPropertyWrapper &prop) override;
@@ -26,7 +25,7 @@ export {
 	};
 
 	class DLLCLIENT CSoundScriptManager : public SoundScriptManager {
-	public:
+	  public:
 		CSoundScriptManager();
 		virtual ~CSoundScriptManager() override;
 		virtual bool Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts = nullptr) override;
@@ -34,10 +33,10 @@ export {
 	};
 
 	class DLLCLIENT CSoundScript : public SoundScript {
-		public:
-			friend SoundScriptManager;
-			friend CSoundScriptManager;
-			CSoundScript(SoundScriptManager *manager, std::string identifier);
-			virtual ~CSoundScript() override;
-		};
+	  public:
+		friend SoundScriptManager;
+		friend CSoundScriptManager;
+		CSoundScript(SoundScriptManager *manager, std::string identifier);
+		virtual ~CSoundScript() override;
+	};
 };

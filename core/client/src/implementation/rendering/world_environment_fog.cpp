@@ -3,10 +3,7 @@
 
 module;
 
-
-
 module pragma.client;
-
 
 import :rendering.world_environment;
 WorldEnvironment::Fog::Fog()

@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.func_physics;
 
 export import :entities.base_entity;
@@ -15,19 +13,19 @@ export import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLCLIENT CFuncPhysicsComponent final : public BaseFuncPhysicsComponent, public CBaseNetComponent {
-		public:
+		  public:
 			CFuncPhysicsComponent(pragma::ecs::BaseEntity &ent) : BaseFuncPhysicsComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void InitializeLuaObject(lua_State *l) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
-		protected:
+		  protected:
 			virtual void OnEntitySpawn() override;
 		};
 	};
 
 	class DLLCLIENT CFuncPhysics : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

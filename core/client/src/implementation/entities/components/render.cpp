@@ -8,7 +8,6 @@ module;
 
 module pragma.client;
 
-
 import :entities.components.render;
 import :engine;
 import :entities.components.color;
@@ -352,7 +351,7 @@ void CRenderComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 	else if(typeid(component) == typeid(pragma::CAnimatedComponent))
 		m_animComponent = nullptr;
 	else if(typeid(component) == typeid(pragma::CLightMapReceiverComponent)) {
-		m_stateFlags = m_stateFlags &~StateFlags::RenderBufferDirty;
+		m_stateFlags = m_stateFlags & ~StateFlags::RenderBufferDirty;
 		m_lightMapReceiverComponent = nullptr;
 	}
 }
@@ -1060,77 +1059,77 @@ namespace {
 	auto UVN = pragma::console::client::register_command("debug_entity_render_buffer", &debug_entity_render_buffer, pragma::console::ConVarFlags::None, "Prints debug information about an entity's render buffer.");
 }
 namespace Lua::Render {
-    void CalcRayIntersection(lua_State *l, pragma::CRenderComponent &hComponent, const Vector3 &start, const Vector3 &dir, bool precise)
-    {
+	void CalcRayIntersection(lua_State *l, pragma::CRenderComponent &hComponent, const Vector3 &start, const Vector3 &dir, bool precise)
+	{
 
-        auto result = hComponent.CalcRayIntersection(start, dir, precise);
-        if(result.has_value() == false) {
-            Lua::PushInt(l, umath::to_integral(umath::intersection::Result::NoIntersection));
-            return;
-        }
-        Lua::Push(l, umath::to_integral(result->result));
+		auto result = hComponent.CalcRayIntersection(start, dir, precise);
+		if(result.has_value() == false) {
+			Lua::PushInt(l, umath::to_integral(umath::intersection::Result::NoIntersection));
+			return;
+		}
+		Lua::Push(l, umath::to_integral(result->result));
 
-        auto t = Lua::CreateTable(l);
+		auto t = Lua::CreateTable(l);
 
-        Lua::PushString(l, "position");        /* 1 */
-        Lua::Push<Vector3>(l, result->hitPos); /* 2 */
-        Lua::SetTableValue(l, t);              /* 0 */
+		Lua::PushString(l, "position");        /* 1 */
+		Lua::Push<Vector3>(l, result->hitPos); /* 2 */
+		Lua::SetTableValue(l, t);              /* 0 */
 
-        Lua::PushString(l, "distance");       /* 1 */
-        Lua::PushNumber(l, result->hitValue); /* 2 */
-        Lua::SetTableValue(l, t);             /* 0 */
+		Lua::PushString(l, "distance");       /* 1 */
+		Lua::PushNumber(l, result->hitValue); /* 2 */
+		Lua::SetTableValue(l, t);             /* 0 */
 
-        if(precise && result->precise) {
-            Lua::PushString(l, "uv");                                                /* 1 */
-            Lua::Push<::Vector2>(l, ::Vector2 {result->precise->u, result->precise->v}); /* 2 */
-            Lua::SetTableValue(l, t);                                                /* 0 */
-            return;
-        }
+		if(precise && result->precise) {
+			Lua::PushString(l, "uv");                                                    /* 1 */
+			Lua::Push<::Vector2>(l, ::Vector2 {result->precise->u, result->precise->v}); /* 2 */
+			Lua::SetTableValue(l, t);                                                    /* 0 */
+			return;
+		}
 
-        Lua::PushString(l, "boneId");    /* 1 */
-        Lua::PushInt(l, result->boneId); /* 2 */
-        Lua::SetTableValue(l, t);        /* 0 */
-    }
-    void CalcRayIntersection(lua_State *l, pragma::CRenderComponent &hComponent, const Vector3 &start, const Vector3 &dir) { CalcRayIntersection(l, hComponent, start, dir, false); }
-    void GetTransformationMatrix(lua_State *l, pragma::CRenderComponent &hEnt)
-    {
+		Lua::PushString(l, "boneId");    /* 1 */
+		Lua::PushInt(l, result->boneId); /* 2 */
+		Lua::SetTableValue(l, t);        /* 0 */
+	}
+	void CalcRayIntersection(lua_State *l, pragma::CRenderComponent &hComponent, const Vector3 &start, const Vector3 &dir) { CalcRayIntersection(l, hComponent, start, dir, false); }
+	void GetTransformationMatrix(lua_State *l, pragma::CRenderComponent &hEnt)
+	{
 
-        ::Mat4 mat = hEnt.GetTransformationMatrix();
-        luabind::object(l, mat).push(l);
-    }
+		::Mat4 mat = hEnt.GetTransformationMatrix();
+		luabind::object(l, mat).push(l);
+	}
 
-    void GetLocalRenderBounds(lua_State *l, pragma::CRenderComponent &hEnt)
-    {
+	void GetLocalRenderBounds(lua_State *l, pragma::CRenderComponent &hEnt)
+	{
 
-        auto &aabb = hEnt.GetLocalRenderBounds();
-        Lua::Push<Vector3>(l, aabb.min);
-        Lua::Push<Vector3>(l, aabb.max);
-    }
-    void GetLocalRenderSphereBounds(lua_State *l, pragma::CRenderComponent &hEnt)
-    {
+		auto &aabb = hEnt.GetLocalRenderBounds();
+		Lua::Push<Vector3>(l, aabb.min);
+		Lua::Push<Vector3>(l, aabb.max);
+	}
+	void GetLocalRenderSphereBounds(lua_State *l, pragma::CRenderComponent &hEnt)
+	{
 
-        auto &sphere = hEnt.GetLocalRenderSphere();
-        Lua::Push<Vector3>(l, sphere.pos);
-        Lua::PushNumber(l, sphere.radius);
-    }
-    void GetAbsoluteRenderBounds(lua_State *l, pragma::CRenderComponent &hEnt)
-    {
+		auto &sphere = hEnt.GetLocalRenderSphere();
+		Lua::Push<Vector3>(l, sphere.pos);
+		Lua::PushNumber(l, sphere.radius);
+	}
+	void GetAbsoluteRenderBounds(lua_State *l, pragma::CRenderComponent &hEnt)
+	{
 
-        auto &aabb = hEnt.GetUpdatedAbsoluteRenderBounds();
-        Lua::Push<Vector3>(l, aabb.min);
-        Lua::Push<Vector3>(l, aabb.max);
-    }
-    void GetAbsoluteRenderSphereBounds(lua_State *l, pragma::CRenderComponent &hEnt)
-    {
+		auto &aabb = hEnt.GetUpdatedAbsoluteRenderBounds();
+		Lua::Push<Vector3>(l, aabb.min);
+		Lua::Push<Vector3>(l, aabb.max);
+	}
+	void GetAbsoluteRenderSphereBounds(lua_State *l, pragma::CRenderComponent &hEnt)
+	{
 
-        auto &sphere = hEnt.GetUpdatedAbsoluteRenderSphere();
-        Lua::Push<Vector3>(l, sphere.pos);
-        Lua::PushNumber(l, sphere.radius);
-    }
+		auto &sphere = hEnt.GetUpdatedAbsoluteRenderSphere();
+		Lua::Push<Vector3>(l, sphere.pos);
+		Lua::PushNumber(l, sphere.radius);
+	}
 
-    void SetLocalRenderBounds(lua_State *l, pragma::CRenderComponent &hEnt, Vector3 &min, Vector3 &max) { hEnt.SetLocalRenderBounds(min, max); }
+	void SetLocalRenderBounds(lua_State *l, pragma::CRenderComponent &hEnt, Vector3 &min, Vector3 &max) { hEnt.SetLocalRenderBounds(min, max); }
 
-    /*void UpdateRenderBuffers(lua_State *l,pragma::CRenderComponent &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &hScene,CCameraHandle &hCam,bool bForceBufferUpdate)
+	/*void UpdateRenderBuffers(lua_State *l,pragma::CRenderComponent &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &hScene,CCameraHandle &hCam,bool bForceBufferUpdate)
     {
 
 
@@ -1141,24 +1140,24 @@ namespace Lua::Render {
         hEnt.UpdateRenderData(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd),*hScene,*hCam,vp,bForceBufferUpdate);
     }
     void UpdateRenderBuffers(lua_State *l,pragma::CRenderComponent &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &hScene,CCameraHandle &hCam) {UpdateRenderBuffers(l,hEnt,drawCmd,hScene,hCam,false);}*/
-    void GetRenderBuffer(lua_State *l, pragma::CRenderComponent &hEnt)
-    {
-        auto *buf = hEnt.GetRenderBuffer();
-        if(buf == nullptr)
-            return;
-        Lua::Push(l, buf->shared_from_this());
-    }
-    void GetBoneBuffer(lua_State *l, pragma::CRenderComponent &hEnt)
-    {
+	void GetRenderBuffer(lua_State *l, pragma::CRenderComponent &hEnt)
+	{
+		auto *buf = hEnt.GetRenderBuffer();
+		if(buf == nullptr)
+			return;
+		Lua::Push(l, buf->shared_from_this());
+	}
+	void GetBoneBuffer(lua_State *l, pragma::CRenderComponent &hEnt)
+	{
 
-        auto *pAnimComponent = static_cast<pragma::CAnimatedComponent *>(hEnt.GetEntity().GetAnimatedComponent().get());
-        if(pAnimComponent == nullptr)
-            return;
-        auto *buf = pAnimComponent->GetBoneBuffer();
-        if(!buf)
-            return;
-        Lua::Push(l, buf->shared_from_this());
-    }
+		auto *pAnimComponent = static_cast<pragma::CAnimatedComponent *>(hEnt.GetEntity().GetAnimatedComponent().get());
+		if(pAnimComponent == nullptr)
+			return;
+		auto *buf = pAnimComponent->GetBoneBuffer();
+		if(!buf)
+			return;
+		Lua::Push(l, buf->shared_from_this());
+	}
 };
 
 void CRenderComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)

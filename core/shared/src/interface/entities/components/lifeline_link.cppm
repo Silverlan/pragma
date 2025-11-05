@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.lifeline_link;
 
 export import :entities.components.base;

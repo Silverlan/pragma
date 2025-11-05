@@ -4,15 +4,13 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
-
 export module pragma.client:gui.net_graph;
 
 export import :gui.line_graph;
 
 export {
 	class DLLCLIENT WINetGraph : public WIBase {
-	private:
+	  private:
 		struct DLLCLIENT NetData {
 			NetData();
 			void Reset();
@@ -52,7 +50,7 @@ export {
 		void UpdateGraph();
 		void AddGraphValue(uint32_t sz);
 		WIText *CreateText(const std::string &text);
-	public:
+	  public:
 		WINetGraph();
 		virtual ~WINetGraph() override;
 		virtual void Initialize() override;

@@ -3,17 +3,13 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :game;
 import :engine;
 import pragma.string.unicode;
-
 
 Bool CGame::RawMouseInput(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {

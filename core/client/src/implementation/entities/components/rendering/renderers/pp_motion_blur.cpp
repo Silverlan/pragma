@@ -19,7 +19,6 @@ import :entities.components.motion_blur_data;
 import :game;
 import :rendering.shaders;
 
-
 using namespace pragma;
 
 class DLLCLIENT VelocityStageRenderProcessor : public pragma::rendering::DepthStageRenderProcessor {

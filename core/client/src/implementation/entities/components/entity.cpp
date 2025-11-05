@@ -3,13 +3,10 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :entities.components.entity;
 import :game;
-
 
 using namespace pragma;
 

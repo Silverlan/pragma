@@ -6,7 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.client:entities.components.env_timescale;
 
 export import :entities.base_entity;
@@ -15,7 +14,7 @@ export import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLCLIENT CEnvTimescaleComponent final : public BaseEnvTimescaleComponent, public CBaseNetComponent {
-		public:
+		  public:
 			CEnvTimescaleComponent(pragma::ecs::BaseEntity &ent) : BaseEnvTimescaleComponent(ent) {}
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void InitializeLuaObject(lua_State *l) override;
@@ -24,7 +23,7 @@ export {
 	};
 
 	class DLLCLIENT CEnvTimescale : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

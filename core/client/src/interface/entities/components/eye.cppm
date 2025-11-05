@@ -6,8 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.eye;
 import :entities.components.animated;
 import :entities.components.flex;
@@ -16,7 +14,7 @@ export import :model.mesh;
 export {
 	namespace pragma {
 		class DLLCLIENT CEyeComponent final : public BaseEntityComponent {
-		public:
+		  public:
 			enum class StateFlags : uint8_t { None = 0u, BlinkingEnabled = 1u, PrevBlinkToggle = BlinkingEnabled << 1u, BlinkToggle = PrevBlinkToggle << 1u };
 
 			struct EyeballState {
@@ -91,14 +89,14 @@ export {
 			umath::Transform CalcEyeballPose(uint32_t eyeballIndex, umath::Transform *optOutBonePose = nullptr) const;
 
 			void UpdateEyeballsMT();
-		protected:
+		  protected:
 			void UpdateBlinkMT();
 			void OnModelChanged(const std::shared_ptr<pragma::Model> &mdl);
 			Vector3 ClampViewTarget(const Vector3 &viewTarget) const;
 			void UpdateEyeballMT(const Eyeball &eyeball, uint32_t eyeballIndex);
 			void UpdateEyeMaterialData();
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
-		private:
+		  private:
 			EyeballConfig m_eyeballConfig = {};
 			std::vector<EyeballData> m_eyeballData = {};
 			Vector3 m_viewTarget {};

@@ -3,7 +3,6 @@
 
 module;
 
-
 export module pragma.client:rendering.bloom_pipeline_info;
 
 export import std.compat;

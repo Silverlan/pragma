@@ -13,7 +13,7 @@ export {
 	namespace pragma::asset {
 		class WorldData;
 		class DLLNETWORK EntityData : public std::enable_shared_from_this<EntityData> {
-		public:
+		  public:
 			enum class Flags : uint64_t { None = 0u, ClientsideOnly = 1u };
 
 			static std::shared_ptr<EntityData> Create();
@@ -47,7 +47,7 @@ export {
 			umath::ScaledTransform GetEffectivePose() const;
 			void SetPose(const umath::ScaledTransform &pose);
 			void ClearPose();
-		private:
+		  private:
 			friend WorldData;
 			EntityData() = default;
 			std::string m_className = "entity";

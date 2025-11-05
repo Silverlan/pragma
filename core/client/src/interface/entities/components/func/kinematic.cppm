@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.func_kinematic;
 
 export import :entities.base_entity;
@@ -15,7 +13,7 @@ export import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLCLIENT CKinematicComponent final : public BaseFuncKinematicComponent, public CBaseNetComponent {
-		public:
+		  public:
 			CKinematicComponent(pragma::ecs::BaseEntity &ent) : BaseFuncKinematicComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void ReceiveData(NetPacket &packet) override;
@@ -23,13 +21,13 @@ export {
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 			virtual void OnEntitySpawn() override;
-		protected:
+		  protected:
 			bool m_bInitiallyMoving = false;
 		};
 	};
 
 	class DLLCLIENT CFuncKinematic : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

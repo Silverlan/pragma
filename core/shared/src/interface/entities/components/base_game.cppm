@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.base_game;
 
 export import :entities.components.base;

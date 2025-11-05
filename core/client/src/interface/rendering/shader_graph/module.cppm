@@ -13,7 +13,9 @@ export import :model.mesh;
 export import :rendering.render_processor;
 export import pragma.shadergraph;
 
-export namespace pragma {class ShaderGraph;};
+export namespace pragma {
+	class ShaderGraph;
+};
 export namespace pragma::rendering {
 	class DLLCLIENT ShaderGraphModule {
 	  public:
@@ -43,4 +45,3 @@ export namespace pragma::rendering {
 		std::unordered_map<std::string, Factory> m_factories;
 	};
 }
-

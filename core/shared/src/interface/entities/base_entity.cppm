@@ -5,8 +5,6 @@ module;
 #include "definitions.hpp"
 #include <format>
 
-
-
 export module pragma.shared:entities.base_entity;
 
 export import :audio.enums;
@@ -34,8 +32,8 @@ export {
 
 	const double ENT_EPSILON = 0.000'01;
 
-	#pragma warning(push)
-	#pragma warning(disable : 4251)
+#pragma warning(push)
+#pragma warning(disable : 4251)
 	namespace pragma::ecs {
 		namespace baseEntity {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_HANDLE_KEY_VALUE;
@@ -44,7 +42,7 @@ export {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_REMOVE;
 		}
 		class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseEntityComponentSystem {
-		public:
+		  public:
 			static constexpr auto PSAVE_IDENTIFIER = "PSAVE";
 			static constexpr uint32_t PSAVE_VERSION = 1;
 
@@ -74,7 +72,7 @@ export {
 			void SetUuid(const util::Uuid &uuid);
 
 			friend pragma::Engine;
-		public:
+		  public:
 			StateFlags GetStateFlags() const;
 			bool HasStateFlag(StateFlags flag) const;
 			void SetStateFlag(StateFlags flag);
@@ -261,7 +259,7 @@ export {
 			static std::string GetUri(const std::string name);
 			static bool ParseUri(std::string uriPath, pragma::EntityUComponentMemberRef &outRef, const util::Uuid *optSelf = nullptr);
 			static bool CreateMemberReference(pragma::EntityIdentifier identifier, std::string var, pragma::EntityUComponentMemberRef &outRef);
-		protected:
+		  protected:
 			StateFlags m_stateFlags = StateFlags::None;
 
 			// These components are needed frequently, so we store a direct reference to them for faster access
@@ -275,7 +273,7 @@ export {
 			// Adds the component and trasmits the information
 			// to the clients if called serverside.
 			virtual pragma::ComponentHandle<pragma::BaseEntityComponent> AddNetworkedComponent(const std::string &name);
-		protected:
+		  protected:
 			uint32_t m_spawnFlags = 0u;
 
 			pragma::GString m_className = "BaseEntity";
@@ -284,12 +282,13 @@ export {
 			virtual void DoSpawn();
 			pragma::NetEventId SetupNetEvent(const std::string &name) const;
 		};
-    	using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 
 		inline DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const BaseEntity &ent) { return ent.print(os); }
 
-		inline std::ostream& operator<<(std::ostream& os, const BaseEntity& ent) {
-			const_cast<BaseEntity&>(ent).print(os);
+		inline std::ostream &operator<<(std::ostream &os, const BaseEntity &ent)
+		{
+			const_cast<BaseEntity &>(ent).print(os);
 			return os;
 		}
 		using ::operator<<;
@@ -298,7 +297,7 @@ export {
 		template<>
 		struct enable_bitwise_operators<pragma::ecs::BaseEntity::StateFlags> : std::true_type {};
 	}
-	#pragma warning(pop)
+#pragma warning(pop)
 
 	DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const EntityHandle &ent);
 	DLLNETWORK std::ostream &operator<<(std::ostream &os, const EntityHandle ent);

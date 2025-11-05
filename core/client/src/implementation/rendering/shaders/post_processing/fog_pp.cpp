@@ -3,9 +3,7 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.pp_fog;
 

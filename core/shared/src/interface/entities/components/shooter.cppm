@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.shooter;
 
 export import :entities.components.base;
@@ -13,7 +11,9 @@ export import :game.bullet_info;
 export import :physics.raycast;
 
 export {
-	namespace pragma {class BasePlayerComponent;};
+	namespace pragma {
+		class BasePlayerComponent;
+	};
 	namespace pragma::ecs {
 		namespace events {
 			struct DLLNETWORK CEOnBulletsFired : public ComponentEvent {

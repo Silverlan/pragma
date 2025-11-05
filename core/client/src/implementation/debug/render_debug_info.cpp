@@ -3,9 +3,7 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :debug.render_debug_info;
 static RenderDebugInfo render_debug_info;

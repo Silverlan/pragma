@@ -4,14 +4,13 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:particle_system.modifier_random_color;
 
 import :particle_system.modifier_random_variable;
 
 export {
 	class DLLCLIENT CParticleModifierComponentRandomColor {
-	public:
+	  public:
 		enum class ComponentFlags : uint8_t { None = 0, Red = 1u, Green = Red << 1, Blue = Green << 1, Alpha = Blue << 1, RGBA = Red | Green | Blue | Alpha };
 		CParticleModifierComponentRandomColor() = default;
 		CParticleModifierComponentRandomColor(const std::string &suffix, const std::unordered_map<std::string, std::string> &values);
@@ -20,7 +19,7 @@ export {
 		bool IsSet() const;
 		bool IsSet(ComponentFlags components) const;
 		ComponentFlags GetComponentFlags() const;
-	private:
+	  private:
 		CParticleModifierComponentRandomVariable<std::uniform_int_distribution<int16_t>, int16_t> m_red;
 		CParticleModifierComponentRandomVariable<std::uniform_int_distribution<int16_t>, int16_t> m_green;
 		CParticleModifierComponentRandomVariable<std::uniform_int_distribution<int16_t>, int16_t> m_blue;

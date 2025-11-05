@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:scripting.lua.error_handling;
 
 export import pragma.lua;

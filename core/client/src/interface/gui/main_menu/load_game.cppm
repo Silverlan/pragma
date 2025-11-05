@@ -4,14 +4,13 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:gui.main_menu_load_game;
 
 export import :gui.main_menu_base;
 
 export {
 	class DLLCLIENT WIMainMenuLoadGame : public WIMainMenuBase {
-	public:
+	  public:
 		WIMainMenuLoadGame();
 		virtual ~WIMainMenuLoadGame() override;
 		virtual void Initialize() override;

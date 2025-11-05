@@ -6,8 +6,6 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
 
 import :engine;

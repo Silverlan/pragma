@@ -5,8 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.triggers.hurt;
 
 import :entities;
@@ -14,15 +12,15 @@ import :entities;
 export {
 	namespace pragma {
 		class DLLSERVER STriggerHurtComponent final : public BaseTriggerHurtComponent {
-		public:
+		  public:
 			STriggerHurtComponent(pragma::ecs::BaseEntity &ent) : BaseTriggerHurtComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};
 
 	class DLLSERVER TriggerHurt : public SBaseEntity {
-	protected:
-	public:
+	  protected:
+	  public:
 		virtual void Initialize() override;
 	};
 };

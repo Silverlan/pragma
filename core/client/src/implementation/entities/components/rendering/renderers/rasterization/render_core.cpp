@@ -3,8 +3,6 @@
 
 module;
 
-
-
 module pragma.client;
 
 import :entities.components.rasterization_renderer;
@@ -16,7 +14,8 @@ import :rendering.shaders;
 
 using namespace pragma::rendering;
 
-void pragma::CRasterizationRendererComponent::RecordRenderParticleSystems(prosper::ICommandBuffer &cmd, const util::DrawSceneInfo &drawSceneInfo, const std::vector<pragma::ecs::CParticleSystemComponent *> &particles, pragma::rendering::SceneRenderPass renderMode, bool depthPass, Bool bloom)
+void pragma::CRasterizationRendererComponent::RecordRenderParticleSystems(prosper::ICommandBuffer &cmd, const util::DrawSceneInfo &drawSceneInfo, const std::vector<pragma::ecs::CParticleSystemComponent *> &particles, pragma::rendering::SceneRenderPass renderMode, bool depthPass,
+  Bool bloom)
 {
 	auto depthOnly = umath::is_flag_set(drawSceneInfo.renderFlags, RenderFlags::ParticleDepth);
 	if((depthOnly && bloom) || drawSceneInfo.scene.expired())

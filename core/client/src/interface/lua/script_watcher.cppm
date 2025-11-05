@@ -4,7 +4,6 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:scripting.lua.script_watcher;
 
 export import pragma.shared;

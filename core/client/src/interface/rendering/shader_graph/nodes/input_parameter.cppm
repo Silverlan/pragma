@@ -5,8 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
-
 export module pragma.client:rendering.shader_graph.node_input_parameter;
 
 export import pragma.shadergraph;

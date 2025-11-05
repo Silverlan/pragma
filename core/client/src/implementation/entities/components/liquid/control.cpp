@@ -4,15 +4,12 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.liquid_control;
 import :client_state;
 import :entities.components.particle_system;
 import :game;
-
 
 using namespace pragma;
 

@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
 #if 0
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
@@ -308,10 +305,7 @@ int Lua::import::import_obj(lua::State *l)
 	return import_model_asset(l);
 }
 
-int Lua::import::export_model_asset(lua::State *l)
-{
-	return 0;
-}
+int Lua::import::export_model_asset(lua::State *l) { return 0; }
 
 bool Lua::import::import_model_asset(NetworkState &nw, const std::string &outputPath, std::string &outFilePath, std::string &outErr)
 {

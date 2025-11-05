@@ -5,9 +5,7 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :scripting.lua.libraries.gui;
 import :client_state;
@@ -17,7 +15,6 @@ import :gui;
 import :scripting.lua;
 import pragma.string.unicode;
 //import pragma.scripting.lua;
-
 
 static void initialize_element(::WIBase &p)
 {

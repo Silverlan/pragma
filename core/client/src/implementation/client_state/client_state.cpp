@@ -5,10 +5,6 @@ module;
 
 #include "pragma/logging.hpp"
 
-
-
-
-
 #include "pragma/lua/core.hpp"
 #include "pragma/console/helper.hpp"
 
@@ -199,12 +195,13 @@ void ClientState::ShowFPSCounter(bool b)
 }
 
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_show_fps", +[](NetworkState *, const ConVar &, bool, bool val) {
-		auto *client = pragma::get_client_state();
-		if(client == nullptr)
-			return;
-		client->ShowFPSCounter(val);
-	});
+	auto UVN = pragma::console::client::register_variable_listener<bool>(
+	  "cl_show_fps", +[](NetworkState *, const ConVar &, bool, bool val) {
+		  auto *client = pragma::get_client_state();
+		  if(client == nullptr)
+			  return;
+		  client->ShowFPSCounter(val);
+	  });
 }
 
 lua_State *ClientState::GetGUILuaState() { return (m_luaGUI != nullptr) ? m_luaGUI->GetState() : nullptr; }
@@ -594,7 +591,7 @@ void ClientState::SendUserInfo()
 	// TODO: Allow client to override steam user name?
 	packet->WriteString(name);
 
-    auto *client = pragma::get_client_state();
+	auto *client = pragma::get_client_state();
 	auto &convars = client->GetConVars();
 	unsigned int numUserInfo = 0;
 	auto sz = packet->GetOffset();
@@ -839,9 +836,10 @@ bool ClientState::GetServerConVarIdentifier(uint32_t id, std::string &cvar)
 }
 
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<int>("sv_tickrate", +[](NetworkState *, const ConVar &, int, int val) {
-		if(val < 0)
-			val = 0;
-		pragma::get_cengine()->SetTickRate(val);
-	});
+	auto UVN = pragma::console::client::register_variable_listener<int>(
+	  "sv_tickrate", +[](NetworkState *, const ConVar &, int, int val) {
+		  if(val < 0)
+			  val = 0;
+		  pragma::get_cengine()->SetTickRate(val);
+	  });
 }

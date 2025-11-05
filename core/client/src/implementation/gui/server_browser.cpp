@@ -3,10 +3,6 @@
 
 module;
 
-
-
-
-
 module pragma.client;
 
 import :gui.frame;

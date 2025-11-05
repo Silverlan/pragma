@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.effects.smoke_trail;
 
 import :entities;
@@ -15,7 +14,7 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SSmokeTrailComponent final : public BaseEnvSmokeTrailComponent, public SBaseNetComponent {
-		public:
+		  public:
 			SSmokeTrailComponent(pragma::ecs::BaseEntity &ent) : BaseEnvSmokeTrailComponent(ent) {}
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
@@ -24,8 +23,8 @@ export {
 	};
 
 	class DLLSERVER EnvSmokeTrail : public SBaseEntity {
-	protected:
-	public:
+	  protected:
+	  public:
 		virtual void Initialize() override;
 	};
 };

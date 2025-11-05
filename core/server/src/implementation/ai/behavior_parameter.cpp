@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.server;
 import :ai.schedule;
 

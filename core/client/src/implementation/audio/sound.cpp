@@ -7,8 +7,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
-
 module pragma.client;
 
 import :audio.sound;
@@ -636,4 +634,6 @@ void CALSound::SetType(pragma::audio::ALSoundType type)
 	ALSound::SetType(type);
 	UpdateVolume();
 }
-namespace { auto _ = pragma::console::client::register_variable_listener<bool>("cl_audio_always_play", +[](NetworkState *, const ConVar &, bool, bool) { pragma::get_client_state()->UpdateSoundVolume(); }); }
+namespace {
+	auto _ = pragma::console::client::register_variable_listener<bool>("cl_audio_always_play", +[](NetworkState *, const ConVar &, bool, bool) { pragma::get_client_state()->UpdateSoundVolume(); });
+}

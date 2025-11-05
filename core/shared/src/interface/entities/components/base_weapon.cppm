@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.base_weapon;
 
 export import :entities.components.base_ownable;
@@ -18,7 +16,7 @@ export namespace pragma {
 		UInt16 oldClipSize;
 		UInt16 newClipSize;
 	};
-		namespace baseWeaponComponent {
+	namespace baseWeaponComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DEPLOY;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_HOLSTER;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PRIMARY_ATTACK;
@@ -31,9 +29,8 @@ export namespace pragma {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED;
 	}
-class DLLNETWORK BaseWeaponComponent : public BaseEntityComponent {
+	class DLLNETWORK BaseWeaponComponent : public BaseEntityComponent {
 	  public:
-
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;

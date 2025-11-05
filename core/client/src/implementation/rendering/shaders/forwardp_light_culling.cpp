@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :rendering.light_data_buffer_manager;

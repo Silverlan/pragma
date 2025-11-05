@@ -10,16 +10,15 @@ export import :entities.components.base;
 export import pragma.util;
 
 export namespace pragma {
-		namespace baseObserverComponent {
+	namespace baseObserverComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_OBSERVATION_MODE_CHANGED;
 	}
-class BaseObservableComponent;
-		namespace baseObserverComponent {
+	class BaseObservableComponent;
+	namespace baseObserverComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_OBSERVATION_MODE_CHANGED;
 	}
-class DLLNETWORK BaseObserverComponent : public BaseEntityComponent {
+	class DLLNETWORK BaseObserverComponent : public BaseEntityComponent {
 	  public:
-
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		virtual ~BaseObserverComponent() override;
 

@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.base_vehicle;
 
 export import :entities.components.base_physics;
@@ -13,13 +11,12 @@ export import :entities.components.base_wheel;
 
 export {
 	namespace pragma {
-				namespace baseVehicleComponent {
+		namespace baseVehicleComponent {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DRIVER_ENTERED;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DRIVER_EXITED;
 		}
-class DLLNETWORK BaseVehicleComponent : public BaseEntityComponent {
-		public:
-
+		class DLLNETWORK BaseVehicleComponent : public BaseEntityComponent {
+		  public:
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			enum class StateFlags : uint32_t { None = 0u, HasDriver = 1u, SteeringWheelInitialized = HasDriver << 1u };
 
@@ -43,7 +40,7 @@ class DLLNETWORK BaseVehicleComponent : public BaseEntityComponent {
 
 			physics::IVehicle *GetPhysicsVehicle();
 			const physics::IVehicle *GetPhysicsVehicle() const;
-		protected:
+		  protected:
 			BaseVehicleComponent(pragma::ecs::BaseEntity &ent);
 			struct DLLNETWORK WheelData {
 				WheelData() = default;
@@ -67,10 +64,10 @@ class DLLNETWORK BaseVehicleComponent : public BaseEntityComponent {
 			void InitializeWheelEntities();
 			void InitializeSteeringWheel();
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::BaseVehicleComponent::StateFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::BaseVehicleComponent::StateFlags> : std::true_type {};
+	}
 };

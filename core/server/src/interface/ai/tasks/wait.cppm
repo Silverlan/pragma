@@ -4,8 +4,6 @@
 module;
 #include "pragma/serverdefinitions.h"
 
-
-
 export module pragma.server:ai.tasks.wait;
 
 export import :ai.schedule;

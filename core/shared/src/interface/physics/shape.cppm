@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:physics.shape;
 
 export import :physics.base;

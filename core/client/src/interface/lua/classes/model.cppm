@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:scripting.lua.classes.model;
 export import :assets;
 
@@ -18,7 +16,7 @@ export namespace Lua {
 			DLLCLIENT void GetVertexAnimationBuffer(lua_State *l, pragma::Model &mdl);
 			DLLCLIENT void Export(lua_State *l, pragma::Model &mdl, const pragma::asset::ModelExportInfo &exportInfo);
 			DLLCLIENT void ExportAnimation(lua_State *l, pragma::Model &mdl, const std::string &animName, const pragma::asset::ModelExportInfo &exportInfo);
-			DLLCLIENT std::shared_ptr<pragma::Model> create_generic_model(pragma::Game &game,pragma::ModelSubMesh &subMesh);
+			DLLCLIENT std::shared_ptr<pragma::Model> create_generic_model(pragma::Game &game, pragma::ModelSubMesh &subMesh);
 		};
 	};
 };

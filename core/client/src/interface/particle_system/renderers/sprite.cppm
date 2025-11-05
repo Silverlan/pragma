@@ -12,7 +12,9 @@ export import :particle_system.modifier;
 import :particle_system.renderer_rotational_buffer;
 
 export namespace pragma {
-	namespace ecs {class CParticleSystemComponent;}
+	namespace ecs {
+		class CParticleSystemComponent;
+	}
 };
 export class DLLCLIENT CParticleRendererSprite : public CParticleRenderer {
   public:

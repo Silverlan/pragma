@@ -17,7 +17,7 @@ export import pragma.materialsystem;
 
 export {
 	class DLLNETWORK TraceData {
-	public:
+	  public:
 		TraceData();
 		TraceData(const TraceData &other);
 		~TraceData();
@@ -52,9 +52,9 @@ export {
 		void SetFilter(const std::function<pragma::physics::RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> &preFilter, const std::function<pragma::physics::RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> &postFilter = nullptr);
 		const std::shared_ptr<pragma::physics::IRayCastFilterCallback> &GetFilter() const;
 		bool HasFlag(pragma::physics::RayCastFlags flag) const;
-	protected:
+	  protected:
 		bool HasTarget() const;
-	private:
+	  private:
 		umath::Transform m_tStart;
 		umath::Transform m_tEnd;
 
@@ -92,7 +92,7 @@ export {
 		void GetMeshes(ModelMesh **mesh, pragma::ModelSubMesh **subMesh);
 		msys::Material *GetMaterial();
 		bool GetMaterial(std::string &mat);
-	private:
+	  private:
 		void InitializeMeshes();
 	};
 };

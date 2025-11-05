@@ -9,6 +9,6 @@ export module pragma.shared:scripting.lua.libraries.debug_overlay;
 export import pragma.lua;
 
 export {
-    DLLNETWORK int Lua_debugoverlay_DrawLine(lua::State *l);
-    DLLNETWORK int Lua_debugoverlay_DrawBox(lua::State *l);
+	DLLNETWORK int Lua_debugoverlay_DrawLine(lua::State *l);
+	DLLNETWORK int Lua_debugoverlay_DrawBox(lua::State *l);
 };

@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:entities.components.constraints.limit_distance;
 
 export import :entities.components.constraints.base;

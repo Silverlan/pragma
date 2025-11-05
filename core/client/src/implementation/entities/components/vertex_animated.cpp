@@ -8,7 +8,6 @@ module;
 
 module pragma.client;
 
-
 import :entities.components.vertex_animated;
 import :entities.components.flex;
 import :entities.components.render;

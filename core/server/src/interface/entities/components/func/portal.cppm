@@ -5,8 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.func.portal;
 
 import :entities;
@@ -14,14 +12,14 @@ import :entities;
 export {
 	namespace pragma {
 		class DLLSERVER SFuncPortalComponent final : public BaseFuncPortalComponent {
-		public:
+		  public:
 			SFuncPortalComponent(pragma::ecs::BaseEntity &ent) : BaseFuncPortalComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};
 
 	class DLLSERVER FuncPortal : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

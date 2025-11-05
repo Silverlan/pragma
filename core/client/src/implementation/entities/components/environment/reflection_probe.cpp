@@ -9,13 +9,9 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
-
-
 #include <spdlog/logger.h>
 
 module pragma.client;
-
 
 import :entities.components.env_reflection_probe;
 import :client_state;
@@ -25,7 +21,6 @@ import :game;
 import :gui;
 import :math;
 import :rendering.shaders;
-
 
 using namespace pragma;
 
@@ -79,7 +74,7 @@ static void map_build_reflection_probes(NetworkState *state, pragma::BasePlayerC
 }
 namespace {
 	auto UVN = pragma::console::client::register_command("map_build_reflection_probes", &map_build_reflection_probes, pragma::console::ConVarFlags::None,
-	"Build all reflection probes in the map. Use the '-rebuild' argument to clear all current IBL textures first. Use 'debug_pbr_ibl' to check the probes after they have been built.");
+	  "Build all reflection probes in the map. Use the '-rebuild' argument to clear all current IBL textures first. Use 'debug_pbr_ibl' to check the probes after they have been built.");
 }
 static void print_status(const uint32_t i, const uint32_t count)
 {
@@ -90,10 +85,7 @@ static void print_status(const uint32_t i, const uint32_t count)
 ////////////////
 
 CReflectionProbeComponent::CReflectionProbeComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
-CReflectionProbeComponent::~CReflectionProbeComponent()
-{
-	m_raytracingJobManager = nullptr;
-}
+CReflectionProbeComponent::~CReflectionProbeComponent() { m_raytracingJobManager = nullptr; }
 CReflectionProbeComponent::RaytracingJobManager::RaytracingJobManager(CReflectionProbeComponent &probe) : probe {probe} {}
 CReflectionProbeComponent::RaytracingJobManager::~RaytracingJobManager()
 {
@@ -462,8 +454,8 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	return result;
 }
 
-util::ParallelJob<uimg::ImageLayerSet> CReflectionProbeComponent::CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, umath::Degree fov, float exposure, const std::vector<pragma::ecs::BaseEntity *> *optEntityList,
-  bool renderJob)
+util::ParallelJob<uimg::ImageLayerSet> CReflectionProbeComponent::CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, umath::Degree fov, float exposure,
+  const std::vector<pragma::ecs::BaseEntity *> *optEntityList, bool renderJob)
 {
 	rendering::cycles::SceneInfo sceneInfo {};
 	sceneInfo.width = width;

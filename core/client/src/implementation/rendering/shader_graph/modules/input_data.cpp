@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :rendering.shader_graph.module_input_data;
@@ -14,7 +13,6 @@ import :game;
 import :rendering.shaders;
 
 using namespace pragma::rendering::shader_graph;
-
 
 InputDataModule::InputDataModule(ShaderGraph &shader) : pragma::rendering::ShaderGraphModule {shader} {}
 InputDataModule::~InputDataModule() {}

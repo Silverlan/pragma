@@ -5,9 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
 export module pragma.client:entities.components.vehicle;
 
 export import :entities.components.entity;
@@ -16,7 +13,7 @@ export namespace pragma {
 	class DLLCLIENT CVehicleComponent final : public BaseVehicleComponent, public CBaseSnapshotComponent {
 	  public:
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
-		
+
 		CVehicleComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~CVehicleComponent() override;
 		static unsigned int GetVehicleCount();

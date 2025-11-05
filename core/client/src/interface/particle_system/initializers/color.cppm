@@ -4,7 +4,6 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:particle_system.initializer_color;
 
 export import :particle_system.modifier;
@@ -23,4 +22,3 @@ void CParticleInitializerColor::Initialize(pragma::BaseEnvParticleSystemComponen
 	CParticleModifierComponentRandomColor::Initialize("", values);
 }
 void CParticleInitializerColor::OnParticleCreated(CParticle &particle) { particle.SetColor(GetValue(particle)); }
-

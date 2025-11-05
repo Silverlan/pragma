@@ -7,6 +7,8 @@ export module pragma.shared:entities.base_entity_handle;
 export import pragma.util;
 
 export {
-    namespace pragma::ecs {class BaseEntity;}
-    using EntityHandle = util::TWeakSharedHandle<pragma::ecs::BaseEntity>;
+	namespace pragma::ecs {
+		class BaseEntity;
+	}
+	using EntityHandle = util::TWeakSharedHandle<pragma::ecs::BaseEntity>;
 };

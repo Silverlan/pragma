@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 #include "definitions.hpp"
 
 module pragma.shared;
@@ -249,7 +248,8 @@ static void LPARAM_resource_dir(const std::vector<std::string> &argv)
 		g_lpResourceDirs.insert(g_lpResourceDirs.begin(), arg);
 }
 
-void register_launch_parameters(LaunchParaMap &map) {
+void register_launch_parameters(LaunchParaMap &map)
+{
 	map.RegisterParameterHelp("-console", LPARAM_console, "", "start with the console open");
 	map.RegisterParameterHelp("-dev", LPARAM_dev, "", "enable developer mode");
 	map.RegisterParameterHelp("-log", LPARAM_log, "[<conLevel>][<fileLevel>]", "enable logging. error level can be: 0 = trace, 1 = debug, 2 = info, 3 = warning, 4 = error, 5 = critical, 6 = disabled.");
@@ -266,7 +266,8 @@ void register_launch_parameters(LaunchParaMap &map) {
 	map.RegisterParameterHelp("-sandboxed", LPARAM_sandboxed, "", "if set, indicates that the application is sandboxed, and that access to the installation files is limited.");
 
 	map.RegisterParameterHelp("-user_data_dir", LPARAM_user_data_dir, "<path>", "the location where user data should be written to. If not specified, the installation directory will be used.");
-	map.RegisterParameterHelp("-resource_dir", LPARAM_resource_dir, "<path>", "the location of an additional resource directory. Pragma will be able to load assets from this location, but not write to it. You can specify multiple resource locations by using this parameter multiple times.");
+	map.RegisterParameterHelp("-resource_dir", LPARAM_resource_dir, "<path>",
+	  "the location of an additional resource directory. Pragma will be able to load assets from this location, but not write to it. You can specify multiple resource locations by using this parameter multiple times.");
 
 	map.RegisterParameterHelp("-tcpport", LPARAM_tcpport, "<port>", "set TCP port");
 	map.RegisterParameterHelp("-udpport", LPARAM_udpport, "<port>", "set UDP port");
@@ -277,6 +278,6 @@ void register_launch_parameters(LaunchParaMap &map) {
 	map.RegisterParameterHelp("-help", LPARAM_help, "-? /?", "show this help message");
 	map.RegisterParameterHelp("-title", LPARAM_title, "<title>", "changes the window title");
 	map.RegisterParameterHelp("-icon", LPARAM_icon, "<icon>", "changes the program icon");
-	map.RegisterParameter("/?",LPARAM_help);
-	map.RegisterParameter("-?",LPARAM_help);
+	map.RegisterParameter("/?", LPARAM_help);
+	map.RegisterParameter("-?", LPARAM_help);
 }

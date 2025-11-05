@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.point_constraint_dof;
 
 export import :entities.base_entity;
@@ -15,7 +13,7 @@ export import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLCLIENT CPointConstraintDoFComponent final : public BasePointConstraintDoFComponent, public CBaseNetComponent {
-		public:
+		  public:
 			CPointConstraintDoFComponent(pragma::ecs::BaseEntity &ent) : BasePointConstraintDoFComponent(ent) {}
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void InitializeLuaObject(lua_State *l) override;
@@ -24,7 +22,7 @@ export {
 	};
 
 	class DLLCLIENT CPointConstraintDoF : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

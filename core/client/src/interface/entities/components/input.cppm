@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.input;
 
 import pragma.gui;
@@ -31,4 +29,3 @@ export namespace pragma {
 		bool m_initialFocus = true;
 	};
 };
-

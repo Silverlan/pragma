@@ -4,8 +4,6 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
-
 export module pragma.client:scripting.lua.libraries.debug_renderer;
 export import :debug;
 

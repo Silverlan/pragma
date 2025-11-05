@@ -3,15 +3,12 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.gradient;
 import :engine;
 
 using namespace pragma;
-
 
 static bool get_line_line_intersection(const Vector2 &p0, const Vector2 &p1, const Vector2 &p3, Vector2 &intersection)
 {

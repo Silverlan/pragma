@@ -14,7 +14,6 @@ import :client_state;
 import :entities.components;
 import :game;
 
-
 void CParticleRendererAnimatedSprites::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleRenderer::Initialize(pSystem, values);

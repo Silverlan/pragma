@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 #include "definitions.hpp"
 
 module pragma.shared;
@@ -407,7 +406,8 @@ void NetworkState::ClearConsoleCommandOverride(const std::string &src)
 }
 void NetworkState::ClearConsoleCommandOverrides() { m_conOverrides.clear(); }
 
-bool check_cheats(const std::string &scmd, NetworkState *state) {
+bool check_cheats(const std::string &scmd, NetworkState *state)
+{
 	if(state->CheatsEnabled() == false) {
 		Con::cout << "Can't use cheat cvar " << scmd << " in multiplayer, unless the server has sv_cheats set to 1." << Con::endl;
 		return false;

@@ -8,7 +8,6 @@ module;
 
 module pragma.client;
 
-
 import :entities.components.material_property_override;
 import :engine;
 import :entities.components.material_override;

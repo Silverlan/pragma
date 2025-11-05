@@ -3,14 +3,11 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :debug.game_ui;
 import :client_state;
 import :game;
-
 
 DebugGameGUI::DebugGameGUI(const std::function<WIHandle(void)> &guiFactory) : m_guiFactory(guiFactory)
 {

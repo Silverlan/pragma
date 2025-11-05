@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :rendering.occlusion_culling.chc_new;

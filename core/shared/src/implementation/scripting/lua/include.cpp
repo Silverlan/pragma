@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
 #include <cassert>
 
 module pragma.shared;

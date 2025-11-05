@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:model.animation.meta_rig;
 
 export import :game.coordinate_system;
@@ -248,7 +246,7 @@ export {
 			// Bounds in normalized space (with forwardFacingRotationOffset applied)
 			Vector3 min {};
 			Vector3 max {};
-		private:
+		  private:
 			bool LoadFromAssetData(const Skeleton &skeleton, const udm::AssetData &data, std::string &outErr);
 		};
 	};

@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:particle_system.modifier_random_variable;
 
 export import :particle_system.particle;
@@ -14,7 +13,7 @@ export import pragma.shared;
 export {
 	template<class TUniformDis, typename T>
 	class DLLCLIENT CParticleModifierComponentRandomVariable {
-	public:
+	  public:
 		CParticleModifierComponentRandomVariable() = default;
 		CParticleModifierComponentRandomVariable(const std::string &identifier, const std::unordered_map<std::string, std::string> &values);
 		void Initialize(const std::string &identifier, const std::unordered_map<std::string, std::string> &values);
@@ -30,7 +29,7 @@ export {
 		T GetMin() const;
 		T GetMax() const;
 		bool IsSet() const;
-	private:
+	  private:
 		uint32_t m_iSeed = umath::random_int(0u, std::numeric_limits<uint32_t>::max());
 		TUniformDis m_value = TUniformDis(T(0), T(0));
 		bool m_bIsSet = false;

@@ -3,13 +3,10 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :engine;
 import :client_state;
-
 
 ClientState *CEngine::OpenClientState()
 {

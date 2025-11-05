@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:debug;
 
 export import :debug.behavior_tree_node;

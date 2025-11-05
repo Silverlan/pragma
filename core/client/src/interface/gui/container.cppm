@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:gui.container;
 
 export import pragma.gui;

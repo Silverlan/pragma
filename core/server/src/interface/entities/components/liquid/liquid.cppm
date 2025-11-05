@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.liquid;
 
 import :entities;
@@ -15,7 +14,7 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SLiquidComponent final : public BaseFuncLiquidComponent, public SBaseNetComponent {
-		public:
+		  public:
 			SLiquidComponent(pragma::ecs::BaseEntity &ent);
 			virtual ~SLiquidComponent() override;
 			virtual void Initialize() override;
@@ -23,13 +22,13 @@ export {
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual void InitializeLuaObject(lua_State *l) override;
-		protected:
+		  protected:
 			CallbackHandle m_cbGameInitialized = {};
 		};
 	};
 
 	class DLLSERVER FuncWater : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

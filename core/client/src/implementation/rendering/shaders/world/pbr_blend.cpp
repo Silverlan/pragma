@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :rendering.shaders.pbr;
@@ -12,7 +11,6 @@ import :client_state;
 import :engine;
 import :entities.components;
 import :model;
-
 
 using namespace pragma;
 

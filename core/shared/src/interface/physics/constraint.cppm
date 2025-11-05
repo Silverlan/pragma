@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:physics.constraint;
 
 export import :entities.base_entity_handle;

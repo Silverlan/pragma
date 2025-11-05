@@ -3,17 +3,12 @@
 
 module;
 
-
 #include "pragma/logging.hpp"
-
-
-
 
 #include <mpParser.h>
 #include <sharedutils/magic_enum.hpp>
 
 module pragma.client;
-
 
 import :rendering.shader_material;
 static spdlog::logger &LOGGER = pragma::register_logger("shader_material");

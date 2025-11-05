@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.func.kinematic;
 
 import :entities;
@@ -16,7 +15,7 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SKinematicComponent final : public BaseFuncKinematicComponent, public SBaseNetComponent {
-		public:
+		  public:
 			SKinematicComponent(pragma::ecs::BaseEntity &ent) : BaseFuncKinematicComponent(ent) {}
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual void StartForward() override;
@@ -27,7 +26,7 @@ export {
 	};
 
 	class DLLSERVER FuncKinematic : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

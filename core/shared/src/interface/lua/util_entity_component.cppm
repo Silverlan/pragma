@@ -18,7 +18,7 @@ export namespace pragma {
 			def.def(
 			  "__tostring", +[](T &c) -> std::string {
 				  std::stringstream ss;
-			  	  ss<<c;
+				  ss << c;
 				  return ss.str();
 			  });
 			// msvc is unable to find the operator<< overload in some cases if we use this function

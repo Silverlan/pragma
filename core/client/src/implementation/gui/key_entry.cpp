@@ -3,8 +3,6 @@
 
 module;
 
-
-
 module pragma.client;
 
 import :gui.key_entry;

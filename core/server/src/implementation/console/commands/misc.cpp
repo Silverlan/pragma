@@ -3,8 +3,6 @@
 
 module;
 
-
-
 #include "pragma/console/helper.hpp"
 
 module pragma.server;
@@ -42,9 +40,9 @@ namespace {
 	auto UVN = register_command("status", &CMD_status_sv, pragma::console::ConVarFlags::None, "Prints information about the server to the console.");
 	auto UVN = register_command("drop", &CMD_drop, pragma::console::ConVarFlags::None, "Drops the player's active weapon.");
 	auto UVN = register_command("kick", &CMD_kick, pragma::console::ConVarFlags::None, "Kicks the specified player for the given reason. Usage: kick <playerId/playerName> <reason>");
-	#ifdef _DEBUG
+#ifdef _DEBUG
 	auto UVN = register_command("sv_dump_netmessages", &CMD_sv_dump_netmessages, pragma::console::ConVarFlags::None, "Prints all registered netmessages to the console.");
-	#endif
+#endif
 
 	auto UVN = register_command("sv_send", &CMD_sv_send, pragma::console::ConVarFlags::None, "Sends a text message to all connected clients and displays it in the console. Usage: sv_send <message>");
 	auto UVN = register_command("sv_send_udp", &CMD_sv_send_udp, pragma::console::ConVarFlags::None, "Sends a text message to all connected clients via UDP and displays it in the console. Usage: sv_send_udp <message>");

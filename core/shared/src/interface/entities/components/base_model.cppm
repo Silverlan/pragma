@@ -4,9 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
-
 export module pragma.shared:entities.components.base_model;
 
 export import :entities.components.base;
@@ -34,15 +31,14 @@ export {
 			virtual void PushArguments(lua::State *l) override;
 			std::shared_ptr<pragma::Model> model;
 		};
-				namespace baseModelComponent {
+		namespace baseModelComponent {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_MODEL_CHANGED;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_MODEL_MATERIALS_LOADED;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SKIN_CHANGED;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BODY_GROUP_CHANGED;
 		}
-class DLLNETWORK BaseModelComponent : public BaseEntityComponent, public DynamicMemberRegister {
+		class DLLNETWORK BaseModelComponent : public BaseEntityComponent, public DynamicMemberRegister {
 		  public:
-
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
@@ -124,4 +120,3 @@ class DLLNETWORK BaseModelComponent : public BaseEntityComponent, public Dynamic
 		};
 	};
 }
-

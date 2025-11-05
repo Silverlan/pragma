@@ -3,9 +3,7 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :entities.components.game_shadow_manager;
 import :engine;
@@ -13,7 +11,6 @@ import :entities.components.renderer;
 import :game;
 
 using namespace pragma;
-
 
 void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::BaseEnvLightDirectionalComponent &light, bool drawParticleShadows)
 {

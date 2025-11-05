@@ -9,17 +9,17 @@ module;
 
 module pragma.client;
 
-
 import :game;
 import :engine;
 import :rendering.shaders;
 
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_shader_quality", +[](NetworkState *, const ConVar &, int, int val) {
-		if(pragma::get_cgame() == nullptr)
-			return;
-		pragma::get_cgame()->GetWorldEnvironment().SetShaderQuality(val);
-	});
+	auto UVN = pragma::console::client::register_variable_listener<int>(
+	  "cl_render_shader_quality", +[](NetworkState *, const ConVar &, int, int val) {
+		  if(pragma::get_cgame() == nullptr)
+			  return;
+		  pragma::get_cgame()->GetWorldEnvironment().SetShaderQuality(val);
+	  });
 }
 
 static void CVAR_CALLBACK_cl_render_shadow_resolution(NetworkState *, const ConVar &, int, int val)
@@ -28,7 +28,9 @@ static void CVAR_CALLBACK_cl_render_shadow_resolution(NetworkState *, const ConV
 		return;
 	pragma::get_cgame()->GetWorldEnvironment().SetShadowResolution(val);
 }
-namespace { auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_shadow_resolution", &CVAR_CALLBACK_cl_render_shadow_resolution); }
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_shadow_resolution", &CVAR_CALLBACK_cl_render_shadow_resolution);
+}
 
 void register_game_shaders()
 {

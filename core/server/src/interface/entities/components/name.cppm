@@ -6,8 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.name;
 
 import :entities.components.entity;

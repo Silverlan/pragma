@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
 module pragma.shared;
 
 import :entities.components.environment.audio.base_sound_scape;

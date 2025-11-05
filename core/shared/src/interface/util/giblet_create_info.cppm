@@ -9,9 +9,9 @@ export module pragma.shared:util.giblet_create_info;
 export import pragma.math;
 
 export {
-	#pragma warning(push)
-	#pragma warning(disable : 4251)
-	#pragma pack(push, 1)
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#pragma pack(push, 1)
 	struct DLLNETWORK GibletCreateInfo {
 		enum class PhysShape : uint32_t { Model = 0, None, Sphere, Box, Cylinder };
 		std::string model;

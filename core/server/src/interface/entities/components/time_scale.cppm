@@ -5,8 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.time_scale;
 
 import :entities.components.entity;

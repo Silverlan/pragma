@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 export module pragma.shared:scripting.lua.converters.entity;
 
 export import :scripting.lua.types.base_types;

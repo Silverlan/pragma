@@ -361,7 +361,7 @@ ConVar *ServerState::SetConVar(std::string scmd, std::string value, bool bApplyI
 	return cvar;
 }
 
-pragma::SPlayerComponent *ServerState::GetPlayer(const pragma::networking::IServerClient &session) { return static_cast<pragma::SPlayerComponent*>(session.GetPlayer()); }
+pragma::SPlayerComponent *ServerState::GetPlayer(const pragma::networking::IServerClient &session) { return static_cast<pragma::SPlayerComponent *>(session.GetPlayer()); }
 bool ServerState::IsServer() const { return true; }
 ConVarMap *ServerState::GetConVarMap() { return console_system::server::get_convar_map(); }
 
@@ -441,11 +441,12 @@ pragma::ModelSubMesh *ServerState::CreateSubMesh() const { return new pragma::Mo
 ModelMesh *ServerState::CreateMesh() const { return new ModelMesh; }
 
 namespace {
-	auto _ = pragma::console::server::register_variable_listener<int>("sv_tickrate",+[](NetworkState *, const ConVar &, int, int val) {
-		if(val < 0)
-			val = 0;
-		pragma::Engine::Get()->SetTickRate(val);
-	});
+	auto _ = pragma::console::server::register_variable_listener<int>(
+	  "sv_tickrate", +[](NetworkState *, const ConVar &, int, int val) {
+		  if(val < 0)
+			  val = 0;
+		  pragma::Engine::Get()->SetTickRate(val);
+	  });
 }
 
 ////////////////

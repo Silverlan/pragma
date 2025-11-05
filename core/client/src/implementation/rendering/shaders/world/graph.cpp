@@ -7,7 +7,6 @@ module;
 
 module pragma.client;
 
-
 import :rendering.shaders.world_graph;
 
 import :client_state;
@@ -15,7 +14,6 @@ import :engine;
 import :entities.components;
 import :model;
 import pragma.shadergraph;
-
 
 using namespace pragma;
 

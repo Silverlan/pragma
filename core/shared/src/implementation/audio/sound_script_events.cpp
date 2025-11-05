@@ -2,10 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
-
 #undef CreateEvent
 
 module pragma.shared;

@@ -4,7 +4,6 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:rendering.shader_graph.node_material_texture;
 
 export import pragma.shadergraph;

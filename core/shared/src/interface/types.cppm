@@ -2,66 +2,65 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 export module pragma.shared:types;
 
 export import std.compat;
 
 export {
 	class ALSound;
-    namespace pragma {
-        class BaseEntityComponent;
-        class BaseFilterComponent;
+	namespace pragma {
+		class BaseEntityComponent;
+		class BaseFilterComponent;
 		struct ComponentMemberInfo;
-        class Engine;
-        class Game;
-        class Model;
-        class ModelMeshGroup;
+		class Engine;
+		class Game;
+		class Model;
+		class ModelMeshGroup;
 		class ModelSubMesh;
-        class PanimaComponent;
+		class PanimaComponent;
 
-        namespace asset {
-            class ModelManager;
-        }
+		namespace asset {
+			class ModelManager;
+		}
 
-        namespace animation {
-            class Animation;
-        }
+		namespace animation {
+			class Animation;
+		}
 
-        namespace ecs {
-            class BaseEntity;
-            class EntityIterator;
-        }
-    
-        class BaseTransformComponent;
-        class BasePhysicsComponent;
-        class BaseModelComponent;
-        class BaseGenericComponent;
-        class BaseChildComponent;
-        class BaseAnimatedComponent;
-        class BaseWeaponComponent;
-        class BaseVehicleComponent;
-        class BaseAIComponent;
-        class BaseCharacterComponent;
-        class BasePlayerComponent;
-        class BaseTimeScaleComponent;
-        class BaseNameComponent;
+		namespace ecs {
+			class BaseEntity;
+			class EntityIterator;
+		}
 
-        namespace physics {
-            class IEnvironment;
-            class IRigidBody;
-            class IShape;
-            class PhysObj;
+		class BaseTransformComponent;
+		class BasePhysicsComponent;
+		class BaseModelComponent;
+		class BaseGenericComponent;
+		class BaseChildComponent;
+		class BaseAnimatedComponent;
+		class BaseWeaponComponent;
+		class BaseVehicleComponent;
+		class BaseAIComponent;
+		class BaseCharacterComponent;
+		class BasePlayerComponent;
+		class BaseTimeScaleComponent;
+		class BaseNameComponent;
 
-            enum class PHYSICSTYPE : int;
-            enum class CollisionMask : uint32_t;
-            enum class RayCastFlags : uint32_t;
-            enum class COLLISIONTYPE : int;
-            enum class MOVETYPE : int;
-            enum class RayCastHitType : uint8_t;
-        }
-    }
-    class DamageInfo;
+		namespace physics {
+			class IEnvironment;
+			class IRigidBody;
+			class IShape;
+			class PhysObj;
+
+			enum class PHYSICSTYPE : int;
+			enum class CollisionMask : uint32_t;
+			enum class RayCastFlags : uint32_t;
+			enum class COLLISIONTYPE : int;
+			enum class MOVETYPE : int;
+			enum class RayCastHitType : uint8_t;
+		}
+	}
+	class DamageInfo;
 	class ModelMesh;
-    class NetworkState;
+	class NetworkState;
 }

@@ -6,9 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
 export module pragma.client:entities.components.env_reflection_probe;
 
 import :entities.components.scene;
@@ -25,7 +22,7 @@ export {
 			};
 		};
 		class DLLCLIENT CReflectionProbeComponent final : public BaseEntityComponent {
-		public:
+		  public:
 			enum class UpdateStatus : uint8_t { Initial = 0, Pending, Complete, Failed };
 			enum class StateFlags : uint8_t { None = 0u, BakingFailed = 1u, RequiresRebuild = BakingFailed << 1u };
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
@@ -57,15 +54,15 @@ export {
 
 			std::string GetCubemapIBLMaterialFilePath() const;
 			void SetCubemapIBLMaterialFilePath(const std::string &path);
-		private:
+		  private:
 			static std::shared_ptr<prosper::IImage> CreateCubemapImage();
 			msys::Material *LoadMaterial(bool &outIsDefault);
 
 			void InitializeDescriptorSet();
 			void ClearDescriptorSet();
 			void ClearIblData();
-			util::ParallelJob<uimg::ImageLayerSet> CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, umath::Degree fov, float exposure, const std::vector<pragma::ecs::BaseEntity *> *optEntityList = nullptr,
-			bool renderJob = false);
+			util::ParallelJob<uimg::ImageLayerSet> CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, umath::Degree fov, float exposure,
+			  const std::vector<pragma::ecs::BaseEntity *> *optEntityList = nullptr, bool renderJob = false);
 			bool FinalizeCubemap(prosper::IImage &imgCubemap);
 			std::string GetCubemapIBLMaterialPath() const;
 			std::string GetCubemapIdentifier() const;
@@ -96,7 +93,7 @@ export {
 	}
 
 	class DLLCLIENT CEnvReflectionProbe : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

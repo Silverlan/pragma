@@ -3,15 +3,12 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :model;
 import :model;
 
 import :engine;
-
 
 void CModel::UpdateVertexAnimationBuffer()
 {

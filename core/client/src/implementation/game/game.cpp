@@ -6,16 +6,11 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/console/helper.hpp"
 
-
-
-
-
 #include "pragma/lua/core.hpp"
 
 //#include "shader_screen.h" // prosper TODO
 
 module pragma.client;
-
 
 import :game;
 import :ai;
@@ -280,7 +275,7 @@ const pragma::rendering::GlobalShaderInputDataManager &CGame::GetGlobalShaderInp
 
 void CGame::GetRegisteredEntities(std::vector<std::string> &classes, std::vector<std::string> &luaClasses) const
 {
-    client_entities::ClientEntityRegistry::Instance().GetRegisteredClassNames(classes);
+	client_entities::ClientEntityRegistry::Instance().GetRegisteredClassNames(classes);
 	GetLuaRegisteredEntities(luaClasses);
 }
 
@@ -310,9 +305,15 @@ static void cmd_render_ibl_enabled(NetworkState *, const ConVar &, bool, bool en
 		return;
 	client->UpdateGameWorldShaderSettings();
 }
-namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("renderender_ibl_enabledr_bloom_enabled", &cmd_render_ibl_enabled); }
-namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("render_dynamic_lighting_enabled", &cmd_render_ibl_enabled); }
-namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("render_dynamic_shadows_enabled", &cmd_render_ibl_enabled); }
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<bool>("renderender_ibl_enabledr_bloom_enabled", &cmd_render_ibl_enabled);
+}
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<bool>("render_dynamic_lighting_enabled", &cmd_render_ibl_enabled);
+}
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<bool>("render_dynamic_shadows_enabled", &cmd_render_ibl_enabled);
+}
 
 static void cmd_render_queue_worker_thread_count(NetworkState *, const ConVar &, int, int val)
 {
@@ -321,7 +322,9 @@ static void cmd_render_queue_worker_thread_count(NetworkState *, const ConVar &,
 	val = umath::clamp(val, 1, 20);
 	pragma::get_cgame()->GetRenderQueueWorkerManager().SetWorkerCount(val);
 }
-namespace { auto UVN = pragma::console::client::register_variable_listener<int>("render_queue_worker_thread_count", &cmd_render_queue_worker_thread_count); }
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int>("render_queue_worker_thread_count", &cmd_render_queue_worker_thread_count);
+}
 
 static void cmd_render_queue_worker_jobs_per_batch(NetworkState *, const ConVar &, int, int val)
 {
@@ -330,7 +333,9 @@ static void cmd_render_queue_worker_jobs_per_batch(NetworkState *, const ConVar 
 	val = umath::max(val, 1);
 	pragma::get_cgame()->GetRenderQueueWorkerManager().SetJobsPerBatchCount(val);
 }
-namespace { auto UVN = pragma::console::client::register_variable_listener<int>("render_queue_worker_jobs_per_batch", &cmd_render_queue_worker_jobs_per_batch); }
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int>("render_queue_worker_jobs_per_batch", &cmd_render_queue_worker_jobs_per_batch);
+}
 
 pragma::rendering::RenderQueueBuilder &CGame::GetRenderQueueBuilder() { return *m_renderQueueBuilder; }
 pragma::rendering::RenderQueueWorkerManager &CGame::GetRenderQueueWorkerManager() { return *m_renderQueueWorkerManager; }
@@ -451,7 +456,7 @@ TCPPM *CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &end, flo
 		prevDist = dist;
 	});
 	pragma::get_cgame()->AddCallback("Think", cb);
-	return reinterpret_cast<TCPPM*>(particle);
+	return reinterpret_cast<TCPPM *>(particle);
 }
 template pragma::ecs::CParticleSystemComponent *CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius, const Color &col, float length, float speed, const std::string &material, float bloomScale);
 
@@ -473,11 +478,17 @@ void CGame::OnEntityCreated(pragma::ecs::BaseEntity *ent)
 }
 
 template<typename TCPPM>
-	const TCPPM *CGame::GetGameComponent() const { return const_cast<CGame *>(this)->GetGameComponent<TCPPM>(); }
+const TCPPM *CGame::GetGameComponent() const
+{
+	return const_cast<CGame *>(this)->GetGameComponent<TCPPM>();
+}
 template const pragma::CGameComponent *CGame::GetGameComponent() const;
 
 template<typename TCPPM>
-	TCPPM *CGame::GetGameComponent() { return static_cast<TCPPM*>(m_gameComponent.get()); }
+TCPPM *CGame::GetGameComponent()
+{
+	return static_cast<TCPPM *>(m_gameComponent.get());
+}
 template pragma::CGameComponent *CGame::GetGameComponent();
 
 template<typename TCPPM>
@@ -485,18 +496,18 @@ TCPPM *CGame::GetViewModel()
 {
 	if(m_viewModel.expired())
 		return nullptr;
-	return static_cast<TCPPM*>(m_viewModel.get());
+	return static_cast<TCPPM *>(m_viewModel.get());
 }
-template pragma::CViewModelComponent* CGame::GetViewModel<pragma::CViewModelComponent>();
+template pragma::CViewModelComponent *CGame::GetViewModel<pragma::CViewModelComponent>();
 
 template<typename TCPPM>
 TCPPM *CGame::GetViewBody()
 {
 	if(m_viewBody.expired())
 		return nullptr;
-	return static_cast<TCPPM*>(m_viewBody.get());
+	return static_cast<TCPPM *>(m_viewBody.get());
 }
-template pragma::CViewBodyComponent* CGame::GetViewBody<pragma::CViewBodyComponent>();
+template pragma::CViewBodyComponent *CGame::GetViewBody<pragma::CViewBodyComponent>();
 
 static void shader_handler(msys::Material *mat)
 {
@@ -568,10 +579,14 @@ static void render_debug_mode(NetworkState *, const ConVar &, int32_t, int32_t d
 		sceneC->SetDebugMode(static_cast<pragma::SceneDebugMode>(debugMode));
 	}
 }
-namespace { auto UVN = pragma::console::client::register_variable_listener<int32_t>("render_debug_mode", &render_debug_mode); }
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int32_t>("render_debug_mode", &render_debug_mode);
+}
 
 static void CVAR_CALLBACK_render_unlit(NetworkState *nw, const ConVar &cv, bool prev, bool val) { render_debug_mode(nw, cv, prev, umath::to_integral(pragma::SceneDebugMode::Unlit)); }
-namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("render_unlit", &CVAR_CALLBACK_render_unlit); }
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<bool>("render_unlit", &CVAR_CALLBACK_render_unlit);
+}
 
 void CGame::SetViewModelFOV(float fov) { *m_viewFov = fov; }
 const util::PFloatProperty &CGame::GetViewModelFOVProperty() const { return m_viewFov; }
@@ -607,7 +622,10 @@ TCPPM *CGame::CreateCamera(float aspectRatio, float fov, float nearZ, float farZ
 }
 
 template<typename TCPPM>
-TCPPM *CGame::CreateCamera(uint32_t width, uint32_t height, float fov, float nearZ, float farZ) { return CreateCamera<TCPPM>(width / static_cast<float>(height), fov, nearZ, farZ); }
+TCPPM *CGame::CreateCamera(uint32_t width, uint32_t height, float fov, float nearZ, float farZ)
+{
+	return CreateCamera<TCPPM>(width / static_cast<float>(height), fov, nearZ, farZ);
+}
 
 void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 {
@@ -711,18 +729,27 @@ util::DrawSceneInfo *CGame::GetQueuedSceneRenderInfo(uint32_t i) { return (i < m
 void CGame::QueueForRendering(const util::DrawSceneInfo &drawSceneInfo) { m_sceneRenderQueue.push_back(drawSceneInfo); }
 const std::vector<util::DrawSceneInfo> &CGame::GetQueuedRenderScenes() const { return m_sceneRenderQueue; }
 template<typename TCPPM>
-void CGame::SetRenderScene(TCPPM &scene) { m_renderScene = scene.GetHandle(); }
+void CGame::SetRenderScene(TCPPM &scene)
+{
+	m_renderScene = scene.GetHandle();
+}
 void CGame::ResetRenderScene() { m_renderScene = m_scene; }
 template<typename TCPPM>
-TCPPM *CGame::GetRenderScene() { return static_cast<pragma::CSceneComponent*>(m_renderScene.get()); }
+TCPPM *CGame::GetRenderScene()
+{
+	return static_cast<pragma::CSceneComponent *>(m_renderScene.get());
+}
 template<typename TCPPM>
-const TCPPM *CGame::GetRenderScene() const { return const_cast<CGame *>(this)->GetRenderScene<pragma::CSceneComponent>(); }
+const TCPPM *CGame::GetRenderScene() const
+{
+	return const_cast<CGame *>(this)->GetRenderScene<pragma::CSceneComponent>();
+}
 template<typename TCPPM>
 TCPPM *CGame::GetRenderCamera() const
 {
 	if(m_renderScene.expired())
 		return nullptr;
-	return const_cast<pragma::CCameraComponent *>(static_cast<const pragma::CSceneComponent*>(m_renderScene.get())->GetActiveCamera().get());
+	return const_cast<pragma::CCameraComponent *>(static_cast<const pragma::CSceneComponent *>(m_renderScene.get())->GetActiveCamera().get());
 }
 template<typename TCPPM>
 void CGame::SetGameplayControlCamera(TCPPM &cam)
@@ -730,7 +757,7 @@ void CGame::SetGameplayControlCamera(TCPPM &cam)
 	m_controlCamera = cam.template GetHandle<pragma::BaseEntityComponent>();
 	m_stateFlags &= ~StateFlags::DisableGamplayControlCamera;
 }
-template void CGame::SetGameplayControlCamera(pragma::CCameraComponent&);
+template void CGame::SetGameplayControlCamera(pragma::CCameraComponent &);
 void CGame::ResetGameplayControlCamera()
 {
 	m_controlCamera = pragma::ComponentHandle<pragma::BaseEntityComponent> {};
@@ -745,14 +772,17 @@ template<typename TCPPM>
 TCPPM *CGame::GetGameplayControlCamera()
 {
 	if(m_controlCamera.valid())
-		return static_cast<pragma::CCameraComponent*>(m_controlCamera.get());
+		return static_cast<pragma::CCameraComponent *>(m_controlCamera.get());
 	if(umath::is_flag_set(m_stateFlags, StateFlags::DisableGamplayControlCamera))
 		return nullptr;
 	return GetRenderCamera<TCPPM>();
 }
-template pragma::CCameraComponent* CGame::GetGameplayControlCamera();
+template pragma::CCameraComponent *CGame::GetGameplayControlCamera();
 template<typename TCPPM>
-TCPPM *CGame::GetPrimaryCamera() const { return const_cast<pragma::CCameraComponent *>(static_cast<const pragma::CCameraComponent*>(m_primaryCamera.get())); }
+TCPPM *CGame::GetPrimaryCamera() const
+{
+	return const_cast<pragma::CCameraComponent *>(static_cast<const pragma::CCameraComponent *>(m_primaryCamera.get()));
+}
 template pragma::CCameraComponent *CGame::GetPrimaryCamera<pragma::CCameraComponent>() const;
 
 void CGame::SetMaterialOverride(msys::Material *mat) { m_matOverride = mat; }
@@ -843,7 +873,7 @@ uint32_t CGame::GetLOD(float dist, uint32_t maxLod) const
 }
 
 template<typename TCPPM>
-	void CGame::CreateGiblet(const GibletCreateInfo &info, TCPPM **particle)
+void CGame::CreateGiblet(const GibletCreateInfo &info, TCPPM **particle)
 {
 	if(particle != nullptr)
 		*particle = nullptr;
@@ -886,7 +916,7 @@ template<typename TCPPM>
 	pt->SetRemoveOnComplete(true);
 	pt->Start();
 	if(particle != nullptr)
-		*particle = reinterpret_cast<TCPPM*>(pt);
+		*particle = reinterpret_cast<TCPPM *>(pt);
 }
 template void CGame::CreateGiblet(const GibletCreateInfo &info, pragma::ecs::CParticleSystemComponent **particle);
 
@@ -902,7 +932,7 @@ WIBase *CGame::CreateGUIElement(std::string name, WIHandle *hParent)
 }
 LuaGUIManager &CGame::GetLuaGUIManager() { return m_luaGUIElements; }
 pragma::LuaShaderManager &CGame::GetLuaShaderManager() { return *m_luaShaderManager; }
-pragma::cxxm_LuaParticleModifierManager &CGame::GetLuaParticleModifierManager() { return *static_cast<pragma::cxxm_LuaParticleModifierManager*>(m_luaParticleModifierManager.get()); }
+pragma::cxxm_LuaParticleModifierManager &CGame::GetLuaParticleModifierManager() { return *static_cast<pragma::cxxm_LuaParticleModifierManager *>(m_luaParticleModifierManager.get()); }
 pragma::LuaInputBindingLayerRegister &CGame::GetLuaInputBindingLayerRegister() { return *m_luaInputBindingLayerRegister; }
 
 void CGame::SetUp()
@@ -979,11 +1009,11 @@ void CGame::Think()
 	double tDelta = m_stateNetwork->DeltaTime();
 	m_tServer += DeltaTime();
 	if(m_gameComponent.valid())
-		static_cast<pragma::CGameComponent*>(m_gameComponent.get())->UpdateFrame(cam);
+		static_cast<pragma::CGameComponent *>(m_gameComponent.get())->UpdateFrame(cam);
 	CallCallbacks<void>("Think");
 	CallLuaCallbacks("Think");
 	if(m_gameComponent.valid())
-		static_cast<pragma::CGameComponent*>(m_gameComponent.get())->UpdateCamera(cam);
+		static_cast<pragma::CGameComponent *>(m_gameComponent.get())->UpdateCamera(cam);
 
 	if(scene)
 		SetRenderScene(*scene);
@@ -1612,7 +1642,7 @@ void CGame::DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, 
 static auto cvRenderPhysics = GetClientConVar("debug_physics_draw");
 static auto cvSvRenderPhysics = GetClientConVar("sv_debug_physics_draw");
 template<typename TCPPM>
-	void CGame::RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, TCPPM &cam)
+void CGame::RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, TCPPM &cam)
 {
 	if(cvRenderPhysics->GetBool()) {
 		auto *physEnv = GetPhysicsEnvironment();
@@ -1630,7 +1660,7 @@ template<typename TCPPM>
 			static_cast<CPhysVisualDebugger &>(*pVisualDebugger).Render(drawCmd, cam);
 	}
 }
-template void CGame::RenderDebugPhysics<pragma::CCameraComponent>(std::shared_ptr<prosper::ICommandBuffer>&, pragma::CCameraComponent&);
+template void CGame::RenderDebugPhysics<pragma::CCameraComponent>(std::shared_ptr<prosper::ICommandBuffer> &, pragma::CCameraComponent &);
 
 bool CGame::LoadAuxEffects(const std::string &fname)
 {

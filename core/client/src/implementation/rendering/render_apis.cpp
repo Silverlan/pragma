@@ -3,9 +3,7 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.render_apis;
 std::vector<std::string> pragma::rendering::get_available_graphics_apis()

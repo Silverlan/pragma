@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:scripting.lua.classes.angle;
 
 export import :scripting.lua.api;

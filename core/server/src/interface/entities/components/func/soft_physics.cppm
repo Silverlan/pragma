@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.func.soft_physics;
 
 import :entities;
@@ -16,7 +15,7 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SFuncSoftPhysicsComponent final : public BaseFuncSoftPhysicsComponent, public SBaseNetComponent {
-		public:
+		  public:
 			SFuncSoftPhysicsComponent(pragma::ecs::BaseEntity &ent) : BaseFuncSoftPhysicsComponent(ent) {}
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
@@ -25,7 +24,7 @@ export {
 	};
 
 	class DLLSERVER FuncSoftPhysics : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

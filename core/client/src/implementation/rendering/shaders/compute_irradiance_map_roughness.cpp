@@ -3,13 +3,11 @@
 
 module;
 
-
 module pragma.client;
 
 import :rendering.shaders.compute_irradiance_map_roughness;
 
 import :engine;
-
 
 using namespace pragma;
 

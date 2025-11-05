@@ -4,7 +4,6 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:rendering.shader_graph.node_toon;
 
 export import pragma.shadergraph;

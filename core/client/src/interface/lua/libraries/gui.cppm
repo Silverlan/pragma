@@ -6,7 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.client:scripting.lua.libraries.gui;
 export import :game;
 

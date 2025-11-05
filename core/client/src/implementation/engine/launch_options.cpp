@@ -134,7 +134,8 @@ static void LPARAM_wayland_libdecor_plugin(const std::vector<std::string> &argv)
 	g_waylandLibdecorPlugin = argv.front();
 }
 
-void register_client_launch_parameters(LaunchParaMap &map) {
+void register_client_launch_parameters(LaunchParaMap &map)
+{
 	map.RegisterParameterHelp("-windowed", &LPARAM_windowed, "-window -startwindowed -sw", "start in windowed mode");
 	map.RegisterParameter("-window", &LPARAM_windowed);
 	map.RegisterParameter("-startwindowed", &LPARAM_windowed);

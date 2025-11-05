@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 #include <cassert>
 
 module pragma.shared;
@@ -12,7 +11,10 @@ import :entities.components.liquid.base_surface_simulation;
 using namespace pragma;
 
 ComponentEventId baseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseLiquidSurfaceSimulationComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = registerEvent("ON_WATER_SURFACE_SIMULATOR_CHANGED", ComponentEventInfo::Type::Broadcast); }
+void BaseLiquidSurfaceSimulationComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+{
+	baseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = registerEvent("ON_WATER_SURFACE_SIMULATOR_CHANGED", ComponentEventInfo::Type::Broadcast);
+}
 
 void BaseLiquidSurfaceSimulationComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
 

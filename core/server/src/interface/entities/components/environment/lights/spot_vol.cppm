@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.lights.spot_vol;
 
 import :entities;
@@ -15,19 +14,19 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SLightSpotVolComponent final : public BaseEnvLightSpotVolComponent, public SBaseNetComponent {
-		public:
+		  public:
 			SLightSpotVolComponent(pragma::ecs::BaseEntity &ent) : BaseEnvLightSpotVolComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual void InitializeLuaObject(lua_State *l) override;
-		protected:
+		  protected:
 			virtual void SetSpotlightTarget(pragma::ecs::BaseEntity &ent) override;
 		};
 	};
 
 	class DLLSERVER EnvLightSpotVol : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

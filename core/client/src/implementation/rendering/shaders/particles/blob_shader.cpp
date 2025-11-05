@@ -7,13 +7,11 @@ module;
 
 module pragma.client;
 
-
 import :rendering.shaders.particle_blob;
 
 import :engine;
 import :entities.components;
 import :game;
-
 
 using namespace pragma;
 

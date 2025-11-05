@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:util.timer;
 
 export import :game.enums;
@@ -14,7 +13,7 @@ export import :util.timer_handle;
 
 export {
 	class DLLNETWORK Timer {
-	public:
+	  public:
 		Timer(float delay, unsigned int reps, LuaFunctionObject luaFunction, TimerType timetype = TimerType::CurTime);
 		Timer(float delay, unsigned int reps, const CallbackHandle &hCallback, TimerType timetype = TimerType::CurTime);
 		~Timer();
@@ -37,7 +36,7 @@ export {
 		void SetCall(pragma::Game *game, const CallbackHandle &hCallback);
 
 		void Call(pragma::Game *game);
-	private:
+	  private:
 		TimerType m_timeType;
 		float m_delay;
 		unsigned int m_reps;
@@ -51,7 +50,7 @@ export {
 
 		double GetCurTime(pragma::Game *game);
 		double GetDeltaTime(pragma::Game *game);
-	protected:
+	  protected:
 		float m_next;
 		virtual void Reset();
 		Timer();

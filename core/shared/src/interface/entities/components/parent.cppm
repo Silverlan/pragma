@@ -4,21 +4,18 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.parent;
 
 export import :entities.components.base;
 export import :entities.components.base_child;
 
 export namespace pragma {
-		namespace parentComponent {
+	namespace parentComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_CHILD_ADDED;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_CHILD_REMOVED;
 	}
-class DLLNETWORK ParentComponent final : public BaseEntityComponent {
+	class DLLNETWORK ParentComponent final : public BaseEntityComponent {
 	  public:
-
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		ParentComponent(pragma::ecs::BaseEntity &ent);

@@ -4,8 +4,6 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
-
 export module pragma.client:particle_system.operator_color_fade;
 
 export import :entities.components.particle_system;
@@ -36,7 +34,7 @@ void CParticleOperatorColorFade::Initialize(pragma::BaseEnvParticleSystemCompone
 	                                   // If no start color has been specified, the previous known color of the particle has to be used as start color.
 	                                   // Since that color cannot be known beforehand, we need to store it.
 	if(m_colorStart.IsSet() == false)
-		m_particleStartColors = std::make_unique<std::vector<Color>>(static_cast<pragma::ecs::CParticleSystemComponent&>(pSystem).GetMaxParticleCount(), Color(std::numeric_limits<int16_t>::max(), 0, 0, 0));
+		m_particleStartColors = std::make_unique<std::vector<Color>>(static_cast<pragma::ecs::CParticleSystemComponent &>(pSystem).GetMaxParticleCount(), Color(std::numeric_limits<int16_t>::max(), 0, 0, 0));
 }
 void CParticleOperatorColorFade::OnParticleCreated(CParticle &particle)
 {

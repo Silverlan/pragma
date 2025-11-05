@@ -3,14 +3,11 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.particle_animated_sprites;
 
 import :engine;
-
 
 using namespace pragma;
 
@@ -132,8 +129,7 @@ void ShaderParticleAnimatedSprites::InitializeGfxPipeline(prosper::GraphicsPipel
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 }
 
-bool ShaderParticleAnimatedSprites::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps, ecs::ParticleOrientationType orientationType,
-  ecs::ParticleRenderFlags renderFlags)
+bool ShaderParticleAnimatedSprites::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps, ecs::ParticleOrientationType orientationType, ecs::ParticleRenderFlags renderFlags)
 {
 	PushConstants pushConstants {};
 	pushConstants.camBias = 0.f;

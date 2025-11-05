@@ -6,8 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:scripting.lua.classes.net_packet;
 
 export import pragma.shared;

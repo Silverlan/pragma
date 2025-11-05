@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
 #include "DetourNavMesh.h"
 #include "DetourNavMeshBuilder.h"
 #include "DetourNavMeshQuery.h"

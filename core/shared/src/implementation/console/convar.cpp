@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
 #include "definitions.hpp"
 #include <cassert>
 
@@ -144,7 +141,8 @@ ConConf *ConVar::Copy()
 
 //////////////////////////////////
 
-ConCommand::ConCommand(const std::function<void(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> &function, pragma::console::ConVarFlags flags, const std::string &help, const std::function<void(const std::string &, std::vector<std::string> &, bool)> &autoCompleteCallback)
+ConCommand::ConCommand(const std::function<void(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> &function, pragma::console::ConVarFlags flags, const std::string &help,
+  const std::function<void(const std::string &, std::vector<std::string> &, bool)> &autoCompleteCallback)
     : ConConf(flags), m_function(function), m_functionLua(nullptr), m_autoCompleteCallback {autoCompleteCallback}
 {
 	m_help = help;
@@ -224,7 +222,7 @@ static void initialize_convar_map(ConVarMap *&r)
 
 #define cvar_newglobal(suffix, glname)                                                                                                                                                                                                                                                           \
 	DLLNETWORK ConVarMap *g_ConVars##suffix = nullptr;                                                                                                                                                                                                                                           \
-	bool console_system::glname::register_convar(const std::string &cvar, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help)                                                                                                                                  \
+	bool console_system::glname::register_convar(const std::string &cvar, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help)                                                                                                                 \
 	{                                                                                                                                                                                                                                                                                            \
 		initialize_convar_map(g_ConVars##suffix);                                                                                                                                                                                                                                                \
 		udm::visit(type, [&cvar, type, &value, flags, &help](auto tag) {                                                                                                                                                                                                                         \
@@ -265,7 +263,7 @@ static void initialize_convar_map(ConVarMap *&r)
 		g_ConVars##suffix->RegisterConVarCallback(scvar, std::function<void(NetworkState *, const ConVar &, bool, bool)>(function));                                                                                                                                                             \
 		return true;                                                                                                                                                                                                                                                                             \
 	}                                                                                                                                                                                                                                                                                            \
-	static bool register_concommand_##glname(const std::string &cvar, const std::function<void(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> &function, pragma::console::ConVarFlags flags, const std::string &help)                                                         \
+	static bool register_concommand_##glname(const std::string &cvar, const std::function<void(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> &function, pragma::console::ConVarFlags flags, const std::string &help)                                        \
 	{                                                                                                                                                                                                                                                                                            \
 		initialize_convar_map(g_ConVars##suffix);                                                                                                                                                                                                                                                \
 		if(function == nullptr)                                                                                                                                                                                                                                                                  \
@@ -274,16 +272,19 @@ static void initialize_convar_map(ConVarMap *&r)
 			g_ConVars##suffix->RegisterConCommand(cvar, function, flags, help);                                                                                                                                                                                                                  \
 		return true;                                                                                                                                                                                                                                                                             \
 	}                                                                                                                                                                                                                                                                                            \
-	bool console_system::glname::register_concommand(const std::string &cvar, void (*function)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), pragma::console::ConVarFlags flags, const std::string &help)                                                                    \
+	bool console_system::glname::register_concommand(const std::string &cvar, void (*function)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), pragma::console::ConVarFlags flags, const std::string &help)                                                   \
 	{                                                                                                                                                                                                                                                                                            \
 		return ::register_concommand_##glname(cvar, function, flags, help);                                                                                                                                                                                                                      \
 	}                                                                                                                                                                                                                                                                                            \
-	bool console_system::glname::register_concommand(const std::string &cvar, void (*function)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &), pragma::console::ConVarFlags flags, const std::string &help)                                                                           \
+	bool console_system::glname::register_concommand(const std::string &cvar, void (*function)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &), pragma::console::ConVarFlags flags, const std::string &help)                                                          \
 	{                                                                                                                                                                                                                                                                                            \
 		return ::register_concommand_##glname(cvar, std::bind(function, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3), flags, help);                                                                                                                                      \
 	}                                                                                                                                                                                                                                                                                            \
-	bool console_system::glname::register_concommand(const std::string &cvar, void (*function)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), const std::string &help) { return register_concommand(cvar, function, pragma::console::ConVarFlags::None, help); }              \
-	bool console_system::glname::register_concommand(const std::string &cvar, void (*function)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &), const std::string &help) { return register_concommand(cvar, function, pragma::console::ConVarFlags::None, help); }                     \
+	bool console_system::glname::register_concommand(const std::string &cvar, void (*function)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), const std::string &help)                                                                                       \
+	{                                                                                                                                                                                                                                                                                            \
+		return register_concommand(cvar, function, pragma::console::ConVarFlags::None, help);                                                                                                                                                                                                    \
+	}                                                                                                                                                                                                                                                                                            \
+	bool console_system::glname::register_concommand(const std::string &cvar, void (*function)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &), const std::string &help) { return register_concommand(cvar, function, pragma::console::ConVarFlags::None, help); }    \
 	ConVarMap *console_system::glname::get_convar_map() { return g_ConVars##suffix; }
 
 cvar_newglobal(Sv, server);

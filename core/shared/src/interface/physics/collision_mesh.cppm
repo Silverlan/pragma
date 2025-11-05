@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:physics.collision_mesh;
 
 export import :game.coordinate_system;
@@ -16,10 +15,10 @@ export import :types;
 export {
 	namespace pragma::physics {
 		class DLLNETWORK CollisionMesh : public std::enable_shared_from_this<pragma::physics::CollisionMesh> {
-		public:
+		  public:
 			static constexpr auto PCOL_IDENTIFIER = "PCOL";
 			static constexpr udm::Version PCOL_VERSION = 1;
-		#pragma pack(push, 1)
+#pragma pack(push, 1)
 			struct DLLNETWORK SoftBodyAnchor {
 				enum class Flags : uint8_t { None = 0u, Rigid = 1u, DisableCollisions = Rigid << 1u };
 				uint16_t vertexIndex = std::numeric_limits<uint16_t>::max();
@@ -30,11 +29,11 @@ export {
 				bool operator==(const SoftBodyAnchor &other) const;
 				bool operator!=(const SoftBodyAnchor &other) const { return !operator==(other); }
 			};
-		#pragma pack(pop)
+#pragma pack(pop)
 			CollisionMesh(const pragma::physics::CollisionMesh &other);
 			bool operator==(const pragma::physics::CollisionMesh &other) const;
 			bool operator!=(const pragma::physics::CollisionMesh &other) const { return !operator==(other); }
-		private:
+		  private:
 			CollisionMesh(pragma::Game *game);
 
 			//void PhysSoftBody::AppendAnchor(uint32_t nodeId,PhysRigidBody &body,const Vector3 &localPivot,bool bDisableCollision,float influence)
@@ -67,7 +66,7 @@ export {
 			util::Uuid m_uuid;
 			void ClipAgainstPlane(const Vector3 &n, double d, pragma::physics::CollisionMesh &clippedMesh);
 			bool LoadFromAssetData(pragma::Game &game, pragma::Model &mdl, const udm::AssetData &data, std::string &outErr);
-		public:
+		  public:
 			static std::shared_ptr<pragma::physics::CollisionMesh> Create(pragma::Game *game);
 			static std::shared_ptr<pragma::physics::CollisionMesh> Create(const pragma::physics::CollisionMesh &other);
 			static std::shared_ptr<pragma::physics::CollisionMesh> Load(pragma::Game &game, pragma::Model &mdl, const udm::AssetData &data, std::string &outErr);
@@ -131,12 +130,12 @@ export {
 
 			bool Save(pragma::Game &game, pragma::Model &mdl, udm::AssetDataArg outData, std::string &outErr);
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	}
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::physics::CollisionMesh::SoftBodyAnchor::Flags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::physics::CollisionMesh::SoftBodyAnchor::Flags> : std::true_type {};
+	}
 
 	DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::physics::CollisionMesh &o);
 };

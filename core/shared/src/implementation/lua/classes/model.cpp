@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 #include "pragma/lua/ostream_operator_alias.hpp"
 
 module pragma.shared;
@@ -563,7 +562,8 @@ void Lua::Model::register_class(lua::State *l, luabind::class_<pragma::Model> &c
 	classDef.def("AssignDistinctMaterial", &Lua::Model::AssignDistinctMaterial);
 
 	classDef.def("SelectWeightedAnimation", static_cast<void (*)(lua::State *, pragma::Model &, uint32_t)>([](lua::State *l, pragma::Model &mdl, uint32_t activity) { Lua::PushInt(l, mdl.SelectWeightedAnimation(static_cast<pragma::Activity>(activity))); }));
-	classDef.def("SelectWeightedAnimation", static_cast<void (*)(lua::State *, pragma::Model &, uint32_t, int32_t)>([](lua::State *l, pragma::Model &mdl, uint32_t activity, int32_t animIgnore) { Lua::PushInt(l, mdl.SelectWeightedAnimation(static_cast<pragma::Activity>(activity), animIgnore)); }));
+	classDef.def("SelectWeightedAnimation",
+	  static_cast<void (*)(lua::State *, pragma::Model &, uint32_t, int32_t)>([](lua::State *l, pragma::Model &mdl, uint32_t activity, int32_t animIgnore) { Lua::PushInt(l, mdl.SelectWeightedAnimation(static_cast<pragma::Activity>(activity), animIgnore)); }));
 	classDef.def("SelectFirstAnimation", static_cast<void (*)(lua::State *, pragma::Model &, uint32_t)>([](lua::State *l, pragma::Model &mdl, uint32_t activity) { Lua::PushInt(l, mdl.SelectFirstAnimation(static_cast<pragma::Activity>(activity))); }));
 	classDef.def("GetAnimationActivityWeight", static_cast<void (*)(lua::State *, pragma::Model &, uint32_t)>([](lua::State *l, pragma::Model &mdl, uint32_t anim) { Lua::PushInt(l, mdl.GetAnimationActivityWeight(anim)); }));
 	classDef.def("GetAnimationActivity", static_cast<void (*)(lua::State *, pragma::Model &, uint32_t)>([](lua::State *l, pragma::Model &mdl, uint32_t anim) { Lua::PushInt(l, umath::to_integral(mdl.GetAnimationActivity(anim))); }));
@@ -1151,7 +1151,8 @@ void Lua::Model::register_class(lua::State *l, luabind::class_<pragma::Model> &c
 	}));
 	classDefFlexAnim.def("GetFrameCount", static_cast<uint32_t (*)(lua::State *, FlexAnimation &)>([](lua::State *l, FlexAnimation &flexAnim) -> uint32_t { return flexAnim.GetFrames().size(); }));
 	classDefFlexAnim.def("GetFlexControllerIds", static_cast<luabind::object (*)(lua::State *, FlexAnimation &)>([](lua::State *l, FlexAnimation &flexAnim) -> luabind::object { return Lua::vector_to_table(l, flexAnim.GetFlexControllerIds()); }));
-	classDefFlexAnim.def("SetFlexControllerIds", static_cast<void (*)(lua::State *, FlexAnimation &, luabind::table<>)>([](lua::State *l, FlexAnimation &flexAnim, luabind::table<> tIds) { flexAnim.SetFlexControllerIds(Lua::table_to_vector<pragma::animation::FlexControllerId>(l, tIds, 2)); }));
+	classDefFlexAnim.def("SetFlexControllerIds",
+	  static_cast<void (*)(lua::State *, FlexAnimation &, luabind::table<>)>([](lua::State *l, FlexAnimation &flexAnim, luabind::table<> tIds) { flexAnim.SetFlexControllerIds(Lua::table_to_vector<pragma::animation::FlexControllerId>(l, tIds, 2)); }));
 	classDefFlexAnim.def("AddFlexControllerId", static_cast<uint32_t (*)(lua::State *, FlexAnimation &, pragma::animation::FlexControllerId)>([](lua::State *l, FlexAnimation &flexAnim, pragma::animation::FlexControllerId id) -> uint32_t { return flexAnim.AddFlexControllerId(id); }));
 	classDefFlexAnim.def("SetFlexControllerValue", static_cast<void (*)(lua::State *, FlexAnimation &, uint32_t, pragma::animation::FlexControllerId, float)>([](lua::State *l, FlexAnimation &flexAnim, uint32_t frameId, pragma::animation::FlexControllerId id, float val) {
 		auto &frames = flexAnim.GetFrames();

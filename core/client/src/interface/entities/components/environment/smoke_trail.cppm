@@ -5,15 +5,14 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
 export module pragma.client:entities.components.effects.smoke_trail;
 
 export import :entities.base_entity;
 export import :entities.components.entity;
 
-export namespace pragma::ecs {class CParticleSystemComponent;}
+export namespace pragma::ecs {
+	class CParticleSystemComponent;
+}
 export namespace pragma {
 	class DLLCLIENT CSmokeTrailComponent final : public BaseEnvSmokeTrailComponent, public CBaseNetComponent {
 	  public:

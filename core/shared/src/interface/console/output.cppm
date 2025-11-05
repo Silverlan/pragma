@@ -43,9 +43,9 @@ export {
 		class DLLNETWORK c_cwar {};
 		class DLLNETWORK c_cerr {};
 		class DLLNETWORK c_crit {
-		private:
+		  private:
 			std::atomic<bool> m_bActivated = false;
-		public:
+		  public:
 			friend DLLNETWORK std::basic_ostream<char, std::char_traits<char>> &endl(std::basic_ostream<char, std::char_traits<char>> &os);
 			template<class T>
 			friend Con::c_crit & ::operator<<(Con::c_crit &con, const T &t);
@@ -114,17 +114,17 @@ export {
 		extern DLLNETWORK Type type;
 	};
 
-	#define PRAGMA_DETAIL_LOG_OUTPUT(v, etype)                                                                                                                                                                                                                                                       \
-		if(pragma::logging::detail::shouldLogOutput) {                                                                                                                                                                                                                                               \
-			pragma::logging::detail::logOutputMutex.lock();                                                                                                                                                                                                                                          \
-			pragma::logging::detail::type = etype;                                                                                                                                                                                                                                                   \
-			pragma::logging::detail::logOutput << v;                                                                                                                                                                                                                                                 \
-			pragma::logging::detail::logOutputMutex.unlock();                                                                                                                                                                                                                                        \
-		}
+#define PRAGMA_DETAIL_LOG_OUTPUT(v, etype)                                                                                                                                                                                                                                                       \
+	if(pragma::logging::detail::shouldLogOutput) {                                                                                                                                                                                                                                               \
+		pragma::logging::detail::logOutputMutex.lock();                                                                                                                                                                                                                                          \
+		pragma::logging::detail::type = etype;                                                                                                                                                                                                                                                   \
+		pragma::logging::detail::logOutput << v;                                                                                                                                                                                                                                                 \
+		pragma::logging::detail::logOutputMutex.unlock();                                                                                                                                                                                                                                        \
+	}
 
-	#define PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(v, type)                                                                                                                                                                                                                                    \
-		if(Con::detail::outputCallback != nullptr)                                                                                                                                                                                                                                                   \
-			Con::invoke_output_callback(v, type);
+#define PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(v, type)                                                                                                                                                                                                                                    \
+	if(Con::detail::outputCallback != nullptr)                                                                                                                                                                                                                                                   \
+		Con::invoke_output_callback(v, type);
 
 	// c_cout
 	template<class T>

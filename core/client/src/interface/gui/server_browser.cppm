@@ -13,28 +13,28 @@ export import pragma.shared;
 export {
 	namespace pragma::networking {
 		class DLLCLIENT DefaultMasterServerQueryDispatcher : public IMasterServerQueryDispatcher {
-		public:
+		  public:
 			virtual void DoQueryServers(const Filter &filter) override;
-		protected:
+		  protected:
 			DefaultMasterServerQueryDispatcher();
 			virtual void DoCancelQuery() override;
 			virtual void DoPoll() override;
 			virtual void DoPingServer(uint32_t serverIdx) override;
 			friend IMasterServerQueryDispatcher;
-		private:
+		  private:
 			std::unique_ptr<UDPMessageDispatcher> m_dispatcher;
 		};
 	};
 
 	class DLLCLIENT WIServerBrowser : public WIFrame {
-	public:
+	  public:
 		WIServerBrowser();
 		virtual ~WIServerBrowser() override;
 		virtual void Initialize() override;
 		virtual void Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd) override;
 		virtual void SetSize(int x, int y) override;
 		void Refresh();
-	protected:
+	  protected:
 		struct ServerData {
 			pragma::networking::MasterServerQueryResult queryResult;
 			WIHandle row = {};

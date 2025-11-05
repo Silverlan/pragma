@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:model.animation.skeletal_animation;
 
 import panima;

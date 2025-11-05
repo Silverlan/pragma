@@ -16,7 +16,7 @@ export {
 			uint32_t numPlayers = 0u;
 		};
 		struct DLLNETWORK IMasterServerQueryDispatcher {
-		public:
+		  public:
 			template<class TMasterServerQueryDispatcher>
 			static std::unique_ptr<IMasterServerQueryDispatcher, void (*)(IMasterServerQueryDispatcher *)> Create();
 			struct DLLNETWORK Filter {
@@ -38,7 +38,7 @@ export {
 			void PingServers();
 			void SetPingBatchCount();
 			void SetEventCallbacks(const EventCallbacks &eventCallbacks);
-		protected:
+		  protected:
 			virtual void DoQueryServers(const Filter &filter) = 0;
 			virtual void DoCancelQuery() = 0;
 			virtual void DoPoll() {};
@@ -56,24 +56,24 @@ export {
 			std::vector<std::optional<MasterServerQueryResult>> m_queryResults = {};
 			// Queue of server indices to be pinged
 			std::queue<uint32_t> m_serverPingQueue = {};
-		private:
+		  private:
 			void OnRefreshComplete();
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	}
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::networking::IMasterServerQueryDispatcher::Filter::Flags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::networking::IMasterServerQueryDispatcher::Filter::Flags> : std::true_type {};
+	}
 
 	namespace pragma {
 		template<class TMasterServerQueryDispatcher>
 		std::unique_ptr<networking::IMasterServerQueryDispatcher, void (*)(networking::IMasterServerQueryDispatcher *)> networking::IMasterServerQueryDispatcher::Create()
 		{
 			return std::unique_ptr<IMasterServerQueryDispatcher, void (*)(IMasterServerQueryDispatcher *)> {new TMasterServerQueryDispatcher {}, [](IMasterServerQueryDispatcher *p) {
-																												p->Release();
-																												delete p;
-																											}};
+				                                                                                                p->Release();
+				                                                                                                delete p;
+			                                                                                                }};
 		}
 	}
 };

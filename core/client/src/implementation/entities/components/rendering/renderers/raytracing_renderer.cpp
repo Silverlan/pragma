@@ -4,13 +4,11 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
 
 import :entities.components.raytracing_renderer;
 import :client_state;
 import :engine;
-
 
 using namespace pragma;
 

@@ -4,9 +4,7 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.character;
 import :client_state;
@@ -16,7 +14,6 @@ import :entities.components.eye;
 import :entities.components.particle_system;
 import :entities.components.sound_emitter;
 import :entities.components.surface;
-
 
 using namespace pragma;
 

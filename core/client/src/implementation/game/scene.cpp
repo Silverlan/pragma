@@ -6,16 +6,21 @@ module;
 #include "pragma/console/helper.hpp"
 module pragma.client;
 
-
 import :game;
 
 template<typename TCPPM>
-TCPPM *CGame::GetScene() { return static_cast<pragma::CSceneComponent*>(m_scene.get()); }
-template pragma::CSceneComponent* CGame::GetScene<pragma::CSceneComponent>();
+TCPPM *CGame::GetScene()
+{
+	return static_cast<pragma::CSceneComponent *>(m_scene.get());
+}
+template pragma::CSceneComponent *CGame::GetScene<pragma::CSceneComponent>();
 
 template<typename TCPPM>
-const TCPPM *CGame::GetScene() const { return const_cast<CGame *>(this)->GetScene<TCPPM>(); }
-template const pragma::CSceneComponent* CGame::GetScene<pragma::CSceneComponent>() const;
+const TCPPM *CGame::GetScene() const
+{
+	return const_cast<CGame *>(this)->GetScene<TCPPM>();
+}
+template const pragma::CSceneComponent *CGame::GetScene<pragma::CSceneComponent>() const;
 
 static void cl_fov_callback(NetworkState *, const ConVar &, float, float val)
 {
@@ -27,8 +32,12 @@ static void cl_fov_callback(NetworkState *, const ConVar &, float, float val)
 	cam->SetFOV(CFloat(val));
 	cam->UpdateMatrices();
 }
-namespace { auto UVN = pragma::console::client::register_variable_listener<float>("cl_fov",&cl_fov_callback); }
-namespace { auto UVN = pragma::console::client::register_variable_listener<float>("cl_render_fov",&cl_fov_callback); }
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<float>("cl_fov", &cl_fov_callback);
+}
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<float>("cl_render_fov", &cl_fov_callback);
+}
 
 static void cl_fov_viewmodel_callback(NetworkState *, const ConVar &, int, int val)
 {
@@ -37,4 +46,6 @@ static void cl_fov_viewmodel_callback(NetworkState *, const ConVar &, int, int v
 	pragma::get_cgame()->SetViewModelFOV(CFloat(val));
 }
 
-namespace { auto UVN = pragma::console::client::register_variable_listener<int>("cl_fov_viewmodel", &cl_fov_viewmodel_callback); }
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int>("cl_fov_viewmodel", &cl_fov_viewmodel_callback);
+}

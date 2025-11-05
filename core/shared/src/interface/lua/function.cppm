@@ -4,11 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
-
-
-
 export module pragma.shared:scripting.lua.function;
 
 import :scripting.lua.core;
@@ -16,9 +11,9 @@ import :scripting.lua.core;
 export {
 	//namespace luabind{class object;}
 	class DLLNETWORK LuaFunction {
-	protected:
+	  protected:
 		std::shared_ptr<luabind::object> m_luaFunction;
-	public:
+	  public:
 		LuaFunction(const luabind::object &o);
 		LuaFunction(const LuaFunction &other);
 		LuaFunction(std::nullptr_t);
@@ -30,11 +25,11 @@ export {
 		T Call(TARGS... args)
 		{
 			auto &r = m_luaFunction;
-		#ifndef LUABIND_NO_EXCEPTIONS
+#ifndef LUABIND_NO_EXCEPTIONS
 			try {
-		#endif
+#endif
 				return static_cast<T>(luabind::call_function<T>(*r, std::forward<TARGS>(args)...));
-		#ifndef LUABIND_NO_EXCEPTIONS
+#ifndef LUABIND_NO_EXCEPTIONS
 			}
 			catch(const luabind::error &) {
 				Lua::HandleLuaError(r->interpreter());
@@ -42,18 +37,18 @@ export {
 			catch(const luabind::cast_failed &) {
 				return T();
 			}
-		#endif
+#endif
 			return T();
 		}
 		template<class T, typename... TARGS>
 		bool Call(T *ret, TARGS... args)
 		{
 			auto &r = m_luaFunction;
-		#ifndef LUABIND_NO_EXCEPTIONS
+#ifndef LUABIND_NO_EXCEPTIONS
 			try {
-		#endif
+#endif
 				*ret = static_cast<T>(luabind::call_function<T>(*r, std::forward<TARGS>(args)...));
-		#ifndef LUABIND_NO_EXCEPTIONS
+#ifndef LUABIND_NO_EXCEPTIONS
 			}
 			catch(luabind::error &) {
 				Lua::HandleLuaError(r->interpreter());
@@ -62,7 +57,7 @@ export {
 			catch(std::exception &) {
 				return false;
 			}
-		#endif
+#endif
 
 			// TODO: What was this for?
 			/*auto *state = r->interpreter();

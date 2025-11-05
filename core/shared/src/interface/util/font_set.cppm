@@ -18,12 +18,12 @@ export {
 			Serif = Mono << 1u,
 			Sans = Serif << 1u,
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	}
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::FontSetFlag> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::FontSetFlag> : std::true_type {};
+	}
 
 	struct DLLNETWORK FontSetFileData {
 		pragma::FontSetFlag flags = pragma::FontSetFlag::None;

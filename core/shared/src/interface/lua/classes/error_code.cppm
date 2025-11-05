@@ -12,11 +12,11 @@ export import pragma.lua;
 
 export {
 	class DLLNETWORK ErrorCode {
-	protected:
+	  protected:
 		std::string m_message;
 		int32_t m_value;
 		std::unique_ptr<std::error_code> m_error;
-	public:
+	  public:
 		ErrorCode();
 		ErrorCode(const std::string &msg, int32_t value);
 		ErrorCode(const std::error_code &err);

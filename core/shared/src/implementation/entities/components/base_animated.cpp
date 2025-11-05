@@ -2,10 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
-
 module pragma.shared;
 
 import :entities.components.base_animated;
@@ -1535,7 +1531,10 @@ void pragma::CEOnStopLayeredAnimation::PushArguments(lua::State *l)
 
 /////////////////
 
-pragma::CEOnBlendAnimation::CEOnBlendAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo, pragma::Activity activity, std::vector<umath::Transform> &bonePoses, std::vector<Vector3> *boneScales) : slotInfo {slotInfo}, activity {activity}, bonePoses {bonePoses}, boneScales {boneScales} {}
+pragma::CEOnBlendAnimation::CEOnBlendAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo, pragma::Activity activity, std::vector<umath::Transform> &bonePoses, std::vector<Vector3> *boneScales)
+    : slotInfo {slotInfo}, activity {activity}, bonePoses {bonePoses}, boneScales {boneScales}
+{
+}
 void pragma::CEOnBlendAnimation::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, slotInfo.animation);

@@ -3,13 +3,7 @@
 
 module;
 
-
-
-
-
-
 module pragma.client;
-
 
 import :debug.overlay;
 import :client_state;
@@ -17,7 +11,6 @@ import :engine;
 import :game;
 import :rendering.shaders;
 import pragma.string.unicode;
-
 
 namespace DebugRenderer {
 	struct RuntimeObject {

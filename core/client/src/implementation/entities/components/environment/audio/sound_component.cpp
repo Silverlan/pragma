@@ -5,7 +5,6 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
 
 import :entities.components.audio.sound;
@@ -13,7 +12,6 @@ import :audio;
 import :client_state;
 
 using namespace pragma;
-
 
 static void apply_sound_identifier(ALSound &snd, const std::string &name)
 {

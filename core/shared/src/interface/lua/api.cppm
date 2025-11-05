@@ -244,9 +244,8 @@ export namespace Lua {
 	DLLNETWORK extern const luabind::object nil;
 	using object = luabind::object;
 
-	struct Exception : public std::runtime_error
-	{
-	public:
+	struct Exception : public std::runtime_error {
+	  public:
 		Exception(const std::string &err) : std::runtime_error {err} {}
 	};
 

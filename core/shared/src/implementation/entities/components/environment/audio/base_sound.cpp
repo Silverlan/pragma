@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
 module pragma.shared;
 
 import :entities.components.environment.audio.base_sound;
@@ -393,8 +391,9 @@ void BaseEnvSoundComponent::InitializeSound()
 	nw->PrecacheSound(m_kvSoundName, mode);
 
 	auto type = m_soundTypes;
-	const std::unordered_map<SpawnFlags, pragma::audio::ALSoundType> types = {{SpawnFlags::Effect, pragma::audio::ALSoundType::Effect}, {SpawnFlags::Music, pragma::audio::ALSoundType::Music}, {SpawnFlags::Voice, pragma::audio::ALSoundType::Voice}, {SpawnFlags::Weapon, pragma::audio::ALSoundType::Weapon}, {SpawnFlags::NPC, pragma::audio::ALSoundType::NPC},
-	  {SpawnFlags::Player, pragma::audio::ALSoundType::Player}, {SpawnFlags::Vehicle, pragma::audio::ALSoundType::Vehicle}, {SpawnFlags::Physics, pragma::audio::ALSoundType::Physics}, {SpawnFlags::Environment, pragma::audio::ALSoundType::Environment}, {SpawnFlags::GUI, pragma::audio::ALSoundType::GUI}};
+	const std::unordered_map<SpawnFlags, pragma::audio::ALSoundType> types = {{SpawnFlags::Effect, pragma::audio::ALSoundType::Effect}, {SpawnFlags::Music, pragma::audio::ALSoundType::Music}, {SpawnFlags::Voice, pragma::audio::ALSoundType::Voice},
+	  {SpawnFlags::Weapon, pragma::audio::ALSoundType::Weapon}, {SpawnFlags::NPC, pragma::audio::ALSoundType::NPC}, {SpawnFlags::Player, pragma::audio::ALSoundType::Player}, {SpawnFlags::Vehicle, pragma::audio::ALSoundType::Vehicle},
+	  {SpawnFlags::Physics, pragma::audio::ALSoundType::Physics}, {SpawnFlags::Environment, pragma::audio::ALSoundType::Environment}, {SpawnFlags::GUI, pragma::audio::ALSoundType::GUI}};
 	for(auto &pair : types) {
 		if((spawnFlags & pair.first) != SpawnFlags::None)
 			type |= pair.second;

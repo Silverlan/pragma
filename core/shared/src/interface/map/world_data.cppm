@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:map.world_data;
 
 export import :map.entity_data;
@@ -17,7 +16,7 @@ export {
 	namespace pragma::asset {
 		using WorldModelMeshIndex = uint32_t;
 		class DLLNETWORK WorldData {
-		public:
+		  public:
 			static constexpr udm::Version PMAP_VERSION = 2;
 			static constexpr auto PMAP_IDENTIFIER = "PMAP";
 			static constexpr auto PMAP_EXTENSION_BINARY = "pmap_b";
@@ -69,7 +68,7 @@ export {
 			bool Save(udm::AssetDataArg outData, const std::string &mapName, std::string &outErr);
 			bool Save(const std::string &fileName, const std::string &mapName, std::string &outErr);
 			bool LoadFromAssetData(udm::AssetDataArg data, EntityData::Flags entMask, std::string &outErr);
-		private:
+		  private:
 			WorldData(NetworkState &nw);
 			void WriteDataOffset(VFilePtrReal &f, uint64_t offsetToOffset);
 			void WriteMaterials(VFilePtrReal &f);

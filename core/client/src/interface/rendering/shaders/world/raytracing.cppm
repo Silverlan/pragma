@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:rendering.shaders.world_raytracing;
 
 export import :entities.components.raytracing;
@@ -60,11 +59,11 @@ export namespace pragma {
 		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeShaderResources() override;
 	};
-    using namespace umath::scoped_enum::bitwise;
+	using namespace umath::scoped_enum::bitwise;
 };
 export {
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::ShaderRayTracing::RenderFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::ShaderRayTracing::RenderFlags> : std::true_type {};
+	}
 };

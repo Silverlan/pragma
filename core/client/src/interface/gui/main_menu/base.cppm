@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:gui.main_menu_base;
 
 export import :gui.options_list;
@@ -13,7 +12,7 @@ export import :gui.options_list;
 export {
 	class WIMainMenuElement;
 	class DLLCLIENT WIMainMenuBase : public WIBase {
-	public:
+	  public:
 		WIMainMenuBase();
 		virtual void Initialize() override;
 		virtual util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
@@ -29,7 +28,7 @@ export {
 		void OnElementSelected(WIMainMenuElement *el);
 		void UpdateElements();
 		void UpdateElement(int i);
-	protected:
+	  protected:
 		std::vector<WIHandle> m_elements;
 		std::vector<WIHandle> m_optionLists = {};
 		WIHandle m_menuElementsContainer = {};
@@ -42,11 +41,11 @@ export {
 	};
 
 	class DLLCLIENT WIMainMenuElement : public WIBase {
-	protected:
+	  protected:
 		WIHandle m_hBackground;
 		WIHandle m_hText;
 		bool m_bSelected;
-	public:
+	  public:
 		WIMainMenuElement();
 		virtual ~WIMainMenuElement() override;
 		virtual void Initialize() override;

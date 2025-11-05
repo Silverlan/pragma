@@ -5,8 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
-
 export module pragma.client:assets.import_export;
 
 export import :entities.components.camera;

@@ -4,11 +4,9 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 #include <cassert>
 
 module pragma.client;
-
 
 import :game;
 import :client_state;
@@ -16,15 +14,14 @@ import :entities;
 import :entities.components;
 import :game;
 
-
 template<typename TCPPM>
 TCPPM *CGame::GetListener()
 {
 	if(m_listener.expired())
 		return nullptr;
-	return static_cast<pragma::CListenerComponent*>(m_listener.get());
+	return static_cast<pragma::CListenerComponent *>(m_listener.get());
 }
-template pragma::CListenerComponent* CGame::GetListener<pragma::CListenerComponent>();
+template pragma::CListenerComponent *CGame::GetListener<pragma::CListenerComponent>();
 pragma::CPlayerComponent *CGame::GetLocalPlayer()
 {
 	if(m_plLocal.expired())

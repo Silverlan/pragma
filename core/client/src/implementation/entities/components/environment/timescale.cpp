@@ -4,9 +4,7 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.env_timescale;
 using namespace pragma;

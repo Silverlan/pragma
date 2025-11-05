@@ -9,7 +9,6 @@ module;
 
 module pragma.client;
 
-
 import :entities.components.particle_system;
 import :client_state;
 import :entities.components.animated;
@@ -21,7 +20,6 @@ import :game;
 import :particle_system;
 
 using namespace pragma;
-
 
 void ecs::CParticleSystemComponent::Initialize()
 {
@@ -127,7 +125,7 @@ void ecs::CParticleSystemComponent::Clear()
 
 std::shared_ptr<pragma::Model> ecs::CParticleSystemComponent::GenerateModel(pragma::Game &game, const std::vector<const ecs::CParticleSystemComponent *> &particleSystems)
 {
-	auto *cam = static_cast<CGame&>(game).GetRenderCamera<pragma::CCameraComponent>();
+	auto *cam = static_cast<CGame &>(game).GetRenderCamera<pragma::CCameraComponent>();
 	if(cam == nullptr)
 		return nullptr;
 	std::unordered_set<const ecs::CParticleSystemComponent *> particleSystemList {};
@@ -164,7 +162,7 @@ std::shared_ptr<pragma::Model> ecs::CParticleSystemComponent::GenerateModel(prag
 		if(skinTexIdx.has_value() == false)
 			continue;
 		auto orientationType = pts->GetOrientationType();
-		pShader->GetParticleSystemOrientationInfo(cam->GetProjectionMatrix() * cam->GetViewMatrix(), *CXXM_RCAST(const pragma::ecs::CParticleSystemComponent*, pts), CXXM_SCAST(pragma::ecs::ParticleOrientationType, orientationType), camUpWs, camRightWs, ptNearZ, ptFarZ, mat, nearZ, farZ);
+		pShader->GetParticleSystemOrientationInfo(cam->GetProjectionMatrix() * cam->GetViewMatrix(), *CXXM_RCAST(const pragma::ecs::CParticleSystemComponent *, pts), CXXM_SCAST(pragma::ecs::ParticleOrientationType, orientationType), camUpWs, camRightWs, ptNearZ, ptFarZ, mat, nearZ, farZ);
 
 		auto *spriteSheetAnim = pts->GetSpriteSheetAnimation();
 		auto &particles = pts->GetRenderParticleData();
@@ -197,7 +195,7 @@ std::shared_ptr<pragma::Model> ecs::CParticleSystemComponent::GenerateModel(prag
 				uvEnd = frame.uvEnd;
 			}
 			for(auto vertIdx = decltype(numVerts) {0u}; vertIdx < numVerts; ++vertIdx) {
-				auto vertPos = pShader->CalcVertexPosition(*CXXM_RCAST(const pragma::ecs::CParticleSystemComponent*, pts), pts->TranslateBufferIndex(i), vertIdx, posCam, camUpWs, camRightWs, nearZ, farZ);
+				auto vertPos = pShader->CalcVertexPosition(*CXXM_RCAST(const pragma::ecs::CParticleSystemComponent *, pts), pts->TranslateBufferIndex(i), vertIdx, posCam, camUpWs, camRightWs, nearZ, farZ);
 				auto uv = pragma::ShaderParticle2DBase::GetVertexUV(vertIdx);
 				auto &v = verts.at(vertOffset + vertIdx);
 				v.position = vertPos;
@@ -306,7 +304,7 @@ bool ecs::CParticleSystemComponent::LoadFromAssetData(CParticleSystemData &ptDat
 static void register_particle_modifier(lua_State *l, pragma::LuaParticleModifierManager::Type type, const std::string &name, luabind::object oClass)
 {
 	Lua::CheckUserData(l, 2);
-	auto &particleModMan = reinterpret_cast<LuaParticleModifierManager&>(pragma::get_cgame()->GetLuaParticleModifierManager());
+	auto &particleModMan = reinterpret_cast<LuaParticleModifierManager &>(pragma::get_cgame()->GetLuaParticleModifierManager());
 	if(particleModMan.RegisterModifier(type, name, oClass) == false)
 		return;
 
@@ -316,7 +314,7 @@ static void register_particle_modifier(lua_State *l, pragma::LuaParticleModifier
 	switch(type) {
 	case pragma::LuaParticleModifierManager::Type::Initializer:
 		map->AddInitializer(name, [name](pragma::ecs::CParticleSystemComponent &psc, const std::unordered_map<std::string, std::string> &keyValues) -> std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)> {
-			auto &particleModMan = reinterpret_cast<LuaParticleModifierManager&>(pragma::get_cgame()->GetLuaParticleModifierManager());
+			auto &particleModMan = reinterpret_cast<LuaParticleModifierManager &>(pragma::get_cgame()->GetLuaParticleModifierManager());
 			auto *modifier = dynamic_cast<CParticleInitializer *>(particleModMan.CreateModifier(name));
 			if(modifier == nullptr)
 				return std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)>(nullptr, [](CParticleInitializer *p) {});
@@ -327,7 +325,7 @@ static void register_particle_modifier(lua_State *l, pragma::LuaParticleModifier
 		break;
 	case pragma::LuaParticleModifierManager::Type::Operator:
 		map->AddOperator(name, [name](pragma::ecs::CParticleSystemComponent &psc, const std::unordered_map<std::string, std::string> &keyValues) -> std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)> {
-			auto &particleModMan = reinterpret_cast<LuaParticleModifierManager&>(pragma::get_cgame()->GetLuaParticleModifierManager());
+			auto &particleModMan = reinterpret_cast<LuaParticleModifierManager &>(pragma::get_cgame()->GetLuaParticleModifierManager());
 			auto *modifier = dynamic_cast<CParticleOperator *>(particleModMan.CreateModifier(name));
 			if(modifier == nullptr)
 				return std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)>(nullptr, [](CParticleOperator *p) {});
@@ -338,7 +336,7 @@ static void register_particle_modifier(lua_State *l, pragma::LuaParticleModifier
 		break;
 	case pragma::LuaParticleModifierManager::Type::Renderer:
 		map->AddRenderer(name, [name](pragma::ecs::CParticleSystemComponent &psc, const std::unordered_map<std::string, std::string> &keyValues) -> std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)> {
-			auto &particleModMan = reinterpret_cast<LuaParticleModifierManager&>(pragma::get_cgame()->GetLuaParticleModifierManager());
+			auto &particleModMan = reinterpret_cast<LuaParticleModifierManager &>(pragma::get_cgame()->GetLuaParticleModifierManager());
 			auto *modifier = dynamic_cast<CParticleRenderer *>(particleModMan.CreateModifier(name));
 			if(modifier == nullptr)
 				return std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)>(nullptr, [](CParticleRenderer *p) {});
@@ -716,19 +714,14 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 	defCParticleSystem.def("SetFlags", &pragma::ecs::CParticleSystemComponent::SetFlags);
 	defCParticleSystem.def("GetMaxNodes", &pragma::ecs::CParticleSystemComponent::GetMaxNodes);
 	defCParticleSystem.def("SetMaxNodes", &pragma::ecs::CParticleSystemComponent::SetMaxNodes);
-	defCParticleSystem.def("AddInitializer", +[](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, std::string name, luabind::object o) {
-		return hComponent.AddInitializer(name, pragma::ecs::get_particle_key_values(l, o));
-	});
-	defCParticleSystem.def("AddOperator", +[](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, std::string name, luabind::object o) {
-		return hComponent.AddOperator(name, pragma::ecs::get_particle_key_values(l, o));
-	});
-	defCParticleSystem.def("AddRenderer", +[](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, std::string name, luabind::object o) {
-		return hComponent.AddRenderer(name, pragma::ecs::get_particle_key_values(l, o));
-	});
+	defCParticleSystem.def("AddInitializer", +[](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, std::string name, luabind::object o) { return hComponent.AddInitializer(name, pragma::ecs::get_particle_key_values(l, o)); });
+	defCParticleSystem.def("AddOperator", +[](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, std::string name, luabind::object o) { return hComponent.AddOperator(name, pragma::ecs::get_particle_key_values(l, o)); });
+	defCParticleSystem.def("AddRenderer", +[](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, std::string name, luabind::object o) { return hComponent.AddRenderer(name, pragma::ecs::get_particle_key_values(l, o)); });
 	defCParticleSystem.def("RemoveInitializer", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveInitializer(name); }));
 	defCParticleSystem.def("RemoveOperator", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveOperator(name); }));
 	defCParticleSystem.def("RemoveRenderer", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveRenderer(name); }));
-	defCParticleSystem.def("RemoveInitializerByType", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveInitializersByType(name); }));
+	defCParticleSystem.def("RemoveInitializerByType",
+	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveInitializersByType(name); }));
 	defCParticleSystem.def("RemoveOperatorByType", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveOperatorsByType(name); }));
 	defCParticleSystem.def("RemoveRendererByType", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveRenderersByType(name); }));
 	defCParticleSystem.def("GetInitializers", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
@@ -821,10 +814,13 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 			return;
 		Lua::Push(l, pt->GetHandle());
 	}));
-	defCParticleSystem.def("AddChild", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, pragma::ecs::CParticleSystemComponent &hChild) { hComponent.AddChild(hChild); }));
+	defCParticleSystem.def("AddChild",
+	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, pragma::ecs::CParticleSystemComponent &hChild) { hComponent.AddChild(hChild); }));
+	defCParticleSystem.def("SetNodeTarget", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, pragma::ecs::BaseEntity &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t nodeId, pragma::ecs::BaseEntity &ent) {
+		hComponent.SetNodeTarget(nodeId, static_cast<CBaseEntity *>(&ent));
+	}));
 	defCParticleSystem.def("SetNodeTarget",
-	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, pragma::ecs::BaseEntity &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t nodeId, pragma::ecs::BaseEntity &ent) { hComponent.SetNodeTarget(nodeId, static_cast<CBaseEntity *>(&ent)); }));
-	defCParticleSystem.def("SetNodeTarget", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const Vector3 &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t nodeId, const Vector3 &pos) { hComponent.SetNodeTarget(nodeId, pos); }));
+	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const Vector3 &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t nodeId, const Vector3 &pos) { hComponent.SetNodeTarget(nodeId, pos); }));
 	defCParticleSystem.def("GetNodeCount", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, hComponent.GetNodeCount()); }));
 	defCParticleSystem.def("GetNodePosition", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t nodeId) { Lua::Push<Vector3>(l, hComponent.GetNodePosition(nodeId)); }));
 	defCParticleSystem.def("GetNodeTarget", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t nodeId) {
@@ -918,7 +914,8 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 	}));
 	defCParticleSystem.def("GetAlphaMode", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, umath::to_integral(hComponent.GetAlphaMode())); }));
 	defCParticleSystem.def("GetEffectiveAlphaMode", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, umath::to_integral(hComponent.GetEffectiveAlphaMode())); }));
-	defCParticleSystem.def("SetAlphaMode", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t alphaMode) { hComponent.SetAlphaMode(static_cast<pragma::ParticleAlphaMode>(alphaMode)); }));
+	defCParticleSystem.def("SetAlphaMode",
+	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t alphaMode) { hComponent.SetAlphaMode(static_cast<pragma::ParticleAlphaMode>(alphaMode)); }));
 	defCParticleSystem.def("GetEmissionRate", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, hComponent.GetEmissionRate()); }));
 	defCParticleSystem.def("SetEmissionRate", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t emissionRate) { hComponent.SetEmissionRate(emissionRate); }));
 	defCParticleSystem.def("SetNextParticleEmissionCount", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t count) { hComponent.SetNextParticleEmissionCount(count); }));
@@ -951,8 +948,9 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, pragma::ecs::CParticleSystemComponent &hParent) { hComponent.SetParent(&hParent); }));
 	defCParticleSystem.def("RemoveChild",
 	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, pragma::ecs::CParticleSystemComponent &hChild) { hComponent.RemoveChild(&hChild); }));
-	defCParticleSystem.def("HasChild",
-	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, pragma::ecs::CParticleSystemComponent &hChild) { Lua::PushBool(l, hComponent.HasChild(hChild)); }));
+	defCParticleSystem.def("HasChild", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, pragma::ecs::CParticleSystemComponent &hChild) {
+		Lua::PushBool(l, hComponent.HasChild(hChild));
+	}));
 	defCParticleSystem.def("GetParent", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
 		auto *hParent = hComponent.GetParent();
 		if(hParent == nullptr)
@@ -995,8 +993,9 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 	defCParticleSystem.def("SetAutoSimulate", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, bool)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool autoSimulate) { hComponent.SetAutoSimulate(autoSimulate); }));
 	defCParticleSystem.def("InitializeFromParticleSystemDefinition",
 	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { Lua::PushBool(l, hComponent.SetupParticleSystem(name)); }));
-	defCParticleSystem.def("SetControlPointEntity",
-	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, pragma::ecs::BaseEntity &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, pragma::ecs::BaseEntity &ent) { hComponent.SetControlPointEntity(cpIdx, static_cast<CBaseEntity &>(ent)); }));
+	defCParticleSystem.def("SetControlPointEntity", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, pragma::ecs::BaseEntity &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, pragma::ecs::BaseEntity &ent) {
+		hComponent.SetControlPointEntity(cpIdx, static_cast<CBaseEntity &>(ent));
+	}));
 	defCParticleSystem.def("SetControlPointPosition",
 	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const Vector3 &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, const Vector3 &pos) { hComponent.SetControlPointPosition(cpIdx, pos); }));
 	defCParticleSystem.def("SetControlPointRotation",

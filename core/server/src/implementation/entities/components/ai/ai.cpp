@@ -549,7 +549,8 @@ void SAIComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
 	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(std::string, DISPOSITION, int32_t)>(&pragma::SAIComponent::SetRelationship), luabind::default_parameter_policy<4, int32_t {0}> {});
 	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(pragma::ecs::BaseEntity *, DISPOSITION, bool, int32_t)>(&pragma::SAIComponent::SetRelationship));
 	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(pragma::ecs::BaseEntity *, DISPOSITION, bool, int32_t)>(&pragma::SAIComponent::SetRelationship), luabind::default_parameter_policy<5, int32_t {0}> {});
-	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(pragma::ecs::BaseEntity *, DISPOSITION, bool, int32_t)>(&pragma::SAIComponent::SetRelationship), luabind::meta::join_t<luabind::default_parameter_policy<4, true>, luabind::default_parameter_policy<5, int32_t {0}>> {});
+	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(pragma::ecs::BaseEntity *, DISPOSITION, bool, int32_t)>(&pragma::SAIComponent::SetRelationship),
+	  luabind::meta::join_t<luabind::default_parameter_policy<4, true>, luabind::default_parameter_policy<5, int32_t {0}>> {});
 	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(Faction &, DISPOSITION, int32_t)>(&pragma::SAIComponent::SetRelationship));
 	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(Faction &, DISPOSITION, int32_t)>(&pragma::SAIComponent::SetRelationship), luabind::default_parameter_policy<4, int32_t {0}> {});
 	def.def("GetMaxViewDistance", &pragma::SAIComponent::GetMaxViewDistance);

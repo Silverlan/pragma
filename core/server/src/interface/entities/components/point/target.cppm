@@ -5,8 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.point.target;
 
 import :entities;
@@ -14,14 +12,14 @@ import :entities;
 export {
 	namespace pragma {
 		class DLLSERVER SPointTargetComponent final : public BasePointTargetComponent {
-		public:
+		  public:
 			SPointTargetComponent(pragma::ecs::BaseEntity &ent) : BasePointTargetComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};
 
 	class DLLSERVER PointTarget : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

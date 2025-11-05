@@ -3,10 +3,7 @@
 
 module;
 
-
-
 module pragma.client;
-
 
 import :rendering.ssao;
 import :client_state;
@@ -16,7 +13,6 @@ import :entities.components;
 import :game;
 import :gui;
 import :rendering.shaders;
-
 
 bool SSAOInfo::Initialize(prosper::IPrContext &context, uint32_t width, uint32_t height, prosper::SampleCountFlags samples, const std::shared_ptr<prosper::Texture> &texNorm, const std::shared_ptr<prosper::Texture> &texDepth)
 {
@@ -144,4 +140,6 @@ static void cl_render_ssao_callback(NetworkState *, const ConVar &, bool, bool v
 		return;
 	client->UpdateGameWorldShaderSettings();
 }
-namespace { auto _ = pragma::console::client::register_variable_listener<bool>("cl_render_ssao",&cl_render_ssao_callback); }
+namespace {
+	auto _ = pragma::console::client::register_variable_listener<bool>("cl_render_ssao", &cl_render_ssao_callback);
+}

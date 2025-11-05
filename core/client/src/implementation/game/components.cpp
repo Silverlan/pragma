@@ -7,7 +7,6 @@ module;
 
 module pragma.client;
 
-
 import :game;
 import :entities.components;
 

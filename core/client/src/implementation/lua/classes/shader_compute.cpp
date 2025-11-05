@@ -5,9 +5,7 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :scripting.lua.classes.shader;
 void Lua::ComputePipelineCreateInfo::AddSpecializationConstant(lua_State *l, prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t constantId, ::util::DataStream &ds) { Lua::PushBool(l, pipelineInfo.AddSpecializationConstant(constantId, ds->GetSize(), ds->GetData())); }

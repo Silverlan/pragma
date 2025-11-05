@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:entities.components.base_filter;
 
 export import :entities.components.base;

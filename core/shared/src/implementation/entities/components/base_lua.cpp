@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
 #include <any>
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include <cassert>
@@ -1564,11 +1562,12 @@ void Lua::register_base_entity_component(luabind::module_ &modEnts)
 		    hComponent.FlagCallbackForRemoval(hCb, callbackType, &hComponentOther);
 	    }));
 	classDef.def("FlagCallbackForRemoval",
-	  static_cast<void (*)(lua::State *, ::pragma::BaseLuaBaseEntityComponent &, CallbackHandle &, ::pragma::BaseEntityComponent::CallbackType)>([](lua::State *l, ::pragma::BaseLuaBaseEntityComponent &hComponent, CallbackHandle &hCb, ::pragma::BaseEntityComponent::CallbackType callbackType) {
-		  if(hCb.IsValid() == false)
-			  return;
-		  hComponent.FlagCallbackForRemoval(hCb, callbackType);
-	  }));
+	  static_cast<void (*)(lua::State *, ::pragma::BaseLuaBaseEntityComponent &, CallbackHandle &, ::pragma::BaseEntityComponent::CallbackType)>(
+	    [](lua::State *l, ::pragma::BaseLuaBaseEntityComponent &hComponent, CallbackHandle &hCb, ::pragma::BaseEntityComponent::CallbackType callbackType) {
+		    if(hCb.IsValid() == false)
+			    return;
+		    hComponent.FlagCallbackForRemoval(hCb, callbackType);
+	    }));
 	classDef.def("BindComponentInitEvent", static_cast<CallbackHandle (*)(lua::State *, ::pragma::BaseLuaBaseEntityComponent &, uint32_t, luabind::object)>([](lua::State *l, ::pragma::BaseLuaBaseEntityComponent &hComponent, uint32_t componentId, luabind::object methodNameOrFunction) {
 		return hComponent.BindInitComponentEvent(l, componentId, methodNameOrFunction);
 	}));

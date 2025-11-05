@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.server;
 import :entities.components.ai;
 
@@ -132,5 +131,5 @@ void SAIComponent::MaintainAnimationMovement(const Vector3 &disp)
 	float dot = glm::dot(dirAnimMove, dirMove);
 	dot = (dot + 1.f) / 2.f;
 	Vector3 mv = disp * dot; // TODO
-	//SetVelocity(mv);
+	                         //SetVelocity(mv);
 }

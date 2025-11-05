@@ -12,12 +12,12 @@ export {
 	// Deprecated, replaced by umath::Transform
 	// TODO: Remove all instances of this, then remove this file!
 	class DLLNETWORK Transform {
-	protected:
+	  protected:
 		Vector3 m_pos = {};
 		Vector3 m_scale = {1.f, 1.f, 1.f};
 		Quat m_orientation = uquat::identity();
 		Mat4 m_transform = umat::identity();
-	public:
+	  public:
 		Transform();
 		Transform(const Vector3 &position);
 		Transform(const Quat &orientation);

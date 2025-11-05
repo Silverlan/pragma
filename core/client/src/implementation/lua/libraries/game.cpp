@@ -3,13 +3,9 @@
 
 module;
 
-
 #include "pragma/clientdefinitions.h"
 
-
 #include "pragma/lua/core.hpp"
-
-
 
 // #define ENABLE_DEPRECATED_PHYSICS
 
@@ -23,9 +19,7 @@ module;
 #include <Bullet3Common/b3AlignedObjectArray.h>
 #endif
 
-
 module pragma.client;
-
 
 import :scripting.lua.libraries.game;
 import :client_state;
@@ -35,7 +29,6 @@ import :engine;
 import :entities.components;
 import :game;
 import :scripting.lua;
-
 
 #ifdef ENABLE_DEPRECATED_PHYSICS
 static btSoftBody *createSoftBody(btSoftRigidDynamicsWorld *world, btSoftBodyWorldInfo *info, const btScalar s, const int numX, const int numY, const int fixed)
@@ -88,7 +81,8 @@ static void get_local_bone_position(const std::function<Transform(uint32_t)> &fG
 	if(parent != nullptr)
 		apply(parent, pos, rot, scale);
 }
-static void get_local_bone_position(const std::shared_ptr<pragma::Model> &mdl, const std::function<Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr, Vector3 *scale = nullptr)
+static void get_local_bone_position(const std::shared_ptr<pragma::Model> &mdl, const std::function<Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr,
+  Vector3 *scale = nullptr)
 {
 	get_local_bone_position(fGetTransform, bone, fscale, pos, rot, scale);
 	if(rot == nullptr)

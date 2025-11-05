@@ -2,10 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
-
 module pragma.shared;
 
 import :math.random;

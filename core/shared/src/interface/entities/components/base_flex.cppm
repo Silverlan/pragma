@@ -4,11 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
-
-
-
 export module pragma.shared:entities.components.base_flex;
 
 export import :entities.components.base;
@@ -16,15 +11,15 @@ export import :model.animation.enums;
 
 export {
 	namespace pragma {
-				namespace baseFlexComponent {
+		namespace baseFlexComponent {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_FLEX_CONTROLLER_CHANGED;
 		}
-class Model;
-				namespace baseFlexComponent {
+		class Model;
+		namespace baseFlexComponent {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_FLEX_CONTROLLER_CHANGED;
 		}
-class DLLNETWORK BaseFlexComponent : public BaseEntityComponent, public DynamicMemberRegister {
-		public:
+		class DLLNETWORK BaseFlexComponent : public BaseEntityComponent, public DynamicMemberRegister {
+		  public:
 			enum class StateFlags : uint8_t {
 				None = 0u,
 				EnableFlexControllerLimits = 1u,
@@ -57,7 +52,7 @@ class DLLNETWORK BaseFlexComponent : public BaseEntityComponent, public DynamicM
 			bool AreFlexControllerLimitsEnabled() const;
 
 			virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
-		protected:
+		  protected:
 			void OnModelChanged(const std::shared_ptr<pragma::Model> &model);
 			virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
 			BaseFlexComponent(pragma::ecs::BaseEntity &ent);
@@ -70,10 +65,10 @@ class DLLNETWORK BaseFlexComponent : public BaseEntityComponent, public DynamicM
 			pragma::animation::FlexControllerId flexControllerId;
 			float value;
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::BaseFlexComponent::StateFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::BaseFlexComponent::StateFlags> : std::true_type {};
+	}
 };

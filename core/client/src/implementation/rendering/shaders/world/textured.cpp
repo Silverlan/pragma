@@ -3,19 +3,16 @@
 
 module;
 
-
 #include "pragma/logging.hpp"
 #include <cstddef>
 
 module pragma.client;
-
 
 import :rendering.shaders.textured;
 
 import :client_state;
 import :engine;
 import :model;
-
 
 using namespace pragma;
 

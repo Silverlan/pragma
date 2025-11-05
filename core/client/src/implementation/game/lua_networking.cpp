@@ -6,7 +6,6 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
 
 import :game;
@@ -66,4 +65,3 @@ void Lua::net::client::receive(lua_State *l, const std::string &name, const Lua:
 	Lua::Pop(l, 1);
 	game->RegisterLuaNetMessage(name, fc);
 }
-

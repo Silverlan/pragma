@@ -4,16 +4,15 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:entities.components.constraints.manager;
 
 export import :entities.components.constraints.base;
 
 export namespace pragma {
-		namespace constraintManagerComponent {
+	namespace constraintManagerComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_APPLY_CONSTRAINT;
 	}
-class DLLNETWORK ConstraintManagerComponent final : public BaseEntityComponent {
+	class DLLNETWORK ConstraintManagerComponent final : public BaseEntityComponent {
 	  public:
 		struct DLLNETWORK ConstraintInfo {
 			ConstraintComponent *constraint = nullptr;

@@ -4,13 +4,12 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:model.flexes;
 
 import :model.animation.vertex_animation;
 
 export {
-	#pragma pack(push, 1)
+#pragma pack(push, 1)
 	struct DLLNETWORK FlexController {
 		std::string name = {};
 		float min = 0.f;
@@ -19,10 +18,10 @@ export {
 		bool operator==(const FlexController &other) const { return name == other.name && umath::abs(min - other.min) < 0.001f && umath::abs(max - other.max) < 0.001f; }
 		bool operator!=(const FlexController &other) const { return !operator==(other); }
 	};
-	#pragma pack(pop)
+#pragma pack(pop)
 
 	class DLLNETWORK Flex {
-	public:
+	  public:
 		Flex(const std::string &name = "");
 		Flex(const Flex &other) = default;
 		struct DLLNETWORK Operation {
@@ -93,7 +92,7 @@ export {
 
 		bool operator==(const Flex &other) const { return m_operations == other.m_operations && m_name == other.m_name && m_frameIndex == other.m_frameIndex; }
 		bool operator!=(const Flex &other) const { return !operator==(other); }
-	private:
+	  private:
 		std::vector<Operation> m_operations;
 		std::string m_name;
 		mutable std::weak_ptr<VertexAnimation> m_vertexAnim = {};

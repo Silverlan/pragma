@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.environment.lights.base_spot;
 
 export import :entities.components.base;

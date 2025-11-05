@@ -4,13 +4,12 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:model.animation.enums;
 
 import pragma.math;
 
 export {
-    constexpr uint32_t PRAGMA_ANIMATION_VERSION = 2;
+	constexpr uint32_t PRAGMA_ANIMATION_VERSION = 2;
 	namespace pragma {
 		enum class Activity : uint16_t {
 			Invalid,
@@ -85,12 +84,12 @@ export {
 
 			Count
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	}
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::Activity> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::Activity> : std::true_type {};
+	}
 
 	extern DLLNETWORK std::unordered_map<int32_t, std::string> ACTIVITY_NAMES;
 
@@ -121,15 +120,15 @@ export {
 
 			Count = 7
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::FPlayAnim> : std::true_type {};
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::FPlayAnim> : std::true_type {};
 
-        template<>
-        struct enable_bitwise_operators<pragma::FAnim> : std::true_type {};
-    }
+		template<>
+		struct enable_bitwise_operators<pragma::FAnim> : std::true_type {};
+	}
 
 	namespace pragma::animation {
 		using BoneId = uint16_t;

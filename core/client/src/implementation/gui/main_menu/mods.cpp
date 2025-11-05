@@ -3,7 +3,6 @@
 
 module;
 
-
 #ifdef PRAGMA_CHROMIUM_ENABLED
 #include <../../../modules/pr_chromium/include/util_javascript.hpp>
 #endif
@@ -18,7 +17,6 @@ import :gui.progress_bar;
 import :client_state;
 import :core;
 import :engine;
-
 
 /////////////////////////
 

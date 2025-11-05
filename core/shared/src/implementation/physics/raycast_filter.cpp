@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
 module pragma.shared;
 
 import :physics.raycast_filter;
@@ -47,14 +45,18 @@ bool pragma::physics::PhysObjRayCastFilterCallback::HasPostFilter() const { retu
 //////////////////
 
 pragma::physics::CollisionObjRayCastFilterCallback::CollisionObjRayCastFilterCallback(ICollisionObject &colObj) : m_hColObj {util::weak_shared_handle_cast<IBase, ICollisionObject>(colObj.GetHandle())} {}
-pragma::physics::RayCastHitType pragma::physics::CollisionObjRayCastFilterCallback::PreFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const { return (&rigidBody == m_hColObj.Get()) ? pragma::physics::RayCastHitType::Block : pragma::physics::RayCastHitType::None; }
+pragma::physics::RayCastHitType pragma::physics::CollisionObjRayCastFilterCallback::PreFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const
+{
+	return (&rigidBody == m_hColObj.Get()) ? pragma::physics::RayCastHitType::Block : pragma::physics::RayCastHitType::None;
+}
 pragma::physics::RayCastHitType pragma::physics::CollisionObjRayCastFilterCallback::PostFilter(pragma::physics::IShape &shape, pragma::physics::IRigidBody &rigidBody) const { return pragma::physics::RayCastHitType::None; }
 bool pragma::physics::CollisionObjRayCastFilterCallback::HasPreFilter() const { return true; }
 bool pragma::physics::CollisionObjRayCastFilterCallback::HasPostFilter() const { return false; }
 
 //////////////////
 
-pragma::physics::CustomRayCastFilterCallback::CustomRayCastFilterCallback(const std::function<pragma::physics::RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> &preFilter, const std::function<pragma::physics::RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> &postFilter)
+pragma::physics::CustomRayCastFilterCallback::CustomRayCastFilterCallback(const std::function<pragma::physics::RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> &preFilter,
+  const std::function<pragma::physics::RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> &postFilter)
     : m_preFilter {preFilter}, m_postFilter {postFilter}
 {
 }

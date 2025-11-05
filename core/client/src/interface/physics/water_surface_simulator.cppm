@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:physics.water_surface_simulator;
 
 export import :model.mesh;

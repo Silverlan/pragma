@@ -3,10 +3,8 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
-
 
 module pragma.client;
 
@@ -467,18 +465,20 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.def("GetSize", static_cast<std::pair<uint32_t, uint32_t> (*)(const pragma::CSceneComponent &)>([](const pragma::CSceneComponent &scene) -> std::pair<uint32_t, uint32_t> { return {scene.GetWidth(), scene.GetHeight()}; }));
 	defCScene.def("Resize", &pragma::CSceneComponent::Resize);
 	// defCScene.def("BeginDraw",&pragma::CSceneComponent::BeginDraw);
-	defCScene.def("UpdateBuffers", +[](lua_State *l, pragma::CSceneComponent &scene, prosper::ICommandBuffer &hCommandBuffer) {
-		if(hCommandBuffer.IsPrimary() == false)
-			return;
-		auto pCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
-		scene.UpdateBuffers(pCmdBuffer);
-	});
-	defCScene.def("GetWorldEnvironment", +[](lua_State *l, pragma::CSceneComponent &scene) -> std::shared_ptr<WorldEnvironment> {
-		auto *worldEnv = scene.GetWorldEnvironment();
-		if(worldEnv == nullptr)
-			return nullptr;
-		return worldEnv->shared_from_this();
-	});
+	defCScene.def(
+	  "UpdateBuffers", +[](lua_State *l, pragma::CSceneComponent &scene, prosper::ICommandBuffer &hCommandBuffer) {
+		  if(hCommandBuffer.IsPrimary() == false)
+			  return;
+		  auto pCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
+		  scene.UpdateBuffers(pCmdBuffer);
+	  });
+	defCScene.def(
+	  "GetWorldEnvironment", +[](lua_State *l, pragma::CSceneComponent &scene) -> std::shared_ptr<WorldEnvironment> {
+		  auto *worldEnv = scene.GetWorldEnvironment();
+		  if(worldEnv == nullptr)
+			  return nullptr;
+		  return worldEnv->shared_from_this();
+	  });
 	defCScene.def("SetWorldEnvironment", &pragma::CSceneComponent::SetWorldEnvironment);
 	defCScene.def("ClearWorldEnvironment", &pragma::CSceneComponent::ClearWorldEnvironment);
 	defCScene.def("InitializeRenderTarget", &pragma::CSceneComponent::ReloadRenderTarget);

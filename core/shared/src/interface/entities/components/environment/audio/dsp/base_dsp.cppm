@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.environment.audio.dsp.base_dsp;
 
 export import :entities.components.base;
@@ -13,7 +11,7 @@ export import :entities.components.base;
 export {
 	namespace pragma {
 		class DLLNETWORK BaseEnvSoundDspComponent : public BaseEntityComponent {
-		public:
+		  public:
 			enum class DLLNETWORK SpawnFlags : uint32_t {
 				None = 0,
 				AffectRelative = 4,
@@ -39,7 +37,7 @@ export {
 			bool Input(const std::string &input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, std::string data);
 			float GetGain() const;
 			virtual void SetGain(float gain);
-		protected:
+		  protected:
 			virtual bool OnSetKeyValue(const std::string &key, const std::string &val);
 
 			pragma::NetEventId m_netEvSetGain = pragma::INVALID_NET_EVENT;

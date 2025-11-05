@@ -5,14 +5,11 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
-
 export module pragma.client:gui.table;
 
 export import :gui.container;
 
-export
-{
+export {
 	class WITableRow;
 	class DLLCLIENT WITableCell : public WIContainer {
 	  private:

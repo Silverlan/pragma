@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.sound_emitter;
 
 export import :entities.components.entity;
@@ -14,7 +12,7 @@ export import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CSoundEmitterComponent final : public BaseSoundEmitterComponent, public CBaseNetComponent {
 	  public:
-	    static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
 
 		CSoundEmitterComponent(pragma::ecs::BaseEntity &ent) : BaseSoundEmitterComponent(ent) {}
 		// Sounds

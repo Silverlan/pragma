@@ -4,19 +4,15 @@
 module;
 #include "pragma/serverdefinitions.h"
 
-
-
-
-
 export module pragma.server:audio.sound_script;
 
 import :audio.sound;
 
 export {
 	class DLLSERVER SALSoundScript : public ALSoundScript, virtual public SALSound {
-	protected:
+	  protected:
 		virtual std::shared_ptr<ALSound> CreateSound(const std::string &name, ALChannel channel, pragma::audio::ALCreateFlags createFlags) override;
-	public:
+	  public:
 		SALSoundScript(NetworkState *nw, unsigned int idx, SoundScript *script, NetworkState *state, const std::string &soundName, pragma::audio::ALCreateFlags createFlags);
 		virtual ALState GetState() const override;
 		virtual unsigned int GetIndex() const override;

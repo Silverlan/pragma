@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.bone_merge;
 
 export import :entities.components.base;
@@ -15,10 +13,10 @@ export import :types;
 
 export {
 	namespace pragma {
-				namespace boneMergeComponent {
+		namespace boneMergeComponent {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TARGET_CHANGED;
 		}
-class DLLNETWORK BoneMergeComponent final : public BaseEntityComponent {
+		class DLLNETWORK BoneMergeComponent final : public BaseEntityComponent {
 		  public:
 			static bool can_merge(const pragma::Model &mdl, const pragma::Model &mdlParent, bool includeRootBones = false);
 

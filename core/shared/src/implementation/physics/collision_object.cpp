@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 #include "noiseutils.h"
-
-
 
 module pragma.shared;
 

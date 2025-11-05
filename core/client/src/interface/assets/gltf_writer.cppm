@@ -5,8 +5,6 @@ module;
 
 #include <tiny_gltf.h>
 
-
-
 export module pragma.client:assets.gltf_writer;
 
 import :assets.import_export;

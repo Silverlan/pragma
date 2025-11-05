@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :console.commands;
@@ -42,7 +41,9 @@ static void debug_steam_audio_probe_boxes(NetworkState *state, ConVar *, bool, b
 	}
 	dbgSoundProbeBoxes->CallOnRemove([dbgSpheres]() mutable { dbgSpheres = {}; });
 }
-namespace { auto _ = pragma::console::client::register_variable_listener<bool>("debug_steam_audio_probe_boxes", &debug_steam_audio_probe_boxes); }
+namespace {
+	auto _ = pragma::console::client::register_variable_listener<bool>("debug_steam_audio_probe_boxes", &debug_steam_audio_probe_boxes);
+}
 
 static void debug_steam_audio_dump_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {

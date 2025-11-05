@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.point.constraints.ball_socket;
 
 import :entities;
@@ -15,7 +14,7 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SPointConstraintBallSocketComponent final : public BasePointConstraintBallSocketComponent, public SBaseNetComponent {
-		public:
+		  public:
 			using BasePointConstraintBallSocketComponent::BasePointConstraintBallSocketComponent;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
@@ -24,7 +23,7 @@ export {
 	};
 
 	class DLLSERVER PointConstraintBallSocket : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

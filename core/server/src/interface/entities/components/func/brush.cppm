@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.func.brush;
 
 import :entities;
@@ -16,7 +15,7 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SBrushComponent final : public BaseFuncBrushComponent, public SBaseNetComponent {
-		public:
+		  public:
 			SBrushComponent(pragma::ecs::BaseEntity &ent) : BaseFuncBrushComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void OnEntitySpawn() override;
@@ -27,7 +26,7 @@ export {
 	};
 
 	class DLLSERVER FuncBrush : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

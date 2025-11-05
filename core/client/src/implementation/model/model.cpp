@@ -3,15 +3,12 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :model;
 import :model;
 
 import :client_state;
-
 
 CModel::CModel(NetworkState *nw, unsigned int numBones, const std::string &name) : pragma::Model(nw, numBones, name) {}
 

@@ -3,16 +3,13 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.ssao_blur;
 
 import :engine;
 
 using namespace pragma;
-
 
 ShaderSSAOBlur::ShaderSSAOBlur(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "programs/post_processing/ssao_blur") { SetBaseShader<prosper::ShaderCopyImage>(); }
 

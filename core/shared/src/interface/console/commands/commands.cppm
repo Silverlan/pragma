@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:console.commands;
 
 export import :entities.components.base_player;

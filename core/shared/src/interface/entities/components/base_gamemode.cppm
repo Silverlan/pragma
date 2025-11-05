@@ -6,8 +6,6 @@ module;
 
 #undef GetClassName
 
-
-
 export module pragma.shared:entities.components.base_gamemode;
 
 export import :entities.components.base;
@@ -16,7 +14,7 @@ export import :game.game_mode_manager;
 export import :networking.enums;
 
 export namespace pragma {
-		namespace baseGamemodeComponent {
+	namespace baseGamemodeComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAYER_DEATH;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAYER_SPAWNED;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAYER_DROPPED;
@@ -26,8 +24,8 @@ export namespace pragma {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_MAP_INITIALIZED;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_GAME_READY;
 	}
-class BasePlayerComponent;
-		namespace baseGamemodeComponent {
+	class BasePlayerComponent;
+	namespace baseGamemodeComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAYER_DEATH;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAYER_SPAWNED;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAYER_DROPPED;
@@ -37,9 +35,8 @@ class BasePlayerComponent;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_MAP_INITIALIZED;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_GAME_READY;
 	}
-class DLLNETWORK BaseGamemodeComponent : public BaseEntityComponent {
+	class DLLNETWORK BaseGamemodeComponent : public BaseEntityComponent {
 	  public:
-
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;

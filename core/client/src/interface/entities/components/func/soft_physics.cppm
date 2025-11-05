@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.func_soft_physics;
 
 export import :entities.base_entity;
@@ -14,7 +12,7 @@ export import :entities.base_entity;
 export {
 	namespace pragma {
 		class DLLCLIENT CFuncSoftPhysicsComponent final : public BaseFuncSoftPhysicsComponent {
-		public:
+		  public:
 			CFuncSoftPhysicsComponent(pragma::ecs::BaseEntity &ent) : BaseFuncSoftPhysicsComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua_State *l) override;
@@ -22,7 +20,7 @@ export {
 	};
 
 	class DLLCLIENT CFuncSoftPhysics : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 }

@@ -3,9 +3,7 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.world_wireframe;
 

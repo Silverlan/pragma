@@ -4,9 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
-
 export module pragma.shared:entities.components.base_character;
 
 export import :entities.components.base_actor;
@@ -44,7 +41,7 @@ export namespace pragma {
 		virtual void PushArguments(lua::State *l) override;
 		const Quat &rotation;
 	};
-		namespace baseCharacterComponent {
+	namespace baseCharacterComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_FOOT_STEP;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_CHARACTER_ORIENTATION_CHANGED;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DEPLOY_WEAPON;
@@ -54,9 +51,8 @@ export namespace pragma {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_HANDLE_VIEW_ROTATION;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_JUMP;
 	}
-class DLLNETWORK BaseCharacterComponent : public BaseActorComponent {
+	class DLLNETWORK BaseCharacterComponent : public BaseActorComponent {
 	  public:
-
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		//

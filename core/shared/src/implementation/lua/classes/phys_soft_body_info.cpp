@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
 module pragma.shared;
 
 import :scripting.lua.classes.phys_soft_body_info;

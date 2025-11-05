@@ -11,7 +11,7 @@ export import std;
 export {
 	namespace util {
 		class DLLNETWORK PIDController {
-		public:
+		  public:
 			PIDController() = default;
 			PIDController(float p, float i, float d, float min = std::numeric_limits<float>::lowest(), float max = std::numeric_limits<float>::max());
 			void SetProportionalTerm(float term);
@@ -32,7 +32,7 @@ export {
 
 			float Calculate(float processFeedback, float setPoint, float dt);
 			void Reset();
-		protected:
+		  protected:
 			float m_proportional = 0.f;
 			float m_integral = 0.f;
 			float m_derivative = 0.f;

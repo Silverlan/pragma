@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.base_surface;
 
 export import :entities.components.base;
@@ -20,7 +18,7 @@ export {
 			STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_ON_SURFACE_MESH_CHANGED;
 		}
 		class DLLNETWORK BaseSurfaceComponent : public BaseEntityComponent {
-		public:
+		  public:
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 			virtual void Initialize() override;
@@ -57,7 +55,7 @@ export {
 			Quat GetPlaneRotation() const;
 
 			virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
-		protected:
+		  protected:
 			virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 			BaseSurfaceComponent(pragma::ecs::BaseEntity &ent);
 			umath::Plane m_plane = {{0.f, 1.f, 0.f}, 0.f};

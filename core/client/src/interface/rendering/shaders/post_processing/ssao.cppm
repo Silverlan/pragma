@@ -9,7 +9,9 @@ export module pragma.client:rendering.shaders.ssao;
 
 export import pragma.prosper;
 
-export namespace pragma {class CSceneComponent;};
+export namespace pragma {
+	class CSceneComponent;
+};
 export namespace pragma {
 	class DLLCLIENT ShaderSSAO : public prosper::ShaderBaseImageProcessing {
 	  public:

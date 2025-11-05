@@ -3,9 +3,7 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.world_water;
 
@@ -13,7 +11,6 @@ import :engine;
 import :entities.components;
 
 using namespace pragma;
-
 
 decltype(ShaderWater::DESCRIPTOR_SET_MATERIAL) ShaderWater::DESCRIPTOR_SET_MATERIAL = {
   "MATERIAL",

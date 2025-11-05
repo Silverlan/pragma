@@ -2,11 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
-
-
 module pragma.shared;
 
 import :assets.conversion;
@@ -84,8 +79,8 @@ bool util::port_sound_script(NetworkState *nw, const std::string &path)
 				}
 			}
 			else if(val.identifier == "channel") {
-				const std::unordered_map<std::string, pragma::audio::ALSoundType> channelToType
-				  = {{"CHAN_AUTO", pragma::audio::ALSoundType::Generic}, {"CHAN_WEAPON", pragma::audio::ALSoundType::Weapon}, {"CHAN_VOICE", pragma::audio::ALSoundType::Voice}, {"CHAN_VOICE2", pragma::audio::ALSoundType::Voice}, {"CHAN_ITEM", pragma::audio::ALSoundType::Physics}, {"CHAN_BODY", pragma::audio::ALSoundType::Effect}, {"CHAN_VOICE_BASE", pragma::audio::ALSoundType::Voice}};
+				const std::unordered_map<std::string, pragma::audio::ALSoundType> channelToType = {{"CHAN_AUTO", pragma::audio::ALSoundType::Generic}, {"CHAN_WEAPON", pragma::audio::ALSoundType::Weapon}, {"CHAN_VOICE", pragma::audio::ALSoundType::Voice},
+				  {"CHAN_VOICE2", pragma::audio::ALSoundType::Voice}, {"CHAN_ITEM", pragma::audio::ALSoundType::Physics}, {"CHAN_BODY", pragma::audio::ALSoundType::Effect}, {"CHAN_VOICE_BASE", pragma::audio::ALSoundType::Voice}};
 				auto it = channelToType.find(val.value);
 				if(it != channelToType.end())
 					udmEvent["type"] = udm::enum_to_string(it->second);

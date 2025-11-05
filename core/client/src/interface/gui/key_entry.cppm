@@ -5,21 +5,20 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:gui.key_entry;
 
 export import pragma.gui;
 
 export {
 	class DLLCLIENT WIKeyEntry : public WITextEntryBase {
-	protected:
+	  protected:
 		std::string m_previousKey;
 		pragma::platform::Key m_key;
 		bool m_bKeyPressed;
 		WIHandle m_hMouseTrap;
 		virtual void OnTextChanged(const pragma::string::Utf8String &text, bool changedByUser) override;
 		void ApplyKey(pragma::platform::Key key);
-	public:
+	  public:
 		WIKeyEntry();
 		virtual ~WIKeyEntry() override;
 		virtual void Initialize() override;

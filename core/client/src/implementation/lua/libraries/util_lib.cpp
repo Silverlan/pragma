@@ -5,10 +5,7 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
-
 
 import :scripting.lua.libraries.util;
 import :assets;
@@ -18,7 +15,6 @@ import :entities.components.particle_system;
 import :entities.components.render;
 import :game;
 import :util;
-
 
 int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l, pragma::CCameraComponent &hCam, const ::Vector2 &uv)
 {
@@ -292,8 +288,8 @@ int Lua::util::Client::export_material(lua_State *l)
 std::string Lua::util::Client::get_clipboard_string() { return pragma::get_cengine()->GetWindow()->GetClipboardString(); }
 void Lua::util::Client::set_clipboard_string(const std::string &str) { pragma::get_cengine()->GetWindow()->SetClipboardString(str); }
 
-::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> Lua::util::Client::bake_directional_lightmap_atlas(const std::vector<pragma::CLightComponent *> &lights, const std::vector<pragma::ModelSubMesh *> &meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width, uint32_t height,
-  ::pragma::LightmapDataCache *optLightmapDataCache)
+::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> Lua::util::Client::bake_directional_lightmap_atlas(const std::vector<pragma::CLightComponent *> &lights, const std::vector<pragma::ModelSubMesh *> &meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
+  uint32_t height, ::pragma::LightmapDataCache *optLightmapDataCache)
 {
 	return ::util::baking::bake_directional_lightmap_atlas(lights, meshes, entities, width, height, optLightmapDataCache);
 }

@@ -16,7 +16,6 @@ static constexpr uint64_t GLOBAL_MESH_VERTEX_WEIGHT_BUFFER_SIZE = MEGABYTE * 32;
 static constexpr uint64_t GLOBAL_MESH_ALPHA_BUFFER_SIZE = MEGABYTE * 16;         // 131'072 instances per MiB
 static constexpr uint64_t GLOBAL_MESH_INDEX_BUFFER_SIZE = MEGABYTE * 32;         // 524'288 instances per MiB
 
-
 CModelMesh::CModelMesh() : ModelMesh() {}
 std::shared_ptr<ModelMesh> CModelMesh::Copy() const { return std::make_shared<CModelMesh>(*this); }
 

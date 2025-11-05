@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:scripting.lua.libraries.game;
 
 export import :game;

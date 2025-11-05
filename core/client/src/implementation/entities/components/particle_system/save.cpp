@@ -3,9 +3,7 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :entities.components.particle_system;
 using namespace pragma;

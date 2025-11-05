@@ -3,14 +3,12 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
 
 module pragma.client;
 
 import :scripting.lua.classes.vulkan;
 import :engine;
-
 
 bool Lua::Vulkan::VKFramebuffer::IsValid(lua_State *l, Framebuffer &hFramebuffer) { return true; }
 #if 0

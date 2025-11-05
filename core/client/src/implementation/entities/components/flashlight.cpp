@@ -5,9 +5,7 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.flashlight;
 import :client_state;
@@ -17,7 +15,6 @@ import :entities.components.radius;
 import :entities.components.sound_emitter;
 
 using namespace pragma;
-
 
 void CFlashlightComponent::Initialize()
 {

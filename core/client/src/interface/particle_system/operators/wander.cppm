@@ -40,7 +40,7 @@ void CParticleOperatorWander::Initialize(pragma::BaseEnvParticleSystemComponent 
 			m_fFrequency = util::to_float(it->second);
 	}
 
-	m_hashCodes.resize(static_cast<pragma::ecs::CParticleSystemComponent&>(pSystem).GetMaxParticleCount());
+	m_hashCodes.resize(static_cast<pragma::ecs::CParticleSystemComponent &>(pSystem).GetMaxParticleCount());
 }
 void CParticleOperatorWander::OnParticleCreated(CParticle &particle) { m_hashCodes.at(particle.GetIndex()) = umath::random(1, std::numeric_limits<int32_t>::max()); }
 void CParticleOperatorWander::Simulate(double tDelta)

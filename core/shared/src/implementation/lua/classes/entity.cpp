@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 #include "definitions.hpp"
 
 module pragma.shared;
@@ -196,7 +195,8 @@ void Lua::Entity::register_class(luabind::class_<::pragma::ecs::BaseEntity> &cla
 	classDef.def("GetCenter", &::pragma::ecs::BaseEntity::GetCenter);
 
 	classDef.def("AddComponent", static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent> (::pragma::ecs::BaseEntity::*)(const std::string &, bool)>(&::pragma::ecs::BaseEntity::AddComponent));
-	classDef.def("AddComponent", static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent> (*)(::pragma::ecs::BaseEntity &, const std::string &)>([](::pragma::ecs::BaseEntity &ent, const std::string &name) -> pragma::ComponentHandle<pragma::BaseEntityComponent> { return ent.AddComponent(name); }));
+	classDef.def("AddComponent",
+	  static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent> (*)(::pragma::ecs::BaseEntity &, const std::string &)>([](::pragma::ecs::BaseEntity &ent, const std::string &name) -> pragma::ComponentHandle<pragma::BaseEntityComponent> { return ent.AddComponent(name); }));
 	classDef.def("AddComponent", static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent> (::pragma::ecs::BaseEntity::*)(pragma::ComponentId, bool)>(&::pragma::ecs::BaseEntity::AddComponent));
 	classDef.def("AddComponent", static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent> (*)(::pragma::ecs::BaseEntity &, pragma::ComponentId)>([](::pragma::ecs::BaseEntity &ent, pragma::ComponentId componentId) { return ent.AddComponent(componentId); }));
 	classDef.def("RemoveComponent", +[](Lua::nil_type) {}); // Don't do anything if component type is nil
@@ -312,8 +312,11 @@ void Lua::Entity::register_class(luabind::class_<::pragma::ecs::BaseEntity> &cla
 	// Quick-access methods
 	classDef.def("CreateSound", &::pragma::ecs::BaseEntity::CreateSound);
 	classDef.def("EmitSound", &::pragma::ecs::BaseEntity::EmitSound);
-	classDef.def("EmitSound", static_cast<std::shared_ptr<::ALSound> (*)(::pragma::ecs::BaseEntity &, const std::string &, pragma::audio::ALSoundType, float)>([](::pragma::ecs::BaseEntity &ent, const std::string &sndname, pragma::audio::ALSoundType soundType, float gain) { return ent.EmitSound(sndname, soundType, gain); }));
-	classDef.def("EmitSound", static_cast<std::shared_ptr<::ALSound> (*)(::pragma::ecs::BaseEntity &, const std::string &, pragma::audio::ALSoundType)>([](::pragma::ecs::BaseEntity &ent, const std::string &sndname, pragma::audio::ALSoundType soundType) { return ent.EmitSound(sndname, soundType); }));
+	classDef.def("EmitSound", static_cast<std::shared_ptr<::ALSound> (*)(::pragma::ecs::BaseEntity &, const std::string &, pragma::audio::ALSoundType, float)>([](::pragma::ecs::BaseEntity &ent, const std::string &sndname, pragma::audio::ALSoundType soundType, float gain) {
+		return ent.EmitSound(sndname, soundType, gain);
+	}));
+	classDef.def("EmitSound",
+	  static_cast<std::shared_ptr<::ALSound> (*)(::pragma::ecs::BaseEntity &, const std::string &, pragma::audio::ALSoundType)>([](::pragma::ecs::BaseEntity &ent, const std::string &sndname, pragma::audio::ALSoundType soundType) { return ent.EmitSound(sndname, soundType); }));
 	classDef.def("GetName", &::pragma::ecs::BaseEntity::GetName);
 	classDef.def("SetName", &::pragma::ecs::BaseEntity::SetName);
 	classDef.def("SetModel", static_cast<void (::pragma::ecs::BaseEntity::*)(const std::string &)>(&::pragma::ecs::BaseEntity::SetModel));
@@ -399,7 +402,9 @@ void Lua::Entity::register_class(luabind::class_<::pragma::ecs::BaseEntity> &cla
 	classDef.def("GetUp", &::pragma::ecs::BaseEntity::GetUp);
 	classDef.def("GetRight", &::pragma::ecs::BaseEntity::GetRight);
 	classDef.def("Input", &::pragma::ecs::BaseEntity::Input);
-	classDef.def("Input", static_cast<void (*)(::pragma::ecs::BaseEntity &, const std::string &, ::pragma::ecs::BaseEntity &, ::pragma::ecs::BaseEntity &)>([](::pragma::ecs::BaseEntity &ent, const std::string &input, ::pragma::ecs::BaseEntity &activator, ::pragma::ecs::BaseEntity &caller) { ent.Input(input, &activator, &caller); }));
+	classDef.def("Input",
+	  static_cast<void (*)(::pragma::ecs::BaseEntity &, const std::string &, ::pragma::ecs::BaseEntity &, ::pragma::ecs::BaseEntity &)>(
+	    [](::pragma::ecs::BaseEntity &ent, const std::string &input, ::pragma::ecs::BaseEntity &activator, ::pragma::ecs::BaseEntity &caller) { ent.Input(input, &activator, &caller); }));
 	classDef.def("Input", static_cast<void (*)(::pragma::ecs::BaseEntity &, const std::string &, ::pragma::ecs::BaseEntity &)>([](::pragma::ecs::BaseEntity &ent, const std::string &input, ::pragma::ecs::BaseEntity &activator) { ent.Input(input, &activator); }));
 	classDef.def("Input", static_cast<void (*)(::pragma::ecs::BaseEntity &, const std::string &)>([](::pragma::ecs::BaseEntity &ent, const std::string &input) { ent.Input(input); }));
 	classDef.def("GetHealth", &::pragma::ecs::BaseEntity::GetHealth);
@@ -423,7 +428,8 @@ void Lua::Entity::register_class(luabind::class_<::pragma::ecs::BaseEntity> &cla
 	classDef.def("PlayActivity", &::pragma::ecs::BaseEntity::PlayActivity);
 	classDef.def("PlayActivity", static_cast<bool (*)(::pragma::ecs::BaseEntity &, pragma::Activity)>([](::pragma::ecs::BaseEntity &ent, pragma::Activity activity) { return ent.PlayActivity(activity); }));
 	classDef.def("PlayLayeredActivity", &::pragma::ecs::BaseEntity::PlayLayeredActivity);
-	classDef.def("PlayLayeredAnimation", static_cast<bool (*)(::pragma::ecs::BaseEntity &, int32_t, const std::string &, pragma::FPlayAnim)>([](::pragma::ecs::BaseEntity &ent, int32_t slot, const std::string &anim, pragma::FPlayAnim flags) { return ent.PlayLayeredAnimation(slot, anim, flags); }));
+	classDef.def("PlayLayeredAnimation",
+	  static_cast<bool (*)(::pragma::ecs::BaseEntity &, int32_t, const std::string &, pragma::FPlayAnim)>([](::pragma::ecs::BaseEntity &ent, int32_t slot, const std::string &anim, pragma::FPlayAnim flags) { return ent.PlayLayeredAnimation(slot, anim, flags); }));
 	classDef.def("StopLayeredAnimation", &::pragma::ecs::BaseEntity::StopLayeredAnimation);
 	classDef.def("PlayAnimation", static_cast<void (*)(::pragma::ecs::BaseEntity &, uint32_t, pragma::FPlayAnim)>([](::pragma::ecs::BaseEntity &ent, uint32_t anim, pragma::FPlayAnim flags) {
 		auto animC = ent.GetAnimatedComponent();

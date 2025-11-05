@@ -7,7 +7,6 @@ module;
 
 module pragma.client;
 
-
 import :entities.components.liquid_surface_simulation;
 import :entities.components.liquid_control;
 import :entities.components.water_surface;
@@ -15,22 +14,23 @@ import :game;
 
 import :physics;
 
-
 using namespace pragma;
 
 static std::vector<CLiquidSurfaceSimulationComponent *> s_waterEntities = {};
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<int>("cl_water_surface_simulation_spacing", +[](NetworkState *, const ConVar &, int, int val) {
-		for(auto *entWater : s_waterEntities)
-			entWater->ReloadSurfaceSimulator();
-	});
+	auto UVN = pragma::console::client::register_variable_listener<int>(
+	  "cl_water_surface_simulation_spacing", +[](NetworkState *, const ConVar &, int, int val) {
+		  for(auto *entWater : s_waterEntities)
+			  entWater->ReloadSurfaceSimulator();
+	  });
 }
 
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_water_surface_simulation_enable_gpu_acceleration", +[](NetworkState *, const ConVar &, bool, bool val) {
-		for(auto *entWater : s_waterEntities)
-			entWater->ReloadSurfaceSimulator();
-	});
+	auto UVN = pragma::console::client::register_variable_listener<bool>(
+	  "cl_water_surface_simulation_enable_gpu_acceleration", +[](NetworkState *, const ConVar &, bool, bool val) {
+		  for(auto *entWater : s_waterEntities)
+			  entWater->ReloadSurfaceSimulator();
+	  });
 }
 
 CLiquidSurfaceSimulationComponent::CLiquidSurfaceSimulationComponent(pragma::ecs::BaseEntity &ent) : BaseLiquidSurfaceSimulationComponent(ent) { s_waterEntities.push_back(this); }

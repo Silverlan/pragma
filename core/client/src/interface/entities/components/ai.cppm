@@ -5,9 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
 export module pragma.client:entities.components.ai;
 
 export import :entities.components.entity;
@@ -24,7 +21,7 @@ export namespace pragma {
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 	  public:
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
-		
+
 		static unsigned int GetNPCCount();
 		static const std::vector<CAIComponent *> &GetAll();
 		CAIComponent(pragma::ecs::BaseEntity &ent);

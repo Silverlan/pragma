@@ -3,7 +3,6 @@
 
 module;
 
-
 export module pragma.client:rendering.cube_map_side;
 
 export import std.compat;

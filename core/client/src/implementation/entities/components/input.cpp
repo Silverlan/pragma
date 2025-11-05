@@ -5,14 +5,11 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
 
 import :engine;
 import :entities.components.input;
 using namespace pragma;
-
 
 CInputComponent::CInputComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent {ent} {}
 CInputComponent::~CInputComponent() {}

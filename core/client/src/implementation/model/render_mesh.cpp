@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :model.render_mesh;
@@ -11,7 +10,6 @@ import :model.render_mesh;
 import :engine;
 
 using namespace pragma;
-
 
 SceneMesh::SceneMesh() : m_vertexBuffer(nullptr), m_vertexWeightBuffer(nullptr), m_alphaBuffer(nullptr), m_indexBuffer(nullptr), m_indexType {pragma::model::IndexType::UInt16} {}
 SceneMesh::SceneMesh(const SceneMesh &other) : m_renderBuffers {other.m_renderBuffers}, m_vertexBuffer {other.m_vertexBuffer}, m_vertexWeightBuffer {other.m_vertexWeightBuffer}, m_alphaBuffer {other.m_alphaBuffer}, m_indexBuffer {other.m_indexBuffer}, m_indexType {other.m_indexType} {}

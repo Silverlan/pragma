@@ -203,6 +203,6 @@ export namespace Lua {
 };
 
 export {
-    DLLCLIENT Con::c_cout &operator<<(Con::c_cout &os, const WIHandle &handle);
-    DLLCLIENT std::ostream &operator<<(std::ostream &os, const WIHandle &handle);
+	DLLCLIENT Con::c_cout &operator<<(Con::c_cout &os, const WIHandle &handle);
+	DLLCLIENT std::ostream &operator<<(std::ostream &os, const WIHandle &handle);
 };

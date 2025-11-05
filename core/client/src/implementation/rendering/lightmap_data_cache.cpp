@@ -3,12 +3,7 @@
 
 module;
 
-
-
-
-
 module pragma.client;
-
 
 import :rendering.lightmap_data_cache;
 using namespace pragma;

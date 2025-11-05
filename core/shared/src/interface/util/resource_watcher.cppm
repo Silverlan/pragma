@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:util.resource_watcher;
 
 export import :networking.util;
@@ -16,7 +14,7 @@ export import pragma.materialsystem;
 
 export {
 	class DLLNETWORK EResourceWatcherCallbackType : public util::ExtensibleEnum {
-	public:
+	  public:
 		using util::ExtensibleEnum::ExtensibleEnum;
 
 		static const EResourceWatcherCallbackType Model;
@@ -26,22 +24,19 @@ export {
 		static const EResourceWatcherCallbackType SoundScript;
 		static const EResourceWatcherCallbackType Sound;
 		static const EResourceWatcherCallbackType Count;
-	protected:
+	  protected:
 		enum class E : uint32_t { Model = 0u, Material, Texture, Map, SoundScript, Sound, Count };
 	};
 
-	namespace std {                                                                                                                                                                                                                                                                              \
-		template<>                                                                                                                                                                                                                                                                               \
-		struct hash<EResourceWatcherCallbackType> {                                                                                                                                                                                                                                                                  \
-			std::size_t operator()(const EResourceWatcherCallbackType &object) const                                                                                                                                                                                                                                 \
-			{                                                                                                                                                                                                                                                                                    \
-				return object.Hash();                                                                                                                                                                                                                                                            \
-			}                                                                                                                                                                                                                                                                                    \
-		};                                                                                                                                                                                                                                                                                       \
+	namespace std {
+		template<>
+		struct hash<EResourceWatcherCallbackType> {
+			std::size_t operator()(const EResourceWatcherCallbackType &object) const { return object.Hash(); }
+		};
 	}
 
 	class DLLNETWORK ResourceWatcherManager {
-	public:
+	  public:
 		using TypeHandler = std::function<void(const util::Path &, const std::string &)>;
 		ResourceWatcherManager(NetworkState *nw);
 		bool MountDirectory(const std::string &path, bool bAbsolutePath = false);
@@ -56,7 +51,7 @@ export {
 		bool IsLocked() const;
 		CallbackHandle AddChangeCallback(EResourceWatcherCallbackType type, const std::function<void(std::reference_wrapper<const std::string>, std::reference_wrapper<const std::string>)> &fcallback);
 		void RegisterTypeHandler(const std::string &ext, const TypeHandler &handler);
-	protected:
+	  protected:
 		NetworkState *m_networkState = nullptr;
 		uint32_t m_lockedCount = 0;
 		std::recursive_mutex m_watcherMutex;
@@ -67,7 +62,7 @@ export {
 		virtual void GetWatchPaths(std::vector<std::string> &paths);
 		virtual void ReloadTexture(const std::string &path);
 		void CallChangeCallbacks(EResourceWatcherCallbackType type, const std::string &path, const std::string &ext);
-	private:
+	  private:
 		std::unordered_map<EResourceWatcherCallbackType, std::vector<CallbackHandle>> m_callbacks;
 		std::unordered_map<std::string, std::function<void()>> m_watchFiles;
 		std::vector<std::shared_ptr<DirectoryWatcherCallback>> m_watchers;

@@ -4,16 +4,16 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
-
 export module pragma.client:particle_system.operator_physics;
 
 export import :particle_system.modifier;
 
-export namespace pragma::ecs {class CParticleSystemComponent;}
+export namespace pragma::ecs {
+	class CParticleSystemComponent;
+}
 export {
 	class DLLCLIENT CParticleOperatorPhysics : public CParticleOperator {
-	protected:
+	  protected:
 		float m_mass = 0.f;
 		float m_linearDamping = 0.f;
 		Vector3 m_linearFactor = {1.f, 1.f, 1.f};
@@ -23,7 +23,7 @@ export {
 		Quat m_rotOffset = uquat::identity();
 		std::vector<util::TSharedHandle<pragma::physics::IRigidBody>> m_physicsObjects;
 		virtual std::shared_ptr<pragma::physics::IShape> CreateShape() = 0;
-	public:
+	  public:
 		CParticleOperatorPhysics() = default;
 		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void OnParticleCreated(CParticle &particle) override;
@@ -35,39 +35,39 @@ export {
 	};
 
 	class DLLCLIENT CParticleOperatorPhysicsSphere : public CParticleOperatorPhysics {
-	protected:
+	  protected:
 		float m_radius = 0.f;
 		virtual std::shared_ptr<pragma::physics::IShape> CreateShape() override;
-	public:
+	  public:
 		CParticleOperatorPhysicsSphere() = default;
 		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	};
 
 	class DLLCLIENT CParticleOperatorPhysicsBox : public CParticleOperatorPhysics {
-	protected:
+	  protected:
 		float m_extent = 0.f;
 		virtual std::shared_ptr<pragma::physics::IShape> CreateShape() override;
-	public:
+	  public:
 		CParticleOperatorPhysicsBox() = default;
 		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	};
 
 	class DLLCLIENT CParticleOperatorPhysicsCylinder : public CParticleOperatorPhysics {
-	protected:
+	  protected:
 		float m_radius = 0.f;
 		float m_height = 0.f;
 		virtual std::shared_ptr<pragma::physics::IShape> CreateShape() override;
-	public:
+	  public:
 		CParticleOperatorPhysicsCylinder() = default;
 		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	};
 
 	class DLLCLIENT CParticleOperatorPhysicsModel : public CParticleOperatorPhysics {
-	public:
+	  public:
 		CParticleOperatorPhysicsModel() = default;
 		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void OnParticleCreated(CParticle &particle) override;
-	protected:
+	  protected:
 		std::shared_ptr<pragma::Model> m_model = nullptr;
 		virtual std::shared_ptr<pragma::physics::IShape> CreateShape() override;
 	};

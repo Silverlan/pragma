@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:rendering.render_stats;
 
 export import :model.mesh;
@@ -96,7 +95,7 @@ export {
 		mutable std::array<std::chrono::nanoseconds, umath::to_integral(TTimer::Count)> timers {};
 		std::vector<std::shared_ptr<prosper::TimerQuery>> gpuTimers;
 		void SetGpuTimerStart(TTimer start) { m_gpuTimerStart = start; }
-	private:
+	  private:
 		TTimer m_gpuTimerStart;
 	};
 

@@ -3,13 +3,9 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
-
 
 import :entities.components.env_decal;
 import :client_state;
@@ -23,7 +19,6 @@ import :entities.components.static_bvh_user;
 import :game;
 
 using namespace pragma;
-
 
 DecalProjector::DecalProjector(const Vector3 &pos, const Quat &rot, float size) : m_pose {pos, rot}, m_size {size} {}
 const Vector3 &DecalProjector::GetPos() const { return m_pose.GetOrigin(); }

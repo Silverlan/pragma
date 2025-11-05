@@ -4,8 +4,6 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
-
 export module pragma.client:particle_system.modifier_gradual_fade;
 
 export import :particle_system.modifier_ease;

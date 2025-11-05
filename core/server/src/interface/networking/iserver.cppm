@@ -13,7 +13,7 @@ export {
 	namespace pragma::networking {
 		class IServerClient;
 		class DLLSERVER ServerEventInterface {
-		public:
+		  public:
 			std::function<void(IServerClient &)> onClientConnected = nullptr;
 			std::function<void(IServerClient &, pragma::networking::DropReason)> onClientDropped = nullptr;
 			std::function<void(IServerClient &, NetPacket &)> handlePacket = nullptr;
@@ -22,14 +22,14 @@ export {
 		class IServerClient;
 		class ClientRecipientFilter;
 		class DLLSERVER IServer : public pragma::networking::MessageTracker {
-		public:
+		  public:
 			template<class TServer, typename... TARGS>
 			static std::unique_ptr<TServer, void (*)(TServer *)> Create(TARGS &&...args)
 			{
 				std::unique_ptr<TServer, void (*)(TServer *)> r {new TServer {std::forward<TARGS>(args)...}, [](TServer *ptr) {
-																	ptr->Shutdown();
-																	delete ptr;
-																}};
+					                                                 ptr->Shutdown();
+					                                                 delete ptr;
+				                                                 }};
 				return r;
 			}
 			virtual ~IServer() = default;
@@ -66,12 +66,12 @@ export {
 			void HandlePacket(IServerClient &client, NetPacket &packet);
 			void OnClientConnected(IServerClient &client);
 			void OnClientDropped(IServerClient &client, DropReason reason);
-		protected:
+		  protected:
 			IServer() = default;
 			virtual bool DoStart(Error &outErr, uint16_t port, bool useP2PIfAvailable = false) = 0;
 			const ServerEventInterface &GetEventInterface() const;
 			virtual bool DoShutdown(Error &outErr) = 0;
-		private:
+		  private:
 			bool m_bRunning = true;
 			std::vector<std::shared_ptr<IServerClient>> m_clients = {};
 			ServerEventInterface m_eventInterface = {};

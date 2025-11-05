@@ -5,9 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
 export module pragma.client:entities.components.skybox;
 
 export import :entities.base_entity;
@@ -16,7 +13,7 @@ export import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLCLIENT CSkyboxComponent final : public BaseSkyboxComponent, public CBaseNetComponent {
-		public:
+		  public:
 			CSkyboxComponent(pragma::ecs::BaseEntity &ent) : BaseSkyboxComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void OnRemove() override;
@@ -32,7 +29,7 @@ export {
 
 			void SetSkyMaterial(msys::Material *mat);
 			void ValidateMaterials();
-		private:
+		  private:
 			bool CreateCubemapFromIndividualTextures(const std::string &materialPath, const std::string &postfix = "") const;
 			CallbackHandle m_cbOnModelMaterialsLoaded = {};
 			EulerAngles m_skyAngles;
@@ -41,7 +38,7 @@ export {
 	};
 
 	class DLLCLIENT CSkybox : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

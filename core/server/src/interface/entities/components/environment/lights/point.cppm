@@ -5,8 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.lights.point;
 
 import :entities;
@@ -14,16 +12,16 @@ import :entities;
 export {
 	namespace pragma {
 		class DLLSERVER SLightPointComponent final : public BaseEnvLightPointComponent {
-		public:
+		  public:
 			SLightPointComponent(pragma::ecs::BaseEntity &ent) : BaseEnvLightPointComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
-		protected:
+		  protected:
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		};
 	};
 
 	class DLLSERVER EnvLightPoint : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

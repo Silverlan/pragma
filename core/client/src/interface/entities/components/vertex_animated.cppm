@@ -6,7 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.client:entities.components.vertex_animated;
 
 export import :model.mesh;
@@ -17,7 +16,7 @@ export namespace pragma {
 	DLLCLIENT const std::shared_ptr<prosper::IDynamicResizableBuffer> &get_vertex_animation_buffer();
 	class DLLCLIENT CVertexAnimatedComponent final : public BaseEntityComponent {
 	  public:
-	    static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
 
 #pragma pack(push, 1)
 		struct VertexAnimationData {

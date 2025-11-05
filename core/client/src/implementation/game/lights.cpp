@@ -3,14 +3,11 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :game;
 import :engine;
 import :entities.components;
-
 
 pragma::BaseEnvLightDirectionalComponent *CGame::GetEnvironmentLightSource() const { return const_cast<pragma::BaseEnvLightDirectionalComponent *>(m_hEnvLight.get()); }
 void CGame::UpdateEnvironmentLightSource()
@@ -37,5 +34,5 @@ void CGame::UpdateEnvironmentLightSource()
 }
 void CGame::OnEnvironmentLightSourceChanged(pragma::BaseEnvLightDirectionalComponent *oldSource, pragma::BaseEnvLightDirectionalComponent *newSource)
 {
-	CallCallbacks<void, pragma::CLightDirectionalComponent *, pragma::CLightDirectionalComponent *>("OnEnvironmentLightSourceChanged", static_cast<pragma::CLightDirectionalComponent*>(oldSource), static_cast<pragma::CLightDirectionalComponent*>(newSource));
+	CallCallbacks<void, pragma::CLightDirectionalComponent *, pragma::CLightDirectionalComponent *>("OnEnvironmentLightSourceChanged", static_cast<pragma::CLightDirectionalComponent *>(oldSource), static_cast<pragma::CLightDirectionalComponent *>(newSource));
 }

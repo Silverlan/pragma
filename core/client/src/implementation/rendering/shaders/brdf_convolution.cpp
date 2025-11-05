@@ -3,13 +3,11 @@
 
 module;
 
-
 module pragma.client;
 
 import :rendering.shaders.brdf_convolution;
 
 import :engine;
-
 
 using namespace pragma;
 

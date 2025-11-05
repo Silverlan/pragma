@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.env_weather;
 
 export import :entities.base_entity;
@@ -14,19 +12,19 @@ export import :entities.base_entity;
 export {
 	namespace pragma {
 		class DLLCLIENT CWeatherComponent final : public BaseEnvWeatherComponent {
-		public:
+		  public:
 			CWeatherComponent(pragma::ecs::BaseEntity &ent) : BaseEnvWeatherComponent(ent) {}
 			virtual ~CWeatherComponent() override;
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua_State *l) override;
 			virtual void OnEntitySpawn() override;
-		protected:
+		  protected:
 			EntityHandle m_hParticle = {};
 		};
 	};
 
 	class DLLCLIENT CEnvWeather : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

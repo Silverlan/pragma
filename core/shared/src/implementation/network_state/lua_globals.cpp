@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
 #include "noise/noise.h"
 
 // import pragma.scripting.lua;

@@ -5,8 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.player_spawn;
 
 import :entities.base;
@@ -14,14 +12,14 @@ import :entities.base;
 export {
 	namespace pragma {
 		class DLLSERVER SPlayerSpawnComponent final : public BaseEntityComponent {
-		public:
+		  public:
 			SPlayerSpawnComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};
 
 	class DLLSERVER GamePlayerSpawn : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

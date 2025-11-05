@@ -5,8 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.world;
 
 import :entities;
@@ -14,14 +12,14 @@ import :entities;
 export {
 	namespace pragma {
 		class DLLSERVER SWorldComponent final : public BaseWorldComponent {
-		public:
+		  public:
 			SWorldComponent(pragma::ecs::BaseEntity &ent) : BaseWorldComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};
 
 	class DLLSERVER World : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

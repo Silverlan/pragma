@@ -3,8 +3,6 @@
 
 module;
 
-
-
 export module pragma.client:rendering.light_data;
 
 export import pragma.math;

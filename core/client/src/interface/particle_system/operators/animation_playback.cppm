@@ -9,7 +9,9 @@ export module pragma.client:particle_system.operator_animation_playback;
 
 export import :particle_system.modifier;
 
-export namespace pragma::ecs {class CParticleSystemComponent;}
+export namespace pragma::ecs {
+	class CParticleSystemComponent;
+}
 export class DLLCLIENT CParticleOperatorAnimationPlayback : public CParticleOperator {
   public:
 	CParticleOperatorAnimationPlayback() = default;

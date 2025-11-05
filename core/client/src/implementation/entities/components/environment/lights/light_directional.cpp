@@ -3,21 +3,15 @@
 
 module;
 
-
-
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
-
 
 import :entities.components.lights.directional;
 import :entities.components.render;
 import :entities.components.toggle;
 import :entities.components.transform;
 import :game;
-
 
 using namespace pragma;
 

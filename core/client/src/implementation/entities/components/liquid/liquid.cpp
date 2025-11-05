@@ -4,9 +4,7 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.liquid;
 import :entities.components.liquid_surface;
@@ -224,5 +222,6 @@ static void debug_water(NetworkState *state, pragma::BasePlayerComponent *pl, st
 		Con::cwar << "No water entity found!" << Con::endl;
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_water", &debug_water, pragma::console::ConVarFlags::None, "Displays the reflection, refraction and refraction depth map for the given water-entity on screen. Call without arguments to turn the display off. Usage: debug_light_water <waterEntityIndex>");
+	auto UVN = pragma::console::client::register_command("debug_water", &debug_water, pragma::console::ConVarFlags::None,
+	  "Displays the reflection, refraction and refraction depth map for the given water-entity on screen. Call without arguments to turn the display off. Usage: debug_light_water <waterEntityIndex>");
 }

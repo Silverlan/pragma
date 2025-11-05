@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:model.poly;
 
 import :console.output;
@@ -52,7 +50,7 @@ export {
 	};
 
 	class DLLNETWORK PolyDispInfo {
-	public:
+	  public:
 		PolyDispInfo();
 		std::vector<Vector3> vertices;
 		std::vector<Vector3> normals;
@@ -67,7 +65,7 @@ export {
 	};
 
 	class DLLNETWORK PolyInfo {
-	public:
+	  public:
 		PolyInfo();
 		Vector3 nu;
 		Vector3 nv;
@@ -83,9 +81,9 @@ export {
 
 	class DLLNETWORK Poly {
 		friend Con::c_cout &operator<<(Con::c_cout &, const Poly &);
-	public:
+	  public:
 		Poly(NetworkState *nw);
-	protected:
+	  protected:
 		NetworkState *m_nwState = nullptr;
 		std::vector<PolyVertex> m_vertices;
 		Vector3 m_normal = {};
@@ -105,7 +103,7 @@ export {
 		void ReverseVertexOrder();
 		void Calculate();
 		void CalculateNormal();
-	public:
+	  public:
 		PolyInfo &GetCompiledData();
 		void SetDistance(double d);
 		void SetNormal(Vector3 n);
@@ -137,6 +135,6 @@ export {
 		bool IsDisplacement();
 		void RemoveDisplacement();
 		void BuildDisplacement(std::vector<Vector3> &verts, Vector3 &nu, Vector3 &nv, unsigned int w, unsigned int h, std::vector<Vector3> &outVertices, std::vector<Vector2> &outUvs, std::vector<unsigned int> &outTriangles, std::vector<Vector3> &faceNormals, unsigned char &numAlpha,
-		std::vector<Vector2> *outAlphas);
+		  std::vector<Vector2> *outAlphas);
 	};
 };

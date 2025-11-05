@@ -4,10 +4,7 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
-
 module pragma.client;
-
 
 import :engine;
 import :client_state;

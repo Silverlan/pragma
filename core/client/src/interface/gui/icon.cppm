@@ -4,14 +4,13 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:gui.icon;
 
 export import pragma.gui;
 
 export {
 	class DLLCLIENT WIIcon : public WITexturedRect {
-	public:
+	  public:
 		WIIcon();
 		virtual ~WIIcon() override;
 		virtual void Initialize() override;

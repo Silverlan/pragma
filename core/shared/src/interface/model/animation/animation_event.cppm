@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:model.animation.animation_event;
 
 import pragma.filesystem;
@@ -12,9 +11,9 @@ import pragma.filesystem;
 export {
 	namespace pragma {
 		struct DLLNETWORK AnimationEvent {
-		public:
+		  public:
 			enum class DLLNETWORK Type : uint32_t { EmitSound, FootstepLeft, FootstepRight, Count, Invalid = std::numeric_limits<std::underlying_type_t<Type>>::max() };
-		public:
+		  public:
 			Type eventID;
 			std::vector<std::string> arguments;
 		};

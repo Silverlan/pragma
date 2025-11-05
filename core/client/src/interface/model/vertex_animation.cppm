@@ -4,7 +4,6 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:model.vertex_animation;
 
 export import pragma.shared;

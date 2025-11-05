@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.base_transform;
 
 export import :entities.components.base;
@@ -24,7 +22,7 @@ export {
 			STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_ON_TELEPORT;
 		}
 		class DLLNETWORK BaseTransformComponent : public BaseEntityComponent {
-		public:
+		  public:
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 			virtual void Initialize() override;
@@ -107,7 +105,7 @@ export {
 
 			void UpdateLastMovedTime();
 			void OnPoseChanged(TransformChangeFlags changeFlags, bool updatePhysics = true);
-		protected:
+		  protected:
 			BaseTransformComponent(pragma::ecs::BaseEntity &ent);
 			pragma::NetEventId m_netEvSetScale = pragma::INVALID_NET_EVENT;
 			double m_tLastMoved = 0.0; // Last time the entity moved or changed rotation
@@ -121,10 +119,10 @@ export {
 			umath::Transform targetPose;
 			umath::Transform deltaPose;
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::TransformChangeFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::TransformChangeFlags> : std::true_type {};
+	}
 };

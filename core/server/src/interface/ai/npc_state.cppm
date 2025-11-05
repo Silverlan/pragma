@@ -3,9 +3,8 @@
 
 module;
 
-
 export module pragma.server:ai.tasks.npc_state;
 
 export {
-    enum class NPCSTATE : int { NONE, IDLE, ALERT, COMBAT, SCRIPT };
+	enum class NPCSTATE : int { NONE, IDLE, ALERT, COMBAT, SCRIPT };
 };

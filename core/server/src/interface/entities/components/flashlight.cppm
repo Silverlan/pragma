@@ -5,8 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.flashlight;
 
 import :entities;
@@ -14,14 +12,14 @@ import :entities;
 export {
 	namespace pragma {
 		class DLLSERVER SFlashlightComponent final : public BaseFlashlightComponent {
-		public:
+		  public:
 			SFlashlightComponent(pragma::ecs::BaseEntity &ent) : BaseFlashlightComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};
 
 	class DLLSERVER Flashlight : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

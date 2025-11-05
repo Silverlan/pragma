@@ -6,8 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.lights.shadow;
 
 export import :entities.components.game_shadow_manager;

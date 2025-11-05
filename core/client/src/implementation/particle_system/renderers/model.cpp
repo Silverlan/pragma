@@ -3,8 +3,6 @@
 
 module;
 
-
-
 module pragma.client;
 
 import :particle_system.renderer_model;
@@ -13,7 +11,6 @@ import :client_state;
 import :entities.components;
 import :game;
 import :rendering.shaders;
-
 
 decltype(CParticleRendererModel::s_rendererCount) CParticleRendererModel::s_rendererCount = 0;
 static std::shared_ptr<prosper::IBuffer> s_instanceBuffer = nullptr;
@@ -70,7 +67,7 @@ void CParticleRendererModel::Initialize(pragma::BaseEnvParticleSystemComponent &
 		m_particleComponents.push_back(ParticleModelComponent {fCreateAnimatedComponent(), nullptr});
 	else // We need one model component per particle (expensive!!)
 	{
-		auto maxParticles = static_cast<pragma::ecs::CParticleSystemComponent&>(pSystem).GetMaxParticleCount();
+		auto maxParticles = static_cast<pragma::ecs::CParticleSystemComponent &>(pSystem).GetMaxParticleCount();
 		m_particleComponents.reserve(maxParticles);
 		for(auto i = decltype(maxParticles) {0u}; i < maxParticles; ++i)
 			m_particleComponents.push_back(ParticleModelComponent {fCreateAnimatedComponent(), nullptr});

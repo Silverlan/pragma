@@ -6,8 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:game;
 
 export import :ai.schedule;
@@ -177,53 +175,53 @@ export class DLLSERVER SGame : public pragma::Game {
 template<class T>
 T *SGame::CreateEntity(unsigned int idx)
 {
-    if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
-        return nullptr;
-    T *ent = new T();
-    SetupEntity(ent, idx);
-    return ent;
+	if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
+		return nullptr;
+	T *ent = new T();
+	SetupEntity(ent, idx);
+	return ent;
 }
 
 template<class T>
 T *SGame::CreateEntity()
 {
-    if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
-        return nullptr;
-    return CreateEntity<T>(GetFreeEntityIndex());
+	if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
+		return nullptr;
+	return CreateEntity<T>(GetFreeEntityIndex());
 }
 
 template<class T>
 void SGame::GetPlayers(std::vector<T *> *ents)
 {
-    auto &players = pragma::SPlayerComponent::GetAll();
-    ents->reserve(ents->size() + players.size());
-    for(auto *pl : players)
-        ents->push_back(static_cast<T *>(&pl->GetEntity()));
+	auto &players = pragma::SPlayerComponent::GetAll();
+	ents->reserve(ents->size() + players.size());
+	for(auto *pl : players)
+		ents->push_back(static_cast<T *>(&pl->GetEntity()));
 }
 
 template<class T>
 void SGame::GetNPCs(std::vector<T *> *ents)
 {
-    auto &npcs = pragma::SPlayerComponent::GetAll();
-    ents->reserve(ents->size() + npcs.size());
-    for(auto *npc : npcs)
-        ents->push_back(static_cast<T *>(&npc->GetEntity()));
+	auto &npcs = pragma::SPlayerComponent::GetAll();
+	ents->reserve(ents->size() + npcs.size());
+	for(auto *npc : npcs)
+		ents->push_back(static_cast<T *>(&npc->GetEntity()));
 }
 
 template<class T>
 void SGame::GetWeapons(std::vector<T *> *ents)
 {
-    auto &weapons = pragma::SPlayerComponent::GetAll();
-    ents->reserve(ents->size() + weapons.size());
-    for(auto *wep : weapons)
-        ents->push_back(static_cast<T *>(&wep->GetEntity()));
+	auto &weapons = pragma::SPlayerComponent::GetAll();
+	ents->reserve(ents->size() + weapons.size());
+	for(auto *wep : weapons)
+		ents->push_back(static_cast<T *>(&wep->GetEntity()));
 }
 
 template<class T>
 void SGame::GetVehicles(std::vector<T *> *ents)
 {
-    auto &vehicles = pragma::SPlayerComponent::GetAll();
-    ents->reserve(ents->size() + vehicles.size());
-    for(auto *vhc : vehicles)
-        ents->push_back(static_cast<T *>(&vhc->GetEntity()));
+	auto &vehicles = pragma::SPlayerComponent::GetAll();
+	ents->reserve(ents->size() + vehicles.size());
+	for(auto *vhc : vehicles)
+		ents->push_back(static_cast<T *>(&vhc->GetEntity()));
 }

@@ -5,9 +5,7 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.effects.smoke_trail;
 import :client_state;
@@ -15,7 +13,6 @@ import :engine;
 import :util;
 
 using namespace pragma;
-
 
 CSmokeTrailComponent::~CSmokeTrailComponent() { DestroyParticle(); }
 void CSmokeTrailComponent::Initialize()

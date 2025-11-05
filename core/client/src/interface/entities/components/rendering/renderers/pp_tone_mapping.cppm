@@ -5,9 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
 export module pragma.client:entities.components.pp_tone_mapping;
 
 export import :entities.components.pp_base;

@@ -85,5 +85,9 @@ static void CVAR_CALLBACK_cl_render_texture_quality(NetworkState *, const ConVar
 	materialManager.ReloadMaterialShaders(); // Make sure to reload descriptor sets (So samplers are updated)
 }
 
-namespace { auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_texture_filtering",&CVAR_CALLBACK_cl_render_texture_quality); }
-namespace { auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_texture_quality",&CVAR_CALLBACK_cl_render_texture_quality); }
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_texture_filtering", &CVAR_CALLBACK_cl_render_texture_quality);
+}
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_texture_quality", &CVAR_CALLBACK_cl_render_texture_quality);
+}

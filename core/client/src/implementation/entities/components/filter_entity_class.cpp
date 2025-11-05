@@ -4,9 +4,7 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.filter_entity_class;
 using namespace pragma;

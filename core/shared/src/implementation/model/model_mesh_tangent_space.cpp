@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
 #include "definitions.hpp"
 #include "model/mikktspace/mikktspace.h"
 

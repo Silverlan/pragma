@@ -4,9 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
-
 export module pragma.shared:entities.components.base_animated;
 
 export import :entities.components.base;
@@ -15,7 +12,7 @@ export import pragma.util;
 
 export {
 	namespace pragma {
-				namespace baseAnimatedComponent {
+		namespace baseAnimatedComponent {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_HANDLE_ANIMATION_EVENT;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAY_ANIMATION;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAY_LAYERED_ANIMATION;
@@ -45,9 +42,8 @@ export {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_POST_ANIMATION_UPDATE;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_RESET_POSE;
 		}
-class DLLNETWORK BaseAnimatedComponent : public BaseEntityComponent, public DynamicMemberRegister {
-		public:
-
+		class DLLNETWORK BaseAnimatedComponent : public BaseEntityComponent, public DynamicMemberRegister {
+		  public:
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 			enum class StateFlags : uint8_t {
@@ -60,7 +56,7 @@ class DLLNETWORK BaseAnimatedComponent : public BaseEntityComponent, public Dyna
 			};
 
 			struct DLLNETWORK AnimationSlotInfo {
-			public:
+			  public:
 				AnimationSlotInfo() = default;
 				AnimationSlotInfo(int32_t panimation, int32_t panimationLast = -1) : animation(panimation), cycle(0.f) {}
 				pragma::Activity activity = pragma::Activity::Invalid;
@@ -215,7 +211,7 @@ class DLLNETWORK BaseAnimatedComponent : public BaseEntityComponent, public Dyna
 			void ClearPreviousAnimation();
 
 			void BlendBonePoses(const std::vector<umath::Transform> &srcBonePoses, const std::vector<Vector3> *optSrcBoneScales, const std::vector<umath::Transform> &dstBonePoses, const std::vector<Vector3> *optDstBoneScales, std::vector<umath::Transform> &outBonePoses,
-			std::vector<Vector3> *optOutBoneScales, pragma::animation::Animation &anim, float interpFactor) const;
+			  std::vector<Vector3> *optOutBoneScales, pragma::animation::Animation &anim, float interpFactor) const;
 			void BlendBoneFrames(std::vector<umath::Transform> &tgt, std::vector<Vector3> *tgtScales, std::vector<umath::Transform> &add, std::vector<Vector3> *addScales, float blendScale) const;
 
 			bool PreMaintainAnimations(double dt);
@@ -237,7 +233,7 @@ class DLLNETWORK BaseAnimatedComponent : public BaseEntityComponent, public Dyna
 
 			virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 			using BaseEntityComponent::Load;
-		protected:
+		  protected:
 			BaseAnimatedComponent(pragma::ecs::BaseEntity &ent);
 			virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
 			virtual void OnModelChanged(const std::shared_ptr<pragma::Model> &mdl);
@@ -286,7 +282,7 @@ class DLLNETWORK BaseAnimatedComponent : public BaseEntityComponent, public Dyna
 			// Animations
 			void TransformBoneFrames(std::vector<umath::Transform> &bonePoses, std::vector<Vector3> *boneScales, pragma::animation::Animation &anim, Frame *frameBlend, bool bAdd = true);
 			void TransformBoneFrames(std::vector<umath::Transform> &tgt, std::vector<Vector3> *boneScales, const std::shared_ptr<pragma::animation::Animation> &baseAnim, const std::shared_ptr<pragma::animation::Animation> &anim, std::vector<umath::Transform> &add,
-			std::vector<Vector3> *addScales, bool bAdd = true);
+			  std::vector<Vector3> *addScales, bool bAdd = true);
 			//
 
 			std::unordered_map<uint32_t, AnimationSlotInfo> m_animSlots = {};
@@ -295,7 +291,7 @@ class DLLNETWORK BaseAnimatedComponent : public BaseEntityComponent, public Dyna
 			Vector3 m_animDisplacement = {};
 			std::vector<umath::ScaledTransform> m_bones = {};
 			std::vector<umath::ScaledTransform> m_processedBones = {}; // Bone positions / rotations in entity space
-		protected:
+		  protected:
 			// We have to collect the animation events for the current frame and execute them after ALL animations have been completed (In case some events need to access animation data)
 			std::queue<AnimationEventQueueItem> m_animEventQueue = std::queue<AnimationEventQueueItem> {};
 
@@ -458,7 +454,7 @@ class DLLNETWORK BaseAnimatedComponent : public BaseEntityComponent, public Dyna
 			virtual void HandleReturnValues(lua::State *l) override;
 			bool bonePosesHaveChanged = false;
 		};
-    	using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
 	namespace umath::scoped_enum::bitwise {
 		template<>

@@ -9,7 +9,9 @@ export module pragma.client:util.smoke_trail;
 
 export import std;
 
-export namespace pragma::ecs {class CParticleSystemComponent;}
+export namespace pragma::ecs {
+	class CParticleSystemComponent;
+}
 export namespace util {
 	DLLCLIENT ::pragma::ecs::CParticleSystemComponent *create_smoke_trail_particle(float distance, float speed, float minSpriteSize, float maxSpriteSize, const std::string &material = "particles/smoke_sprites_dense");
 };

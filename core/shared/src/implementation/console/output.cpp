@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 #include "definitions.hpp"
 
 #ifdef _WIN32
@@ -16,8 +15,8 @@ module pragma.shared;
 import :console.output;
 
 #define PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(v, type)                                                                                                                                                                                                                                    \
-    if(Con::detail::outputCallback != nullptr)                                                                                                                                                                                                                                                   \
-        Con::invoke_output_callback(v, type);
+	if(Con::detail::outputCallback != nullptr)                                                                                                                                                                                                                                                   \
+		Con::invoke_output_callback(v, type);
 
 DLLNETWORK Con::c_cout Con::cout;
 DLLNETWORK Con::c_cwar Con::cwar;

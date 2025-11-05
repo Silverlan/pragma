@@ -5,15 +5,14 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
 export module pragma.client:entities.components.effects.fire;
 
 export import :entities.base_entity;
 export import :entities.components.entity;
 
-export namespace pragma::ecs {class CParticleSystemComponent;}
+export namespace pragma::ecs {
+	class CParticleSystemComponent;
+}
 export namespace pragma {
 	class DLLCLIENT CFireComponent final : public BaseEnvFireComponent, public CBaseNetComponent {
 	  public:

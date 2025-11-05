@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.system;
 
 export import :entities.components.base;
@@ -15,11 +13,13 @@ export import :entities.manager;
 export import :entities.enums;
 
 export {
-	namespace pragma::ecs {class BaseEntity;}
+	namespace pragma::ecs {
+		class BaseEntity;
+	}
 	namespace pragma {
 		class EntityComponentManager;
 		class DLLNETWORK BaseEntityComponentSystem {
-		public:
+		  public:
 			enum class StateFlags : uint32_t {
 				None = 0,
 				// A component was removed and it's entry set to NULL
@@ -65,25 +65,25 @@ export {
 			EntityComponentManager *GetComponentManager();
 			const EntityComponentManager *GetComponentManager() const;
 			static void Cleanup();
-		protected:
+		  protected:
 			BaseEntityComponentSystem() = default;
 
 			void Initialize(pragma::ecs::BaseEntity &ent, EntityComponentManager &componentManager);
 			virtual void OnComponentAdded(BaseEntityComponent &component);
 			virtual void OnComponentRemoved(BaseEntityComponent &component);
-		private:
+		  private:
 			std::unordered_map<ComponentId, ComponentHandle<BaseEntityComponent>> m_componentLookupTable; // Only contains one (the first) component per type; Used for fast lookups
 			std::vector<util::TSharedHandle<BaseEntityComponent>> m_components;
 			EntityComponentManager *m_componentManager;
 			pragma::ecs::BaseEntity *m_entity;
 			mutable StateFlags m_stateFlags = StateFlags::None;
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::BaseEntityComponentSystem::StateFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::BaseEntityComponentSystem::StateFlags> : std::true_type {};
+	}
 
 	namespace pragma {
 		template<class TComponent, typename>

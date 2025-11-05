@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:entities.components.func.base_soft_physics;
 
 export import :entities.components.base;

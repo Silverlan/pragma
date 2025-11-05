@@ -4,9 +4,7 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.point_constraint_fixed;
 using namespace pragma;

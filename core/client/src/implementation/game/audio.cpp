@@ -3,17 +3,12 @@
 
 module;
 
-
-
-
 module pragma.client;
-
 
 import :game;
 import :client_state;
 import :engine;
 import :entities.components;
-
 
 void CGame::ClearSoundCache()
 {
@@ -144,7 +139,7 @@ void CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cacheFlags,
 								mat.highFreqTransmission = surfMat->GetAudioHighFrequencyTransmission();
 							}
 							else
-							auto matId = iplScene->AddMaterial(mat);
+								auto matId = iplScene->AddMaterial(mat);
 							it = surfMatToIplMat.insert(std::make_pair(surfMatId, matId)).first;
 						}
 

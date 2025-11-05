@@ -6,9 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
 export module pragma.client:entities.components.env_decal;
 
 export import :entities.base_entity;
@@ -17,7 +14,7 @@ export import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLCLIENT DecalProjector {
-		public:
+		  public:
 			struct DLLCLIENT MeshData {
 				std::vector<pragma::ModelSubMesh *> subMeshes {};
 				umath::ScaledTransform pose = {};
@@ -31,7 +28,7 @@ export {
 
 			bool GenerateDecalMesh(const std::vector<MeshData> &meshDatas, std::vector<umath::Vertex> &outVerts, std::vector<uint16_t> &outTris);
 			void DebugDraw(float duration) const;
-		private:
+		  private:
 			struct VertexInfo {
 				// Position in projector space
 				Vector2 position = {};
@@ -48,7 +45,7 @@ export {
 		};
 
 		class DLLCLIENT CDecalComponent final : public BaseEnvDecalComponent, public CBaseNetComponent {
-		public:
+		  public:
 			CDecalComponent(pragma::ecs::BaseEntity &ent) : BaseEnvDecalComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua_State *l) override;
@@ -65,7 +62,7 @@ export {
 
 			void DebugDraw(float duration) const;
 			virtual void OnTick(double dt) override;
-		protected:
+		  protected:
 			bool ApplyDecal(DecalProjector &projector, const std::vector<DecalProjector::MeshData> &meshes);
 
 			bool m_decalDirty = true;
@@ -73,7 +70,7 @@ export {
 	};
 
 	class DLLCLIENT CEnvDecal : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

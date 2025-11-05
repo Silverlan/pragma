@@ -3,13 +3,10 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.render_stats;
 import :engine;
-
 
 RenderStats::RenderStats()
 {

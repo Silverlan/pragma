@@ -3,15 +3,12 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.world_flat;
 
 import :engine;
 import :model;
-
 
 using namespace pragma;
 

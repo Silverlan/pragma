@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.base_io;
 
 export import :entities.components.base;
@@ -25,7 +23,7 @@ export {
 			STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_HANDLE_INPUT;
 		}
 		class DLLNETWORK BaseIOComponent : public BaseEntityComponent {
-		public:
+		  public:
 			enum class IoFlags : uint32_t {
 				None = 0u,
 				ForceDelayedFire = 1u // Never triggers the input/output immediately, even if the delay is set to 0
@@ -41,17 +39,17 @@ export {
 			virtual void Input(std::string input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, std::string data);
 			void Input(const std::string input, pragma::ecs::BaseEntity *activator = nullptr, pragma::ecs::BaseEntity *caller = nullptr);
 			virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
-		protected:
+		  protected:
 			virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 			BaseIOComponent(pragma::ecs::BaseEntity &ent);
 			bool FireSingleOutput(Output &output, pragma::ecs::BaseEntity *activator, IoFlags flags = IoFlags::None);
 
 			std::unordered_map<std::string, std::vector<Output>> m_outputs;
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::BaseIOComponent::IoFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::BaseIOComponent::IoFlags> : std::true_type {};
+	}
 };

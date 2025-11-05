@@ -5,14 +5,11 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.debug_hitbox;
 import :debug;
 import :engine;
-
 
 using namespace pragma;
 

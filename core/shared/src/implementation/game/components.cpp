@@ -2,13 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
 module pragma.shared;
 
 import :game.game;
-
 
 void pragma::Game::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
 {

@@ -3,10 +3,7 @@
 
 module;
 
-
-
 module pragma.client;
-
 
 import :rendering.prepass;
 import :debug;
@@ -14,7 +11,6 @@ import :engine;
 import :entities.components;
 import :game;
 import :gui;
-
 
 bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context, uint32_t width, uint32_t height, prosper::SampleCountFlags samples, bool bExtended)
 {

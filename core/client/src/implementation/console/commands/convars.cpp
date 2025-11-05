@@ -31,7 +31,8 @@ namespace {
 
 	auto UVN = register_variable<udm::Boolean>("debug_render_lock_render_queues", false, pragma::console::ConVarFlags::None, "Locks the current render queues and effectively disables the render queue thread.");
 	auto UVN = register_variable<udm::Boolean>("debug_render_lock_render_command_buffers", false, pragma::console::ConVarFlags::None, "Locks the current render command buffers and causes them to not be re-created every frame.");
-	auto UVN = register_variable<udm::Boolean>("debug_render_normals", false, pragma::console::ConVarFlags::Cheat, "Displays all normals as lines in the world. 0 = Disabled, 1 = Display normals, 2 = Display normals, tangents and bitangents, 3 = Display face normals, 4 = Display tangents, 5 = Display bitangents.");
+	auto UVN = register_variable<udm::Boolean>("debug_render_normals", false, pragma::console::ConVarFlags::Cheat,
+	  "Displays all normals as lines in the world. 0 = Disabled, 1 = Display normals, 2 = Display normals, tangents and bitangents, 3 = Display face normals, 4 = Display tangents, 5 = Display bitangents.");
 	auto UVN = register_variable<udm::Boolean>("cl_show_fps", false, pragma::console::ConVarFlags::None, "Displays the current fps at the top left of the screen if enabled.");
 
 	auto UVN = register_variable<udm::Boolean>("render_vsync_enabled", true, pragma::console::ConVarFlags::Archive, "1 = Vertical sync enabled, 0 = disabled.");
@@ -50,7 +51,7 @@ namespace {
 	auto UVN = register_variable<udm::Boolean>("render_draw_particles", true, pragma::console::ConVarFlags::Cheat, "1 = Default, 0 = Particles aren't drawn.");
 	auto UVN = register_variable<udm::Boolean>("render_draw_glow", true, pragma::console::ConVarFlags::Cheat, "1 = Default, 0 = Glow-effects aren't drawn.");
 	auto UVN = register_variable<udm::Boolean>("render_clear_scene", false, pragma::console::ConVarFlags::None, "0 = Default, 1 = Screen is cleared before scene is rendered.");
-	auto UVN = register_variable<udm::Vector4i>("render_clear_scene_color", Vector4i{0, 0, 0, 255}, pragma::console::ConVarFlags::None, "Clear color to use if render_clear_scene is set to 1.");
+	auto UVN = register_variable<udm::Vector4i>("render_clear_scene_color", Vector4i {0, 0, 0, 255}, pragma::console::ConVarFlags::None, "Clear color to use if render_clear_scene is set to 1.");
 	auto UVN = register_variable<udm::UInt32>("render_forwardplus_tile_size", 16, pragma::console::ConVarFlags::None, "Changes the tile size used for the light culling in forward+.");
 	auto UVN = register_variable<udm::UInt8>("render_technique", 0, pragma::console::ConVarFlags::None, "0 = Rasterization, 1 = Raytracing");
 	auto UVN = register_variable<udm::String>("sky_override", "", pragma::console::ConVarFlags::None, "Replaces the material for all current skyboxes with the specified material.");

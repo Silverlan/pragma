@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.lights.directional;
 
 import :entities;
@@ -15,19 +14,19 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SLightDirectionalComponent final : public BaseEnvLightDirectionalComponent, public SBaseNetComponent {
-		public:
+		  public:
 			SLightDirectionalComponent(pragma::ecs::BaseEntity &ent) : BaseEnvLightDirectionalComponent(ent) {};
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual void SetAmbientColor(const Color &color) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual void InitializeLuaObject(lua_State *l) override;
-		protected:
+		  protected:
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		};
 	};
 
 	class DLLSERVER EnvLightDirectional : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

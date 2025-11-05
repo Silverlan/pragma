@@ -3,16 +3,13 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :entities.components.light_map;
 import :client_state;
 import :engine;
 import :game;
 import source_engine.bsp;
-
 
 using namespace pragma;
 

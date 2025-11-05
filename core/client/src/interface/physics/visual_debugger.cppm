@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:physics.visual_debugger;
 
 export import :entities.components.camera;
@@ -15,7 +14,7 @@ export import pragma.prosper;
 
 export {
 	class DLLCLIENT CPhysVisualDebugger : public pragma::physics::IVisualDebugger {
-	public:
+	  public:
 		static constexpr uint32_t MAX_LINES = 250'000;
 		static constexpr uint32_t LINE_SIZE = sizeof(Vector3) * 2;
 
@@ -33,11 +32,11 @@ export {
 		virtual void DrawTriangle(const Vector3 &v0, const Vector3 &v1, const Vector3 &v2, const Color &c0, const Color &c1, const Color &c2) override;
 		virtual void ReportErrorWarning(const std::string &str) override;
 		virtual void DrawText(const std::string &str, const Vector3 &location, const Color &color, float size) override;
-	protected:
+	  protected:
 		void InitializeBuffers();
 		virtual void Reset() override;
 		virtual void Flush() override;
-	private:
+	  private:
 		template<uint32_t TMAX_INSTANCES, uint32_t TVERTS_PER_INSTANCE>
 		struct DataBuffer {
 			static constexpr auto MAX_INSTANCES = TMAX_INSTANCES;

@@ -74,7 +74,8 @@ void CMD_debug_light_shadowmap(NetworkState *nw, pragma::BasePlayerComponent *, 
 	pElSm->Update();
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_light_shadowmap", &CMD_debug_light_shadowmap, pragma::console::ConVarFlags::None, "Displays the depth map for the given light on screen. Call without arguments to turn the display off. Usage: debug_light_shadowmap <lightEntityIndex>");
+	auto UVN = pragma::console::client::register_command("debug_light_shadowmap", &CMD_debug_light_shadowmap, pragma::console::ConVarFlags::None,
+	  "Displays the depth map for the given light on screen. Call without arguments to turn the display off. Usage: debug_light_shadowmap <lightEntityIndex>");
 }
 static void CVAR_CALLBACK_cl_render_shadow_pssm_split_count(NetworkState *state, const ConVar &, int, int)
 {
@@ -83,4 +84,6 @@ static void CVAR_CALLBACK_cl_render_shadow_pssm_split_count(NetworkState *state,
 	std::vector<std::string> argv = {std::to_string(shadowmapTargetIdx), std::to_string(shadowmapWidth), std::to_string(shadowmapHeight)};
 	CMD_debug_light_shadowmap(state, nullptr, argv);
 }
-namespace { auto _ = pragma::console::client::register_variable_listener<int>("cl_render_shadow_pssm_split_count",&CVAR_CALLBACK_cl_render_shadow_pssm_split_count); }
+namespace {
+	auto _ = pragma::console::client::register_variable_listener<int>("cl_render_shadow_pssm_split_count", &CVAR_CALLBACK_cl_render_shadow_pssm_split_count);
+}

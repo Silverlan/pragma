@@ -4,9 +4,7 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :scripting.lua.classes.texture;
 std::shared_ptr<prosper::Texture> Lua::Texture::GetVkTexture(lua_State *l, msys::Texture &tex)

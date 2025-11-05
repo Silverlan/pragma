@@ -7,10 +7,10 @@ module;
 export module pragma.shared:audio.effect_params;
 
 export {
-    struct DLLNETWORK SoundEffectParams {
-        SoundEffectParams(float gain = 1.f, float gainHF = 1.f, float gainLF = 1.f);
-        float gain = 1.f;
-        float gainHF = 1.f; // For low-pass and band-pass filters
-        float gainLF = 1.f; // For high-pass and band-pass filters
-    };
+	struct DLLNETWORK SoundEffectParams {
+		SoundEffectParams(float gain = 1.f, float gainHF = 1.f, float gainLF = 1.f);
+		float gain = 1.f;
+		float gainHF = 1.f; // For low-pass and band-pass filters
+		float gainLF = 1.f; // For high-pass and band-pass filters
+	};
 };

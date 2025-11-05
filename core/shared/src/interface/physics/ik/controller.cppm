@@ -10,7 +10,7 @@ export import :physics.ik.method;
 
 export {
 	class DLLNETWORK IKController : public std::enable_shared_from_this<IKController> {
-	public:
+	  public:
 		IKController(const std::string &effectorName, uint32_t chainLength, const std::string &type, util::ik::Method method = util::ik::Method::Default);
 		IKController(const IKController &other);
 
@@ -30,7 +30,7 @@ export {
 
 		bool operator==(const IKController &other) const;
 		bool operator!=(const IKController &other) const { return !operator==(other); }
-	protected:
+	  protected:
 		std::string m_effectorName;
 		std::string m_type;
 		uint32_t m_chainLength = 0u;

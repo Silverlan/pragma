@@ -175,7 +175,7 @@ const util::Uuid &pragma::ModelSubMesh::GetUuid() const { return m_uuid; }
 void pragma::ModelSubMesh::SetUuid(const util::Uuid &uuid) { m_uuid = uuid; }
 const std::string &pragma::ModelSubMesh::GetName() const { return m_name; }
 void pragma::ModelSubMesh::SetName(const std::string &name) { m_name = name; }
-udm::PropertyWrapper pragma::ModelSubMesh::GetExtensionData() const { return udm::PropertyWrapper{*m_extensions}; }
+udm::PropertyWrapper pragma::ModelSubMesh::GetExtensionData() const { return udm::PropertyWrapper {*m_extensions}; }
 bool pragma::ModelSubMesh::operator==(const pragma::ModelSubMesh &other) const { return this == &other; }
 bool pragma::ModelSubMesh::operator!=(const pragma::ModelSubMesh &other) const { return !operator==(other); }
 bool pragma::ModelSubMesh::IsEqual(const pragma::ModelSubMesh &other) const

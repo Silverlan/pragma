@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:game.animation_channel_cache_data;
 
 import pragma.math;

@@ -4,7 +4,7 @@ module;
 
 #include "definitions.hpp"
 
-export module pragma.shared:math.print;                                                                                                                                                                                                                                                          \
+export module pragma.shared:math.print;
 
 export import :console.output;
 

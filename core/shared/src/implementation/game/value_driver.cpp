@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 module pragma.shared;
 
 import :game.value_driver;

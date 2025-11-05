@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.func_brush;
 
 export import :entities.base_entity;
@@ -15,7 +13,7 @@ export import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLCLIENT CBrushComponent final : public BaseFuncBrushComponent, public CBaseNetComponent {
-		public:
+		  public:
 			CBrushComponent(pragma::ecs::BaseEntity &ent) : BaseFuncBrushComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void ReceiveData(NetPacket &packet) override;
@@ -26,7 +24,7 @@ export {
 	};
 
 	class DLLCLIENT CFuncBrush : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 }

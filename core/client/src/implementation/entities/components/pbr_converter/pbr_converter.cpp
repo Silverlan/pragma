@@ -5,16 +5,13 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.util_pbr_converter;
 import :client_state;
 import :engine;
 import :game;
 import :rendering.shaders;
-
 
 using namespace pragma;
 

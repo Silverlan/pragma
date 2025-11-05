@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:rendering.render_context;
 export import pragma.platform;
 export import pragma.prosper;

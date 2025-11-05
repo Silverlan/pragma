@@ -4,9 +4,7 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :scripting.lua.libraries.ents;
 import :client_state;
@@ -16,7 +14,6 @@ import :entities.components.render;
 import :entities.components.view_body;
 import :entities.components.view_model;
 import :game;
-
 
 int Lua::ents::Client::get_local_player(lua_State *l)
 {

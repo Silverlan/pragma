@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 #ifndef DLLSPEC_ISTEAMWORKS
 #define DLLSPEC_ISTEAMWORKS
 #endif
@@ -14,9 +13,8 @@ export import pragma.util;
 export struct DLLSPEC_ISTEAMWORKS ISteamworks final {
 	ISteamworks(util::Library &lib)
 	    : initialize {lib.FindSymbolAddress<decltype(initialize)>("wv_steamworks_initialize")}, get_build_id {lib.FindSymbolAddress<decltype(get_build_id)>("wv_steamworks_get_build_id")}, shutdown {lib.FindSymbolAddress<decltype(shutdown)>("wv_steamworks_shutdown")},
-	      update_subscribed_items {lib.FindSymbolAddress<decltype(update_subscribed_items)>("wv_steamworks_update_subscribed_items")}, subscribe_item {lib.FindSymbolAddress<decltype(subscribe_item)>("wv_steamworks_subscribe_item")}, unsubscribe_item {
-	                                                                                                                                                                                                                                       lib.FindSymbolAddress<decltype(unsubscribe_item)>(
-	                                                                                                                                                                                                                                         "wv_steamworks_unsubscribe_item")}
+	      update_subscribed_items {lib.FindSymbolAddress<decltype(update_subscribed_items)>("wv_steamworks_update_subscribed_items")}, subscribe_item {lib.FindSymbolAddress<decltype(subscribe_item)>("wv_steamworks_subscribe_item")},
+	      unsubscribe_item {lib.FindSymbolAddress<decltype(unsubscribe_item)>("wv_steamworks_unsubscribe_item")}
 	{
 		m_bValid = initialize != nullptr && get_build_id != nullptr && shutdown != nullptr;
 	}

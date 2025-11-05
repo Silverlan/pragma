@@ -14,7 +14,6 @@ import se_script;
 
 using namespace pragma;
 
-
 static auto cvFlexPhonemeDrag = GetClientConVar("cl_flex_phoneme_drag");
 
 ComponentEventId CFlexComponent::EVENT_ON_FLEX_CONTROLLERS_UPDATED = INVALID_COMPONENT_ID;
@@ -351,31 +350,31 @@ void CFlexComponent::UpdateSoundPhonemes(CALSound &snd)
 }
 
 namespace Lua::Flex {
-    std::optional<float> GetFlexController(pragma::CFlexComponent &hEnt, uint32_t flexId)
-    {
-        auto val = 0.f;
-        if(hEnt.GetFlexController(flexId, val) == false)
-            return {};
-        return val;
-    }
-    std::optional<float> GetFlexController(pragma::CFlexComponent &hEnt, const std::string &flexController)
-    {
-        auto flexId = 0u;
-        auto mdlComponent = hEnt.GetEntity().GetModelComponent();
-        if(!mdlComponent || mdlComponent->LookupFlexController(flexController, flexId) == false)
-            return {};
-        auto val = 0.f;
-        if(hEnt.GetFlexController(flexId, val) == false)
-            return {};
-        return val;
-    }
-    std::optional<float> CalcFlexValue(pragma::CFlexComponent &hEnt, uint32_t flexId)
-    {
-        auto val = 0.f;
-        if(hEnt.CalcFlexValue(flexId, val) == false)
-            return {};
-        return val;
-    }
+	std::optional<float> GetFlexController(pragma::CFlexComponent &hEnt, uint32_t flexId)
+	{
+		auto val = 0.f;
+		if(hEnt.GetFlexController(flexId, val) == false)
+			return {};
+		return val;
+	}
+	std::optional<float> GetFlexController(pragma::CFlexComponent &hEnt, const std::string &flexController)
+	{
+		auto flexId = 0u;
+		auto mdlComponent = hEnt.GetEntity().GetModelComponent();
+		if(!mdlComponent || mdlComponent->LookupFlexController(flexController, flexId) == false)
+			return {};
+		auto val = 0.f;
+		if(hEnt.GetFlexController(flexId, val) == false)
+			return {};
+		return val;
+	}
+	std::optional<float> CalcFlexValue(pragma::CFlexComponent &hEnt, uint32_t flexId)
+	{
+		auto val = 0.f;
+		if(hEnt.CalcFlexValue(flexId, val) == false)
+			return {};
+		return val;
+	}
 };
 
 void CFlexComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)

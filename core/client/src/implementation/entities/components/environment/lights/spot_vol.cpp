@@ -17,7 +17,6 @@ import :scripting.lua;
 
 using namespace pragma;
 
-
 void CLightSpotVolComponent::Initialize()
 {
 	auto &ent = GetEntity();

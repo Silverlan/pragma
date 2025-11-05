@@ -3,7 +3,6 @@
 
 module;
 
-
 #include <cassert>
 
 module pragma.client;
@@ -15,7 +14,6 @@ import :debug;
 import :entities.components;
 import :game;
 import :gui;
-
 
 decltype(CParticleRendererBlob::s_bShowNeighborLinks) CParticleRendererBlob::s_bShowNeighborLinks = false;
 decltype(CParticleRendererBlob::s_dsParticles) CParticleRendererBlob::s_dsParticles = nullptr;
@@ -253,13 +251,16 @@ void CParticleRendererBlob::OnParticleSystemStarted()
 #endif
 }
 
-namespace { auto _ = pragma::console::client::register_variable_listener<bool>("debug_particle_blob_show_neighbor_links", +[](NetworkState *state, const ConVar &, bool, bool val) {
-	if(!check_cheats("debug_particle_blob_show_neighbor_links", state))
-		return;
-	if(pragma::get_cgame() == nullptr)
-		return;
-	CParticleRendererBlob::SetShowNeighborLinks(val);
-}); };
+namespace {
+	auto _ = pragma::console::client::register_variable_listener<bool>(
+	  "debug_particle_blob_show_neighbor_links", +[](NetworkState *state, const ConVar &, bool, bool val) {
+		  if(!check_cheats("debug_particle_blob_show_neighbor_links", state))
+			  return;
+		  if(pragma::get_cgame() == nullptr)
+			  return;
+		  CParticleRendererBlob::SetShowNeighborLinks(val);
+	  });
+};
 
 void CParticleRendererBlob::OnParticleSystemStopped()
 {

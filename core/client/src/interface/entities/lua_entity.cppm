@@ -5,22 +5,20 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.lua;
 
 export import :entities.base_entity;
 
 export {
 	class DLLCLIENT CLuaEntity : public CBaseEntity {
-	public:
+	  public:
 		CLuaEntity();
 		virtual void Initialize() override;
 		void SetupLua(const luabind::object &o, const std::string &className);
 
 		void LuaInitialize() {}
 		static void default_Initialize(CBaseEntity *ent);
-	protected:
+	  protected:
 		virtual void InitializeLuaObject(lua_State *lua) override;
 	};
 };

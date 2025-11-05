@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :entities.components.rasterization_renderer;
@@ -11,7 +10,6 @@ import :game;
 import :rendering.shaders;
 
 using namespace pragma::rendering;
-
 
 void pragma::CRasterizationRendererComponent::RenderSSAO(const util::DrawSceneInfo &drawSceneInfo)
 {

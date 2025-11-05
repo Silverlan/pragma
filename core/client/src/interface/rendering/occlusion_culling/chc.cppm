@@ -71,7 +71,9 @@ export class DLLCLIENT CHCQuery {
 	uint32_t GetResult() const;
 };
 
-export namespace pragma {class CCameraComponent;};
+export namespace pragma {
+	class CCameraComponent;
+};
 export class DLLCLIENT CHC {
   public:
 	friend CHCNode;

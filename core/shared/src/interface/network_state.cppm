@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:network_state;
 
 export import :assets.common;
@@ -17,18 +15,17 @@ export import :engine.enums;
 export import :input.enums;
 export import :map.map_info;
 
-
 export import :types;
 export import :util.resource_watcher;
 
 export {
 	class DLLNETWORK NetworkState : public util::CallbackHandler, public CVarHandler {
 		// For internal use only! Not to be used directly!
-	protected:
+	  protected:
 		static ConVarHandle GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ptrs, std::string scvar);
-	public:
+	  public:
 		virtual std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &GetConVarPtrs() = 0;
-	public:
+	  public:
 		// Internal
 		std::vector<CallbackHandle> &GetLuaEnumRegisterCallbacks();
 		void TerminateLuaModules(lua::State *l);
@@ -85,7 +82,7 @@ export {
 		std::vector<ALSoundRef> m_sounds;
 		std::unordered_map<std::string, std::shared_ptr<SoundCacheInfo>> m_soundsPrecached;
 		void UpdateSounds(std::vector<std::shared_ptr<ALSound>> &sounds);
-	public:
+	  public:
 		NetworkState();
 		virtual ~NetworkState();
 		virtual bool IsServer() const;
@@ -138,7 +135,7 @@ export {
 		ConVar *RegisterConVar(const std::string &scmd, const std::shared_ptr<ConVar> &cvar);
 		void UnregisterConVar(const std::string &scmd);
 		virtual ConCommand *CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags = pragma::console::ConVarFlags::None, const std::string &help = "");
-	protected:
+	  protected:
 		virtual msys::Material *LoadMaterial(const std::string &path, bool precache, bool bReload);
 
 		static UInt8 STATE_COUNT;

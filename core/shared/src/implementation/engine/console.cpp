@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
 #ifdef __linux__
 
 #include <pthread.h>

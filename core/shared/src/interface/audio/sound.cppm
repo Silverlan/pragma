@@ -4,10 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
-
-
 export module pragma.shared:audio.sound;
 
 export import :audio.effect_params;
@@ -31,10 +27,10 @@ export {
 		float gain;
 	};
 
-	#pragma warning(push)
-	#pragma warning(disable : 4251)
+#pragma warning(push)
+#pragma warning(disable : 4251)
 	class DLLNETWORK ALSound : virtual public util::inheritable_enable_shared_from_this<ALSound>, virtual public util::CallbackHandler, public LuaCallbackHandler {
-	public:
+	  public:
 		enum class NetEvent : uint8_t {
 			Play = 0,
 			Stop,
@@ -81,7 +77,7 @@ export {
 			SetEffectParameters,
 			SetEntityMapIndex
 		};
-	protected:
+	  protected:
 		unsigned int m_index = 0;
 		void CheckStateChange(ALState old);
 		float m_lastOffset = 0.f;
@@ -100,7 +96,7 @@ export {
 		virtual void UpdateState();
 		void UpdateOffset();
 		void InitRange();
-	public:
+	  public:
 		ALSound(NetworkState *nw);
 		virtual ~ALSound();
 		virtual void Initialize();
@@ -223,5 +219,5 @@ export {
 		float GetLastTimeOffset() const;
 		float GetDeltaTimeOffset() const;
 	};
-	#pragma warning(pop)
+#pragma warning(pop)
 };

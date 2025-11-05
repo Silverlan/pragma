@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 export module pragma.shared:entities.member_type;
 
 export import :entities.enums;
@@ -18,12 +17,12 @@ export {
 		};
 		template<class T>
 		constexpr tag_t<T> tag = {};
-	#pragma warning(push)
-	#pragma warning(disable : 4715)
-	#ifdef __linux__
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wreturn-type"
-	#endif
+#pragma warning(push)
+#pragma warning(disable : 4715)
+#ifdef __linux__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
+#endif
 		constexpr std::variant<tag_t<EntityURef>, tag_t<MultiEntityURef>, tag_t<EntityUComponentMemberRef>, tag_t<Element>> get_managed_member_type_tag(EntityMemberType e)
 		{
 			switch(e) {
@@ -47,18 +46,18 @@ export {
 				return udm::visit<true, true, true, ENABLE_DEFAULT_RETURN>(member_type_to_udm_type(type), vs);
 		}
 
-	#pragma warning(pop)
-	#ifdef __linux__
-	#pragma GCC diagnostic pop
-	#endif
+#pragma warning(pop)
+#ifdef __linux__
+#pragma GCC diagnostic pop
+#endif
 
 		template<typename T>
 		concept is_managed_member_type = std::is_same_v<T, EntityURef> || std::is_same_v<T, MultiEntityURef> || std::is_same_v<T, EntityUComponentMemberRef> || std::is_same_v<T, Element>;
 	};
 
 	namespace pragma {
-	    namespace ents {
-	        template<typename T>
+		namespace ents {
+			template<typename T>
 			constexpr EntityMemberType member_type_to_enum()
 			{
 				if constexpr(is_managed_member_type<T>) {
@@ -74,7 +73,7 @@ export {
 				else
 					return static_cast<EntityMemberType>(udm::type_to_enum<T>());
 			}
-	    };
+		};
 
 		template<typename T>
 		concept is_valid_component_property_type_v = is_valid_component_property_type(pragma::ents::member_type_to_enum<T>());

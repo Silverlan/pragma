@@ -5,7 +5,6 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
 
 import :entities.components.pp_bloom;
@@ -13,7 +12,6 @@ import :entities.components.rasterization_renderer;
 import :engine;
 import :game;
 import :rendering.shaders;
-
 
 using namespace pragma;
 

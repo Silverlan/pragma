@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :gui.net_graph;
@@ -11,7 +10,6 @@ import :client_state;
 import :engine;
 import :game;
 import pragma.string.unicode;
-
 
 static const uint32_t DATA_RECORD_BACKLOG = 30;
 

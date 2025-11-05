@@ -10,12 +10,11 @@ export import :entities.components.base;
 export import :entities.universal_reference;
 
 export namespace pragma {
-		namespace baseChildComponent {
+	namespace baseChildComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PARENT_CHANGED;
 	}
-class DLLNETWORK BaseChildComponent : public BaseEntityComponent {
+	class DLLNETWORK BaseChildComponent : public BaseEntityComponent {
 	  public:
-
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 

@@ -3,12 +3,9 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.view_model;
 import :entities.components.animated;
@@ -52,7 +49,7 @@ void CViewModelComponent::Initialize()
 			animComponent->PlayActivity(pragma::Activity::VmIdle);
 	});
 	BindEventUnhandled(CAnimatedComponent::EVENT_ON_ANIMATION_RESET, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto *wepC = static_cast<pragma::CWeaponComponent*>(GetWeapon());
+		auto *wepC = static_cast<pragma::CWeaponComponent *>(GetWeapon());
 		if(wepC)
 			wepC->UpdateDeployState();
 	});
@@ -117,7 +114,7 @@ void CViewModelComponent::SetViewModelOffset(const Vector3 &offset)
 	auto *pl = GetPlayer();
 	if(pl == nullptr)
 		return;
-	static_cast<CPlayerComponent*>(pl)->UpdateViewModelTransform();
+	static_cast<CPlayerComponent *>(pl)->UpdateViewModelTransform();
 }
 const Vector3 &CViewModelComponent::GetViewModelOffset() const { return m_viewModelOffset; }
 void CViewModelComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

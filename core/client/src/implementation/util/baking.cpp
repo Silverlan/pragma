@@ -3,18 +3,12 @@
 
 module;
 
-
-
-
-
 module pragma.client;
-
 
 import :util.baking;
 import :engine;
 import :entities.components;
 import :util.image;
-
 
 // #define DEBUG_BAKE_LIGHT_WEIGHTS
 
@@ -184,8 +178,8 @@ static std::shared_ptr<uimg::ImageBuffer> generate_sh_normal_map(const std::vect
 	return imgBuf;
 }
 
-util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directional_lightmap_atlas(const std::vector<::pragma::CLightComponent *> &lights, const std::vector<pragma::ModelSubMesh *> meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width, uint32_t height,
-  ::pragma::LightmapDataCache *optLightmapDataCache)
+util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directional_lightmap_atlas(const std::vector<::pragma::CLightComponent *> &lights, const std::vector<pragma::ModelSubMesh *> meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
+  uint32_t height, ::pragma::LightmapDataCache *optLightmapDataCache)
 {
 	class LightmapBakeJob : public util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> {
 	  public:

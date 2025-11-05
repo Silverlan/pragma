@@ -5,19 +5,15 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
-
-
-
 export module pragma.server:networking.resource;
 
 export import pragma.filesystem;
 
 export {
-	#pragma warning(push)
-	#pragma warning(disable : 4251)
-	struct DLLSERVER Resource
-	{
-		Resource(std::string name,bool bStream=true);
+#pragma warning(push)
+#pragma warning(disable : 4251)
+	struct DLLSERVER Resource {
+		Resource(std::string name, bool bStream = true);
 		~Resource();
 		bool Construct();
 		std::string name;
@@ -25,5 +21,5 @@ export {
 		std::shared_ptr<VFilePtrInternal> file;
 		bool stream;
 	};
-	#pragma warning(pop)
+#pragma warning(pop)
 }

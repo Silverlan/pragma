@@ -3,10 +3,8 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
 #include <cassert>
-
 
 module pragma.server;
 import :game;
@@ -92,7 +90,7 @@ void SGame::SpawnEntity(pragma::ecs::BaseEntity *ent) // Don't call directly
 	if(ID != std::nullopt && (pMapComponent.valid() == false || pMapComponent->GetMapIndex() == 0)) {
 		pragma::networking::ClientRecipientFilter rp {[](const pragma::networking::IServerClient &client) -> bool {
 			auto *pl = client.GetPlayer();
-			return pl && static_cast<pragma::SPlayerComponent*>(pl)->IsAuthed();
+			return pl && static_cast<pragma::SPlayerComponent *>(pl)->IsAuthed();
 		}};
 		SBaseEntity *sent = static_cast<SBaseEntity *>(ent);
 		NetPacket p;

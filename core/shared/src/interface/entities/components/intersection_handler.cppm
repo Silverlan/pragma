@@ -4,9 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
-
 export module pragma.shared:entities.components.intersection_handler;
 
 export import :entities.components.base;

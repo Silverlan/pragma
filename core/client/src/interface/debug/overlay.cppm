@@ -5,8 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
-
 export module pragma.client:debug.overlay;
 import :client_state;
 import :engine;
@@ -156,7 +154,7 @@ export namespace DebugRenderer {
 	std::array<std::shared_ptr<DebugRenderer::BaseObject>, 3> DrawAxis(const DebugRenderInfo &renderInfo);
 	void ClearObjects();
 	void Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pragma::CCameraComponent &cam);
-	
+
 	using namespace umath::scoped_enum::bitwise;
 };
 export {

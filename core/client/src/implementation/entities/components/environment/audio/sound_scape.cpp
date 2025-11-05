@@ -4,8 +4,6 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
 
 import :entities.components.audio.sound_scape;
@@ -18,7 +16,6 @@ namespace pragma {
 };
 
 CSoundScapeComponent *CSoundScapeComponent::s_active = nullptr;
-
 
 CSoundScapeComponent::~CSoundScapeComponent()
 {

@@ -4,10 +4,6 @@
 module;
 #include "pragma/logging.hpp"
 
-
-
-
-
 #include <spdlog/pattern_formatter.h>
 
 module pragma.client;

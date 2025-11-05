@@ -5,9 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
-
-
 export module pragma.client:gui.main_menu_options;
 
 import :gui.checkbox;
@@ -15,12 +12,12 @@ export import :gui.main_menu_base;
 
 export {
 	class DLLCLIENT WIMainMenuOptions : public WIMainMenuBase {
-	public:
+	  public:
 		WIMainMenuOptions();
 		virtual ~WIMainMenuOptions() override;
 		virtual void Initialize() override;
 		virtual void Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd) override;
-	protected:
+	  protected:
 		std::vector<WIHandle> m_labels;
 		WIHandle m_hResolutionList;
 		WIHandle m_hVSync;

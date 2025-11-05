@@ -3,7 +3,6 @@
 
 module;
 
-
 // #define PRAGMA_ENABLE_SHADER_DEBUG_PRINT
 
 export module pragma.client:rendering.global_render_settings_buffer_data;

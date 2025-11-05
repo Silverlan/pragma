@@ -3,11 +3,8 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
 #include "pragma/console/helper.hpp"
-
-
 
 module pragma.client;
 
@@ -16,7 +13,6 @@ import :client_state;
 import :engine;
 import :game;
 import :rendering.shaders;
-
 
 using namespace pragma;
 
@@ -316,7 +312,9 @@ static void sky_override(NetworkState *, const ConVar &, std::string, std::strin
 	for(auto *ent : entIt)
 		ent->GetComponent<CSkyboxComponent>()->SetSkyMaterial(matSky);
 }
-namespace { auto _ = pragma::console::client::register_variable_listener<std::string>("sky_override", &sky_override); }
+namespace {
+	auto _ = pragma::console::client::register_variable_listener<std::string>("sky_override", &sky_override);
+}
 
 enum class ConversionMode : uint8_t { CubemapToEquirectangular = 0, EquirectangularToCubemap };
 
@@ -429,4 +427,3 @@ namespace {
 	auto UVN = pragma::console::client::register_command("util_convert_cubemap_to_equirectangular_image", &util_convert_cubemap_to_equirectangular_image, pragma::console::ConVarFlags::None, "Converts a cubemap to a equirectangular image.");
 	auto UVN = pragma::console::client::register_command("util_convert_equirectangular_image_to_cubemap", &util_convert_equirectangular_image_to_cubemap, pragma::console::ConVarFlags::None, "Converts a equirectangular image to a cubemap.");
 }
-

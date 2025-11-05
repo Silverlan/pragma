@@ -3,13 +3,11 @@
 
 module;
 
-
 module pragma.client;
 
 import :rendering.shaders.base_3d;
 
 import :engine;
-
 
 using namespace pragma;
 

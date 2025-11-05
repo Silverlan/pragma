@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.base_ai;
 
 export import :entities.components.base;
@@ -47,7 +45,7 @@ export {
 		};
 
 		class DLLNETWORK BaseAIComponent : public BaseEntityComponent {
-		public:
+		  public:
 			enum class MoveResult : uint32_t { TargetUnreachable = 0, TargetReached, WaitingForPath, MovingToTarget };
 			enum class SnapshotFlags : uint8_t { None = 0u, Moving = 1u, MoveSpeed = Moving << 1, TurnSpeed = MoveSpeed << 1u, FaceTarget = TurnSpeed << 1u };
 			static const char *MoveResultToString(MoveResult result);
@@ -94,13 +92,13 @@ export {
 			bool CanMove() const;
 
 			float GetMaxSpeed(bool bUseAnimSpeedIfAvailable = true) const;
-		protected:
+		  protected:
 			virtual void OnModelChanged(const std::shared_ptr<pragma::Model> &model);
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 			static std::atomic<uint32_t> s_npcCount;
 			static std::shared_ptr<ai::navigation::NavThread> s_navThread;
 			//
-		protected:
+		  protected:
 			BaseAIComponent(pragma::ecs::BaseEntity &ent);
 			virtual ~BaseAIComponent() override;
 			void UpdateMovementProperties();
@@ -178,10 +176,10 @@ export {
 			Vector3 CalcMovementDirection() const;
 			virtual bool IsObstruction(const pragma::ecs::BaseEntity &ent) const;
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::BaseAIComponent::SnapshotFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::BaseAIComponent::SnapshotFlags> : std::true_type {};
+	}
 };

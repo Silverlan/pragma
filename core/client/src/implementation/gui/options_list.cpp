@@ -3,8 +3,6 @@
 
 module;
 
-
-
 module pragma.client;
 
 import :gui.options_list;

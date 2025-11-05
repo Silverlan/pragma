@@ -2,10 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
-
 module pragma.shared;
 
 import :scripting.lua.classes.physics;
@@ -475,11 +471,12 @@ void Lua::PhysConstraint::register_class(lua::State *l, luabind::module_ &mod)
 			return;
 		constraint->EnableSpring(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type), static_cast<pragma::Axis>(axis), enable);
 	}));
-	doFSprintClassDef.def("SetStiffness", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, uint32_t, uint32_t, double, bool)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, uint32_t type, uint32_t axis, double stiffness, bool limitIfNeeded) {
-		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
-			return;
-		constraint->SetStiffness(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type), static_cast<pragma::Axis>(axis), stiffness, limitIfNeeded);
-	}));
+	doFSprintClassDef.def("SetStiffness",
+	  static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, uint32_t, uint32_t, double, bool)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, uint32_t type, uint32_t axis, double stiffness, bool limitIfNeeded) {
+		  if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
+			  return;
+		  constraint->SetStiffness(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type), static_cast<pragma::Axis>(axis), stiffness, limitIfNeeded);
+	  }));
 	doFSprintClassDef.def("SetStiffness", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, uint32_t, uint32_t, double)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, uint32_t type, uint32_t axis, double stiffness) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
 			return;

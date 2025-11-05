@@ -10,14 +10,14 @@ export {
 	template<int nodeCount>
 	class OctTreeNode;
 	class DLLNETWORK BaseOctTreeNode {
-	public:
+	  public:
 		template<int>
 		friend class OctTreeNode;
-	protected:
+	  protected:
 		BaseOctTreeNode(BaseOctTreeNode *parent = nullptr);
 		BaseOctTreeNode *m_parent;
 		unsigned char m_activeNodes;
-	public:
+	  public:
 		virtual ~BaseOctTreeNode() = default;
 		virtual BaseOctTreeNode *GetParent();
 		bool HasChildren();
@@ -28,9 +28,9 @@ export {
 
 	template<int nodeCount>
 	class OctTreeNode : public BaseOctTreeNode {
-	protected:
+	  protected:
 		OctTreeNode *m_children[nodeCount];
-	public:
+	  public:
 		OctTreeNode(OctTreeNode<nodeCount> *parent = nullptr) : BaseOctTreeNode(parent)
 		{
 			for(unsigned int i = 0; i < nodeCount; i++)
@@ -44,17 +44,8 @@ export {
 			}
 		}
 		virtual bool IsLeaf() = 0;
-		unsigned char GetChildCount()
-		{
-			return nodeCount;
-		}
-		OctTreeNode *GetParent()
-		{
-			return static_cast<OctTreeNode<nodeCount> *>(m_parent);
-		}
-		virtual OctTreeNode *GetChild(unsigned char idx) override
-		{
-			return m_children[idx];
-		}
+		unsigned char GetChildCount() { return nodeCount; }
+		OctTreeNode *GetParent() { return static_cast<OctTreeNode<nodeCount> *>(m_parent); }
+		virtual OctTreeNode *GetChild(unsigned char idx) override { return m_children[idx]; }
 	};
 };

@@ -7,13 +7,11 @@ module;
 
 module pragma.client;
 
-
 import :entities.components.util_pbr_converter;
 import :client_state;
 import :engine;
 
 using namespace pragma;
-
 
 PBRAOBakeJob::PBRAOBakeJob(pragma::Model &mdl, msys::Material &mat) : hModel {mdl.GetHandle()}, hMaterial {mat.GetHandle()} {}
 
@@ -63,7 +61,7 @@ void CPBRConverterComponent::ProcessQueue()
 		if(hMat == nullptr || hMdl.expired())
 			return;
 		auto imgBuffer = worker.GetResult().images.begin()->second;
-		WriteAOMap(*hMdl.get(), const_cast<msys::CMaterial&>(static_cast<const msys::CMaterial &>(*hMat.get())), *imgBuffer, imgBuffer->GetWidth(), imgBuffer->GetHeight());
+		WriteAOMap(*hMdl.get(), const_cast<msys::CMaterial &>(static_cast<const msys::CMaterial &>(*hMat.get())), *imgBuffer, imgBuffer->GetWidth(), imgBuffer->GetHeight());
 	});
 	item.job.Start();
 	pragma::get_cengine()->AddParallelJob(item.job, "Ambient Occlusion");

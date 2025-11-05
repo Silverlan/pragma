@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:model.animation.animation;
 
 import panima;
@@ -41,7 +39,7 @@ export {
 		class Skeleton;
 		class Animation;
 		class DLLNETWORK Animation : public std::enable_shared_from_this<Animation> {
-		public:
+		  public:
 			static util::EnumRegister &GetActivityEnumRegister();
 			static util::EnumRegister &GetEventEnumRegister();
 			static constexpr uint32_t PANIM_VERSION = 1;
@@ -118,7 +116,7 @@ export {
 
 			bool operator==(const Animation &other) const;
 			bool operator!=(const Animation &other) const { return !operator==(other); }
-		private:
+		  private:
 			static util::EnumRegister s_activityEnumRegister;
 			static util::EnumRegister s_eventEnumRegister;
 			bool LoadFromAssetData(const udm::AssetData &data, std::string &outErr, const pragma::animation::Skeleton *optSkeleton = nullptr, const Frame *optReference = nullptr);
@@ -141,10 +139,10 @@ export {
 			std::unique_ptr<float> m_fadeIn;
 			std::unique_ptr<float> m_fadeOut;
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::animation::Animation::ShareMode> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::animation::Animation::ShareMode> : std::true_type {};
+	}
 };

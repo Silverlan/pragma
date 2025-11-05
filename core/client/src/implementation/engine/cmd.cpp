@@ -4,10 +4,7 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 #include "pragma/lua/core.hpp"
-
-
 
 module pragma.client;
 
@@ -473,7 +470,8 @@ void CEngine::RegisterConsoleCommands()
 		  }
 	  });
 #endif
-	conVarMap.RegisterConCommand("asset_clear_unused_textures", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(pragma::asset::Type::Texture, true); }, pragma::console::ConVarFlags::None, "Clears all unused textures from memory.");
+	conVarMap.RegisterConCommand(
+	  "asset_clear_unused_textures", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(pragma::asset::Type::Texture, true); }, pragma::console::ConVarFlags::None, "Clears all unused textures from memory.");
 	conVarMap.RegisterConCommand(
 	  "vr_preinitialize",
 	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {

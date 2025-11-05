@@ -3,7 +3,6 @@
 
 module;
 
-
 export module pragma.client:rendering.entity_instance_data;
 
 export import pragma.math;

@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.base_sound_emitter;
 
 export import :entities.components.base;
@@ -14,12 +12,11 @@ export import :audio.enums;
 export import :audio.sound;
 
 export namespace pragma {
-		namespace baseSoundEmitterComponent {
+	namespace baseSoundEmitterComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SOUND_CREATED;
 	}
-class DLLNETWORK BaseSoundEmitterComponent : public BaseEntityComponent {
+	class DLLNETWORK BaseSoundEmitterComponent : public BaseEntityComponent {
 	  public:
-
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		struct DLLNETWORK SoundInfo {

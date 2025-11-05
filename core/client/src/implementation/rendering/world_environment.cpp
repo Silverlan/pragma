@@ -3,9 +3,7 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.world_environment;
 std::shared_ptr<WorldEnvironment> WorldEnvironment::Create() { return std::shared_ptr<WorldEnvironment>(new WorldEnvironment()); }

@@ -4,8 +4,6 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
 
 import :entities.components.rasterization_renderer;
@@ -18,7 +16,6 @@ import :entities.components.radius;
 import :entities.components.render;
 import :game;
 import :rendering.shaders;
-
 
 using namespace pragma;
 

@@ -3,9 +3,7 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.world_test;
 
@@ -13,7 +11,6 @@ import :client_state;
 import :engine;
 import :entities.components;
 import :model;
-
 
 using namespace pragma;
 

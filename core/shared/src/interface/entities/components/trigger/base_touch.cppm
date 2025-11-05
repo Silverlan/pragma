@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.triggers.base_touch;
 
 export import :entities.components.base;
@@ -28,15 +26,15 @@ export {
 			virtual void PushArguments(lua::State *l) override;
 			pragma::ecs::BaseEntity *entity;
 		};
-				namespace baseTouchComponent {
+		namespace baseTouchComponent {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_CAN_TRIGGER;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_START_TOUCH;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_END_TOUCH;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TRIGGER;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TRIGGER_INITIALIZED;
 		}
-class DLLNETWORK BaseTouchComponent : public BaseEntityComponent {
-		public:
+		class DLLNETWORK BaseTouchComponent : public BaseEntityComponent {
+		  public:
 			enum class TriggerFlags : uint32_t { None = 0u, Players = 1u, NPCs = Players << 1u, Physics = NPCs << 1u, Everything = Players | NPCs | Physics };
 			struct ContactEvent {
 				enum class Event : uint8_t { StartTouch = 0, EndTouch };
@@ -74,7 +72,7 @@ class DLLNETWORK BaseTouchComponent : public BaseEntityComponent {
 			void EndAllTouch();
 			virtual void OnEntitySpawn() override;
 			void SetNeverDisablePhysicsCallbacks(bool b);
-		protected:
+		  protected:
 			void UpdatePhysics();
 			bool IsTouching(pragma::ecs::BaseEntity &ent) const;
 
@@ -96,10 +94,10 @@ class DLLNETWORK BaseTouchComponent : public BaseEntityComponent {
 			virtual void OnTouch(PhysTouch &touch);
 			virtual bool IsTouchEnabled() const;
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::BaseTouchComponent::TriggerFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::BaseTouchComponent::TriggerFlags> : std::true_type {};
+	}
 };

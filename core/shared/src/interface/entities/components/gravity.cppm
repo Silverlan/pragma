@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.gravity;
 
 export import :entities.components.base;
@@ -37,7 +35,7 @@ export namespace pragma {
 	class DLLNETWORK GravityComponent final : public BaseEntityComponent, public BaseGravity {
 	  public:
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
-		
+
 		GravityComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 

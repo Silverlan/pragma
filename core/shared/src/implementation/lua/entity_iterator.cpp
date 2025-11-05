@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
 module pragma.shared;
 
 import :scripting.lua.entity_iterator;
@@ -144,8 +141,14 @@ bool LuaBaseEntityComponentIterator::operator!=(const LuaBaseEntityComponentIter
 
 ////////////
 
-LuaEntityComponentIterator::LuaEntityComponentIterator(lua::State *l, pragma::ComponentId componentId, pragma::ecs::EntityIterator::FilterFlags filterFlags) : m_iterator(std::make_shared<CEntityComponentIterator>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), componentId, filterFlags)) {}
-LuaEntityComponentIterator::LuaEntityComponentIterator(lua::State *l, const std::string &componentName, pragma::ecs::EntityIterator::FilterFlags filterFlags) : m_iterator(std::make_shared<CEntityComponentIterator>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), componentName, filterFlags)) {}
+LuaEntityComponentIterator::LuaEntityComponentIterator(lua::State *l, pragma::ComponentId componentId, pragma::ecs::EntityIterator::FilterFlags filterFlags)
+    : m_iterator(std::make_shared<CEntityComponentIterator>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), componentId, filterFlags))
+{
+}
+LuaEntityComponentIterator::LuaEntityComponentIterator(lua::State *l, const std::string &componentName, pragma::ecs::EntityIterator::FilterFlags filterFlags)
+    : m_iterator(std::make_shared<CEntityComponentIterator>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), componentName, filterFlags))
+{
+}
 LuaBaseEntityComponentIterator LuaEntityComponentIterator::begin() const { return LuaBaseEntityComponentIterator(m_iterator->begin()); }
 LuaBaseEntityComponentIterator LuaEntityComponentIterator::end() const { return LuaBaseEntityComponentIterator(m_iterator->end()); }
 void LuaEntityComponentIterator::AttachFilter(LuaEntityIteratorFilterBase &filter) { filter.Attach(*m_iterator); }

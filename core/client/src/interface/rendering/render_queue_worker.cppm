@@ -3,7 +3,6 @@
 
 module;
 
-
 #undef AddJob
 
 export module pragma.client:rendering.render_queue_worker;

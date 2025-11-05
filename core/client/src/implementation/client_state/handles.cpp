@@ -13,7 +13,6 @@ import :engine;
 import :entities.components.world;
 import :game;
 
-
 void ClientState::HandlePacket(NetPacket &packet)
 {
 	packet->SetClient(true);

@@ -3,17 +3,14 @@
 
 module;
 
-
 #include <cassert>
 
 module pragma.client;
-
 
 import :rendering.shaders.particle_2d_base;
 
 import :engine;
 import :entities.components;
-
 
 using namespace pragma;
 

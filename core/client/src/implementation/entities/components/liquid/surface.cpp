@@ -3,15 +3,9 @@
 
 module;
 
-
-
-
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
-
 
 import :entities.components.liquid_surface;
 import :client_state;
@@ -21,7 +15,6 @@ import :entities.components.render;
 import :entities.components.surface;
 import :game;
 import :rendering.shaders;
-
 
 using namespace pragma;
 

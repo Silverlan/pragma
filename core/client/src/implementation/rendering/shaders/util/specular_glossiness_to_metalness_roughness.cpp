@@ -3,14 +3,11 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.specular_glossiness_to_metalness_roughness;
 
 import :client_state;
-
 
 decltype(pragma::ShaderSpecularGlossinessToMetalnessRoughness::DESCRIPTOR_SET_TEXTURE) pragma::ShaderSpecularGlossinessToMetalnessRoughness::DESCRIPTOR_SET_TEXTURE = {
   "TEXTURES",

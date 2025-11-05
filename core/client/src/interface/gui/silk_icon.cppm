@@ -11,7 +11,7 @@ export import :gui.icon;
 
 export {
 	class DLLCLIENT WISilkIcon : public WIIcon {
-	public:
+	  public:
 		WISilkIcon();
 		virtual ~WISilkIcon() override;
 		virtual void Initialize() override;

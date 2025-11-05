@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:particle_system.initializer_lua;
 
 export import :entities.components.particle_system;
@@ -16,18 +14,18 @@ export import :particle_system.particle;
 
 export {
 	class DLLCLIENT CParticleModifierLua : public LuaObjectBase {
-	public:
+	  public:
 		void Initialize(const luabind::object &o);
 
 		void SetIdentifier(const std::string &identifier);
 		const std::string &GetIdentifier() const;
-	private:
+	  private:
 		std::string m_identifier = "";
 	};
 
 	template<class TModifier>
 	class TParticleModifierLua : public TModifier, public CParticleModifierLua {
-	public:
+	  public:
 		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
 		{
 			TModifier::Initialize(pSystem, values);
@@ -72,12 +70,12 @@ export {
 	};
 
 	class DLLCLIENT CParticleInitializerLua : public TParticleModifierLua<CParticleInitializer> {
-	public:
+	  public:
 		CParticleInitializerLua() = default;
 	};
 
 	class DLLCLIENT CParticleOperatorLua : public TParticleModifierLua<CParticleOperator> {
-	public:
+	  public:
 		CParticleOperatorLua() = default;
 		virtual void PreSimulate(CParticle &particle, double tDelta) override;
 		virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
@@ -89,7 +87,7 @@ export {
 	};
 
 	class DLLCLIENT CParticleRendererLua : public TParticleModifierLua<CParticleRenderer> {
-	public:
+	  public:
 		CParticleRendererLua() = default;
 		virtual void RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ecs::ParticleRenderFlags renderFlags) override;
 		virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId = 0) override;
@@ -98,7 +96,7 @@ export {
 
 		void Lua_Render(prosper::ICommandBuffer &drawCmd, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, bool bloom) {}
 		static void Lua_default_Render(lua_State *l, CParticleRendererLua &mod, prosper::ICommandBuffer &drawCmd, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, bool bloom) { mod.Lua_Render(drawCmd, scene, renderer, bloom); }
-	private:
+	  private:
 		pragma::ShaderParticleBase *m_shader = nullptr;
 	};
 };

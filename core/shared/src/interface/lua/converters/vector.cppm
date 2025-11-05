@@ -4,7 +4,6 @@ module;
 
 #include <cassert>
 
-
 export module pragma.shared:scripting.lua.converters.vector;
 
 export import pragma.lua;

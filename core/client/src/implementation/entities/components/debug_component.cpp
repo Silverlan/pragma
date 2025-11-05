@@ -5,16 +5,12 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
-
 
 import :entities.components.debug;
 import :debug;
 import :engine;
 import :entities.components.radius;
-
 
 using namespace pragma;
 

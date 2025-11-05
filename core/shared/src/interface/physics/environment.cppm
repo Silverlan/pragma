@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:physics.environment;
 
 export import :physics.constraint;
@@ -22,7 +21,7 @@ export {
 	namespace pragma::physics {
 		class IConstraint;
 		class DLLNETWORK IEventCallback {
-		public:
+		  public:
 			virtual ~IEventCallback() = default;
 			// Called if contact report is enabled for a collision object and it
 			// collided with another actor. This is NOT called for triggers!
@@ -42,7 +41,7 @@ export {
 		};
 
 		class DLLNETWORK IEnvironment {
-		public:
+		  public:
 			enum class StateFlags : uint32_t { None = 0u, SurfacesDirty = 1u };
 			enum class Event : uint32_t {
 				OnConstraintCreated = 0,
@@ -144,7 +143,7 @@ export {
 			virtual void RemoveVehicle(IVehicle &vehicle);
 
 			const WaterBuoyancySimulator &GetWaterBuoyancySimulator() const;
-		protected:
+		  protected:
 			friend IConstraint;
 			friend ICollisionObject;
 			friend IController;
@@ -165,7 +164,7 @@ export {
 
 			template<class T>
 			void CallCallbacks(Event eventid, T &obj);
-		protected:
+		  protected:
 			void OnContact(const ContactInfo &contactInfo);
 			void OnStartTouch(ICollisionObject &a, ICollisionObject &b);
 			void OnEndTouch(ICollisionObject &a, ICollisionObject &b);
@@ -177,7 +176,7 @@ export {
 			virtual void UpdateSurfaceTypes() = 0;
 
 			std::unique_ptr<pragma::physics::IVisualDebugger> m_visualDebugger;
-		private:
+		  private:
 			NetworkState &m_nwState;
 			StateFlags m_stateFlags = StateFlags::SurfacesDirty;
 			std::unordered_map<Event, std::vector<CallbackHandle>> m_callbacks = {};
@@ -192,9 +191,9 @@ export {
 		std::shared_ptr<T> IEnvironment::CreateSharedPtr(TARGS &&...args)
 		{
 			auto ptr = std::shared_ptr<T> {new T {std::forward<TARGS>(args)...}, [](T *o) {
-											o->OnRemove();
-											delete o;
-										}};
+				                               o->OnRemove();
+				                               delete o;
+			                               }};
 			ptr->Initialize();
 			return ptr;
 		}
@@ -202,9 +201,9 @@ export {
 		util::TSharedHandle<T> IEnvironment::CreateSharedHandle(TARGS &&...args)
 		{
 			auto handle = util::TSharedHandle<T> {new T {std::forward<TARGS>(args)...}, [](T *o) {
-													o->OnRemove();
-													delete o;
-												}};
+				                                      o->OnRemove();
+				                                      delete o;
+			                                      }};
 			handle->Initialize();
 			handle->InitializeLuaHandle(util::TWeakSharedHandle<IBase> {util::shared_handle_cast<T, IBase>(handle)});
 			return handle;

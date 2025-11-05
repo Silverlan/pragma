@@ -3,15 +3,9 @@
 
 module;
 
-
-
-
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
-
 
 import :scripting.lua.libraries.engine;
 import util_zip;
@@ -19,7 +13,6 @@ import :client_state;
 import :engine;
 import :entities.components.particle_system;
 import :game;
-
 
 std::shared_ptr<const FontInfo> Lua::engine::create_font(lua_State *l, const std::string &identifier, const std::string &fontSetName, pragma::FontSetFlag features, uint32_t size, bool reload)
 {
@@ -70,8 +63,8 @@ void Lua::engine::register_library(lua_State *l)
 	Lua::engine::register_shared_functions(l, modEngine);
 
 	Lua::RegisterLibraryEnums(l, "engine",
-	  {{"FONT_FEATURE_FLAG_NONE", umath::to_integral(pragma::FontSetFlag::None)}, {"FONT_FEATURE_FLAG_BOLD_BIT", umath::to_integral(pragma::FontSetFlag::Bold)}, {"FONT_FEATURE_FLAG_ITALIC_BIT", umath::to_integral(pragma::FontSetFlag::Italic)}, {"FONT_FEATURE_FLAG_MONO_BIT", umath::to_integral(pragma::FontSetFlag::Mono)},
-	    {"FONT_FEATURE_FLAG_SERIF_BIT", umath::to_integral(pragma::FontSetFlag::Serif)}, {"FONT_FEATURE_FLAG_SANS_BIT", umath::to_integral(pragma::FontSetFlag::Sans)}});
+	  {{"FONT_FEATURE_FLAG_NONE", umath::to_integral(pragma::FontSetFlag::None)}, {"FONT_FEATURE_FLAG_BOLD_BIT", umath::to_integral(pragma::FontSetFlag::Bold)}, {"FONT_FEATURE_FLAG_ITALIC_BIT", umath::to_integral(pragma::FontSetFlag::Italic)},
+	    {"FONT_FEATURE_FLAG_MONO_BIT", umath::to_integral(pragma::FontSetFlag::Mono)}, {"FONT_FEATURE_FLAG_SERIF_BIT", umath::to_integral(pragma::FontSetFlag::Serif)}, {"FONT_FEATURE_FLAG_SANS_BIT", umath::to_integral(pragma::FontSetFlag::Sans)}});
 }
 
 Vector2i Lua::engine::get_text_size(lua_State *l, const std::string &text, const std::string &font)
@@ -191,7 +184,8 @@ void Lua::asset_client::register_library(Lua::Interface &lua, luabind::module_ &
 	  luabind::def("precache_material", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::precache_material)), luabind::def("get_error_material", Lua::asset_client::get_error_material))];
 }
 
-std::shared_ptr<msys::Material> Lua::asset_client::create_material(const std::string &identifier, const std::string &shader) {
+std::shared_ptr<msys::Material> Lua::asset_client::create_material(const std::string &identifier, const std::string &shader)
+{
 
 	auto mat = pragma::get_client_state()->CreateMaterial(identifier, shader);
 	if(!mat)

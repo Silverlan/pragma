@@ -3,19 +3,13 @@
 
 module;
 
-
-
-
-
 module pragma.client;
-
 
 import :util.resource_watcher;
 import :engine;
 import :entities.components.particle_system;
 import :game;
 import pragma.shadergraph;
-
 
 decltype(ECResourceWatcherCallbackType::Shader) ECResourceWatcherCallbackType::Shader = ECResourceWatcherCallbackType {umath::to_integral(E::Shader)};
 decltype(ECResourceWatcherCallbackType::ParticleSystem) ECResourceWatcherCallbackType::ParticleSystem = ECResourceWatcherCallbackType {umath::to_integral(E::ParticleSystem)};

@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.base_networked;
 
 export import :entities.components.base;
@@ -15,13 +13,13 @@ export import :entities.components.base;
 export {
 	namespace pragma {
 		class DLLNETWORK BaseNetworkedComponent : public BaseEntityComponent {
-		public:
+		  public:
 			enum class NetworkFlags : uint32_t { None = 0, ExcludeFromSnapshots = 1 };
 			virtual void Initialize() override;
 
 			virtual void SetNetworkFlags(NetworkFlags flags);
 			NetworkFlags GetNetworkFlags() const;
-	#if NETWORKED_VARS_ENABLED != 0
+#if NETWORKED_VARS_ENABLED != 0
 			struct DLLNETWORK NetworkedVariable {
 				using Id = size_t;
 				NetworkedVariable(Id id, util::VarType type, const std::shared_ptr<util::BaseProperty> &data);
@@ -41,11 +39,11 @@ export {
 			bool SetNetworkedVariable(NetworkedVariable::Id id, const T &val);
 
 			const std::vector<NetworkedVariable> &GetNetworkedVariables() const;
-	#endif
-		protected:
+#endif
+		  protected:
 			BaseNetworkedComponent(pragma::ecs::BaseEntity &ent);
 			NetworkFlags m_networkFlags = NetworkFlags::None;
-	#if NETWORKED_VARS_ENABLED != 0
+#if NETWORKED_VARS_ENABLED != 0
 			virtual void OnNetworkedVariableCreated(NetworkedVariable &nwVar);
 			template<typename T>
 			T GetNetworkedVariable(const std::string &name, util::VarType type) const;
@@ -53,16 +51,16 @@ export {
 			std::vector<NetworkedVariable> m_networkedVars = {};
 			std::vector<std::string> m_networkedVarNames = {};
 			pragma::NetEventId m_netEvSetVar = pragma::INVALID_NET_EVENT;
-	#endif
+#endif
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::BaseNetworkedComponent::NetworkFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::BaseNetworkedComponent::NetworkFlags> : std::true_type {};
+	}
 
-	#if NETWORKED_VARS_ENABLED != 0
+#if NETWORKED_VARS_ENABLED != 0
 	template<typename T>
 	bool pragma::BaseNetworkedComponent::SetNetworkedVariable(NetworkedVariable::Id id, const T &val)
 	{
@@ -182,5 +180,5 @@ export {
 			return false;
 		return SetNetworkedVariable(it - m_networkedVarNames.begin(), val);
 	}
-	#endif
+#endif
 };

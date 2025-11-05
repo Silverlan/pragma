@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
 export module pragma.shared:entities.enums;
 
 import panima;
@@ -16,14 +14,14 @@ export {
 	constexpr uint32_t SF_TRIGGER_PHYSICS = 32;
 	constexpr uint32_t SF_TRIGGER_EVERYTHING = 64;
 
-    namespace pragma {
-        enum class FRenderFlags : uint32_t { None = 0u, CastShadows = 1u, Unlit = CastShadows << 1u };
-    	using namespace umath::scoped_enum::bitwise;
-    }
+	namespace pragma {
+		enum class FRenderFlags : uint32_t { None = 0u, CastShadows = 1u, Unlit = CastShadows << 1u };
+		using namespace umath::scoped_enum::bitwise;
+	}
 	namespace umath::scoped_enum::bitwise {
-    	template<>
+		template<>
 		struct enable_bitwise_operators<pragma::FRenderFlags> : std::true_type {};
-    };
+	};
 
 	using EntityIndex = uint32_t;
 

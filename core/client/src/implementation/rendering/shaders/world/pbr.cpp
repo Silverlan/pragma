@@ -14,7 +14,6 @@ import :engine;
 import :entities.components;
 import :model;
 
-
 using namespace pragma;
 
 decltype(ShaderPBR::DESCRIPTOR_SET_PBR) ShaderPBR::DESCRIPTOR_SET_PBR = {

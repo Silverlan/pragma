@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.point_constraint_fixed;
 
 export import :entities.base_entity;
@@ -15,7 +13,7 @@ export import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLCLIENT CPointConstraintFixedComponent final : public BasePointConstraintFixedComponent, public CBaseNetComponent {
-		public:
+		  public:
 			CPointConstraintFixedComponent(pragma::ecs::BaseEntity &ent) : BasePointConstraintFixedComponent(ent) {}
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void InitializeLuaObject(lua_State *l) override;
@@ -24,7 +22,7 @@ export {
 	};
 
 	class DLLCLIENT CPointConstraintFixed : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

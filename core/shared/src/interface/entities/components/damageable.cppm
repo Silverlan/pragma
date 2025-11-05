@@ -4,20 +4,17 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.damageable;
 
 export import :entities.components.base;
 export import :game.damage_info;
 
 export namespace pragma {
-		namespace damageableComponent {
+	namespace damageableComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TAKE_DAMAGE;
 	}
-class DLLNETWORK DamageableComponent final : public BaseEntityComponent {
+	class DLLNETWORK DamageableComponent final : public BaseEntityComponent {
 	  public:
-
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		DamageableComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;

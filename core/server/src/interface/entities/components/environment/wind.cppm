@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.wind;
 
 import :entities;
@@ -15,7 +14,7 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SWindComponent final : public BaseEnvWindComponent, public SBaseNetComponent {
-		public:
+		  public:
 			SWindComponent(pragma::ecs::BaseEntity &ent) : BaseEnvWindComponent(ent) {}
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
@@ -24,7 +23,7 @@ export {
 	};
 
 	class DLLSERVER EnvWind : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

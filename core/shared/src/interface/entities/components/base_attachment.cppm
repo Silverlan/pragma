@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.base_attachment;
 
 export import :entities.components.base;
@@ -14,12 +12,11 @@ export import :entities.parent_info;
 
 export {
 	namespace pragma {
-				namespace baseAttachmentComponent {
+		namespace baseAttachmentComponent {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ATTACHMENT_UPDATE;
 		}
-class DLLNETWORK BaseAttachmentComponent : public BaseEntityComponent {
-		public:
-
+		class DLLNETWORK BaseAttachmentComponent : public BaseEntityComponent {
+		  public:
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 			enum class StateFlags : uint32_t { None = 0u, UpdatingPosition = 1u, UpdatingRotation = UpdatingPosition << 1u };
@@ -47,7 +44,7 @@ class DLLNETWORK BaseAttachmentComponent : public BaseEntityComponent {
 			void SetLocalPose(const umath::Transform &pose);
 
 			virtual void OnTick(double dt) override;
-		protected:
+		  protected:
 			BaseAttachmentComponent(pragma::ecs::BaseEntity &ent);
 			virtual void OnAttachmentChanged() {}
 			virtual AttachmentData *SetupAttachment(pragma::ecs::BaseEntity *ent, const AttachmentInfo &attInfo);
@@ -63,10 +60,10 @@ class DLLNETWORK BaseAttachmentComponent : public BaseEntityComponent {
 			CallbackHandle m_parentModelChanged {};
 			std::string m_kvParent;
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::BaseAttachmentComponent::StateFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::BaseAttachmentComponent::StateFlags> : std::true_type {};
+	}
 };

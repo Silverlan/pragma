@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:physics.surface_material;
 
 export import :ai.nav_system;
@@ -13,9 +12,12 @@ export import :physics.surface_type_manager;
 
 export {
 	class SurfaceMaterial;
-	namespace pragma::physics {class IEnvironment; class IMaterial;};
+	namespace pragma::physics {
+		class IEnvironment;
+		class IMaterial;
+	};
 	class DLLNETWORK SurfaceMaterialManager {
-	public:
+	  public:
 		SurfaceMaterialManager(pragma::physics::IEnvironment &env);
 		bool Load(const std::string &path);
 		SurfaceMaterial &Create(const std::string &identifier, Float staticFriction, Float dynamicFriction, Float restitution);
@@ -23,13 +25,13 @@ export {
 		// The returned pointer is NOT guaranteed to stay alive; Don't store it.
 		SurfaceMaterial *GetMaterial(const std::string &id);
 		std::vector<SurfaceMaterial> &GetMaterials();
-	protected:
+	  protected:
 		std::vector<SurfaceMaterial> m_materials; // These have to be objects (Not pointers) to uphold the requirements for the btTriangleIndexVertexMaterialArray constructor.
 		pragma::physics::IEnvironment &m_physEnv;
 	};
 
 	class DLLNETWORK SurfaceMaterial {
-	public:
+	  public:
 		struct AudioInfo {
 			// These should correspond to the values specified in "c_game_audio.cpp"
 			float lowFreqAbsorption = 0.10f;
@@ -50,7 +52,7 @@ export {
 				float factor = 0.f;
 			} subsurface;
 		};
-	public:
+	  public:
 		SurfaceMaterial(pragma::physics::IEnvironment &env, const std::string &identifier, UInt idx, pragma::physics::IMaterial &physMat);
 		SurfaceMaterial(const SurfaceMaterial &other);
 		void Reset();
@@ -118,7 +120,7 @@ export {
 		float GetAudioMidFrequencyTransmission() const;
 		void SetAudioHighFrequencyTransmission(float transmission);
 		float GetAudioHighFrequencyTransmission() const;
-	protected:
+	  protected:
 		pragma::physics::IEnvironment &m_physEnv;
 		UInt m_index;
 		std::string m_identifier;

@@ -18,7 +18,6 @@ import :client_state;
 		throw std::logic_error {"glTF assertion failed!"};                                                                                                                                                                                                                                       \
 	}
 
-
 bool pragma::asset::GLTFWriter::Export(const SceneDesc &sceneDesc, const std::string &outputFileName, const pragma::asset::ModelExportInfo &exportInfo, std::string &outErrMsg, std::string *optOutPath)
 {
 	GLTFWriter writer {sceneDesc, exportInfo, std::optional<std::string> {}};
@@ -282,7 +281,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 	ufile::remove_extension_from_filename(outputPath);
 	outputPath += '/';
 	m_exportPath = outputPath;
-	outputPath = std::string{EXPORT_PATH} + m_exportPath;
+	outputPath = std::string {EXPORT_PATH} + m_exportPath;
 
 	// Note: These values are for reserving space. They don't
 	// have to be accurate, but they *have* to be larger than (or equal to) the

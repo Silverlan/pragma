@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :entities.components.rasterization_renderer;
@@ -11,7 +10,6 @@ import :client_state;
 import :game;
 
 using namespace pragma::rendering;
-
 
 void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawSceneInfo &drawSceneInfo)
 {

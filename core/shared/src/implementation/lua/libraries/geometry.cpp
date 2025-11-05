@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 #include <clip2tri/clip2tri.h>
 
 //#include <Pinocchio.h>

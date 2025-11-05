@@ -9,7 +9,9 @@ export module pragma.client:particle_system.operator_jitter;
 
 export import :particle_system.operator_wander;
 
-export namespace pragma::ecs {class CParticleSystemComponent;}
+export namespace pragma::ecs {
+	class CParticleSystemComponent;
+}
 export class DLLCLIENT CParticleOperatorJitter : public CParticleOperatorWander {
   public:
 	CParticleOperatorJitter() = default;

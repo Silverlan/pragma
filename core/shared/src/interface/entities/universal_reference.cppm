@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:entities.universal_reference;
 
 export import :entities.base_entity_handle;
@@ -33,7 +32,7 @@ export {
 			std::optional<util::Uuid> GetUuid() const;
 			std::optional<std::string> GetClassOrName() const;
 			std::string ToString() const;
-		protected:
+		  protected:
 			void ToStringArgs(std::stringstream &outSs) const;
 			std::unique_ptr<EntityIdentifier> m_identifier = nullptr;
 			EntityHandle m_hEntity;
@@ -56,7 +55,7 @@ export {
 			ComponentId GetComponentId() const { return m_componentId; }
 			const std::string *GetComponentName() const { return m_componentName.get(); }
 			std::string ToString() const;
-		protected:
+		  protected:
 			void ToStringArgs(std::stringstream &outSs) const;
 			ComponentId m_componentId = INVALID_COMPONENT_ID;
 			std::unique_ptr<std::string> m_componentName = nullptr;
@@ -84,7 +83,7 @@ export {
 
 			bool HasMemberReference() const;
 			std::string ToString() const;
-		protected:
+		  protected:
 			void ToStringArgs(std::stringstream &outSs) const;
 			ComponentMemberReference m_memberRef;
 		};
@@ -104,7 +103,7 @@ export {
 			bool HasEntityReference() const;
 			const EntityIdentifier *GetIdentifier() const { return m_identifier.get(); }
 			std::string ToString() const;
-		protected:
+		  protected:
 			void ToStringArgs(std::stringstream &outSs) const;
 			std::unique_ptr<EntityIdentifier> m_identifier = nullptr;
 		};
@@ -125,7 +124,7 @@ export {
 			ComponentId GetComponentId() const { return m_componentId; }
 			const std::string *GetComponentName() const { return m_componentName.get(); }
 			std::string ToString() const;
-		protected:
+		  protected:
 			void ToStringArgs(std::stringstream &outSs) const;
 			ComponentId m_componentId = INVALID_COMPONENT_ID;
 			std::unique_ptr<std::string> m_componentName = nullptr;

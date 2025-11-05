@@ -3,10 +3,7 @@
 
 module;
 
-
-
 #include "pragma/lua/core.hpp"
-
 
 //#include <assimp/Importer.hpp>
 //#include <assimp/Exporter.hpp>
@@ -17,11 +14,9 @@ module;
 
 module pragma.client;
 
-
 import :scripting.lua.libraries.import_lib;
 import :entities.components;
 import :game;
-
 
 #if 0
 static aiVector3D to_assimp_position(const Vector3 &pos)

@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:physics.vehicle;
 
 export import :physics.collision_object;
@@ -41,7 +40,7 @@ export {
 				bool operator==(const SuspensionInfo &other) const
 				{
 					return maxCompression == other.maxCompression && maxDroop == other.maxDroop && springStrength == other.springStrength && springDamperRate == other.springDamperRate && camberAngleAtRest == other.camberAngleAtRest && camberAngleAtMaxDroop == other.camberAngleAtMaxDroop
-					&& camberAngleAtMaxCompression == other.camberAngleAtMaxCompression;
+					  && camberAngleAtMaxCompression == other.camberAngleAtMaxCompression;
 				}
 				bool operator!=(const SuspensionInfo &other) const { return !operator==(other); }
 			};
@@ -51,7 +50,7 @@ export {
 			bool operator==(const WheelCreateInfo &other) const
 			{
 				return flags == other.flags && width == other.width && radius == other.radius && maxHandbrakeTorque == other.maxHandbrakeTorque && shapeIndex == other.shapeIndex && maxSteeringAngle == other.maxSteeringAngle && chassisOffset == other.chassisOffset
-				&& suspension == other.suspension && tireType == other.tireType && momentOfInertia == other.momentOfInertia;
+				  && suspension == other.suspension && tireType == other.tireType && momentOfInertia == other.momentOfInertia;
 			}
 			bool operator!=(const WheelCreateInfo &other) const { return !operator==(other); }
 			enum class Flags : uint32_t { None = 0u, Front = 1u, Rear = Front << 1u, Left = Rear << 1u, Right = Left << 1u };
@@ -108,7 +107,7 @@ export {
 			bool operator==(const VehicleCreateInfo &other) const
 			{
 				return chassis == other.chassis && wheels == other.wheels && wheelDrive == other.wheelDrive && antiRollBars == other.antiRollBars && maxEngineTorque == other.maxEngineTorque && gearSwitchTime == other.gearSwitchTime && clutchStrength == other.clutchStrength
-				&& gravityFactor == other.gravityFactor && actor.Get() == other.actor.Get();
+				  && gravityFactor == other.gravityFactor && actor.Get() == other.actor.Get();
 			}
 			bool operator!=(const VehicleCreateInfo &other) const { return !operator==(other); }
 
@@ -125,7 +124,7 @@ export {
 		};
 
 		class DLLNETWORK IVehicle : public IBase, public IWorldObject {
-		public:
+		  public:
 			enum class Gear : uint8_t {
 				Reverse = 0,
 				Neutral,
@@ -211,21 +210,21 @@ export {
 			virtual float GetHandbrakeFactor() const = 0;
 			virtual float GetAccelerationFactor() const = 0;
 			virtual umath::Radian GetWheelRotationSpeed(WheelIndex wheel) const = 0;
-		protected:
+		  protected:
 			IVehicle(IEnvironment &env, const util::TSharedHandle<ICollisionObject> &collisionObject);
 			virtual bool ShouldUseDigitalInputs() const = 0;
 			util::TSharedHandle<ICollisionObject> m_collisionObject = nullptr;
 		};
 
 		class DLLNETWORK IWheel : public IBase {
-		public:
-		protected:
+		  public:
+		  protected:
 			IWheel(IEnvironment &env);
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::physics::WheelCreateInfo::Flags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::physics::WheelCreateInfo::Flags> : std::true_type {};
+	}
 };

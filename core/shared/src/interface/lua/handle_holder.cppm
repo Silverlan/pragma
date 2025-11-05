@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 export module pragma.shared:scripting.lua.handle_holder;
 
 export import luabind;
@@ -12,11 +11,11 @@ export {
 	namespace pragma::LuaCore {
 		template<typename T>
 		struct HandleHolder {
-		public:
+		  public:
 			HandleHolder(T *ptr);
 			T *get() const;
 			void SetHandle(const util::TWeakSharedHandle<T> &handle);
-		private:
+		  private:
 			mutable T *m_ptr = nullptr;
 			mutable util::TWeakSharedHandle<T> m_handle {};
 			bool m_hasHandle = false;

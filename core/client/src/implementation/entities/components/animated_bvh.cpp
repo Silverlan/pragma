@@ -3,7 +3,6 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
 #include <cassert>
 
@@ -12,7 +11,6 @@ module pragma.client;
 import :entities.components.animated_bvh;
 import :entities.components.model;
 import :engine;
-
 
 using namespace pragma;
 

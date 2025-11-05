@@ -11,7 +11,7 @@ export import std.compat;
 
 export {
 	class DLLCLIENT RenderDebugInfo {
-	public:
+	  public:
 		uint32_t triangleCount = 0;
 		uint32_t vertexCount = 0;
 		uint32_t shadowMeshCount = 0;

@@ -48,8 +48,7 @@ export namespace pragma {
 		{
 			using FirstType = std::tuple_element_t<0, std::tuple<Types...>>;
 			ClassWrapper<Types...> def = {l, name, typeid(FirstType)};
-			def->def(
-			  "__tostring", +[]() -> const char * { return TStr; });
+			def->def("__tostring", +[]() -> const char * { return TStr; });
 			return def;
 		}
 		template<util::StringLiteral TStr, typename... Types>
@@ -57,8 +56,7 @@ export namespace pragma {
 		{
 			using FirstType = std::tuple_element_t<0, std::tuple<Types...>>;
 			ClassWrapper<Types...> def {l, TStr.value, typeid(FirstType)};
-			def->def(
-			  "__tostring", +[]() -> const char * { return TStr.value; });
+			def->def("__tostring", +[]() -> const char * { return TStr.value; });
 			return def;
 		}
 	};

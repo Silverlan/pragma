@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:rendering.shaders.textured;
 
 export import :rendering.shaders.textured_enums;
@@ -17,7 +16,9 @@ export import :rendering.shader_input_data;
 export import :rendering.shader_material_enums;
 export import :rendering.shaders.scene;
 
-export namespace pragma::rendering::shader_material {struct ShaderMaterial;};
+export namespace pragma::rendering::shader_material {
+	struct ShaderMaterial;
+};
 export namespace pragma {
 	class DLLCLIENT ShaderSpecializationManager {
 	  public:

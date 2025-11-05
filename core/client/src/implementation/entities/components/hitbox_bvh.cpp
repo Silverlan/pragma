@@ -11,13 +11,11 @@ module;
 
 module pragma.client;
 
-
 import :entities.components.hitbox_bvh;
 import :engine;
 import :debug;
 import :entities.components.animated;
 import :entities.components.render;
-
 
 using namespace pragma;
 

@@ -3,7 +3,6 @@
 
 module;
 
-
 export module pragma.client:rendering.shaders.particle_blob_shadow;
 
 export namespace Shader {

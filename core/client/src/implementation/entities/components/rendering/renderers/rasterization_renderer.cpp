@@ -17,7 +17,6 @@ import :entities.components.renderer;
 import :game;
 import :rendering.shaders;
 
-
 using namespace pragma;
 
 ComponentEventId CRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS = INVALID_COMPONENT_ID;
@@ -214,7 +213,7 @@ void CRasterizationRendererComponent::UpdateCSMDescriptorSet(pragma::BaseEnvLigh
 	auto *dsLights = GetRendererDescriptorSet();
 	if(dsLights == nullptr)
 		return;
-	auto *pShadowMap = static_cast<CLightDirectionalComponent&>(lightSource).GetShadowMap();
+	auto *pShadowMap = static_cast<CLightDirectionalComponent &>(lightSource).GetShadowMap();
 	auto texture = pShadowMap ? pShadowMap->GetDepthTexture() : nullptr;
 	if(texture == nullptr)
 		return;
@@ -302,8 +301,8 @@ void CRasterizationRendererComponent::SetSSAOEnabled(bool b)
 	m_hdrInfo.ssaoInfo.Clear();
 	UpdateRenderSettings();*/
 }
-uint32_t CRasterizationRendererComponent::GetWidth() const { return m_rendererComponent ? static_cast<pragma::CRendererComponent*>(m_rendererComponent)->GetWidth() : 0; }
-uint32_t CRasterizationRendererComponent::GetHeight() const { return m_rendererComponent ? static_cast<pragma::CRendererComponent*>(m_rendererComponent)->GetHeight() : 0; }
+uint32_t CRasterizationRendererComponent::GetWidth() const { return m_rendererComponent ? static_cast<pragma::CRendererComponent *>(m_rendererComponent)->GetWidth() : 0; }
+uint32_t CRasterizationRendererComponent::GetHeight() const { return m_rendererComponent ? static_cast<pragma::CRendererComponent *>(m_rendererComponent)->GetHeight() : 0; }
 void CRasterizationRendererComponent::UpdateRenderSettings()
 {
 	auto &tileInfo = m_rendererData.tileInfo;
@@ -549,4 +548,6 @@ static void cl_render_ssao_callback(NetworkState *, const ConVar &, bool, bool e
 	for(auto &c : EntityCIterator<CRasterizationRendererComponent> {*pragma::get_cgame()})
 		c.SetSSAOEnabled(enabled);
 }
-namespace { auto _ = pragma::console::client::register_variable_listener<bool>("cl_render_ssao", &cl_render_ssao_callback); }
+namespace {
+	auto _ = pragma::console::client::register_variable_listener<bool>("cl_render_ssao", &cl_render_ssao_callback);
+}

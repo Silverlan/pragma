@@ -4,7 +4,6 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:entities.components.lua;
 
 export import :entities.components.entity;

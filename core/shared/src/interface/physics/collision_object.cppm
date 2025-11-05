@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:physics.collision_object;
 
 export import :physics.base;
@@ -20,7 +19,7 @@ export {
 		class ISoftBody;
 		struct ContactInfo;
 		class DLLNETWORK ICollisionObject : public IBase, public IWorldObject {
-		public:
+		  public:
 			enum class ActivationState : uint32_t {
 				Active = 0,
 				AlwaysActive,
@@ -128,7 +127,7 @@ export {
 			const IGhostObject *GetGhostObject() const;
 
 			virtual void InitializeLuaHandle(const util::TWeakSharedHandle<IBase> &handle) override;
-		protected:
+		  protected:
 			ICollisionObject(pragma::physics::IEnvironment &env, pragma::physics::IShape &shape);
 			virtual void ApplyCollisionShape(pragma::physics::IShape *optShape) = 0;
 			virtual void DoSetCollisionFilterGroup(pragma::physics::CollisionMask group) = 0;
@@ -147,16 +146,16 @@ export {
 		};
 
 		class DLLNETWORK IGhostObject : virtual public ICollisionObject {
-		public:
+		  public:
 			virtual bool IsGhost() const override;
 			virtual IGhostObject *GetGhostObject() override;
 			virtual void InitializeLuaObject(lua::State *lua) override;
-		protected:
+		  protected:
 			using ICollisionObject::ICollisionObject;
 		};
 
 		class DLLNETWORK IRigidBody : virtual public ICollisionObject {
-		public:
+		  public:
 			virtual void InitializeLuaObject(lua::State *lua) override;
 			virtual bool IsRigid() const override;
 			virtual IRigidBody *GetRigidBody() override;
@@ -202,12 +201,12 @@ export {
 
 			virtual void SetKinematic(bool bKinematic) = 0;
 			virtual bool IsKinematic() const = 0;
-		protected:
+		  protected:
 			IRigidBody(IEnvironment &env, pragma::physics::IShape &shape);
 		};
 
 		class DLLNETWORK ISoftBody : virtual public ICollisionObject {
-		public:
+		  public:
 			virtual void InitializeLuaObject(lua::State *lua) override;
 			virtual bool IsSoftBody() const override;
 			virtual ISoftBody *GetSoftBody() override;
@@ -311,7 +310,7 @@ export {
 			virtual float GetMaterialAngularStiffnessCoefficient(uint32_t matId) const = 0;
 			virtual float GetMaterialLinearStiffnessCoefficient(uint32_t matId) const = 0;
 			virtual float GetMaterialVolumeStiffnessCoefficient(uint32_t matId) const = 0;
-		protected:
+		  protected:
 			ISoftBody(IEnvironment &env, pragma::physics::IShape &shape, const std::vector<uint16_t> &meshVertIndicesToPhysIndices);
 			std::weak_ptr<pragma::ModelSubMesh> m_subMesh = {};
 		};
@@ -324,8 +323,8 @@ export {
 
 		using ::operator<<;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::physics::ICollisionObject::StateFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::physics::ICollisionObject::StateFlags> : std::true_type {};
+	}
 };

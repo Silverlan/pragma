@@ -9,7 +9,7 @@ export module pragma.shared:physics.soft_body_info;
 export import std.compat;
 
 export {
-	#pragma pack(push, 1)
+#pragma pack(push, 1)
 	struct DLLNETWORK PhysSoftBodyInfo {
 		struct MaterialStiffnessCoefficient {
 			MaterialStiffnessCoefficient() = default;
@@ -53,5 +53,5 @@ export {
 		bool operator==(const PhysSoftBodyInfo &other) const;
 		bool operator!=(const PhysSoftBodyInfo &other) const { return !operator==(other); }
 	};
-	#pragma pack(pop)
+#pragma pack(pop)
 };

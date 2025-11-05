@@ -4,64 +4,63 @@
 module;
 #include "pragma/serverdefinitions.h"
 
-
 export module pragma.server:entities.debug;
 
 import :entities.base;
 import :entities.components.entity;
 
 export {
-    class DLLSERVER EntDebugText : public SBaseEntity {
-      public:
-        virtual void Initialize() override;
-    };
+	class DLLSERVER EntDebugText : public SBaseEntity {
+	  public:
+		virtual void Initialize() override;
+	};
 
-    ////////////////
+	////////////////
 
-    class DLLSERVER EntDebugPoint : public SBaseEntity {
-      public:
-        virtual void Initialize() override;
-    };
+	class DLLSERVER EntDebugPoint : public SBaseEntity {
+	  public:
+		virtual void Initialize() override;
+	};
 
-    ////////////////
+	////////////////
 
-    class DLLSERVER EntDebugLine : public SBaseEntity {
-      public:
-        virtual void Initialize() override;
-    };
+	class DLLSERVER EntDebugLine : public SBaseEntity {
+	  public:
+		virtual void Initialize() override;
+	};
 
-    ////////////////
+	////////////////
 
-    class DLLSERVER EntDebugBox : public SBaseEntity {
-      public:
-        virtual void Initialize() override;
-    };
+	class DLLSERVER EntDebugBox : public SBaseEntity {
+	  public:
+		virtual void Initialize() override;
+	};
 
-    ////////////////
+	////////////////
 
-    class DLLSERVER EntDebugSphere : public SBaseEntity {
-      public:
-        virtual void Initialize() override;
-    };
+	class DLLSERVER EntDebugSphere : public SBaseEntity {
+	  public:
+		virtual void Initialize() override;
+	};
 
-    ////////////////
+	////////////////
 
-    class DLLSERVER EntDebugCone : public SBaseEntity {
-      public:
-        virtual void Initialize() override;
-    };
+	class DLLSERVER EntDebugCone : public SBaseEntity {
+	  public:
+		virtual void Initialize() override;
+	};
 
-    ////////////////
+	////////////////
 
-    class DLLSERVER EntDebugCylinder : public SBaseEntity {
-      public:
-        virtual void Initialize() override;
-    };
+	class DLLSERVER EntDebugCylinder : public SBaseEntity {
+	  public:
+		virtual void Initialize() override;
+	};
 
-    ////////////////
+	////////////////
 
-    class DLLSERVER EntDebugPlane : public SBaseEntity {
-      public:
-        virtual void Initialize() override;
-    };
+	class DLLSERVER EntDebugPlane : public SBaseEntity {
+	  public:
+		virtual void Initialize() override;
+	};
 };

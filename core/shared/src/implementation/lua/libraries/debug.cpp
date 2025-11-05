@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
 #ifdef __linux__
 #include <sys/ioctl.h>
 #include <linux/kd.h>

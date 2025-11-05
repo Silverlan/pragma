@@ -4,13 +4,14 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:particle_system.initializer_speed;
 
 import :particle_system.modifier_random_variable;
 export import :particle_system.modifier;
 
-export namespace pragma::ecs {class CParticleSystemComponent;}
+export namespace pragma::ecs {
+	class CParticleSystemComponent;
+}
 export class DLLCLIENT CParticleInitializerSpeed : public CParticleInitializer {
   public:
 	CParticleInitializerSpeed() = default;

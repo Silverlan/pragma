@@ -5,7 +5,6 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
 #include "pragma/console/helper.hpp"
 
 module pragma.client;
@@ -46,7 +45,9 @@ static void cmd_cl_render_shadow_pssm_split_count(NetworkState *, const ConVar &
 		hCsmC->ReloadDepthTextures();
 	}
 }
-namespace { auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_shadow_pssm_split_count", &cmd_cl_render_shadow_pssm_split_count); }
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_shadow_pssm_split_count", &cmd_cl_render_shadow_pssm_split_count);
+}
 
 static void cmd_render_csm_max_distance(NetworkState *, const ConVar &, float, float val)
 {
@@ -61,7 +62,9 @@ static void cmd_render_csm_max_distance(NetworkState *, const ConVar &, float, f
 		hCsmC->SetMaxDistance(val);
 	}
 }
-namespace { auto UVN = pragma::console::client::register_variable_listener<float>("render_csm_max_distance", &cmd_render_csm_max_distance); }
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<float>("render_csm_max_distance", &cmd_render_csm_max_distance);
+}
 
 static CVar cvCascadeCount = GetClientConVar("cl_render_shadow_pssm_split_count");
 static CVar cvRange = GetClientConVar("render_csm_max_distance");

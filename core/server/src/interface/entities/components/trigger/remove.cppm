@@ -5,8 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.triggers.remove;
 
 import :entities;
@@ -14,15 +12,15 @@ import :entities;
 export {
 	namespace pragma {
 		class DLLSERVER STriggerRemoveComponent final : public BaseTriggerRemoveComponent {
-		public:
+		  public:
 			STriggerRemoveComponent(pragma::ecs::BaseEntity &ent) : BaseTriggerRemoveComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};
 
 	class DLLSERVER TriggerRemove : public SBaseEntity {
-	protected:
-	public:
+	  protected:
+	  public:
 		virtual void Initialize() override;
 	};
 };

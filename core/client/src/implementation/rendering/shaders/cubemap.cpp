@@ -3,13 +3,11 @@
 
 module;
 
-
 module pragma.client;
 
 import :engine;
 import :math;
 import :rendering.shaders.cubemap;
-
 
 using namespace pragma;
 

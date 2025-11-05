@@ -5,9 +5,7 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :core.input_binding_layer;
 import :engine;

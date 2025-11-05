@@ -3,13 +3,11 @@
 
 module;
 
-
 module pragma.client;
 
 import :rendering.shaders.cubemap_to_equirectangular;
 
 import :engine;
-
 
 using namespace pragma;
 

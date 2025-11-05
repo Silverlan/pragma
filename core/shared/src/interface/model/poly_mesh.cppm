@@ -4,10 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
-
-
 export module pragma.shared:model.poly_mesh;
 
 export import :model.poly;
@@ -15,15 +11,15 @@ export import :types;
 
 export {
 	class DLLNETWORK PolyMeshInfo {
-	public:
+	  public:
 		std::vector<Vector3> vertexList;
 	};
 
 	class DLLNETWORK PolyMesh {
 		friend Con::c_cout &operator<<(Con::c_cout &, const PolyMesh &);
-	public:
+	  public:
 		PolyMesh();
-	private:
+	  private:
 		bool m_bHasDisplacements = false;
 		std::vector<std::shared_ptr<Poly>> m_polys;
 		PolyMeshInfo m_compiledData = {};
@@ -37,7 +33,7 @@ export {
 		bool HasVertex(const PolyVertex &v, Vector3 *vThis = nullptr);
 		void Localize();
 		void Localize(const Vector3 &center);
-	public:
+	  public:
 		PolyMeshInfo &GetCompiledData();
 		bool HasDisplacements();
 		void SetHasDisplacements(bool b);

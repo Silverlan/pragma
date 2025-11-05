@@ -2,10 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
-
 export module pragma.shared:scripting.lua.classes.property_generic;
 
 export import pragma.util;
@@ -17,7 +13,7 @@ export {
 
 	class LGenericIntPropertyWrapper;
 	class LGenericFloatPropertyWrapper {
-	public:
+	  public:
 		friend LGenericIntPropertyWrapper;
 		LGenericFloatPropertyWrapper();
 		LGenericFloatPropertyWrapper(double v);
@@ -91,13 +87,13 @@ export {
 		bool operator<(const LGenericFloatPropertyWrapper &propOther) const;
 		bool operator<=(const double &val) const;
 		bool operator<=(const LGenericFloatPropertyWrapper &propOther) const;
-	private:
+	  private:
 		std::shared_ptr<util::BaseProperty> m_property = nullptr;
 		ArithmeticFloatPropertyType m_propertyType;
 	};
 
 	class LGenericIntPropertyWrapper {
-	public:
+	  public:
 		friend LGenericFloatPropertyWrapper;
 		LGenericIntPropertyWrapper();
 		LGenericIntPropertyWrapper(int32_t v);
@@ -248,13 +244,13 @@ export {
 		bool operator<(const LGenericIntPropertyWrapper &propOther) const;
 		bool operator<=(const int32_t &val) const;
 		bool operator<=(const LGenericIntPropertyWrapper &propOther) const;
-	private:
+	  private:
 		std::shared_ptr<util::BaseProperty> m_property = nullptr;
 		ArithmeticIntPropertyType m_propertyType;
 	};
 
 	class LBasePropertyWrapper {
-	public:
+	  public:
 		template<class TProperty, typename T>
 		void Initialize(const T &v)
 		{
@@ -262,13 +258,13 @@ export {
 		}
 		mutable std::shared_ptr<util::BaseProperty> prop = nullptr;
 		virtual util::BaseProperty &GetProperty() const { return *prop; }
-	protected:
+	  protected:
 		LBasePropertyWrapper() = default;
 	};
 
 	template<class TProperty, typename T>
 	class LSimplePropertyWrapper : public LBasePropertyWrapper {
-	public:
+	  public:
 		LSimplePropertyWrapper(const T &v) : LBasePropertyWrapper() { Initialize<TProperty, T>(v); }
 		LSimplePropertyWrapper(const std::shared_ptr<TProperty> &v) : LBasePropertyWrapper() { this->prop = v; }
 		LSimplePropertyWrapper() : LSimplePropertyWrapper(T {}) {}
@@ -292,7 +288,7 @@ export {
 
 	template<class TProperty, typename T>
 	class TLNumberPropertyWrapper : public LSimplePropertyWrapper<TProperty, T> {
-	public:
+	  public:
 		TProperty &operator*() { return GetProperty(); }
 		const TProperty &operator*() const { return GetProperty(); }
 		TProperty *operator->() { return &GetProperty(); }

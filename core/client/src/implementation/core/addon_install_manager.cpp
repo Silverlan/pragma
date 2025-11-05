@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :core.addon_install_manager;

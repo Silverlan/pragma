@@ -104,7 +104,9 @@ static void cl_render_vr_enabled(bool b)
 		lastColor = colors::White;
 	}
 }
-namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("cl_render_vr_enabled", +[](NetworkState *, const ConVar &, bool, bool b) { cl_render_vr_enabled(b); }); }
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_render_vr_enabled", +[](NetworkState *, const ConVar &, bool, bool b) { cl_render_vr_enabled(b); });
+}
 
 /*REGISTER_CONVAR_CALLBACK_CL(cl_render_vr_resolution,[](NetworkState*,ConVar*,std::string,std::string val) {
 	

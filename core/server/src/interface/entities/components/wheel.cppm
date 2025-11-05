@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.wheel;
 
 import :entities.components.entity;
@@ -15,7 +14,7 @@ import :entities;
 export {
 	namespace pragma {
 		class DLLSERVER SWheelComponent final : public BaseWheelComponent, public SBaseSnapshotComponent {
-		public:
+		  public:
 			SWheelComponent(pragma::ecs::BaseEntity &ent) : BaseWheelComponent(ent) {}
 			virtual ~SWheelComponent() override;
 			virtual void Initialize() override;
@@ -27,7 +26,7 @@ export {
 		};
 	};
 	class DLLSERVER SWheel : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

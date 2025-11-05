@@ -4,21 +4,20 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:gui.line_graph;
 
 export import pragma.gui;
 
 export {
 	class DLLCLIENT WILineGraph : public WIBase {
-	protected:
+	  protected:
 		WIHandle m_hOutline;
 		std::vector<float> m_values;
 		std::vector<WIHandle> m_lines;
 		virtual void DoUpdate() override;
 		void UpdateGraph();
 		void UpdateLines();
-	public:
+	  public:
 		WILineGraph();
 		virtual void Initialize() override;
 		virtual void SetSize(int x, int y) override;

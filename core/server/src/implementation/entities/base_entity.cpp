@@ -3,9 +3,7 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
-
 
 module pragma.server;
 import :entities.base;
@@ -83,7 +81,7 @@ void SBaseEntity::Initialize()
 	pragma::ecs::BaseEntity::Initialize();
 
 	auto className = server_entities::ServerEntityRegistry::Instance().GetClassName(typeid(*this));
-	std::string strClassName = className ? std::string{*className} : std::string {};
+	std::string strClassName = className ? std::string {*className} : std::string {};
 	m_className = pragma::ents::register_class_name(strClassName);
 
 	auto ID = server_entities::ServerEntityRegistry::Instance().GetNetworkFactoryID(typeid(*this));

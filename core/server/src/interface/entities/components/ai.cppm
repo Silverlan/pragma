@@ -6,11 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
-
-
 export module pragma.server:entities.components.ai;
 
 import :ai;
@@ -25,7 +20,7 @@ export {
 	constexpr float AI_LISTEN_DISTANCE_THRESHOLD = 100.f;
 
 	class DLLSERVER NPCRelationship {
-	public:
+	  public:
 		NPCRelationship(const std::shared_ptr<void> &userData, int pPriority = 0) : data(userData), priority(pPriority) {}
 		std::shared_ptr<void> data;
 		int priority;
@@ -97,17 +92,17 @@ export {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_LOOK_TARGET_CHANGED;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SCHEDULE_STARTED;
 		}
-	class DLLSERVER SAIComponent final : public BaseAIComponent, public SBaseSnapshotComponent {
-		public:
+		class DLLSERVER SAIComponent final : public BaseAIComponent, public SBaseSnapshotComponent {
+		  public:
 			void _debugSendNavInfo(pragma::SPlayerComponent &pl);
 			void _debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::shared_ptr<DebugBehaviorTreeNode> &dbgTree, std::shared_ptr<ai::Schedule> &aiSchedule, float &tLastSchedUpdate);
 			static std::vector<ComponentHandle<pragma::SPlayerComponent>> s_plDebugAiNav;
-		private:
+		  private:
 			static std::vector<SAIComponent *> s_npcs;
 			static FactionManager s_factionManager;
-		public:
+		  public:
 			static FactionManager &GetFactionManager();
-		public:
+		  public:
 			static unsigned int GetNPCCount();
 			static const std::vector<SAIComponent *> &GetAll();
 
@@ -224,7 +219,7 @@ export {
 				pragma::Activity GetActivity() const;
 				const Vector3 *GetFacePosition() const;
 				pragma::ecs::BaseEntity *GetEntityFaceTarget() const;
-			private:
+			  private:
 				union {
 					int32_t animation;
 					pragma::Activity activity = pragma::Activity::Invalid;
@@ -237,7 +232,7 @@ export {
 
 			bool PlayActivity(pragma::Activity act, const AIAnimationInfo &info);
 			bool PlayAnimation(int32_t anim, const AIAnimationInfo &info);
-		protected:
+		  protected:
 			friend ai::BehaviorNode;
 
 			struct ControlInfo {
@@ -316,10 +311,10 @@ export {
 			bool PlayAnimation(const AIAnimationInfo &info);
 			bool m_bSkipHandling = false;
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::SAIComponent::AIAnimationInfo::AIAnimFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::SAIComponent::AIAnimationInfo::AIAnimFlags> : std::true_type {};
+	}
 };

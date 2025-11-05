@@ -3,9 +3,6 @@
 
 module;
 
-
-
-
 module pragma.client;
 
 import :rendering.controlled_blur_settings;

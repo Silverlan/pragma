@@ -5,8 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.effects.fire;
 
 import :entities;
@@ -14,15 +12,15 @@ import :entities;
 export {
 	namespace pragma {
 		class DLLSERVER SFireComponent final : public BaseEnvFireComponent {
-		public:
+		  public:
 			SFireComponent(pragma::ecs::BaseEntity &ent) : BaseEnvFireComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};
 
 	class DLLSERVER EnvFire : public SBaseEntity {
-	protected:
-	public:
+	  protected:
+	  public:
 		virtual void Initialize() override;
 	};
 };

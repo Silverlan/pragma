@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.env_wind;
 
 export import :entities.base_entity;
@@ -15,7 +13,7 @@ export import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLCLIENT CWindComponent final : public BaseEnvWindComponent, public CBaseNetComponent {
-		public:
+		  public:
 			CWindComponent(pragma::ecs::BaseEntity &ent) : BaseEnvWindComponent(ent) {}
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void InitializeLuaObject(lua_State *l) override;
@@ -24,7 +22,7 @@ export {
 	};
 
 	class DLLCLIENT CEnvWind : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

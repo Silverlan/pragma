@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:util.steam.vdf;
 
 export import pragma.util;

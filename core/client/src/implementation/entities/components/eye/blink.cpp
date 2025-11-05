@@ -3,13 +3,10 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :entities.components.eye;
 import :game;
-
 
 using namespace pragma;
 

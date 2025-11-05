@@ -12,13 +12,13 @@ export import pragma.gui;
 
 export {
 	class DLLCLIENT WITexturedCubemap : public WIBase {
-	public:
+	  public:
 		WITexturedCubemap();
 		virtual void Initialize() override;
 		void SetTexture(prosper::Texture &tex);
 		WITexturedRect *GetSideElement(CubeMapSide side);
 		void SetLOD(float lod);
-	protected:
+	  protected:
 		std::array<WIHandle, 6> m_hCubemapSides = {};
 	};
 };

@@ -3,14 +3,10 @@
 
 module;
 
-
-
 module pragma.client;
-
 
 import :entities.components.eye;
 import :game;
-
 
 static auto g_debugPrint = false;
 void pragma::CEyeComponent::UpdateEyeballsMT()

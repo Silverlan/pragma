@@ -53,7 +53,7 @@ void CMD_cl_rcon(NetworkState *, pragma::BasePlayerComponent *, std::vector<std:
 void CMD_connect(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
-		auto &lastConnection = static_cast<ClientState*>(state)->GetLastConnectionInfo();
+		auto &lastConnection = static_cast<ClientState *>(state)->GetLastConnectionInfo();
 		if(lastConnection.address.has_value() == false && lastConnection.steamId.has_value() == false) {
 			Con::cout << "No previous connection attempt has been made! Please supply a destination address." << Con::endl;
 			return;

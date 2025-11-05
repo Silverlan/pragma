@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.skybox;
 
 import :entities;
@@ -15,7 +14,7 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SSkyboxComponent final : public BaseSkyboxComponent, public SBaseNetComponent {
-		public:
+		  public:
 			SSkyboxComponent(pragma::ecs::BaseEntity &ent) : BaseSkyboxComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 			virtual void SetSkyAngles(const EulerAngles &ang) override;
@@ -26,7 +25,7 @@ export {
 	};
 
 	class DLLSERVER Skybox : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

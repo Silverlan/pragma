@@ -6,7 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.client:entities.components.material_override;
 
 export import :rendering.material_property_block;

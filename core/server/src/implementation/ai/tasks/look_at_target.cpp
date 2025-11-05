@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.server;
 import :ai.tasks.look_at_target;
 

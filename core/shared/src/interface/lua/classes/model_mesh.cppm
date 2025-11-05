@@ -4,9 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
-
 export module pragma.shared:scripting.lua.classes.model_mesh;
 
 export import :model.model_mesh;

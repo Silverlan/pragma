@@ -4,7 +4,6 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
 
 import :model.model_class;

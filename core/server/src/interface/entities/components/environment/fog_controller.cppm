@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.fog_controller;
 
 import :entities;
@@ -15,7 +14,7 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SFogControllerComponent final : public BaseEnvFogControllerComponent, public SBaseNetComponent {
-		public:
+		  public:
 			SFogControllerComponent(pragma::ecs::BaseEntity &ent) : BaseEnvFogControllerComponent(ent) {}
 			virtual void SetFogStart(float start) override;
 			virtual void SetFogEnd(float end) override;
@@ -29,7 +28,7 @@ export {
 	};
 
 	class DLLSERVER EnvFogController : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

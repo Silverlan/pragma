@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:entities.components.constraints.copy_scale;
 
 export import :entities.components.constraints.space;

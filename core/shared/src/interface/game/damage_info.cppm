@@ -12,7 +12,7 @@ import :physics.hitbox;
 
 export {
 	class DLLNETWORK DamageInfo {
-	protected:
+	  protected:
 		unsigned short m_damage = 0u;
 		unsigned int m_types = 0u;
 		Vector3 m_source = {};
@@ -21,7 +21,7 @@ export {
 		EntityHandle m_attacker = {};
 		EntityHandle m_inflictor = {};
 		HitGroup m_hitGroup = HitGroup::Generic;
-	public:
+	  public:
 		DamageInfo() = default;
 		~DamageInfo() = default;
 		void SetDamage(unsigned short dmg);

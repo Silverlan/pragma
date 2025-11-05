@@ -4,9 +4,7 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.env_fog_controller;
 import :entities.components.color;
@@ -14,7 +12,6 @@ import :entities.components.toggle;
 import :game;
 
 using namespace pragma;
-
 
 void CFogControllerComponent::Initialize()
 {

@@ -105,7 +105,8 @@ void ShaderScene::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &ou
 decltype(ShaderSceneLit::DESCRIPTOR_SET_SHADOWS) ShaderSceneLit::DESCRIPTOR_SET_SHADOWS = {
   "SHADOWS",
   {prosper::DescriptorSetInfo::Binding {"MAPS", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit, umath::to_integral(pragma::GameLimits::MaxActiveShadowMaps)},
-    prosper::DescriptorSetInfo::Binding {"CUBEMAPS", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit, umath::to_integral(pragma::GameLimits::MaxActiveShadowCubeMaps), std::numeric_limits<uint32_t>::max(), prosper::PrDescriptorSetBindingFlags::Cubemap}},
+    prosper::DescriptorSetInfo::Binding {"CUBEMAPS", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit, umath::to_integral(pragma::GameLimits::MaxActiveShadowCubeMaps), std::numeric_limits<uint32_t>::max(),
+      prosper::PrDescriptorSetBindingFlags::Cubemap}},
 };
 ShaderSceneLit::ShaderSceneLit(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderScene(context, identifier, vsShader, fsShader, gsShader) {}
 

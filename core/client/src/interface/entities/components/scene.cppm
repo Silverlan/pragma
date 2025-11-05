@@ -6,9 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
 export module pragma.client:entities.components.scene;
 
 export import :debug.enums;
@@ -158,14 +155,14 @@ export namespace pragma {
 
 		void LinkWorldEnvironment(CSceneComponent &other);
 		template<typename TCPPM>
-			void SetLightMap(TCPPM &lightMapC);
+		void SetLightMap(TCPPM &lightMapC);
 
 		template<typename TCPPM>
-			void SetRenderer(TCPPM *renderer);
+		void SetRenderer(TCPPM *renderer);
 		template<typename TCPPM>
-			TCPPM *GetRenderer();
+		TCPPM *GetRenderer();
 		template<typename TCPPM>
-			const TCPPM *GetRenderer() const;
+		const TCPPM *GetRenderer() const;
 
 		SceneDebugMode GetDebugMode() const;
 		void SetDebugMode(SceneDebugMode debugMode);
@@ -177,9 +174,9 @@ export namespace pragma {
 		const Vector4 &GetParticleSystemColorFactor() const;
 
 		template<typename TCPPM>
-			TCPPM *FindOcclusionCuller();
+		TCPPM *FindOcclusionCuller();
 		template<typename TCPPM>
-			const TCPPM *FindOcclusionCuller() const;
+		const TCPPM *FindOcclusionCuller() const;
 		SceneIndex GetSceneIndex() const;
 		bool IsValid() const;
 		CSceneComponent *GetParentScene();

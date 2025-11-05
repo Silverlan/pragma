@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :gui.main_menu_load_game;

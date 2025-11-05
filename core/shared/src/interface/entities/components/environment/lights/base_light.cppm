@@ -4,36 +4,33 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.environment.lights.base_light;
 
 export import :entities.components.base;
 
 export {
 	namespace pragma {
-				namespace baseEnvLightComponent {
+		namespace baseEnvLightComponent {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_DIRECTION_TO_POINT;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_INTENSITY_AT_POINT;
 		}
-class BaseEnvLightSpotComponent;
-				namespace baseEnvLightComponent {
+		class BaseEnvLightSpotComponent;
+		namespace baseEnvLightComponent {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_DIRECTION_TO_POINT;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_INTENSITY_AT_POINT;
 		}
-class BaseEnvLightPointComponent;
-				namespace baseEnvLightComponent {
+		class BaseEnvLightPointComponent;
+		namespace baseEnvLightComponent {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_DIRECTION_TO_POINT;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_INTENSITY_AT_POINT;
 		}
-class BaseEnvLightDirectionalComponent;
-				namespace baseEnvLightComponent {
+		class BaseEnvLightDirectionalComponent;
+		namespace baseEnvLightComponent {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_DIRECTION_TO_POINT;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_INTENSITY_AT_POINT;
 		}
-class DLLNETWORK BaseEnvLightComponent : public BaseEntityComponent {
-		public:
-
+		class DLLNETWORK BaseEnvLightComponent : public BaseEntityComponent {
+		  public:
 			enum class SpawnFlag : uint32_t { DontCastShadows = 512 };
 			enum class LightFlags : uint32_t { None = 0u, BakedLightSource = 1u };
 			enum class ShadowType : uint8_t { None = 0, StaticOnly = 1, Full = StaticOnly | 2 };
@@ -77,7 +74,7 @@ class DLLNETWORK BaseEnvLightComponent : public BaseEntityComponent {
 
 			float CalcLightIntensityAtPoint(const Vector3 &pos) const;
 			Vector3 CalcLightDirectionToPoint(const Vector3 &pos) const;
-		protected:
+		  protected:
 			virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 			virtual void InitializeLight(BaseEntityComponent &component);
 			ComponentHandle<BaseEntityComponent> m_hLight = {};
@@ -90,7 +87,7 @@ class DLLNETWORK BaseEnvLightComponent : public BaseEntityComponent {
 			float m_lightIntensity = 0.f;
 			pragma::NetEventId m_netEvSetShadowType = pragma::INVALID_NET_EVENT;
 			pragma::NetEventId m_netEvSetFalloffExponent = pragma::INVALID_NET_EVENT;
-		public:
+		  public:
 			ShadowType GetShadowType() const;
 			ShadowType GetEffectiveShadowType() const;
 			virtual void SetShadowType(ShadowType type);
@@ -107,10 +104,10 @@ class DLLNETWORK BaseEnvLightComponent : public BaseEntityComponent {
 			const Vector3 &pos;
 			Candela intensity = 0.f;
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::BaseEnvLightComponent::LightFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::BaseEnvLightComponent::LightFlags> : std::true_type {};
+	}
 };

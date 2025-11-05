@@ -4,15 +4,12 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
 
 import :entities.components.light_map_receiver;
 import :client_state;
 import :engine;
 import :model;
-
 
 using namespace pragma;
 

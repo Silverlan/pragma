@@ -3,8 +3,6 @@
 
 module;
 
-
-
 module pragma.client;
 
 import :particle_system.renderer_beam;
@@ -13,7 +11,6 @@ import :client_state;
 import :entities.components;
 import :game;
 import :rendering.shaders;
-
 
 CParticleRendererBeam::Node::Node(const Vector3 &o, const Color &) : origin(o), color(1.f, 0.f, 0.f, 1.f) //{c.r /255.f,c.g /255.f,c.b /255.f,c.a /255.f})
 {

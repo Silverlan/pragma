@@ -6,9 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
 export module pragma.client:scripting.lua.classes.shader;
 
 export import :rendering.shaders.lua;
@@ -39,7 +36,7 @@ export {
 
 			void to_lua(lua_State *L, LuaShaderRecordTarget const &x);
 			void to_lua(lua_State *L, LuaShaderRecordTarget *x);
-		public:
+		  public:
 			static value_type to_cpp_deferred(lua_State *, int) { return {}; }
 			static void to_lua_deferred(lua_State *, param_type) {}
 			static int compute_score(lua_State *, int) { return no_match; }
@@ -75,7 +72,7 @@ export {
 			DLLCLIENT void SetBlendingProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, const ::Vector4 &blendingProperties);
 			DLLCLIENT void SetCommonAlphaBlendProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo);
 			DLLCLIENT void SetColorBlendAttachmentProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t attId, bool blendingEnabled, uint32_t blendOpColor, uint32_t blendOpAlpha, uint32_t srcColorBlendFactor, uint32_t dstColorBlendFactor,
-			uint32_t srcAlphaBlendFactor, uint32_t dstAlphaBlendFactor, uint32_t channelWriteMask);
+			  uint32_t srcAlphaBlendFactor, uint32_t dstAlphaBlendFactor, uint32_t channelWriteMask);
 			DLLCLIENT void SetMultisamplingProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t sampleCount, float sampleShading, uint32_t sampleMask);
 			DLLCLIENT void SetSampleCount(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t sampleCount);
 			DLLCLIENT void SetMinSampleShading(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, float sampleShading);
@@ -90,7 +87,7 @@ export {
 			DLLCLIENT void SetLineWidth(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, float lineWidth);
 			DLLCLIENT void SetScissorBoxProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t iScissorBox, int32_t x, int32_t y, uint32_t w, uint32_t h);
 			DLLCLIENT void SetStencilTestProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, bool updateFrontFaceState, uint32_t stencilFailOp, uint32_t stencilPassOp, uint32_t stencilDepthFailOp, uint32_t stencilCompareOp, uint32_t stencilCompareMask,
-			uint32_t stencilWriteMask, uint32_t stencilReference);
+			  uint32_t stencilWriteMask, uint32_t stencilReference);
 			DLLCLIENT void SetViewportProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t iViewport, float originX, float originY, float w, float h, float minDepth, float maxDepth);
 			DLLCLIENT void AreDepthWritesEnabled(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo);
 			DLLCLIENT void GetBlendingProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo);

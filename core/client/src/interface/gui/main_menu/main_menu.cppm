@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:gui.main_menu;
 
 export import pragma.gui;
@@ -13,7 +12,7 @@ export import pragma.shared;
 
 export {
 	class DLLCLIENT WIMainMenu : public WIBase {
-	public:
+	  public:
 		WIMainMenu();
 		virtual ~WIMainMenu() override;
 		virtual void Initialize() override;
@@ -30,7 +29,7 @@ export {
 		void OpenModsMenu();
 		void OpenLoadScreen();
 		void OpenMainMenu();
-	protected:
+	  protected:
 		WIHandle m_hMain;
 		WIHandle m_hNewGame;
 		WIHandle m_hLoad;
@@ -66,7 +65,7 @@ export {
 		double m_tOpen;
 		//
 		void PlayNextMenuTrack(bool newRound = false);
-	private:
+	  private:
 		CallbackHandle m_cbOnSteamworksInit = {};
 		CallbackHandle m_cbOnSteamworksShutdown = {};
 	};

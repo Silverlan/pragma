@@ -10,20 +10,20 @@ export module pragma.client:particle_system.particle;
 export import pragma.math;
 
 export {
-	#pragma warning(push)
-	#pragma warning(disable : 4251)
+#pragma warning(push)
+#pragma warning(disable : 4251)
 	class DLLCLIENT CParticleSystemBaseKeyValues {
-	public:
+	  public:
 		CParticleSystemBaseKeyValues() = default;
 		void RecordKeyValues(const std::unordered_map<std::string, std::string> &values);
 		const std::unordered_map<std::string, std::string> *GetKeyValues() const;
 		bool IsRecordingKeyValues() const;
-	private:
+	  private:
 		std::unique_ptr<std::unordered_map<std::string, std::string>> m_keyValues;
 	};
 
 	class DLLCLIENT CParticle {
-	public:
+	  public:
 		enum class FieldId : uint8_t {
 			Pos = 0,
 			Rot,
@@ -149,11 +149,11 @@ export {
 				v = powf(v, exp);
 			return v + min;
 		}
-	private:
+	  private:
 		Vector3 m_pos = {};
 		Quat m_rot = uquat::identity(); // Only used by model renderer and physics
-										// Optional relative origin, which is rotated by the particle's rotation, and added to its position before
-										// being written to the render buffer (= Position modifier)
+		                                // Optional relative origin, which is rotated by the particle's rotation, and added to its position before
+		                                // being written to the render buffer (= Position modifier)
 		Vector3 m_origin = {};
 		Vector3 m_velocity = {};
 		Vector3 m_angularVelocity = {};
@@ -188,7 +188,7 @@ export {
 		Vector4 m_initialColor = {};
 		float m_initialFrameOffset = 0.f;
 	};
-	#pragma warning(pop)
+#pragma warning(pop)
 
 	inline bool operator<(const CParticle &a, const CParticle &b) { return a.GetCameraDistance() > b.GetCameraDistance(); }
 };

@@ -4,8 +4,6 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
-
 export module pragma.client:rendering.shaders.pbr;
 
 export import :rendering.shaders.textured;

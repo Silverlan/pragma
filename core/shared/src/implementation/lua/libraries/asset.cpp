@@ -2,12 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
-
-
-
 module pragma.shared;
 
 import :scripting.lua.libraries.asset;

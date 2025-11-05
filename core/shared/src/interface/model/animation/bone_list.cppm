@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:model.animation.bone_list;
 
 export import std.compat;

@@ -417,7 +417,7 @@ export {
 
 	namespace pragma::ecs {
 		class DLLCLIENT CEnvParticleSystem : public CBaseEntity {
-		public:
+		  public:
 			virtual void Initialize() override;
 		};
 	};

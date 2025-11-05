@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:networking.net_message_map;
 
 #define COMMA ,
@@ -14,32 +13,32 @@ export import pragma.network_manager;
 export import std;
 
 export {
-	using ServerClientHandle = void*;
+	using ServerClientHandle = void *;
 	class DLLNETWORK SVNetMessage {
-	public:
-		using Handler = void(*)(ServerClientHandle, NetPacket);
+	  public:
+		using Handler = void (*)(ServerClientHandle, NetPacket);
 		Handler handler;
 		unsigned int ID;
 	};
 
 	class DLLNETWORK CLNetMessage {
-	public:
-		using Handler = void(*)(NetPacket);
+	  public:
+		using Handler = void (*)(NetPacket);
 		Handler handler;
 		unsigned int ID;
 	};
 
 	namespace pragma::networking {
 		class IBaseNetMessageMap {
-		public:
+		  public:
 			virtual void RegisterNetMessage(const std::string_view &name) = 0;
 		};
 
 		template<class T>
 		class NetMessageMap : public IBaseNetMessageMap {
-		public:
+		  public:
 			NetMessageMap();
-		public:
+		  public:
 			void GetNetMessages(std::unordered_map<unsigned int, T> **messages);
 			void GetNetMessages(util::StringMap<unsigned int> **messages);
 			T *GetNetMessage(unsigned int ID);
@@ -48,7 +47,7 @@ export {
 
 			void RegisterNetMessage(const std::string_view &name) override;
 			void RegisterNetMessage(const std::string_view &name, const T::Handler &handler);
-		protected:
+		  protected:
 			std::unordered_map<unsigned int, T> m_netMessages;
 			util::StringMap<unsigned int> m_netMessageIDs;
 			unsigned int m_messageID;

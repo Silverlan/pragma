@@ -4,15 +4,11 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
-
 
 import :entities.components.eye;
 import :engine;
 import :entities.components.render;
-
 
 using namespace pragma;
 

@@ -3,14 +3,11 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.combine_image_channels;
 
 import :client_state;
-
 
 decltype(pragma::ShaderCombineImageChannels::DESCRIPTOR_SET_TEXTURE) pragma::ShaderCombineImageChannels::DESCRIPTOR_SET_TEXTURE = {
   "TEXTURES",

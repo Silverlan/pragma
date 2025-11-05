@@ -3,8 +3,6 @@
 
 module;
 
-
-
 module pragma.client;
 
 import :particle_system.particle;

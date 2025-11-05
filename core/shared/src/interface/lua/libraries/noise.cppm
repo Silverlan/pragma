@@ -12,13 +12,13 @@ export import pragma.lua;
 
 #define DECLARE_NOISE_MODULE(name)                                                                                                                                                                                                                                                               \
 	class DLLNETWORK Noise##name : public NoiseBaseModule {                                                                                                                                                                                                                                      \
-	public:                                                                                                                                                                                                                                                                                    \
+	  public:                                                                                                                                                                                                                                                                                    \
 		using NoiseBaseModule::NoiseBaseModule;                                                                                                                                                                                                                                                  \
 	};
 
 export {
 	class DLLNETWORK NoiseBaseModule : public std::shared_ptr<noise::module::Module> {
-	public:
+	  public:
 		NoiseBaseModule(noise::module::Module *mod);
 	};
 

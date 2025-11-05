@@ -217,12 +217,13 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("calc_best_fitting_plane", Lua::vector::calc_best_fitting_plane, luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>>::type {}), luabind::def("calc_linear_velocity_from_angular", util::angular_velocity_to_linear),
 	  luabind::def(
 	    "calc_spherical_stereo_transform",
-	    +[](const Vector3 &p, const Vector3 &d, float interocularDistance, float convergenceDistance) -> std::pair<Vector3, Vector3> {
-		    auto pr = p;
-		    auto dr = d;
-		    uvec::calc_spherical_stereo_transform(pr, dr, ::pragma::metres_to_units(interocularDistance), ::pragma::metres_to_units(convergenceDistance));
-		    return std::pair<Vector3, Vector3> {pr, dr};
-	    }),
+	    +[](const Vector3 &p, const Vector3 &d, float interocularDistance, float convergenceDistance) -> std::
+	                                                                                                    pair<Vector3, Vector3> {
+		                                                                                                    auto pr = p;
+		                                                                                                    auto dr = d;
+		                                                                                                    uvec::calc_spherical_stereo_transform(pr, dr, ::pragma::metres_to_units(interocularDistance), ::pragma::metres_to_units(convergenceDistance));
+		                                                                                                    return std::pair<Vector3, Vector3> {pr, dr};
+	                                                                                                    }),
 	  luabind::def(
 	    "calc_spherical_stereo_transform",
 	    +[](const Vector3 &p, const Vector3 &d, float interocularDistance) -> std::
@@ -944,166 +945,166 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	_G["Color"] = _G["util"]["Color"]; // Add to global table for quicker access
 	_G["util"]["Color"]["Clear"] = Color(0, 0, 0, 0);
 	// Pink Colors
-	_G["util"]["Color"]["Pink"]= colors::Pink;
-	_G["util"]["Color"]["LightPink"]= colors::LightPink;
-	_G["util"]["Color"]["HotPink"]= colors::HotPink;
-	_G["util"]["Color"]["DeepPink"]= colors::DeepPink;
-	_G["util"]["Color"]["PaleVioletRed"]= colors::PaleVioletRed;
-	_G["util"]["Color"]["MediumVioletRed"]= colors::MediumVioletRed;
+	_G["util"]["Color"]["Pink"] = colors::Pink;
+	_G["util"]["Color"]["LightPink"] = colors::LightPink;
+	_G["util"]["Color"]["HotPink"] = colors::HotPink;
+	_G["util"]["Color"]["DeepPink"] = colors::DeepPink;
+	_G["util"]["Color"]["PaleVioletRed"] = colors::PaleVioletRed;
+	_G["util"]["Color"]["MediumVioletRed"] = colors::MediumVioletRed;
 
 	// Red Colors
-	_G["util"]["Color"]["LightSalmon"]= colors::LightSalmon;
-	_G["util"]["Color"]["Salmon"]= colors::Salmon;
-	_G["util"]["Color"]["DarkSalmon"]= colors::DarkSalmon;
-	_G["util"]["Color"]["LightCoral"]= colors::LightCoral;
-	_G["util"]["Color"]["IndianRed"]= colors::IndianRed;
-	_G["util"]["Color"]["Crimson"]= colors::Crimson;
-	_G["util"]["Color"]["FireBrick"]= colors::FireBrick;
-	_G["util"]["Color"]["DarkRed"]= colors::DarkRed;
-	_G["util"]["Color"]["Red"]= colors::Red;
+	_G["util"]["Color"]["LightSalmon"] = colors::LightSalmon;
+	_G["util"]["Color"]["Salmon"] = colors::Salmon;
+	_G["util"]["Color"]["DarkSalmon"] = colors::DarkSalmon;
+	_G["util"]["Color"]["LightCoral"] = colors::LightCoral;
+	_G["util"]["Color"]["IndianRed"] = colors::IndianRed;
+	_G["util"]["Color"]["Crimson"] = colors::Crimson;
+	_G["util"]["Color"]["FireBrick"] = colors::FireBrick;
+	_G["util"]["Color"]["DarkRed"] = colors::DarkRed;
+	_G["util"]["Color"]["Red"] = colors::Red;
 
 	// Orange Colors
-	_G["util"]["Color"]["OrangeRed"]= colors::OrangeRed;
-	_G["util"]["Color"]["Tomato"]= colors::Tomato;
-	_G["util"]["Color"]["Coral"]= colors::Coral;
-	_G["util"]["Color"]["DarkOrange"]= colors::DarkOrange;
-	_G["util"]["Color"]["Orange"]= colors::Orange;
+	_G["util"]["Color"]["OrangeRed"] = colors::OrangeRed;
+	_G["util"]["Color"]["Tomato"] = colors::Tomato;
+	_G["util"]["Color"]["Coral"] = colors::Coral;
+	_G["util"]["Color"]["DarkOrange"] = colors::DarkOrange;
+	_G["util"]["Color"]["Orange"] = colors::Orange;
 
 	// Yellow Colors
-	_G["util"]["Color"]["Yellow"]= colors::Yellow;
-	_G["util"]["Color"]["LightYellow"]= colors::LightYellow;
-	_G["util"]["Color"]["LemonChiffon"]= colors::LemonChiffon;
-	_G["util"]["Color"]["LightGoldenrodYellow"]= colors::LightGoldenrodYellow;
-	_G["util"]["Color"]["PapayaWhip"]= colors::PapayaWhip;
-	_G["util"]["Color"]["Moccasin"]= colors::Moccasin;
-	_G["util"]["Color"]["PeachPuff"]= colors::PeachPuff;
-	_G["util"]["Color"]["PaleGoldenrod"]= colors::PaleGoldenrod;
-	_G["util"]["Color"]["Khaki"]= colors::Khaki;
-	_G["util"]["Color"]["DarkKhaki"]= colors::DarkKhaki;
-	_G["util"]["Color"]["Gold"]= colors::Gold;
+	_G["util"]["Color"]["Yellow"] = colors::Yellow;
+	_G["util"]["Color"]["LightYellow"] = colors::LightYellow;
+	_G["util"]["Color"]["LemonChiffon"] = colors::LemonChiffon;
+	_G["util"]["Color"]["LightGoldenrodYellow"] = colors::LightGoldenrodYellow;
+	_G["util"]["Color"]["PapayaWhip"] = colors::PapayaWhip;
+	_G["util"]["Color"]["Moccasin"] = colors::Moccasin;
+	_G["util"]["Color"]["PeachPuff"] = colors::PeachPuff;
+	_G["util"]["Color"]["PaleGoldenrod"] = colors::PaleGoldenrod;
+	_G["util"]["Color"]["Khaki"] = colors::Khaki;
+	_G["util"]["Color"]["DarkKhaki"] = colors::DarkKhaki;
+	_G["util"]["Color"]["Gold"] = colors::Gold;
 
 	// Brown Colors
-	_G["util"]["Color"]["Cornsilk"]= colors::Cornsilk;
-	_G["util"]["Color"]["BlanchedAlmond"]= colors::BlanchedAlmond;
-	_G["util"]["Color"]["Bisque"]= colors::Bisque;
-	_G["util"]["Color"]["NavajoWhite"]= colors::NavajoWhite;
-	_G["util"]["Color"]["Wheat"]= colors::Wheat;
-	_G["util"]["Color"]["BurlyWood"]= colors::BurlyWood;
-	_G["util"]["Color"]["Tan"]= colors::Tan;
-	_G["util"]["Color"]["RosyBrown"]= colors::RosyBrown;
-	_G["util"]["Color"]["SandyBrown"]= colors::SandyBrown;
-	_G["util"]["Color"]["Goldenrod"]= colors::Goldenrod;
-	_G["util"]["Color"]["DarkGoldenrod"]= colors::DarkGoldenrod;
-	_G["util"]["Color"]["Peru"]= colors::Peru;
-	_G["util"]["Color"]["Chocolate"]= colors::Chocolate;
-	_G["util"]["Color"]["SaddleBrown"]= colors::SaddleBrown;
-	_G["util"]["Color"]["Sienna"]= colors::Sienna;
-	_G["util"]["Color"]["Brown"]= colors::Brown;
-	_G["util"]["Color"]["Maroon"]= colors::Maroon;
+	_G["util"]["Color"]["Cornsilk"] = colors::Cornsilk;
+	_G["util"]["Color"]["BlanchedAlmond"] = colors::BlanchedAlmond;
+	_G["util"]["Color"]["Bisque"] = colors::Bisque;
+	_G["util"]["Color"]["NavajoWhite"] = colors::NavajoWhite;
+	_G["util"]["Color"]["Wheat"] = colors::Wheat;
+	_G["util"]["Color"]["BurlyWood"] = colors::BurlyWood;
+	_G["util"]["Color"]["Tan"] = colors::Tan;
+	_G["util"]["Color"]["RosyBrown"] = colors::RosyBrown;
+	_G["util"]["Color"]["SandyBrown"] = colors::SandyBrown;
+	_G["util"]["Color"]["Goldenrod"] = colors::Goldenrod;
+	_G["util"]["Color"]["DarkGoldenrod"] = colors::DarkGoldenrod;
+	_G["util"]["Color"]["Peru"] = colors::Peru;
+	_G["util"]["Color"]["Chocolate"] = colors::Chocolate;
+	_G["util"]["Color"]["SaddleBrown"] = colors::SaddleBrown;
+	_G["util"]["Color"]["Sienna"] = colors::Sienna;
+	_G["util"]["Color"]["Brown"] = colors::Brown;
+	_G["util"]["Color"]["Maroon"] = colors::Maroon;
 
 	// Green Colors
-	_G["util"]["Color"]["DarkOliveGreen"]= colors::DarkOliveGreen;
-	_G["util"]["Color"]["Olive"]= colors::Olive;
-	_G["util"]["Color"]["OliveDrab"]= colors::OliveDrab;
-	_G["util"]["Color"]["YellowGreen"]= colors::YellowGreen;
-	_G["util"]["Color"]["LimeGreen"]= colors::LimeGreen;
-	_G["util"]["Color"]["Lime"]= colors::Lime;
-	_G["util"]["Color"]["LawnGreen"]= colors::LawnGreen;
-	_G["util"]["Color"]["Chartreuse"]= colors::Chartreuse;
-	_G["util"]["Color"]["GreenYellow"]= colors::GreenYellow;
-	_G["util"]["Color"]["SpringGreen"]= colors::SpringGreen;
-	_G["util"]["Color"]["MediumSpringGreen"]= colors::MediumSpringGreen;
-	_G["util"]["Color"]["LightGreen"]= colors::LightGreen;
-	_G["util"]["Color"]["PaleGreen"]= colors::PaleGreen;
-	_G["util"]["Color"]["DarkSeaGreen"]= colors::DarkSeaGreen;
-	_G["util"]["Color"]["MediumAquamarine"]= colors::MediumAquamarine;
-	_G["util"]["Color"]["MediumSeaGreen"]= colors::MediumSeaGreen;
-	_G["util"]["Color"]["SeaGreen"]= colors::SeaGreen;
-	_G["util"]["Color"]["ForestGreen"]= colors::ForestGreen;
-	_G["util"]["Color"]["Green"]= colors::Green;
-	_G["util"]["Color"]["DarkGreen"]= colors::DarkGreen;
+	_G["util"]["Color"]["DarkOliveGreen"] = colors::DarkOliveGreen;
+	_G["util"]["Color"]["Olive"] = colors::Olive;
+	_G["util"]["Color"]["OliveDrab"] = colors::OliveDrab;
+	_G["util"]["Color"]["YellowGreen"] = colors::YellowGreen;
+	_G["util"]["Color"]["LimeGreen"] = colors::LimeGreen;
+	_G["util"]["Color"]["Lime"] = colors::Lime;
+	_G["util"]["Color"]["LawnGreen"] = colors::LawnGreen;
+	_G["util"]["Color"]["Chartreuse"] = colors::Chartreuse;
+	_G["util"]["Color"]["GreenYellow"] = colors::GreenYellow;
+	_G["util"]["Color"]["SpringGreen"] = colors::SpringGreen;
+	_G["util"]["Color"]["MediumSpringGreen"] = colors::MediumSpringGreen;
+	_G["util"]["Color"]["LightGreen"] = colors::LightGreen;
+	_G["util"]["Color"]["PaleGreen"] = colors::PaleGreen;
+	_G["util"]["Color"]["DarkSeaGreen"] = colors::DarkSeaGreen;
+	_G["util"]["Color"]["MediumAquamarine"] = colors::MediumAquamarine;
+	_G["util"]["Color"]["MediumSeaGreen"] = colors::MediumSeaGreen;
+	_G["util"]["Color"]["SeaGreen"] = colors::SeaGreen;
+	_G["util"]["Color"]["ForestGreen"] = colors::ForestGreen;
+	_G["util"]["Color"]["Green"] = colors::Green;
+	_G["util"]["Color"]["DarkGreen"] = colors::DarkGreen;
 
 	// Cyan Colors
-	_G["util"]["Color"]["Aqua"]= colors::Aqua;
-	_G["util"]["Color"]["Cyan"]= colors::Cyan;
-	_G["util"]["Color"]["LightCyan"]= colors::LightCyan;
-	_G["util"]["Color"]["PaleTurquoise"]= colors::PaleTurquoise;
-	_G["util"]["Color"]["Aquamarine"]= colors::Aquamarine;
-	_G["util"]["Color"]["Turquoise"]= colors::Turquoise;
-	_G["util"]["Color"]["MediumTurquoise"]= colors::MediumTurquoise;
-	_G["util"]["Color"]["DarkTurquoise"]= colors::DarkTurquoise;
-	_G["util"]["Color"]["LightSeaGreen"]= colors::LightSeaGreen;
-	_G["util"]["Color"]["CadetBlue"]= colors::CadetBlue;
-	_G["util"]["Color"]["DarkCyan"]= colors::DarkCyan;
-	_G["util"]["Color"]["Teal"]= colors::Teal;
+	_G["util"]["Color"]["Aqua"] = colors::Aqua;
+	_G["util"]["Color"]["Cyan"] = colors::Cyan;
+	_G["util"]["Color"]["LightCyan"] = colors::LightCyan;
+	_G["util"]["Color"]["PaleTurquoise"] = colors::PaleTurquoise;
+	_G["util"]["Color"]["Aquamarine"] = colors::Aquamarine;
+	_G["util"]["Color"]["Turquoise"] = colors::Turquoise;
+	_G["util"]["Color"]["MediumTurquoise"] = colors::MediumTurquoise;
+	_G["util"]["Color"]["DarkTurquoise"] = colors::DarkTurquoise;
+	_G["util"]["Color"]["LightSeaGreen"] = colors::LightSeaGreen;
+	_G["util"]["Color"]["CadetBlue"] = colors::CadetBlue;
+	_G["util"]["Color"]["DarkCyan"] = colors::DarkCyan;
+	_G["util"]["Color"]["Teal"] = colors::Teal;
 
 	// Blue Colors
-	_G["util"]["Color"]["LightSteelBlue"]= colors::LightSteelBlue;
-	_G["util"]["Color"]["PowderBlue"]= colors::PowderBlue;
-	_G["util"]["Color"]["LightBlue"]= colors::LightBlue;
-	_G["util"]["Color"]["SkyBlue"]= colors::SkyBlue;
-	_G["util"]["Color"]["LightSkyBlue"]= colors::LightSkyBlue;
-	_G["util"]["Color"]["DeepSkyBlue"]= colors::DeepSkyBlue;
-	_G["util"]["Color"]["DodgerBlue"]= colors::DodgerBlue;
-	_G["util"]["Color"]["CornflowerBlue"]= colors::CornflowerBlue;
-	_G["util"]["Color"]["SteelBlue"]= colors::SteelBlue;
-	_G["util"]["Color"]["RoyalBlue"]= colors::RoyalBlue;
-	_G["util"]["Color"]["Blue"]= colors::Blue;
-	_G["util"]["Color"]["MediumBlue"]= colors::MediumBlue;
-	_G["util"]["Color"]["DarkBlue"]= colors::DarkBlue;
-	_G["util"]["Color"]["Navy"]= colors::Navy;
-	_G["util"]["Color"]["MidnightBlue"]= colors::MidnightBlue;
+	_G["util"]["Color"]["LightSteelBlue"] = colors::LightSteelBlue;
+	_G["util"]["Color"]["PowderBlue"] = colors::PowderBlue;
+	_G["util"]["Color"]["LightBlue"] = colors::LightBlue;
+	_G["util"]["Color"]["SkyBlue"] = colors::SkyBlue;
+	_G["util"]["Color"]["LightSkyBlue"] = colors::LightSkyBlue;
+	_G["util"]["Color"]["DeepSkyBlue"] = colors::DeepSkyBlue;
+	_G["util"]["Color"]["DodgerBlue"] = colors::DodgerBlue;
+	_G["util"]["Color"]["CornflowerBlue"] = colors::CornflowerBlue;
+	_G["util"]["Color"]["SteelBlue"] = colors::SteelBlue;
+	_G["util"]["Color"]["RoyalBlue"] = colors::RoyalBlue;
+	_G["util"]["Color"]["Blue"] = colors::Blue;
+	_G["util"]["Color"]["MediumBlue"] = colors::MediumBlue;
+	_G["util"]["Color"]["DarkBlue"] = colors::DarkBlue;
+	_G["util"]["Color"]["Navy"] = colors::Navy;
+	_G["util"]["Color"]["MidnightBlue"] = colors::MidnightBlue;
 
 	// Purple, Violet and Magenta Colors
-	_G["util"]["Color"]["Lavender"]= colors::Lavender;
-	_G["util"]["Color"]["Thistle"]= colors::Thistle;
-	_G["util"]["Color"]["Plum"]= colors::Plum;
-	_G["util"]["Color"]["Violet"]= colors::Violet;
-	_G["util"]["Color"]["Orchid"]= colors::Orchid;
-	_G["util"]["Color"]["Fuchsia"]= colors::Fuchsia;
-	_G["util"]["Color"]["Magenta"]= colors::Magenta;
-	_G["util"]["Color"]["MediumOrchid"]= colors::MediumOrchid;
-	_G["util"]["Color"]["MediumPurple"]= colors::MediumPurple;
-	_G["util"]["Color"]["BlueViolet"]= colors::BlueViolet;
-	_G["util"]["Color"]["DarkViolet"]= colors::DarkViolet;
-	_G["util"]["Color"]["DarkOrchid"]= colors::DarkOrchid;
-	_G["util"]["Color"]["DarkMagenta"]= colors::DarkMagenta;
-	_G["util"]["Color"]["Purple"]= colors::Purple;
-	_G["util"]["Color"]["Indigo"]= colors::Indigo;
-	_G["util"]["Color"]["DarkSlateBlue"]= colors::DarkSlateBlue;
-	_G["util"]["Color"]["SlateBlue"]= colors::SlateBlue;
-	_G["util"]["Color"]["MediumSlateBlue"]= colors::MediumSlateBlue;
+	_G["util"]["Color"]["Lavender"] = colors::Lavender;
+	_G["util"]["Color"]["Thistle"] = colors::Thistle;
+	_G["util"]["Color"]["Plum"] = colors::Plum;
+	_G["util"]["Color"]["Violet"] = colors::Violet;
+	_G["util"]["Color"]["Orchid"] = colors::Orchid;
+	_G["util"]["Color"]["Fuchsia"] = colors::Fuchsia;
+	_G["util"]["Color"]["Magenta"] = colors::Magenta;
+	_G["util"]["Color"]["MediumOrchid"] = colors::MediumOrchid;
+	_G["util"]["Color"]["MediumPurple"] = colors::MediumPurple;
+	_G["util"]["Color"]["BlueViolet"] = colors::BlueViolet;
+	_G["util"]["Color"]["DarkViolet"] = colors::DarkViolet;
+	_G["util"]["Color"]["DarkOrchid"] = colors::DarkOrchid;
+	_G["util"]["Color"]["DarkMagenta"] = colors::DarkMagenta;
+	_G["util"]["Color"]["Purple"] = colors::Purple;
+	_G["util"]["Color"]["Indigo"] = colors::Indigo;
+	_G["util"]["Color"]["DarkSlateBlue"] = colors::DarkSlateBlue;
+	_G["util"]["Color"]["SlateBlue"] = colors::SlateBlue;
+	_G["util"]["Color"]["MediumSlateBlue"] = colors::MediumSlateBlue;
 
 	// White Colors
-	_G["util"]["Color"]["White"]= colors::White;
-	_G["util"]["Color"]["Snow"]= colors::Snow;
-	_G["util"]["Color"]["Honeydew"]= colors::Honeydew;
-	_G["util"]["Color"]["MintCream"]= colors::MintCream;
-	_G["util"]["Color"]["Azure"]= colors::Azure;
-	_G["util"]["Color"]["AliceBlue"]= colors::AliceBlue;
-	_G["util"]["Color"]["GhostWhite"]= colors::GhostWhite;
-	_G["util"]["Color"]["WhiteSmoke"]= colors::WhiteSmoke;
-	_G["util"]["Color"]["Seashell"]= colors::Seashell;
-	_G["util"]["Color"]["Beige"]= colors::Beige;
-	_G["util"]["Color"]["OldLace"]= colors::OldLace;
-	_G["util"]["Color"]["FloralWhite"]= colors::FloralWhite;
-	_G["util"]["Color"]["Ivory"]= colors::Ivory;
-	_G["util"]["Color"]["AntiqueWhite"]= colors::AntiqueWhite;
-	_G["util"]["Color"]["Linen"]= colors::Linen;
-	_G["util"]["Color"]["LavenderBlush"]= colors::LavenderBlush;
-	_G["util"]["Color"]["MistyRose"]= colors::MistyRose;
+	_G["util"]["Color"]["White"] = colors::White;
+	_G["util"]["Color"]["Snow"] = colors::Snow;
+	_G["util"]["Color"]["Honeydew"] = colors::Honeydew;
+	_G["util"]["Color"]["MintCream"] = colors::MintCream;
+	_G["util"]["Color"]["Azure"] = colors::Azure;
+	_G["util"]["Color"]["AliceBlue"] = colors::AliceBlue;
+	_G["util"]["Color"]["GhostWhite"] = colors::GhostWhite;
+	_G["util"]["Color"]["WhiteSmoke"] = colors::WhiteSmoke;
+	_G["util"]["Color"]["Seashell"] = colors::Seashell;
+	_G["util"]["Color"]["Beige"] = colors::Beige;
+	_G["util"]["Color"]["OldLace"] = colors::OldLace;
+	_G["util"]["Color"]["FloralWhite"] = colors::FloralWhite;
+	_G["util"]["Color"]["Ivory"] = colors::Ivory;
+	_G["util"]["Color"]["AntiqueWhite"] = colors::AntiqueWhite;
+	_G["util"]["Color"]["Linen"] = colors::Linen;
+	_G["util"]["Color"]["LavenderBlush"] = colors::LavenderBlush;
+	_G["util"]["Color"]["MistyRose"] = colors::MistyRose;
 
 	// Grey and Black Colors
-	_G["util"]["Color"]["Gainsboro"]= colors::Gainsboro;
-	_G["util"]["Color"]["LightGrey"]= colors::LightGrey;
-	_G["util"]["Color"]["Silver"]= colors::Silver;
-	_G["util"]["Color"]["DarkGray"]= colors::DarkGray;
-	_G["util"]["Color"]["Gray"]= colors::Gray;
-	_G["util"]["Color"]["DimGray"]= colors::DimGray;
-	_G["util"]["Color"]["LightSlateGray"]= colors::LightSlateGray;
-	_G["util"]["Color"]["SlateGray"]= colors::SlateGray;
-	_G["util"]["Color"]["DarkSlateGray"]= colors::DarkSlateGray;
-	_G["util"]["Color"]["Black"]= colors::Black;
+	_G["util"]["Color"]["Gainsboro"] = colors::Gainsboro;
+	_G["util"]["Color"]["LightGrey"] = colors::LightGrey;
+	_G["util"]["Color"]["Silver"] = colors::Silver;
+	_G["util"]["Color"]["DarkGray"] = colors::DarkGray;
+	_G["util"]["Color"]["Gray"] = colors::Gray;
+	_G["util"]["Color"]["DimGray"] = colors::DimGray;
+	_G["util"]["Color"]["LightSlateGray"] = colors::LightSlateGray;
+	_G["util"]["Color"]["SlateGray"] = colors::SlateGray;
+	_G["util"]["Color"]["DarkSlateGray"] = colors::DarkSlateGray;
+	_G["util"]["Color"]["Black"] = colors::Black;
 
 	auto dataStreamClassDef = luabind::class_<::util::DataStream>("DataStream");
 	Lua::DataStream::register_class(dataStreamClassDef);
@@ -1527,9 +1528,9 @@ void pragma::Game::RegisterLuaLibraries()
 	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::ModelSubMesh &, luabind::object &, luabind::object &, bool)>(
 	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1, precise); }),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::ModelSubMesh &, luabind::object &, luabind::object &)>([](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1) {
-		  return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1);
-	  }),
+	  luabind::def("line_with_mesh",
+	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::ModelSubMesh &, luabind::object &, luabind::object &)>(
+	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1); }),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
 	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, ModelMesh &, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),

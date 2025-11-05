@@ -3,7 +3,6 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
 
@@ -175,7 +174,10 @@ void AILuaBehaviorNodeWrapper::Stop() {}
 void AILuaBehaviorNodeWrapper::default_Stop(lua_State *, AILuaBehaviorNodeWrapper &) {}
 
 uint32_t AILuaBehaviorNodeWrapper::Think(std::shared_ptr<pragma::ai::Schedule> &, pragma::BaseAIComponent &, std::underlying_type_t<pragma::ai::BehaviorNode::Result>) { return umath::to_integral(pragma::ai::BehaviorNode::Result::Succeeded); }
-uint32_t AILuaBehaviorNodeWrapper::default_Think(lua_State *, AILuaBehaviorNodeWrapper &, std::shared_ptr<pragma::ai::Schedule> &, pragma::BaseAIComponent &, std::underlying_type_t<pragma::ai::BehaviorNode::Result>) { return umath::to_integral(pragma::ai::BehaviorNode::Result::Succeeded); }
+uint32_t AILuaBehaviorNodeWrapper::default_Think(lua_State *, AILuaBehaviorNodeWrapper &, std::shared_ptr<pragma::ai::Schedule> &, pragma::BaseAIComponent &, std::underlying_type_t<pragma::ai::BehaviorNode::Result>)
+{
+	return umath::to_integral(pragma::ai::BehaviorNode::Result::Succeeded);
+}
 
 void AILuaBehaviorNodeWrapper::OnTaskComplete(std::shared_ptr<pragma::ai::Schedule> &schedule, uint32_t taskId, std::underlying_type_t<pragma::ai::BehaviorNode::Result> result) {}
 void AILuaBehaviorNodeWrapper::default_OnTaskComplete(lua_State *l, AILuaBehaviorNodeWrapper &wrapper, std::shared_ptr<pragma::ai::Schedule> &schedule, uint32_t taskId, std::underlying_type_t<pragma::ai::BehaviorNode::Result> result) {}

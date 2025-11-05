@@ -5,14 +5,11 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :rendering.shaders.lua;
 import :scripting.lua.classes.shader;
 import :engine;
-
 
 void Lua::GraphicsPipelineCreateInfo::SetBlendingProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, const ::Vector4 &blendingProperties) { pipelineInfo.SetBlendingProperties(reinterpret_cast<const float *>(&blendingProperties)); }
 void Lua::GraphicsPipelineCreateInfo::SetCommonAlphaBlendProperties(lua_State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { prosper::util::set_generic_alpha_color_blend_attachment_properties(pipelineInfo); }

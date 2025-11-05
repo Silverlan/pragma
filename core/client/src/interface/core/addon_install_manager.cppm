@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:core.addon_install_manager;
 
 export import pragma.shared;

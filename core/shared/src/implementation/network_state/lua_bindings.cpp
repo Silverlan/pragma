@@ -4,8 +4,6 @@ module;
 
 #include "noiseutils.h"
 
-
-
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include <cassert>
 
@@ -198,7 +196,6 @@ std::ostream &operator<<(std::ostream &out,const pragma::animation::Bone &o)
 }
 }; */
 
-
 #undef DEFINE_OSTEAM_OPERATOR_NAMESPACE_ALIAS
 
 //namespace glm {
@@ -348,7 +345,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		outMin = colTemp.first;
 		outMax = colTemp.second;
 	}),
-	           luabind::meta::join<luabind::pure_out_value<2>, luabind::pure_out_value<3>>::type {}),
+	            luabind::meta::join<luabind::pure_out_value<2>, luabind::pure_out_value<3>>::type {}),
 	  luabind::def("get_average_color_temperature", ulighting::get_average_color_temperature), luabind::def("color_temperature_to_color", ulighting::color_temperature_to_color), luabind::def("wavelength_to_color", ulighting::wavelength_to_color),
 	  luabind::def("get_luminous_efficacy", ulighting::get_luminous_efficacy), luabind::def("lumens_to_watts", static_cast<Watt (*)(Lumen, LuminousEfficacy)>(ulighting::lumens_to_watts)),
 	  luabind::def("lumens_to_watts", static_cast<Watt (*)(Lumen)>([](Lumen lumen) -> Watt { return ulighting::lumens_to_watts(lumen); })), luabind::def("watts_to_lumens", static_cast<Watt (*)(Lumen, LuminousEfficacy)>(ulighting::watts_to_lumens)),
@@ -1480,7 +1477,8 @@ void pragma::Game::RegisterLuaClasses()
 	defSplashDamageInfo.def_readwrite("origin", &util::SplashDamageInfo::origin);
 	defSplashDamageInfo.def_readwrite("radius", &util::SplashDamageInfo::radius);
 	defSplashDamageInfo.def_readwrite("damageInfo", &util::SplashDamageInfo::damageInfo);
-	defSplashDamageInfo.def("SetCone", static_cast<void (*)(lua::State *, util::SplashDamageInfo &, const Vector3 &, float)>([](lua::State *l, util::SplashDamageInfo &splashDamageInfo, const Vector3 &coneDirection, float coneAngle) { splashDamageInfo.cone = {{coneDirection, coneAngle}}; }));
+	defSplashDamageInfo.def("SetCone",
+	  static_cast<void (*)(lua::State *, util::SplashDamageInfo &, const Vector3 &, float)>([](lua::State *l, util::SplashDamageInfo &splashDamageInfo, const Vector3 &coneDirection, float coneAngle) { splashDamageInfo.cone = {{coneDirection, coneAngle}}; }));
 	defSplashDamageInfo.def("SetCallback", static_cast<void (*)(lua::State *, util::SplashDamageInfo &, luabind::object)>([](lua::State *l, util::SplashDamageInfo &splashDamageInfo, luabind::object oCallback) {
 		Lua::CheckFunction(l, 2);
 		splashDamageInfo.callback = [l, oCallback](pragma::ecs::BaseEntity *ent, DamageInfo &dmgInfo) -> bool {
@@ -1945,7 +1943,7 @@ void pragma::Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	defMat.def(luabind::constructor<Mat4x3>());                                                                                                                                                                                                                                                  \
 	defMat.def("Copy", &Lua::Mat##type::Copy);                                                                                                                                                                                                                                                   \
 	defMat.def("Get", &Lua::Mat##type::Get);                                                                                                                                                                                                                                                     \
-	defMat.def("Set", static_cast<void (*)(lua::State *, Mat##type &, int, int, float)>(&Lua::Mat##type::Set));                                                                                                                                                                                   \
+	defMat.def("Set", static_cast<void (*)(lua::State *, Mat##type &, int, int, float)>(&Lua::Mat##type::Set));                                                                                                                                                                                  \
 	defMat.def("Transpose", &Lua::Mat##type::Transpose);                                                                                                                                                                                                                                         \
 	defMat.def("GetTranspose", &Lua::Mat##type::GetTransposition);
 

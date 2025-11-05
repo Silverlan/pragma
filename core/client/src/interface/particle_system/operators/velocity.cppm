@@ -4,12 +4,13 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:particle_system.operator_velocity;
 
 export import :particle_system.modifier;
 
-export namespace pragma::ecs {class CParticleSystemComponent;}
+export namespace pragma::ecs {
+	class CParticleSystemComponent;
+}
 export class DLLCLIENT CParticleOperatorVelocity : public CParticleOperator {
   private:
 	Vector3 m_velocity = {};

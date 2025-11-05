@@ -3,16 +3,13 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.world_raytracing;
 
 import :engine;
 
 using namespace pragma;
-
 
 decltype(ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT) ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT = {
   "OUTPUTS",

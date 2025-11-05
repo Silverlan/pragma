@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :networking.standard_client;
@@ -106,13 +105,14 @@ void pragma::networking::NWMClientConnection::SetClient(StandardClient &client) 
 bool pragma::networking::NWMClientConnection::IsDisconnected() const { return m_bDisconnected; }
 
 namespace {
-	auto _ = pragma::console::client::register_variable_listener<float>("sv_timeout_duration", +[](NetworkState *, const ConVar &, float, float val) {
-		auto *client = pragma::get_client_state();
-		if(client == nullptr)
-			return;
-		auto *cl = client->GetClient();
-		if(cl == nullptr)
-			return;
-		cl->SetTimeoutDuration(val);
-	});
+	auto _ = pragma::console::client::register_variable_listener<float>(
+	  "sv_timeout_duration", +[](NetworkState *, const ConVar &, float, float val) {
+		  auto *client = pragma::get_client_state();
+		  if(client == nullptr)
+			  return;
+		  auto *cl = client->GetClient();
+		  if(cl == nullptr)
+			  return;
+		  cl->SetTimeoutDuration(val);
+	  });
 };

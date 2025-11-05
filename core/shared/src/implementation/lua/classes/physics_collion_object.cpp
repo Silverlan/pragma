@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
 #include "pragma/lua/ostream_operator_alias.hpp"
 
 module pragma.shared;

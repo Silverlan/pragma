@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
 #include <cassert>
 
 module pragma.shared;
@@ -343,7 +341,7 @@ void pragma::asset::ModelAssetWrapper::SetModel(pragma::Model &model) { m_model 
 pragma::Model *pragma::asset::ModelAssetWrapper::GetModel() const { return m_model.get(); }
 
 void pragma::asset::MaterialAssetWrapper::SetMaterial(msys::Material &mat) { m_material = mat.GetHandle(); }
-msys::Material *pragma::asset::MaterialAssetWrapper::GetMaterial() const { return const_cast<msys::Material*>(m_material.get()); }
+msys::Material *pragma::asset::MaterialAssetWrapper::GetMaterial() const { return const_cast<msys::Material *>(m_material.get()); }
 
 void pragma::asset::AssetManager::RegisterImporter(const ImporterInfo &importerInfo, Type type, const ImportHandler &importHandler)
 {

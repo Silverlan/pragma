@@ -230,5 +230,5 @@ static void sv_timeout_duration_callback(NetworkState *, const ConVar &, float, 
 	sv->SetTimeoutDuration(GET_TIMEOUT_DURATION(val));
 }
 namespace {
-	auto UVN = pragma::console::server::register_variable_listener<float>("sv_timeout_duration",&sv_timeout_duration_callback);
+	auto UVN = pragma::console::server::register_variable_listener<float>("sv_timeout_duration", &sv_timeout_duration_callback);
 }

@@ -4,16 +4,13 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.listener;
 import :engine;
 import :entities.components.transform;
 
 using namespace pragma;
-
 
 void CListenerComponent::Initialize()
 {

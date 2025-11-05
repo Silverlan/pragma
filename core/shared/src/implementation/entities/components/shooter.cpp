@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
 module pragma.shared;
 
 import :entities.components.shooter;
@@ -83,7 +80,8 @@ void BaseShooterComponent::GetBulletTraceData(const BulletInfo &bulletInfo, Trac
 			return pragma::physics::RayCastHitType::None;
 		auto filterGroup = phys->GetCollisionFilter();
 		auto mdlComponent = ent->GetEntity().GetModelComponent();
-		if(mdlComponent && mdlComponent->GetHitboxCount() > 0 && (filterGroup & pragma::physics::CollisionMask::NPC) != pragma::physics::CollisionMask::None || (filterGroup & pragma::physics::CollisionMask::Player) != pragma::physics::CollisionMask::None) // Filter out player and NPC collision objects, since we only want to check their hitboxes
+		if(mdlComponent && mdlComponent->GetHitboxCount() > 0 && (filterGroup & pragma::physics::CollisionMask::NPC) != pragma::physics::CollisionMask::None
+		  || (filterGroup & pragma::physics::CollisionMask::Player) != pragma::physics::CollisionMask::None) // Filter out player and NPC collision objects, since we only want to check their hitboxes
 			return pragma::physics::RayCastHitType::None;
 		return const_cast<BaseShooterComponent *>(this)->OnBulletHit(bulletInfo, data, *phys, body);
 	});

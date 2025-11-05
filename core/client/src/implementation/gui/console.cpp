@@ -3,8 +3,6 @@
 
 module;
 
-
-
 #include "pragma/lua/core.hpp"
 #include <cassert>
 
@@ -20,8 +18,6 @@ import :client_state;
 import :engine;
 import pragma.gui;
 import pragma.string.unicode;
-
-
 
 static WIHandle s_hConsole = {};
 WIConsole *WIConsole::Open()

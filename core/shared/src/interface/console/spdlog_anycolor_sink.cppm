@@ -14,12 +14,12 @@ export namespace pragma::console {
 	// Based on wincolor_sink
 	template<typename ConsoleMutex>
 	class anycolor_sink : public spdlog::sinks::sink {
-	public:
-	#ifdef _WIN32
+	  public:
+#ifdef _WIN32
 		anycolor_sink(void *out_handle, spdlog::color_mode mode);
-	#else
+#else
 		anycolor_sink(FILE *target_file, spdlog::color_mode mode);
-	#endif
+#endif
 		~anycolor_sink() override;
 
 		anycolor_sink(const anycolor_sink &other) = delete;
@@ -32,13 +32,13 @@ export namespace pragma::console {
 		void set_pattern(const std::string &pattern) override final;
 		void set_formatter(std::unique_ptr<spdlog::formatter> sink_formatter) override final;
 		void set_color_mode(spdlog::color_mode mode);
-	protected:
+	  protected:
 		using mutex_t = typename ConsoleMutex::mutex_t;
-	#ifdef _WIN32
+#ifdef _WIN32
 		void *out_handle_;
-	#else
+#else
 		FILE *target_file_;
-	#endif
+#endif
 		mutex_t &mutex_;
 		bool should_do_colors_;
 		std::unique_ptr<spdlog::formatter> formatter_;
@@ -47,23 +47,23 @@ export namespace pragma::console {
 		// print a range of formatted message to console
 		void print_range_(const spdlog::memory_buf_t &formatted, size_t start, size_t end);
 
-	#ifdef _WIN32
+#ifdef _WIN32
 		// in case we are redirected to file (not in console mode)
 		void write_to_file_(const spdlog::memory_buf_t &formatted);
-	#endif
+#endif
 
 		void set_color_mode_impl(spdlog::color_mode mode);
 	};
 
 	template<typename ConsoleMutex>
 	class anycolor_stdout_sink : public anycolor_sink<ConsoleMutex> {
-	public:
+	  public:
 		explicit anycolor_stdout_sink(spdlog::color_mode mode = spdlog::color_mode::automatic);
 	};
 
 	template<typename ConsoleMutex>
 	class anycolor_stderr_sink : public anycolor_sink<ConsoleMutex> {
-	public:
+	  public:
 		explicit anycolor_stderr_sink(spdlog::color_mode mode = spdlog::color_mode::automatic);
 	};
 
@@ -75,21 +75,21 @@ export namespace pragma::console {
 
 	using anycolor_color_sink_mt = anycolor_stdout_sink_mt;
 
-	#ifdef _WIN32
+#ifdef _WIN32
 	template<typename ConsoleMutex>
 	inline anycolor_sink<ConsoleMutex>::anycolor_sink(void *out_handle, spdlog::color_mode mode) : out_handle_(out_handle), mutex_(ConsoleMutex::mutex()), formatter_(spdlog::details::make_unique<spdlog::pattern_formatter>())
 	{
 
 		set_color_mode_impl(mode);
 	}
-	#else
+#else
 	template<typename ConsoleMutex>
 	inline anycolor_sink<ConsoleMutex>::anycolor_sink(FILE *target_file, spdlog::color_mode mode) : target_file_(target_file), mutex_(ConsoleMutex::mutex()), formatter_(spdlog::details::make_unique<spdlog::pattern_formatter>())
 	{
 
 		set_color_mode_impl(mode);
 	}
-	#endif
+#endif
 
 	template<typename ConsoleMutex>
 	inline anycolor_sink<ConsoleMutex>::~anycolor_sink()
@@ -102,21 +102,21 @@ export namespace pragma::console {
 	void inline anycolor_sink<ConsoleMutex>::set_color(spdlog::level::level_enum level, const std::string &color)
 	{
 		std::lock_guard<mutex_t> lock(mutex_);
-	#ifdef SPDLOG_USE_STD_FORMAT
+#ifdef SPDLOG_USE_STD_FORMAT
 		colors_[static_cast<size_t>(level)] = color;
-	#else
+#else
 		colors_[static_cast<size_t>(level)].append(color.data(), color.data() + color.size());
-	#endif
+#endif
 	}
 
 	template<typename ConsoleMutex>
 	void inline anycolor_sink<ConsoleMutex>::log(const spdlog::details::log_msg &msg)
 	{
-	#ifdef _WIN32
+#ifdef _WIN32
 		if(out_handle_ == nullptr || out_handle_ == INVALID_HANDLE_VALUE) {
 			return;
 		}
-	#endif
+#endif
 
 		std::lock_guard<mutex_t> lock(mutex_);
 		msg.color_range_start = 0;
@@ -131,32 +131,32 @@ export namespace pragma::console {
 			print_range_(col, 0, col.size());
 			print_range_(formatted, msg.color_range_start, msg.color_range_end);
 			// reset to orig colors
-	#ifdef SPDLOG_USE_STD_FORMAT
+#ifdef SPDLOG_USE_STD_FORMAT
 			auto &reset = Con::COLOR_RESET;
-	#else
+#else
 			spdlog::memory_buf_t reset {};
 			reset.append(Con::COLOR_RESET.data(), Con::COLOR_RESET.data() + Con::COLOR_RESET.size());
-	#endif
+#endif
 			print_range_(reset, 0, reset.size());
 			print_range_(formatted, msg.color_range_end, formatted.size());
 		}
 		else // print without colors if color range is invalid (or color is disabled)
 		{
-	#ifdef _WIN32
+#ifdef _WIN32
 			write_to_file_(formatted);
-	#else
+#else
 			print_range_(formatted, 0, formatted.size());
-	#endif
+#endif
 		}
 	}
 
 	template<typename ConsoleMutex>
 	void inline anycolor_sink<ConsoleMutex>::flush()
 	{
-	#ifndef _WIN32
+#ifndef _WIN32
 		std::lock_guard<mutex_t> lock(mutex_);
 		fflush(target_file_);
-	#endif
+#endif
 	}
 
 	template<typename ConsoleMutex>
@@ -183,7 +183,7 @@ export namespace pragma::console {
 	template<typename ConsoleMutex>
 	void inline anycolor_sink<ConsoleMutex>::set_color_mode_impl(spdlog::color_mode mode)
 	{
-	#ifdef _WIN32
+#ifdef _WIN32
 		if(mode == spdlog::color_mode::automatic) {
 			// should do colors only if out_handle_  points to actual console.
 			DWORD console_mode;
@@ -193,7 +193,7 @@ export namespace pragma::console {
 		else {
 			should_do_colors_ = mode == spdlog::color_mode::always ? true : false;
 		}
-	#else
+#else
 		switch(mode) {
 		case spdlog::color_mode::always:
 			should_do_colors_ = true;
@@ -207,25 +207,25 @@ export namespace pragma::console {
 		default:
 			should_do_colors_ = false;
 		}
-	#endif
+#endif
 	}
 
 	// print a range of formatted message to console
 	template<typename ConsoleMutex>
 	void inline anycolor_sink<ConsoleMutex>::print_range_(const spdlog::memory_buf_t &formatted, size_t start, size_t end)
 	{
-	#ifdef _WIN32
+#ifdef _WIN32
 		if(end > start) {
 			auto size = static_cast<DWORD>(end - start);
 			auto ignored = ::WriteConsoleA(static_cast<HANDLE>(out_handle_), formatted.data() + start, size, nullptr, nullptr);
 			(void)(ignored);
 		}
-	#else
+#else
 		fwrite(formatted.data() + start, sizeof(char), end - start, target_file_);
-	#endif
+#endif
 	}
 
-	#ifdef _WIN32
+#ifdef _WIN32
 	template<typename ConsoleMutex>
 	void inline anycolor_sink<ConsoleMutex>::write_to_file_(const spdlog::memory_buf_t &formatted)
 	{
@@ -234,9 +234,9 @@ export namespace pragma::console {
 		auto ignored = ::WriteFile(static_cast<HANDLE>(out_handle_), formatted.data(), size, &bytes_written, nullptr);
 		(void)(ignored);
 	}
-	#endif
+#endif
 
-	#ifdef _WIN32
+#ifdef _WIN32
 	// anycolor_stdout_sink
 	template<typename ConsoleMutex>
 	inline anycolor_stdout_sink<ConsoleMutex>::anycolor_stdout_sink(spdlog::color_mode mode) : anycolor_sink<ConsoleMutex>(::GetStdHandle(STD_OUTPUT_HANDLE), mode)
@@ -248,7 +248,7 @@ export namespace pragma::console {
 	inline anycolor_stderr_sink<ConsoleMutex>::anycolor_stderr_sink(spdlog::color_mode mode) : anycolor_sink<ConsoleMutex>(::GetStdHandle(STD_ERROR_HANDLE), mode)
 	{
 	}
-	#else
+#else
 	// ansicolor_stdout_sink
 	template<typename ConsoleMutex>
 	inline anycolor_stdout_sink<ConsoleMutex>::anycolor_stdout_sink(spdlog::color_mode mode) : anycolor_sink<ConsoleMutex>(stdout, mode)
@@ -260,5 +260,5 @@ export namespace pragma::console {
 	inline anycolor_stderr_sink<ConsoleMutex>::anycolor_stderr_sink(spdlog::color_mode mode) : anycolor_sink<ConsoleMutex>(stderr, mode)
 	{
 	}
-	#endif
+#endif
 };

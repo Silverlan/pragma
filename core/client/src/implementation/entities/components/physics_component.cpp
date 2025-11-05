@@ -5,9 +5,7 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.physics;
 import :client_state;
@@ -15,7 +13,6 @@ import :game;
 import :model;
 
 using namespace pragma;
-
 
 void CPhysicsComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { BasePhysicsComponent::RegisterEvents(componentManager, registerEvent); }
 void CPhysicsComponent::Initialize()

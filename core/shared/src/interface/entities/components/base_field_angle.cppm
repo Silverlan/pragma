@@ -4,19 +4,16 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.base_field_angle;
 
 export import :entities.components.base;
 
 export namespace pragma {
-		namespace baseFieldAngleComponent {
+	namespace baseFieldAngleComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_FIELD_ANGLE_CHANGED;
 	}
-class DLLNETWORK BaseFieldAngleComponent : public BaseEntityComponent {
+	class DLLNETWORK BaseFieldAngleComponent : public BaseEntityComponent {
 	  public:
-
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;

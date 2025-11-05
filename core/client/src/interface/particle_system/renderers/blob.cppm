@@ -4,7 +4,6 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 #define ENABLE_BLOB_DEPTH_TEST 0
 
 export module pragma.client:particle_system.renderer_blob;

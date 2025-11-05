@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
 #undef CreateFile
 
 module pragma.shared;
@@ -131,28 +129,29 @@ void pragma::Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 			autoCompleteOptions.push_back(strOption);
 		}
 	});
-	map.RegisterConVar<std::string>("net_library", "game_networking", pragma::console::ConVarFlags::Archive | pragma::console::ConVarFlags::Replicated, "The underlying networking library to use for multiplayer games.", "<netLibrary>", [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
-		auto netLibs = pragma::networking::GetAvailableNetworkingModules();
-		auto it = netLibs.begin();
-		std::vector<std::string_view> similarCandidates {};
-		ustring::gather_similar_elements(
-		  arg,
-		  [&it, &netLibs]() -> std::optional<std::string_view> {
-			  if(it == netLibs.end())
-				  return {};
-			  auto &name = *it;
-			  ++it;
-			  return name;
-		  },
-		  similarCandidates, 15);
+	map.RegisterConVar<std::string>("net_library", "game_networking", pragma::console::ConVarFlags::Archive | pragma::console::ConVarFlags::Replicated, "The underlying networking library to use for multiplayer games.", "<netLibrary>",
+	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
+		  auto netLibs = pragma::networking::GetAvailableNetworkingModules();
+		  auto it = netLibs.begin();
+		  std::vector<std::string_view> similarCandidates {};
+		  ustring::gather_similar_elements(
+		    arg,
+		    [&it, &netLibs]() -> std::optional<std::string_view> {
+			    if(it == netLibs.end())
+				    return {};
+			    auto &name = *it;
+			    ++it;
+			    return name;
+		    },
+		    similarCandidates, 15);
 
-		autoCompleteOptions.reserve(similarCandidates.size());
-		for(auto &candidate : similarCandidates) {
-			auto strOption = std::string {candidate};
-			ufile::remove_extension_from_filename(strOption);
-			autoCompleteOptions.push_back(strOption);
-		}
-	});
+		  autoCompleteOptions.reserve(similarCandidates.size());
+		  for(auto &candidate : similarCandidates) {
+			  auto strOption = std::string {candidate};
+			  ufile::remove_extension_from_filename(strOption);
+			  autoCompleteOptions.push_back(strOption);
+		  }
+	  });
 	map.RegisterConVar<bool>("sv_require_authentication", false, pragma::console::ConVarFlags::Archive | pragma::console::ConVarFlags::Replicated, "If enabled, clients will have to authenticate via steam to join the server.");
 
 	map.RegisterConVar<bool>("asset_multithreading_enabled", true, pragma::console::ConVarFlags::Archive, "If enabled, assets will be loaded in the background.");
@@ -182,7 +181,7 @@ void pragma::Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 		  std::vector<std::string>::iterator it;
 		  for(it = cvars.begin(); it != cvars.end(); it++) {
 			  if(*it != "credits")
-			  	Con::cout << *it << Con::endl;
+				  Con::cout << *it << Con::endl;
 		  }
 	  },
 	  pragma::console::ConVarFlags::None, "Prints a list of all serverside console commands to the console.");
@@ -201,7 +200,7 @@ void pragma::Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 		  }
 		  Con::cout << "Found " << similar.size() << " potential candidates:" << Con::endl;
 		  for(auto &name : similar)
-		  	Con::cout << "- " << name << Con::endl;
+			  Con::cout << "- " << name << Con::endl;
 	  },
 	  pragma::console::ConVarFlags::None, "Finds similar console commands to whatever was given as argument.");
 }
@@ -579,8 +578,10 @@ void pragma::Engine::RegisterConsoleCommands()
 	  },
 	  pragma::console::ConVarFlags::None, "Searches for the specified text in all currently loaded text strings.");
 
-	conVarMap.RegisterConCommand("asset_clear_unused_models", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(pragma::asset::Type::Model, true); }, pragma::console::ConVarFlags::None, "Clears all unused models from memory.");
-	conVarMap.RegisterConCommand("asset_clear_unused_materials", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(pragma::asset::Type::Material, true); }, pragma::console::ConVarFlags::None, "Clears all unused materials from memory.");
+	conVarMap.RegisterConCommand(
+	  "asset_clear_unused_models", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(pragma::asset::Type::Model, true); }, pragma::console::ConVarFlags::None, "Clears all unused models from memory.");
+	conVarMap.RegisterConCommand(
+	  "asset_clear_unused_materials", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(pragma::asset::Type::Material, true); }, pragma::console::ConVarFlags::None, "Clears all unused materials from memory.");
 	conVarMap.RegisterConCommand(
 	  "asset_clear_unused",
 	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
@@ -651,14 +652,16 @@ void pragma::Engine::RegisterConsoleCommands()
 	  },
 	  pragma::console::ConVarFlags::None, "Starts the Lua debugger server for the serverside lua state.");
 
-	conVarMap.RegisterConCommand("log",
+	conVarMap.RegisterConCommand(
+	  "log",
 	  [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty())
 			  return;
 		  pragma::Engine::Get()->WriteToLog(argv[0]);
 	  },
 	  pragma::console::ConVarFlags::None, "Adds the specified message to the engine log. Usage: log <msg>.");
-	conVarMap.RegisterConCommand("clear_cache",
+	conVarMap.RegisterConCommand(
+	  "clear_cache",
 	  [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty())
 			  return;
@@ -674,7 +677,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  "0 = Remote debugging is disabled; 1 = Remote debugging is enabled serverside; 2 = Remote debugging is enabled clientside.\nCannot be changed during an active game. Also requires the \"-luaext\" launch parameter.\nRemote debugging cannot be enabled clientside and serverside at the same time.");
 	conVarMap.RegisterConVar<udm::Boolean>("lua_open_editor_on_error", true, pragma::console::ConVarFlags::Archive, "1 = Whenever there's a Lua error, the engine will attempt to automatically open a Lua IDE and open the file and line which caused the error.");
 	conVarMap.RegisterConVar<udm::Boolean>("steam_steamworks_enabled", true, pragma::console::ConVarFlags::Archive, "Enables or disables steamworks.");
-	conVarMap.RegisterConVarCallback("steam_steamworks_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)>{[](NetworkState *, const ConVar &, bool prev, bool val) {
+	conVarMap.RegisterConVarCallback("steam_steamworks_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[](NetworkState *, const ConVar &, bool prev, bool val) {
 		static std::weak_ptr<util::Library> wpSteamworks = {};
 		static std::unique_ptr<ISteamworks> isteamworks = nullptr;
 		auto *nwSv = pragma::Engine::Get()->GetServerNetworkState();
@@ -720,8 +723,9 @@ void pragma::Engine::RegisterConsoleCommands()
 			nwCl->CallCallbacks<void>("OnSteamworksShutdown");
 	}});
 
-	conVarMap.RegisterConVarCallback("sh_mount_external_game_resources", std::function<void(NetworkState *, const ConVar &, bool, bool)>{[](NetworkState *, const ConVar &, bool prev, bool val) { pragma::Engine::Get()->SetMountExternalGameResources(val); }});
-	conVarMap.RegisterConCommand("toggle",
+	conVarMap.RegisterConVarCallback("sh_mount_external_game_resources", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[](NetworkState *, const ConVar &, bool prev, bool val) { pragma::Engine::Get()->SetMountExternalGameResources(val); }});
+	conVarMap.RegisterConCommand(
+	  "toggle",
 	  [](NetworkState *nw, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv, float) {
 		  if(argv.empty() == true)
 			  return;
@@ -738,34 +742,38 @@ void pragma::Engine::RegisterConsoleCommands()
 	////////////////////////////////
 	////////////////////////////////
 
-	conVarMap.RegisterConCommand("lua_compile", +[](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
-		if(argv.empty() || !state->IsGameActive())
-			return;
-		pragma::Game *game = state->GetGameState();
-		auto *l = game->GetLuaState();
-		std::string arg = argv[0];
-		if(FileManager::IsDir(Lua::SCRIPT_DIRECTORY_SLASH + arg)) {
-			std::function<void(const std::string &)> fCompileFiles = nullptr;
-			fCompileFiles = [l, game, &fCompileFiles](const std::string &path) {
-				std::vector<std::string> files {};
-				std::vector<std::string> dirs {};
-				FileManager::FindFiles((Lua::SCRIPT_DIRECTORY_SLASH + path + "/*").c_str(), &files, &dirs);
-				for(auto &f : files) {
-					std::string ext;
-					if(ufile::get_extension(f, &ext) == false || ustring::compare<std::string>(ext, Lua::FILE_EXTENSION, false) == false)
-						continue;
-					compile_lua_file(l, *game, path + '/' + f);
-				}
-				for(auto &d : dirs)
-					fCompileFiles(path + '/' + d);
-			};
-			fCompileFiles(arg);
-			return;
-		}
-		compile_lua_file(l, *game, arg);
-	}, pragma::console::ConVarFlags::None, "Opens the specified lua-file and outputs a precompiled file with the same name (And the extension '" + Lua::DOT_FILE_EXTENSION_PRECOMPILED + "').");
+	conVarMap.RegisterConCommand(
+	  "lua_compile",
+	  +[](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  if(argv.empty() || !state->IsGameActive())
+			  return;
+		  pragma::Game *game = state->GetGameState();
+		  auto *l = game->GetLuaState();
+		  std::string arg = argv[0];
+		  if(FileManager::IsDir(Lua::SCRIPT_DIRECTORY_SLASH + arg)) {
+			  std::function<void(const std::string &)> fCompileFiles = nullptr;
+			  fCompileFiles = [l, game, &fCompileFiles](const std::string &path) {
+				  std::vector<std::string> files {};
+				  std::vector<std::string> dirs {};
+				  FileManager::FindFiles((Lua::SCRIPT_DIRECTORY_SLASH + path + "/*").c_str(), &files, &dirs);
+				  for(auto &f : files) {
+					  std::string ext;
+					  if(ufile::get_extension(f, &ext) == false || ustring::compare<std::string>(ext, Lua::FILE_EXTENSION, false) == false)
+						  continue;
+					  compile_lua_file(l, *game, path + '/' + f);
+				  }
+				  for(auto &d : dirs)
+					  fCompileFiles(path + '/' + d);
+			  };
+			  fCompileFiles(arg);
+			  return;
+		  }
+		  compile_lua_file(l, *game, arg);
+	  },
+	  pragma::console::ConVarFlags::None, "Opens the specified lua-file and outputs a precompiled file with the same name (And the extension '" + Lua::DOT_FILE_EXTENSION_PRECOMPILED + "').");
 
-	conVarMap.RegisterConCommand("toggleconsole",
+	conVarMap.RegisterConCommand(
+	  "toggleconsole",
 	  [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float) {
 		  if(pragma::Engine::Get()->IsServerOnly())
 			  return;
@@ -776,7 +784,8 @@ void pragma::Engine::RegisterConsoleCommands()
 	  },
 	  pragma::console::ConVarFlags::None, "Toggles the developer console.");
 
-	conVarMap.RegisterConCommand("echo",
+	conVarMap.RegisterConCommand(
+	  "echo",
 	  [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty())
 			  return;
@@ -787,7 +796,8 @@ void pragma::Engine::RegisterConsoleCommands()
 	conVarMap.RegisterConCommand("exit", cmdExit, pragma::console::ConVarFlags::None, "Exits the game.");
 	conVarMap.RegisterConCommand("quit", cmdExit, pragma::console::ConVarFlags::None, "Exits the game.");
 
-	conVarMap.RegisterConCommand("listmaps",
+	conVarMap.RegisterConCommand(
+	  "listmaps",
 	  [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float) {
 		  std::vector<std::string> resFiles;
 		  auto exts = pragma::asset::get_supported_extensions(pragma::asset::Type::Map);
@@ -802,7 +812,8 @@ void pragma::Engine::RegisterConsoleCommands()
 
 	conVarMap.RegisterConCommand("clear", [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float) { pragma::Engine::Get()->ClearConsole(); }, pragma::console::ConVarFlags::None, "Clears everything in the console.");
 
-	conVarMap.RegisterConCommand("credits",
+	conVarMap.RegisterConCommand(
+	  "credits",
 	  [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float) {
 		  Con::cout << "Silverlan" << Con::endl;
 		  Con::cout << "Contact: " << engine_info::get_author_mail_address() << Con::endl;
@@ -814,16 +825,14 @@ void pragma::Engine::RegisterConsoleCommands()
 	conVarMap.RegisterConCommand("debug_profiling_print", debug_profiling_print, pragma::console::ConVarFlags::None, "Prints the last profiled times.");
 	conVarMap.RegisterConCommand("debug_profiling_physics_start", debug_profiling_physics_start, pragma::console::ConVarFlags::None, "Prints physics profiling information for the last simulation step.");
 	conVarMap.RegisterConCommand("debug_profiling_physics_end", debug_profiling_physics_end, pragma::console::ConVarFlags::None, "Prints physics profiling information for the last simulation step.");
-	conVarMap.RegisterConCommand("debug_dump_scene_graph", static_cast<void(*)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(debug_dump_scene_graph), pragma::console::ConVarFlags::None, "Prints the game scene graph.");
+	conVarMap.RegisterConCommand("debug_dump_scene_graph", static_cast<void (*)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(debug_dump_scene_graph), pragma::console::ConVarFlags::None, "Prints the game scene graph.");
 
-	conVarMap.RegisterConVarCallback("asset_multithreading_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)> {
-		[this](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void {
-			if(pragma::Engine::Get() == nullptr)
-				return;
-			pragma::Engine::Get()->SetProfilingEnabled(newVal);
-		}});
+	conVarMap.RegisterConVarCallback("asset_multithreading_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[this](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void {
+		if(pragma::Engine::Get() == nullptr)
+			return;
+		pragma::Engine::Get()->SetProfilingEnabled(newVal);
+	}});
 }
-
 
 class ModuleInstallJob : public util::ParallelWorker<bool> {
   public:

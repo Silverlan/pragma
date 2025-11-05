@@ -6,7 +6,6 @@ module;
 
 #undef RegisterClass
 
-
 export module pragma.shared:scripting.lua.class_manager;
 
 export import pragma.lua;

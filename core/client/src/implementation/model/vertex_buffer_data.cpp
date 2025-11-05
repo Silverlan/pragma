@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :model.vertex_buffer_data;

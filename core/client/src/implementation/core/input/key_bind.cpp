@@ -6,15 +6,12 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :core.key_bind;
 import :client_state;
 
 import :engine;
-
 
 KeyBind::KeyBind() : m_type(Type::Invalid) { Initialize(); }
 

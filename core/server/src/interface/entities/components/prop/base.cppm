@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.prop.base;
 
 import :entities;
@@ -15,7 +14,7 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER PropComponent final : public BasePropComponent, public SBaseNetComponent {
-		public:
+		  public:
 			PropComponent(pragma::ecs::BaseEntity &ent) : BasePropComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
@@ -24,6 +23,6 @@ export {
 	};
 
 	class DLLSERVER SBaseProp : public SBaseEntity {
-	protected:
+	  protected:
 	};
 };

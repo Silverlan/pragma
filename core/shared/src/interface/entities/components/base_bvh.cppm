@@ -4,9 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
-
 export module pragma.shared:entities.components.base_bvh;
 
 export import :entities.components.base;
@@ -15,20 +12,19 @@ export import :entities.components.intersection_handler;
 export import :model.model_mesh;
 
 export namespace pragma {
-		namespace baseBvhComponent {
+	namespace baseBvhComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_CLEAR_BVH;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BVH_UPDATE_REQUESTED;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BVH_REBUILT;
 	}
-class BaseStaticBvhCacheComponent;
-		namespace baseBvhComponent {
+	class BaseStaticBvhCacheComponent;
+	namespace baseBvhComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_CLEAR_BVH;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BVH_UPDATE_REQUESTED;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BVH_REBUILT;
 	}
-class DLLNETWORK BaseBvhComponent : public BaseEntityComponent {
+	class DLLNETWORK BaseBvhComponent : public BaseEntityComponent {
 	  public:
-
 		static bool ShouldConsiderMesh(const pragma::ModelSubMesh &mesh);
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 

@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:scripting.lua.libraries.game;
 export namespace Lua {
 	namespace game {

@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:scripting.lua.converters.thread_pool;
 
 export import :scripting.lua.classes.thread_pool;

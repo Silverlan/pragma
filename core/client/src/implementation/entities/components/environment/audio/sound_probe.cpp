@@ -3,18 +3,14 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.audio.sound_probe;
 import :client_state;
 
 using namespace pragma;
-
 
 decltype(CEnvSoundProbeComponent::s_probes) CEnvSoundProbeComponent::s_probes = {};
 decltype(CEnvSoundProbeComponent::s_probeCallback) CEnvSoundProbeComponent::s_probeCallback = {};

@@ -3,9 +3,6 @@
 
 module;
 
-
-
-
 #include "pragma/console/helper.hpp"
 
 module pragma.client;
@@ -20,7 +17,6 @@ import :rendering.shaders;
 
 using namespace pragma::rendering;
 
-
 static const float EXPOSURE_FRAME_UPDATE = 0.25f; // Exposure will be updated every x seconds
 
 static CVar cvMaxExposure = GetClientConVar("render_hdr_max_exposure");
@@ -30,7 +26,9 @@ static void CVAR_CALLBACK_render_hdr_max_exposure(NetworkState *, const ConVar &
 		return;
 	pragma::get_cgame()->SetMaxHDRExposure(val);
 }
-namespace { auto UVN = pragma::console::client::register_variable_listener<float>("render_hdr_max_exposure", &CVAR_CALLBACK_render_hdr_max_exposure); }
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<float>("render_hdr_max_exposure", &CVAR_CALLBACK_render_hdr_max_exposure);
+}
 
 HDRData::Exposure::Exposure() : lastExposureUpdate(0), averageColor(0.f, 0.f, 0.f) { m_shaderCalcColor = pragma::get_cengine()->GetShader("calcimagecolor"); }
 
@@ -478,8 +476,12 @@ static void CVAR_CALLBACK_render_msaa_enabled(NetworkState *, const ConVar &, in
 		sceneC->ReloadRenderTarget(sceneC->GetWidth(), sceneC->GetHeight());
 	}
 }
-namespace { auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_anti_aliasing", &CVAR_CALLBACK_render_msaa_enabled); }
-namespace { auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_msaa_samples", &CVAR_CALLBACK_render_msaa_enabled); }
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_anti_aliasing", &CVAR_CALLBACK_render_msaa_enabled);
+}
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_msaa_samples", &CVAR_CALLBACK_render_msaa_enabled);
+}
 
 static void CVAR_CALLBACK_render_bloom_resolution(NetworkState *, const ConVar &, int, int width)
 {
@@ -488,7 +490,9 @@ static void CVAR_CALLBACK_render_bloom_resolution(NetworkState *, const ConVar &
 	for(auto &c : EntityCIterator<pragma::CRendererComponent> {*pragma::get_cgame()})
 		c.ReloadBloomRenderTarget(width);
 }
-namespace { auto UVN = pragma::console::client::register_variable_listener<int>("render_bloom_resolution", &CVAR_CALLBACK_render_bloom_resolution); }
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int>("render_bloom_resolution", &CVAR_CALLBACK_render_bloom_resolution);
+}
 
 static void debug_render_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {

@@ -6,8 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.audio.dsp.echo;
 
 import :entities;
@@ -16,7 +14,7 @@ import :entities.components.audio.dsp.base;
 export {
 	namespace pragma {
 		class DLLSERVER SSoundDspEchoComponent final : public SBaseSoundDspComponent, public BaseEnvSoundDspEcho {
-		public:
+		  public:
 			SSoundDspEchoComponent(pragma::ecs::BaseEntity &ent) : SBaseSoundDspComponent(ent) {}
 			virtual bool OnSetKeyValue(const std::string &key, const std::string &val) override;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
@@ -25,7 +23,7 @@ export {
 	};
 
 	class DLLSERVER EnvSoundDspEcho : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

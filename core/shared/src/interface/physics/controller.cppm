@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:physics.controller;
 
 export import :physics.collision_object;
@@ -12,7 +11,7 @@ export import :physics.collision_object;
 export {
 	namespace pragma::physics {
 		class DLLNETWORK IController : public IBase, public IWorldObject {
-		public:
+		  public:
 			enum class CollisionFlags : uint32_t { None = 0u, Down = 1u, Sides = Down << 1u, Up = Sides << 1u };
 
 			enum class ShapeType : uint8_t { Capsule = 0, Box };
@@ -60,7 +59,7 @@ export {
 			pragma::physics::IConvexShape *GetShape();
 			const Vector3 &GetLastMoveDisplacement() const;
 			virtual void InitializeLuaObject(lua::State *lua) override;
-		protected:
+		  protected:
 			virtual void DoMove(Vector3 &disp) = 0;
 			IController(IEnvironment &env, const util::TSharedHandle<ICollisionObject> &collisionObject, const Vector3 &halfExtents, ShapeType shapeType);
 			util::TSharedHandle<ICollisionObject> m_collisionObject = nullptr;

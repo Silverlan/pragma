@@ -3,9 +3,7 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.render_queue;
 import :client_state;
@@ -14,7 +12,6 @@ import :entities.components.render;
 import :game;
 
 using namespace pragma::rendering;
-
 
 SortingKey::SortingKey(msys::MaterialIndex material, prosper::ShaderIndex shader, bool instantiable, bool translucentKey)
 {

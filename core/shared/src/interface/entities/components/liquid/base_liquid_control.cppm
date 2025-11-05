@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.liquid.base_control;
 
 export import :entities.components.base;
@@ -16,16 +14,18 @@ export import :physics.surface_material;
 
 export {
 	namespace pragma {
-		namespace physics {		namespace baseLiquidControlComponent {
+		namespace physics {
+			namespace baseLiquidControlComponent {
+				STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SPLASH;
+				STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PROPERTIES_CHANGED;
+			}
+			class ICollisionObject;
+		};
+		namespace baseLiquidControlComponent {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SPLASH;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PROPERTIES_CHANGED;
 		}
-class ICollisionObject;};
-				namespace baseLiquidControlComponent {
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SPLASH;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PROPERTIES_CHANGED;
-		}
-class DLLNETWORK BaseLiquidControlComponent : public BaseEntityComponent {
+		class DLLNETWORK BaseLiquidControlComponent : public BaseEntityComponent {
 		  public:
 			struct DLLNETWORK SplashInfo {
 				Vector3 origin = {};

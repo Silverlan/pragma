@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.prop_dynamic;
 
 export import :entities.base_entity;
@@ -14,18 +12,18 @@ export import :entities.base_entity;
 export {
 	namespace pragma {
 		class DLLCLIENT CPropDynamicComponent final : public BasePropDynamicComponent {
-		public:
+		  public:
 			CPropDynamicComponent(pragma::ecs::BaseEntity &ent) : BasePropDynamicComponent(ent) {}
 			virtual void Initialize() override;
 			using BasePropDynamicComponent::BasePropDynamicComponent;
 			virtual void InitializeLuaObject(lua_State *l) override;
-		protected:
+		  protected:
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		};
 	};
 
 	class DLLCLIENT CPropDynamic : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

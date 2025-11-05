@@ -5,10 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
-
 export module pragma.client:entities.components.player;
 
 export import :entities.components.entity;
@@ -20,7 +16,7 @@ export namespace pragma {
 		const float VIEW_BODY_OFFSET = -20.f;
 	  public:
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
-		
+
 		CPlayerComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~CPlayerComponent() override;
 		virtual bool ShouldTransmitNetData() const override { return true; }

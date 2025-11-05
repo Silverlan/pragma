@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:entities.components.base_observable;
 
 export import :entities.components.base;
@@ -23,10 +22,10 @@ export namespace pragma {
 		bool rotateWithObservee = false;
 		std::optional<std::pair<EulerAngles, EulerAngles>> angleLimits = {};
 	};
-		namespace baseObservableComponent {
+	namespace baseObservableComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_OBSERVER_CHANGED;
 	}
-class DLLNETWORK BaseObservableComponent : public BaseEntityComponent {
+	class DLLNETWORK BaseObservableComponent : public BaseEntityComponent {
 	  public:
 		enum class CameraType : uint8_t {
 			FirstPerson,

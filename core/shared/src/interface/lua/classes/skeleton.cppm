@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:scripting.lua.classes.skeleton;
 
 export import :model.animation.skeleton;

@@ -4,10 +4,6 @@ module;
 
 #include <cassert>
 
-
-
-
-
 export module pragma.shared:util.functional_parallel_worker;
 
 export import pragma.util;
@@ -16,7 +12,7 @@ export {
 	namespace util {
 		template<typename T>
 		class TFunctionalParallelWorker : public util::ParallelWorker<T> {
-		public:
+		  public:
 			using Task = std::function<void(TFunctionalParallelWorker<T> &)>;
 			TFunctionalParallelWorker(bool continuousUntilCancelled);
 			virtual ~TFunctionalParallelWorker() override;
@@ -36,7 +32,7 @@ export {
 
 			using util::ParallelWorker<T>::SetResultMessage;
 			using util::ParallelWorker<T>::UpdateProgress;
-		private:
+		  private:
 			using util::ParallelWorker<T>::AddThread;
 			virtual void DoCancel(const std::string &resultMsg, std::optional<int32_t> resultCode) override;
 			bool IsFinished() const;
@@ -63,16 +59,16 @@ export {
 
 		template<typename T>
 		class TFunctionalParallelWorkerWithResult : public TFunctionalParallelWorker<T> {
-		public:
+		  public:
 			TFunctionalParallelWorkerWithResult(bool continuousUntilCancelled) : TFunctionalParallelWorker<T> {continuousUntilCancelled} {}
 			virtual T GetResult() override;
 			const T &GetResultRef() const
-				requires(!std::is_same_v<T, void>)
+			    requires(!std::is_same_v<T, void>)
 			{
 				return m_result;
 			}
 			void SetResult(T &&v);
-		private:
+		  private:
 			T m_result;
 		};
 	};

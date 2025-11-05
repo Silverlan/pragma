@@ -3,13 +3,9 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
-
 
 import :entities.components.lights.point;
 import :engine;
@@ -19,7 +15,6 @@ import :entities.components.render;
 import :entities.components.transform;
 
 using namespace pragma;
-
 
 static const std::array<Vector3, 6> directions = {Vector3(1.f, 0.f, 0.f), Vector3(-1.f, 0.f, 0.f), Vector3(0.f, 1.f, 0.f), Vector3(0.f, -1.f, 0.f), Vector3(0.f, 0.f, 1.f), Vector3(0.f, 0.f, -1.f)};
 

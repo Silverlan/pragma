@@ -5,9 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
 export module pragma.client:entities.components.flashlight;
 
 export import :entities.base_entity;
@@ -15,7 +12,7 @@ export import :entities.base_entity;
 export {
 	namespace pragma {
 		class DLLCLIENT CFlashlightComponent final : public BaseFlashlightComponent {
-		public:
+		  public:
 			CFlashlightComponent(pragma::ecs::BaseEntity &ent) : BaseFlashlightComponent(ent) {}
 			virtual void Initialize() override;
 			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
@@ -24,7 +21,7 @@ export {
 	};
 
 	class DLLCLIENT CFlashlight : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

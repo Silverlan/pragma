@@ -3,16 +3,13 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.velocity_buffer;
 
 import :client_state;
 import :engine;
 import :game;
-
 
 using namespace pragma;
 

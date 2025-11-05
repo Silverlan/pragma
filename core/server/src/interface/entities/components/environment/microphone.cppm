@@ -5,8 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.microphone;
 
 import :entities;
@@ -14,14 +12,14 @@ import :entities;
 export {
 	namespace pragma {
 		class DLLSERVER SMicrophoneComponent final : public BaseEnvMicrophoneComponent {
-		public:
+		  public:
 			SMicrophoneComponent(pragma::ecs::BaseEntity &ent) : BaseEnvMicrophoneComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};
 
 	class DLLSERVER EnvMicrophone : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

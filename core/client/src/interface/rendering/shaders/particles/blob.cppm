@@ -4,7 +4,6 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:rendering.shaders.particle_blob;
 
 export import :rendering.shaders.particle_2d_base;

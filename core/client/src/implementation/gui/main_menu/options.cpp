@@ -3,12 +3,7 @@
 
 module;
 
-
-
-
 #include "pragma/lua/core.hpp"
-
-
 
 #include <rapidxml.hpp>
 #include <rapidxml_utils.hpp>
@@ -28,7 +23,6 @@ import :entities.components;
 import :rendering.render_apis;
 import pragma.pad;
 import pragma.string.unicode;
-
 
 WIMainMenuOptions::WIMainMenuOptions() : WIMainMenuBase(), m_yOffset(128) {}
 

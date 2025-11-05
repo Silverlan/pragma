@@ -4,8 +4,6 @@
 module;
 #include "pragma/logging.hpp"
 
-
-
 module pragma.client;
 
 import :rendering.render_processor;
@@ -210,7 +208,7 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh, pragma:
 		return false;
 	}
 	auto &vkMesh = mesh.GetSceneMesh();
-	auto &bufferData = *static_cast<CModelComponent*>(m_modelC)->GetRenderBufferData(meshIdx);
+	auto &bufferData = *static_cast<CModelComponent *>(m_modelC)->GetRenderBufferData(meshIdx);
 	if(bufferData.renderBuffer == nullptr) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED) {
 			Con::cwar << "[Render] WARNING: Render buffer data of entity " << m_modelC->GetEntity() << " has invalid render buffer!" << Con::endl;

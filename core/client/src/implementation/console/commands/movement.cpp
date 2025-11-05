@@ -344,13 +344,14 @@ static void update_turn_callbacks()
 		return;
 	}
 	if(!cbCalcView.IsValid()) {
-		cbCalcView = pragma::get_cgame()->AddCallback("CalcView", FunctionCallback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>, std::reference_wrapper<Quat>>::Create([](std::reference_wrapper<Vector3>, std::reference_wrapper<Quat> rot, std::reference_wrapper<Quat> rotMod) {
-			const auto tFactor = 0.016f; // 60 FPS as reference
-			auto t = pragma::get_cgame()->DeltaRealTime() / tFactor;
-			EulerAngles angVertical(-turn_speeds.up + turn_speeds.down, 0.f, 0.f);
-			EulerAngles angHorizontal(0.f, -turn_speeds.right + turn_speeds.left, 0.f);
-			rot.get() = uquat::create(angHorizontal * t) * rot.get() * uquat::create(angVertical * t);
-		}));
+		cbCalcView
+		  = pragma::get_cgame()->AddCallback("CalcView", FunctionCallback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>, std::reference_wrapper<Quat>>::Create([](std::reference_wrapper<Vector3>, std::reference_wrapper<Quat> rot, std::reference_wrapper<Quat> rotMod) {
+			    const auto tFactor = 0.016f; // 60 FPS as reference
+			    auto t = pragma::get_cgame()->DeltaRealTime() / tFactor;
+			    EulerAngles angVertical(-turn_speeds.up + turn_speeds.down, 0.f, 0.f);
+			    EulerAngles angHorizontal(0.f, -turn_speeds.right + turn_speeds.left, 0.f);
+			    rot.get() = uquat::create(angHorizontal * t) * rot.get() * uquat::create(angVertical * t);
+		    }));
 	}
 	if(!cbGameEnd.IsValid()) {
 		cbGameEnd = pragma::get_cgame()->AddCallback("OnGameEnd", FunctionCallback<void, CGame *>::Create([](CGame *) {

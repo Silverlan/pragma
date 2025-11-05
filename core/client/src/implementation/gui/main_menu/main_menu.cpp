@@ -3,11 +3,7 @@
 
 module;
 
-
-
 #include "pragma/lua/core.hpp"
-
-
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
 
@@ -20,7 +16,6 @@ import :gui.main_menu;
 import :client_state;
 import :engine;
 import :game;
-
 
 WIMainMenu::WIMainMenu() : WIBase(), m_menuType(0), m_tOpen(0.0)
 {

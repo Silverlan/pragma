@@ -7,10 +7,8 @@ module;
 
 module pragma.client;
 
-
 import :rendering.shaders.pp_bloom_blur;
 import :client_state;
-
 
 using namespace pragma;
 

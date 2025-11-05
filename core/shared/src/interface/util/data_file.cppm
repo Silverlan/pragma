@@ -24,8 +24,8 @@ export {
 	};
 
 	class DLLNETWORK DataFile {
-	private:
-	public:
+	  private:
+	  public:
 		static DataFileBlock *ReadBlock(VFilePtr f);
 		static DataFileBlock *Read(const char *f);
 	};

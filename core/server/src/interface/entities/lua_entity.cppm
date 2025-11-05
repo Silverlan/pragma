@@ -5,15 +5,13 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.lua;
 
 import :entities.base;
 
 export {
 	class DLLSERVER SLuaEntity : public SBaseEntity {
-	public:
+	  public:
 		SLuaEntity();
 		virtual void Initialize() override;
 
@@ -24,7 +22,7 @@ export {
 
 		void LuaInitialize() {}
 		static void default_Initialize(SBaseEntity *ent);
-	protected:
+	  protected:
 		virtual void InitializeLuaObject(lua_State *lua) override;
 	};
 };

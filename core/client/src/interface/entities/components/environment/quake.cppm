@@ -5,9 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
 export module pragma.client:entities.components.env_quake;
 
 export import :entities.base_entity;
@@ -16,14 +13,14 @@ export import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLCLIENT CQuakeComponent final : public BaseEnvQuakeComponent, public CBaseNetComponent {
-		public:
+		  public:
 			CQuakeComponent(pragma::ecs::BaseEntity &ent) : BaseEnvQuakeComponent(ent) {}
 			virtual ~CQuakeComponent() override;
 
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void InitializeLuaObject(lua_State *l) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
-		protected:
+		  protected:
 			CallbackHandle m_cbScreenShake;
 			virtual void StartShake() override;
 			void CancelScreenShake();
@@ -31,7 +28,7 @@ export {
 	};
 
 	class DLLCLIENT CEnvQuake : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

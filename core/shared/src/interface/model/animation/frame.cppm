@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:model.animation.frame;
 
 export import :game.coordinate_system;
@@ -22,7 +20,7 @@ export {
 	};
 
 	class DLLNETWORK Frame : public std::enable_shared_from_this<Frame> {
-	public:
+	  public:
 		static std::shared_ptr<Frame> Create(unsigned int numBones);
 		static std::shared_ptr<Frame> Create(const Frame &other);
 
@@ -77,7 +75,7 @@ export {
 
 		bool operator==(const Frame &other) const;
 		bool operator!=(const Frame &other) const { return !operator==(other); }
-	private:
+	  private:
 		Frame(unsigned int numBones);
 		Frame(const Frame &other);
 		std::vector<umath::Transform> m_bones;

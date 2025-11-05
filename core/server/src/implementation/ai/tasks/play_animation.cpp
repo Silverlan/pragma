@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.server;
 import :ai.tasks.play_animation;
 
@@ -92,14 +91,14 @@ bool ai::TaskPlayAnimationBase::StartTask(const Schedule *sched, pragma::BaseAIC
 		return false;
 	}
 	m_targetNpc = &ent;
-	static_cast<SAIComponent&>(ent).LockAnimation(true);
+	static_cast<SAIComponent &>(ent).LockAnimation(true);
 	return true;
 }
 
 void ai::TaskPlayAnimationBase::UnlockAnimation()
 {
 	if(m_targetNpc != nullptr)
-		static_cast<SAIComponent&>(*m_targetNpc).LockAnimation(false);
+		static_cast<SAIComponent &>(*m_targetNpc).LockAnimation(false);
 	m_targetNpc = nullptr;
 }
 
@@ -134,7 +133,7 @@ bool ai::TaskPlayAnimation::GetFaceTarget(const Schedule *sched, pragma::BaseAIC
 		}
 	}
 	else if(type == ai::Schedule::Parameter::Type::Bool && param->GetBool() == true) {
-		auto *fragment = static_cast<SAIComponent&>(ent).GetPrimaryTarget();
+		auto *fragment = static_cast<SAIComponent &>(ent).GetPrimaryTarget();
 		if(fragment == nullptr || !fragment->hEntity.valid())
 			return false;
 		auto pTrComponentTgt = fragment->hEntity.get()->GetTransformComponent();
@@ -158,7 +157,7 @@ void ai::TaskPlayAnimation::PlayAnimation(pragma::BaseAIComponent &ent)
 
 	pragma::SAIComponent::AIAnimationInfo info {};
 	info.SetPlayAsSchedule(false);
-	static_cast<SAIComponent&>(ent).PlayAnimation(m_animation, info);
+	static_cast<SAIComponent &>(ent).PlayAnimation(m_animation, info);
 }
 
 void ai::TaskPlayAnimation::SetAnimation(int32_t animation) { SetParameter(umath::to_integral(Parameter::Animation), animation); }

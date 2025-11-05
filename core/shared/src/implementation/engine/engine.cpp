@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 #include "definitions.hpp"
 #include <cassert>
 #include <cstdlib>
@@ -85,7 +84,7 @@ extern bool g_lpSandboxed;
 pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(pragma::Engine::DEFAULT_TICK_RATE), m_stateFlags {StateFlags::Running | StateFlags::MultiThreadedAssetLoadingEnabled}
 {
 	g_engine = this;
-	
+
 	register_shared_convars(*console_system::server::get_convar_map());
 	register_launch_parameters(*GetLaunchParaMap());
 

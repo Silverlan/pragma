@@ -3,13 +3,9 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
-
 
 import :entities.components.observer;
 import :engine;

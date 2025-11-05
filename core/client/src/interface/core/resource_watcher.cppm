@@ -4,15 +4,11 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
-
-
 export module pragma.client:util.resource_watcher;
 
 export import pragma.shared;
 
-export
-{
+export {
 	class DLLCLIENT ECResourceWatcherCallbackType : public EResourceWatcherCallbackType {
 	  public:
 		using EResourceWatcherCallbackType::EResourceWatcherCallbackType;

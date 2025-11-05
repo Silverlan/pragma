@@ -4,7 +4,6 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:rendering.shaders.pp_hdr;
 
 export import :rendering.enums;

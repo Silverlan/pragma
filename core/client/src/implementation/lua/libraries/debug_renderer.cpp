@@ -4,10 +4,7 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
-
 
 import :scripting.lua.libraries.debug_renderer;
 import :debug;

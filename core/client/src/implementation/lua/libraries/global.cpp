@@ -4,13 +4,10 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :scripting.lua.libraries.global;
 import :engine;
-
 
 double Lua::ServerTime(lua_State *l)
 {

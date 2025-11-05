@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.decal;
 
 import :entities;
@@ -15,7 +14,7 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SDecalComponent final : public BaseEnvDecalComponent, public SBaseNetComponent {
-		public:
+		  public:
 			SDecalComponent(pragma::ecs::BaseEntity &ent) : BaseEnvDecalComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
@@ -25,7 +24,7 @@ export {
 	};
 
 	class DLLSERVER EnvDecal : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

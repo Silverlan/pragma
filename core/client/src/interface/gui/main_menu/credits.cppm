@@ -4,19 +4,18 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:gui.main_menu_credits;
 
 export import :gui.main_menu_base;
 
 export {
 	class DLLCLIENT WIMainMenuCredits : public WIMainMenuBase {
-	public:
+	  public:
 		WIMainMenuCredits();
 		virtual ~WIMainMenuCredits() override;
 		virtual void Initialize() override;
 		virtual void SetSize(int x, int y) override;
-	protected:
+	  protected:
 		virtual void DoUpdate() override;
 		virtual void OnVisibilityChanged(bool bVisible) override;
 		WITexturedRect &AddLogo(const std::string &material);

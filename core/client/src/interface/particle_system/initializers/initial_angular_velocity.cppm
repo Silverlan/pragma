@@ -4,12 +4,13 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:particle_system.initializer_initial_angular_velocity;
 
 export import :particle_system.modifier;
 
-export namespace pragma::ecs {class CParticleSystemComponent;}
+export namespace pragma::ecs {
+	class CParticleSystemComponent;
+}
 export class DLLCLIENT CParticleInitializerInitialAngularVelocity : public CParticleInitializer {
   private:
 	Vector3 m_direction = {};

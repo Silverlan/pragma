@@ -4,14 +4,16 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:rendering.shaders.particle_animated_sprites;
 
 export import :rendering.shaders.particle_2d_base;
 
 export namespace pragma {
-	class CSceneComponent; class CRasterizationRendererComponent;
-	namespace ecs {class CParticleSystemComponent;};
+	class CSceneComponent;
+	class CRasterizationRendererComponent;
+	namespace ecs {
+		class CParticleSystemComponent;
+	};
 }
 export namespace pragma {
 	class DLLCLIENT ShaderParticleAnimatedSprites : public ShaderParticle2DBase {

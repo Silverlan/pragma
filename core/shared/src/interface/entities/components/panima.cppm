@@ -6,9 +6,6 @@ module;
 
 #undef GetCurrentTime
 
-
-
-
 export module pragma.shared:entities.components.panima;
 
 export import :entities.components.base;
@@ -27,7 +24,7 @@ export {
 			std::vector<AnimationChannelCacheData> channelCache;
 			bool isChannelCacheDirty = false;
 		};
-				namespace panimaComponent {
+		namespace panimaComponent {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_HANDLE_ANIMATION_EVENT;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PLAY_ANIMATION;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ANIMATION_COMPLETE;
@@ -38,8 +35,8 @@ export {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_TRANSLATE_ANIMATION;
 			STATIC_DLL_COMPAT ComponentEventId EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER;
 		}
-class DLLNETWORK PanimaComponent final : public BaseEntityComponent {
-		public:
+		class DLLNETWORK PanimaComponent final : public BaseEntityComponent {
+		  public:
 			enum class PropertyFlags : uint8_t {
 				None = 0,
 				Disabled = 1u,
@@ -98,7 +95,7 @@ class DLLNETWORK PanimaComponent final : public BaseEntityComponent {
 			virtual void InitializeLuaObject(lua::State *l) override;
 			virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 			using BaseEntityComponent::Load;
-		protected:
+		  protected:
 			bool UnsetPropertyFlags(const char *propName, PropertyFlags flags);
 			virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 			void UpdateAnimationData(GlobalAnimationChannelQueueProcessor *channelQueueProcessor, AnimationManagerData &amd);
@@ -163,10 +160,10 @@ class DLLNETWORK PanimaComponent final : public BaseEntityComponent {
 			util::Path &path;
 			panima::ChannelValueSubmitter submitter {};
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::PanimaComponent::PropertyFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::PanimaComponent::PropertyFlags> : std::true_type {};
+	}
 };

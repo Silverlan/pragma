@@ -3,15 +3,12 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :util.screenshot;
 import :client_state;
 import :engine;
 import :entities.components;
-
 
 static std::string get_screenshot_name(pragma::Game *game, uimg::ImageFormat format)
 {
@@ -74,7 +71,7 @@ void util::rt_screenshot(CGame &game, uint32_t width, uint32_t height, const RtS
 				return;
 			}
 
-            auto *client = pragma::get_client_state();
+			auto *client = pragma::get_client_state();
 			auto path = get_screenshot_name(client ? client->GetGameState() : nullptr, format);
 			Con::cout << "Raytracing complete! Saving screenshot as '" << path << "'..." << Con::endl;
 			auto fp = FileManager::OpenFile<VFilePtrReal>(path.c_str(), "wb");

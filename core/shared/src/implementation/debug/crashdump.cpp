@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 #ifdef _WIN32
 #include <Windows.h>
 #include <tchar.h>

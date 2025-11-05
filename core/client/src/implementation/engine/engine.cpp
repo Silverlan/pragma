@@ -3,8 +3,6 @@
 
 module;
 
-
-
 #include "pragma/console/helper.hpp"
 #include "pragma/logging.hpp"
 #include "pragma/clientdefinitions.h"
@@ -18,7 +16,6 @@ module;
 #endif
 
 module pragma.client;
-
 
 import :engine;
 import util_zip;
@@ -313,7 +310,7 @@ void CEngine::MouseInput(prosper::Window &window, pragma::platform::MouseButton 
 		return;
 	if(WGUI::GetInstance().HandleMouseInput(window, button, state, mods))
 		return;
-	button = static_cast<pragma::platform::MouseButton>(umath::to_integral(button) +umath::to_integral(pragma::platform::Key::Last));
+	button = static_cast<pragma::platform::MouseButton>(umath::to_integral(button) + umath::to_integral(pragma::platform::Key::Last));
 	if(client != nullptr && client->MouseInput(button, state, mods) == false)
 		return;
 	Input(static_cast<int>(button), state);
@@ -1537,9 +1534,7 @@ void CEngine::SetControllersEnabled(bool b)
 	pragma::platform::set_joystick_state_callback([this](const pragma::platform::Joystick &joystick, bool bConnected) { pragma::get_cengine()->CallCallbacks<void, std::reference_wrapper<const pragma::platform::Joystick>, bool>("OnJoystickStateChanged", std::ref(joystick), bConnected); });
 }
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_controller_enabled", +[](NetworkState *, const ConVar &, bool, bool newVal) {
-		pragma::get_cengine()->SetControllersEnabled(newVal);
-	});
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_controller_enabled", +[](NetworkState *, const ConVar &, bool, bool newVal) { pragma::get_cengine()->SetControllersEnabled(newVal); });
 }
 
 float CEngine::GetRawJoystickAxisMagnitude() const { return m_rawInputJoystickMagnitude; }
@@ -2186,62 +2181,67 @@ CEngine::DroppedFile::DroppedFile(const std::string &rootPath, const std::string
 }
 
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<int32_t>("cl_render_monitor", +[](NetworkState *, const ConVar &, int32_t, int32_t monitor) {
-		auto monitors = pragma::platform::get_monitors();
-		if(monitor < monitors.size() && monitor >= 0)
-			pragma::get_cengine()->GetWindow().SetMonitor(monitors[monitor]);
-	});
+	auto UVN = pragma::console::client::register_variable_listener<int32_t>(
+	  "cl_render_monitor", +[](NetworkState *, const ConVar &, int32_t, int32_t monitor) {
+		  auto monitors = pragma::platform::get_monitors();
+		  if(monitor < monitors.size() && monitor >= 0)
+			  pragma::get_cengine()->GetWindow().SetMonitor(monitors[monitor]);
+	  });
 }
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<int32_t>("cl_render_window_mode", +[](NetworkState *, const ConVar &, int32_t, int32_t val) {
-		pragma::get_cengine()->GetWindow().SetWindowedMode(val != 0);
-		pragma::get_cengine()->GetWindow().SetNoBorder(val == 2);
-	});
+	auto UVN = pragma::console::client::register_variable_listener<int32_t>(
+	  "cl_render_window_mode", +[](NetworkState *, const ConVar &, int32_t, int32_t val) {
+		  pragma::get_cengine()->GetWindow().SetWindowedMode(val != 0);
+		  pragma::get_cengine()->GetWindow().SetNoBorder(val == 2);
+	  });
 }
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<std::string>("cl_window_resolution", +[](NetworkState *, const ConVar &, std::string, std::string val) {
-		std::vector<std::string> vals;
-		ustring::explode(val, "x", vals);
-		if(vals.size() < 2)
-			return;
-		auto x = util::to_int(vals[0]);
-		auto y = util::to_int(vals[1]);
-		Vector2i resolution(x, y);
-		pragma::get_cengine()->GetWindow().SetResolution(resolution);
-		auto *client = static_cast<ClientState *>(pragma::get_cengine()->GetClientState());
-		if(client != nullptr)
-			return;
-		auto &wgui = WGUI::GetInstance();
-		auto *el = wgui.GetBaseElement();
-		if(el == nullptr)
-			return;
-		el->SetSize(resolution);
-		auto *menu = client->GetMainMenu();
-		if(menu == nullptr)
-			return;
-		menu->SetSize(x, y);
-	});
+	auto UVN = pragma::console::client::register_variable_listener<std::string>(
+	  "cl_window_resolution", +[](NetworkState *, const ConVar &, std::string, std::string val) {
+		  std::vector<std::string> vals;
+		  ustring::explode(val, "x", vals);
+		  if(vals.size() < 2)
+			  return;
+		  auto x = util::to_int(vals[0]);
+		  auto y = util::to_int(vals[1]);
+		  Vector2i resolution(x, y);
+		  pragma::get_cengine()->GetWindow().SetResolution(resolution);
+		  auto *client = static_cast<ClientState *>(pragma::get_cengine()->GetClientState());
+		  if(client != nullptr)
+			  return;
+		  auto &wgui = WGUI::GetInstance();
+		  auto *el = wgui.GetBaseElement();
+		  if(el == nullptr)
+			  return;
+		  el->SetSize(resolution);
+		  auto *menu = client->GetMainMenu();
+		  if(menu == nullptr)
+			  return;
+		  menu->SetSize(x, y);
+	  });
 }
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<std::string>("cl_render_resolution", +[](NetworkState *, const ConVar &, std::string, std::string val) {
-		std::vector<std::string> vals;
-		ustring::explode(val, "x", vals);
-		if(vals.size() < 2) {
-			pragma::get_cengine()->SetRenderResolution({});
-			return;
-		}
-		auto x = util::to_int(vals[0]);
-		auto y = util::to_int(vals[1]);
-		Vector2i resolution(x, y);
-		pragma::get_cengine()->SetRenderResolution(resolution);
-	});
+	auto UVN = pragma::console::client::register_variable_listener<std::string>(
+	  "cl_render_resolution", +[](NetworkState *, const ConVar &, std::string, std::string val) {
+		  std::vector<std::string> vals;
+		  ustring::explode(val, "x", vals);
+		  if(vals.size() < 2) {
+			  pragma::get_cengine()->SetRenderResolution({});
+			  return;
+		  }
+		  auto x = util::to_int(vals[0]);
+		  auto y = util::to_int(vals[1]);
+		  Vector2i resolution(x, y);
+		  pragma::get_cengine()->SetRenderResolution(resolution);
+	  });
 }
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_gpu_timer_queries_enabled", +[](NetworkState *, const ConVar &, bool, bool enabled) {
-		if(pragma::get_cengine() == nullptr)
-			return;
-		pragma::get_cengine()->SetGPUProfilingEnabled(enabled);
-	});
+	auto UVN = pragma::console::client::register_variable_listener<bool>(
+	  "cl_gpu_timer_queries_enabled", +[](NetworkState *, const ConVar &, bool, bool enabled) {
+		  if(pragma::get_cengine() == nullptr)
+			  return;
+		  pragma::get_cengine()->SetGPUProfilingEnabled(enabled);
+	  });
 }
 
 static void dump_traceback_gui()

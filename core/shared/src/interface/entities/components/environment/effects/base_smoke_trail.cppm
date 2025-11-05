@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:entities.components.environment.effects.base_smoke_trail;
 
 export import :entities.components.base;

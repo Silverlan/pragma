@@ -3,19 +3,15 @@
 
 module;
 
-
 #include "pragma/logging.hpp"
 
 #include "pragma/clientdefinitions.h"
 
-
 #include "pragma/lua/core.hpp"
-
 
 #include <sharedutils/magic_enum.hpp>
 
 module pragma.client;
-
 
 import :rendering.render_processor;
 import :client_state;
@@ -24,7 +20,6 @@ import :engine;
 import :entities.components;
 import :game;
 import :model;
-
 
 static bool g_collectRenderStats = false;
 static CallbackHandle g_cbPreRenderScene = {};

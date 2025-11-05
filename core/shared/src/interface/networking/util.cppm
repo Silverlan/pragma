@@ -11,8 +11,12 @@ export import :entities.base_entity_handle;
 export import pragma.util;
 
 export {
-	namespace pragma::ecs {class BaseEntity;}
-	namespace pragma {class BasePlayerComponent;};
+	namespace pragma::ecs {
+		class BaseEntity;
+	}
+	namespace pragma {
+		class BasePlayerComponent;
+	};
 	namespace nwm {
 		DLLNETWORK void write_vector(NetPacket &packet, const Vector3 &v);
 		DLLNETWORK void write_angles(NetPacket &packet, const EulerAngles &ang);

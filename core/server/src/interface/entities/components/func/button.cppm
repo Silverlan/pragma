@@ -5,8 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.func.button;
 
 import :entities;
@@ -14,7 +12,7 @@ import :entities;
 export {
 	namespace pragma {
 		class DLLSERVER SButtonComponent final : public BaseFuncButtonComponent {
-		public:
+		  public:
 			SButtonComponent(pragma::ecs::BaseEntity &ent) : BaseFuncButtonComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua_State *l) override;
@@ -22,7 +20,7 @@ export {
 	};
 
 	class DLLSERVER FuncButton : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

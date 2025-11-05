@@ -5,9 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
 export module pragma.client:entities.components.env_sky_camera;
 
 export import :entities.base_entity;
@@ -18,17 +15,17 @@ import :rendering.render_queue;
 export {
 	namespace pragma {
 		class DLLCLIENT CSkyCameraComponent final : public BaseEntityComponent {
-		public:
+		  public:
 			CSkyCameraComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void OnRemove() override;
 			virtual void OnEntitySpawn() override;
 			virtual void InitializeLuaObject(lua_State *l) override;
 			void BuildSkyMeshRenderQueues(const pragma::CSceneComponent &scene, RenderFlags renderFlags, pragma::rendering::RenderMask renderMask, bool enableClipping, rendering::RenderQueue &outRenderQueue, rendering::RenderQueue &outTranslucentRenderQueue,
-			pragma::CRasterizationRendererComponent *optRasterizationRenderer = nullptr, bool waitForRenderQueues = true) const;
+			  pragma::CRasterizationRendererComponent *optRasterizationRenderer = nullptr, bool waitForRenderQueues = true) const;
 
 			float GetSkyboxScale() const;
-		private:
+		  private:
 			struct SceneData {
 				~SceneData();
 				CallbackHandle onBuildRenderQueue = {};
@@ -52,7 +49,7 @@ export {
 	};
 
 	class DLLCLIENT CSkyCamera : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

@@ -5,15 +5,13 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
-
 export module pragma.client:gui.debug_depth_texture;
 
 export import pragma.gui;
 
 export {
 	class DLLCLIENT WIDebugDepthTexture : public WIBase {
-	public:
+	  public:
 		WIDebugDepthTexture();
 		virtual ~WIDebugDepthTexture() override;
 		virtual void Initialize() override;
@@ -26,7 +24,7 @@ export {
 
 		void Setup(float nearZ, float farZ);
 		void SetShouldResolveImage(bool b);
-	protected:
+	  protected:
 		virtual void DoUpdate() override;
 		void UpdateResolvedTexture();
 		WIHandle m_hTextureRect;

@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:networking.message_tracker;
 
 export import pragma.network_manager;

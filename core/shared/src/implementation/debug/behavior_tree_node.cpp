@@ -3,8 +3,6 @@
 
 module;
 
-
-
 module pragma.shared;
 
 import :debug.behavior_tree_node;

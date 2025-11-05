@@ -76,8 +76,8 @@ namespace {
 	auto UVN = register_command("sound_stop", &CMD_sound_stop, pragma::console::ConVarFlags::None, "Stops all sounds that are currently playing.");
 	auto UVN = register_command("status", &CMD_status_cl, pragma::console::ConVarFlags::None, "Prints information about the current connection to the console.");
 	auto UVN = register_command("screenshot", &CMD_screenshot, pragma::console::ConVarFlags::None,
-	"Writes the contents of the screen into a .tga-file in 'screenshots/'. The name of the file will start with the map's name, or '" + engine_info::get_identifier()
-		+ "' if no map is loaded. After the name follows an ID which is incremented each time. You can use 'screenshot 1' to take a screenshot without the GUI (Ingame only).");
+	  "Writes the contents of the screen into a .tga-file in 'screenshots/'. The name of the file will start with the map's name, or '" + engine_info::get_identifier()
+	    + "' if no map is loaded. After the name follows an ID which is incremented each time. You can use 'screenshot 1' to take a screenshot without the GUI (Ingame only).");
 	auto UVN = register_command("thirdperson", &CMD_thirdperson, pragma::console::ConVarFlags::None, "Toggles between first- and third-person mode.");
 	auto UVN = register_command("shader_reload", &CMD_shader_reload, pragma::console::ConVarFlags::None, "Reloads a specific shader, or all registered shaders if no arguments are given. Usage: shader_reload <shaderName>");
 	auto UVN = register_command("shader_list", &CMD_shader_list, pragma::console::ConVarFlags::None, "Prints a list of all currently loaded shaders");
@@ -100,11 +100,11 @@ namespace {
 	auto UVN = register_command("vk_dump_memory_stats", &Console::commands::vk_dump_memory_stats, pragma::console::ConVarFlags::None, "Dumps information about currently allocated GPU memory.");
 	auto UVN = register_command("vk_print_memory_stats", &Console::commands::vk_print_memory_stats, pragma::console::ConVarFlags::None, "Prints information about currently allocated GPU memory to the console.");
 
-	#ifdef _DEBUG
+#ifdef _DEBUG
 	auto UVN = register_command("cl_dump_sounds", &CMD_cl_dump_sounds, pragma::console::ConVarFlags::None, "Prints information about all active sounds to the console.");
 	auto UVN = register_command("cl_dump_netmessages", &CMD_cl_dump_netmessages, pragma::console::ConVarFlags::None, "Prints all registered netmessages to the console.");
-	#endif
-	
+#endif
+
 	auto UVN = register_command("lua_reload_entity", &CMD_lua_reload_entity, pragma::console::ConVarFlags::None, "Reloads the scripts for the given entity class. Usage: lua_reload_entity <className>");
 	auto UVN = register_command("lua_reload_weapon", &CMD_lua_reload_weapon, pragma::console::ConVarFlags::None, "Reloads the scripts for the given weapon class. Usage: lua_reload_weapon <className>");
 	auto UVN = register_command("lua_reload_entities", &CMD_lua_reload_entities, pragma::console::ConVarFlags::None, "Reloads the scripts for all registered lua entity classes.");
@@ -663,7 +663,8 @@ void CMD_reloadmaterial(NetworkState *state, pragma::BasePlayerComponent *, std:
 	pragma::get_client_state()->LoadMaterial(argv[0].c_str(), nullptr, true);
 }
 
-void CMD_reloadmaterials(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &) {
+void CMD_reloadmaterials(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+{
 	if(!check_cheats("reloadmaterials", state))
 		return;
 }
@@ -987,7 +988,5 @@ static void cvar_net_graph(bool val)
 	dbg = nullptr;
 }
 namespace {
-	auto _ = pragma::console::client::register_variable_listener<bool>("net_graph", +[](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void {
-		cvar_net_graph(newVal);
-	});
+	auto _ = pragma::console::client::register_variable_listener<bool>("net_graph", +[](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void { cvar_net_graph(newVal); });
 }

@@ -4,14 +4,11 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :scripting.lua.classes.material;
 import :client_state;
 import :game;
-
 
 void Lua::Material::Client::SetTexture(lua_State *, msys::Material *mat, const std::string &textureID, const std::string &tex)
 {

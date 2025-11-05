@@ -5,8 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.triggers.push;
 
 import :entities;
@@ -14,7 +12,7 @@ import :entities;
 export {
 	namespace pragma {
 		class DLLSERVER STriggerPushComponent final : public BaseTriggerPushComponent {
-		public:
+		  public:
 			STriggerPushComponent(pragma::ecs::BaseEntity &ent) : BaseTriggerPushComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua_State *l) override;
@@ -22,7 +20,7 @@ export {
 	};
 
 	class DLLSERVER TriggerPush : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

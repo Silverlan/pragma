@@ -7,14 +7,12 @@ module;
 
 module pragma.client;
 
-
 import :rendering.shaders.shadow;
 
 import :engine;
 import :entities.components;
 
 using namespace pragma;
-
 
 static auto SHADOW_DEPTH_BIAS_CONSTANT = 1.25f;
 static auto SHADOW_DEPTH_BIAS_SLOPE = 1.75f;

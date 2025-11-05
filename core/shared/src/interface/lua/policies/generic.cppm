@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
 export module pragma.shared:scripting.lua.policies.generic;
 
 export import pragma.lua;

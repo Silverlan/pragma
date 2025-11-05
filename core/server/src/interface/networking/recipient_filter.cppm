@@ -5,11 +5,6 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
-
-
-
-
-
 export module pragma.server:networking.recipient_filter;
 
 export import pragma.util;

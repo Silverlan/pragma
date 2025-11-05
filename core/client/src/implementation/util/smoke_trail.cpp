@@ -3,11 +3,7 @@
 
 module;
 
-
-
 module pragma.client;
-
-
 
 import :util.smoke_trail;
 pragma::ecs::CParticleSystemComponent *util::create_smoke_trail_particle(float distance, float speed, float minSpriteSize, float maxSpriteSize, const std::string &material)

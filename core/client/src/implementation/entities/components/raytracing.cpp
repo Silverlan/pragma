@@ -16,7 +16,6 @@ import :rendering.shaders;
 
 using namespace pragma;
 
-
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_entityMeshInfoBuffer = nullptr;
 static uint32_t m_entityMeshCount = 0;
 static std::shared_ptr<MaterialDescriptorArrayManager> s_materialDescriptorArrayManager = nullptr;
@@ -238,4 +237,6 @@ static void cmd_render_technique(NetworkState *, const ConVar &, int32_t, int32_
 		}
 	}
 }
-namespace { auto _ = pragma::console::client::register_variable_listener<int32_t>("render_technique", &cmd_render_technique); }
+namespace {
+	auto _ = pragma::console::client::register_variable_listener<int32_t>("render_technique", &cmd_render_technique);
+}

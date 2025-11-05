@@ -4,15 +4,13 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:scripting.lua.callback_handler;
 
 import :scripting.lua.callback;
 
 export {
 	class DLLNETWORK LuaCallbackHandler {
-	public:
+	  public:
 		// Lua Callbacks
 		CallbackHandle AddLuaCallback(std::string identifier, const luabind::object &o);
 		std::vector<CallbackHandle> *GetLuaCallbacks(std::string identifier);
@@ -125,9 +123,9 @@ export {
 			}
 			return util::EventReply::Unhandled;
 		}
-	protected:
+	  protected:
 		std::unordered_map<std::string, std::vector<CallbackHandle>> m_luaCallbacks;
-	private:
+	  private:
 		std::queue<std::pair<std::string, CallbackHandle>> m_addQueue = {};
 		uint32_t m_callDepth = 0u;
 	};

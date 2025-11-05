@@ -3,10 +3,7 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
-
-
 
 module pragma.client;
 
@@ -26,7 +23,6 @@ void CWeaponComponent::RegisterEvents(pragma::EntityComponentManager &componentM
 std::vector<CWeaponComponent *> CWeaponComponent::s_weapons;
 const std::vector<CWeaponComponent *> &CWeaponComponent::GetAll() { return s_weapons; }
 unsigned int CWeaponComponent::GetWeaponCount() { return CUInt32(s_weapons.size()); }
-
 
 CWeaponComponent::CWeaponComponent(pragma::ecs::BaseEntity &ent) : BaseWeaponComponent(ent), CBaseNetComponent() { s_weapons.push_back(this); }
 

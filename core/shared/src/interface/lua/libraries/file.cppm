@@ -4,10 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
-
-
 export module pragma.shared:scripting.lua.libraries.file;
 
 export import pragma.lua;
@@ -23,12 +19,12 @@ export {
 	}
 
 	class DLLNETWORK LFile {
-	public:
+	  public:
 		LFile();
 		~LFile();
-	private:
+	  private:
 		std::shared_ptr<ufile::IFile> m_file = nullptr;
-	public:
+	  public:
 		void Construct(const VFilePtr &f);
 		void Construct(const std::shared_ptr<ufile::IFile> &f);
 		bool Construct(const char *path, const char *mode, fsys::SearchFlags fsearchmode = fsys::SearchFlags::All, std::string *optOutErr = nullptr);
@@ -59,15 +55,9 @@ export {
 		void IgnoreComments(std::string start = "//", std::string end = "\n");
 	};
 
-	#define lua_lfile_datatype(datatype, suffix, luapush)																																																											\
-		inline DLLNETWORK void Lua_LFile_Write##suffix(lua::State *, LFile &f, datatype d)																																																			\
-		{																																																																							\
-			f.Write<datatype>(d);																																																																	\
-		}																																																																							\
-		inline DLLNETWORK void Lua_LFile_Read##suffix(lua::State *l, LFile &f)																																																						\
-		{																																																																							\
-			luapush(l, f.Read<datatype>());																																																														  \
-		}
+#define lua_lfile_datatype(datatype, suffix, luapush)                                                                                                                                                                                                                                            \
+	inline DLLNETWORK void Lua_LFile_Write##suffix(lua::State *, LFile &f, datatype d) { f.Write<datatype>(d); }                                                                                                                                                                                 \
+	inline DLLNETWORK void Lua_LFile_Read##suffix(lua::State *l, LFile &f) { luapush(l, f.Read<datatype>()); }
 
 	DLLNETWORK void Lua_LFile_Close(lua::State *l, LFile &f);
 	DLLNETWORK void Lua_LFile_Size(lua::State *l, LFile &f);

@@ -4,21 +4,18 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.action_input_controller;
 
 export import :entities.components.base;
 export import :input.enums;
 
 export namespace pragma {
-		namespace actionInputControllerComponent {
+	namespace actionInputControllerComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_HANDLE_ACTION_INPUT;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ACTION_INPUT_CHANGED;
 	}
-class DLLNETWORK ActionInputControllerComponent final : public BaseEntityComponent {
+	class DLLNETWORK ActionInputControllerComponent final : public BaseEntityComponent {
 	  public:
-
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		ActionInputControllerComponent(pragma::ecs::BaseEntity &ent);

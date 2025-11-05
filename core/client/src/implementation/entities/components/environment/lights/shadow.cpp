@@ -3,13 +3,8 @@
 
 module;
 
-
-
-
-
 #include "pragma/lua/core.hpp"
 #include "pragma/console/helper.hpp"
-
 
 module pragma.client;
 
@@ -20,7 +15,6 @@ import :game;
 import :rendering.render_queue_instancer;
 
 using namespace pragma;
-
 
 CShadowComponent::CShadowComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent {ent} {}
 
@@ -53,7 +47,9 @@ static void cmd_render_shadow_quality(NetworkState *, const ConVar &, int, int q
 		return;
 	client->UpdateGameWorldShaderSettings();
 }
-namespace { auto UVN = pragma::console::client::register_variable_listener<int>("render_shadow_quality", &cmd_render_shadow_quality); }
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int>("render_shadow_quality", &cmd_render_shadow_quality);
+}
 
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_render_shadow_dynamic", +[](NetworkState *, const ConVar &, bool, bool) { reload_all_shadow_maps(); });

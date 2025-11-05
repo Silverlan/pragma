@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:scripting.lua.classes.data_block;
 
 import :scripting.lua.libraries.file;

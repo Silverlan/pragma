@@ -3,15 +3,11 @@
 
 module;
 
-
-
 module pragma.client;
-
 
 import :game;
 import :engine;
 import :entities.components;
-
 
 prosper::IDescriptorSet &CGame::GetGlobalRenderSettingsDescriptorSet() { return *m_globalRenderSettingsBufferData->descSetGroup->GetDescriptorSet(); }
 pragma::rendering::GlobalRenderSettingsBufferData &CGame::GetGlobalRenderSettingsBufferData() { return *m_globalRenderSettingsBufferData; }

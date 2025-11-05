@@ -3,16 +3,13 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.compose_rma;
 
 import :client_state;
 import :engine;
 import :game;
-
 
 decltype(pragma::ShaderComposeRMA::DESCRIPTOR_SET_TEXTURE) pragma::ShaderComposeRMA::DESCRIPTOR_SET_TEXTURE = {
   "TEXTURES",

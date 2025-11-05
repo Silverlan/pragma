@@ -5,10 +5,7 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
-
 
 import :entities.components.env_sky_camera;
 import :client_state;
@@ -21,7 +18,6 @@ import :entities.components.toggle;
 import :entities.components.transform;
 import :entities.components.world;
 import :game;
-
 
 using namespace pragma;
 

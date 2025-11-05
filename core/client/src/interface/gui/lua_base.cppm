@@ -35,8 +35,7 @@ export import pragma.shared;
 		Lua::Pop(m_stateLua, 1);                                                                                                                                                                                                                                                                 \
 	}
 
-export
-{
+export {
 	class DLLCLIENT WILuaBase : public WIBase, public LuaObjectBase {
 	  public:
 		WILuaBase();

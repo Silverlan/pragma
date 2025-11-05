@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:game.rig_config;
 
 export import :game.coordinate_system;
@@ -107,7 +105,7 @@ export {
 		using PRigConfigConstraint = std::shared_ptr<RigConfigConstraint>;
 		using PRigConfigJoint = std::shared_ptr<RigConfigJoint>;
 		class DLLNETWORK RigConfig {
-		public:
+		  public:
 			static constexpr auto PIKR_EXTENSION_BINARY = "pikr_b";
 			static constexpr auto PIKR_EXTENSION_ASCII = "pikr";
 
@@ -164,7 +162,7 @@ export {
 			float CalcScaleFactor() const;
 
 			bool Save(const std::string &fileName);
-		private:
+		  private:
 			std::vector<PRigConfigBone>::iterator FindBoneIt(const pragma::GString &name);
 			const std::vector<PRigConfigBone>::iterator FindBoneIt(const pragma::GString &name) const;
 

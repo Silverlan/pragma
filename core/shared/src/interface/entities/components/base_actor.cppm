@@ -4,9 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
-
 export module pragma.shared:entities.components.base_actor;
 
 export import :entities.components.base;
@@ -20,14 +17,13 @@ export namespace pragma {
 		virtual void PushArguments(lua::State *l) override;
 		DamageInfo *damageInfo;
 	};
-		namespace baseActorComponent {
+	namespace baseActorComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_KILLED;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_RESPAWN;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DEATH;
 	}
-class DLLNETWORK BaseActorComponent : public BaseEntityComponent {
+	class DLLNETWORK BaseActorComponent : public BaseEntityComponent {
 	  public:
-
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;

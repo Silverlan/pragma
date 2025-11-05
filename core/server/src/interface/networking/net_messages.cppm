@@ -6,5 +6,5 @@ module;
 export module pragma.server:networking.net_messages;
 
 export {
-    void register_server_net_messages();
+	void register_server_net_messages();
 }

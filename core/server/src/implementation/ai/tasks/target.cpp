@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.server;
 import :ai.tasks.target;
 
@@ -18,7 +17,7 @@ const pragma::ecs::BaseEntity *ai::TaskTarget::GetTargetEntity(const Schedule *s
 	if(type == ai::Schedule::Parameter::Type::Entity)
 		return target->GetEntity();
 	else if(type != ai::Schedule::Parameter::Type::Vector) {
-		auto *memFragment = static_cast<SAIComponent&>(ent).GetPrimaryTarget();
+		auto *memFragment = static_cast<SAIComponent &>(ent).GetPrimaryTarget();
 		if(memFragment == nullptr || memFragment->hEntity.valid() == false)
 			return nullptr;
 		return memFragment->hEntity.get();
@@ -34,7 +33,7 @@ bool ai::TaskTarget::GetTargetPosition(const Schedule *sched, pragma::BaseAIComp
 	auto *target = GetParameter(sched, umath::to_integral(Parameter::Target));
 	auto type = (target != nullptr) ? target->GetType() : ai::Schedule::Parameter::Type::None;
 	if(type != ai::Schedule::Parameter::Type::Entity && type != ai::Schedule::Parameter::Type::Vector) {
-		auto *memFragment = static_cast<SAIComponent&>(ent).GetPrimaryTarget();
+		auto *memFragment = static_cast<SAIComponent &>(ent).GetPrimaryTarget();
 		if(memFragment == nullptr || memFragment->hEntity.valid() == false)
 			return false;
 		auto pTrComponentEnt = memFragment->hEntity.get()->GetTransformComponent();

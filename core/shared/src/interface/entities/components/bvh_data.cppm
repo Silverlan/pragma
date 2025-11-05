@@ -11,7 +11,6 @@ module;
 #include <bvh/v2/tri.h>
 #include <bvh/v2/vec.h>
 
-
 export module pragma.shared:entities.components.bvh_data;
 
 export import :entities.components.base;

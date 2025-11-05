@@ -10,7 +10,7 @@ export import std.compat;
 
 export {
 	namespace pragma {
-	#pragma pack(push, 1)
+#pragma pack(push, 1)
 		struct DLLNETWORK GString {
 			GString();
 			GString(const char *str);
@@ -39,7 +39,7 @@ export {
 			size_t length() const;
 			const char *str = nullptr;
 		};
-	#pragma pack(pop)
+#pragma pack(pop)
 		DLLNETWORK const char *register_global_string(const std::string &str);
 		DLLNETWORK const char *register_global_string(const std::string_view &str);
 		DLLNETWORK const char *register_global_string(const char *str);

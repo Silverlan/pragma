@@ -6,8 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.lights.light;
 
 export import :entities.base_entity;
@@ -111,9 +109,9 @@ export namespace pragma {
 		CLightComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~CLightComponent() override;
 		template<typename TCPPM>
-			TCPPM *GetShadowComponent();
+		TCPPM *GetShadowComponent();
 		template<typename TCPPM>
-			const TCPPM *GetShadowComponent() const;
+		const TCPPM *GetShadowComponent() const;
 		bool HasShadowsEnabled() const;
 		Mat4 &GetTransformationMatrix(unsigned int j);
 		virtual void Initialize() override;
@@ -123,7 +121,7 @@ export namespace pragma {
 		virtual bool ShouldPass(const CBaseEntity &ent, const CModelMesh &mesh, uint32_t &renderFlags);
 		virtual bool ShouldPass(const pragma::Model &mdl, const CModelSubMesh &mesh);
 		template<typename TCPPM>
-			pragma::ComponentHandle<TCPPM> GetShadowMap(rendering::ShadowMapType type) const;
+		pragma::ComponentHandle<TCPPM> GetShadowMap(rendering::ShadowMapType type) const;
 		bool ShouldRender();
 		void UpdateTransformationMatrix(const Mat4 &biasMatrix, const Mat4 &viewMatrix, const Mat4 &projectionMatrix);
 		virtual void OnEntitySpawn() override;
@@ -143,7 +141,7 @@ export namespace pragma {
 		// A shadowed light source may only be assigned to one scene / one scene slot
 		CSceneComponent *FindShadowScene() const;
 		template<typename TCPPM>
-			TCPPM *FindShadowOcclusionCuller() const;
+		TCPPM *FindShadowOcclusionCuller() const;
 
 		virtual void SetLightIntensityType(LightIntensityType type) override;
 		virtual void SetLightIntensity(float intensity, LightIntensityType type) override;
@@ -213,7 +211,7 @@ export namespace pragma {
 		ComponentHandle<BaseEntityComponent> m_shadowMapDynamic = {};
 		BaseEntityComponent *m_shadowComponent = nullptr;
 		template<typename TCPPM>
-			void InitializeShadowMap(TCPPM &sm);
+		void InitializeShadowMap(TCPPM &sm);
 		virtual void InitializeShadowMap();
 	};
 	using namespace umath::scoped_enum::bitwise;

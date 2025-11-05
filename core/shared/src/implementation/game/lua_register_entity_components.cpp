@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
 #include "pragma/lua/ostream_operator_alias.hpp"
 
 module pragma.shared;
@@ -80,7 +77,7 @@ namespace pragma {
 		ReturnPrimitives = 1u,
 		ReturnMeshes = ReturnPrimitives << 1u,
 	};
-    using namespace umath::scoped_enum::bitwise;
+	using namespace umath::scoped_enum::bitwise;
 }
 namespace umath::scoped_enum::bitwise {
 	template<>

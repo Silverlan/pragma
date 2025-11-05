@@ -4,14 +4,10 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
-
 
 import :entities.components.optical_camera;
 import :engine;
-
 
 using namespace pragma;
 

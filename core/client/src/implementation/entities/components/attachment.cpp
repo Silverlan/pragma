@@ -4,7 +4,6 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
 
 import :entities.components.attachment;
@@ -12,7 +11,6 @@ import :game;
 import :networking.util;
 
 using namespace pragma;
-
 
 void CAttachmentComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CAttachmentComponent::ReceiveData(NetPacket &packet)

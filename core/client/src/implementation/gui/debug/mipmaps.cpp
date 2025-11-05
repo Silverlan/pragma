@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :gui.debug_mipmaps;

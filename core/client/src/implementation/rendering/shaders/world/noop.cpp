@@ -3,15 +3,12 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.world_noop;
 
 import :client_state;
 import :engine;
-
 
 using namespace pragma;
 

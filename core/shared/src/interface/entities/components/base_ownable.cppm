@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:entities.components.base_ownable;
 
 export import :entities.components.base;
@@ -17,12 +16,11 @@ export namespace pragma {
 		pragma::ecs::BaseEntity *oldOwner;
 		pragma::ecs::BaseEntity *newOwner;
 	};
-		namespace baseOwnableComponent {
+	namespace baseOwnableComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_OWNER_CHANGED;
 	}
-class DLLNETWORK BaseOwnableComponent : public BaseEntityComponent {
+	class DLLNETWORK BaseOwnableComponent : public BaseEntityComponent {
 	  public:
-
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;

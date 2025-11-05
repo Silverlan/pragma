@@ -9,8 +9,8 @@ export module pragma.shared:entities.member_reference;
 export import :entities.enums;
 
 export namespace pragma {
-    class BaseEntityComponent;
-    class EntityComponentManager;
+	class BaseEntityComponent;
+	class EntityComponentManager;
 	struct ComponentMemberInfo;
 	struct DLLNETWORK ComponentMemberReference {
 		static std::optional<ComponentMemberReference> Create(BaseEntityComponent &component, pragma::ComponentMemberIndex index);

@@ -28,8 +28,7 @@ export namespace Lua::logging {
 	template<spdlog::level::level_enum TLevel, int LOG_FUNC(lua::State *, spdlog::level::level_enum)>
 	void add_log_func(lua::State *l, luabind::object &oClass, const char *name)
 	{
-		lua_pushcfunction(
-		  l, +[](lua::State *l) -> int { return LOG_FUNC(l, TLevel); });
+		lua_pushcfunction(l, +[](lua::State *l) -> int { return LOG_FUNC(l, TLevel); });
 		oClass[name] = luabind::object {luabind::from_stack(l, -1)};
 		Lua::Pop(l, 1);
 	}

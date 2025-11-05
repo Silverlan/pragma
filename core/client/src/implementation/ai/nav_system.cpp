@@ -11,13 +11,11 @@ module;
 
 module pragma.client;
 
-
 import :ai;
 import :client_state;
 import :console.register_commands;
 import :debug;
 import :game;
-
 
 std::shared_ptr<pragma::nav::CMesh> pragma::nav::CMesh::Create(const std::shared_ptr<RcNavMesh> &rcMesh, const Config &config) { return Mesh::Create<CMesh>(rcMesh, config); }
 std::shared_ptr<pragma::nav::CMesh> pragma::nav::CMesh::Load(pragma::Game &game, const std::string &fname) { return Mesh::Load<CMesh>(game, fname); }
@@ -209,14 +207,15 @@ void pragma::nav::CMesh::Clear()
 
 static auto cvShowNavMeshes = GetClientConVar("debug_nav_show_meshes");
 namespace {
-	auto _ = pragma::console::client::register_variable_listener<bool>("debug_nav_show_meshes", +[](NetworkState *, const ConVar &, bool, bool val) {
-		if(pragma::get_cgame() == nullptr || pragma::get_cgame()->LoadNavMesh() == false)
-			return;
-		auto &navMesh = pragma::get_cgame()->GetNavMesh();
-		if(navMesh == nullptr)
-			return;
-		static_cast<pragma::nav::CMesh &>(*navMesh).ShowNavMeshes(val);
-	});
+	auto _ = pragma::console::client::register_variable_listener<bool>(
+	  "debug_nav_show_meshes", +[](NetworkState *, const ConVar &, bool, bool val) {
+		  if(pragma::get_cgame() == nullptr || pragma::get_cgame()->LoadNavMesh() == false)
+			  return;
+		  auto &navMesh = pragma::get_cgame()->GetNavMesh();
+		  if(navMesh == nullptr)
+			  return;
+		  static_cast<pragma::nav::CMesh &>(*navMesh).ShowNavMeshes(val);
+	  });
 }
 
 ////////////////////////////////////
@@ -278,5 +277,6 @@ void CMD_debug_nav_path_end(NetworkState *state, pragma::BasePlayerComponent *pl
 }
 namespace {
 	auto UVN = pragma::console::client::register_command("debug_nav_path_start", &CMD_debug_nav_path_start, pragma::console::ConVarFlags::None, "Sets a start point for a navigation path. Use debug_nav_path_end to set the end point.");
-	auto UVN = pragma::console::client::register_command("debug_nav_path_end", &CMD_debug_nav_path_end, pragma::console::ConVarFlags::None, "Sets an end point for a navigation path. Use debug_nav_path_start to set the start point. The path will be drawn in the scene once both points have been set.");
+	auto UVN = pragma::console::client::register_command("debug_nav_path_end", &CMD_debug_nav_path_end, pragma::console::ConVarFlags::None,
+	  "Sets an end point for a navigation path. Use debug_nav_path_start to set the start point. The path will be drawn in the scene once both points have been set.");
 }

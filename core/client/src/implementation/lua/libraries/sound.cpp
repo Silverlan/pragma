@@ -4,10 +4,7 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
-
 
 import :scripting.lua.libraries.sound;
 import :engine;
@@ -101,10 +98,7 @@ bool Lua::sound::add_global_effect(const std::string &name, al::ISoundSystem::Gl
 	auto r = soundSys->AddGlobalEffect(*effect, flags, params);
 	return (r != std::numeric_limits<uint32_t>::max()) ? true : false;
 }
-bool Lua::sound::add_global_effect(const std::string &name)
-{
-	return add_global_effect(name, al::ISoundSystem::GlobalEffectFlag::All, {});
-}
+bool Lua::sound::add_global_effect(const std::string &name) { return add_global_effect(name, al::ISoundSystem::GlobalEffectFlag::All, {}); }
 void Lua::sound::remove_global_effect(const std::string &name)
 {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();

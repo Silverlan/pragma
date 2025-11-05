@@ -3,14 +3,11 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.particle_polyboard;
 
 import :engine;
-
 
 using namespace pragma;
 

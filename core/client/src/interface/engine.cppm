@@ -6,12 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
-
-
-
 export module pragma.client:engine;
 
 export import :client_state;

@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:rendering.shaders.equirectangular_to_cubemap;
 
 export import :rendering.shaders.cubemap;

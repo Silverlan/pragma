@@ -4,15 +4,11 @@
 module;
 #include "pragma/logging.hpp"
 
-
-
 module pragma.client;
-
 
 import :rendering.shaders.debug;
 
 import :engine;
-
 
 using namespace pragma;
 

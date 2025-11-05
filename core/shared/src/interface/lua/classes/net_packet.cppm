@@ -9,7 +9,9 @@ export module pragma.shared:scripting.lua.classes.net_packet;
 export import pragma.lua;
 
 export {
-	namespace pragma::ecs {class BaseEntity;}
+	namespace pragma::ecs {
+		class BaseEntity;
+	}
 	class ALSound;
 	namespace Lua {
 		namespace NetPacket {

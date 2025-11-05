@@ -4,7 +4,6 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:rendering.shaders.world_eye;
 
 export import :rendering.shaders.pbr;

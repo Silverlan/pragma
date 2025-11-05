@@ -4,18 +4,17 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:gui.message_box;
 
 export import pragma.gui;
 
 export {
 	class DLLCLIENT WIMessageBox : public WIBase {
-	public:
+	  public:
 		enum class Button : Int32 { NONE = 0, APPLY = 1, CANCEL = 2, YES = 4, NO = 8, YESNO = 12, ACCEPT = 16, DECLINE = 32, OK = 64 };
-	private:
+	  private:
 		static void __buttonCallback(WIHandle hMessageBox, WIMessageBox::Button button);
-	protected:
+	  protected:
 		WIHandle m_hBg;
 		WIHandle m_hMessage;
 		WIHandle m_hText;
@@ -23,7 +22,7 @@ export {
 		std::function<void(WIMessageBox *, Button)> m_buttonCallback;
 		WIButton *AddButton(const std::string &text, Button button);
 		virtual void OnRemove() override;
-	public:
+	  public:
 		WIMessageBox();
 		virtual ~WIMessageBox() override;
 		virtual void Initialize() override;

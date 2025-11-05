@@ -6,5 +6,5 @@ module;
 export module pragma.client:networking.net_messages;
 
 export namespace pragma::networking {
-    void register_client_net_messages();
+	void register_client_net_messages();
 }

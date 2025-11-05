@@ -11,7 +11,7 @@ export import pragma.gui;
 
 export {
 	class DLLCLIENT WIChoiceList : public WIBase {
-	public:
+	  public:
 		struct Choice {
 			Choice(const std::string &c, const std::string &v) : choice(c), value(v) {}
 			std::string choice;
@@ -31,7 +31,7 @@ export {
 		void SelectNext();
 		void SelectPrevious();
 		const Choice *GetSelectedChoice();
-	private:
+	  private:
 		WIHandle m_text;
 		WIHandle m_buttonPrev;
 		WIHandle m_buttonNext;

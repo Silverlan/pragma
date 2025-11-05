@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:util.lookup_identifier;
 
 export import std.compat;

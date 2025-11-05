@@ -2,10 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
-
 export module pragma.shared:entities.class_map;
 
 export import std;
@@ -13,19 +9,16 @@ export import std;
 export {
 	template<class T>
 	class EntityClassMap {
-	private:
+	  private:
 		std::unordered_map<std::string, T *(*)(void)> m_factories;
 		std::unordered_map<size_t, std::string> m_classNames;
-	public:
+	  public:
 		void AddClass(std::string name, const std::type_info &info, T *(*fc)(void))
 		{
 			m_factories.insert(typename std::unordered_map<std::string, T *(*)(void)>::value_type(name, fc));
 			m_classNames.insert(typename std::unordered_map<size_t, std::string>::value_type(info.hash_code(), name));
 		}
-		void GetFactories(std::unordered_map<std::string, T *(*)(void)> **factories)
-		{
-			*factories = &m_factories;
-		}
+		void GetFactories(std::unordered_map<std::string, T *(*)(void)> **factories) { *factories = &m_factories; }
 		bool GetClassName(const std::type_info &info, std::string *classname)
 		{
 			std::unordered_map<size_t, std::string>::iterator i = m_classNames.find(info.hash_code());

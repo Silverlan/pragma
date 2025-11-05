@@ -3,9 +3,7 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
-
 
 module pragma.server;
 import :scripting.lua.libraries.ai;
@@ -79,7 +77,8 @@ void Lua::ai::server::register_library(Lua::Interface &lua)
 	cdMoveRandom.add_static_constant("PARAMETER_DISTANCE", umath::to_integral(pragma::ai::TaskMoveRandom::Parameter::Distance));
 	cdMoveRandom.add_static_constant("PARAMETER_MOVE_ACTIVITY", umath::to_integral(pragma::ai::TaskMoveRandom::Parameter::MoveActivity));
 	cdMoveRandom.def("SetMoveDistance", static_cast<void (*)(lua_State *, TaskWrapperMoveRandom &, float)>([](lua_State *l, TaskWrapperMoveRandom &task, float dist) { task->SetMoveDistance(dist); }));
-	cdMoveRandom.def("SetMoveActivity", static_cast<void (*)(lua_State *, TaskWrapperMoveRandom &, std::underlying_type_t<pragma::Activity>)>([](lua_State *l, TaskWrapperMoveRandom &task, std::underlying_type_t<pragma::Activity> activity) { task->SetMoveActivity(static_cast<pragma::Activity>(activity)); }));
+	cdMoveRandom.def("SetMoveActivity",
+	  static_cast<void (*)(lua_State *, TaskWrapperMoveRandom &, std::underlying_type_t<pragma::Activity>)>([](lua_State *l, TaskWrapperMoveRandom &task, std::underlying_type_t<pragma::Activity> activity) { task->SetMoveActivity(static_cast<pragma::Activity>(activity)); }));
 	modAi[cdMoveRandom];
 
 	auto cdLookAtTarget = luabind::class_<TaskWrapperLookAtTarget, Lua::ai::TaskWrapper>("TaskLookAtTarget");
@@ -100,7 +99,8 @@ void Lua::ai::server::register_library(Lua::Interface &lua)
 	auto cdPlayActivity = luabind::class_<TaskWrapperPlayActivity, Lua::ai::TaskWrapper>("TaskPlayActivity");
 	cdPlayActivity.add_static_constant("PARAMETER_ACTIVITY", umath::to_integral(pragma::ai::TaskPlayActivity::Parameter::Activity));
 	cdPlayActivity.add_static_constant("PARAMETER_FACE_TARGET", umath::to_integral(pragma::ai::TaskPlayActivity::Parameter::FaceTarget));
-	cdPlayActivity.def("SetActivity", static_cast<void (*)(lua_State *, TaskWrapperPlayActivity &, std::underlying_type_t<pragma::Activity>)>([](lua_State *l, TaskWrapperPlayActivity &task, std::underlying_type_t<pragma::Activity> activity) { task->SetActivity(static_cast<pragma::Activity>(activity)); }));
+	cdPlayActivity.def("SetActivity",
+	  static_cast<void (*)(lua_State *, TaskWrapperPlayActivity &, std::underlying_type_t<pragma::Activity>)>([](lua_State *l, TaskWrapperPlayActivity &task, std::underlying_type_t<pragma::Activity> activity) { task->SetActivity(static_cast<pragma::Activity>(activity)); }));
 	cdPlayActivity.def("SetFaceTarget", static_cast<void (*)(lua_State *, TaskWrapperPlayActivity &, const Vector3 &)>([](lua_State *l, TaskWrapperPlayActivity &task, const Vector3 &target) { task->SetFaceTarget(target); }));
 	cdPlayActivity.def("SetFaceTarget", static_cast<void (*)(lua_State *, TaskWrapperPlayActivity &, pragma::ecs::BaseEntity &)>([](lua_State *l, TaskWrapperPlayActivity &task, pragma::ecs::BaseEntity &target) { task->SetFaceTarget(target); }));
 	cdPlayActivity.def("SetFacePrimaryTarget", static_cast<void (*)(lua_State *, TaskWrapperPlayActivity &)>([](lua_State *l, TaskWrapperPlayActivity &task) { task->SetFacePrimaryTarget(); }));
@@ -158,8 +158,9 @@ void Lua::ai::server::register_library(Lua::Interface &lua)
 	auto cdEvent = luabind::class_<TaskWrapperEvent, Lua::ai::TaskWrapper>("TaskEvent");
 	cdEvent.add_static_constant("PARAMETER_EVENT_ID", umath::to_integral(pragma::ai::TaskEvent::Parameter::EventId));
 	cdEvent.add_static_constant("PARAMETER_EVENT_ARGS_START", umath::to_integral(pragma::ai::TaskEvent::Parameter::EventArgStart));
-	cdEvent.def("SetEventId",
-	  static_cast<void (*)(lua_State *, TaskWrapperEvent &, std::underlying_type_t<pragma::AnimationEvent::Type>)>([](lua_State *l, TaskWrapperEvent &task, std::underlying_type_t<pragma::AnimationEvent::Type> eventId) { task->SetEventId(static_cast<pragma::AnimationEvent::Type>(eventId)); }));
+	cdEvent.def("SetEventId", static_cast<void (*)(lua_State *, TaskWrapperEvent &, std::underlying_type_t<pragma::AnimationEvent::Type>)>([](lua_State *l, TaskWrapperEvent &task, std::underlying_type_t<pragma::AnimationEvent::Type> eventId) {
+		task->SetEventId(static_cast<pragma::AnimationEvent::Type>(eventId));
+	}));
 	cdEvent.def("SetEventArgument", static_cast<void (*)(lua_State *, TaskWrapperEvent &, uint32_t, const std::string &)>([](lua_State *l, TaskWrapperEvent &task, uint32_t argIdx, const std::string &arg) { task->SetEventArgument(argIdx, arg); }));
 	modAi[cdEvent];
 

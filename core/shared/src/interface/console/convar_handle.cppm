@@ -10,9 +10,9 @@ import :console.convar;
 
 export {
 	class DLLNETWORK PtrConVar {
-	private:
+	  private:
 		ConVar *m_cvar;
-	public:
+	  public:
 		PtrConVar();
 		ConVar *get();
 		void set(ConVar *cvar);
@@ -20,16 +20,16 @@ export {
 
 	///////////////////////
 
-	#pragma warning(push)
-	#pragma warning(disable : 4251)
+#pragma warning(push)
+#pragma warning(disable : 4251)
 	class DLLNETWORK ConVarHandle {
-	private:
+	  private:
 		std::shared_ptr<PtrConVar> m_cvar;
-	public:
+	  public:
 		ConVarHandle(std::shared_ptr<PtrConVar> &sptr);
 		ConVar *operator->();
 	};
-	#pragma warning(pop)
+#pragma warning(pop)
 
 	typedef ConVarHandle CVar;
 };

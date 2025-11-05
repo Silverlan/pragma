@@ -14,7 +14,6 @@ import :gui.chromium_page;
 
 import :client_state;
 
-
 WIChromiumPage::WIChromiumPage(WIBase *parent) : m_parent(parent) {}
 
 void WIChromiumPage::OnVisibilityChanged(bool bVisible)

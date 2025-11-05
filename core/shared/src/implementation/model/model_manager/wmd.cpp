@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 #include "definitions.hpp"
 #include <cassert>
 
@@ -14,7 +13,7 @@ import :model.model_manager;
 
 namespace pragma {
 	enum class CollisionMeshLoadFlags : uint64_t { None = 0u, SoftBody = 1u, Convex = SoftBody << 1u };
-    using namespace umath::scoped_enum::bitwise;
+	using namespace umath::scoped_enum::bitwise;
 }
 namespace umath::scoped_enum::bitwise {
 	template<>

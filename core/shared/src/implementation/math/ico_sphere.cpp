@@ -6,9 +6,6 @@
 */
 module;
 
-
-
-
 module pragma.shared;
 
 import :math.ico_sphere;

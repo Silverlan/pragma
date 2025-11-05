@@ -16,7 +16,6 @@ import source_engine.bsp;
 
 using namespace pragma;
 
-
 void CWorldComponent::Initialize()
 {
 	BaseWorldComponent::Initialize();

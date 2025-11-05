@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
 export module pragma.shared:entities.components;
 
 export import :entities.components.action_input_controller;

@@ -12,9 +12,6 @@
 // Source: http://www.flipcode.com/archives/Efficient_Polygon_Triangulation.shtml
 module;
 
-
-
-
 module pragma.shared;
 
 import :math.triangulate;

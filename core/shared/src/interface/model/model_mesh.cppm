@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:model.model_mesh;
 
 export import :game.coordinate_system;
@@ -23,9 +21,9 @@ export {
 
 	namespace pragma {
 		class DLLNETWORK ModelSubMesh : public std::enable_shared_from_this<pragma::ModelSubMesh> {
-		public:
+		  public:
 			static constexpr std::uint32_t layout_version = 1;
-			
+
 			static constexpr auto PMESH_IDENTIFIER = "PMESH";
 			static constexpr udm::Version PMESH_VERSION = 1;
 			enum class ShareMode : uint32_t { None = 0, Vertices = 1, Alphas = 2, Triangles = 4, VertexWeights = 8, All = Vertices | Alphas | Triangles | VertexWeights };
@@ -176,7 +174,7 @@ export {
 
 			bool Save(udm::AssetDataArg outData, std::string &outErr);
 			bool LoadFromAssetData(const udm::AssetData &data, std::string &outErr);
-		protected:
+		  protected:
 			void Copy(pragma::ModelSubMesh &other, bool fullCopy) const;
 			std::vector<umath::VertexWeight> &GetVertexWeightSet(uint32_t idx);
 			const std::vector<umath::VertexWeight> &GetVertexWeightSet(uint32_t idx) const;
@@ -202,15 +200,15 @@ export {
 			umath::ScaledTransform m_pose = umath::ScaledTransform {};
 			void ClipAgainstPlane(const Vector3 &n, double d, pragma::ModelSubMesh &clippedMesh, const std::vector<Mat4> *boneMatrices = nullptr, pragma::ModelSubMesh *clippedCoverMesh = nullptr);
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	}
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::ModelSubMesh::ShareMode> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::ModelSubMesh::ShareMode> : std::true_type {};
+	}
 
 	class DLLNETWORK ModelMesh : public std::enable_shared_from_this<ModelMesh> {
-	public:
+	  public:
 		static constexpr std::uint32_t layout_version = 1;
 
 		ModelMesh();
@@ -239,7 +237,7 @@ export {
 
 		uint32_t GetReferenceId() const;
 		void SetReferenceId(uint32_t refId);
-	protected:
+	  protected:
 		Vector3 m_min;
 		Vector3 m_max;
 		uint32_t m_numVerts;

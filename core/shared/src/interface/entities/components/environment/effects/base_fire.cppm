@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:entities.components.environment.effects.base_fire;
 
 export import :entities.components.base;

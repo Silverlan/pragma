@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:util.type_manager;
 
 export import pragma.util;
@@ -17,7 +15,7 @@ export {
 		using TypeId = uint32_t;
 		template<class TType>
 		class TTypeManager {
-		public:
+		  public:
 			TTypeManager() = default;
 			virtual ~TTypeManager() = default;
 			const std::vector<::util::TSharedHandle<TType>> &GetRegisteredTypes() const { return m_registeredTypes; }
@@ -25,22 +23,22 @@ export {
 			::util::TWeakSharedHandle<TType> RegisterType(const std::string &name, TARGS &&...args);
 			::util::TWeakSharedHandle<TType> GetType(TypeId id) const;
 			::util::TWeakSharedHandle<TType> FindType(const std::string &name) const;
-		protected:
+		  protected:
 			TTypeManager(const TTypeManager &) = delete;
 			TTypeManager &operator=(const TTypeManager &) = delete;
-		private:
+		  private:
 			std::vector<::util::TSharedHandle<TType>> m_registeredTypes = {};
 			std::unordered_map<std::string, TypeId> m_typeNameToId = {};
 		};
 
 		class DLLNETWORK BaseNamedType {
-		public:
+		  public:
 			virtual ~BaseNamedType() = default;
 			TypeId GetId() const;
 			const std::string &GetName() const;
-		protected:
+		  protected:
 			BaseNamedType(TypeId id, const std::string &name);
-		private:
+		  private:
 			TypeId m_id = 0u;
 			std::string m_name = "";
 		};

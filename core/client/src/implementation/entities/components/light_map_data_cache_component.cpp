@@ -8,12 +8,10 @@ module;
 
 module pragma.client;
 
-
 import :entities.components.light_map_data_cache;
 import :entities.components.light_map_receiver;
 import :entities.components.light_map;
 import :game;
-
 
 using namespace pragma;
 

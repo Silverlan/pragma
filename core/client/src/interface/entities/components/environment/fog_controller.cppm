@@ -6,7 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.client:entities.components.env_fog_controller;
 
 export import :entities.base_entity;
@@ -16,7 +15,7 @@ import :rendering.world_environment;
 export {
 	namespace pragma {
 		class DLLCLIENT CFogControllerComponent final : public BaseEnvFogControllerComponent, public CBaseNetComponent {
-		public:
+		  public:
 			CFogControllerComponent(pragma::ecs::BaseEntity &ent) : BaseEnvFogControllerComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void ReceiveData(NetPacket &packet) override;
@@ -29,14 +28,14 @@ export {
 			virtual void InitializeLuaObject(lua_State *l) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual void OnEntitySpawn() override;
-		protected:
+		  protected:
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 			WorldEnvironment::Fog &GetFog();
 		};
 	};
 
 	class DLLCLIENT CEnvFogController : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

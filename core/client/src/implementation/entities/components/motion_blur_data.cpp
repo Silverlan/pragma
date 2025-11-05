@@ -4,16 +4,13 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.motion_blur_data;
 import :engine;
 import :entities.components.render;
 import :game;
 import :rendering.shaders;
-
 
 using namespace pragma;
 

@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :networking.local_client;

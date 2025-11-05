@@ -5,9 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
 export module pragma.server:scripting.lua.classes.ai_behavior;
 
 import :ai;
@@ -26,11 +23,11 @@ export {
 		by calling "CreateTask" (In Lua) on an existing task.
 	*/
 	class DLLSERVER AILuaBehaviorNode : public pragma::ai::BehaviorNode, public LuaObjectBase {
-	protected:
+	  protected:
 		luabind::object m_luaClass;
 		virtual void Clear() override;
 		virtual void OnTaskComplete(const pragma::ai::Schedule *sched, uint32_t taskId, Result result) override;
-	public:
+	  public:
 		AILuaBehaviorNode(Type type = Type::Sequence, pragma::ai::SelectorType selectorType = pragma::ai::SelectorType::Sequential);
 		virtual std::shared_ptr<BehaviorNode> Copy() const override;
 		virtual ~AILuaBehaviorNode() override;
@@ -49,7 +46,7 @@ export {
 
 		namespace ai {
 			class TaskWrapper {
-			public:
+			  public:
 				TaskWrapper(pragma::ai::BehaviorNode &task);
 				TaskWrapper(const std::shared_ptr<pragma::ai::BehaviorNode> &task);
 				pragma::ai::BehaviorNode &GetTask();
@@ -60,13 +57,13 @@ export {
 
 				const pragma::ai::BehaviorNode *operator->() const;
 				pragma::ai::BehaviorNode *operator->();
-			private:
+			  private:
 				std::shared_ptr<pragma::ai::BehaviorNode> m_task = nullptr;
 			};
 
 			template<class TTask>
 			class TTaskWrapper : public TaskWrapper {
-			public:
+			  public:
 				TTask &GetTask() { return static_cast<TTask &>(TaskWrapper::GetTask()); }
 				const TTask &GetTask() const { return static_cast<TTask &>(TaskWrapper::GetTask()); }
 
@@ -98,14 +95,14 @@ export {
 	namespace Lua {
 		namespace ai {
 			class BaseBehaviorTask : public ai::TaskWrapper {
-			public:
+			  public:
 				using ai::TaskWrapper::TaskWrapper;
 			};
 		};
 	};
 
 	struct DLLSERVER AILuaBehaviorNodeWrapper : public Lua::ai::BaseBehaviorTask, luabind::wrap_base {
-	public:
+	  public:
 		AILuaBehaviorNodeWrapper(uint32_t nodeType, uint32_t selectorType);
 		AILuaBehaviorNodeWrapper(uint32_t nodeType);
 		AILuaBehaviorNodeWrapper();

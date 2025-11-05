@@ -2,10 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
-
 #include <bvh/v2/stack.h>
 #include <cassert>
 

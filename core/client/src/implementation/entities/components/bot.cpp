@@ -5,9 +5,7 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.bot;
 import :client_state;
@@ -15,7 +13,6 @@ import :entities.components.animated;
 import :entities.components.sound_emitter;
 
 using namespace pragma;
-
 
 void CBotComponent::Initialize()
 {

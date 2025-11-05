@@ -3,9 +3,7 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :entities;
 import :debug;

@@ -3,18 +3,9 @@
 
 module;
 
-
-
-
 #include "pragma/clientdefinitions.h"
 
-
-
-
-
 #include "pragma/lua/core.hpp"
-
-
 
 module pragma.client;
 
@@ -68,7 +59,6 @@ static TStream &print_ui_element(TStream &os, const ::WIBase &handle)
 }
 DLLCLIENT Con::c_cout &operator<<(Con::c_cout &os, const ::WIBase &handle) { return print_ui_element<Con::c_cout>(os, handle); }
 DLLCLIENT std::ostream &operator<<(std::ostream &os, const ::WIBase &handle) { return print_ui_element<std::ostream>(os, handle); }
-
 
 static bool operator==(::WIBase &a, ::WIBase &b) { return &a == &b; }
 

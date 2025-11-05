@@ -199,7 +199,7 @@ export {
 		void SendPacket(const std::string &name, pragma::networking::Protocol protocol);
 
 		LastConnectionInfo &GetLastConnectionInfo() { return m_lastConnection; }
-		
+
 		void Disconnect();
 		// Game
 		virtual bool IsMultiPlayer() const override;
@@ -235,7 +235,7 @@ export {
 		void ReadEntityData(NetPacket &packet);
 	};
 
-    namespace pragma {
+	namespace pragma {
 		DLLCLIENT ClientState *get_client_state();
 	};
 };

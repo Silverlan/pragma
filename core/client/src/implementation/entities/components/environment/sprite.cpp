@@ -3,13 +3,9 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
-
 
 import :entities.components.effects.sprite;
 import :entities.components.attachment;
@@ -18,7 +14,6 @@ import :client_state;
 import :engine;
 
 using namespace pragma;
-
 
 void CSpriteComponent::Initialize() { BaseEnvSpriteComponent::Initialize(); }
 

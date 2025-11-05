@@ -6,7 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.client:entities.components.raytracing_renderer;
 
 import :entities.base_entity;
@@ -15,15 +14,15 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLCLIENT CRaytracingRendererComponent final : public BaseEntityComponent {
-		public:
+		  public:
 			CRaytracingRendererComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
-		private:
+		  private:
 		};
 	};
 
 	class DLLCLIENT CRaytracingRenderer : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

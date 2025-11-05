@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 #include <ittnotify.h>
 #endif

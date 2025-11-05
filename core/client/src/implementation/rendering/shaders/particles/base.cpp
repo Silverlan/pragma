@@ -3,16 +3,11 @@
 
 module;
 
-
-
-
 module pragma.client;
-
 
 import :rendering.shaders.particle_base;
 
 import :engine;
-
 
 using namespace pragma;
 

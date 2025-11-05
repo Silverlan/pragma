@@ -3,13 +3,9 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
-
 
 import :entities.components.audio.dsp.base;
 import :client_state;
@@ -17,7 +13,6 @@ import :entities.components.toggle;
 import :game;
 
 using namespace pragma;
-
 
 CBaseSoundDspComponent::~CBaseSoundDspComponent() { DetachAllSoundSources(); }
 void CBaseSoundDspComponent::Initialize()

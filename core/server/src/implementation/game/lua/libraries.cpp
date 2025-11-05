@@ -3,11 +3,7 @@
 
 module;
 
-
-
-
 #include "pragma/lua/core.hpp"
-
 
 module pragma.server;
 import :game;
@@ -31,33 +27,33 @@ void SGame::RegisterLuaLibraries()
 	pragma::Game::RegisterLuaLibraries();
 	auto modAsset = luabind::module_(GetLuaState(), "asset");
 	modAsset[(luabind::def(
-	           "load",
-	           +[](lua_State *l, LFile &f, pragma::asset::Type type) -> Lua::var<bool, luabind::object> {
-		           // See also core/client/src/lua/c_library.cpp
-		           auto *manager = pragma::get_engine()->GetNetworkState(l)->GetAssetManager(type);
-		           if(!manager)
-			           return luabind::object {l, false};
-		           auto fh = f.GetHandle();
-		           if(!fh)
-			           return luabind::object {l, false};
-		           auto fp = std::make_unique<ufile::FileWrapper>(fh);
-		           auto fileName = fp->GetFileName();
-		           if(!fileName.has_value())
-			           return luabind::object {l, false};
-		           std::string ext;
-		           if(ufile::get_extension(*fileName, &ext) == false)
-			           return luabind::object {l, false};
-		           auto loadInfo = manager->CreateDefaultLoadInfo();
-		           loadInfo->flags |= util::AssetLoadFlags::DontCache | util::AssetLoadFlags::IgnoreCache;
-		           auto asset = manager->LoadAsset(ufile::get_file_from_filename(*fileName), std::move(fp), ext, std::move(loadInfo));
-		           switch(type) {
-		           case pragma::asset::Type::Model:
-			           return luabind::object {l, std::static_pointer_cast<pragma::Model>(asset)};
-		           case pragma::asset::Type::Material:
-			           return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
-		           }
-		           return luabind::object {};
-	           }),
+	            "load",
+	            +[](lua_State *l, LFile &f, pragma::asset::Type type) -> Lua::var<bool, luabind::object> {
+		            // See also core/client/src/lua/c_library.cpp
+		            auto *manager = pragma::get_engine()->GetNetworkState(l)->GetAssetManager(type);
+		            if(!manager)
+			            return luabind::object {l, false};
+		            auto fh = f.GetHandle();
+		            if(!fh)
+			            return luabind::object {l, false};
+		            auto fp = std::make_unique<ufile::FileWrapper>(fh);
+		            auto fileName = fp->GetFileName();
+		            if(!fileName.has_value())
+			            return luabind::object {l, false};
+		            std::string ext;
+		            if(ufile::get_extension(*fileName, &ext) == false)
+			            return luabind::object {l, false};
+		            auto loadInfo = manager->CreateDefaultLoadInfo();
+		            loadInfo->flags |= util::AssetLoadFlags::DontCache | util::AssetLoadFlags::IgnoreCache;
+		            auto asset = manager->LoadAsset(ufile::get_file_from_filename(*fileName), std::move(fp), ext, std::move(loadInfo));
+		            switch(type) {
+		            case pragma::asset::Type::Model:
+			            return luabind::object {l, std::static_pointer_cast<pragma::Model>(asset)};
+		            case pragma::asset::Type::Material:
+			            return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
+		            }
+		            return luabind::object {};
+	            }),
 	  luabind::def(
 	    "load",
 	    +[](lua_State *l, const std::string &name, pragma::asset::Type type) -> Lua::var<bool, luabind::object> {

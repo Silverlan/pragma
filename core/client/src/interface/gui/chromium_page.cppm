@@ -14,10 +14,10 @@ namespace pragma {
 };
 export {
 	class DLLCLIENT WIChromiumPage {
-	public:
+	  public:
 		WIChromiumPage(WIBase *parent);
 		void SetInitialURL(const std::string &url);
-	protected:
+	  protected:
 		void InitializeChromium();
 		virtual void InitializeJavascript();
 		virtual void InitializeWebView(WIBase *el);
@@ -33,7 +33,7 @@ export {
 		bool m_bEntered = false;
 		WIHandle m_hWeb;
 		std::string m_initialURL;
-	private:
+	  private:
 		WIBase *m_parent = nullptr;
 	};
 };

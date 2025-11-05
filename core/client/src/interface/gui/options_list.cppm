@@ -4,7 +4,6 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:gui.options_list;
 
 export import :gui.checkbox;
@@ -14,7 +13,7 @@ export import :gui.table;
 
 export {
 	class DLLCLIENT WIOptionsList : public WIBase {
-	private:
+	  private:
 		WIHandle m_hTable;
 		WIHandle m_hHeaderRow;
 		uint32_t m_maxHeight = 512;
@@ -27,7 +26,7 @@ export {
 		template<class T>
 		WIDropDownMenu *AddDropDownMenu(const std::string &name, T list, const std::string &cvarName, const std::function<void(WIDropDownMenu *)> &initializer);
 		virtual void DoUpdate() override;
-	public:
+	  public:
 		WIOptionsList();
 		virtual ~WIOptionsList() override;
 		virtual void Initialize() override;

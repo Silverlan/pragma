@@ -24,11 +24,11 @@ export import pragma.materialsystem;
 
 export {
 	class NetworkState;
-	#pragma warning(push)
-	#pragma warning(disable : 4251)
+#pragma warning(push)
+#pragma warning(disable : 4251)
 	namespace pragma {
 		class DLLNETWORK ModelMeshGroup : public std::enable_shared_from_this<pragma::ModelMeshGroup> {
-		public:
+		  public:
 			static constexpr std::uint32_t layout_version = 1;
 
 			static std::shared_ptr<pragma::ModelMeshGroup> Create(const std::string &name);
@@ -41,7 +41,7 @@ export {
 			void AddMesh(const std::shared_ptr<ModelMesh> &mesh);
 
 			bool IsEqual(const pragma::ModelMeshGroup &other) const;
-		private:
+		  private:
 			ModelMeshGroup(const std::string &name);
 			std::string m_name;
 			std::vector<std::shared_ptr<ModelMesh>> m_meshes;
@@ -106,10 +106,10 @@ export {
 		bool operator!=(const BodyGroup &other) const { return !operator==(other); }
 	};
 
-	#pragma pack(push, 1)
+#pragma pack(push, 1)
 	struct DLLNETWORK Eyeball {
 		static constexpr std::uint32_t layout_version = 1;
-		
+
 		std::string name = "";
 		int32_t boneIndex = -1;
 		Vector3 origin = {};
@@ -143,7 +143,7 @@ export {
 		bool operator==(const Eyeball &other) const;
 		bool operator!=(const Eyeball &other) const { return !operator==(other); }
 	};
-	#pragma pack(pop)
+#pragma pack(pop)
 
 	constexpr auto MODEL_NO_MESH = std::numeric_limits<uint32_t>::max();
 
@@ -169,12 +169,11 @@ export {
 		Vector3 get_mirror_transform_vector(pragma::Axis axis);
 	};
 
-
 	namespace pragma {
 		class DLLNETWORK Model : public std::enable_shared_from_this<pragma::Model> {
-		public:
+		  public:
 			static constexpr std::uint32_t layout_version = 1;
-			
+
 			Model();
 			virtual void Remove();
 			enum class Flags : uint32_t {
@@ -224,7 +223,7 @@ export {
 
 				DeepCopy = CopyMeshesBit | CopyVertexData | CopyAnimationsBit | CopyVertexAnimationsBit | CopyCollisionMeshesBit | CopyFlexAnimationsBit
 			};
-		public:
+		  public:
 			static constexpr auto PMDL_IDENTIFIER = "PMDL";
 			static constexpr udm::Version PMDL_VERSION = 1;
 			static bool Load(pragma::Model &mdl, NetworkState &nw, const udm::AssetData &data, std::string &outErr);
@@ -577,7 +576,7 @@ export {
 			std::optional<pragma::SignedAxis> FindBoneTwistAxis(pragma::animation::BoneId boneId) const;
 			std::optional<pragma::SignedAxis> FindBoneAxisForDirection(pragma::animation::BoneId boneId, const Vector3 &dir) const;
 			static Quat GetTwistAxisRotationOffset(pragma::SignedAxis axis);
-		protected:
+		  protected:
 			Model(NetworkState *nw, uint32_t numBones, const std::string &name = "");
 			Model(const pragma::Model &other);
 			bool LoadFromAssetData(pragma::Game &game, const udm::AssetData &data, std::string &outErr);
@@ -599,7 +598,7 @@ export {
 
 			std::vector<Flex>::const_iterator FindFlex(const std::string &name) const;
 			std::vector<Flex>::iterator FindFlex(const std::string &name);
-		private:
+		  private:
 			void Construct();
 			udm::PProperty m_extensions = nullptr;
 			NetworkState *m_networkState = nullptr;
@@ -655,20 +654,20 @@ export {
 			void OnMaterialLoaded();
 		};
 
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	}
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::Model::CopyFlags> : std::true_type {};
-		
-        template<>
-        struct enable_bitwise_operators<pragma::Model::MergeFlags> : std::true_type {};
-		
-        template<>
-        struct enable_bitwise_operators<pragma::Model::Flags> : std::true_type {};
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::Model::CopyFlags> : std::true_type {};
 
-        template<>
-        struct enable_bitwise_operators<pragma::Model::StateFlags> : std::true_type {};
-    }
-	#pragma warning(pop)
+		template<>
+		struct enable_bitwise_operators<pragma::Model::MergeFlags> : std::true_type {};
+
+		template<>
+		struct enable_bitwise_operators<pragma::Model::Flags> : std::true_type {};
+
+		template<>
+		struct enable_bitwise_operators<pragma::Model::StateFlags> : std::true_type {};
+	}
+#pragma warning(pop)
 };

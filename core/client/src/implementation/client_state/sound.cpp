@@ -3,10 +3,8 @@
 
 module;
 
-
 #include "pragma/logging.hpp"
 #include "pragma/console/helper.hpp"
-
 
 #undef PlaySound
 
@@ -408,52 +406,55 @@ float ClientState::GetSoundVolume(pragma::audio::ALSoundType type)
 std::unordered_map<pragma::audio::ALSoundType, float> &ClientState::GetSoundVolumes() { return m_volTypes; }
 
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<float>("cl_audio_master_volume", +[](NetworkState *, const ConVar &, float, float vol) {
-		auto *client = pragma::get_client_state();
-		if(client == nullptr)
-			return;
-		client->SetMasterSoundVolume(vol);
-	});
+	auto UVN = pragma::console::client::register_variable_listener<float>(
+	  "cl_audio_master_volume", +[](NetworkState *, const ConVar &, float, float vol) {
+		  auto *client = pragma::get_client_state();
+		  if(client == nullptr)
+			  return;
+		  client->SetMasterSoundVolume(vol);
+	  });
 }
 
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_audio_hrtf_enabled", +[](NetworkState *, const ConVar &, bool, bool bEnabled) {
-		pragma::get_cengine()->SetHRTFEnabled(bEnabled);
-	});
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_audio_hrtf_enabled", +[](NetworkState *, const ConVar &, bool, bool bEnabled) { pragma::get_cengine()->SetHRTFEnabled(bEnabled); });
 }
 
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<float>("cl_effects_volume", +[](NetworkState *, const ConVar &, float, float vol) {
-		auto *client = pragma::get_client_state();
-		if(client == nullptr)
-			return;
-		client->SetSoundVolume(pragma::audio::ALSoundType::Effect, vol);
-	});
+	auto UVN = pragma::console::client::register_variable_listener<float>(
+	  "cl_effects_volume", +[](NetworkState *, const ConVar &, float, float vol) {
+		  auto *client = pragma::get_client_state();
+		  if(client == nullptr)
+			  return;
+		  client->SetSoundVolume(pragma::audio::ALSoundType::Effect, vol);
+	  });
 }
 
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<float>("cl_music_volume", +[](NetworkState *, const ConVar &, float, float vol) {
-		auto *client = pragma::get_client_state();
-		if(client == nullptr)
-			return;
-		client->SetSoundVolume(pragma::audio::ALSoundType::Music, vol);
-	});
+	auto UVN = pragma::console::client::register_variable_listener<float>(
+	  "cl_music_volume", +[](NetworkState *, const ConVar &, float, float vol) {
+		  auto *client = pragma::get_client_state();
+		  if(client == nullptr)
+			  return;
+		  client->SetSoundVolume(pragma::audio::ALSoundType::Music, vol);
+	  });
 }
 
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<float>("cl_voice_volume", +[](NetworkState *, const ConVar &, float, float vol) {
-		auto *client = pragma::get_client_state();
-		if(client == nullptr)
-			return;
-		client->SetSoundVolume(pragma::audio::ALSoundType::Voice, vol);
-	});
+	auto UVN = pragma::console::client::register_variable_listener<float>(
+	  "cl_voice_volume", +[](NetworkState *, const ConVar &, float, float vol) {
+		  auto *client = pragma::get_client_state();
+		  if(client == nullptr)
+			  return;
+		  client->SetSoundVolume(pragma::audio::ALSoundType::Voice, vol);
+	  });
 }
 
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<float>("cl_gui_volume", +[](NetworkState *, const ConVar &, float, float vol) {
-		auto *client = pragma::get_client_state();
-		if(client == nullptr)
-			return;
-		client->SetSoundVolume(pragma::audio::ALSoundType::GUI, vol);
-	});
+	auto UVN = pragma::console::client::register_variable_listener<float>(
+	  "cl_gui_volume", +[](NetworkState *, const ConVar &, float, float vol) {
+		  auto *client = pragma::get_client_state();
+		  if(client == nullptr)
+			  return;
+		  client->SetSoundVolume(pragma::audio::ALSoundType::GUI, vol);
+	  });
 }

@@ -4,14 +4,11 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
-
 export module pragma.client:gui.tree_list;
 
 export import :gui.table;
 
-export
-{
+export {
 	class WITreeList;
 	class DLLCLIENT WITreeListElement : public WITableRow {
 	  public:

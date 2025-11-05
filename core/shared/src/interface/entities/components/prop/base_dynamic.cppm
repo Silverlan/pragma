@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:entities.components.props.base_dynamic;
 
 export import :entities.components.base;

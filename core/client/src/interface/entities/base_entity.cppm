@@ -7,12 +7,14 @@ module;
 #include <format>
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.client:entities.base_entity;
 
 export import pragma.shared;
 
-export namespace pragma {class CRenderComponent; class CSceneComponent;};
+export namespace pragma {
+	class CRenderComponent;
+	class CSceneComponent;
+};
 namespace cBaseEntity {
 	STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_ON_SCENE_FLAGS_CHANGED;
 }

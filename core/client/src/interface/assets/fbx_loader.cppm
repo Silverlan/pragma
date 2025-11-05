@@ -5,8 +5,6 @@ module;
 
 #include <ofbx.h>
 
-
-
 export module pragma.client:assets.fbx_loader;
 
 import :assets.import_export;

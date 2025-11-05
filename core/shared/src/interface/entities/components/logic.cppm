@@ -4,18 +4,16 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:entities.components.logic_component;
 
 export import :entities.components.base;
 
 export namespace pragma {
-		namespace logicComponent {
+	namespace logicComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TICK;
 	}
-class DLLNETWORK LogicComponent final : public BaseEntityComponent {
+	class DLLNETWORK LogicComponent final : public BaseEntityComponent {
 	  public:
-
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		LogicComponent(pragma::ecs::BaseEntity &ent);

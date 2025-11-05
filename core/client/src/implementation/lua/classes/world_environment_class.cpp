@@ -5,10 +5,7 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
-
 
 import :scripting.lua.classes.world_environment;
 namespace Lua {

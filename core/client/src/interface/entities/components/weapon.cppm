@@ -6,9 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
 export module pragma.client:entities.components.weapon;
 
 export import :entities.components.entity;
@@ -84,7 +81,7 @@ export namespace pragma {
 		pragma::ecs::BaseEntity &owner;
 		CViewModelComponent *viewModel = nullptr;
 	};
-	
+
 	using namespace umath::scoped_enum::bitwise;
 };
 export {

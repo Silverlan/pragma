@@ -4,8 +4,6 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
-
 module pragma.client;
 
 import :entities.components.particle_system;
@@ -132,7 +130,7 @@ class DLLCLIENT CParticleInitializerRotationRandom : public CParticleInitializer
 
 void CParticleModifier::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	m_particleSystem = &static_cast<pragma::ecs::CParticleSystemComponent&>(pSystem);
+	m_particleSystem = &static_cast<pragma::ecs::CParticleSystemComponent &>(pSystem);
 	RecordKeyValues(values);
 }
 

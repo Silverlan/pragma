@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.environment.effects.base_sprite;
 
 export import :entities.components.base;

@@ -5,9 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
-
-
 export module pragma.client:rendering.lightmap_data_cache;
 
 export import pragma.udm;

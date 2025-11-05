@@ -3,14 +3,11 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.pp_hdr;
 
 import :client_state;
-
 
 using namespace pragma;
 

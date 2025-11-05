@@ -5,10 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
-
 export module pragma.client:entities.components.camera;
 
 export import :entities.base_entity;

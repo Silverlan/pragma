@@ -4,15 +4,12 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.audio.dsp.flanger;
 import :engine;
 
 using namespace pragma;
-
 
 void CSoundDspFlangerComponent::ReceiveData(NetPacket &packet)
 {

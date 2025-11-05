@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:scripting.lua.converters.game_types;
 
 export import :physics.base;
@@ -124,9 +122,8 @@ export namespace luabind {
 	template<class T>
 	concept IsGameObjectType = IsHandleType<T> || IsPhysicsType<T>;
 
-	template<class T> // Note: BaseEntity and derived types are already handled by entity_converter.hpp, so we exclude them here
-	concept IsGenericGameObjectType = IsGameObjectType<T> && !
-	is_type_or_derived<base_type<T>, pragma::ecs::BaseEntity>; // && !is_type_or_derived<base_type<T>,pragma::BaseEntityComponent>;
+	template<class T>                                                                                                    // Note: BaseEntity and derived types are already handled by entity_converter.hpp, so we exclude them here
+	concept IsGenericGameObjectType = IsGameObjectType<T> && !is_type_or_derived<base_type<T>, pragma::ecs::BaseEntity>; // && !is_type_or_derived<base_type<T>,pragma::BaseEntityComponent>;
 
 	template<typename T>
 	    requires(IsGenericGameObjectType<base_type<T>> && std::is_pointer_v<T> && !std::is_const_v<std::remove_pointer_t<T>>)

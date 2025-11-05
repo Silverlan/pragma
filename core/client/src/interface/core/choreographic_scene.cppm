@@ -3,7 +3,6 @@
 
 module;
 
-
 export module pragma.client:core.choreographic_scene;
 
 export import :entities.base_entity;

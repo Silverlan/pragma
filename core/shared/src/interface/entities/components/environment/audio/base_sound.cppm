@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.environment.audio.base_sound;
 
 export import :audio.enums;
@@ -15,7 +13,7 @@ export import :entities.components.base;
 export {
 	namespace pragma {
 		class DLLNETWORK BaseEnvSoundComponent : public BaseEntityComponent {
-		public:
+		  public:
 			enum class DLLNETWORK SpawnFlags : uint32_t {
 				None = 0,
 				PlayEverywhere = 8,
@@ -81,7 +79,7 @@ export {
 			bool IsPaused() const;
 			bool IsPlaying() const;
 			const std::shared_ptr<ALSound> &GetSound() const;
-		protected:
+		  protected:
 			void InitializeSound();
 			virtual void OnSoundCreated(ALSound &snd);
 			std::string m_kvSoundName;

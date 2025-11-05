@@ -3,16 +3,13 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :entities.components.lights.light;
 import :entities.components.radius;
 import :game;
 
 using namespace pragma;
-
 
 CBaseLightComponent::CBaseLightComponent(pragma::ecs::BaseEntity &ent) : BaseEnvLightComponent(ent) {}
 

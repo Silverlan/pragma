@@ -6,8 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.lights.spot_vol;
 
 export import :entities.base_entity;

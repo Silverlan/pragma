@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.field_angle;
 
 import :entities.components.entity;
@@ -14,7 +13,7 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SFieldAngleComponent final : public BaseFieldAngleComponent, public SBaseNetComponent {
-		public:
+		  public:
 			SFieldAngleComponent(pragma::ecs::BaseEntity &ent) : BaseFieldAngleComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;

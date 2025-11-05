@@ -44,10 +44,7 @@ export namespace luabind {
 }
 
 export namespace luabind {
-	default_converter<pragma::string::Utf8String>::value_type default_converter<pragma::string::Utf8String>::to_cpp_deferred(lua::State *, int)
-	{
-		return {};
-	}
+	default_converter<pragma::string::Utf8String>::value_type default_converter<pragma::string::Utf8String>::to_cpp_deferred(lua::State *, int) { return {}; }
 
 	template<typename U>
 	pragma::string::Utf8String default_converter<pragma::string::Utf8String>::to_cpp(lua::State *L, U u, int index)

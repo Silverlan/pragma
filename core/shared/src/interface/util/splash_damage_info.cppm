@@ -4,9 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
-
 export module pragma.shared:util.splash_damage_info;
 
 import :game.damage_info;

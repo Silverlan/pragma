@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.point_constraint_hinge;
 
 export import :entities.base_entity;
@@ -15,7 +13,7 @@ export import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLCLIENT CPointConstraintHingeComponent final : public BasePointConstraintHingeComponent, public CBaseNetComponent {
-		public:
+		  public:
 			CPointConstraintHingeComponent(pragma::ecs::BaseEntity &ent) : BasePointConstraintHingeComponent(ent) {}
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void InitializeLuaObject(lua_State *l) override;
@@ -24,7 +22,7 @@ export {
 	};
 
 	class DLLCLIENT CPointConstraintHinge : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

@@ -178,15 +178,15 @@ void pragma::bvh::BvhTree::InitializeBvh()
 }
 
 template<typename T>
-	static std::unique_ptr<pragma::bvh::Executor> make_executor()
-	{
-		std::unique_ptr<pragma::bvh::Executor> executor;
-		if constexpr(std::is_same_v<T, ::bvh::v2::ParallelExecutor>)
-			executor = std::make_unique<T>(*g_threadPool);
-		else
-			executor = std::make_unique<T>();
-		return executor;
-	}
+static std::unique_ptr<pragma::bvh::Executor> make_executor()
+{
+	std::unique_ptr<pragma::bvh::Executor> executor;
+	if constexpr(std::is_same_v<T, ::bvh::v2::ParallelExecutor>)
+		executor = std::make_unique<T>(*g_threadPool);
+	else
+		executor = std::make_unique<T>();
+	return executor;
+}
 ::bvh::v2::DefaultBuilder<pragma::bvh::Node>::Config pragma::bvh::BvhTree::InitializeExecutor()
 {
 	executor = make_executor<Executor>();

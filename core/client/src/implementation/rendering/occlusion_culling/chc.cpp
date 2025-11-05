@@ -5,9 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
-
-
 module pragma.client;
 
 import :rendering.occlusion_culling.chc;

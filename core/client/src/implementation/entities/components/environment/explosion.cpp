@@ -4,9 +4,7 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.effects.explosion;
 import :client_state;
@@ -19,7 +17,6 @@ import :entities.components.sound_emitter;
 import :game;
 
 using namespace pragma;
-
 
 void CExplosionComponent::Initialize()
 {

@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:entities.components.environment.base_quake;
 
 export import :entities.components.base;
@@ -17,7 +16,7 @@ export {
 	constexpr uint32_t SF_QUAKE_REMOVE_ON_COMPLETE = 4096;
 	namespace pragma {
 		class DLLNETWORK BaseEnvQuakeComponent : public BaseEntityComponent {
-		public:
+		  public:
 			using BaseEntityComponent::BaseEntityComponent;
 			virtual void Initialize() override;
 			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
@@ -33,7 +32,7 @@ export {
 			void SetDuration(Float duration);
 			void SetFadeInDuration(Float tFadeIn);
 			void SetFadeOutDuration(Float tFadeOut);
-		protected:
+		  protected:
 			Float m_tStartShake = 0.f;
 			Float m_frequency = 50.f;
 			Float m_amplitude = 50.f;

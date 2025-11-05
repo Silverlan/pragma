@@ -7,7 +7,6 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
 // --template-include-location
 
 module pragma.server;

@@ -3,16 +3,13 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.merge_images;
 
 import :engine;
 
 using namespace pragma;
-
 
 decltype(ShaderMergeImages::DESCRIPTOR_SET_TEXTURE_2D) ShaderMergeImages::DESCRIPTOR_SET_TEXTURE_2D = {
   "TEXTURE2",

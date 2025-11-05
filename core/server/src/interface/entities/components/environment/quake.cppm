@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.quake;
 
 import :entities;
@@ -15,7 +14,7 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SQuakeComponent final : public BaseEnvQuakeComponent, public SBaseNetComponent {
-		public:
+		  public:
 			SQuakeComponent(pragma::ecs::BaseEntity &ent) : BaseEnvQuakeComponent(ent) {}
 			virtual void Initialize() override;
 
@@ -26,7 +25,7 @@ export {
 	};
 
 	class DLLSERVER EnvQuake : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

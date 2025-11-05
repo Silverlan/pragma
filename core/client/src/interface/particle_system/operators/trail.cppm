@@ -4,7 +4,6 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:particle_system.operator_trail;
 
 export import :entities.components.particle_system;
@@ -29,7 +28,7 @@ void CParticleOperatorTrail::Initialize(pragma::BaseEnvParticleSystemComponent &
 		if(key == "travel_time")
 			m_travelTime = util::to_float(it.second);
 	}
-	m_particleNodes.resize(static_cast<pragma::ecs::CParticleSystemComponent&>(pSystem).GetMaxParticleCount(), 0);
+	m_particleNodes.resize(static_cast<pragma::ecs::CParticleSystemComponent &>(pSystem).GetMaxParticleCount(), 0);
 }
 void CParticleOperatorTrail::Simulate(CParticle &particle, double, float strength)
 {

@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:scripting.lua.libraries.debug;
 
 export import :entities.components.base_ai;

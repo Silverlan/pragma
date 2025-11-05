@@ -20,10 +20,10 @@ export {
 	};
 
 	class DLLNETWORK GameModeManager {
-	private:
+	  private:
 		GameModeManager() = delete;
 		static std::unordered_map<std::string, GameModeInfo> m_gameModes;
-	public:
+	  public:
 		static void Initialize();
 		static std::unordered_map<std::string, GameModeInfo> &GetGameModes();
 		static GameModeInfo *GetGameModeInfo(const std::string &id);

@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.effects.particle_system;
 
 import :entities;
@@ -15,7 +14,7 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SParticleSystemComponent final : public BaseEnvParticleSystemComponent, public SBaseNetComponent {
-		public:
+		  public:
 			SParticleSystemComponent(pragma::ecs::BaseEntity &ent) : BaseEnvParticleSystemComponent(ent) {}
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual void SetContinuous(bool b) override;
@@ -25,7 +24,7 @@ export {
 	};
 
 	class DLLSERVER EnvParticleSystem : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

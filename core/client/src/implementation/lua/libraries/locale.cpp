@@ -6,11 +6,9 @@ module;
 
 module pragma.client;
 
-
 import :scripting.lua.libraries.locale;
 import :client_state;
 import pragma.string.unicode;
-
 
 void Lua::Locale::change_language(const std::string &lan) { pragma::locale::set_language(lan); }
 

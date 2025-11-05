@@ -3,15 +3,12 @@
 
 module;
 
-
-
 module pragma.client;
 
 import :rendering.gpu_profiler;
 import :engine;
 
 using namespace pragma::debug;
-
 
 static CVar cvTimerQueries = GetClientConVar("cl_gpu_timer_queries_enabled");
 

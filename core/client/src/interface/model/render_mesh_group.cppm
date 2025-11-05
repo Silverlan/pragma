@@ -3,7 +3,6 @@
 
 module;
 
-
 export module pragma.client:model.render_mesh_group;
 
 export import std.compat;

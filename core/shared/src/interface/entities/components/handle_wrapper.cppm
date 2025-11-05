@@ -9,7 +9,9 @@ export module pragma.shared:entities.components.handle_wrapper;
 export import pragma.util;
 
 export {
-	namespace pragma {class BaseEntityComponent;};
+	namespace pragma {
+		class BaseEntityComponent;
+	};
 	struct DLLNETWORK BaseEntityComponentHandleWrapper {
 		BaseEntityComponentHandleWrapper(const util::WeakHandle<pragma::BaseEntityComponent> &wh) : handle(wh) {}
 		BaseEntityComponentHandleWrapper() = default;

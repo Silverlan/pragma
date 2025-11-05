@@ -7,10 +7,8 @@ module;
 
 module pragma.client;
 
-
 import :rendering.light_data_buffer_manager;
 import :engine;
-
 
 using namespace pragma;
 

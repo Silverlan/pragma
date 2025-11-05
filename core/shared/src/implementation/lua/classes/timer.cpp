@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 #include "definitions.hpp"
 
 module pragma.shared;
@@ -10,13 +9,13 @@ module pragma.shared;
 import :scripting.lua.classes.timer;
 
 #define lua_checktimer(l, hTimer)                                                                                                                                                                                                                                                                \
-    {                                                                                                                                                                                                                                                                                            \
-        if(hTimer.IsValid() == false) {                                                                                                                                                                                                                                                          \
-            lua::push_string(l, "Attempted to use a NULL timer");                                                                                                                                                                                                                                  \
-            lua::error(l);                                                                                                                                                                                                                                                                        \
-            return;                                                                                                                                                                                                                                                                              \
-        }                                                                                                                                                                                                                                                                                        \
-    }
+	{                                                                                                                                                                                                                                                                                            \
+		if(hTimer.IsValid() == false) {                                                                                                                                                                                                                                                          \
+			lua::push_string(l, "Attempted to use a NULL timer");                                                                                                                                                                                                                                \
+			lua::error(l);                                                                                                                                                                                                                                                                       \
+			return;                                                                                                                                                                                                                                                                              \
+		}                                                                                                                                                                                                                                                                                        \
+	}
 
 DLLNETWORK void Lua_Timer_Start(lua::State *l, TimerHandle &timer)
 {

@@ -4,19 +4,17 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
-
 export module pragma.client:gui.checkbox;
 
 export import pragma.gui;
 
 export {
 	class DLLCLIENT WICheckbox : public WIRect {
-	protected:
+	  protected:
 		WIHandle m_hOutline;
 		WIHandle m_hTick;
 		bool m_bChecked;
-	public:
+	  public:
 		WICheckbox();
 		virtual ~WICheckbox() override;
 		virtual void Initialize() override;

@@ -5,16 +5,15 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:gui.slider;
 
 export import :gui.progress_bar;
 
 export {
 	class DLLCLIENT WISlider : public WIProgressBar {
-	private:
+	  private:
 		bool m_bMoveSlider;
-	public:
+	  public:
 		WISlider();
 		virtual ~WISlider() override;
 		virtual void Initialize() override;

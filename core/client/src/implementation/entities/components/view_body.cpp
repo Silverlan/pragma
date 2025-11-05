@@ -4,9 +4,7 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.view_body;
 import :client_state;
@@ -14,7 +12,6 @@ import :entities.components.render;
 import :entities.components.transform;
 
 using namespace pragma;
-
 
 void CViewBodyComponent::Initialize()
 {

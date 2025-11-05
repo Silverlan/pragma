@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:scripting.lua.classes.collision_mesh;
 
 export import :physics.collision_mesh;

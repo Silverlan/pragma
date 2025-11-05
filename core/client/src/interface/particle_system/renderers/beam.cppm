@@ -5,13 +5,13 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
-
 export module pragma.client:particle_system.renderer_beam;
 
 export import :particle_system.modifier;
 
-export namespace pragma::ecs {class CParticleSystemComponent;}
+export namespace pragma::ecs {
+	class CParticleSystemComponent;
+}
 export class DLLCLIENT CParticleRendererBeam : public CParticleRenderer {
   public:
 	CParticleRendererBeam() = default;

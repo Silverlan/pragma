@@ -5,7 +5,6 @@ module;
 #include "definitions.hpp"
 #include "buss_ik/Jacobian.h"
 
-
 export module pragma.shared:entities.components.ik;
 
 export import :entities.components.base;

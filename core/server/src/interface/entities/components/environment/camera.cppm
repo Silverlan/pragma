@@ -5,8 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.camera;
 
 import :entities;
@@ -15,16 +13,16 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SCameraComponent final : public BaseEnvCameraComponent {
-		public:
+		  public:
 			SCameraComponent(pragma::ecs::BaseEntity &ent) : BaseEnvCameraComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
-		protected:
+		  protected:
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		};
 	};
 
 	class DLLSERVER EnvCamera : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

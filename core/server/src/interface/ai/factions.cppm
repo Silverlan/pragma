@@ -5,8 +5,6 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
-
-
 export module pragma.server:ai.factions;
 
 import :ai.disposition;
@@ -16,14 +14,14 @@ export {
 	class FactionManager;
 	struct FactionDisposition;
 	class DLLSERVER Faction : public std::enable_shared_from_this<Faction> {
-	protected:
+	  protected:
 		friend FactionManager;
 		DISPOSITION m_defaultDisp;
 		Faction(const std::string &name);
 		std::string m_name;
 		std::vector<std::string> m_classes;
 		std::array<std::vector<std::shared_ptr<FactionDisposition>>, 4> m_relationships;
-	public:
+	  public:
 		void AddClass(std::string className);
 		std::vector<std::string> &GetClasses();
 		void SetDisposition(Faction &faction, DISPOSITION disp, bool revert = false, int priority = 0);
@@ -50,9 +48,9 @@ export {
 	};
 
 	class DLLSERVER FactionManager {
-	protected:
+	  protected:
 		std::vector<std::shared_ptr<Faction>> m_factions;
-	public:
+	  public:
 		FactionManager();
 		std::shared_ptr<Faction> RegisterFaction(const std::string &name);
 		const std::vector<std::shared_ptr<Faction>> &GetFactions();

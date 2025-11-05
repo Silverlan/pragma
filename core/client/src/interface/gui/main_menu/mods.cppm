@@ -13,7 +13,7 @@ export import :gui.main_menu_base;
 
 export {
 	class DLLCLIENT WIMainMenuMods : public WIMainMenuBase, public WIChromiumPage {
-	protected:
+	  protected:
 		WIHandle m_hWeb;
 		std::shared_ptr<pragma::AddonInstallManager> m_addonInstallManager = nullptr;
 		virtual void OnVisibilityChanged(bool bVisible) override;
@@ -30,7 +30,7 @@ export {
 		};
 		std::vector<std::unique_ptr<DownloadInfo>> m_downloads;
 		std::mutex m_downloadMutex;
-	public:
+	  public:
 		WIMainMenuMods();
 		virtual ~WIMainMenuMods() override;
 		virtual void Initialize() override;

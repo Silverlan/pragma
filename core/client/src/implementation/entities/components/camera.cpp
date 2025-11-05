@@ -5,15 +5,12 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
 
 import :entities.components.camera;
 import :game;
 
 using namespace pragma;
-
 
 CCameraComponent::~CCameraComponent() {}
 void CCameraComponent::Save(udm::LinkedPropertyWrapperArg udm) { BaseEnvCameraComponent::Save(udm); }

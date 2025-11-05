@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:entities.components.environment.base_camera;
 
 export import :entities.components.base;
@@ -15,7 +14,7 @@ import :util.render_tile;
 export {
 	namespace pragma {
 		class DLLNETWORK BaseEnvCameraComponent : public BaseEntityComponent {
-		public:
+		  public:
 			static const float DEFAULT_NEAR_Z;
 			static const float DEFAULT_FAR_Z;
 			static const float DEFAULT_FOV;
@@ -95,11 +94,11 @@ export {
 			static Mat4 CalcProjectionMatrix(umath::Radian fovRad, float aspectRatio, float nearZ, float farZ, const rendering::Tile *optTile = nullptr);
 			static void GetFrustumPlanes(const std::vector<Vector3> &points, std::vector<umath::Plane> &outPlanes);
 			static void GetFrustumPlanes(std::vector<umath::Plane> &outPlanes, float neard, float fard, float fov, float ratio, const Vector3 &center, const Vector3 &viewDir, const Vector3 &viewUp);
-		protected:
+		  protected:
 			void FlagViewMatrixAsDirty();
 			void FlagProjectionMatrixAsDirty();
 			virtual void SetFieldAngleComponent(BaseFieldAngleComponent &c);
-		private:
+		  private:
 			util::PMatrix4Property m_projectionMatrix = nullptr;
 			util::PMatrix4Property m_viewMatrix = nullptr;
 			util::PFloatProperty m_aspectRatio = nullptr;
@@ -110,10 +109,10 @@ export {
 			StateFlags m_stateFlags = StateFlags::None;
 			ComponentHandle<BaseFieldAngleComponent> m_fieldAngleComponent;
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::BaseEnvCameraComponent::StateFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::BaseEnvCameraComponent::StateFlags> : std::true_type {};
+	}
 };

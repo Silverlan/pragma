@@ -6,15 +6,12 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
 export module pragma.client:entities.components.game_shadow_manager;
 
 import :rendering.shaders;
 
 export namespace pragma {
-    class CLightComponent;
+	class CLightComponent;
 	struct ShadowRenderInfo {
 		const CBaseEntity *entity = nullptr;
 		const CModelSubMesh *mesh = nullptr;

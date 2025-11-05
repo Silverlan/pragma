@@ -4,7 +4,6 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:rendering.shaders.textured_alpha_transition;
 
 export import :rendering.shaders.textured;

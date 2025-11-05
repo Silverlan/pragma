@@ -4,20 +4,17 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.base_toggle;
 
 export import :entities.components.base;
 
 export namespace pragma {
-		namespace baseToggleComponent {
+	namespace baseToggleComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TURN_ON;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TURN_OFF;
 	}
-class DLLNETWORK BaseToggleComponent : public BaseEntityComponent {
+	class DLLNETWORK BaseToggleComponent : public BaseEntityComponent {
 	  public:
-
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		enum class SpawnFlags : uint32_t { StartOn = SF_STARTON };

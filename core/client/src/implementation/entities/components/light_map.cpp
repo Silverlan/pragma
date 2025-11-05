@@ -3,12 +3,7 @@
 
 module;
 
-
-
 #include "pragma/logging.hpp"
-
-
-
 
 #include "pragma/lua/core.hpp"
 #include <sharedutils/magic_enum.hpp>
@@ -23,7 +18,6 @@ import :engine;
 import :game;
 import :gui;
 import :model;
-
 
 using namespace pragma;
 spdlog::logger &CLightMapComponent::LOGGER = pragma::register_logger("lightmap");
@@ -638,9 +632,8 @@ void CLightMapComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &mod
 
 	auto defLightmapBakeSettings = luabind::class_<pragma::LightmapBakeSettings>("BakeSettings");
 	defLightmapBakeSettings.def(luabind::constructor<>());
-	defLightmapBakeSettings.property("width", static_cast<luabind::object (*)(lua_State *, pragma::LightmapBakeSettings &)>([](lua_State *l, pragma::LightmapBakeSettings &bakeSettings) -> luabind::object {
-		return bakeSettings.width.has_value() ? luabind::object {l, *bakeSettings.width} : luabind::object {};
-	}),
+	defLightmapBakeSettings.property("width",
+	  static_cast<luabind::object (*)(lua_State *, pragma::LightmapBakeSettings &)>([](lua_State *l, pragma::LightmapBakeSettings &bakeSettings) -> luabind::object { return bakeSettings.width.has_value() ? luabind::object {l, *bakeSettings.width} : luabind::object {}; }),
 	  static_cast<void (*)(lua_State *, pragma::LightmapBakeSettings &, luabind::object)>([](lua_State *l, pragma::LightmapBakeSettings &bakeSettings, luabind::object o) {
 		  if(Lua::IsSet(l, 2) == false) {
 			  bakeSettings.width = {};
@@ -648,9 +641,8 @@ void CLightMapComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &mod
 		  }
 		  bakeSettings.width = Lua::CheckNumber(l, 2);
 	  }));
-	defLightmapBakeSettings.property("height", static_cast<luabind::object (*)(lua_State *, pragma::LightmapBakeSettings &)>([](lua_State *l, pragma::LightmapBakeSettings &bakeSettings) -> luabind::object {
-		return bakeSettings.height.has_value() ? luabind::object {l, *bakeSettings.height} : luabind::object {};
-	}),
+	defLightmapBakeSettings.property("height",
+	  static_cast<luabind::object (*)(lua_State *, pragma::LightmapBakeSettings &)>([](lua_State *l, pragma::LightmapBakeSettings &bakeSettings) -> luabind::object { return bakeSettings.height.has_value() ? luabind::object {l, *bakeSettings.height} : luabind::object {}; }),
 	  static_cast<void (*)(lua_State *, pragma::LightmapBakeSettings &, luabind::object)>([](lua_State *l, pragma::LightmapBakeSettings &bakeSettings, luabind::object o) {
 		  if(Lua::IsSet(l, 2) == false) {
 			  bakeSettings.height = {};
@@ -664,12 +656,11 @@ void CLightMapComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &mod
 	defLightmapBakeSettings.def_readwrite("createAsRenderJob", &pragma::LightmapBakeSettings::createAsRenderJob);
 	defLightmapBakeSettings.def_readwrite("rebuildUvAtlas", &pragma::LightmapBakeSettings::rebuildUvAtlas);
 	defLightmapBakeSettings.def_readwrite("exposure", &pragma::LightmapBakeSettings::exposure);
-	defLightmapBakeSettings.def("SetColorTransform",
-	  static_cast<void (*)(lua_State *, pragma::LightmapBakeSettings &, const std::string &, const std::string &)>([](lua_State *l, pragma::LightmapBakeSettings &bakeSettings, const std::string &config, const std::string &look) {
-		  bakeSettings.colorTransform = pragma::rendering::cycles::SceneInfo::ColorTransform {};
-		  bakeSettings.colorTransform->config = config;
-		  bakeSettings.colorTransform->look = look;
-	  }));
+	defLightmapBakeSettings.def("SetColorTransform", static_cast<void (*)(lua_State *, pragma::LightmapBakeSettings &, const std::string &, const std::string &)>([](lua_State *l, pragma::LightmapBakeSettings &bakeSettings, const std::string &config, const std::string &look) {
+		bakeSettings.colorTransform = pragma::rendering::cycles::SceneInfo::ColorTransform {};
+		bakeSettings.colorTransform->config = config;
+		bakeSettings.colorTransform->look = look;
+	}));
 	defLightmapBakeSettings.def("ResetColorTransform", static_cast<void (*)(lua_State *, pragma::LightmapBakeSettings &)>([](lua_State *l, pragma::LightmapBakeSettings &bakeSettings) { bakeSettings.colorTransform = {}; }));
 	defCLightMap.scope[defLightmapBakeSettings];
 

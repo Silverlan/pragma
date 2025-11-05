@@ -3,11 +3,9 @@
 
 module;
 
-
 #include <cassert>
 
 module pragma.client;
-
 
 import :rendering.global_shader_input_manager;
 import :engine;

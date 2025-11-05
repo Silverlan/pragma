@@ -7,12 +7,10 @@ module;
 
 module pragma.client;
 
-
 import :rendering.entity_instance_index_buffer;
 import :engine;
 
 using namespace pragma;
-
 
 rendering::EntityInstanceIndexBuffer::EntityInstanceIndexBuffer()
 {

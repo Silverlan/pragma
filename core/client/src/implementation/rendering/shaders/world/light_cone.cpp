@@ -3,9 +3,7 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.world_light_cone;
 
@@ -14,7 +12,6 @@ import :entities.components;
 import :model;
 
 using namespace pragma;
-
 
 decltype(ShaderLightCone::DESCRIPTOR_SET_DEPTH_MAP) ShaderLightCone::DESCRIPTOR_SET_DEPTH_MAP = {
   "DEPTH_BUFFER",

@@ -3,8 +3,6 @@
 
 module;
 
-
-
 export module pragma.client:rendering.shaders.textured_uniform_data;
 
 export import pragma.math;

@@ -4,13 +4,10 @@
 module;
 #include "pragma/logging.hpp"
 
-
 module pragma.client;
-
 
 import :engine;
 import :audio;
-
 
 const al::ISoundSystem *CEngine::GetSoundSystem() const { return const_cast<CEngine *>(this)->GetSoundSystem(); }
 al::ISoundSystem *CEngine::GetSoundSystem() { return m_soundSystem.get(); }

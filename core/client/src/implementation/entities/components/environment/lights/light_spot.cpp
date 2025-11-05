@@ -13,7 +13,6 @@ import :engine;
 
 using namespace pragma;
 
-
 CLightSpotComponent::CLightSpotComponent(pragma::ecs::BaseEntity &ent) : BaseEnvLightSpotComponent(ent) {}
 bool CLightSpotComponent::ShouldTransmitNetData() const { return true; }
 void CLightSpotComponent::Initialize()

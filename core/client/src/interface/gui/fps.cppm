@@ -4,18 +4,17 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:gui.fps;
 
 export import pragma.gui;
 
 export {
 	class DLLCLIENT WIFPS : public WIBase {
-	private:
+	  private:
 		WIHandle m_text;
 		uint32_t m_fpsLast;
 		double m_tLastUpdate;
-	public:
+	  public:
 		WIFPS();
 		virtual ~WIFPS() override;
 		virtual void Initialize() override;

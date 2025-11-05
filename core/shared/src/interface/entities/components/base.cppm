@@ -11,10 +11,6 @@ module;
 #endif
 #endif
 
-
-
-
-
 export module pragma.shared:entities.components.base;
 
 export import :entities.base_entity_handle;
@@ -36,19 +32,20 @@ export namespace pragma {
 		enum class E : uint32_t { Count };
 	};
 };
-export namespace std {                                                                                                                                                                                                                                                                              \
-	template<>                                                                                                                                                                                                                                                                               \
-	struct hash<pragma::EEntityComponentCallbackEvent> {                                                                                                                                                                                                                                                                  \
-		std::size_t operator()(const pragma::EEntityComponentCallbackEvent &object) const                                                                                                                                                                                                                                 \
-		{                                                                                                                                                                                                                                                                                    \
-			return object.Hash();                                                                                                                                                                                                                                                            \
-		}                                                                                                                                                                                                                                                                                    \
-	};                                                                                                                                                                                                                                                                                       \
+export namespace std {
+	template<>
+	struct hash<pragma::EEntityComponentCallbackEvent> {
+		std::size_t operator()(const pragma::EEntityComponentCallbackEvent &object) const { return object.Hash(); }
+	};
 }
 
 export {
-	namespace pragma::ecs {class BaseEntity;}
-	namespace pragma {class Game;}
+	namespace pragma::ecs {
+		class BaseEntity;
+	}
+	namespace pragma {
+		class Game;
+	}
 	class NetworkState;
 	namespace pragma {
 		class EntityComponentManager;
@@ -70,17 +67,17 @@ export {
 		};
 
 		template<typename... Args>
-	#ifdef _WIN32
+#ifdef _WIN32
 
-	#if __cpp_lib_format >= 202207L
+#if __cpp_lib_format >= 202207L
 		using format_string_t = std::format_string<Args...>;
-	#else
+#else
 		using format_string_t = std::string_view;
-	#endif
+#endif
 
-	#else
+#else
 		using format_string_t = std::string_view;
-	#endif
+#endif
 
 		namespace baseEntityComponent {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ENTITY_COMPONENT_ADDED;
@@ -90,7 +87,7 @@ export {
 		}
 
 		class DLLNETWORK BaseEntityComponent : public pragma::BaseLuaHandle, public std::enable_shared_from_this<BaseEntityComponent> {
-		public:
+		  public:
 			// Note: Use BaseEntityComponent::OnEntityComponentAdded to initialize data for other components
 			// instead of using this event!
 
@@ -98,7 +95,7 @@ export {
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 			static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 			template<typename TClass>
-				static spdlog::logger &get_logger();
+			static spdlog::logger &get_logger();
 			enum class StateFlags : uint32_t {
 				None = 0u,
 				IsThinking = 1u,
@@ -281,7 +278,7 @@ export {
 			std::optional<std::string> GetMemberUri(ComponentMemberIndex memberIdx) const;
 			static std::optional<std::string> GetUri(pragma::Game *game, std::variant<util::Uuid, std::string> entityIdentifier, std::variant<ComponentId, std::string> componentIdentifier);
 			static std::optional<std::string> GetMemberUri(pragma::Game *game, std::variant<util::Uuid, std::string> entityIdentifier, std::variant<ComponentId, std::string> componentIdentifier, std::variant<ComponentMemberIndex, std::string> memberIdentifier);
-		protected:
+		  protected:
 			friend EntityComponentManager;
 			friend BaseEntityComponentSystem;
 			BaseEntityComponent(pragma::ecs::BaseEntity &ent);
@@ -316,13 +313,13 @@ export {
 			std::vector<CallbackInfo> &GetCallbackInfos() const;
 			std::unordered_map<ComponentEventId, std::vector<CallbackHandle>> &GetEventCallbacks() const;
 			std::unordered_map<ComponentEventId, std::vector<CallbackHandle>> &GetBoundEvents() const;
-		protected:
+		  protected:
 			void OnEntityComponentAdded(BaseEntityComponent &component, bool bSkipEventBinding);
 			pragma::ecs::BaseEntity &m_entity;
 
 			StateFlags m_stateFlags = StateFlags::None;
 			TickData m_tickData {};
-		private:
+		  private:
 			friend BaseEntityComponentSystem;
 
 			mutable std::unique_ptr<std::vector<CallbackInfo>> m_callbackInfos;
@@ -330,13 +327,13 @@ export {
 			mutable std::unique_ptr<std::unordered_map<ComponentEventId, std::vector<CallbackHandle>>> m_boundEvents;
 		};
 		DLLNETWORK std::ostream &operator<<(std::ostream &os, const pragma::BaseEntityComponent &component);
-		
-        using namespace umath::scoped_enum::bitwise;
+
+		using namespace umath::scoped_enum::bitwise;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::BaseEntityComponent::StateFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::BaseEntityComponent::StateFlags> : std::true_type {};
+	}
 
 	namespace pragma {
 		template<class TComponent>
@@ -350,7 +347,7 @@ export {
 			return BaseLuaHandle::GetHandle<TComponent>();
 		}
 
-			template<typename... Args>
+		template<typename... Args>
 		void BaseEntityComponent::Log(spdlog::level::level_enum level, const std::string &msg) const
 		{
 			auto &logger = InitLogger();
@@ -403,12 +400,14 @@ export {
 		spdlog::logger *find_logger(Game &game, std::type_index typeIndex);
 
 		template<typename TClass>
-		spdlog::logger *find_logger(Game &game) {
+		spdlog::logger *find_logger(Game &game)
+		{
 			return find_logger(game, typeid(TClass));
 		}
 
 		template<typename TClass>
-		spdlog::logger &BaseEntityComponent::get_logger() {
+		spdlog::logger &BaseEntityComponent::get_logger()
+		{
 			return get_logger(typeid(TClass));
 		}
 	}

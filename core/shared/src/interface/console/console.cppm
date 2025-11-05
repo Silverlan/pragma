@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
 export module pragma.shared:console;
 
 export import :console.command_options;

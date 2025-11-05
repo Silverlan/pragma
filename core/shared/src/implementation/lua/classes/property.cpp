@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 module pragma.shared;
 
 import :scripting.lua.classes.property;
@@ -255,8 +254,9 @@ void Lua::Property::register_classes(Lua::Interface &l)
 
 	add_generic_methods<LBoolPropertyWrapper, bool, luabind::class_<LBoolPropertyWrapper, LBasePropertyWrapper>>(boolDef);
 	boolDef.def("Link", static_cast<void (*)(lua::State *, LBoolPropertyWrapper &, LBoolPropertyWrapper &)>([](lua::State *l, LBoolPropertyWrapper &prop, LBoolPropertyWrapper &propOther) { prop->Link(*propOther); }));
-	boolDef.def("Link",
-	  static_cast<void (*)(lua::State *, LBoolPropertyWrapper &, LStringProperty &)>([](lua::State *l, LBoolPropertyWrapper &prop, LStringProperty &propOther) { prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> bool { return ::util::to_boolean(v); }); }));
+	boolDef.def("Link", static_cast<void (*)(lua::State *, LBoolPropertyWrapper &, LStringProperty &)>([](lua::State *l, LBoolPropertyWrapper &prop, LStringProperty &propOther) {
+		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> bool { return ::util::to_boolean(v); });
+	}));
 	boolDef.def("Link", static_cast<void (*)(lua::State *, LBoolPropertyWrapper &, LGenericFloatPropertyWrapper &)>([](lua::State *l, LBoolPropertyWrapper &prop, LGenericFloatPropertyWrapper &propOther) { propOther->LinkOther(*prop); }));
 	boolDef.def("Link", static_cast<void (*)(lua::State *, LBoolPropertyWrapper &, LGenericIntPropertyWrapper &)>([](lua::State *l, LBoolPropertyWrapper &prop, LGenericIntPropertyWrapper &propOther) { propOther->LinkOther(*prop); }));
 	modUtil[boolDef];
@@ -292,7 +292,8 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	colDef.def("Link", static_cast<void (*)(lua::State *, LColorProperty &, LColorProperty &)>(link<LColorProperty, ::Color>));
 	colDef.def("Link", static_cast<void (*)(lua::State *, LColorProperty &, LStringProperty &)>([](lua::State *l, LColorProperty &prop, LStringProperty &propOther) { prop->Link(*propOther); }));
 	colDef.def("Link", static_cast<void (*)(lua::State *, LColorProperty &, LVector3Property &)>([](lua::State *l, LColorProperty &prop, LVector3Property &propOther) { prop->Link<::util::Vector3Property, Vector3>(*propOther, [](const Vector3 &v) -> ::Color { return ::Color {v}; }); }));
-	colDef.def("Link", static_cast<void (*)(lua::State *, LColorProperty &, LVector4Property &)>([](lua::State *l, LColorProperty &prop, LVector4Property &propOther) { prop->Link<::util::Vector4Property, ::Vector4>(*propOther, [](const ::Vector4 &v) -> ::Color { return ::Color {v}; }); }));
+	colDef.def("Link",
+	  static_cast<void (*)(lua::State *, LColorProperty &, LVector4Property &)>([](lua::State *l, LColorProperty &prop, LVector4Property &propOther) { prop->Link<::util::Vector4Property, ::Vector4>(*propOther, [](const ::Vector4 &v) -> ::Color { return ::Color {v}; }); }));
 	/*colDef.def("Link",static_cast<void(*)(lua::State*,LColorProperty&,LStringProperty&)>([](lua::State *l,LColorProperty &prop,LStringProperty &propOther) {
 		prop->Link<::util::StringProperty,std::string>(*propOther,[](const std::string &v) -> Color {
 			return Color{v};
@@ -366,8 +367,9 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	add_generic_vector_methods<LVector2Property, ::Vector2, luabind::class_<LVector2Property, LBasePropertyWrapper>>(vec2Def);
 	vec2Def.def(luabind::constructor<float, float>());
 	vec2Def.def("Link", static_cast<void (*)(lua::State *, LVector2Property &, LVector2Property &)>(link<LVector2Property, ::Vector2>));
-	vec2Def.def("Link",
-	  static_cast<void (*)(lua::State *, LVector2Property &, LVector2iProperty &)>([](lua::State *l, LVector2Property &prop, LVector2iProperty &propOther) { prop->Link<::util::Vector2iProperty, ::Vector2i>(*propOther, [](const ::Vector2i &v) -> ::Vector2 { return ::Vector2(v.x, v.y); }); }));
+	vec2Def.def("Link", static_cast<void (*)(lua::State *, LVector2Property &, LVector2iProperty &)>([](lua::State *l, LVector2Property &prop, LVector2iProperty &propOther) {
+		prop->Link<::util::Vector2iProperty, ::Vector2i>(*propOther, [](const ::Vector2i &v) -> ::Vector2 { return ::Vector2(v.x, v.y); });
+	}));
 	vec2Def.def("Link", static_cast<void (*)(lua::State *, LVector2Property &, LStringProperty &)>([](lua::State *l, LVector2Property &prop, LStringProperty &propOther) {
 		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> ::Vector2 {
 			::Vector2 r;
@@ -381,8 +383,9 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	add_generic_vector_methods<LVector2iProperty, ::Vector2i, luabind::class_<LVector2iProperty, LBasePropertyWrapper>>(vec2iDef);
 	vec2iDef.def(luabind::constructor<int32_t, int32_t>());
 	vec2iDef.def("Link", static_cast<void (*)(lua::State *, LVector2iProperty &, LVector2iProperty &)>(link<LVector2iProperty, ::Vector2i>));
-	vec2iDef.def("Link",
-	  static_cast<void (*)(lua::State *, LVector2iProperty &, LVector2Property &)>([](lua::State *l, LVector2iProperty &prop, LVector2Property &propOther) { prop->Link<::util::Vector2Property, ::Vector2>(*propOther, [](const ::Vector2 &v) -> ::Vector2i { return ::Vector2i(v.x, v.y); }); }));
+	vec2iDef.def("Link", static_cast<void (*)(lua::State *, LVector2iProperty &, LVector2Property &)>([](lua::State *l, LVector2iProperty &prop, LVector2Property &propOther) {
+		prop->Link<::util::Vector2Property, ::Vector2>(*propOther, [](const ::Vector2 &v) -> ::Vector2i { return ::Vector2i(v.x, v.y); });
+	}));
 	vec2iDef.def("Link", static_cast<void (*)(lua::State *, LVector2iProperty &, LStringProperty &)>([](lua::State *l, LVector2iProperty &prop, LStringProperty &propOther) {
 		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> ::Vector2i {
 			::Vector2i r;
@@ -412,8 +415,9 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	add_generic_vector_methods<LVector4iProperty, ::Vector4i, luabind::class_<LVector4iProperty, LBasePropertyWrapper>>(vec4iDef);
 	vec4iDef.def(luabind::constructor<int32_t, int32_t, int32_t, int32_t>());
 	vec4iDef.def("Link", static_cast<void (*)(lua::State *, LVector4iProperty &, LVector4iProperty &)>(link<LVector4iProperty, ::Vector4i>));
-	vec4iDef.def("Link",
-	  static_cast<void (*)(lua::State *, LVector4iProperty &, LVector4Property &)>([](lua::State *l, LVector4iProperty &prop, LVector4Property &propOther) { prop->Link<::util::Vector4Property, ::Vector4>(*propOther, [](const ::Vector4 &v) -> ::Vector4i { return ::Vector4i(v.x, v.y, v.z, v.w); }); }));
+	vec4iDef.def("Link", static_cast<void (*)(lua::State *, LVector4iProperty &, LVector4Property &)>([](lua::State *l, LVector4iProperty &prop, LVector4Property &propOther) {
+		prop->Link<::util::Vector4Property, ::Vector4>(*propOther, [](const ::Vector4 &v) -> ::Vector4i { return ::Vector4i(v.x, v.y, v.z, v.w); });
+	}));
 	vec4iDef.def("Link", static_cast<void (*)(lua::State *, LVector4iProperty &, LStringProperty &)>([](lua::State *l, LVector4iProperty &prop, LStringProperty &propOther) {
 		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> ::Vector4i {
 			::Vector4i r;
@@ -430,7 +434,8 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	quatDef.def(luabind::constructor<float, float, float, float>());
 	quatDef.def(luabind::tostring(luabind::const_self));
 	quatDef.def("Link", static_cast<void (*)(lua::State *, LQuatProperty &, LQuatProperty &)>(link<LQuatProperty, Quat>));
-	quatDef.def("Link", static_cast<void (*)(lua::State *, LQuatProperty &, LStringProperty &)>([](lua::State *l, LQuatProperty &prop, LStringProperty &propOther) { prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> Quat { return uquat::create(v); }); }));
+	quatDef.def("Link",
+	  static_cast<void (*)(lua::State *, LQuatProperty &, LStringProperty &)>([](lua::State *l, LQuatProperty &prop, LStringProperty &propOther) { prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> Quat { return uquat::create(v); }); }));
 	modUtil[quatDef];
 
 	// String

@@ -5,8 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.triggers.touch;
 
 import :entities;
@@ -14,14 +12,14 @@ import :entities;
 export {
 	namespace pragma {
 		class DLLSERVER STouchComponent final : public BaseTouchComponent {
-		public:
+		  public:
 			STouchComponent(pragma::ecs::BaseEntity &ent) : BaseTouchComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};
 
 	class DLLSERVER TriggerTouch : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

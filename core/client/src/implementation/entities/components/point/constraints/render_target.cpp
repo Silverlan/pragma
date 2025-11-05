@@ -4,17 +4,13 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
-
 
 import :entities.components.point_render_target;
 import :client_state;
 import :engine;
 
 using namespace pragma;
-
 
 #pragma message("FIXME: If point_rendertarget is out of view of the local player, but one of the texture targets isn't, they won't get updated! Find a solution!")
 

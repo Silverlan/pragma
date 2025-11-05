@@ -4,10 +4,7 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
-
 module pragma.client;
-
 
 import :entities.components.vehicle;
 import :entities.components.observable;
@@ -17,7 +14,6 @@ import :entities.components.view_body;
 import :game;
 
 using namespace pragma;
-
 
 std::vector<CVehicleComponent *> CVehicleComponent::s_vehicles;
 const std::vector<CVehicleComponent *> &CVehicleComponent::GetAll() { return s_vehicles; }

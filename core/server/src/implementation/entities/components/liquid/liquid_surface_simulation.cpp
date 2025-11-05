@@ -4,7 +4,6 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.server;
 import :entities.components.liquid_surface_simulation;
 
@@ -16,10 +15,11 @@ using namespace pragma;
 
 static std::vector<SLiquidSurfaceSimulationComponent *> s_waterEntities = {};
 namespace {
-	auto _ = pragma::console::server::register_variable_listener<float>("sv_water_surface_simulation_shared", +[](NetworkState *, const ConVar &, float, float val) {
-		for(auto *entWater : s_waterEntities)
-			entWater->UpdateSurfaceSimulator();
-	});
+	auto _ = pragma::console::server::register_variable_listener<float>(
+	  "sv_water_surface_simulation_shared", +[](NetworkState *, const ConVar &, float, float val) {
+		  for(auto *entWater : s_waterEntities)
+			  entWater->UpdateSurfaceSimulator();
+	  });
 };
 
 SLiquidSurfaceSimulationComponent::SLiquidSurfaceSimulationComponent(pragma::ecs::BaseEntity &ent) : BaseLiquidSurfaceSimulationComponent(ent) { s_waterEntities.push_back(this); }

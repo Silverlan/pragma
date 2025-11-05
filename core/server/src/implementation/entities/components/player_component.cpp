@@ -3,9 +3,7 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
-
 
 module pragma.server;
 import :entities.components.player;

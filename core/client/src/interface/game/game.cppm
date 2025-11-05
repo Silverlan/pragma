@@ -6,11 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
-
-
 export module pragma.client:game;
 
 export import :core.lua_input_binding_layer_register;
@@ -46,8 +41,8 @@ export {
 // some predeclaration issues. Once the transition is complete, these types should be
 // reverted to the actual types.
 export namespace pragma {
-    struct cxxm_LuaParticleModifierManager {};
-    using cxxm_LuaParticleModifierManager_vp = void;
+	struct cxxm_LuaParticleModifierManager {};
+	using cxxm_LuaParticleModifierManager_vp = void;
 };
 
 #pragma warning(push)
@@ -128,7 +123,7 @@ export class DLLCLIENT CGame : public pragma::Game {
 	void HandleLuaNetPacket(NetPacket &packet);
 	void SendUserInput();
 	template<typename TCPPM>
-		void CreateGiblet(const GibletCreateInfo &info, TCPPM **particle);
+	void CreateGiblet(const GibletCreateInfo &info, TCPPM **particle);
 	virtual pragma::BaseEntityComponent *CreateLuaEntityComponent(pragma::ecs::BaseEntity &ent, std::string classname) override;
 	virtual void CreateGiblet(const GibletCreateInfo &info) override;
 	virtual std::shared_ptr<ModelMesh> CreateModelMesh() const override;
@@ -186,9 +181,9 @@ export class DLLCLIENT CGame : public pragma::Game {
 	virtual void GetVehicles(std::vector<EntityHandle> *ents) override;
 
 	template<typename TCPPM>
-		TCPPM *GetGameComponent();
+	TCPPM *GetGameComponent();
 	template<typename TCPPM>
-		const TCPPM *GetGameComponent() const;
+	const TCPPM *GetGameComponent() const;
 	virtual CBaseEntity *CreateEntity(std::string classname) override;
 	template<class T>
 	T *CreateEntity()
@@ -208,7 +203,7 @@ export class DLLCLIENT CGame : public pragma::Game {
 	}
 	virtual void RemoveEntity(pragma::ecs::BaseEntity *ent) override;
 	template<typename TCPPM>
-	    TCPPM *GetListener();
+	TCPPM *GetListener();
 	pragma::CPlayerComponent *GetLocalPlayer();
 	void GetPrimaryCameraRenderMask(::pragma::rendering::RenderMask &inclusionMask, ::pragma::rendering::RenderMask &exclusionMask) const;
 	void SetLocalPlayer(pragma::CPlayerComponent *pl);
@@ -225,8 +220,8 @@ export class DLLCLIENT CGame : public pragma::Game {
 	virtual Float GetRestitutionScale() const override;
 
 	template<typename TCPPM>
-	TCPPM *CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius = bulletInfo::DEFAULT_TRACER_RADIUS, const Color &col = bulletInfo::DEFAULT_TRACER_COLOR, float length = bulletInfo::DEFAULT_TRACER_LENGTH,
-	  float speed = bulletInfo::DEFAULT_TRACER_SPEED, const std::string &material = bulletInfo::DEFAULT_TRACER_MATERIAL, float bloomScale = bulletInfo::DEFAULT_TRACER_BLOOM);
+	TCPPM *CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius = bulletInfo::DEFAULT_TRACER_RADIUS, const Color &col = bulletInfo::DEFAULT_TRACER_COLOR, float length = bulletInfo::DEFAULT_TRACER_LENGTH, float speed = bulletInfo::DEFAULT_TRACER_SPEED,
+	  const std::string &material = bulletInfo::DEFAULT_TRACER_MATERIAL, float bloomScale = bulletInfo::DEFAULT_TRACER_BLOOM);
 
 	virtual bool IsPhysicsSimulationEnabled() const override;
 
@@ -236,7 +231,7 @@ export class DLLCLIENT CGame : public pragma::Game {
 	virtual void DrawPlane(const Vector3 &n, float dist, const Color &color, float duration = 0.f) override;
 	virtual void DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration = 0.f) override;
 	template<typename TCPPM>
-	    void RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, TCPPM &cam);
+	void RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, TCPPM &cam);
 
 	using pragma::Game::LoadNavMesh;
 
@@ -272,16 +267,16 @@ export class DLLCLIENT CGame : public pragma::Game {
 	// Returns the number of lost snapshot packets within the last second
 	uint32_t GetLostPacketCount();
 
-    template<typename TCPPM>
-	    TCPPM *CreateCamera(uint32_t width, uint32_t height, float fov, float nearZ, float farZ);
-    template<typename TCPPM>
-	    TCPPM *CreateCamera(float aspectRatio, float fov, float nearZ, float farZ);
-    template<typename TCPPM>
-	    TCPPM *GetPrimaryCamera() const;
 	template<typename TCPPM>
-	    const TCPPM *GetScene() const;
-    template<typename TCPPM>
-	    TCPPM *GetScene();
+	TCPPM *CreateCamera(uint32_t width, uint32_t height, float fov, float nearZ, float farZ);
+	template<typename TCPPM>
+	TCPPM *CreateCamera(float aspectRatio, float fov, float nearZ, float farZ);
+	template<typename TCPPM>
+	TCPPM *GetPrimaryCamera() const;
+	template<typename TCPPM>
+	const TCPPM *GetScene() const;
+	template<typename TCPPM>
+	TCPPM *GetScene();
 	const WorldEnvironment &GetWorldEnvironment() const;
 	WorldEnvironment &GetWorldEnvironment();
 
@@ -291,9 +286,9 @@ export class DLLCLIENT CGame : public pragma::Game {
 
 	void UpdateEntityModel(CBaseEntity *ent);
 	template<typename TCPPM>
-	    TCPPM *GetViewModel();
+	TCPPM *GetViewModel();
 	template<typename TCPPM>
-	    TCPPM *GetViewBody();
+	TCPPM *GetViewBody();
 	void ReloadRenderFrameBuffer();
 
 	void RenderScenes(util::DrawSceneInfo &drawSceneInfo);
@@ -367,20 +362,20 @@ export class DLLCLIENT CGame : public pragma::Game {
 	void QueueForRendering(const util::DrawSceneInfo &drawSceneInfo);
 	void RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos);
 	template<typename TCPPM>
-	    void SetRenderScene(TCPPM &scene);
+	void SetRenderScene(TCPPM &scene);
 	void ResetRenderScene();
 	template<typename TCPPM>
-	    TCPPM *GetRenderScene();
-    template<typename TCPPM>
-	    const TCPPM *GetRenderScene() const;
-    template<typename TCPPM>
-	    TCPPM *GetRenderCamera() const;
-    template<typename TCPPM>
-	    void SetGameplayControlCamera(TCPPM &cam);
+	TCPPM *GetRenderScene();
+	template<typename TCPPM>
+	const TCPPM *GetRenderScene() const;
+	template<typename TCPPM>
+	TCPPM *GetRenderCamera() const;
+	template<typename TCPPM>
+	void SetGameplayControlCamera(TCPPM &cam);
 	void ClearGameplayControlCamera();
 	void ResetGameplayControlCamera();
-    template<typename TCPPM>
-	    TCPPM *GetGameplayControlCamera();
+	template<typename TCPPM>
+	TCPPM *GetGameplayControlCamera();
 
 	pragma::rendering::GlobalShaderInputDataManager &GetGlobalShaderInputDataManager();
 	const pragma::rendering::GlobalShaderInputDataManager &GetGlobalShaderInputDataManager() const;

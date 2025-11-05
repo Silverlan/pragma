@@ -5,21 +5,21 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.client:scripting.lua.bindings.scene;
 export import :entities.components;
 
 export namespace pragma::scripting::lua::bindings {
-	void register_renderers(lua_State *l, luabind::module_ &entsMod) {
+	void register_renderers(lua_State *l, luabind::module_ &entsMod)
+	{
 		auto defRenderer = pragma::lua::create_entity_component_class<pragma::CRendererComponent, pragma::BaseEntityComponent>("RendererComponent");
 		defRenderer.def("GetWidth", &pragma::CRendererComponent::GetWidth);
 		defRenderer.def("GetHeight", &pragma::CRendererComponent::GetHeight);
 		defRenderer.def("InitializeRenderTarget",
-		static_cast<void (*)(lua_State *, pragma::CRendererComponent &, pragma::CSceneComponent &, uint32_t, uint32_t, bool)>([](lua_State *l, pragma::CRendererComponent &renderer, pragma::CSceneComponent &scene, uint32_t width, uint32_t height, bool reload) {
-			if(reload == false && width == renderer.GetWidth() && height == renderer.GetHeight())
-				return;
-			renderer.ReloadRenderTarget(scene, width, height);
-		}));
+		  static_cast<void (*)(lua_State *, pragma::CRendererComponent &, pragma::CSceneComponent &, uint32_t, uint32_t, bool)>([](lua_State *l, pragma::CRendererComponent &renderer, pragma::CSceneComponent &scene, uint32_t width, uint32_t height, bool reload) {
+			  if(reload == false && width == renderer.GetWidth() && height == renderer.GetHeight())
+				  return;
+			  renderer.ReloadRenderTarget(scene, width, height);
+		  }));
 		defRenderer.def("InitializeRenderTarget", static_cast<void (*)(lua_State *, pragma::CRendererComponent &, pragma::CSceneComponent &, uint32_t, uint32_t)>([](lua_State *l, pragma::CRendererComponent &renderer, pragma::CSceneComponent &scene, uint32_t width, uint32_t height) {
 			if(width == renderer.GetWidth() && height == renderer.GetHeight())
 				return;
@@ -41,21 +41,11 @@ export namespace pragma::scripting::lua::bindings {
 		defRaster.add_static_constant("EVENT_POST_PREPASS", pragma::CRasterizationRendererComponent::EVENT_POST_PREPASS);
 		defRaster.add_static_constant("EVENT_PRE_LIGHTING_PASS", pragma::CRasterizationRendererComponent::EVENT_PRE_LIGHTING_PASS);
 		defRaster.add_static_constant("EVENT_POST_LIGHTING_PASS", pragma::CRasterizationRendererComponent::EVENT_POST_LIGHTING_PASS);
-		defRaster.def("GetPrepassDepthTexture", +[](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::Texture> {
-			return renderer.GetPrepass().textureDepth;
-		});
-		defRaster.def("GetPrepassNormalTexture", +[](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::Texture> {
-			return renderer.GetPrepass().textureNormals;
-		});
-		defRaster.def("GetRenderTarget", +[](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::RenderTarget> {
-			return renderer.GetHDRInfo().sceneRenderTarget;
-		});
-		defRaster.def("BeginRenderPass", +[](lua_State *l, pragma::CRasterizationRendererComponent &renderer, const ::util::DrawSceneInfo &drawSceneInfo) -> bool {
-			return renderer.BeginRenderPass(drawSceneInfo);
-		});
-		defRaster.def("BeginRenderPass", +[](lua_State *l, pragma::CRasterizationRendererComponent &renderer, const ::util::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass &rp) -> bool {
-			return renderer.BeginRenderPass(drawSceneInfo, &rp);
-		});
+		defRaster.def("GetPrepassDepthTexture", +[](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::Texture> { return renderer.GetPrepass().textureDepth; });
+		defRaster.def("GetPrepassNormalTexture", +[](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::Texture> { return renderer.GetPrepass().textureNormals; });
+		defRaster.def("GetRenderTarget", +[](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::RenderTarget> { return renderer.GetHDRInfo().sceneRenderTarget; });
+		defRaster.def("BeginRenderPass", +[](lua_State *l, pragma::CRasterizationRendererComponent &renderer, const ::util::DrawSceneInfo &drawSceneInfo) -> bool { return renderer.BeginRenderPass(drawSceneInfo); });
+		defRaster.def("BeginRenderPass", +[](lua_State *l, pragma::CRasterizationRendererComponent &renderer, const ::util::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass &rp) -> bool { return renderer.BeginRenderPass(drawSceneInfo, &rp); });
 		defRaster.def("EndRenderPass", &pragma::CRasterizationRendererComponent::EndRenderPass);
 		defRaster.def("GetPrepassShader", &pragma::CRasterizationRendererComponent::GetPrepassShader);
 		defRaster.def("SetShaderOverride", &pragma::CRasterizationRendererComponent::SetShaderOverride);
@@ -71,13 +61,13 @@ export namespace pragma::scripting::lua::bindings {
 			return ds->GetDescriptorSetGroup().shared_from_this();
 		}));
 		defRaster.def("GetPostPrepassDepthTexture",
-		static_cast<std::shared_ptr<prosper::Texture> (*)(lua_State *, pragma::CRasterizationRendererComponent &)>([](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::Texture> { return renderer.GetPrepass().textureDepth; }));
+		  static_cast<std::shared_ptr<prosper::Texture> (*)(lua_State *, pragma::CRasterizationRendererComponent &)>([](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::Texture> { return renderer.GetPrepass().textureDepth; }));
 		defRaster.def("GetPostProcessingDepthDescriptorSet",
-		static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua_State *, pragma::CRasterizationRendererComponent &)>(
-			[](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> { return renderer.GetHDRInfo().dsgDepthPostProcessing; }));
+		  static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua_State *, pragma::CRasterizationRendererComponent &)>(
+		    [](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> { return renderer.GetHDRInfo().dsgDepthPostProcessing; }));
 		defRaster.def("GetPostProcessingHDRColorDescriptorSet",
-		static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua_State *, pragma::CRasterizationRendererComponent &)>(
-			[](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> { return renderer.GetHDRInfo().dsgHDRPostProcessing; }));
+		  static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua_State *, pragma::CRasterizationRendererComponent &)>(
+		    [](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> { return renderer.GetHDRInfo().dsgHDRPostProcessing; }));
 #if 0
 		defRaster.def("GetStagingRenderTarget",static_cast<void(*)(lua_State*,pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) {
 			
@@ -107,8 +97,8 @@ export namespace pragma::scripting::lua::bindings {
 		}));
 #endif
 		defRaster.def("GetRenderTargetTextureDescriptorSet",
-		static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua_State *, pragma::CRasterizationRendererComponent &)>(
-			[](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> { return renderer.GetHDRInfo().dsgHDRPostProcessing; }));
+		  static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua_State *, pragma::CRasterizationRendererComponent &)>(
+		    [](lua_State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> { return renderer.GetHDRInfo().dsgHDRPostProcessing; }));
 		defRaster.def("ReloadPresentationRenderTarget", &pragma::CRasterizationRendererComponent::ReloadPresentationRenderTarget);
 		defRaster.def("RecordPrepass", &pragma::CRasterizationRendererComponent::RecordPrepass);
 		defRaster.def("RecordLightingPass", &pragma::CRasterizationRendererComponent::RecordLightingPass);

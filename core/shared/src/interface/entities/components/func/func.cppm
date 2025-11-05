@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
 export module pragma.shared:entities.components.func;
 
 export import :entities.components.func.base_brush;

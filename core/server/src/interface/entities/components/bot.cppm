@@ -5,8 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.bot;
 
 import :entities.base;
@@ -14,14 +12,14 @@ import :entities.base;
 export {
 	namespace pragma {
 		class DLLSERVER SBotComponent final : public BaseBotComponent {
-		public:
+		  public:
 			SBotComponent(pragma::ecs::BaseEntity &ent) : BaseBotComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};
 
 	class DLLSERVER Bot : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

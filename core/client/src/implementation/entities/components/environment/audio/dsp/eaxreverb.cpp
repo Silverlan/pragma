@@ -4,15 +4,12 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.audio.dsp.eaxreverb;
 import :engine;
 
 using namespace pragma;
-
 
 void CSoundDspEAXReverbComponent::ReceiveData(NetPacket &packet)
 {

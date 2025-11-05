@@ -10,10 +10,10 @@ export import :audio.effect_params;
 export import :audio.enums;
 
 export {
-	#pragma warning(push)
-	#pragma warning(disable : 4251)
+#pragma warning(push)
+#pragma warning(disable : 4251)
 	class DLLNETWORK ALSoundBase {
-	public:
+	  public:
 		virtual float GetDuration() const;
 
 		virtual void SetPitch(float pitch);
@@ -100,7 +100,7 @@ export {
 		virtual bool IsPlaying() const;
 		virtual bool IsPaused() const;
 		virtual bool IsStopped() const;
-	protected:
+	  protected:
 		ALSoundBase() = default;
 		float m_pitch = 1.f;
 		float m_gain = 1.f;
@@ -130,5 +130,5 @@ export {
 		double m_tLastUpdate = 0.0;
 		double m_tPassed = 0.0;
 	};
-	#pragma warning(pop)
+#pragma warning(pop)
 };

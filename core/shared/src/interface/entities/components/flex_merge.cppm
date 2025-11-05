@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.flex_merge;
 
 export import :entities.components.base;
@@ -17,10 +15,10 @@ export import :types;
 
 export {
 	namespace pragma {
-				namespace flexMergeComponent {
+		namespace flexMergeComponent {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TARGET_CHANGED;
 		}
-class DLLNETWORK FlexMergeComponent final : public BaseEntityComponent {
+		class DLLNETWORK FlexMergeComponent final : public BaseEntityComponent {
 		  public:
 			static bool can_merge(const pragma::Model &mdl, const pragma::Model &mdlParent);
 

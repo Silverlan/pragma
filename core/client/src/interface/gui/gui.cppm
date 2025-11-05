@@ -3,7 +3,6 @@
 
 module;
 
-
 export module pragma.client:gui;
 export import :gui.checkbox;
 export import :gui.choice_list;
@@ -52,6 +51,5 @@ export import :gui.transformable;
 export import :gui.tree_list;
 
 export {
-    bool load_skin(const std::string &skinName);
+	bool load_skin(const std::string &skinName);
 };
-

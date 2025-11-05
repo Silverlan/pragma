@@ -4,15 +4,13 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
-
 export module pragma.client:gui.main_menu_new_game;
 
 export import :gui.main_menu_base;
 
 export {
 	class DLLCLIENT WIMainMenuNewGame : public WIMainMenuBase {
-	protected:
+	  protected:
 		WIHandle m_hMapList;
 		WIHandle m_hServerName;
 		WIHandle m_hGameMode;
@@ -23,7 +21,7 @@ export {
 		void InitializeGameSettings();
 		virtual void InitializeOptionsList(WIOptionsList *pList) override;
 		using WIMainMenuBase::InitializeOptionsList;
-	public:
+	  public:
 		WIMainMenuNewGame();
 		virtual ~WIMainMenuNewGame() override;
 		virtual void Initialize() override;

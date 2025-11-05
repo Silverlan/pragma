@@ -3,12 +3,7 @@
 
 module;
 
-
-
-
 #include "pragma/lua/core.hpp"
-
-
 
 module pragma.client;
 
@@ -18,7 +13,6 @@ import :client_state;
 import :game;
 import :scripting.lua;
 import pragma.gui;
-
 
 CallbackHandle WGUILuaInterface::m_cbGameStart;
 CallbackHandle WGUILuaInterface::m_cbLuaReleased;

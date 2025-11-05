@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.constraints.base;
 
 export import :entities.components.base;
@@ -14,22 +12,22 @@ export import :game.coordinate_system;
 export import :game.enums;
 
 export namespace pragma {
-		namespace constraintComponent {
+	namespace constraintComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_APPLY_CONSTRAINT;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DRIVER_CHANGED;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DRIVEN_OBJECT_CHANGED;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ORDER_INDEX_CHANGED;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PARTICIPANTS_FLAGGED_DIRTY;
 	}
-class ConstraintManagerComponent;
-		namespace constraintComponent {
+	class ConstraintManagerComponent;
+	namespace constraintComponent {
 		STATIC_DLL_COMPAT ComponentEventId EVENT_APPLY_CONSTRAINT;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DRIVER_CHANGED;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DRIVEN_OBJECT_CHANGED;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ORDER_INDEX_CHANGED;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PARTICIPANTS_FLAGGED_DIRTY;
 	}
-class DLLNETWORK ConstraintComponent final : public BaseEntityComponent {
+	class DLLNETWORK ConstraintComponent final : public BaseEntityComponent {
 	  public:
 		struct DLLNETWORK ConstraintParticipants {
 			pragma::ComponentHandle<pragma::BaseEntityComponent> driverC;

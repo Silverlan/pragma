@@ -5,7 +5,6 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
-
 export module pragma.server:networking.standard_server;
 
 import :entities.components;

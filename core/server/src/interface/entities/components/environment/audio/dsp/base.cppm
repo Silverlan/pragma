@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.audio.dsp.base;
 
 import :entities;
@@ -15,24 +14,24 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SBaseSoundDspComponent : public BaseEnvSoundDspComponent, public SBaseNetComponent {
-		public:
+		  public:
 			virtual void Initialize() override;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual void SetGain(float gain) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
-		protected:
+		  protected:
 			using BaseEnvSoundDspComponent::BaseEnvSoundDspComponent;
 		};
 
 		class DLLSERVER SSoundDspComponent final : public SBaseSoundDspComponent {
-		public:
+		  public:
 			SSoundDspComponent(pragma::ecs::BaseEntity &ent) : SBaseSoundDspComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};
 
 	class DLLSERVER EnvSoundDsp : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

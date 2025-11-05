@@ -3,9 +3,6 @@
 
 module;
 
-
-
-
 module pragma.client;
 
 import :gui.command_line_entry;

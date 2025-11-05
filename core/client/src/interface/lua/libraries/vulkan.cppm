@@ -6,9 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
 export module pragma.client:scripting.lua.libraries.vulkan;
 
 export import pragma.prosper;
@@ -96,7 +93,7 @@ export {
 
 			void to_lua(lua_State *L, Lua::Vulkan::PreparedCommandLuaArg const &x);
 			void to_lua(lua_State *L, Lua::Vulkan::PreparedCommandLuaArg *x);
-		public:
+		  public:
 			static value_type to_cpp_deferred(lua_State *, int) { return {}; }
 			static void to_lua_deferred(lua_State *, param_type) {}
 			static int compute_score(lua_State *, int) { return no_match; }

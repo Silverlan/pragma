@@ -3,17 +3,13 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :scripting.lua.classes.vulkan;
 import :engine;
 import :model;
-
 
 namespace prosper {
 	static bool operator==(const Lua::Vulkan::Framebuffer &a, const Lua::Vulkan::Framebuffer &b) { return &a == &b; }
@@ -391,7 +387,8 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 	devVkBuffer.def("GetParent", static_cast<std::shared_ptr<prosper::IBuffer> (prosper::IBuffer::*)()>(&Lua::Vulkan::Buffer::GetParent));
 	devVkBuffer.def("WriteMemory", static_cast<bool (*)(lua_State *, Lua::Vulkan::Buffer &, uint32_t, ::util::DataStream &, uint32_t, uint32_t)>(&Lua::Vulkan::VKBuffer::Write));
 	devVkBuffer.def("WriteMemory", static_cast<bool (*)(lua_State *, Lua::Vulkan::Buffer &, uint32_t, ::udm::Type, Lua::udm_ng)>(&Lua::Vulkan::VKBuffer::Write));
-	devVkBuffer.def("WriteMemory", static_cast<bool (*)(lua_State *, Lua::Vulkan::Buffer &, uint32_t, ::util::DataStream &)>([](lua_State *l, Lua::Vulkan::Buffer &hBuffer, uint32_t offset, ::util::DataStream &ds) { return Lua::Vulkan::VKBuffer::Write(l, hBuffer, offset, ds, 0u, ds->GetSize()); }));
+	devVkBuffer.def("WriteMemory",
+	  static_cast<bool (*)(lua_State *, Lua::Vulkan::Buffer &, uint32_t, ::util::DataStream &)>([](lua_State *l, Lua::Vulkan::Buffer &hBuffer, uint32_t offset, ::util::DataStream &ds) { return Lua::Vulkan::VKBuffer::Write(l, hBuffer, offset, ds, 0u, ds->GetSize()); }));
 	devVkBuffer.def("ReadMemory", static_cast<bool (*)(lua_State *, Lua::Vulkan::Buffer &, uint32_t, uint32_t, ::util::DataStream &, uint32_t)>(&Lua::Vulkan::VKBuffer::Read));
 	devVkBuffer.def("ReadMemory",
 	  static_cast<bool (*)(lua_State *, Lua::Vulkan::Buffer &, uint32_t, uint32_t, ::util::DataStream &)>([](lua_State *l, Lua::Vulkan::Buffer &hBuffer, uint32_t offset, uint32_t size, ::util::DataStream &ds) { return Lua::Vulkan::VKBuffer::Read(l, hBuffer, offset, size, ds, 0u); }));

@@ -4,10 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
-
-
 export module pragma.shared:model.animation.vertex_animation;
 
 export import :game.coordinate_system;
@@ -17,7 +13,7 @@ export import pragma.udm;
 export {
 	namespace pragma {
 		class DLLNETWORK MeshVertexFrame : public std::enable_shared_from_this<pragma::MeshVertexFrame> {
-		public:
+		  public:
 			enum class Flags : uint8_t {
 				None = 0u,
 				HasDeltaValues = 1u,
@@ -61,21 +57,21 @@ export {
 
 			bool operator==(const pragma::MeshVertexFrame &other) const;
 			bool operator!=(const pragma::MeshVertexFrame &other) const { return !operator==(other); }
-		private:
+		  private:
 			// Each uint16_t is a half-float
 			std::vector<std::array<uint16_t, 4>> m_vertices = {}; // Fourth component is wrinkle data
 			std::vector<std::array<uint16_t, 4>> m_normals = {};  // Optional
 			Flags m_flags = Flags::None;
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	}
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::MeshVertexFrame::Flags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::MeshVertexFrame::Flags> : std::true_type {};
+	}
 
 	class DLLNETWORK MeshVertexAnimation : public std::enable_shared_from_this<MeshVertexAnimation> {
-	public:
+	  public:
 		MeshVertexAnimation() = default;
 		MeshVertexAnimation(const MeshVertexAnimation &other);
 
@@ -97,16 +93,16 @@ export {
 
 		bool operator==(const MeshVertexAnimation &other) const;
 		bool operator!=(const MeshVertexAnimation &other) const { return !operator==(other); }
-	private:
+	  private:
 		mutable std::weak_ptr<ModelMesh> m_wpMesh = {};
 		mutable std::weak_ptr<pragma::ModelSubMesh> m_wpSubMesh = {};
 		std::vector<std::shared_ptr<pragma::MeshVertexFrame>> m_frames;
 	};
 
 	class DLLNETWORK VertexAnimation : public std::enable_shared_from_this<VertexAnimation> {
-	public:
+	  public:
 		static constexpr std::uint32_t layout_version = 1;
-		
+
 		static constexpr uint32_t FORMAT_VERSION = 1u;
 		static constexpr auto PMORPHANI_IDENTIFIER = "PMORPHANI";
 		static std::shared_ptr<VertexAnimation> Create();
@@ -138,7 +134,7 @@ export {
 
 		bool operator==(const VertexAnimation &other) const;
 		bool operator!=(const VertexAnimation &other) const { return !operator==(other); }
-	protected:
+	  protected:
 		VertexAnimation() = default;
 		VertexAnimation(const VertexAnimation &other);
 		VertexAnimation(const std::string &name);

@@ -3,15 +3,11 @@
 
 module;
 
-
-
-
 #include "pragma/console/helper.hpp"
 #include <sharedutils/magic_enum.hpp>
 //#include "shader_gaussianblur.h" // prosper TODO
 
 module pragma.client;
-
 
 import :game;
 import :client_state;
@@ -24,9 +20,10 @@ import :physics;
 import :rendering.shaders;
 import :scripting.lua;
 
-
 static void CVAR_CALLBACK_render_vsync_enabled(NetworkState *, const ConVar &, int, int val) { pragma::platform::set_swap_interval((val == 0) ? 0 : 1); }
-namespace { auto UVN = pragma::console::client::register_variable_listener<int>("render_vsync_enabled", &CVAR_CALLBACK_render_vsync_enabled); }
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int>("render_vsync_enabled", &CVAR_CALLBACK_render_vsync_enabled);
+}
 
 static CallbackHandle cbDrawPhysics;
 static CallbackHandle cbDrawPhysicsEnd;

@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.func_portal;
 
 export import :entities.base_entity;
@@ -14,7 +12,7 @@ export import :entities.base_entity;
 export {
 	namespace pragma {
 		class DLLCLIENT CFuncPortalComponent final : public BaseFuncPortalComponent {
-		public:
+		  public:
 			CFuncPortalComponent(pragma::ecs::BaseEntity &ent) : BaseFuncPortalComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua_State *l) override;
@@ -22,7 +20,7 @@ export {
 	};
 
 	class DLLCLIENT CFuncPortal : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

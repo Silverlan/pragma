@@ -4,11 +4,8 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 #include "pragma/lua/core.hpp"
 #include "pragma/console/helper.hpp"
-
-
 
 module pragma.client;
 
@@ -16,7 +13,6 @@ import :entities.components.game_occlusion_culler;
 import :client_state;
 import :engine;
 import :game;
-
 
 using namespace pragma;
 
@@ -266,7 +262,9 @@ static void CVAR_CALLBACK_debug_render_octree_static_draw(NetworkState *, const 
 	return;
 	chc->SetDrawDebugTexture(val);*/
 }
-namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("debug_render_octree_static_draw", &CVAR_CALLBACK_debug_render_octree_static_draw); }
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<bool>("debug_render_octree_static_draw", &CVAR_CALLBACK_debug_render_octree_static_draw);
+}
 
 static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(NetworkState *, const ConVar &, bool, bool val)
 {
@@ -279,4 +277,6 @@ static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(NetworkState *, const
 	auto &octree = culler->GetOcclusionOctree();
 	octree.SetDebugModeEnabled(val);
 }
-namespace { auto UVN = pragma::console::client::register_variable_listener<bool>("debug_render_octree_dynamic_draw", &CVAR_CALLBACK_debug_render_octree_dynamic_draw); }
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<bool>("debug_render_octree_dynamic_draw", &CVAR_CALLBACK_debug_render_octree_dynamic_draw);
+}

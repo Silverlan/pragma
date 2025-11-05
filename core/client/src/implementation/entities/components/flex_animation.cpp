@@ -3,9 +3,7 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :entities.components.flex;
 using namespace pragma;
@@ -140,4 +138,3 @@ void CFlexComponent::MaintainFlexAnimations(float dt)
 		++it;
 	}
 }
-

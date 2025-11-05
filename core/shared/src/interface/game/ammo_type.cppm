@@ -11,11 +11,11 @@ import :game.enums;
 export {
 	class AmmoTypeManager;
 	struct DLLNETWORK AmmoType {
-	public:
+	  public:
 		friend AmmoTypeManager;
-	protected:
+	  protected:
 		AmmoType(UInt32 id, const std::string &name, DAMAGETYPE dmgType, Int32 dmg, Float force);
-	public:
+	  public:
 		std::string name;
 		UInt32 id;
 		DAMAGETYPE damageType;
@@ -24,9 +24,9 @@ export {
 	};
 
 	class DLLNETWORK AmmoTypeManager {
-	private:
+	  private:
 		std::vector<std::unique_ptr<AmmoType>> m_ammoTypes;
-	public:
+	  public:
 		AmmoTypeManager();
 		Bool RegisterAmmoType(const std::string &name, Int32 damage = 10, Float force = 200.f, DAMAGETYPE dmgType = DAMAGETYPE::BULLET, AmmoType **ammoOut = nullptr);
 		AmmoType *GetAmmoType(const std::string &name, UInt32 *ammoId = nullptr);

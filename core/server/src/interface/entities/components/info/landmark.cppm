@@ -5,8 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.info.landmark;
 
 import :entities;
@@ -15,14 +13,14 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SInfoLandmarkComponent final : public BaseInfoLandmarkComponent {
-		public:
+		  public:
 			SInfoLandmarkComponent(pragma::ecs::BaseEntity &ent) : BaseInfoLandmarkComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};
 
 	class DLLSERVER InfoLandmark : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

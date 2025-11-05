@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:particle_system.renderer_model;
 
 import :entities.components.animated;
@@ -14,7 +13,9 @@ import :particle_system.renderer_rotational_buffer;
 
 export namespace pragma {
 	enum class ParticleRenderFlags : uint32_t;
-	namespace ecs {class CParticleSystemComponent;}
+	namespace ecs {
+		class CParticleSystemComponent;
+	}
 };
 export class DLLCLIENT CParticleRendererModel : public CParticleRenderer {
   public:

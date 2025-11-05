@@ -3,9 +3,7 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :scripting.lua.script_watcher;
 import :gui;

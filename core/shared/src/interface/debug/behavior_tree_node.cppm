@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:debug.behavior_tree_node;
 
 export import std.compat;

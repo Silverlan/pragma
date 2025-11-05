@@ -2,15 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
-
-
-
-
-
-
 module pragma.shared;
 
 import :scripting.lua.libraries.ents;
@@ -671,7 +662,7 @@ Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_trigger(lua::State *l, cons
 
 	auto extents = max - min;
 	auto center = (max + min) * 0.5f;
-	auto centerOrigin = origin +center;
+	auto centerOrigin = origin + center;
 	auto shape = phys->CreateBoxShape(extents * 0.5f, phys->GetGenericMaterial());
 	return Lua::ents::create_trigger(l, centerOrigin, &angles, shape.get());
 }

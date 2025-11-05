@@ -12,9 +12,9 @@ export import pragma.shared;
 
 export {
 	class ModelLoadManager {
-	private:
+	  private:
 		static std::shared_ptr<ModelLoadManager> s_manager;
-	private:
+	  private:
 		struct ModelLoadQuery {
 			NetPacket packet;
 			std::shared_ptr<pragma::Model> model;
@@ -29,9 +29,9 @@ export {
 		CallbackHandle m_hCbTick;
 		CallbackHandle m_hCbOnGameEnd;
 		void Update();
-	protected:
+	  protected:
 		ModelLoadManager();
-	public:
+	  public:
 		~ModelLoadManager();
 		static ModelLoadManager &Initialize();
 		void AddQuery(const NetPacket &packet, const std::shared_ptr<pragma::Model> &mdl, const std::string &fileName);

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 export module pragma.shared:scripting.lua.classes.property_entity;
 
 export import :entities.property;
@@ -11,8 +10,8 @@ export import :scripting.lua.classes.property_generic;
 export {
 	// Entity
 	class LEntityPropertyWrapper : public LSimplePropertyWrapper<pragma::EntityProperty, EntityHandle> {
-	public:
-		LEntityPropertyWrapper(const EntityHandle &v) : LSimplePropertyWrapper<pragma::EntityProperty, EntityHandle>{v} {}
+	  public:
+		LEntityPropertyWrapper(const EntityHandle &v) : LSimplePropertyWrapper<pragma::EntityProperty, EntityHandle> {v} {}
 		LEntityPropertyWrapper(const std::shared_ptr<pragma::EntityProperty> &v) : LSimplePropertyWrapper<pragma::EntityProperty, EntityHandle> {v} {}
 		LEntityPropertyWrapper() : LSimplePropertyWrapper<pragma::EntityProperty, EntityHandle> {} {}
 

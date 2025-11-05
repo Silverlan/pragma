@@ -3,7 +3,6 @@
 
 module;
 
-
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
@@ -287,9 +286,9 @@ export namespace pragma {
 		uint32_t GetHeight() const;
 
 		template<typename TCPPM>
-			TCPPM *GetRendererComponent();
+		TCPPM *GetRendererComponent();
 		template<typename TCPPM>
-			const TCPPM *GetRendererComponent() const;
+		const TCPPM *GetRendererComponent() const;
 
 		void StartPrepassRecording(const util::DrawSceneInfo &drawSceneInfo);
 		void StartLightingPassRecording(const util::DrawSceneInfo &drawSceneInfo);
@@ -398,7 +397,7 @@ export {
 	}
 
 	class DLLCLIENT CRasterizationRenderer : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

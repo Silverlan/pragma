@@ -4,9 +4,7 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.shooter;
 import :client_state;
@@ -14,7 +12,6 @@ import :entities.components.particle_system;
 import :game;
 
 using namespace pragma;
-
 
 using namespace ecs::baseShooterComponent;
 void ecs::CShooterComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

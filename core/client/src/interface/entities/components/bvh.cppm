@@ -6,7 +6,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.client:entities.components.bvh;
 
 export import pragma.shared;
@@ -15,7 +14,7 @@ export namespace pragma {
 	namespace rendering {
 		struct RenderBufferData;
 	};
-	
+
 	class DLLCLIENT CBvhComponent final : public BaseBvhComponent {
 	  public:
 		static bool ShouldConsiderMesh(const pragma::ModelSubMesh &mesh, const rendering::RenderBufferData &bufferData);

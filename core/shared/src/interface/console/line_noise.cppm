@@ -5,14 +5,14 @@ module;
 export module pragma.shared:console.line_noise;
 
 export {
-    #ifdef __linux__
+#ifdef __linux__
 
-    namespace pragma::console::impl {
-        void init_linenoise();
-        void close_linenoise();
-        void update_linenoise();
-        bool is_linenoise_enabled();
-    };
+	namespace pragma::console::impl {
+		void init_linenoise();
+		void close_linenoise();
+		void update_linenoise();
+		bool is_linenoise_enabled();
+	};
 
-    #endif
+#endif
 };

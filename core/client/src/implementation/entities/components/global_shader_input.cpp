@@ -5,15 +5,12 @@ module;
 
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.global_shader_input;
 import :client_state;
 import :engine;
 import :game;
-
 
 using namespace pragma;
 UdmPropertyList::UdmPropertyList() : m_properties {udm::Property::Create<udm::Element>()} {}

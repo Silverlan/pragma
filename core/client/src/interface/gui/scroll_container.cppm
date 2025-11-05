@@ -4,15 +4,11 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
-
-
 export module pragma.client:gui.scroll_container;
 
 export import pragma.gui;
 
-export
-{
+export {
 	class DLLCLIENT WIScrollContainer : public WIBase {
 	  public:
 		enum class StateFlags : uint8_t { None = 0u, AutoStickToBottom = 1u, ContentsWidthFixed = AutoStickToBottom << 1u, ContentsHeightFixed = ContentsWidthFixed << 1u };

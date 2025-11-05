@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:scripting.lua.classes.property;
 
 import :entities.property;
@@ -15,38 +14,14 @@ export import pragma.lua;
 
 #define DEFINE_LUA_NUMBER_PROPERTY(TYPE, UNDERLYING_TYPE)                                                                                                                                                                                                                                        \
 	using L##TYPE##Property = TLNumberPropertyWrapper<util::TYPE##Property, UNDERLYING_TYPE>;                                                                                                                                                                                                    \
-	UNDERLYING_TYPE operator+(UNDERLYING_TYPE v, const L##TYPE##Property &prop)                                                                                                                                                                                                           \
-	{                                                                                                                                                                                                                                                                                            \
-		return v + prop->GetValue();                                                                                                                                                                                                                                                             \
-	}                                                                                                                                                                                                                                                                                            \
-	UNDERLYING_TYPE operator-(UNDERLYING_TYPE v, const L##TYPE##Property &prop)                                                                                                                                                                                                           \
-	{                                                                                                                                                                                                                                                                                            \
-		return v - prop->GetValue();                                                                                                                                                                                                                                                             \
-	}                                                                                                                                                                                                                                                                                            \
-	UNDERLYING_TYPE operator*(UNDERLYING_TYPE v, const L##TYPE##Property &prop)                                                                                                                                                                                                           \
-	{                                                                                                                                                                                                                                                                                            \
-		return v * prop->GetValue();                                                                                                                                                                                                                                                             \
-	}                                                                                                                                                                                                                                                                                            \
-	UNDERLYING_TYPE operator/(UNDERLYING_TYPE v, const L##TYPE##Property &prop)                                                                                                                                                                                                           \
-	{                                                                                                                                                                                                                                                                                            \
-		return v / prop->GetValue();                                                                                                                                                                                                                                                             \
-	}                                                                                                                                                                                                                                                                                            \
-	bool operator<(UNDERLYING_TYPE v, const L##TYPE##Property &prop)                                                                                                                                                                                                                      \
-	{                                                                                                                                                                                                                                                                                            \
-		return v < *prop;                                                                                                                                                                                                                                                                        \
-	}                                                                                                                                                                                                                                                                                            \
-	bool operator<=(UNDERLYING_TYPE v, const L##TYPE##Property &prop)                                                                                                                                                                                                                     \
-	{                                                                                                                                                                                                                                                                                            \
-		return v <= *prop;                                                                                                                                                                                                                                                                       \
-	}                                                                                                                                                                                                                                                                                            \
-	bool operator==(UNDERLYING_TYPE v, const L##TYPE##Property &prop)                                                                                                                                                                                                                     \
-	{                                                                                                                                                                                                                                                                                            \
-		return **prop == v;                                                                                                                                                                                                                                                                      \
-	}                                                                                                                                                                                                                                                                                            \
-	std::ostream &operator<<(std::ostream &str, const L##TYPE##Property &v)                                                                                                                                                                                                               \
-	{                                                                                                                                                                                                                                                                                            \
-		return str << **v;                                                                                                                                                                                                                                                                       \
-	}
+	UNDERLYING_TYPE operator+(UNDERLYING_TYPE v, const L##TYPE##Property &prop) { return v + prop->GetValue(); }                                                                                                                                                                                 \
+	UNDERLYING_TYPE operator-(UNDERLYING_TYPE v, const L##TYPE##Property &prop) { return v - prop->GetValue(); }                                                                                                                                                                                 \
+	UNDERLYING_TYPE operator*(UNDERLYING_TYPE v, const L##TYPE##Property &prop) { return v * prop->GetValue(); }                                                                                                                                                                                 \
+	UNDERLYING_TYPE operator/(UNDERLYING_TYPE v, const L##TYPE##Property &prop) { return v / prop->GetValue(); }                                                                                                                                                                                 \
+	bool operator<(UNDERLYING_TYPE v, const L##TYPE##Property &prop) { return v < *prop; }                                                                                                                                                                                                       \
+	bool operator<=(UNDERLYING_TYPE v, const L##TYPE##Property &prop) { return v <= *prop; }                                                                                                                                                                                                     \
+	bool operator==(UNDERLYING_TYPE v, const L##TYPE##Property &prop) { return **prop == v; }                                                                                                                                                                                                    \
+	std::ostream &operator<<(std::ostream &str, const L##TYPE##Property &v) { return str << **v; }
 
 export {
 	DEFINE_LUA_NUMBER_PROPERTY(Int8, int8_t);
@@ -66,7 +41,7 @@ export {
 
 	// Bool
 	class LBoolPropertyWrapper : public LSimplePropertyWrapper<util::BoolProperty, bool> {
-	public:
+	  public:
 		LBoolPropertyWrapper(const bool &v) : LSimplePropertyWrapper<util::BoolProperty, bool> {v} {}
 		LBoolPropertyWrapper(const std::shared_ptr<util::BoolProperty> &v) : LSimplePropertyWrapper<util::BoolProperty, bool> {v} {}
 		LBoolPropertyWrapper() : LSimplePropertyWrapper<util::BoolProperty, bool> {} {}
@@ -82,7 +57,7 @@ export {
 
 	// Color
 	class LColorPropertyWrapper : public LSimplePropertyWrapper<util::ColorProperty, Color> {
-	public:
+	  public:
 		util::ColorProperty &operator*() { return GetProperty(); }
 		const util::ColorProperty &operator*() const { return const_cast<LColorPropertyWrapper *>(this)->operator*(); }
 		util::ColorProperty *operator->() { return &GetProperty(); }
@@ -132,7 +107,7 @@ export {
 
 	// Euler Angles
 	class LEulerAnglesPropertyWrapper : public LSimplePropertyWrapper<util::EulerAnglesProperty, EulerAngles> {
-	public:
+	  public:
 		util::EulerAnglesProperty &operator*() { return GetProperty(); }
 		const util::EulerAnglesProperty &operator*() const { return const_cast<LEulerAnglesPropertyWrapper *>(this)->operator*(); }
 		util::EulerAnglesProperty *operator->() { return &GetProperty(); }
@@ -180,7 +155,7 @@ export {
 
 	// Transform
 	class LTransformPropertyWrapper : public LSimplePropertyWrapper<util::TransformProperty, umath::Transform> {
-	public:
+	  public:
 		util::TransformProperty &operator*() { return GetProperty(); }
 		const util::TransformProperty &operator*() const { return const_cast<LTransformPropertyWrapper *>(this)->operator*(); }
 		util::TransformProperty *operator->() { return &GetProperty(); }
@@ -206,7 +181,7 @@ export {
 	using LTransformProperty = LTransformPropertyWrapper;
 
 	class LScaledTransformPropertyWrapper : public LSimplePropertyWrapper<util::ScaledTransformProperty, umath::ScaledTransform> {
-	public:
+	  public:
 		util::ScaledTransformProperty &operator*() { return GetProperty(); }
 		const util::ScaledTransformProperty &operator*() const { return const_cast<LScaledTransformPropertyWrapper *>(this)->operator*(); }
 		util::ScaledTransformProperty *operator->() { return &GetProperty(); }
@@ -233,7 +208,7 @@ export {
 
 	template<class TProperty, typename T>
 	class TLVectorPropertyWrapper : public LSimplePropertyWrapper<TProperty, T> {
-	public:
+	  public:
 		TLVectorPropertyWrapper() : LSimplePropertyWrapper<TProperty, T>() {}
 		TLVectorPropertyWrapper(const T &v) : LSimplePropertyWrapper<TProperty, T>(v) {}
 		TLVectorPropertyWrapper(const std::shared_ptr<TProperty> &v) : LSimplePropertyWrapper<TProperty, T>(v) {}
@@ -277,7 +252,7 @@ export {
 	};
 
 	class LVector2PropertyWrapper : public TLVectorPropertyWrapper<util::Vector2Property, Vector2> {
-	public:
+	  public:
 		LVector2PropertyWrapper() : TLVectorPropertyWrapper<util::Vector2Property, Vector2>() {}
 		LVector2PropertyWrapper(const Vector2 &v) : TLVectorPropertyWrapper<util::Vector2Property, Vector2>(v) {}
 		LVector2PropertyWrapper(float x, float y) : TLVectorPropertyWrapper<util::Vector2Property, Vector2>(Vector2 {x, y}) {}
@@ -285,7 +260,7 @@ export {
 	};
 
 	class LVector2iPropertyWrapper : public TLVectorPropertyWrapper<util::Vector2iProperty, Vector2i> {
-	public:
+	  public:
 		LVector2iPropertyWrapper() : TLVectorPropertyWrapper<util::Vector2iProperty, Vector2i>() {}
 		LVector2iPropertyWrapper(const Vector2i &v) : TLVectorPropertyWrapper<util::Vector2iProperty, Vector2i>(v) {}
 		LVector2iPropertyWrapper(int32_t x, int32_t y) : TLVectorPropertyWrapper<util::Vector2iProperty, Vector2i>(Vector2i {x, y}) {}
@@ -293,7 +268,7 @@ export {
 	};
 
 	class LVector3PropertyWrapper : public TLVectorPropertyWrapper<util::Vector3Property, Vector3> {
-	public:
+	  public:
 		LVector3PropertyWrapper() : TLVectorPropertyWrapper<util::Vector3Property, Vector3>() {}
 		LVector3PropertyWrapper(const Vector3 &v) : TLVectorPropertyWrapper<util::Vector3Property, Vector3>(v) {}
 		LVector3PropertyWrapper(float x, float y, float z) : TLVectorPropertyWrapper<util::Vector3Property, Vector3>(Vector3 {x, y, z}) {}
@@ -301,7 +276,7 @@ export {
 	};
 
 	class LVector3iPropertyWrapper : public TLVectorPropertyWrapper<util::Vector3iProperty, Vector3i> {
-	public:
+	  public:
 		LVector3iPropertyWrapper() : TLVectorPropertyWrapper<util::Vector3iProperty, Vector3i>() {}
 		LVector3iPropertyWrapper(const Vector3i &v) : TLVectorPropertyWrapper<util::Vector3iProperty, Vector3i>(v) {}
 		LVector3iPropertyWrapper(int32_t x, int32_t y, int32_t z) : TLVectorPropertyWrapper<util::Vector3iProperty, Vector3i>(Vector3i {x, y, z}) {}
@@ -309,7 +284,7 @@ export {
 	};
 
 	class LVector4PropertyWrapper : public TLVectorPropertyWrapper<util::Vector4Property, Vector4> {
-	public:
+	  public:
 		LVector4PropertyWrapper() : TLVectorPropertyWrapper<util::Vector4Property, Vector4>() {}
 		LVector4PropertyWrapper(const Vector4 &v) : TLVectorPropertyWrapper<util::Vector4Property, Vector4>(v) {}
 		LVector4PropertyWrapper(float x, float y, float z, float w) : TLVectorPropertyWrapper<util::Vector4Property, Vector4>(Vector4 {x, y, z, w}) {}
@@ -317,43 +292,22 @@ export {
 	};
 
 	class LVector4iPropertyWrapper : public TLVectorPropertyWrapper<util::Vector4iProperty, Vector4i> {
-	public:
+	  public:
 		LVector4iPropertyWrapper() : TLVectorPropertyWrapper<util::Vector4iProperty, Vector4i>() {}
 		LVector4iPropertyWrapper(const Vector4i &v) : TLVectorPropertyWrapper<util::Vector4iProperty, Vector4i>(v) {}
 		LVector4iPropertyWrapper(int32_t x, int32_t y, int32_t z, int32_t w) : TLVectorPropertyWrapper<util::Vector4iProperty, Vector4i>(Vector4i {x, y, z, w}) {}
 		LVector4iPropertyWrapper(const std::shared_ptr<util::Vector4iProperty> &v) : TLVectorPropertyWrapper(v) {}
 	};
 
-	#define DEFINE_LUA_VECTOR_PROPERTY(TYPE, UNDERLYING_PROP_TYPE, UNDERLYING_TYPE)                                                                                                                                                                                                                  \
-		using L##TYPE##Property = L##TYPE##PropertyWrapper;                                                                                                                                                                                                                                          \
-		UNDERLYING_PROP_TYPE operator+(const UNDERLYING_PROP_TYPE &v, const L##TYPE##Property &prop)                                                                                                                                                                                          \
-		{                                                                                                                                                                                                                                                                                            \
-			return v + prop->GetValue();                                                                                                                                                                                                                                                             \
-		}                                                                                                                                                                                                                                                                                            \
-		UNDERLYING_PROP_TYPE operator-(const UNDERLYING_PROP_TYPE &v, const L##TYPE##Property &prop)                                                                                                                                                                                          \
-		{                                                                                                                                                                                                                                                                                            \
-			return v - prop->GetValue();                                                                                                                                                                                                                                                             \
-		}                                                                                                                                                                                                                                                                                            \
-		UNDERLYING_PROP_TYPE operator*(const UNDERLYING_PROP_TYPE &v, const L##TYPE##Property &prop)                                                                                                                                                                                          \
-		{                                                                                                                                                                                                                                                                                            \
-			return v * prop->GetValue();                                                                                                                                                                                                                                                             \
-		}                                                                                                                                                                                                                                                                                            \
-		UNDERLYING_PROP_TYPE operator/(const UNDERLYING_PROP_TYPE &v, const L##TYPE##Property &prop)                                                                                                                                                                                          \
-		{                                                                                                                                                                                                                                                                                            \
-			return v / prop->GetValue();                                                                                                                                                                                                                                                             \
-		}                                                                                                                                                                                                                                                                                            \
-		UNDERLYING_PROP_TYPE operator*(UNDERLYING_TYPE v, const L##TYPE##Property &prop)                                                                                                                                                                                                      \
-		{                                                                                                                                                                                                                                                                                            \
-			return v * prop->GetValue();                                                                                                                                                                                                                                                             \
-		}                                                                                                                                                                                                                                                                                            \
-		bool operator==(const UNDERLYING_PROP_TYPE &v, const L##TYPE##Property &prop)                                                                                                                                                                                                         \
-		{                                                                                                                                                                                                                                                                                            \
-			return **prop == v;                                                                                                                                                                                                                                                                      \
-		}                                                                                                                                                                                                                                                                                            \
-		std::ostream &operator<<(std::ostream &str, const L##TYPE##Property &v)                                                                                                                                                                                                               \
-		{                                                                                                                                                                                                                                                                                            \
-			return str << **v;                                                                                                                                                                                                                                                                       \
-		}
+#define DEFINE_LUA_VECTOR_PROPERTY(TYPE, UNDERLYING_PROP_TYPE, UNDERLYING_TYPE)                                                                                                                                                                                                                  \
+	using L##TYPE##Property = L##TYPE##PropertyWrapper;                                                                                                                                                                                                                                          \
+	UNDERLYING_PROP_TYPE operator+(const UNDERLYING_PROP_TYPE &v, const L##TYPE##Property &prop) { return v + prop->GetValue(); }                                                                                                                                                                \
+	UNDERLYING_PROP_TYPE operator-(const UNDERLYING_PROP_TYPE &v, const L##TYPE##Property &prop) { return v - prop->GetValue(); }                                                                                                                                                                \
+	UNDERLYING_PROP_TYPE operator*(const UNDERLYING_PROP_TYPE &v, const L##TYPE##Property &prop) { return v * prop->GetValue(); }                                                                                                                                                                \
+	UNDERLYING_PROP_TYPE operator/(const UNDERLYING_PROP_TYPE &v, const L##TYPE##Property &prop) { return v / prop->GetValue(); }                                                                                                                                                                \
+	UNDERLYING_PROP_TYPE operator*(UNDERLYING_TYPE v, const L##TYPE##Property &prop) { return v * prop->GetValue(); }                                                                                                                                                                            \
+	bool operator==(const UNDERLYING_PROP_TYPE &v, const L##TYPE##Property &prop) { return **prop == v; }                                                                                                                                                                                        \
+	std::ostream &operator<<(std::ostream &str, const L##TYPE##Property &v) { return str << **v; }
 
 	DEFINE_LUA_VECTOR_PROPERTY(Vector2, Vector2, float);
 	DEFINE_LUA_VECTOR_PROPERTY(Vector2i, Vector2i, int32_t);
@@ -364,7 +318,7 @@ export {
 
 	// Quaternion
 	class LQuatPropertyWrapper : public LSimplePropertyWrapper<util::QuatProperty, Quat> {
-	public:
+	  public:
 		util::QuatProperty &operator*() { return GetProperty(); }
 		const util::QuatProperty &operator*() const { return const_cast<LQuatPropertyWrapper *>(this)->operator*(); }
 		util::QuatProperty *operator->() { return &GetProperty(); }
@@ -402,7 +356,7 @@ export {
 
 	// String
 	class LStringPropertyWrapper : public LSimplePropertyWrapper<util::StringProperty, std::string> {
-	public:
+	  public:
 		util::StringProperty &operator*() { return GetProperty(); }
 		const util::StringProperty &operator*() const { return const_cast<LStringPropertyWrapper *>(this)->operator*(); }
 		util::StringProperty *operator->() { return &GetProperty(); }
@@ -419,7 +373,7 @@ export {
 	// Matrix
 	template<class TProperty, typename T>
 	class TLMatrixPropertyWrapper : public LSimplePropertyWrapper<TProperty, T> {
-	public:
+	  public:
 		TProperty &operator*() { return GetProperty(); }
 		const TProperty &operator*() const { return const_cast<TLMatrixPropertyWrapper *>(this)->operator*(); }
 		TProperty *operator->() { return &GetProperty(); }
@@ -493,14 +447,14 @@ export {
 				Lua::CheckFunction(l, 2);
 				auto cb = prop->AddCallback([l, oCallback](std::reference_wrapper<const T> oldVal, std::reference_wrapper<const T> newVal) {
 					auto c = Lua::CallFunction(
-					l,
-					[&oCallback, &oldVal, &newVal](lua::State *l) -> Lua::StatusCode {
-						oCallback.push(l);
-						Lua::Push<T>(l, oldVal.get());
-						Lua::Push<T>(l, newVal.get());
-						return Lua::StatusCode::Ok;
-					},
-					0);
+					  l,
+					  [&oCallback, &oldVal, &newVal](lua::State *l) -> Lua::StatusCode {
+						  oCallback.push(l);
+						  Lua::Push<T>(l, oldVal.get());
+						  Lua::Push<T>(l, newVal.get());
+						  return Lua::StatusCode::Ok;
+					  },
+					  0);
 				});
 				Lua::Push<CallbackHandle>(l, cb);
 			}
@@ -511,13 +465,13 @@ export {
 				Lua::CheckFunction(l, 2);
 				auto cb = prop->AddModifier([l, oCallback](T &val) {
 					auto c = Lua::CallFunction(
-					l,
-					[&oCallback, &val](lua::State *l) -> Lua::StatusCode {
-						oCallback.push(l);
-						Lua::Push<T>(l, val);
-						return Lua::StatusCode::Ok;
-					},
-					1);
+					  l,
+					  [&oCallback, &val](lua::State *l) -> Lua::StatusCode {
+						  oCallback.push(l);
+						  Lua::Push<T>(l, val);
+						  return Lua::StatusCode::Ok;
+					  },
+					  1);
 					if(c == Lua::StatusCode::Ok && Lua::IsSet(l, -1))
 						val = Lua::Check<T>(l, -1);
 				});

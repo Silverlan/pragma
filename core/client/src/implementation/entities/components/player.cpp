@@ -3,9 +3,7 @@
 
 module;
 
-
 #include "pragma/lua/core.hpp"
-
 
 module pragma.client;
 
@@ -23,7 +21,6 @@ namespace pragma {
 std::vector<CPlayerComponent *> CPlayerComponent::s_players;
 const std::vector<CPlayerComponent *> &CPlayerComponent::GetAll() { return s_players; }
 unsigned int CPlayerComponent::GetPlayerCount() { return CUInt32(s_players.size()); }
-
 
 Con::c_cout &CPlayerComponent::print(Con::c_cout &os)
 {

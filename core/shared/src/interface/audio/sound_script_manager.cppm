@@ -6,7 +6,6 @@ module;
 
 #undef CreateEvent
 
-
 export module pragma.shared:audio.sound_script_manager;
 
 export import :audio.sound_script_events;
@@ -14,27 +13,26 @@ export import :audio.sound_script_events;
 export {
 	class SoundScriptManager;
 	class DLLNETWORK SoundScript : public SoundScriptEventContainer {
-	public:
+	  public:
 		friend SoundScriptManager;
 		SoundScript(SoundScriptManager *manager, const std::string &identifier);
 		const std::string &GetIdentifier() const;
 		virtual ~SoundScript() override;
-	protected:
+	  protected:
 		std::string m_identifier;
 	};
 
 	class DLLNETWORK SoundScriptManager {
-	protected:
+	  protected:
 		std::unordered_map<std::string, std::shared_ptr<SoundScript>> m_soundScripts;
 		std::vector<std::string> m_soundScriptFiles;
 		template<class TSoundScript>
 		bool Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts = nullptr)
 		{
-			return Load(
-			fname, [this](const std::string &name) -> std::shared_ptr<SoundScript> { return std::make_shared<TSoundScript>(this, name); }, scripts);
+			return Load(fname, [this](const std::string &name) -> std::shared_ptr<SoundScript> { return std::make_shared<TSoundScript>(this, name); }, scripts);
 		}
 		bool Load(const char *fname, const std::function<std::shared_ptr<SoundScript>(const std::string &)> fCreateSoundScript, std::vector<std::shared_ptr<SoundScript>> *scripts = nullptr);
-	public:
+	  public:
 		static const std::string &GetSoundScriptPath();
 		SoundScriptManager();
 		virtual ~SoundScriptManager();

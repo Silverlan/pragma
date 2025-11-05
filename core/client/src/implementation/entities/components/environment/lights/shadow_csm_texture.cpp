@@ -3,18 +3,15 @@
 
 module;
 
-
 #include <cassert>
 
 module pragma.client;
-
 
 import :entities.components.lights.shadow_csm;
 import :client_state;
 import :engine;
 
 using namespace pragma;
-
 
 CShadowCSMComponent::TextureSet::TextureSet() {}
 

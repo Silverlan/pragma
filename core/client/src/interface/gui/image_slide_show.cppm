@@ -11,7 +11,7 @@ export import pragma.gui;
 
 export {
 	class DLLCLIENT WIImageSlideShow : public WIBase {
-	private:
+	  private:
 		struct PreloadImage {
 			PreloadImage();
 			Int32 image;
@@ -34,7 +34,7 @@ export {
 		void PreloadNextRandomShuffle();
 		void DisplayPreloadedImage();
 		void DisplayNextImage();
-	public:
+	  public:
 		WIImageSlideShow();
 		virtual void Initialize() override;
 		virtual void SetSize(int x, int y) override;

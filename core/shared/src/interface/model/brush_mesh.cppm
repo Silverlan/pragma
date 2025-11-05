@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:model.brush_mesh;
 
 export import :model.side;

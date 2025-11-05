@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:game.bullet_info;
 
 export import :entities.base_entity_handle;

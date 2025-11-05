@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:game.value_driver;
 
 export import :entities.enums;
@@ -25,7 +24,7 @@ export {
 			const std::string &GetExpression() const { return m_expression; }
 
 			template<typename T>
-				requires(udm::type_to_enum_s<T>() != udm::Type::Invalid)
+			    requires(udm::type_to_enum_s<T>() != udm::Type::Invalid)
 			void AddConstant(const std::string &name, T &&value)
 			{
 				return AddConstant(name, udm::Property::Create<T>(std::forward<T>(value)));
@@ -38,7 +37,7 @@ export {
 
 			const std::unordered_map<std::string, udm::PProperty> &GetConstants() const { return m_constants; }
 			const std::unordered_map<std::string, std::string> &GetReferences() const { return m_variables; }
-		private:
+		  private:
 			void RebuildLuaExpression() const;
 			std::string m_expression;
 			mutable bool m_expressionDirty = true;
@@ -68,14 +67,14 @@ export {
 			Result Apply(pragma::ecs::BaseEntity &ent);
 			void ResetFailureState();
 			bool IsFailureFlagSet() const;
-		private:
+		  private:
 			ValueDriverDescriptor m_descriptor;
 			std::unordered_map<std::string, ValueDriverVariable> m_variables;
 			pragma::ComponentId m_componentId = std::numeric_limits<pragma::ComponentId>::max();
 			ComponentMemberReference m_memberReference;
 			StateFlags m_stateFlags = StateFlags::None;
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
 	namespace umath::scoped_enum::bitwise {
 		template<>

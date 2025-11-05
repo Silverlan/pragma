@@ -4,5 +4,4 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 module pragma.client;

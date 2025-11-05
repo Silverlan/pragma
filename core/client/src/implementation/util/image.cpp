@@ -3,9 +3,7 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :util.image;
 import :engine;

@@ -5,8 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.server:entities.components.logic.relay;
 
 import :entities;
@@ -14,17 +12,17 @@ import :entities;
 export {
 	namespace pragma {
 		class DLLSERVER SLogicRelayComponent final : public BaseLogicRelayComponent {
-		public:
+		  public:
 			SLogicRelayComponent(pragma::ecs::BaseEntity &ent) : BaseLogicRelayComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua_State *l) override;
-		protected:
+		  protected:
 			void Trigger(pragma::ecs::BaseEntity *activator);
 		};
 	};
 
 	class DLLSERVER LogicRelay : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

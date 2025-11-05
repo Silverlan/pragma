@@ -3,7 +3,6 @@
 
 module;
 
-
 #if DEBUG_RENDER_PERFORMANCE_TEST_ENABLED == 1
 #endif
 
@@ -15,7 +14,6 @@ import :engine;
 import :game;
 
 using namespace pragma::rendering;
-
 
 #define ENABLE_PARTICLE_RENDERING 1
 
@@ -232,11 +230,17 @@ void pragma::CRasterizationRendererComponent::ExecuteLightingPass(const util::Dr
 	pragma::get_cgame()->StopProfilingStage(); // ExecuteLightingPass
 }
 template<typename TCPPM>
-	TCPPM *pragma::CRasterizationRendererComponent::GetRendererComponent() { return static_cast<TCPPM*>(m_rendererComponent); }
+TCPPM *pragma::CRasterizationRendererComponent::GetRendererComponent()
+{
+	return static_cast<TCPPM *>(m_rendererComponent);
+}
 template pragma::CRendererComponent *pragma::CRasterizationRendererComponent::GetRendererComponent();
 
 template<typename TCPPM>
-	const TCPPM *pragma::CRasterizationRendererComponent::GetRendererComponent() const { return const_cast<CRasterizationRendererComponent *>(this)->GetRendererComponent<pragma::CRendererComponent>(); }
+const TCPPM *pragma::CRasterizationRendererComponent::GetRendererComponent() const
+{
+	return const_cast<CRasterizationRendererComponent *>(this)->GetRendererComponent<pragma::CRendererComponent>();
+}
 template const pragma::CRendererComponent *pragma::CRasterizationRendererComponent::GetRendererComponent() const;
 
 void pragma::CRasterizationRendererComponent::StartPrepassRecording(const util::DrawSceneInfo &drawSceneInfo)

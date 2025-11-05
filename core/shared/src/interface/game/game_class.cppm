@@ -5,8 +5,6 @@ module;
 #include "definitions.hpp"
 #include "encryption/md5.h"
 
-
-
 export module pragma.shared:game.game;
 
 export import :console.convar;
@@ -38,7 +36,7 @@ export import :util.timer;
 export {
 	namespace pragma {
 		class DLLNETWORK Game : public util::CallbackHandler, public LuaCallbackHandler {
-		public:
+		  public:
 			pragma::physics::IEnvironment *GetPhysicsEnvironment();
 			const pragma::physics::IEnvironment *GetPhysicsEnvironment() const;
 			SurfaceMaterial &CreateSurfaceMaterial(const std::string &identifier, Float friction = 0.5f, Float restitution = 0.5f);
@@ -185,7 +183,7 @@ export {
 			void CollisionTest(pragma::ecs::BaseEntity *a, pragma::ecs::BaseEntity *b);
 			void EnableCollisions(bool b);
 			//
-		public:
+		  public:
 			//
 			Game(NetworkState *state);
 			virtual ~Game();
@@ -294,7 +292,7 @@ export {
 			pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *GetProfilingStageManager();
 			bool StartProfilingStage(const char *stage);
 			bool StopProfilingStage();
-		protected:
+		  protected:
 			virtual void UpdateTime();
 			void GetLuaRegisteredEntities(std::vector<std::string> &luaClasses) const;
 
@@ -376,12 +374,12 @@ export {
 			virtual void InitializeEntityComponents(pragma::EntityComponentManager &componentManager);
 			virtual void OnMapLoaded();
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	}
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::Game::GameFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::Game::GameFlags> : std::true_type {};
+	}
 
 	DLLNETWORK void IncludeLuaEntityBaseClasses(lua::State *l, int refEntities, int obj, int data);
 	namespace pragma {
@@ -405,9 +403,9 @@ export {
 			}
 			luabind::object r;
 			ecs::BaseEntity *el = nullptr;
-		#ifndef LUABIND_NO_EXCEPTIONS
+#ifndef LUABIND_NO_EXCEPTIONS
 			try {
-		#endif
+#endif
 				r = (*o)();
 				auto *elLua = luabind::object_cast<TLuaEntity *>(r);
 				auto *holder = luabind::object_cast<THandle *>(r);
@@ -420,13 +418,13 @@ export {
 					Con::csv << "WARNING: Unable to create lua entity '" << classname << "': Lua class is not derived from valid entity base!" << Con::endl;
 					return nullptr;
 				}
-		#ifndef LUABIND_NO_EXCEPTIONS
+#ifndef LUABIND_NO_EXCEPTIONS
 			}
 			catch(luabind::error &) {
 				Lua::HandleLuaError(GetLuaState());
 				return nullptr;
 			}
-		#endif
+#endif
 			if(!el) {
 				Con::cwar << "Unable to create lua entity '" << classname << "'!" << Con::endl;
 				return nullptr;
@@ -443,9 +441,9 @@ export {
 				return nullptr;
 			luabind::object r;
 			BaseEntityComponent *el = nullptr;
-		#ifndef LUABIND_NO_EXCEPTIONS
+#ifndef LUABIND_NO_EXCEPTIONS
 			try {
-		#endif
+#endif
 				r = (*o)(ent.GetLuaObject());
 
 				auto *elLua = luabind::object_cast<TComponent *>(r);
@@ -459,13 +457,13 @@ export {
 					Con::csv << "WARNING: Unable to create lua entity component '" << classname << "': Lua class is not derived from valid entity component base!" << Con::endl;
 					return nullptr;
 				}
-		#ifndef LUABIND_NO_EXCEPTIONS
+#ifndef LUABIND_NO_EXCEPTIONS
 			}
 			catch(luabind::error &) {
 				Lua::HandleLuaError(GetLuaState());
 				return nullptr;
 			}
-		#endif
+#endif
 			if(!r) {
 				Con::cwar << "Unable to create lua entity component '" << classname << "'!" << Con::endl;
 				return nullptr;

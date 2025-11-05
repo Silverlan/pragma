@@ -4,13 +4,11 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
 
 import :entities.components.rasterization_renderer;
 import :entities.components.pp_base;
 import :engine;
-
 
 using namespace pragma;
 

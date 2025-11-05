@@ -3,16 +3,13 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.world_eye;
 
 import :client_state;
 import :engine;
 import :entities.components;
-
 
 using namespace pragma;
 

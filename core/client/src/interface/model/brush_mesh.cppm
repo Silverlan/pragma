@@ -4,7 +4,6 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:model.brush_mesh;
 
 export import pragma.shared;

@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
-
 module pragma.shared;
 
 import :math;
@@ -119,14 +116,13 @@ static uint32_t find_cubic_equation_roots(double c0, double c1, double c2, doubl
 	return 0;
 }
 
-
 uint32_t umath::find_bezier_roots(float x, float v0, float v1, float v2, float v3, std::array<float, 3> &roots) { return find_cubic_equation_roots(v0 - x, 3.f * (v1 - v0), 3.f * (v0 - 2.f * v1 + v2), v3 - v0 + 3.f * (v1 - v2), roots); }
 
 float umath::calc_bezier_point(float f1, float f2, float f3, float f4, float t)
 {
-    auto c0 = f1;
-    auto c1 = 3.f * (f2 - f1);
-    auto c2 = 3.f * (f1 - 2.f * f2 + f3);
-    auto c3 = f4 - f1 + 3.f * (f2 - f3);
-    return c0 + t * c1 + umath::pow2(t) * c2 + umath::pow3(t) * c3;
+	auto c0 = f1;
+	auto c1 = 3.f * (f2 - f1);
+	auto c2 = 3.f * (f1 - 2.f * f2 + f3);
+	auto c3 = f4 - f1 + 3.f * (f2 - f3);
+	return c0 + t * c1 + umath::pow2(t) * c2 + umath::pow3(t) * c3;
 }

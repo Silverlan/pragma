@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:audio.sound_script;
 
 export import :audio.sound;

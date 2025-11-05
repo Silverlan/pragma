@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.bsp;
 
 export import pragma.shared;
@@ -15,11 +13,11 @@ import source_engine.bsp;
 export {
 	namespace pragma {
 		class DLLCLIENT CBSPComponent final : public BaseEntityComponent {
-		public:
+		  public:
 			CBSPComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua_State *l) override;
-		protected:
+		  protected:
 			void InitializeBSPTree(source_engine::bsp::File &bsp);
 		};
 	};

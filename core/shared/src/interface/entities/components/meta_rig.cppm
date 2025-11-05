@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:entities.components.meta_rig;
 
 export import :entities.components.base_animated;

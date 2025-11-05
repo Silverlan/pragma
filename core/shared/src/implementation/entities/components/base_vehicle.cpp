@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
 //#define ENABLE_DEPRECATED_PHYSICS
 
 module pragma.shared;

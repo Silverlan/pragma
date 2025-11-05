@@ -35,7 +35,7 @@ void CParticleOperatorTextureScrolling::Initialize(pragma::BaseEnvParticleSystem
 		else if(key == "vertical_speed")
 			m_fVerticalSpeed = util::to_float(pair.second);
 	}
-	static_cast<pragma::ecs::CParticleSystemComponent&>(pSystem).SetTextureScrollingEnabled(true);
+	static_cast<pragma::ecs::CParticleSystemComponent &>(pSystem).SetTextureScrollingEnabled(true);
 }
 void CParticleOperatorTextureScrolling::SetFrameOffset(CParticle &particle, Vector2 uv)
 {

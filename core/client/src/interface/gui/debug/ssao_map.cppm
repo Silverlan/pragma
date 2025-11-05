@@ -4,17 +4,16 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:gui.debug_ssao;
 
 export import pragma.gui;
 
 export {
 	class DLLCLIENT WIDebugSSAO : public WITexturedRect {
-	public:
+	  public:
 		WIDebugSSAO();
 		void SetUseBlurredSSAOImage(bool b);
-	private:
+	  private:
 		virtual void DoUpdate() override;
 		bool m_bUseBlurVariant = false;
 	};

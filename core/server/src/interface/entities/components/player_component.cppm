@@ -5,10 +5,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
-
 export module pragma.server:entities.components.player;
 
 import :entities.components.entity;
@@ -17,7 +13,7 @@ export namespace pragma {
 	class DLLSERVER SPlayerComponent final : public BasePlayerComponent, public SBaseNetComponent {
 	  public:
 		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
-		
+
 		// Same as PlayActivity, but doesn't automatically transmit to clients if called serverside
 		virtual bool PlaySharedActivity(pragma::Activity activity) override;
 		static unsigned int GetPlayerCount();

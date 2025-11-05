@@ -4,9 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
-
 export module pragma.shared:entities.components.base_physics;
 
 export import :entities.components.base;
@@ -31,7 +28,7 @@ export {
 				pragma::Model *GetModel() const;
 				const std::unordered_map<BoneId, std::vector<ShapeInfo>> &GetShapes() const;
 				const std::unordered_map<MeshIndex, BoneId> &GetModelMeshBoneMappings() const;
-			private:
+			  private:
 				std::unordered_map<BoneId, std::vector<ShapeInfo>> m_shapes = {};
 				std::unordered_map<MeshIndex, BoneId> m_modelMeshIndexToShapeIndex = {};
 				util::WeakHandle<pragma::Model> m_model = {};
@@ -62,7 +59,7 @@ export {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_INITIALIZE_PHYSICS;
 		}
 		class DLLNETWORK BasePhysicsComponent : public BaseEntityComponent {
-		protected:
+		  protected:
 			struct DLLNETWORK CollisionInfo {
 				CollisionInfo();
 				CollisionInfo(pragma::ecs::BaseEntity *ent, Bool shouldCollide);
@@ -75,7 +72,7 @@ export {
 				unsigned int target; // Bone ID
 				util::TSharedHandle<pragma::physics::IConstraint> constraint;
 			};
-		public:
+		  public:
 			enum class StateFlags : uint32_t {
 				None = 0u,
 				Ragdoll = 1u,
@@ -116,10 +113,10 @@ export {
 			bool GetCollisionCallbacksEnabled() const;
 			void SetCollisionContactReportEnabled(bool b);
 			bool GetCollisionContactReportEnabled() const;
-	#if PHYS_KEEP_SIMULATION_TRANSFORM != 0
+#if PHYS_KEEP_SIMULATION_TRANSFORM != 0
 			Vector3 GetPhysicsSimulationOffset();
 			Quat GetPhysicsSimulationRotation();
-	#endif
+#endif
 			virtual void PrePhysicsSimulate();
 			virtual bool PostPhysicsSimulate();
 			virtual void SetKinematic(bool b);
@@ -207,7 +204,7 @@ export {
 
 			// Should only be called from within an EVENT_INITIALIZE_PHYSICS event!
 			PhysObjHandle InitializePhysics(const physics::PhysObjCreateInfo &physObjCreateInfo, PhysFlags flags, int32_t rootMeshBoneId = -1);
-		protected:
+		  protected:
 			BasePhysicsComponent(pragma::ecs::BaseEntity &ent);
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 
@@ -247,7 +244,7 @@ export {
 			float m_colRadius = 0.f;
 			Vector3 m_colMin = {};
 			Vector3 m_colMax = {};
-		private:
+		  private:
 			void ClearAwakeStatus();
 		};
 		struct DLLNETWORK CEInitializePhysics : public ComponentEvent {
@@ -263,13 +260,13 @@ export {
 			virtual void HandleReturnValues(lua::State *l) override;
 			bool keepAwake = true;
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	};
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::BasePhysicsComponent::StateFlags> : std::true_type {};
-		
-        template<>
-        struct enable_bitwise_operators<pragma::BasePhysicsComponent::PhysFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::BasePhysicsComponent::StateFlags> : std::true_type {};
+
+		template<>
+		struct enable_bitwise_operators<pragma::BasePhysicsComponent::PhysFlags> : std::true_type {};
+	}
 };

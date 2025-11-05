@@ -4,7 +4,6 @@ module;
 
 #include <cassert>
 
-
 export module pragma.shared:entities.components.panima_channel_submitter;
 
 import :console.output;
@@ -37,14 +36,13 @@ export {
 	constexpr bool is_type_compatible(udm::Type channelType, udm::Type memberType) { return get_component_count(channelType) <= get_component_count(memberType); }
 
 	template<typename TChannel, typename TMember, auto TMapArray>
-		requires(pragma::is_animatable_type_v<TChannel> && pragma::is_animatable_type_v<TMember> && is_type_compatible(udm::type_to_enum<TChannel>(), udm::type_to_enum<TMember>()))
+	    requires(pragma::is_animatable_type_v<TChannel> && pragma::is_animatable_type_v<TMember> && is_type_compatible(udm::type_to_enum<TChannel>(), udm::type_to_enum<TMember>()))
 	panima::ChannelValueSubmitter get_member_channel_submitter(pragma::BaseEntityComponent &component, const pragma::AnimationChannelCacheData &cacheData, uint32_t memberIdx, void (*setter)(const pragma::ComponentMemberInfo &, pragma::BaseEntityComponent &, const void *, void *),
-	void *userData = nullptr);
+	  void *userData = nullptr);
 
 	template<typename TChannel, typename TMember, typename T, uint32_t I, uint32_t ARRAY_INDEX_COUNT, T MAX_ARRAY_VALUE, template<typename, typename, auto TTFunc> class TFunc, T... values>
 	panima::ChannelValueSubmitter runtime_array_to_compile_time(pragma::BaseEntityComponent &component, const pragma::AnimationChannelCacheData &cacheData, uint32_t memberIdx, void (*setter)(const pragma::ComponentMemberInfo &, pragma::BaseEntityComponent &, const void *, void *),
-	void *userData,
-	const std::array<T, ARRAY_INDEX_COUNT> &rtValues);
+	  void *userData, const std::array<T, ARRAY_INDEX_COUNT> &rtValues);
 
 	template<typename TChannel, typename TMember, auto TMapArray>
 	struct get_member_channel_submitter_wrapper {
@@ -55,9 +53,9 @@ export {
 	};
 
 	template<typename TChannel, typename TMember, auto TMapArray>
-		requires(pragma::is_animatable_type_v<TChannel> && pragma::is_animatable_type_v<TMember> && is_type_compatible(udm::type_to_enum<TChannel>(), udm::type_to_enum<TMember>()))
+	    requires(pragma::is_animatable_type_v<TChannel> && pragma::is_animatable_type_v<TMember> && is_type_compatible(udm::type_to_enum<TChannel>(), udm::type_to_enum<TMember>()))
 	panima::ChannelValueSubmitter get_member_channel_submitter(pragma::BaseEntityComponent &component, const pragma::AnimationChannelCacheData &cacheData, uint32_t memberIdx, void (*setter)(const pragma::ComponentMemberInfo &, pragma::BaseEntityComponent &, const void *, void *),
-	void *userData)
+	  void *userData)
 	{
 		return panima::ChannelValueSubmitter {[&component, &cacheData, memberIdx, setter, userData](panima::Channel &channel, uint32_t &inOutPivotTimeIndex, double t) mutable {
 			auto *memberInfo = cacheData.memberInfo; //component.GetMemberInfo(memberIdx);
@@ -123,11 +121,11 @@ export {
 
 	template<typename TChannel, typename TMember, typename T, uint32_t I, uint32_t ARRAY_INDEX_COUNT, T MAX_ARRAY_VALUE, template<typename, typename, auto TTFunc> class TFunc, T... values>
 	panima::ChannelValueSubmitter runtime_array_to_compile_time(pragma::BaseEntityComponent &component, const pragma::AnimationChannelCacheData &cacheData, uint32_t memberIdx, void (*setter)(const pragma::ComponentMemberInfo &, pragma::BaseEntityComponent &, const void *, void *),
-	void *userData, const std::array<T, ARRAY_INDEX_COUNT> &rtValues);
+	  void *userData, const std::array<T, ARRAY_INDEX_COUNT> &rtValues);
 
 	template<typename TChannel, typename TMember, typename T, uint32_t I, uint32_t VAL, uint32_t ARRAY_INDEX_COUNT, T MAX_ARRAY_VALUE, template<typename, typename, auto TTFunc> class TFunc, T... values>
 	panima::ChannelValueSubmitter runtime_array_to_compile_time_it(pragma::BaseEntityComponent &component, const pragma::AnimationChannelCacheData &cacheData, uint32_t memberIdx, void (*setter)(const pragma::ComponentMemberInfo &, pragma::BaseEntityComponent &, const void *, void *),
-	void *userData, const std::array<T, ARRAY_INDEX_COUNT> &rtValues)
+	  void *userData, const std::array<T, ARRAY_INDEX_COUNT> &rtValues)
 	{
 		if(rtValues[I] == VAL)
 			return runtime_array_to_compile_time<TChannel, TMember, T, I + 1, ARRAY_INDEX_COUNT, MAX_ARRAY_VALUE, TFunc, values..., VAL>(component, cacheData, memberIdx, setter, userData, rtValues);
@@ -140,7 +138,7 @@ export {
 
 	template<typename TChannel, typename TMember, typename T, uint32_t I, uint32_t ARRAY_INDEX_COUNT, T MAX_ARRAY_VALUE, template<typename, typename, auto TTFunc> class TFunc, T... values>
 	panima::ChannelValueSubmitter runtime_array_to_compile_time(pragma::BaseEntityComponent &component, const pragma::AnimationChannelCacheData &cacheData, uint32_t memberIdx, void (*setter)(const pragma::ComponentMemberInfo &, pragma::BaseEntityComponent &, const void *, void *),
-	void *userData, const std::array<T, ARRAY_INDEX_COUNT> &rtValues)
+	  void *userData, const std::array<T, ARRAY_INDEX_COUNT> &rtValues)
 	{
 		if constexpr(I < ARRAY_INDEX_COUNT)
 			return runtime_array_to_compile_time_it<TChannel, TMember, T, I, 0, ARRAY_INDEX_COUNT, MAX_ARRAY_VALUE, TFunc, values...>(component, cacheData, memberIdx, setter, userData, rtValues);
@@ -148,8 +146,8 @@ export {
 			return TFunc<TChannel, TMember, std::array<T, ARRAY_INDEX_COUNT> {values...}> {}(component, cacheData, memberIdx, setter, userData);
 	}
 
-	#pragma warning(push)
-	#pragma warning(disable : 4700)
+#pragma warning(push)
+#pragma warning(disable : 4700)
 	template<typename TChannel>
 	void instantiate_get_member_channel_submitter()
 	{
@@ -175,5 +173,5 @@ export {
 			});
 		}
 	}
-	#pragma warning(pop)
+#pragma warning(pop)
 }

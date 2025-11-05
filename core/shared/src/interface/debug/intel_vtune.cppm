@@ -4,13 +4,12 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:debug.intel_vtune;
 
 export import std;
 
 export {
-	#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	struct ___itt_domain;
 	struct ___itt_string_handle;
 	namespace debug {
@@ -22,12 +21,12 @@ export {
 			___itt_string_handle *handle;
 		};
 		class DLLNETWORK VTuneDomain {
-		public:
+		  public:
 			VTuneDomain();
 			~VTuneDomain();
 			VTuneTask BeginTask(const std::string &name);
 			void EndTask();
-		private:
+		  private:
 			___itt_domain *m_domain = nullptr;
 		};
 
@@ -35,5 +34,5 @@ export {
 		DLLNETWORK VTuneDomain &get_domain();
 		void close_domain();
 	};
-	#endif
+#endif
 };

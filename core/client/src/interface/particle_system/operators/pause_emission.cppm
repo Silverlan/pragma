@@ -5,7 +5,6 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:particle_system.operator_pause_emission;
 
 export import :entities.components.particle_system;
@@ -13,14 +12,14 @@ export import :particle_system.modifier;
 
 export {
 	class DLLCLIENT CParticleOperatorPauseEmissionBase : public CParticleOperator {
-	public:
+	  public:
 		virtual void Simulate(double tDelta) override;
 		virtual void OnParticleSystemStarted() override;
-	protected:
+	  protected:
 		CParticleOperatorPauseEmissionBase() = default;
 		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual pragma::ecs::CParticleSystemComponent *GetTargetParticleSystem() = 0;
-	private:
+	  private:
 		enum class State : uint32_t { Initial = 0u, Paused, Unpaused };
 		float m_fStart = 0.f;
 		float m_fEnd = 0.f;
@@ -30,7 +29,7 @@ export {
 	/////////////////////
 
 	class DLLCLIENT CParticleOperatorPauseEmission : public CParticleOperatorPauseEmissionBase {
-	public:
+	  public:
 		CParticleOperatorPauseEmission() = default;
 		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual pragma::ecs::CParticleSystemComponent *GetTargetParticleSystem() override;
@@ -39,11 +38,11 @@ export {
 	/////////////////////
 
 	class DLLCLIENT CParticleOperatorPauseChildEmission : public CParticleOperatorPauseEmissionBase {
-	public:
+	  public:
 		CParticleOperatorPauseChildEmission() = default;
 		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual pragma::ecs::CParticleSystemComponent *GetTargetParticleSystem() override;
-	private:
+	  private:
 		util::WeakHandle<pragma::ecs::CParticleSystemComponent> m_hChildSystem = {};
 	};
 };
@@ -59,7 +58,7 @@ void CParticleOperatorPauseEmissionBase::Initialize(pragma::BaseEnvParticleSyste
 		else if(key == "pause_end")
 			m_fEnd = util::to_float(pair.second);
 	}
-	static_cast<pragma::ecs::CParticleSystemComponent&>(pSystem).SetAlwaysSimulate(true); // Required, otherwise Simulate() might not get called
+	static_cast<pragma::ecs::CParticleSystemComponent &>(pSystem).SetAlwaysSimulate(true); // Required, otherwise Simulate() might not get called
 }
 void CParticleOperatorPauseEmissionBase::OnParticleSystemStarted()
 {

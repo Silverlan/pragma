@@ -4,9 +4,7 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :scripting.lua.libraries.ai;
 void Lua::ai::client::register_library(Lua::Interface &lua)

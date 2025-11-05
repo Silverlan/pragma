@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:entities.components.environment.audio.base_sound_scape;
 
 export import :entities.components.base;

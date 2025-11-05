@@ -21,9 +21,6 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 module;
 
-
-
-
 module pragma.shared;
 
 import :math.noise;

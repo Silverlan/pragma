@@ -11,7 +11,7 @@ export import pragma.udm;
 export {
 	namespace pragma::asset {
 		class DLLNETWORK ComponentData : public std::enable_shared_from_this<ComponentData> {
-		public:
+		  public:
 			enum class Flags : uint64_t {
 				None = 0u,
 				ClientsideOnly = 1u,
@@ -22,7 +22,7 @@ export {
 			Flags GetFlags() const;
 			void SetFlags(Flags flags);
 			udm::PProperty GetData() const { return m_data; }
-		private:
+		  private:
 			ComponentData();
 			udm::PProperty m_data;
 			Flags m_flags = Flags::None;

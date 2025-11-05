@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:model.side;
 
 import :console.output;
@@ -12,9 +11,9 @@ export import pragma.materialsystem;
 
 export {
 	class DLLNETWORK Side {
-	public:
+	  public:
 		Side();
-	public:
+	  public:
 		void Update();
 		void Merge(Side *other);
 		msys::Material *GetMaterial();
@@ -41,7 +40,7 @@ export {
 		bool HasAlpha() const;
 		unsigned char GetAlphaCount() const;
 		virtual void SetDisplacementAlpha(unsigned char numAlpha);
-	protected:
+	  protected:
 		std::vector<std::vector<uint16_t>> m_triangles; // Vertices as triangles; Every index is an Lod
 		std::vector<Vector2> m_alphas = {};
 		std::vector<Vector3> m_vertices = {};

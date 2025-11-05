@@ -11,7 +11,7 @@ export import pragma.gui;
 
 export {
 	class DLLCLIENT WIProgressBar : public WIBase {
-	public:
+	  public:
 		WIProgressBar();
 		virtual ~WIProgressBar() override;
 		virtual void Initialize() override;
@@ -29,7 +29,7 @@ export {
 		void SetPostFix(const std::string &postfix);
 		void SetValueTranslator(const std::function<std::string(float)> &translator);
 		void SetLabelVisible(bool visible);
-	private:
+	  private:
 		WIHandle m_hProgress;
 		WIHandle m_hLabel;
 		WIHandle m_hLabel2;

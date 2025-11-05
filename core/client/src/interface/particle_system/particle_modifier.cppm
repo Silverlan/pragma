@@ -15,7 +15,9 @@ export import pragma.shared;
 #pragma warning(push)
 #pragma warning(disable : 4251)
 export {
-	namespace pragma::ecs {class CParticleSystemComponent;}
+	namespace pragma::ecs {
+		class CParticleSystemComponent;
+	}
 	class DLLCLIENT CParticleModifier : public CParticleSystemBaseKeyValues {
 	  public:
 		const std::string &GetName() const;
@@ -128,8 +130,8 @@ export {
 		}
 	};
 
-	#pragma warning(push)
-	#pragma warning(disable : 4251)
+#pragma warning(push)
+#pragma warning(disable : 4251)
 	class DLLCLIENT ParticleModifierMap {
 	  private:
 		std::unordered_map<std::string, TParticleModifierFactory<CParticleInitializer>> m_initializers;
@@ -147,7 +149,7 @@ export {
 		const std::unordered_map<std::string, TParticleModifierFactory<CParticleOperator>> &GetOperators() const;
 		const std::unordered_map<std::string, TParticleModifierFactory<CParticleRenderer>> &GetRenderers() const;
 	};
-	#pragma warning(pop)
+#pragma warning(pop)
 
 	DLLCLIENT ParticleModifierMap *GetParticleModifierMap();
 };

@@ -6,9 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
-
 export module pragma.server:entities.components.flammable;
 
 import :entities.components.entity;
@@ -16,7 +13,7 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SFlammableComponent final : public BaseFlammableComponent, public SBaseNetComponent {
-		protected:
+		  protected:
 			struct DLLSERVER IgniteInfo {
 				IgniteInfo();
 				~IgniteInfo();
@@ -25,7 +22,7 @@ export {
 				EntityHandle hAttacker;
 				EntityHandle hInflictor;
 			} m_igniteInfo;
-		public:
+		  public:
 			SFlammableComponent(pragma::ecs::BaseEntity &ent) : BaseFlammableComponent(ent) {}
 			virtual util::EventReply Ignite(float duration, pragma::ecs::BaseEntity *attacker = nullptr, pragma::ecs::BaseEntity *inflictor = nullptr) override;
 			virtual void Extinguish() override;
@@ -33,7 +30,7 @@ export {
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual void InitializeLuaObject(lua_State *l) override;
-		protected:
+		  protected:
 			void ApplyIgnitionDamage();
 		};
 	};

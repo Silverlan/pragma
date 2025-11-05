@@ -8,7 +8,6 @@ module;
 #define ENABLE_LAD 1
 #endif
 
-
 export module pragma.shared:scripting.lua.auto_doc;
 
 export import pragma.doc;

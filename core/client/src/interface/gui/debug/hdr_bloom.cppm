@@ -5,17 +5,16 @@ module;
 
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:gui.debug_hdr_bloom;
 
 export import pragma.gui;
 
 export {
 	class DLLCLIENT WIDebugHDRBloom : public WITexturedRect {
-	public:
+	  public:
 		WIDebugHDRBloom();
 		virtual ~WIDebugHDRBloom() override;
-	private:
+	  private:
 		virtual void DoUpdate() override;
 		void UpdateBloomImage();
 		CallbackHandle m_cbRenderHDRMap = {};

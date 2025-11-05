@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.point_target;
 
 export import :entities.base_entity;
@@ -14,14 +12,14 @@ export import :entities.base_entity;
 export {
 	namespace pragma {
 		class DLLCLIENT CPointTargetComponent final : public BasePointTargetComponent {
-		public:
+		  public:
 			CPointTargetComponent(pragma::ecs::BaseEntity &ent) : BasePointTargetComponent(ent) {}
 			virtual void InitializeLuaObject(lua_State *l) override;
 		};
 	};
 
 	class DLLCLIENT CPointTarget : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

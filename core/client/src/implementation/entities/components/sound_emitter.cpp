@@ -4,9 +4,7 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.sound_emitter;
 import :client_state;
@@ -14,7 +12,6 @@ import :entities.components.flex;
 import :entities.components.particle_system;
 
 using namespace pragma;
-
 
 void CSoundEmitterComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 bool CSoundEmitterComponent::ShouldRemoveSound(ALSound &snd) const { return (BaseSoundEmitterComponent::ShouldRemoveSound(snd) /* && snd.GetIndex() == 0*/) ? true : false; }

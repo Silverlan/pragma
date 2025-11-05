@@ -3,14 +3,11 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.merge_2d_image_to_equirectangular;
 
 import :engine;
-
 
 using namespace pragma;
 

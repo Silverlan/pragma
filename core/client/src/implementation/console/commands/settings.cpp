@@ -9,7 +9,6 @@ module pragma.client;
 
 import :console.register_commands;
 
-
 namespace {
 	using namespace pragma::console::client;
 	auto UVN = register_variable<udm::Boolean>("cl_allowdownload", true, pragma::console::ConVarFlags::Archive, "");
@@ -36,7 +35,8 @@ namespace {
 	auto UVN = register_variable<udm::Float>("cl_render_brightness", 1, pragma::console::ConVarFlags::Archive, "Scene brightness.");
 	auto UVN = register_variable<udm::Float>("cl_render_contrast", 1, pragma::console::ConVarFlags::Archive, "Scene contrast.");
 	auto UVN = register_variable<udm::Float>("cl_render_motion_blur", 0, pragma::console::ConVarFlags::Archive, "Amount of motion blur. 0 = disabled.");
-	auto UVN = register_variable<udm::UInt8>("cl_render_texture_filtering", 6, pragma::console::ConVarFlags::Archive, "0 = Nearest Neighbour, 1 = Bilinear Filtering, 2 = Trilinear Filtering, 3 = Antisotropic Filtering x2, 4 = Antisotropic Filtering x4, 5 = Antisotropic Filtering x8, 6 = Antisotropic Filtering x16");
+	auto UVN = register_variable<udm::UInt8>("cl_render_texture_filtering", 6, pragma::console::ConVarFlags::Archive,
+	  "0 = Nearest Neighbour, 1 = Bilinear Filtering, 2 = Trilinear Filtering, 3 = Antisotropic Filtering x2, 4 = Antisotropic Filtering x4, 5 = Antisotropic Filtering x8, 6 = Antisotropic Filtering x16");
 	auto UVN = register_variable<udm::UInt8>("cl_render_occlusion_culling", 4, pragma::console::ConVarFlags::Archive, "0 = Off, 1 = Brute-Force, 2 = CHC++, 3 = Octree, 4 = BSP +Octree");
 	auto UVN = register_variable<udm::Boolean>("cl_render_frustum_culling_enabled", true, pragma::console::ConVarFlags::None, "Enables or disables frustum culling.");
 	auto UVN = register_variable<udm::Float>("cl_render_depth_of_field", 0, pragma::console::ConVarFlags::Archive, "Depth of field scale.");
@@ -54,7 +54,8 @@ namespace {
 	auto UVN = register_variable<udm::UInt8>("cl_render_shader_quality", 8, pragma::console::ConVarFlags::Archive, "Shader quality. The actual effect depends on the shader. 1 = Lowest Quality, 10 = Highest Quality");
 	auto UVN = register_variable<udm::UInt8>("cl_render_particle_quality", 3, pragma::console::ConVarFlags::Archive, "Quality of particle systems. 0 = No particles will be rendered, 1 = Particles will be unlit, 2 = Particles will receive lighting, 3 = Particles will cast shadows.");
 	auto UVN = register_variable<udm::UInt8>("cl_render_present_mode", 1, pragma::console::ConVarFlags::Archive, "0 = Immediate, 1 = FIFO, 2 = Mailbox");
-	auto UVN = register_variable<udm::Boolean>("cl_material_streaming_enabled", false, pragma::console::ConVarFlags::Archive, "0 = All materials and textures will be loaded immediately (= Slower load times), 1 = All materials and textures will be loaded over time. (= Black textures until loaded)");
+	auto UVN = register_variable<udm::Boolean>("cl_material_streaming_enabled", false, pragma::console::ConVarFlags::Archive,
+	  "0 = All materials and textures will be loaded immediately (= Slower load times), 1 = All materials and textures will be loaded over time. (= Black textures until loaded)");
 
 	auto UVN = register_variable<udm::Float>("cl_flex_phoneme_drag", 0.02, pragma::console::ConVarFlags::Archive, "Changes the time required for facial phoneme flexes to adapt to new phonemes.");
 
@@ -104,7 +105,8 @@ namespace {
 	auto UVN = register_variable<udm::UInt8>("cl_steam_audio_spatialize_hrtf_interpolation", 1, pragma::console::ConVarFlags::Archive, "HRTF interpolation. 0 = Nearest, 1 = Bilinear.");
 	auto UVN = register_variable<udm::Boolean>("cl_steam_audio_spatialize_distance_attenuation", true, pragma::console::ConVarFlags::Archive, "Enable distance attenuation. If disabled, regular distance attenuation will be used instead.");
 	auto UVN = register_variable<udm::Boolean>("cl_steam_audio_spatialize_air_absorption", true, pragma::console::ConVarFlags::Archive, "Enable air absorption.");
-	auto UVN = register_variable<udm::UInt8>("cl_steam_audio_spatialize_occlusion_mode", 1, pragma::console::ConVarFlags::Archive, "Direct occlusion and transmission mode. 0 = Off, 1 = On, No Transmission, 2 = On, Frequency Independent Transmission, 3 = On, Frequency Dependent Transmission.");
+	auto UVN
+	  = register_variable<udm::UInt8>("cl_steam_audio_spatialize_occlusion_mode", 1, pragma::console::ConVarFlags::Archive, "Direct occlusion and transmission mode. 0 = Off, 1 = On, No Transmission, 2 = On, Frequency Independent Transmission, 3 = On, Frequency Dependent Transmission.");
 	auto UVN = register_variable<udm::UInt8>("cl_steam_audio_spatialize_occlusion_method", 1, pragma::console::ConVarFlags::Archive, "Direct occlusion algorithm. 0 = Raycast, 1 = Partial.");
 	auto UVN = register_variable<udm::Float>("cl_steam_audio_spatialize_direct_level", 1.0, pragma::console::ConVarFlags::Archive, "Relative level of direct sound. Range: [0,1].");
 	auto UVN = register_variable<udm::Boolean>("cl_steam_audio_spatialize_indirect", true, pragma::console::ConVarFlags::Archive, "Enable indirect sound.");

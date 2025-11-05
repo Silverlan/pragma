@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 module;
 
-
-
 #include <cassert>
 
 module pragma.shared;
@@ -232,7 +230,7 @@ pragma::Model &pragma::Model::operator=(const pragma::Model &other)
 
 const PhonemeMap &pragma::Model::GetPhonemeMap() const { return const_cast<pragma::Model *>(this)->GetPhonemeMap(); }
 PhonemeMap &pragma::Model::GetPhonemeMap() { return m_phonemeMap; }
-udm::PropertyWrapper pragma::Model::GetExtensionData() const { return udm::PropertyWrapper{*m_extensions}; }
+udm::PropertyWrapper pragma::Model::GetExtensionData() const { return udm::PropertyWrapper {*m_extensions}; }
 void pragma::Model::Rotate(const Quat &rot)
 {
 	uvec::rotate(&m_collisionMin, rot);

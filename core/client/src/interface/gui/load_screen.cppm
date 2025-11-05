@@ -4,17 +4,16 @@
 module;
 #include "pragma/clientdefinitions.h"
 
-
 export module pragma.client:gui.load_screen;
 
 export import :gui.main_menu_base;
 
 export {
 	class DLLCLIENT WILoadScreen : public WIMainMenuBase {
-	private:
+	  private:
 		WIHandle m_hText;
 		WIHandle m_hProgress;
-	public:
+	  public:
 		WILoadScreen();
 		virtual ~WILoadScreen() override;
 		virtual void Initialize() override;

@@ -3,13 +3,9 @@
 
 module;
 
-
-
-
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 #include <cassert>
-
 
 module pragma.server;
 import :game;
@@ -76,7 +72,7 @@ SGame::~SGame() { g_game = nullptr; }
 
 void SGame::GetRegisteredEntities(std::vector<std::string> &classes, std::vector<std::string> &luaClasses) const
 {
-    server_entities::ServerEntityRegistry::Instance().GetRegisteredClassNames(classes);
+	server_entities::ServerEntityRegistry::Instance().GetRegisteredClassNames(classes);
 	GetLuaRegisteredEntities(luaClasses);
 }
 
@@ -116,7 +112,7 @@ void SGame::SetTimeScale(float t)
 
 static void CVAR_CALLBACK_host_timescale(NetworkState *, const ConVar &, float, float val) { SGame::Get()->SetTimeScale(val); }
 namespace {
-	auto _ = pragma::console::server::register_variable_listener<float>("host_timescale",&CVAR_CALLBACK_host_timescale);
+	auto _ = pragma::console::server::register_variable_listener<float>("host_timescale", &CVAR_CALLBACK_host_timescale);
 }
 
 void SGame::Initialize()
@@ -443,7 +439,7 @@ void SGame::WriteEntityData(NetPacket &packet, SBaseEntity **ents, uint32_t entC
 		SBaseEntity *ent = ents[i];
 		if(ent != nullptr && ent->IsSpawned()) {
 			auto pMapComponent = ent->GetComponent<pragma::MapComponent>();
-		    auto factoryID = server_entities::ServerEntityRegistry::Instance().GetNetworkFactoryID(typeid(*ent));
+			auto factoryID = server_entities::ServerEntityRegistry::Instance().GetNetworkFactoryID(typeid(*ent));
 			if(factoryID != std::nullopt) {
 				packet->Write<Bool>(false);
 				packet->Write<unsigned int>(*factoryID);

@@ -17,12 +17,12 @@ export import pragma.cmaterialsystem;
 export {
 	namespace pragma {
 		class DLLCLIENT CRenderTargetComponent final : public BasePointRenderTargetComponent, public CBaseNetComponent {
-		public:
+		  public:
 			CRenderTargetComponent(pragma::ecs::BaseEntity &ent) : BasePointRenderTargetComponent(ent) {}
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void InitializeLuaObject(lua_State *l) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
-		protected:
+		  protected:
 			void SetRenderSize(Vector2 &size);
 			void SetRenderSize(float w, float h);
 			Vector2 GetRenderSize();
@@ -55,7 +55,7 @@ export {
 	};
 
 	class DLLCLIENT CPointRenderTarget : public CBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

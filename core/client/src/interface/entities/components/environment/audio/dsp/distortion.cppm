@@ -5,8 +5,6 @@ module;
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
-
 export module pragma.client:entities.components.audio.dsp.distortion;
 
 export import :entities.components.audio.dsp.base;

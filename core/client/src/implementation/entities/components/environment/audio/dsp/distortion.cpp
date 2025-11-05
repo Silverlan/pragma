@@ -4,15 +4,12 @@
 module;
 #include "pragma/lua/core.hpp"
 
-
 module pragma.client;
-
 
 import :entities.components.audio.dsp.distortion;
 import :engine;
 
 using namespace pragma;
-
 
 void CSoundDspDistortionComponent::ReceiveData(NetPacket &packet)
 {

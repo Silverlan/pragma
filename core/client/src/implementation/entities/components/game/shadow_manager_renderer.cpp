@@ -3,16 +3,11 @@
 
 module;
 
-
-
-
-
 module pragma.client;
 
 import :entities.components.game_shadow_manager;
 import :engine;
 import :game;
-
 
 using namespace pragma;
 

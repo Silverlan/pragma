@@ -5,7 +5,6 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
-
 export module pragma.server:networking.iserver_client;
 
 export import :networking.resource;
@@ -14,7 +13,7 @@ export import pragma.shared;
 export {
 	namespace pragma::networking {
 		class DLLSERVER IServerClient : public std::enable_shared_from_this<IServerClient> {
-		public:
+		  public:
 			template<class TServerClient, typename... TARGS>
 			static std::shared_ptr<TServerClient> Create(TARGS &&...args)
 			{
@@ -55,9 +54,9 @@ export {
 			// TODO: These don't really belong here
 			void SetSteamId(uint64_t steamId);
 			uint64_t GetSteamId() const;
-		protected:
+		  protected:
 			IServerClient() = default;
-		private:
+		  private:
 			mutable pragma::ComponentHandle<pragma::BasePlayerComponent> m_player = {};
 			bool m_bTransferring = false;
 			std::vector<std::shared_ptr<Resource>> m_resourceTransfer;

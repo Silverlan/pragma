@@ -4,13 +4,6 @@
 module;
 #include "pragma/cxxmodules.hpp"
 
-
-
-
-
-
-
-
 module pragma.client;
 
 import :entities.components.particle_system;
@@ -25,7 +18,6 @@ using namespace pragma;
 
 decltype(ecs::CParticleSystemComponent::s_particleData) ecs::CParticleSystemComponent::s_particleData;
 decltype(ecs::CParticleSystemComponent::s_precached) ecs::CParticleSystemComponent::s_precached;
-
 
 struct SpriteSheetTextureAnimationFrame {
 	Vector2 uvStart;
@@ -766,7 +758,7 @@ float ecs::CParticleSystemComponent::GetExtent() const { return m_extent; }
 
 void ecs::CParticleSystemComponent::SetMaterial(msys::Material *mat) { m_material = mat ? mat->GetHandle() : msys::MaterialHandle {}; }
 void ecs::CParticleSystemComponent::SetMaterial(const char *mat) { SetMaterial(pragma::get_client_state()->LoadMaterial(mat)); }
-msys::Material *ecs::CParticleSystemComponent::GetMaterial() const { return const_cast<msys::Material*>(m_material.get()); }
+msys::Material *ecs::CParticleSystemComponent::GetMaterial() const { return const_cast<msys::Material *>(m_material.get()); }
 
 CParticleInitializer *ecs::CParticleSystemComponent::AddInitializer(std::string identifier, const std::unordered_map<std::string, std::string> &values)
 {
@@ -777,7 +769,7 @@ CParticleInitializer *ecs::CParticleSystemComponent::AddInitializer(std::string 
 		Con::cwar << "Attempted to create unknown particle initializer '" << identifier << "'! Ignoring..." << Con::endl;
 		return nullptr;
 	}
-	auto initializer = factory(*CXXM_RCAST(pragma::ecs::CParticleSystemComponent*, this), values);
+	auto initializer = factory(*CXXM_RCAST(pragma::ecs::CParticleSystemComponent *, this), values);
 	if(initializer == nullptr)
 		return nullptr;
 	if(IsRecordingKeyValues())
@@ -794,7 +786,7 @@ CParticleOperator *ecs::CParticleSystemComponent::AddOperator(std::string identi
 		Con::cwar << "Attempted to create unknown particle operator '" << identifier << "'! Ignoring..." << Con::endl;
 		return nullptr;
 	}
-	auto op = factory(*CXXM_RCAST(pragma::ecs::CParticleSystemComponent*, this), values);
+	auto op = factory(*CXXM_RCAST(pragma::ecs::CParticleSystemComponent *, this), values);
 	if(op == nullptr)
 		return nullptr;
 	if(IsRecordingKeyValues())
@@ -811,7 +803,7 @@ CParticleRenderer *ecs::CParticleSystemComponent::AddRenderer(std::string identi
 		Con::cwar << "Attempted to create unknown particle renderer '" << identifier << "'! Ignoring..." << Con::endl;
 		return nullptr;
 	}
-	auto op = factory(*CXXM_RCAST(pragma::ecs::CParticleSystemComponent*, this), values);
+	auto op = factory(*CXXM_RCAST(pragma::ecs::CParticleSystemComponent *, this), values);
 	if(op == nullptr)
 		return nullptr;
 	if(IsRecordingKeyValues())
@@ -1505,7 +1497,8 @@ void ecs::CParticleSystemComponent::Simulate(double tDelta)
 			pAttComponent->UpdateAttachmentOffset();
 	}
 
-	auto bMoving = (umath::is_flag_set(m_flags, Flags::MoveWithEmitter) && GetEntity().HasStateFlag(pragma::ecs::BaseEntity::StateFlags::PositionChanged)) || (umath::is_flag_set(m_flags, Flags::RotateWithEmitter) && GetEntity().HasStateFlag(pragma::ecs::BaseEntity::StateFlags::RotationChanged));
+	auto bMoving
+	  = (umath::is_flag_set(m_flags, Flags::MoveWithEmitter) && GetEntity().HasStateFlag(pragma::ecs::BaseEntity::StateFlags::PositionChanged)) || (umath::is_flag_set(m_flags, Flags::RotateWithEmitter) && GetEntity().HasStateFlag(pragma::ecs::BaseEntity::StateFlags::RotationChanged));
 	umath::set_flag(m_flags, Flags::HasMovingParticles, bMoving);
 	auto &pose = GetEntity().GetPose();
 	auto &posCam = cam->GetEntity().GetPosition();

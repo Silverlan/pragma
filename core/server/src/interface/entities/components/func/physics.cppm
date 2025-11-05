@@ -6,7 +6,6 @@ module;
 #include "pragma/serverdefinitions.h"
 #include "pragma/lua/core.hpp"
 
-
 export module pragma.server:entities.components.func.physics;
 
 import :entities;
@@ -16,19 +15,19 @@ import :entities.components.entity;
 export {
 	namespace pragma {
 		class DLLSERVER SFuncPhysicsComponent final : public BaseFuncPhysicsComponent, public SBaseNetComponent {
-		public:
+		  public:
 			SFuncPhysicsComponent(pragma::ecs::BaseEntity &ent) : BaseFuncPhysicsComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual void InitializeLuaObject(lua_State *l) override;
-		protected:
+		  protected:
 			virtual pragma::physics::PhysObj *InitializePhysics() override;
 		};
 	};
 
 	class DLLSERVER FuncPhysics : public SBaseEntity {
-	public:
+	  public:
 		virtual void Initialize() override;
 	};
 };

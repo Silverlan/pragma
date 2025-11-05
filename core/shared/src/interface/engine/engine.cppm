@@ -4,8 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
-
 export module pragma.shared:engine;
 
 export import :assets.manager;
@@ -33,14 +31,14 @@ export {
 	class NetworkState;
 	namespace pragma {
 		class DLLNETWORK Engine : public CVarHandler, public util::CallbackHandler {
-		public:
+		  public:
 			static const uint32_t DEFAULT_TICK_RATE;
 			// For internal use only! Not to be used directly!
-		private:
+		  private:
 			// Note: m_libServer needs to be the first member, to ensure it's destroyed last!
 			mutable std::shared_ptr<util::Library> m_libServer = nullptr;
 			mutable pragma::IServerState m_iServerState;
-		public:
+		  public:
 			struct DLLNETWORK ConVarInfoList {
 				using ConVarArgs = std::vector<std::string>;
 				struct DLLNETWORK ConVarInfo {
@@ -51,7 +49,7 @@ export {
 				void Add(const std::string &cmd, const ConVarArgs &args);
 				std::vector<ConVarInfo> &GetConVars() { return m_cvars; }
 				const std::vector<ConVarInfo> &GetConVars() const { return m_cvars; }
-			private:
+			  private:
 				std::vector<ConVarInfo> m_cvars;
 				// Only contains last convar, used for fast lookups
 				std::unordered_map<std::string, ConVarArgs> m_cvarMap;
@@ -61,7 +59,7 @@ export {
 			static ConVarHandle GetConVarHandle(std::string scvar);
 			//
 			class DLLNETWORK StateInstance {
-			public:
+			  public:
 				~StateInstance();
 				StateInstance(const std::shared_ptr<msys::MaterialManager> &matManager, msys::Material *matErr);
 				std::shared_ptr<msys::MaterialManager> materialManager;
@@ -75,7 +73,7 @@ export {
 			enum class ConsoleType : uint8_t { None = 0, Terminal, GUI, GUIDetached };
 
 			virtual std::unique_ptr<ConVarInfoList> &GetConVarConfig(NwStateType type);
-		protected:
+		  protected:
 			bool ExecConfig(const std::string &cfg, const std::function<void(std::string &, std::vector<std::string> &)> &callback);
 			bool ExecConfig(const std::string &cfg, ConVarInfoList &infoList);
 			void ExecCommands(ConVarInfoList &cmds);
@@ -87,7 +85,7 @@ export {
 
 			std::atomic<bool> m_bRecordConsoleOutput = false;
 			std::mutex m_consoleOutputMutex = {};
-		public:
+		  public:
 			static pragma::Engine *Get();
 			Engine(int argc, char *argv[]);
 			virtual ~Engine();
@@ -108,11 +106,11 @@ export {
 				ManagedByPackageManager = UseLinenoise << 1u,
 				Sandboxed = ManagedByPackageManager << 1u,
 			};
-		public:
-			virtual void OpenConsole();                                                                                                                                                                                                                                                                  \
-			virtual void CloseConsole();                                                                                                                                                                                                                                                                 \
-			void ToggleConsole();                                                                                                                                                                                                                                                                        \
-			virtual bool IsConsoleOpen() const;                                                                                                                                                                                                                                                          \
+		  public:
+			virtual void OpenConsole();
+			virtual void CloseConsole();
+			void ToggleConsole();
+			virtual bool IsConsoleOpen() const;
 			DebugConsole *GetConsole();
 
 			virtual bool Initialize(int argc, char *argv[]);
@@ -270,7 +268,7 @@ export {
 
 			// For internal use only
 			void SetReplicatedConVar(const std::string &cvar, const std::string &val);
-		protected:
+		  protected:
 			void UpdateParallelJobs();
 			bool RunEngineConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(ConConf *, float &)> &callback = nullptr);
 			void WriteServerConfig(VFilePtrReal f);
@@ -346,12 +344,12 @@ export {
 			virtual void Think();
 			virtual void Tick();
 		};
-        using namespace umath::scoped_enum::bitwise;
+		using namespace umath::scoped_enum::bitwise;
 	}
-    namespace umath::scoped_enum::bitwise {
-        template<>
-        struct enable_bitwise_operators<pragma::Engine::StateFlags> : std::true_type {};
-    }
+	namespace umath::scoped_enum::bitwise {
+		template<>
+		struct enable_bitwise_operators<pragma::Engine::StateFlags> : std::true_type {};
+	}
 
 	namespace pragma {
 		DLLNETWORK pragma::Engine *get_engine();

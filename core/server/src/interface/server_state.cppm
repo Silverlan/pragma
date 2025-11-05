@@ -5,7 +5,6 @@ module;
 
 #include "pragma/serverdefinitions.h"
 
-
 export module pragma.server:server_state;
 
 export import :audio;
@@ -135,6 +134,6 @@ export class DLLSERVER ServerState : public NetworkState {
 #pragma warning(pop)
 export {
 	namespace pragma {
-	    constexpr inline uint32_t FSYS_SEARCH_CACHE = 8'192;
+		constexpr inline uint32_t FSYS_SEARCH_CACHE = 8'192;
 	};
 };

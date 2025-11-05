@@ -4,11 +4,6 @@
 module;
 #include "pragma/logging.hpp"
 
-
-
-
-
-
 #include <tiny_gltf.h>
 
 module pragma.client;
@@ -22,7 +17,6 @@ import :entities.components;
 import :game;
 import :rendering.shaders;
 import :util;
-
 
 void pragma::asset::MapExportInfo::AddCamera(CCameraComponent &cam) { m_cameras.push_back(cam.GetHandle<CCameraComponent>()); }
 void pragma::asset::MapExportInfo::AddLightSource(CLightComponent &light) { m_lightSources.push_back(light.GetHandle<CLightComponent>()); }
@@ -1644,7 +1638,7 @@ bool pragma::asset::export_model(pragma::Model &mdl, const ModelExportInfo &expo
 bool pragma::asset::export_animation(pragma::Model &mdl, const std::string &animName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName) { return GLTFWriter::Export(mdl, animName, exportInfo, outErrMsg, modelName); }
 bool pragma::asset::export_texture(uimg::ImageBuffer &imgBuf, ModelExportInfo::ImageFormat imageFormat, const std::string &outputPath, std::string &outErrMsg, bool normalMap, bool srgb, uimg::TextureInfo::AlphaMode alphaMode, std::string *optOutOutputPath)
 {
-	std::string inOutPath = std::string{EXPORT_PATH} + outputPath;
+	std::string inOutPath = std::string {EXPORT_PATH} + outputPath;
 	auto success = save_image(imgBuf, imageFormat, inOutPath, normalMap, srgb, alphaMode);
 	if(optOutOutputPath)
 		*optOutOutputPath = inOutPath;
@@ -1666,7 +1660,7 @@ bool pragma::asset::export_texture(const std::string &texturePath, ModelExportIn
 	ufile::remove_extension_from_filename(imgPath);
 	if(optExportPath)
 		imgPath = (util::Path::CreatePath(*optExportPath) + imgPath).GetString();
-	auto imgOutputPath = std::string{EXPORT_PATH} + imgPath;
+	auto imgOutputPath = std::string {EXPORT_PATH} + imgPath;
 
 	auto exportSuccess = false;
 	if(imageFormat == ModelExportInfo::ImageFormat::DDS || imageFormat == ModelExportInfo::ImageFormat::KTX) {
@@ -1840,7 +1834,8 @@ static bool save_ambient_occlusion(msys::Material &mat, std::string rmaPath, T &
 	return true;
 }
 
-pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::Model &mdl, msys::Material &mat, util::ParallelJob<uimg::ImageLayerSet> &outJob, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples, pragma::rendering::cycles::SceneInfo::DeviceType aoDevice)
+pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::Model &mdl, msys::Material &mat, util::ParallelJob<uimg::ImageLayerSet> &outJob, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples,
+  pragma::rendering::cycles::SceneInfo::DeviceType aoDevice)
 {
 	// TODO: There really is no good way to determine whether the material has a ambient occlusion map or not.
 	// Use a compute shader to determine if it's all white or black?

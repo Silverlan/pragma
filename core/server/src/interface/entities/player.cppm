@@ -4,7 +4,6 @@
 module;
 #include "pragma/serverdefinitions.h"
 
-
 export module pragma.server:entities.player;
 
 import :entities.base;

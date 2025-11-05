@@ -4,7 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-
 export module pragma.shared:model.animation.pose;
 
 export import :model.animation.bone;
@@ -15,7 +14,7 @@ export {
 	namespace pragma::animation {
 		class Skeleton;
 		class DLLNETWORK Pose {
-		public:
+		  public:
 			Pose() = default;
 			Pose(const Pose &) = default;
 			Pose(Pose &&) = default;
@@ -41,7 +40,7 @@ export {
 
 			std::vector<uint32_t> &GetBoneTranslationTable() { return m_boneIdToChannelId; }
 			const std::vector<uint32_t> &GetBoneTranslationTable() const { return const_cast<Pose *>(this)->GetBoneTranslationTable(); }
-		private:
+		  private:
 			uint32_t GetChannelIdx(pragma::animation::BoneId boneId) const;
 			std::vector<umath::ScaledTransform> m_transforms {};
 			std::vector<uint32_t> m_boneIdToChannelId;

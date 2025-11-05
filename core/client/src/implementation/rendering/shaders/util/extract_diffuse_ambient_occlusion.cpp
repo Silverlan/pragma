@@ -3,14 +3,11 @@
 
 module;
 
-
 module pragma.client;
-
 
 import :rendering.shaders.extract_diffuse_ambinet_occlusion;
 
 import :engine;
-
 
 using namespace pragma;
 

@@ -3,11 +3,9 @@
 
 module;
 
-
 #include <cassert>
 
 module pragma.client;
-
 
 import :entities.components.util_pbr_converter;
 import :client_state;
@@ -15,7 +13,6 @@ import :engine;
 import :game;
 
 using namespace pragma;
-
 
 void CPBRConverterComponent::UpdateMetalness(pragma::Model &mdl, msys::CMaterial &mat)
 {

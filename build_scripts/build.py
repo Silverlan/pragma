@@ -855,6 +855,24 @@ print("Modules:" +', '.join(module_list))
 print("Additional CMake Arguments:" +', '.join(cmake_args))
 print("Additional Build Targets:" +', '.join(additional_build_targets))
 
+
+
+try:
+	result = subprocess.run(["cmake", "--version"], capture_output=True, text=True, check=False)
+	if result.returncode == 0:
+		print(result.stdout.strip())
+	else:
+		print("cmake exited with code", result.returncode)
+		print("stderr:", result.stderr.strip())
+except FileNotFoundError:
+	print("cmake not found — make sure it's installed and on your PATH")
+
+
+
+
+
+
+
 if not deps_only:
 	########## Configure Pragma ##########
 	print_msg("Configuring Pragma...")

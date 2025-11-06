@@ -19,7 +19,7 @@ bool CBvhComponent::ShouldConsiderMesh(const pragma::ModelSubMesh &mesh, const r
 	return BaseBvhComponent::ShouldConsiderMesh(mesh) && !umath::is_flag_set(bufferData.stateFlags, pragma::rendering::RenderBufferData::StateFlags::ExcludeFromAccelerationStructures);
 }
 
-void CBvhComponent::InitializeLuaObject(lua_State *l) { return BaseBvhComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CBvhComponent::InitializeLuaObject(lua::State *l) { return BaseBvhComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CBvhComponent::Initialize()
 {

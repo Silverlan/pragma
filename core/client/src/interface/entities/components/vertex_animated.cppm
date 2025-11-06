@@ -16,7 +16,7 @@ export namespace pragma {
 	DLLCLIENT const std::shared_ptr<prosper::IDynamicResizableBuffer> &get_vertex_animation_buffer();
 	class DLLCLIENT CVertexAnimatedComponent final : public BaseEntityComponent {
 	  public:
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 #pragma pack(push, 1)
 		struct VertexAnimationData {
@@ -35,7 +35,7 @@ export namespace pragma {
 		const std::shared_ptr<prosper::IBuffer> &GetVertexAnimationBuffer() const;
 		bool GetVertexAnimationBufferMeshOffset(CModelSubMesh &mesh, uint32_t &offset, uint32_t &animCount) const;
 		bool GetLocalVertexPosition(const pragma::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 &pos, Vector3 *optOutNormal = nullptr, float *optOutDelta = nullptr) const;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
 		// Vertex animations
 		struct VertexAnimationInfo {

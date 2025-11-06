@@ -13,6 +13,6 @@ export namespace pragma {
 	class DLLSERVER SGenericComponent final : public BaseGenericComponent {
 	  public:
 		SGenericComponent(pragma::ecs::BaseEntity &ent) : BaseGenericComponent(ent) {}
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	};
 };

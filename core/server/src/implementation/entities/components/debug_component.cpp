@@ -31,7 +31,7 @@ void SDebugTextComponent::SetSize(float size)
 	packet->Write<float>(size);
 	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetSize, packet, pragma::networking::Protocol::SlowReliable);
 }
-void SDebugTextComponent::InitializeLuaObject(lua_State *l) { return BaseDebugTextComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SDebugTextComponent::InitializeLuaObject(lua::State *l) { return BaseDebugTextComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void SDebugTextComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_debugText);
@@ -49,7 +49,7 @@ void SBaseDebugOutlineComponent::SendData(NetPacket &packet, networking::ClientR
 ////////////////
 
 void SDebugPointComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { packet->Write<bool>(m_bAxis); }
-void SDebugPointComponent::InitializeLuaObject(lua_State *l) { return BaseDebugPointComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SDebugPointComponent::InitializeLuaObject(lua::State *l) { return BaseDebugPointComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////////
 
@@ -58,7 +58,7 @@ void SDebugLineComponent::SendData(NetPacket &packet, networking::ClientRecipien
 	packet->WriteString(m_targetEntity);
 	packet->Write<Vector3>(m_targetOrigin);
 }
-void SDebugLineComponent::InitializeLuaObject(lua_State *l) { return BaseDebugLineComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SDebugLineComponent::InitializeLuaObject(lua::State *l) { return BaseDebugLineComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////////
 
@@ -80,7 +80,7 @@ void SDebugBoxComponent::SendData(NetPacket &packet, networking::ClientRecipient
 	packet->Write<Vector3>(m_bounds.first);
 	packet->Write<Vector3>(m_bounds.second);
 }
-void SDebugBoxComponent::InitializeLuaObject(lua_State *l) { return BaseDebugBoxComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SDebugBoxComponent::InitializeLuaObject(lua::State *l) { return BaseDebugBoxComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////////
 
@@ -89,7 +89,7 @@ void SDebugSphereComponent::SendData(NetPacket &packet, networking::ClientRecipi
 	SBaseDebugOutlineComponent::SendData(packet, rp);
 	packet->Write<uint32_t>(m_recursionLevel);
 }
-void SDebugSphereComponent::InitializeLuaObject(lua_State *l) { return BaseDebugSphereComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SDebugSphereComponent::InitializeLuaObject(lua::State *l) { return BaseDebugSphereComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////////
 
@@ -121,7 +121,7 @@ void SDebugConeComponent::SendData(NetPacket &packet, networking::ClientRecipien
 	packet->Write<float>(m_startRadius);
 	packet->Write<uint32_t>(m_segmentCount);
 }
-void SDebugConeComponent::InitializeLuaObject(lua_State *l) { return BaseDebugConeComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SDebugConeComponent::InitializeLuaObject(lua::State *l) { return BaseDebugConeComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////////
 
@@ -142,8 +142,8 @@ void SDebugCylinderComponent::SendData(NetPacket &packet, networking::ClientReci
 	packet->Write<float>(m_length);
 	packet->Write<uint32_t>(m_segmentCount);
 }
-void SDebugCylinderComponent::InitializeLuaObject(lua_State *l) { return BaseDebugCylinderComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SDebugCylinderComponent::InitializeLuaObject(lua::State *l) { return BaseDebugCylinderComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////////
 
-void SDebugPlaneComponent::InitializeLuaObject(lua_State *l) { return BaseDebugPlaneComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SDebugPlaneComponent::InitializeLuaObject(lua::State *l) { return BaseDebugPlaneComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

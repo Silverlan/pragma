@@ -14,7 +14,7 @@ export namespace pragma {
 	  public:
 		CTouchComponent(pragma::ecs::BaseEntity &ent) : BaseTouchComponent(ent) {}
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnEntitySpawn() override;
 	};
 };

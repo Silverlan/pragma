@@ -55,7 +55,7 @@ void CEyeComponent::RegisterMembers(pragma::EntityComponentManager &componentMan
 		registerMember(std::move(memberInfo));
 	}
 }
-void CEyeComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CEyeComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 CEyeComponent::CEyeComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_stateFlags {StateFlags::BlinkingEnabled | StateFlags::PrevBlinkToggle} {}
 

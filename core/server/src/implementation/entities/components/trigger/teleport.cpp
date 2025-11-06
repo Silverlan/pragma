@@ -11,7 +11,7 @@ import :game;
 
 using namespace pragma;
 
-void STriggerTeleportComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void STriggerTeleportComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void TriggerTeleport::Initialize()
 {

@@ -23,6 +23,6 @@ export {
 		void LuaInitialize() {}
 		static void default_Initialize(SBaseEntity *ent);
 	  protected:
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 	};
 };

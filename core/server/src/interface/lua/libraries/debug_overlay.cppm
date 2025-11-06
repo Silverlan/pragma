@@ -26,9 +26,9 @@ export namespace Lua {
 			DLLSERVER void DrawAxis(const DebugRenderInfo &renderInfo);
 			DLLSERVER void DrawText(const std::string &text, const ::Vector2 &size, const DebugRenderInfo &renderInfo);
 			DLLSERVER void DrawText(const std::string &text, float size, const DebugRenderInfo &renderInfo);
-			DLLSERVER void DrawPath(lua_State *l, luabind::table<> points, const DebugRenderInfo &renderInfo);
-			DLLSERVER void DrawSpline(lua_State *l, luabind::table<> points, uint32_t segmentCount, float curvature, const DebugRenderInfo &renderInfo);
-			DLLSERVER void DrawSpline(lua_State *l, luabind::table<> points, uint32_t segmentCount, const DebugRenderInfo &renderInfo);
+			DLLSERVER void DrawPath(lua::State *l, luabind::table<> points, const DebugRenderInfo &renderInfo);
+			DLLSERVER void DrawSpline(lua::State *l, luabind::table<> points, uint32_t segmentCount, float curvature, const DebugRenderInfo &renderInfo);
+			DLLSERVER void DrawSpline(lua::State *l, luabind::table<> points, uint32_t segmentCount, const DebugRenderInfo &renderInfo);
 			DLLSERVER void DrawPlane(const DebugRenderInfo &renderInfo);
 		};
 	};

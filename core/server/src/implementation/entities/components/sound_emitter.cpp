@@ -14,7 +14,7 @@ import :server_state;
 
 using namespace pragma;
 
-void SSoundEmitterComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SSoundEmitterComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void SSoundEmitterComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	auto &sounds = m_sounds;

@@ -65,7 +65,7 @@ void CEnvSoundProbeComponent::OnEntitySpawn()
 	}
 	ent.RemoveSafely();
 }
-void CEnvSoundProbeComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CEnvSoundProbeComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////
 

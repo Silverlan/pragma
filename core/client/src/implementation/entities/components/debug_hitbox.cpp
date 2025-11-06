@@ -14,7 +14,7 @@ import :engine;
 using namespace pragma;
 
 CDebugHitboxComponent::~CDebugHitboxComponent() {}
-void CDebugHitboxComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CDebugHitboxComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CDebugHitboxComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

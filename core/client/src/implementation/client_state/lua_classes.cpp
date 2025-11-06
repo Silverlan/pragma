@@ -35,7 +35,7 @@ static void reload_textures(msys::CMaterial &mat)
 		mat.SetTexture(pair.first, pair.second);
 }
 
-static luabind::object shader_mat_value_to_lua_object(lua_State *l, const pragma::shadergraph::Value &val)
+static luabind::object shader_mat_value_to_lua_object(lua::State *l, const pragma::shadergraph::Value &val)
 {
 	return pragma::shadergraph::visit(val.GetType(), [l, &val](auto tag) {
 		using T = typename decltype(tag)::type;
@@ -49,7 +49,7 @@ static luabind::object shader_mat_value_to_lua_object(lua_State *l, const pragma
 	});
 }
 
-static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
+static void register_shader_graph(lua::State *l, luabind::module_ &modShader)
 {
 	modShader[luabind::def(
 	  "get_test_node_register", +[]() -> std::shared_ptr<pragma::shadergraph::NodeRegistry> {
@@ -121,7 +121,7 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 	defGraph.def("RemoveNode", &pragma::shadergraph::Graph::RemoveNode);
 	defGraph.def("GetNode", &pragma::shadergraph::Graph::GetNode);
 	defGraph.def(
-	  "GetNodes", +[](lua_State *l, const pragma::shadergraph::Graph &graph) -> luabind::object {
+	  "GetNodes", +[](lua::State *l, const pragma::shadergraph::Graph &graph) -> luabind::object {
 		  auto t = luabind::newtable(l);
 		  uint32_t idx = 1;
 		  for(auto &node : graph.GetNodes())
@@ -135,7 +135,7 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 	defNode.def("GetType", &pragma::shadergraph::Node::GetType);
 	defNode.def("GetCategory", &pragma::shadergraph::Node::GetCategory);
 	defNode.def(
-	  "GetInputs", +[](lua_State *l, const pragma::shadergraph::Node &node) -> luabind::object {
+	  "GetInputs", +[](lua::State *l, const pragma::shadergraph::Node &node) -> luabind::object {
 		  auto t = luabind::newtable(l);
 		  uint32_t idx = 1;
 		  for(auto &socket : node.GetInputs())
@@ -143,7 +143,7 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 		  return t;
 	  });
 	defNode.def(
-	  "GetOutputs", +[](lua_State *l, const pragma::shadergraph::Node &node) -> luabind::object {
+	  "GetOutputs", +[](lua::State *l, const pragma::shadergraph::Node &node) -> luabind::object {
 		  auto t = luabind::newtable(l);
 		  uint32_t idx = 1;
 		  for(auto &socket : node.GetOutputs())
@@ -159,14 +159,14 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 	defEnumSet.def("FindValue", &pragma::shadergraph::EnumSet::findValue);
 	defEnumSet.def("FindName", &pragma::shadergraph::EnumSet::findName);
 	defEnumSet.def(
-	  "GetNameToValue", +[](lua_State *l, const pragma::shadergraph::EnumSet &enumSet) -> Lua::map<std::string, int32_t> {
+	  "GetNameToValue", +[](lua::State *l, const pragma::shadergraph::EnumSet &enumSet) -> Lua::map<std::string, int32_t> {
 		  auto t = luabind::newtable(l);
 		  for(auto &pair : enumSet.getNameToValue())
 			  t[pair.first] = pair.second;
 		  return t;
 	  });
 	defEnumSet.def(
-	  "GetValueToName", +[](lua_State *l, const pragma::shadergraph::EnumSet &enumSet) -> Lua::map<int32_t, std::string> {
+	  "GetValueToName", +[](lua::State *l, const pragma::shadergraph::EnumSet &enumSet) -> Lua::map<int32_t, std::string> {
 		  auto t = luabind::newtable(l);
 		  for(auto &pair : enumSet.getValueToName())
 			  t[pair.first] = pair.second;
@@ -178,7 +178,7 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 	defParameter.def_readonly("type", &pragma::shadergraph::Parameter::type);
 	defParameter.def_readonly("min", &pragma::shadergraph::Parameter::min);
 	defParameter.def_readonly("max", &pragma::shadergraph::Parameter::max);
-	defParameter.property("defaultValue", +[](lua_State *l, const pragma::shadergraph::Parameter &param) -> luabind::object { return shader_mat_value_to_lua_object(l, param.defaultValue); });
+	defParameter.property("defaultValue", +[](lua::State *l, const pragma::shadergraph::Parameter &param) -> luabind::object { return shader_mat_value_to_lua_object(l, param.defaultValue); });
 	defParameter.def(
 	  "__tostring", +[](const pragma::shadergraph::Parameter &param) -> std::string {
 		  std::stringstream ss;
@@ -188,7 +188,7 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 		  return ss.str();
 	  });
 	defParameter.def(
-	  "GetOptions", +[](lua_State *l, const pragma::shadergraph::Parameter &param) -> std::optional<std::unordered_map<std::string, luabind::object>> {
+	  "GetOptions", +[](lua::State *l, const pragma::shadergraph::Parameter &param) -> std::optional<std::unordered_map<std::string, luabind::object>> {
 		  if(!param.enumSet)
 			  return {};
 		  std::unordered_map<std::string, luabind::object> options {};
@@ -226,7 +226,7 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 	defSocket.def_readonly("max", &pragma::shadergraph::Socket::max);
 	defSocket.def_readonly("flags", &pragma::shadergraph::Socket::flags);
 	defSocket.property(
-	  "defaultValue", +[](lua_State *l, const pragma::shadergraph::Socket &socket) -> luabind::object {
+	  "defaultValue", +[](lua::State *l, const pragma::shadergraph::Socket &socket) -> luabind::object {
 		  auto udmType = pragma::shadergraph::to_udm_type(socket.defaultValue.GetType());
 		  if(udmType == udm::Type::Invalid)
 			  return Lua::nil;
@@ -238,7 +238,7 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 		  prop.value = nullptr; // We don't want to free the data
 		  return val;
 	  });
-	defSocket.property("enumSet", +[](lua_State *l, const pragma::shadergraph::Socket &socket) -> pragma::shadergraph::EnumSet * { return socket.enumSet.get(); });
+	defSocket.property("enumSet", +[](lua::State *l, const pragma::shadergraph::Socket &socket) -> pragma::shadergraph::EnumSet * { return socket.enumSet.get(); });
 	defSocket.def("IsLinkable", &pragma::shadergraph::Socket::IsLinkable);
 	defSocket.scope[defEnumSet];
 	modShader[defSocket];
@@ -274,7 +274,7 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 		  });
 	  });
 	defGraphNode.def(
-	  "GetInputValue", +[](lua_State *l, const pragma::shadergraph::GraphNode &graphNode, const std::string_view &inputName) -> Lua::udm_type {
+	  "GetInputValue", +[](lua::State *l, const pragma::shadergraph::GraphNode &graphNode, const std::string_view &inputName) -> Lua::udm_type {
 		  auto *input = graphNode.FindInput(inputName);
 		  if(!input)
 			  return Lua::nil;
@@ -307,7 +307,7 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 	defGraphNode.def("FindOutputIndex", &pragma::shadergraph::GraphNode::FindOutputIndex);
 	defGraphNode.def("FindInputIndex", &pragma::shadergraph::GraphNode::FindInputIndex);
 	defGraphNode.def(
-	  "GetInputs", +[](lua_State *l, const pragma::shadergraph::GraphNode &graphNode) -> luabind::object {
+	  "GetInputs", +[](lua::State *l, const pragma::shadergraph::GraphNode &graphNode) -> luabind::object {
 		  auto t = luabind::newtable(l);
 		  uint32_t idx = 1;
 		  for(auto &input : graphNode.inputs)
@@ -315,7 +315,7 @@ static void register_shader_graph(lua_State *l, luabind::module_ &modShader)
 		  return t;
 	  });
 	defGraphNode.def(
-	  "GetOutputs", +[](lua_State *l, const pragma::shadergraph::GraphNode &graphNode) -> luabind::object {
+	  "GetOutputs", +[](lua::State *l, const pragma::shadergraph::GraphNode &graphNode) -> luabind::object {
 		  auto t = luabind::newtable(l);
 		  uint32_t idx = 1;
 		  for(auto &output : graphNode.outputs)
@@ -391,7 +391,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defTexInfo.def("GetSize", &Lua::TextureInfo::GetSize);
 	defTexInfo.def("GetWidth", &Lua::TextureInfo::GetWidth);
 	defTexInfo.def("GetHeight", &Lua::TextureInfo::GetHeight);
-	defTexInfo.def("GetName", static_cast<std::string (*)(lua_State *, TextureInfo &)>([](lua_State *l, TextureInfo &textureInfo) { return textureInfo.name; }));
+	defTexInfo.def("GetName", static_cast<std::string (*)(lua::State *, TextureInfo &)>([](lua::State *l, TextureInfo &textureInfo) { return textureInfo.name; }));
 	modUtil[defTexInfo];
 
 	auto &modGame = lua.RegisterLibrary("game");
@@ -404,18 +404,18 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	sequenceDef.def("GetFrameOffset", &SpriteSheetAnimation::Sequence::GetFrameOffset);
 
 	auto frameDef = luabind::class_<SpriteSheetAnimation::Sequence::Frame>("Frame");
-	frameDef.def("GetUVBounds", static_cast<std::pair<Vector2, Vector2> (*)(lua_State *, SpriteSheetAnimation::Sequence::Frame &)>([](lua_State *l, SpriteSheetAnimation::Sequence::Frame &frame) { return std::pair<Vector2, Vector2> {frame.uvStart, frame.uvEnd}; }));
-	frameDef.def("GetDuration", static_cast<float (*)(lua_State *, SpriteSheetAnimation::Sequence::Frame &)>([](lua_State *l, SpriteSheetAnimation::Sequence::Frame &frame) -> float { return frame.duration; }));
+	frameDef.def("GetUVBounds", static_cast<std::pair<Vector2, Vector2> (*)(lua::State *, SpriteSheetAnimation::Sequence::Frame &)>([](lua::State *l, SpriteSheetAnimation::Sequence::Frame &frame) { return std::pair<Vector2, Vector2> {frame.uvStart, frame.uvEnd}; }));
+	frameDef.def("GetDuration", static_cast<float (*)(lua::State *, SpriteSheetAnimation::Sequence::Frame &)>([](lua::State *l, SpriteSheetAnimation::Sequence::Frame &frame) -> float { return frame.duration; }));
 	sequenceDef.scope[frameDef];
 
-	sequenceDef.def("GetFrameCount", static_cast<uint32_t (*)(lua_State *, SpriteSheetAnimation::Sequence &)>([](lua_State *l, SpriteSheetAnimation::Sequence &sequence) -> uint32_t { return sequence.frames.size(); }));
-	sequenceDef.def("GetFrame", static_cast<SpriteSheetAnimation::Sequence::Frame *(*)(lua_State *, SpriteSheetAnimation::Sequence &, uint32_t)>([](lua_State *l, SpriteSheetAnimation::Sequence &sequence, uint32_t frameIdx) -> SpriteSheetAnimation::Sequence::Frame * {
+	sequenceDef.def("GetFrameCount", static_cast<uint32_t (*)(lua::State *, SpriteSheetAnimation::Sequence &)>([](lua::State *l, SpriteSheetAnimation::Sequence &sequence) -> uint32_t { return sequence.frames.size(); }));
+	sequenceDef.def("GetFrame", static_cast<SpriteSheetAnimation::Sequence::Frame *(*)(lua::State *, SpriteSheetAnimation::Sequence &, uint32_t)>([](lua::State *l, SpriteSheetAnimation::Sequence &sequence, uint32_t frameIdx) -> SpriteSheetAnimation::Sequence::Frame * {
 		if(frameIdx >= sequence.frames.size())
 			return nullptr;
 		auto &frame = sequence.frames.at(frameIdx);
 		return &frame;
 	}));
-	sequenceDef.def("GetFrames", static_cast<luabind::tableT<SpriteSheetAnimation::Sequence::Frame> (*)(lua_State *, SpriteSheetAnimation::Sequence &)>([](lua_State *l, SpriteSheetAnimation::Sequence &sequence) -> luabind::tableT<SpriteSheetAnimation::Sequence::Frame> {
+	sequenceDef.def("GetFrames", static_cast<luabind::tableT<SpriteSheetAnimation::Sequence::Frame> (*)(lua::State *, SpriteSheetAnimation::Sequence &)>([](lua::State *l, SpriteSheetAnimation::Sequence &sequence) -> luabind::tableT<SpriteSheetAnimation::Sequence::Frame> {
 		auto &frames = sequence.frames;
 		auto t = luabind::newtable(l);
 		uint32_t frameIndex = 1;
@@ -423,9 +423,9 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 			t[frameIndex++] = &frame;
 		return t;
 	}));
-	sequenceDef.def("IsLooping", static_cast<bool (*)(lua_State *, SpriteSheetAnimation::Sequence &)>([](lua_State *l, SpriteSheetAnimation::Sequence &sequence) { return sequence.loop; }));
+	sequenceDef.def("IsLooping", static_cast<bool (*)(lua::State *, SpriteSheetAnimation::Sequence &)>([](lua::State *l, SpriteSheetAnimation::Sequence &sequence) { return sequence.loop; }));
 	sequenceDef.def("GetInterpolatedFrameData",
-	  static_cast<luabind::optional<luabind::mult<uint32_t, uint32_t, float>> (*)(lua_State *, SpriteSheetAnimation::Sequence &, float)>([](lua_State *l, SpriteSheetAnimation::Sequence &sequence, float ptTime) -> luabind::optional<luabind::mult<uint32_t, uint32_t, float>> {
+	  static_cast<luabind::optional<luabind::mult<uint32_t, uint32_t, float>> (*)(lua::State *, SpriteSheetAnimation::Sequence &, float)>([](lua::State *l, SpriteSheetAnimation::Sequence &sequence, float ptTime) -> luabind::optional<luabind::mult<uint32_t, uint32_t, float>> {
 		  uint32_t frameIndex0, frameIndex1;
 		  float interpFactor;
 		  if(sequence.GetInterpolatedFrameData(ptTime, frameIndex0, frameIndex1, interpFactor) == false)
@@ -435,14 +435,14 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 
 	spriteSheetDef.scope[sequenceDef];
 
-	spriteSheetDef.def("GetSequenceCount", static_cast<uint32_t (*)(lua_State *, SpriteSheetAnimation &)>([](lua_State *l, SpriteSheetAnimation &spriteSheetAnim) -> uint32_t { return spriteSheetAnim.sequences.size(); }));
-	spriteSheetDef.def("GetSequence", static_cast<SpriteSheetAnimation::Sequence *(*)(lua_State *, SpriteSheetAnimation &, uint32_t)>([](lua_State *l, SpriteSheetAnimation &spriteSheetAnim, uint32_t seqIdx) -> SpriteSheetAnimation::Sequence * {
+	spriteSheetDef.def("GetSequenceCount", static_cast<uint32_t (*)(lua::State *, SpriteSheetAnimation &)>([](lua::State *l, SpriteSheetAnimation &spriteSheetAnim) -> uint32_t { return spriteSheetAnim.sequences.size(); }));
+	spriteSheetDef.def("GetSequence", static_cast<SpriteSheetAnimation::Sequence *(*)(lua::State *, SpriteSheetAnimation &, uint32_t)>([](lua::State *l, SpriteSheetAnimation &spriteSheetAnim, uint32_t seqIdx) -> SpriteSheetAnimation::Sequence * {
 		if(seqIdx >= spriteSheetAnim.sequences.size())
 			return nullptr;
 		auto &seq = spriteSheetAnim.sequences.at(seqIdx);
 		return &seq;
 	}));
-	spriteSheetDef.def("GetSequences", static_cast<luabind::tableT<SpriteSheetAnimation::Sequence> (*)(lua_State *, SpriteSheetAnimation &)>([](lua_State *l, SpriteSheetAnimation &spriteSheetAnim) -> luabind::tableT<SpriteSheetAnimation::Sequence> {
+	spriteSheetDef.def("GetSequences", static_cast<luabind::tableT<SpriteSheetAnimation::Sequence> (*)(lua::State *, SpriteSheetAnimation &)>([](lua::State *l, SpriteSheetAnimation &spriteSheetAnim) -> luabind::tableT<SpriteSheetAnimation::Sequence> {
 		auto &sequences = spriteSheetAnim.sequences;
 		auto t = luabind::newtable(l);
 		uint32_t seqIdx = 1;
@@ -453,22 +453,22 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	materialClassDef.scope[spriteSheetDef];
 
 	Lua::Material::register_class(materialClassDef);
-	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, msys::Material *, const std::string &, const std::string &)>(&Lua::Material::Client::SetTexture));
-	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, msys::Material *, const std::string &, msys::Texture &)>(&Lua::Material::Client::SetTexture));
-	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, msys::Material *, const std::string &, Lua::Vulkan::Texture &)>(&Lua::Material::Client::SetTexture));
-	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, msys::Material *, const std::string &, Lua::Vulkan::Texture &, const std::string &)>(&Lua::Material::Client::SetTexture));
+	materialClassDef.def("SetTexture", static_cast<void (*)(lua::State *, msys::Material *, const std::string &, const std::string &)>(&Lua::Material::Client::SetTexture));
+	materialClassDef.def("SetTexture", static_cast<void (*)(lua::State *, msys::Material *, const std::string &, msys::Texture &)>(&Lua::Material::Client::SetTexture));
+	materialClassDef.def("SetTexture", static_cast<void (*)(lua::State *, msys::Material *, const std::string &, Lua::Vulkan::Texture &)>(&Lua::Material::Client::SetTexture));
+	materialClassDef.def("SetTexture", static_cast<void (*)(lua::State *, msys::Material *, const std::string &, Lua::Vulkan::Texture &, const std::string &)>(&Lua::Material::Client::SetTexture));
 	materialClassDef.def("GetTextureInfo", &Lua::Material::Client::GetTexture);
 	materialClassDef.def("ReloadTextures", &reload_textures);
-	materialClassDef.def("InitializeShaderDescriptorSet", static_cast<void (*)(lua_State *, msys::Material *, bool)>(&Lua::Material::Client::InitializeShaderData));
-	materialClassDef.def("InitializeShaderDescriptorSet", static_cast<void (*)(lua_State *, msys::Material *)>(&Lua::Material::Client::InitializeShaderData));
-	materialClassDef.def("ClearSpriteSheetAnimation", static_cast<void (*)(lua_State *, msys::Material &)>([](lua_State *l, msys::Material &mat) { static_cast<msys::CMaterial &>(mat).ClearSpriteSheetAnimation(); }));
-	materialClassDef.def("GetSpriteSheetAnimation", static_cast<void (*)(lua_State *, msys::Material &)>([](lua_State *l, msys::Material &mat) {
+	materialClassDef.def("InitializeShaderDescriptorSet", static_cast<void (*)(lua::State *, msys::Material *, bool)>(&Lua::Material::Client::InitializeShaderData));
+	materialClassDef.def("InitializeShaderDescriptorSet", static_cast<void (*)(lua::State *, msys::Material *)>(&Lua::Material::Client::InitializeShaderData));
+	materialClassDef.def("ClearSpriteSheetAnimation", static_cast<void (*)(lua::State *, msys::Material &)>([](lua::State *l, msys::Material &mat) { static_cast<msys::CMaterial &>(mat).ClearSpriteSheetAnimation(); }));
+	materialClassDef.def("GetSpriteSheetAnimation", static_cast<void (*)(lua::State *, msys::Material &)>([](lua::State *l, msys::Material &mat) {
 		auto *spriteSheetAnim = static_cast<msys::CMaterial &>(mat).GetSpriteSheetAnimation();
 		if(spriteSheetAnim == nullptr)
 			return;
 		Lua::Push<SpriteSheetAnimation *>(l, spriteSheetAnim);
 	}));
-	materialClassDef.def("SetShader", static_cast<void (*)(lua_State *, msys::Material &, const std::string &)>([](lua_State *l, msys::Material &mat, const std::string &shader) {
+	materialClassDef.def("SetShader", static_cast<void (*)(lua::State *, msys::Material &, const std::string &)>([](lua::State *l, msys::Material &mat, const std::string &shader) {
 		auto db = mat.GetPropertyDataBlock();
 		if(db == nullptr)
 			return;
@@ -481,7 +481,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		pragma::get_cgame()->ReloadMaterialShader(static_cast<msys::CMaterial *>(&mat));
 	}));
 	materialClassDef.def(
-	  "GetPrimaryShader", +[](lua_State *l, msys::Material &mat) -> luabind::object {
+	  "GetPrimaryShader", +[](lua::State *l, msys::Material &mat) -> luabind::object {
 		  auto *shader = static_cast<msys::CMaterial &>(mat).GetPrimaryShader();
 		  if(!shader)
 			  return Lua::nil;
@@ -495,9 +495,9 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	// prosper TODO
 	auto &modShader = lua.RegisterLibrary("shader",
 	  {{"register",
-	     [](lua_State *l) {
+	     [](lua::State *l) {
 		     auto *className = Lua::CheckString(l, 1);
-		     luaL_checkuserdata(l, 2);
+		     Lua::CheckUserData(l, 2);
 		     auto o = luabind::object(luabind::from_stack(l, 2));
 		     if(o) {
 			     auto &manager = pragma::get_cgame()->GetLuaShaderManager();
@@ -506,7 +506,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		     return 0;
 	     }},
 	    {"get",
-	      [](lua_State *l) {
+	      [](lua::State *l) {
 		      auto *className = Lua::CheckString(l, 1);
 		      auto whShader = pragma::get_cengine()->GetShader(className);
 		      if(whShader.expired())
@@ -515,7 +515,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		      return 1;
 	      }},
 	    {"get_all",
-	      [](lua_State *l) {
+	      [](lua::State *l) {
 		      auto t = luabind::newtable(l);
 		      uint32_t idx = 1;
 		      for(auto &shader : pragma::get_cengine()->GetShaderManager().GetShaders()) {
@@ -527,7 +527,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		      t.push(l);
 		      return 1;
 	      }},
-	    {"cubemap_to_equirectangular_texture", [](lua_State *l) {
+	    {"cubemap_to_equirectangular_texture", [](lua::State *l) {
 		     auto *shader = static_cast<pragma::ShaderCubemapToEquirectangular *>(pragma::get_cengine()->GetShader("cubemap_to_equirectangular").get());
 		     if(!shader)
 			     return 0;
@@ -693,7 +693,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 
 	auto defShader = luabind::class_<prosper::Shader>("Shader");
 	defShader.def(
-	  "GetWrapper", +[](lua_State *l, prosper::Shader &shader) -> luabind::object {
+	  "GetWrapper", +[](lua::State *l, prosper::Shader &shader) -> luabind::object {
 		  auto *lshader = dynamic_cast<pragma::LShaderBase *>(&shader);
 		  if(!lshader)
 			  return {};
@@ -701,27 +701,27 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	  });
 	defShader.def(
 	  "RecordBindDescriptorSet",
-	  +[](lua_State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets) { Lua::Shader::RecordBindDescriptorSet(l, shader, bindState, ds, firstSet, dynamicOffsets, 5); });
-	defShader.def("RecordBindDescriptorSet", +[](lua_State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet) { Lua::Shader::RecordBindDescriptorSet(l, shader, bindState, ds, firstSet, {}); });
-	defShader.def("RecordBindDescriptorSet", +[](lua_State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::DescriptorSet &ds) { Lua::Shader::RecordBindDescriptorSet(l, shader, bindState, ds, 0u, {}); });
+	  +[](lua::State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets) { Lua::Shader::RecordBindDescriptorSet(l, shader, bindState, ds, firstSet, dynamicOffsets, 5); });
+	defShader.def("RecordBindDescriptorSet", +[](lua::State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet) { Lua::Shader::RecordBindDescriptorSet(l, shader, bindState, ds, firstSet, {}); });
+	defShader.def("RecordBindDescriptorSet", +[](lua::State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::DescriptorSet &ds) { Lua::Shader::RecordBindDescriptorSet(l, shader, bindState, ds, 0u, {}); });
 	defShader.def("RecordBindDescriptorSets", &Lua::Shader::RecordBindDescriptorSets);
-	defShader.def("RecordBindDescriptorSets", +[](lua_State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, luabind::object descSets, uint32_t firstSet) { Lua::Shader::RecordBindDescriptorSets(l, shader, bindState, descSets, firstSet, {}); });
-	defShader.def("RecordBindDescriptorSets", +[](lua_State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, luabind::object descSets) { Lua::Shader::RecordBindDescriptorSets(l, shader, bindState, descSets, 0u, {}); });
+	defShader.def("RecordBindDescriptorSets", +[](lua::State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, luabind::object descSets, uint32_t firstSet) { Lua::Shader::RecordBindDescriptorSets(l, shader, bindState, descSets, firstSet, {}); });
+	defShader.def("RecordBindDescriptorSets", +[](lua::State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, luabind::object descSets) { Lua::Shader::RecordBindDescriptorSets(l, shader, bindState, descSets, 0u, {}); });
 	defShader.def(
 	  "RecordBindDescriptorSet",
-	  +[](lua_State *l, prosper::Shader &shader, prosper::util::PreparedCommandBuffer &pcb, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets) { Lua::Shader::RecordBindDescriptorSet(l, shader, pcb, ds, firstSet, dynamicOffsets, 5); });
-	defShader.def("RecordPushConstants", static_cast<void (*)(lua_State *, prosper::Shader &, const LuaShaderRecordTarget &, ::util::DataStream &, uint32_t)>(&Lua::Shader::RecordPushConstants));
-	defShader.def("RecordPushConstants", static_cast<void (*)(lua_State *, prosper::Shader &, prosper::util::PreparedCommandBuffer &, udm::Type, const Lua::Vulkan::PreparedCommandLuaArg &, uint32_t)>(&Lua::Shader::RecordPushConstants));
-	defShader.def("RecordPushConstants", static_cast<void (*)(lua_State *, prosper::Shader &, const LuaShaderRecordTarget &, ::util::DataStream &, uint32_t)>(&Lua::Shader::RecordPushConstants), luabind::default_parameter_policy<5, static_cast<uint32_t>(0)> {});
-	defShader.def("RecordPushConstants", static_cast<void (*)(lua_State *, prosper::Shader &, prosper::util::PreparedCommandBuffer &, udm::Type, const Lua::Vulkan::PreparedCommandLuaArg &, uint32_t)>(&Lua::Shader::RecordPushConstants),
+	  +[](lua::State *l, prosper::Shader &shader, prosper::util::PreparedCommandBuffer &pcb, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets) { Lua::Shader::RecordBindDescriptorSet(l, shader, pcb, ds, firstSet, dynamicOffsets, 5); });
+	defShader.def("RecordPushConstants", static_cast<void (*)(lua::State *, prosper::Shader &, const LuaShaderRecordTarget &, ::util::DataStream &, uint32_t)>(&Lua::Shader::RecordPushConstants));
+	defShader.def("RecordPushConstants", static_cast<void (*)(lua::State *, prosper::Shader &, prosper::util::PreparedCommandBuffer &, udm::Type, const Lua::Vulkan::PreparedCommandLuaArg &, uint32_t)>(&Lua::Shader::RecordPushConstants));
+	defShader.def("RecordPushConstants", static_cast<void (*)(lua::State *, prosper::Shader &, const LuaShaderRecordTarget &, ::util::DataStream &, uint32_t)>(&Lua::Shader::RecordPushConstants), luabind::default_parameter_policy<5, static_cast<uint32_t>(0)> {});
+	defShader.def("RecordPushConstants", static_cast<void (*)(lua::State *, prosper::Shader &, prosper::util::PreparedCommandBuffer &, udm::Type, const Lua::Vulkan::PreparedCommandLuaArg &, uint32_t)>(&Lua::Shader::RecordPushConstants),
 	  luabind::default_parameter_policy<6, static_cast<uint32_t>(0)> {});
 	defShader.def("GetEntrypointName", &Lua::Shader::GetEntrypointName);
-	defShader.def("GetEntrypointName", static_cast<void (*)(lua_State *, prosper::Shader &, uint32_t)>([](lua_State *l, prosper::Shader &shader, uint32_t shaderStage) { Lua::Shader::GetEntrypointName(l, shader, shaderStage, 0u); }));
+	defShader.def("GetEntrypointName", static_cast<void (*)(lua::State *, prosper::Shader &, uint32_t)>([](lua::State *l, prosper::Shader &shader, uint32_t shaderStage) { Lua::Shader::GetEntrypointName(l, shader, shaderStage, 0u); }));
 	defShader.def("CreateDescriptorSet", &Lua::Shader::CreateDescriptorSetGroup);
 	defShader.def("GetPipelineInfo", &Lua::Shader::GetPipelineInfo);
-	defShader.def("GetPipelineInfo", static_cast<void (*)(lua_State *, prosper::Shader &, uint32_t, uint32_t)>([](lua_State *l, prosper::Shader &shader, uint32_t shaderStage, uint32_t pipelineIdx) { Lua::Shader::GetPipelineInfo(l, shader, shaderStage, 0u); }));
+	defShader.def("GetPipelineInfo", static_cast<void (*)(lua::State *, prosper::Shader &, uint32_t, uint32_t)>([](lua::State *l, prosper::Shader &shader, uint32_t shaderStage, uint32_t pipelineIdx) { Lua::Shader::GetPipelineInfo(l, shader, shaderStage, 0u); }));
 	defShader.def("GetGlslSourceCode", &Lua::Shader::GetGlslSourceCode);
-	defShader.def("GetGlslSourceCode", static_cast<void (*)(lua_State *, prosper::Shader &, uint32_t, uint32_t)>([](lua_State *l, prosper::Shader &shader, uint32_t shaderStage, uint32_t pipelineIdx) { Lua::Shader::GetGlslSourceCode(l, shader, shaderStage, 0u); }));
+	defShader.def("GetGlslSourceCode", static_cast<void (*)(lua::State *, prosper::Shader &, uint32_t, uint32_t)>([](lua::State *l, prosper::Shader &shader, uint32_t shaderStage, uint32_t pipelineIdx) { Lua::Shader::GetGlslSourceCode(l, shader, shaderStage, 0u); }));
 
 	defShader.def("IsGraphicsShader", &Lua::Shader::IsGraphicsShader);
 	defShader.def("IsComputeShader", &Lua::Shader::IsComputeShader);
@@ -736,35 +736,35 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	auto defShaderGraphics = luabind::class_<prosper::ShaderGraphics, prosper::Shader>("Graphics");
 	defShaderGraphics.def("RecordBindVertexBuffer", &Lua::Shader::Graphics::RecordBindVertexBuffer);
 	defShaderGraphics.def(
-	  "RecordBindVertexBuffer", +[](lua_State *l, prosper::ShaderGraphics &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::Buffer &buffer, uint32_t startBinding) { Lua::Shader::Graphics::RecordBindVertexBuffer(l, shader, bindState, buffer, startBinding, 0u); });
-	defShaderGraphics.def("RecordBindVertexBuffer", +[](lua_State *l, prosper::ShaderGraphics &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::Buffer &buffer) { Lua::Shader::Graphics::RecordBindVertexBuffer(l, shader, bindState, buffer, 0u, 0u); });
+	  "RecordBindVertexBuffer", +[](lua::State *l, prosper::ShaderGraphics &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::Buffer &buffer, uint32_t startBinding) { Lua::Shader::Graphics::RecordBindVertexBuffer(l, shader, bindState, buffer, startBinding, 0u); });
+	defShaderGraphics.def("RecordBindVertexBuffer", +[](lua::State *l, prosper::ShaderGraphics &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::Buffer &buffer) { Lua::Shader::Graphics::RecordBindVertexBuffer(l, shader, bindState, buffer, 0u, 0u); });
 
 	defShaderGraphics.def("RecordBindVertexBuffers", &Lua::Shader::Graphics::RecordBindVertexBuffers);
 	defShaderGraphics.def(
-	  "RecordBindVertexBuffers", +[](lua_State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, luabind::object buffers, uint32_t startBinding) { Lua::Shader::Graphics::RecordBindVertexBuffers(l, shader, recordTarget, buffers, startBinding, {}); });
-	defShaderGraphics.def("RecordBindVertexBuffers", +[](lua_State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, luabind::object buffers) { Lua::Shader::Graphics::RecordBindVertexBuffers(l, shader, recordTarget, buffers, 0u, {}); });
+	  "RecordBindVertexBuffers", +[](lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, luabind::object buffers, uint32_t startBinding) { Lua::Shader::Graphics::RecordBindVertexBuffers(l, shader, recordTarget, buffers, startBinding, {}); });
+	defShaderGraphics.def("RecordBindVertexBuffers", +[](lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, luabind::object buffers) { Lua::Shader::Graphics::RecordBindVertexBuffers(l, shader, recordTarget, buffers, 0u, {}); });
 	defShaderGraphics.def("RecordBindIndexBuffer", &Lua::Shader::Graphics::RecordBindIndexBuffer);
 	defShaderGraphics.def(
-	  "RecordBindIndexBuffer", +[](lua_State *l, prosper::ShaderGraphics &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::Buffer &indexBuffer, uint32_t indexType) { Lua::Shader::Graphics::RecordBindIndexBuffer(l, shader, bindState, indexBuffer, indexType, 0u); });
-	defShaderGraphics.def("RecordDraw", static_cast<void (*)(lua_State *, prosper::ShaderGraphics &, const LuaShaderRecordTarget &, uint32_t, uint32_t, uint32_t, uint32_t)>(&Lua::Shader::Graphics::RecordDraw));
+	  "RecordBindIndexBuffer", +[](lua::State *l, prosper::ShaderGraphics &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::Buffer &indexBuffer, uint32_t indexType) { Lua::Shader::Graphics::RecordBindIndexBuffer(l, shader, bindState, indexBuffer, indexType, 0u); });
+	defShaderGraphics.def("RecordDraw", static_cast<void (*)(lua::State *, prosper::ShaderGraphics &, const LuaShaderRecordTarget &, uint32_t, uint32_t, uint32_t, uint32_t)>(&Lua::Shader::Graphics::RecordDraw));
 	defShaderGraphics.def(
-	  "RecordDraw", +[](lua_State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, uint32_t vertCount, uint32_t instanceCount, uint32_t firstVertex) { Lua::Shader::Graphics::RecordDraw(l, shader, recordTarget, vertCount, instanceCount, firstVertex, 0u); });
-	defShaderGraphics.def("RecordDraw", +[](lua_State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, uint32_t vertCount, uint32_t instanceCount) { Lua::Shader::Graphics::RecordDraw(l, shader, recordTarget, vertCount, instanceCount, 0u, 0u); });
-	defShaderGraphics.def("RecordDraw", +[](lua_State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, uint32_t vertCount) { Lua::Shader::Graphics::RecordDraw(l, shader, recordTarget, vertCount, 1u, 0u, 0u); });
+	  "RecordDraw", +[](lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, uint32_t vertCount, uint32_t instanceCount, uint32_t firstVertex) { Lua::Shader::Graphics::RecordDraw(l, shader, recordTarget, vertCount, instanceCount, firstVertex, 0u); });
+	defShaderGraphics.def("RecordDraw", +[](lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, uint32_t vertCount, uint32_t instanceCount) { Lua::Shader::Graphics::RecordDraw(l, shader, recordTarget, vertCount, instanceCount, 0u, 0u); });
+	defShaderGraphics.def("RecordDraw", +[](lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, uint32_t vertCount) { Lua::Shader::Graphics::RecordDraw(l, shader, recordTarget, vertCount, 1u, 0u, 0u); });
 	defShaderGraphics.def("RecordDrawIndexed", &Lua::Shader::Graphics::RecordDrawIndexed);
 	defShaderGraphics.def(
 	  "RecordDrawIndexed",
-	  +[](lua_State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex) { Lua::Shader::Graphics::RecordDrawIndexed(l, shader, recordTarget, indexCount, instanceCount, firstIndex, 0u); });
+	  +[](lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex) { Lua::Shader::Graphics::RecordDrawIndexed(l, shader, recordTarget, indexCount, instanceCount, firstIndex, 0u); });
 	defShaderGraphics.def(
-	  "RecordDrawIndexed", +[](lua_State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, uint32_t indexCount, uint32_t instanceCount) { Lua::Shader::Graphics::RecordDrawIndexed(l, shader, recordTarget, indexCount, instanceCount, 0u, 0); });
-	defShaderGraphics.def("RecordDrawIndexed", +[](lua_State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, uint32_t indexCount) { Lua::Shader::Graphics::RecordDrawIndexed(l, shader, recordTarget, indexCount, 1u, 0u, 0); });
+	  "RecordDrawIndexed", +[](lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, uint32_t indexCount, uint32_t instanceCount) { Lua::Shader::Graphics::RecordDrawIndexed(l, shader, recordTarget, indexCount, instanceCount, 0u, 0); });
+	defShaderGraphics.def("RecordDrawIndexed", +[](lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, uint32_t indexCount) { Lua::Shader::Graphics::RecordDrawIndexed(l, shader, recordTarget, indexCount, 1u, 0u, 0); });
 	defShaderGraphics.def("RecordBeginDraw", &Lua::Shader::Graphics::RecordBeginDraw);
-	defShaderGraphics.def("RecordBeginDraw", +[](lua_State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget) { Lua::Shader::Graphics::RecordBeginDraw(l, shader, recordTarget, 0u); });
-	defShaderGraphics.def("RecordDraw", static_cast<void (*)(lua_State *, prosper::ShaderGraphics &, const LuaShaderRecordTarget &)>(&Lua::Shader::Graphics::RecordDraw));
+	defShaderGraphics.def("RecordBeginDraw", +[](lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget) { Lua::Shader::Graphics::RecordBeginDraw(l, shader, recordTarget, 0u); });
+	defShaderGraphics.def("RecordDraw", static_cast<void (*)(lua::State *, prosper::ShaderGraphics &, const LuaShaderRecordTarget &)>(&Lua::Shader::Graphics::RecordDraw));
 	defShaderGraphics.def("RecordEndDraw", &Lua::Shader::Graphics::RecordEndDraw);
-	defShaderGraphics.def("GetRenderPass", static_cast<void (*)(lua_State *, prosper::ShaderGraphics &, uint32_t)>(&Lua::Shader::Graphics::GetRenderPass));
-	defShaderGraphics.def("GetRenderPass", static_cast<void (*)(lua_State *, prosper::ShaderGraphics &)>([](lua_State *l, prosper::ShaderGraphics &shader) { Lua::Shader::Graphics::GetRenderPass(l, shader, 0u); }));
-	defShaderGraphics.scope[luabind::def("get_render_pass", static_cast<void (*)(lua_State *)>([](lua_State *l) {
+	defShaderGraphics.def("GetRenderPass", static_cast<void (*)(lua::State *, prosper::ShaderGraphics &, uint32_t)>(&Lua::Shader::Graphics::GetRenderPass));
+	defShaderGraphics.def("GetRenderPass", static_cast<void (*)(lua::State *, prosper::ShaderGraphics &)>([](lua::State *l, prosper::ShaderGraphics &shader) { Lua::Shader::Graphics::GetRenderPass(l, shader, 0u); }));
+	defShaderGraphics.scope[luabind::def("get_render_pass", static_cast<void (*)(lua::State *)>([](lua::State *l) {
 		auto &rp = prosper::ShaderGraphics::GetRenderPass<prosper::ShaderGraphics>(pragma::get_cengine()->GetRenderContext());
 		if(rp == nullptr)
 			return;
@@ -777,7 +777,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 
 	auto defShaderScene = luabind::class_<pragma::ShaderScene, luabind::bases<prosper::ShaderGraphics, prosper::Shader>>("Scene3D");
 	defShaderScene.scope[luabind::def("get_render_pass", &Lua::Shader::Scene3D::GetRenderPass)];
-	defShaderScene.scope[luabind::def("get_render_pass", static_cast<void (*)(lua_State *)>([](lua_State *l) { Lua::Shader::Scene3D::GetRenderPass(l, 0u); }))];
+	defShaderScene.scope[luabind::def("get_render_pass", static_cast<void (*)(lua::State *)>([](lua::State *l) { Lua::Shader::Scene3D::GetRenderPass(l, 0u); }))];
 	defShaderScene.add_static_constant("RENDER_PASS_COLOR_FORMAT", umath::to_integral(pragma::ShaderScene::RENDER_PASS_FORMAT));
 	defShaderScene.add_static_constant("RENDER_PASS_BLOOM_FORMAT", umath::to_integral(pragma::ShaderScene::RENDER_PASS_FORMAT));
 	defShaderScene.add_static_constant("RENDER_PASS_DEPTH_FORMAT", umath::to_integral(pragma::ShaderScene::RENDER_PASS_DEPTH_FORMAT));
@@ -806,11 +806,11 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 
 	auto defShaderCompute = luabind::class_<prosper::ShaderCompute, prosper::Shader>("Compute");
 	defShaderCompute.def("RecordDispatch", &Lua::Shader::Compute::RecordDispatch);
-	defShaderCompute.def("RecordDispatch", +[](lua_State *l, prosper::ShaderCompute &shader, prosper::ShaderBindState &bindState, uint32_t x, uint32_t y) { Lua::Shader::Compute::RecordDispatch(l, shader, bindState, x, y, 1u); });
-	defShaderCompute.def("RecordDispatch", +[](lua_State *l, prosper::ShaderCompute &shader, prosper::ShaderBindState &bindState, uint32_t x) { Lua::Shader::Compute::RecordDispatch(l, shader, bindState, x, 1u, 1u); });
-	defShaderCompute.def("RecordDispatch", +[](lua_State *l, prosper::ShaderCompute &shader, prosper::ShaderBindState &bindState) { Lua::Shader::Compute::RecordDispatch(l, shader, bindState, 1u, 1u, 1u); });
+	defShaderCompute.def("RecordDispatch", +[](lua::State *l, prosper::ShaderCompute &shader, prosper::ShaderBindState &bindState, uint32_t x, uint32_t y) { Lua::Shader::Compute::RecordDispatch(l, shader, bindState, x, y, 1u); });
+	defShaderCompute.def("RecordDispatch", +[](lua::State *l, prosper::ShaderCompute &shader, prosper::ShaderBindState &bindState, uint32_t x) { Lua::Shader::Compute::RecordDispatch(l, shader, bindState, x, 1u, 1u); });
+	defShaderCompute.def("RecordDispatch", +[](lua::State *l, prosper::ShaderCompute &shader, prosper::ShaderBindState &bindState) { Lua::Shader::Compute::RecordDispatch(l, shader, bindState, 1u, 1u, 1u); });
 	defShaderCompute.def("RecordBeginCompute", &Lua::Shader::Compute::RecordBeginCompute);
-	defShaderCompute.def("RecordBeginCompute", +[](lua_State *l, prosper::ShaderCompute &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::CommandBuffer &hCommandBuffer) { Lua::Shader::Compute::RecordBeginCompute(l, shader, bindState, 0u); });
+	defShaderCompute.def("RecordBeginCompute", +[](lua::State *l, prosper::ShaderCompute &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::CommandBuffer &hCommandBuffer) { Lua::Shader::Compute::RecordBeginCompute(l, shader, bindState, 0u); });
 	defShaderCompute.def("RecordCompute", &Lua::Shader::Compute::RecordCompute);
 	defShaderCompute.def("RecordEndCompute", &Lua::Shader::Compute::RecordEndCompute);
 	modShader[defShaderCompute];
@@ -820,8 +820,8 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defShaderComposeRMA.add_static_constant("FLAG_NONE", umath::to_integral(pragma::ShaderComposeRMA::Flags::None));
 	defShaderComposeRMA.add_static_constant("FLAG_USE_SPECULAR_WORKFLOW_BIT", umath::to_integral(pragma::ShaderComposeRMA::Flags::UseSpecularWorkflow));
 	defShaderComposeRMA.def("ComposeRMA",
-	  static_cast<void (*)(lua_State *, pragma::ShaderComposeRMA &, prosper::Texture *, prosper::Texture *, prosper::Texture *, uint32_t)>(
-	    [](lua_State *l, pragma::ShaderComposeRMA &shader, prosper::Texture *roughnessMap, prosper::Texture *metalnessMap, prosper::Texture *aoMap, uint32_t flags) {
+	  static_cast<void (*)(lua::State *, pragma::ShaderComposeRMA &, prosper::Texture *, prosper::Texture *, prosper::Texture *, uint32_t)>(
+	    [](lua::State *l, pragma::ShaderComposeRMA &shader, prosper::Texture *roughnessMap, prosper::Texture *metalnessMap, prosper::Texture *aoMap, uint32_t flags) {
 		    auto rma = shader.ComposeRMA(pragma::get_cengine()->GetRenderContext(), roughnessMap, metalnessMap, aoMap, static_cast<pragma::ShaderComposeRMA::Flags>(flags));
 		    if(rma == nullptr)
 			    return;
@@ -1035,7 +1035,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		  return static_cast<pragma::LShaderGui *>(&shader.GetShader())->RecordBeginDraw(bindState, drawState, width, height, pipelineIdx, msaa, testStencilLevel);
 	  });
 	defShaderGUIBase.def(
-	  "RecordBeginDraw", +[](lua_State *l, pragma::LuaShaderWrapperGUI &shader, prosper::util::PreparedCommandBuffer &pcb) {
+	  "RecordBeginDraw", +[](lua::State *l, pragma::LuaShaderWrapperGUI &shader, prosper::util::PreparedCommandBuffer &pcb) {
 		  auto hShader = shader.GetShader().GetHandle();
 		  pcb.PushCommand(
 		    [hShader](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
@@ -1056,7 +1056,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	modShader[defShaderGUITexturedBase];
 
 	auto defShaderParticleBase = luabind::class_<pragma::LuaShaderWrapperParticle2D, luabind::bases<pragma::LuaShaderWrapperGraphicsBase, pragma::LuaShaderWrapperBase>>("BaseParticle2D");
-	defShaderParticleBase.scope[luabind::def("get_depth_pipeline_render_pass", static_cast<void (*)(lua_State *)>([](lua_State *l) {
+	defShaderParticleBase.scope[luabind::def("get_depth_pipeline_render_pass", static_cast<void (*)(lua::State *)>([](lua::State *l) {
 		auto &rp = prosper::ShaderGraphics::GetRenderPass<pragma::ShaderParticle2DBase>(pragma::get_cengine()->GetRenderContext(), pragma::ShaderParticle2DBase::GetDepthPipelineIndex());
 		if(rp == nullptr)
 			return;
@@ -1066,7 +1066,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defShaderParticleBase.add_static_constant("PUSH_CONSTANTS_SIZE", sizeof(pragma::ShaderParticle2DBase::PushConstants));
 	defShaderParticleBase.add_static_constant("PUSH_CONSTANTS_USER_DATA_OFFSET", sizeof(pragma::ShaderParticle2DBase::PushConstants));
 	defShaderParticleBase.def(
-	  "RecordBeginDraw", +[](lua_State *l, pragma::LuaShaderWrapperParticle2D &shader, prosper::ShaderBindState &bindState, pragma::ecs::CParticleSystemComponent &ps, uint32_t renderFlags) {
+	  "RecordBeginDraw", +[](lua::State *l, pragma::LuaShaderWrapperParticle2D &shader, prosper::ShaderBindState &bindState, pragma::ecs::CParticleSystemComponent &ps, uint32_t renderFlags) {
 		  return static_cast<pragma::LShaderParticle2D *>(&shader.GetShader())->RecordBeginDraw(bindState, ps, static_cast<pragma::ecs::ParticleRenderFlags>(renderFlags));
 	  });
 
@@ -1245,10 +1245,10 @@ void CGame::RegisterLuaClasses()
 	defRenderPassStats.add_static_constant("TIMER_GPU_COUNT", umath::to_integral(RenderPassStats::Timer::GpuCount));
 	defRenderPassStats.add_static_constant("TIMER_CPU_COUNT", umath::to_integral(RenderPassStats::Timer::CpuCount));
 	static_assert(umath::to_integral(RenderPassStats::Timer::Count) == 7);
-	defRenderPassStats.def("Copy", static_cast<RenderPassStats (*)(lua_State *, RenderPassStats &)>([](lua_State *l, RenderPassStats &renderStats) -> RenderPassStats { return renderStats; }));
-	defRenderPassStats.def("GetCount", static_cast<uint32_t (*)(lua_State *, RenderPassStats &, RenderPassStats::Counter)>([](lua_State *l, RenderPassStats &renderStats, RenderPassStats::Counter counter) -> uint32_t { return renderStats->GetCount(counter); }));
+	defRenderPassStats.def("Copy", static_cast<RenderPassStats (*)(lua::State *, RenderPassStats &)>([](lua::State *l, RenderPassStats &renderStats) -> RenderPassStats { return renderStats; }));
+	defRenderPassStats.def("GetCount", static_cast<uint32_t (*)(lua::State *, RenderPassStats &, RenderPassStats::Counter)>([](lua::State *l, RenderPassStats &renderStats, RenderPassStats::Counter counter) -> uint32_t { return renderStats->GetCount(counter); }));
 	defRenderPassStats.def("GetTime",
-	  static_cast<long double (*)(lua_State *, RenderPassStats &, RenderPassStats::Timer)>([](lua_State *l, RenderPassStats &renderStats, RenderPassStats::Timer timer) -> long double { return renderStats->GetTime(timer).count() / static_cast<long double>(1'000'000.0); }));
+	  static_cast<long double (*)(lua::State *, RenderPassStats &, RenderPassStats::Timer)>([](lua::State *l, RenderPassStats &renderStats, RenderPassStats::Timer timer) -> long double { return renderStats->GetTime(timer).count() / static_cast<long double>(1'000'000.0); }));
 	modGame[defRenderPassStats];
 
 	auto defRenderStats = luabind::class_<RenderStats>("RenderStats");
@@ -1286,10 +1286,10 @@ void CGame::RegisterLuaClasses()
 	defRenderStats.add_static_constant("TIMER_RENDER_SCENE_CPU", umath::to_integral(RenderStats::RenderStage::RenderSceneCpu));
 	defRenderStats.add_static_constant("TIMER_COUNT", umath::to_integral(RenderStats::RenderStage::Count));
 	static_assert(umath::to_integral(RenderStats::RenderStage::Count) == 21);
-	defRenderStats.def("Copy", static_cast<RenderStats (*)(lua_State *, RenderStats &)>([](lua_State *l, RenderStats &renderStats) -> RenderStats { return renderStats; }));
-	defRenderStats.def("GetPassStats", static_cast<RenderPassStats *(*)(lua_State *, RenderStats &, RenderStats::RenderPass)>([](lua_State *l, RenderStats &renderStats, RenderStats::RenderPass pass) -> RenderPassStats * { return &renderStats.GetPassStats(pass); }));
+	defRenderStats.def("Copy", static_cast<RenderStats (*)(lua::State *, RenderStats &)>([](lua::State *l, RenderStats &renderStats) -> RenderStats { return renderStats; }));
+	defRenderStats.def("GetPassStats", static_cast<RenderPassStats *(*)(lua::State *, RenderStats &, RenderStats::RenderPass)>([](lua::State *l, RenderStats &renderStats, RenderStats::RenderPass pass) -> RenderPassStats * { return &renderStats.GetPassStats(pass); }));
 	defRenderStats.def("GetTime",
-	  static_cast<long double (*)(lua_State *, RenderStats &, RenderStats::RenderStage)>([](lua_State *l, RenderStats &renderStats, RenderStats::RenderStage timer) -> long double { return renderStats->GetTime(timer).count() / static_cast<long double>(1'000'000.0); }));
+	  static_cast<long double (*)(lua::State *, RenderStats &, RenderStats::RenderStage)>([](lua::State *l, RenderStats &renderStats, RenderStats::RenderStage timer) -> long double { return renderStats->GetTime(timer).count() / static_cast<long double>(1'000'000.0); }));
 	modGame[defRenderStats];
 
 	auto defDrawSceneInfo = luabind::class_<::util::DrawSceneInfo>("DrawSceneInfo");
@@ -1300,7 +1300,7 @@ void CGame::RegisterLuaClasses()
 	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_LIGHTING_PASS_BIT", umath::to_integral(::util::DrawSceneInfo::Flags::DisableLightingPass));
 	defDrawSceneInfo.def(luabind::constructor<>());
 	defDrawSceneInfo.property("scene", static_cast<luabind::object (*)(const ::util::DrawSceneInfo &)>([](const ::util::DrawSceneInfo &drawSceneInfo) -> luabind::object { return drawSceneInfo.scene.valid() ? drawSceneInfo.scene->GetLuaObject() : luabind::object {}; }),
-	  static_cast<void (*)(lua_State *, ::util::DrawSceneInfo &, luabind::object)>([](lua_State *l, ::util::DrawSceneInfo &drawSceneInfo, luabind::object o) {
+	  static_cast<void (*)(lua::State *, ::util::DrawSceneInfo &, luabind::object)>([](lua::State *l, ::util::DrawSceneInfo &drawSceneInfo, luabind::object o) {
 		  if(Lua::IsSet(l, 2) == false) {
 			  drawSceneInfo.scene = decltype(drawSceneInfo.scene) {};
 			  return;
@@ -1308,10 +1308,10 @@ void CGame::RegisterLuaClasses()
 		  auto &scene = Lua::Check<pragma::CSceneComponent>(l, 2);
 		  drawSceneInfo.scene = scene.GetHandle<pragma::CSceneComponent>();
 	  }));
-	defDrawSceneInfo.property("toneMapping", static_cast<luabind::object (*)(lua_State *, ::util::DrawSceneInfo &)>([](lua_State *l, ::util::DrawSceneInfo &drawSceneInfo) -> luabind::object {
+	defDrawSceneInfo.property("toneMapping", static_cast<luabind::object (*)(lua::State *, ::util::DrawSceneInfo &)>([](lua::State *l, ::util::DrawSceneInfo &drawSceneInfo) -> luabind::object {
 		return drawSceneInfo.toneMapping.has_value() ? luabind::object {l, umath::to_integral(*drawSceneInfo.toneMapping)} : luabind::object {};
 	}),
-	  static_cast<void (*)(lua_State *, ::util::DrawSceneInfo &, luabind::object)>([](lua_State *l, ::util::DrawSceneInfo &drawSceneInfo, luabind::object o) {
+	  static_cast<void (*)(lua::State *, ::util::DrawSceneInfo &, luabind::object)>([](lua::State *l, ::util::DrawSceneInfo &drawSceneInfo, luabind::object o) {
 		  if(Lua::IsSet(l, 2) == false) {
 			  drawSceneInfo.toneMapping = {};
 			  return;
@@ -1335,38 +1335,38 @@ void CGame::RegisterLuaClasses()
 	static_assert(sizeof(::util::DrawSceneInfo::outputLayerId) == sizeof(uint32_t));
 	defDrawSceneInfo.def_readwrite("outputLayerId", reinterpret_cast<uint32_t util::DrawSceneInfo::*>(&::util::DrawSceneInfo::outputLayerId));
 	defDrawSceneInfo.property("clearColor", static_cast<Color (*)(::util::DrawSceneInfo &)>([](::util::DrawSceneInfo &drawSceneInfo) -> Color { return *drawSceneInfo.clearColor; }),
-	  static_cast<void (*)(lua_State *, ::util::DrawSceneInfo &, const luabind::object &)>([](lua_State *l, ::util::DrawSceneInfo &drawSceneInfo, const luabind::object &color) {
-		  if(luabind::type(color) == LUA_TNIL)
+	  static_cast<void (*)(lua::State *, ::util::DrawSceneInfo &, const luabind::object &)>([](lua::State *l, ::util::DrawSceneInfo &drawSceneInfo, const luabind::object &color) {
+		  if(static_cast<Lua::Type>(luabind::type(color)) == Lua::Type::Nil)
 			  drawSceneInfo.clearColor = {};
 		  else
 			  drawSceneInfo.clearColor = Lua::Check<Color>(l, 2);
 	  }));
 	defDrawSceneInfo.property("clipPlane", static_cast<Vector4 (*)(::util::DrawSceneInfo &)>([](::util::DrawSceneInfo &drawSceneInfo) -> Vector4 { return *drawSceneInfo.clipPlane; }),
-	  static_cast<void (*)(lua_State *, ::util::DrawSceneInfo &, const luabind::object &)>([](lua_State *l, ::util::DrawSceneInfo &drawSceneInfo, const luabind::object &clipPlane) {
-		  if(luabind::type(clipPlane) == LUA_TNIL)
+	  static_cast<void (*)(lua::State *, ::util::DrawSceneInfo &, const luabind::object &)>([](lua::State *l, ::util::DrawSceneInfo &drawSceneInfo, const luabind::object &clipPlane) {
+		  if(static_cast<Lua::Type>(luabind::type(clipPlane)) == Lua::Type::Nil)
 			  drawSceneInfo.clipPlane = {};
 		  else
 			  drawSceneInfo.clipPlane = Lua::Check<Vector4>(l, 2);
 	  }));
 	defDrawSceneInfo.property("pvsOrigin", static_cast<Vector3 (*)(::util::DrawSceneInfo &)>([](::util::DrawSceneInfo &drawSceneInfo) -> Vector3 { return *drawSceneInfo.pvsOrigin; }),
-	  static_cast<void (*)(lua_State *, ::util::DrawSceneInfo &, const luabind::object &)>([](lua_State *l, ::util::DrawSceneInfo &drawSceneInfo, const luabind::object &pvsOrigin) {
-		  if(luabind::type(pvsOrigin) == LUA_TNIL)
+	  static_cast<void (*)(lua::State *, ::util::DrawSceneInfo &, const luabind::object &)>([](lua::State *l, ::util::DrawSceneInfo &drawSceneInfo, const luabind::object &pvsOrigin) {
+		  if(static_cast<Lua::Type>(luabind::type(pvsOrigin)) == Lua::Type::Nil)
 			  drawSceneInfo.pvsOrigin = {};
 		  else
 			  drawSceneInfo.pvsOrigin = Lua::Check<Vector3>(l, 2);
 	  }));
-	defDrawSceneInfo.property("renderStats", static_cast<luabind::object (*)(lua_State *, ::util::DrawSceneInfo &)>([](lua_State *l, ::util::DrawSceneInfo &drawSceneInfo) -> luabind::object {
+	defDrawSceneInfo.property("renderStats", static_cast<luabind::object (*)(lua::State *, ::util::DrawSceneInfo &)>([](lua::State *l, ::util::DrawSceneInfo &drawSceneInfo) -> luabind::object {
 		if(drawSceneInfo.renderStats == nullptr)
 			return {};
 		return luabind::object {l, drawSceneInfo.renderStats.get()};
 	}));
 	defDrawSceneInfo.def("AddSubPass", &::util::DrawSceneInfo::AddSubPass);
-	defDrawSceneInfo.def("SetEntityRenderFilter", static_cast<void (*)(lua_State *, util::DrawSceneInfo &, luabind::object)>([](lua_State *l, util::DrawSceneInfo &drawSceneInfo, luabind::object f) {
+	defDrawSceneInfo.def("SetEntityRenderFilter", static_cast<void (*)(lua::State *, util::DrawSceneInfo &, luabind::object)>([](lua::State *l, util::DrawSceneInfo &drawSceneInfo, luabind::object f) {
 		Lua::CheckFunction(l, 2);
 		drawSceneInfo.renderFilter = [f, l](CBaseEntity &ent) -> bool {
 			auto r = Lua::CallFunction(
 			  l,
-			  [&f, &ent](lua_State *l) {
+			  [&f, &ent](lua::State *l) {
 				  f.push(l);
 				  ent.GetLuaObject().push(l);
 				  return Lua::StatusCode::Ok;
@@ -1380,12 +1380,12 @@ void CGame::RegisterLuaClasses()
 			return true;
 		};
 	}));
-	defDrawSceneInfo.def("SetEntityPrepassFilter", static_cast<void (*)(lua_State *, util::DrawSceneInfo &, luabind::object)>([](lua_State *l, util::DrawSceneInfo &drawSceneInfo, luabind::object f) {
+	defDrawSceneInfo.def("SetEntityPrepassFilter", static_cast<void (*)(lua::State *, util::DrawSceneInfo &, luabind::object)>([](lua::State *l, util::DrawSceneInfo &drawSceneInfo, luabind::object f) {
 		Lua::CheckFunction(l, 2);
 		drawSceneInfo.prepassFilter = [f, l](CBaseEntity &ent) -> bool {
 			auto r = Lua::CallFunction(
 			  l,
-			  [&f, &ent](lua_State *l) {
+			  [&f, &ent](lua::State *l) {
 				  f.push(l);
 				  ent.GetLuaObject().push(l);
 				  return Lua::StatusCode::Ok;
@@ -1408,24 +1408,24 @@ void CGame::RegisterLuaClasses()
 	    {"SCENE_RENDER_PASS_SKY", umath::to_integral(pragma::rendering::SceneRenderPass::Sky)}, {"SCENE_RENDER_PASS_COUNT", umath::to_integral(pragma::rendering::SceneRenderPass::Count)}});
 
 	auto defRenderQueue = luabind::class_<pragma::rendering::RenderQueue>("RenderQueue");
-	defRenderQueue.def("WaitForCompletion", static_cast<void (*)(lua_State *, const pragma::rendering::RenderQueue &)>([](lua_State *l, const pragma::rendering::RenderQueue &renderQueue) { renderQueue.WaitForCompletion(); }));
-	defRenderQueue.def("IsComplete", static_cast<bool (*)(lua_State *, const pragma::rendering::RenderQueue &)>([](lua_State *l, const pragma::rendering::RenderQueue &renderQueue) -> bool { return renderQueue.IsComplete(); }));
+	defRenderQueue.def("WaitForCompletion", static_cast<void (*)(lua::State *, const pragma::rendering::RenderQueue &)>([](lua::State *l, const pragma::rendering::RenderQueue &renderQueue) { renderQueue.WaitForCompletion(); }));
+	defRenderQueue.def("IsComplete", static_cast<bool (*)(lua::State *, const pragma::rendering::RenderQueue &)>([](lua::State *l, const pragma::rendering::RenderQueue &renderQueue) -> bool { return renderQueue.IsComplete(); }));
 	modGame[defRenderQueue];
 
 	auto defBaseRenderProcessor = luabind::class_<pragma::rendering::BaseRenderProcessor>("BaseRenderProcessor");
-	defBaseRenderProcessor.def("SetDepthBias", static_cast<void (*)(lua_State *, pragma::rendering::BaseRenderProcessor &, float, float)>([](lua_State *l, pragma::rendering::BaseRenderProcessor &processor, float d, float delta) { processor.SetDepthBias(d, delta); }));
+	defBaseRenderProcessor.def("SetDepthBias", static_cast<void (*)(lua::State *, pragma::rendering::BaseRenderProcessor &, float, float)>([](lua::State *l, pragma::rendering::BaseRenderProcessor &processor, float d, float delta) { processor.SetDepthBias(d, delta); }));
 	modGame[defBaseRenderProcessor];
 
 	auto defDepthStageRenderProcessor = luabind::class_<pragma::rendering::DepthStageRenderProcessor, luabind::bases<pragma::rendering::BaseRenderProcessor>>("DepthStageRenderProcessor");
 	defDepthStageRenderProcessor.def("Render",
-	  static_cast<void (*)(lua_State *, pragma::rendering::DepthStageRenderProcessor &, const pragma::rendering::RenderQueue &)>(
-	    [](lua_State *l, pragma::rendering::DepthStageRenderProcessor &processor, const pragma::rendering::RenderQueue &renderQueue) { processor.Render(renderQueue, pragma::rendering::RenderPass::Prepass); }));
+	  static_cast<void (*)(lua::State *, pragma::rendering::DepthStageRenderProcessor &, const pragma::rendering::RenderQueue &)>(
+	    [](lua::State *l, pragma::rendering::DepthStageRenderProcessor &processor, const pragma::rendering::RenderQueue &renderQueue) { processor.Render(renderQueue, pragma::rendering::RenderPass::Prepass); }));
 	modGame[defDepthStageRenderProcessor];
 
 	auto defLightingStageRenderProcessor = luabind::class_<pragma::rendering::LightingStageRenderProcessor, luabind::bases<pragma::rendering::BaseRenderProcessor>>("LightingStageRenderProcessor");
 	defLightingStageRenderProcessor.def("Render",
-	  static_cast<void (*)(lua_State *, pragma::rendering::LightingStageRenderProcessor &, const pragma::rendering::RenderQueue &)>(
-	    [](lua_State *l, pragma::rendering::LightingStageRenderProcessor &processor, const pragma::rendering::RenderQueue &renderQueue) { processor.Render(renderQueue); }));
+	  static_cast<void (*)(lua::State *, pragma::rendering::LightingStageRenderProcessor &, const pragma::rendering::RenderQueue &)>(
+	    [](lua::State *l, pragma::rendering::LightingStageRenderProcessor &processor, const pragma::rendering::RenderQueue &renderQueue) { processor.Render(renderQueue); }));
 	modGame[defLightingStageRenderProcessor];
 
 	auto modelMeshClassDef = luabind::class_<ModelMesh>("Mesh");
@@ -1475,7 +1475,7 @@ void CGame::RegisterLuaClasses()
 	defMdlExportInfo.def_readwrite("mergeMeshesByMaterial", &pragma::asset::ModelExportInfo::mergeMeshesByMaterial);
 	defMdlExportInfo.def_readwrite("imageFormat", reinterpret_cast<std::underlying_type_t<decltype(pragma::asset::ModelExportInfo::imageFormat)> pragma::asset::ModelExportInfo::*>(&pragma::asset::ModelExportInfo::imageFormat));
 	defMdlExportInfo.def_readwrite("aoDevice", reinterpret_cast<std::underlying_type_t<decltype(pragma::asset::ModelExportInfo::aoDevice)> pragma::asset::ModelExportInfo::*>(&pragma::asset::ModelExportInfo::aoDevice));
-	defMdlExportInfo.def("SetAnimationList", static_cast<void (*)(lua_State *, pragma::asset::ModelExportInfo &, luabind::object)>([](lua_State *l, pragma::asset::ModelExportInfo &exportInfo, luabind::object oTable) {
+	defMdlExportInfo.def("SetAnimationList", static_cast<void (*)(lua::State *, pragma::asset::ModelExportInfo &, luabind::object)>([](lua::State *l, pragma::asset::ModelExportInfo &exportInfo, luabind::object oTable) {
 		int32_t t = 2;
 		auto n = Lua::GetObjectLength(l, t);
 		std::vector<std::string> anims {};
@@ -1542,7 +1542,7 @@ void CGame::RegisterLuaClasses()
 	// COMPONENT TODO
 	/*auto classDefBase = luabind::class_<CLuaEntityHandle COMMA CLuaEntityWrapper COMMA luabind::bases<EntityHandle>>("BaseEntity");
 	LUA_CUSTOM_CLASS_ENTITY_SHARED(classDefBase,CLuaEntityWrapper);
-	classDefBase.def("ReceiveData",&CLuaEntityWrapper::ReceiveData,static_cast<void(*)(lua_State*,EntityHandle&,NetPacket&)>(&CLuaBaseEntityWrapper::default_ReceiveData));
+	classDefBase.def("ReceiveData",&CLuaEntityWrapper::ReceiveData,static_cast<void(*)(lua::State*,EntityHandle&,NetPacket&)>(&CLuaBaseEntityWrapper::default_ReceiveData));
 	classDefBase.def("OnRender",&CLuaEntityWrapper::OnRender,&CLuaBaseEntityWrapper::default_OnRender);
 	classDefBase.def("OnPostRender",&CLuaEntityWrapper::OnPostRender,&CLuaBaseEntityWrapper::default_OnPostRender);
 	classDefBase.def("ReceiveNetEvent",&CLuaEntityWrapper::ReceiveNetEvent,&CLuaBaseEntityWrapper::default_ReceiveNetEvent);
@@ -1613,9 +1613,9 @@ void CGame::RegisterLuaClasses()
 	defRenderTarget.def("GetTextureBuffer",&Lua_PointRenderTarget_GetTextureBuffer);
 	defRenderTarget.def("SetRenderSize",&Lua_PointRenderTarget_SetRenderSize);
 	defRenderTarget.def("GetRenderSize",&Lua_PointRenderTarget_GetRenderSize);
-	defRenderTarget.def("SetRenderMaterial",static_cast<void(*)(lua_State*,PointRenderTargetHandle&,Material*)) &Lua_PointRenderTarget_SetRenderMaterial);
-	defRenderTarget.def("SetRenderMaterial",static_cast<void(*)(lua_State*,PointRenderTargetHandle&,std::string)) &Lua_PointRenderTarget_SetRenderMaterial);
-	defRenderTarget.def("SetRenderMaterial",static_cast<void(*)(lua_State*,PointRenderTargetHandle&)) &Lua_PointRenderTarget_SetRenderMaterial);
+	defRenderTarget.def("SetRenderMaterial",static_cast<void(*)(lua::State*,PointRenderTargetHandle&,Material*)) &Lua_PointRenderTarget_SetRenderMaterial);
+	defRenderTarget.def("SetRenderMaterial",static_cast<void(*)(lua::State*,PointRenderTargetHandle&,std::string)) &Lua_PointRenderTarget_SetRenderMaterial);
+	defRenderTarget.def("SetRenderMaterial",static_cast<void(*)(lua::State*,PointRenderTargetHandle&)) &Lua_PointRenderTarget_SetRenderMaterial);
 	defRenderTarget.def("GetRenderMaterial",&Lua_PointRenderTarget_GetRenderMaterial);
 	defRenderTarget.def("SetRefreshRate",&Lua_PointRenderTarget_SetRefreshRate);
 	defRenderTarget.def("GetRefreshRate",&Lua_PointRenderTarget_GetRefreshRate);

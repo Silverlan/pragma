@@ -15,7 +15,7 @@ export {
 		  public:
 			CFuncSoftPhysicsComponent(pragma::ecs::BaseEntity &ent) : BaseFuncSoftPhysicsComponent(ent) {}
 			virtual void Initialize() override;
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};
 

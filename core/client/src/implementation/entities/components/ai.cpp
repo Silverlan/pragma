@@ -72,7 +72,7 @@ void CAIComponent::ReceiveSnapshotData(NetPacket &packet)
 			m_moveInfo.faceTarget = nullptr;
 	}
 }
-void CAIComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<CAIComponent>(l); }
+void CAIComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<CAIComponent>(l); }
 
 void CAIComponent::ReceiveData(NetPacket &packet)
 {
@@ -137,7 +137,7 @@ util::EventReply CAIComponent::HandleEvent(ComponentEventId eventId, ComponentEv
 	return util::EventReply::Unhandled;
 }
 
-void CAIComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+void CAIComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseAIComponent::RegisterLuaBindings(l, modEnts);
 	auto def = pragma::lua::create_entity_component_class<pragma::CAIComponent, pragma::BaseAIComponent>("AIComponent");

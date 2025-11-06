@@ -24,4 +24,4 @@ void SNameComponent::SetName(std::string name)
 	p->WriteString(name);
 	ServerState::Get()->SendPacket("ent_setname", p, pragma::networking::Protocol::SlowReliable);
 }
-void SNameComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SNameComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

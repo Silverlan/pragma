@@ -40,7 +40,7 @@ export namespace pragma {
 		};
 		static spdlog::logger &LOGGER;
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 		static std::shared_ptr<prosper::IDynamicResizableBuffer> GenerateLightmapUVBuffers(std::vector<std::shared_ptr<prosper::IBuffer>> &outMeshLightMapUvBuffers);
 		static std::shared_ptr<prosper::Texture> CreateLightmapTexture(uimg::ImageBuffer &imgBuf);
 		static bool BakeLightmaps(const LightmapBakeSettings &bakeSettings);
@@ -50,7 +50,7 @@ export namespace pragma {
 
 		CLightMapComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnEntitySpawn() override;
 		const std::shared_ptr<prosper::Texture> &GetLightMap() const;
 		const std::shared_ptr<prosper::Texture> &GetDirectionalLightMap() const;

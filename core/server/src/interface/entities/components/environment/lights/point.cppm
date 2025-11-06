@@ -14,7 +14,7 @@ export {
 		class DLLSERVER SLightPointComponent final : public BaseEnvLightPointComponent {
 		  public:
 			SLightPointComponent(pragma::ecs::BaseEntity &ent) : BaseEnvLightPointComponent(ent) {}
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		  protected:
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		};

@@ -12,7 +12,7 @@ export import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CSoundEmitterComponent final : public BaseSoundEmitterComponent, public CBaseNetComponent {
 	  public:
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		CSoundEmitterComponent(pragma::ecs::BaseEntity &ent) : BaseSoundEmitterComponent(ent) {}
 		// Sounds
@@ -22,7 +22,7 @@ export namespace pragma {
 
 		virtual void PrecacheSounds() override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	  protected:
 		virtual void MaintainSounds() override;

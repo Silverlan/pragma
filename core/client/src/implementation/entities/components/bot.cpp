@@ -59,7 +59,7 @@ void CBotComponent::OnFootStep(BaseCharacterComponent::FootType footType)
 		return;
 	pSoundEmitterComponent->EmitSound("fx.fst_concrete", pragma::audio::ALSoundType::Effect, scale);
 }
-void CBotComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CBotComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////////
 

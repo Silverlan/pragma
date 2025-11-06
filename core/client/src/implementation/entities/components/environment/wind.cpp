@@ -14,7 +14,7 @@ void CWindComponent::ReceiveData(NetPacket &packet)
 	auto windForce = packet->Read<Vector3>();
 	SetWindForce(windForce);
 }
-void CWindComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CWindComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////
 

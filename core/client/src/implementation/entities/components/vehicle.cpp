@@ -56,7 +56,7 @@ void CVehicleComponent::ReceiveSnapshotData(NetPacket &packet)
 	}
 }
 
-void CVehicleComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CVehicleComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CVehicleComponent::ReadWheelInfo(NetPacket &packet)
 {
@@ -173,7 +173,7 @@ Bool CVehicleComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &p
 	return true;
 }
 
-void CVehicleComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+void CVehicleComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseVehicleComponent::RegisterLuaBindings(l, modEnts);
 	auto def = pragma::lua::create_entity_component_class<pragma::CVehicleComponent, pragma::BaseVehicleComponent>("VehicleComponent");

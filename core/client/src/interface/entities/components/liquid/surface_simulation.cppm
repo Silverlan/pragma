@@ -18,7 +18,7 @@ export namespace pragma {
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void ReloadSurfaceSimulator() override;
 		CWaterSurface *GetSurfaceEntity() const;
 	  protected:

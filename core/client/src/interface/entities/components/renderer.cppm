@@ -41,7 +41,7 @@ export namespace pragma {
 
 		CRendererComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 
 		void RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo);
 		void Render(const util::DrawSceneInfo &drawSceneInfo);
@@ -73,8 +73,8 @@ export namespace pragma {
 
 	struct DLLCLIENT CEReloadRenderTarget : public ComponentEvent {
 		CEReloadRenderTarget(pragma::CSceneComponent &scene, uint32_t width, uint32_t height);
-		virtual void PushArguments(lua_State *l) override;
-		virtual void HandleReturnValues(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
+		virtual void HandleReturnValues(lua::State *l) override;
 		pragma::CSceneComponent &scene;
 		uint32_t width;
 		uint32_t height;
@@ -84,8 +84,8 @@ export namespace pragma {
 
 	struct DLLCLIENT CEReloadBloomRenderTarget : public ComponentEvent {
 		CEReloadBloomRenderTarget(uint32_t width);
-		virtual void PushArguments(lua_State *l) override;
-		virtual void HandleReturnValues(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
+		virtual void HandleReturnValues(lua::State *l) override;
 		uint32_t width;
 
 		bool resultSuccess = false;
@@ -93,40 +93,40 @@ export namespace pragma {
 
 	struct DLLCLIENT CEBeginRendering : public ComponentEvent {
 		CEBeginRendering(const util::DrawSceneInfo &drawSceneInfo);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		const util::DrawSceneInfo &drawSceneInfo;
 	};
 
 	struct DLLCLIENT CEUpdateCameraData : public ComponentEvent {
 		CEUpdateCameraData(pragma::CSceneComponent &scene, pragma::CameraData &cameraData);
-		virtual void PushArguments(lua_State *l) override {}
+		virtual void PushArguments(lua::State *l) override {}
 		pragma::CSceneComponent &scene;
 		pragma::CameraData &cameraData;
 	};
 
 	struct DLLCLIENT CEGetSceneTexture : public ComponentEvent {
 		CEGetSceneTexture() = default;
-		virtual void PushArguments(lua_State *l) override {}
-		virtual void HandleReturnValues(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override {}
+		virtual void HandleReturnValues(lua::State *l) override;
 
 		prosper::Texture *resultTexture = nullptr;
 	};
 
 	struct DLLCLIENT CERender : public ComponentEvent {
 		CERender(const util::DrawSceneInfo &drawSceneInfo);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		const util::DrawSceneInfo &drawSceneInfo;
 	};
 
 	struct DLLCLIENT CEOnRenderTargetReloaded : public ComponentEvent {
 		CEOnRenderTargetReloaded(bool success);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		bool success;
 	};
 
 	struct DLLCLIENT CEUpdateRendererBuffer : public ComponentEvent {
 		CEUpdateRendererBuffer(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCommandBuffer);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		std::shared_ptr<prosper::IPrimaryCommandBuffer> drawCommandBuffer;
 	};
 	using CEGetPresentationTexture = CEGetSceneTexture;

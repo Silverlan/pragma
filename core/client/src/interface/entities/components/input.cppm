@@ -20,7 +20,7 @@ export namespace pragma {
 		float GetMouseDeltaX() const;
 		float GetMouseDeltaY() const;
 
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		void UpdateMouseMovementDeltaValues();
 	  private:
 		float m_mouseDeltaX = 0.f;

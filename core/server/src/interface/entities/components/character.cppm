@@ -17,7 +17,7 @@ export namespace pragma {
 	class DLLSERVER SCharacterComponent final : public BaseCharacterComponent {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		SCharacterComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
@@ -40,7 +40,7 @@ export namespace pragma {
 	  protected:
 		void OnFrozen(bool bFrozen);
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		Faction *m_faction;
 		bool m_bNoTarget;
 		bool m_bGodMode;

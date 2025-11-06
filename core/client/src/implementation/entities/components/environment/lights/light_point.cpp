@@ -143,7 +143,7 @@ void CLightPointComponent::OnEntityComponentAdded(BaseEntityComponent &component
 	else if(typeid(component) == typeid(CLightComponent))
 		static_cast<CLightComponent &>(component).SetLight(*this);
 }
-void CLightPointComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CLightPointComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 const std::array<std::vector<umath::Plane>, 6u> &CLightPointComponent::GetFrustumPlanes() const { return m_frustumPlanes; }
 const std::vector<umath::Plane> &CLightPointComponent::GetFrustumPlanes(CubeMapSide side) const { return m_frustumPlanes.at(umath::to_integral(side)); }

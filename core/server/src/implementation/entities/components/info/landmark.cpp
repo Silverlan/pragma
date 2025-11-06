@@ -9,7 +9,7 @@ import :entities.components.info.landmark;
 
 using namespace pragma;
 
-void SInfoLandmarkComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SInfoLandmarkComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void InfoLandmark::Initialize()
 {

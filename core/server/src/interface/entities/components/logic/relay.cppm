@@ -15,7 +15,7 @@ export {
 		  public:
 			SLogicRelayComponent(pragma::ecs::BaseEntity &ent) : BaseLogicRelayComponent(ent) {}
 			virtual void Initialize() override;
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		  protected:
 			void Trigger(pragma::ecs::BaseEntity *activator);
 		};

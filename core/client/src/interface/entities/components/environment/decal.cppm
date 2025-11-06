@@ -48,7 +48,7 @@ export {
 		  public:
 			CDecalComponent(pragma::ecs::BaseEntity &ent) : BaseEnvDecalComponent(ent) {}
 			virtual void Initialize() override;
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 			virtual void OnEntitySpawn() override;
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }

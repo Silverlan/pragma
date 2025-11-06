@@ -20,6 +20,6 @@ export namespace pragma {
 		virtual void SetViewOffset(const Vector3 &offset) override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	};
 };

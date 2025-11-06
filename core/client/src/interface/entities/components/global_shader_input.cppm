@@ -28,14 +28,14 @@ export namespace pragma {
 
 	class DLLCLIENT CGlobalShaderInputComponent final : public BaseEntityComponent, public DynamicMemberRegister {
 	  public:
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		static void DebugPrintProperties();
 
 		CGlobalShaderInputComponent(pragma::ecs::BaseEntity &ent);
 
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnEntitySpawn() override;
 
 		template<typename T>

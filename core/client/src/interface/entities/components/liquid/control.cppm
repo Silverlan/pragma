@@ -16,7 +16,7 @@ export namespace pragma {
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, pragma::physics::PhysObj *phys, pragma::physics::ICollisionObject *col, const LocalRayResult &result) override;
 	};
 };

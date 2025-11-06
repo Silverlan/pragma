@@ -33,7 +33,7 @@ CObserverComponent::CObserverComponent(pragma::ecs::BaseEntity &ent) : BaseObser
 
 CObserverComponent::~CObserverComponent() {}
 
-void CObserverComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CObserverComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 bool CObserverComponent::IsInFirstPersonMode() const { return (GetObserverMode() == ObserverMode::FirstPerson) ? true : false; }
 
@@ -299,7 +299,7 @@ void CObserverComponent::UpdateCameraPose()
 /////////////////
 
 CECalcView::CECalcView(Vector3 &pos, Quat &rot, Quat &rotModifier) : pos {pos}, rot {rot}, rotModifier {rotModifier} {}
-void CECalcView::PushArguments(lua_State *l)
+void CECalcView::PushArguments(lua::State *l)
 {
 	Lua::Push<Vector3 *>(l, &pos);
 	Lua::Push<Quat *>(l, &rot);
@@ -309,7 +309,7 @@ void CECalcView::PushArguments(lua_State *l)
 /////////////////
 
 CECalcViewOffset::CECalcViewOffset(Vector3 &pos, Quat &rot) : pos {pos}, rot {rot} {}
-void CECalcViewOffset::PushArguments(lua_State *l)
+void CECalcViewOffset::PushArguments(lua::State *l)
 {
 	Lua::Push<Vector3 *>(l, &pos);
 	Lua::Push<Quat *>(l, &rot);

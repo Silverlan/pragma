@@ -70,7 +70,7 @@ const std::shared_ptr<prosper::IDescriptorSetGroup> &CRaytracingComponent::GetGa
 
 CRaytracingComponent::CRaytracingComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent {ent} {}
 CRaytracingComponent::~CRaytracingComponent() { m_subMeshBuffers.clear(); }
-void CRaytracingComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CRaytracingComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CRaytracingComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

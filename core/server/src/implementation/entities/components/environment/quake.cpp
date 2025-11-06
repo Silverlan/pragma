@@ -24,7 +24,7 @@ void SQuakeComponent::SendData(NetPacket &packet, networking::ClientRecipientFil
 	packet->Write<Float>(GetFadeOutDuration());
 }
 
-void SQuakeComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SQuakeComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ///////////////
 

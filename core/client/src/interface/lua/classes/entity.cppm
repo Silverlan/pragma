@@ -14,9 +14,9 @@ export namespace Lua {
 	namespace Entity {
 		namespace Client {
 			DLLCLIENT void register_class(luabind::class_<CBaseEntity, pragma::ecs::BaseEntity> &classDef);
-			DLLCLIENT void GetEffectiveBoneTransform(lua_State *l, CBaseEntity &ent, uint32_t boneIdx);
-			DLLCLIENT void SendNetEvent(lua_State *l, CBaseEntity &ent, nwm::Protocol protocol, unsigned int eventId, const ::NetPacket &packet);
-			DLLCLIENT void SendNetEvent(lua_State *l, CBaseEntity &ent, nwm::Protocol protocol, unsigned int eventId);
+			DLLCLIENT void GetEffectiveBoneTransform(lua::State *l, CBaseEntity &ent, uint32_t boneIdx);
+			DLLCLIENT void SendNetEvent(lua::State *l, CBaseEntity &ent, nwm::Protocol protocol, unsigned int eventId, const ::NetPacket &packet);
+			DLLCLIENT void SendNetEvent(lua::State *l, CBaseEntity &ent, nwm::Protocol protocol, unsigned int eventId);
 		};
 	};
 };

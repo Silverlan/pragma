@@ -41,7 +41,7 @@ void CFlammableComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent<pragma::CSoundEmitterComponent>();
 }
-void CFlammableComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CFlammableComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 Bool CFlammableComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetIgnitable)

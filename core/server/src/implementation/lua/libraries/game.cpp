@@ -22,14 +22,14 @@ Vector3 Lua::game::Server::get_gravity()
 	pragma::Game *game = ServerState::Get()->GetGameState();
 	return game->GetGravity();
 }
-luabind::object Lua::game::Server::load_model(lua_State *l, const std::string &name)
+luabind::object Lua::game::Server::load_model(lua::State *l, const std::string &name)
 {
 	auto mdl = SGame::Get()->LoadModel(name);
 	if(mdl == nullptr)
 		return {};
 	return luabind::object {l, mdl};
 }
-int Lua::game::Server::create_model(lua_State *l)
+int Lua::game::Server::create_model(lua::State *l)
 {
 	std::shared_ptr<pragma::Model> mdl = nullptr;
 	if(!Lua::IsSet(l, 1))
@@ -52,7 +52,7 @@ int Lua::game::Server::create_model(lua_State *l)
 	return 1;
 }
 
-int Lua::game::Server::load_map(lua_State *l)
+int Lua::game::Server::load_map(lua::State *l)
 {
 	std::vector<EntityHandle> ents;
 	auto hCb = std::make_shared<CallbackHandle>(SGame::Get()->AddCallback("OnEntityCreated", FunctionCallback<void, pragma::ecs::BaseEntity *>::Create([&ents](pragma::ecs::BaseEntity *ent) { ents.push_back(ent->GetHandle()); })));

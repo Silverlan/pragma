@@ -13,7 +13,7 @@ import :server_state;
 using namespace pragma;
 
 void SRenderComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { packet->Write<decltype(m_renderFlags)>(m_renderFlags); }
-void SRenderComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SRenderComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void SRenderComponent::SetUnlit(bool b)
 {
 	BaseRenderComponent::SetUnlit(b);

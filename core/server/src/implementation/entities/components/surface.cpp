@@ -23,4 +23,4 @@ void SSurfaceComponent::SetPlane(const umath::Plane &plane)
 	p->Write<Vector4>(plane.ToVector4());
 	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetPlane, p, pragma::networking::Protocol::SlowReliable);
 }
-void SSurfaceComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SSurfaceComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

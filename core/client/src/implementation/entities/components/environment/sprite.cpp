@@ -159,7 +159,7 @@ void CSpriteComponent::ReceiveData(NetPacket &packet)
 	m_tFadeIn = packet->Read<float>();
 	m_tFadeOut = packet->Read<float>();
 }
-void CSpriteComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CSpriteComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////
 

@@ -26,7 +26,7 @@ export namespace pragma {
 		CEnvSoundProbeComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
 		static std::vector<ProbeInfo> s_probes;
 		static CallbackHandle s_probeCallback;

@@ -59,7 +59,7 @@ void CPhysicsComponent::OnEntitySpawn()
 	if(m_physicsType != pragma::physics::PHYSICSTYPE::NONE)
 		InitializePhysics(m_physicsType);
 }
-void CPhysicsComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CPhysicsComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CPhysicsComponent::PrePhysicsSimulate()
 {
 	auto dt = pragma::get_cgame()->DeltaTime();

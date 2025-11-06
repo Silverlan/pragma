@@ -16,19 +16,19 @@ namespace Lua {
 		static bool IsInView(const pragma::ai::Memory::Fragment &fragment);
 		static Vector3 GetLastKnownPosition(const pragma::ai::Memory::Fragment &fragment);
 		static Vector3 GetLastVelocity(const pragma::ai::Memory::Fragment &fragment);
-		// static void GetLastKnownDistance(lua_State *l,ai::Memory::Fragment *fragment); // Only useful for internal purposes
+		// static void GetLastKnownDistance(lua::State *l,ai::Memory::Fragment *fragment); // Only useful for internal purposes
 		static float GetLastCheckTime(const pragma::ai::Memory::Fragment &fragment);
 		static float GetLastTimeSeen(const pragma::ai::Memory::Fragment &fragment);
 		static float GetLastTimeHeared(const pragma::ai::Memory::Fragment &fragment);
 		static float GetLastTimeSensed(const pragma::ai::Memory::Fragment &fragment);
 	};
 	namespace AIMemory {
-		static luabind::tableT<pragma::ai::Memory::Fragment> GetFragments(lua_State *l, pragma::ai::Memory &mem);
+		static luabind::tableT<pragma::ai::Memory::Fragment> GetFragments(lua::State *l, pragma::ai::Memory &mem);
 		static uint32_t GetFragmentCount(const pragma::ai::Memory &mem);
 	};
 };
 
-void Lua::AIMemory::register_class(lua_State *l, luabind::module_ &mod)
+void Lua::AIMemory::register_class(lua::State *l, luabind::module_ &mod)
 {
 	auto classDef = luabind::class_<pragma::ai::Memory>("Memory");
 	classDef.def("GetFragments", &GetFragments);
@@ -50,7 +50,7 @@ void Lua::AIMemory::register_class(lua_State *l, luabind::module_ &mod)
 	mod[classDefFragment];
 }
 
-luabind::tableT<pragma::ai::Memory::Fragment> Lua::AIMemory::GetFragments(lua_State *l, pragma::ai::Memory &mem)
+luabind::tableT<pragma::ai::Memory::Fragment> Lua::AIMemory::GetFragments(lua::State *l, pragma::ai::Memory &mem)
 {
 	auto t = luabind::newtable(l);
 	uint32_t idx = 1;

@@ -94,7 +94,7 @@ void CRendererPpBloomComponent::DoRenderEffect(const util::DrawSceneInfo &drawSc
 	// drawCmd->RecordImageBarrier(hdrInfo.bloomBlurRenderTarget->GetTexture().GetImage(), prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 	pragma::get_cgame()->StopGPUProfilingStage(); // PostProcessingBloom
 }
-void CRendererPpBloomComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CRendererPpBloomComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CRendererPpBloomComponent::SetBlurRadius(uint32_t radius)
 {

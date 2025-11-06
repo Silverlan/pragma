@@ -43,7 +43,7 @@ void SObservableComponent::SetViewOffset(const Vector3 &offset)
 	p->Write<Vector3>(offset);
 	ent.SendNetEvent(m_netSetViewOffset, p, pragma::networking::Protocol::SlowReliable);
 }
-void SObservableComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SObservableComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void SObservableComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	constexpr auto numTypes = umath::to_integral(CameraType::Count);

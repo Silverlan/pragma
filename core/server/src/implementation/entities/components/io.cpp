@@ -10,4 +10,4 @@ import :entities.components.io;
 using namespace pragma;
 
 void SIOComponent::Initialize() { BaseIOComponent::Initialize(); }
-void SIOComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SIOComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

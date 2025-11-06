@@ -21,6 +21,6 @@ export namespace pragma {
 		virtual void SetObserverTarget(BaseObservableComponent *ent) override;
 
 		virtual bool ShouldTransmitNetData() const override { return true; };
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	};
 };

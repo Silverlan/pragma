@@ -19,7 +19,7 @@ export {
 		void LuaInitialize() {}
 		static void default_Initialize(CBaseEntity *ent);
 	  protected:
-		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void InitializeLuaObject(lua::State *lua) override;
 	};
 };
 
@@ -30,6 +30,6 @@ void CLuaEntity::SetupLua(const luabind::object &o, const std::string &className
 	m_className = pragma::ents::register_class_name(className);
 	SetLuaObject(o);
 }
-void CLuaEntity::InitializeLuaObject(lua_State *lua) {}
+void CLuaEntity::InitializeLuaObject(lua::State *lua) {}
 
 void CLuaEntity::default_Initialize(CBaseEntity *ent) {}

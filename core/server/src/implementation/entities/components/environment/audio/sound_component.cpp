@@ -25,7 +25,7 @@ void SSoundComponent::SendData(NetPacket &packet, networking::ClientRecipientFil
 	packet->Write<uint32_t>(idx);
 }
 
-void SSoundComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SSoundComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////
 

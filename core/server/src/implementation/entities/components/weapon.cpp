@@ -27,7 +27,7 @@ SWeaponComponent::~SWeaponComponent()
 		s_weapons.erase(it);
 }
 
-void SWeaponComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SWeaponComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SWeaponComponent::OnUse(pragma::ecs::BaseEntity *pl)
 {
@@ -392,7 +392,7 @@ void SWeaponComponent::SetSecondaryAmmoType(const std::string &type)
 	SetSecondaryAmmoType(ammoTypeId);
 }
 
-void SWeaponComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+void SWeaponComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseWeaponComponent::RegisterLuaBindings(l, modEnts);
 

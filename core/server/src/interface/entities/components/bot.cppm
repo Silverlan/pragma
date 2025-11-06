@@ -14,7 +14,7 @@ export {
 		class DLLSERVER SBotComponent final : public BaseBotComponent {
 		  public:
 			SBotComponent(pragma::ecs::BaseEntity &ent) : BaseBotComponent(ent) {}
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};
 

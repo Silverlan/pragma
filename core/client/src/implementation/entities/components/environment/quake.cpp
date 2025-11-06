@@ -90,7 +90,7 @@ void CQuakeComponent::CancelScreenShake()
 	if(m_cbScreenShake.IsValid())
 		m_cbScreenShake.Remove();
 }
-void CQuakeComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CQuakeComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////
 

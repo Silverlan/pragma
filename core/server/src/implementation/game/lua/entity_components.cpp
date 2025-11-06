@@ -14,7 +14,7 @@ import :entities;
 import :entities.components;
 import pragma.shared;
 
-void RegisterLuaEntityComponents2_sv(lua_State *l, luabind::module_ &entsMod);
+void RegisterLuaEntityComponents2_sv(lua::State *l, luabind::module_ &entsMod);
 
 void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {

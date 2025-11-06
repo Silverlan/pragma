@@ -70,7 +70,7 @@ void CBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 		m_childComponent = nullptr;
 }
 pragma::CRenderComponent *CBaseEntity::GetRenderComponent() const { return m_renderComponent; }
-void CBaseEntity::InitializeLuaObject(lua_State *lua) { pragma::BaseLuaHandle::InitializeLuaObject<CBaseEntity>(lua); }
+void CBaseEntity::InitializeLuaObject(lua::State *lua) { pragma::BaseLuaHandle::InitializeLuaObject<CBaseEntity>(lua); }
 
 //////////////////////////////////
 

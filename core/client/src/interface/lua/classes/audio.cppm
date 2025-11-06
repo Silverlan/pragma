@@ -11,7 +11,7 @@ export import :audio;
 export import se_script;
 
 export namespace pragma::scripting::lua::bindings {
-	void register_audio(lua_State *l);
+	void register_audio(lua::State *l);
 };
 
 namespace Lua {
@@ -26,16 +26,16 @@ namespace Lua {
 namespace Lua {
 	namespace ALSound {
 		namespace Client {
-			static void GetWorldPosition(lua_State *l, ::ALSound &snd);
+			static void GetWorldPosition(lua::State *l, ::ALSound &snd);
 
-			//static void GetChannelConfigName(lua_State *l,::ALSound &snd);
-			//static void GetSampleTypeName(lua_State *l,::ALSound &snd);
-			static void IsMono(lua_State *l, ::ALSound &snd);
-			static void IsStereo(lua_State *l, ::ALSound &snd);
+			//static void GetChannelConfigName(lua::State *l,::ALSound &snd);
+			//static void GetSampleTypeName(lua::State *l,::ALSound &snd);
+			static void IsMono(lua::State *l, ::ALSound &snd);
+			static void IsStereo(lua::State *l, ::ALSound &snd);
 		};
 	};
 	namespace ALBuffer {
-		static Lua::opt<luabind::tableT<void>> GetPhonemeData(lua_State *l, al::ISoundBuffer &);
+		static Lua::opt<luabind::tableT<void>> GetPhonemeData(lua::State *l, al::ISoundBuffer &);
 	};
 };
 
@@ -55,16 +55,16 @@ void Lua::ALSound::Client::register_class(luabind::class_<::ALSound> &classDef)
 	classDef.def("GetBuffer", static_cast<al::ISoundBuffer *(*)(::ALSound &)>([](::ALSound &sound) -> al::ISoundBuffer * { return static_cast<CALSound &>(sound)->GetBuffer(); }));
 }
 
-void Lua::ALSound::Client::GetWorldPosition(lua_State *l, ::ALSound &snd) { Lua::Push<Vector3>(l, static_cast<CALSound &>(snd)->GetWorldPosition()); }
+void Lua::ALSound::Client::GetWorldPosition(lua::State *l, ::ALSound &snd) { Lua::Push<Vector3>(l, static_cast<CALSound &>(snd)->GetWorldPosition()); }
 
-//void Lua::ALSound::Client::GetChannelConfigName(lua_State *l,::ALSound &snd) {Lua::PushString(l,static_cast<CALSound&>(snd)->GetChannelConfigName());}
-//void Lua::ALSound::Client::GetSampleTypeName(lua_State *l,::ALSound &snd) {Lua::PushString(l,static_cast<CALSound&>(snd)->GetSampleTypeName());}
-void Lua::ALSound::Client::IsMono(lua_State *l, ::ALSound &snd) { Lua::PushBool(l, static_cast<CALSound &>(snd)->IsMono()); }
-void Lua::ALSound::Client::IsStereo(lua_State *l, ::ALSound &snd) { Lua::PushBool(l, static_cast<CALSound &>(snd)->IsStereo()); }
+//void Lua::ALSound::Client::GetChannelConfigName(lua::State *l,::ALSound &snd) {Lua::PushString(l,static_cast<CALSound&>(snd)->GetChannelConfigName());}
+//void Lua::ALSound::Client::GetSampleTypeName(lua::State *l,::ALSound &snd) {Lua::PushString(l,static_cast<CALSound&>(snd)->GetSampleTypeName());}
+void Lua::ALSound::Client::IsMono(lua::State *l, ::ALSound &snd) { Lua::PushBool(l, static_cast<CALSound &>(snd)->IsMono()); }
+void Lua::ALSound::Client::IsStereo(lua::State *l, ::ALSound &snd) { Lua::PushBool(l, static_cast<CALSound &>(snd)->IsStereo()); }
 
 /////////////////
 
-Lua::opt<luabind::tableT<void>> Lua::ALBuffer::GetPhonemeData(lua_State *l, al::ISoundBuffer &buffer)
+Lua::opt<luabind::tableT<void>> Lua::ALBuffer::GetPhonemeData(lua::State *l, al::ISoundBuffer &buffer)
 {
 	auto pUserData = buffer.GetUserData();
 	if(pUserData == nullptr)
@@ -95,21 +95,21 @@ Lua::opt<luabind::tableT<void>> Lua::ALBuffer::GetPhonemeData(lua_State *l, al::
 	return t;
 }
 
-void pragma::scripting::lua::bindings::register_audio(lua_State *l)
+void pragma::scripting::lua::bindings::register_audio(lua::State *l)
 {
 	auto classDefAlEffect = luabind::class_<al::PEffect>("Effect");
-	classDefAlEffect.def("SetProperties", +[](lua_State *, al::PEffect &effect, const al::EfxEaxReverbProperties &props) { effect->SetProperties(props); });
-	classDefAlEffect.def("SetProperties", +[](lua_State *, al::PEffect &effect, const al::EfxChorusProperties &props) { effect->SetProperties(props); });
-	classDefAlEffect.def("SetProperties", +[](lua_State *, al::PEffect &effect, const al::EfxDistortionProperties &props) { effect->SetProperties(props); });
-	classDefAlEffect.def("SetProperties", +[](lua_State *, al::PEffect &effect, const al::EfxEchoProperties &props) { effect->SetProperties(props); });
-	classDefAlEffect.def("SetProperties", +[](lua_State *, al::PEffect &effect, const al::EfxFlangerProperties &props) { effect->SetProperties(props); });
-	classDefAlEffect.def("SetProperties", +[](lua_State *, al::PEffect &effect, const al::EfxFrequencyShifterProperties &props) { effect->SetProperties(props); });
-	classDefAlEffect.def("SetProperties", +[](lua_State *, al::PEffect &effect, const al::EfxVocalMorpherProperties &props) { effect->SetProperties(props); });
-	classDefAlEffect.def("SetProperties", +[](lua_State *, al::PEffect &effect, const al::EfxPitchShifterProperties &props) { effect->SetProperties(props); });
-	classDefAlEffect.def("SetProperties", +[](lua_State *, al::PEffect &effect, const al::EfxRingModulatorProperties &props) { effect->SetProperties(props); });
-	classDefAlEffect.def("SetProperties", +[](lua_State *, al::PEffect &effect, const al::EfxAutoWahProperties &props) { effect->SetProperties(props); });
-	classDefAlEffect.def("SetProperties", +[](lua_State *, al::PEffect &effect, const al::EfxCompressor &props) { effect->SetProperties(props); });
-	classDefAlEffect.def("SetProperties", +[](lua_State *, al::PEffect &effect, const al::EfxEqualizer &props) { effect->SetProperties(props); });
+	classDefAlEffect.def("SetProperties", +[](lua::State *, al::PEffect &effect, const al::EfxEaxReverbProperties &props) { effect->SetProperties(props); });
+	classDefAlEffect.def("SetProperties", +[](lua::State *, al::PEffect &effect, const al::EfxChorusProperties &props) { effect->SetProperties(props); });
+	classDefAlEffect.def("SetProperties", +[](lua::State *, al::PEffect &effect, const al::EfxDistortionProperties &props) { effect->SetProperties(props); });
+	classDefAlEffect.def("SetProperties", +[](lua::State *, al::PEffect &effect, const al::EfxEchoProperties &props) { effect->SetProperties(props); });
+	classDefAlEffect.def("SetProperties", +[](lua::State *, al::PEffect &effect, const al::EfxFlangerProperties &props) { effect->SetProperties(props); });
+	classDefAlEffect.def("SetProperties", +[](lua::State *, al::PEffect &effect, const al::EfxFrequencyShifterProperties &props) { effect->SetProperties(props); });
+	classDefAlEffect.def("SetProperties", +[](lua::State *, al::PEffect &effect, const al::EfxVocalMorpherProperties &props) { effect->SetProperties(props); });
+	classDefAlEffect.def("SetProperties", +[](lua::State *, al::PEffect &effect, const al::EfxPitchShifterProperties &props) { effect->SetProperties(props); });
+	classDefAlEffect.def("SetProperties", +[](lua::State *, al::PEffect &effect, const al::EfxRingModulatorProperties &props) { effect->SetProperties(props); });
+	classDefAlEffect.def("SetProperties", +[](lua::State *, al::PEffect &effect, const al::EfxAutoWahProperties &props) { effect->SetProperties(props); });
+	classDefAlEffect.def("SetProperties", +[](lua::State *, al::PEffect &effect, const al::EfxCompressor &props) { effect->SetProperties(props); });
+	classDefAlEffect.def("SetProperties", +[](lua::State *, al::PEffect &effect, const al::EfxEqualizer &props) { effect->SetProperties(props); });
 
 	auto classDefEaxReverb = luabind::class_<al::EfxEaxReverbProperties>("ReverbProperties");
 	classDefEaxReverb.def(luabind::constructor<>());

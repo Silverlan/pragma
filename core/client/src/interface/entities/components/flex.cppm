@@ -14,7 +14,7 @@ export namespace pragma {
 	  public:
 		static ComponentEventId EVENT_ON_FLEX_CONTROLLERS_UPDATED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		struct FlexAnimationData {
 			uint32_t flexAnimationId = std::numeric_limits<uint32_t>::max();
@@ -36,7 +36,7 @@ export namespace pragma {
 		void SetFlexWeight(uint32_t flexId, float weight);
 		void UpdateSoundPhonemes(CALSound &snd);
 		void UpdateFlexWeightsMT();
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 
 		void SetFlexWeightOverride(uint32_t flexId, float weight);
 		void ClearFlexWeightOverride(uint32_t flexId);

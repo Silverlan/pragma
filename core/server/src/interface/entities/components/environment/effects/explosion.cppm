@@ -15,7 +15,7 @@ export {
 		  public:
 			SExplosionComponent(pragma::ecs::BaseEntity &ent) : BaseEnvExplosionComponent(ent) {}
 			virtual void Explode() override;
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};
 	class DLLSERVER EnvExplosion : public SBaseEntity {

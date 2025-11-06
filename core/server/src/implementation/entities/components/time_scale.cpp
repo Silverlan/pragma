@@ -12,7 +12,7 @@ import :entities.base;
 using namespace pragma;
 
 void STimeScaleComponent::Initialize() { BaseTimeScaleComponent::Initialize(); }
-void STimeScaleComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void STimeScaleComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void STimeScaleComponent::SetTimeScale(float timeScale)
 {

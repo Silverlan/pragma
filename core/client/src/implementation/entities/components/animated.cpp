@@ -29,7 +29,7 @@ void CAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componen
 	EVENT_ON_BONE_BUFFER_INITIALIZED = registerEvent("ON_BONE_BUFFER_INITIALIZED", ComponentEventInfo::Type::Broadcast);
 }
 void CAnimatedComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseAnimatedComponent)); }
-void CAnimatedComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CAnimatedComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBoneBuffer = nullptr;
 const std::shared_ptr<prosper::IUniformResizableBuffer> &pragma::get_instance_bone_buffer() { return s_instanceBoneBuffer; }
 void pragma::initialize_articulated_buffers()
@@ -302,9 +302,9 @@ uint32_t CAnimatedComponent::OnSkeletonUpdated() { return std::numeric_limits<ui
 //////////////
 
 CEOnSkeletonUpdated::CEOnSkeletonUpdated(uint32_t &physRootBoneId) : physRootBoneId {physRootBoneId} {}
-void CEOnSkeletonUpdated::PushArguments(lua_State *l) { Lua::PushInt(l, physRootBoneId); }
+void CEOnSkeletonUpdated::PushArguments(lua::State *l) { Lua::PushInt(l, physRootBoneId); }
 uint32_t CEOnSkeletonUpdated::GetReturnCount() { return 1u; }
-void CEOnSkeletonUpdated::HandleReturnValues(lua_State *l)
+void CEOnSkeletonUpdated::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -1))
 		physRootBoneId = Lua::CheckInt(l, -1);
@@ -313,34 +313,34 @@ void CEOnSkeletonUpdated::HandleReturnValues(lua_State *l)
 //////////////
 
 CEOnBoneBufferInitialized::CEOnBoneBufferInitialized(const std::shared_ptr<prosper::IBuffer> &buffer) : buffer {buffer} {}
-void CEOnBoneBufferInitialized::PushArguments(lua_State *l) { Lua::Push<std::shared_ptr<Lua::Vulkan::Buffer>>(l, buffer); }
+void CEOnBoneBufferInitialized::PushArguments(lua::State *l) { Lua::Push<std::shared_ptr<Lua::Vulkan::Buffer>>(l, buffer); }
 
-void CAnimatedComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+void CAnimatedComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseAnimatedComponent::RegisterLuaBindings(l, modEnts);
 	auto defCAnimated = pragma::lua::create_entity_component_class<pragma::CAnimatedComponent, pragma::BaseAnimatedComponent>("AnimatedComponent");
 	defCAnimated.def(
-	  "GetBoneBuffer", +[](lua_State *l, pragma::CAnimatedComponent &hAnim) -> std::optional<std::shared_ptr<prosper::IBuffer>> {
+	  "GetBoneBuffer", +[](lua::State *l, pragma::CAnimatedComponent &hAnim) -> std::optional<std::shared_ptr<prosper::IBuffer>> {
 		  auto *buf = hAnim.GetBoneBuffer();
 		  if(!buf)
 			  return {};
 		  return const_cast<prosper::IBuffer *>(buf)->shared_from_this();
 	  });
 	defCAnimated.def("GetBoneRenderMatrices", static_cast<const std::vector<Mat4> &(pragma::CAnimatedComponent::*)() const>(&pragma::CAnimatedComponent::GetBoneMatrices));
-	defCAnimated.def("GetBoneRenderMatrix", static_cast<std::optional<Mat4> (*)(lua_State *, pragma::CAnimatedComponent &, uint32_t)>([](lua_State *l, pragma::CAnimatedComponent &hAnim, uint32_t boneIndex) -> std::optional<Mat4> {
+	defCAnimated.def("GetBoneRenderMatrix", static_cast<std::optional<Mat4> (*)(lua::State *, pragma::CAnimatedComponent &, uint32_t)>([](lua::State *l, pragma::CAnimatedComponent &hAnim, uint32_t boneIndex) -> std::optional<Mat4> {
 		auto &mats = hAnim.GetBoneMatrices();
 		if(boneIndex >= mats.size())
 			return {};
 		return mats.at(boneIndex);
 	}));
-	defCAnimated.def("SetBoneRenderMatrix", static_cast<void (*)(lua_State *, pragma::CAnimatedComponent &, uint32_t, const Mat4 &)>([](lua_State *l, pragma::CAnimatedComponent &hAnim, uint32_t boneIndex, const Mat4 &m) {
+	defCAnimated.def("SetBoneRenderMatrix", static_cast<void (*)(lua::State *, pragma::CAnimatedComponent &, uint32_t, const Mat4 &)>([](lua::State *l, pragma::CAnimatedComponent &hAnim, uint32_t boneIndex, const Mat4 &m) {
 		auto &mats = hAnim.GetBoneMatrices();
 		if(boneIndex >= mats.size())
 			return;
 		mats.at(boneIndex) = m;
 	}));
 	defCAnimated.def("GetLocalVertexPosition",
-	  static_cast<std::optional<Vector3> (*)(lua_State *, pragma::CAnimatedComponent &, std::shared_ptr<pragma::ModelSubMesh> &, uint32_t)>([](lua_State *l, pragma::CAnimatedComponent &hAnim, std::shared_ptr<pragma::ModelSubMesh> &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
+	  static_cast<std::optional<Vector3> (*)(lua::State *, pragma::CAnimatedComponent &, std::shared_ptr<pragma::ModelSubMesh> &, uint32_t)>([](lua::State *l, pragma::CAnimatedComponent &hAnim, std::shared_ptr<pragma::ModelSubMesh> &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
 		  Vector3 pos, n;
 		  if(vertexId >= subMesh->GetVertexCount())
 			  return {};

@@ -15,7 +15,7 @@ export namespace Lua {
 	namespace Vulkan {
 		struct DLLCLIENT PreparedCommandLuaArg {
 			template<typename T>
-			static PreparedCommandLuaArg CreateValue(lua_State *l, T &&value)
+			static PreparedCommandLuaArg CreateValue(lua::State *l, T &&value)
 			{
 				PreparedCommandLuaArg r {};
 				r.o = luabind::object {l, value};
@@ -81,22 +81,22 @@ export {
 			enum { consumed_args = 1 };
 
 			template<typename U>
-			Lua::Vulkan::PreparedCommandLuaArg to_cpp(lua_State *L, U u, int index);
+			Lua::Vulkan::PreparedCommandLuaArg to_cpp(lua::State *L, U u, int index);
 
 			template<class U>
-			static int match(lua_State *l, U u, int index);
+			static int match(lua::State *l, U u, int index);
 
 			template<class U>
-			void converter_postcall(lua_State *, U u, int)
+			void converter_postcall(lua::State *, U u, int)
 			{
 			}
 
-			void to_lua(lua_State *L, Lua::Vulkan::PreparedCommandLuaArg const &x);
-			void to_lua(lua_State *L, Lua::Vulkan::PreparedCommandLuaArg *x);
+			void to_lua(lua::State *L, Lua::Vulkan::PreparedCommandLuaArg const &x);
+			void to_lua(lua::State *L, Lua::Vulkan::PreparedCommandLuaArg *x);
 		  public:
-			static value_type to_cpp_deferred(lua_State *, int) { return {}; }
-			static void to_lua_deferred(lua_State *, param_type) {}
-			static int compute_score(lua_State *, int) { return no_match; }
+			static value_type to_cpp_deferred(lua::State *, int) { return {}; }
+			static void to_lua_deferred(lua::State *, param_type) {}
+			static int compute_score(lua::State *, int) { return no_match; }
 		};
 
 		template<>
@@ -111,13 +111,13 @@ export {
 
 	namespace luabind {
 		template<typename U>
-		Lua::Vulkan::PreparedCommandLuaArg default_converter<Lua::Vulkan::PreparedCommandLuaArg>::to_cpp(lua_State *L, U u, int index)
+		Lua::Vulkan::PreparedCommandLuaArg default_converter<Lua::Vulkan::PreparedCommandLuaArg>::to_cpp(lua::State *L, U u, int index)
 		{
 			return Lua::Vulkan::PreparedCommandLuaArg {luabind::object {luabind::from_stack(L, index)}};
 		}
 
 		template<class U>
-		int default_converter<Lua::Vulkan::PreparedCommandLuaArg>::match(lua_State *l, U u, int index)
+		int default_converter<Lua::Vulkan::PreparedCommandLuaArg>::match(lua::State *l, U u, int index)
 		{
 			return (luabind::check_udm<true, true, true>(l, index) || Lua::IsType<Lua::Vulkan::PreparedCommandLuaDynamicArg>(l, index)) ? 1 : no_match;
 		}

@@ -22,7 +22,7 @@ void SPointConstraintConeTwistComponent::SendData(NetPacket &packet, networking:
 	packet->Write<float>(m_kvRelaxationFactor);
 }
 
-void SPointConstraintConeTwistComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SPointConstraintConeTwistComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void PointConstraintConeTwist::Initialize()
 {

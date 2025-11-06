@@ -59,7 +59,7 @@ const std::string &CSoundComponent::GetSteamAudioIdentifier() const { return m_s
 #endif
 
 float CSoundComponent::GetMaxDistance() const { return m_kvMaxDistance; }
-void CSoundComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CSoundComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////
 

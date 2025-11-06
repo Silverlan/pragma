@@ -9,7 +9,7 @@ import :entities.components.prop.dynamic;
 
 using namespace pragma;
 
-void SPropDynamicComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SPropDynamicComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void PropDynamic::Initialize()
 {

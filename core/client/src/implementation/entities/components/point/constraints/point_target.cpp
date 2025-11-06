@@ -11,7 +11,7 @@ import :entities.components.transform;
 
 using namespace pragma;
 
-void CPointTargetComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CPointTargetComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CPointTarget::Initialize()
 {
 	CBaseEntity::Initialize();

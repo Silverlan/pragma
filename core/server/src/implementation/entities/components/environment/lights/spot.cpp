@@ -52,7 +52,7 @@ void SLightSpotComponent::SetBlendFraction(float ang)
 	ServerState::Get()->SendPacket("env_light_spot_innercutoff_angle", p, pragma::networking::Protocol::SlowReliable);
 }
 
-void SLightSpotComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SLightSpotComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SLightSpotComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {

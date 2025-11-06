@@ -18,7 +18,7 @@ bool Lua::resource::add_lua_file(const std::string &f)
 	return ResourceManager::AddResource(Lua::SCRIPT_DIRECTORY_SLASH + path);
 }
 
-LuaTableObject Lua::resource::get_list(lua_State *l)
+LuaTableObject Lua::resource::get_list(lua::State *l)
 {
 	auto &resources = ResourceManager::GetResources();
 	auto result = luabind::newtable(l);

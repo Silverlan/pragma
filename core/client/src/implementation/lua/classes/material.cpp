@@ -10,21 +10,21 @@ import :scripting.lua.classes.material;
 import :client_state;
 import :game;
 
-void Lua::Material::Client::SetTexture(lua_State *, msys::Material *mat, const std::string &textureID, const std::string &tex)
+void Lua::Material::Client::SetTexture(lua::State *, msys::Material *mat, const std::string &textureID, const std::string &tex)
 {
 	auto *cmat = static_cast<msys::CMaterial *>(mat);
 	cmat->SetTexture(textureID, tex);
 	cmat->UpdateTextures();
 	pragma::get_cgame()->ReloadMaterialShader(static_cast<msys::CMaterial *>(mat));
 }
-void Lua::Material::Client::SetTexture(lua_State *l, msys::Material *mat, const std::string &textureID, msys::Texture &tex)
+void Lua::Material::Client::SetTexture(lua::State *l, msys::Material *mat, const std::string &textureID, msys::Texture &tex)
 {
 	auto *cmat = static_cast<msys::CMaterial *>(mat);
 	cmat->SetTexture(textureID, &tex);
 	cmat->UpdateTextures();
 	pragma::get_cgame()->ReloadMaterialShader(static_cast<msys::CMaterial *>(mat));
 }
-void Lua::Material::Client::SetTexture(lua_State *l, msys::Material *mat, const std::string &textureID, Lua::Vulkan::Texture &hTex, const std::string &name)
+void Lua::Material::Client::SetTexture(lua::State *l, msys::Material *mat, const std::string &textureID, Lua::Vulkan::Texture &hTex, const std::string &name)
 {
 	auto *cmat = static_cast<msys::CMaterial *>(mat);
 	cmat->SetTexture(textureID, hTex);
@@ -37,9 +37,9 @@ void Lua::Material::Client::SetTexture(lua_State *l, msys::Material *mat, const 
 	cmat->UpdateTextures();
 	pragma::get_cgame()->ReloadMaterialShader(static_cast<msys::CMaterial *>(mat));
 }
-void Lua::Material::Client::SetTexture(lua_State *l, msys::Material *mat, const std::string &textureID, Lua::Vulkan::Texture &hTex) { SetTexture(l, mat, textureID, hTex, ""); }
+void Lua::Material::Client::SetTexture(lua::State *l, msys::Material *mat, const std::string &textureID, Lua::Vulkan::Texture &hTex) { SetTexture(l, mat, textureID, hTex, ""); }
 
-void Lua::Material::Client::GetTexture(lua_State *l, msys::Material *mat, const std::string &textureID)
+void Lua::Material::Client::GetTexture(lua::State *l, msys::Material *mat, const std::string &textureID)
 {
 	auto *tex = mat->GetTextureInfo(textureID);
 	if(tex == nullptr)
@@ -47,7 +47,7 @@ void Lua::Material::Client::GetTexture(lua_State *l, msys::Material *mat, const 
 	Lua::Push<::TextureInfo *>(l, tex);
 }
 
-void Lua::Material::Client::InitializeShaderData(lua_State *l, msys::Material *mat, bool reload)
+void Lua::Material::Client::InitializeShaderData(lua::State *l, msys::Material *mat, bool reload)
 {
 	auto shaderHandler = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetShaderHandler();
 	if(shaderHandler)
@@ -58,16 +58,16 @@ void Lua::Material::Client::InitializeShaderData(lua_State *l, msys::Material *m
 	shader->InitializeMaterialDescriptorSet(static_cast<msys::CMaterial &>(*mat), reload);
 }
 
-void Lua::Material::Client::InitializeShaderData(lua_State *l, msys::Material *mat) { InitializeShaderData(l, mat, false); }
+void Lua::Material::Client::InitializeShaderData(lua::State *l, msys::Material *mat) { InitializeShaderData(l, mat, false); }
 
 ///////////////////
 
-std::shared_ptr<msys::Texture> Lua::TextureInfo::GetTexture(lua_State *l, ::TextureInfo *tex)
+std::shared_ptr<msys::Texture> Lua::TextureInfo::GetTexture(lua::State *l, ::TextureInfo *tex)
 {
 	if(tex->texture == nullptr)
 		return nullptr;
 	return std::static_pointer_cast<msys::Texture>(tex->texture);
 }
-std::pair<uint32_t, uint32_t> Lua::TextureInfo::GetSize(lua_State *l, ::TextureInfo *tex) { return {tex->width, tex->height}; }
-uint32_t Lua::TextureInfo::GetWidth(lua_State *l, ::TextureInfo *tex) { return tex->width; }
-uint32_t Lua::TextureInfo::GetHeight(lua_State *l, ::TextureInfo *tex) { return tex->height; }
+std::pair<uint32_t, uint32_t> Lua::TextureInfo::GetSize(lua::State *l, ::TextureInfo *tex) { return {tex->width, tex->height}; }
+uint32_t Lua::TextureInfo::GetWidth(lua::State *l, ::TextureInfo *tex) { return tex->width; }
+uint32_t Lua::TextureInfo::GetHeight(lua::State *l, ::TextureInfo *tex) { return tex->height; }

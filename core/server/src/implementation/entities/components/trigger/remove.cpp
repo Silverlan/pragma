@@ -9,7 +9,7 @@ import :entities.components.triggers.remove;
 
 using namespace pragma;
 
-void STriggerRemoveComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void STriggerRemoveComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void TriggerRemove::Initialize()
 {

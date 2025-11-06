@@ -13,7 +13,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SWeaponComponent final : public BaseWeaponComponent, public SBaseNetComponent {
 	  public:
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		static uint32_t GetWeaponCount();
 		static const std::vector<SWeaponComponent *> &GetAll();
@@ -58,7 +58,7 @@ export namespace pragma {
 		virtual void OnUse(pragma::ecs::BaseEntity *pl);
 		virtual void OnPhysicsInitialized() override;
 		virtual void OnEntitySpawn() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  private:
 		static std::vector<SWeaponComponent *> s_weapons;
 	};

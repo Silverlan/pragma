@@ -26,7 +26,7 @@ CAnimatedBvhComponent::CAnimatedBvhComponent(pragma::ecs::BaseEntity &ent) : Bas
 	if(g_instanceCount++ == 0)
 		init_thread_pool();
 }
-void CAnimatedBvhComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CAnimatedBvhComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CAnimatedBvhComponent::UpdateDirtyBones()
 {

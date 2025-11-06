@@ -15,7 +15,7 @@ export namespace pragma {
 		CToggleComponent(pragma::ecs::BaseEntity &ent) : BaseToggleComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(UInt32 eventId, NetPacket &packet) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 };

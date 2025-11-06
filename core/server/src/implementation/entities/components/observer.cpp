@@ -20,7 +20,7 @@ SObserverComponent::SObserverComponent(pragma::ecs::BaseEntity &ent) : BaseObser
 
 SObserverComponent::~SObserverComponent() {}
 
-void SObserverComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SObserverComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SObserverComponent::DoSetObserverMode(ObserverMode mode)
 {

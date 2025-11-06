@@ -200,7 +200,7 @@ void CLightDirectionalComponent::UpdateAmbientColor()
 	// pragma::get_cgame()->GetWorldEnvironment().SetAmbientColor((*m_ambientColor)->ToVector4());
 	pragma::get_cgame()->SetMaxHDRExposure(m_maxExposure);
 }
-void CLightDirectionalComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CLightDirectionalComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 //////////////
 

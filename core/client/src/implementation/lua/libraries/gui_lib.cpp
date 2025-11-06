@@ -78,7 +78,7 @@ static bool check_element(const std::string &name, ::WIBase *el)
 	return el;
 }
 
-::WIBase *Lua::gui::create_button(lua_State *l, const std::string &text, ::WIBase &parent, int32_t x, int32_t y)
+::WIBase *Lua::gui::create_button(lua::State *l, const std::string &text, ::WIBase &parent, int32_t x, int32_t y)
 {
 	auto *pButton = WGUI::GetInstance().Create<::WIButton>(&parent);
 	if(!pButton)
@@ -89,7 +89,7 @@ static bool check_element(const std::string &name, ::WIBase *el)
 	initialize_element(*pButton);
 	return pButton;
 }
-::WIBase *Lua::gui::create_button(lua_State *l, const std::string &text, ::WIBase &parent)
+::WIBase *Lua::gui::create_button(lua::State *l, const std::string &text, ::WIBase &parent)
 {
 	auto *pButton = WGUI::GetInstance().Create<::WIButton>(&parent);
 	if(!pButton)
@@ -99,7 +99,7 @@ static bool check_element(const std::string &name, ::WIBase *el)
 	initialize_element(*pButton);
 	return pButton;
 }
-::WIBase *Lua::gui::create_button(lua_State *l, const std::string &text)
+::WIBase *Lua::gui::create_button(lua::State *l, const std::string &text)
 {
 	auto *pButton = WGUI::GetInstance().Create<::WIButton>();
 	if(!pButton)
@@ -110,7 +110,7 @@ static bool check_element(const std::string &name, ::WIBase *el)
 	return pButton;
 }
 
-static Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>>> create_checkbox(lua_State *l, const std::string &label, ::WIBase *parent)
+static Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>>> create_checkbox(lua::State *l, const std::string &label, ::WIBase *parent)
 {
 	auto &wgui = WGUI::GetInstance();
 	auto *pContainer = wgui.Create<::WIBase>(parent);
@@ -137,10 +137,10 @@ static Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::
 
 	return Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>> {l, WGUILuaInterface::GetLuaObject(l, *pContainer), WGUILuaInterface::GetLuaObject(l, *pCheckbox), WGUILuaInterface::GetLuaObject(l, *pText)};
 }
-Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>>> Lua::gui::create_checkbox(lua_State *l, const std::string &label, ::WIBase &parent) { return ::create_checkbox(l, label, &parent); }
-Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>>> Lua::gui::create_checkbox(lua_State *l, const std::string &label) { return ::create_checkbox(l, label, nullptr); }
+Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>>> Lua::gui::create_checkbox(lua::State *l, const std::string &label, ::WIBase &parent) { return ::create_checkbox(l, label, &parent); }
+Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>>> Lua::gui::create_checkbox(lua::State *l, const std::string &label) { return ::create_checkbox(l, label, nullptr); }
 
-::WIBase *Lua::gui::create_label(lua_State *l, const std::string &str, ::WIBase &parent, int32_t x, int32_t y)
+::WIBase *Lua::gui::create_label(lua::State *l, const std::string &str, ::WIBase &parent, int32_t x, int32_t y)
 {
 	auto *pText = WGUI::GetInstance().Create<::WIText>(&parent);
 	if(pText == nullptr)
@@ -151,7 +151,7 @@ Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>
 	initialize_element(*pText);
 	return pText;
 }
-::WIBase *Lua::gui::create_label(lua_State *l, const std::string &str, ::WIBase &parent)
+::WIBase *Lua::gui::create_label(lua::State *l, const std::string &str, ::WIBase &parent)
 {
 	auto *pText = WGUI::GetInstance().Create<::WIText>(&parent);
 	if(pText == nullptr)
@@ -161,7 +161,7 @@ Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>
 	initialize_element(*pText);
 	return pText;
 }
-::WIBase *Lua::gui::create_label(lua_State *l, const std::string &str)
+::WIBase *Lua::gui::create_label(lua::State *l, const std::string &str)
 {
 	auto *pText = WGUI::GetInstance().Create<::WIText>();
 	if(pText == nullptr)
@@ -181,13 +181,13 @@ void Lua::gui::register_element(const std::string &className, const Lua::classOb
 ::WIBase *Lua::gui::get_base_element(const prosper::Window &window) { return WGUI::GetInstance().GetBaseElement(&window); }
 ::WIBase *Lua::gui::get_base_element() { return WGUI::GetInstance().GetBaseElement(); }
 
-::WIBase *Lua::gui::get_element_under_cursor(lua_State *l, ::WIBase &elRoot, const Lua::func<bool, ::WIBase> &condition)
+::WIBase *Lua::gui::get_element_under_cursor(lua::State *l, ::WIBase &elRoot, const Lua::func<bool, ::WIBase> &condition)
 {
 	return ::WGUI::GetInstance().GetCursorGUIElement(&elRoot, [l, condition](::WIBase *el) -> bool {
 		auto &oFunc = condition;
 		auto result = Lua::CallFunction(
 		  l,
-		  [&oFunc, el](lua_State *l) -> Lua::StatusCode {
+		  [&oFunc, el](lua::State *l) -> Lua::StatusCode {
 			  oFunc.push(l);
 			  auto o = WGUILuaInterface::GetLuaObject(l, *el);
 			  o.push(l);
@@ -204,34 +204,34 @@ void Lua::gui::register_element(const std::string &className, const Lua::classOb
 		return r;
 	});
 }
-::WIBase *Lua::gui::get_element_under_cursor(lua_State *l, const prosper::Window *window, const Lua::func<bool, ::WIBase> &condition)
+::WIBase *Lua::gui::get_element_under_cursor(lua::State *l, const prosper::Window *window, const Lua::func<bool, ::WIBase> &condition)
 {
 	auto *el = WGUI::GetInstance().GetBaseElement(window);
 	if(!el)
 		return nullptr;
 	return get_element_under_cursor(l, *el, condition);
 }
-::WIBase *Lua::gui::get_element_under_cursor(lua_State *l, const Lua::func<bool, ::WIBase> &condition) { return get_element_under_cursor(l, nullptr, condition); }
-::WIBase *Lua::gui::get_element_under_cursor(lua_State *l, const prosper::Window *window)
+::WIBase *Lua::gui::get_element_under_cursor(lua::State *l, const Lua::func<bool, ::WIBase> &condition) { return get_element_under_cursor(l, nullptr, condition); }
+::WIBase *Lua::gui::get_element_under_cursor(lua::State *l, const prosper::Window *window)
 {
 	auto *el = WGUI::GetInstance().GetBaseElement(window);
 	if(!el)
 		return nullptr;
 	return ::WGUI::GetInstance().GetCursorGUIElement(el, [l](::WIBase *el) -> bool { return true; }, window);
 }
-::WIBase *Lua::gui::get_element_under_cursor(lua_State *l, ::WIBase &elRoot)
+::WIBase *Lua::gui::get_element_under_cursor(lua::State *l, ::WIBase &elRoot)
 {
 	return ::WGUI::GetInstance().GetCursorGUIElement(&elRoot, [l](::WIBase *el) -> bool { return true; });
 }
 
-::WIBase *Lua::gui::get_element_at_position(lua_State *l, prosper::Window *window, ::WIBase *baseElement, int32_t x, int32_t y, const Lua::func<bool, ::WIBase> &condition)
+::WIBase *Lua::gui::get_element_at_position(lua::State *l, prosper::Window *window, ::WIBase *baseElement, int32_t x, int32_t y, const Lua::func<bool, ::WIBase> &condition)
 {
 	std::function<bool(::WIBase *)> fCondition = nullptr;
 
 	fCondition = [condition, l](::WIBase *el) -> bool {
 		auto result = Lua::CallFunction(
 		  l,
-		  [condition, el](lua_State *l) -> Lua::StatusCode {
+		  [condition, el](lua::State *l) -> Lua::StatusCode {
 			  condition.push(l);
 			  auto o = WGUILuaInterface::GetLuaObject(l, *el);
 			  o.push(l);
@@ -247,22 +247,22 @@ void Lua::gui::register_element(const std::string &className, const Lua::classOb
 
 	return WGUI::GetInstance().GetGUIElement(baseElement, x, y, fCondition, window);
 }
-::WIBase *Lua::gui::get_element_at_position(lua_State *l, prosper::Window *window, ::WIBase *baseElement, int32_t x, int32_t y) { return WGUI::GetInstance().GetGUIElement(baseElement, x, y, nullptr, window); }
-::WIBase *Lua::gui::get_element_at_position(lua_State *l, prosper::Window *window, ::WIBase *baseElement)
+::WIBase *Lua::gui::get_element_at_position(lua::State *l, prosper::Window *window, ::WIBase *baseElement, int32_t x, int32_t y) { return WGUI::GetInstance().GetGUIElement(baseElement, x, y, nullptr, window); }
+::WIBase *Lua::gui::get_element_at_position(lua::State *l, prosper::Window *window, ::WIBase *baseElement)
 {
 	int32_t x;
 	int32_t y;
 	WGUI::GetInstance().GetMousePos(x, y);
 	return WGUI::GetInstance().GetGUIElement(baseElement, x, y, nullptr, window);
 }
-::WIBase *Lua::gui::get_element_at_position(lua_State *l, prosper::Window *window)
+::WIBase *Lua::gui::get_element_at_position(lua::State *l, prosper::Window *window)
 {
 	int32_t x;
 	int32_t y;
 	WGUI::GetInstance().GetMousePos(x, y);
 	return WGUI::GetInstance().GetGUIElement(nullptr, x, y, nullptr, window);
 }
-::WIBase *Lua::gui::get_element_at_position(lua_State *l)
+::WIBase *Lua::gui::get_element_at_position(lua::State *l)
 {
 	int32_t x;
 	int32_t y;
@@ -270,11 +270,11 @@ void Lua::gui::register_element(const std::string &className, const Lua::classOb
 	return WGUI::GetInstance().GetGUIElement(nullptr, x, y, nullptr);
 }
 
-::WIBase *Lua::gui::get_focused_element(lua_State *l) { return WGUI::GetInstance().GetFocusedElement(); }
+::WIBase *Lua::gui::get_focused_element(lua::State *l) { return WGUI::GetInstance().GetFocusedElement(); }
 
-::WIBase *Lua::gui::get_focused_element(lua_State *l, prosper::Window &window) { return WGUI::GetInstance().GetFocusedElement(&window); }
+::WIBase *Lua::gui::get_focused_element(lua::State *l, prosper::Window &window) { return WGUI::GetInstance().GetFocusedElement(&window); }
 
-static bool register_skin(lua_State *l, const std::string &skin, const luabind::tableT<void> &vars, const luabind::tableT<void> &skinData, const std::string *baseName)
+static bool register_skin(lua::State *l, const std::string &skin, const luabind::tableT<void> &vars, const luabind::tableT<void> &skinData, const std::string *baseName)
 {
 	if(l != pragma::get_client_state()->GetGUILuaState()) {
 		Lua::Error(l, "Attempted to register GUI skin with client lua state! This is not allowed, skins can only be registered with GUI lua state!");
@@ -320,8 +320,8 @@ void Lua::gui::register_default_skin(const std::string &vars, const std::string 
 	settings.skin = tSkinData;
 	skin->MergeInto(l, settings);
 }
-bool Lua::gui::register_skin(lua_State *l, const std::string &skin, const luabind::tableT<void> &vars, const luabind::tableT<void> &skinData) { return ::register_skin(l, skin, vars, skinData, nullptr); }
-bool Lua::gui::register_skin(lua_State *l, const std::string &skin, const luabind::tableT<void> &vars, const luabind::tableT<void> &skinData, const std::string &baseName) { return ::register_skin(l, skin, vars, skinData, &baseName); }
+bool Lua::gui::register_skin(lua::State *l, const std::string &skin, const luabind::tableT<void> &vars, const luabind::tableT<void> &skinData) { return ::register_skin(l, skin, vars, skinData, nullptr); }
+bool Lua::gui::register_skin(lua::State *l, const std::string &skin, const luabind::tableT<void> &vars, const luabind::tableT<void> &skinData, const std::string &baseName) { return ::register_skin(l, skin, vars, skinData, &baseName); }
 
 void Lua::gui::set_skin(const std::string &skin) { WGUI::GetInstance().SetSkin(skin); }
 
@@ -335,7 +335,7 @@ pragma::platform::Cursor::Shape Lua::gui::get_cursor() { return WGUI::GetInstanc
 void Lua::gui::set_cursor(pragma::platform::Cursor::Shape shape) { WGUI::GetInstance().SetCursor(shape); }
 pragma::platform::CursorMode Lua::gui::get_cursor_input_mode() { return WGUI::GetInstance().GetCursorInputMode(); }
 void Lua::gui::set_cursor_input_mode(pragma::platform::CursorMode mode) { WGUI::GetInstance().SetCursorInputMode(mode); }
-::Vector2i Lua::gui::get_window_size(lua_State *l)
+::Vector2i Lua::gui::get_window_size(lua::State *l)
 {
 	auto &context = WGUI::GetInstance().GetContext();
 	auto &window = context.GetWindow();
@@ -425,7 +425,7 @@ bool Lua::gui::inject_char_input(const std::string &c)
 		b = WGUI::GetInstance().HandleCharInput(window, c.front());
 	return b;
 }
-bool Lua::gui::inject_scroll_input(lua_State *l, const ::Vector2 &offset, const ::Vector2i &pCursorPos)
+bool Lua::gui::inject_scroll_input(lua::State *l, const ::Vector2 &offset, const ::Vector2i &pCursorPos)
 {
 	::Vector2i cursorPos = {};
 	auto &gui = WGUI::GetInstance();
@@ -438,7 +438,7 @@ bool Lua::gui::inject_scroll_input(lua_State *l, const ::Vector2 &offset, const 
 	window->SetCursorPos(cursorPos);
 	return b;
 }
-bool Lua::gui::inject_scroll_input(lua_State *l, const ::Vector2 &offset)
+bool Lua::gui::inject_scroll_input(lua::State *l, const ::Vector2 &offset)
 {
 	::Vector2i cursorPos = {};
 	auto &gui = WGUI::GetInstance();
@@ -446,8 +446,8 @@ bool Lua::gui::inject_scroll_input(lua_State *l, const ::Vector2 &offset)
 	return gui.HandleScrollInput(window, offset);
 }
 
-float Lua::gui::RealTime(lua_State *l) { return pragma::get_client_state()->RealTime(); }
+float Lua::gui::RealTime(lua::State *l) { return pragma::get_client_state()->RealTime(); }
 
-float Lua::gui::DeltaTime(lua_State *l) { return pragma::get_client_state()->DeltaTime(); }
+float Lua::gui::DeltaTime(lua::State *l) { return pragma::get_client_state()->DeltaTime(); }
 
-float Lua::gui::LastThink(lua_State *l) { return pragma::get_client_state()->LastThink(); }
+float Lua::gui::LastThink(lua::State *l) { return pragma::get_client_state()->LastThink(); }

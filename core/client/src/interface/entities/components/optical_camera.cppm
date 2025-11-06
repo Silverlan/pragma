@@ -58,7 +58,7 @@ export namespace pragma {
 
 		COpticalCameraComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  private:
 		float m_focalDistance = 200.f;
 		float m_focalLength = 24.f;

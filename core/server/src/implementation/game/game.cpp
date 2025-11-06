@@ -697,8 +697,8 @@ void SGame::HandleLuaNetPacket(pragma::networking::IServerClient &session, ::Net
 		return;
 	}
 	ProtectedLuaCall(
-	  [&i, &pl, &packet](lua_State *l) {
-		  lua_rawgeti(l, LUA_REGISTRYINDEX, i->second);
+	  [&i, &pl, &packet](lua::State *l) {
+		  lua::raw_get(l, LUA_REGISTRYINDEX, i->second);
 		  luabind::object(l, packet).push(l);
 		  pl->PushLuaObject(l);
 		  return Lua::StatusCode::Ok;

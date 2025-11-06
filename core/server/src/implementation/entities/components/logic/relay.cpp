@@ -43,7 +43,7 @@ void SLogicRelayComponent::Trigger(pragma::ecs::BaseEntity *activator)
 
 //////////////
 
-void SLogicRelayComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SLogicRelayComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void LogicRelay::Initialize()
 {

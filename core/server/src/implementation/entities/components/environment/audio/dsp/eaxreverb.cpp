@@ -90,7 +90,7 @@ void SSoundDspEAXReverbComponent::SendData(NetPacket &packet, networking::Client
 	packet->Write<float>(m_kvRoomRolloff);
 	packet->Write<float>(m_kvAirAbsorpGainHF);
 }
-void SSoundDspEAXReverbComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SSoundDspEAXReverbComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////////
 

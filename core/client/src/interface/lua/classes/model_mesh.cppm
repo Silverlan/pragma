@@ -12,19 +12,19 @@ export import pragma.shared;
 export namespace Lua {
 	namespace ModelMesh {
 		namespace Client {
-			DLLCLIENT void Create(lua_State *l);
+			DLLCLIENT void Create(lua::State *l);
 		};
 	};
 	namespace ModelSubMesh {
 		namespace Client {
-			DLLCLIENT void Create(lua_State *l);
-			DLLCLIENT void GetVkMesh(lua_State *l, pragma::ModelSubMesh &mesh);
-			DLLCLIENT void GetTangents(lua_State *l, pragma::ModelSubMesh &mesh);
-			DLLCLIENT void GetBiTangents(lua_State *l, pragma::ModelSubMesh &mesh);
-			DLLCLIENT void GetVertexBuffer(lua_State *l, pragma::ModelSubMesh &mesh);
-			DLLCLIENT void GetVertexWeightBuffer(lua_State *l, pragma::ModelSubMesh &mesh);
-			DLLCLIENT void GetAlphaBuffer(lua_State *l, pragma::ModelSubMesh &mesh);
-			DLLCLIENT void GetIndexBuffer(lua_State *l, pragma::ModelSubMesh &mesh);
+			DLLCLIENT void Create(lua::State *l);
+			DLLCLIENT void GetVkMesh(lua::State *l, pragma::ModelSubMesh &mesh);
+			DLLCLIENT void GetTangents(lua::State *l, pragma::ModelSubMesh &mesh);
+			DLLCLIENT void GetBiTangents(lua::State *l, pragma::ModelSubMesh &mesh);
+			DLLCLIENT void GetVertexBuffer(lua::State *l, pragma::ModelSubMesh &mesh);
+			DLLCLIENT void GetVertexWeightBuffer(lua::State *l, pragma::ModelSubMesh &mesh);
+			DLLCLIENT void GetAlphaBuffer(lua::State *l, pragma::ModelSubMesh &mesh);
+			DLLCLIENT void GetIndexBuffer(lua::State *l, pragma::ModelSubMesh &mesh);
 		};
 	};
 };

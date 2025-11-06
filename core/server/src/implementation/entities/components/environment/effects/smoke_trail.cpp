@@ -21,7 +21,7 @@ void SSmokeTrailComponent::SendData(NetPacket &packet, networking::ClientRecipie
 	packet->WriteString(m_material);
 }
 
-void SSmokeTrailComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SSmokeTrailComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ///////////////
 

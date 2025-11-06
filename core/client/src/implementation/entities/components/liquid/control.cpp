@@ -13,7 +13,7 @@ import :game;
 
 using namespace pragma;
 
-void CLiquidControlComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CLiquidControlComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CLiquidControlComponent::ReceiveData(NetPacket &packet)
 {

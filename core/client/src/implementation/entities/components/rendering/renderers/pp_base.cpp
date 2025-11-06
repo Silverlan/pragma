@@ -30,7 +30,7 @@ void CRendererPpBaseComponent::OnRemove()
 	if(m_cbEffect.IsValid())
 		m_cbEffect.Remove();
 }
-void CRendererPpBaseComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CRendererPpBaseComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 pragma::PostProcessingEffectData::Flags CRendererPpBaseComponent::GetFlags() const { return PostProcessingEffectData::Flags::None; }
 void CRendererPpBaseComponent::RenderEffect(const util::DrawSceneInfo &drawSceneInfo)
 {

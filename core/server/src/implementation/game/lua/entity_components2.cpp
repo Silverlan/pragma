@@ -14,7 +14,7 @@ import :game;
 
 import :entities.components;
 
-void RegisterLuaEntityComponents2_sv(lua_State *l, luabind::module_ &entsMod)
+void RegisterLuaEntityComponents2_sv(lua::State *l, luabind::module_ &entsMod)
 {
 	auto defSPointConstraintBallSocket = pragma::lua::create_entity_component_class<pragma::SPointConstraintBallSocketComponent, pragma::BasePointConstraintBallSocketComponent>("PointConstraintBallSocketComponent");
 	entsMod[defSPointConstraintBallSocket];

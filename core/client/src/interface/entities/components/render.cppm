@@ -60,7 +60,7 @@ export namespace pragma {
 		static ComponentEventId EVENT_ON_DEPTH_BIAS_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		CRenderComponent(pragma::ecs::BaseEntity &ent);
 		const prosper::IBuffer *GetRenderBuffer() const;
@@ -131,7 +131,7 @@ export namespace pragma {
 
 		bool ShouldDraw() const;
 		bool ShouldDrawShadow() const;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void OnEntitySpawn() override;
 		virtual void OnRemove() override;
@@ -246,43 +246,43 @@ export namespace pragma {
 
 	struct DLLCLIENT CEUpdateInstantiability : public ComponentEvent {
 		CEUpdateInstantiability(bool &instantiable);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		virtual uint32_t GetReturnCount() override;
-		virtual void HandleReturnValues(lua_State *l) override;
+		virtual void HandleReturnValues(lua::State *l) override;
 		bool &instantiable;
 	};
 
 	struct DLLCLIENT CEShouldDraw : public ComponentEvent {
 		CEShouldDraw(bool &shouldDraw);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		virtual uint32_t GetReturnCount() override;
-		virtual void HandleReturnValues(lua_State *l) override;
+		virtual void HandleReturnValues(lua::State *l) override;
 		bool &shouldDraw;
 	};
 
 	struct DLLCLIENT CEOnUpdateRenderMatrices : public ComponentEvent {
 		CEOnUpdateRenderMatrices(umath::ScaledTransform &pose, Mat4 &transformation);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		virtual uint32_t GetReturnCount() override;
-		virtual void HandleReturnValues(lua_State *l) override;
+		virtual void HandleReturnValues(lua::State *l) override;
 		umath::ScaledTransform &pose;
 		Mat4 &transformation;
 	};
 
 	struct DLLCLIENT CEOnUpdateRenderData : public ComponentEvent {
 		CEOnUpdateRenderData();
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 	};
 
 	struct DLLCLIENT CEOnUpdateRenderBuffers : public ComponentEvent {
 		CEOnUpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		std::shared_ptr<prosper::IPrimaryCommandBuffer> commandBuffer;
 	};
 
 	struct DLLCLIENT CEOnRenderBoundsChanged : public ComponentEvent {
 		CEOnRenderBoundsChanged(const Vector3 &min, const Vector3 &max, const Sphere &sphere);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		const Vector3 &min;
 		const Vector3 &max;
 		const Sphere &sphere;

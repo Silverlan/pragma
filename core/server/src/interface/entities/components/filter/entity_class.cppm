@@ -14,7 +14,7 @@ export {
 		class DLLSERVER SFilterClassComponent final : public BaseFilterClassComponent {
 		  public:
 			SFilterClassComponent(pragma::ecs::BaseEntity &ent) : BaseFilterClassComponent(ent) {}
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};
 

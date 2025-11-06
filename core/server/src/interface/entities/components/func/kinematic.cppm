@@ -21,7 +21,7 @@ export {
 			virtual void StartForward() override;
 			virtual void StartBackward() override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};
 

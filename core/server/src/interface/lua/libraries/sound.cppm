@@ -12,7 +12,7 @@ export import pragma.shared;
 export namespace Lua {
 	namespace sound {
 		namespace Server {
-			std::shared_ptr<::ALSound> create(lua_State *l, const std::string &snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags);
+			std::shared_ptr<::ALSound> create(lua::State *l, const std::string &snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags);
 		};
 	};
 };

@@ -84,7 +84,7 @@ const std::vector<Vector2> *CLightMapReceiverComponent::FindLightmapUvSet(pragma
 		return cache->FindLightmapUvs(GetEntity().GetUuid(), mesh.GetUuid());
 	return mesh.GetUVSet("lightmap");
 }
-void CLightMapReceiverComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CLightMapReceiverComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CLightMapReceiverComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

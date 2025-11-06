@@ -12,7 +12,7 @@ export import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CVehicleComponent final : public BaseVehicleComponent, public CBaseSnapshotComponent {
 	  public:
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		CVehicleComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~CVehicleComponent() override;
@@ -30,7 +30,7 @@ export namespace pragma {
 		void ReadWheelInfo(NetPacket &packet);
 		CallbackHandle m_hCbSteeringWheel;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  private:
 		static std::vector<CVehicleComponent *> s_vehicles;
 	};

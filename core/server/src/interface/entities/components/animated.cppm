@@ -22,7 +22,7 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 
 		using BaseAnimatedComponent::PlayAnimation;
 		using BaseAnimatedComponent::PlayLayeredAnimation;

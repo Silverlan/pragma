@@ -211,7 +211,7 @@ export namespace pragma {
 		};
 
 		CRasterizationRendererComponent(pragma::ecs::BaseEntity &ent);
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void Initialize() override;
 
 		friend SceneRenderDesc;
@@ -369,20 +369,20 @@ export namespace pragma {
 
 	struct DLLCLIENT CELightingStageData : public ComponentEvent {
 		CELightingStageData(pragma::rendering::LightingStageRenderProcessor &renderProcessor);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		pragma::rendering::LightingStageRenderProcessor &renderProcessor;
 	};
 
 	struct DLLCLIENT CEPrepassStageData : public ComponentEvent {
 		CEPrepassStageData(pragma::rendering::DepthStageRenderProcessor &renderProcessor, pragma::ShaderPrepassBase &shader);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		pragma::rendering::DepthStageRenderProcessor &renderProcessor;
 		pragma::ShaderPrepassBase &shader;
 	};
 
 	struct DLLCLIENT CEUpdateRenderBuffers : public ComponentEvent {
 		CEUpdateRenderBuffers(const util::DrawSceneInfo &drawSceneInfo);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		const util::DrawSceneInfo &drawSceneInfo;
 	};
 	using namespace umath::scoped_enum::bitwise;

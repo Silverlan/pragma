@@ -16,7 +16,7 @@ export namespace pragma {
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual void SetNetworkFlags(NetworkFlags flags) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
 #if NETWORKED_VARS_ENABLED != 0
 		template<class TProperty>

@@ -17,7 +17,7 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 
 		virtual void CreateSplash(const Vector3 &origin, float radius, float force) override;
 	};

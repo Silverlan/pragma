@@ -16,7 +16,7 @@ export {
 			CBotComponent(pragma::ecs::BaseEntity &ent) : BaseBotComponent(ent) {}
 			virtual void Initialize() override;
 			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		  protected:
 			void OnFootStep(BaseCharacterComponent::FootType foot);
 		};

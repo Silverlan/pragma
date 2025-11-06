@@ -16,17 +16,17 @@ import pragma.gui;
 
 CallbackHandle WGUILuaInterface::m_cbGameStart;
 CallbackHandle WGUILuaInterface::m_cbLuaReleased;
-lua_State *WGUILuaInterface::m_guiLuaState = nullptr;
+lua::State *WGUILuaInterface::m_guiLuaState = nullptr;
 
 static std::optional<util::EventReply> GUI_Callback_OnMouseEvent(WIBase &p, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
-	lua_State *luaStates[2] = {pragma::get_client_state()->GetGUILuaState(), nullptr};
+	lua::State *luaStates[2] = {pragma::get_client_state()->GetGUILuaState(), nullptr};
 	if(pragma::get_cgame() != nullptr)
 		luaStates[1] = pragma::get_cgame()->GetLuaState();
 	std::optional<util::EventReply> reply {};
 	for(char i = 0; i < 2; i++) {
 		if(luaStates[i] != nullptr) {
-			lua_State *lua = luaStates[i];
+			lua::State *lua = luaStates[i];
 			auto o = WGUILuaInterface::GetLuaObject(lua, p);
 
 			o.push(lua);                          /* 1 */
@@ -36,7 +36,7 @@ static std::optional<util::EventReply> GUI_Callback_OnMouseEvent(WIBase &p, prag
 				auto functionIdx = Lua::GetStackTop(lua);
 				if(Lua::CallFunction(
 				     lua,
-				     [functionIdx, &o, button, state, mods](lua_State *l) {
+				     [functionIdx, &o, button, state, mods](lua::State *l) {
 					     Lua::PushValue(l, functionIdx);
 					     o.push(l);
 					     Lua::PushInt(l, button);
@@ -63,13 +63,13 @@ static std::optional<util::EventReply> GUI_Callback_OnMouseEvent(WIBase &p, prag
 
 static std::optional<util::EventReply> GUI_Callback_OnKeyEvent(WIBase &p, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
-	lua_State *luaStates[2] = {pragma::get_client_state()->GetGUILuaState(), nullptr};
+	lua::State *luaStates[2] = {pragma::get_client_state()->GetGUILuaState(), nullptr};
 	if(pragma::get_cgame() != nullptr)
 		luaStates[1] = pragma::get_cgame()->GetLuaState();
 	std::optional<util::EventReply> reply {};
 	for(char i = 0; i < 2; i++) {
 		if(luaStates[i] != nullptr) {
-			lua_State *lua = luaStates[i];
+			lua::State *lua = luaStates[i];
 			auto o = WGUILuaInterface::GetLuaObject(lua, p);
 			o.push(lua);                        /* 1 */
 			Lua::PushString(lua, "OnKeyEvent"); /* 2 */
@@ -78,7 +78,7 @@ static std::optional<util::EventReply> GUI_Callback_OnKeyEvent(WIBase &p, pragma
 				auto functionIdx = Lua::GetStackTop(lua);
 				if(Lua::CallFunction(
 				     lua,
-				     [functionIdx, &o, key, scanCode, state, mods](lua_State *l) {
+				     [functionIdx, &o, key, scanCode, state, mods](lua::State *l) {
 					     Lua::PushValue(l, functionIdx);
 					     o.push(l);
 					     Lua::PushInt(l, key);
@@ -106,13 +106,13 @@ static std::optional<util::EventReply> GUI_Callback_OnKeyEvent(WIBase &p, pragma
 
 static std::optional<util::EventReply> GUI_Callback_OnCharEvent(WIBase &p, int c, pragma::platform::Modifier mods)
 {
-	lua_State *luaStates[2] = {pragma::get_client_state()->GetGUILuaState(), nullptr};
+	lua::State *luaStates[2] = {pragma::get_client_state()->GetGUILuaState(), nullptr};
 	if(pragma::get_cgame() != nullptr)
 		luaStates[1] = pragma::get_cgame()->GetLuaState();
 	std::optional<util::EventReply> reply {};
 	for(char i = 0; i < 2; i++) {
 		if(luaStates[i] != nullptr) {
-			lua_State *lua = luaStates[i];
+			lua::State *lua = luaStates[i];
 			auto o = WGUILuaInterface::GetLuaObject(lua, p);
 			o.push(lua);                         /* 1 */
 			Lua::PushString(lua, "OnCharEvent"); /* 2 */
@@ -121,7 +121,7 @@ static std::optional<util::EventReply> GUI_Callback_OnCharEvent(WIBase &p, int c
 				auto functionIdx = Lua::GetStackTop(lua);
 				if(Lua::CallFunction(
 				     lua,
-				     [functionIdx, &o, c, mods](lua_State *l) {
+				     [functionIdx, &o, c, mods](lua::State *l) {
 					     Lua::PushValue(l, functionIdx);
 					     o.push(l);
 					     char ch = CInt8(c);
@@ -148,13 +148,13 @@ static std::optional<util::EventReply> GUI_Callback_OnCharEvent(WIBase &p, int c
 
 static std::optional<util::EventReply> GUI_Callback_OnScroll(WIBase &p, Vector2 offset, bool offsetAsPixels)
 {
-	lua_State *luaStates[2] = {pragma::get_client_state()->GetGUILuaState(), nullptr};
+	lua::State *luaStates[2] = {pragma::get_client_state()->GetGUILuaState(), nullptr};
 	if(pragma::get_cgame() != nullptr)
 		luaStates[1] = pragma::get_cgame()->GetLuaState();
 	std::optional<util::EventReply> reply {};
 	for(char i = 0; i < 2; i++) {
 		if(luaStates[i] != nullptr) {
-			lua_State *lua = luaStates[i];
+			lua::State *lua = luaStates[i];
 			auto o = WGUILuaInterface::GetLuaObject(lua, p);
 			o.push(lua);                      /* 1 */
 			Lua::PushString(lua, "OnScroll"); /* 2 */
@@ -163,7 +163,7 @@ static std::optional<util::EventReply> GUI_Callback_OnScroll(WIBase &p, Vector2 
 				auto functionIdx = Lua::GetStackTop(lua);
 				if(Lua::CallFunction(
 				     lua,
-				     [functionIdx, &o, &offset, &offsetAsPixels](lua_State *l) {
+				     [functionIdx, &o, &offset, &offsetAsPixels](lua::State *l) {
 					     Lua::PushValue(l, functionIdx);
 					     o.push(l);
 					     Lua::PushNumber(l, offset.x);
@@ -188,9 +188,9 @@ static std::optional<util::EventReply> GUI_Callback_OnScroll(WIBase &p, Vector2 
 	return reply;
 }
 
-void WGUILuaInterface::OnGameStart() { m_cbLuaReleased = pragma::get_cgame()->AddCallback("OnLuaReleased", FunctionCallback<void, lua_State *>::Create(&WGUILuaInterface::OnGameLuaReleased)); }
+void WGUILuaInterface::OnGameStart() { m_cbLuaReleased = pragma::get_cgame()->AddCallback("OnLuaReleased", FunctionCallback<void, lua::State *>::Create(&WGUILuaInterface::OnGameLuaReleased)); }
 
-void WGUILuaInterface::OnGameLuaReleased(lua_State *)
+void WGUILuaInterface::OnGameLuaReleased(lua::State *)
 {
 	auto *el = WGUI::GetInstance().GetBaseElement();
 	if(el == nullptr)
@@ -293,12 +293,12 @@ void WGUILuaInterface::InitializeGUIElement(WIBase &p)
 }
 
 template<typename T>
-luabind::object cast_to_type(lua_State *l, ::WIBase &el)
+luabind::object cast_to_type(lua::State *l, ::WIBase &el)
 {
 	return pragma::lua::raw_object_to_luabind_object(l, util::weak_shared_handle_cast<::WIBase, T>(el.GetHandle()));
 }
 
-luabind::object WGUILuaInterface::CreateLuaObject(lua_State *l, WIBase &p)
+luabind::object WGUILuaInterface::CreateLuaObject(lua::State *l, WIBase &p)
 {
 	for(auto &f : pragma::get_client_state()->GetGUILuaWrapperFactories()) {
 		auto r = f(l, p);
@@ -391,7 +391,7 @@ luabind::object WGUILuaInterface::CreateLuaObject(lua_State *l, WIBase &p)
 	return pragma::lua::raw_object_to_luabind_object(l, p.GetHandle());
 }
 
-luabind::object WGUILuaInterface::GetLuaObject(lua_State *l, WIBase &p)
+luabind::object WGUILuaInterface::GetLuaObject(lua::State *l, WIBase &p)
 {
 	luabind::object o {};
 	if(l == m_guiLuaState) {

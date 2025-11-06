@@ -20,7 +20,7 @@ export {
 			virtual void SetOuterConeAngle(float ang) override;
 			virtual void SetBlendFraction(float fraction) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 			virtual void SetConeStartOffset(float offset) override;
 		  protected:
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;

@@ -117,7 +117,7 @@ void CViewModelComponent::SetViewModelOffset(const Vector3 &offset)
 	static_cast<CPlayerComponent *>(pl)->UpdateViewModelTransform();
 }
 const Vector3 &CViewModelComponent::GetViewModelOffset() const { return m_viewModelOffset; }
-void CViewModelComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CViewModelComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////////
 

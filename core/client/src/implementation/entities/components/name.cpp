@@ -14,4 +14,4 @@ void CNameComponent::ReceiveData(NetPacket &packet)
 	std::string name = packet->ReadString();
 	SetName(name);
 }
-void CNameComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CNameComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

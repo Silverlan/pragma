@@ -14,7 +14,7 @@ import :game;
 using namespace pragma;
 
 using namespace ecs::baseShooterComponent;
-void ecs::CShooterComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ecs::CShooterComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ecs::CShooterComponent::FireBullets(const BulletInfo &bulletInfo, const Vector3 &origin, const Vector3 &effectsOrigins, const std::vector<Vector3> &destPositions, bool bTransmitToServer, std::vector<TraceResult> &outHitTargets)
 {
 	auto *physEnv = pragma::get_cgame()->GetPhysicsEnvironment();

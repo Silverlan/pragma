@@ -57,15 +57,15 @@ void Lua::DebugRenderer::Server::DrawCylinder(float dist, float radius, const De
 void Lua::DebugRenderer::Server::DrawAxis(const DebugRenderInfo &renderInfo) { SDebugRenderer::DrawAxis(renderInfo.pose.GetOrigin(), EulerAngles {renderInfo.pose.GetRotation()}, renderInfo.duration); }
 void Lua::DebugRenderer::Server::DrawText(const std::string &text, const ::Vector2 &size, const DebugRenderInfo &renderInfo) { ::SDebugRenderer::DrawText(text, renderInfo.pose.GetOrigin(), size, renderInfo.color, renderInfo.duration); }
 void Lua::DebugRenderer::Server::DrawText(const std::string &text, float size, const DebugRenderInfo &renderInfo) { ::SDebugRenderer::DrawText(text, renderInfo.pose.GetOrigin(), size, renderInfo.color, renderInfo.duration); }
-void Lua::DebugRenderer::Server::DrawPath(lua_State *l, luabind::table<> points, const DebugRenderInfo &renderInfo)
+void Lua::DebugRenderer::Server::DrawPath(lua::State *l, luabind::table<> points, const DebugRenderInfo &renderInfo)
 {
 	auto path = Lua::table_to_vector<Vector3>(l, points, 1);
 	::SDebugRenderer::DrawPath(path, renderInfo.color, renderInfo.duration);
 }
-void Lua::DebugRenderer::Server::DrawSpline(lua_State *l, luabind::table<> points, uint32_t segmentCount, float curvature, const DebugRenderInfo &renderInfo)
+void Lua::DebugRenderer::Server::DrawSpline(lua::State *l, luabind::table<> points, uint32_t segmentCount, float curvature, const DebugRenderInfo &renderInfo)
 {
 	auto path = Lua::table_to_vector<Vector3>(l, points, 1);
 	::SDebugRenderer::DrawSpline(path, renderInfo.color, segmentCount, curvature, renderInfo.duration);
 }
-void Lua::DebugRenderer::Server::DrawSpline(lua_State *l, luabind::table<> points, uint32_t segmentCount, const DebugRenderInfo &renderInfo) { DrawSpline(l, points, segmentCount, 1.f, renderInfo); }
+void Lua::DebugRenderer::Server::DrawSpline(lua::State *l, luabind::table<> points, uint32_t segmentCount, const DebugRenderInfo &renderInfo) { DrawSpline(l, points, segmentCount, 1.f, renderInfo); }
 void Lua::DebugRenderer::Server::DrawPlane(const DebugRenderInfo &renderInfo) { ::SDebugRenderer::DrawPlane(umath::Plane {uquat::forward(renderInfo.pose.GetRotation()), renderInfo.pose.GetOrigin()}, renderInfo.color, renderInfo.duration); }

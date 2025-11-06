@@ -24,14 +24,14 @@ export namespace pragma {
 		static ComponentEventId EVENT_ON_BONE_MATRICES_UPDATED;
 		static ComponentEventId EVENT_ON_BONE_BUFFER_INITIALIZED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		CAnimatedComponent(pragma::ecs::BaseEntity &ent) : BaseAnimatedComponent(ent) {}
 
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void PlayAnimation(int animation, FPlayAnim flags = FPlayAnim::Default) override;
 		bool HasBones() const;
@@ -68,15 +68,15 @@ export namespace pragma {
 
 	struct DLLCLIENT CEOnSkeletonUpdated : public ComponentEvent {
 		CEOnSkeletonUpdated(uint32_t &physRootBoneId);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		virtual uint32_t GetReturnCount() override;
-		virtual void HandleReturnValues(lua_State *l) override;
+		virtual void HandleReturnValues(lua::State *l) override;
 		uint32_t &physRootBoneId;
 	};
 
 	struct DLLCLIENT CEOnBoneBufferInitialized : public ComponentEvent {
 		CEOnBoneBufferInitialized(const std::shared_ptr<prosper::IBuffer> &buffer);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		std::shared_ptr<prosper::IBuffer> buffer;
 	};
 	using namespace umath::scoped_enum::bitwise;

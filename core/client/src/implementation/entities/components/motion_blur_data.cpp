@@ -22,7 +22,7 @@ pragma::ShaderVelocityBuffer *pragma::get_velocity_buffer_shader()
 	return g_velocityBufferShader;
 }
 
-void CMotionBlurDataComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CMotionBlurDataComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CMotionBlurDataComponent::Initialize() { BaseEntityComponent::Initialize(); }
 

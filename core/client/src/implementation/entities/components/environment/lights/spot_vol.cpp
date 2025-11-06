@@ -228,7 +228,7 @@ void CLightSpotVolComponent::OnEntitySpawn()
 	InitializeVolumetricLight();
 }
 
-void CLightSpotVolComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CLightSpotVolComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ///////
 

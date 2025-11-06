@@ -17,10 +17,10 @@ export namespace pragma {
 		Vector3 OnCalcMovementDirection() const;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 	  public:
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		static unsigned int GetNPCCount();
 		static const std::vector<CAIComponent *> &GetAll();

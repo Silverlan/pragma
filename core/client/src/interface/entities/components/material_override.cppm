@@ -18,13 +18,13 @@ export namespace pragma {
 		static ComponentEventId EVENT_ON_MATERIAL_OVERRIDES_CLEARED;
 		static ComponentEventId EVENT_ON_MATERIAL_OVERRIDE_CHANGED;
 
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		CMaterialOverrideComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~CMaterialOverrideComponent() override;
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnEntitySpawn() override;
 		virtual void OnRemove() override;
 
@@ -49,7 +49,7 @@ export namespace pragma {
 
 	struct DLLCLIENT CEOnMaterialOverrideChanged : public ComponentEvent {
 		CEOnMaterialOverrideChanged(uint32_t idx, msys::CMaterial &mat);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		uint32_t materialIndex;
 		msys::CMaterial &material;
 	};

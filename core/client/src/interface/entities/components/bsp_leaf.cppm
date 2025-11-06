@@ -14,7 +14,7 @@ export namespace pragma {
 	class DLLCLIENT CBSPLeafComponent final : public BaseEntityComponent {
 	  public:
 		CBSPLeafComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 
 		void SetLeaves(const std::vector<uint16_t> &leaves);
 		bool GetLeafVisibility(uint16_t leafIdx) const;

@@ -73,7 +73,7 @@ void CRasterizationRendererComponent::RegisterEvents(pragma::EntityComponentMana
 	EVENT_MT_BEGIN_RECORD_PREPASS = registerEvent("MT_BEGIN_RECORD_PREPASS", ComponentEventInfo::Type::Explicit);
 }
 
-void CRasterizationRendererComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CRasterizationRendererComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 static pragma::ComponentHandle<pragma::CLightMapComponent> g_lightmapC = {};
 void CRasterizationRendererComponent::UpdateLightmap(CLightMapComponent &lightMapC)
@@ -515,17 +515,17 @@ prosper::Shader *CRasterizationRendererComponent::GetWireframeShader() const { r
 ////////
 
 CELightingStageData::CELightingStageData(pragma::rendering::LightingStageRenderProcessor &renderProcessor) : renderProcessor {renderProcessor} {}
-void CELightingStageData::PushArguments(lua_State *l) {}
+void CELightingStageData::PushArguments(lua::State *l) {}
 
 ////////
 
 CEPrepassStageData::CEPrepassStageData(pragma::rendering::DepthStageRenderProcessor &renderProcessor, pragma::ShaderPrepassBase &shader) : renderProcessor {renderProcessor}, shader {shader} {}
-void CEPrepassStageData::PushArguments(lua_State *l) {}
+void CEPrepassStageData::PushArguments(lua::State *l) {}
 
 ////////
 
 CEUpdateRenderBuffers::CEUpdateRenderBuffers(const util::DrawSceneInfo &drawSceneInfo) : drawSceneInfo {drawSceneInfo} {}
-void CEUpdateRenderBuffers::PushArguments(lua_State *l) {}
+void CEUpdateRenderBuffers::PushArguments(lua::State *l) {}
 
 ////////
 

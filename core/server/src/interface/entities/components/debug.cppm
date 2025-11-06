@@ -18,7 +18,7 @@ export namespace pragma {
 		virtual void SetSize(float size) override;
 
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 
@@ -38,7 +38,7 @@ export namespace pragma {
 	  public:
 		SDebugPointComponent(pragma::ecs::BaseEntity &ent) : BaseDebugPointComponent(ent) {}
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 
@@ -48,7 +48,7 @@ export namespace pragma {
 	  public:
 		SDebugLineComponent(pragma::ecs::BaseEntity &ent) : BaseDebugLineComponent(ent) {}
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 
@@ -60,7 +60,7 @@ export namespace pragma {
 		virtual void SetBounds(const Vector3 &min, const Vector3 &max) override;
 
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 
@@ -70,7 +70,7 @@ export namespace pragma {
 	  public:
 		SDebugSphereComponent(pragma::ecs::BaseEntity &ent) : BaseDebugSphereComponent(ent) {}
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 
@@ -83,7 +83,7 @@ export namespace pragma {
 		virtual void SetStartRadius(float radius) override;
 
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 
@@ -95,7 +95,7 @@ export namespace pragma {
 		virtual void SetLength(float length) override;
 
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 
@@ -104,6 +104,6 @@ export namespace pragma {
 	class DLLSERVER SDebugPlaneComponent final : public BaseDebugPlaneComponent {
 	  public:
 		SDebugPlaneComponent(pragma::ecs::BaseEntity &ent) : BaseDebugPlaneComponent(ent) {}
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	};
 };

@@ -11,7 +11,7 @@ import :entities;
 import :entities.components;
 import :server_state;
 
-luabind::tableT<pragma::SPlayerComponent> Lua::RecipientFilter::GetRecipients(lua_State *l, pragma::networking::TargetRecipientFilter &rp)
+luabind::tableT<pragma::SPlayerComponent> Lua::RecipientFilter::GetRecipients(lua::State *l, pragma::networking::TargetRecipientFilter &rp)
 {
 	auto &recipients = rp.GetRecipients();
 	auto t = luabind::newtable(l);
@@ -28,8 +28,8 @@ luabind::tableT<pragma::SPlayerComponent> Lua::RecipientFilter::GetRecipients(lu
 	return t;
 }
 
-void Lua::RecipientFilter::AddRecipient(lua_State *l, pragma::networking::TargetRecipientFilter &rp, pragma::SPlayerComponent &hPl) { rp.AddRecipient(*hPl.GetClientSession()); }
+void Lua::RecipientFilter::AddRecipient(lua::State *l, pragma::networking::TargetRecipientFilter &rp, pragma::SPlayerComponent &hPl) { rp.AddRecipient(*hPl.GetClientSession()); }
 
-void Lua::RecipientFilter::RemoveRecipient(lua_State *l, pragma::networking::TargetRecipientFilter &rp, pragma::SPlayerComponent &hPl) { rp.RemoveRecipient(*hPl.GetClientSession()); }
+void Lua::RecipientFilter::RemoveRecipient(lua::State *l, pragma::networking::TargetRecipientFilter &rp, pragma::SPlayerComponent &hPl) { rp.RemoveRecipient(*hPl.GetClientSession()); }
 
-bool Lua::RecipientFilter::HasRecipient(lua_State *l, pragma::networking::TargetRecipientFilter &rp, pragma::SPlayerComponent &hPl) { return rp.HasRecipient(*hPl.GetClientSession()); }
+bool Lua::RecipientFilter::HasRecipient(lua::State *l, pragma::networking::TargetRecipientFilter &rp, pragma::SPlayerComponent &hPl) { return rp.HasRecipient(*hPl.GetClientSession()); }

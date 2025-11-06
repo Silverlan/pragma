@@ -52,7 +52,7 @@ void CSkyboxComponent::OnRemove()
 	if(m_cbOnModelMaterialsLoaded.IsValid())
 		m_cbOnModelMaterialsLoaded.Remove();
 }
-void CSkyboxComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CSkyboxComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CSkyboxComponent::SetSkyAngles(const EulerAngles &ang)
 {
 	m_skyAngles = ang;

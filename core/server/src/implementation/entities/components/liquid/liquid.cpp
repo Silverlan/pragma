@@ -62,7 +62,7 @@ void SLiquidComponent::SendData(NetPacket &packet, networking::ClientRecipientFi
 
 ///////////////
 
-void SLiquidComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SLiquidComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void FuncWater::Initialize()
 {

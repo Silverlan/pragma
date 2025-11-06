@@ -36,7 +36,7 @@ void SSoundDspEchoComponent::SendData(NetPacket &packet, networking::ClientRecip
 	packet->Write<float>(m_kvFeedback);
 	packet->Write<float>(m_kvSpread);
 }
-void SSoundDspEchoComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SSoundDspEchoComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////////
 

@@ -9,7 +9,7 @@ import :entities.components.microphone;
 
 using namespace pragma;
 
-void SMicrophoneComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SMicrophoneComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void EnvMicrophone::Initialize()
 {

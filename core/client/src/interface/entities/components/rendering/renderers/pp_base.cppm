@@ -15,7 +15,7 @@ export namespace pragma {
 	  public:
 		CRendererPpBaseComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnRemove() override;
 		virtual std::string GetIdentifier() const = 0;
 		virtual uint32_t GetPostProcessingWeight() const = 0;

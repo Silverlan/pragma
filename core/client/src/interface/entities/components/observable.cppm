@@ -16,7 +16,7 @@ export namespace pragma {
 		virtual void SetLocalCameraOrigin(CameraType type, const Vector3 &offset) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 };

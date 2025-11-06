@@ -17,6 +17,6 @@ export namespace pragma {
 	  public:
 		SIOComponent(pragma::ecs::BaseEntity &ent) : BaseIOComponent(ent) {}
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	};
 };

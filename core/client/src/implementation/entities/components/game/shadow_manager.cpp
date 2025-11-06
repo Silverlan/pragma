@@ -18,7 +18,7 @@ using namespace pragma;
 static CShadowManagerComponent *g_shadowManager = nullptr;
 CShadowManagerComponent *CShadowManagerComponent::GetShadowManager() { return g_shadowManager; }
 
-void CShadowManagerComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CShadowManagerComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CShadowManagerComponent::Initialize()
 {

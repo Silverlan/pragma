@@ -9,7 +9,7 @@ import :entities.components.point.path_node;
 
 using namespace pragma;
 
-void SPathNodeComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SPathNodeComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void PointPathNode::Initialize()
 {

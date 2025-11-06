@@ -15,6 +15,6 @@ export namespace pragma {
 		CLiquidVolumeComponent(pragma::ecs::BaseEntity &ent) : BaseLiquidVolumeComponent(ent) {}
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	};
 };

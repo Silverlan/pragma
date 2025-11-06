@@ -241,7 +241,7 @@ void CSkyCameraComponent::OnEntitySpawn()
 	BaseEntityComponent::OnEntitySpawn();
 	UpdateToggleState();
 }
-void CSkyCameraComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CSkyCameraComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////
 

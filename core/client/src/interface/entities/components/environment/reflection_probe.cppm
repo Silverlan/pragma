@@ -35,7 +35,7 @@ export {
 			virtual void Initialize() override;
 			virtual void OnEntitySpawn() override;
 			virtual void OnRemove() override;
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 			bool CaptureIBLReflectionsFromScene(const std::vector<pragma::ecs::BaseEntity *> *optEntityList = nullptr, bool renderJob = false);
 			bool GenerateIBLReflectionsFromEnvMap(const std::string &envMapFileName);
 			bool GenerateIBLReflectionsFromCubemap(prosper::Texture &cubemap);

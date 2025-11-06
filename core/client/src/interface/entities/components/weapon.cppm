@@ -16,7 +16,7 @@ export namespace pragma {
 	  public:
 		static ComponentEventId EVENT_ATTACH_TO_OWNER;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		static unsigned int GetWeaponCount();
 		static const std::vector<CWeaponComponent *> &GetAll();
@@ -68,7 +68,7 @@ export namespace pragma {
 		CallbackHandle m_cbOnObserverChanged {};
 		virtual pragma::Activity TranslateViewActivity(pragma::Activity act);
 		virtual void OnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin = nullptr) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		void UpdateViewModel();
 		void UpdateWorldModel();
 		void ClearOwnerCallbacks();
@@ -77,7 +77,7 @@ export namespace pragma {
 	};
 	struct DLLCLIENT CEAttachToOwner : public ComponentEvent {
 		CEAttachToOwner(pragma::ecs::BaseEntity &owner, CViewModelComponent *optViewmodel);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		pragma::ecs::BaseEntity &owner;
 		CViewModelComponent *viewModel = nullptr;
 	};

@@ -13,7 +13,7 @@ import :entities.components.particle_system;
 
 using namespace pragma;
 
-void CSoundEmitterComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CSoundEmitterComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 bool CSoundEmitterComponent::ShouldRemoveSound(ALSound &snd) const { return (BaseSoundEmitterComponent::ShouldRemoveSound(snd) /* && snd.GetIndex() == 0*/) ? true : false; }
 
 void CSoundEmitterComponent::AddSound(std::shared_ptr<ALSound> snd) { InitializeSound(snd); }
@@ -87,7 +87,7 @@ void CSoundEmitterComponent::MaintainSounds()
 	}
 }
 
-void CSoundEmitterComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+void CSoundEmitterComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseSoundEmitterComponent::RegisterLuaBindings(l, modEnts);
 	auto defCSoundEmitter = pragma::lua::create_entity_component_class<pragma::CSoundEmitterComponent, pragma::BaseSoundEmitterComponent>("SoundEmitterComponent");

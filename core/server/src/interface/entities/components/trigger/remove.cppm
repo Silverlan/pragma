@@ -14,7 +14,7 @@ export {
 		class DLLSERVER STriggerRemoveComponent final : public BaseTriggerRemoveComponent {
 		  public:
 			STriggerRemoveComponent(pragma::ecs::BaseEntity &ent) : BaseTriggerRemoveComponent(ent) {}
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};
 

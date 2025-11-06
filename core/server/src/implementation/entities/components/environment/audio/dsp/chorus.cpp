@@ -39,7 +39,7 @@ void SSoundDspChorusComponent::SendData(NetPacket &packet, networking::ClientRec
 	packet->Write<float>(m_kvFeedback);
 	packet->Write<float>(m_kvDelay);
 }
-void SSoundDspChorusComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SSoundDspChorusComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////////
 

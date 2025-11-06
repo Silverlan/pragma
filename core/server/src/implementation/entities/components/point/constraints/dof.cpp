@@ -21,7 +21,7 @@ void SPointConstraintDoFComponent::SendData(NetPacket &packet, networking::Clien
 	nwm::write_vector(packet, m_kvLimAngUpper);
 }
 
-void SPointConstraintDoFComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SPointConstraintDoFComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void PointConstraintDoF::Initialize()
 {

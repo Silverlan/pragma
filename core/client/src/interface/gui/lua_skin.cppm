@@ -13,13 +13,13 @@ export import pragma.gui;
 
 export {
 	struct DLLCLIENT WISkinClass {
-		WISkinClass(lua_State *l);
+		WISkinClass(lua::State *l);
 		WISkinClass(const WISkinClass &) = delete;
 		WISkinClass &operator=(const WISkinClass &) = delete;
 		std::unordered_map<std::string, std::unique_ptr<WISkinClass>> classes;
 		std::optional<luabind::object> initializeFunction = {};
 		std::optional<luabind::object> releaseFunction = {};
-		lua_State *lua;
+		lua::State *lua;
 		WISkinClass *Copy();
 	};
 
@@ -32,7 +32,7 @@ export {
 			WILuaSkin *base;
 		};
 	  protected:
-		lua_State *m_lua;
+		lua::State *m_lua;
 		WISkinClass m_rootClass;
 		std::optional<luabind::object> m_vars = {};
 		void InitializeClasses(WISkinClass &cl);
@@ -46,7 +46,7 @@ export {
 		WILuaSkin();
 		virtual void Release(WIBase *el) override;
 		virtual void Initialize(WIBase *el) override;
-		void Initialize(lua_State *l, Settings &settings);
-		void MergeInto(lua_State *l, Settings &settings);
+		void Initialize(lua::State *l, Settings &settings);
+		void MergeInto(lua::State *l, Settings &settings);
 	};
 };

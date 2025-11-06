@@ -16,7 +16,7 @@ export namespace pragma {
 
 		virtual void Initialize() override;
 		void UpdateSoftBodyGeometry();
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
 		virtual bool InitializeSoftBodyData() override;
 		virtual void ReleaseSoftBodyData() override;

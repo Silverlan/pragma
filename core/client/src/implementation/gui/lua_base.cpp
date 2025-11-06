@@ -241,67 +241,67 @@ void WILuaBase::OnRemove()
 ///////////////////////////////////////////
 
 void WILuaBase::Lua_OnInitialize() {}
-void WILuaBase::default_OnInitialize(lua_State *, WILuaBase &) {}
+void WILuaBase::default_OnInitialize(lua::State *, WILuaBase &) {}
 
 void WILuaBase::Lua_OnThink() {}
-void WILuaBase::default_OnThink(lua_State *, WILuaBase &) {}
+void WILuaBase::default_OnThink(lua::State *, WILuaBase &) {}
 
 void WILuaBase::Lua_OnFirstThink() {}
-void WILuaBase::default_OnFirstThink(lua_State *, WILuaBase &) {}
+void WILuaBase::default_OnFirstThink(lua::State *, WILuaBase &) {}
 
 void WILuaBase::Lua_MouseCallback(int, int, int) {}
-void WILuaBase::default_MouseCallback(lua_State *, WILuaBase &, int, int, int) {}
+void WILuaBase::default_MouseCallback(lua::State *, WILuaBase &, int, int, int) {}
 
 void WILuaBase::Lua_KeyboardCallback(int, int, int, int) {}
-void WILuaBase::default_KeyboardCallback(lua_State *, WILuaBase &, int, int, int, int) {}
+void WILuaBase::default_KeyboardCallback(lua::State *, WILuaBase &, int, int, int, int) {}
 
 void WILuaBase::Lua_CharCallback(unsigned int, uint32_t) {}
-void WILuaBase::default_CharCallback(lua_State *, WILuaBase &, unsigned int, uint32_t) {}
+void WILuaBase::default_CharCallback(lua::State *, WILuaBase &, unsigned int, uint32_t) {}
 
 void WILuaBase::Lua_ScrollCallback(double, double) {}
-void WILuaBase::default_ScrollCallback(lua_State *, WILuaBase &, double, double) {}
+void WILuaBase::default_ScrollCallback(lua::State *, WILuaBase &, double, double) {}
 
 void WILuaBase::Lua_OnUpdate() {}
-void WILuaBase::default_OnUpdate(lua_State *l, WILuaBase &hElement) {}
+void WILuaBase::default_OnUpdate(lua::State *l, WILuaBase &hElement) {}
 
 void WILuaBase::Lua_OnSetSize(int, int) {}
-void WILuaBase::default_OnSetSize(lua_State *, WILuaBase &, int, int) {}
+void WILuaBase::default_OnSetSize(lua::State *, WILuaBase &, int, int) {}
 
 void WILuaBase::Lua_OnSetVisible(bool) {}
-void WILuaBase::default_OnSetVisible(lua_State *, WILuaBase &, bool) {}
+void WILuaBase::default_OnSetVisible(lua::State *, WILuaBase &, bool) {}
 
 void WILuaBase::Lua_OnSetColor(float, float, float, float) {}
-void WILuaBase::default_OnSetColor(lua_State *, WILuaBase &, float, float, float, float) {}
+void WILuaBase::default_OnSetColor(lua::State *, WILuaBase &, float, float, float, float) {}
 
 void WILuaBase::Lua_OnSetAlpha(float) {}
-void WILuaBase::default_OnSetAlpha(lua_State *, WILuaBase &, float) {}
+void WILuaBase::default_OnSetAlpha(lua::State *, WILuaBase &, float) {}
 
 void WILuaBase::Lua_Render(const ::wgui::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale) {}
-void WILuaBase::default_Render(lua_State *, WILuaBase &, const ::wgui::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale) {}
+void WILuaBase::default_Render(lua::State *, WILuaBase &, const ::wgui::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale) {}
 
 void WILuaBase::Lua_OnCursorEntered() {}
-void WILuaBase::default_OnCursorEntered(lua_State *, WILuaBase &) {}
+void WILuaBase::default_OnCursorEntered(lua::State *, WILuaBase &) {}
 
 void WILuaBase::Lua_OnCursorExited() {}
-void WILuaBase::default_OnCursorExited(lua_State *, WILuaBase &) {}
+void WILuaBase::default_OnCursorExited(lua::State *, WILuaBase &) {}
 
 void WILuaBase::Lua_OnFileDragEntered() {}
-void WILuaBase::default_OnFileDragEntered(lua_State *l, WILuaBase &hElement) {}
+void WILuaBase::default_OnFileDragEntered(lua::State *l, WILuaBase &hElement) {}
 
 void WILuaBase::Lua_OnFileDragExited() {}
-void WILuaBase::default_OnFileDragExited(lua_State *l, WILuaBase &hElement) {}
+void WILuaBase::default_OnFileDragExited(lua::State *l, WILuaBase &hElement) {}
 
 void WILuaBase::Lua_OnFilesDropped(const std::vector<std::string> &files) {}
-void WILuaBase::default_OnFilesDropped(lua_State *l, WILuaBase &hElement, const std::vector<std::string> &files) {}
+void WILuaBase::default_OnFilesDropped(lua::State *l, WILuaBase &hElement, const std::vector<std::string> &files) {}
 
 void WILuaBase::Lua_OnFocusGained() {}
-void WILuaBase::default_OnFocusGained(lua_State *, WILuaBase &) {}
+void WILuaBase::default_OnFocusGained(lua::State *, WILuaBase &) {}
 
 void WILuaBase::Lua_OnFocusKilled() {}
-void WILuaBase::default_OnFocusKilled(lua_State *, WILuaBase &) {}
+void WILuaBase::default_OnFocusKilled(lua::State *, WILuaBase &) {}
 
 void WILuaBase::Lua_OnRemove() {}
-void WILuaBase::default_OnRemove(lua_State *, WILuaBase &) {}
+void WILuaBase::default_OnRemove(lua::State *, WILuaBase &) {}
 
 bool WILuaBase::Lua_CheckPosInBounds(const Vector2i &pos) { return WIBase::DoPosInBounds(pos); }
-bool WILuaBase::default_CheckPosInBounds(lua_State *l, WILuaBase &hElement, const Vector2i &pos) { return hElement.WIBase::DoPosInBounds(pos); }
+bool WILuaBase::default_CheckPosInBounds(lua::State *l, WILuaBase &hElement, const Vector2i &pos) { return hElement.WIBase::DoPosInBounds(pos); }

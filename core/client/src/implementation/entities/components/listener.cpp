@@ -60,7 +60,7 @@ void CListenerComponent::SetGain(float gain)
 		return;
 	m_listener->SetGain(gain);
 }
-void CListenerComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CListenerComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////////
 

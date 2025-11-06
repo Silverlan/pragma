@@ -91,4 +91,4 @@ void CRendererPpToneMappingComponent::DoRenderEffect(const util::DrawSceneInfo &
 	if(m_applyToHdrImage)
 		hdrInfo.BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo, prosper::ImageLayout::ColorAttachmentOptimal);
 }
-void CRendererPpToneMappingComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CRendererPpToneMappingComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

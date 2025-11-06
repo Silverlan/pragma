@@ -17,7 +17,7 @@ export namespace pragma {
 	  public:
 		CLightPointComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		const std::array<std::vector<umath::Plane>, 6u> &GetFrustumPlanes() const;
 		const std::vector<umath::Plane> &GetFrustumPlanes(CubeMapSide side) const;
 	  protected:

@@ -18,7 +18,7 @@ using namespace pragma;
 
 ComponentEventId CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId CModelComponent::EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED = INVALID_COMPONENT_ID;
-void CModelComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CModelComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CModelComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseModelComponent::RegisterEvents(componentManager, registerEvent);
@@ -510,9 +510,9 @@ void CModelComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &model
 ////////////
 
 CEOnRenderMeshesUpdated::CEOnRenderMeshesUpdated(bool requireBoundingVolumeUpdate) : requireBoundingVolumeUpdate {requireBoundingVolumeUpdate} {}
-void CEOnRenderMeshesUpdated::PushArguments(lua_State *l) { Lua::PushBool(l, requireBoundingVolumeUpdate); }
+void CEOnRenderMeshesUpdated::PushArguments(lua::State *l) { Lua::PushBool(l, requireBoundingVolumeUpdate); }
 
-void CModelComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+void CModelComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseModelComponent::RegisterLuaBindings(l, modEnts);
 	auto defCModel = pragma::lua::create_entity_component_class<pragma::CModelComponent, pragma::BaseModelComponent>("ModelComponent");

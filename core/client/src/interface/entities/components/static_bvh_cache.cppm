@@ -15,7 +15,7 @@ export namespace pragma {
 	  public:
 		CStaticBvhCacheComponent(pragma::ecs::BaseEntity &ent) : BaseStaticBvhCacheComponent(ent) {}
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void TestRebuildBvh() override;
 	  private:
 		virtual void DoRebuildBvh() override;

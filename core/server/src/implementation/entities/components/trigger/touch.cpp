@@ -9,7 +9,7 @@ import :entities.components.triggers.touch;
 
 using namespace pragma;
 
-void STouchComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void STouchComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void TriggerTouch::Initialize()
 {

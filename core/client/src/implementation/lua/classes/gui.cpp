@@ -212,20 +212,20 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("ClearFocus", +[](::WIBase &el) { return WGUI::GetInstance().ClearFocus(el); });
 	classDef.def("KillFocus", &::WIBase::KillFocus);
 	classDef.def("KillFocus", &::WIBase::KillFocus, luabind::default_parameter_policy<2, false> {});
-	classDef.def("TrapFocus", static_cast<void (*)(lua_State *, ::WIBase &, bool)>(&TrapFocus));
-	classDef.def("TrapFocus", static_cast<void (*)(lua_State *, ::WIBase &)>(&TrapFocus));
+	classDef.def("TrapFocus", static_cast<void (*)(lua::State *, ::WIBase &, bool)>(&TrapFocus));
+	classDef.def("TrapFocus", static_cast<void (*)(lua::State *, ::WIBase &)>(&TrapFocus));
 	classDef.def("IsFocusTrapped", &::WIBase::IsFocusTrapped);
-	classDef.def("IsHidden", static_cast<bool (*)(lua_State *, ::WIBase &)>([](lua_State *l, ::WIBase &hPanel) { return !hPanel.IsVisible(); }));
+	classDef.def("IsHidden", static_cast<bool (*)(lua::State *, ::WIBase &)>([](lua::State *l, ::WIBase &hPanel) { return !hPanel.IsVisible(); }));
 	classDef.def("SetVisible", &::WIBase::SetVisible);
 	classDef.def("IsVisible", &::WIBase::IsSelfVisible);
 	classDef.def("IsParentVisible", &::WIBase::IsParentVisible);
-	classDef.def("SetAutoSizeToContents", static_cast<void (*)(lua_State *, ::WIBase &)>([](lua_State *l, ::WIBase &hPanel) { hPanel.SetAutoSizeToContents(true); }));
-	classDef.def("SetAutoSizeToContents", static_cast<void (*)(lua_State *, ::WIBase &, bool)>([](lua_State *l, ::WIBase &hPanel, bool autoSize) { hPanel.SetAutoSizeToContents(autoSize); }));
-	classDef.def("SetAutoSizeToContents", static_cast<void (*)(lua_State *, ::WIBase &, bool, bool)>([](lua_State *l, ::WIBase &hPanel, bool x, bool y) { hPanel.SetAutoSizeToContents(x, y); }));
-	classDef.def("SetAutoSizeToContents", +[](lua_State *l, ::WIBase &hPanel, bool x, bool y, bool updateImmediately) { hPanel.SetAutoSizeToContents(x, y, updateImmediately); });
-	classDef.def("UpdateAutoSizeToContents", +[](lua_State *l, ::WIBase &hPanel) { hPanel.UpdateAutoSizeToContents(hPanel.ShouldAutoSizeToContentsX(), hPanel.ShouldAutoSizeToContentsY()); });
+	classDef.def("SetAutoSizeToContents", static_cast<void (*)(lua::State *, ::WIBase &)>([](lua::State *l, ::WIBase &hPanel) { hPanel.SetAutoSizeToContents(true); }));
+	classDef.def("SetAutoSizeToContents", static_cast<void (*)(lua::State *, ::WIBase &, bool)>([](lua::State *l, ::WIBase &hPanel, bool autoSize) { hPanel.SetAutoSizeToContents(autoSize); }));
+	classDef.def("SetAutoSizeToContents", static_cast<void (*)(lua::State *, ::WIBase &, bool, bool)>([](lua::State *l, ::WIBase &hPanel, bool x, bool y) { hPanel.SetAutoSizeToContents(x, y); }));
+	classDef.def("SetAutoSizeToContents", +[](lua::State *l, ::WIBase &hPanel, bool x, bool y, bool updateImmediately) { hPanel.SetAutoSizeToContents(x, y, updateImmediately); });
+	classDef.def("UpdateAutoSizeToContents", +[](lua::State *l, ::WIBase &hPanel) { hPanel.UpdateAutoSizeToContents(hPanel.ShouldAutoSizeToContentsX(), hPanel.ShouldAutoSizeToContentsY()); });
 	classDef.def(
-	  "FindAncestorByClass", +[](lua_State *l, ::WIBase &hPanel, std::string className) -> ::WIBase * {
+	  "FindAncestorByClass", +[](lua::State *l, ::WIBase &hPanel, std::string className) -> ::WIBase * {
 		  ustring::to_lower(className);
 		  auto *parent = hPanel.GetParent();
 		  while(parent) {
@@ -255,14 +255,14 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("SetCursorMovementCheckEnabled", &::WIBase::SetMouseMovementCheckEnabled);
 	classDef.def("GetCursorMovementCheckEnabled", &::WIBase::GetMouseMovementCheckEnabled);
 	classDef.def("GetPos", static_cast<const ::Vector2i &(::WIBase::*)() const>(&::WIBase::GetPos), luabind::copy_policy<0> {});
-	classDef.def("SetPos", static_cast<void (*)(lua_State *, ::WIBase &, ::Vector2)>(&SetPos));
-	classDef.def("SetPos", static_cast<void (*)(lua_State *, ::WIBase &, float, float)>(&SetPos));
+	classDef.def("SetPos", static_cast<void (*)(lua::State *, ::WIBase &, ::Vector2)>(&SetPos));
+	classDef.def("SetPos", static_cast<void (*)(lua::State *, ::WIBase &, float, float)>(&SetPos));
 	classDef.def("GetAbsolutePos", static_cast<::Vector2 (::WIBase::*)(bool) const>(&::WIBase::GetAbsolutePos));
 	classDef.def("GetAbsolutePos", static_cast<::Vector2 (::WIBase::*)(bool) const>(&::WIBase::GetAbsolutePos), luabind::default_parameter_policy<2, true> {});
 	classDef.def("GetAbsolutePos", static_cast<::Vector2 (::WIBase::*)(const ::Vector2 &, bool) const>(&::WIBase::GetAbsolutePos));
 	classDef.def("GetAbsolutePos", static_cast<::Vector2 (::WIBase::*)(const ::Vector2 &, bool) const>(&::WIBase::GetAbsolutePos), luabind::default_parameter_policy<3, true> {});
-	classDef.def("SetAbsolutePos", static_cast<void (*)(lua_State *, ::WIBase &, ::Vector2)>(&SetAbsolutePos));
-	classDef.def("SetAbsolutePos", static_cast<void (*)(lua_State *, ::WIBase &, float, float)>(&SetAbsolutePos));
+	classDef.def("SetAbsolutePos", static_cast<void (*)(lua::State *, ::WIBase &, ::Vector2)>(&SetAbsolutePos));
+	classDef.def("SetAbsolutePos", static_cast<void (*)(lua::State *, ::WIBase &, float, float)>(&SetAbsolutePos));
 	classDef.def("GetAbsolutePose", static_cast<::Mat4 (::WIBase::*)() const>(&::WIBase::GetAbsolutePose));
 	classDef.def("GetRelativePos", &::WIBase::GetRelativePos);
 	classDef.def("GetColor", &::WIBase::GetColor, luabind::copy_policy<0> {});
@@ -273,7 +273,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("GetSizeProperty", &::WIBase::GetSizeProperty);
 	classDef.def("GetMouseInBoundsProperty", &::WIBase::GetMouseInBoundsProperty);
 	classDef.def("SetColor", &SetColor);
-	classDef.def("SetColorRGB", static_cast<void (*)(lua_State *, ::WIBase &, const ::Color &)>([](lua_State *l, ::WIBase &hPanel, const ::Color &color) {
+	classDef.def("SetColorRGB", static_cast<void (*)(lua::State *, ::WIBase &, const ::Color &)>([](lua::State *l, ::WIBase &hPanel, const ::Color &color) {
 		auto vCol = color.ToVector4();
 		vCol.a = hPanel.GetAlpha();
 		hPanel.SetColor(vCol);
@@ -283,21 +283,21 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("GetWidth", &::WIBase::GetWidth);
 	classDef.def("GetHeight", &::WIBase::GetHeight);
 	classDef.def("GetSize", static_cast<const ::Vector2i &(::WIBase::*)() const>(&::WIBase::GetSize), luabind::copy_policy<0> {});
-	classDef.def("SetSize", static_cast<void (*)(lua_State *, ::WIBase &, ::Vector2)>(&SetSize));
-	classDef.def("SetSize", static_cast<void (*)(lua_State *, ::WIBase &, float, float)>(&SetSize));
-	classDef.def("Wrap", static_cast<void (*)(lua_State *, ::WIBase &, const std::string &)>(&Wrap));
+	classDef.def("SetSize", static_cast<void (*)(lua::State *, ::WIBase &, ::Vector2)>(&SetSize));
+	classDef.def("SetSize", static_cast<void (*)(lua::State *, ::WIBase &, float, float)>(&SetSize));
+	classDef.def("Wrap", static_cast<void (*)(lua::State *, ::WIBase &, const std::string &)>(&Wrap));
 	classDef.def("Wrap", static_cast<bool (::WIBase::*)(::WIBase &)>(&::WIBase::Wrap));
 	classDef.def("AnchorWithMargin", static_cast<void (::WIBase::*)(uint32_t, uint32_t, uint32_t, uint32_t)>(&::WIBase::AnchorWithMargin));
 	classDef.def("AnchorWithMargin", static_cast<void (::WIBase::*)(uint32_t)>(&::WIBase::AnchorWithMargin));
 	classDef.def("GetParent", &::WIBase::GetParent);
-	classDef.def("SetParent", +[](lua_State *l, ::WIBase &hPanel, ::WIBase &hParent) { hPanel.SetParent(&hParent); });
-	classDef.def("SetParent", +[](lua_State *l, ::WIBase &hPanel, ::WIBase &hParent, uint32_t index) { hPanel.SetParent(&hParent, index); });
-	classDef.def("SetParentAndUpdateWindow", +[](lua_State *l, ::WIBase &hPanel, ::WIBase &hParent) { hPanel.SetParentAndUpdateWindow(&hParent); });
-	classDef.def("SetParentAndUpdateWindow", +[](lua_State *l, ::WIBase &hPanel, ::WIBase &hParent, uint32_t index) { hPanel.SetParentAndUpdateWindow(&hParent, index); });
+	classDef.def("SetParent", +[](lua::State *l, ::WIBase &hPanel, ::WIBase &hParent) { hPanel.SetParent(&hParent); });
+	classDef.def("SetParent", +[](lua::State *l, ::WIBase &hPanel, ::WIBase &hParent, uint32_t index) { hPanel.SetParent(&hParent, index); });
+	classDef.def("SetParentAndUpdateWindow", +[](lua::State *l, ::WIBase &hPanel, ::WIBase &hParent) { hPanel.SetParentAndUpdateWindow(&hParent); });
+	classDef.def("SetParentAndUpdateWindow", +[](lua::State *l, ::WIBase &hPanel, ::WIBase &hParent, uint32_t index) { hPanel.SetParentAndUpdateWindow(&hParent, index); });
 	classDef.def("ClearParent", &ClearParent);
 	classDef.def("ResetParent", &ResetParent);
 	classDef.def(
-	  "GetChildren", +[](lua_State *l, ::WIBase &hPanel) -> luabind::tableT<::WIBase> {
+	  "GetChildren", +[](lua::State *l, ::WIBase &hPanel) -> luabind::tableT<::WIBase> {
 		  auto &children = *hPanel.GetChildren();
 		  auto t = luabind::newtable(l);
 		  for(uint32_t idx = 1; auto &hChild : children) {
@@ -307,16 +307,16 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 		  }
 		  return t;
 	  });
-	classDef.def("GetChildren", static_cast<void (*)(lua_State *, ::WIBase &, std::string)>(&GetChildren));
+	classDef.def("GetChildren", static_cast<void (*)(lua::State *, ::WIBase &, std::string)>(&GetChildren));
 	classDef.def("GetFirstChild", &::WIBase::GetFirstChild);
-	classDef.def("GetChild", static_cast<void (*)(lua_State *, ::WIBase &, unsigned int)>(&GetChild));
-	classDef.def("GetChild", static_cast<void (*)(lua_State *, ::WIBase &, std::string, unsigned int)>(&GetChild));
+	classDef.def("GetChild", static_cast<void (*)(lua::State *, ::WIBase &, unsigned int)>(&GetChild));
+	classDef.def("GetChild", static_cast<void (*)(lua::State *, ::WIBase &, std::string, unsigned int)>(&GetChild));
 	classDef.def("IsPosInBounds", &PosInBounds);
 	classDef.def("IsCursorInBounds", &::WIBase::MouseInBounds);
 	classDef.def("GetCursorPos", &GetMousePos);
-	classDef.def("Draw", static_cast<void (*)(lua_State *, ::WIBase &, const ::wgui::DrawInfo &, wgui::DrawState &, const ::Vector2i &, const ::Vector2i &, const ::Vector2i &)>(&Draw));
-	classDef.def("Draw", static_cast<void (*)(lua_State *, ::WIBase &, const ::wgui::DrawInfo &, wgui::DrawState &, const ::Vector2i &, const ::Vector2i &)>(&Draw));
-	classDef.def("Draw", static_cast<void (*)(lua_State *, ::WIBase &, const ::wgui::DrawInfo &, wgui::DrawState &)>(&Draw));
+	classDef.def("Draw", static_cast<void (*)(lua::State *, ::WIBase &, const ::wgui::DrawInfo &, wgui::DrawState &, const ::Vector2i &, const ::Vector2i &, const ::Vector2i &)>(&Draw));
+	classDef.def("Draw", static_cast<void (*)(lua::State *, ::WIBase &, const ::wgui::DrawInfo &, wgui::DrawState &, const ::Vector2i &, const ::Vector2i &)>(&Draw));
+	classDef.def("Draw", static_cast<void (*)(lua::State *, ::WIBase &, const ::wgui::DrawInfo &, wgui::DrawState &)>(&Draw));
 	classDef.def("DrawToTexture", &render_ui);
 	classDef.def("DrawToTexture", +[](::WIBase &el, prosper::RenderTarget &rt) { return render_ui(el, rt, {}); });
 	classDef.def("DrawToTexture", &draw_to_texture);
@@ -332,27 +332,27 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("SizeToContents", &::WIBase::SizeToContents, luabind::default_parameter_policy<3, true> {});
 	classDef.def("SizeToContents", &::WIBase::SizeToContents, luabind::meta::join<luabind::default_parameter_policy<2, true>, luabind::default_parameter_policy<3, true>>::type {});
 	classDef.def("AddCallback", &AddCallback);
-	classDef.def("CallCallbacks", static_cast<void (*)(lua_State *, ::WIBase &, std::string)>(&CallCallbacks));
-	classDef.def("CallCallbacks", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, ::WIBase &, std::string)>(&CallCallbacks));
+	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, ::WIBase &, std::string, luabind::object)>(&CallCallbacks));
+	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, ::WIBase &, std::string, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
 	classDef.def("AddEventListener", &AddCallback);
-	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string)>(&CallCallbacks));
-	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object)>(&CallCallbacks));
-	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("FadeIn", static_cast<void (*)(lua_State *, ::WIBase &, float)>(&FadeIn));
-	classDef.def("FadeIn", static_cast<void (*)(lua_State *, ::WIBase &, float, float)>(&FadeIn));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua::State *, ::WIBase &, std::string)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua::State *, ::WIBase &, std::string, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua::State *, ::WIBase &, std::string, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua::State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua::State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua::State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua::State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua::State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua::State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("FadeIn", static_cast<void (*)(lua::State *, ::WIBase &, float)>(&FadeIn));
+	classDef.def("FadeIn", static_cast<void (*)(lua::State *, ::WIBase &, float, float)>(&FadeIn));
 	classDef.def("FadeOut", static_cast<void (::WIBase::*)(float, bool)>(&::WIBase::FadeOut));
 	classDef.def("FadeOut", static_cast<void (*)(::WIBase &, float)>([](::WIBase &el, float tFade) { el.FadeOut(tFade); }));
 	classDef.def("IsFading", &::WIBase::IsFading);
@@ -367,18 +367,18 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 		  el.Think(primaryCmdBuffer);
 	  });
 	classDef.def("InjectMouseMoveInput", &InjectMouseMoveInput);
-	classDef.def("InjectMouseInput", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, const ::Vector2 &, int, int, int)>(&InjectMouseInput));
-	classDef.def("InjectMouseInput", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, const ::Vector2 &, int, int)>(&InjectMouseInput));
-	classDef.def("InjectMouseClick", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, const ::Vector2 &, int, int)>(&InjectMouseClick));
-	classDef.def("InjectMouseClick", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, const ::Vector2 &, int)>(&InjectMouseClick));
-	classDef.def("InjectKeyboardInput", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, int, int, int)>(&InjectKeyboardInput));
-	classDef.def("InjectKeyboardInput", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, int, int)>(&InjectKeyboardInput));
-	classDef.def("InjectKeyPress", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, int, int)>(&InjectKeyPress));
-	classDef.def("InjectKeyPress", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, int)>(&InjectKeyPress));
-	classDef.def("InjectCharInput", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, std::string, uint32_t)>(&InjectCharInput));
-	classDef.def("InjectCharInput", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, std::string)>(&InjectCharInput));
-	classDef.def("InjectScrollInput", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, const ::Vector2 &, const ::Vector2 &, bool)>(&InjectScrollInput));
-	classDef.def("InjectScrollInput", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, const ::Vector2 &, const ::Vector2 &)>(&InjectScrollInput));
+	classDef.def("InjectMouseInput", static_cast<::util::EventReply (*)(lua::State *, ::WIBase &, const ::Vector2 &, int, int, int)>(&InjectMouseInput));
+	classDef.def("InjectMouseInput", static_cast<::util::EventReply (*)(lua::State *, ::WIBase &, const ::Vector2 &, int, int)>(&InjectMouseInput));
+	classDef.def("InjectMouseClick", static_cast<::util::EventReply (*)(lua::State *, ::WIBase &, const ::Vector2 &, int, int)>(&InjectMouseClick));
+	classDef.def("InjectMouseClick", static_cast<::util::EventReply (*)(lua::State *, ::WIBase &, const ::Vector2 &, int)>(&InjectMouseClick));
+	classDef.def("InjectKeyboardInput", static_cast<::util::EventReply (*)(lua::State *, ::WIBase &, int, int, int)>(&InjectKeyboardInput));
+	classDef.def("InjectKeyboardInput", static_cast<::util::EventReply (*)(lua::State *, ::WIBase &, int, int)>(&InjectKeyboardInput));
+	classDef.def("InjectKeyPress", static_cast<::util::EventReply (*)(lua::State *, ::WIBase &, int, int)>(&InjectKeyPress));
+	classDef.def("InjectKeyPress", static_cast<::util::EventReply (*)(lua::State *, ::WIBase &, int)>(&InjectKeyPress));
+	classDef.def("InjectCharInput", static_cast<::util::EventReply (*)(lua::State *, ::WIBase &, std::string, uint32_t)>(&InjectCharInput));
+	classDef.def("InjectCharInput", static_cast<::util::EventReply (*)(lua::State *, ::WIBase &, std::string)>(&InjectCharInput));
+	classDef.def("InjectScrollInput", static_cast<::util::EventReply (*)(lua::State *, ::WIBase &, const ::Vector2 &, const ::Vector2 &, bool)>(&InjectScrollInput));
+	classDef.def("InjectScrollInput", static_cast<::util::EventReply (*)(lua::State *, ::WIBase &, const ::Vector2 &, const ::Vector2 &)>(&InjectScrollInput));
 	classDef.def("IsDescendant", &::WIBase::IsDescendant);
 	classDef.def("IsDescendantOf", &::WIBase::IsDescendantOf);
 	classDef.def("IsAncestor", &::WIBase::IsAncestor);
@@ -419,9 +419,9 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("IsBackgroundElement", &::WIBase::IsBackgroundElement);
 	classDef.def("SetBaseElement", &::WIBase::SetBaseElement);
 	classDef.def("IsBaseElement", &::WIBase::IsBaseElement);
-	classDef.def("FindDescendantByName", static_cast<::WIBase *(*)(lua_State *, ::WIBase &, const std::string &)>([](lua_State *l, ::WIBase &hPanel, const std::string &name) { return hPanel.FindDescendantByName(name); }));
+	classDef.def("FindDescendantByName", static_cast<::WIBase *(*)(lua::State *, ::WIBase &, const std::string &)>([](lua::State *l, ::WIBase &hPanel, const std::string &name) { return hPanel.FindDescendantByName(name); }));
 	classDef.def("FindDescendantByPath", &find_descendant_by_path);
-	classDef.def("FindDescendantsByName", static_cast<luabind::tableT<::WIBase> (*)(lua_State *, ::WIBase &, const std::string &)>([](lua_State *l, ::WIBase &hPanel, const std::string &name) -> luabind::tableT<::WIBase> {
+	classDef.def("FindDescendantsByName", static_cast<luabind::tableT<::WIBase> (*)(lua::State *, ::WIBase &, const std::string &)>([](lua::State *l, ::WIBase &hPanel, const std::string &name) -> luabind::tableT<::WIBase> {
 		std::vector<::WIHandle> children {};
 		hPanel.FindDescendantsByName(name, children);
 		auto t = luabind::newtable(l);
@@ -484,7 +484,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("SetLocalAlpha", &::WIBase::SetLocalAlpha);
 	classDef.def("GetLocalAlpha", &::WIBase::GetLocalAlpha);
 	classDef.def("CenterToParent", static_cast<void (::WIBase::*)(bool)>(&::WIBase::CenterToParent));
-	classDef.def("CenterToParent", static_cast<void (*)(lua_State *, ::WIBase &)>([](lua_State *l, ::WIBase &hPanel) { hPanel.CenterToParent(false); }));
+	classDef.def("CenterToParent", static_cast<void (*)(lua::State *, ::WIBase &)>([](lua::State *l, ::WIBase &hPanel) { hPanel.CenterToParent(false); }));
 	classDef.def("CenterToParentX", &::WIBase::CenterToParentX);
 	classDef.def("CenterToParentY", &::WIBase::CenterToParentY);
 	classDef.def("RemoveStyleClass", &::WIBase::RemoveStyleClass);
@@ -532,16 +532,16 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	defDrawInfo.def_readwrite("size", &::wgui::DrawInfo::size);
 	defDrawInfo.def_readwrite("transform", &::wgui::DrawInfo::transform);
 	defDrawInfo.def_readwrite("flags", &::wgui::DrawInfo::flags);
-	defDrawInfo.property("commandBuffer", static_cast<luabind::object (*)(lua_State *, ::wgui::DrawInfo &)>([](lua_State *l, ::wgui::DrawInfo &drawInfo) -> luabind::object { return drawInfo.commandBuffer ? luabind::object {l, drawInfo.commandBuffer} : luabind::object {}; }),
-	  static_cast<void (*)(lua_State *, ::wgui::DrawInfo &, luabind::object)>([](lua_State *l, ::wgui::DrawInfo &drawInfo, luabind::object o) {
+	defDrawInfo.property("commandBuffer", static_cast<luabind::object (*)(lua::State *, ::wgui::DrawInfo &)>([](lua::State *l, ::wgui::DrawInfo &drawInfo) -> luabind::object { return drawInfo.commandBuffer ? luabind::object {l, drawInfo.commandBuffer} : luabind::object {}; }),
+	  static_cast<void (*)(lua::State *, ::wgui::DrawInfo &, luabind::object)>([](lua::State *l, ::wgui::DrawInfo &drawInfo, luabind::object o) {
 		  if(Lua::IsSet(l, 2) == false) {
 			  drawInfo.commandBuffer = nullptr;
 			  return;
 		  }
 		  drawInfo.commandBuffer = Lua::Check<Lua::Vulkan::CommandBuffer>(l, 2).shared_from_this();
 	  }));
-	defDrawInfo.def("SetColor", static_cast<void (*)(lua_State *, ::wgui::DrawInfo &, const ::Color &)>([](lua_State *l, ::wgui::DrawInfo &drawInfo, const ::Color &color) { drawInfo.color = color.ToVector4(); }));
-	defDrawInfo.def("SetPostTransform", static_cast<void (*)(lua_State *, ::wgui::DrawInfo &, const ::Mat4 &)>([](lua_State *l, ::wgui::DrawInfo &drawInfo, const ::Mat4 &t) { drawInfo.postTransform = t; }));
+	defDrawInfo.def("SetColor", static_cast<void (*)(lua::State *, ::wgui::DrawInfo &, const ::Color &)>([](lua::State *l, ::wgui::DrawInfo &drawInfo, const ::Color &color) { drawInfo.color = color.ToVector4(); }));
+	defDrawInfo.def("SetPostTransform", static_cast<void (*)(lua::State *, ::wgui::DrawInfo &, const ::Mat4 &)>([](lua::State *l, ::wgui::DrawInfo &drawInfo, const ::Mat4 &t) { drawInfo.postTransform = t; }));
 	classDef.scope[defDrawInfo];
 }
 
@@ -647,10 +647,10 @@ void Lua::WIGridPanel::register_class(luabind::class_<::WIGridPanel, luabind::ba
 
 void Lua::WITreeList::register_class(luabind::class_<::WITreeList, luabind::bases<::WITable, ::WIBase>> &classDef)
 {
-	classDef.def("AddItem", static_cast<::WITreeListElement *(*)(lua_State *, ::WITreeList &, const std::string &)>([](lua_State *l, ::WITreeList &hPanel, const std::string &text) -> ::WITreeListElement * { return hPanel.AddItem(text); }));
-	classDef.def("AddItem", static_cast<::WIBase *(*)(lua_State *, ::WITreeList &, const std::string &, Lua::func<void(::WIBase)>)>([](lua_State *l, ::WITreeList &hPanel, const std::string &text, Lua::func<void(::WIBase)> populate) -> ::WIBase * {
+	classDef.def("AddItem", static_cast<::WITreeListElement *(*)(lua::State *, ::WITreeList &, const std::string &)>([](lua::State *l, ::WITreeList &hPanel, const std::string &text) -> ::WITreeListElement * { return hPanel.AddItem(text); }));
+	classDef.def("AddItem", static_cast<::WIBase *(*)(lua::State *, ::WITreeList &, const std::string &, Lua::func<void(::WIBase)>)>([](lua::State *l, ::WITreeList &hPanel, const std::string &text, Lua::func<void(::WIBase)> populate) -> ::WIBase * {
 		auto fPopulate = [l, populate](::WITreeListElement &el) {
-			Lua::CallFunction(l, [&populate, &el](lua_State *l) {
+			Lua::CallFunction(l, [&populate, &el](lua::State *l) {
 				populate.push(l);
 				auto o = WGUILuaInterface::GetLuaObject(l, el);
 				o.push(l);
@@ -670,10 +670,10 @@ void Lua::WITreeListElement::register_class(luabind::class_<::WITreeListElement,
 	classDef.def("Collapse", static_cast<void (::WITreeListElement::*)(bool)>(&::WITreeListElement::Collapse));
 	classDef.def("Collapse", static_cast<void (*)(::WITreeListElement &)>([](::WITreeListElement &el) { el.Collapse(); }));
 	classDef.def("GetItems", &::WITreeListElement::GetItems);
-	classDef.def("AddItem", static_cast<::WITreeListElement *(*)(lua_State *, ::WITreeListElement &, const std::string &)>([](lua_State *l, ::WITreeListElement &hPanel, const std::string &text) -> ::WITreeListElement * { return hPanel.AddItem(text); }));
-	classDef.def("AddItem", static_cast<::WIBase *(*)(lua_State *, ::WITreeListElement &, const std::string &, Lua::func<void(::WIBase)>)>([](lua_State *l, ::WITreeListElement &hPanel, const std::string &text, Lua::func<void(::WIBase)> populate) -> ::WIBase * {
+	classDef.def("AddItem", static_cast<::WITreeListElement *(*)(lua::State *, ::WITreeListElement &, const std::string &)>([](lua::State *l, ::WITreeListElement &hPanel, const std::string &text) -> ::WITreeListElement * { return hPanel.AddItem(text); }));
+	classDef.def("AddItem", static_cast<::WIBase *(*)(lua::State *, ::WITreeListElement &, const std::string &, Lua::func<void(::WIBase)>)>([](lua::State *l, ::WITreeListElement &hPanel, const std::string &text, Lua::func<void(::WIBase)> populate) -> ::WIBase * {
 		auto fPopulate = [l, populate](::WITreeListElement &el) {
-			Lua::CallFunction(l, [&populate, &el](lua_State *l) {
+			Lua::CallFunction(l, [&populate, &el](lua::State *l) {
 				populate.push(l);
 				auto o = WGUILuaInterface::GetLuaObject(l, el);
 				o.push(l);
@@ -713,11 +713,11 @@ void Lua::WITable::register_class(luabind::class_<::WITable, luabind::bases<::WI
 	classDef.def("IsSortable", &::WITable::IsSortable);
 	classDef.def("Sort", static_cast<void (::WITable::*)()>(&::WITable::Sort));
 	classDef.def(
-	  "SetSortFunction", +[](lua_State *l, ::WITable &table, const Lua::func<bool, const ::WITableRow &, const ::WITableRow &> &lfunc) {
+	  "SetSortFunction", +[](lua::State *l, ::WITable &table, const Lua::func<bool, const ::WITableRow &, const ::WITableRow &> &lfunc) {
 		  table.SetSortFunction([l, lfunc](const ::WITableRow &rowA, const ::WITableRow &rowB, uint32_t columnIndex, bool ascending) -> bool {
 			  auto r = Lua::CallFunction(
 			    l,
-			    [&lfunc, &rowA, &rowB, columnIndex, ascending](lua_State *l) {
+			    [&lfunc, &rowA, &rowB, columnIndex, ascending](lua::State *l) {
 				    lfunc.push(l);
 				    Lua::Push<::WIBase *>(l, const_cast<::WITableRow *>(&rowA));
 				    Lua::Push<::WIBase *>(l, const_cast<::WITableRow *>(&rowB));
@@ -763,7 +763,7 @@ void Lua::WITableRow::register_class(luabind::class_<::WITableRow, luabind::base
 	classDef.def("InsertElement", static_cast<::WITableCell *(::WIBase::*)(uint32_t, ::WIBase *)>(&::WITableRow::InsertElement));
 	classDef.def("GetCellCount", &::WITableRow::GetCellCount);
 	classDef.def("GetCell", &::WITableRow::GetCell);
-	classDef.def("GetRowIndex", static_cast<uint32_t (*)(lua_State *, ::WITableRow &)>([](lua_State *l, ::WITableRow &hRow) -> uint32_t {
+	classDef.def("GetRowIndex", static_cast<uint32_t (*)(lua::State *, ::WITableRow &)>([](lua::State *l, ::WITableRow &hRow) -> uint32_t {
 		auto *pTable = hRow.GetTable();
 		uint32_t rowIndex = 0u;
 		if(pTable)
@@ -831,14 +831,14 @@ void Lua::WIDropDownMenu::register_class(luabind::class_<::WIDropDownMenu, luabi
 
 void Lua::WIText::register_class(luabind::class_<::WIText, ::WIBase> &classDef)
 {
-	classDef.def("SetText", static_cast<void (*)(lua_State *, ::WIText &, const std::string &)>([](lua_State *l, ::WIText &hPanel, const std::string &text) { hPanel.SetText(text); }));
+	classDef.def("SetText", static_cast<void (*)(lua::State *, ::WIText &, const std::string &)>([](lua::State *l, ::WIText &hPanel, const std::string &text) { hPanel.SetText(text); }));
 	classDef.def("GetText", +[](const ::WIText &text) { return text.GetText().cpp_str(); });
 	classDef.def("GetTextHeight", &::WIText::GetTextHeight);
 	classDef.def("CalcTextSize", &::WIText::CalcTextSize);
 	classDef.def("GetTextWidth", &::WIText::GetTextWidth);
-	classDef.def("SetFont", static_cast<void (*)(lua_State *, ::WIText &, const std::string &)>([](lua_State *l, ::WIText &hPanel, const std::string &font) { hPanel.SetFont(font); }));
+	classDef.def("SetFont", static_cast<void (*)(lua::State *, ::WIText &, const std::string &)>([](lua::State *l, ::WIText &hPanel, const std::string &font) { hPanel.SetFont(font); }));
 	classDef.def(
-	  "GetFont", +[](lua_State *l, ::WIText &hPanel) -> std::optional<std::string> {
+	  "GetFont", +[](lua::State *l, ::WIText &hPanel) -> std::optional<std::string> {
 		  auto *font = hPanel.GetFont();
 		  if(!font)
 			  return {};
@@ -861,14 +861,14 @@ void Lua::WIText::register_class(luabind::class_<::WIText, ::WIBase> &classDef)
 	classDef.def("GetShadowBlurSize", &::WIText::GetShadowBlurSize);
 	classDef.def("SetAutoBreakMode", &::WIText::SetAutoBreakMode);
 	classDef.def("GetLineCount", &::WIText::GetLineCount);
-	classDef.def("GetLine", static_cast<std::optional<std::string> (*)(lua_State *, ::WIText &, int32_t)>([](lua_State *l, ::WIText &hPanel, int32_t lineIndex) -> std::optional<std::string> {
+	classDef.def("GetLine", static_cast<std::optional<std::string> (*)(lua::State *, ::WIText &, int32_t)>([](lua::State *l, ::WIText &hPanel, int32_t lineIndex) -> std::optional<std::string> {
 		auto *pLine = hPanel.GetLine(lineIndex);
 		if(pLine == nullptr)
 			return {};
 		return pLine->GetUnformattedLine().GetText().cpp_str();
 	}));
-	classDef.def("GetTextLength", static_cast<uint32_t (*)(lua_State *, ::WIText &)>([](lua_State *l, ::WIText &hPanel) -> uint32_t { return hPanel.GetText().length(); }));
-	classDef.def("SetTagArgument", static_cast<void (*)(lua_State *, ::WIText &, const std::string &, uint32_t, luabind::object)>([](lua_State *l, ::WIText &hPanel, const std::string &label, uint32_t argIdx, luabind::object o) {
+	classDef.def("GetTextLength", static_cast<uint32_t (*)(lua::State *, ::WIText &)>([](lua::State *l, ::WIText &hPanel) -> uint32_t { return hPanel.GetText().length(); }));
+	classDef.def("SetTagArgument", static_cast<void (*)(lua::State *, ::WIText &, const std::string &, uint32_t, luabind::object)>([](lua::State *l, ::WIText &hPanel, const std::string &label, uint32_t argIdx, luabind::object o) {
 		if(Lua::IsString(l, 4)) {
 			std::string arg = Lua::CheckString(l, 4);
 			hPanel.SetTagArgument(label, argIdx, arg);
@@ -886,7 +886,7 @@ void Lua::WIText::register_class(luabind::class_<::WIText, ::WIBase> &classDef)
 			auto arg = FunctionCallback<::util::EventReply>::CreateWithOptionalReturn([f, l](::util::EventReply *reply) -> CallbackReturnType {
 				auto r = Lua::CallFunction(
 				  l,
-				  [&f](lua_State *l) {
+				  [&f](lua::State *l) {
 					  f.push(l);
 					  return Lua::StatusCode::Ok;
 				  },
@@ -914,11 +914,11 @@ void Lua::WIText::register_class(luabind::class_<::WIText, ::WIBase> &classDef)
 	classDef.def("InsertText", static_cast<bool (*)(::WIText &, const std::string &, ::util::text::LineIndex)>([](::WIText &hPanel, const std::string &text, ::util::text::LineIndex lineIdx) { return hPanel.InsertText(text, lineIdx); }));
 	classDef.def("InsertText",
 	  static_cast<bool (*)(::WIText &, const std::string &, ::util::text::LineIndex, ::util::text::CharOffset)>([](::WIText &hPanel, const std::string &text, ::util::text::LineIndex lineIdx, ::util::text::CharOffset charOffset) { return hPanel.InsertText(text, lineIdx, charOffset); }));
-	classDef.def("SetMaxLineCount", +[](lua_State *l, ::WIText &hPanel, uint32_t c) { hPanel.GetFormattedTextObject().SetMaxLineCount(c); });
-	classDef.def("GetMaxLineCount", +[](lua_State *l, ::WIText &hPanel) { return hPanel.GetFormattedTextObject().GetMaxLineCount(); });
+	classDef.def("SetMaxLineCount", +[](lua::State *l, ::WIText &hPanel, uint32_t c) { hPanel.GetFormattedTextObject().SetMaxLineCount(c); });
+	classDef.def("GetMaxLineCount", +[](lua::State *l, ::WIText &hPanel) { return hPanel.GetFormattedTextObject().GetMaxLineCount(); });
 	classDef.def("AppendText", +[](::WIText &el, const std::string &text) { return el.AppendText(text); });
-	classDef.def("AppendLine", static_cast<void (*)(lua_State *, ::WIText &, const std::string &)>([](lua_State *l, ::WIText &hPanel, const std::string &line) { hPanel.AppendLine(line); }));
-	classDef.def("MoveText", static_cast<void (*)(lua_State *, ::WIText &, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t)>([](lua_State *l, ::WIText &hPanel, uint32_t lineIdx, uint32_t startOffset, uint32_t len, uint32_t targetLineIdx, uint32_t targetCharOffset) {
+	classDef.def("AppendLine", static_cast<void (*)(lua::State *, ::WIText &, const std::string &)>([](lua::State *l, ::WIText &hPanel, const std::string &line) { hPanel.AppendLine(line); }));
+	classDef.def("MoveText", static_cast<void (*)(lua::State *, ::WIText &, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t)>([](lua::State *l, ::WIText &hPanel, uint32_t lineIdx, uint32_t startOffset, uint32_t len, uint32_t targetLineIdx, uint32_t targetCharOffset) {
 		Lua::PushBool(l, hPanel.MoveText(lineIdx, startOffset, len, targetLineIdx, targetCharOffset));
 	}));
 	classDef.def("Clear", &::WIText::Clear);
@@ -1031,20 +1031,20 @@ void Lua::WIScrollBar::register_class(luabind::class_<::WIScrollBar, ::WIBase> &
 	classDef.def("IsVertical", &::WIScrollBar::IsVertical);
 }
 
-bool Lua::WIBase::IsValid(lua_State *l, ::WIBase *hPanel) { return hPanel != nullptr; }
+bool Lua::WIBase::IsValid(lua::State *l, ::WIBase *hPanel) { return hPanel != nullptr; }
 
-void Lua::WIBase::TrapFocus(lua_State *l, ::WIBase &hPanel, bool bTrap) { hPanel.TrapFocus(bTrap); }
-void Lua::WIBase::TrapFocus(lua_State *l, ::WIBase &hPanel) { TrapFocus(l, hPanel, true); }
-void Lua::WIBase::SetPos(lua_State *l, ::WIBase &hPanel, ::Vector2 pos) { hPanel.SetPos(CInt32(pos.x), CInt32(pos.y)); }
-void Lua::WIBase::SetPos(lua_State *l, ::WIBase &hPanel, float x, float y) { hPanel.SetPos(CInt32(x), CInt32(y)); }
-void Lua::WIBase::SetAbsolutePos(lua_State *l, ::WIBase &hPanel, ::Vector2 pos) { hPanel.SetAbsolutePos(::Vector2i(pos.x, pos.y)); }
-void Lua::WIBase::SetAbsolutePos(lua_State *l, ::WIBase &hPanel, float x, float y) { hPanel.SetAbsolutePos(::Vector2i(x, y)); }
-void Lua::WIBase::SetColor(lua_State *l, ::WIBase &hPanel, ::Color col) { hPanel.SetColor(col.r / 255.f, col.g / 255.f, col.b / 255.f, col.a / 255.f); }
-void Lua::WIBase::GetAlpha(lua_State *l, ::WIBase &hPanel) { Lua::PushNumber(l, hPanel.GetAlpha() * 255); }
-void Lua::WIBase::SetAlpha(lua_State *l, ::WIBase &hPanel, float alpha) { hPanel.SetAlpha(alpha / 255.f); }
-void Lua::WIBase::SetSize(lua_State *l, ::WIBase &hPanel, ::Vector2 size) { hPanel.SetSize(CInt32(size.x), CInt32(size.y)); }
-void Lua::WIBase::SetSize(lua_State *l, ::WIBase &hPanel, float x, float y) { hPanel.SetSize(CInt32(x), CInt32(y)); }
-void Lua::WIBase::Wrap(lua_State *l, ::WIBase &hPanel, const std::string &wrapperClassName)
+void Lua::WIBase::TrapFocus(lua::State *l, ::WIBase &hPanel, bool bTrap) { hPanel.TrapFocus(bTrap); }
+void Lua::WIBase::TrapFocus(lua::State *l, ::WIBase &hPanel) { TrapFocus(l, hPanel, true); }
+void Lua::WIBase::SetPos(lua::State *l, ::WIBase &hPanel, ::Vector2 pos) { hPanel.SetPos(CInt32(pos.x), CInt32(pos.y)); }
+void Lua::WIBase::SetPos(lua::State *l, ::WIBase &hPanel, float x, float y) { hPanel.SetPos(CInt32(x), CInt32(y)); }
+void Lua::WIBase::SetAbsolutePos(lua::State *l, ::WIBase &hPanel, ::Vector2 pos) { hPanel.SetAbsolutePos(::Vector2i(pos.x, pos.y)); }
+void Lua::WIBase::SetAbsolutePos(lua::State *l, ::WIBase &hPanel, float x, float y) { hPanel.SetAbsolutePos(::Vector2i(x, y)); }
+void Lua::WIBase::SetColor(lua::State *l, ::WIBase &hPanel, ::Color col) { hPanel.SetColor(col.r / 255.f, col.g / 255.f, col.b / 255.f, col.a / 255.f); }
+void Lua::WIBase::GetAlpha(lua::State *l, ::WIBase &hPanel) { Lua::PushNumber(l, hPanel.GetAlpha() * 255); }
+void Lua::WIBase::SetAlpha(lua::State *l, ::WIBase &hPanel, float alpha) { hPanel.SetAlpha(alpha / 255.f); }
+void Lua::WIBase::SetSize(lua::State *l, ::WIBase &hPanel, ::Vector2 size) { hPanel.SetSize(CInt32(size.x), CInt32(size.y)); }
+void Lua::WIBase::SetSize(lua::State *l, ::WIBase &hPanel, float x, float y) { hPanel.SetSize(CInt32(x), CInt32(y)); }
+void Lua::WIBase::Wrap(lua::State *l, ::WIBase &hPanel, const std::string &wrapperClassName)
 {
 	auto *el = pragma::get_cgame()->CreateGUIElement(wrapperClassName);
 	if(el == nullptr)
@@ -1057,9 +1057,9 @@ void Lua::WIBase::Wrap(lua_State *l, ::WIBase &hPanel, const std::string &wrappe
 	auto o = WGUILuaInterface::GetLuaObject(l, *el);
 	o.push(l);
 }
-void Lua::WIBase::ClearParent(lua_State *l, ::WIBase &hPanel) { hPanel.SetParent(nullptr); }
-void Lua::WIBase::ResetParent(lua_State *l, ::WIBase &hPanel) { hPanel.SetParent(WGUI::GetInstance().GetBaseElement()); }
-void Lua::WIBase::GetChildren(lua_State *l, ::WIBase &hPanel, std::string className)
+void Lua::WIBase::ClearParent(lua::State *l, ::WIBase &hPanel) { hPanel.SetParent(nullptr); }
+void Lua::WIBase::ResetParent(lua::State *l, ::WIBase &hPanel) { hPanel.SetParent(WGUI::GetInstance().GetBaseElement()); }
+void Lua::WIBase::GetChildren(lua::State *l, ::WIBase &hPanel, std::string className)
 {
 	std::vector<WIHandle> *children = hPanel.GetChildren();
 	int table = Lua::CreateTable(l);
@@ -1078,7 +1078,7 @@ void Lua::WIBase::GetChildren(lua_State *l, ::WIBase &hPanel, std::string classN
 		}
 	}
 }
-void Lua::WIBase::GetChild(lua_State *l, ::WIBase &hPanel, unsigned int idx)
+void Lua::WIBase::GetChild(lua::State *l, ::WIBase &hPanel, unsigned int idx)
 {
 	auto *el = hPanel.GetChild(idx);
 	if(el == nullptr)
@@ -1086,7 +1086,7 @@ void Lua::WIBase::GetChild(lua_State *l, ::WIBase &hPanel, unsigned int idx)
 	auto oChild = WGUILuaInterface::GetLuaObject(l, *el);
 	oChild.push(l);
 }
-void Lua::WIBase::GetChild(lua_State *l, ::WIBase &hPanel, std::string className, unsigned int idx)
+void Lua::WIBase::GetChild(lua::State *l, ::WIBase &hPanel, std::string className, unsigned int idx)
 {
 	auto *el = hPanel.GetChild(className, idx);
 	if(el == nullptr)
@@ -1094,49 +1094,49 @@ void Lua::WIBase::GetChild(lua_State *l, ::WIBase &hPanel, std::string className
 	auto oChild = WGUILuaInterface::GetLuaObject(l, *el);
 	oChild.push(l);
 }
-void Lua::WIBase::PosInBounds(lua_State *l, ::WIBase &hPanel, ::Vector2 pos) { lua_pushboolean(l, hPanel.PosInBounds(CInt32(pos.x), CInt32(pos.y))); }
-void Lua::WIBase::GetMousePos(lua_State *l, ::WIBase &hPanel)
+void Lua::WIBase::PosInBounds(lua::State *l, ::WIBase &hPanel, ::Vector2 pos) { lua::push_boolean(l, hPanel.PosInBounds(CInt32(pos.x), CInt32(pos.y))); }
+void Lua::WIBase::GetMousePos(lua::State *l, ::WIBase &hPanel)
 {
 	int x, y;
 	hPanel.GetMousePos(&x, &y);
 	luabind::object(l, ::Vector2(x, y)).push(l);
 }
-void Lua::WIBase::Draw(lua_State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState) { hPanel.Draw(drawInfo, drawState); }
-void Lua::WIBase::Draw(lua_State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize) { hPanel.Draw(drawInfo, drawState, ::Vector2i {}, scissorOffset, scissorSize, hPanel.GetScale()); }
-void Lua::WIBase::Draw(lua_State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize, const ::Vector2i &offsetParent)
+void Lua::WIBase::Draw(lua::State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState) { hPanel.Draw(drawInfo, drawState); }
+void Lua::WIBase::Draw(lua::State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize) { hPanel.Draw(drawInfo, drawState, ::Vector2i {}, scissorOffset, scissorSize, hPanel.GetScale()); }
+void Lua::WIBase::Draw(lua::State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize, const ::Vector2i &offsetParent)
 {
 	hPanel.Draw(drawInfo, drawState, offsetParent, scissorOffset, scissorSize, hPanel.GetScale());
 }
-void Lua::WIBase::Draw(lua_State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize, const ::Vector2i &offsetParent, const ::Vector2 &scale)
+void Lua::WIBase::Draw(lua::State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize, const ::Vector2i &offsetParent, const ::Vector2 &scale)
 {
 	hPanel.Draw(drawInfo, drawState, offsetParent, scissorOffset, scissorSize, scale);
 }
-void Lua::WIBase::GetX(lua_State *l, ::WIBase &hPanel)
+void Lua::WIBase::GetX(lua::State *l, ::WIBase &hPanel)
 {
 	::Vector2i pos = hPanel.GetPos();
 	Lua::PushInt(l, pos.x);
 }
-void Lua::WIBase::GetY(lua_State *l, ::WIBase &hPanel)
+void Lua::WIBase::GetY(lua::State *l, ::WIBase &hPanel)
 {
 	::Vector2i pos = hPanel.GetPos();
 	Lua::PushInt(l, pos.y);
 }
-void Lua::WIBase::SetX(lua_State *l, ::WIBase &hPanel, float x)
+void Lua::WIBase::SetX(lua::State *l, ::WIBase &hPanel, float x)
 {
 	::Vector2i pos = hPanel.GetPos();
 	hPanel.SetPos(::Vector2i(x, pos.y));
 }
-void Lua::WIBase::SetY(lua_State *l, ::WIBase &hPanel, float y)
+void Lua::WIBase::SetY(lua::State *l, ::WIBase &hPanel, float y)
 {
 	::Vector2i pos = hPanel.GetPos();
 	hPanel.SetPos(::Vector2i(pos.x, y));
 }
-void Lua::WIBase::SetWidth(lua_State *l, ::WIBase &hPanel, float w)
+void Lua::WIBase::SetWidth(lua::State *l, ::WIBase &hPanel, float w)
 {
 	::Vector2i size = hPanel.GetSize();
 	hPanel.SetSize(::Vector2i(w, size.y));
 }
-void Lua::WIBase::SetHeight(lua_State *l, ::WIBase &hPanel, float h)
+void Lua::WIBase::SetHeight(lua::State *l, ::WIBase &hPanel, float h)
 {
 	::Vector2i size = hPanel.GetSize();
 	hPanel.SetSize(::Vector2i(size.x, h));
@@ -1144,10 +1144,10 @@ void Lua::WIBase::SetHeight(lua_State *l, ::WIBase &hPanel, float h)
 
 struct LuaCallbacks {
 	struct CallbackInfo {
-		CallbackInfo(lua_State *l, const CallbackHandle &_hCallback, const luabind::object &f) : luaState(l), hCallback(_hCallback), luaFunction(f) {}
+		CallbackInfo(lua::State *l, const CallbackHandle &_hCallback, const luabind::object &f) : luaState(l), hCallback(_hCallback), luaFunction(f) {}
 		CallbackHandle hCallback;
 		luabind::object luaFunction;
-		lua_State *luaState;
+		lua::State *luaState;
 	};
 	~LuaCallbacks()
 	{
@@ -1177,7 +1177,7 @@ void Lua::gui::register_lua_callback(std::string className, std::string callback
 	g_uiCallbacks[get_gui_callback_hash(className, callbackName)] = fCb;
 }
 
-void Lua::gui::clear_lua_callbacks(lua_State *l)
+void Lua::gui::clear_lua_callbacks(lua::State *l)
 {
 	auto &wgui = WGUI::GetInstance();
 	std::function<void(::WIBase &)> fIterateElements = nullptr;
@@ -1211,7 +1211,7 @@ void Lua::gui::clear_lua_callbacks(lua_State *l)
 namespace Lua {
 	namespace WIBase {
 		template<typename... TARGS>
-		void CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name, TARGS... args)
+		void CallCallbacks(lua::State *l, ::WIBase &hPanel, std::string name, TARGS... args)
 		{
 			auto callbackPtr = std::static_pointer_cast<LuaCallbacks>(hPanel.GetUserData4());
 			if(callbackPtr == nullptr)
@@ -1236,7 +1236,7 @@ namespace Lua {
 					auto n = Lua::GetStackTop(l);
 					auto r = pragma::scripting::lua::protected_call(
 					  l,
-					  [&](lua_State *l) -> Lua::StatusCode {
+					  [&](lua::State *l) -> Lua::StatusCode {
 						  o.push(l);
 						  auto obj = WGUILuaInterface::GetLuaObject(l, hPanel);
 						  obj.push(l);
@@ -1265,28 +1265,28 @@ namespace Lua {
 		}
 	};
 };
-void Lua::WIBase::CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name) { CallCallbacks<>(l, hPanel, name); }
-void Lua::WIBase::CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name, luabind::object o1) { CallCallbacks<luabind::object>(l, hPanel, name, o1); }
-void Lua::WIBase::CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2) { CallCallbacks<luabind::object, luabind::object>(l, hPanel, name, o1, o2); }
-void Lua::WIBase::CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3) { CallCallbacks<luabind::object, luabind::object, luabind::object>(l, hPanel, name, o1, o2, o3); }
-void Lua::WIBase::CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4) { CallCallbacks<luabind::object, luabind::object, luabind::object, luabind::object>(l, hPanel, name, o1, o2, o3, o4); }
-void Lua::WIBase::CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5)
+void Lua::WIBase::CallCallbacks(lua::State *l, ::WIBase &hPanel, std::string name) { CallCallbacks<>(l, hPanel, name); }
+void Lua::WIBase::CallCallbacks(lua::State *l, ::WIBase &hPanel, std::string name, luabind::object o1) { CallCallbacks<luabind::object>(l, hPanel, name, o1); }
+void Lua::WIBase::CallCallbacks(lua::State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2) { CallCallbacks<luabind::object, luabind::object>(l, hPanel, name, o1, o2); }
+void Lua::WIBase::CallCallbacks(lua::State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3) { CallCallbacks<luabind::object, luabind::object, luabind::object>(l, hPanel, name, o1, o2, o3); }
+void Lua::WIBase::CallCallbacks(lua::State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4) { CallCallbacks<luabind::object, luabind::object, luabind::object, luabind::object>(l, hPanel, name, o1, o2, o3, o4); }
+void Lua::WIBase::CallCallbacks(lua::State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5)
 {
 	CallCallbacks<luabind::object, luabind::object, luabind::object, luabind::object, luabind::object>(l, hPanel, name, o1, o2, o3, o4, o5);
 }
-void Lua::WIBase::CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6)
+void Lua::WIBase::CallCallbacks(lua::State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6)
 {
 	CallCallbacks<luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object>(l, hPanel, name, o1, o2, o3, o4, o5, o6);
 }
-void Lua::WIBase::CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6, luabind::object o7)
+void Lua::WIBase::CallCallbacks(lua::State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6, luabind::object o7)
 {
 	CallCallbacks<luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object>(l, hPanel, name, o1, o2, o3, o4, o5, o6, o7);
 }
-void Lua::WIBase::CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6, luabind::object o7, luabind::object o8)
+void Lua::WIBase::CallCallbacks(lua::State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6, luabind::object o7, luabind::object o8)
 {
 	CallCallbacks<luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object>(l, hPanel, name, o1, o2, o3, o4, o5, o6, o7, o8);
 }
-CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::string name, Lua::func<void> o)
+CallbackHandle Lua::WIBase::AddCallback(lua::State *l, ::WIBase &panel, std::string name, Lua::func<void> o)
 {
 	CallbackHandle hCallback {};
 	ustring::to_lower(name);
@@ -1302,7 +1302,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 		hCallback = it->second(panel, l, [l, o, &panel](const std::function<void()> &pushArgs) {
 			Lua::CallFunction(
 			  l,
-			  [&pushArgs, &o, &panel](lua_State *l) mutable {
+			  [&pushArgs, &o, &panel](lua::State *l) mutable {
 				  o.push(l);
 
 				  auto obj = WGUILuaInterface::GetLuaObject(l, panel);
@@ -1321,7 +1321,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 					return;
 				Lua::CallFunction(
 				  l,
-				  [&o, hPanel, text](lua_State *l) mutable {
+				  [&o, hPanel, text](lua::State *l) mutable {
 					  o.push(l);
 
 					  auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1338,7 +1338,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 					return;
 				Lua::CallFunction(
 				  l,
-				  [&o, hPanel, text, changedByUser](lua_State *l) mutable {
+				  [&o, hPanel, text, changedByUser](lua::State *l) mutable {
 					  o.push(l);
 
 					  auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1357,7 +1357,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(
 			     l,
-			     [&o, hPanel, &arg](lua_State *l) mutable {
+			     [&o, hPanel, &arg](lua::State *l) mutable {
 				     o.push(l);
 
 				     auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1387,7 +1387,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 				return;
 			Lua::CallFunction(
 			  l,
-			  [&o, hPanel, offset](lua_State *l) mutable {
+			  [&o, hPanel, offset](lua::State *l) mutable {
 				  o.push(l);
 
 				  auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1404,7 +1404,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(
 			     l,
-			     [&o, hPanel, c, mods](lua_State *l) mutable {
+			     [&o, hPanel, c, mods](lua::State *l) mutable {
 				     o.push(l);
 
 				     auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1434,7 +1434,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 				  return CallbackReturnType::NoReturnValue;
 			  if(Lua::CallFunction(
 			       l,
-			       [&o, hPanel, key, action, mods](lua_State *l) mutable {
+			       [&o, hPanel, key, action, mods](lua::State *l) mutable {
 				       o.push(l);
 
 				       auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1465,7 +1465,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 				  return CallbackReturnType::NoReturnValue;
 			  if(Lua::CallFunction(
 			       l,
-			       [&o, hPanel, button, action, mods](lua_State *l) mutable {
+			       [&o, hPanel, button, action, mods](lua::State *l) mutable {
 				       o.push(l);
 
 				       auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1493,7 +1493,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 		hCallback = FunctionCallback<void, int32_t, int32_t>::Create([l, hPanel, o](int32_t x, int32_t y) mutable {
 			if(!hPanel.IsValid())
 				return;
-			Lua::CallFunction(l, [&o, hPanel, x, y](lua_State *l) mutable {
+			Lua::CallFunction(l, [&o, hPanel, x, y](lua::State *l) mutable {
 				o.push(l);
 
 				auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1508,7 +1508,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 		hCallback = FunctionCallback<void, ::WIBase *>::Create([l, hPanel, o](::WIBase *el) mutable {
 			if(!hPanel.IsValid())
 				return;
-			Lua::CallFunction(l, [&o, hPanel, el](lua_State *l) mutable {
+			Lua::CallFunction(l, [&o, hPanel, el](lua::State *l) mutable {
 				o.push(l);
 
 				auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1525,7 +1525,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 		hCallback = FunctionCallback<void, ::WITooltip *>::Create([l, hPanel, o](::WITooltip *el) mutable {
 			if(!hPanel.IsValid())
 				return;
-			Lua::CallFunction(l, [&o, hPanel, el](lua_State *l) mutable {
+			Lua::CallFunction(l, [&o, hPanel, el](lua::State *l) mutable {
 				o.push(l);
 
 				auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1542,7 +1542,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 		hCallback = FunctionCallback<void, ::WIBase *>::Create([l, hPanel, o](::WIBase *el) mutable {
 			if(!hPanel.IsValid())
 				return;
-			Lua::CallFunction(l, [&o, hPanel, el](lua_State *l) mutable {
+			Lua::CallFunction(l, [&o, hPanel, el](lua::State *l) mutable {
 				o.push(l);
 
 				auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1561,7 +1561,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(
 			     l,
-			     [&o, hPanel](lua_State *l) mutable {
+			     [&o, hPanel](lua::State *l) mutable {
 				     o.push(l);
 
 				     auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1588,7 +1588,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(
 			     l,
-			     [&o, hPanel](lua_State *l) mutable {
+			     [&o, hPanel](lua::State *l) mutable {
 				     o.push(l);
 
 				     auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1615,7 +1615,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(
 			     l,
-			     [&o, hPanel](lua_State *l) mutable {
+			     [&o, hPanel](lua::State *l) mutable {
 				     o.push(l);
 
 				     auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1643,7 +1643,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 				  return CallbackReturnType::NoReturnValue;
 			  if(Lua::CallFunction(
 			       l,
-			       [&o, hPanel, key, state](lua_State *l) mutable {
+			       [&o, hPanel, key, state](lua::State *l) mutable {
 				       o.push(l);
 
 				       auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1672,7 +1672,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(
 			     l,
-			     [&o, hPanel, &offset, &offsetAsPixels](lua_State *l) mutable {
+			     [&o, hPanel, &offset, &offsetAsPixels](lua::State *l) mutable {
 				     o.push(l);
 
 				     auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1702,7 +1702,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 				return ::util::EventReply::Unhandled;
 			if(Lua::CallFunction(
 			     l,
-			     [&o, hPanel, bChecked](lua_State *l) mutable {
+			     [&o, hPanel, bChecked](lua::State *l) mutable {
 				     o.push(l);
 
 				     auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1725,7 +1725,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 				return;
 			Lua::CallFunction(
 			  l,
-			  [&o, hPanel, idx](lua_State *l) mutable {
+			  [&o, hPanel, idx](lua::State *l) mutable {
 				  o.push(l);
 
 				  auto *p = hPanel.get();
@@ -1745,7 +1745,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 				return;
 			auto r = Lua::CallFunction(
 			  l,
-			  [&o, hPanel, pos, bDrag](lua_State *l) mutable {
+			  [&o, hPanel, pos, bDrag](lua::State *l) mutable {
 				  o.push(l);
 
 				  auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1768,7 +1768,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 				return;
 			Lua::CallFunction(
 			  l,
-			  [&o, hPanel, progress, value](lua_State *l) mutable {
+			  [&o, hPanel, progress, value](lua::State *l) mutable {
 				  o.push(l);
 
 				  auto *p = hPanel.get();
@@ -1788,7 +1788,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 				return;
 			Lua::CallFunction(
 			  l,
-			  [&o, hPanel, selected](lua_State *l) mutable {
+			  [&o, hPanel, selected](lua::State *l) mutable {
 				  o.push(l);
 
 				  auto *p = hPanel.get();
@@ -1808,7 +1808,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			auto retVal = false;
 			auto r = Lua::CallFunction(
 			  l,
-			  [&o, hPanel, rawValue, value, &retVal](lua_State *l) mutable {
+			  [&o, hPanel, rawValue, value, &retVal](lua::State *l) mutable {
 				  o.push(l);
 
 				  auto *p = hPanel.get();
@@ -1832,7 +1832,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 				return;
 			Lua::CallFunction(
 			  l,
-			  [&o, hPanel](lua_State *l) mutable {
+			  [&o, hPanel](lua::State *l) mutable {
 				  o.push(l);
 
 				  auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1849,8 +1849,8 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 	itCallback->second.push_back({l, hCallback, o});
 	return hCallbackRet;
 }
-void Lua::WIBase::FadeIn(lua_State *l, ::WIBase &hPanel, float tFadeIn, float alphaTarget) { hPanel.FadeIn(tFadeIn, alphaTarget / 255.f); }
-void Lua::WIBase::FadeIn(lua_State *l, ::WIBase &hPanel, float tFadeIn) { Lua::WIBase::FadeIn(l, hPanel, tFadeIn, 255.f); }
+void Lua::WIBase::FadeIn(lua::State *l, ::WIBase &hPanel, float tFadeIn, float alphaTarget) { hPanel.FadeIn(tFadeIn, alphaTarget / 255.f); }
+void Lua::WIBase::FadeIn(lua::State *l, ::WIBase &hPanel, float tFadeIn) { Lua::WIBase::FadeIn(l, hPanel, tFadeIn, 255.f); }
 static std::optional<Vector2> get_cursor_pos_override(WIRoot *elRoot)
 {
 	if(!elRoot)
@@ -1866,7 +1866,7 @@ static void restore_cursor_pos_override(WIRoot *elRoot, const std::optional<Vect
 	else
 		elRoot->ClearCursorPosOverride();
 }
-void Lua::WIBase::InjectMouseMoveInput(lua_State *l, ::WIBase &hPanel, const ::Vector2 &mousePos)
+void Lua::WIBase::InjectMouseMoveInput(lua::State *l, ::WIBase &hPanel, const ::Vector2 &mousePos)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("inect_mouse_move_input");
@@ -1880,7 +1880,7 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l, ::WIBase &hPanel, const ::V
 	::util::ScopeGuard sg {[elRoot, &origOverride]() { restore_cursor_pos_override(elRoot, origOverride); }};
 	hPanel.InjectMouseMoveInput(mousePos.x, mousePos.y);
 }
-::util::EventReply Lua::WIBase::InjectMouseInput(lua_State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, int button, int action, int mods)
+::util::EventReply Lua::WIBase::InjectMouseInput(lua::State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, int button, int action, int mods)
 {
 	auto *elRoot = hPanel.GetBaseRootElement();
 	auto absPos = hPanel.GetAbsolutePos();
@@ -1890,8 +1890,8 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l, ::WIBase &hPanel, const ::V
 	::util::ScopeGuard sg {[elRoot, &origOverride]() { restore_cursor_pos_override(elRoot, origOverride); }};
 	return hPanel.InjectMouseInput(pragma::platform::MouseButton(button), pragma::platform::KeyState(action), pragma::platform::Modifier(mods));
 }
-::util::EventReply Lua::WIBase::InjectMouseInput(lua_State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, int button, int action) { return InjectMouseInput(l, hPanel, mousePos, button, action, 0); }
-::util::EventReply Lua::WIBase::InjectMouseClick(lua_State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, int button, int mods)
+::util::EventReply Lua::WIBase::InjectMouseInput(lua::State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, int button, int action) { return InjectMouseInput(l, hPanel, mousePos, button, action, 0); }
+::util::EventReply Lua::WIBase::InjectMouseClick(lua::State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, int button, int mods)
 {
 	auto handled0 = InjectMouseInput(l, hPanel, mousePos, button, KEY_PRESS, mods);
 	auto handled1 = InjectMouseInput(l, hPanel, mousePos, button, KEY_RELEASE, mods);
@@ -1899,14 +1899,14 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l, ::WIBase &hPanel, const ::V
 		handled0 = handled1;
 	return handled0;
 }
-::util::EventReply Lua::WIBase::InjectMouseClick(lua_State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, int button) { return InjectMouseClick(l, hPanel, mousePos, button, 0); }
-::util::EventReply Lua::WIBase::InjectKeyboardInput(lua_State *l, ::WIBase &hPanel, int key, int action, int mods)
+::util::EventReply Lua::WIBase::InjectMouseClick(lua::State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, int button) { return InjectMouseClick(l, hPanel, mousePos, button, 0); }
+::util::EventReply Lua::WIBase::InjectKeyboardInput(lua::State *l, ::WIBase &hPanel, int key, int action, int mods)
 {
 	return hPanel.InjectKeyboardInput(pragma::platform::Key(key), 0, pragma::platform::KeyState(action), pragma::platform::Modifier(mods));
 	// Vulkan TODO
 }
-::util::EventReply Lua::WIBase::InjectKeyboardInput(lua_State *l, ::WIBase &hPanel, int key, int action) { return InjectKeyboardInput(l, hPanel, key, action, 0); }
-::util::EventReply Lua::WIBase::InjectKeyPress(lua_State *l, ::WIBase &hPanel, int key, int mods)
+::util::EventReply Lua::WIBase::InjectKeyboardInput(lua::State *l, ::WIBase &hPanel, int key, int action) { return InjectKeyboardInput(l, hPanel, key, action, 0); }
+::util::EventReply Lua::WIBase::InjectKeyPress(lua::State *l, ::WIBase &hPanel, int key, int mods)
 {
 	auto handled0 = InjectKeyboardInput(l, hPanel, key, KEY_PRESS, mods);
 	auto handled1 = InjectKeyboardInput(l, hPanel, key, KEY_RELEASE, mods);
@@ -1914,22 +1914,22 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l, ::WIBase &hPanel, const ::V
 		handled0 = handled1;
 	return handled0;
 }
-::util::EventReply Lua::WIBase::InjectKeyPress(lua_State *l, ::WIBase &hPanel, int key) { return InjectKeyPress(l, hPanel, key, 0); }
-::util::EventReply Lua::WIBase::InjectCharInput(lua_State *l, ::WIBase &hPanel, std::string c, uint32_t mods)
+::util::EventReply Lua::WIBase::InjectKeyPress(lua::State *l, ::WIBase &hPanel, int key) { return InjectKeyPress(l, hPanel, key, 0); }
+::util::EventReply Lua::WIBase::InjectCharInput(lua::State *l, ::WIBase &hPanel, std::string c, uint32_t mods)
 {
 	if(c.empty())
 		return ::util::EventReply::Unhandled;
 	const char *cStr = c.c_str();
 	return hPanel.InjectCharInput(cStr[0], static_cast<pragma::platform::Modifier>(mods));
 }
-::util::EventReply Lua::WIBase::InjectCharInput(lua_State *l, ::WIBase &hPanel, std::string c)
+::util::EventReply Lua::WIBase::InjectCharInput(lua::State *l, ::WIBase &hPanel, std::string c)
 {
 	if(c.empty())
 		return ::util::EventReply::Unhandled;
 	const char *cStr = c.c_str();
 	return hPanel.InjectCharInput(cStr[0]);
 }
-::util::EventReply Lua::WIBase::InjectScrollInput(lua_State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, const ::Vector2 &offset, bool offsetAsPixels)
+::util::EventReply Lua::WIBase::InjectScrollInput(lua::State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, const ::Vector2 &offset, bool offsetAsPixels)
 {
 	auto *elRoot = hPanel.GetBaseRootElement();
 	auto cursorPos = elRoot ? elRoot->GetCursorPos() : ::Vector2 {};
@@ -1942,8 +1942,8 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l, ::WIBase &hPanel, const ::V
 		restore_cursor_pos_override(elRoot, origOverride);
 	return result;
 }
-::util::EventReply Lua::WIBase::InjectScrollInput(lua_State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, const ::Vector2 &offset) { return InjectScrollInput(l, hPanel, mousePos, offset, false); }
-void Lua::WIBase::FindChildByName(lua_State *l, ::WIBase &hPanel, std::string name)
+::util::EventReply Lua::WIBase::InjectScrollInput(lua::State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, const ::Vector2 &offset) { return InjectScrollInput(l, hPanel, mousePos, offset, false); }
+void Lua::WIBase::FindChildByName(lua::State *l, ::WIBase &hPanel, std::string name)
 {
 	auto *el = hPanel.FindChildByName(name);
 	if(el == nullptr)
@@ -1951,7 +1951,7 @@ void Lua::WIBase::FindChildByName(lua_State *l, ::WIBase &hPanel, std::string na
 	auto oChild = WGUILuaInterface::GetLuaObject(l, *el);
 	oChild.push(l);
 }
-void Lua::WIBase::FindChildrenByName(lua_State *l, ::WIBase &hPanel, std::string name)
+void Lua::WIBase::FindChildrenByName(lua::State *l, ::WIBase &hPanel, std::string name)
 {
 	std::vector<WIHandle> children;
 	hPanel.FindChildrenByName(name, children);
@@ -1969,7 +1969,7 @@ void Lua::WIBase::FindChildrenByName(lua_State *l, ::WIBase &hPanel, std::string
 		}
 	}
 }
-void Lua::WIBase::SetBounds(lua_State *l, ::WIBase &hPanel, const ::Vector2 &start, const ::Vector2 &end)
+void Lua::WIBase::SetBounds(lua::State *l, ::WIBase &hPanel, const ::Vector2 &start, const ::Vector2 &end)
 {
 	auto &pos = start;
 	auto size = end - start;
@@ -1979,37 +1979,37 @@ void Lua::WIBase::SetBounds(lua_State *l, ::WIBase &hPanel, const ::Vector2 &sta
 
 ////////////////////////////////////
 
-void Lua::WIText::SetShadowColor(lua_State *l, ::WIText &hPanel, ::Color &col) { hPanel.SetShadowColor(::Vector4(col.r / 255.f, col.g / 255.f, col.b / 255.f, col.a / 255.f)); }
+void Lua::WIText::SetShadowColor(lua::State *l, ::WIText &hPanel, ::Color &col) { hPanel.SetShadowColor(::Vector4(col.r / 255.f, col.g / 255.f, col.b / 255.f, col.a / 255.f)); }
 
-void Lua::WIText::SetShadowOffset(lua_State *l, ::WIText &hPanel, ::Vector2 pos) { hPanel.SetShadowOffset(CInt32(pos.x), CInt32(pos.y)); }
+void Lua::WIText::SetShadowOffset(lua::State *l, ::WIText &hPanel, ::Vector2 pos) { hPanel.SetShadowOffset(CInt32(pos.x), CInt32(pos.y)); }
 
-void Lua::WIText::SetShadowXOffset(lua_State *l, ::WIText &hPanel, float x) { hPanel.SetShadowOffset(::Vector2i(x, hPanel.GetShadowOffset()->y)); }
+void Lua::WIText::SetShadowXOffset(lua::State *l, ::WIText &hPanel, float x) { hPanel.SetShadowOffset(::Vector2i(x, hPanel.GetShadowOffset()->y)); }
 
-void Lua::WIText::SetShadowYOffset(lua_State *l, ::WIText &hPanel, float y) { hPanel.SetShadowOffset(::Vector2i(hPanel.GetShadowOffset()->x, y)); }
+void Lua::WIText::SetShadowYOffset(lua::State *l, ::WIText &hPanel, float y) { hPanel.SetShadowOffset(::Vector2i(hPanel.GetShadowOffset()->x, y)); }
 
-Color Lua::WIText::GetShadowColor(lua_State *l, ::WIText &hPanel)
+Color Lua::WIText::GetShadowColor(lua::State *l, ::WIText &hPanel)
 {
 
 	::Vector4 *col = hPanel.GetShadowColor();
 	return ::Color(CInt16(col->r * 255), CInt16(col->g * 255), CInt16(col->b * 255), CInt16(col->a * 255));
 }
 
-::Vector2 Lua::WIText::GetShadowOffset(lua_State *l, ::WIText &hPanel)
+::Vector2 Lua::WIText::GetShadowOffset(lua::State *l, ::WIText &hPanel)
 {
 	::Vector2i *offset = hPanel.GetShadowOffset();
 	return ::Vector2(offset->x, offset->y);
 }
 
-float Lua::WIText::GetShadowXOffset(lua_State *l, ::WIText &hPanel) { return float(hPanel.GetShadowOffset()->x); }
+float Lua::WIText::GetShadowXOffset(lua::State *l, ::WIText &hPanel) { return float(hPanel.GetShadowOffset()->x); }
 
-float Lua::WIText::GetShadowYOffset(lua_State *l, ::WIText &hPanel) { return float(hPanel.GetShadowOffset()->y); }
+float Lua::WIText::GetShadowYOffset(lua::State *l, ::WIText &hPanel) { return float(hPanel.GetShadowOffset()->y); }
 
 ////////////////////////////////////
 
-void Lua::WILine::SetStartPos(lua_State *l, ::WILine &hPanel, ::Vector2 &pos) { hPanel.SetStartPos(::Vector2i(pos.x, pos.y)); }
-void Lua::WILine::SetEndPos(lua_State *l, ::WILine &hPanel, ::Vector2 &pos) { hPanel.SetEndPos(::Vector2i(pos.x, pos.y)); }
-Vector2 Lua::WILine::GetStartPos(lua_State *l, ::WILine &hPanel) { return hPanel.GetStartPos(); }
-Vector2 Lua::WILine::GetEndPos(lua_State *l, ::WILine &hPanel)
+void Lua::WILine::SetStartPos(lua::State *l, ::WILine &hPanel, ::Vector2 &pos) { hPanel.SetStartPos(::Vector2i(pos.x, pos.y)); }
+void Lua::WILine::SetEndPos(lua::State *l, ::WILine &hPanel, ::Vector2 &pos) { hPanel.SetEndPos(::Vector2i(pos.x, pos.y)); }
+Vector2 Lua::WILine::GetStartPos(lua::State *l, ::WILine &hPanel) { return hPanel.GetStartPos(); }
+Vector2 Lua::WILine::GetEndPos(lua::State *l, ::WILine &hPanel)
 {
 	::Vector2i &pos = hPanel.GetEndPos();
 	return {pos.x, pos.y};
@@ -2052,7 +2052,7 @@ void Lua::WITransformable::register_class(luabind::class_<::WITransformable, ::W
 
 ////////////////////////////////////
 
-luabind::tableT<::WITreeListElement> Lua::WITreeListElement::GetItems(lua_State *l, ::WITreeListElement &hElement)
+luabind::tableT<::WITreeListElement> Lua::WITreeListElement::GetItems(lua::State *l, ::WITreeListElement &hElement)
 {
 	auto t = luabind::newtable(l);
 	auto &items = hElement.GetItems();
@@ -2068,7 +2068,7 @@ luabind::tableT<::WITreeListElement> Lua::WITreeListElement::GetItems(lua_State 
 
 ////////////////////////////////////
 
-luabind::tableT<::WITableRow> Lua::WITable::GetSelectedRows(lua_State *l, ::WITable &hTable)
+luabind::tableT<::WITableRow> Lua::WITable::GetSelectedRows(lua::State *l, ::WITable &hTable)
 {
 	auto t = luabind::newtable(l);
 	auto &rows = hTable.GetSelectedRows();
@@ -2080,7 +2080,7 @@ luabind::tableT<::WITableRow> Lua::WITable::GetSelectedRows(lua_State *l, ::WITa
 	}
 	return t;
 }
-luabind::tableT<::WITableRow> Lua::WITable::GetRows(lua_State *l, ::WITable &hTable)
+luabind::tableT<::WITableRow> Lua::WITable::GetRows(lua::State *l, ::WITable &hTable)
 {
 	auto t = luabind::newtable(l);
 	auto numRows = hTable.GetRowCount();

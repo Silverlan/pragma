@@ -20,7 +20,7 @@ export namespace pragma::ecs {
 		virtual Bool ReceiveNetEvent(pragma::BasePlayerComponent &pl, pragma::NetEventId, NetPacket &packet) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override {}
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
 		virtual void FireBullets(const BulletInfo &bulletInfo, DamageInfo &dmgInfo, std::vector<TraceResult> &outHitTargets, const std::function<bool(DamageInfo &, pragma::ecs::BaseEntity *)> &fCallback = nullptr, bool bMaster = true);
 	};

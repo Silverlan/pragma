@@ -27,7 +27,7 @@ void SParticleSystemComponent::SetContinuous(bool b)
 	ServerState::Get()->SendPacket("env_prtsys_setcontinuous", p, pragma::networking::Protocol::SlowReliable);
 }
 
-void SParticleSystemComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SParticleSystemComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ///////////////
 

@@ -14,7 +14,7 @@ export {
 		class DLLSERVER SFuncPortalComponent final : public BaseFuncPortalComponent {
 		  public:
 			SFuncPortalComponent(pragma::ecs::BaseEntity &ent) : BaseFuncPortalComponent(ent) {}
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};
 

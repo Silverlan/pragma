@@ -426,7 +426,7 @@ void CDecalComponent::ReceiveData(NetPacket &packet)
 	m_startDisabled = packet->Read<bool>();
 }
 
-void CDecalComponent::InitializeLuaObject(lua_State *l) { return BaseEnvDecalComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CDecalComponent::InitializeLuaObject(lua::State *l) { return BaseEnvDecalComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 //////////////
 

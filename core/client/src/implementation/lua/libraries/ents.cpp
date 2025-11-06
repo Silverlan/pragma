@@ -15,7 +15,7 @@ import :entities.components.view_body;
 import :entities.components.view_model;
 import :game;
 
-int Lua::ents::Client::get_local_player(lua_State *l)
+int Lua::ents::Client::get_local_player(lua::State *l)
 {
 	auto *pl = pragma::get_cgame()->GetLocalPlayer();
 	if(pl == nullptr)
@@ -23,7 +23,7 @@ int Lua::ents::Client::get_local_player(lua_State *l)
 	pl->PushLuaObject(l);
 	return 1;
 }
-int Lua::ents::Client::get_listener(lua_State *l)
+int Lua::ents::Client::get_listener(lua::State *l)
 {
 	auto *listener = pragma::get_cgame()->GetListener<pragma::CListenerComponent>();
 	if(listener == nullptr)
@@ -32,7 +32,7 @@ int Lua::ents::Client::get_listener(lua_State *l)
 	return 1;
 }
 
-int Lua::ents::Client::get_view_model(lua_State *l)
+int Lua::ents::Client::get_view_model(lua::State *l)
 {
 	auto *vm = pragma::get_cgame()->GetViewModel<pragma::CViewModelComponent>();
 	if(vm == nullptr)
@@ -41,7 +41,7 @@ int Lua::ents::Client::get_view_model(lua_State *l)
 	return 1;
 }
 
-int Lua::ents::Client::get_view_body(lua_State *l)
+int Lua::ents::Client::get_view_body(lua::State *l)
 {
 	auto *vb = pragma::get_cgame()->GetViewBody<pragma::CViewBodyComponent>();
 	if(vb == nullptr)
@@ -50,7 +50,7 @@ int Lua::ents::Client::get_view_body(lua_State *l)
 	return 1;
 }
 
-int Lua::ents::Client::get_instance_buffer(lua_State *l)
+int Lua::ents::Client::get_instance_buffer(lua::State *l)
 {
 	auto &instanceBuffer = pragma::CRenderComponent::GetInstanceBuffer();
 	Lua::Push<std::shared_ptr<prosper::IBuffer>>(l, instanceBuffer);
@@ -58,7 +58,7 @@ int Lua::ents::Client::get_instance_buffer(lua_State *l)
 	return 2;
 }
 
-int Lua::ents::Client::get_instance_bone_buffer(lua_State *l)
+int Lua::ents::Client::get_instance_bone_buffer(lua::State *l)
 {
 	auto &instanceBuffer = pragma::get_instance_bone_buffer();
 	Lua::Push<std::shared_ptr<prosper::IBuffer>>(l, instanceBuffer);

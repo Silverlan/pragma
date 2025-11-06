@@ -44,7 +44,7 @@ void CSoundDspEqualizerComponent::OnEntitySpawn()
 	props.flHighCutoff = m_highCutoff;
 	m_dsp = soundSys->CreateEffect(props);
 }
-void CSoundDspEqualizerComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CSoundDspEqualizerComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 //////////////////
 

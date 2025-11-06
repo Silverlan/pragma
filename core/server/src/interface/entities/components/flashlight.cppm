@@ -14,7 +14,7 @@ export {
 		class DLLSERVER SFlashlightComponent final : public BaseFlashlightComponent {
 		  public:
 			SFlashlightComponent(pragma::ecs::BaseEntity &ent) : BaseFlashlightComponent(ent) {}
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};
 

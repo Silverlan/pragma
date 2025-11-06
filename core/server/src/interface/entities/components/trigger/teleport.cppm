@@ -15,7 +15,7 @@ export {
 		class DLLSERVER STriggerTeleportComponent final : public BaseTriggerTeleportComponent {
 		  public:
 			STriggerTeleportComponent(pragma::ecs::BaseEntity &ent) : BaseTriggerTeleportComponent(ent) {}
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};
 

@@ -84,7 +84,7 @@ void CLightComponent::SetBaked(bool baked)
 		UpdateBuffers();
 	}
 }
-void CLightComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CLightComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CLightComponent::InitializeRenderBuffer()
 {
 	if(m_renderBuffer != nullptr || umath::is_flag_set(m_lightFlags, LightFlags::BakedLightSource))
@@ -751,34 +751,34 @@ namespace {
 /////////////////
 
 CEShouldPassEntity::CEShouldPassEntity(const CBaseEntity &entity, uint32_t &renderFlags) : entity {entity}, renderFlags {renderFlags} {}
-void CEShouldPassEntity::PushArguments(lua_State *l) {}
+void CEShouldPassEntity::PushArguments(lua::State *l) {}
 
 /////////////////
 
 CEShouldPassMesh::CEShouldPassMesh(const pragma::Model &model, const CModelSubMesh &mesh) : model {model}, mesh {mesh} {}
-void CEShouldPassMesh::PushArguments(lua_State *l) {}
+void CEShouldPassMesh::PushArguments(lua::State *l) {}
 
 /////////////////
 
 CEShouldPassEntityMesh::CEShouldPassEntityMesh(const CBaseEntity &entity, const CModelMesh &mesh, uint32_t &renderFlags) : entity {entity}, mesh {mesh}, renderFlags {renderFlags} {}
-void CEShouldPassEntityMesh::PushArguments(lua_State *l) {}
+void CEShouldPassEntityMesh::PushArguments(lua::State *l) {}
 
 /////////////////
 
 CEShouldUpdateRenderPass::CEShouldUpdateRenderPass() {}
-void CEShouldUpdateRenderPass::PushArguments(lua_State *l) {}
+void CEShouldUpdateRenderPass::PushArguments(lua::State *l) {}
 
 /////////////////
 
 CEGetTransformationMatrix::CEGetTransformationMatrix(uint32_t index) : index {index} {}
-void CEGetTransformationMatrix::PushArguments(lua_State *l) {}
+void CEGetTransformationMatrix::PushArguments(lua::State *l) {}
 
 /////////////////
 
 CEHandleShadowMap::CEHandleShadowMap() {}
-void CEHandleShadowMap::PushArguments(lua_State *l) {}
+void CEHandleShadowMap::PushArguments(lua::State *l) {}
 
 /////////////////
 
 CEOnShadowBufferInitialized::CEOnShadowBufferInitialized(prosper::IBuffer &shadowBuffer) : shadowBuffer {shadowBuffer} {}
-void CEOnShadowBufferInitialized::PushArguments(lua_State *l) { Lua::Push<std::shared_ptr<Lua::Vulkan::Buffer>>(l, shadowBuffer.shared_from_this()); }
+void CEOnShadowBufferInitialized::PushArguments(lua::State *l) { Lua::Push<std::shared_ptr<Lua::Vulkan::Buffer>>(l, shadowBuffer.shared_from_this()); }

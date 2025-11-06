@@ -115,7 +115,7 @@ export namespace pragma {
 		virtual void OnRemove() override;
 		virtual ~CSceneComponent() override;
 
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 
 		void Setup(const CreateInfo &createInfo, SceneIndex sceneIndex);
 		const ComponentHandle<pragma::CCameraComponent> &GetActiveCamera() const;
@@ -250,7 +250,7 @@ export namespace pragma {
 
 	struct DLLCLIENT CEDrawSceneInfo : public ComponentEvent {
 		CEDrawSceneInfo(const ::util::DrawSceneInfo &drawSceneInfo);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		const ::util::DrawSceneInfo &drawSceneInfo;
 	};
 	using namespace umath::scoped_enum::bitwise;

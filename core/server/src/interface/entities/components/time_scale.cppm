@@ -16,6 +16,6 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual void SetTimeScale(float timeScale) override;
 
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	};
 };

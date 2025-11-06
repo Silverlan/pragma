@@ -365,7 +365,7 @@ class RagDoll {
 	virtual ~RagDoll() {}
 };
 
-int Lua::game::Client::test(lua_State *l)
+int Lua::game::Client::test(lua::State *l)
 {
 	/*auto &point = pragma::get_cgame()->GetLocalPlayer()->GetEntity().GetPosition();
 	pragma::OcclusionCullingHandlerBSP ocHandler {};
@@ -783,7 +783,7 @@ int Lua::game::Client::test(lua_State *l)
 namespace pragma {
 	DLLCLIENT const std::unordered_map<std::string, std::string> &get_dropped_files();
 };
-int Lua::game::Client::open_dropped_file(lua_State *l)
+int Lua::game::Client::open_dropped_file(lua::State *l)
 {
 	auto &droppedFiles = pragma::get_cengine()->GetDroppedFiles();
 	const CEngine::DroppedFile *pf = nullptr;
@@ -822,18 +822,18 @@ int Lua::game::Client::open_dropped_file(lua_State *l)
 	Lua::Push<std::shared_ptr<LFile>>(l, r);
 	return 1;
 }
-int Lua::game::Client::set_gravity(lua_State *l)
+int Lua::game::Client::set_gravity(lua::State *l)
 {
 	Vector3 &gravity = Lua::Check<Vector3>(l, 1);
 	pragma::get_cgame()->SetGravity(gravity);
 	return 0;
 }
-int Lua::game::Client::get_gravity(lua_State *l)
+int Lua::game::Client::get_gravity(lua::State *l)
 {
 	Lua::Push<Vector3>(l, pragma::get_cgame()->GetGravity());
 	return 1;
 }
-int Lua::game::Client::load_model(lua_State *l)
+int Lua::game::Client::load_model(lua::State *l)
 {
 	auto *name = Lua::CheckString(l, 1);
 	auto reload = false;
@@ -845,7 +845,7 @@ int Lua::game::Client::load_model(lua_State *l)
 	Lua::Push<decltype(mdl)>(l, mdl);
 	return 1;
 }
-int Lua::game::Client::create_model(lua_State *l)
+int Lua::game::Client::create_model(lua::State *l)
 {
 	std::shared_ptr<pragma::Model> mdl = nullptr;
 	if(!Lua::IsSet(l, 1))
@@ -867,27 +867,27 @@ int Lua::game::Client::create_model(lua_State *l)
 	Lua::Push<decltype(mdl)>(l, mdl);
 	return 1;
 }
-int Lua::game::Client::get_action_input(lua_State *l)
+int Lua::game::Client::get_action_input(lua::State *l)
 {
 	auto input = Lua::CheckInt(l, 1);
 	Lua::PushBool(l, pragma::get_cgame()->GetActionInput(static_cast<pragma::Action>(input)));
 	return 1;
 }
-int Lua::game::Client::set_action_input(lua_State *l)
+int Lua::game::Client::set_action_input(lua::State *l)
 {
 	auto input = Lua::CheckInt(l, 1);
 	auto pressed = Lua::CheckBool(l, 2);
 	pragma::get_cgame()->SetActionInput(static_cast<pragma::Action>(input), pressed);
 	return 0;
 }
-int Lua::game::Client::update_render_buffers(lua_State *l)
+int Lua::game::Client::update_render_buffers(lua::State *l)
 {
 	auto &drawSceneInfo = Lua::Check<const ::util::DrawSceneInfo>(l, 1);
 	auto &renderQueue = Lua::Check<const pragma::rendering::RenderQueue>(l, 2);
 	pragma::CSceneComponent::UpdateRenderBuffers(drawSceneInfo.commandBuffer, renderQueue);
 	return 0;
 }
-int Lua::game::Client::render_scenes(lua_State *l)
+int Lua::game::Client::render_scenes(lua::State *l)
 {
 	std::vector<::util::DrawSceneInfo> scenes {};
 	auto n = Lua::GetObjectLength(l, 1);
@@ -903,7 +903,7 @@ int Lua::game::Client::render_scenes(lua_State *l)
 	return 0;
 }
 extern void set_debug_render_filter(std::unique_ptr<DebugRenderFilter> filter);
-int Lua::game::Client::set_debug_render_filter(lua_State *l)
+int Lua::game::Client::set_debug_render_filter(lua::State *l)
 {
 	if(Lua::IsSet(l, 1) == false) {
 		::set_debug_render_filter(nullptr);
@@ -945,7 +945,7 @@ int Lua::game::Client::set_debug_render_filter(lua_State *l)
 	set_debug_render_filter(std::move(filter));
 	return 0;
 }
-int Lua::game::Client::queue_scene_for_rendering(lua_State *l)
+int Lua::game::Client::queue_scene_for_rendering(lua::State *l)
 {
 	auto &drawSceneInfo = Lua::Check<::util::DrawSceneInfo>(l, 1);
 	pragma::get_cgame()->QueueForRendering(drawSceneInfo);
@@ -977,14 +977,14 @@ int Lua::game::Client::queue_scene_for_rendering(lua_State *l)
 	return 0;
 }
 DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool continuous);
-int Lua::game::Client::set_render_stats_enabled(lua_State *l)
+int Lua::game::Client::set_render_stats_enabled(lua::State *l)
 {
 	auto enabled = Lua::CheckBool(l, 1);
 	pragma::get_cengine()->SetGpuPerformanceTimersEnabled(enabled);
 	debug_render_stats(enabled, false, false, true);
 	return 0;
 }
-int Lua::game::Client::get_queued_render_scenes(lua_State *l)
+int Lua::game::Client::get_queued_render_scenes(lua::State *l)
 {
 	auto &renderScenes = pragma::get_cgame()->GetQueuedRenderScenes();
 	auto t = luabind::newtable(l);
@@ -994,7 +994,7 @@ int Lua::game::Client::get_queued_render_scenes(lua_State *l)
 	t.push(l);
 	return 1;
 }
-int Lua::game::Client::create_scene(lua_State *l)
+int Lua::game::Client::create_scene(lua::State *l)
 {
 	auto argIdx = 1;
 	pragma::CSceneComponent::CreateInfo createInfo {};
@@ -1009,7 +1009,7 @@ int Lua::game::Client::create_scene(lua_State *l)
 	scene->GetLuaObject().push(l);
 	return 1;
 }
-int Lua::game::Client::get_render_scene(lua_State *l)
+int Lua::game::Client::get_render_scene(lua::State *l)
 {
 	auto *scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
 	if(scene == nullptr)
@@ -1017,7 +1017,7 @@ int Lua::game::Client::get_render_scene(lua_State *l)
 	scene->GetLuaObject().push(l);
 	return 1;
 }
-int Lua::game::Client::get_render_scene_camera(lua_State *l)
+int Lua::game::Client::get_render_scene_camera(lua::State *l)
 {
 	auto *scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
 	if(scene == nullptr)
@@ -1028,7 +1028,7 @@ int Lua::game::Client::get_render_scene_camera(lua_State *l)
 	cam->PushLuaObject(l);
 	return 1;
 }
-int Lua::game::Client::get_scene(lua_State *l)
+int Lua::game::Client::get_scene(lua::State *l)
 {
 	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
 	if(scene == nullptr)
@@ -1036,7 +1036,7 @@ int Lua::game::Client::get_scene(lua_State *l)
 	scene->GetLuaObject().push(l);
 	return 1;
 }
-int Lua::game::Client::get_scene_by_index(lua_State *l)
+int Lua::game::Client::get_scene_by_index(lua::State *l)
 {
 	auto *scene = ::pragma::CSceneComponent::GetByIndex(Lua::CheckInt(l, 1));
 	if(scene == nullptr)
@@ -1044,7 +1044,7 @@ int Lua::game::Client::get_scene_by_index(lua_State *l)
 	scene->GetLuaObject().push(l);
 	return 1;
 }
-int Lua::game::Client::get_scene_camera(lua_State *l)
+int Lua::game::Client::get_scene_camera(lua::State *l)
 {
 	auto *cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
 	if(cam == nullptr)
@@ -1053,24 +1053,24 @@ int Lua::game::Client::get_scene_camera(lua_State *l)
 	return 1;
 }
 
-int Lua::game::Client::get_draw_command_buffer(lua_State *l)
+int Lua::game::Client::get_draw_command_buffer(lua::State *l)
 {
 	auto &drawCmd = pragma::get_cengine()->GetDrawCommandBuffer();
 	Lua::Push(l, std::static_pointer_cast<prosper::ICommandBuffer>(drawCmd));
 	return 1;
 }
-int Lua::game::Client::get_setup_command_buffer(lua_State *l)
+int Lua::game::Client::get_setup_command_buffer(lua::State *l)
 {
 	auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
 	Lua::Push<std::shared_ptr<prosper::ICommandBuffer>>(l, setupCmd);
 	return 1;
 }
-int Lua::game::Client::flush_setup_command_buffer(lua_State *l)
+int Lua::game::Client::flush_setup_command_buffer(lua::State *l)
 {
 	pragma::get_cengine()->FlushSetupCommandBuffer();
 	return 0;
 }
-int Lua::game::Client::get_camera_position(lua_State *l)
+int Lua::game::Client::get_camera_position(lua::State *l)
 {
 	auto *cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
 	if(cam == nullptr) {
@@ -1082,48 +1082,48 @@ int Lua::game::Client::get_camera_position(lua_State *l)
 	Lua::Push<Quat>(l, cam->GetEntity().GetRotation());
 	return 2;
 }
-int Lua::game::Client::get_render_clip_plane(lua_State *l)
+int Lua::game::Client::get_render_clip_plane(lua::State *l)
 {
 	Lua::Push<::Vector4>(l, pragma::get_cgame()->GetRenderClipPlane());
 	return 1;
 }
-int Lua::game::Client::set_render_clip_plane(lua_State *l)
+int Lua::game::Client::set_render_clip_plane(lua::State *l)
 {
 	auto &clipPlane = Lua::Check<::Vector4>(l, 1);
 	pragma::get_cgame()->SetRenderClipPlane(clipPlane);
 	return 0;
 }
-int Lua::game::Client::get_debug_buffer(lua_State *l)
+int Lua::game::Client::get_debug_buffer(lua::State *l)
 {
 	auto &renderSettings = pragma::get_cgame()->GetGlobalRenderSettingsBufferData();
 	Lua::Push(l, renderSettings.debugBuffer);
 	return 1;
 }
-int Lua::game::Client::get_time_buffer(lua_State *l)
+int Lua::game::Client::get_time_buffer(lua::State *l)
 {
 	auto &renderSettings = pragma::get_cgame()->GetGlobalRenderSettingsBufferData();
 	Lua::Push(l, renderSettings.timeBuffer);
 	return 1;
 }
-int Lua::game::Client::get_csm_buffer(lua_State *l)
+int Lua::game::Client::get_csm_buffer(lua::State *l)
 {
 	auto &renderSettings = pragma::get_cgame()->GetGlobalRenderSettingsBufferData();
 	Lua::Push(l, renderSettings.csmBuffer);
 	return 1;
 }
-int Lua::game::Client::get_render_settings_descriptor_set(lua_State *l)
+int Lua::game::Client::get_render_settings_descriptor_set(lua::State *l)
 {
 	auto &renderSettings = pragma::get_cgame()->GetGlobalRenderSettingsBufferData();
 	Lua::Push(l, renderSettings.descSetGroup);
 	return 1;
 }
-int Lua::game::Client::load_map(lua_State *l)
+int Lua::game::Client::load_map(lua::State *l)
 {
 	std::string mapName;
 	Vector3 origin {};
 	return Lua::game::load_map(l, mapName, nullptr, origin).second;
 }
-int Lua::game::Client::build_reflection_probes(lua_State *l)
+int Lua::game::Client::build_reflection_probes(lua::State *l)
 {
 	auto rebuild = false;
 	if(Lua::IsSet(l, 1))

@@ -14,68 +14,68 @@ export import pragma.gui;
 
 export namespace Lua {
 	namespace gui {
-		DLLCLIENT void clear_lua_callbacks(lua_State *l);
+		DLLCLIENT void clear_lua_callbacks(lua::State *l);
 	};
 	namespace WIBase {
 		DLLCLIENT void register_class(luabind::class_<::WIBase> &classDef);
-		DLLCLIENT bool IsValid(lua_State *l, ::WIBase *hPanel);
-		DLLCLIENT void TrapFocus(lua_State *l, ::WIBase &hPanel, bool bTrap);
-		DLLCLIENT void TrapFocus(lua_State *l, ::WIBase &hPanel);
-		DLLCLIENT void SetPos(lua_State *l, ::WIBase &hPanel, ::Vector2 pos);
-		DLLCLIENT void SetPos(lua_State *l, ::WIBase &hPanel, float x, float y);
-		DLLCLIENT void SetAbsolutePos(lua_State *l, ::WIBase &hPanel, ::Vector2 pos);
-		DLLCLIENT void SetAbsolutePos(lua_State *l, ::WIBase &hPanel, float x, float y);
-		DLLCLIENT void SetColor(lua_State *l, ::WIBase &hPanel, ::Color col);
-		DLLCLIENT void GetAlpha(lua_State *l, ::WIBase &hPanel);
-		DLLCLIENT void SetAlpha(lua_State *l, ::WIBase &hPanel, float alpha);
-		DLLCLIENT void SetSize(lua_State *l, ::WIBase &hPanel, ::Vector2 size);
-		DLLCLIENT void SetSize(lua_State *l, ::WIBase &hPanel, float x, float y);
-		DLLCLIENT void Wrap(lua_State *l, ::WIBase &hPanel, const std::string &wrapperClassName);
-		DLLCLIENT void ClearParent(lua_State *l, ::WIBase &hPanel);
-		DLLCLIENT void ResetParent(lua_State *l, ::WIBase &hPanel);
-		DLLCLIENT void GetChildren(lua_State *l, ::WIBase &hPanel, std::string className);
-		DLLCLIENT void GetChild(lua_State *l, ::WIBase &hPanel, unsigned int idx);
-		DLLCLIENT void GetChild(lua_State *l, ::WIBase &hPanel, std::string className, unsigned int idx);
-		DLLCLIENT void PosInBounds(lua_State *l, ::WIBase &hPanel, ::Vector2 pos);
-		DLLCLIENT void GetMousePos(lua_State *l, ::WIBase &hPanel);
-		DLLCLIENT void Draw(lua_State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState);
-		DLLCLIENT void Draw(lua_State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize);
-		DLLCLIENT void Draw(lua_State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize, const ::Vector2i &offsetParent);
-		DLLCLIENT void Draw(lua_State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize, const ::Vector2i &offsetParent, const ::Vector2 &scale);
-		DLLCLIENT void GetX(lua_State *l, ::WIBase &hPanel);
-		DLLCLIENT void GetY(lua_State *l, ::WIBase &hPanel);
-		DLLCLIENT void SetX(lua_State *l, ::WIBase &hPanel, float x); // TODO This should be int, but float-to-int conversion is currently broken with luabind
-		DLLCLIENT void SetY(lua_State *l, ::WIBase &hPanel, float y);
-		DLLCLIENT void SetWidth(lua_State *l, ::WIBase &hPanel, float w);
-		DLLCLIENT void SetHeight(lua_State *l, ::WIBase &hPanel, float h);
-		DLLCLIENT void CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name);
-		DLLCLIENT void CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name, luabind::object o1);
-		DLLCLIENT void CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2);
-		DLLCLIENT void CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3);
-		DLLCLIENT void CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4);
-		DLLCLIENT void CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5);
-		DLLCLIENT void CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6);
-		DLLCLIENT void CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6, luabind::object o7);
-		DLLCLIENT void CallCallbacks(lua_State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6, luabind::object o7, luabind::object o8);
-		DLLCLIENT CallbackHandle AddCallback(lua_State *l, ::WIBase &hPanel, std::string name, Lua::func<void> o);
-		DLLCLIENT void FadeIn(lua_State *l, ::WIBase &hPanel, float tFadeIn);
-		DLLCLIENT void FadeIn(lua_State *l, ::WIBase &hPanel, float tFadeIn, float alphaTarget);
-		DLLCLIENT void InjectMouseMoveInput(lua_State *l, ::WIBase &hPanel, const ::Vector2 &mousePos);
-		DLLCLIENT ::util::EventReply InjectMouseInput(lua_State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, int button, int action, int mods);
-		DLLCLIENT ::util::EventReply InjectMouseInput(lua_State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, int button, int action);
-		DLLCLIENT ::util::EventReply InjectMouseClick(lua_State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, int button, int mods);
-		DLLCLIENT ::util::EventReply InjectMouseClick(lua_State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, int button);
-		DLLCLIENT ::util::EventReply InjectKeyboardInput(lua_State *l, ::WIBase &hPanel, int key, int action, int mods);
-		DLLCLIENT ::util::EventReply InjectKeyboardInput(lua_State *l, ::WIBase &hPanel, int key, int action);
-		DLLCLIENT ::util::EventReply InjectKeyPress(lua_State *l, ::WIBase &hPanel, int key, int mods);
-		DLLCLIENT ::util::EventReply InjectKeyPress(lua_State *l, ::WIBase &hPanel, int key);
-		DLLCLIENT ::util::EventReply InjectCharInput(lua_State *l, ::WIBase &hPanel, std::string c, uint32_t mods);
-		DLLCLIENT ::util::EventReply InjectCharInput(lua_State *l, ::WIBase &hPanel, std::string c);
-		DLLCLIENT ::util::EventReply InjectScrollInput(lua_State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, const ::Vector2 &offset, bool offsetAsPixels);
-		DLLCLIENT ::util::EventReply InjectScrollInput(lua_State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, const ::Vector2 &offset);
-		DLLCLIENT void FindChildByName(lua_State *l, ::WIBase &hPanel, std::string name);
-		DLLCLIENT void FindChildrenByName(lua_State *l, ::WIBase &hPanel, std::string name);
-		DLLCLIENT void SetBounds(lua_State *l, ::WIBase &hPanel, const ::Vector2 &start, const ::Vector2 &end);
+		DLLCLIENT bool IsValid(lua::State *l, ::WIBase *hPanel);
+		DLLCLIENT void TrapFocus(lua::State *l, ::WIBase &hPanel, bool bTrap);
+		DLLCLIENT void TrapFocus(lua::State *l, ::WIBase &hPanel);
+		DLLCLIENT void SetPos(lua::State *l, ::WIBase &hPanel, ::Vector2 pos);
+		DLLCLIENT void SetPos(lua::State *l, ::WIBase &hPanel, float x, float y);
+		DLLCLIENT void SetAbsolutePos(lua::State *l, ::WIBase &hPanel, ::Vector2 pos);
+		DLLCLIENT void SetAbsolutePos(lua::State *l, ::WIBase &hPanel, float x, float y);
+		DLLCLIENT void SetColor(lua::State *l, ::WIBase &hPanel, ::Color col);
+		DLLCLIENT void GetAlpha(lua::State *l, ::WIBase &hPanel);
+		DLLCLIENT void SetAlpha(lua::State *l, ::WIBase &hPanel, float alpha);
+		DLLCLIENT void SetSize(lua::State *l, ::WIBase &hPanel, ::Vector2 size);
+		DLLCLIENT void SetSize(lua::State *l, ::WIBase &hPanel, float x, float y);
+		DLLCLIENT void Wrap(lua::State *l, ::WIBase &hPanel, const std::string &wrapperClassName);
+		DLLCLIENT void ClearParent(lua::State *l, ::WIBase &hPanel);
+		DLLCLIENT void ResetParent(lua::State *l, ::WIBase &hPanel);
+		DLLCLIENT void GetChildren(lua::State *l, ::WIBase &hPanel, std::string className);
+		DLLCLIENT void GetChild(lua::State *l, ::WIBase &hPanel, unsigned int idx);
+		DLLCLIENT void GetChild(lua::State *l, ::WIBase &hPanel, std::string className, unsigned int idx);
+		DLLCLIENT void PosInBounds(lua::State *l, ::WIBase &hPanel, ::Vector2 pos);
+		DLLCLIENT void GetMousePos(lua::State *l, ::WIBase &hPanel);
+		DLLCLIENT void Draw(lua::State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState);
+		DLLCLIENT void Draw(lua::State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize);
+		DLLCLIENT void Draw(lua::State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize, const ::Vector2i &offsetParent);
+		DLLCLIENT void Draw(lua::State *l, ::WIBase &hPanel, const ::wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize, const ::Vector2i &offsetParent, const ::Vector2 &scale);
+		DLLCLIENT void GetX(lua::State *l, ::WIBase &hPanel);
+		DLLCLIENT void GetY(lua::State *l, ::WIBase &hPanel);
+		DLLCLIENT void SetX(lua::State *l, ::WIBase &hPanel, float x); // TODO This should be int, but float-to-int conversion is currently broken with luabind
+		DLLCLIENT void SetY(lua::State *l, ::WIBase &hPanel, float y);
+		DLLCLIENT void SetWidth(lua::State *l, ::WIBase &hPanel, float w);
+		DLLCLIENT void SetHeight(lua::State *l, ::WIBase &hPanel, float h);
+		DLLCLIENT void CallCallbacks(lua::State *l, ::WIBase &hPanel, std::string name);
+		DLLCLIENT void CallCallbacks(lua::State *l, ::WIBase &hPanel, std::string name, luabind::object o1);
+		DLLCLIENT void CallCallbacks(lua::State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2);
+		DLLCLIENT void CallCallbacks(lua::State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3);
+		DLLCLIENT void CallCallbacks(lua::State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4);
+		DLLCLIENT void CallCallbacks(lua::State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5);
+		DLLCLIENT void CallCallbacks(lua::State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6);
+		DLLCLIENT void CallCallbacks(lua::State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6, luabind::object o7);
+		DLLCLIENT void CallCallbacks(lua::State *l, ::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6, luabind::object o7, luabind::object o8);
+		DLLCLIENT CallbackHandle AddCallback(lua::State *l, ::WIBase &hPanel, std::string name, Lua::func<void> o);
+		DLLCLIENT void FadeIn(lua::State *l, ::WIBase &hPanel, float tFadeIn);
+		DLLCLIENT void FadeIn(lua::State *l, ::WIBase &hPanel, float tFadeIn, float alphaTarget);
+		DLLCLIENT void InjectMouseMoveInput(lua::State *l, ::WIBase &hPanel, const ::Vector2 &mousePos);
+		DLLCLIENT ::util::EventReply InjectMouseInput(lua::State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, int button, int action, int mods);
+		DLLCLIENT ::util::EventReply InjectMouseInput(lua::State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, int button, int action);
+		DLLCLIENT ::util::EventReply InjectMouseClick(lua::State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, int button, int mods);
+		DLLCLIENT ::util::EventReply InjectMouseClick(lua::State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, int button);
+		DLLCLIENT ::util::EventReply InjectKeyboardInput(lua::State *l, ::WIBase &hPanel, int key, int action, int mods);
+		DLLCLIENT ::util::EventReply InjectKeyboardInput(lua::State *l, ::WIBase &hPanel, int key, int action);
+		DLLCLIENT ::util::EventReply InjectKeyPress(lua::State *l, ::WIBase &hPanel, int key, int mods);
+		DLLCLIENT ::util::EventReply InjectKeyPress(lua::State *l, ::WIBase &hPanel, int key);
+		DLLCLIENT ::util::EventReply InjectCharInput(lua::State *l, ::WIBase &hPanel, std::string c, uint32_t mods);
+		DLLCLIENT ::util::EventReply InjectCharInput(lua::State *l, ::WIBase &hPanel, std::string c);
+		DLLCLIENT ::util::EventReply InjectScrollInput(lua::State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, const ::Vector2 &offset, bool offsetAsPixels);
+		DLLCLIENT ::util::EventReply InjectScrollInput(lua::State *l, ::WIBase &hPanel, const ::Vector2 &mousePos, const ::Vector2 &offset);
+		DLLCLIENT void FindChildByName(lua::State *l, ::WIBase &hPanel, std::string name);
+		DLLCLIENT void FindChildrenByName(lua::State *l, ::WIBase &hPanel, std::string name);
+		DLLCLIENT void SetBounds(lua::State *l, ::WIBase &hPanel, const ::Vector2 &start, const ::Vector2 &end);
 	};
 
 	namespace WIButton {
@@ -100,14 +100,14 @@ export namespace Lua {
 
 	namespace WIText {
 		DLLCLIENT void register_class(luabind::class_<::WIText, ::WIBase> &classDef);
-		DLLCLIENT void SetShadowColor(lua_State *l, ::WIText &hPanel, ::Color &col);
-		DLLCLIENT void SetShadowOffset(lua_State *l, ::WIText &hPanel, ::Vector2 pos);
-		DLLCLIENT void SetShadowXOffset(lua_State *l, ::WIText &hPanel, float x);
-		DLLCLIENT void SetShadowYOffset(lua_State *l, ::WIText &hPanel, float y);
-		DLLCLIENT ::Color GetShadowColor(lua_State *l, ::WIText &hPanel);
-		DLLCLIENT ::Vector2 GetShadowOffset(lua_State *l, ::WIText &hPanel);
-		DLLCLIENT float GetShadowXOffset(lua_State *l, ::WIText &hPanel);
-		DLLCLIENT float GetShadowYOffset(lua_State *l, ::WIText &hPanel);
+		DLLCLIENT void SetShadowColor(lua::State *l, ::WIText &hPanel, ::Color &col);
+		DLLCLIENT void SetShadowOffset(lua::State *l, ::WIText &hPanel, ::Vector2 pos);
+		DLLCLIENT void SetShadowXOffset(lua::State *l, ::WIText &hPanel, float x);
+		DLLCLIENT void SetShadowYOffset(lua::State *l, ::WIText &hPanel, float y);
+		DLLCLIENT ::Color GetShadowColor(lua::State *l, ::WIText &hPanel);
+		DLLCLIENT ::Vector2 GetShadowOffset(lua::State *l, ::WIText &hPanel);
+		DLLCLIENT float GetShadowXOffset(lua::State *l, ::WIText &hPanel);
+		DLLCLIENT float GetShadowYOffset(lua::State *l, ::WIText &hPanel);
 	};
 
 	namespace WITextEntry {
@@ -124,10 +124,10 @@ export namespace Lua {
 
 	namespace WILine {
 		DLLCLIENT void register_class(luabind::class_<::WILine, ::WIBase> &classDef);
-		DLLCLIENT void SetStartPos(lua_State *l, ::WILine &hPanel, ::Vector2 &pos);
-		DLLCLIENT void SetEndPos(lua_State *l, ::WILine &hPanel, ::Vector2 &pos);
-		DLLCLIENT ::Vector2 GetStartPos(lua_State *l, ::WILine &hPanel);
-		DLLCLIENT ::Vector2 GetEndPos(lua_State *l, ::WILine &hPanel);
+		DLLCLIENT void SetStartPos(lua::State *l, ::WILine &hPanel, ::Vector2 &pos);
+		DLLCLIENT void SetEndPos(lua::State *l, ::WILine &hPanel, ::Vector2 &pos);
+		DLLCLIENT ::Vector2 GetStartPos(lua::State *l, ::WILine &hPanel);
+		DLLCLIENT ::Vector2 GetEndPos(lua::State *l, ::WILine &hPanel);
 	};
 
 	namespace WIRoundedRect {
@@ -176,7 +176,7 @@ export namespace Lua {
 
 	namespace WITreeListElement {
 		DLLCLIENT void register_class(luabind::class_<::WITreeListElement, luabind::bases<::WITableRow, ::WIBase>> &classDef);
-		DLLCLIENT luabind::tableT<::WITreeListElement> GetItems(lua_State *l, ::WITreeListElement &hElement);
+		DLLCLIENT luabind::tableT<::WITreeListElement> GetItems(lua::State *l, ::WITreeListElement &hElement);
 	};
 
 	namespace WIContainer {
@@ -185,8 +185,8 @@ export namespace Lua {
 
 	namespace WITable {
 		DLLCLIENT void register_class(luabind::class_<::WITable, luabind::bases<::WIContainer, ::WIBase>> &classDef);
-		DLLCLIENT luabind::tableT<::WITableRow> GetSelectedRows(lua_State *l, ::WITable &hTable);
-		DLLCLIENT luabind::tableT<::WITableRow> GetRows(lua_State *l, ::WITable &hTable);
+		DLLCLIENT luabind::tableT<::WITableRow> GetSelectedRows(lua::State *l, ::WITable &hTable);
+		DLLCLIENT luabind::tableT<::WITableRow> GetRows(lua::State *l, ::WITable &hTable);
 	};
 
 	namespace WITableRow {

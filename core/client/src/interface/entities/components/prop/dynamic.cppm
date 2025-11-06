@@ -16,7 +16,7 @@ export {
 			CPropDynamicComponent(pragma::ecs::BaseEntity &ent) : BasePropDynamicComponent(ent) {}
 			virtual void Initialize() override;
 			using BasePropDynamicComponent::BasePropDynamicComponent;
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		  protected:
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		};

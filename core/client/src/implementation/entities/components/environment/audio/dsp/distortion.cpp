@@ -34,7 +34,7 @@ void CSoundDspDistortionComponent::OnEntitySpawn()
 	props.flEQBandwidth = m_kvEqBandwidth;
 	m_dsp = soundSys->CreateEffect(props);
 }
-void CSoundDspDistortionComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CSoundDspDistortionComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 //////////////////
 

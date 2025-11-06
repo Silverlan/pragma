@@ -36,7 +36,7 @@ void CSoundDspFlangerComponent::OnEntitySpawn()
 	props.flDelay = m_kvDelay;
 	m_dsp = soundSys->CreateEffect(props);
 }
-void CSoundDspFlangerComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CSoundDspFlangerComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 //////////////////
 

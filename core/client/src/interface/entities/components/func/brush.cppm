@@ -17,7 +17,7 @@ export {
 			CBrushComponent(pragma::ecs::BaseEntity &ent) : BaseFuncBrushComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void ReceiveData(NetPacket &packet) override;
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual void OnEntitySpawn() override;
 		};

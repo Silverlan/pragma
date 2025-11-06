@@ -17,7 +17,7 @@ export {
 			CSkyboxComponent(pragma::ecs::BaseEntity &ent) : BaseSkyboxComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void OnRemove() override;
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 
 			virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 			virtual void ReceiveData(NetPacket &packet) override;

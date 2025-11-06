@@ -66,7 +66,7 @@ void CExplosionComponent::Explode()
 			pIoComponent->Input("StartShake");
 	}
 }
-void CExplosionComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CExplosionComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////////
 

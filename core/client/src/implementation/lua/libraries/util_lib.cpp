@@ -16,7 +16,7 @@ import :entities.components.render;
 import :game;
 import :util;
 
-int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l, pragma::CCameraComponent &hCam, const ::Vector2 &uv)
+int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua::State *l, pragma::CCameraComponent &hCam, const ::Vector2 &uv)
 {
 	auto trComponent = hCam.GetEntity().GetTransformComponent();
 	auto forward = trComponent ? trComponent->GetForward() : uvec::FORWARD;
@@ -27,7 +27,7 @@ int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l, pr
 	return 1;
 }
 
-int Lua::util::Client::create_particle_tracer(lua_State *l)
+int Lua::util::Client::create_particle_tracer(lua::State *l)
 {
 	auto &start = Lua::Check<Vector3>(l, 1);
 	auto &end = Lua::Check<Vector3>(l, 2);
@@ -45,7 +45,7 @@ int Lua::util::Client::create_particle_tracer(lua_State *l)
 	return 1;
 }
 
-int Lua::util::Client::create_muzzle_flash(lua_State *l)
+int Lua::util::Client::create_muzzle_flash(lua::State *l)
 {
 	if(Lua::IsType<pragma::ecs::BaseEntity>(l, 1) == true) {
 		auto &ent = Lua::Check<pragma::ecs::BaseEntity>(l, 1);
@@ -113,7 +113,7 @@ luabind::object Lua::util::Client::create_giblet(GibletCreateInfo &createInfo)
 	return particle->GetLuaObject();
 }
 
-int Lua::util::Client::import_gltf(lua_State *l)
+int Lua::util::Client::import_gltf(lua::State *l)
 {
 	std::shared_ptr<ufile::IFile> f = nullptr;
 	std::string fileName;
@@ -148,7 +148,7 @@ int Lua::util::Client::import_gltf(lua_State *l)
 	return 1;
 }
 
-int Lua::util::Client::import_model(lua_State *l)
+int Lua::util::Client::import_model(lua::State *l)
 {
 	std::shared_ptr<ufile::IFile> f = nullptr;
 	std::string fileName;
@@ -180,7 +180,7 @@ int Lua::util::Client::import_model(lua_State *l)
 	return 1;
 }
 
-int Lua::util::Client::export_map(lua_State *l)
+int Lua::util::Client::export_map(lua::State *l)
 {
 	std::string mapName = Lua::CheckString(l, 1);
 	auto &exportInfo = Lua::Check<pragma::asset::ModelExportInfo>(l, 2);
@@ -198,7 +198,7 @@ int Lua::util::Client::export_map(lua_State *l)
 	return 2;
 }
 
-int Lua::util::Client::export_texture(lua_State *l)
+int Lua::util::Client::export_texture(lua::State *l)
 {
 	if(Lua::IsString(l, 1)) {
 		std::string texturePath = Lua::CheckString(l, 1);
@@ -248,7 +248,7 @@ int Lua::util::Client::export_texture(lua_State *l)
 	return 2;
 }
 
-int Lua::util::Client::export_material(lua_State *l)
+int Lua::util::Client::export_material(lua::State *l)
 {
 	msys::Material *mat = nullptr;
 	if(Lua::IsString(l, 1)) {

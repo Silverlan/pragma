@@ -172,7 +172,7 @@ void CBaseSoundDspComponent::DetachAllSoundSources()
 	}
 	m_affectedSounds.clear();
 }
-void CSoundDspComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CSoundDspComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 //////////////////
 

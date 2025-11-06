@@ -89,7 +89,7 @@ void SBaseEntity::Initialize()
 		return;
 	m_bShared = true;
 }
-void SBaseEntity::InitializeLuaObject(lua_State *lua) { pragma::BaseLuaHandle::InitializeLuaObject<SBaseEntity>(lua); }
+void SBaseEntity::InitializeLuaObject(lua::State *lua) { pragma::BaseLuaHandle::InitializeLuaObject<SBaseEntity>(lua); }
 bool SBaseEntity::IsShared() const { return m_bShared; }
 void SBaseEntity::SetShared(bool b) { m_bShared = b; }
 Bool SBaseEntity::IsNetworked() { return (IsShared() && IsSpawned()) ? true : false; }

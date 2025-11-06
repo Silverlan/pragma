@@ -21,14 +21,14 @@ void SGame::RegisterLuaLibraries()
 
 	auto utilMod = luabind::module(GetLuaState(), "util");
 	Lua::util::register_shared(GetLuaState(), utilMod);
-	utilMod[(luabind::def("fire_bullets", static_cast<luabind::object (*)(lua_State *, const BulletInfo &, bool)>(Lua::util::Server::fire_bullets)), luabind::def("fire_bullets", static_cast<luabind::object (*)(lua_State *, const BulletInfo &)>(Lua::util::Server::fire_bullets)),
+	utilMod[(luabind::def("fire_bullets", static_cast<luabind::object (*)(lua::State *, const BulletInfo &, bool)>(Lua::util::Server::fire_bullets)), luabind::def("fire_bullets", static_cast<luabind::object (*)(lua::State *, const BulletInfo &)>(Lua::util::Server::fire_bullets)),
 	  luabind::def("create_giblet", Lua::util::Server::create_giblet), luabind::def("create_explosion", Lua::util::Server::create_explosion), luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::calc_world_direction_from_2d_coordinates))];
 
 	pragma::Game::RegisterLuaLibraries();
 	auto modAsset = luabind::module_(GetLuaState(), "asset");
 	modAsset[(luabind::def(
 	            "load",
-	            +[](lua_State *l, LFile &f, pragma::asset::Type type) -> Lua::var<bool, luabind::object> {
+	            +[](lua::State *l, LFile &f, pragma::asset::Type type) -> Lua::var<bool, luabind::object> {
 		            // See also core/client/src/lua/c_library.cpp
 		            auto *manager = pragma::get_engine()->GetNetworkState(l)->GetAssetManager(type);
 		            if(!manager)
@@ -56,7 +56,7 @@ void SGame::RegisterLuaLibraries()
 	            }),
 	  luabind::def(
 	    "load",
-	    +[](lua_State *l, const std::string &name, pragma::asset::Type type) -> Lua::var<bool, luabind::object> {
+	    +[](lua::State *l, const std::string &name, pragma::asset::Type type) -> Lua::var<bool, luabind::object> {
 		    // See also core/client/src/lua/c_library.cpp
 		    auto *manager = pragma::get_engine()->GetNetworkState(l)->GetAssetManager(type);
 		    if(!manager)
@@ -71,7 +71,7 @@ void SGame::RegisterLuaLibraries()
 		    return luabind::object {};
 	    }),
 	  luabind::def(
-	    "reload", +[](lua_State *l, const std::string &name, pragma::asset::Type type) -> Lua::var<bool, luabind::object> {
+	    "reload", +[](lua::State *l, const std::string &name, pragma::asset::Type type) -> Lua::var<bool, luabind::object> {
 		    auto *manager = pragma::get_engine()->GetNetworkState(l)->GetAssetManager(type);
 		    if(!manager)
 			    return luabind::object {l, false};
@@ -97,8 +97,8 @@ void SGame::RegisterLuaLibraries()
 	  luabind::def("draw_cone", &Lua::DebugRenderer::Server::DrawCone), luabind::def("draw_truncated_cone", &Lua::DebugRenderer::Server::DrawTruncatedCone), luabind::def("draw_cylinder", &Lua::DebugRenderer::Server::DrawCylinder),
 	  luabind::def("draw_pose", &Lua::DebugRenderer::Server::DrawAxis), luabind::def("draw_text", static_cast<void (*)(const std::string &, const Vector2 &, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)),
 	  luabind::def("draw_text", static_cast<void (*)(const std::string &, float, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)), luabind::def("draw_path", &Lua::DebugRenderer::Server::DrawPath),
-	  luabind::def("draw_spline", static_cast<void (*)(lua_State *, luabind::table<>, uint32_t, float, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)),
-	  luabind::def("draw_spline", static_cast<void (*)(lua_State *, luabind::table<>, uint32_t, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)), luabind::def("draw_plane", &Lua::DebugRenderer::Server::DrawPlane), luabind::def("draw_mesh", &SGame::DrawMesh))];
+	  luabind::def("draw_spline", static_cast<void (*)(lua::State *, luabind::table<>, uint32_t, float, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)),
+	  luabind::def("draw_spline", static_cast<void (*)(lua::State *, luabind::table<>, uint32_t, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)), luabind::def("draw_plane", &Lua::DebugRenderer::Server::DrawPlane), luabind::def("draw_mesh", &SGame::DrawMesh))];
 
 	Lua::ai::server::register_library(GetLuaInterface());
 

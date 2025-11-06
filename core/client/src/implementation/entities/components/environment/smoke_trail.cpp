@@ -64,7 +64,7 @@ void CSmokeTrailComponent::DestroyParticle()
 		m_hParticle->SetRemoveOnComplete(true);
 	}
 }
-void CSmokeTrailComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CSmokeTrailComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////
 

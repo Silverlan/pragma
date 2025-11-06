@@ -80,4 +80,4 @@ void CRendererPpFxaaComponent::DoRenderEffect(const util::DrawSceneInfo &drawSce
 	}
 	pragma::get_cgame()->StopGPUProfilingStage(); // PostProcessingFXAA
 }
-void CRendererPpFxaaComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CRendererPpFxaaComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

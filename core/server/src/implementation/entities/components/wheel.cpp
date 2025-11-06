@@ -45,7 +45,7 @@ void SWheelComponent::SendSnapshotData(NetPacket &packet, pragma::BasePlayerComp
 	}
 #endif
 }
-void SWheelComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SWheelComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void SWheelComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	nwm::write_entity(packet, m_vehicle.valid() ? &m_vehicle->GetEntity() : nullptr);

@@ -12,7 +12,7 @@ import :entities.components.observer;
 
 using namespace pragma;
 
-void CGameComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CGameComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CGameComponent::UpdateFrame(CCameraComponent *cam)
 {

@@ -204,10 +204,10 @@ namespace {
 	  });
 }
 
-lua_State *ClientState::GetGUILuaState() { return (m_luaGUI != nullptr) ? m_luaGUI->GetState() : nullptr; }
+lua::State *ClientState::GetGUILuaState() { return (m_luaGUI != nullptr) ? m_luaGUI->GetState() : nullptr; }
 Lua::Interface &ClientState::GetGUILuaInterface() { return *m_luaGUI; }
 
-//__declspec(dllimport) void test_lua_policies(lua_State *l);
+//__declspec(dllimport) void test_lua_policies(lua::State *l);
 std::optional<std::vector<std::string>> g_autoExecScripts {};
 
 void ClientState::InitializeGUILua()
@@ -215,7 +215,7 @@ void ClientState::InitializeGUILua()
 	m_luaGUI = std::make_shared<Lua::Interface>();
 	m_luaGUI->Open();
 	m_luaGUI->SetIdentifier("gui");
-	Lua::initialize_lua_state(GetGUILuaInterface());
+	Lua::initialize_lua::State(GetGUILuaInterface());
 
 	auto utilMod = luabind::module(m_luaGUI->GetState(), "util");
 	Lua::util::register_shared_generic(m_luaGUI->GetState(), utilMod);
@@ -276,8 +276,8 @@ void ClientState::InitializeGUILua()
 	}
 }
 
-void ClientState::AddGUILuaWrapperFactory(const std::function<luabind::object(lua_State *, WIBase &)> &f) { m_guiLuaWrapperFactories.push_back(f); }
-std::vector<std::function<luabind::object(lua_State *, WIBase &)>> &ClientState::GetGUILuaWrapperFactories() { return m_guiLuaWrapperFactories; }
+void ClientState::AddGUILuaWrapperFactory(const std::function<luabind::object(lua::State *, WIBase &)> &f) { m_guiLuaWrapperFactories.push_back(f); }
+std::vector<std::function<luabind::object(lua::State *, WIBase &)>> &ClientState::GetGUILuaWrapperFactories() { return m_guiLuaWrapperFactories; }
 
 WIMainMenu *ClientState::GetMainMenu()
 {

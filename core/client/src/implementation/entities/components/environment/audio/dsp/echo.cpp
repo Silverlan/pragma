@@ -34,7 +34,7 @@ void CSoundDspEchoComponent::OnEntitySpawn()
 	props.flSpread = m_kvSpread;
 	m_dsp = soundSys->CreateEffect(props);
 }
-void CSoundDspEchoComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CSoundDspEchoComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 //////////////////
 

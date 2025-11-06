@@ -24,7 +24,7 @@ Bool ecs::SShooterComponent::ReceiveNetEvent(pragma::BasePlayerComponent &pl, pr
 		return false;
 	return true;
 }
-void ecs::SShooterComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ecs::SShooterComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ecs::SShooterComponent::FireBullets(const BulletInfo &bulletInfo, const std::function<bool(DamageInfo &, pragma::ecs::BaseEntity *)> &fCallback, std::vector<TraceResult> &outHitTargets, bool bMaster)
 {
 	DamageInfo dmg;

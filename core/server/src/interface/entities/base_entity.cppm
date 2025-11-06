@@ -26,7 +26,7 @@ export class DLLSERVER SBaseEntity : public pragma::ecs::BaseEntity {
 
 	virtual void Remove() override;
 	virtual void Initialize() override;
-	virtual void InitializeLuaObject(lua_State *lua) override;
+	virtual void InitializeLuaObject(lua::State *lua) override;
 	virtual void SendSnapshotData(NetPacket &packet, pragma::BasePlayerComponent &pl);
 	virtual void SendData(NetPacket &packet, pragma::networking::ClientRecipientFilter &rp);
 	bool IsShared() const;

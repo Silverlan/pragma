@@ -16,7 +16,7 @@ export {
 			CWeatherComponent(pragma::ecs::BaseEntity &ent) : BaseEnvWeatherComponent(ent) {}
 			virtual ~CWeatherComponent() override;
 			virtual void Initialize() override;
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 			virtual void OnEntitySpawn() override;
 		  protected:
 			EntityHandle m_hParticle = {};

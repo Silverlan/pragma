@@ -91,7 +91,7 @@ void CCharacterComponent::CreateWaterSplash()
 	}
 }
 
-void CCharacterComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CCharacterComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CCharacterComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseCharacterComponent)); }
 void CCharacterComponent::ReceiveData(NetPacket &packet)
 {
@@ -117,7 +117,7 @@ Bool CCharacterComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket 
 	return true;
 }
 
-void CCharacterComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+void CCharacterComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseCharacterComponent::RegisterLuaBindings(l, modEnts);
 	auto def = pragma::lua::create_entity_component_class<pragma::CCharacterComponent, pragma::BaseCharacterComponent>("CharacterComponent");

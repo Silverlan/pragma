@@ -15,7 +15,7 @@ export namespace pragma {
 		CTransformComponent(pragma::ecs::BaseEntity &ent) : BaseTransformComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	  protected:
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;

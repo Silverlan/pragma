@@ -62,7 +62,7 @@ CRenderComponent::CRenderComponent(pragma::ecs::BaseEntity &ent)
     : BaseRenderComponent(ent), m_renderGroups {util::TEnumProperty<pragma::rendering::RenderGroup>::Create(pragma::rendering::RenderGroup::None)}, m_renderPass {util::TEnumProperty<pragma::rendering::SceneRenderPass>::Create(rendering::SceneRenderPass::World)}
 {
 }
-void CRenderComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CRenderComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CRenderComponent::InitializeBuffers()
 {
 	auto instanceSize = sizeof(pragma::rendering::InstanceData);
@@ -925,9 +925,9 @@ const std::optional<double> &CRenderComponent::GetTranslucencyPassDistanceOverri
 /////////////////
 
 CEUpdateInstantiability::CEUpdateInstantiability(bool &instantiable) : instantiable {instantiable} {}
-void CEUpdateInstantiability::PushArguments(lua_State *l) { Lua::PushBool(l, instantiable); }
+void CEUpdateInstantiability::PushArguments(lua::State *l) { Lua::PushBool(l, instantiable); }
 uint32_t CEUpdateInstantiability::GetReturnCount() { return 1u; }
-void CEUpdateInstantiability::HandleReturnValues(lua_State *l)
+void CEUpdateInstantiability::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -1))
 		instantiable = Lua::CheckBool(l, -1);
@@ -936,9 +936,9 @@ void CEUpdateInstantiability::HandleReturnValues(lua_State *l)
 /////////////////
 
 CEShouldDraw::CEShouldDraw(bool &shouldDraw) : shouldDraw {shouldDraw} {}
-void CEShouldDraw::PushArguments(lua_State *l) { Lua::PushBool(l, shouldDraw); }
+void CEShouldDraw::PushArguments(lua::State *l) { Lua::PushBool(l, shouldDraw); }
 uint32_t CEShouldDraw::GetReturnCount() { return 1u; }
-void CEShouldDraw::HandleReturnValues(lua_State *l)
+void CEShouldDraw::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -1))
 		shouldDraw = Lua::CheckBool(l, -1);
@@ -947,13 +947,13 @@ void CEShouldDraw::HandleReturnValues(lua_State *l)
 /////////////////
 
 CEOnUpdateRenderMatrices::CEOnUpdateRenderMatrices(umath::ScaledTransform &pose, Mat4 &transformation) : pose {pose}, transformation {transformation} {}
-void CEOnUpdateRenderMatrices::PushArguments(lua_State *l)
+void CEOnUpdateRenderMatrices::PushArguments(lua::State *l)
 {
 	Lua::Push<umath::ScaledTransform>(l, pose);
 	Lua::Push<Mat4>(l, transformation);
 }
 uint32_t CEOnUpdateRenderMatrices::GetReturnCount() { return 3; }
-void CEOnUpdateRenderMatrices::HandleReturnValues(lua_State *l)
+void CEOnUpdateRenderMatrices::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -2))
 		pose = Lua::Check<umath::ScaledTransform>(l, -2);
@@ -964,17 +964,17 @@ void CEOnUpdateRenderMatrices::HandleReturnValues(lua_State *l)
 /////////////////
 
 CEOnUpdateRenderData::CEOnUpdateRenderData() {}
-void CEOnUpdateRenderData::PushArguments(lua_State *l) { throw std::runtime_error {"Lua callbacks of multi-threaded events are not allowed!"}; }
+void CEOnUpdateRenderData::PushArguments(lua::State *l) { throw std::runtime_error {"Lua callbacks of multi-threaded events are not allowed!"}; }
 
 /////////////////
 
 CEOnUpdateRenderBuffers::CEOnUpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer) : commandBuffer {commandBuffer} {}
-void CEOnUpdateRenderBuffers::PushArguments(lua_State *l) {}
+void CEOnUpdateRenderBuffers::PushArguments(lua::State *l) {}
 
 /////////////////
 
 CEOnRenderBoundsChanged::CEOnRenderBoundsChanged(const Vector3 &min, const Vector3 &max, const Sphere &sphere) : min {min}, max {max}, sphere {sphere} {}
-void CEOnRenderBoundsChanged::PushArguments(lua_State *l)
+void CEOnRenderBoundsChanged::PushArguments(lua::State *l)
 {
 	Lua::Push<Vector3>(l, min);
 	Lua::Push<Vector3>(l, max);
@@ -1059,7 +1059,7 @@ namespace {
 	auto UVN = pragma::console::client::register_command("debug_entity_render_buffer", &debug_entity_render_buffer, pragma::console::ConVarFlags::None, "Prints debug information about an entity's render buffer.");
 }
 namespace Lua::Render {
-	void CalcRayIntersection(lua_State *l, pragma::CRenderComponent &hComponent, const Vector3 &start, const Vector3 &dir, bool precise)
+	void CalcRayIntersection(lua::State *l, pragma::CRenderComponent &hComponent, const Vector3 &start, const Vector3 &dir, bool precise)
 	{
 
 		auto result = hComponent.CalcRayIntersection(start, dir, precise);
@@ -1090,36 +1090,36 @@ namespace Lua::Render {
 		Lua::PushInt(l, result->boneId); /* 2 */
 		Lua::SetTableValue(l, t);        /* 0 */
 	}
-	void CalcRayIntersection(lua_State *l, pragma::CRenderComponent &hComponent, const Vector3 &start, const Vector3 &dir) { CalcRayIntersection(l, hComponent, start, dir, false); }
-	void GetTransformationMatrix(lua_State *l, pragma::CRenderComponent &hEnt)
+	void CalcRayIntersection(lua::State *l, pragma::CRenderComponent &hComponent, const Vector3 &start, const Vector3 &dir) { CalcRayIntersection(l, hComponent, start, dir, false); }
+	void GetTransformationMatrix(lua::State *l, pragma::CRenderComponent &hEnt)
 	{
 
 		::Mat4 mat = hEnt.GetTransformationMatrix();
 		luabind::object(l, mat).push(l);
 	}
 
-	void GetLocalRenderBounds(lua_State *l, pragma::CRenderComponent &hEnt)
+	void GetLocalRenderBounds(lua::State *l, pragma::CRenderComponent &hEnt)
 	{
 
 		auto &aabb = hEnt.GetLocalRenderBounds();
 		Lua::Push<Vector3>(l, aabb.min);
 		Lua::Push<Vector3>(l, aabb.max);
 	}
-	void GetLocalRenderSphereBounds(lua_State *l, pragma::CRenderComponent &hEnt)
+	void GetLocalRenderSphereBounds(lua::State *l, pragma::CRenderComponent &hEnt)
 	{
 
 		auto &sphere = hEnt.GetLocalRenderSphere();
 		Lua::Push<Vector3>(l, sphere.pos);
 		Lua::PushNumber(l, sphere.radius);
 	}
-	void GetAbsoluteRenderBounds(lua_State *l, pragma::CRenderComponent &hEnt)
+	void GetAbsoluteRenderBounds(lua::State *l, pragma::CRenderComponent &hEnt)
 	{
 
 		auto &aabb = hEnt.GetUpdatedAbsoluteRenderBounds();
 		Lua::Push<Vector3>(l, aabb.min);
 		Lua::Push<Vector3>(l, aabb.max);
 	}
-	void GetAbsoluteRenderSphereBounds(lua_State *l, pragma::CRenderComponent &hEnt)
+	void GetAbsoluteRenderSphereBounds(lua::State *l, pragma::CRenderComponent &hEnt)
 	{
 
 		auto &sphere = hEnt.GetUpdatedAbsoluteRenderSphere();
@@ -1127,9 +1127,9 @@ namespace Lua::Render {
 		Lua::PushNumber(l, sphere.radius);
 	}
 
-	void SetLocalRenderBounds(lua_State *l, pragma::CRenderComponent &hEnt, Vector3 &min, Vector3 &max) { hEnt.SetLocalRenderBounds(min, max); }
+	void SetLocalRenderBounds(lua::State *l, pragma::CRenderComponent &hEnt, Vector3 &min, Vector3 &max) { hEnt.SetLocalRenderBounds(min, max); }
 
-	/*void UpdateRenderBuffers(lua_State *l,pragma::CRenderComponent &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &hScene,CCameraHandle &hCam,bool bForceBufferUpdate)
+	/*void UpdateRenderBuffers(lua::State *l,pragma::CRenderComponent &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &hScene,CCameraHandle &hCam,bool bForceBufferUpdate)
     {
 
 
@@ -1139,15 +1139,15 @@ namespace Lua::Render {
         auto vp = hCam->GetProjectionMatrix() *hCam->GetViewMatrix();
         hEnt.UpdateRenderData(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd),*hScene,*hCam,vp,bForceBufferUpdate);
     }
-    void UpdateRenderBuffers(lua_State *l,pragma::CRenderComponent &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &hScene,CCameraHandle &hCam) {UpdateRenderBuffers(l,hEnt,drawCmd,hScene,hCam,false);}*/
-	void GetRenderBuffer(lua_State *l, pragma::CRenderComponent &hEnt)
+    void UpdateRenderBuffers(lua::State *l,pragma::CRenderComponent &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &hScene,CCameraHandle &hCam) {UpdateRenderBuffers(l,hEnt,drawCmd,hScene,hCam,false);}*/
+	void GetRenderBuffer(lua::State *l, pragma::CRenderComponent &hEnt)
 	{
 		auto *buf = hEnt.GetRenderBuffer();
 		if(buf == nullptr)
 			return;
 		Lua::Push(l, buf->shared_from_this());
 	}
-	void GetBoneBuffer(lua_State *l, pragma::CRenderComponent &hEnt)
+	void GetBoneBuffer(lua::State *l, pragma::CRenderComponent &hEnt)
 	{
 
 		auto *pAnimComponent = static_cast<pragma::CAnimatedComponent *>(hEnt.GetEntity().GetAnimatedComponent().get());
@@ -1160,7 +1160,7 @@ namespace Lua::Render {
 	}
 };
 
-void CRenderComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+void CRenderComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseRenderComponent::RegisterLuaBindings(l, modEnts);
 	auto defCRender = pragma::lua::create_entity_component_class<pragma::CRenderComponent, pragma::BaseRenderComponent>("RenderComponent");
@@ -1170,24 +1170,24 @@ void CRenderComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEn
 	defCRender.def("IsInRenderGroup", &pragma::CRenderComponent::IsInRenderGroup);
 	defCRender.def("GetSceneRenderPass", &pragma::CRenderComponent::GetSceneRenderPass);
 	defCRender.def("SetSceneRenderPass", &pragma::CRenderComponent::SetSceneRenderPass);
-	defCRender.def("GetSceneRenderPassProperty", +[](lua_State *l, pragma::CRenderComponent &c) { Lua::Property::push(l, *c.GetSceneRenderPassProperty()); });
+	defCRender.def("GetSceneRenderPassProperty", +[](lua::State *l, pragma::CRenderComponent &c) { Lua::Property::push(l, *c.GetSceneRenderPassProperty()); });
 	defCRender.def("AddToRenderGroup", static_cast<bool (pragma::CRenderComponent::*)(const std::string &)>(&pragma::CRenderComponent::AddToRenderGroup));
 	defCRender.def("AddToRenderGroup", static_cast<void (pragma::CRenderComponent::*)(pragma::rendering::RenderGroup)>(&pragma::CRenderComponent::AddToRenderGroup));
 	defCRender.def("RemoveFromRenderGroup", static_cast<bool (pragma::CRenderComponent::*)(const std::string &)>(&pragma::CRenderComponent::RemoveFromRenderGroup));
 	defCRender.def("RemoveFromRenderGroup", static_cast<void (pragma::CRenderComponent::*)(pragma::rendering::RenderGroup)>(&pragma::CRenderComponent::RemoveFromRenderGroup));
 	defCRender.def("SetRenderGroups", &pragma::CRenderComponent::SetRenderGroups);
 	defCRender.def("GetRenderGroups", &pragma::CRenderComponent::GetRenderGroups);
-	defCRender.def("GetRenderGroupsProperty", +[](lua_State *l, pragma::CRenderComponent &c) { Lua::Property::push(l, *c.GetRenderGroupsProperty()); });
+	defCRender.def("GetRenderGroupsProperty", +[](lua::State *l, pragma::CRenderComponent &c) { Lua::Property::push(l, *c.GetRenderGroupsProperty()); });
 	defCRender.def("GetLocalRenderBounds", &Lua::Render::GetLocalRenderBounds);
 	defCRender.def("GetLocalRenderSphereBounds", &Lua::Render::GetLocalRenderSphereBounds);
 	defCRender.def("GetAbsoluteRenderBounds", &Lua::Render::GetAbsoluteRenderBounds);
 	defCRender.def("GetAbsoluteRenderSphereBounds", &Lua::Render::GetAbsoluteRenderSphereBounds);
 	defCRender.def("SetLocalRenderBounds", &Lua::Render::SetLocalRenderBounds);
-	// defCRender.def("UpdateRenderBuffers",static_cast<void(*)(lua_State*,pragma::CRenderComponent&,std::shared_ptr<prosper::ICommandBuffer>&,CSceneHandle&,CCameraHandle&,bool)>(&Lua::Render::UpdateRenderBuffers));
-	// defCRender.def("UpdateRenderBuffers",static_cast<void(*)(lua_State*,pragma::CRenderComponent&,std::shared_ptr<prosper::ICommandBuffer>&,CSceneHandle&,CCameraHandle&)>(&Lua::Render::UpdateRenderBuffers));
+	// defCRender.def("UpdateRenderBuffers",static_cast<void(*)(lua::State*,pragma::CRenderComponent&,std::shared_ptr<prosper::ICommandBuffer>&,CSceneHandle&,CCameraHandle&,bool)>(&Lua::Render::UpdateRenderBuffers));
+	// defCRender.def("UpdateRenderBuffers",static_cast<void(*)(lua::State*,pragma::CRenderComponent&,std::shared_ptr<prosper::ICommandBuffer>&,CSceneHandle&,CCameraHandle&)>(&Lua::Render::UpdateRenderBuffers));
 	defCRender.def("GetRenderBuffer", &Lua::Render::GetRenderBuffer);
 	defCRender.def("GetBoneBuffer", &Lua::Render::GetBoneBuffer);
-	defCRender.def("GetLODMeshes", static_cast<void (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) {
+	defCRender.def("GetLODMeshes", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) {
 		auto &lodMeshes = hComponent.GetLODMeshes();
 		auto t = Lua::CreateTable(l);
 		int32_t idx = 1;
@@ -1197,7 +1197,7 @@ void CRenderComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEn
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	defCRender.def("GetRenderMeshes", static_cast<void (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) {
+	defCRender.def("GetRenderMeshes", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) {
 		auto &renderMeshes = hComponent.GetRenderMeshes();
 		auto t = Lua::CreateTable(l);
 		int32_t idx = 1;
@@ -1207,7 +1207,7 @@ void CRenderComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEn
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	defCRender.def("GetLodRenderMeshes", static_cast<void (*)(lua_State *, pragma::CRenderComponent &, uint32_t)>([](lua_State *l, pragma::CRenderComponent &hComponent, uint32_t lod) {
+	defCRender.def("GetLodRenderMeshes", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, uint32_t)>([](lua::State *l, pragma::CRenderComponent &hComponent, uint32_t lod) {
 		auto &renderMeshes = hComponent.GetRenderMeshes();
 		auto &renderMeshGroup = hComponent.GetLodRenderMeshGroup(lod);
 		auto t = Lua::CreateTable(l);
@@ -1218,12 +1218,12 @@ void CRenderComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEn
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	defCRender.def("SetExemptFromOcclusionCulling", static_cast<void (*)(lua_State *, pragma::CRenderComponent &, bool)>([](lua_State *l, pragma::CRenderComponent &hComponent, bool exempt) { hComponent.SetExemptFromOcclusionCulling(exempt); }));
-	defCRender.def("IsExemptFromOcclusionCulling", static_cast<void (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) { Lua::PushBool(l, hComponent.IsExemptFromOcclusionCulling()); }));
-	defCRender.def("SetReceiveShadows", static_cast<void (*)(lua_State *, pragma::CRenderComponent &, bool)>([](lua_State *l, pragma::CRenderComponent &hComponent, bool enabled) { hComponent.SetReceiveShadows(enabled); }));
-	defCRender.def("IsReceivingShadows", static_cast<void (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) { Lua::PushBool(l, hComponent.IsReceivingShadows()); }));
-	defCRender.def("SetRenderBufferDirty", static_cast<void (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) { hComponent.SetRenderBufferDirty(); }));
-	/*defCRender.def("GetDepthBias",static_cast<void(*)(lua_State*,pragma::CRenderComponent&)>([](lua_State *l,pragma::CRenderComponent &hComponent) {
+	defCRender.def("SetExemptFromOcclusionCulling", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, bool)>([](lua::State *l, pragma::CRenderComponent &hComponent, bool exempt) { hComponent.SetExemptFromOcclusionCulling(exempt); }));
+	defCRender.def("IsExemptFromOcclusionCulling", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { Lua::PushBool(l, hComponent.IsExemptFromOcclusionCulling()); }));
+	defCRender.def("SetReceiveShadows", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, bool)>([](lua::State *l, pragma::CRenderComponent &hComponent, bool enabled) { hComponent.SetReceiveShadows(enabled); }));
+	defCRender.def("IsReceivingShadows", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { Lua::PushBool(l, hComponent.IsReceivingShadows()); }));
+	defCRender.def("SetRenderBufferDirty", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { hComponent.SetRenderBufferDirty(); }));
+	/*defCRender.def("GetDepthBias",static_cast<void(*)(lua::State*,pragma::CRenderComponent&)>([](lua::State *l,pragma::CRenderComponent &hComponent) {
 		
 		float constantFactor,biasClamp,slopeFactor;
 		hComponent.GetDepthBias(constantFactor,biasClamp,slopeFactor);
@@ -1231,44 +1231,44 @@ void CRenderComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEn
 		Lua::PushNumber(l,biasClamp);
 		Lua::PushNumber(l,slopeFactor);
 	}));
-	defCRender.def("SetDepthBias",static_cast<void(*)(lua_State*,pragma::CRenderComponent&,float,float,float)>([](lua_State *l,pragma::CRenderComponent &hComponent,float constantFactor,float biasClamp,float slopeFactor) {
+	defCRender.def("SetDepthBias",static_cast<void(*)(lua::State*,pragma::CRenderComponent&,float,float,float)>([](lua::State *l,pragma::CRenderComponent &hComponent,float constantFactor,float biasClamp,float slopeFactor) {
 		
 		hComponent.SetDepthBias(constantFactor,biasClamp,slopeFactor);
 	}));*/
-	defCRender.def("CalcRayIntersection", static_cast<void (*)(lua_State *, pragma::CRenderComponent &, const Vector3 &, const Vector3 &, bool)>(&Lua::Render::CalcRayIntersection));
-	defCRender.def("CalcRayIntersection", static_cast<void (*)(lua_State *, pragma::CRenderComponent &, const Vector3 &, const Vector3 &)>(&Lua::Render::CalcRayIntersection));
-	defCRender.def("SetDepthPassEnabled", static_cast<void (*)(lua_State *, pragma::CRenderComponent &, bool)>([](lua_State *l, pragma::CRenderComponent &hComponent, bool depthPassEnabled) { hComponent.SetDepthPassEnabled(depthPassEnabled); }));
-	defCRender.def("IsDepthPassEnabled", static_cast<void (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) { Lua::PushBool(l, hComponent.IsDepthPassEnabled()); }));
-	defCRender.def("GetRenderClipPlane", static_cast<void (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) {
+	defCRender.def("CalcRayIntersection", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, const Vector3 &, const Vector3 &, bool)>(&Lua::Render::CalcRayIntersection));
+	defCRender.def("CalcRayIntersection", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, const Vector3 &, const Vector3 &)>(&Lua::Render::CalcRayIntersection));
+	defCRender.def("SetDepthPassEnabled", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, bool)>([](lua::State *l, pragma::CRenderComponent &hComponent, bool depthPassEnabled) { hComponent.SetDepthPassEnabled(depthPassEnabled); }));
+	defCRender.def("IsDepthPassEnabled", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { Lua::PushBool(l, hComponent.IsDepthPassEnabled()); }));
+	defCRender.def("GetRenderClipPlane", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) {
 		auto *clipPlane = hComponent.GetRenderClipPlane();
 		if(clipPlane == nullptr)
 			return;
 		Lua::Push(l, *clipPlane);
 	}));
-	defCRender.def("SetRenderClipPlane", static_cast<void (*)(lua_State *, pragma::CRenderComponent &, const Vector4 &)>([](lua_State *l, pragma::CRenderComponent &hComponent, const Vector4 &clipPlane) { hComponent.SetRenderClipPlane(clipPlane); }));
-	defCRender.def("ClearRenderClipPlane", static_cast<void (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) { hComponent.ClearRenderClipPlane(); }));
-	defCRender.def("GetDepthBias", static_cast<void (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) {
+	defCRender.def("SetRenderClipPlane", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, const Vector4 &)>([](lua::State *l, pragma::CRenderComponent &hComponent, const Vector4 &clipPlane) { hComponent.SetRenderClipPlane(clipPlane); }));
+	defCRender.def("ClearRenderClipPlane", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { hComponent.ClearRenderClipPlane(); }));
+	defCRender.def("GetDepthBias", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) {
 		auto *depthBias = hComponent.GetDepthBias();
 		if(depthBias == nullptr)
 			return;
 		Lua::PushNumber(l, depthBias->x);
 		Lua::PushNumber(l, depthBias->y);
 	}));
-	defCRender.def("SetDepthBias", static_cast<void (*)(lua_State *, pragma::CRenderComponent &, float, float)>([](lua_State *l, pragma::CRenderComponent &hComponent, float d, float delta) { hComponent.SetDepthBias(d, delta); }));
-	defCRender.def("ClearDepthBias", static_cast<void (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) { hComponent.ClearDepthBias(); }));
-	defCRender.def("GetRenderPose", static_cast<void (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) { Lua::Push(l, hComponent.GetRenderPose()); }));
-	defCRender.def("SetRenderOffsetTransform", static_cast<void (*)(lua_State *, pragma::CRenderComponent &, const umath::ScaledTransform &)>([](lua_State *l, pragma::CRenderComponent &hComponent, const umath::ScaledTransform &pose) { hComponent.SetRenderOffsetTransform(pose); }));
-	defCRender.def("ClearRenderOffsetTransform", static_cast<void (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) { hComponent.ClearRenderOffsetTransform(); }));
-	defCRender.def("GetRenderOffsetTransform", static_cast<void (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) {
+	defCRender.def("SetDepthBias", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, float, float)>([](lua::State *l, pragma::CRenderComponent &hComponent, float d, float delta) { hComponent.SetDepthBias(d, delta); }));
+	defCRender.def("ClearDepthBias", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { hComponent.ClearDepthBias(); }));
+	defCRender.def("GetRenderPose", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { Lua::Push(l, hComponent.GetRenderPose()); }));
+	defCRender.def("SetRenderOffsetTransform", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, const umath::ScaledTransform &)>([](lua::State *l, pragma::CRenderComponent &hComponent, const umath::ScaledTransform &pose) { hComponent.SetRenderOffsetTransform(pose); }));
+	defCRender.def("ClearRenderOffsetTransform", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { hComponent.ClearRenderOffsetTransform(); }));
+	defCRender.def("GetRenderOffsetTransform", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) {
 		auto *t = hComponent.GetRenderOffsetTransform();
 		if(t == nullptr)
 			return;
 		Lua::Push(l, *t);
 	}));
-	defCRender.def("ShouldCastShadows", static_cast<bool (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) -> bool { return hComponent.GetCastShadows(); }));
-	defCRender.def("ShouldDraw", static_cast<bool (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) -> bool { return hComponent.ShouldDraw(); }));
-	defCRender.def("ShouldDrawShadow", static_cast<bool (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) -> bool { return hComponent.ShouldDrawShadow(); }));
-	defCRender.def("ClearBuffers", static_cast<void (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) { hComponent.ClearRenderBuffers(); }));
+	defCRender.def("ShouldCastShadows", static_cast<bool (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) -> bool { return hComponent.GetCastShadows(); }));
+	defCRender.def("ShouldDraw", static_cast<bool (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) -> bool { return hComponent.ShouldDraw(); }));
+	defCRender.def("ShouldDrawShadow", static_cast<bool (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) -> bool { return hComponent.ShouldDrawShadow(); }));
+	defCRender.def("ClearBuffers", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { hComponent.ClearRenderBuffers(); }));
 	defCRender.def("SetTranslucencyPassDistanceOverride", &pragma::CRenderComponent::SetTranslucencyPassDistanceOverride);
 	defCRender.def("ClearTranslucencyPassDistanceOverride", &pragma::CRenderComponent::ClearTranslucencyPassDistanceOverride);
 	defCRender.def("GetTranslucencyPassDistanceOverrideSqr", &pragma::CRenderComponent::GetTranslucencyPassDistanceOverrideSqr);

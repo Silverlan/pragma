@@ -14,7 +14,7 @@ export {
 		class DLLSERVER SPropPhysicsComponent final : public BasePropPhysicsComponent {
 		  public:
 			SPropPhysicsComponent(pragma::ecs::BaseEntity &ent) : BasePropPhysicsComponent(ent) {}
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};
 

@@ -14,6 +14,6 @@ export namespace Lua {
 		DLLSERVER bool add_file(const std::string &res, bool stream);
 		DLLSERVER bool add_file(const std::string &res);
 		DLLSERVER bool add_lua_file(const std::string &f);
-		DLLSERVER LuaTableObject get_list(lua_State *l);
+		DLLSERVER LuaTableObject get_list(lua::State *l);
 	};
 };

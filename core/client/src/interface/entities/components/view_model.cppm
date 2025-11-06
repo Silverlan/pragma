@@ -18,7 +18,7 @@ export namespace pragma {
 		const Vector3 &GetViewModelOffset() const;
 		void SetViewFOV(float fov);
 		float GetViewFOV() const;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 
 		BasePlayerComponent *GetPlayer();
 		BaseWeaponComponent *GetWeapon();

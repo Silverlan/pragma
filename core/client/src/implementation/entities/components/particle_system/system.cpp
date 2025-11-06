@@ -228,7 +228,7 @@ std::shared_ptr<pragma::Model> ecs::CParticleSystemComponent::GenerateModel() co
 	return GenerateModel(game, particleSystems);
 }
 
-void ecs::CParticleSystemComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ecs::CParticleSystemComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 bool ecs::CParticleSystemComponent::InitializeFromAssetData(const std::string &ptName, const ::udm::LinkedPropertyWrapper &udm, std::string &outErr)
 {
@@ -301,7 +301,7 @@ bool ecs::CParticleSystemComponent::LoadFromAssetData(CParticleSystemData &ptDat
 	return LoadFromAssetData(ptData, udm, outErr);
 }
 
-static void register_particle_modifier(lua_State *l, pragma::LuaParticleModifierManager::Type type, const std::string &name, luabind::object oClass)
+static void register_particle_modifier(lua::State *l, pragma::LuaParticleModifierManager::Type type, const std::string &name, luabind::object oClass)
 {
 	Lua::CheckUserData(l, 2);
 	auto &particleModMan = reinterpret_cast<LuaParticleModifierManager &>(pragma::get_cgame()->GetLuaParticleModifierManager());
@@ -351,7 +351,7 @@ static void register_particle_modifier(lua_State *l, pragma::LuaParticleModifier
 	}
 }
 
-static void push_particle_system_definition_data(lua_State *l, const CParticleSystemData &ptSysData)
+static void push_particle_system_definition_data(lua::State *l, const CParticleSystemData &ptSysData)
 {
 	auto tPtSys = Lua::CreateTable(l);
 
@@ -407,7 +407,7 @@ static void push_particle_system_definition_data(lua_State *l, const CParticleSy
 	Lua::SetTableValue(l, tPtSys);
 }
 
-static void Stop(lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool bStopImmediately)
+static void Stop(lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool bStopImmediately)
 {
 	if(bStopImmediately == true)
 		hComponent.Stop();
@@ -415,15 +415,15 @@ static void Stop(lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent
 		hComponent.Die();
 }
 
-static std::string get_key_value(lua_State *l, const luabind::object &value)
+static std::string get_key_value(lua::State *l, const luabind::object &value)
 {
-	auto type = luabind::type(value);
+	auto type = static_cast<Lua::Type>(luabind::type(value));
 	switch(type) {
-	case LUA_TNUMBER:
+	case Lua::Type::Number:
 		return std::to_string(luabind::object_cast<double>(value));
-	case LUA_TBOOLEAN:
+	case Lua::Type::Bool:
 		return luabind::object_cast<bool>(value) ? "1" : "0";
-	case LUA_TUSERDATA:
+	case Lua::Type::UserData:
 		{
 			auto *v4 = luabind::object_cast_nothrow<Vector4 *>(value, static_cast<Vector4 *>(nullptr));
 			if(v4)
@@ -465,7 +465,7 @@ static std::string get_key_value(lua_State *l, const luabind::object &value)
 	return luabind::object_cast<std::string>(value);
 }
 
-std::unordered_map<std::string, std::string> pragma::ecs::get_particle_key_values(lua_State *l, const luabind::map<std::string, void> &keyValues)
+std::unordered_map<std::string, std::string> pragma::ecs::get_particle_key_values(lua::State *l, const luabind::map<std::string, void> &keyValues)
 {
 	std::unordered_map<std::string, std::string> values;
 	for(luabind::iterator i {keyValues}, end; i != end; ++i) {
@@ -497,17 +497,17 @@ static void register_particle_class(luabind::class_<pragma::ecs::CParticleSystem
 	defPt.add_static_constant("FIELD_ID_INVALID", umath::to_integral(CParticle::FieldId::Invalid));
 	defPt.add_static_constant("FIELD_ID_COUNT", umath::to_integral(CParticle::FieldId::Count));
 	static_assert(umath::to_integral(CParticle::FieldId::Count) == 13);
-	defPt.scope[luabind::def("field_id_to_name", static_cast<void (*)(lua_State *, uint32_t)>([](lua_State *l, uint32_t id) {
+	defPt.scope[luabind::def("field_id_to_name", static_cast<void (*)(lua::State *, uint32_t)>([](lua::State *l, uint32_t id) {
 		auto name = ::CParticle::field_id_to_name(static_cast<CParticle::FieldId>(id));
 		Lua::PushString(l, name);
 	}))];
-	defPt.scope[luabind::def("name_to_field_id", static_cast<void (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &name) {
+	defPt.scope[luabind::def("name_to_field_id", static_cast<void (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &name) {
 		auto id = ::CParticle::name_to_field_id(name);
 		Lua::PushInt(l, umath::to_integral(id));
 	}))];
-	defPt.def("SetField", static_cast<void (*)(lua_State *, ::CParticle &, uint32_t, const Vector4 &)>([](lua_State *l, ::CParticle &pt, uint32_t fieldId, const Vector4 &value) { pt.SetField(static_cast<CParticle::FieldId>(fieldId), value); }));
-	defPt.def("SetField", static_cast<void (*)(lua_State *, ::CParticle &, uint32_t, float)>([](lua_State *l, ::CParticle &pt, uint32_t fieldId, float value) { pt.SetField(static_cast<CParticle::FieldId>(fieldId), value); }));
-	defPt.def("GetField", static_cast<void (*)(lua_State *, ::CParticle &, uint32_t)>([](lua_State *l, ::CParticle &pt, uint32_t fieldId) {
+	defPt.def("SetField", static_cast<void (*)(lua::State *, ::CParticle &, uint32_t, const Vector4 &)>([](lua::State *l, ::CParticle &pt, uint32_t fieldId, const Vector4 &value) { pt.SetField(static_cast<CParticle::FieldId>(fieldId), value); }));
+	defPt.def("SetField", static_cast<void (*)(lua::State *, ::CParticle &, uint32_t, float)>([](lua::State *l, ::CParticle &pt, uint32_t fieldId, float value) { pt.SetField(static_cast<CParticle::FieldId>(fieldId), value); }));
+	defPt.def("GetField", static_cast<void (*)(lua::State *, ::CParticle &, uint32_t)>([](lua::State *l, ::CParticle &pt, uint32_t fieldId) {
 		float value;
 		if(pt.GetField(static_cast<CParticle::FieldId>(fieldId), value) == false) {
 			Vector4 vValue;
@@ -519,95 +519,95 @@ static void register_particle_class(luabind::class_<pragma::ecs::CParticleSystem
 		}
 		Lua::PushNumber(l, value);
 	}));
-	defPt.def("GetIndex", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushInt(l, pt.GetIndex()); }));
-	defPt.def("IsAlive", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushBool(l, pt.IsAlive()); }));
-	defPt.def("SetAlive", static_cast<void (*)(lua_State *, ::CParticle &, bool)>([](lua_State *l, ::CParticle &pt, bool alive) { pt.SetAlive(alive); }));
-	defPt.def("ShouldDraw", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushBool(l, pt.ShouldDraw()); }));
-	defPt.def("GetRotation", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetRotation()); }));
-	defPt.def("SetRotation", static_cast<void (*)(lua_State *, ::CParticle &, float)>([](lua_State *l, ::CParticle &pt, float rot) { pt.SetRotation(rot); }));
-	defPt.def("GetRotationYaw", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetRotationYaw()); }));
-	defPt.def("SetRotationYaw", static_cast<void (*)(lua_State *, ::CParticle &, float)>([](lua_State *l, ::CParticle &pt, float rot) { pt.SetRotationYaw(rot); }));
-	defPt.def("GetPosition", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::Push<Vector3>(l, pt.GetPosition()); }));
-	defPt.def("SetPreviousPosition", static_cast<void (*)(lua_State *, ::CParticle &, const Vector3 &)>([](lua_State *l, ::CParticle &pt, const Vector3 &prevPos) { pt.SetPrevPos(prevPos); }));
-	defPt.def("GetPreviousPosition", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::Push<Vector3>(l, pt.GetPrevPos()); }));
-	defPt.def("GetVelocity", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::Push<Vector3>(l, pt.GetVelocity()); }));
-	defPt.def("GetAngularVelocity", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::Push<Vector3>(l, pt.GetAngularVelocity()); }));
-	defPt.def("GetColor", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::Push<Vector4>(l, pt.GetColor()); }));
-	defPt.def("GetAlpha", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetColor().a); }));
-	defPt.def("GetLife", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetLife()); }));
-	defPt.def("SetLife", static_cast<void (*)(lua_State *, ::CParticle &, float)>([](lua_State *l, ::CParticle &pt, float life) { pt.SetLife(life); }));
-	defPt.def("GetTimeAlive", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetTimeAlive()); }));
-	defPt.def("SetTimeAlive", static_cast<void (*)(lua_State *, ::CParticle &, float)>([](lua_State *l, ::CParticle &pt, float life) { pt.SetTimeAlive(life); }));
-	defPt.def("GetTimeCreated", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetTimeCreated()); }));
-	defPt.def("SetTimeCreated", static_cast<void (*)(lua_State *, ::CParticle &, float)>([](lua_State *l, ::CParticle &pt, float time) { pt.SetTimeCreated(time); }));
-	defPt.def("SetColor", static_cast<void (*)(lua_State *, ::CParticle &, const Vector4 &)>([](lua_State *l, ::CParticle &pt, const Vector4 &color) { pt.SetColor(color); }));
-	defPt.def("SetAlpha", static_cast<void (*)(lua_State *, ::CParticle &, float)>([](lua_State *l, ::CParticle &pt, float a) {
+	defPt.def("GetIndex", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushInt(l, pt.GetIndex()); }));
+	defPt.def("IsAlive", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushBool(l, pt.IsAlive()); }));
+	defPt.def("SetAlive", static_cast<void (*)(lua::State *, ::CParticle &, bool)>([](lua::State *l, ::CParticle &pt, bool alive) { pt.SetAlive(alive); }));
+	defPt.def("ShouldDraw", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushBool(l, pt.ShouldDraw()); }));
+	defPt.def("GetRotation", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetRotation()); }));
+	defPt.def("SetRotation", static_cast<void (*)(lua::State *, ::CParticle &, float)>([](lua::State *l, ::CParticle &pt, float rot) { pt.SetRotation(rot); }));
+	defPt.def("GetRotationYaw", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetRotationYaw()); }));
+	defPt.def("SetRotationYaw", static_cast<void (*)(lua::State *, ::CParticle &, float)>([](lua::State *l, ::CParticle &pt, float rot) { pt.SetRotationYaw(rot); }));
+	defPt.def("GetPosition", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::Push<Vector3>(l, pt.GetPosition()); }));
+	defPt.def("SetPreviousPosition", static_cast<void (*)(lua::State *, ::CParticle &, const Vector3 &)>([](lua::State *l, ::CParticle &pt, const Vector3 &prevPos) { pt.SetPrevPos(prevPos); }));
+	defPt.def("GetPreviousPosition", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::Push<Vector3>(l, pt.GetPrevPos()); }));
+	defPt.def("GetVelocity", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::Push<Vector3>(l, pt.GetVelocity()); }));
+	defPt.def("GetAngularVelocity", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::Push<Vector3>(l, pt.GetAngularVelocity()); }));
+	defPt.def("GetColor", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::Push<Vector4>(l, pt.GetColor()); }));
+	defPt.def("GetAlpha", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetColor().a); }));
+	defPt.def("GetLife", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetLife()); }));
+	defPt.def("SetLife", static_cast<void (*)(lua::State *, ::CParticle &, float)>([](lua::State *l, ::CParticle &pt, float life) { pt.SetLife(life); }));
+	defPt.def("GetTimeAlive", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetTimeAlive()); }));
+	defPt.def("SetTimeAlive", static_cast<void (*)(lua::State *, ::CParticle &, float)>([](lua::State *l, ::CParticle &pt, float life) { pt.SetTimeAlive(life); }));
+	defPt.def("GetTimeCreated", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetTimeCreated()); }));
+	defPt.def("SetTimeCreated", static_cast<void (*)(lua::State *, ::CParticle &, float)>([](lua::State *l, ::CParticle &pt, float time) { pt.SetTimeCreated(time); }));
+	defPt.def("SetColor", static_cast<void (*)(lua::State *, ::CParticle &, const Vector4 &)>([](lua::State *l, ::CParticle &pt, const Vector4 &color) { pt.SetColor(color); }));
+	defPt.def("SetAlpha", static_cast<void (*)(lua::State *, ::CParticle &, float)>([](lua::State *l, ::CParticle &pt, float a) {
 		auto &col = pt.GetColor();
 		col.a = a;
 	}));
-	defPt.def("SetPosition", static_cast<void (*)(lua_State *, ::CParticle &, const Vector3 &)>([](lua_State *l, ::CParticle &pt, const Vector3 &pos) { pt.SetPosition(pos); }));
-	defPt.def("SetVelocity", static_cast<void (*)(lua_State *, ::CParticle &, const Vector3 &)>([](lua_State *l, ::CParticle &pt, const Vector3 &vel) { pt.SetVelocity(vel); }));
-	defPt.def("SetAngularVelocity", static_cast<void (*)(lua_State *, ::CParticle &, const Vector3 &)>([](lua_State *l, ::CParticle &pt, const Vector3 &vel) { pt.SetAngularVelocity(vel); }));
-	defPt.def("GetRadius", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetRadius()); }));
-	defPt.def("GetLength", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetLength()); }));
-	defPt.def("GetExtent", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetExtent()); }));
-	defPt.def("SetRadius", static_cast<void (*)(lua_State *, ::CParticle &, float)>([](lua_State *l, ::CParticle &pt, float radius) { pt.SetRadius(radius); }));
-	defPt.def("SetLength", static_cast<void (*)(lua_State *, ::CParticle &, float)>([](lua_State *l, ::CParticle &pt, float len) { pt.SetLength(len); }));
-	defPt.def("SetCameraDistance", static_cast<void (*)(lua_State *, ::CParticle &, float)>([](lua_State *l, ::CParticle &pt, float dist) { pt.SetCameraDistance(dist); }));
-	defPt.def("GetCameraDistance", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetCameraDistance()); }));
-	defPt.def("Reset", static_cast<void (*)(lua_State *, ::CParticle &, float)>([](lua_State *l, ::CParticle &pt, float t) { pt.Reset(t); }));
-	defPt.def("SetAnimationFrameOffset", static_cast<void (*)(lua_State *, ::CParticle &, float)>([](lua_State *l, ::CParticle &pt, float offset) { pt.SetFrameOffset(offset); }));
-	defPt.def("GetAnimationFrameOffset", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetFrameOffset()); }));
-	defPt.def("Die", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { pt.Die(); }));
-	defPt.def("Resurrect", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { pt.Resurrect(); }));
-	defPt.def("IsDying", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushBool(l, pt.IsDying()); }));
-	defPt.def("GetDeathTime", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetDeathTime()); }));
-	defPt.def("GetLifeSpan", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetLifeSpan()); }));
-	defPt.def("GetWorldRotation", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::Push<Quat>(l, pt.GetWorldRotation()); }));
-	defPt.def("SetWorldRotation", static_cast<void (*)(lua_State *, ::CParticle &, const Quat &)>([](lua_State *l, ::CParticle &pt, const Quat &rot) { pt.SetWorldRotation(rot); }));
-	defPt.def("GetOrigin", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::Push<Vector3>(l, pt.GetOrigin()); }));
-	defPt.def("SetOrigin", static_cast<void (*)(lua_State *, ::CParticle &, const Vector3 &)>([](lua_State *l, ::CParticle &pt, const Vector3 &origin) { pt.SetOrigin(origin); }));
-	defPt.def("GetSeed", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetSeed()); }));
-	defPt.def("GetSequence", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushInt(l, pt.GetSequence()); }));
-	defPt.def("SetSequence", static_cast<void (*)(lua_State *, ::CParticle &, uint32_t)>([](lua_State *l, ::CParticle &pt, uint32_t sequence) { pt.SetSequence(sequence); }));
-	defPt.def("CalcRandomInt", static_cast<void (*)(lua_State *, ::CParticle &, int32_t, int32_t)>([](lua_State *l, ::CParticle &pt, int32_t min, int32_t max) { Lua::PushInt(l, pt.PseudoRandomInt(min, max)); }));
-	defPt.def("CalcRandomInt", static_cast<void (*)(lua_State *, ::CParticle &, int32_t, int32_t, uint32_t)>([](lua_State *l, ::CParticle &pt, int32_t min, int32_t max, uint32_t seed) { Lua::PushInt(l, pt.PseudoRandomInt(min, max, seed)); }));
-	defPt.def("CalcRandomFloat", static_cast<void (*)(lua_State *, ::CParticle &, float, float)>([](lua_State *l, ::CParticle &pt, float min, float max) { Lua::PushNumber(l, pt.PseudoRandomReal(min, max)); }));
-	defPt.def("CalcRandomFloat", static_cast<void (*)(lua_State *, ::CParticle &, float, float, uint32_t)>([](lua_State *l, ::CParticle &pt, float min, float max, uint32_t seed) { Lua::PushNumber(l, pt.PseudoRandomReal(min, max, seed)); }));
-	defPt.def("CalcRandomFloatExp", static_cast<void (*)(lua_State *, ::CParticle &, float, float, float)>([](lua_State *l, ::CParticle &pt, float min, float max, float exp) { Lua::PushNumber(l, pt.PseudoRandomRealExp(min, max, exp)); }));
-	defPt.def("CalcRandomFloatExp", static_cast<void (*)(lua_State *, ::CParticle &, float, float, float, uint32_t)>([](lua_State *l, ::CParticle &pt, float min, float max, float exp, uint32_t seed) { Lua::PushNumber(l, pt.PseudoRandomRealExp(min, max, exp, seed)); }));
+	defPt.def("SetPosition", static_cast<void (*)(lua::State *, ::CParticle &, const Vector3 &)>([](lua::State *l, ::CParticle &pt, const Vector3 &pos) { pt.SetPosition(pos); }));
+	defPt.def("SetVelocity", static_cast<void (*)(lua::State *, ::CParticle &, const Vector3 &)>([](lua::State *l, ::CParticle &pt, const Vector3 &vel) { pt.SetVelocity(vel); }));
+	defPt.def("SetAngularVelocity", static_cast<void (*)(lua::State *, ::CParticle &, const Vector3 &)>([](lua::State *l, ::CParticle &pt, const Vector3 &vel) { pt.SetAngularVelocity(vel); }));
+	defPt.def("GetRadius", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetRadius()); }));
+	defPt.def("GetLength", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetLength()); }));
+	defPt.def("GetExtent", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetExtent()); }));
+	defPt.def("SetRadius", static_cast<void (*)(lua::State *, ::CParticle &, float)>([](lua::State *l, ::CParticle &pt, float radius) { pt.SetRadius(radius); }));
+	defPt.def("SetLength", static_cast<void (*)(lua::State *, ::CParticle &, float)>([](lua::State *l, ::CParticle &pt, float len) { pt.SetLength(len); }));
+	defPt.def("SetCameraDistance", static_cast<void (*)(lua::State *, ::CParticle &, float)>([](lua::State *l, ::CParticle &pt, float dist) { pt.SetCameraDistance(dist); }));
+	defPt.def("GetCameraDistance", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetCameraDistance()); }));
+	defPt.def("Reset", static_cast<void (*)(lua::State *, ::CParticle &, float)>([](lua::State *l, ::CParticle &pt, float t) { pt.Reset(t); }));
+	defPt.def("SetAnimationFrameOffset", static_cast<void (*)(lua::State *, ::CParticle &, float)>([](lua::State *l, ::CParticle &pt, float offset) { pt.SetFrameOffset(offset); }));
+	defPt.def("GetAnimationFrameOffset", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetFrameOffset()); }));
+	defPt.def("Die", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { pt.Die(); }));
+	defPt.def("Resurrect", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { pt.Resurrect(); }));
+	defPt.def("IsDying", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushBool(l, pt.IsDying()); }));
+	defPt.def("GetDeathTime", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetDeathTime()); }));
+	defPt.def("GetLifeSpan", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetLifeSpan()); }));
+	defPt.def("GetWorldRotation", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::Push<Quat>(l, pt.GetWorldRotation()); }));
+	defPt.def("SetWorldRotation", static_cast<void (*)(lua::State *, ::CParticle &, const Quat &)>([](lua::State *l, ::CParticle &pt, const Quat &rot) { pt.SetWorldRotation(rot); }));
+	defPt.def("GetOrigin", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::Push<Vector3>(l, pt.GetOrigin()); }));
+	defPt.def("SetOrigin", static_cast<void (*)(lua::State *, ::CParticle &, const Vector3 &)>([](lua::State *l, ::CParticle &pt, const Vector3 &origin) { pt.SetOrigin(origin); }));
+	defPt.def("GetSeed", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetSeed()); }));
+	defPt.def("GetSequence", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushInt(l, pt.GetSequence()); }));
+	defPt.def("SetSequence", static_cast<void (*)(lua::State *, ::CParticle &, uint32_t)>([](lua::State *l, ::CParticle &pt, uint32_t sequence) { pt.SetSequence(sequence); }));
+	defPt.def("CalcRandomInt", static_cast<void (*)(lua::State *, ::CParticle &, int32_t, int32_t)>([](lua::State *l, ::CParticle &pt, int32_t min, int32_t max) { Lua::PushInt(l, pt.PseudoRandomInt(min, max)); }));
+	defPt.def("CalcRandomInt", static_cast<void (*)(lua::State *, ::CParticle &, int32_t, int32_t, uint32_t)>([](lua::State *l, ::CParticle &pt, int32_t min, int32_t max, uint32_t seed) { Lua::PushInt(l, pt.PseudoRandomInt(min, max, seed)); }));
+	defPt.def("CalcRandomFloat", static_cast<void (*)(lua::State *, ::CParticle &, float, float)>([](lua::State *l, ::CParticle &pt, float min, float max) { Lua::PushNumber(l, pt.PseudoRandomReal(min, max)); }));
+	defPt.def("CalcRandomFloat", static_cast<void (*)(lua::State *, ::CParticle &, float, float, uint32_t)>([](lua::State *l, ::CParticle &pt, float min, float max, uint32_t seed) { Lua::PushNumber(l, pt.PseudoRandomReal(min, max, seed)); }));
+	defPt.def("CalcRandomFloatExp", static_cast<void (*)(lua::State *, ::CParticle &, float, float, float)>([](lua::State *l, ::CParticle &pt, float min, float max, float exp) { Lua::PushNumber(l, pt.PseudoRandomRealExp(min, max, exp)); }));
+	defPt.def("CalcRandomFloatExp", static_cast<void (*)(lua::State *, ::CParticle &, float, float, float, uint32_t)>([](lua::State *l, ::CParticle &pt, float min, float max, float exp, uint32_t seed) { Lua::PushNumber(l, pt.PseudoRandomRealExp(min, max, exp, seed)); }));
 
-	defPt.def("GetInitialRadius", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetInitialRadius()); }));
-	defPt.def("GetInitialLength", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetInitialLength()); }));
-	defPt.def("GetInitialRotation", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetInitialRotation()); }));
-	defPt.def("GetInitialLife", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetInitialLife()); }));
-	defPt.def("GetInitialColor", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::Push<Vector4>(l, pt.GetInitialColor()); }));
-	defPt.def("GetInitialAlpha", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetInitialColor().a); }));
-	defPt.def("GetInitialAnimationFrameOffset", static_cast<void (*)(lua_State *, ::CParticle &)>([](lua_State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetInitialFrameOffset()); }));
+	defPt.def("GetInitialRadius", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetInitialRadius()); }));
+	defPt.def("GetInitialLength", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetInitialLength()); }));
+	defPt.def("GetInitialRotation", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetInitialRotation()); }));
+	defPt.def("GetInitialLife", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetInitialLife()); }));
+	defPt.def("GetInitialColor", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::Push<Vector4>(l, pt.GetInitialColor()); }));
+	defPt.def("GetInitialAlpha", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetInitialColor().a); }));
+	defPt.def("GetInitialAnimationFrameOffset", static_cast<void (*)(lua::State *, ::CParticle &)>([](lua::State *l, ::CParticle &pt) { Lua::PushNumber(l, pt.GetInitialFrameOffset()); }));
 	defPtc.scope[defPt];
 }
 static void register_modifier_class(luabind::class_<pragma::ecs::CParticleSystemComponent, pragma::BaseEnvParticleSystemComponent> &defPtc)
 {
 	auto defPtModifier = luabind::class_<::CParticleModifier>("ParticleModifier");
-	defPtModifier.def("GetName", static_cast<void (*)(lua_State *, ::CParticleModifier &)>([](lua_State *l, ::CParticleModifier &ptm) { Lua::PushString(l, ptm.GetName()); }));
-	defPtModifier.def("GetType", static_cast<void (*)(lua_State *, ::CParticleModifier &)>([](lua_State *l, ::CParticleModifier &ptm) { Lua::PushString(l, ptm.GetType()); }));
-	defPtModifier.def("SetPriority", static_cast<void (*)(lua_State *, ::CParticleModifier &, int32_t)>([](lua_State *l, ::CParticleModifier &ptm, int32_t priority) { ptm.SetPriority(priority); }));
-	defPtModifier.def("GetPriority", static_cast<void (*)(lua_State *, ::CParticleModifier &)>([](lua_State *l, ::CParticleModifier &ptm) { Lua::PushInt(l, ptm.GetPriority()); }));
-	defPtModifier.def("GetParticleSystem", static_cast<void (*)(lua_State *, ::CParticleModifier &)>([](lua_State *l, ::CParticleModifier &ptm) { ptm.GetParticleSystem().PushLuaObject(l); }));
-	defPtModifier.def("SetKeyValue", static_cast<void (*)(lua_State *, ::CParticleModifier &, const std::string &, const std::string &)>([](lua_State *l, ::CParticleModifier &ptm, const std::string &key, const std::string &value) {
+	defPtModifier.def("GetName", static_cast<void (*)(lua::State *, ::CParticleModifier &)>([](lua::State *l, ::CParticleModifier &ptm) { Lua::PushString(l, ptm.GetName()); }));
+	defPtModifier.def("GetType", static_cast<void (*)(lua::State *, ::CParticleModifier &)>([](lua::State *l, ::CParticleModifier &ptm) { Lua::PushString(l, ptm.GetType()); }));
+	defPtModifier.def("SetPriority", static_cast<void (*)(lua::State *, ::CParticleModifier &, int32_t)>([](lua::State *l, ::CParticleModifier &ptm, int32_t priority) { ptm.SetPriority(priority); }));
+	defPtModifier.def("GetPriority", static_cast<void (*)(lua::State *, ::CParticleModifier &)>([](lua::State *l, ::CParticleModifier &ptm) { Lua::PushInt(l, ptm.GetPriority()); }));
+	defPtModifier.def("GetParticleSystem", static_cast<void (*)(lua::State *, ::CParticleModifier &)>([](lua::State *l, ::CParticleModifier &ptm) { ptm.GetParticleSystem().PushLuaObject(l); }));
+	defPtModifier.def("SetKeyValue", static_cast<void (*)(lua::State *, ::CParticleModifier &, const std::string &, const std::string &)>([](lua::State *l, ::CParticleModifier &ptm, const std::string &key, const std::string &value) {
 		auto *keyValues = const_cast<std::unordered_map<std::string, std::string> *>(ptm.GetKeyValues());
 		if(keyValues == nullptr)
 			return;
 		(*keyValues)[key] = value;
 	}));
-	defPtModifier.def("GetKeyValue", static_cast<void (*)(lua_State *, ::CParticleModifier &, const std::string &)>([](lua_State *l, ::CParticleModifier &ptm, const std::string &key) {
+	defPtModifier.def("GetKeyValue", static_cast<void (*)(lua::State *, ::CParticleModifier &, const std::string &)>([](lua::State *l, ::CParticleModifier &ptm, const std::string &key) {
 		auto *keyValues = ptm.GetKeyValues();
 		if(keyValues == nullptr)
 			return;
 		auto it = keyValues->find(key);
 		Lua::PushString(l, (it != keyValues->end()) ? it->second : "");
 	}));
-	defPtModifier.def("GetKeyValues", static_cast<void (*)(lua_State *, ::CParticleModifier &)>([](lua_State *l, ::CParticleModifier &ptm) {
+	defPtModifier.def("GetKeyValues", static_cast<void (*)(lua::State *, ::CParticleModifier &)>([](lua::State *l, ::CParticleModifier &ptm) {
 		auto t = Lua::CreateTable(l);
 		auto *keyValues = ptm.GetKeyValues();
 		if(keyValues == nullptr)
@@ -624,7 +624,7 @@ static void register_modifier_class(luabind::class_<pragma::ecs::CParticleSystem
 	defPtc.scope[defPtInitializer];
 
 	auto defPtOperator = luabind::class_<::CParticleOperator, ::CParticleModifier>("ParticleOperator");
-	defPtOperator.def("CalcStrength", static_cast<void (*)(lua_State *, ::CParticleOperator &, float)>([](lua_State *l, ::CParticleOperator &op, float curTime) {
+	defPtOperator.def("CalcStrength", static_cast<void (*)(lua::State *, ::CParticleOperator &, float)>([](lua::State *l, ::CParticleOperator &op, float curTime) {
 		auto strength = op.CalcStrength(curTime);
 		Lua::PushNumber(l, strength);
 	}));
@@ -660,10 +660,10 @@ static void register_modifier_class(luabind::class_<pragma::ecs::CParticleSystem
 	defPtRendererBase.def("OnParticleCreated", &CParticleRendererLua::Lua_OnParticleCreated, &CParticleRendererLua::Lua_default_OnParticleCreated);
 	defPtRendererBase.def("OnParticleDestroyed", &CParticleRendererLua::Lua_OnParticleDestroyed, &CParticleRendererLua::Lua_default_OnParticleDestroyed);
 	defPtRendererBase.def("Render", &CParticleRendererLua::Lua_Render, &CParticleRendererLua::Lua_default_Render);
-	defPtRendererBase.def("SetShader", static_cast<void (*)(lua_State *, ::CParticleRendererLua &, ::pragma::LuaShaderWrapperParticle2D &)>([](lua_State *l, ::CParticleRendererLua &renderer, ::pragma::LuaShaderWrapperParticle2D &shader) {
+	defPtRendererBase.def("SetShader", static_cast<void (*)(lua::State *, ::CParticleRendererLua &, ::pragma::LuaShaderWrapperParticle2D &)>([](lua::State *l, ::CParticleRendererLua &renderer, ::pragma::LuaShaderWrapperParticle2D &shader) {
 		renderer.SetShader(&static_cast<pragma::LShaderParticle2D &>(shader.GetShader()));
 	}));
-	defPtRendererBase.def("GetShader", static_cast<void (*)(lua_State *, ::CParticleRendererLua &)>([](lua_State *l, ::CParticleRendererLua &renderer) {
+	defPtRendererBase.def("GetShader", static_cast<void (*)(lua::State *, ::CParticleRendererLua &)>([](lua::State *l, ::CParticleRendererLua &renderer) {
 		auto *shader = dynamic_cast<pragma::LShaderParticle2D *>(renderer.GetShader());
 		if(shader == nullptr)
 			return;
@@ -677,7 +677,7 @@ static void register_modifier_class(luabind::class_<pragma::ecs::CParticleSystem
 	defPtc.scope[defPtRendererBase];
 }
 
-void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+void ecs::CParticleSystemComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseEnvParticleSystemComponent::RegisterLuaBindings(l, modEnts);
 	auto defCParticleSystem = pragma::lua::create_entity_component_class<pragma::ecs::CParticleSystemComponent, pragma::BaseEnvParticleSystemComponent>("ParticleSystemComponent");
@@ -705,26 +705,26 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 	defCParticleSystem.add_static_constant("FLAG_BIT_AUTO_SIMULATE", umath::to_integral(pragma::ecs::CParticleSystemComponent::Flags::AutoSimulate));
 	defCParticleSystem.add_static_constant("FLAG_BIT_MATERIAL_DESCRIPT_SET_INITIALIZED", umath::to_integral(pragma::ecs::CParticleSystemComponent::Flags::MaterialDescriptorSetInitialized));
 
-	defCParticleSystem.def("Start", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { hComponent.Start(); }));
-	defCParticleSystem.def("Stop", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { ::Stop(l, hComponent, false); }));
-	defCParticleSystem.def("Stop", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, bool)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool bStopImmediately) { ::Stop(l, hComponent, bStopImmediately); }));
-	defCParticleSystem.def("Die", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { hComponent.Die(); }));
-	defCParticleSystem.def("Die", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, float)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, float t) { hComponent.Die(t); }));
+	defCParticleSystem.def("Start", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { hComponent.Start(); }));
+	defCParticleSystem.def("Stop", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { ::Stop(l, hComponent, false); }));
+	defCParticleSystem.def("Stop", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, bool)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool bStopImmediately) { ::Stop(l, hComponent, bStopImmediately); }));
+	defCParticleSystem.def("Die", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { hComponent.Die(); }));
+	defCParticleSystem.def("Die", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, float)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, float t) { hComponent.Die(t); }));
 	defCParticleSystem.def("GetFlags", &pragma::ecs::CParticleSystemComponent::GetFlags);
 	defCParticleSystem.def("SetFlags", &pragma::ecs::CParticleSystemComponent::SetFlags);
 	defCParticleSystem.def("GetMaxNodes", &pragma::ecs::CParticleSystemComponent::GetMaxNodes);
 	defCParticleSystem.def("SetMaxNodes", &pragma::ecs::CParticleSystemComponent::SetMaxNodes);
-	defCParticleSystem.def("AddInitializer", +[](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, std::string name, luabind::object o) { return hComponent.AddInitializer(name, pragma::ecs::get_particle_key_values(l, o)); });
-	defCParticleSystem.def("AddOperator", +[](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, std::string name, luabind::object o) { return hComponent.AddOperator(name, pragma::ecs::get_particle_key_values(l, o)); });
-	defCParticleSystem.def("AddRenderer", +[](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, std::string name, luabind::object o) { return hComponent.AddRenderer(name, pragma::ecs::get_particle_key_values(l, o)); });
-	defCParticleSystem.def("RemoveInitializer", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveInitializer(name); }));
-	defCParticleSystem.def("RemoveOperator", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveOperator(name); }));
-	defCParticleSystem.def("RemoveRenderer", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveRenderer(name); }));
+	defCParticleSystem.def("AddInitializer", +[](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, std::string name, luabind::object o) { return hComponent.AddInitializer(name, pragma::ecs::get_particle_key_values(l, o)); });
+	defCParticleSystem.def("AddOperator", +[](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, std::string name, luabind::object o) { return hComponent.AddOperator(name, pragma::ecs::get_particle_key_values(l, o)); });
+	defCParticleSystem.def("AddRenderer", +[](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, std::string name, luabind::object o) { return hComponent.AddRenderer(name, pragma::ecs::get_particle_key_values(l, o)); });
+	defCParticleSystem.def("RemoveInitializer", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveInitializer(name); }));
+	defCParticleSystem.def("RemoveOperator", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveOperator(name); }));
+	defCParticleSystem.def("RemoveRenderer", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveRenderer(name); }));
 	defCParticleSystem.def("RemoveInitializerByType",
-	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveInitializersByType(name); }));
-	defCParticleSystem.def("RemoveOperatorByType", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveOperatorsByType(name); }));
-	defCParticleSystem.def("RemoveRendererByType", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveRenderersByType(name); }));
-	defCParticleSystem.def("GetInitializers", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
+	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveInitializersByType(name); }));
+	defCParticleSystem.def("RemoveOperatorByType", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveOperatorsByType(name); }));
+	defCParticleSystem.def("RemoveRendererByType", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.RemoveRenderersByType(name); }));
+	defCParticleSystem.def("GetInitializers", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
 		auto t = Lua::CreateTable(l);
 		auto &initializers = hComponent.GetInitializers();
 		uint32_t idx = 1;
@@ -738,7 +738,7 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	defCParticleSystem.def("GetOperators", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
+	defCParticleSystem.def("GetOperators", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
 		auto t = Lua::CreateTable(l);
 		auto &operators = hComponent.GetOperators();
 		uint32_t idx = 1;
@@ -752,7 +752,7 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	defCParticleSystem.def("GetRenderers", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
+	defCParticleSystem.def("GetRenderers", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
 		auto t = Lua::CreateTable(l);
 		auto &renderers = hComponent.GetRenderers();
 		uint32_t idx = 1;
@@ -766,121 +766,121 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	defCParticleSystem.def("FindInitializer", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
+	defCParticleSystem.def("FindInitializer", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
 		auto &initializers = hComponent.GetInitializers();
 		auto it = std::find_if(initializers.begin(), initializers.end(), [&name](const std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)> &initializer) { return ustring::compare(name, initializer->GetName(), false); });
 		if(it == initializers.end())
 			return;
 		Lua::Push(l, it->get());
 	}));
-	defCParticleSystem.def("FindOperator", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
+	defCParticleSystem.def("FindOperator", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
 		auto &operators = hComponent.GetOperators();
 		auto it = std::find_if(operators.begin(), operators.end(), [&name](const std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)> &op) { return ustring::compare(name, op->GetName(), false); });
 		if(it == operators.end())
 			return;
 		Lua::Push(l, it->get());
 	}));
-	defCParticleSystem.def("FindRenderer", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
+	defCParticleSystem.def("FindRenderer", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
 		auto &renderers = hComponent.GetRenderers();
 		auto it = std::find_if(renderers.begin(), renderers.end(), [&name](const std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)> &renderer) { return ustring::compare(name, renderer->GetName(), false); });
 		if(it == renderers.end())
 			return;
 		Lua::Push(l, it->get());
 	}));
-	defCParticleSystem.def("FindInitializerByType", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
+	defCParticleSystem.def("FindInitializerByType", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
 		auto &initializers = hComponent.GetInitializers();
 		auto it = std::find_if(initializers.begin(), initializers.end(), [&name](const std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)> &initializer) { return ustring::compare(name, initializer->GetType(), false); });
 		if(it == initializers.end())
 			return;
 		Lua::Push(l, it->get());
 	}));
-	defCParticleSystem.def("FindOperatorByType", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
+	defCParticleSystem.def("FindOperatorByType", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
 		auto &operators = hComponent.GetOperators();
 		auto it = std::find_if(operators.begin(), operators.end(), [&name](const std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)> &op) { return ustring::compare(name, op->GetType(), false); });
 		if(it == operators.end())
 			return;
 		Lua::Push(l, it->get());
 	}));
-	defCParticleSystem.def("FindRendererByType", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
+	defCParticleSystem.def("FindRendererByType", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
 		auto &renderers = hComponent.GetRenderers();
 		auto it = std::find_if(renderers.begin(), renderers.end(), [&name](const std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)> &renderer) { return ustring::compare(name, renderer->GetType(), false); });
 		if(it == renderers.end())
 			return;
 		Lua::Push(l, it->get());
 	}));
-	defCParticleSystem.def("AddChild", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
+	defCParticleSystem.def("AddChild", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
 		auto *pt = hComponent.AddChild(name);
 		if(pt == nullptr)
 			return;
 		Lua::Push(l, pt->GetHandle());
 	}));
 	defCParticleSystem.def("AddChild",
-	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, pragma::ecs::CParticleSystemComponent &hChild) { hComponent.AddChild(hChild); }));
-	defCParticleSystem.def("SetNodeTarget", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, pragma::ecs::BaseEntity &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t nodeId, pragma::ecs::BaseEntity &ent) {
+	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, pragma::ecs::CParticleSystemComponent &hChild) { hComponent.AddChild(hChild); }));
+	defCParticleSystem.def("SetNodeTarget", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t, pragma::ecs::BaseEntity &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t nodeId, pragma::ecs::BaseEntity &ent) {
 		hComponent.SetNodeTarget(nodeId, static_cast<CBaseEntity *>(&ent));
 	}));
 	defCParticleSystem.def("SetNodeTarget",
-	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const Vector3 &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t nodeId, const Vector3 &pos) { hComponent.SetNodeTarget(nodeId, pos); }));
-	defCParticleSystem.def("GetNodeCount", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, hComponent.GetNodeCount()); }));
-	defCParticleSystem.def("GetNodePosition", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t nodeId) { Lua::Push<Vector3>(l, hComponent.GetNodePosition(nodeId)); }));
-	defCParticleSystem.def("GetNodeTarget", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t nodeId) {
+	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const Vector3 &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t nodeId, const Vector3 &pos) { hComponent.SetNodeTarget(nodeId, pos); }));
+	defCParticleSystem.def("GetNodeCount", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, hComponent.GetNodeCount()); }));
+	defCParticleSystem.def("GetNodePosition", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t nodeId) { Lua::Push<Vector3>(l, hComponent.GetNodePosition(nodeId)); }));
+	defCParticleSystem.def("GetNodeTarget", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t nodeId) {
 		auto *ent = hComponent.GetNodeTarget(nodeId);
 		if(ent == nullptr)
 			return;
 		ent->GetLuaObject().push(l);
 	}));
-	defCParticleSystem.def("SetRemoveOnComplete", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, bool)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool b) { hComponent.SetRemoveOnComplete(b); }));
-	defCParticleSystem.def("GetRenderBounds", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
+	defCParticleSystem.def("SetRemoveOnComplete", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, bool)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool b) { hComponent.SetRemoveOnComplete(b); }));
+	defCParticleSystem.def("GetRenderBounds", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
 		auto &bounds = hComponent.GetRenderBounds();
 		Lua::Push<Vector3>(l, bounds.first);
 		Lua::Push<Vector3>(l, bounds.second);
 	}));
-	defCParticleSystem.def("CalcRenderBounds", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
+	defCParticleSystem.def("CalcRenderBounds", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
 		auto bounds = hComponent.CalcRenderBounds();
 		Lua::Push<Vector3>(l, bounds.first);
 		Lua::Push<Vector3>(l, bounds.second);
 	}));
-	defCParticleSystem.def("SetRadius", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, float)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, float radius) { hComponent.SetRadius(radius); }));
-	defCParticleSystem.def("GetRadius", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushNumber(l, hComponent.GetRadius()); }));
-	defCParticleSystem.def("GetSimulationTime", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushNumber(l, hComponent.GetSimulationTime()); }));
-	defCParticleSystem.def("SetExtent", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, float)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, float extent) { hComponent.SetExtent(extent); }));
-	defCParticleSystem.def("GetExtent", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushNumber(l, hComponent.GetExtent()); }));
-	defCParticleSystem.def("SetMaterial", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.SetMaterial(name.c_str()); }));
-	defCParticleSystem.def("SetMaterial", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, msys::Material *)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, msys::Material *mat) { hComponent.SetMaterial(mat); }));
-	defCParticleSystem.def("GetMaterial", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
+	defCParticleSystem.def("SetRadius", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, float)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, float radius) { hComponent.SetRadius(radius); }));
+	defCParticleSystem.def("GetRadius", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushNumber(l, hComponent.GetRadius()); }));
+	defCParticleSystem.def("GetSimulationTime", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushNumber(l, hComponent.GetSimulationTime()); }));
+	defCParticleSystem.def("SetExtent", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, float)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, float extent) { hComponent.SetExtent(extent); }));
+	defCParticleSystem.def("GetExtent", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushNumber(l, hComponent.GetExtent()); }));
+	defCParticleSystem.def("SetMaterial", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.SetMaterial(name.c_str()); }));
+	defCParticleSystem.def("SetMaterial", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, msys::Material *)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, msys::Material *mat) { hComponent.SetMaterial(mat); }));
+	defCParticleSystem.def("GetMaterial", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
 		auto *mat = hComponent.GetMaterial();
 		if(mat == nullptr)
 			return;
 		Lua::Push<msys::Material *>(l, mat);
 	}));
-	defCParticleSystem.def("SetOrientationType", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t orientationType) {
+	defCParticleSystem.def("SetOrientationType", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t orientationType) {
 		hComponent.SetOrientationType(static_cast<pragma::ecs::ParticleOrientationType>(orientationType));
 	}));
-	defCParticleSystem.def("GetOrientationType", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, umath::to_integral(hComponent.GetOrientationType())); }));
-	defCParticleSystem.def("IsContinuous", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.IsContinuous()); }));
-	defCParticleSystem.def("SetContinuous", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, bool)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool b) { hComponent.SetContinuous(b); }));
-	defCParticleSystem.def("GetRemoveOnComplete", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.GetRemoveOnComplete()); }));
-	defCParticleSystem.def("GetCastShadows", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.GetCastShadows()); }));
-	defCParticleSystem.def("SetCastShadows", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, bool)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool b) { hComponent.SetCastShadows(b); }));
-	defCParticleSystem.def("SetBloomColorFactor", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const Vector4 &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const Vector4 &factor) { hComponent.SetBloomColorFactor(factor); }));
-	defCParticleSystem.def("GetBloomColorFactor", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::Push<Vector4>(l, hComponent.GetBloomColorFactor()); }));
-	defCParticleSystem.def("GetEffectiveBloomColorFactor", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
+	defCParticleSystem.def("GetOrientationType", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, umath::to_integral(hComponent.GetOrientationType())); }));
+	defCParticleSystem.def("IsContinuous", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.IsContinuous()); }));
+	defCParticleSystem.def("SetContinuous", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, bool)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool b) { hComponent.SetContinuous(b); }));
+	defCParticleSystem.def("GetRemoveOnComplete", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.GetRemoveOnComplete()); }));
+	defCParticleSystem.def("GetCastShadows", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.GetCastShadows()); }));
+	defCParticleSystem.def("SetCastShadows", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, bool)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool b) { hComponent.SetCastShadows(b); }));
+	defCParticleSystem.def("SetBloomColorFactor", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const Vector4 &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const Vector4 &factor) { hComponent.SetBloomColorFactor(factor); }));
+	defCParticleSystem.def("GetBloomColorFactor", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::Push<Vector4>(l, hComponent.GetBloomColorFactor()); }));
+	defCParticleSystem.def("GetEffectiveBloomColorFactor", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
 		auto bloomCol = hComponent.GetEffectiveBloomColorFactor();
 		if(bloomCol.has_value() == false)
 			return;
 		Lua::Push<Vector4>(l, *bloomCol);
 	}));
-	defCParticleSystem.def("IsBloomEnabled", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.IsBloomEnabled()); }));
-	defCParticleSystem.def("SetColorFactor", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const Vector4 &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const Vector4 &factor) { hComponent.SetColorFactor(factor); }));
-	defCParticleSystem.def("GetColorFactor", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::Push<Vector4>(l, hComponent.GetColorFactor()); }));
-	defCParticleSystem.def("GetParticleCount", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, hComponent.GetParticleCount()); }));
-	defCParticleSystem.def("GetParticle", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t idx) {
+	defCParticleSystem.def("IsBloomEnabled", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.IsBloomEnabled()); }));
+	defCParticleSystem.def("SetColorFactor", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const Vector4 &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const Vector4 &factor) { hComponent.SetColorFactor(factor); }));
+	defCParticleSystem.def("GetColorFactor", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::Push<Vector4>(l, hComponent.GetColorFactor()); }));
+	defCParticleSystem.def("GetParticleCount", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, hComponent.GetParticleCount()); }));
+	defCParticleSystem.def("GetParticle", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t idx) {
 		auto *pt = hComponent.GetParticle(idx);
 		if(pt == nullptr)
 			return;
 		Lua::Push(l, pt);
 	}));
-	defCParticleSystem.def("GetParticles", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
+	defCParticleSystem.def("GetParticles", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
 		auto &particles = hComponent.GetParticles();
 		auto t = Lua::CreateTable(l);
 		uint32_t ptIdx = 1u;
@@ -892,15 +892,15 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 	}));
 	defCParticleSystem.def("GetMaxParticleCount", &pragma::ecs::CParticleSystemComponent::GetMaxParticleCount);
 	defCParticleSystem.def("SetMaxParticleCount", &pragma::ecs::CParticleSystemComponent::SetMaxParticleCount);
-	defCParticleSystem.def("IsActive", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.IsActive()); }));
-	defCParticleSystem.def("GetSceneRenderPass", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, hComponent.GetSceneRenderPass()); }));
+	defCParticleSystem.def("IsActive", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.IsActive()); }));
+	defCParticleSystem.def("GetSceneRenderPass", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, hComponent.GetSceneRenderPass()); }));
 	defCParticleSystem.def("SetSceneRenderPass",
-	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t renderMode) { hComponent.SetSceneRenderPass(static_cast<pragma::rendering::SceneRenderPass>(renderMode)); }));
-	defCParticleSystem.def("SetName", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.SetParticleSystemName(name); }));
-	defCParticleSystem.def("GetName", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushString(l, hComponent.GetParticleSystemName()); }));
-	defCParticleSystem.def("IsStatic", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.IsStatic()); }));
-	defCParticleSystem.def("IsDying", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.IsDying()); }));
-	defCParticleSystem.def("GetChildren", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
+	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t renderMode) { hComponent.SetSceneRenderPass(static_cast<pragma::rendering::SceneRenderPass>(renderMode)); }));
+	defCParticleSystem.def("SetName", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { hComponent.SetParticleSystemName(name); }));
+	defCParticleSystem.def("GetName", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushString(l, hComponent.GetParticleSystemName()); }));
+	defCParticleSystem.def("IsStatic", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.IsStatic()); }));
+	defCParticleSystem.def("IsDying", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.IsDying()); }));
+	defCParticleSystem.def("GetChildren", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
 		auto &children = hComponent.GetChildren();
 		auto t = Lua::CreateTable(l);
 		auto idx = 1u;
@@ -912,106 +912,106 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	defCParticleSystem.def("GetAlphaMode", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, umath::to_integral(hComponent.GetAlphaMode())); }));
-	defCParticleSystem.def("GetEffectiveAlphaMode", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, umath::to_integral(hComponent.GetEffectiveAlphaMode())); }));
+	defCParticleSystem.def("GetAlphaMode", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, umath::to_integral(hComponent.GetAlphaMode())); }));
+	defCParticleSystem.def("GetEffectiveAlphaMode", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, umath::to_integral(hComponent.GetEffectiveAlphaMode())); }));
 	defCParticleSystem.def("SetAlphaMode",
-	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t alphaMode) { hComponent.SetAlphaMode(static_cast<pragma::ParticleAlphaMode>(alphaMode)); }));
-	defCParticleSystem.def("GetEmissionRate", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, hComponent.GetEmissionRate()); }));
-	defCParticleSystem.def("SetEmissionRate", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t emissionRate) { hComponent.SetEmissionRate(emissionRate); }));
-	defCParticleSystem.def("SetNextParticleEmissionCount", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t count) { hComponent.SetNextParticleEmissionCount(count); }));
-	defCParticleSystem.def("PauseEmission", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { hComponent.PauseEmission(); }));
-	defCParticleSystem.def("ResumeEmission", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { hComponent.ResumeEmission(); }));
-	defCParticleSystem.def("GetLifeTime", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushNumber(l, hComponent.GetLifeTime()); }));
-	defCParticleSystem.def("GetStartTime", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushNumber(l, hComponent.GetStartTime()); }));
-	defCParticleSystem.def("GetSoftParticles", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.GetSoftParticles()); }));
-	defCParticleSystem.def("SetSoftParticles", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, bool)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool bSoft) { hComponent.SetSoftParticles(bSoft); }));
-	defCParticleSystem.def("GetSortParticles", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.GetSortParticles()); }));
-	defCParticleSystem.def("SetSortParticles", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, bool)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool bSort) { hComponent.SetSortParticles(bSort); }));
-	defCParticleSystem.def("GetInitialColor", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::Push<Color>(l, hComponent.GetInitialColor()); }));
-	defCParticleSystem.def("SetInitialColor", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const Color &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const Color &col) { hComponent.SetInitialColor(col); }));
-	defCParticleSystem.def("Simulate", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, float)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, float tDelta) { hComponent.Simulate(tDelta); }));
+	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t alphaMode) { hComponent.SetAlphaMode(static_cast<pragma::ParticleAlphaMode>(alphaMode)); }));
+	defCParticleSystem.def("GetEmissionRate", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, hComponent.GetEmissionRate()); }));
+	defCParticleSystem.def("SetEmissionRate", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t emissionRate) { hComponent.SetEmissionRate(emissionRate); }));
+	defCParticleSystem.def("SetNextParticleEmissionCount", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t count) { hComponent.SetNextParticleEmissionCount(count); }));
+	defCParticleSystem.def("PauseEmission", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { hComponent.PauseEmission(); }));
+	defCParticleSystem.def("ResumeEmission", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { hComponent.ResumeEmission(); }));
+	defCParticleSystem.def("GetLifeTime", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushNumber(l, hComponent.GetLifeTime()); }));
+	defCParticleSystem.def("GetStartTime", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushNumber(l, hComponent.GetStartTime()); }));
+	defCParticleSystem.def("GetSoftParticles", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.GetSoftParticles()); }));
+	defCParticleSystem.def("SetSoftParticles", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, bool)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool bSoft) { hComponent.SetSoftParticles(bSoft); }));
+	defCParticleSystem.def("GetSortParticles", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.GetSortParticles()); }));
+	defCParticleSystem.def("SetSortParticles", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, bool)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool bSort) { hComponent.SetSortParticles(bSort); }));
+	defCParticleSystem.def("GetInitialColor", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::Push<Color>(l, hComponent.GetInitialColor()); }));
+	defCParticleSystem.def("SetInitialColor", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const Color &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const Color &col) { hComponent.SetInitialColor(col); }));
+	defCParticleSystem.def("Simulate", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, float)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, float tDelta) { hComponent.Simulate(tDelta); }));
 #if 0
-	defCParticleSystem.def("Render",static_cast<void(*)(lua_State*,pragma::ecs::CParticleSystemComponent&,std::shared_ptr<prosper::ICommandBuffer>&,pragma::CSceneComponent&,pragma::CRasterizationRendererComponent&,uint32_t)>([](lua_State *l,pragma::ecs::CParticleSystemComponent &hComponent,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pragma::CSceneComponent &scene,pragma::CRasterizationRendererComponent &renderer,uint32_t renderFlags) {
+	defCParticleSystem.def("Render",static_cast<void(*)(lua::State*,pragma::ecs::CParticleSystemComponent&,std::shared_ptr<prosper::ICommandBuffer>&,pragma::CSceneComponent&,pragma::CRasterizationRendererComponent&,uint32_t)>([](lua::State *l,pragma::ecs::CParticleSystemComponent &hComponent,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pragma::CSceneComponent &scene,pragma::CRasterizationRendererComponent &renderer,uint32_t renderFlags) {
 		if(drawCmd->IsPrimary() == false)
 			return;
 		hComponent.Render(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd),scene,renderer,static_cast<pragma::ecs::ParticleRenderFlags>(renderFlags));
 		}));
 #endif
-	defCParticleSystem.def("GetRenderParticleCount", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, hComponent.GetRenderParticleCount()); }));
-	defCParticleSystem.def("IsActiveOrPaused", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.IsActiveOrPaused()); }));
+	defCParticleSystem.def("GetRenderParticleCount", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, hComponent.GetRenderParticleCount()); }));
+	defCParticleSystem.def("IsActiveOrPaused", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.IsActiveOrPaused()); }));
 	defCParticleSystem.def("GetParticleBufferIndexFromParticleIndex",
-	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t ptIdx) { Lua::PushInt(l, hComponent.TranslateParticleIndex(ptIdx)); }));
+	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t ptIdx) { Lua::PushInt(l, hComponent.TranslateParticleIndex(ptIdx)); }));
 	defCParticleSystem.def("GetParticleIndexFromParticleBufferIndex",
-	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t ptBufIdx) { Lua::PushInt(l, hComponent.TranslateBufferIndex(ptBufIdx)); }));
-	defCParticleSystem.def("IsEmissionPaused", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.IsEmissionPaused()); }));
+	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t ptBufIdx) { Lua::PushInt(l, hComponent.TranslateBufferIndex(ptBufIdx)); }));
+	defCParticleSystem.def("IsEmissionPaused", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.IsEmissionPaused()); }));
 	defCParticleSystem.def("SetParent",
-	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, pragma::ecs::CParticleSystemComponent &hParent) { hComponent.SetParent(&hParent); }));
+	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, pragma::ecs::CParticleSystemComponent &hParent) { hComponent.SetParent(&hParent); }));
 	defCParticleSystem.def("RemoveChild",
-	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, pragma::ecs::CParticleSystemComponent &hChild) { hComponent.RemoveChild(&hChild); }));
-	defCParticleSystem.def("HasChild", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, pragma::ecs::CParticleSystemComponent &hChild) {
+	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, pragma::ecs::CParticleSystemComponent &hChild) { hComponent.RemoveChild(&hChild); }));
+	defCParticleSystem.def("HasChild", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, pragma::ecs::CParticleSystemComponent &hChild) {
 		Lua::PushBool(l, hComponent.HasChild(hChild));
 	}));
-	defCParticleSystem.def("GetParent", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
+	defCParticleSystem.def("GetParent", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
 		auto *hParent = hComponent.GetParent();
 		if(hParent == nullptr)
 			return;
 		Lua::Push(l, hParent->GetHandle());
 	}));
-	defCParticleSystem.def("GetParticleBuffer", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
+	defCParticleSystem.def("GetParticleBuffer", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
 		auto &particleBuffer = hComponent.GetParticleBuffer();
 		if(particleBuffer == nullptr)
 			return;
 		Lua::Push(l, particleBuffer);
 	}));
-	defCParticleSystem.def("GetParticleAnimationBuffer", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
+	defCParticleSystem.def("GetParticleAnimationBuffer", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
 		auto &animBuffer = hComponent.GetParticleAnimationBuffer();
 		if(animBuffer == nullptr)
 			return;
 		Lua::Push(l, animBuffer);
 	}));
-	defCParticleSystem.def("GetAnimationSpriteSheetBuffer", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
+	defCParticleSystem.def("GetAnimationSpriteSheetBuffer", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
 		auto &spriteSheetBuffer = hComponent.GetSpriteSheetBuffer();
 		if(spriteSheetBuffer == nullptr)
 			return;
 		Lua::Push(l, spriteSheetBuffer);
 	}));
-	defCParticleSystem.def("GetSpriteSheetAnimation", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
+	defCParticleSystem.def("GetSpriteSheetAnimation", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
 		auto *spriteSheetBuffer = hComponent.GetSpriteSheetAnimation();
 		if(spriteSheetBuffer == nullptr)
 			return;
 		Lua::Push(l, spriteSheetBuffer);
 	}));
-	defCParticleSystem.def("GetAnimationDescriptorSet", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
+	defCParticleSystem.def("GetAnimationDescriptorSet", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
 		auto &animDescSetGroup = hComponent.GetAnimationDescriptorSetGroup();
 		if(animDescSetGroup == nullptr)
 			return;
 		Lua::Push(l, animDescSetGroup);
 	}));
-	defCParticleSystem.def("IsAnimated", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.IsAnimated()); }));
-	defCParticleSystem.def("ShouldAutoSimulate", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.ShouldAutoSimulate()); }));
-	defCParticleSystem.def("SetAutoSimulate", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, bool)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool autoSimulate) { hComponent.SetAutoSimulate(autoSimulate); }));
-	defCParticleSystem.def("SetAutoSimulate", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, bool)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool autoSimulate) { hComponent.SetAutoSimulate(autoSimulate); }));
+	defCParticleSystem.def("IsAnimated", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.IsAnimated()); }));
+	defCParticleSystem.def("ShouldAutoSimulate", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.ShouldAutoSimulate()); }));
+	defCParticleSystem.def("SetAutoSimulate", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, bool)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool autoSimulate) { hComponent.SetAutoSimulate(autoSimulate); }));
+	defCParticleSystem.def("SetAutoSimulate", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, bool)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool autoSimulate) { hComponent.SetAutoSimulate(autoSimulate); }));
 	defCParticleSystem.def("InitializeFromParticleSystemDefinition",
-	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { Lua::PushBool(l, hComponent.SetupParticleSystem(name)); }));
-	defCParticleSystem.def("SetControlPointEntity", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, pragma::ecs::BaseEntity &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, pragma::ecs::BaseEntity &ent) {
+	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) { Lua::PushBool(l, hComponent.SetupParticleSystem(name)); }));
+	defCParticleSystem.def("SetControlPointEntity", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t, pragma::ecs::BaseEntity &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, pragma::ecs::BaseEntity &ent) {
 		hComponent.SetControlPointEntity(cpIdx, static_cast<CBaseEntity &>(ent));
 	}));
 	defCParticleSystem.def("SetControlPointPosition",
-	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const Vector3 &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, const Vector3 &pos) { hComponent.SetControlPointPosition(cpIdx, pos); }));
+	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const Vector3 &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, const Vector3 &pos) { hComponent.SetControlPointPosition(cpIdx, pos); }));
 	defCParticleSystem.def("SetControlPointRotation",
-	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const Quat &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, const Quat &rot) { hComponent.SetControlPointRotation(cpIdx, rot); }));
+	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const Quat &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, const Quat &rot) { hComponent.SetControlPointRotation(cpIdx, rot); }));
 	defCParticleSystem.def("SetControlPointPose",
-	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const umath::Transform &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, const umath::Transform &pose) { hComponent.SetControlPointPose(cpIdx, pose); }));
+	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const umath::Transform &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, const umath::Transform &pose) { hComponent.SetControlPointPose(cpIdx, pose); }));
 	defCParticleSystem.def("SetControlPointPose",
-	  static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const umath::Transform &, float)>(
-	    [](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, const umath::Transform &pose, float timeStamp) { hComponent.SetControlPointPose(cpIdx, pose, &timeStamp); }));
-	defCParticleSystem.def("GetControlPointEntity", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx) {
+	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const umath::Transform &, float)>(
+	    [](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, const umath::Transform &pose, float timeStamp) { hComponent.SetControlPointPose(cpIdx, pose, &timeStamp); }));
+	defCParticleSystem.def("GetControlPointEntity", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx) {
 		auto *ent = hComponent.GetControlPointEntity(cpIdx);
 		if(ent == nullptr)
 			return;
 		ent->GetLuaObject().push(l);
 	}));
-	defCParticleSystem.def("GetPrevControlPointPose", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx) {
+	defCParticleSystem.def("GetPrevControlPointPose", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx) {
 		float timeStamp;
 		auto pose = hComponent.GetPrevControlPointPose(cpIdx, &timeStamp);
 		if(pose.has_value() == false)
@@ -1019,7 +1019,7 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 		Lua::Push(l, *pose);
 		Lua::PushNumber(l, timeStamp);
 	}));
-	defCParticleSystem.def("GetControlPointPose", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx) {
+	defCParticleSystem.def("GetControlPointPose", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx) {
 		float timeStamp;
 		auto pose = hComponent.GetControlPointPose(cpIdx, &timeStamp);
 		if(pose.has_value() == false)
@@ -1027,13 +1027,13 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 		Lua::Push(l, *pose);
 		Lua::PushNumber(l, timeStamp);
 	}));
-	defCParticleSystem.def("GetControlPointPose", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &, uint32_t, float)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, float timeStamp) {
+	defCParticleSystem.def("GetControlPointPose", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t, float)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, float timeStamp) {
 		auto pose = hComponent.GetControlPointPose(cpIdx, timeStamp);
 		if(pose.has_value() == false)
 			return;
 		Lua::Push(l, *pose);
 	}));
-	defCParticleSystem.def("GenerateModel", static_cast<void (*)(lua_State *, pragma::ecs::CParticleSystemComponent &)>([](lua_State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
+	defCParticleSystem.def("GenerateModel", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) {
 		auto mdl = hComponent.GenerateModel();
 		if(mdl == nullptr)
 			return;
@@ -1041,14 +1041,14 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 	}));
 	defCParticleSystem.def("Clear", &pragma::ecs::CParticleSystemComponent::Clear);
 #if 0
-	defCParticleSystem.def("GetAnimationFrameCount",static_cast<void(*)(lua_State*,pragma::ecs::CParticleSystemComponent&)>([](lua_State *l,pragma::ecs::CParticleSystemComponent &hComponent) {
+	defCParticleSystem.def("GetAnimationFrameCount",static_cast<void(*)(lua::State*,pragma::ecs::CParticleSystemComponent&)>([](lua::State *l,pragma::ecs::CParticleSystemComponent &hComponent) {
 		
 		auto *animData = hComponent.GetRenderParticleAnimationStartData();
 		if(animData == nullptr)
 			return;
 		Lua::PushInt(l,animData->frames);
 	}));
-	defCParticleSystem.def("GetAnimationFPS",static_cast<void(*)(lua_State*,pragma::ecs::CParticleSystemComponent&)>([](lua_State *l,pragma::ecs::CParticleSystemComponent &hComponent) {
+	defCParticleSystem.def("GetAnimationFPS",static_cast<void(*)(lua::State*,pragma::ecs::CParticleSystemComponent&)>([](lua::State *l,pragma::ecs::CParticleSystemComponent &hComponent) {
 		
 		auto *animData = hComponent.GetAnimationData();
 		if(animData == nullptr)
@@ -1071,14 +1071,14 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 	defCParticleSystem.add_static_constant("ALPHA_MODE_COUNT", umath::to_integral(pragma::ParticleAlphaMode::Count));
 	register_particle_class(defCParticleSystem);
 	register_modifier_class(defCParticleSystem);
-	defCParticleSystem.scope[luabind::def("find_particle_system_file", static_cast<void (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &ptSystemName) {
+	defCParticleSystem.scope[luabind::def("find_particle_system_file", static_cast<void (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &ptSystemName) {
 		std::string ptName = Lua::CheckString(l, 1);
 		auto ptFileName = pragma::ecs::CParticleSystemComponent::FindParticleSystemFile(ptName);
 		if(ptFileName.has_value() == false)
 			return;
 		Lua::PushString(l, "particles/" + *ptFileName + ".wpt");
 	}))];
-	defCParticleSystem.scope[luabind::def("get_particle_system_definitions", static_cast<void (*)(lua_State *)>([](lua_State *l) {
+	defCParticleSystem.scope[luabind::def("get_particle_system_definitions", static_cast<void (*)(lua::State *)>([](lua::State *l) {
 		auto &ptSystemCache = pragma::ecs::CParticleSystemComponent::GetCachedParticleSystemData();
 		auto t = Lua::CreateTable(l);
 		for(auto &pair : ptSystemCache) {
@@ -1087,7 +1087,7 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 			Lua::SetTableValue(l, t);
 		}
 	}))];
-	defCParticleSystem.scope[luabind::def("get_particle_system_definition", static_cast<void (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &ptSystemName) {
+	defCParticleSystem.scope[luabind::def("get_particle_system_definition", static_cast<void (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &ptSystemName) {
 		auto lPtSystemName = ptSystemName;
 		ustring::to_lower(lPtSystemName);
 		auto &ptSystemCache = pragma::ecs::CParticleSystemComponent::GetCachedParticleSystemData();
@@ -1096,7 +1096,7 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 			return;
 		push_particle_system_definition_data(l, *it->second);
 	}))];
-	defCParticleSystem.scope[luabind::def("generate_model", static_cast<void (*)(lua_State *, luabind::object)>([](lua_State *l, luabind::object o) {
+	defCParticleSystem.scope[luabind::def("generate_model", static_cast<void (*)(lua::State *, luabind::object)>([](lua::State *l, luabind::object o) {
 		int32_t t = 1;
 		Lua::CheckTable(l, t);
 		auto n = Lua::GetObjectLength(l, t);
@@ -1116,7 +1116,7 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 			return;
 		Lua::Push(l, mdl);
 	}))];
-	defCParticleSystem.scope[luabind::def("read_header_data", static_cast<void (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &name) {
+	defCParticleSystem.scope[luabind::def("read_header_data", static_cast<void (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &name) {
 		auto fileHeader = pragma::ecs::CParticleSystemComponent::ReadHeader(*pragma::Engine::Get()->GetNetworkState(l), name);
 		if(fileHeader.has_value() == false)
 			return;
@@ -1151,15 +1151,15 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 		Lua::SetTableValue(l, t);
 	}))];
 	defCParticleSystem.scope[luabind::def("register_initializer",
-	  static_cast<void (*)(lua_State *, const std::string &, luabind::object)>([](lua_State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaParticleModifierManager::Type::Initializer, name, oClass); }))];
+	  static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaParticleModifierManager::Type::Initializer, name, oClass); }))];
 	defCParticleSystem
-	  .scope[luabind::def("register_operator", static_cast<void (*)(lua_State *, const std::string &, luabind::object)>([](lua_State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaParticleModifierManager::Type::Operator, name, oClass); }))];
+	  .scope[luabind::def("register_operator", static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaParticleModifierManager::Type::Operator, name, oClass); }))];
 	defCParticleSystem
-	  .scope[luabind::def("register_renderer", static_cast<void (*)(lua_State *, const std::string &, luabind::object)>([](lua_State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaParticleModifierManager::Type::Renderer, name, oClass); }))];
+	  .scope[luabind::def("register_renderer", static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaParticleModifierManager::Type::Renderer, name, oClass); }))];
 	defCParticleSystem
-	  .scope[luabind::def("register_emitter", static_cast<void (*)(lua_State *, const std::string &, luabind::object)>([](lua_State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaParticleModifierManager::Type::Emitter, name, oClass); }))];
+	  .scope[luabind::def("register_emitter", static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaParticleModifierManager::Type::Emitter, name, oClass); }))];
 
-	defCParticleSystem.scope[luabind::def("get_registered_initializers", static_cast<void (*)(lua_State *)>([](lua_State *l) {
+	defCParticleSystem.scope[luabind::def("get_registered_initializers", static_cast<void (*)(lua::State *)>([](lua::State *l) {
 		auto t = Lua::CreateTable(l);
 		auto *map = GetParticleModifierMap();
 		if(map == nullptr)
@@ -1171,7 +1171,7 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 			Lua::SetTableValue(l, t);
 		}
 	}))];
-	defCParticleSystem.scope[luabind::def("get_registered_operators", static_cast<void (*)(lua_State *)>([](lua_State *l) {
+	defCParticleSystem.scope[luabind::def("get_registered_operators", static_cast<void (*)(lua::State *)>([](lua::State *l) {
 		auto t = Lua::CreateTable(l);
 		auto *map = GetParticleModifierMap();
 		if(map == nullptr)
@@ -1183,7 +1183,7 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 			Lua::SetTableValue(l, t);
 		}
 	}))];
-	defCParticleSystem.scope[luabind::def("get_registered_renderers", static_cast<void (*)(lua_State *)>([](lua_State *l) {
+	defCParticleSystem.scope[luabind::def("get_registered_renderers", static_cast<void (*)(lua::State *)>([](lua::State *l) {
 		auto t = Lua::CreateTable(l);
 		auto *map = GetParticleModifierMap();
 		if(map == nullptr)
@@ -1197,7 +1197,7 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua_State *l, luabind::m
 	}))];
 #if 0
 	// TODO
-	defCParticleSystem.scope[luabind::def("get_registered_emitters",static_cast<void(*)(lua_State*,const std::string&,luabind::object)>([](lua_State *l,const std::string &name,luabind::object oClass) {
+	defCParticleSystem.scope[luabind::def("get_registered_emitters",static_cast<void(*)(lua::State*,const std::string&,luabind::object)>([](lua::State *l,const std::string &name,luabind::object oClass) {
 		auto t = Lua::CreateTable(l);
 		auto *map = GetParticleModifierMap();
 		if(map == nullptr)

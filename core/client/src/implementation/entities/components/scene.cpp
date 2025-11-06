@@ -144,7 +144,7 @@ void CSceneComponent::OnRemove()
 	if(--g_numScenes == 0)
 		g_entityInstanceIndexBuffer = nullptr;
 }
-void CSceneComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CSceneComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CSceneComponent::Initialize() { BaseEntityComponent::Initialize(); }
 
 void CSceneComponent::Setup(const CreateInfo &createInfo, SceneIndex sceneIndex)
@@ -634,7 +634,7 @@ void CSceneComponent::SetActiveCamera()
 /////////////////
 
 CEDrawSceneInfo::CEDrawSceneInfo(const util::DrawSceneInfo &drawSceneInfo) : drawSceneInfo {drawSceneInfo} {}
-void CEDrawSceneInfo::PushArguments(lua_State *l) { Lua::Push<const util::DrawSceneInfo *>(l, &drawSceneInfo); }
+void CEDrawSceneInfo::PushArguments(lua::State *l) { Lua::Push<const util::DrawSceneInfo *>(l, &drawSceneInfo); }
 
 ////////
 

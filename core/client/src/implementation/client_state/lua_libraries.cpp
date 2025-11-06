@@ -16,13 +16,13 @@ import pragma.gui;
 import pragma.platform;
 import pragma.string.unicode;
 
-static int log(lua_State *l, spdlog::level::level_enum logLevel)
+static int log(lua::State *l, spdlog::level::level_enum logLevel)
 {
 	auto &el = Lua::Check<::WIBase>(l, 1);
 	const char *msg = Lua::CheckString(l, 2);
 	std::string loggerName = "ui_" + el.GetClass();
 	int32_t argOffset = 2;
-	auto n = lua_gettop(l) - argOffset; /* number of arguments */
+	auto n = lua::get_top(l) - argOffset; /* number of arguments */
 	switch(n) {
 	case 0:
 		{
@@ -113,29 +113,29 @@ static void register_gui(Lua::Interface &lua)
 	  luabind::def("create", static_cast<::WIBase *(*)(CGame *, const std::string &, ::WIBase &, int32_t, int32_t, uint32_t, uint32_t)>(&Lua::gui::create)), luabind::def("create", static_cast<::WIBase *(*)(CGame *, const std::string &, ::WIBase &, int32_t, int32_t)>(&Lua::gui::create)),
 	  luabind::def("create", static_cast<::WIBase *(*)(CGame *, const std::string &, ::WIBase *)>(&Lua::gui::create)), luabind::def("create", static_cast<::WIBase *(*)(CGame *, const std::string &)>(&Lua::gui::create)),
 
-	  luabind::def("create_label", static_cast<::WIBase *(*)(lua_State *, const std::string &, ::WIBase &, int32_t, int32_t)>(&Lua::gui::create_label)), luabind::def("create_label", static_cast<::WIBase *(*)(lua_State *, const std::string &, ::WIBase &)>(&Lua::gui::create_label)),
-	  luabind::def("create_label", static_cast<::WIBase *(*)(lua_State *, const std::string &)>(&Lua::gui::create_label)),
+	  luabind::def("create_label", static_cast<::WIBase *(*)(lua::State *, const std::string &, ::WIBase &, int32_t, int32_t)>(&Lua::gui::create_label)), luabind::def("create_label", static_cast<::WIBase *(*)(lua::State *, const std::string &, ::WIBase &)>(&Lua::gui::create_label)),
+	  luabind::def("create_label", static_cast<::WIBase *(*)(lua::State *, const std::string &)>(&Lua::gui::create_label)),
 
-	  luabind::def("create_button", static_cast<::WIBase *(*)(lua_State *, const std::string &, ::WIBase &, int32_t, int32_t)>(&Lua::gui::create_button)), luabind::def("create_button", static_cast<::WIBase *(*)(lua_State *, const std::string &, ::WIBase &)>(&Lua::gui::create_button)),
-	  luabind::def("create_button", static_cast<::WIBase *(*)(lua_State *, const std::string &)>(&Lua::gui::create_button)),
+	  luabind::def("create_button", static_cast<::WIBase *(*)(lua::State *, const std::string &, ::WIBase &, int32_t, int32_t)>(&Lua::gui::create_button)), luabind::def("create_button", static_cast<::WIBase *(*)(lua::State *, const std::string &, ::WIBase &)>(&Lua::gui::create_button)),
+	  luabind::def("create_button", static_cast<::WIBase *(*)(lua::State *, const std::string &)>(&Lua::gui::create_button)),
 
-	  luabind::def("create_checkbox", static_cast<Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>>> (*)(lua_State *, const std::string &, ::WIBase &)>(&Lua::gui::create_checkbox)),
-	  luabind::def("create_checkbox", static_cast<Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>>> (*)(lua_State *, const std::string &)>(&Lua::gui::create_checkbox)),
+	  luabind::def("create_checkbox", static_cast<Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>>> (*)(lua::State *, const std::string &, ::WIBase &)>(&Lua::gui::create_checkbox)),
+	  luabind::def("create_checkbox", static_cast<Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>>> (*)(lua::State *, const std::string &)>(&Lua::gui::create_checkbox)),
 
 	  luabind::def("register", &Lua::gui::register_element), luabind::def("get_base_element", static_cast<::WIBase *(*)(const prosper::Window &)>(&Lua::gui::get_base_element)), luabind::def("get_base_element", static_cast<::WIBase *(*)()>(&Lua::gui::get_base_element)),
 
 	  luabind::def("create_render_target", &Lua::gui::create_render_target), luabind::def("create_color_image", &Lua::gui::create_color_image),
 
-	  luabind::def("get_element_at_position", static_cast<::WIBase *(*)(lua_State *)>(&Lua::gui::get_element_at_position)), luabind::def("get_element_at_position", static_cast<::WIBase *(*)(lua_State *, prosper::Window *)>(&Lua::gui::get_element_at_position)),
-	  luabind::def("get_element_at_position", static_cast<::WIBase *(*)(lua_State *, prosper::Window *, ::WIBase *)>(&Lua::gui::get_element_at_position)),
-	  luabind::def("get_element_at_position", static_cast<::WIBase *(*)(lua_State *, prosper::Window *, ::WIBase *, int32_t, int32_t)>(&Lua::gui::get_element_at_position)),
-	  luabind::def("get_element_at_position", static_cast<::WIBase *(*)(lua_State *, prosper::Window *, ::WIBase *, int32_t, int32_t, const Lua::func<bool, ::WIBase> &)>(&Lua::gui::get_element_at_position)),
+	  luabind::def("get_element_at_position", static_cast<::WIBase *(*)(lua::State *)>(&Lua::gui::get_element_at_position)), luabind::def("get_element_at_position", static_cast<::WIBase *(*)(lua::State *, prosper::Window *)>(&Lua::gui::get_element_at_position)),
+	  luabind::def("get_element_at_position", static_cast<::WIBase *(*)(lua::State *, prosper::Window *, ::WIBase *)>(&Lua::gui::get_element_at_position)),
+	  luabind::def("get_element_at_position", static_cast<::WIBase *(*)(lua::State *, prosper::Window *, ::WIBase *, int32_t, int32_t)>(&Lua::gui::get_element_at_position)),
+	  luabind::def("get_element_at_position", static_cast<::WIBase *(*)(lua::State *, prosper::Window *, ::WIBase *, int32_t, int32_t, const Lua::func<bool, ::WIBase> &)>(&Lua::gui::get_element_at_position)),
 
-	  luabind::def("get_element_under_cursor", static_cast<::WIBase *(*)(lua_State *, const Lua::func<bool, ::WIBase> &)>(&Lua::gui::get_element_under_cursor)),
-	  luabind::def("get_element_under_cursor", static_cast<::WIBase *(*)(lua_State *, const prosper::Window *, const Lua::func<bool, ::WIBase> &)>(&Lua::gui::get_element_under_cursor)),
-	  luabind::def("get_element_under_cursor", static_cast<::WIBase *(*)(lua_State *, const prosper::Window *)>(&Lua::gui::get_element_under_cursor)),
-	  luabind::def("get_element_under_cursor", static_cast<::WIBase *(*)(lua_State *, const prosper::Window *)>(&Lua::gui::get_element_under_cursor), luabind::default_parameter_policy<2, static_cast<const prosper::Window *>(nullptr)> {}),
-	  luabind::def("get_element_under_cursor", static_cast<::WIBase *(*)(lua_State *, ::WIBase &)>(&Lua::gui::get_element_under_cursor)),
+	  luabind::def("get_element_under_cursor", static_cast<::WIBase *(*)(lua::State *, const Lua::func<bool, ::WIBase> &)>(&Lua::gui::get_element_under_cursor)),
+	  luabind::def("get_element_under_cursor", static_cast<::WIBase *(*)(lua::State *, const prosper::Window *, const Lua::func<bool, ::WIBase> &)>(&Lua::gui::get_element_under_cursor)),
+	  luabind::def("get_element_under_cursor", static_cast<::WIBase *(*)(lua::State *, const prosper::Window *)>(&Lua::gui::get_element_under_cursor)),
+	  luabind::def("get_element_under_cursor", static_cast<::WIBase *(*)(lua::State *, const prosper::Window *)>(&Lua::gui::get_element_under_cursor), luabind::default_parameter_policy<2, static_cast<const prosper::Window *>(nullptr)> {}),
+	  luabind::def("get_element_under_cursor", static_cast<::WIBase *(*)(lua::State *, ::WIBase &)>(&Lua::gui::get_element_under_cursor)),
 
 	  luabind::def("find_focused_window", static_cast<prosper::Window *(*)()>([]() -> prosper::Window * { return WGUI::GetInstance().FindFocusedWindow(); }), luabind::pointer_policy<0> {}),
 	  luabind::def("get_primary_window", static_cast<prosper::Window *(*)()>([]() -> prosper::Window * { return &pragma::get_cengine()->GetRenderContext().GetWindow(); }), luabind::pointer_policy<0> {}),
@@ -157,9 +157,9 @@ static void register_gui(Lua::Interface &lua)
 	    "get_primary_monitor", +[]() -> pragma::platform::Monitor { return pragma::platform::get_primary_monitor(); }),
 	  luabind::def("find_window_under_cursor", static_cast<prosper::Window *(*)()>([]() -> prosper::Window * { return WGUI::GetInstance().FindWindowUnderCursor(); }), luabind::pointer_policy<0> {}),
 
-	  luabind::def("get_focused_element", static_cast<::WIBase *(*)(lua_State *)>(&Lua::gui::get_focused_element)), luabind::def("get_focused_element", static_cast<::WIBase *(*)(lua_State *, prosper::Window &)>(&Lua::gui::get_focused_element)),
-	  luabind::def("register_skin", static_cast<bool (*)(lua_State *, const std::string &, const luabind::tableT<void> &, const luabind::tableT<void> &)>(&Lua::gui::register_skin)),
-	  luabind::def("register_skin", static_cast<bool (*)(lua_State *, const std::string &, const luabind::tableT<void> &, const luabind::tableT<void> &, const std::string &)>(&Lua::gui::register_skin)), luabind::def("register_default_skin", &Lua::gui::register_default_skin),
+	  luabind::def("get_focused_element", static_cast<::WIBase *(*)(lua::State *)>(&Lua::gui::get_focused_element)), luabind::def("get_focused_element", static_cast<::WIBase *(*)(lua::State *, prosper::Window &)>(&Lua::gui::get_focused_element)),
+	  luabind::def("register_skin", static_cast<bool (*)(lua::State *, const std::string &, const luabind::tableT<void> &, const luabind::tableT<void> &)>(&Lua::gui::register_skin)),
+	  luabind::def("register_skin", static_cast<bool (*)(lua::State *, const std::string &, const luabind::tableT<void> &, const luabind::tableT<void> &, const std::string &)>(&Lua::gui::register_skin)), luabind::def("register_default_skin", &Lua::gui::register_default_skin),
 	  luabind::def(
 	    "set_focus_enabled", +[](const prosper::Window &window, bool focusEnabled) { WGUI::GetInstance().SetFocusEnabled(window, focusEnabled); }),
 	  luabind::def(
@@ -169,7 +169,7 @@ static void register_gui(Lua::Interface &lua)
 	  luabind::def("get_cursor_input_mode", Lua::gui::get_cursor_input_mode), luabind::def("set_cursor_input_mode", Lua::gui::set_cursor_input_mode), luabind::def("get_window_size", Lua::gui::get_window_size),
 	  luabind::def("inject_mouse_input", static_cast<bool (*)(pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier, const Vector2i &)>(&Lua::gui::inject_mouse_input)),
 	  luabind::def("inject_mouse_input", static_cast<bool (*)(pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier)>(&Lua::gui::inject_mouse_input)), luabind::def("inject_keyboard_input", Lua::gui::inject_keyboard_input), luabind::def("inject_char_input", Lua::gui::inject_char_input),
-	  luabind::def("inject_scroll_input", static_cast<bool (*)(lua_State *, const Vector2 &, const ::Vector2i &)>(&Lua::gui::inject_scroll_input)), luabind::def("inject_scroll_input", static_cast<bool (*)(lua_State *, const Vector2 &)>(&Lua::gui::inject_scroll_input)),
+	  luabind::def("inject_scroll_input", static_cast<bool (*)(lua::State *, const Vector2 &, const ::Vector2i &)>(&Lua::gui::inject_scroll_input)), luabind::def("inject_scroll_input", static_cast<bool (*)(lua::State *, const Vector2 &)>(&Lua::gui::inject_scroll_input)),
 	  luabind::def("find_element_by_name", static_cast<::WIBase *(*)(const std::string &)>([](const std::string &name) -> ::WIBase * {
 		  auto *p = WGUI::GetInstance().GetBaseElement();
 		  if(p == nullptr)
@@ -177,7 +177,7 @@ static void register_gui(Lua::Interface &lua)
 		  return p->FindDescendantByName(name);
 	  })),
 	  luabind::def("find_element_by_index", static_cast<::WIBase *(*)(uint64_t)>([](uint64_t idx) -> ::WIBase * { return WGUI::GetInstance().FindByIndex(idx); })),
-	  luabind::def("find_elements_by_name", static_cast<luabind::tableT<WIBase> (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &name) -> luabind::tableT<WIBase> {
+	  luabind::def("find_elements_by_name", static_cast<luabind::tableT<WIBase> (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &name) -> luabind::tableT<WIBase> {
 		  std::vector<WIHandle> results {};
 		  auto t = luabind::newtable(l);
 		  auto *p = WGUI::GetInstance().GetBaseElement();
@@ -191,7 +191,7 @@ static void register_gui(Lua::Interface &lua)
 		  }
 		  return t;
 	  })),
-	  luabind::def("find_elements_by_class", static_cast<luabind::tableT<WIBase> (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &className) -> luabind::tableT<WIBase> {
+	  luabind::def("find_elements_by_class", static_cast<luabind::tableT<WIBase> (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &className) -> luabind::tableT<WIBase> {
 		  auto t = luabind::newtable(l);
 		  auto *p = WGUI::GetInstance().GetBaseElement();
 		  if(p == nullptr)
@@ -210,12 +210,12 @@ static void register_gui(Lua::Interface &lua)
 		  fIterateChildren(*p);
 		  return t;
 	  })),
-	  luabind::def("get_console", &WIConsole::GetConsole), luabind::def("open_console", &WIConsole::Open), luabind::def("close_console", &WIConsole::Close), luabind::def("is_console_open", static_cast<bool (*)(lua_State *)>([](lua_State *l) -> bool {
+	  luabind::def("get_console", &WIConsole::GetConsole), luabind::def("open_console", &WIConsole::Open), luabind::def("close_console", &WIConsole::Close), luabind::def("is_console_open", static_cast<bool (*)(lua::State *)>([](lua::State *l) -> bool {
 		  auto *pConsole = WIConsole::GetConsole();
 		  auto *pFrame = pConsole ? pConsole->GetFrame() : nullptr;
 		  return pFrame ? pFrame->IsVisible() : false;
 	  })),
-	  luabind::def("get_delta_time", static_cast<float (*)(lua_State *)>([](lua_State *l) -> float { return WGUI::GetInstance().GetDeltaTime(); })), luabind::def("get_base_elements", static_cast<luabind::tableT<WIBase> (*)(lua_State *)>([](lua_State *l) -> luabind::tableT<WIBase> {
+	  luabind::def("get_delta_time", static_cast<float (*)(lua::State *)>([](lua::State *l) -> float { return WGUI::GetInstance().GetDeltaTime(); })), luabind::def("get_base_elements", static_cast<luabind::tableT<WIBase> (*)(lua::State *)>([](lua::State *l) -> luabind::tableT<WIBase> {
 		  auto &els = WGUI::GetInstance().GetBaseElements();
 		  auto t = luabind::newtable(l);
 		  int32_t idx = 1;
@@ -227,8 +227,8 @@ static void register_gui(Lua::Interface &lua)
 		  }
 		  return t;
 	  })),
-	  luabind::def("get_delta_time", static_cast<float (*)(lua_State *)>([](lua_State *l) -> float { return WGUI::GetInstance().GetDeltaTime(); })),
-	  luabind::def("get_next_gui_element_index", static_cast<uint64_t (*)(lua_State *)>([](lua_State *l) -> uint64_t { return WGUI::GetInstance().GetNextGuiElementIndex(); })),
+	  luabind::def("get_delta_time", static_cast<float (*)(lua::State *)>([](lua::State *l) -> float { return WGUI::GetInstance().GetDeltaTime(); })),
+	  luabind::def("get_next_gui_element_index", static_cast<uint64_t (*)(lua::State *)>([](lua::State *l) -> uint64_t { return WGUI::GetInstance().GetNextGuiElementIndex(); })),
 	  luabind::def("add_base_element", static_cast<::WIBase *(*)(const prosper::Window &)>([](const prosper::Window &window) -> ::WIBase * { return WGUI::GetInstance().AddBaseElement(&window); })),
 	  luabind::def("add_base_element", static_cast<::WIBase *(*)()>([]() -> ::WIBase * { return WGUI::GetInstance().AddBaseElement(); })),
 	  luabind::def(
@@ -696,7 +696,7 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
 	defInLay.def_readwrite("enabled", &InputBindingLayer::enabled);
 	defInLay.scope[(luabind::def(
 	                  "load",
-	                  +[](lua_State *l, const udm::AssetData &data) -> Lua::var<bool, std::vector<std::shared_ptr<InputBindingLayer>>> {
+	                  +[](lua::State *l, const udm::AssetData &data) -> Lua::var<bool, std::vector<std::shared_ptr<InputBindingLayer>>> {
 		                  std::vector<std::shared_ptr<InputBindingLayer>> layers;
 		                  std::string err;
 		                  if(!InputBindingLayer::Load(data, layers, err))
@@ -704,7 +704,7 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
 		                  return luabind::object {l, layers};
 	                  }),
 	  luabind::def(
-	    "save", +[](lua_State *l, const udm::AssetData &data, const std::vector<std::shared_ptr<InputBindingLayer>> &layers) {
+	    "save", +[](lua::State *l, const udm::AssetData &data, const std::vector<std::shared_ptr<InputBindingLayer>> &layers) {
 		    std::string err;
 		    return InputBindingLayer::Save(layers, data, err);
 	    }))];

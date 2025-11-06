@@ -63,7 +63,7 @@ export namespace pragma {
 		CHitboxBvhComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~CHitboxBvhComponent() override;
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnRemove() override;
 		virtual void OnEntitySpawn() override;
 		void InitializeBvh();

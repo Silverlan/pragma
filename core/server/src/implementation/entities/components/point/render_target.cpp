@@ -21,7 +21,7 @@ void SRenderTargetComponent::SendData(NetPacket &packet, networking::ClientRecip
 	packet->Write<int>(m_kvRenderDepth);
 }
 
-void SRenderTargetComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SRenderTargetComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void PointRenderTarget::Initialize()
 {

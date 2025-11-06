@@ -9,7 +9,7 @@ module pragma.client;
 import :entities.components.filter_entity_name;
 using namespace pragma;
 
-void CFilterNameComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CFilterNameComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CFilterEntityName::Initialize()
 {

@@ -14,7 +14,7 @@ export {
 		class DLLSERVER SPropDynamicComponent final : public BasePropDynamicComponent {
 		  public:
 			SPropDynamicComponent(pragma::ecs::BaseEntity &ent) : BasePropDynamicComponent(ent) {}
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};
 

@@ -12,7 +12,7 @@ import :engine;
 
 using namespace pragma;
 
-void CStaticBvhCacheComponent::InitializeLuaObject(lua_State *l) { return BaseStaticBvhCacheComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CStaticBvhCacheComponent::InitializeLuaObject(lua::State *l) { return BaseStaticBvhCacheComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CStaticBvhCacheComponent::Initialize() { BaseStaticBvhCacheComponent::Initialize(); }
 

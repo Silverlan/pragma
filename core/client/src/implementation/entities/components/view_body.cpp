@@ -29,7 +29,7 @@ void CViewBodyComponent::Initialize()
 	}
 	ent.AddComponent<CAnimatedComponent>();
 }
-void CViewBodyComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CViewBodyComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 //////////////
 

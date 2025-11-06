@@ -39,7 +39,7 @@ void SLiquidSurfaceSimulationComponent::Initialize()
 	BindEventUnhandled(baseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateSurfaceSimulator(); });
 }
 
-void SLiquidSurfaceSimulationComponent::InitializeLuaObject(lua_State *l) { return BaseLiquidSurfaceSimulationComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SLiquidSurfaceSimulationComponent::InitializeLuaObject(lua::State *l) { return BaseLiquidSurfaceSimulationComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SLiquidSurfaceSimulationComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { packet->Write<float>(m_kvMaxWaveHeight); }
 

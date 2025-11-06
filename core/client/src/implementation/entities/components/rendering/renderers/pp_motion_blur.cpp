@@ -86,7 +86,7 @@ CRendererPpMotionBlurComponent::CRendererPpMotionBlurComponent(pragma::ecs::Base
 		pragma::get_cengine()->GetShaderManager().RegisterShader("pp_motion_blur", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPMotionBlur(context, identifier); });
 	}
 }
-void CRendererPpMotionBlurComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CRendererPpMotionBlurComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CRendererPpMotionBlurComponent::ReloadVelocityTexture()
 {

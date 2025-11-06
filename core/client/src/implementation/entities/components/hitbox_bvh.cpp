@@ -118,7 +118,7 @@ void CHitboxBvhComponent::WaitForHitboxBvhUpdate()
 		m_hitboxBvhUpdate.wait();
 }
 pragma::bvh::HitboxBvhCache &CHitboxBvhComponent::GetGlobalBvhCache() const { return *g_hbBvhCache; }
-void CHitboxBvhComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CHitboxBvhComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CHitboxBvhComponent::Initialize()
 {

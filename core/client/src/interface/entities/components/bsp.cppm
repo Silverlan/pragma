@@ -16,7 +16,7 @@ export {
 		  public:
 			CBSPComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 			virtual void Initialize() override;
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		  protected:
 			void InitializeBSPTree(source_engine::bsp::File &bsp);
 		};

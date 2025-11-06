@@ -36,7 +36,7 @@ export namespace pragma {
 		void SetCollisionType(pragma::physics::COLLISIONTYPE collisiontype) override;
 
 		virtual bool ShouldTransmitNetData() const override { return true; }
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	};

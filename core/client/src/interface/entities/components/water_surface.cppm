@@ -22,7 +22,7 @@ export namespace pragma {
 		msys::CMaterial *GetWaterMaterial() const;
 		void SetWaterObject(BaseLiquidSurfaceSimulationComponent *ent);
 		CModelSubMesh *GetWaterSurfaceMesh() const;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnEntitySpawn() override;
 	  protected:
 		std::shared_ptr<PhysWaterSurfaceSimulator> m_surfaceSimulator = nullptr;

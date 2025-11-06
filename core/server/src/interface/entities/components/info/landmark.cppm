@@ -15,7 +15,7 @@ export {
 		class DLLSERVER SInfoLandmarkComponent final : public BaseInfoLandmarkComponent {
 		  public:
 			SInfoLandmarkComponent(pragma::ecs::BaseEntity &ent) : BaseInfoLandmarkComponent(ent) {}
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};
 

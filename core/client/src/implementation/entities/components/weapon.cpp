@@ -34,7 +34,7 @@ CWeaponComponent::~CWeaponComponent()
 	ClearOwnerCallbacks();
 }
 
-void CWeaponComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CWeaponComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CWeaponComponent::ReceiveData(NetPacket &packet)
 {
@@ -392,14 +392,14 @@ void CWeaponComponent::Attack4() { BaseWeaponComponent::Attack4(); }
 void CWeaponComponent::Reload() { BaseWeaponComponent::Reload(); }
 
 CEAttachToOwner::CEAttachToOwner(pragma::ecs::BaseEntity &owner, CViewModelComponent *optViewmodel) : owner {owner}, viewModel {optViewmodel} {}
-void CEAttachToOwner::PushArguments(lua_State *l)
+void CEAttachToOwner::PushArguments(lua::State *l)
 {
 	owner.GetLuaObject().push(l);
 	if(viewModel)
 		viewModel->PushLuaObject(l);
 }
 
-void CWeaponComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+void CWeaponComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseWeaponComponent::RegisterLuaBindings(l, modEnts);
 	auto def = pragma::lua::create_entity_component_class<pragma::CWeaponComponent, pragma::BaseWeaponComponent>("WeaponComponent");

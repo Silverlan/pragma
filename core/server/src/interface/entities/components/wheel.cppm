@@ -22,7 +22,7 @@ export {
 			virtual void SendSnapshotData(NetPacket &packet, pragma::BasePlayerComponent &pl) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual bool ShouldTransmitSnapshotData() const override { return true; }
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};
 	class DLLSERVER SWheel : public SBaseEntity {

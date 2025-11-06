@@ -18,7 +18,7 @@ void CPointConstraintSliderComponent::ReceiveData(NetPacket &packet)
 	m_kvLimitLinLow = packet->Read<float>();
 	m_kvLimitLinHigh = packet->Read<float>();
 }
-void CPointConstraintSliderComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CPointConstraintSliderComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////
 

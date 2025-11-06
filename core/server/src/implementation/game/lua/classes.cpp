@@ -204,7 +204,7 @@ void SGame::RegisterLuaClasses()
 
 	auto materialClassDef = luabind::class_<msys::Material>("Material");
 	Lua::Material::register_class(materialClassDef);
-	materialClassDef.def("SetShader", static_cast<void (*)(lua_State *, msys::Material &, const std::string &)>([](lua_State *l, msys::Material &mat, const std::string &shader) {
+	materialClassDef.def("SetShader", static_cast<void (*)(lua::State *, msys::Material &, const std::string &)>([](lua::State *l, msys::Material &mat, const std::string &shader) {
 		auto db = mat.GetPropertyDataBlock();
 		if(db == nullptr)
 			return;

@@ -15,7 +15,7 @@ export namespace pragma {
 		CExplosionComponent(pragma::ecs::BaseEntity &ent) : BaseEnvExplosionComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void Explode() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	};
 };
 

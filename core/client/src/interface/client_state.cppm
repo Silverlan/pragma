@@ -85,7 +85,7 @@ export {
 	  protected:
 		std::shared_ptr<Lua::Interface> m_luaGUI = nullptr;
 		void InitializeGUILua();
-		std::vector<std::function<luabind::object(lua_State *, WIBase &)>> m_guiLuaWrapperFactories;
+		std::vector<std::function<luabind::object(lua::State *, WIBase &)>> m_guiLuaWrapperFactories;
 
 		virtual void InitializeResourceManager() override;
 		void StartResourceTransfer();
@@ -114,8 +114,8 @@ export {
 		virtual void Close() override;
 		virtual ConVarMap *GetConVarMap() override;
 		bool IsConnected() const;
-		void AddGUILuaWrapperFactory(const std::function<luabind::object(lua_State *, WIBase &)> &f);
-		std::vector<std::function<luabind::object(lua_State *, WIBase &)>> &GetGUILuaWrapperFactories();
+		void AddGUILuaWrapperFactory(const std::function<luabind::object(lua::State *, WIBase &)> &f);
+		std::vector<std::function<luabind::object(lua::State *, WIBase &)>> &GetGUILuaWrapperFactories();
 		virtual msys::MaterialManager &GetMaterialManager() override;
 		virtual pragma::ModelSubMesh *CreateSubMesh() const override;
 		virtual ModelMesh *CreateMesh() const override;
@@ -129,7 +129,7 @@ export {
 
 		WIMainMenu *GetMainMenu();
 
-		lua_State *GetGUILuaState();
+		lua::State *GetGUILuaState();
 		Lua::Interface &GetGUILuaInterface();
 		bool IsMainMenuOpen();
 		void CloseMainMenu();

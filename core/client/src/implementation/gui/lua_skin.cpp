@@ -39,7 +39,7 @@ void WILuaSkin::Release(WIBase *el)
 			auto fRelease = elClasses[i]->releaseFunction;
 			Lua::CallFunction(
 			  m_lua,
-			  [this, fRelease, el](lua_State *) {
+			  [this, fRelease, el](lua::State *) {
 				  fRelease->push(m_lua);
 
 				  m_vars->push(m_lua);
@@ -77,7 +77,7 @@ void WILuaSkin::Initialize(WIBase *el)
 			auto fInit = elClasses[i]->initializeFunction;
 			Lua::CallFunction(
 			  m_lua,
-			  [this, fInit, el](lua_State *) {
+			  [this, fInit, el](lua::State *) {
 				  fInit->push(m_lua);
 
 				  m_vars->push(m_lua);
@@ -159,7 +159,7 @@ void WILuaSkin::InitializeBase(WILuaSkin *base)
 			auto dstVal = tDst[key];
 			if(dstVal) {
 				auto val = *it;
-				if(luabind::type(val) == LUA_TTABLE && luabind::type(dstVal) == LUA_TTABLE) {
+				if(static_cast<Lua::Type>(luabind::type(val)) == Lua::Type::Table && static_cast<Lua::Type>(luabind::type(dstVal)) == Lua::Type::Table) {
 					luabind::object oVal {val};
 					luabind::object oDstVal {dstVal};
 					mergeTable(oVal, oDstVal);
@@ -185,7 +185,7 @@ void WILuaSkin::InitializeBaseClass(WISkinClass &base, WISkinClass &cl)
 	}
 }
 
-void WILuaSkin::Initialize(lua_State *l, Settings &settings)
+void WILuaSkin::Initialize(lua::State *l, Settings &settings)
 {
 	m_lua = l;
 	m_rootClass.lua = l;
@@ -193,7 +193,7 @@ void WILuaSkin::Initialize(lua_State *l, Settings &settings)
 	MergeInto(l, settings);
 }
 
-void WILuaSkin::MergeInto(lua_State *l, Settings &settings)
+void WILuaSkin::MergeInto(lua::State *l, Settings &settings)
 {
 	settings.skin->push(l); /* 1 */
 	InitializeClasses();
@@ -204,7 +204,7 @@ void WILuaSkin::MergeInto(lua_State *l, Settings &settings)
 
 //////////////////////////////////
 
-WISkinClass::WISkinClass(lua_State *l) : lua(l) {}
+WISkinClass::WISkinClass(lua::State *l) : lua(l) {}
 WISkinClass *WISkinClass::Copy()
 {
 	WISkinClass *other = new WISkinClass(lua);

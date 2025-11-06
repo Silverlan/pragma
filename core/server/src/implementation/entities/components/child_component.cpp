@@ -13,7 +13,7 @@ import :networking.util;
 using namespace pragma;
 
 void SChildComponent::Initialize() { BaseChildComponent::Initialize(); }
-void SChildComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SChildComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SChildComponent::OnParentChanged(pragma::ecs::BaseEntity *parent)
 {

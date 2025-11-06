@@ -11,6 +11,6 @@ using namespace pragma;
 
 void SLiquidVolumeComponent::Initialize() { BaseLiquidVolumeComponent::Initialize(); }
 
-void SLiquidVolumeComponent::InitializeLuaObject(lua_State *l) { return BaseLiquidVolumeComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SLiquidVolumeComponent::InitializeLuaObject(lua::State *l) { return BaseLiquidVolumeComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SLiquidVolumeComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) {}

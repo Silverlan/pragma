@@ -31,7 +31,7 @@ void SLightSpotVolComponent::SetSpotlightTarget(pragma::ecs::BaseEntity &ent)
 	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetSpotlightTarget, p, pragma::networking::Protocol::SlowReliable);
 }
 
-void SLightSpotVolComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SLightSpotVolComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void EnvLightSpotVol::Initialize()
 {

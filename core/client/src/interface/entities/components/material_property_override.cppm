@@ -14,13 +14,13 @@ import :rendering.shader_graph.node_shader_material;
 export namespace pragma {
 	class DLLCLIENT CMaterialPropertyOverrideComponent final : public BaseEntityComponent, public DynamicMemberRegister {
 	  public:
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		CMaterialPropertyOverrideComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~CMaterialPropertyOverrideComponent() override;
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnEntitySpawn() override;
 		virtual void OnRemove() override;
 		msys::CMaterial *GetRenderMaterial(uint32_t matIdx) const;

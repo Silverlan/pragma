@@ -54,19 +54,19 @@ export {
 		}
 
 		void Lua_Initialize() {}
-		static void Lua_default_Initialize(lua_State *l, TParticleModifierLua<TModifier> &mod) { mod.Lua_Initialize(); }
+		static void Lua_default_Initialize(lua::State *l, TParticleModifierLua<TModifier> &mod) { mod.Lua_Initialize(); }
 
 		void Lua_OnParticleSystemStarted() {}
-		static void Lua_default_OnParticleSystemStarted(lua_State *l, TParticleModifierLua<TModifier> &mod) { mod.Lua_OnParticleSystemStarted(); }
+		static void Lua_default_OnParticleSystemStarted(lua::State *l, TParticleModifierLua<TModifier> &mod) { mod.Lua_OnParticleSystemStarted(); }
 
 		void Lua_OnParticleSystemStopped() {}
-		static void Lua_default_OnParticleSystemStopped(lua_State *l, TParticleModifierLua<TModifier> &mod) { mod.Lua_OnParticleSystemStopped(); }
+		static void Lua_default_OnParticleSystemStopped(lua::State *l, TParticleModifierLua<TModifier> &mod) { mod.Lua_OnParticleSystemStopped(); }
 
 		void Lua_OnParticleCreated(CParticle &pt) {}
-		static void Lua_default_OnParticleCreated(lua_State *l, TParticleModifierLua<TModifier> &mod, CParticle &pt) { mod.Lua_OnParticleCreated(pt); }
+		static void Lua_default_OnParticleCreated(lua::State *l, TParticleModifierLua<TModifier> &mod, CParticle &pt) { mod.Lua_OnParticleCreated(pt); }
 
 		void Lua_OnParticleDestroyed(CParticle &pt) {}
-		static void Lua_default_OnParticleDestroyed(lua_State *l, TParticleModifierLua<TModifier> &mod, CParticle &pt) { mod.Lua_OnParticleDestroyed(pt); }
+		static void Lua_default_OnParticleDestroyed(lua::State *l, TParticleModifierLua<TModifier> &mod, CParticle &pt) { mod.Lua_OnParticleDestroyed(pt); }
 	};
 
 	class DLLCLIENT CParticleInitializerLua : public TParticleModifierLua<CParticleInitializer> {
@@ -83,7 +83,7 @@ export {
 		virtual void Simulate(double tDelta) override;
 
 		void Lua_Simulate(CParticle &pt, float dt, float strength) {}
-		static void Lua_default_Simulate(lua_State *l, CParticleOperatorLua &mod, CParticle &pt, float dt, float strength) { mod.Lua_Simulate(pt, dt, strength); }
+		static void Lua_default_Simulate(lua::State *l, CParticleOperatorLua &mod, CParticle &pt, float dt, float strength) { mod.Lua_Simulate(pt, dt, strength); }
 	};
 
 	class DLLCLIENT CParticleRendererLua : public TParticleModifierLua<CParticleRenderer> {
@@ -95,7 +95,7 @@ export {
 		void SetShader(pragma::ShaderParticleBase *shader);
 
 		void Lua_Render(prosper::ICommandBuffer &drawCmd, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, bool bloom) {}
-		static void Lua_default_Render(lua_State *l, CParticleRendererLua &mod, prosper::ICommandBuffer &drawCmd, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, bool bloom) { mod.Lua_Render(drawCmd, scene, renderer, bloom); }
+		static void Lua_default_Render(lua::State *l, CParticleRendererLua &mod, prosper::ICommandBuffer &drawCmd, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, bool bloom) { mod.Lua_Render(drawCmd, scene, renderer, bloom); }
 	  private:
 		pragma::ShaderParticleBase *m_shader = nullptr;
 	};

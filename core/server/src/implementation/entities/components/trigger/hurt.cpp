@@ -9,7 +9,7 @@ import :entities.components.triggers.hurt;
 
 using namespace pragma;
 
-void STriggerHurtComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void STriggerHurtComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void TriggerHurt::Initialize()
 {

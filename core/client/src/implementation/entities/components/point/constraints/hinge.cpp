@@ -21,7 +21,7 @@ void CPointConstraintHingeComponent::ReceiveData(NetPacket &packet)
 	m_kvLimitBiasFactor = packet->Read<float>();
 	m_kvLimitRelaxationFactor = packet->Read<float>();
 }
-void CPointConstraintHingeComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CPointConstraintHingeComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CPointConstraintHinge::Initialize()
 {

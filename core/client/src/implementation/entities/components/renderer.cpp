@@ -58,7 +58,7 @@ void CRendererComponent::Initialize()
 	GetEntity().AddComponent<CRendererPpToneMappingComponent>();
 	GetEntity().AddComponent<CRendererPpFxaaComponent>();
 }
-void CRendererComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CRendererComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CRendererComponent::UpdateRenderSettings() { InvokeEventCallbacks(EVENT_UPDATE_RENDER_SETTINGS); }
 
@@ -170,14 +170,14 @@ void CRendererComponent::BeginRendering(const util::DrawSceneInfo &drawSceneInfo
 
 CEReloadRenderTarget::CEReloadRenderTarget(pragma::CSceneComponent &scene, uint32_t width, uint32_t height) : ComponentEvent {}, scene {scene}, width {width}, height {height} {}
 
-void CEReloadRenderTarget::PushArguments(lua_State *l)
+void CEReloadRenderTarget::PushArguments(lua::State *l)
 {
 	scene.PushLuaObject(l);
 	Lua::PushInt(l, width);
 	Lua::PushInt(l, height);
 }
 
-void CEReloadRenderTarget::HandleReturnValues(lua_State *l)
+void CEReloadRenderTarget::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -1))
 		resultSuccess = Lua::CheckBool(l, -1);
@@ -186,13 +186,13 @@ void CEReloadRenderTarget::HandleReturnValues(lua_State *l)
 ////////////
 
 CEBeginRendering::CEBeginRendering(const util::DrawSceneInfo &drawSceneInfo) : ComponentEvent {}, drawSceneInfo {drawSceneInfo} {}
-void CEBeginRendering::PushArguments(lua_State *l) { Lua::Push<const util::DrawSceneInfo *>(l, &drawSceneInfo); }
+void CEBeginRendering::PushArguments(lua::State *l) { Lua::Push<const util::DrawSceneInfo *>(l, &drawSceneInfo); }
 
 ////////////
 
 CEReloadBloomRenderTarget::CEReloadBloomRenderTarget(uint32_t width) : ComponentEvent {}, width {width} {}
-void CEReloadBloomRenderTarget::PushArguments(lua_State *l) { Lua::PushInt(l, width); }
-void CEReloadBloomRenderTarget::HandleReturnValues(lua_State *l)
+void CEReloadBloomRenderTarget::PushArguments(lua::State *l) { Lua::PushInt(l, width); }
+void CEReloadBloomRenderTarget::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -1))
 		resultSuccess = Lua::CheckBool(l, -1);
@@ -204,7 +204,7 @@ CEUpdateCameraData::CEUpdateCameraData(pragma::CSceneComponent &scene, pragma::C
 
 ////////////
 
-void CEGetSceneTexture::HandleReturnValues(lua_State *l)
+void CEGetSceneTexture::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -1))
 		resultTexture = &Lua::Check<prosper::Texture>(l, -1);
@@ -213,14 +213,14 @@ void CEGetSceneTexture::HandleReturnValues(lua_State *l)
 ////////////
 
 CERender::CERender(const util::DrawSceneInfo &drawSceneInfo) : drawSceneInfo {drawSceneInfo} {}
-void CERender::PushArguments(lua_State *l) { Lua::Push<const util::DrawSceneInfo *>(l, &drawSceneInfo); }
+void CERender::PushArguments(lua::State *l) { Lua::Push<const util::DrawSceneInfo *>(l, &drawSceneInfo); }
 
 ////////////
 
 CEUpdateRendererBuffer::CEUpdateRendererBuffer(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCommandBuffer) : drawCommandBuffer {drawCommandBuffer} {}
-void CEUpdateRendererBuffer::PushArguments(lua_State *l) { Lua::Push<std::shared_ptr<Lua::Vulkan::CommandBuffer>>(l, std::static_pointer_cast<Lua::Vulkan::CommandBuffer>(drawCommandBuffer)); }
+void CEUpdateRendererBuffer::PushArguments(lua::State *l) { Lua::Push<std::shared_ptr<Lua::Vulkan::CommandBuffer>>(l, std::static_pointer_cast<Lua::Vulkan::CommandBuffer>(drawCommandBuffer)); }
 
 ////////////
 
 CEOnRenderTargetReloaded::CEOnRenderTargetReloaded(bool success) : success {success} {}
-void CEOnRenderTargetReloaded::PushArguments(lua_State *l) { Lua::PushBool(l, success); }
+void CEOnRenderTargetReloaded::PushArguments(lua::State *l) { Lua::PushBool(l, success); }

@@ -13,6 +13,6 @@ export import pragma.prosper;
 
 export namespace Lua {
 	namespace Texture {
-		DLLCLIENT std::shared_ptr<prosper::Texture> GetVkTexture(lua_State *l, msys::Texture &tex);
+		DLLCLIENT std::shared_ptr<prosper::Texture> GetVkTexture(lua::State *l, msys::Texture &tex);
 	};
 };

@@ -14,7 +14,7 @@ void Lua::Locale::change_language(const std::string &lan) { pragma::locale::set_
 
 void Lua::Locale::set_localization(const std::string &id, const std::string &text) { pragma::locale::set_localization(id, text); }
 
-int Lua::Locale::get_text(lua_State *l)
+int Lua::Locale::get_text(lua::State *l)
 {
 	auto id = Lua::CheckString(l, 1);
 	std::vector<std::string> args {};
@@ -53,7 +53,7 @@ bool Lua::Locale::load(const std::string &fileName) { return ::pragma::locale::l
 
 const std::string &Lua::Locale::get_language() { return ::pragma::locale::get_language(); }
 
-int Lua::Locale::get_languages(lua_State *l)
+int Lua::Locale::get_languages(lua::State *l)
 {
 	auto languages = pragma::locale::get_languages();
 	auto t = Lua::CreateTable(l);
@@ -69,7 +69,7 @@ bool Lua::Locale::localize(const std::string &identifier, const std::string &lan
 bool Lua::Locale::relocalize(const std::string &identifier, const std::string &newIdentifier, const std::string &oldCategory, const std::string &newCategory) { return pragma::locale::relocalize(identifier, newIdentifier, oldCategory, newCategory); }
 
 void Lua::Locale::clear() { pragma::locale::clear(); }
-Lua::map<std::string, std::string> Lua::Locale::get_texts(lua_State *l)
+Lua::map<std::string, std::string> Lua::Locale::get_texts(lua::State *l)
 {
 	auto &texts = pragma::locale::get_texts();
 	auto t = luabind::newtable(l);
@@ -77,7 +77,7 @@ Lua::map<std::string, std::string> Lua::Locale::get_texts(lua_State *l)
 		t[pair.first] = pair.second.cpp_str();
 	return t;
 }
-Lua::opt<Lua::map<std::string, std::string>> Lua::Locale::parse(lua_State *l, const std::string &fileName, const std::string &lan)
+Lua::opt<Lua::map<std::string, std::string>> Lua::Locale::parse(lua::State *l, const std::string &fileName, const std::string &lan)
 {
 	std::unordered_map<std::string, pragma::string::Utf8String> texts;
 	auto res = pragma::locale::parse_file(fileName, lan, texts);
@@ -88,4 +88,4 @@ Lua::opt<Lua::map<std::string, std::string>> Lua::Locale::parse(lua_State *l, co
 		t[pair.first] = pair.second.cpp_str();
 	return t;
 }
-Lua::opt<Lua::map<std::string, std::string>> Lua::Locale::parse(lua_State *l, const std::string &fileName) { return parse(l, fileName, ::pragma::locale::get_language()); }
+Lua::opt<Lua::map<std::string, std::string>> Lua::Locale::parse(lua::State *l, const std::string &fileName) { return parse(l, fileName, ::pragma::locale::get_language()); }

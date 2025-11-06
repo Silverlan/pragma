@@ -74,7 +74,7 @@ bool SPlayerComponent::SendResource(const std::string &fileName) const
 	return r;
 }
 
-void SPlayerComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SPlayerComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SPlayerComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
@@ -421,14 +421,14 @@ void SPlayerComponent::OnTakeDamage(DamageInfo &info)
 namespace Lua {
 	namespace Player {
 		namespace Server {
-			static void Respawn(lua_State *l, pragma::SPlayerComponent &hEnt);
-			static void SetActionInput(lua_State *l, pragma::SPlayerComponent &hPl, UInt32 input, Bool pressed);
-			static bool SendResource(lua_State *l, pragma::SPlayerComponent &hPl, const std::string &name);
+			static void Respawn(lua::State *l, pragma::SPlayerComponent &hEnt);
+			static void SetActionInput(lua::State *l, pragma::SPlayerComponent &hPl, UInt32 input, Bool pressed);
+			static bool SendResource(lua::State *l, pragma::SPlayerComponent &hPl, const std::string &name);
 		};
 	};
 };
 
-void SPlayerComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+void SPlayerComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BasePlayerComponent::RegisterLuaBindings(l, modEnts);
 
@@ -440,18 +440,18 @@ void SPlayerComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEn
 	modEnts[def];
 }
 
-void Lua::Player::Server::Respawn(lua_State *l, pragma::SPlayerComponent &hEnt)
+void Lua::Player::Server::Respawn(lua::State *l, pragma::SPlayerComponent &hEnt)
 {
 	auto charComponent = hEnt.GetEntity().GetCharacterComponent();
 	if(charComponent.valid())
 		charComponent->Respawn();
 }
 
-void Lua::Player::Server::SetActionInput(lua_State *l, pragma::SPlayerComponent &hPl, UInt32 input, Bool pressed)
+void Lua::Player::Server::SetActionInput(lua::State *l, pragma::SPlayerComponent &hPl, UInt32 input, Bool pressed)
 {
 	auto *actionInputC = hPl.GetActionInputController();
 	if(actionInputC)
 		actionInputC->SetActionInput(static_cast<pragma::Action>(input), pressed);
 }
 
-bool Lua::Player::Server::SendResource(lua_State *l, pragma::SPlayerComponent &hPl, const std::string &name) { return hPl.SendResource(name); }
+bool Lua::Player::Server::SendResource(lua::State *l, pragma::SPlayerComponent &hPl, const std::string &name) { return hPl.SendResource(name); }

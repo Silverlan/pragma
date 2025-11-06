@@ -20,11 +20,11 @@ void SGame::RegisterLua()
 {
 	GetLuaInterface().SetIdentifier("sv");
 
-	lua_pushboolean(GetLuaState(), 1);
-	lua_setglobal(GetLuaState(), "SERVER");
+	lua::push_boolean(GetLuaState(), 1);
+	Lua::SetGlobal(GetLuaState(), "SERVER");
 
-	lua_pushboolean(GetLuaState(), 0);
-	lua_setglobal(GetLuaState(), "CLIENT");
+	lua::push_boolean(GetLuaState(), 0);
+	Lua::SetGlobal(GetLuaState(), "CLIENT");
 
 	auto engineMod = luabind::module(GetLuaState(), "engine");
 	engineMod[(luabind::def("load_library", Lua::engine::LoadLibrary), luabind::def("unload_library", Lua::engine::UnloadLibrary), luabind::def("is_library_loaded", Lua::engine::IsLibraryLoaded), luabind::def("library_exists", Lua::engine::LibraryExists),
@@ -40,7 +40,7 @@ void SGame::RegisterLua()
 	Lua::game::register_shared_functions(GetLuaState(), gameMod);
 	gameMod[(luabind::def("change_map", static_cast<void (*)(const std::string &, const std::string &)>(Lua::game::Server::change_level)), luabind::def("change_map", static_cast<void (*)(const std::string &)>(Lua::game::Server::change_level)),
 	  luabind::def("set_gravity", Lua::game::Server::set_gravity), luabind::def("get_gravity", Lua::game::Server::get_gravity), luabind::def("load_model", Lua::game::Server::load_model),
-	  luabind::def("load_sound_scripts", static_cast<void (*)(lua_State *, const std::string &, bool)>(Lua::engine::LoadSoundScripts)), luabind::def("load_sound_scripts", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::LoadSoundScripts)),
+	  luabind::def("load_sound_scripts", static_cast<void (*)(lua::State *, const std::string &, bool)>(Lua::engine::LoadSoundScripts)), luabind::def("load_sound_scripts", static_cast<void (*)(lua::State *, const std::string &)>(Lua::engine::LoadSoundScripts)),
 	  luabind::def("precache_model", Lua::engine::PrecacheModel_sv), luabind::def("get_model", Lua::engine::get_model), luabind::def("load_material", static_cast<msys::Material *(*)(const std::string &, bool)>(Lua::engine::server::LoadMaterial)),
 	  luabind::def("load_material", static_cast<msys::Material *(*)(const std::string &)>(Lua::engine::server::LoadMaterial)), luabind::def("set_time_scale", &Lua::game::set_time_scale))];
 
@@ -77,41 +77,41 @@ void SGame::RegisterLua()
 	Lua::register_base_entity_component(modEnts);
 	auto defEntCmp = pragma::lua::create_entity_component_class<pragma::SLuaBaseEntityComponent, luabind::bases<pragma::BaseLuaBaseEntityComponent, pragma::BaseEntityComponent>, pragma::lua::SLuaBaseEntityComponentHolder>("BaseEntityComponent");
 	defEntCmp.def(luabind::constructor<SBaseEntity &>());
-	defEntCmp.def("SendData", static_cast<void (*)(lua_State *, pragma::SLuaBaseEntityComponent &, NetPacket, pragma::networking::ClientRecipientFilter &)>([](lua_State *l, pragma::SLuaBaseEntityComponent &hComponent, NetPacket packet, pragma::networking::ClientRecipientFilter &rp) {
+	defEntCmp.def("SendData", static_cast<void (*)(lua::State *, pragma::SLuaBaseEntityComponent &, NetPacket, pragma::networking::ClientRecipientFilter &)>([](lua::State *l, pragma::SLuaBaseEntityComponent &hComponent, NetPacket packet, pragma::networking::ClientRecipientFilter &rp) {
 
 	}));
-	defEntCmp.def("ReceiveNetEvent", static_cast<void (*)(lua_State *, pragma::SLuaBaseEntityComponent &, pragma::SPlayerComponent &, uint32_t, NetPacket)>([](lua_State *l, pragma::SLuaBaseEntityComponent &hComponent, pragma::SPlayerComponent &pl, uint32_t evId, NetPacket packet) {
+	defEntCmp.def("ReceiveNetEvent", static_cast<void (*)(lua::State *, pragma::SLuaBaseEntityComponent &, pragma::SPlayerComponent &, uint32_t, NetPacket)>([](lua::State *l, pragma::SLuaBaseEntityComponent &hComponent, pragma::SPlayerComponent &pl, uint32_t evId, NetPacket packet) {
 
 	}));
-	defEntCmp.def("SendSnapshotData", static_cast<void (*)(lua_State *, pragma::SLuaBaseEntityComponent &, NetPacket, pragma::SPlayerComponent &)>([](lua_State *l, pragma::SLuaBaseEntityComponent &hComponent, NetPacket packet, pragma::SPlayerComponent &pl) {
+	defEntCmp.def("SendSnapshotData", static_cast<void (*)(lua::State *, pragma::SLuaBaseEntityComponent &, NetPacket, pragma::SPlayerComponent &)>([](lua::State *l, pragma::SLuaBaseEntityComponent &hComponent, NetPacket packet, pragma::SPlayerComponent &pl) {
 
 	}));
 	defEntCmp.def("SendNetEvent",
-	  static_cast<void (*)(lua_State *, pragma::SLuaBaseEntityComponent &, uint32_t, uint32_t, NetPacket &, pragma::networking::TargetRecipientFilter &)>(
-	    [](lua_State *l, pragma::SLuaBaseEntityComponent &hComponent, uint32_t protocol, uint32_t eventId, NetPacket &packet, pragma::networking::TargetRecipientFilter &rf) {
+	  static_cast<void (*)(lua::State *, pragma::SLuaBaseEntityComponent &, uint32_t, uint32_t, NetPacket &, pragma::networking::TargetRecipientFilter &)>(
+	    [](lua::State *l, pragma::SLuaBaseEntityComponent &hComponent, uint32_t protocol, uint32_t eventId, NetPacket &packet, pragma::networking::TargetRecipientFilter &rf) {
 		    static_cast<SBaseEntity &>(hComponent.GetEntity()).SendNetEvent(eventId, packet, static_cast<pragma::networking::Protocol>(protocol), rf);
 	    }));
-	defEntCmp.def("SendNetEvent", static_cast<void (*)(lua_State *, pragma::SLuaBaseEntityComponent &, uint32_t, uint32_t, NetPacket &)>([](lua_State *l, pragma::SLuaBaseEntityComponent &hComponent, uint32_t protocol, uint32_t eventId, NetPacket &packet) {
+	defEntCmp.def("SendNetEvent", static_cast<void (*)(lua::State *, pragma::SLuaBaseEntityComponent &, uint32_t, uint32_t, NetPacket &)>([](lua::State *l, pragma::SLuaBaseEntityComponent &hComponent, uint32_t protocol, uint32_t eventId, NetPacket &packet) {
 		static_cast<SBaseEntity &>(hComponent.GetEntity()).SendNetEvent(eventId, packet, static_cast<pragma::networking::Protocol>(protocol));
 	}));
-	defEntCmp.def("SendNetEvent", static_cast<void (*)(lua_State *, pragma::SLuaBaseEntityComponent &, uint32_t, uint32_t)>([](lua_State *l, pragma::SLuaBaseEntityComponent &hComponent, uint32_t protocol, uint32_t eventId) {
+	defEntCmp.def("SendNetEvent", static_cast<void (*)(lua::State *, pragma::SLuaBaseEntityComponent &, uint32_t, uint32_t)>([](lua::State *l, pragma::SLuaBaseEntityComponent &hComponent, uint32_t protocol, uint32_t eventId) {
 		static_cast<SBaseEntity &>(hComponent.GetEntity()).SendNetEvent(eventId, static_cast<pragma::networking::Protocol>(protocol));
 	}));
 	defEntCmp.def("SendNetEvent",
-	  static_cast<void (*)(lua_State *, pragma::SLuaBaseEntityComponent &, uint32_t, NetPacket &)>([](lua_State *l, pragma::SLuaBaseEntityComponent &hComponent, uint32_t eventId, NetPacket &packet) { static_cast<SBaseEntity &>(hComponent.GetEntity()).SendNetEvent(eventId, packet); }));
+	  static_cast<void (*)(lua::State *, pragma::SLuaBaseEntityComponent &, uint32_t, NetPacket &)>([](lua::State *l, pragma::SLuaBaseEntityComponent &hComponent, uint32_t eventId, NetPacket &packet) { static_cast<SBaseEntity &>(hComponent.GetEntity()).SendNetEvent(eventId, packet); }));
 	register_shared_lua_component_methods<pragma::SLuaBaseEntityComponent>(defEntCmp);
 	modEnts[defEntCmp];
 
 	auto modNet = luabind::module(GetLuaState(), "net");
-	modNet[(luabind::def("broadcast", &Lua::net::server::broadcast), luabind::def("send", static_cast<void (*)(lua_State *, pragma::networking::Protocol, const std::string &, NetPacket &, const luabind::tableT<pragma::SPlayerComponent> &)>(&Lua::net::server::send)),
-	  luabind::def("send", static_cast<void (*)(lua_State *, pragma::networking::Protocol, const std::string &, NetPacket &, pragma::networking::TargetRecipientFilter &)>(&Lua::net::server::send)),
-	  luabind::def("send", static_cast<void (*)(lua_State *, pragma::networking::Protocol, const std::string &, NetPacket &, pragma::SPlayerComponent &)>(&Lua::net::server::send)), luabind::def("receive", &Lua::net::server::receive),
+	modNet[(luabind::def("broadcast", &Lua::net::server::broadcast), luabind::def("send", static_cast<void (*)(lua::State *, pragma::networking::Protocol, const std::string &, NetPacket &, const luabind::tableT<pragma::SPlayerComponent> &)>(&Lua::net::server::send)),
+	  luabind::def("send", static_cast<void (*)(lua::State *, pragma::networking::Protocol, const std::string &, NetPacket &, pragma::networking::TargetRecipientFilter &)>(&Lua::net::server::send)),
+	  luabind::def("send", static_cast<void (*)(lua::State *, pragma::networking::Protocol, const std::string &, NetPacket &, pragma::SPlayerComponent &)>(&Lua::net::server::send)), luabind::def("receive", &Lua::net::server::receive),
 	  luabind::def("register", &Lua::net::server::register_net_message), luabind::def("register_event", &Lua::net::register_event))];
 	auto netPacketClassDef = luabind::class_<NetPacket>("Packet");
 	Lua::NetPacket::Server::register_class(netPacketClassDef);
-	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua_State *, ::NetPacket &, util::WeakHandle<pragma::SPlayerComponent> &)>([](lua_State *l, ::NetPacket &packet, util::WeakHandle<pragma::SPlayerComponent> &pl) { nwm::write_player(packet, pl.get()); }));
-	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua_State *, ::NetPacket &, EntityHandle &)>([](lua_State *l, ::NetPacket &packet, EntityHandle &hEnt) { nwm::write_player(packet, hEnt.get()); }));
-	netPacketClassDef.def("ReadPlayer", static_cast<void (*)(lua_State *, ::NetPacket &)>([](lua_State *l, ::NetPacket &packet) {
+	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, util::WeakHandle<pragma::SPlayerComponent> &)>([](lua::State *l, ::NetPacket &packet, util::WeakHandle<pragma::SPlayerComponent> &pl) { nwm::write_player(packet, pl.get()); }));
+	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, EntityHandle &)>([](lua::State *l, ::NetPacket &packet, EntityHandle &hEnt) { nwm::write_player(packet, hEnt.get()); }));
+	netPacketClassDef.def("ReadPlayer", static_cast<void (*)(lua::State *, ::NetPacket &)>([](lua::State *l, ::NetPacket &packet) {
 		auto *pl = static_cast<pragma::SPlayerComponent *>(nwm::read_player(packet));
 		if(pl == nullptr)
 			return;
@@ -126,15 +126,15 @@ void SGame::RegisterLua()
 	classDefRp.def("AddRecipient", &Lua::RecipientFilter::AddRecipient);
 	classDefRp.def("RemoveRecipient", &Lua::RecipientFilter::RemoveRecipient);
 	classDefRp.def("HasRecipient", &Lua::RecipientFilter::HasRecipient);
-	classDefRp.def("GetFilterType", static_cast<void (*)(lua_State *, pragma::networking::TargetRecipientFilter &)>([](lua_State *l, pragma::networking::TargetRecipientFilter &rp) { Lua::PushInt(l, umath::to_integral(rp.GetFilterType())); }));
+	classDefRp.def("GetFilterType", static_cast<void (*)(lua::State *, pragma::networking::TargetRecipientFilter &)>([](lua::State *l, pragma::networking::TargetRecipientFilter &rp) { Lua::PushInt(l, umath::to_integral(rp.GetFilterType())); }));
 	classDefRp.def("SetFilterType",
-	  static_cast<void (*)(lua_State *, pragma::networking::TargetRecipientFilter &, uint32_t)>([](lua_State *l, pragma::networking::TargetRecipientFilter &rp, uint32_t filterType) { rp.SetFilterType(static_cast<pragma::networking::ClientRecipientFilter::FilterType>(filterType)); }));
+	  static_cast<void (*)(lua::State *, pragma::networking::TargetRecipientFilter &, uint32_t)>([](lua::State *l, pragma::networking::TargetRecipientFilter &rp, uint32_t filterType) { rp.SetFilterType(static_cast<pragma::networking::ClientRecipientFilter::FilterType>(filterType)); }));
 	classDefRp.add_static_constant("TYPE_INCLUDE", umath::to_integral(pragma::networking::ClientRecipientFilter::FilterType::Include));
 	classDefRp.add_static_constant("TYPE_EXCLUDE", umath::to_integral(pragma::networking::ClientRecipientFilter::FilterType::Exclude));
 	modNet[classDefRp];
 
 	auto classDefClRp = luabind::class_<pragma::networking::ClientRecipientFilter>("ClientRecipientFilter");
-	classDefClRp.def("GetRecipients", static_cast<void (*)(lua_State *, pragma::networking::ClientRecipientFilter &)>([](lua_State *l, pragma::networking::ClientRecipientFilter &rp) {
+	classDefClRp.def("GetRecipients", static_cast<void (*)(lua::State *, pragma::networking::ClientRecipientFilter &)>([](lua::State *l, pragma::networking::ClientRecipientFilter &rp) {
 		auto *sv = ServerState::Get()->GetServer();
 		if(sv == nullptr)
 			return;
@@ -160,7 +160,7 @@ void SGame::RegisterLua()
 void SGame::InitializeLua()
 {
 	pragma::Game::InitializeLua();
-	CallCallbacks<void, lua_State *>("OnLuaInitialized", GetLuaState());
+	CallCallbacks<void, lua::State *>("OnLuaInitialized", GetLuaState());
 }
 
 void SGame::SetupLua()

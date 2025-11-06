@@ -16,7 +16,7 @@ export namespace pragma {
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		CLightMapDataCacheComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 
 		void SetLightMapDataCachePath(const std::string &cachePath);
 		const std::string &GetLightMapDataCachePath() const;

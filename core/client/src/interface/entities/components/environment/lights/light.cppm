@@ -17,14 +17,14 @@ export import :rendering.light_data;
 export namespace pragma {
 	struct DLLCLIENT CEShouldPassEntity : public ComponentEvent {
 		CEShouldPassEntity(const CBaseEntity &entity, uint32_t &renderFlags);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		const CBaseEntity &entity;
 		uint32_t &renderFlags;
 		bool shouldPass = true;
 	};
 	struct DLLCLIENT CEShouldPassEntityMesh : public ComponentEvent {
 		CEShouldPassEntityMesh(const CBaseEntity &ent, const CModelMesh &mesh, uint32_t &renderFlags);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		const CBaseEntity &entity;
 		const CModelMesh &mesh;
 		uint32_t &renderFlags;
@@ -32,30 +32,30 @@ export namespace pragma {
 	};
 	struct DLLCLIENT CEShouldPassMesh : public ComponentEvent {
 		CEShouldPassMesh(const pragma::Model &model, const CModelSubMesh &mesh);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		const pragma::Model &model;
 		const CModelSubMesh &mesh;
 		bool shouldPass = true;
 	};
 	struct DLLCLIENT CEShouldUpdateRenderPass : public ComponentEvent {
 		CEShouldUpdateRenderPass();
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		bool shouldUpdate = false;
 	};
 	struct DLLCLIENT CEGetTransformationMatrix : public ComponentEvent {
 		CEGetTransformationMatrix(uint32_t index);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		uint32_t index;
 		Mat4 *transformation = nullptr;
 	};
 	struct DLLCLIENT CEHandleShadowMap : public ComponentEvent {
 		CEHandleShadowMap();
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		BaseEntityComponent *resultShadow = nullptr;
 	};
 	struct DLLCLIENT CEOnShadowBufferInitialized : public ComponentEvent {
 		CEOnShadowBufferInitialized(prosper::IBuffer &shadowBuffer);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		prosper::IBuffer &shadowBuffer;
 	};
 	class DLLCLIENT CBaseLightComponent : public BaseEnvLightComponent, public CBaseNetComponent {
@@ -125,7 +125,7 @@ export namespace pragma {
 		bool ShouldRender();
 		void UpdateTransformationMatrix(const Mat4 &biasMatrix, const Mat4 &viewMatrix, const Mat4 &projectionMatrix);
 		virtual void OnEntitySpawn() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		void SetStateFlag(StateFlags flag, bool enabled);
 
 		void SetMorphTargetsInShadowsEnabled(bool enabled);

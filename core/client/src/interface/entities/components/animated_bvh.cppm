@@ -30,7 +30,7 @@ export namespace pragma {
 	  public:
 		CAnimatedBvhComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnRemove() override;
 		void SetUpdateLazily(bool updateLazily);
 		bool ShouldUpdateLazily() const;

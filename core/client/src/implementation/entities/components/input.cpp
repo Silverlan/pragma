@@ -13,7 +13,7 @@ using namespace pragma;
 
 CInputComponent::CInputComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent {ent} {}
 CInputComponent::~CInputComponent() {}
-void CInputComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CInputComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CInputComponent::Initialize() { BaseEntityComponent::Initialize(); }
 
 static CVar cvAcceleration = GetClientConVar("cl_mouse_acceleration");

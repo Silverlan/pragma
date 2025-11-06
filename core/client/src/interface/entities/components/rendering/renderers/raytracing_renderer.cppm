@@ -16,7 +16,7 @@ export {
 		class DLLCLIENT CRaytracingRendererComponent final : public BaseEntityComponent {
 		  public:
 			CRaytracingRendererComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		  private:
 		};
 	};

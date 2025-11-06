@@ -9,7 +9,7 @@ import :entities.components.decal;
 
 using namespace pragma;
 
-void SDecalComponent::InitializeLuaObject(lua_State *l) { return BaseEnvDecalComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SDecalComponent::InitializeLuaObject(lua::State *l) { return BaseEnvDecalComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SDecalComponent::Initialize()
 {

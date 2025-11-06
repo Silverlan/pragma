@@ -143,7 +143,7 @@ void COpticalCameraComponent::RegisterMembers(pragma::EntityComponentManager &co
 	}
 }
 
-void COpticalCameraComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void COpticalCameraComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void COpticalCameraComponent::Initialize() { BaseEntityComponent::Initialize(); }
 

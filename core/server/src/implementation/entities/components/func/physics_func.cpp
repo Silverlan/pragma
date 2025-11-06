@@ -31,7 +31,7 @@ pragma::physics::PhysObj *SFuncPhysicsComponent::InitializePhysics()
 
 /////////////
 
-void SFuncPhysicsComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SFuncPhysicsComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void FuncPhysics::Initialize()
 {

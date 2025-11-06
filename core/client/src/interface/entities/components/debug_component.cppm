@@ -162,7 +162,7 @@ export namespace pragma {
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
 		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
 		std::string m_text = {};
@@ -182,7 +182,7 @@ export namespace pragma {
 	  public:
 		CDebugPointComponent(pragma::ecs::BaseEntity &ent) : TCBaseDebugComponent<BaseDebugPointComponent>(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	  protected:
 		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
@@ -194,7 +194,7 @@ export namespace pragma {
 	  public:
 		CDebugLineComponent(pragma::ecs::BaseEntity &ent) : TCBaseDebugComponent<BaseDebugLineComponent>(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	  protected:
 		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
@@ -209,7 +209,7 @@ export namespace pragma {
 
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
 		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
 	};
@@ -220,7 +220,7 @@ export namespace pragma {
 	  public:
 		CDebugSphereComponent(pragma::ecs::BaseEntity &ent) : TCBaseDebugComponent<BaseDebugSphereComponent>(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
 		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
 	};
@@ -235,7 +235,7 @@ export namespace pragma {
 
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
 		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
 	};
@@ -249,7 +249,7 @@ export namespace pragma {
 
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
 		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
 	};
@@ -259,7 +259,7 @@ export namespace pragma {
 	class DLLCLIENT CDebugPlaneComponent final : public TCBaseDebugComponent<BaseDebugPlaneComponent>, public CBaseNetComponent {
 	  public:
 		CDebugPlaneComponent(pragma::ecs::BaseEntity &ent) : TCBaseDebugComponent<BaseDebugPlaneComponent>(ent) {}
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	  protected:

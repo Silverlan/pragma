@@ -11,7 +11,7 @@ import :entities.components.lights.base;
 
 using namespace pragma;
 
-void SLightPointComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SLightPointComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SLightPointComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {

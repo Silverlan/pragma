@@ -24,4 +24,4 @@ void SHealthComponent::SetHealth(unsigned short health)
 	p->Write<unsigned short>(health);
 	ServerState::Get()->SendPacket("ent_sethealth", p, pragma::networking::Protocol::SlowReliable);
 }
-void SHealthComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SHealthComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

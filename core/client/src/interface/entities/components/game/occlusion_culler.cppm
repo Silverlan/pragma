@@ -14,7 +14,7 @@ export namespace pragma {
 	class DLLCLIENT COcclusionCullerComponent final : public BaseEntityComponent {
 	  public:
 		COcclusionCullerComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		virtual void OnEntitySpawn() override;

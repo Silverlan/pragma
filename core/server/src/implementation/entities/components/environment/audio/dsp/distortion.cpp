@@ -36,7 +36,7 @@ void SSoundDspDistortionComponent::SendData(NetPacket &packet, networking::Clien
 	packet->Write<float>(m_kvEqCenter);
 	packet->Write<float>(m_kvEqBandwidth);
 }
-void SSoundDspDistortionComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SSoundDspDistortionComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////////
 

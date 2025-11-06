@@ -386,7 +386,7 @@ CReflectionProbeComponent::UpdateStatus CReflectionProbeComponent::UpdateIBLData
 	return UpdateStatus::Complete;
 }
 
-void CReflectionProbeComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CReflectionProbeComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 {

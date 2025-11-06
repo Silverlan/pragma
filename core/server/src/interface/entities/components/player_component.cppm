@@ -12,7 +12,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SPlayerComponent final : public BasePlayerComponent, public SBaseNetComponent {
 	  public:
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		// Same as PlayActivity, but doesn't automatically transmit to clients if called serverside
 		virtual bool PlaySharedActivity(pragma::Activity activity) override;
@@ -53,7 +53,7 @@ export namespace pragma {
 		virtual void ApplyViewRotationOffset(const EulerAngles &ang, float dur = 0.5f) override;
 
 		virtual bool ShouldTransmitNetData() const override { return true; };
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
 		mutable util::WeakHandle<networking::IServerClient> m_session = {};
 		bool m_bGameReady;

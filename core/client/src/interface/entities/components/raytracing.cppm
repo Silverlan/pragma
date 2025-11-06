@@ -62,7 +62,7 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual ~CRaytracingComponent() override;
 
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  private:
 		void InitializeModelRaytracingBuffers();
 		void InitializeBufferUpdateCallback();

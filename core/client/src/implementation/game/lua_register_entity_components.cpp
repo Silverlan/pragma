@@ -13,18 +13,18 @@ import :scripting.lua.bindings.scene;
 
 namespace Lua {
 	namespace PBRConverter {
-		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, pragma::Model &mdl, uint32_t width, uint32_t height, uint32_t samples, bool rebuild) { hComponent.GenerateAmbientOcclusionMaps(mdl, width, height, samples, rebuild); }
-		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, pragma::Model &mdl, uint32_t width, uint32_t height, uint32_t samples) { hComponent.GenerateAmbientOcclusionMaps(mdl, width, height, samples); }
-		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, pragma::Model &mdl, uint32_t width, uint32_t height) { hComponent.GenerateAmbientOcclusionMaps(mdl, width, height); }
-		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, pragma::Model &mdl) { hComponent.GenerateAmbientOcclusionMaps(mdl); }
+		static void GenerateAmbientOcclusionMaps(lua::State *l, pragma::CPBRConverterComponent &hComponent, pragma::Model &mdl, uint32_t width, uint32_t height, uint32_t samples, bool rebuild) { hComponent.GenerateAmbientOcclusionMaps(mdl, width, height, samples, rebuild); }
+		static void GenerateAmbientOcclusionMaps(lua::State *l, pragma::CPBRConverterComponent &hComponent, pragma::Model &mdl, uint32_t width, uint32_t height, uint32_t samples) { hComponent.GenerateAmbientOcclusionMaps(mdl, width, height, samples); }
+		static void GenerateAmbientOcclusionMaps(lua::State *l, pragma::CPBRConverterComponent &hComponent, pragma::Model &mdl, uint32_t width, uint32_t height) { hComponent.GenerateAmbientOcclusionMaps(mdl, width, height); }
+		static void GenerateAmbientOcclusionMaps(lua::State *l, pragma::CPBRConverterComponent &hComponent, pragma::Model &mdl) { hComponent.GenerateAmbientOcclusionMaps(mdl); }
 
-		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, pragma::ecs::BaseEntity &ent, uint32_t width, uint32_t height, uint32_t samples, bool rebuild) { hComponent.GenerateAmbientOcclusionMaps(ent, width, height, samples, rebuild); }
-		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, pragma::ecs::BaseEntity &ent, uint32_t width, uint32_t height, uint32_t samples) { hComponent.GenerateAmbientOcclusionMaps(ent, width, height, samples); }
-		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, pragma::ecs::BaseEntity &ent, uint32_t width, uint32_t height) { hComponent.GenerateAmbientOcclusionMaps(ent, width, height); }
-		static void GenerateAmbientOcclusionMaps(lua_State *l, pragma::CPBRConverterComponent &hComponent, pragma::ecs::BaseEntity &ent) { hComponent.GenerateAmbientOcclusionMaps(ent); }
+		static void GenerateAmbientOcclusionMaps(lua::State *l, pragma::CPBRConverterComponent &hComponent, pragma::ecs::BaseEntity &ent, uint32_t width, uint32_t height, uint32_t samples, bool rebuild) { hComponent.GenerateAmbientOcclusionMaps(ent, width, height, samples, rebuild); }
+		static void GenerateAmbientOcclusionMaps(lua::State *l, pragma::CPBRConverterComponent &hComponent, pragma::ecs::BaseEntity &ent, uint32_t width, uint32_t height, uint32_t samples) { hComponent.GenerateAmbientOcclusionMaps(ent, width, height, samples); }
+		static void GenerateAmbientOcclusionMaps(lua::State *l, pragma::CPBRConverterComponent &hComponent, pragma::ecs::BaseEntity &ent, uint32_t width, uint32_t height) { hComponent.GenerateAmbientOcclusionMaps(ent, width, height); }
+		static void GenerateAmbientOcclusionMaps(lua::State *l, pragma::CPBRConverterComponent &hComponent, pragma::ecs::BaseEntity &ent) { hComponent.GenerateAmbientOcclusionMaps(ent); }
 	};
 	namespace Decal {
-		static void create_from_projection(lua_State *l, pragma::CDecalComponent &hComponent, luabind::object tMeshes, const umath::ScaledTransform &pose)
+		static void create_from_projection(lua::State *l, pragma::CDecalComponent &hComponent, luabind::object tMeshes, const umath::ScaledTransform &pose)
 		{
 
 			int32_t t = 2;
@@ -65,11 +65,11 @@ namespace Lua {
 			}
 			Lua::PushBool(l, hComponent.ApplyDecal(meshesDatas));
 		}
-		static void create_from_projection(lua_State *l, pragma::CDecalComponent &hComponent, luabind::object tMeshes) { create_from_projection(l, hComponent, tMeshes, {}); }
+		static void create_from_projection(lua::State *l, pragma::CDecalComponent &hComponent, luabind::object tMeshes) { create_from_projection(l, hComponent, tMeshes, {}); }
 	};
 };
 
-static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l, pragma::CReflectionProbeComponent &hRp, luabind::table<> tEnts, bool renderJob)
+static bool reflection_probe_capture_ibl_reflections_from_scene(lua::State *l, pragma::CReflectionProbeComponent &hRp, luabind::table<> tEnts, bool renderJob)
 {
 
 	std::vector<pragma::ecs::BaseEntity *> ents {};
@@ -82,9 +82,9 @@ static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l, pr
 	}
 	return hRp.CaptureIBLReflectionsFromScene(&ents, renderJob);
 }
-static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l, pragma::CReflectionProbeComponent &hRp, luabind::table<> tEnts) { return reflection_probe_capture_ibl_reflections_from_scene(l, hRp, tEnts, false); }
-static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l, pragma::CReflectionProbeComponent &hRp, bool renderJob) { return hRp.CaptureIBLReflectionsFromScene(nullptr, renderJob); }
-static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l, pragma::CReflectionProbeComponent &hRp) { return hRp.CaptureIBLReflectionsFromScene(); }
+static bool reflection_probe_capture_ibl_reflections_from_scene(lua::State *l, pragma::CReflectionProbeComponent &hRp, luabind::table<> tEnts) { return reflection_probe_capture_ibl_reflections_from_scene(l, hRp, tEnts, false); }
+static bool reflection_probe_capture_ibl_reflections_from_scene(lua::State *l, pragma::CReflectionProbeComponent &hRp, bool renderJob) { return hRp.CaptureIBLReflectionsFromScene(nullptr, renderJob); }
+static bool reflection_probe_capture_ibl_reflections_from_scene(lua::State *l, pragma::CReflectionProbeComponent &hRp) { return hRp.CaptureIBLReflectionsFromScene(); }
 
 #ifdef _WIN32
 namespace pragma {
@@ -99,16 +99,16 @@ namespace pragma {
 };
 #endif
 
-static void bsp_register_class(lua_State *l, luabind::module_ &entsMod, luabind::class_<pragma::CWorldComponent, pragma::BaseWorldComponent> &defWorld)
+static void bsp_register_class(lua::State *l, luabind::module_ &entsMod, luabind::class_<pragma::CWorldComponent, pragma::BaseWorldComponent> &defWorld)
 {
 	auto defBspTree = luabind::class_<::util::BSPTree>("BSPTree");
-	defBspTree.def("IsValid", static_cast<void (*)(lua_State *, ::util::BSPTree &)>([](lua_State *l, ::util::BSPTree &tree) { Lua::PushBool(l, tree.IsValid()); }));
-	defBspTree.def("IsClusterVisible", static_cast<void (*)(lua_State *, ::util::BSPTree &, uint32_t, uint32_t)>([](lua_State *l, ::util::BSPTree &tree, uint32_t clusterSrc, uint32_t clusterDst) { Lua::PushBool(l, tree.IsClusterVisible(clusterSrc, clusterDst)); }));
-	defBspTree.def("GetRootNode", static_cast<void (*)(lua_State *, ::util::BSPTree &)>([](lua_State *l, ::util::BSPTree &tree) {
+	defBspTree.def("IsValid", static_cast<void (*)(lua::State *, ::util::BSPTree &)>([](lua::State *l, ::util::BSPTree &tree) { Lua::PushBool(l, tree.IsValid()); }));
+	defBspTree.def("IsClusterVisible", static_cast<void (*)(lua::State *, ::util::BSPTree &, uint32_t, uint32_t)>([](lua::State *l, ::util::BSPTree &tree, uint32_t clusterSrc, uint32_t clusterDst) { Lua::PushBool(l, tree.IsClusterVisible(clusterSrc, clusterDst)); }));
+	defBspTree.def("GetRootNode", static_cast<void (*)(lua::State *, ::util::BSPTree &)>([](lua::State *l, ::util::BSPTree &tree) {
 		auto &node = tree.GetRootNode();
 		Lua::Push(l, &node);
 	}));
-	defBspTree.def("GetNodes", static_cast<void (*)(lua_State *, ::util::BSPTree &)>([](lua_State *l, ::util::BSPTree &tree) {
+	defBspTree.def("GetNodes", static_cast<void (*)(lua::State *, ::util::BSPTree &)>([](lua::State *l, ::util::BSPTree &tree) {
 		auto &nodes = tree.GetNodes();
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
@@ -118,7 +118,7 @@ static void bsp_register_class(lua_State *l, luabind::module_ &entsMod, luabind:
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	defBspTree.def("GetClusterVisibility", static_cast<void (*)(lua_State *, ::util::BSPTree &)>([](lua_State *l, ::util::BSPTree &tree) {
+	defBspTree.def("GetClusterVisibility", static_cast<void (*)(lua::State *, ::util::BSPTree &)>([](lua::State *l, ::util::BSPTree &tree) {
 		auto &clusterVisibility = tree.GetClusterVisibility();
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
@@ -128,14 +128,14 @@ static void bsp_register_class(lua_State *l, luabind::module_ &entsMod, luabind:
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	defBspTree.def("GetClusterCount", static_cast<void (*)(lua_State *, ::util::BSPTree &)>([](lua_State *l, ::util::BSPTree &tree) { Lua::PushInt(l, tree.GetClusterCount()); }));
-	defBspTree.def("FindLeafNode", static_cast<void (*)(lua_State *, ::util::BSPTree &, const Vector3 &)>([](lua_State *l, ::util::BSPTree &tree, const Vector3 &origin) {
+	defBspTree.def("GetClusterCount", static_cast<void (*)(lua::State *, ::util::BSPTree &)>([](lua::State *l, ::util::BSPTree &tree) { Lua::PushInt(l, tree.GetClusterCount()); }));
+	defBspTree.def("FindLeafNode", static_cast<void (*)(lua::State *, ::util::BSPTree &, const Vector3 &)>([](lua::State *l, ::util::BSPTree &tree, const Vector3 &origin) {
 		auto *node = tree.FindLeafNode(origin);
 		if(node == nullptr)
 			return;
 		Lua::Push(l, &node);
 	}));
-	defBspTree.def("FindLeafNodesInAABB", static_cast<luabind::object (*)(lua_State *, ::util::BSPTree &, const Vector3 &, const Vector3 &)>([](lua_State *l, ::util::BSPTree &tree, const Vector3 &min, const Vector3 &max) -> luabind::object {
+	defBspTree.def("FindLeafNodesInAABB", static_cast<luabind::object (*)(lua::State *, ::util::BSPTree &, const Vector3 &, const Vector3 &)>([](lua::State *l, ::util::BSPTree &tree, const Vector3 &min, const Vector3 &max) -> luabind::object {
 		auto nodes = tree.FindLeafNodesInAabb(min, max);
 		auto t = luabind::newtable(l);
 		int32_t idx = 1;
@@ -145,13 +145,13 @@ static void bsp_register_class(lua_State *l, luabind::module_ &entsMod, luabind:
 	}));
 
 	auto defBspNode = luabind::class_<::util::BSPTree::Node>("Node");
-	defBspNode.def("GetIndex", static_cast<::util::BSPTree::ChildIndex (*)(lua_State *, ::util::BSPTree::Node &)>([](lua_State *l, ::util::BSPTree::Node &node) -> ::util::BSPTree::ChildIndex { return node.index; }));
-	defBspNode.def("IsLeaf", static_cast<void (*)(lua_State *, ::util::BSPTree::Node &)>([](lua_State *l, ::util::BSPTree::Node &node) { Lua::PushBool(l, node.leaf); }));
-	defBspNode.def("GetBounds", static_cast<void (*)(lua_State *, ::util::BSPTree::Node &)>([](lua_State *l, ::util::BSPTree::Node &node) {
+	defBspNode.def("GetIndex", static_cast<::util::BSPTree::ChildIndex (*)(lua::State *, ::util::BSPTree::Node &)>([](lua::State *l, ::util::BSPTree::Node &node) -> ::util::BSPTree::ChildIndex { return node.index; }));
+	defBspNode.def("IsLeaf", static_cast<void (*)(lua::State *, ::util::BSPTree::Node &)>([](lua::State *l, ::util::BSPTree::Node &node) { Lua::PushBool(l, node.leaf); }));
+	defBspNode.def("GetBounds", static_cast<void (*)(lua::State *, ::util::BSPTree::Node &)>([](lua::State *l, ::util::BSPTree::Node &node) {
 		Lua::Push<Vector3>(l, node.min);
 		Lua::Push<Vector3>(l, node.max);
 	}));
-	defBspNode.def("GetChildren", static_cast<void (*)(lua_State *, ::util::BSPTree::Node &)>([](lua_State *l, ::util::BSPTree::Node &node) {
+	defBspNode.def("GetChildren", static_cast<void (*)(lua::State *, ::util::BSPTree::Node &)>([](lua::State *l, ::util::BSPTree::Node &node) {
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
 		for(auto &child : node.children) {
@@ -159,14 +159,14 @@ static void bsp_register_class(lua_State *l, luabind::module_ &entsMod, luabind:
 			Lua::Push(l, child);
 		}
 	}));
-	defBspNode.def("GetCluster", static_cast<void (*)(lua_State *, ::util::BSPTree::Node &)>([](lua_State *l, ::util::BSPTree::Node &node) { Lua::PushInt(l, node.cluster); }));
-	defBspNode.def("GetVisibleLeafAreaBounds", static_cast<void (*)(lua_State *, ::util::BSPTree::Node &)>([](lua_State *l, ::util::BSPTree::Node &node) {
+	defBspNode.def("GetCluster", static_cast<void (*)(lua::State *, ::util::BSPTree::Node &)>([](lua::State *l, ::util::BSPTree::Node &node) { Lua::PushInt(l, node.cluster); }));
+	defBspNode.def("GetVisibleLeafAreaBounds", static_cast<void (*)(lua::State *, ::util::BSPTree::Node &)>([](lua::State *l, ::util::BSPTree::Node &node) {
 		Lua::Push<Vector3>(l, node.minVisible);
 		Lua::Push<Vector3>(l, node.maxVisible);
 	}));
-	defBspNode.def("GetInternalNodePlane", static_cast<void (*)(lua_State *, ::util::BSPTree::Node &)>([](lua_State *l, ::util::BSPTree::Node &node) { Lua::Push<umath::Plane>(l, node.plane); }));
-	defBspNode.def("GetInternalNodeFirstFaceIndex", static_cast<void (*)(lua_State *, ::util::BSPTree::Node &)>([](lua_State *l, ::util::BSPTree::Node &node) { Lua::PushInt(l, node.firstFace); }));
-	defBspNode.def("GetInternalNodeFaceCount", static_cast<void (*)(lua_State *, ::util::BSPTree::Node &)>([](lua_State *l, ::util::BSPTree::Node &node) { Lua::PushInt(l, node.numFaces); }));
+	defBspNode.def("GetInternalNodePlane", static_cast<void (*)(lua::State *, ::util::BSPTree::Node &)>([](lua::State *l, ::util::BSPTree::Node &node) { Lua::Push<umath::Plane>(l, node.plane); }));
+	defBspNode.def("GetInternalNodeFirstFaceIndex", static_cast<void (*)(lua::State *, ::util::BSPTree::Node &)>([](lua::State *l, ::util::BSPTree::Node &node) { Lua::PushInt(l, node.firstFace); }));
+	defBspNode.def("GetInternalNodeFaceCount", static_cast<void (*)(lua::State *, ::util::BSPTree::Node &)>([](lua::State *l, ::util::BSPTree::Node &node) { Lua::PushInt(l, node.numFaces); }));
 	defBspTree.scope[defBspNode];
 	defWorld.scope[defBspTree];
 }
@@ -278,7 +278,7 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CBSPComponent);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CGenericComponent);
 #endif
 
-void RegisterLuaEntityComponents2_cl(lua_State *l, luabind::module_ &entsMod);
+void RegisterLuaEntityComponents2_cl(lua::State *l, luabind::module_ &entsMod);
 void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {
 	pragma::Game::RegisterLuaEntityComponents(entsMod);
@@ -340,74 +340,74 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCEye.def("GetViewTarget", &pragma::CEyeComponent::GetViewTarget);
 	defCEye.def("SetViewTarget", &pragma::CEyeComponent::SetViewTarget);
 	defCEye.def("ClearViewTarget", &pragma::CEyeComponent::ClearViewTarget);
-	defCEye.def("GetEyeShift", static_cast<std::optional<Vector3> (*)(lua_State *, pragma::CEyeComponent &, uint32_t)>([](lua_State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex) -> std::optional<Vector3> {
+	defCEye.def("GetEyeShift", static_cast<std::optional<Vector3> (*)(lua::State *, pragma::CEyeComponent &, uint32_t)>([](lua::State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex) -> std::optional<Vector3> {
 		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return {};
 		return config->eyeShift;
 	}));
-	defCEye.def("SetEyeShift", static_cast<void (*)(lua_State *, pragma::CEyeComponent &, uint32_t, const Vector3 &)>([](lua_State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex, const Vector3 &eyeShift) {
+	defCEye.def("SetEyeShift", static_cast<void (*)(lua::State *, pragma::CEyeComponent &, uint32_t, const Vector3 &)>([](lua::State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex, const Vector3 &eyeShift) {
 		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return;
 		config->eyeShift = eyeShift;
 	}));
-	defCEye.def("GetEyeJitter", static_cast<std::optional<Vector2> (*)(lua_State *, pragma::CEyeComponent &, uint32_t)>([](lua_State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex) -> std::optional<Vector2> {
+	defCEye.def("GetEyeJitter", static_cast<std::optional<Vector2> (*)(lua::State *, pragma::CEyeComponent &, uint32_t)>([](lua::State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex) -> std::optional<Vector2> {
 		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return {};
 		return config->jitter;
 	}));
-	defCEye.def("SetEyeJitter", static_cast<void (*)(lua_State *, pragma::CEyeComponent &, uint32_t, const Vector2 &)>([](lua_State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex, const Vector2 &eyeJitter) {
+	defCEye.def("SetEyeJitter", static_cast<void (*)(lua::State *, pragma::CEyeComponent &, uint32_t, const Vector2 &)>([](lua::State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex, const Vector2 &eyeJitter) {
 		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return;
 		config->jitter = eyeJitter;
 	}));
-	defCEye.def("GetEyeSize", static_cast<std::optional<float> (*)(lua_State *, pragma::CEyeComponent &, uint32_t)>([](lua_State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex) -> std::optional<float> {
+	defCEye.def("GetEyeSize", static_cast<std::optional<float> (*)(lua::State *, pragma::CEyeComponent &, uint32_t)>([](lua::State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex) -> std::optional<float> {
 		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return {};
 		return config->eyeSize;
 	}));
-	defCEye.def("SetEyeSize", static_cast<void (*)(lua_State *, pragma::CEyeComponent &, uint32_t, float)>([](lua_State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex, float eyeSize) {
+	defCEye.def("SetEyeSize", static_cast<void (*)(lua::State *, pragma::CEyeComponent &, uint32_t, float)>([](lua::State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex, float eyeSize) {
 		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return;
 		config->eyeSize = eyeSize;
 	}));
-	defCEye.def("SetIrisDilation", static_cast<void (*)(lua_State *, pragma::CEyeComponent &, uint32_t, float)>([](lua_State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex, float dilation) {
+	defCEye.def("SetIrisDilation", static_cast<void (*)(lua::State *, pragma::CEyeComponent &, uint32_t, float)>([](lua::State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex, float dilation) {
 		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return;
 		config->dilation = dilation;
 	}));
-	defCEye.def("GetIrisDilation", static_cast<std::optional<float> (*)(lua_State *, pragma::CEyeComponent &, uint32_t)>([](lua_State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex) -> std::optional<float> {
+	defCEye.def("GetIrisDilation", static_cast<std::optional<float> (*)(lua::State *, pragma::CEyeComponent &, uint32_t)>([](lua::State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex) -> std::optional<float> {
 		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return {};
 		return config->dilation;
 	}));
-	defCEye.def("CalcEyeballPose", static_cast<std::pair<umath::Transform, umath::Transform> (*)(lua_State *, pragma::CEyeComponent &, uint32_t)>([](lua_State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex) -> std::pair<umath::Transform, umath::Transform> {
+	defCEye.def("CalcEyeballPose", static_cast<std::pair<umath::Transform, umath::Transform> (*)(lua::State *, pragma::CEyeComponent &, uint32_t)>([](lua::State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex) -> std::pair<umath::Transform, umath::Transform> {
 		umath::Transform bonePose;
 		auto pose = hEye.CalcEyeballPose(eyeIndex, &bonePose);
 		return {pose, bonePose};
 	}));
 	defCEye.def(
-	  "FindEyeballIndex", +[](lua_State *l, pragma::CEyeComponent &hEye, uint32_t skinMatIdx) -> std::optional<uint32_t> {
+	  "FindEyeballIndex", +[](lua::State *l, pragma::CEyeComponent &hEye, uint32_t skinMatIdx) -> std::optional<uint32_t> {
 		  uint32_t eyeballIdx;
 		  if(!hEye.FindEyeballIndex(skinMatIdx, eyeballIdx))
 			  return {};
 		  return eyeballIdx;
 	  });
 	defCEye.def(
-	  "GetEyeballProjectionVectors", +[](lua_State *l, pragma::CEyeComponent &hEye, uint32_t eyeballIndex) -> std::optional<std::pair<Vector4, Vector4>> {
+	  "GetEyeballProjectionVectors", +[](lua::State *l, pragma::CEyeComponent &hEye, uint32_t eyeballIndex) -> std::optional<std::pair<Vector4, Vector4>> {
 		  Vector4 projU, projV;
 		  if(!hEye.GetEyeballProjectionVectors(eyeballIndex, projU, projV))
 			  return {};
 		  return std::pair<Vector4, Vector4> {projU, projV};
 	  });
-	defCEye.def("GetEyeballState", static_cast<pragma::CEyeComponent::EyeballState *(*)(lua_State *, pragma::CEyeComponent &, uint32_t)>([](lua_State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex) -> pragma::CEyeComponent::EyeballState * {
+	defCEye.def("GetEyeballState", static_cast<pragma::CEyeComponent::EyeballState *(*)(lua::State *, pragma::CEyeComponent &, uint32_t)>([](lua::State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex) -> pragma::CEyeComponent::EyeballState * {
 		auto *eyeballData = hEye.GetEyeballData(eyeIndex);
 		if(eyeballData == nullptr)
 			return nullptr;
@@ -466,14 +466,14 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.def("Resize", &pragma::CSceneComponent::Resize);
 	// defCScene.def("BeginDraw",&pragma::CSceneComponent::BeginDraw);
 	defCScene.def(
-	  "UpdateBuffers", +[](lua_State *l, pragma::CSceneComponent &scene, prosper::ICommandBuffer &hCommandBuffer) {
+	  "UpdateBuffers", +[](lua::State *l, pragma::CSceneComponent &scene, prosper::ICommandBuffer &hCommandBuffer) {
 		  if(hCommandBuffer.IsPrimary() == false)
 			  return;
 		  auto pCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
 		  scene.UpdateBuffers(pCmdBuffer);
 	  });
 	defCScene.def(
-	  "GetWorldEnvironment", +[](lua_State *l, pragma::CSceneComponent &scene) -> std::shared_ptr<WorldEnvironment> {
+	  "GetWorldEnvironment", +[](lua::State *l, pragma::CSceneComponent &scene) -> std::shared_ptr<WorldEnvironment> {
 		  auto *worldEnv = scene.GetWorldEnvironment();
 		  if(worldEnv == nullptr)
 			  return nullptr;
@@ -499,11 +499,11 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.def("GetSceneIndex", static_cast<pragma::CSceneComponent::SceneIndex (pragma::CSceneComponent::*)() const>(&pragma::CSceneComponent::GetSceneIndex));
 	defCScene.def("SetParticleSystemColorFactor", &pragma::CSceneComponent::SetParticleSystemColorFactor);
 	defCScene.def("GetParticleSystemColorFactor", &pragma::CSceneComponent::GetParticleSystemColorFactor, luabind::copy_policy<0> {});
-	//defCScene.def("GetRenderParticleSystems",static_cast<std::vector<pragma::ecs::CParticleSystemComponent*>(*)(lua_State*,pragma::CSceneComponent&)>([](lua_State *l,pragma::CSceneComponent &scene) -> std::vector<pragma::ecs::CParticleSystemComponent*> {
+	//defCScene.def("GetRenderParticleSystems",static_cast<std::vector<pragma::ecs::CParticleSystemComponent*>(*)(lua::State*,pragma::CSceneComponent&)>([](lua::State *l,pragma::CSceneComponent &scene) -> std::vector<pragma::ecs::CParticleSystemComponent*> {
 	//	return scene.GetSceneRenderDesc().GetCulledParticles();
 	//}));
 	defCScene.def(
-	  "GetRenderQueue", +[](lua_State *l, pragma::CSceneComponent &scene, pragma::rendering::SceneRenderPass renderMode, bool translucent) -> pragma::rendering::RenderQueue * {
+	  "GetRenderQueue", +[](lua::State *l, pragma::CSceneComponent &scene, pragma::rendering::SceneRenderPass renderMode, bool translucent) -> pragma::rendering::RenderQueue * {
 		  auto *renderQueue = scene.GetSceneRenderDesc().GetRenderQueue(renderMode, translucent);
 		  if(renderQueue == nullptr)
 			  return nullptr;
@@ -565,8 +565,8 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defCOccl];
 
 	auto defCDecal = pragma::lua::create_entity_component_class<pragma::CDecalComponent, pragma::BaseEnvDecalComponent>("DecalComponent");
-	defCDecal.def("CreateFromProjection", static_cast<void (*)(lua_State *, pragma::CDecalComponent &, luabind::object, const umath::ScaledTransform &)>(&Lua::Decal::create_from_projection));
-	defCDecal.def("CreateFromProjection", static_cast<void (*)(lua_State *, pragma::CDecalComponent &, luabind::object)>(&Lua::Decal::create_from_projection));
+	defCDecal.def("CreateFromProjection", static_cast<void (*)(lua::State *, pragma::CDecalComponent &, luabind::object, const umath::ScaledTransform &)>(&Lua::Decal::create_from_projection));
+	defCDecal.def("CreateFromProjection", static_cast<void (*)(lua::State *, pragma::CDecalComponent &, luabind::object)>(&Lua::Decal::create_from_projection));
 	defCDecal.def("DebugDraw", &pragma::CDecalComponent::DebugDraw);
 	defCDecal.def("ApplyDecal", static_cast<bool (pragma::CDecalComponent::*)()>(&pragma::CDecalComponent::ApplyDecal));
 	entsMod[defCDecal];
@@ -584,7 +584,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCLight.def("SetShadowType", &pragma::CLightComponent::SetShadowType);
 	defCLight.def("GetShadowType", &pragma::CLightComponent::GetShadowType);
 	defCLight.def("UpdateBuffers", &pragma::CLightComponent::UpdateBuffers);
-	defCLight.def("SetAddToGameScene", static_cast<void (*)(lua_State *, pragma::CLightComponent &, bool)>([](lua_State *l, pragma::CLightComponent &hComponent, bool b) { hComponent.SetStateFlag(pragma::CLightComponent::StateFlags::AddToGameScene, b); }));
+	defCLight.def("SetAddToGameScene", static_cast<void (*)(lua::State *, pragma::CLightComponent &, bool)>([](lua::State *l, pragma::CLightComponent &hComponent, bool b) { hComponent.SetStateFlag(pragma::CLightComponent::StateFlags::AddToGameScene, b); }));
 	defCLight.def("SetMorphTargetsInShadowsEnabled", &pragma::CLightComponent::SetMorphTargetsInShadowsEnabled);
 	defCLight.def("AreMorphTargetsInShadowsEnabled", &pragma::CLightComponent::AreMorphTargetsInShadowsEnabled);
 	defCLight.add_static_constant("SHADOW_TYPE_NONE", umath::to_integral(ShadowType::None));
@@ -741,10 +741,10 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCReflectionProbe.def("SetIBLStrength", &pragma::CReflectionProbeComponent::SetIBLStrength);
 	defCReflectionProbe.def("GetLocationIdentifier", &pragma::CReflectionProbeComponent::GetLocationIdentifier);
 	defCReflectionProbe.def("GetIBLMaterialFilePath", &pragma::CReflectionProbeComponent::GetCubemapIBLMaterialFilePath);
-	defCReflectionProbe.def("CaptureIBLReflectionsFromScene", static_cast<bool (*)(lua_State *, pragma::CReflectionProbeComponent &, luabind::table<>, bool)>(&reflection_probe_capture_ibl_reflections_from_scene));
-	defCReflectionProbe.def("CaptureIBLReflectionsFromScene", static_cast<bool (*)(lua_State *, pragma::CReflectionProbeComponent &, luabind::table<>)>(&reflection_probe_capture_ibl_reflections_from_scene));
-	defCReflectionProbe.def("CaptureIBLReflectionsFromScene", static_cast<bool (*)(lua_State *, pragma::CReflectionProbeComponent &, bool)>(&reflection_probe_capture_ibl_reflections_from_scene));
-	defCReflectionProbe.def("CaptureIBLReflectionsFromScene", static_cast<bool (*)(lua_State *, pragma::CReflectionProbeComponent &)>(&reflection_probe_capture_ibl_reflections_from_scene));
+	defCReflectionProbe.def("CaptureIBLReflectionsFromScene", static_cast<bool (*)(lua::State *, pragma::CReflectionProbeComponent &, luabind::table<>, bool)>(&reflection_probe_capture_ibl_reflections_from_scene));
+	defCReflectionProbe.def("CaptureIBLReflectionsFromScene", static_cast<bool (*)(lua::State *, pragma::CReflectionProbeComponent &, luabind::table<>)>(&reflection_probe_capture_ibl_reflections_from_scene));
+	defCReflectionProbe.def("CaptureIBLReflectionsFromScene", static_cast<bool (*)(lua::State *, pragma::CReflectionProbeComponent &, bool)>(&reflection_probe_capture_ibl_reflections_from_scene));
+	defCReflectionProbe.def("CaptureIBLReflectionsFromScene", static_cast<bool (*)(lua::State *, pragma::CReflectionProbeComponent &)>(&reflection_probe_capture_ibl_reflections_from_scene));
 	defCReflectionProbe.def("RequiresRebuild", &pragma::CReflectionProbeComponent::RequiresRebuild);
 	defCReflectionProbe.def("GenerateFromEquirectangularImage", &pragma::CReflectionProbeComponent::GenerateFromEquirectangularImage);
 	entsMod[defCReflectionProbe];
@@ -753,14 +753,14 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defCSkyCamera];
 
 	auto defCPBRConverter = pragma::lua::create_entity_component_class<pragma::CPBRConverterComponent, pragma::BaseEntityComponent>("PBRConverterComponent");
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, pragma::Model &, uint32_t, uint32_t, uint32_t, bool)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, pragma::Model &, uint32_t, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, pragma::Model &, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, pragma::Model &)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, pragma::ecs::BaseEntity &, uint32_t, uint32_t, uint32_t, bool)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, pragma::ecs::BaseEntity &, uint32_t, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, pragma::ecs::BaseEntity &, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua_State *, pragma::CPBRConverterComponent &, pragma::ecs::BaseEntity &)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua::State *, pragma::CPBRConverterComponent &, pragma::Model &, uint32_t, uint32_t, uint32_t, bool)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua::State *, pragma::CPBRConverterComponent &, pragma::Model &, uint32_t, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua::State *, pragma::CPBRConverterComponent &, pragma::Model &, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua::State *, pragma::CPBRConverterComponent &, pragma::Model &)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua::State *, pragma::CPBRConverterComponent &, pragma::ecs::BaseEntity &, uint32_t, uint32_t, uint32_t, bool)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua::State *, pragma::CPBRConverterComponent &, pragma::ecs::BaseEntity &, uint32_t, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua::State *, pragma::CPBRConverterComponent &, pragma::ecs::BaseEntity &, uint32_t, uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps", static_cast<void (*)(lua::State *, pragma::CPBRConverterComponent &, pragma::ecs::BaseEntity &)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
 	entsMod[defCPBRConverter];
 
 	auto defShadow = pragma::lua::create_entity_component_class<pragma::CShadowComponent, pragma::BaseEntityComponent>("ShadowMapComponent");

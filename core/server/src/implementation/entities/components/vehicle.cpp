@@ -30,7 +30,7 @@ SVehicleComponent::~SVehicleComponent()
 	if(it != s_vehicles.end())
 		s_vehicles.erase(it);
 }
-void SVehicleComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SVehicleComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void SVehicleComponent::OnRemove() { ClearDriver(); }
 void SVehicleComponent::OnUse(pragma::ecs::BaseEntity *pl)
 {
@@ -183,7 +183,7 @@ void SVehicleComponent::OnPostSpawn()
 	}
 }
 
-void SVehicleComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+void SVehicleComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseVehicleComponent::RegisterLuaBindings(l, modEnts);
 

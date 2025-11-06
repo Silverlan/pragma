@@ -24,7 +24,7 @@ export class DLLCLIENT CBaseEntity : public pragma::ecs::BaseEntity {
 
 	CBaseEntity();
 	void Construct(unsigned int idx, unsigned int clientIdx);
-	virtual void InitializeLuaObject(lua_State *lua) override;
+	virtual void InitializeLuaObject(lua::State *lua) override;
 
 	virtual pragma::ComponentHandle<pragma::BaseAnimatedComponent> GetAnimatedComponent() const override;
 	virtual pragma::ComponentHandle<pragma::BaseWeaponComponent> GetWeaponComponent() const override;

@@ -29,46 +29,46 @@ export {
 	namespace pragma {
 		struct DLLSERVER CEMemoryData : public ComponentEvent {
 			CEMemoryData(const ai::Memory::Fragment *memoryFragment);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			const ai::Memory::Fragment *memoryFragment;
 		};
 		struct DLLSERVER CEOnNPCStateChanged : public ComponentEvent {
 			CEOnNPCStateChanged(NPCSTATE oldState, NPCSTATE newState);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			NPCSTATE oldState;
 			NPCSTATE newState;
 		};
 		struct DLLSERVER CEOnTargetAcquired : public ComponentEvent {
 			CEOnTargetAcquired(pragma::ecs::BaseEntity *entity, float distance, bool isFirstNewTarget);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			pragma::ecs::BaseEntity *entity;
 			float distance;
 			bool isFirstNewTarget;
 		};
 		struct DLLSERVER CEOnControllerActionInput : public ComponentEvent {
 			CEOnControllerActionInput(pragma::Action action, bool pressed);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			pragma::Action action;
 			bool pressed;
 		};
 		struct DLLSERVER CEOnSuspiciousSoundHeared : public ComponentEvent {
 			CEOnSuspiciousSoundHeared(const std::shared_ptr<ALSound> &sound);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			std::shared_ptr<ALSound> sound;
 		};
 		struct DLLSERVER CEOnStartControl : public ComponentEvent {
 			CEOnStartControl(pragma::SPlayerComponent &player);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			pragma::SPlayerComponent &player;
 		};
 		struct DLLSERVER CEOnPathNodeChanged : public ComponentEvent {
 			CEOnPathNodeChanged(uint32_t nodeIndex);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			uint32_t nodeIndex;
 		};
 		struct DLLSERVER CEOnScheduleStateChanged : public ComponentEvent {
 			CEOnScheduleStateChanged(const std::shared_ptr<ai::Schedule> &schedule, ai::BehaviorNode::Result result);
-			virtual void PushArguments(lua_State *l) override;
+			virtual void PushArguments(lua::State *l) override;
 			std::shared_ptr<ai::Schedule> schedule;
 			ai::BehaviorNode::Result result;
 		};
@@ -107,7 +107,7 @@ export {
 			static const std::vector<SAIComponent *> &GetAll();
 
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-			static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+			static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 			SAIComponent(pragma::ecs::BaseEntity &ent);
 			virtual ~SAIComponent() override;
@@ -280,7 +280,7 @@ export {
 			void Listen(std::vector<TargetInfo> &targets);
 			void SelectPrimaryTarget();
 			void OnPrePhysicsSimulate();
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 			virtual void OnPrimaryTargetChanged(const ai::Memory::Fragment *memFragment);
 			virtual void OnPathChanged() override;

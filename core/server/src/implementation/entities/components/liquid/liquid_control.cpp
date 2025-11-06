@@ -13,7 +13,7 @@ using namespace pragma;
 
 void SLiquidControlComponent::Initialize() { BaseLiquidControlComponent::Initialize(); }
 
-void SLiquidControlComponent::InitializeLuaObject(lua_State *l) { return BaseLiquidControlComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SLiquidControlComponent::InitializeLuaObject(lua::State *l) { return BaseLiquidControlComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SLiquidControlComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { packet->WriteString(m_kvSurfaceMaterial); }
 

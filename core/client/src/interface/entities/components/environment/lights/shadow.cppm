@@ -64,7 +64,7 @@ export namespace pragma {
 		std::weak_ptr<CShadowManagerComponent::RenderTarget> RequestRenderTarget();
 		void FreeRenderTarget();
 		bool HasRenderTarget() const;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 
 		LightShadowRenderer &GetRenderer();
 		const LightShadowRenderer &GetRenderer() const;

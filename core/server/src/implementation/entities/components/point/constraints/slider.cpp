@@ -19,7 +19,7 @@ void SPointConstraintSliderComponent::SendData(NetPacket &packet, networking::Cl
 	packet->Write<float>(m_kvLimitLinHigh);
 }
 
-void SPointConstraintSliderComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SPointConstraintSliderComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void PointConstraintSlider::Initialize()
 {

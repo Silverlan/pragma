@@ -92,19 +92,19 @@ export namespace pragma {
 		virtual LShaderBase *CreateShader() const = 0;
 
 		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) {}
-		static void Lua_default_InitializePipeline(lua_State *l, LuaShaderWrapperBase *shader, prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { shader->Lua_InitializePipeline(pipelineInfo, pipelineIdx); }
+		static void Lua_default_InitializePipeline(lua::State *l, LuaShaderWrapperBase *shader, prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { shader->Lua_InitializePipeline(pipelineInfo, pipelineIdx); }
 
 		virtual void Lua_InitializeShaderResources() {}
-		static void Lua_default_InitializeShaderResources(lua_State *l, LuaShaderWrapperBase *shader) { shader->Lua_InitializeShaderResources(); }
+		static void Lua_default_InitializeShaderResources(lua::State *l, LuaShaderWrapperBase *shader) { shader->Lua_InitializeShaderResources(); }
 
 		void Lua_OnInitialized() {}
-		static void Lua_default_OnInitialized(lua_State *l, LuaShaderWrapperBase *shader) { shader->Lua_OnInitialized(); }
+		static void Lua_default_OnInitialized(lua::State *l, LuaShaderWrapperBase *shader) { shader->Lua_OnInitialized(); }
 
 		void Lua_OnPipelinesInitialized() {}
-		static void Lua_default_OnPipelinesInitialized(lua_State *l, LuaShaderWrapperBase *shader) { shader->Lua_OnPipelinesInitialized(); }
+		static void Lua_default_OnPipelinesInitialized(lua::State *l, LuaShaderWrapperBase *shader) { shader->Lua_OnPipelinesInitialized(); }
 
 		void Lua_OnPipelineInitialized(uint32_t pipelineIdx) {}
-		static void Lua_default_OnPipelineInitialized(lua_State *l, LuaShaderWrapperBase *shader, uint32_t pipelineIdx) { shader->Lua_OnPipelineInitialized(pipelineIdx); }
+		static void Lua_default_OnPipelineInitialized(lua::State *l, LuaShaderWrapperBase *shader, uint32_t pipelineIdx) { shader->Lua_OnPipelineInitialized(pipelineIdx); }
 
 		// For internal use only!
 		uint32_t GetCurrentPipelineIndex() const { return m_curPipelineIdx; }
@@ -140,7 +140,7 @@ export namespace pragma {
 	};
 
 	template<class TShader>
-	luabind::object create_shader_object(lua_State *l, LShaderBase &shader)
+	luabind::object create_shader_object(lua::State *l, LShaderBase &shader)
 	{
 		Lua::PushRaw<TShader *>(l, static_cast<TShader *>(&shader));
 		auto o = luabind::object {luabind::from_stack(l, -1)};
@@ -352,8 +352,8 @@ export namespace pragma {
 		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void Lua_InitializeShaderResources() override;
 
-		Vector3 Lua_CalcVertexPosition(lua_State *l, pragma::ecs::CParticleSystemComponent &hPtC, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ);
-		static Vector3 Lua_default_CalcVertexPosition(lua_State *l, LuaShaderWrapperParticle2D &shader, pragma::ecs::CParticleSystemComponent &hPtC, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ)
+		Vector3 Lua_CalcVertexPosition(lua::State *l, pragma::ecs::CParticleSystemComponent &hPtC, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ);
+		static Vector3 Lua_default_CalcVertexPosition(lua::State *l, LuaShaderWrapperParticle2D &shader, pragma::ecs::CParticleSystemComponent &hPtC, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ)
 		{
 			return shader.Lua_CalcVertexPosition(l, hPtC, ptIdx, localVertIdx, camPos, camUpWs, camRightWs, nearZ, farZ);
 		}
@@ -478,40 +478,40 @@ export namespace pragma {
 		// virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(msys::CMaterial &mat) override; // TODO: ShaderTexturedBase
 
 		std::shared_ptr<prosper::IDescriptorSetGroup> Lua_InitializeMaterialDescriptorSet(msys::Material &mat);
-		static std::shared_ptr<prosper::IDescriptorSetGroup> Lua_default_InitializeMaterialDescriptorSet(lua_State *l, LuaShaderWrapperTextured3D &shader, msys::Material &mat) { return shader.Lua_InitializeMaterialDescriptorSet(mat); }
+		static std::shared_ptr<prosper::IDescriptorSetGroup> Lua_default_InitializeMaterialDescriptorSet(lua::State *l, LuaShaderWrapperTextured3D &shader, msys::Material &mat) { return shader.Lua_InitializeMaterialDescriptorSet(mat); }
 
 		void Lua_InitializeMaterialData(msys::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData);
-		static void Lua_default_InitializeMaterialData(lua_State *l, LuaShaderWrapperTextured3D &shader, msys::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
+		static void Lua_default_InitializeMaterialData(lua::State *l, LuaShaderWrapperTextured3D &shader, msys::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
 		{
 			shader.Lua_InitializeMaterialData(mat, shaderMat, inOutMatData);
 		}
 
 		void Lua_InitializeGfxPipelineVertexAttributes();
-		static void Lua_default_InitializeGfxPipelineVertexAttributes(lua_State *l, LuaShaderWrapperTextured3D &shader) { shader.Lua_InitializeGfxPipelineVertexAttributes(); }
+		static void Lua_default_InitializeGfxPipelineVertexAttributes(lua::State *l, LuaShaderWrapperTextured3D &shader) { shader.Lua_InitializeGfxPipelineVertexAttributes(); }
 
 		void Lua_InitializeGfxPipelinePushConstantRanges();
-		static void Lua_default_InitializeGfxPipelinePushConstantRanges(lua_State *l, LuaShaderWrapperTextured3D &shader) { shader.Lua_InitializeGfxPipelinePushConstantRanges(); }
+		static void Lua_default_InitializeGfxPipelinePushConstantRanges(lua::State *l, LuaShaderWrapperTextured3D &shader) { shader.Lua_InitializeGfxPipelinePushConstantRanges(); }
 
 		void Lua_InitializeGfxPipelineDescriptorSets();
-		static void Lua_default_InitializeGfxPipelineDescriptorSets(lua_State *l, LuaShaderWrapperTextured3D &shader) { shader.Lua_InitializeGfxPipelineDescriptorSets(); }
+		static void Lua_default_InitializeGfxPipelineDescriptorSets(lua::State *l, LuaShaderWrapperTextured3D &shader) { shader.Lua_InitializeGfxPipelineDescriptorSets(); }
 
 		void Lua_OnBindMaterial(msys::Material &mat);
-		static void Lua_default_OnBindMaterial(lua_State *l, LuaShaderWrapperTextured3D &shader, msys::Material &mat) { shader.Lua_OnBindMaterial(mat); }
+		static void Lua_default_OnBindMaterial(lua::State *l, LuaShaderWrapperTextured3D &shader, msys::Material &mat) { shader.Lua_OnBindMaterial(mat); }
 
 		int32_t Lua_OnDraw(pragma::ModelSubMesh &mesh);
-		static int32_t Lua_default_OnDraw(lua_State *l, LuaShaderWrapperTextured3D &shader, pragma::ModelSubMesh &mesh) { return shader.Lua_OnDraw(mesh); }
+		static int32_t Lua_default_OnDraw(lua::State *l, LuaShaderWrapperTextured3D &shader, pragma::ModelSubMesh &mesh) { return shader.Lua_OnDraw(mesh); }
 
 		void Lua_OnBindEntity(EntityHandle &hEnt);
-		static void Lua_default_OnBindEntity(lua_State *l, LuaShaderWrapperTextured3D &shader, EntityHandle &hEnt) { shader.Lua_OnBindEntity(hEnt); }
+		static void Lua_default_OnBindEntity(lua::State *l, LuaShaderWrapperTextured3D &shader, EntityHandle &hEnt) { shader.Lua_OnBindEntity(hEnt); }
 
 		void Lua_OnBindScene(CRasterizationRendererComponent &renderer, bool bView);
-		static void Lua_default_OnBindScene(lua_State *l, LuaShaderWrapperTextured3D &shader, CRasterizationRendererComponent &renderer, bool bView) { shader.Lua_OnBindScene(renderer, bView); }
+		static void Lua_default_OnBindScene(lua::State *l, LuaShaderWrapperTextured3D &shader, CRasterizationRendererComponent &renderer, bool bView) { shader.Lua_OnBindScene(renderer, bView); }
 
 		void Lua_OnBeginDraw(prosper::ICommandBuffer &drawCmd, const Vector4 &clipPlane, uint32_t pipelineIdx, uint32_t recordFlags);
-		static void Lua_default_OnBeginDraw(lua_State *l, LuaShaderWrapperTextured3D &shader, prosper::ICommandBuffer &drawCmd, const Vector4 &clipPlane, uint32_t pipelineIdx, uint32_t recordFlags) { shader.Lua_OnBeginDraw(drawCmd, clipPlane, pipelineIdx, recordFlags); }
+		static void Lua_default_OnBeginDraw(lua::State *l, LuaShaderWrapperTextured3D &shader, prosper::ICommandBuffer &drawCmd, const Vector4 &clipPlane, uint32_t pipelineIdx, uint32_t recordFlags) { shader.Lua_OnBeginDraw(drawCmd, clipPlane, pipelineIdx, recordFlags); }
 
 		void Lua_OnEndDraw();
-		static void Lua_default_OnEndDraw(lua_State *l, LuaShaderWrapperTextured3D &shader) { shader.Lua_OnEndDraw(); }
+		static void Lua_default_OnEndDraw(lua::State *l, LuaShaderWrapperTextured3D &shader) { shader.Lua_OnEndDraw(); }
 
 		void SetPushConstants(util::DataStream dsPushConstants);
 		prosper::util::PreparedCommandBuffer &GetBindPcb();
@@ -562,31 +562,31 @@ export namespace pragma {
 		// virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(msys::CMaterial &mat) override; // TODO: ShaderTexturedBase
 
 		void Lua_InitializeGfxPipelineVertexAttributes();
-		static void Lua_default_InitializeGfxPipelineVertexAttributes(lua_State *l, LuaShaderWrapperPbr &shader) { shader.Lua_InitializeGfxPipelineVertexAttributes(); }
+		static void Lua_default_InitializeGfxPipelineVertexAttributes(lua::State *l, LuaShaderWrapperPbr &shader) { shader.Lua_InitializeGfxPipelineVertexAttributes(); }
 
 		void Lua_InitializeGfxPipelinePushConstantRanges();
-		static void Lua_default_InitializeGfxPipelinePushConstantRanges(lua_State *l, LuaShaderWrapperPbr &shader) { shader.Lua_InitializeGfxPipelinePushConstantRanges(); }
+		static void Lua_default_InitializeGfxPipelinePushConstantRanges(lua::State *l, LuaShaderWrapperPbr &shader) { shader.Lua_InitializeGfxPipelinePushConstantRanges(); }
 
 		void Lua_InitializeGfxPipelineDescriptorSets();
-		static void Lua_default_InitializeGfxPipelineDescriptorSets(lua_State *l, LuaShaderWrapperPbr &shader) { shader.Lua_InitializeGfxPipelineDescriptorSets(); }
+		static void Lua_default_InitializeGfxPipelineDescriptorSets(lua::State *l, LuaShaderWrapperPbr &shader) { shader.Lua_InitializeGfxPipelineDescriptorSets(); }
 
 		void Lua_OnBindMaterial(msys::Material &mat);
-		static void Lua_default_OnBindMaterial(lua_State *l, LuaShaderWrapperPbr &shader, msys::Material &mat) { shader.Lua_OnBindMaterial(mat); }
+		static void Lua_default_OnBindMaterial(lua::State *l, LuaShaderWrapperPbr &shader, msys::Material &mat) { shader.Lua_OnBindMaterial(mat); }
 
 		int32_t Lua_OnDraw(pragma::ModelSubMesh &mesh);
-		static int32_t Lua_default_OnDraw(lua_State *l, LuaShaderWrapperPbr &shader, pragma::ModelSubMesh &mesh) { return shader.Lua_OnDraw(mesh); }
+		static int32_t Lua_default_OnDraw(lua::State *l, LuaShaderWrapperPbr &shader, pragma::ModelSubMesh &mesh) { return shader.Lua_OnDraw(mesh); }
 
 		void Lua_OnBindEntity(EntityHandle &hEnt);
-		static void Lua_default_OnBindEntity(lua_State *l, LuaShaderWrapperPbr &shader, EntityHandle &hEnt) { shader.Lua_OnBindEntity(hEnt); }
+		static void Lua_default_OnBindEntity(lua::State *l, LuaShaderWrapperPbr &shader, EntityHandle &hEnt) { shader.Lua_OnBindEntity(hEnt); }
 
 		void Lua_OnBindScene(CRasterizationRendererComponent &renderer, bool bView);
-		static void Lua_default_OnBindScene(lua_State *l, LuaShaderWrapperPbr &shader, CRasterizationRendererComponent &renderer, bool bView) { shader.Lua_OnBindScene(renderer, bView); }
+		static void Lua_default_OnBindScene(lua::State *l, LuaShaderWrapperPbr &shader, CRasterizationRendererComponent &renderer, bool bView) { shader.Lua_OnBindScene(renderer, bView); }
 
 		void Lua_OnBeginDraw(prosper::ICommandBuffer &drawCmd, const Vector4 &clipPlane, uint32_t pipelineIdx, uint32_t recordFlags);
-		static void Lua_default_OnBeginDraw(lua_State *l, LuaShaderWrapperPbr &shader, prosper::ICommandBuffer &drawCmd, const Vector4 &clipPlane, uint32_t pipelineIdx, uint32_t recordFlags) { shader.Lua_OnBeginDraw(drawCmd, clipPlane, pipelineIdx, recordFlags); }
+		static void Lua_default_OnBeginDraw(lua::State *l, LuaShaderWrapperPbr &shader, prosper::ICommandBuffer &drawCmd, const Vector4 &clipPlane, uint32_t pipelineIdx, uint32_t recordFlags) { shader.Lua_OnBeginDraw(drawCmd, clipPlane, pipelineIdx, recordFlags); }
 
 		void Lua_OnEndDraw();
-		static void Lua_default_OnEndDraw(lua_State *l, LuaShaderWrapperPbr &shader) { shader.Lua_OnEndDraw(); }
+		static void Lua_default_OnEndDraw(lua::State *l, LuaShaderWrapperPbr &shader) { shader.Lua_OnEndDraw(); }
 
 		virtual LShaderBase *CreateShader() const override { return new TShader {}; }
 	  protected:

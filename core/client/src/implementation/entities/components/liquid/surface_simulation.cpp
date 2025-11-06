@@ -60,7 +60,7 @@ void CLiquidSurfaceSimulationComponent::Initialize()
 	});
 }
 
-void CLiquidSurfaceSimulationComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CLiquidSurfaceSimulationComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CLiquidSurfaceSimulationComponent::ReceiveData(NetPacket &packet)
 {

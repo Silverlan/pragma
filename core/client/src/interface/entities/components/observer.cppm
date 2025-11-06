@@ -19,7 +19,7 @@ export namespace pragma {
 		CObserverComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~CObserverComponent() override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 	  public:
@@ -38,7 +38,7 @@ export namespace pragma {
 
 	struct DLLCLIENT CECalcView : public ComponentEvent {
 		CECalcView(Vector3 &pos, Quat &rot, Quat &rotModifier);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		Vector3 &pos;
 		Quat &rot;
 		Quat &rotModifier;
@@ -46,7 +46,7 @@ export namespace pragma {
 
 	struct DLLCLIENT CECalcViewOffset : public ComponentEvent {
 		CECalcViewOffset(Vector3 &pos, Quat &rot);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		Vector3 &pos;
 		Quat &rot;
 	};

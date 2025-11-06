@@ -91,7 +91,7 @@ CPlayerComponent::~CPlayerComponent()
 		m_cbUnderwaterDsp->Remove();
 }
 
-void CPlayerComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CPlayerComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CPlayerComponent::OnDeployWeapon(pragma::ecs::BaseEntity &ent) {}
 
@@ -478,7 +478,7 @@ void CPlayerComponent::PrintMessage(std::string message, MESSAGE type)
 		{
 			// TODO
 			//auto *l = client->GetLuaState();
-			//DLLLUA void GetGlobal(lua_State *lua,const std::string &name);
+			//DLLLUA void GetGlobal(lua::State *lua,const std::string &name);
 			break;
 		}
 	}
@@ -558,7 +558,7 @@ void CPlayerComponent::OnSetCharacterOrientation(const Vector3 &up)
 	}));*/
 }
 
-void CPlayerComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+void CPlayerComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BasePlayerComponent::RegisterLuaBindings(l, modEnts);
 	auto def = pragma::lua::create_entity_component_class<pragma::CPlayerComponent, pragma::BasePlayerComponent>("PlayerComponent");

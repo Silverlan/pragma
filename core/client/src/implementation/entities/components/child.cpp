@@ -12,7 +12,7 @@ import :networking.util;
 
 using namespace pragma;
 
-void CChildComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CChildComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CChildComponent::OnRemove() { BaseChildComponent::OnRemove(); }
 
 bool CChildComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)

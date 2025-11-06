@@ -36,7 +36,7 @@ export namespace pragma {
 	  public:
 		CMotionBlurDataComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 
 		void UpdateEntityPoses();
 		const MotionBlurTemporalData &GetMotionBlurData() const { return m_motionBlurData; }

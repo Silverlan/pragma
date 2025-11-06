@@ -23,10 +23,10 @@ export namespace pragma::ecs {
 		std::vector<std::string> particleSystemNames {};
 		std::vector<uint64_t> particleSystemOffsets {};
 	};
-	DLLCLIENT std::unordered_map<std::string, std::string> get_particle_key_values(lua_State *l, const luabind::map<std::string, void> &keyValues);
+	DLLCLIENT std::unordered_map<std::string, std::string> get_particle_key_values(lua::State *l, const luabind::map<std::string, void> &keyValues);
 	class DLLCLIENT CParticleSystemComponent final : public BaseEnvParticleSystemComponent, public CBaseNetComponent, public CParticleSystemBaseKeyValues {
 	  public:
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		static const uint32_t PARTICLE_DATA_SIZE;
 		static const uint32_t VERTEX_COUNT;
@@ -114,7 +114,7 @@ export namespace pragma::ecs {
 		virtual ::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void SetRemoveOnComplete(bool b) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void OnEntitySpawn() override;
 		virtual void SetParticleFile(const std::string &fileName) override;

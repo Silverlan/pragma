@@ -11,7 +11,7 @@ import :engine;
 
 using namespace pragma;
 
-void CBSPLeafComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CBSPLeafComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CBSPLeafComponent::SetLeaves(const std::vector<uint16_t> &leaves)
 {
 	for(auto idx : leaves)

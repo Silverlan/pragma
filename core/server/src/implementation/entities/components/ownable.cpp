@@ -12,7 +12,7 @@ import :entities;
 using namespace pragma;
 
 void SOwnableComponent::Initialize() { BaseOwnableComponent::Initialize(); }
-void SOwnableComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SOwnableComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SOwnableComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { nwm::write_entity(packet, *m_owner); }
 

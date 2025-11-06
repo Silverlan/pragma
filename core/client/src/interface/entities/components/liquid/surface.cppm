@@ -39,7 +39,7 @@ export namespace pragma {
 	  public:
 		CLiquidSurfaceComponent(pragma::ecs::BaseEntity &ent) : BaseLiquidSurfaceComponent(ent) {}
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnRemove() override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void ReceiveData(NetPacket &packet) override;

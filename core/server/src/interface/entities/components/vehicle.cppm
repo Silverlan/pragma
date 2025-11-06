@@ -13,7 +13,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SVehicleComponent final : public BaseVehicleComponent, public SBaseSnapshotComponent {
 	  public:
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		static unsigned int GetVehicleCount();
 		static const std::vector<SVehicleComponent *> &GetAll();
@@ -38,7 +38,7 @@ export namespace pragma {
 		void OnPostSpawn();
 		void OnUse(pragma::ecs::BaseEntity *pl);
 		virtual BaseWheelComponent *CreateWheelEntity(uint8_t wheelIndex) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  private:
 		static std::vector<SVehicleComponent *> s_vehicles;
 	};

@@ -44,7 +44,7 @@ void SFlammableComponent::ApplyIgnitionDamage()
 	info.SetDamage(5);
 	pDamageableComponent->TakeDamage(info);
 }
-void SFlammableComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SFlammableComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 util::EventReply SFlammableComponent::Ignite(float duration, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor)
 {
 	if(!IsIgnitable())

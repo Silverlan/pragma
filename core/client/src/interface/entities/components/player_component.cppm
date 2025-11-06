@@ -15,12 +15,12 @@ export namespace pragma {
 		static std::vector<CPlayerComponent *> s_players;
 		const float VIEW_BODY_OFFSET = -20.f;
 	  public:
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		CPlayerComponent(pragma::ecs::BaseEntity &ent);
 		virtual ~CPlayerComponent() override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 	  public:
 		static unsigned int GetPlayerCount();
 		static const std::vector<CPlayerComponent *> &GetAll();

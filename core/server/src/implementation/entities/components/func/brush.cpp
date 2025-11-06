@@ -29,7 +29,7 @@ void SBrushComponent::SendData(NetPacket &packet, networking::ClientRecipientFil
 	packet->WriteString(m_kvSurfaceMaterial);
 }
 
-void SBrushComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SBrushComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void FuncBrush::Initialize()
 {

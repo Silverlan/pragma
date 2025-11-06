@@ -11,6 +11,6 @@ export import pragma.lua;
 
 export namespace Lua {
 	namespace lib_export {
-		DLLCLIENT int export_scene(lua_State *l);
+		DLLCLIENT int export_scene(lua::State *l);
 	};
 };

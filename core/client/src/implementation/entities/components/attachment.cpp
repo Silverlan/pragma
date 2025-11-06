@@ -12,7 +12,7 @@ import :networking.util;
 
 using namespace pragma;
 
-void CAttachmentComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CAttachmentComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CAttachmentComponent::ReceiveData(NetPacket &packet)
 {
 	auto bParent = packet->Read<Bool>();

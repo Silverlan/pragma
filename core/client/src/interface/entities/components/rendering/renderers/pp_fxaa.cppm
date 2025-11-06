@@ -14,7 +14,7 @@ export namespace pragma {
 	class DLLCLIENT CRendererPpFxaaComponent final : public CRendererPpBaseComponent {
 	  public:
 		CRendererPpFxaaComponent(pragma::ecs::BaseEntity &ent);
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual std::string GetIdentifier() const override { return "fxaa"; }
 		virtual uint32_t GetPostProcessingWeight() const override { return umath::to_integral(CRendererComponent::StandardPostProcessingWeight::Fxaa); }
 		virtual PostProcessingEffectData::Flags GetFlags() const override { return PostProcessingEffectData::Flags::ToneMapped; }

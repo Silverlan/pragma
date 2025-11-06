@@ -16,7 +16,7 @@ export {
 		class DLLSERVER SSkyboxComponent final : public BaseSkyboxComponent, public SBaseNetComponent {
 		  public:
 			SSkyboxComponent(pragma::ecs::BaseEntity &ent) : BaseSkyboxComponent(ent) {}
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 			virtual void SetSkyAngles(const EulerAngles &ang) override;
 
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;

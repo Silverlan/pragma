@@ -13,10 +13,10 @@ export import luabind;
 export namespace Lua {
 	namespace util {
 		namespace Server {
-			DLLSERVER luabind::object fire_bullets(lua_State *l, const BulletInfo &bulletInfo, bool hitReport);
-			DLLSERVER luabind::object fire_bullets(lua_State *l, const BulletInfo &bulletInfo);
-			DLLSERVER void create_giblet(lua_State *l, const GibletCreateInfo &gibletInfo);
-			DLLSERVER void create_explosion(lua_State *l, const ::util::SplashDamageInfo &splashDamageInfo);
+			DLLSERVER luabind::object fire_bullets(lua::State *l, const BulletInfo &bulletInfo, bool hitReport);
+			DLLSERVER luabind::object fire_bullets(lua::State *l, const BulletInfo &bulletInfo);
+			DLLSERVER void create_giblet(lua::State *l, const GibletCreateInfo &gibletInfo);
+			DLLSERVER void create_explosion(lua::State *l, const ::util::SplashDamageInfo &splashDamageInfo);
 		};
 	};
 };

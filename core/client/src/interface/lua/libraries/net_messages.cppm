@@ -12,7 +12,7 @@ export import pragma.shared;
 export {
 	namespace Lua::net::client {
 		DLLCLIENT void send(nwm::Protocol protocol, const std::string &identifier, ::NetPacket &packet);
-		DLLCLIENT void receive(lua_State *l, const std::string &name, const Lua::func<void> &function);
+		DLLCLIENT void receive(lua::State *l, const std::string &name, const Lua::func<void> &function);
 	};
 	DLLCLIENT void NET_cl_luanet(NetPacket &packet);
 	DLLCLIENT void NET_cl_luanet_reg(NetPacket &packet);

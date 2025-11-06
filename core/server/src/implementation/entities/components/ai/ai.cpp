@@ -88,7 +88,7 @@ SAIComponent::~SAIComponent()
 		s_npcs.erase(it);
 }
 
-void SAIComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SAIComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SAIComponent::OnRemove()
 {
@@ -530,13 +530,13 @@ bool SAIComponent::HasCharacterNoTargetEnabled(const pragma::ecs::BaseEntity &en
 namespace Lua {
 	namespace NPC {
 		namespace Server {
-			static Lua::mult<bool, Lua::opt<float>> IsInViewCone(lua_State *l, pragma::SAIComponent &hEnt, pragma::ecs::BaseEntity &entOther);
-			static bool HasPrimaryTarget(lua_State *l, pragma::SAIComponent &hEnt);
+			static Lua::mult<bool, Lua::opt<float>> IsInViewCone(lua::State *l, pragma::SAIComponent &hEnt, pragma::ecs::BaseEntity &entOther);
+			static bool HasPrimaryTarget(lua::State *l, pragma::SAIComponent &hEnt);
 		};
 	};
 };
 
-void SAIComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+void SAIComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseAIComponent::RegisterLuaBindings(l, modEnts);
 
@@ -632,8 +632,8 @@ void SAIComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
 	defAIAnimInfo.def(luabind::constructor<>());
 	defAIAnimInfo.property("flags", &pragma::SAIComponent::AIAnimationInfo::GetPlayFlags, &pragma::SAIComponent::AIAnimationInfo::SetPlayFlags);
 	defAIAnimInfo.property("playAsSchedule", &pragma::SAIComponent::AIAnimationInfo::ShouldPlayAsSchedule, &pragma::SAIComponent::AIAnimationInfo::SetPlayAsSchedule);
-	defAIAnimInfo.def("SetFacePrimaryTarget", static_cast<void (*)(lua_State *, pragma::SAIComponent::AIAnimationInfo &)>([](lua_State *l, pragma::SAIComponent::AIAnimationInfo &info) { info.SetFaceTarget(true); }));
-	defAIAnimInfo.def("ClearFaceTarget", static_cast<void (*)(lua_State *, pragma::SAIComponent::AIAnimationInfo &)>([](lua_State *l, pragma::SAIComponent::AIAnimationInfo &info) { info.SetFaceTarget(false); }));
+	defAIAnimInfo.def("SetFacePrimaryTarget", static_cast<void (*)(lua::State *, pragma::SAIComponent::AIAnimationInfo &)>([](lua::State *l, pragma::SAIComponent::AIAnimationInfo &info) { info.SetFaceTarget(true); }));
+	defAIAnimInfo.def("ClearFaceTarget", static_cast<void (*)(lua::State *, pragma::SAIComponent::AIAnimationInfo &)>([](lua::State *l, pragma::SAIComponent::AIAnimationInfo &info) { info.SetFaceTarget(false); }));
 	defAIAnimInfo.def("SetFaceTarget", static_cast<void (pragma::SAIComponent::AIAnimationInfo::*)(const Vector3 &)>(&pragma::SAIComponent::AIAnimationInfo::SetFaceTarget));
 	defAIAnimInfo.def("SetFaceTarget", static_cast<void (pragma::SAIComponent::AIAnimationInfo::*)(pragma::ecs::BaseEntity &)>(&pragma::SAIComponent::AIAnimationInfo::SetFaceTarget));
 	def.scope[defAIAnimInfo];
@@ -659,7 +659,7 @@ void SAIComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
 	modEnts[def];
 }
 
-Lua::mult<bool, Lua::opt<float>> Lua::NPC::Server::IsInViewCone(lua_State *l, pragma::SAIComponent &hEnt, pragma::ecs::BaseEntity &entOther)
+Lua::mult<bool, Lua::opt<float>> Lua::NPC::Server::IsInViewCone(lua::State *l, pragma::SAIComponent &hEnt, pragma::ecs::BaseEntity &entOther)
 {
 	auto dist = 0.f;
 	auto r = hEnt.IsInViewCone(&entOther, &dist);
@@ -667,12 +667,12 @@ Lua::mult<bool, Lua::opt<float>> Lua::NPC::Server::IsInViewCone(lua_State *l, pr
 		return luabind::object {l, r};
 	return {l, r, Lua::opt<float> {luabind::object {l, dist}}};
 }
-bool Lua::NPC::Server::HasPrimaryTarget(lua_State *l, pragma::SAIComponent &hEnt) { return hEnt.GetPrimaryTarget() != nullptr; }
+bool Lua::NPC::Server::HasPrimaryTarget(lua::State *l, pragma::SAIComponent &hEnt) { return hEnt.GetPrimaryTarget() != nullptr; }
 
 //////////////////
 
 CEMemoryData::CEMemoryData(const ai::Memory::Fragment *memoryFragment) : memoryFragment {memoryFragment} {}
-void CEMemoryData::PushArguments(lua_State *l)
+void CEMemoryData::PushArguments(lua::State *l)
 {
 	if(memoryFragment != nullptr)
 		Lua::Push<ai::Memory::Fragment *>(l, const_cast<ai::Memory::Fragment *>(memoryFragment));
@@ -683,7 +683,7 @@ void CEMemoryData::PushArguments(lua_State *l)
 //////////////////
 
 CEOnNPCStateChanged::CEOnNPCStateChanged(NPCSTATE oldState, NPCSTATE newState) : oldState {oldState}, newState {newState} {}
-void CEOnNPCStateChanged::PushArguments(lua_State *l)
+void CEOnNPCStateChanged::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, umath::to_integral(oldState));
 	Lua::PushInt(l, umath::to_integral(newState));
@@ -692,7 +692,7 @@ void CEOnNPCStateChanged::PushArguments(lua_State *l)
 //////////////////
 
 CEOnTargetAcquired::CEOnTargetAcquired(pragma::ecs::BaseEntity *entity, float distance, bool isFirstNewTarget) : entity {entity}, distance {distance}, isFirstNewTarget {isFirstNewTarget} {}
-void CEOnTargetAcquired::PushArguments(lua_State *l)
+void CEOnTargetAcquired::PushArguments(lua::State *l)
 {
 	if(entity != nullptr)
 		entity->GetLuaObject().push(l);
@@ -705,7 +705,7 @@ void CEOnTargetAcquired::PushArguments(lua_State *l)
 //////////////////
 
 CEOnControllerActionInput::CEOnControllerActionInput(pragma::Action action, bool pressed) : action {action}, pressed {pressed} {}
-void CEOnControllerActionInput::PushArguments(lua_State *l)
+void CEOnControllerActionInput::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, umath::to_integral(action));
 	Lua::PushBool(l, pressed);
@@ -714,22 +714,22 @@ void CEOnControllerActionInput::PushArguments(lua_State *l)
 //////////////////
 
 CEOnSuspiciousSoundHeared::CEOnSuspiciousSoundHeared(const std::shared_ptr<ALSound> &sound) : sound {sound} {}
-void CEOnSuspiciousSoundHeared::PushArguments(lua_State *l) { Lua::Push<std::shared_ptr<ALSound>>(l, sound); }
+void CEOnSuspiciousSoundHeared::PushArguments(lua::State *l) { Lua::Push<std::shared_ptr<ALSound>>(l, sound); }
 
 //////////////////
 
 CEOnStartControl::CEOnStartControl(pragma::SPlayerComponent &player) : player {player} {}
-void CEOnStartControl::PushArguments(lua_State *l) { player.PushLuaObject(l); }
+void CEOnStartControl::PushArguments(lua::State *l) { player.PushLuaObject(l); }
 
 //////////////////
 
 CEOnPathNodeChanged::CEOnPathNodeChanged(uint32_t nodeIndex) : nodeIndex {nodeIndex} {}
-void CEOnPathNodeChanged::PushArguments(lua_State *l) { Lua::PushInt(l, nodeIndex); }
+void CEOnPathNodeChanged::PushArguments(lua::State *l) { Lua::PushInt(l, nodeIndex); }
 
 //////////////////
 
 CEOnScheduleStateChanged::CEOnScheduleStateChanged(const std::shared_ptr<ai::Schedule> &schedule, ai::BehaviorNode::Result result) : schedule {schedule}, result {result} {}
-void CEOnScheduleStateChanged::PushArguments(lua_State *l)
+void CEOnScheduleStateChanged::PushArguments(lua::State *l)
 {
 	Lua::Push<std::shared_ptr<ai::Schedule>>(l, schedule);
 	Lua::PushInt(l, umath::to_integral(result));

@@ -14,7 +14,7 @@ export {
 		class DLLSERVER STriggerHurtComponent final : public BaseTriggerHurtComponent {
 		  public:
 			STriggerHurtComponent(pragma::ecs::BaseEntity &ent) : BaseTriggerHurtComponent(ent) {}
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};
 

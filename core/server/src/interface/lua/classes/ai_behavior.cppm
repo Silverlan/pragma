@@ -41,7 +41,7 @@ export {
 
 	namespace Lua {
 		namespace AIBehaviorNode {
-			DLLSERVER void register_class(lua_State *l, luabind::module_ &mod);
+			DLLSERVER void register_class(lua::State *l, luabind::module_ &mod);
 		};
 
 		namespace ai {
@@ -88,7 +88,7 @@ export {
 			using TaskWrapperEvent = TTaskWrapper<pragma::ai::TaskEvent>;
 			using TaskWrapperWait = TTaskWrapper<pragma::ai::TaskWait>;
 
-			void push_task(lua_State *l, pragma::ai::BehaviorNode &task);
+			void push_task(lua::State *l, pragma::ai::BehaviorNode &task);
 		};
 	};
 
@@ -110,18 +110,18 @@ export {
 		//AILuaBehaviorNodeWrapper &operator=(const AILuaBehaviorNodeWrapper&)=delete;
 
 		uint32_t Start(std::shared_ptr<pragma::ai::Schedule> &schedule, pragma::BaseAIComponent &hEnt);
-		static uint32_t default_Start(lua_State *l, AILuaBehaviorNodeWrapper &wrapper, std::shared_ptr<pragma::ai::Schedule> &schedule, pragma::BaseAIComponent &hEnt);
+		static uint32_t default_Start(lua::State *l, AILuaBehaviorNodeWrapper &wrapper, std::shared_ptr<pragma::ai::Schedule> &schedule, pragma::BaseAIComponent &hEnt);
 
 		void Stop();
-		static void default_Stop(lua_State *l, AILuaBehaviorNodeWrapper &wrapper);
+		static void default_Stop(lua::State *l, AILuaBehaviorNodeWrapper &wrapper);
 
 		uint32_t Think(std::shared_ptr<pragma::ai::Schedule> &schedule, pragma::BaseAIComponent &hEnt, std::underlying_type_t<pragma::ai::BehaviorNode::Result> result);
-		static uint32_t default_Think(lua_State *l, AILuaBehaviorNodeWrapper &wrapper, std::shared_ptr<pragma::ai::Schedule> &schedule, pragma::BaseAIComponent &hEnt, std::underlying_type_t<pragma::ai::BehaviorNode::Result> result);
+		static uint32_t default_Think(lua::State *l, AILuaBehaviorNodeWrapper &wrapper, std::shared_ptr<pragma::ai::Schedule> &schedule, pragma::BaseAIComponent &hEnt, std::underlying_type_t<pragma::ai::BehaviorNode::Result> result);
 
 		void OnTaskComplete(std::shared_ptr<pragma::ai::Schedule> &schedule, uint32_t taskId, std::underlying_type_t<pragma::ai::BehaviorNode::Result> result);
-		static void default_OnTaskComplete(lua_State *l, AILuaBehaviorNodeWrapper &wrapper, std::shared_ptr<pragma::ai::Schedule> &schedule, uint32_t taskId, std::underlying_type_t<pragma::ai::BehaviorNode::Result> result);
+		static void default_OnTaskComplete(lua::State *l, AILuaBehaviorNodeWrapper &wrapper, std::shared_ptr<pragma::ai::Schedule> &schedule, uint32_t taskId, std::underlying_type_t<pragma::ai::BehaviorNode::Result> result);
 
 		void OnSetScheduleParameter(uint8_t taskParamId, uint8_t scheduleParamId);
-		static void default_OnSetScheduleParameter(lua_State *l, AILuaBehaviorNodeWrapper &wrapper, uint8_t taskParamId, uint8_t scheduleParamId);
+		static void default_OnSetScheduleParameter(lua::State *l, AILuaBehaviorNodeWrapper &wrapper, uint8_t taskParamId, uint8_t scheduleParamId);
 	};
 };

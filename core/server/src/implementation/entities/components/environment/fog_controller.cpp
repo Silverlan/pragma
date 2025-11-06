@@ -11,7 +11,7 @@ import :server_state;
 
 using namespace pragma;
 
-void SFogControllerComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SFogControllerComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void SFogControllerComponent::SetFogStart(float start)
 {
 	BaseEnvFogControllerComponent::SetFogStart(start);

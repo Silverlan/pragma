@@ -14,7 +14,7 @@ export {
 		class DLLSERVER SWorldComponent final : public BaseWorldComponent {
 		  public:
 			SWorldComponent(pragma::ecs::BaseEntity &ent) : BaseWorldComponent(ent) {}
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};
 

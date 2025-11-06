@@ -46,7 +46,7 @@ void Lua::net::server::broadcast(pragma::networking::Protocol protocol, const st
 	::ServerState::Get()->SendPacket("luanet", packetNew, protocol);
 }
 
-static void send(lua_State *l, pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet, const pragma::networking::TargetRecipientFilter &rp)
+static void send(lua::State *l, pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet, const pragma::networking::TargetRecipientFilter &rp)
 {
 	::NetPacket packetNew;
 	if(!NetIncludePacketID(::ServerState::Get(), identifier, packet, packetNew)) {
@@ -56,27 +56,27 @@ static void send(lua_State *l, pragma::networking::Protocol protocol, const std:
 	::ServerState::Get()->SendPacket("luanet", packetNew, protocol, rp);
 }
 
-void Lua::net::server::send(lua_State *l, pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet, const luabind::tableT<pragma::SPlayerComponent> &recipients)
+void Lua::net::server::send(lua::State *l, pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet, const luabind::tableT<pragma::SPlayerComponent> &recipients)
 {
 	pragma::networking::TargetRecipientFilter rp {};
 	GetRecipients(recipients, rp);
 	::send(l, protocol, identifier, packet, rp);
 }
-void Lua::net::server::send(lua_State *l, pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet, pragma::networking::TargetRecipientFilter &recipients) { ::send(l, protocol, identifier, packet, recipients); }
-void Lua::net::server::send(lua_State *l, pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet, pragma::SPlayerComponent &recipient)
+void Lua::net::server::send(lua::State *l, pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet, pragma::networking::TargetRecipientFilter &recipients) { ::send(l, protocol, identifier, packet, recipients); }
+void Lua::net::server::send(lua::State *l, pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet, pragma::SPlayerComponent &recipient)
 {
 	pragma::networking::TargetRecipientFilter rp {};
 	GetRecipients(recipient, rp);
 	::send(l, protocol, identifier, packet, rp);
 }
 
-void Lua::net::server::receive(lua_State *l, const std::string &name, const Lua::func<void> &function)
+void Lua::net::server::receive(lua::State *l, const std::string &name, const Lua::func<void> &function)
 {
 	if(!::ServerState::Get()->IsGameActive())
 		return;
 	pragma::Game *game = ::ServerState::Get()->GetGameState();
 	function.push(l);
-	int fc = lua_createreference(l, -1);
+	int fc = Lua::create_reference(l, -1);
 	Lua::Pop(l, 1);
 	game->RegisterLuaNetMessage(name, fc);
 }

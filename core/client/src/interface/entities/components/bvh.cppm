@@ -20,7 +20,7 @@ export namespace pragma {
 		static bool ShouldConsiderMesh(const pragma::ModelSubMesh &mesh, const rendering::RenderBufferData &bufferData);
 		CBvhComponent(pragma::ecs::BaseEntity &ent) : BaseBvhComponent(ent) {}
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnEntitySpawn() override;
 		virtual void OnRemove() override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;

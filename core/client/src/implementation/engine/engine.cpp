@@ -193,7 +193,7 @@ void CEngine::DumpDebugInformation(uzip::ZIPFile &zip) const
 		ss.clear();
 	}
 
-	auto fWriteLuaTraceback = [&zip](lua_State *l, const std::string &identifier) {
+	auto fWriteLuaTraceback = [&zip](lua::State *l, const std::string &identifier) {
 		if(!l)
 			return;
 		std::stringstream ss;
@@ -1676,7 +1676,7 @@ void CEngine::StartDefaultGame(const std::string &map, bool singlePlayer)
 
 void CEngine::StartDefaultGame(const std::string &map) { StartDefaultGame(map, true); }
 
-Lua::Interface *CEngine::GetLuaInterface(lua_State *l)
+Lua::Interface *CEngine::GetLuaInterface(lua::State *l)
 {
 	auto *cl = static_cast<ClientState *>(GetClientState());
 	if(cl != nullptr) {
@@ -1698,7 +1698,7 @@ bool CEngine::IsProgramInFocus() const
 	return false;
 }
 
-NetworkState *CEngine::GetNetworkState(lua_State *l)
+NetworkState *CEngine::GetNetworkState(lua::State *l)
 {
 	auto *cl = static_cast<ClientState *>(GetClientState());
 	if(cl == nullptr)

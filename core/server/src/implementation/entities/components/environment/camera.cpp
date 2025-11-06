@@ -11,7 +11,7 @@ import :entities.components.field_angle;
 
 using namespace pragma;
 
-void SCameraComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SCameraComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void SCameraComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEnvCameraComponent::OnEntityComponentAdded(component);

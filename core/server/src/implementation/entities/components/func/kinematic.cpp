@@ -31,7 +31,7 @@ void SKinematicComponent::StartBackward()
 	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvStartBackward, pragma::networking::Protocol::SlowReliable);
 }
 
-void SKinematicComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SKinematicComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void FuncKinematic::Initialize()
 {

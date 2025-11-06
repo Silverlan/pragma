@@ -15,7 +15,7 @@ export {
 		  public:
 			CButtonComponent(pragma::ecs::BaseEntity &ent) : BaseFuncButtonComponent(ent) {}
 			virtual void Initialize() override;
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};
 

@@ -15,9 +15,9 @@ export namespace Lua {
 		namespace Server {
 			DLLSERVER void set_gravity(const Vector3 &gravity);
 			DLLSERVER Vector3 get_gravity();
-			DLLSERVER luabind::object load_model(lua_State *l, const std::string &name);
-			DLLSERVER int create_model(lua_State *l);
-			DLLSERVER int load_map(lua_State *l);
+			DLLSERVER luabind::object load_model(lua::State *l, const std::string &name);
+			DLLSERVER int create_model(lua::State *l);
+			DLLSERVER int load_map(lua::State *l);
 			DLLSERVER void change_level(const std::string &mapName, const std::string &landmarkName);
 			DLLSERVER void change_level(const std::string &mapName);
 		};

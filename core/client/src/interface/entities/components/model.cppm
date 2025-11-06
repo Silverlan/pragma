@@ -35,13 +35,13 @@ export namespace pragma {
 		};
 
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		static void RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts);
+		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		CModelComponent(pragma::ecs::BaseEntity &ent);
 
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void Initialize() override;
 
@@ -137,7 +137,7 @@ export namespace pragma {
 
 	struct DLLCLIENT CEOnRenderMeshesUpdated : public ComponentEvent {
 		CEOnRenderMeshesUpdated(bool requireBoundingVolumeUpdate = true);
-		virtual void PushArguments(lua_State *l) override;
+		virtual void PushArguments(lua::State *l) override;
 		bool requireBoundingVolumeUpdate = true;
 	};
 	using namespace umath::scoped_enum::bitwise;

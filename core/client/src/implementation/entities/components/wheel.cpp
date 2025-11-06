@@ -17,7 +17,7 @@ void CWheel::Initialize()
 
 /////////
 
-void CWheelComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CWheelComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CWheelComponent::ReceiveData(NetPacket &packet)
 {
 	// TODO

@@ -39,7 +39,7 @@ static std::unordered_map<prosper::BasePipelineCreateInfo *, pragma::LuaShaderWr
 
 pragma::LuaDescriptorSetInfo::LuaDescriptorSetInfo(uint32_t tableIndex, const std::string &name, luabind::object lbindings, uint32_t setIndex) : name {name}, setIndex(setIndex)
 {
-	::Lua::get_table_values<LuaDescriptorSetBinding>(lbindings.interpreter(), tableIndex, bindings, [](lua_State *l, int32_t idx) -> LuaDescriptorSetBinding { return ::Lua::Check<LuaDescriptorSetBinding>(l, idx); });
+	::Lua::get_table_values<LuaDescriptorSetBinding>(lbindings.interpreter(), tableIndex, bindings, [](lua::State *l, int32_t idx) -> LuaDescriptorSetBinding { return ::Lua::Check<LuaDescriptorSetBinding>(l, idx); });
 }
 pragma::LuaDescriptorSetInfo::LuaDescriptorSetInfo(const std::string &name, luabind::object lbindings, uint32_t setIndex) : LuaDescriptorSetInfo {3u, name, lbindings, setIndex} {}
 
@@ -210,7 +210,7 @@ void pragma::LShaderParticle2D::InitializeShaderResources() { static_cast<LuaSha
 void pragma::LShaderParticle2D::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { static_cast<LuaShaderWrapperParticle2D *>(m_wrapper)->InitializeRenderPass(outRenderPass, pipelineIdx); }
 void pragma::LShaderParticle2D::InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { pragma::ShaderParticle2DBase::InitializeRenderPass(outRenderPass, pipelineIdx); }
 pragma::LuaShaderWrapperParticle2D::LuaShaderWrapperParticle2D() {}
-Vector3 pragma::LuaShaderWrapperParticle2D::Lua_CalcVertexPosition(lua_State *l, pragma::ecs::CParticleSystemComponent &hPtC, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ)
+Vector3 pragma::LuaShaderWrapperParticle2D::Lua_CalcVertexPosition(lua::State *l, pragma::ecs::CParticleSystemComponent &hPtC, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ)
 {
 	return static_cast<LShaderParticle2D *>(m_shader)->DoCalcVertexPosition(hPtC, ptIdx, localVertIdx, camPos, camUpWs, camRightWs, nearZ, farZ);
 }
@@ -427,7 +427,7 @@ void pragma::LuaShaderWrapperPbr::InitializeDefaultRenderPass(std::shared_ptr<pr
 
 /////////////////
 
-static void get_descriptor_set_layout_bindings(lua_State *l, std::vector<prosper::DescriptorSetInfo::Binding> &bindings, int32_t tBindings)
+static void get_descriptor_set_layout_bindings(lua::State *l, std::vector<prosper::DescriptorSetInfo::Binding> &bindings, int32_t tBindings)
 {
 	auto numBindings = ::Lua::GetObjectLength(l, tBindings);
 	bindings.reserve(numBindings);
@@ -442,13 +442,13 @@ static void get_descriptor_set_layout_bindings(lua_State *l, std::vector<prosper
 		std::string name = luabind::object_cast<std::string>(t["name"]);
 
 		auto type = prosper::DescriptorType::UniformBuffer;
-		::Lua::get_table_value<ptrdiff_t, decltype(type)>(l, "type", tBinding, type, [](lua_State *l, int32_t idx) { return static_cast<ptrdiff_t>(::Lua::CheckInt(l, idx)); });
+		::Lua::get_table_value<ptrdiff_t, decltype(type)>(l, "type", tBinding, type, [](lua::State *l, int32_t idx) { return static_cast<ptrdiff_t>(::Lua::CheckInt(l, idx)); });
 
 		auto shaderStages = prosper::ShaderStageFlags::AllGraphics;
-		::Lua::get_table_value<ptrdiff_t, decltype(shaderStages)>(l, "stage", tBinding, shaderStages, [](lua_State *l, int32_t idx) { return static_cast<ptrdiff_t>(::Lua::CheckInt(l, idx)); });
+		::Lua::get_table_value<ptrdiff_t, decltype(shaderStages)>(l, "stage", tBinding, shaderStages, [](lua::State *l, int32_t idx) { return static_cast<ptrdiff_t>(::Lua::CheckInt(l, idx)); });
 
 		uint32_t arrayCount = 1;
-		::Lua::get_table_value<ptrdiff_t, decltype(arrayCount)>(l, "arrayCount", tBinding, arrayCount, [](lua_State *l, int32_t idx) { return static_cast<ptrdiff_t>(::Lua::CheckInt(l, idx)); });
+		::Lua::get_table_value<ptrdiff_t, decltype(arrayCount)>(l, "arrayCount", tBinding, arrayCount, [](lua::State *l, int32_t idx) { return static_cast<ptrdiff_t>(::Lua::CheckInt(l, idx)); });
 
 		prosper::DescriptorSetInfo::Binding binding {pragma::register_global_string(name), type, shaderStages, arrayCount};
 		bindings.push_back(binding);

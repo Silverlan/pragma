@@ -63,7 +63,7 @@ void CRenderTargetComponent::Render(pragma::rendering::SceneRenderPass renderMod
 {
 	// TODO
 }
-void CRenderTargetComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CRenderTargetComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CPointRenderTarget::Initialize()
 {

@@ -7,8 +7,8 @@ module;
 
 export module pragma.client:scripting.lua.libraries.global;
 export namespace Lua {
-	DLLCLIENT double ServerTime(lua_State *l);
-	DLLCLIENT double FrameTime(lua_State *l);
+	DLLCLIENT double ServerTime(lua::State *l);
+	DLLCLIENT double FrameTime(lua::State *l);
 
-	DLLCLIENT void register_shared_client_state(lua_State *l);
+	DLLCLIENT void register_shared_client_state(lua::State *l);
 };

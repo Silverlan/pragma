@@ -27,7 +27,7 @@ export namespace pragma {
 		void SetBlurAmount(int32_t blurAmount);
 		int32_t GetBlurAmount() const;
 
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual std::string GetIdentifier() const override { return "bloom"; }
 		virtual uint32_t GetPostProcessingWeight() const override { return umath::to_integral(CRendererComponent::StandardPostProcessingWeight::Bloom); }
 

@@ -11,6 +11,6 @@ export import luabind;
 
 export namespace Lua {
 	namespace AISquad {
-		DLLSERVER void register_class(lua_State *l, luabind::module_ &mod);
+		DLLSERVER void register_class(lua::State *l, luabind::module_ &mod);
 	};
 };

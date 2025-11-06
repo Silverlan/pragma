@@ -16,7 +16,7 @@ export class DLLCLIENT WILuaHandleWrapper {
 	WILuaHandleWrapper() {}
   public:
 	template<class THandle>
-	static WILuaHandleWrapper *Create(lua_State *l, THandle handle)
+	static WILuaHandleWrapper *Create(lua::State *l, THandle handle)
 	{
 		WILuaHandleWrapper *wrapper = new WILuaHandleWrapper;
 		wrapper->object = new luabind::object(l, handle);

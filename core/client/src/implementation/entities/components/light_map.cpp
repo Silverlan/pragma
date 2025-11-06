@@ -50,7 +50,7 @@ void CLightMapComponent::RegisterMembers(pragma::EntityComponentManager &compone
 }
 CLightMapComponent::CLightMapComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_lightMapExposure {util::FloatProperty::Create(0.f)} {}
 
-void CLightMapComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CLightMapComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CLightMapComponent::Initialize() { BaseEntityComponent::Initialize(); }
 
 void CLightMapComponent::InitializeLightMapData(const std::shared_ptr<prosper::Texture> &lightMap, const std::shared_ptr<prosper::IDynamicResizableBuffer> &lightMapUvBuffer, const std::vector<std::shared_ptr<prosper::IBuffer>> &meshUvBuffers,
@@ -568,7 +568,7 @@ namespace {
 	auto UVN = pragma::console::client::register_command("map_rebuild_lightmaps", &map_rebuild_lightmaps, pragma::console::ConVarFlags::None, "Rebuilds the lightmaps for the current map. Note that this will only work if the map was compiled with lightmap uvs.");
 }
 
-static void set_lightmap_texture(lua_State *l, pragma::CLightMapComponent &hLightMapC, const std::string &path, bool directional)
+static void set_lightmap_texture(lua::State *l, pragma::CLightMapComponent &hLightMapC, const std::string &path, bool directional)
 {
 	auto *nw = pragma::get_cengine()->GetNetworkState(l);
 
@@ -588,7 +588,7 @@ static void set_lightmap_texture(lua_State *l, pragma::CLightMapComponent &hLigh
 		hLightMapC.SetLightMapAtlas(vkTex);
 }
 
-void CLightMapComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+void CLightMapComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	auto defCLightMap = pragma::lua::create_entity_component_class<pragma::CLightMapComponent, pragma::BaseEntityComponent>("LightMapComponent");
 	defCLightMap.add_static_constant("TEXTURE_DIFFUSE", umath::to_integral(pragma::CLightMapComponent::Texture::DiffuseMap));
@@ -601,14 +601,14 @@ void CLightMapComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &mod
 	defCLightMap.scope[luabind::def("import_lightmap_atlas", static_cast<bool (*)(const std::string &)>(&pragma::CLightMapComponent::ImportLightmapAtlas))];
 	defCLightMap.scope[luabind::def("import_lightmap_atlas", static_cast<bool (*)(uimg::ImageBuffer &)>(&pragma::CLightMapComponent::ImportLightmapAtlas))];
 	//defCLightMap.scope[luabind::def("import_lightmap_atlas",static_cast<bool(*)(VFilePtr)>(&pragma::CLightMapComponent::ImportLightmapAtlas),luabind::file_policy<1>{})];
-	defCLightMap.def("GetLightmapTexture", static_cast<std::optional<std::shared_ptr<prosper::Texture>> (*)(lua_State *, pragma::CLightMapComponent &)>([](lua_State *l, pragma::CLightMapComponent &hLightMapC) -> std::optional<std::shared_ptr<prosper::Texture>> {
+	defCLightMap.def("GetLightmapTexture", static_cast<std::optional<std::shared_ptr<prosper::Texture>> (*)(lua::State *, pragma::CLightMapComponent &)>([](lua::State *l, pragma::CLightMapComponent &hLightMapC) -> std::optional<std::shared_ptr<prosper::Texture>> {
 		auto lightMap = hLightMapC.GetLightMap();
 		if(lightMap == nullptr)
 			return {};
 		return lightMap;
 	}));
 	defCLightMap.def(
-	  "GetDirectionalLightmapTexture", +[](lua_State *l, pragma::CLightMapComponent &hLightMapC) -> std::optional<std::shared_ptr<prosper::Texture>> {
+	  "GetDirectionalLightmapTexture", +[](lua::State *l, pragma::CLightMapComponent &hLightMapC) -> std::optional<std::shared_ptr<prosper::Texture>> {
 		  auto lightMap = hLightMapC.GetDirectionalLightMap();
 		  if(lightMap == nullptr)
 			  return {};
@@ -623,9 +623,9 @@ void CLightMapComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &mod
 	defCLightMap.def("GetDirectionalLightmapAtlas", &pragma::CLightMapComponent::GetDirectionalLightMapAtlas);
 	defCLightMap.def("GetLightmapTexture", &pragma::CLightMapComponent::GetTexture, luabind::copy_policy<0> {});
 	defCLightMap.def("SetLightmapAtlas", &pragma::CLightMapComponent::SetLightMapAtlas);
-	defCLightMap.def("SetLightmapAtlas", +[](lua_State *l, pragma::CLightMapComponent &hLightMapC, const std::string &path) { set_lightmap_texture(l, hLightMapC, path, false); });
+	defCLightMap.def("SetLightmapAtlas", +[](lua::State *l, pragma::CLightMapComponent &hLightMapC, const std::string &path) { set_lightmap_texture(l, hLightMapC, path, false); });
 	defCLightMap.def("SetDirectionalLightmapAtlas", &pragma::CLightMapComponent::SetDirectionalLightMapAtlas);
-	defCLightMap.def("SetDirectionalLightmapAtlas", +[](lua_State *l, pragma::CLightMapComponent &hLightMapC, const std::string &path) { set_lightmap_texture(l, hLightMapC, path, true); });
+	defCLightMap.def("SetDirectionalLightmapAtlas", +[](lua::State *l, pragma::CLightMapComponent &hLightMapC, const std::string &path) { set_lightmap_texture(l, hLightMapC, path, true); });
 	defCLightMap.def("SetExposure", &pragma::CLightMapComponent::SetLightMapExposure);
 	defCLightMap.def("GetExposure", &pragma::CLightMapComponent::GetLightMapExposure);
 	defCLightMap.def("GetExposureProperty", &pragma::CLightMapComponent::GetLightMapExposureProperty);
@@ -633,8 +633,8 @@ void CLightMapComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &mod
 	auto defLightmapBakeSettings = luabind::class_<pragma::LightmapBakeSettings>("BakeSettings");
 	defLightmapBakeSettings.def(luabind::constructor<>());
 	defLightmapBakeSettings.property("width",
-	  static_cast<luabind::object (*)(lua_State *, pragma::LightmapBakeSettings &)>([](lua_State *l, pragma::LightmapBakeSettings &bakeSettings) -> luabind::object { return bakeSettings.width.has_value() ? luabind::object {l, *bakeSettings.width} : luabind::object {}; }),
-	  static_cast<void (*)(lua_State *, pragma::LightmapBakeSettings &, luabind::object)>([](lua_State *l, pragma::LightmapBakeSettings &bakeSettings, luabind::object o) {
+	  static_cast<luabind::object (*)(lua::State *, pragma::LightmapBakeSettings &)>([](lua::State *l, pragma::LightmapBakeSettings &bakeSettings) -> luabind::object { return bakeSettings.width.has_value() ? luabind::object {l, *bakeSettings.width} : luabind::object {}; }),
+	  static_cast<void (*)(lua::State *, pragma::LightmapBakeSettings &, luabind::object)>([](lua::State *l, pragma::LightmapBakeSettings &bakeSettings, luabind::object o) {
 		  if(Lua::IsSet(l, 2) == false) {
 			  bakeSettings.width = {};
 			  return;
@@ -642,8 +642,8 @@ void CLightMapComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &mod
 		  bakeSettings.width = Lua::CheckNumber(l, 2);
 	  }));
 	defLightmapBakeSettings.property("height",
-	  static_cast<luabind::object (*)(lua_State *, pragma::LightmapBakeSettings &)>([](lua_State *l, pragma::LightmapBakeSettings &bakeSettings) -> luabind::object { return bakeSettings.height.has_value() ? luabind::object {l, *bakeSettings.height} : luabind::object {}; }),
-	  static_cast<void (*)(lua_State *, pragma::LightmapBakeSettings &, luabind::object)>([](lua_State *l, pragma::LightmapBakeSettings &bakeSettings, luabind::object o) {
+	  static_cast<luabind::object (*)(lua::State *, pragma::LightmapBakeSettings &)>([](lua::State *l, pragma::LightmapBakeSettings &bakeSettings) -> luabind::object { return bakeSettings.height.has_value() ? luabind::object {l, *bakeSettings.height} : luabind::object {}; }),
+	  static_cast<void (*)(lua::State *, pragma::LightmapBakeSettings &, luabind::object)>([](lua::State *l, pragma::LightmapBakeSettings &bakeSettings, luabind::object o) {
 		  if(Lua::IsSet(l, 2) == false) {
 			  bakeSettings.height = {};
 			  return;
@@ -656,17 +656,17 @@ void CLightMapComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &mod
 	defLightmapBakeSettings.def_readwrite("createAsRenderJob", &pragma::LightmapBakeSettings::createAsRenderJob);
 	defLightmapBakeSettings.def_readwrite("rebuildUvAtlas", &pragma::LightmapBakeSettings::rebuildUvAtlas);
 	defLightmapBakeSettings.def_readwrite("exposure", &pragma::LightmapBakeSettings::exposure);
-	defLightmapBakeSettings.def("SetColorTransform", static_cast<void (*)(lua_State *, pragma::LightmapBakeSettings &, const std::string &, const std::string &)>([](lua_State *l, pragma::LightmapBakeSettings &bakeSettings, const std::string &config, const std::string &look) {
+	defLightmapBakeSettings.def("SetColorTransform", static_cast<void (*)(lua::State *, pragma::LightmapBakeSettings &, const std::string &, const std::string &)>([](lua::State *l, pragma::LightmapBakeSettings &bakeSettings, const std::string &config, const std::string &look) {
 		bakeSettings.colorTransform = pragma::rendering::cycles::SceneInfo::ColorTransform {};
 		bakeSettings.colorTransform->config = config;
 		bakeSettings.colorTransform->look = look;
 	}));
-	defLightmapBakeSettings.def("ResetColorTransform", static_cast<void (*)(lua_State *, pragma::LightmapBakeSettings &)>([](lua_State *l, pragma::LightmapBakeSettings &bakeSettings) { bakeSettings.colorTransform = {}; }));
+	defLightmapBakeSettings.def("ResetColorTransform", static_cast<void (*)(lua::State *, pragma::LightmapBakeSettings &)>([](lua::State *l, pragma::LightmapBakeSettings &bakeSettings) { bakeSettings.colorTransform = {}; }));
 	defCLightMap.scope[defLightmapBakeSettings];
 
 	auto defCache = luabind::class_<pragma::LightmapDataCache>("DataCache");
 	defCache.scope[luabind::def(
-	  "load", +[](lua_State *l, const std::string &path) -> Lua::var<pragma::LightmapDataCache, std::pair<bool, std::string>> {
+	  "load", +[](lua::State *l, const std::string &path) -> Lua::var<pragma::LightmapDataCache, std::pair<bool, std::string>> {
 		  auto cache = std::make_shared<pragma::LightmapDataCache>();
 		  std::string err;
 		  if(!pragma::LightmapDataCache::Load(path, *cache, err))
@@ -701,15 +701,15 @@ void CLightMapComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &mod
 		  return *uvs;
 	  });
 	defCache.def(
-	  "SaveAs", +[](lua_State *l, pragma::LightmapDataCache &cache, const std::string &path) -> Lua::var<bool, std::pair<bool, std::string>> {
+	  "SaveAs", +[](lua::State *l, pragma::LightmapDataCache &cache, const std::string &path) -> Lua::var<bool, std::pair<bool, std::string>> {
 		  std::string err;
 		  auto res = cache.SaveAs(path, err);
 		  if(res)
 			  return luabind::object {l, res};
 		  return luabind::object {l, std::pair<bool, std::string> {res, err}};
 	  });
-	defCache.def("SetLightmapEntity", +[](lua_State *l, pragma::LightmapDataCache &cache, const std::string &uuid) { cache.lightmapEntityId = util::uuid_string_to_bytes(uuid); });
-	defCache.def("GetLightmapEntity", +[](lua_State *l, pragma::LightmapDataCache &cache) -> std::string { return util::uuid_to_string(cache.lightmapEntityId); });
+	defCache.def("SetLightmapEntity", +[](lua::State *l, pragma::LightmapDataCache &cache, const std::string &uuid) { cache.lightmapEntityId = util::uuid_string_to_bytes(uuid); });
+	defCache.def("GetLightmapEntity", +[](lua::State *l, pragma::LightmapDataCache &cache) -> std::string { return util::uuid_to_string(cache.lightmapEntityId); });
 	defCLightMap.scope[defCache];
 	modEnts[defCLightMap];
 	pragma::lua::define_custom_constructor<pragma::LightmapDataCache, +[]() -> std::shared_ptr<pragma::LightmapDataCache> { return std::make_shared<pragma::LightmapDataCache>(); }>(l);

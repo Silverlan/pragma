@@ -10,12 +10,12 @@ export module pragma.server:scripting.lua.classes.model_mesh;
 export namespace Lua {
 	namespace ModelMesh {
 		namespace Server {
-			DLLSERVER void Create(lua_State *l);
+			DLLSERVER void Create(lua::State *l);
 		};
 	};
 	namespace ModelSubMesh {
 		namespace Server {
-			DLLSERVER void Create(lua_State *l);
+			DLLSERVER void Create(lua::State *l);
 		};
 	};
 };

@@ -15,7 +15,7 @@ export namespace pragma {
 		CDebugHitboxComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual ~CDebugHitboxComponent() override;
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnEntitySpawn() override;
 		virtual void OnRemove() override;
 		virtual void OnTick(double tDelta) override;

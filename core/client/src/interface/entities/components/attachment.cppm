@@ -13,7 +13,7 @@ export namespace pragma {
 	class DLLCLIENT CAttachmentComponent final : public BaseAttachmentComponent, public CBaseNetComponent {
 	  public:
 		CAttachmentComponent(pragma::ecs::BaseEntity &ent) : BaseAttachmentComponent(ent) {}
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 
 		virtual void ReceiveData(NetPacket &packet) override;

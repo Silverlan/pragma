@@ -22,7 +22,7 @@ void CMaterialOverrideComponent::RegisterEvents(pragma::EntityComponentManager &
 CMaterialOverrideComponent::CMaterialOverrideComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 CMaterialOverrideComponent::~CMaterialOverrideComponent() {}
-void CMaterialOverrideComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CMaterialOverrideComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CMaterialOverrideComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -194,14 +194,14 @@ msys::CMaterial *CMaterialOverrideComponent::GetRenderMaterial(uint32_t idx) con
 
 size_t CMaterialOverrideComponent::GetMaterialOverrideCount() const { return m_materialOverrides.size(); }
 
-void CMaterialOverrideComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+void CMaterialOverrideComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	auto def = pragma::lua::create_entity_component_class<pragma::CMaterialOverrideComponent, pragma::BaseEntityComponent>("MaterialOverrideComponent");
 	def.add_static_constant("EVENT_ON_MATERIAL_OVERRIDES_CLEARED", pragma::CMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDES_CLEARED);
 	def.def("SetMaterialOverride", static_cast<void (pragma::CMaterialOverrideComponent::*)(uint32_t, const std::string &)>(&pragma::CMaterialOverrideComponent::SetMaterialOverride));
 	def.def("SetMaterialOverride", static_cast<void (pragma::CMaterialOverrideComponent::*)(uint32_t, msys::CMaterial &)>(&pragma::CMaterialOverrideComponent::SetMaterialOverride));
 	def.def(
-	  "SetMaterialOverride", +[](lua_State *l, pragma::CMaterialOverrideComponent &hModel, const std::string &matSrc, const std::string &matDst) {
+	  "SetMaterialOverride", +[](lua::State *l, pragma::CMaterialOverrideComponent &hModel, const std::string &matSrc, const std::string &matDst) {
 		  auto &mdl = hModel.GetEntity().GetModel();
 		  if(!mdl)
 			  return;
@@ -216,7 +216,7 @@ void CMaterialOverrideComponent::RegisterLuaBindings(lua_State *l, luabind::modu
 		  hModel.SetMaterialOverride(it - mats.begin(), matDst);
 	  });
 	def.def(
-	  "SetMaterialOverride", +[](lua_State *l, pragma::CMaterialOverrideComponent &hModel, const std::string &matSrc, msys::CMaterial &matDst) {
+	  "SetMaterialOverride", +[](lua::State *l, pragma::CMaterialOverrideComponent &hModel, const std::string &matSrc, msys::CMaterial &matDst) {
 		  auto &mdl = hModel.GetEntity().GetModel();
 		  if(!mdl)
 			  return;
@@ -231,7 +231,7 @@ void CMaterialOverrideComponent::RegisterLuaBindings(lua_State *l, luabind::modu
 		  hModel.SetMaterialOverride(it - mats.begin(), matDst);
 	  });
 	def.def(
-	  "ClearMaterialOverride", +[](lua_State *l, pragma::CMaterialOverrideComponent &hModel, const std::string &matSrc) {
+	  "ClearMaterialOverride", +[](lua::State *l, pragma::CMaterialOverrideComponent &hModel, const std::string &matSrc) {
 		  auto &mdl = hModel.GetEntity().GetModel();
 		  if(!mdl)
 			  return;
@@ -256,4 +256,4 @@ void CMaterialOverrideComponent::RegisterLuaBindings(lua_State *l, luabind::modu
 ////////////
 
 CEOnMaterialOverrideChanged::CEOnMaterialOverrideChanged(uint32_t idx, msys::CMaterial &mat) : materialIndex {idx}, material {mat} {}
-void CEOnMaterialOverrideChanged::PushArguments(lua_State *l) { Lua::PushInt(l, materialIndex); }
+void CEOnMaterialOverrideChanged::PushArguments(lua::State *l) { Lua::PushInt(l, materialIndex); }

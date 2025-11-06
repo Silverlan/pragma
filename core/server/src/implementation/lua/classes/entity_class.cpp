@@ -14,17 +14,17 @@ void Lua::Entity::Server::register_class(luabind::class_<SBaseEntity, pragma::ec
 {
 	classDef.def("IsShared", &SBaseEntity::IsShared);
 	classDef.def("SetShared", &SBaseEntity::SetShared);
-	classDef.def("SendNetEvent", static_cast<void (*)(lua_State *, SBaseEntity &, nwm::Protocol, unsigned int, ::NetPacket, pragma::networking::TargetRecipientFilter &)>(&SendNetEvent));
-	classDef.def("BroadcastNetEvent", static_cast<void (*)(lua_State *, SBaseEntity &, nwm::Protocol, unsigned int, ::NetPacket)>(&SendNetEvent));
-	classDef.def("SendNetEvent", static_cast<void (*)(lua_State *, SBaseEntity &, nwm::Protocol, unsigned int, pragma::networking::TargetRecipientFilter &)>(&SendNetEvent));
-	classDef.def("BroadcastNetEvent", static_cast<void (*)(lua_State *, SBaseEntity &, nwm::Protocol, unsigned int)>(&SendNetEvent));
+	classDef.def("SendNetEvent", static_cast<void (*)(lua::State *, SBaseEntity &, nwm::Protocol, unsigned int, ::NetPacket, pragma::networking::TargetRecipientFilter &)>(&SendNetEvent));
+	classDef.def("BroadcastNetEvent", static_cast<void (*)(lua::State *, SBaseEntity &, nwm::Protocol, unsigned int, ::NetPacket)>(&SendNetEvent));
+	classDef.def("SendNetEvent", static_cast<void (*)(lua::State *, SBaseEntity &, nwm::Protocol, unsigned int, pragma::networking::TargetRecipientFilter &)>(&SendNetEvent));
+	classDef.def("BroadcastNetEvent", static_cast<void (*)(lua::State *, SBaseEntity &, nwm::Protocol, unsigned int)>(&SendNetEvent));
 	classDef.def("IsSynchronized", &SBaseEntity::IsSynchronized);
 	classDef.def("SetSynchronized", &SBaseEntity::SetSynchronized);
 	classDef.def("SetSnapshotDirty", &SBaseEntity::MarkForSnapshot);
 	classDef.def("AddNetworkedComponent", &SBaseEntity::AddNetworkedComponent);
 }
 
-void Lua::Entity::Server::SendNetEvent(lua_State *l, SBaseEntity &ent, nwm::Protocol protocol, unsigned int eventId, ::NetPacket packet, pragma::networking::TargetRecipientFilter &rp)
+void Lua::Entity::Server::SendNetEvent(lua::State *l, SBaseEntity &ent, nwm::Protocol protocol, unsigned int eventId, ::NetPacket packet, pragma::networking::TargetRecipientFilter &rp)
 {
 	switch(static_cast<nwm::Protocol>(protocol)) {
 	case nwm::Protocol::TCP:
@@ -35,7 +35,7 @@ void Lua::Entity::Server::SendNetEvent(lua_State *l, SBaseEntity &ent, nwm::Prot
 		break;
 	}
 }
-void Lua::Entity::Server::SendNetEvent(lua_State *l, SBaseEntity &ent, nwm::Protocol protocol, unsigned int eventId, ::NetPacket packet)
+void Lua::Entity::Server::SendNetEvent(lua::State *l, SBaseEntity &ent, nwm::Protocol protocol, unsigned int eventId, ::NetPacket packet)
 {
 	switch(static_cast<nwm::Protocol>(protocol)) {
 	case nwm::Protocol::TCP:
@@ -46,5 +46,5 @@ void Lua::Entity::Server::SendNetEvent(lua_State *l, SBaseEntity &ent, nwm::Prot
 		break;
 	}
 }
-void Lua::Entity::Server::SendNetEvent(lua_State *l, SBaseEntity &ent, nwm::Protocol protocol, unsigned int eventId, pragma::networking::TargetRecipientFilter &rp) { SendNetEvent(l, ent, protocol, eventId, {}, rp); }
-void Lua::Entity::Server::SendNetEvent(lua_State *l, SBaseEntity &ent, nwm::Protocol protocol, unsigned int eventId) { SendNetEvent(l, ent, protocol, eventId, {}); }
+void Lua::Entity::Server::SendNetEvent(lua::State *l, SBaseEntity &ent, nwm::Protocol protocol, unsigned int eventId, pragma::networking::TargetRecipientFilter &rp) { SendNetEvent(l, ent, protocol, eventId, {}, rp); }
+void Lua::Entity::Server::SendNetEvent(lua::State *l, SBaseEntity &ent, nwm::Protocol protocol, unsigned int eventId) { SendNetEvent(l, ent, protocol, eventId, {}); }

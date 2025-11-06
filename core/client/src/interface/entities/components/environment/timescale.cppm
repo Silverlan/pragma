@@ -17,7 +17,7 @@ export {
 		  public:
 			CEnvTimescaleComponent(pragma::ecs::BaseEntity &ent) : BaseEnvTimescaleComponent(ent) {}
 			virtual void ReceiveData(NetPacket &packet) override;
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 		};
 	};

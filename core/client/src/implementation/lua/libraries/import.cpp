@@ -92,7 +92,7 @@ static aiNode &add_node(aiNode &parentNode,uint32_t index,const std::string &nam
 	return *node;
 }
 #endif
-int Lua::lib_export::export_scene(lua_State *l)
+int Lua::lib_export::export_scene(lua::State *l)
 {
 #if 0
 	std::string outputPath = FileManager::GetCanonicalizedPath(Lua::CheckString(l,1));

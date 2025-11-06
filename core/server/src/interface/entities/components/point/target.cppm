@@ -14,7 +14,7 @@ export {
 		class DLLSERVER SPointTargetComponent final : public BasePointTargetComponent {
 		  public:
 			SPointTargetComponent(pragma::ecs::BaseEntity &ent) : BasePointTargetComponent(ent) {}
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};
 

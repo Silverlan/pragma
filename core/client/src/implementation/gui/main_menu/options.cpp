@@ -346,7 +346,7 @@ void WIMainMenuOptions::UpdateMemoryUsage()
 	std::array<WIHandle, 3> luaMemUsageSliders = {m_hLuaMemoryUsageGUI, m_hLuaMemoryUsageClient, m_hLuaMemoryUsageServer};
 	auto *svState = pragma::get_cengine()->GetServerNetworkState();
 	auto *client = pragma::get_client_state();
-	std::array<lua_State *, 3> luaMemUsageStates = {client->GetGUILuaState(), client->GetLuaState(), (svState != nullptr) ? svState->GetLuaState() : nullptr};
+	std::array<lua::State *, 3> luaMemUsageStates = {client->GetGUILuaState(), client->GetLuaState(), (svState != nullptr) ? svState->GetLuaState() : nullptr};
 	for(auto i = decltype(luaMemUsageSliders.size()) {0}; i < luaMemUsageSliders.size(); ++i) {
 		auto &hSlider = luaMemUsageSliders.at(i);
 		if(hSlider.IsValid() == false)

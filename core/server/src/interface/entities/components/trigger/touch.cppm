@@ -14,7 +14,7 @@ export {
 		class DLLSERVER STouchComponent final : public BaseTouchComponent {
 		  public:
 			STouchComponent(pragma::ecs::BaseEntity &ent) : BaseTouchComponent(ent) {}
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};
 

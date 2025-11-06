@@ -11,7 +11,7 @@ import :entities.components;
 
 using namespace pragma;
 
-void SPlayerSpawnComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SPlayerSpawnComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void GamePlayerSpawn::Initialize()
 {

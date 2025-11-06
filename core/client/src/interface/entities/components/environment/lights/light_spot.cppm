@@ -16,7 +16,7 @@ export namespace pragma {
 	  public:
 		CLightSpotComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
-		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override;
 		virtual void SetConeStartOffset(float offset) override;
 		virtual void OnEntitySpawn() override;

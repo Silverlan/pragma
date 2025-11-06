@@ -14,7 +14,7 @@ import :server_state;
 using namespace pragma;
 
 void SModelComponent::Initialize() { BaseModelComponent::Initialize(); }
-void SModelComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SModelComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SModelComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &model)
 {

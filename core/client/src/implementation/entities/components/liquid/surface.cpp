@@ -215,7 +215,7 @@ prosper::IDescriptorSet *CLiquidSurfaceComponent::GetEffectDescriptorSet() const
 	return m_waterScene->descSetGroupTexEffects->GetDescriptorSet();
 }
 
-void CLiquidSurfaceComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CLiquidSurfaceComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CLiquidSurfaceComponent::InitializeWaterScene(const WaterScene &scene)
 {

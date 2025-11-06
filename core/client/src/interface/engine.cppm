@@ -152,8 +152,8 @@ export {
 		}
 		std::shared_ptr<al::IEffect> GetAuxEffect(const std::string &name);
 		// Lua
-		virtual NetworkState *GetNetworkState(lua_State *l) override;
-		virtual Lua::Interface *GetLuaInterface(lua_State *l) override;
+		virtual NetworkState *GetNetworkState(lua::State *l) override;
+		virtual Lua::Interface *GetLuaInterface(lua::State *l) override;
 
 		float GetNearZ();
 		float GetFarZ();

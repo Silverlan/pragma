@@ -66,70 +66,70 @@ export {
 
 		// Lua
 		void Lua_OnInitialize();
-		static void default_OnInitialize(lua_State *l, WILuaBase &hElement);
+		static void default_OnInitialize(lua::State *l, WILuaBase &hElement);
 
 		void Lua_OnThink();
-		static void default_OnThink(lua_State *l, WILuaBase &hElement);
+		static void default_OnThink(lua::State *l, WILuaBase &hElement);
 
 		void Lua_OnFirstThink();
-		static void default_OnFirstThink(lua_State *l, WILuaBase &hElement);
+		static void default_OnFirstThink(lua::State *l, WILuaBase &hElement);
 
 		void Lua_MouseCallback(int button, int action, int mods);
-		static void default_MouseCallback(lua_State *l, WILuaBase &hElement, int button, int action, int mods);
+		static void default_MouseCallback(lua::State *l, WILuaBase &hElement, int button, int action, int mods);
 
 		void Lua_KeyboardCallback(int key, int scancode, int action, int mods);
-		static void default_KeyboardCallback(lua_State *l, WILuaBase &hElement, int key, int scancode, int action, int mods);
+		static void default_KeyboardCallback(lua::State *l, WILuaBase &hElement, int key, int scancode, int action, int mods);
 
 		void Lua_CharCallback(unsigned int c, uint32_t mods);
-		static void default_CharCallback(lua_State *l, WILuaBase &hElement, unsigned int c, uint32_t mods);
+		static void default_CharCallback(lua::State *l, WILuaBase &hElement, unsigned int c, uint32_t mods);
 
 		void Lua_ScrollCallback(double xoffset, double yoffset);
-		static void default_ScrollCallback(lua_State *l, WILuaBase &hElement, double xoffset, double yoffset);
+		static void default_ScrollCallback(lua::State *l, WILuaBase &hElement, double xoffset, double yoffset);
 
 		void Lua_OnUpdate();
-		static void default_OnUpdate(lua_State *l, WILuaBase &hElement);
+		static void default_OnUpdate(lua::State *l, WILuaBase &hElement);
 
 		void Lua_OnSetSize(int x, int y);
-		static void default_OnSetSize(lua_State *l, WILuaBase &hElement, int x, int y);
+		static void default_OnSetSize(lua::State *l, WILuaBase &hElement, int x, int y);
 
 		void Lua_OnSetVisible(bool b);
-		static void default_OnSetVisible(lua_State *l, WILuaBase &hElement, bool b);
+		static void default_OnSetVisible(lua::State *l, WILuaBase &hElement, bool b);
 
 		void Lua_OnSetColor(float r, float g, float b, float a = 1.f);
-		static void default_OnSetColor(lua_State *l, WILuaBase &hElement, float r, float g, float b, float a = 1.f);
+		static void default_OnSetColor(lua::State *l, WILuaBase &hElement, float r, float g, float b, float a = 1.f);
 
 		void Lua_OnSetAlpha(float alpha);
-		static void default_OnSetAlpha(lua_State *l, WILuaBase &hElement, float alpha);
+		static void default_OnSetAlpha(lua::State *l, WILuaBase &hElement, float alpha);
 
 		bool Lua_CheckPosInBounds(const Vector2i &pos);
-		static bool default_CheckPosInBounds(lua_State *l, WILuaBase &hElement, const Vector2i &pos);
+		static bool default_CheckPosInBounds(lua::State *l, WILuaBase &hElement, const Vector2i &pos);
 
 		void Lua_Render(const ::wgui::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale);
-		static void default_Render(lua_State *l, WILuaBase &hElement, const ::wgui::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale);
+		static void default_Render(lua::State *l, WILuaBase &hElement, const ::wgui::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale);
 
 		void Lua_OnCursorEntered();
-		static void default_OnCursorEntered(lua_State *l, WILuaBase &hElement);
+		static void default_OnCursorEntered(lua::State *l, WILuaBase &hElement);
 
 		void Lua_OnCursorExited();
-		static void default_OnCursorExited(lua_State *l, WILuaBase &hElement);
+		static void default_OnCursorExited(lua::State *l, WILuaBase &hElement);
 
 		void Lua_OnFileDragEntered();
-		static void default_OnFileDragEntered(lua_State *l, WILuaBase &hElement);
+		static void default_OnFileDragEntered(lua::State *l, WILuaBase &hElement);
 
 		void Lua_OnFileDragExited();
-		static void default_OnFileDragExited(lua_State *l, WILuaBase &hElement);
+		static void default_OnFileDragExited(lua::State *l, WILuaBase &hElement);
 
 		void Lua_OnFilesDropped(const std::vector<std::string> &files);
-		static void default_OnFilesDropped(lua_State *l, WILuaBase &hElement, const std::vector<std::string> &files);
+		static void default_OnFilesDropped(lua::State *l, WILuaBase &hElement, const std::vector<std::string> &files);
 
 		void Lua_OnFocusGained();
-		static void default_OnFocusGained(lua_State *l, WILuaBase &hElement);
+		static void default_OnFocusGained(lua::State *l, WILuaBase &hElement);
 
 		void Lua_OnFocusKilled();
-		static void default_OnFocusKilled(lua_State *l, WILuaBase &hElement);
+		static void default_OnFocusKilled(lua::State *l, WILuaBase &hElement);
 
 		void Lua_OnRemove();
-		static void default_OnRemove(lua_State *l, WILuaBase &hElement);
+		static void default_OnRemove(lua::State *l, WILuaBase &hElement);
 	  protected:
 		virtual void DoUpdate() override;
 		virtual bool DoPosInBounds(const Vector2i &pos) const override;

@@ -14,7 +14,7 @@ export {
 		class DLLSERVER SGamemodeComponent final : public BaseGamemodeComponent {
 		  public:
 			SGamemodeComponent(pragma::ecs::BaseEntity &ent) : BaseGamemodeComponent(ent) {}
-			virtual void InitializeLuaObject(lua_State *l) override;
+			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};
 

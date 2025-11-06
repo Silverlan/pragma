@@ -30,7 +30,7 @@ void SCharacterComponent::Initialize()
 	});
 }
 void SCharacterComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseCharacterComponent)); }
-void SCharacterComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SCharacterComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void SCharacterComponent::OnTick(double tDelta) { BaseCharacterComponent::OnTick(tDelta); }
 
 void SCharacterComponent::OnFrozen(bool bFrozen)
@@ -158,19 +158,19 @@ void SCharacterComponent::SetFaction(Faction &faction)
 namespace Lua {
 	namespace Character {
 		namespace Server {
-			static void DropWeapon(lua_State *l, pragma::SCharacterComponent &hEnt, pragma::SWeaponComponent &hWep);
-			static void RemoveWeapon(lua_State *l, pragma::SCharacterComponent &hEnt, pragma::SWeaponComponent &hWep);
-			static void DeployWeapon(lua_State *l, pragma::SCharacterComponent &hEnt, pragma::SWeaponComponent &hWep);
+			static void DropWeapon(lua::State *l, pragma::SCharacterComponent &hEnt, pragma::SWeaponComponent &hWep);
+			static void RemoveWeapon(lua::State *l, pragma::SCharacterComponent &hEnt, pragma::SWeaponComponent &hWep);
+			static void DeployWeapon(lua::State *l, pragma::SCharacterComponent &hEnt, pragma::SWeaponComponent &hWep);
 		};
 	};
 	namespace Actor {
 		namespace Server {
-			static void SetFaction(lua_State *l, pragma::SCharacterComponent &hEnt, const std::string &factionName);
+			static void SetFaction(lua::State *l, pragma::SCharacterComponent &hEnt, const std::string &factionName);
 		};
 	};
 };
 
-void SCharacterComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &modEnts)
+void SCharacterComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseCharacterComponent::RegisterLuaBindings(l, modEnts);
 
@@ -198,7 +198,7 @@ void SCharacterComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &mo
 	def.def("SetGodMode", &pragma::SCharacterComponent::SetGodMode);
 	def.def("GetGodMode", &pragma::SCharacterComponent::GetGodMode);
 	def.def("GetFaction", &pragma::SCharacterComponent::GetFaction);
-	def.def("SetFaction", static_cast<void (*)(lua_State *, pragma::SCharacterComponent &, const std::string &)>(&Lua::Actor::Server::SetFaction));
+	def.def("SetFaction", static_cast<void (*)(lua::State *, pragma::SCharacterComponent &, const std::string &)>(&Lua::Actor::Server::SetFaction));
 	def.def("SetFaction", &pragma::SCharacterComponent::SetFaction);
 
 	// This is a bit of a hack: Usually the client controls the view angles of the player, which means changing it serverside would
@@ -220,13 +220,13 @@ void SCharacterComponent::RegisterLuaBindings(lua_State *l, luabind::module_ &mo
 	modEnts[def];
 }
 
-void Lua::Character::Server::DropWeapon(lua_State *l, pragma::SCharacterComponent &hEnt, pragma::SWeaponComponent &hWep) { hEnt.DropWeapon(&hWep.GetEntity()); }
-void Lua::Character::Server::RemoveWeapon(lua_State *l, pragma::SCharacterComponent &hEnt, pragma::SWeaponComponent &hWep) { hEnt.RemoveWeapon(hWep.GetEntity()); }
-void Lua::Character::Server::DeployWeapon(lua_State *l, pragma::SCharacterComponent &hEnt, pragma::SWeaponComponent &hWep) { hEnt.DeployWeapon(hWep.GetEntity()); }
+void Lua::Character::Server::DropWeapon(lua::State *l, pragma::SCharacterComponent &hEnt, pragma::SWeaponComponent &hWep) { hEnt.DropWeapon(&hWep.GetEntity()); }
+void Lua::Character::Server::RemoveWeapon(lua::State *l, pragma::SCharacterComponent &hEnt, pragma::SWeaponComponent &hWep) { hEnt.RemoveWeapon(hWep.GetEntity()); }
+void Lua::Character::Server::DeployWeapon(lua::State *l, pragma::SCharacterComponent &hEnt, pragma::SWeaponComponent &hWep) { hEnt.DeployWeapon(hWep.GetEntity()); }
 
 /////////////
 
-void Lua::Actor::Server::SetFaction(lua_State *l, pragma::SCharacterComponent &hEnt, const std::string &factionName)
+void Lua::Actor::Server::SetFaction(lua::State *l, pragma::SCharacterComponent &hEnt, const std::string &factionName)
 {
 	auto &factionManager = pragma::SAIComponent::GetFactionManager();
 	auto faction = factionManager.FindFactionByName(factionName);

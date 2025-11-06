@@ -178,7 +178,7 @@ void CWaterSurfaceComponent::DestroySurface()
 	if(m_cbRenderSurface.IsValid())
 		m_cbRenderSurface.Remove();
 }
-void CWaterSurfaceComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CWaterSurfaceComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////
 

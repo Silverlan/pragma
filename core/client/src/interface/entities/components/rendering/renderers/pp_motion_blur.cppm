@@ -3,8 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 #define MOTION_BLUR_DEBUG_ELEMENT_ENABLED 0
 

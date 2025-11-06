@@ -2,13 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/serverdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.server:scripting.lua.classes.recipient_filter;
 
 import :entities.components;
-export import luabind;
+export import pragma.lua;
 
 export {
 	;

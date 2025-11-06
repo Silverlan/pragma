@@ -3,11 +3,9 @@
 
 module;
 
-#include "pragma/logging.hpp"
 
 #include "pragma/console/helper.hpp"
 
-#include "pragma/lua/core.hpp"
 
 #include <spdlog/logger.h>
 

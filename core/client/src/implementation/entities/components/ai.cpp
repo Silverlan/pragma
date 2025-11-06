@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 module pragma.client;
 
@@ -140,6 +139,6 @@ util::EventReply CAIComponent::HandleEvent(ComponentEventId eventId, ComponentEv
 void CAIComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseAIComponent::RegisterLuaBindings(l, modEnts);
-	auto def = pragma::lua::create_entity_component_class<pragma::CAIComponent, pragma::BaseAIComponent>("AIComponent");
+	auto def = pragma::LuaCore::create_entity_component_class<pragma::CAIComponent, pragma::BaseAIComponent>("AIComponent");
 	modEnts[def];
 }

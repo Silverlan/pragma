@@ -3,13 +3,12 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.server:scripting.lua.classes.entity;
 
 import :entities;
-export import luabind;
+export import pragma.lua;
 
 export {
 	namespace Lua {

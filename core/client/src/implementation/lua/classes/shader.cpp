@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 module pragma.client;
 
@@ -12,7 +11,7 @@ import :rendering.shaders;
 
 prosper::ShaderBindState *LuaShaderRecordTarget::GetBindState() const { return luabind::object_cast_nothrow<prosper::ShaderBindState *>(target, static_cast<prosper::ShaderBindState *>(nullptr)); }
 prosper::util::PreparedCommandBuffer *LuaShaderRecordTarget::GetPcb() const { return luabind::object_cast_nothrow<prosper::util::PreparedCommandBuffer *>(target, static_cast<prosper::util::PreparedCommandBuffer *>(nullptr)); }
-uint32_t Lua::Shader::AttachDescriptorSetInfo(lua::State *l, pragma::LuaShaderWrapperBase &shader, pragma::LuaDescriptorSetInfo &descSetInfo)
+uint32_t Lua::Shader::AttachDescriptorSetInfo(lua::State *l, pragma::LuaCoreShaderWrapperBase &shader, pragma::LuaCoreDescriptorSetInfo &descSetInfo)
 {
 	prosper::DescriptorSetInfo shaderDescSetInfo {pragma::register_global_string(descSetInfo.name), {}};
 	shaderDescSetInfo.bindings.reserve(descSetInfo.bindings.size());
@@ -31,11 +30,11 @@ uint32_t Lua::Shader::AttachDescriptorSetInfo(lua::State *l, pragma::LuaShaderWr
 	shaderDescSetInfo.setIndex = descSetInfo.setIndex;
 	return shader.GetShader().AddDescriptorSetGroup(shaderDescSetInfo);
 }
-void Lua::Shader::AttachPushConstantRange(lua::State *l, pragma::LuaShaderWrapperBase &shader, uint32_t offset, uint32_t size, uint32_t shaderStages) { shader.GetShader().AttachPushConstantRange(offset, size, static_cast<prosper::ShaderStageFlags>(shaderStages)); }
+void Lua::Shader::AttachPushConstantRange(lua::State *l, pragma::LuaCoreShaderWrapperBase &shader, uint32_t offset, uint32_t size, uint32_t shaderStages) { shader.GetShader().AttachPushConstantRange(offset, size, static_cast<prosper::ShaderStageFlags>(shaderStages)); }
 
 void Lua::shader::push_shader(lua::State *l, prosper::Shader &shader)
 {
-	auto *luaShader = dynamic_cast<pragma::LuaShaderWrapperBase *>(&shader);
+	auto *luaShader = dynamic_cast<pragma::LuaCoreShaderWrapperBase *>(&shader);
 	if(luaShader != nullptr)
 		luaShader->GetLuaObject().push(l);
 	else {
@@ -194,5 +193,5 @@ void Lua::Shader::RecordBindDescriptorSets(lua::State *l, prosper::Shader &shade
 	Lua::PushBool(l, r);
 }
 
-void Lua::Shader::SetStageSourceFilePath(lua::State *l, pragma::LuaShaderWrapperBase &shader, uint32_t shaderStage, const std::string &fpath) { shader.SetStageSourceFilePath(static_cast<prosper::ShaderStage>(shaderStage), fpath); }
-void Lua::Shader::SetPipelineCount(lua::State *l, pragma::LuaShaderWrapperBase &shader, uint32_t pipelineCount) { shader.SetPipelineCount(pipelineCount); }
+void Lua::Shader::SetStageSourceFilePath(lua::State *l, pragma::LuaCoreShaderWrapperBase &shader, uint32_t shaderStage, const std::string &fpath) { shader.SetStageSourceFilePath(static_cast<prosper::ShaderStage>(shaderStage), fpath); }
+void Lua::Shader::SetPipelineCount(lua::State *l, pragma::LuaCoreShaderWrapperBase &shader, uint32_t pipelineCount) { shader.SetPipelineCount(pipelineCount); }

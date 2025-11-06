@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/core.hpp"
 
 #include <cassert>
 
@@ -128,7 +127,7 @@ CBaseEntity *CGame::CreateLuaEntity(std::string classname, unsigned int idx, boo
 	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 	luabind::object oClass {};
-	auto *ent = static_cast<CBaseEntity *>(pragma::Game::CreateLuaEntity<CLuaEntity, pragma::lua::HandleHolder<CLuaEntity>>(classname, oClass, bLoadIfNotExists));
+	auto *ent = static_cast<CBaseEntity *>(pragma::Game::CreateLuaEntity<CLuaEntity, pragma::LuaCore::HandleHolder<CLuaEntity>>(classname, oClass, bLoadIfNotExists));
 	if(ent == nullptr)
 		return nullptr;
 	SetupEntity(ent, idx);

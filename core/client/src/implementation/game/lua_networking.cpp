@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/clientdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 module pragma.client;
 
@@ -26,7 +25,7 @@ void CGame::HandleLuaNetPacket(NetPacket &packet)
 	}
 	ProtectedLuaCall(
 	  [this, &i, &packet](lua::State *) {
-		  lua::raw_get(GetLuaState(), LUA_REGISTRYINDEX, i->second);
+		  lua::raw_get(GetLuaState(), Lua::RegistryIndex, i->second);
 
 		  luabind::object(GetLuaState(), packet).push(GetLuaState());
 		  return Lua::StatusCode::Ok;

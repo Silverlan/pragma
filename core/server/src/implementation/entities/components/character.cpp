@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 module pragma.server;
 import :entities.components.character;
@@ -174,7 +173,7 @@ void SCharacterComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &m
 {
 	BaseCharacterComponent::RegisterLuaBindings(l, modEnts);
 
-	auto def = pragma::lua::create_entity_component_class<pragma::SCharacterComponent, pragma::BaseCharacterComponent>("CharacterComponent");
+	auto def = pragma::LuaCore::create_entity_component_class<pragma::SCharacterComponent, pragma::BaseCharacterComponent>("CharacterComponent");
 	def.def("GiveWeapon", static_cast<pragma::ecs::BaseEntity *(pragma::SCharacterComponent::*)(std::string)>(&pragma::SCharacterComponent::GiveWeapon));
 	def.def("DropActiveWeapon", &pragma::SCharacterComponent::DropActiveWeapon);
 	def.def("DropWeapon", static_cast<void (pragma::SCharacterComponent::*)(std::string)>(&pragma::SCharacterComponent::DropWeapon));

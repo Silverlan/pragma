@@ -3,9 +3,8 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
+#include "definitions.hpp"
 #include <format>
-#include "pragma/lua/core.hpp"
 
 export module pragma.server:entities.base;
 

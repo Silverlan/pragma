@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 module pragma.client;
 
@@ -55,7 +54,7 @@ namespace Lua {
 		static std::shared_ptr<prosper::Texture> create_texture(prosper::IImage &img, const prosper::util::TextureCreateInfo &texCreateInfo, const prosper::util::ImageViewCreateInfo &imgViewCreateInfo, const prosper::util::SamplerCreateInfo &samplerCreateInfo);
 		static std::shared_ptr<prosper::Texture> create_texture(prosper::IImage &img, const prosper::util::TextureCreateInfo &texCreateInfo, const prosper::util::ImageViewCreateInfo &imgViewCreateInfo);
 		static std::shared_ptr<prosper::Texture> create_texture(prosper::IImage &img, const prosper::util::TextureCreateInfo &texCreateInfo);
-		static std::shared_ptr<prosper::IDescriptorSetGroup> create_descriptor_set(const pragma::LuaDescriptorSetInfo &ldescSetInfo);
+		static std::shared_ptr<prosper::IDescriptorSetGroup> create_descriptor_set(const pragma::LuaCoreDescriptorSetInfo &ldescSetInfo);
 		static std::shared_ptr<prosper::IImage> create_image(const prosper::util::ImageCreateInfo &imgCreateInfo, ::util::DataStream &ds);
 		static std::shared_ptr<prosper::IImage> create_image(const prosper::util::ImageCreateInfo &imgCreateInfo);
 		static std::shared_ptr<prosper::IImage> create_image(const std::array<std::shared_ptr<uimg::ImageBuffer>, 6> &imgBuffers);
@@ -337,7 +336,7 @@ void Lua::Vulkan::get_descriptor_set_layout_bindings(lua::State *l,std::vector<:
 }
 #endif // TODO
 
-std::shared_ptr<prosper::IDescriptorSetGroup> Lua::Vulkan::create_descriptor_set(const pragma::LuaDescriptorSetInfo &ldescSetInfo)
+std::shared_ptr<prosper::IDescriptorSetGroup> Lua::Vulkan::create_descriptor_set(const pragma::LuaCoreDescriptorSetInfo &ldescSetInfo)
 {
 	auto shaderDescSetInfo = to_prosper_descriptor_set_info(ldescSetInfo);
 	auto dsg = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(shaderDescSetInfo);

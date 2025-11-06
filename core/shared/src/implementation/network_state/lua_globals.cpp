@@ -69,11 +69,11 @@ void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 {
 	// To make sure Lua errors are handled properly, we need to use a regular Lua binding here
 	// without luabind
-	//lua_register(lua.GetState(), "include", &include);
-	//lua_register(lua.GetState(), "exec", &exec);
+	lua::register_function(lua.GetState(), "include", &include);
+	lua::register_function(lua.GetState(), "exec", &exec);
 
 	luabind::module(lua.GetState())[luabind::def("get_script_path", Lua::global::get_script_path)];
-	/*lua_register(lua.GetState(), "toboolean", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
+	lua::register_function(lua.GetState(), "toboolean", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
 		if(Lua::IsBool(l, 1)) {
 			Lua::PushBool(l, Lua::CheckBool(l, 1));
 			return 1;
@@ -87,7 +87,7 @@ void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 		Lua::PushBool(l, b);
 		return 1;
 	}));
-	lua_register(lua.GetState(), "toint", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
+	lua::register_function(lua.GetState(), "toint", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
 		if(Lua::IsBool(l, 1)) {
 			Lua::PushInt(l, Lua::CheckBool(l, 1) ? 1 : 0);
 			return 1;
@@ -100,7 +100,7 @@ void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 		auto i = util::to_int(v);
 		Lua::PushInt(l, i);
 		return 1;
-	}));*/
+	}));
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "console",
 	  {
@@ -236,13 +236,13 @@ void pragma::Game::RegisterLuaGlobals()
 {
 	NetworkState::RegisterSharedLuaGlobals(GetLuaInterface());
 
-	/*lua_register(GetLuaState(), "include_component", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
+	lua::register_function(GetLuaState(), "include_component", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
 		std::string componentName = Lua::CheckString(l, 1);
 		auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 		auto *game = nw->GetGameState();
 		Lua::PushBool(l, game->LoadLuaComponentByName(componentName));
 		return 1;
-	}));*/
+	}));
 	Lua::RegisterLibraryEnums(GetLuaState(), "game",
 	  {
 	    {"DAMAGETYPE_GENERIC", umath::to_integral(DAMAGETYPE::GENERIC)},

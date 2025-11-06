@@ -3,8 +3,7 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.server:entities.components.radius;
 

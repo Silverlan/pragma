@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 module pragma.client;
 
@@ -196,7 +195,7 @@ size_t CMaterialOverrideComponent::GetMaterialOverrideCount() const { return m_m
 
 void CMaterialOverrideComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
-	auto def = pragma::lua::create_entity_component_class<pragma::CMaterialOverrideComponent, pragma::BaseEntityComponent>("MaterialOverrideComponent");
+	auto def = pragma::LuaCore::create_entity_component_class<pragma::CMaterialOverrideComponent, pragma::BaseEntityComponent>("MaterialOverrideComponent");
 	def.add_static_constant("EVENT_ON_MATERIAL_OVERRIDES_CLEARED", pragma::CMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDES_CLEARED);
 	def.def("SetMaterialOverride", static_cast<void (pragma::CMaterialOverrideComponent::*)(uint32_t, const std::string &)>(&pragma::CMaterialOverrideComponent::SetMaterialOverride));
 	def.def("SetMaterialOverride", static_cast<void (pragma::CMaterialOverrideComponent::*)(uint32_t, msys::CMaterial &)>(&pragma::CMaterialOverrideComponent::SetMaterialOverride));

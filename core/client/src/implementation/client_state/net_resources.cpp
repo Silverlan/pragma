@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 #define RESOURCE_TRANSFER_VERBOSE 0
 

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/core.hpp"
 
 module pragma.client;
 
@@ -176,6 +175,6 @@ Bool CVehicleComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &p
 void CVehicleComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseVehicleComponent::RegisterLuaBindings(l, modEnts);
-	auto def = pragma::lua::create_entity_component_class<pragma::CVehicleComponent, pragma::BaseVehicleComponent>("VehicleComponent");
+	auto def = pragma::LuaCore::create_entity_component_class<pragma::CVehicleComponent, pragma::BaseVehicleComponent>("VehicleComponent");
 	modEnts[def];
 }

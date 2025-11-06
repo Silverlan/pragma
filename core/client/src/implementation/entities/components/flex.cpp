@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 #include <cassert>
 
 module pragma.client;
@@ -380,7 +379,7 @@ namespace Lua::Flex {
 void CFlexComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseFlexComponent::RegisterLuaBindings(l, modEnts);
-	auto defCFlex = pragma::lua::create_entity_component_class<pragma::CFlexComponent, pragma::BaseFlexComponent>("FlexComponent");
+	auto defCFlex = pragma::LuaCore::create_entity_component_class<pragma::CFlexComponent, pragma::BaseFlexComponent>("FlexComponent");
 	defCFlex.def("SetFlexController",
 	  static_cast<void (*)(lua::State *, pragma::CFlexComponent &, uint32_t, float, float, bool)>([](lua::State *l, pragma::CFlexComponent &hEnt, uint32_t flexId, float value, float duration, bool clampToLimits) { hEnt.SetFlexController(flexId, value, duration, clampToLimits); }));
 	defCFlex.def("SetFlexController", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, uint32_t, float, float)>([](lua::State *l, pragma::CFlexComponent &hEnt, uint32_t flexId, float value, float duration) { hEnt.SetFlexController(flexId, value, duration); }));

@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 module pragma.client;
 
@@ -91,7 +90,7 @@ void CGlobalShaderInputComponent::RegisterLuaBindings(lua::State *l, luabind::mo
 	// TODO: This should be moved to a more appropriate location
 	pragma::get_client_state()->RegisterConCommand("debug_print_shader_input_properties", +[](NetworkState *nw, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv, float) { CGlobalShaderInputComponent::DebugPrintProperties(); });
 
-	auto def = pragma::lua::create_entity_component_class<pragma::CGlobalShaderInputComponent, pragma::BaseEntityComponent>("GlobalShaderInputComponent");
+	auto def = pragma::LuaCore::create_entity_component_class<pragma::CGlobalShaderInputComponent, pragma::BaseEntityComponent>("GlobalShaderInputComponent");
 	modEnts[def];
 }
 

@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.client:scripting.lua.classes.vulkan;
 

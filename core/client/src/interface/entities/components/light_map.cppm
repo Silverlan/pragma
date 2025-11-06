@@ -3,9 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/lua/core.hpp"
-#include "pragma/logging.hpp"
+#include "definitions.hpp"
 
 export module pragma.client:entities.components.light_map;
 

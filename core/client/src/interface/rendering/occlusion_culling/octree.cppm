@@ -3,7 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
+#include "definitions.hpp"
 #include <cassert>
 
 #define ENABLE_OCCLUSION_DEBUG_MODE 0

@@ -3,9 +3,7 @@
 
 module;
 
-#include "pragma/logging.hpp"
 
-#include "pragma/lua/core.hpp"
 #include <sharedutils/magic_enum.hpp>
 
 #include <GuillotineBinPack.h>
@@ -590,7 +588,7 @@ static void set_lightmap_texture(lua::State *l, pragma::CLightMapComponent &hLig
 
 void CLightMapComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
-	auto defCLightMap = pragma::lua::create_entity_component_class<pragma::CLightMapComponent, pragma::BaseEntityComponent>("LightMapComponent");
+	auto defCLightMap = pragma::LuaCore::create_entity_component_class<pragma::CLightMapComponent, pragma::BaseEntityComponent>("LightMapComponent");
 	defCLightMap.add_static_constant("TEXTURE_DIFFUSE", umath::to_integral(pragma::CLightMapComponent::Texture::DiffuseMap));
 	defCLightMap.add_static_constant("TEXTURE_DIFFUSE_DIRECT", umath::to_integral(pragma::CLightMapComponent::Texture::DiffuseDirectMap));
 	defCLightMap.add_static_constant("TEXTURE_DIFFUSE_INDIRECT", umath::to_integral(pragma::CLightMapComponent::Texture::DiffuseIndirectMap));
@@ -712,13 +710,13 @@ void CLightMapComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &mo
 	defCache.def("GetLightmapEntity", +[](lua::State *l, pragma::LightmapDataCache &cache) -> std::string { return util::uuid_to_string(cache.lightmapEntityId); });
 	defCLightMap.scope[defCache];
 	modEnts[defCLightMap];
-	pragma::lua::define_custom_constructor<pragma::LightmapDataCache, +[]() -> std::shared_ptr<pragma::LightmapDataCache> { return std::make_shared<pragma::LightmapDataCache>(); }>(l);
+	pragma::LuaCore::define_custom_constructor<pragma::LightmapDataCache, +[]() -> std::shared_ptr<pragma::LightmapDataCache> { return std::make_shared<pragma::LightmapDataCache>(); }>(l);
 
-	auto defCLightMapReceiver = pragma::lua::create_entity_component_class<pragma::CLightMapReceiverComponent, pragma::BaseEntityComponent>("LightMapReceiverComponent");
+	auto defCLightMapReceiver = pragma::LuaCore::create_entity_component_class<pragma::CLightMapReceiverComponent, pragma::BaseEntityComponent>("LightMapReceiverComponent");
 	defCLightMapReceiver.def("UpdateLightmapUvData", &pragma::CLightMapReceiverComponent::UpdateLightMapUvData);
 	modEnts[defCLightMapReceiver];
 
-	auto defCLmCache = pragma::lua::create_entity_component_class<pragma::CLightMapDataCacheComponent, pragma::BaseEntityComponent>("LightMapDataCacheComponent");
+	auto defCLmCache = pragma::LuaCore::create_entity_component_class<pragma::CLightMapDataCacheComponent, pragma::BaseEntityComponent>("LightMapDataCacheComponent");
 	defCLmCache.def("SetLightMapDataCachePath", &pragma::CLightMapDataCacheComponent::SetLightMapDataCachePath);
 	defCLmCache.def("GetLightMapDataCachePath", &pragma::CLightMapDataCacheComponent::GetLightMapDataCachePath);
 	defCLmCache.def("GetLightMapDataCacheFilePath", +[](const pragma::CLightMapDataCacheComponent &component) -> std::string { return pragma::LightmapDataCache::GetCacheFileName(component.GetLightMapDataCachePath()); });

@@ -4,8 +4,6 @@
 module;
 
 #include "pragma/console/helper.hpp"
-#include "pragma/lua/core.hpp"
-#include "pragma/logging.hpp"
 
 module pragma.client;
 

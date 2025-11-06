@@ -3,7 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
+#include "definitions.hpp"
 
 export module pragma.client:rendering.model_render_buffer_data;
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/clientdefinitions.h"
+#include "definitions.hpp"
 
 export module pragma.client:gui.main_menu_load_game;
 

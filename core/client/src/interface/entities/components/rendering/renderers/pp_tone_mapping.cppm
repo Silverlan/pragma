@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/clientdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.client:entities.components.pp_tone_mapping;
 

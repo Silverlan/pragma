@@ -2,6 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/clientdefinitions.h"
+#include "definitions.hpp"
 
 module pragma.client;

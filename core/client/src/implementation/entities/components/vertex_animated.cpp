@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 #include <cassert>
 
 module pragma.client;
@@ -298,7 +297,7 @@ bool CVertexAnimatedComponent::GetLocalVertexPosition(const pragma::ModelSubMesh
 
 void CVertexAnimatedComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
-	auto defCVertexAnimated = pragma::lua::create_entity_component_class<pragma::CVertexAnimatedComponent, pragma::BaseEntityComponent>("VertexAnimatedComponent");
+	auto defCVertexAnimated = pragma::LuaCore::create_entity_component_class<pragma::CVertexAnimatedComponent, pragma::BaseEntityComponent>("VertexAnimatedComponent");
 	defCVertexAnimated.def("UpdateVertexAnimationBuffer", static_cast<void (*)(lua::State *, pragma::CVertexAnimatedComponent &, std::shared_ptr<prosper::ICommandBuffer> &)>([](lua::State *l, pragma::CVertexAnimatedComponent &hAnim, std::shared_ptr<prosper::ICommandBuffer> &drawCmd) {
 		if(drawCmd->IsPrimary() == false)
 			return;

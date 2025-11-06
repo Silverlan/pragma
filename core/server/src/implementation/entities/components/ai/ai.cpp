@@ -3,9 +3,7 @@
 
 module;
 
-#include "pragma/logging.hpp"
 
-#include "pragma/lua/core.hpp"
 
 module pragma.server;
 import :entities.components.ai;
@@ -540,7 +538,7 @@ void SAIComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseAIComponent::RegisterLuaBindings(l, modEnts);
 
-	auto def = pragma::lua::create_entity_component_class<pragma::SAIComponent, pragma::BaseAIComponent>("AIComponent");
+	auto def = pragma::LuaCore::create_entity_component_class<pragma::SAIComponent, pragma::BaseAIComponent>("AIComponent");
 	def.def("StartSchedule", &pragma::SAIComponent::StartSchedule);
 	def.def("CancelSchedule", &pragma::SAIComponent::CancelSchedule);
 	def.def("SetSquad", &pragma::SAIComponent::SetSquad);

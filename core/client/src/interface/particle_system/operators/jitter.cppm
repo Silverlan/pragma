@@ -3,7 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
+#include "definitions.hpp"
 
 export module pragma.client:particle_system.operator_jitter;
 

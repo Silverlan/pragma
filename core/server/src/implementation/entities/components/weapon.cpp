@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 module pragma.server;
 import :entities.components.weapon;
@@ -396,7 +395,7 @@ void SWeaponComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modE
 {
 	BaseWeaponComponent::RegisterLuaBindings(l, modEnts);
 
-	auto def = pragma::lua::create_entity_component_class<pragma::SWeaponComponent, pragma::BaseWeaponComponent>("WeaponComponent");
+	auto def = pragma::LuaCore::create_entity_component_class<pragma::SWeaponComponent, pragma::BaseWeaponComponent>("WeaponComponent");
 	def.def("SetPrimaryClipSize", &pragma::SWeaponComponent::SetPrimaryClipSize);
 	def.def("SetSecondaryClipSize", &pragma::SWeaponComponent::SetSecondaryClipSize);
 	def.def("SetMaxPrimaryClipSize", &pragma::SWeaponComponent::SetMaxPrimaryClipSize);

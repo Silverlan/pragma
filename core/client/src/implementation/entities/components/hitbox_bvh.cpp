@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/logging.hpp"
-#include "pragma/lua/core.hpp"
 #include "sharedutils/BS_thread_pool.hpp"
 #include <bvh/v2/default_builder.h>
 #include <bvh/v2/stack.h>

@@ -3,9 +3,8 @@
 
 module;
 
-#include "pragma/logging.hpp"
 
-#include "pragma/clientdefinitions.h"
+#include "definitions.hpp"
 
 module pragma.client;
 

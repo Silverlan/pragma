@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/serverdefinitions.h"
+#include "definitions.hpp"
 
 export module pragma.server:entities.components.lua;
 
@@ -25,6 +25,6 @@ export namespace pragma {
 	};
 };
 
-export namespace pragma::lua {
+export namespace pragma::LuaCore {
 	using SLuaBaseEntityComponentHolder = HandleHolder<SLuaBaseEntityComponent>;
 };

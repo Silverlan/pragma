@@ -3,9 +3,8 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 // #define ENABLE_DEPRECATED_PHYSICS
 

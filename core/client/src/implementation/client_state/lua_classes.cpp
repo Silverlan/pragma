@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/logging.hpp"
-#include "pragma/lua/core.hpp"
 #include <sharedutils/magic_enum.hpp>
 
 #undef DrawState
@@ -860,44 +858,44 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	modShader[defShaderMergeIntoEquirect];
 
 	// Custom Shaders
-	auto defVertexBinding = luabind::class_<pragma::LuaVertexBinding>("VertexBinding");
+	auto defVertexBinding = luabind::class_<pragma::LuaCoreVertexBinding>("VertexBinding");
 	defVertexBinding.def(luabind::constructor<>());
 	defVertexBinding.def(luabind::constructor<uint32_t, uint32_t>());
 	defVertexBinding.def(luabind::constructor<uint32_t>());
-	defVertexBinding.def_readwrite("inputRate", reinterpret_cast<uint32_t pragma::LuaVertexBinding::*>(&pragma::LuaVertexBinding::inputRate));
-	defVertexBinding.def_readwrite("stride", &pragma::LuaVertexBinding::stride);
+	defVertexBinding.def_readwrite("inputRate", reinterpret_cast<uint32_t pragma::LuaCoreVertexBinding::*>(&pragma::LuaCoreVertexBinding::inputRate));
+	defVertexBinding.def_readwrite("stride", &pragma::LuaCoreVertexBinding::stride);
 	modShader[defVertexBinding];
 
-	auto defVertexAttribute = luabind::class_<pragma::LuaVertexAttribute>("VertexAttribute");
+	auto defVertexAttribute = luabind::class_<pragma::LuaCoreVertexAttribute>("VertexAttribute");
 	defVertexAttribute.def(luabind::constructor<>());
 	defVertexAttribute.def(luabind::constructor<uint32_t, uint32_t, uint32_t>());
 	defVertexAttribute.def(luabind::constructor<uint32_t, uint32_t>());
 	defVertexAttribute.def(luabind::constructor<uint32_t>());
-	defVertexAttribute.def_readwrite("format", reinterpret_cast<uint32_t pragma::LuaVertexAttribute::*>(&pragma::LuaVertexAttribute::format));
-	defVertexAttribute.def_readwrite("offset", &pragma::LuaVertexAttribute::offset);
-	defVertexAttribute.def_readwrite("location", &pragma::LuaVertexAttribute::location);
+	defVertexAttribute.def_readwrite("format", reinterpret_cast<uint32_t pragma::LuaCoreVertexAttribute::*>(&pragma::LuaCoreVertexAttribute::format));
+	defVertexAttribute.def_readwrite("offset", &pragma::LuaCoreVertexAttribute::offset);
+	defVertexAttribute.def_readwrite("location", &pragma::LuaCoreVertexAttribute::location);
 	modShader[defVertexAttribute];
 
-	auto defDescriptorSetInfo = luabind::class_<pragma::LuaDescriptorSetInfo>("DescriptorSetInfo");
+	auto defDescriptorSetInfo = luabind::class_<pragma::LuaCoreDescriptorSetInfo>("DescriptorSetInfo");
 	defDescriptorSetInfo.def(luabind::constructor<>());
 	defDescriptorSetInfo.def(luabind::constructor<const std::string &, luabind::object, uint32_t>());
 	defDescriptorSetInfo.def(luabind::constructor<const std::string &, luabind::object>());
 	defDescriptorSetInfo.def(luabind::constructor<luabind::object, uint32_t>());
 	defDescriptorSetInfo.def(luabind::constructor<luabind::object>());
-	defDescriptorSetInfo.def_readwrite("setIndex", &pragma::LuaDescriptorSetInfo::setIndex);
+	defDescriptorSetInfo.def_readwrite("setIndex", &pragma::LuaCoreDescriptorSetInfo::setIndex);
 	modShader[defDescriptorSetInfo];
 
-	auto defDescriptorSetBinding = luabind::class_<pragma::LuaDescriptorSetBinding>("DescriptorSetBinding");
+	auto defDescriptorSetBinding = luabind::class_<pragma::LuaCoreDescriptorSetBinding>("DescriptorSetBinding");
 	defDescriptorSetBinding.def(luabind::constructor<const std::string &, uint32_t, uint32_t, uint32_t, uint32_t>());
 	defDescriptorSetBinding.def(luabind::constructor<const std::string &, uint32_t, uint32_t, uint32_t>());
 	defDescriptorSetBinding.def(luabind::constructor<const std::string &, uint32_t, uint32_t>());
 	defDescriptorSetBinding.def(luabind::constructor<uint32_t, uint32_t, uint32_t, uint32_t>());
 	defDescriptorSetBinding.def(luabind::constructor<uint32_t, uint32_t, uint32_t>());
 	defDescriptorSetBinding.def(luabind::constructor<uint32_t, uint32_t>());
-	defDescriptorSetBinding.def_readwrite("type", reinterpret_cast<uint32_t pragma::LuaDescriptorSetBinding::*>(&pragma::LuaDescriptorSetBinding::type));
-	defDescriptorSetBinding.def_readwrite("shaderStages", reinterpret_cast<uint32_t pragma::LuaDescriptorSetBinding::*>(&pragma::LuaDescriptorSetBinding::shaderStages));
-	defDescriptorSetBinding.def_readwrite("bindingIndex", &pragma::LuaDescriptorSetBinding::bindingIndex);
-	defDescriptorSetBinding.def_readwrite("descriptorArraySize", &pragma::LuaDescriptorSetBinding::descriptorArraySize);
+	defDescriptorSetBinding.def_readwrite("type", reinterpret_cast<uint32_t pragma::LuaCoreDescriptorSetBinding::*>(&pragma::LuaCoreDescriptorSetBinding::type));
+	defDescriptorSetBinding.def_readwrite("shaderStages", reinterpret_cast<uint32_t pragma::LuaCoreDescriptorSetBinding::*>(&pragma::LuaCoreDescriptorSetBinding::shaderStages));
+	defDescriptorSetBinding.def_readwrite("bindingIndex", &pragma::LuaCoreDescriptorSetBinding::bindingIndex);
+	defDescriptorSetBinding.def_readwrite("descriptorArraySize", &pragma::LuaCoreDescriptorSetBinding::descriptorArraySize);
 	modShader[defDescriptorSetBinding];
 
 	auto defShaderBasePipelineCreateInfo = luabind::class_<prosper::BasePipelineCreateInfo>("BasePipelineCreateInfo");
@@ -997,45 +995,45 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defShaderComputePipelineCreateInfo.def("AddSpecializationConstant", &Lua::ComputePipelineCreateInfo::AddSpecializationConstant);
 	modShader[defShaderComputePipelineCreateInfo];
 
-	auto defShaderModule = luabind::class_<pragma::LuaShaderWrapperBase>("BaseModule");
+	auto defShaderModule = luabind::class_<pragma::LuaCoreShaderWrapperBase>("BaseModule");
 	defShaderModule.def("SetShaderSource", &Lua::Shader::SetStageSourceFilePath);
 	defShaderModule.def("SetPipelineCount", &Lua::Shader::SetPipelineCount);
-	defShaderModule.def("GetShader", static_cast<prosper::Shader &(pragma::LuaShaderWrapperBase::*)() const>(&pragma::LuaShaderWrapperBase::GetShader));
+	defShaderModule.def("GetShader", static_cast<prosper::Shader &(pragma::LuaCoreShaderWrapperBase::*)() const>(&pragma::LuaCoreShaderWrapperBase::GetShader));
 	defShaderModule.def("AttachPushConstantRange", &Lua::Shader::AttachPushConstantRange);
 	defShaderModule.def("AttachDescriptorSetInfo", &Lua::Shader::AttachDescriptorSetInfo);
 
-	defShaderModule.def("InitializePipeline", &pragma::LuaShaderWrapperBase::Lua_InitializePipeline, &pragma::LuaShaderWrapperBase::Lua_default_InitializePipeline);
-	defShaderModule.def("InitializeShaderResources", &pragma::LuaShaderWrapperBase::Lua_InitializeShaderResources, &pragma::LuaShaderWrapperBase::Lua_default_InitializeShaderResources);
-	defShaderModule.def("OnInitialized", &pragma::LuaShaderWrapperBase::Lua_OnInitialized, &pragma::LuaShaderWrapperBase::Lua_default_OnInitialized);
-	defShaderModule.def("OnPipelinesInitialized", &pragma::LuaShaderWrapperBase::Lua_OnPipelinesInitialized, &pragma::LuaShaderWrapperBase::Lua_default_OnPipelinesInitialized);
-	defShaderModule.def("OnPipelineInitialized", &pragma::LuaShaderWrapperBase::Lua_OnPipelineInitialized, &pragma::LuaShaderWrapperBase::Lua_default_OnPipelineInitialized);
+	defShaderModule.def("InitializePipeline", &pragma::LuaCoreShaderWrapperBase::Lua_InitializePipeline, &pragma::LuaCoreShaderWrapperBase::Lua_default_InitializePipeline);
+	defShaderModule.def("InitializeShaderResources", &pragma::LuaCoreShaderWrapperBase::Lua_InitializeShaderResources, &pragma::LuaCoreShaderWrapperBase::Lua_default_InitializeShaderResources);
+	defShaderModule.def("OnInitialized", &pragma::LuaCoreShaderWrapperBase::Lua_OnInitialized, &pragma::LuaCoreShaderWrapperBase::Lua_default_OnInitialized);
+	defShaderModule.def("OnPipelinesInitialized", &pragma::LuaCoreShaderWrapperBase::Lua_OnPipelinesInitialized, &pragma::LuaCoreShaderWrapperBase::Lua_default_OnPipelinesInitialized);
+	defShaderModule.def("OnPipelineInitialized", &pragma::LuaCoreShaderWrapperBase::Lua_OnPipelineInitialized, &pragma::LuaCoreShaderWrapperBase::Lua_default_OnPipelineInitialized);
 	modShader[defShaderModule];
 
-	auto defShaderGraphicsModule = luabind::class_<pragma::LuaShaderWrapperGraphicsBase, pragma::LuaShaderWrapperBase>("BaseGraphicsModule");
+	auto defShaderGraphicsModule = luabind::class_<pragma::LuaCoreShaderWrapperGraphicsBase, pragma::LuaCoreShaderWrapperBase>("BaseGraphicsModule");
 	defShaderGraphicsModule.def("AttachVertexAttribute", &Lua::Shader::Graphics::AttachVertexAttribute);
 	modShader[defShaderGraphicsModule];
 
-	auto defShaderComputeModule = luabind::class_<pragma::LuaShaderWrapperComputeBase, pragma::LuaShaderWrapperBase>("BaseComputeModule");
+	auto defShaderComputeModule = luabind::class_<pragma::LuaCoreShaderWrapperComputeBase, pragma::LuaCoreShaderWrapperBase>("BaseComputeModule");
 	// defShaderComputeModule.def("GetCurrentComputeCommandBuffer",&Lua::Shader::GetCurrentComputeCommandBuffer);
 	modShader[defShaderComputeModule];
 
-	auto defShaderGraphicsBase = luabind::class_<pragma::LuaShaderWrapperGraphics, luabind::bases<pragma::LuaShaderWrapperGraphicsBase, pragma::LuaShaderWrapperBase>>("BaseGraphics");
+	auto defShaderGraphicsBase = luabind::class_<pragma::LuaCoreShaderWrapperGraphics, luabind::bases<pragma::LuaCoreShaderWrapperGraphicsBase, pragma::LuaCoreShaderWrapperBase>>("BaseGraphics");
 	defShaderGraphicsBase.def(luabind::constructor<>());
 	modShader[defShaderGraphicsBase];
 
-	auto defShaderComputeBase = luabind::class_<pragma::LuaShaderWrapperCompute, luabind::bases<pragma::LuaShaderWrapperComputeBase, pragma::LuaShaderWrapperBase>>("BaseCompute");
+	auto defShaderComputeBase = luabind::class_<pragma::LuaCoreShaderWrapperCompute, luabind::bases<pragma::LuaCoreShaderWrapperComputeBase, pragma::LuaCoreShaderWrapperBase>>("BaseCompute");
 	defShaderComputeBase.def(luabind::constructor<>());
 	modShader[defShaderComputeBase];
 
 	using PcbArg = prosper::util::PreparedCommand::Argument;
-	auto defShaderGUIBase = luabind::class_<pragma::LuaShaderWrapperGUI, luabind::bases<pragma::LuaShaderWrapperGraphicsBase, pragma::LuaShaderWrapperBase>>("BaseGUI");
+	auto defShaderGUIBase = luabind::class_<pragma::LuaCoreShaderWrapperGUI, luabind::bases<pragma::LuaCoreShaderWrapperGraphicsBase, pragma::LuaCoreShaderWrapperBase>>("BaseGUI");
 	defShaderGUIBase.def(luabind::constructor<>());
 	defShaderGUIBase.def(
-	  "RecordBeginDraw", +[](pragma::LuaShaderWrapperGUI &shader, prosper::ShaderBindState &bindState, wgui::DrawState &drawState, uint32_t width, uint32_t height, wgui::StencilPipeline pipelineIdx, bool msaa, uint32_t testStencilLevel) -> bool {
+	  "RecordBeginDraw", +[](pragma::LuaCoreShaderWrapperGUI &shader, prosper::ShaderBindState &bindState, wgui::DrawState &drawState, uint32_t width, uint32_t height, wgui::StencilPipeline pipelineIdx, bool msaa, uint32_t testStencilLevel) -> bool {
 		  return static_cast<pragma::LShaderGui *>(&shader.GetShader())->RecordBeginDraw(bindState, drawState, width, height, pipelineIdx, msaa, testStencilLevel);
 	  });
 	defShaderGUIBase.def(
-	  "RecordBeginDraw", +[](lua::State *l, pragma::LuaShaderWrapperGUI &shader, prosper::util::PreparedCommandBuffer &pcb) {
+	  "RecordBeginDraw", +[](lua::State *l, pragma::LuaCoreShaderWrapperGUI &shader, prosper::util::PreparedCommandBuffer &pcb) {
 		  auto hShader = shader.GetShader().GetHandle();
 		  pcb.PushCommand(
 		    [hShader](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
@@ -1051,11 +1049,11 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	  });
 	modShader[defShaderGUIBase];
 
-	auto defShaderGUITexturedBase = luabind::class_<pragma::LuaShaderWrapperGUITextured, luabind::bases<pragma::LuaShaderWrapperGraphicsBase, pragma::LuaShaderWrapperBase>>("BaseGUITextured");
+	auto defShaderGUITexturedBase = luabind::class_<pragma::LuaCoreShaderWrapperGUITextured, luabind::bases<pragma::LuaCoreShaderWrapperGraphicsBase, pragma::LuaCoreShaderWrapperBase>>("BaseGUITextured");
 	defShaderGUITexturedBase.def(luabind::constructor<>());
 	modShader[defShaderGUITexturedBase];
 
-	auto defShaderParticleBase = luabind::class_<pragma::LuaShaderWrapperParticle2D, luabind::bases<pragma::LuaShaderWrapperGraphicsBase, pragma::LuaShaderWrapperBase>>("BaseParticle2D");
+	auto defShaderParticleBase = luabind::class_<pragma::LuaCoreShaderWrapperParticle2D, luabind::bases<pragma::LuaCoreShaderWrapperGraphicsBase, pragma::LuaCoreShaderWrapperBase>>("BaseParticle2D");
 	defShaderParticleBase.scope[luabind::def("get_depth_pipeline_render_pass", static_cast<void (*)(lua::State *)>([](lua::State *l) {
 		auto &rp = prosper::ShaderGraphics::GetRenderPass<pragma::ShaderParticle2DBase>(pragma::get_cengine()->GetRenderContext(), pragma::ShaderParticle2DBase::GetDepthPipelineIndex());
 		if(rp == nullptr)
@@ -1066,25 +1064,25 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defShaderParticleBase.add_static_constant("PUSH_CONSTANTS_SIZE", sizeof(pragma::ShaderParticle2DBase::PushConstants));
 	defShaderParticleBase.add_static_constant("PUSH_CONSTANTS_USER_DATA_OFFSET", sizeof(pragma::ShaderParticle2DBase::PushConstants));
 	defShaderParticleBase.def(
-	  "RecordBeginDraw", +[](lua::State *l, pragma::LuaShaderWrapperParticle2D &shader, prosper::ShaderBindState &bindState, pragma::ecs::CParticleSystemComponent &ps, uint32_t renderFlags) {
+	  "RecordBeginDraw", +[](lua::State *l, pragma::LuaCoreShaderWrapperParticle2D &shader, prosper::ShaderBindState &bindState, pragma::ecs::CParticleSystemComponent &ps, uint32_t renderFlags) {
 		  return static_cast<pragma::LShaderParticle2D *>(&shader.GetShader())->RecordBeginDraw(bindState, ps, static_cast<pragma::ecs::ParticleRenderFlags>(renderFlags));
 	  });
 
 	modShader[defShaderParticleBase];
 
-	auto defShaderPostProcessingBase = luabind::class_<pragma::LuaShaderWrapperPostProcessing, luabind::bases<pragma::LuaShaderWrapperGraphicsBase, pragma::LuaShaderWrapperBase>>("BasePostProcessing");
+	auto defShaderPostProcessingBase = luabind::class_<pragma::LuaCoreShaderWrapperPostProcessing, luabind::bases<pragma::LuaCoreShaderWrapperGraphicsBase, pragma::LuaCoreShaderWrapperBase>>("BasePostProcessing");
 	defShaderPostProcessingBase.def(luabind::constructor<>());
 	modShader[defShaderPostProcessingBase];
 
-	auto defShaderImageProcessing = luabind::class_<pragma::LuaShaderWrapperImageProcessing, luabind::bases<pragma::LuaShaderWrapperGraphicsBase, pragma::LuaShaderWrapperBase>>("BaseImageProcessing");
+	auto defShaderImageProcessing = luabind::class_<pragma::LuaCoreShaderWrapperImageProcessing, luabind::bases<pragma::LuaCoreShaderWrapperGraphicsBase, pragma::LuaCoreShaderWrapperBase>>("BaseImageProcessing");
 	defShaderImageProcessing.add_static_constant("DESCRIPTOR_SET_TEXTURE", 0);
 	defShaderImageProcessing.add_static_constant("DESCRIPTOR_SET_TEXTURE_BINDING_TEXTURE", 0);
 	defShaderImageProcessing.def(luabind::constructor<>());
 	defShaderImageProcessing.def(
-	  "RecordDraw", +[](pragma::LuaShaderWrapperImageProcessing &shader, prosper::ShaderBindState &bindState, prosper::IDescriptorSetGroup &dsg) -> bool { return static_cast<prosper::ShaderBaseImageProcessing &>(shader.GetShader()).RecordDraw(bindState, *dsg.GetDescriptorSet()); });
+	  "RecordDraw", +[](pragma::LuaCoreShaderWrapperImageProcessing &shader, prosper::ShaderBindState &bindState, prosper::IDescriptorSetGroup &dsg) -> bool { return static_cast<prosper::ShaderBaseImageProcessing &>(shader.GetShader()).RecordDraw(bindState, *dsg.GetDescriptorSet()); });
 	modShader[defShaderImageProcessing];
 
-	auto defShaderTextured3DBase = luabind::class_<pragma::LuaShaderWrapperTextured3D, luabind::bases<pragma::LuaShaderWrapperGraphicsBase, pragma::LuaShaderWrapperBase>>("BaseTexturedLit3D");
+	auto defShaderTextured3DBase = luabind::class_<pragma::LuaCoreShaderWrapperTextured3D, luabind::bases<pragma::LuaCoreShaderWrapperGraphicsBase, pragma::LuaCoreShaderWrapperBase>>("BaseTexturedLit3D");
 	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_FLAG_NONE", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::None));
 	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_LIGHT_MAPS_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableLightMapsBit));
 	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_ANIMATION_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableAnimationBit));
@@ -1093,39 +1091,39 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	static_assert(umath::to_integral(pragma::GameShaderSpecializationConstantFlag::Last) == 8, "Update this list when adding new flags!");
 
 	defShaderTextured3DBase.def(luabind::constructor<>());
-	defShaderTextured3DBase.def("InitializeGfxPipelineVertexAttributes", &pragma::LuaShaderWrapperTextured3D::Lua_InitializeGfxPipelineVertexAttributes, &pragma::LuaShaderWrapperTextured3D::Lua_default_InitializeGfxPipelineVertexAttributes);
-	defShaderTextured3DBase.def("InitializeGfxPipelinePushConstantRanges", &pragma::LuaShaderWrapperTextured3D::Lua_InitializeGfxPipelinePushConstantRanges, &pragma::LuaShaderWrapperTextured3D::Lua_default_InitializeGfxPipelinePushConstantRanges);
-	defShaderTextured3DBase.def("InitializeGfxPipelineDescriptorSets", &pragma::LuaShaderWrapperTextured3D::Lua_InitializeGfxPipelineDescriptorSets, &pragma::LuaShaderWrapperTextured3D::Lua_default_InitializeGfxPipelineDescriptorSets);
-	defShaderTextured3DBase.def("InitializeMaterialDescriptorSet", &pragma::LuaShaderWrapperTextured3D::Lua_InitializeMaterialDescriptorSet, &pragma::LuaShaderWrapperTextured3D::Lua_default_InitializeMaterialDescriptorSet);
-	defShaderTextured3DBase.def("InitializeMaterialData", &pragma::LuaShaderWrapperTextured3D::Lua_InitializeMaterialData, &pragma::LuaShaderWrapperTextured3D::Lua_default_InitializeMaterialData);
-	defShaderTextured3DBase.def("SetPushConstants", &pragma::LuaShaderWrapperTextured3D::SetPushConstants);
-	defShaderTextured3DBase.def("GetBindPcb", &pragma::LuaShaderWrapperTextured3D::GetBindPcb);
-	defShaderTextured3DBase.def("InitializeMaterialBuffer", &pragma::LuaShaderWrapperTextured3D::InitializeMaterialBuffer);
+	defShaderTextured3DBase.def("InitializeGfxPipelineVertexAttributes", &pragma::LuaCoreShaderWrapperTextured3D::Lua_InitializeGfxPipelineVertexAttributes, &pragma::LuaCoreShaderWrapperTextured3D::Lua_default_InitializeGfxPipelineVertexAttributes);
+	defShaderTextured3DBase.def("InitializeGfxPipelinePushConstantRanges", &pragma::LuaCoreShaderWrapperTextured3D::Lua_InitializeGfxPipelinePushConstantRanges, &pragma::LuaCoreShaderWrapperTextured3D::Lua_default_InitializeGfxPipelinePushConstantRanges);
+	defShaderTextured3DBase.def("InitializeGfxPipelineDescriptorSets", &pragma::LuaCoreShaderWrapperTextured3D::Lua_InitializeGfxPipelineDescriptorSets, &pragma::LuaCoreShaderWrapperTextured3D::Lua_default_InitializeGfxPipelineDescriptorSets);
+	defShaderTextured3DBase.def("InitializeMaterialDescriptorSet", &pragma::LuaCoreShaderWrapperTextured3D::Lua_InitializeMaterialDescriptorSet, &pragma::LuaCoreShaderWrapperTextured3D::Lua_default_InitializeMaterialDescriptorSet);
+	defShaderTextured3DBase.def("InitializeMaterialData", &pragma::LuaCoreShaderWrapperTextured3D::Lua_InitializeMaterialData, &pragma::LuaCoreShaderWrapperTextured3D::Lua_default_InitializeMaterialData);
+	defShaderTextured3DBase.def("SetPushConstants", &pragma::LuaCoreShaderWrapperTextured3D::SetPushConstants);
+	defShaderTextured3DBase.def("GetBindPcb", &pragma::LuaCoreShaderWrapperTextured3D::GetBindPcb);
+	defShaderTextured3DBase.def("InitializeMaterialBuffer", &pragma::LuaCoreShaderWrapperTextured3D::InitializeMaterialBuffer);
 
-	defShaderTextured3DBase.def("OnBindMaterial", &pragma::LuaShaderWrapperTextured3D::Lua_OnBindMaterial, &pragma::LuaShaderWrapperTextured3D::Lua_default_OnBindMaterial);
-	defShaderTextured3DBase.def("OnDraw", &pragma::LuaShaderWrapperTextured3D::Lua_OnDraw, &pragma::LuaShaderWrapperTextured3D::Lua_default_OnDraw);
-	defShaderTextured3DBase.def("OnBindEntity", &pragma::LuaShaderWrapperTextured3D::Lua_OnBindEntity, &pragma::LuaShaderWrapperTextured3D::Lua_default_OnBindEntity);
-	defShaderTextured3DBase.def("OnBindScene", &pragma::LuaShaderWrapperTextured3D::Lua_OnBindScene, &pragma::LuaShaderWrapperTextured3D::Lua_default_OnBindScene);
-	defShaderTextured3DBase.def("OnBeginDraw", &pragma::LuaShaderWrapperTextured3D::Lua_OnBeginDraw, &pragma::LuaShaderWrapperTextured3D::Lua_default_OnBeginDraw);
-	defShaderTextured3DBase.def("OnEndDraw", &pragma::LuaShaderWrapperTextured3D::Lua_OnEndDraw, &pragma::LuaShaderWrapperTextured3D::Lua_default_OnEndDraw);
-	defShaderTextured3DBase.def("IsDepthPrepassEnabled", +[](const pragma::LuaShaderWrapperTextured3D &shader) { return static_cast<pragma::ShaderGameWorldLightingPass &>(shader.GetShader()).IsDepthPrepassEnabled(); });
-	defShaderTextured3DBase.def("SetDepthPrepassEnabled", +[](pragma::LuaShaderWrapperTextured3D &shader, bool depthPrepassEnabled) { static_cast<pragma::ShaderGameWorldLightingPass &>(shader.GetShader()).SetDepthPrepassEnabled(depthPrepassEnabled); });
-	defShaderTextured3DBase.def("SetShaderMaterialName", +[](pragma::LuaShaderWrapperTextured3D &shader, const std::optional<std::string> &shaderMatName) { static_cast<pragma::ShaderGameWorldLightingPass &>(shader.GetShader()).SetShaderMaterialName(shaderMatName); });
-	defShaderTextured3DBase.def("GetShaderMaterialName", +[](pragma::LuaShaderWrapperTextured3D &shader) -> std::optional<std::string> { return static_cast<pragma::ShaderGameWorldLightingPass &>(shader.GetShader()).GetShaderMaterialName(); });
+	defShaderTextured3DBase.def("OnBindMaterial", &pragma::LuaCoreShaderWrapperTextured3D::Lua_OnBindMaterial, &pragma::LuaCoreShaderWrapperTextured3D::Lua_default_OnBindMaterial);
+	defShaderTextured3DBase.def("OnDraw", &pragma::LuaCoreShaderWrapperTextured3D::Lua_OnDraw, &pragma::LuaCoreShaderWrapperTextured3D::Lua_default_OnDraw);
+	defShaderTextured3DBase.def("OnBindEntity", &pragma::LuaCoreShaderWrapperTextured3D::Lua_OnBindEntity, &pragma::LuaCoreShaderWrapperTextured3D::Lua_default_OnBindEntity);
+	defShaderTextured3DBase.def("OnBindScene", &pragma::LuaCoreShaderWrapperTextured3D::Lua_OnBindScene, &pragma::LuaCoreShaderWrapperTextured3D::Lua_default_OnBindScene);
+	defShaderTextured3DBase.def("OnBeginDraw", &pragma::LuaCoreShaderWrapperTextured3D::Lua_OnBeginDraw, &pragma::LuaCoreShaderWrapperTextured3D::Lua_default_OnBeginDraw);
+	defShaderTextured3DBase.def("OnEndDraw", &pragma::LuaCoreShaderWrapperTextured3D::Lua_OnEndDraw, &pragma::LuaCoreShaderWrapperTextured3D::Lua_default_OnEndDraw);
+	defShaderTextured3DBase.def("IsDepthPrepassEnabled", +[](const pragma::LuaCoreShaderWrapperTextured3D &shader) { return static_cast<pragma::ShaderGameWorldLightingPass &>(shader.GetShader()).IsDepthPrepassEnabled(); });
+	defShaderTextured3DBase.def("SetDepthPrepassEnabled", +[](pragma::LuaCoreShaderWrapperTextured3D &shader, bool depthPrepassEnabled) { static_cast<pragma::ShaderGameWorldLightingPass &>(shader.GetShader()).SetDepthPrepassEnabled(depthPrepassEnabled); });
+	defShaderTextured3DBase.def("SetShaderMaterialName", +[](pragma::LuaCoreShaderWrapperTextured3D &shader, const std::optional<std::string> &shaderMatName) { static_cast<pragma::ShaderGameWorldLightingPass &>(shader.GetShader()).SetShaderMaterialName(shaderMatName); });
+	defShaderTextured3DBase.def("GetShaderMaterialName", +[](pragma::LuaCoreShaderWrapperTextured3D &shader) -> std::optional<std::string> { return static_cast<pragma::ShaderGameWorldLightingPass &>(shader.GetShader()).GetShaderMaterialName(); });
 	modShader[defShaderTextured3DBase];
 
-	auto defShaderPbr = luabind::class_<pragma::LuaShaderWrapperPbr, luabind::bases<pragma::LuaShaderWrapperGraphicsBase, pragma::LuaShaderWrapperBase>>("BasePbr");
+	auto defShaderPbr = luabind::class_<pragma::LuaCoreShaderWrapperPbr, luabind::bases<pragma::LuaCoreShaderWrapperGraphicsBase, pragma::LuaCoreShaderWrapperBase>>("BasePbr");
 	defShaderPbr.def(luabind::constructor<>());
-	defShaderPbr.def("InitializeGfxPipelineVertexAttributes", &pragma::LuaShaderWrapperPbr::Lua_InitializeGfxPipelineVertexAttributes, &pragma::LuaShaderWrapperPbr::Lua_default_InitializeGfxPipelineVertexAttributes);
-	defShaderPbr.def("InitializeGfxPipelinePushConstantRanges", &pragma::LuaShaderWrapperPbr::Lua_InitializeGfxPipelinePushConstantRanges, &pragma::LuaShaderWrapperPbr::Lua_default_InitializeGfxPipelinePushConstantRanges);
-	defShaderPbr.def("InitializeGfxPipelineDescriptorSets", &pragma::LuaShaderWrapperPbr::Lua_InitializeGfxPipelineDescriptorSets, &pragma::LuaShaderWrapperPbr::Lua_default_InitializeGfxPipelineDescriptorSets);
+	defShaderPbr.def("InitializeGfxPipelineVertexAttributes", &pragma::LuaCoreShaderWrapperPbr::Lua_InitializeGfxPipelineVertexAttributes, &pragma::LuaCoreShaderWrapperPbr::Lua_default_InitializeGfxPipelineVertexAttributes);
+	defShaderPbr.def("InitializeGfxPipelinePushConstantRanges", &pragma::LuaCoreShaderWrapperPbr::Lua_InitializeGfxPipelinePushConstantRanges, &pragma::LuaCoreShaderWrapperPbr::Lua_default_InitializeGfxPipelinePushConstantRanges);
+	defShaderPbr.def("InitializeGfxPipelineDescriptorSets", &pragma::LuaCoreShaderWrapperPbr::Lua_InitializeGfxPipelineDescriptorSets, &pragma::LuaCoreShaderWrapperPbr::Lua_default_InitializeGfxPipelineDescriptorSets);
 
-	defShaderPbr.def("OnBindMaterial", &pragma::LuaShaderWrapperPbr::Lua_OnBindMaterial, &pragma::LuaShaderWrapperPbr::Lua_default_OnBindMaterial);
-	defShaderPbr.def("OnDraw", &pragma::LuaShaderWrapperPbr::Lua_OnDraw, &pragma::LuaShaderWrapperPbr::Lua_default_OnDraw);
-	defShaderPbr.def("OnBindEntity", &pragma::LuaShaderWrapperPbr::Lua_OnBindEntity, &pragma::LuaShaderWrapperPbr::Lua_default_OnBindEntity);
-	defShaderPbr.def("OnBindScene", &pragma::LuaShaderWrapperPbr::Lua_OnBindScene, &pragma::LuaShaderWrapperPbr::Lua_default_OnBindScene);
-	defShaderPbr.def("OnBeginDraw", &pragma::LuaShaderWrapperPbr::Lua_OnBeginDraw, &pragma::LuaShaderWrapperPbr::Lua_default_OnBeginDraw);
-	defShaderPbr.def("OnEndDraw", &pragma::LuaShaderWrapperPbr::Lua_OnEndDraw, &pragma::LuaShaderWrapperPbr::Lua_default_OnEndDraw);
+	defShaderPbr.def("OnBindMaterial", &pragma::LuaCoreShaderWrapperPbr::Lua_OnBindMaterial, &pragma::LuaCoreShaderWrapperPbr::Lua_default_OnBindMaterial);
+	defShaderPbr.def("OnDraw", &pragma::LuaCoreShaderWrapperPbr::Lua_OnDraw, &pragma::LuaCoreShaderWrapperPbr::Lua_default_OnDraw);
+	defShaderPbr.def("OnBindEntity", &pragma::LuaCoreShaderWrapperPbr::Lua_OnBindEntity, &pragma::LuaCoreShaderWrapperPbr::Lua_default_OnBindEntity);
+	defShaderPbr.def("OnBindScene", &pragma::LuaCoreShaderWrapperPbr::Lua_OnBindScene, &pragma::LuaCoreShaderWrapperPbr::Lua_default_OnBindScene);
+	defShaderPbr.def("OnBeginDraw", &pragma::LuaCoreShaderWrapperPbr::Lua_OnBeginDraw, &pragma::LuaCoreShaderWrapperPbr::Lua_default_OnBeginDraw);
+	defShaderPbr.def("OnEndDraw", &pragma::LuaCoreShaderWrapperPbr::Lua_OnEndDraw, &pragma::LuaCoreShaderWrapperPbr::Lua_default_OnEndDraw);
 	modShader[defShaderPbr];
 }
 

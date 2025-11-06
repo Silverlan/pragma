@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/core.hpp"
 
 module pragma.server;
 import :entities.components.effects.sprite;

@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 module pragma.server;
 import :game;
@@ -64,7 +63,7 @@ void SGame::RegisterLua()
 	//modEnts[tmp];
 
 	// Obsolete?
-	auto classDefBase = luabind::class_<SLuaEntity, luabind::bases<SBaseEntity>, pragma::lua::HandleHolder<SLuaEntity>>("BaseEntity");
+	auto classDefBase = luabind::class_<SLuaEntity, luabind::bases<SBaseEntity>, pragma::LuaCore::HandleHolder<SLuaEntity>>("BaseEntity");
 	classDefBase.def(luabind::constructor<>());
 	// classDefBase.def(luabind::tostring(luabind::self));
 	//classDefBase.def(luabind::constructor<>());
@@ -75,7 +74,7 @@ void SGame::RegisterLua()
 
 	// Needs to be registered AFTER RegisterLuaGameClasses has been called!
 	Lua::register_base_entity_component(modEnts);
-	auto defEntCmp = pragma::lua::create_entity_component_class<pragma::SLuaBaseEntityComponent, luabind::bases<pragma::BaseLuaBaseEntityComponent, pragma::BaseEntityComponent>, pragma::lua::SLuaBaseEntityComponentHolder>("BaseEntityComponent");
+	auto defEntCmp = pragma::LuaCore::create_entity_component_class<pragma::SLuaBaseEntityComponent, luabind::bases<pragma::BaseLuaBaseEntityComponent, pragma::BaseEntityComponent>, pragma::LuaCore::SLuaBaseEntityComponentHolder>("BaseEntityComponent");
 	defEntCmp.def(luabind::constructor<SBaseEntity &>());
 	defEntCmp.def("SendData", static_cast<void (*)(lua::State *, pragma::SLuaBaseEntityComponent &, NetPacket, pragma::networking::ClientRecipientFilter &)>([](lua::State *l, pragma::SLuaBaseEntityComponent &hComponent, NetPacket packet, pragma::networking::ClientRecipientFilter &rp) {
 

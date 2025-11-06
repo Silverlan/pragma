@@ -3,10 +3,9 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
+#include "definitions.hpp"
 #include "pragma/console/helper.hpp"
 
-#include "pragma/lua/core.hpp"
 
 //#include "shader_screen.h" // prosper TODO
 
@@ -76,13 +75,13 @@ CGame::CGame(NetworkState *state)
       //m_shaderOverride(nullptr), // prosper TODO
       m_matLoad(), m_scene(nullptr),
       /*m_dummyVertexBuffer(nullptr),*/ m_tLastClientUpdate(0.0), // prosper TODO
-      m_snapshotTracker {}, m_userInputTracker {}, m_viewFov {util::FloatProperty::Create(pragma::BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV)}, m_luaInputBindingLayerRegister {std::make_unique<pragma::LuaInputBindingLayerRegister>()}
+      m_snapshotTracker {}, m_userInputTracker {}, m_viewFov {util::FloatProperty::Create(pragma::BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV)}, m_luaInputBindingLayerRegister {std::make_unique<pragma::LuaCoreInputBindingLayerRegister>()}
 {
 	std::fill(m_renderModesEnabled.begin(), m_renderModesEnabled.end(), true);
 	g_game = this;
 
-	m_luaShaderManager = std::make_shared<pragma::LuaShaderManager>();
-	m_luaParticleModifierManager = std::make_shared<pragma::LuaParticleModifierManager>();
+	m_luaShaderManager = std::make_shared<pragma::LuaCoreShaderManager>();
+	m_luaParticleModifierManager = std::make_shared<pragma::LuaCoreParticleModifierManager>();
 
 	umath::set_flag(m_stateFlags, StateFlags::PrepassShaderPipelineReloadRequired, false);
 	umath::set_flag(m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired, false);
@@ -809,7 +808,7 @@ WIBase *CGame::CreateGUIElement(std::string className, WIBase *parent)
 			r = (*o)();
 
 			auto *elLua = luabind::object_cast<WILuaBase *>(r);
-			auto *holder = luabind::object_cast<pragma::lua::WILuaBaseHolder *>(r);
+			auto *holder = luabind::object_cast<pragma::LuaCore::WILuaBaseHolder *>(r);
 			if(elLua && holder) {
 				ustring::to_lower(className);
 				elLua->SetupLua(r, className);
@@ -931,9 +930,9 @@ WIBase *CGame::CreateGUIElement(std::string name, WIHandle *hParent)
 	return CreateGUIElement(name, pParent);
 }
 LuaGUIManager &CGame::GetLuaGUIManager() { return m_luaGUIElements; }
-pragma::LuaShaderManager &CGame::GetLuaShaderManager() { return *m_luaShaderManager; }
+pragma::LuaCoreShaderManager &CGame::GetLuaShaderManager() { return *m_luaShaderManager; }
 pragma::cxxm_LuaParticleModifierManager &CGame::GetLuaParticleModifierManager() { return *static_cast<pragma::cxxm_LuaParticleModifierManager *>(m_luaParticleModifierManager.get()); }
-pragma::LuaInputBindingLayerRegister &CGame::GetLuaInputBindingLayerRegister() { return *m_luaInputBindingLayerRegister; }
+pragma::LuaCoreInputBindingLayerRegister &CGame::GetLuaInputBindingLayerRegister() { return *m_luaInputBindingLayerRegister; }
 
 void CGame::SetUp()
 {

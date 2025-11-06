@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 module pragma.client;
 
@@ -295,7 +294,7 @@ void WGUILuaInterface::InitializeGUIElement(WIBase &p)
 template<typename T>
 luabind::object cast_to_type(lua::State *l, ::WIBase &el)
 {
-	return pragma::lua::raw_object_to_luabind_object(l, util::weak_shared_handle_cast<::WIBase, T>(el.GetHandle()));
+	return pragma::LuaCore::raw_object_to_luabind_object(l, util::weak_shared_handle_cast<::WIBase, T>(el.GetHandle()));
 }
 
 luabind::object WGUILuaInterface::CreateLuaObject(lua::State *l, WIBase &p)
@@ -388,7 +387,7 @@ luabind::object WGUILuaInterface::CreateLuaObject(lua::State *l, WIBase &p)
 		return cast_to_type<WIRoot>(l, p);
 	else if(dynamic_cast<wgui::WI9SliceRect *>(&p) != nullptr)
 		return cast_to_type<wgui::WI9SliceRect>(l, p);
-	return pragma::lua::raw_object_to_luabind_object(l, p.GetHandle());
+	return pragma::LuaCore::raw_object_to_luabind_object(l, p.GetHandle());
 }
 
 luabind::object WGUILuaInterface::GetLuaObject(lua::State *l, WIBase &p)

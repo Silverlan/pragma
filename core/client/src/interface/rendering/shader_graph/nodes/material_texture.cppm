@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/clientdefinitions.h"
+#include "definitions.hpp"
 
 export module pragma.client:rendering.shader_graph.node_material_texture;
 

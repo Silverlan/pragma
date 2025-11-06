@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/core.hpp"
 
 module pragma.client;
 
@@ -90,7 +89,7 @@ void CSoundEmitterComponent::MaintainSounds()
 void CSoundEmitterComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseSoundEmitterComponent::RegisterLuaBindings(l, modEnts);
-	auto defCSoundEmitter = pragma::lua::create_entity_component_class<pragma::CSoundEmitterComponent, pragma::BaseSoundEmitterComponent>("SoundEmitterComponent");
+	auto defCSoundEmitter = pragma::LuaCore::create_entity_component_class<pragma::CSoundEmitterComponent, pragma::BaseSoundEmitterComponent>("SoundEmitterComponent");
 	defCSoundEmitter.scope[Lua::SoundEmitter::RegisterSoundInfo()];
 	modEnts[defCSoundEmitter];
 }

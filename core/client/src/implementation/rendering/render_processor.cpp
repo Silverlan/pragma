@@ -3,11 +3,9 @@
 
 module;
 
-#include "pragma/logging.hpp"
 
-#include "pragma/clientdefinitions.h"
+#include "definitions.hpp"
 
-#include "pragma/lua/core.hpp"
 
 #include <sharedutils/magic_enum.hpp>
 

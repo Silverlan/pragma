@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 module pragma.client;
 
@@ -561,7 +560,7 @@ void CPlayerComponent::OnSetCharacterOrientation(const Vector3 &up)
 void CPlayerComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BasePlayerComponent::RegisterLuaBindings(l, modEnts);
-	auto def = pragma::lua::create_entity_component_class<pragma::CPlayerComponent, pragma::BasePlayerComponent>("PlayerComponent");
+	auto def = pragma::LuaCore::create_entity_component_class<pragma::CPlayerComponent, pragma::BasePlayerComponent>("PlayerComponent");
 	def.def("IsInFirstPersonMode", &pragma::CPlayerComponent::IsInFirstPersonMode);
 	modEnts[def];
 }

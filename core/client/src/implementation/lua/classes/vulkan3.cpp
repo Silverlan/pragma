@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 module pragma.client;
 
@@ -325,7 +324,7 @@ void Lua::Vulkan::VKDescriptorSet::GetBindingInfo(lua::State *l,DescriptorSet &h
 	auto idx = 1u;
 	for(auto i=decltype(numBindings){0};i<numBindings;++i)
 	{
-		pragma::LuaDescriptorSetBinding binding {};
+		pragma::LuaCoreDescriptorSetBinding binding {};
 		if(infos->at(0)->get_binding_properties_by_index_number(
 				i,&binding.bindingIndex,reinterpret_cast<Anvil::DescriptorType*>(&binding.type),&binding.descriptorArraySize,reinterpret_cast<Anvil::ShaderStageFlags*>(&binding.shaderStages)
 			) == false)
@@ -340,7 +339,7 @@ void Lua::Vulkan::VKDescriptorSet::GetBindingInfo(lua::State *l,DescriptorSet &h
 	auto *infos = hDescSet->get_descriptor_set_create_info();
 	if(infos == nullptr || infos->empty())
 		return;
-	pragma::LuaDescriptorSetBinding binding {};
+	pragma::LuaCoreDescriptorSetBinding binding {};
 	if(infos->at(0)->get_binding_properties_by_index_number(
 			bindingIdx,&binding.bindingIndex,reinterpret_cast<Anvil::DescriptorType*>(&binding.type),&binding.descriptorArraySize,reinterpret_cast<Anvil::ShaderStageFlags*>(&binding.shaderStages)
 		) == false)

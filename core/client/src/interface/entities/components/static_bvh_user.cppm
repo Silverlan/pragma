@@ -3,8 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.client:entities.components.static_bvh_user;
 

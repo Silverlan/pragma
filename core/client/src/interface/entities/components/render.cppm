@@ -3,8 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 #define ENTITY_RENDER_BUFFER_USE_STORAGE_BUFFER 1
 

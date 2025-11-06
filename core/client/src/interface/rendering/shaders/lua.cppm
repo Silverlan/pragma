@@ -3,8 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 #undef DrawState
 
@@ -150,7 +149,7 @@ export namespace pragma {
 
 	class DLLCLIENT LuaShaderWrapperGraphicsBase : public LuaShaderWrapperBase {
 	  public:
-		bool AttachVertexAttribute(const pragma::LuaVertexBinding &binding, const std::vector<pragma::LuaVertexAttribute> &attributes);
+		bool AttachVertexAttribute(const pragma::LuaCoreVertexBinding &binding, const std::vector<pragma::LuaCoreVertexAttribute> &attributes);
 	  protected:
 		LuaShaderWrapperGraphicsBase();
 		void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);

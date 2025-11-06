@@ -3,7 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
+#include "definitions.hpp"
 
 module pragma.client;
 

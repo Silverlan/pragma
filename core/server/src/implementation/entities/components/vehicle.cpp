@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 module pragma.server;
 import :entities.components.vehicle;
@@ -187,6 +186,6 @@ void SVehicleComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &mod
 {
 	BaseVehicleComponent::RegisterLuaBindings(l, modEnts);
 
-	auto def = pragma::lua::create_entity_component_class<pragma::SVehicleComponent, pragma::BaseVehicleComponent>("VehicleComponent");
+	auto def = pragma::LuaCore::create_entity_component_class<pragma::SVehicleComponent, pragma::BaseVehicleComponent>("VehicleComponent");
 	modEnts[def];
 }

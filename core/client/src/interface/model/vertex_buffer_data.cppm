@@ -3,7 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
+#include "definitions.hpp"
 
 #define ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 

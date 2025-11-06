@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 #include <sharedutils/magic_enum.hpp>
 
 module pragma.client;
@@ -1163,7 +1162,7 @@ namespace Lua::Render {
 void CRenderComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseRenderComponent::RegisterLuaBindings(l, modEnts);
-	auto defCRender = pragma::lua::create_entity_component_class<pragma::CRenderComponent, pragma::BaseRenderComponent>("RenderComponent");
+	auto defCRender = pragma::LuaCore::create_entity_component_class<pragma::CRenderComponent, pragma::BaseRenderComponent>("RenderComponent");
 	defCRender.def("GetTransformationMatrix", &Lua::Render::GetTransformationMatrix);
 	defCRender.def("IsInPvs", static_cast<bool (pragma::CRenderComponent::*)(const Vector3 &, const pragma::CWorldComponent &) const>(&pragma::CRenderComponent::IsInPvs));
 	defCRender.def("IsInPvs", static_cast<bool (pragma::CRenderComponent::*)(const Vector3 &) const>(&pragma::CRenderComponent::IsInPvs));

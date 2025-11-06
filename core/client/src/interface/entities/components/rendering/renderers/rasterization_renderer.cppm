@@ -3,8 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 #define DEBUG_RENDER_PERFORMANCE_TEST_ENABLED 0
 

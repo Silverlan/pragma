@@ -3,8 +3,7 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 #include <cassert>
 
 module pragma.server;
@@ -698,7 +697,7 @@ void SGame::HandleLuaNetPacket(pragma::networking::IServerClient &session, ::Net
 	}
 	ProtectedLuaCall(
 	  [&i, &pl, &packet](lua::State *l) {
-		  lua::raw_get(l, LUA_REGISTRYINDEX, i->second);
+		  lua::raw_get(l, Lua::RegistryIndex, i->second);
 		  luabind::object(l, packet).push(l);
 		  pl->PushLuaObject(l);
 		  return Lua::StatusCode::Ok;

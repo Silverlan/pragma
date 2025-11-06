@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 module pragma.client;
 
@@ -37,12 +36,12 @@ static bool is_asset_loaded(NetworkState &nw, const std::string &name, pragma::a
 	return is_loaded(nw, name, type);
 }
 
-static std::optional<uint32_t> save_image(lua::State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::TextureInfo &imgWriteInfo, bool cubemap, const pragma::lua::LuaThreadWrapper &tw)
+static std::optional<uint32_t> save_image(lua::State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::TextureInfo &imgWriteInfo, bool cubemap, const pragma::LuaCore::LuaThreadWrapper &tw)
 {
 	if(Lua::file::validate_write_operation(l, fileName) == false)
 		return {};
 	auto pImgBuffer = imgBuffer.shared_from_this();
-	auto task = [pImgBuffer, fileName = std::move(fileName), imgWriteInfo, cubemap]() -> pragma::lua::LuaThreadPool::ResultHandler {
+	auto task = [pImgBuffer, fileName = std::move(fileName), imgWriteInfo, cubemap]() -> pragma::LuaCore::LuaThreadPool::ResultHandler {
 		auto result = pragma::get_cgame()->SaveImage(*pImgBuffer, fileName, imgWriteInfo, cubemap);
 		return [result](lua::State *l) { luabind::object {l, result}.push(l); };
 	};
@@ -71,7 +70,7 @@ static std::vector<std::string> &get_image_file_extensions()
 	return exts;
 }
 
-static std::pair<bool, std::optional<std::string>> save_image(lua::State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format, float quality, pragma::lua::LuaThreadWrapper *tw = nullptr)
+static std::pair<bool, std::optional<std::string>> save_image(lua::State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format, float quality, pragma::LuaCore::LuaThreadWrapper *tw = nullptr)
 {
 	if(Lua::file::validate_write_operation(l, fileName) == false)
 		return std::pair<bool, std::optional<std::string>> {false, {}};
@@ -82,7 +81,7 @@ static std::pair<bool, std::optional<std::string>> save_image(lua::State *l, uim
 		return std::pair<bool, std::optional<std::string>> {false, {}};
 	if(tw) {
 		auto pImgBuffer = imgBuffer.shared_from_this();
-		auto task = [fp, pImgBuffer, format, quality]() -> pragma::lua::LuaThreadPool::ResultHandler {
+		auto task = [fp, pImgBuffer, format, quality]() -> pragma::LuaCore::LuaThreadPool::ResultHandler {
 			fsys::File f {fp};
 			auto result = uimg::save_image(f, *pImgBuffer, format, quality);
 			return [result](lua::State *l) { luabind::object {l, result}.push(l); };
@@ -257,11 +256,11 @@ void CGame::RegisterLuaLibraries()
 	  luabind::def("save_image", static_cast<bool (*)(lua::State *, uimg::ImageBuffer &, std::string, uimg::TextureInfo &, bool)>(save_image)),
 	  luabind::def("save_image", static_cast<bool (*)(lua::State *, uimg::ImageBuffer &, std::string, uimg::TextureInfo &, bool)>(save_image), luabind::default_parameter_policy<5, false> {}),
 	  luabind::def(
-	    "save_image", +[](lua::State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::TextureInfo &imgWriteInfo, const pragma::lua::LuaThreadWrapper &tw) { return save_image(l, imgBuffer, fileName, imgWriteInfo, false, tw); }),
+	    "save_image", +[](lua::State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::TextureInfo &imgWriteInfo, const pragma::LuaCore::LuaThreadWrapper &tw) { return save_image(l, imgBuffer, fileName, imgWriteInfo, false, tw); }),
 	  luabind::def(
 	    "save_image", +[](lua::State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format, float quality) { return save_image(l, imgBuffer, fileName, format, quality); }),
 	  luabind::def(
-	    "save_image", +[](lua::State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format, float quality, const pragma::lua::LuaThreadWrapper &tw) { return save_image(l, imgBuffer, fileName, format, quality, const_cast<pragma::lua::LuaThreadWrapper *>(&tw)); }),
+	    "save_image", +[](lua::State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format, float quality, const pragma::LuaCore::LuaThreadWrapper &tw) { return save_image(l, imgBuffer, fileName, format, quality, const_cast<pragma::LuaCore::LuaThreadWrapper *>(&tw)); }),
 	  luabind::def("save_image", static_cast<std::pair<bool, std::optional<std::string>> (*)(lua::State *, uimg::ImageBuffer &, std::string, uimg::ImageFormat)>(save_image)),
 	  luabind::def("save_image", static_cast<bool (*)(lua::State *, luabind::table<>, std::string, uimg::TextureInfo &, bool)>(save_image)), luabind::def("save_image", static_cast<bool (*)(lua::State *, luabind::table<>, std::string, uimg::TextureInfo &)>(save_image)),
 	  luabind::def("save_image", static_cast<bool (*)(lua::State *, prosper::IImage &, std::string, uimg::TextureInfo &)>(save_image)), luabind::def("load_image", static_cast<luabind::object (*)(lua::State *, const std::string &, bool, uimg::Format)>(load_image)),

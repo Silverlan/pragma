@@ -3,8 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 #include <bvh/v2/default_builder.h>
 
 export module pragma.client:entities.components.hitbox_bvh;

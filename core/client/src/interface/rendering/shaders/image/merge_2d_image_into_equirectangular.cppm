@@ -3,7 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
+#include "definitions.hpp"
 
 export module pragma.client:rendering.shaders.merge_2d_image_to_equirectangular;
 

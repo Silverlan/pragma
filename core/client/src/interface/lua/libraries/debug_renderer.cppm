@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/clientdefinitions.h"
+#include "definitions.hpp"
 
 export module pragma.client:scripting.lua.libraries.debug_renderer;
 export import :debug;

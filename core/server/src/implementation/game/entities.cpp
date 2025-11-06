@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 #include <cassert>
 
 module pragma.server;
@@ -186,7 +185,7 @@ SBaseEntity *SGame::CreateLuaEntity(std::string classname, bool bLoadIfNotExists
 	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 	luabind::object oClass {};
-	auto *ent = static_cast<SBaseEntity *>(pragma::Game::CreateLuaEntity<SLuaEntity, pragma::lua::HandleHolder<SLuaEntity>>(classname, oClass, bLoadIfNotExists));
+	auto *ent = static_cast<SBaseEntity *>(pragma::Game::CreateLuaEntity<SLuaEntity, pragma::LuaCore::HandleHolder<SLuaEntity>>(classname, oClass, bLoadIfNotExists));
 	if(ent == nullptr)
 		return nullptr;
 	auto oType = oClass["Type"];

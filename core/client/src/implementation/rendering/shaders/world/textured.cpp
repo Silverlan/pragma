@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/logging.hpp"
 #include <cstddef>
 
 module pragma.client;

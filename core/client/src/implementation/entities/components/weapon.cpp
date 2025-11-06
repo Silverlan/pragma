@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 module pragma.client;
 
@@ -402,7 +401,7 @@ void CEAttachToOwner::PushArguments(lua::State *l)
 void CWeaponComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseWeaponComponent::RegisterLuaBindings(l, modEnts);
-	auto def = pragma::lua::create_entity_component_class<pragma::CWeaponComponent, pragma::BaseWeaponComponent>("WeaponComponent");
+	auto def = pragma::LuaCore::create_entity_component_class<pragma::CWeaponComponent, pragma::BaseWeaponComponent>("WeaponComponent");
 	def.def("PlayViewActivity", &pragma::CWeaponComponent::PlayViewActivity);
 	def.def("PlayViewActivity", static_cast<bool (*)(pragma::CWeaponComponent &wepComponent, pragma::Activity)>([](pragma::CWeaponComponent &wepComponent, pragma::Activity activity) { return wepComponent.PlayViewActivity(activity); }));
 	def.def("SetViewModel", &pragma::CWeaponComponent::SetViewModel);

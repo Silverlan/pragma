@@ -3,9 +3,7 @@
 
 module;
 
-#include "pragma/logging.hpp"
 
-#include "pragma/lua/core.hpp"
 
 module pragma.client;
 
@@ -93,7 +91,7 @@ static std::vector<pragma::platform::Key> get_mapped_keys(const std::string &cva
 	return mappedKeys;
 }
 
-static pragma::LuaInputBindingLayerRegister &get_input_binding_layer_register() { return pragma::get_cgame()->GetLuaInputBindingLayerRegister(); }
+static pragma::LuaCoreInputBindingLayerRegister &get_input_binding_layer_register() { return pragma::get_cgame()->GetLuaInputBindingLayerRegister(); }
 static std::shared_ptr<InputBindingLayer> create_input_binding_layer()
 {
 	auto layer = std::shared_ptr<InputBindingLayer> {new InputBindingLayer {}, [](InputBindingLayer *layer) {
@@ -313,7 +311,7 @@ static void register_gui(Lua::Interface &lua)
 	guiMod[defDrawToTex];
 
 	// Custom Classes
-	auto wiBaseWIElement = luabind::class_<WILuaBase, luabind::bases<WIBase>, pragma::lua::WILuaBaseHolder>("Base");
+	auto wiBaseWIElement = luabind::class_<WILuaBase, luabind::bases<WIBase>, pragma::LuaCore::WILuaBaseHolder>("Base");
 	wiBaseWIElement.def(luabind::constructor<>());
 	wiBaseWIElement.def("OnInitialize", &WILuaBase::Lua_OnInitialize, &WILuaBase::default_OnInitialize);
 	wiBaseWIElement.def("OnThink", &WILuaBase::Lua_OnThink, &WILuaBase::default_OnThink);
@@ -749,7 +747,7 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
 		  return boundKeys;
 	  });
 	inputMod[defInLay];
-	pragma::lua::define_custom_constructor<InputBindingLayer,
+	pragma::LuaCore::define_custom_constructor<InputBindingLayer,
 	  +[](const std::string &name) -> std::shared_ptr<InputBindingLayer> {
 		  auto layer = create_input_binding_layer();
 		  layer->identifier = name;

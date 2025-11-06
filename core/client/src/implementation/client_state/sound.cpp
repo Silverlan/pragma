@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/logging.hpp"
 #include "pragma/console/helper.hpp"
 
 #undef PlaySound

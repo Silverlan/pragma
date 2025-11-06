@@ -665,7 +665,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	    });
 #endif
 
-	    //lua_register(lua.GetState(), "print", Lua::console::print);
+	lua::register_function(lua.GetState(), "print", Lua::console::print);
 	Lua::RegisterLibrary(lua.GetState(), "console",
 	  {{"print", Lua::console::print}, {"printc", Lua::console::msgc}, {"print_table", static_cast<int (*)(lua::State *)>(Lua::console::print_table)}, {"print_message", static_cast<int (*)(lua::State *)>(Lua::console::msg)}, {"print_messageln", Lua::console::msgn},
 	    {"print_color", Lua::console::msgc}, {"print_warning", Lua::console::msgw}, {"print_error", Lua::console::msge},

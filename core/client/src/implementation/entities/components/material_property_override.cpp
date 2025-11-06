@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 #include <cassert>
 
 module pragma.client;
@@ -848,7 +847,7 @@ void CMaterialPropertyOverrideComponent::ApplyMaterialPropertyOverride(msys::Mat
 
 void CMaterialPropertyOverrideComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
-	auto def = pragma::lua::create_entity_component_class<pragma::CMaterialPropertyOverrideComponent, pragma::BaseEntityComponent>("MaterialPropertyOverrideComponent");
+	auto def = pragma::LuaCore::create_entity_component_class<pragma::CMaterialPropertyOverrideComponent, pragma::BaseEntityComponent>("MaterialPropertyOverrideComponent");
 	def.def("SetMaterialProperty", +[](CMaterialPropertyOverrideComponent &component, uint32_t matIdx, const char *key, const Vector3 &value) { component.SetMaterialProperty(matIdx, key, value); });
 	def.def("ClearMaterialProperty", +[](CMaterialPropertyOverrideComponent &component, uint32_t matIdx, const char *key) { component.ClearMaterialProperty(matIdx, key); });
 	def.def("SetTextureProperty", &pragma::CMaterialPropertyOverrideComponent::SetTextureProperty);

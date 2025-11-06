@@ -5,7 +5,6 @@ module;
 
 #include "pragma/lua/ostream_operator_alias.hpp"
 
-#include "pragma/lua/core.hpp"
 
 // --template-include-location
 
@@ -16,127 +15,127 @@ import :entities.components;
 
 void RegisterLuaEntityComponents2_sv(lua::State *l, luabind::module_ &entsMod)
 {
-	auto defSPointConstraintBallSocket = pragma::lua::create_entity_component_class<pragma::SPointConstraintBallSocketComponent, pragma::BasePointConstraintBallSocketComponent>("PointConstraintBallSocketComponent");
+	auto defSPointConstraintBallSocket = pragma::LuaCore::create_entity_component_class<pragma::SPointConstraintBallSocketComponent, pragma::BasePointConstraintBallSocketComponent>("PointConstraintBallSocketComponent");
 	entsMod[defSPointConstraintBallSocket];
 
-	auto defSPointConstraintConeTwist = pragma::lua::create_entity_component_class<pragma::SPointConstraintConeTwistComponent, pragma::BasePointConstraintConeTwistComponent>("PointConstraintConeTwistComponent");
+	auto defSPointConstraintConeTwist = pragma::LuaCore::create_entity_component_class<pragma::SPointConstraintConeTwistComponent, pragma::BasePointConstraintConeTwistComponent>("PointConstraintConeTwistComponent");
 	entsMod[defSPointConstraintConeTwist];
 
-	auto defSPointConstraintDoF = pragma::lua::create_entity_component_class<pragma::SPointConstraintDoFComponent, pragma::BasePointConstraintDoFComponent>("PointConstraintDoFComponent");
+	auto defSPointConstraintDoF = pragma::LuaCore::create_entity_component_class<pragma::SPointConstraintDoFComponent, pragma::BasePointConstraintDoFComponent>("PointConstraintDoFComponent");
 	entsMod[defSPointConstraintDoF];
 
-	auto defSPointConstraintFixed = pragma::lua::create_entity_component_class<pragma::SPointConstraintFixedComponent, pragma::BasePointConstraintFixedComponent>("PointConstraintFixedComponent");
+	auto defSPointConstraintFixed = pragma::LuaCore::create_entity_component_class<pragma::SPointConstraintFixedComponent, pragma::BasePointConstraintFixedComponent>("PointConstraintFixedComponent");
 	entsMod[defSPointConstraintFixed];
 
-	auto defSPointConstraintHinge = pragma::lua::create_entity_component_class<pragma::SPointConstraintHingeComponent, pragma::BasePointConstraintHingeComponent>("PointConstraintHingeComponent");
+	auto defSPointConstraintHinge = pragma::LuaCore::create_entity_component_class<pragma::SPointConstraintHingeComponent, pragma::BasePointConstraintHingeComponent>("PointConstraintHingeComponent");
 	entsMod[defSPointConstraintHinge];
 
-	auto defSPointConstraintSlider = pragma::lua::create_entity_component_class<pragma::SPointConstraintSliderComponent, pragma::BasePointConstraintSliderComponent>("PointConstraintSliderComponent");
+	auto defSPointConstraintSlider = pragma::LuaCore::create_entity_component_class<pragma::SPointConstraintSliderComponent, pragma::BasePointConstraintSliderComponent>("PointConstraintSliderComponent");
 	entsMod[defSPointConstraintSlider];
 
-	auto defSPathNode = pragma::lua::create_entity_component_class<pragma::SPathNodeComponent, pragma::BasePointPathNodeComponent>("PathNodeComponent");
+	auto defSPathNode = pragma::LuaCore::create_entity_component_class<pragma::SPathNodeComponent, pragma::BasePointPathNodeComponent>("PathNodeComponent");
 	entsMod[defSPathNode];
 
-	// auto defSRenderTarget = pragma::lua::create_entity_component_class<pragma::SRenderTargetComponent,pragma::BasePointRenderTargetComponent>("RenderTargetComponent");
+	// auto defSRenderTarget = pragma::LuaCore::create_entity_component_class<pragma::SRenderTargetComponent,pragma::BasePointRenderTargetComponent>("RenderTargetComponent");
 	// entsMod[defSRenderTarget];
 
-	auto defSPointTarget = pragma::lua::create_entity_component_class<pragma::SPointTargetComponent, pragma::BasePointTargetComponent>("PointTargetComponent");
+	auto defSPointTarget = pragma::LuaCore::create_entity_component_class<pragma::SPointTargetComponent, pragma::BasePointTargetComponent>("PointTargetComponent");
 	entsMod[defSPointTarget];
 
-	auto defSProp = pragma::lua::create_entity_component_class<pragma::PropComponent, pragma::BasePropComponent>("PropComponent");
+	auto defSProp = pragma::LuaCore::create_entity_component_class<pragma::PropComponent, pragma::BasePropComponent>("PropComponent");
 	entsMod[defSProp];
 
-	auto defSPropDynamic = pragma::lua::create_entity_component_class<pragma::SPropDynamicComponent, pragma::BasePropDynamicComponent>("PropDynamicComponent");
+	auto defSPropDynamic = pragma::LuaCore::create_entity_component_class<pragma::SPropDynamicComponent, pragma::BasePropDynamicComponent>("PropDynamicComponent");
 	entsMod[defSPropDynamic];
 
-	auto defSPropPhysics = pragma::lua::create_entity_component_class<pragma::SPropPhysicsComponent, pragma::BasePropPhysicsComponent>("PropPhysicsComponent");
+	auto defSPropPhysics = pragma::LuaCore::create_entity_component_class<pragma::SPropPhysicsComponent, pragma::BasePropPhysicsComponent>("PropPhysicsComponent");
 	entsMod[defSPropPhysics];
 
-	auto defSTriggerGravity = pragma::lua::create_entity_component_class<pragma::STriggerGravityComponent, pragma::BaseEntityTriggerGravityComponent>("TriggerGravityComponent");
+	auto defSTriggerGravity = pragma::LuaCore::create_entity_component_class<pragma::STriggerGravityComponent, pragma::BaseEntityTriggerGravityComponent>("TriggerGravityComponent");
 	entsMod[defSTriggerGravity];
 
-	auto defSTriggerHurt = pragma::lua::create_entity_component_class<pragma::STriggerHurtComponent, pragma::BaseTriggerHurtComponent>("TriggerHurtComponent");
+	auto defSTriggerHurt = pragma::LuaCore::create_entity_component_class<pragma::STriggerHurtComponent, pragma::BaseTriggerHurtComponent>("TriggerHurtComponent");
 	entsMod[defSTriggerHurt];
 
-	auto defSTriggerPush = pragma::lua::create_entity_component_class<pragma::STriggerPushComponent, pragma::BaseTriggerPushComponent>("TriggerPushComponent");
+	auto defSTriggerPush = pragma::LuaCore::create_entity_component_class<pragma::STriggerPushComponent, pragma::BaseTriggerPushComponent>("TriggerPushComponent");
 	entsMod[defSTriggerPush];
 
-	auto defSTriggerRemove = pragma::lua::create_entity_component_class<pragma::STriggerRemoveComponent, pragma::BaseTriggerRemoveComponent>("TriggerRemoveComponent");
+	auto defSTriggerRemove = pragma::LuaCore::create_entity_component_class<pragma::STriggerRemoveComponent, pragma::BaseTriggerRemoveComponent>("TriggerRemoveComponent");
 	entsMod[defSTriggerRemove];
 
-	auto defSTriggerTeleport = pragma::lua::create_entity_component_class<pragma::STriggerTeleportComponent, pragma::BaseTriggerTeleportComponent>("TriggerTeleportComponent");
+	auto defSTriggerTeleport = pragma::LuaCore::create_entity_component_class<pragma::STriggerTeleportComponent, pragma::BaseTriggerTeleportComponent>("TriggerTeleportComponent");
 	entsMod[defSTriggerTeleport];
 
-	auto defSTouch = pragma::lua::create_entity_component_class<pragma::STouchComponent, pragma::BaseTouchComponent>("TouchComponent");
+	auto defSTouch = pragma::LuaCore::create_entity_component_class<pragma::STouchComponent, pragma::BaseTouchComponent>("TouchComponent");
 	entsMod[defSTouch];
 
-	auto defSSkybox = pragma::lua::create_entity_component_class<pragma::SSkyboxComponent, pragma::BaseSkyboxComponent>("SkyboxComponent");
+	auto defSSkybox = pragma::LuaCore::create_entity_component_class<pragma::SSkyboxComponent, pragma::BaseSkyboxComponent>("SkyboxComponent");
 	entsMod[defSSkybox];
 
-	auto defSWorld = pragma::lua::create_entity_component_class<pragma::SWorldComponent, pragma::BaseWorldComponent>("WorldComponent");
+	auto defSWorld = pragma::LuaCore::create_entity_component_class<pragma::SWorldComponent, pragma::BaseWorldComponent>("WorldComponent");
 	entsMod[defSWorld];
 
-	auto defSFlashlight = pragma::lua::create_entity_component_class<pragma::SFlashlightComponent, pragma::BaseFlashlightComponent>("FlashlightComponent");
+	auto defSFlashlight = pragma::LuaCore::create_entity_component_class<pragma::SFlashlightComponent, pragma::BaseFlashlightComponent>("FlashlightComponent");
 	entsMod[defSFlashlight];
 
-	auto defSIo = pragma::lua::create_entity_component_class<pragma::SIOComponent, pragma::BaseIOComponent>("IOComponent");
+	auto defSIo = pragma::LuaCore::create_entity_component_class<pragma::SIOComponent, pragma::BaseIOComponent>("IOComponent");
 	entsMod[defSIo];
 
-	auto defSModel = pragma::lua::create_entity_component_class<pragma::SModelComponent, pragma::BaseModelComponent>("ModelComponent");
+	auto defSModel = pragma::LuaCore::create_entity_component_class<pragma::SModelComponent, pragma::BaseModelComponent>("ModelComponent");
 	entsMod[defSModel];
 
-	auto defSAnimated = pragma::lua::create_entity_component_class<pragma::SAnimatedComponent, pragma::BaseAnimatedComponent>("AnimatedComponent");
+	auto defSAnimated = pragma::LuaCore::create_entity_component_class<pragma::SAnimatedComponent, pragma::BaseAnimatedComponent>("AnimatedComponent");
 	entsMod[defSAnimated];
 
-	auto defSTimeScale = pragma::lua::create_entity_component_class<pragma::STimeScaleComponent, pragma::BaseTimeScaleComponent>("TimeScaleComponent");
+	auto defSTimeScale = pragma::LuaCore::create_entity_component_class<pragma::STimeScaleComponent, pragma::BaseTimeScaleComponent>("TimeScaleComponent");
 	entsMod[defSTimeScale];
 
-	auto defSAttachable = pragma::lua::create_entity_component_class<pragma::SAttachmentComponent, pragma::BaseAttachmentComponent>("AttachmentComponent");
+	auto defSAttachable = pragma::LuaCore::create_entity_component_class<pragma::SAttachmentComponent, pragma::BaseAttachmentComponent>("AttachmentComponent");
 	entsMod[defSAttachable];
 
-	auto defSChild = pragma::lua::create_entity_component_class<pragma::SChildComponent, pragma::BaseChildComponent>("ChildComponent");
+	auto defSChild = pragma::LuaCore::create_entity_component_class<pragma::SChildComponent, pragma::BaseChildComponent>("ChildComponent");
 	entsMod[defSChild];
 
-	auto defSOwnable = pragma::lua::create_entity_component_class<pragma::SOwnableComponent, pragma::BaseOwnableComponent>("OwnableComponent");
+	auto defSOwnable = pragma::LuaCore::create_entity_component_class<pragma::SOwnableComponent, pragma::BaseOwnableComponent>("OwnableComponent");
 	entsMod[defSOwnable];
 
-	auto defSDebugText = pragma::lua::create_entity_component_class<pragma::SDebugTextComponent, pragma::BaseDebugTextComponent>("DebugTextComponent");
+	auto defSDebugText = pragma::LuaCore::create_entity_component_class<pragma::SDebugTextComponent, pragma::BaseDebugTextComponent>("DebugTextComponent");
 	entsMod[defSDebugText];
 
-	auto defSDebugPoint = pragma::lua::create_entity_component_class<pragma::SDebugPointComponent, pragma::BaseDebugPointComponent>("DebugPointComponent");
+	auto defSDebugPoint = pragma::LuaCore::create_entity_component_class<pragma::SDebugPointComponent, pragma::BaseDebugPointComponent>("DebugPointComponent");
 	entsMod[defSDebugPoint];
 
-	auto defSDebugLine = pragma::lua::create_entity_component_class<pragma::SDebugLineComponent, pragma::BaseDebugLineComponent>("DebugLineComponent");
+	auto defSDebugLine = pragma::LuaCore::create_entity_component_class<pragma::SDebugLineComponent, pragma::BaseDebugLineComponent>("DebugLineComponent");
 	entsMod[defSDebugLine];
 
-	auto defSDebugBox = pragma::lua::create_entity_component_class<pragma::SDebugBoxComponent, pragma::BaseDebugBoxComponent>("DebugBoxComponent");
+	auto defSDebugBox = pragma::LuaCore::create_entity_component_class<pragma::SDebugBoxComponent, pragma::BaseDebugBoxComponent>("DebugBoxComponent");
 	entsMod[defSDebugBox];
 
-	auto defSDebugSphere = pragma::lua::create_entity_component_class<pragma::SDebugSphereComponent, pragma::BaseDebugSphereComponent>("DebugSphereComponent");
+	auto defSDebugSphere = pragma::LuaCore::create_entity_component_class<pragma::SDebugSphereComponent, pragma::BaseDebugSphereComponent>("DebugSphereComponent");
 	entsMod[defSDebugSphere];
 
-	auto defSDebugCone = pragma::lua::create_entity_component_class<pragma::SDebugConeComponent, pragma::BaseDebugConeComponent>("DebugConeComponent");
+	auto defSDebugCone = pragma::LuaCore::create_entity_component_class<pragma::SDebugConeComponent, pragma::BaseDebugConeComponent>("DebugConeComponent");
 	entsMod[defSDebugCone];
 
-	auto defSDebugCylinder = pragma::lua::create_entity_component_class<pragma::SDebugCylinderComponent, pragma::BaseDebugCylinderComponent>("DebugCylinderComponent");
+	auto defSDebugCylinder = pragma::LuaCore::create_entity_component_class<pragma::SDebugCylinderComponent, pragma::BaseDebugCylinderComponent>("DebugCylinderComponent");
 	entsMod[defSDebugCylinder];
 
-	auto defSDebugPlane = pragma::lua::create_entity_component_class<pragma::SDebugPlaneComponent, pragma::BaseDebugPlaneComponent>("DebugPlaneComponent");
+	auto defSDebugPlane = pragma::LuaCore::create_entity_component_class<pragma::SDebugPlaneComponent, pragma::BaseDebugPlaneComponent>("DebugPlaneComponent");
 	entsMod[defSDebugPlane];
 
-	auto defSPointAtTarget = pragma::lua::create_entity_component_class<pragma::SPointAtTargetComponent, pragma::BasePointAtTargetComponent>("PointAtTargetComponent");
+	auto defSPointAtTarget = pragma::LuaCore::create_entity_component_class<pragma::SPointAtTargetComponent, pragma::BasePointAtTargetComponent>("PointAtTargetComponent");
 	entsMod[defSPointAtTarget];
 
-	auto defSInfoLandmark = pragma::lua::create_entity_component_class<pragma::SInfoLandmarkComponent, pragma::BaseInfoLandmarkComponent>("InfoLandmarkComponent");
+	auto defSInfoLandmark = pragma::LuaCore::create_entity_component_class<pragma::SInfoLandmarkComponent, pragma::BaseInfoLandmarkComponent>("InfoLandmarkComponent");
 	entsMod[defSInfoLandmark];
 
-	auto defSGeneric = pragma::lua::create_entity_component_class<pragma::SGenericComponent, pragma::BaseGenericComponent>("GenericComponent");
+	auto defSGeneric = pragma::LuaCore::create_entity_component_class<pragma::SGenericComponent, pragma::BaseGenericComponent>("GenericComponent");
 	entsMod[defSGeneric];
 
-	auto defLiquidControl = pragma::lua::create_entity_component_class<pragma::SLiquidControlComponent, pragma::BaseLiquidControlComponent>("LiquidControlComponent");
+	auto defLiquidControl = pragma::LuaCore::create_entity_component_class<pragma::SLiquidControlComponent, pragma::BaseLiquidControlComponent>("LiquidControlComponent");
 	entsMod[defLiquidControl];
 
-	auto defLiquidSurfaceSimulation = pragma::lua::create_entity_component_class<pragma::SLiquidSurfaceSimulationComponent, pragma::BaseLiquidSurfaceSimulationComponent>("LiquidSurfaceSimulationComponent");
+	auto defLiquidSurfaceSimulation = pragma::LuaCore::create_entity_component_class<pragma::SLiquidSurfaceSimulationComponent, pragma::BaseLiquidSurfaceSimulationComponent>("LiquidSurfaceSimulationComponent");
 	entsMod[defLiquidSurfaceSimulation];
 
 	SGame::Get()->GetEntityComponentManager().RegisterLuaBindings(l, entsMod);

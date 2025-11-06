@@ -3,8 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.client:scripting.lua.classes.shader;
 
@@ -189,8 +188,8 @@ export {
 			DLLCLIENT void RecordBindDescriptorSet(lua::State *l, prosper::Shader &shader, prosper::util::PreparedCommandBuffer &pcb, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets, std::optional<uint32_t> dynamicOffsetIndex = {});
 			DLLCLIENT void RecordBindDescriptorSet(lua::State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets, std::optional<uint32_t> dynamicOffsetIndex = {});
 			DLLCLIENT void RecordBindDescriptorSets(lua::State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, luabind::object descSets, uint32_t firstSet, luabind::object dynamicOffsets);
-			DLLCLIENT void AttachPushConstantRange(lua::State *l, pragma::LuaShaderWrapperBase &shader, uint32_t offset, uint32_t size, uint32_t shaderStages);
-			DLLCLIENT uint32_t AttachDescriptorSetInfo(lua::State *l, pragma::LuaShaderWrapperBase &shader, pragma::LuaDescriptorSetInfo &descSetInfo);
+			DLLCLIENT void AttachPushConstantRange(lua::State *l, pragma::LuaCoreShaderWrapperBase &shader, uint32_t offset, uint32_t size, uint32_t shaderStages);
+			DLLCLIENT uint32_t AttachDescriptorSetInfo(lua::State *l, pragma::LuaCoreShaderWrapperBase &shader, pragma::LuaCoreDescriptorSetInfo &descSetInfo);
 
 			namespace Graphics {
 				DLLCLIENT void RecordBindVertexBuffer(lua::State *l, prosper::ShaderGraphics &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::Buffer &buffer, uint32_t startBinding, uint32_t offset);
@@ -202,7 +201,7 @@ export {
 				DLLCLIENT void RecordDraw(lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget);
 				DLLCLIENT void RecordEndDraw(lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget);
 				DLLCLIENT void GetRenderPass(lua::State *l, prosper::ShaderGraphics &shader, uint32_t pipelineIdx);
-				DLLCLIENT void AttachVertexAttribute(lua::State *l, pragma::LuaShaderWrapperGraphicsBase &shader, const pragma::LuaVertexBinding &binding, luabind::object attributes);
+				DLLCLIENT void AttachVertexAttribute(lua::State *l, pragma::LuaCoreShaderWrapperGraphicsBase &shader, const pragma::LuaCoreVertexBinding &binding, luabind::object attributes);
 			};
 
 			namespace Scene3D {
@@ -217,8 +216,8 @@ export {
 			};
 
 			// Custom shaders
-			DLLCLIENT void SetStageSourceFilePath(lua::State *l, pragma::LuaShaderWrapperBase &shader, uint32_t shaderStage, const std::string &fpath);
-			DLLCLIENT void SetPipelineCount(lua::State *l, pragma::LuaShaderWrapperBase &shader, uint32_t pipelineCount);
+			DLLCLIENT void SetStageSourceFilePath(lua::State *l, pragma::LuaCoreShaderWrapperBase &shader, uint32_t shaderStage, const std::string &fpath);
+			DLLCLIENT void SetPipelineCount(lua::State *l, pragma::LuaCoreShaderWrapperBase &shader, uint32_t pipelineCount);
 		};
 	};
 };

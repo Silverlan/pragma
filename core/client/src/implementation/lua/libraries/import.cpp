@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 //#include <assimp/Importer.hpp>
 //#include <assimp/Exporter.hpp>

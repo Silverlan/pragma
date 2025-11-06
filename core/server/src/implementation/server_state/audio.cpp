@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/logging.hpp"
+
+#include <cassert>
 
 module pragma.server;
 import :server_state;

@@ -3,9 +3,8 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
+#include "definitions.hpp"
 #include <format>
-#include "pragma/lua/core.hpp"
 
 export module pragma.client:entities.base_entity;
 

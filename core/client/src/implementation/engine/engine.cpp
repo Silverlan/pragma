@@ -4,9 +4,7 @@
 module;
 
 #include "pragma/console/helper.hpp"
-#include "pragma/logging.hpp"
-#include "pragma/clientdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 #include <sharedutils/magic_enum.hpp>
 #ifdef _WIN32
 
@@ -2262,7 +2260,7 @@ static void dump_stack_gui()
 		return;
 	Lua::StackDump(l);
 }
-namespace pragma::lua::debug {
+namespace pragma::LuaCore::debug {
 	// These are mainly used in the immediate window for debugging purposes
 	DLLCLIENT void dump_traceback_gui() { ::dump_traceback_gui(); }
 	DLLCLIENT void dump_stack_gui() { ::dump_stack_gui(); }

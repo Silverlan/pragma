@@ -2,12 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/serverdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 export module pragma.server:scripting.lua.libraries.game;
 
-export import luabind;
+export import pragma.lua;
 export import pragma.math;
 
 export namespace Lua {

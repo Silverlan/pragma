@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 module pragma.server;
 import :entities.components.player;
@@ -432,7 +431,7 @@ void SPlayerComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modE
 {
 	BasePlayerComponent::RegisterLuaBindings(l, modEnts);
 
-	auto def = pragma::lua::create_entity_component_class<pragma::SPlayerComponent, pragma::BasePlayerComponent>("PlayerComponent");
+	auto def = pragma::LuaCore::create_entity_component_class<pragma::SPlayerComponent, pragma::BasePlayerComponent>("PlayerComponent");
 	def.def("Respawn", &Lua::Player::Server::Respawn);
 	def.def("SetActionInput", &Lua::Player::Server::SetActionInput);
 	def.def("Kick", &pragma::SPlayerComponent::Kick);

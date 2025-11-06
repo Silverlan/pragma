@@ -3,7 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
+#include "definitions.hpp"
 
 #include "../../../../../../modules/pr_unirender/src/interface/definitions.hpp"
 

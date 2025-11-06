@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/logging.hpp"
 
 #include <bvh/v2/stream.h>
 #include <sharedutils/BS_thread_pool.hpp>

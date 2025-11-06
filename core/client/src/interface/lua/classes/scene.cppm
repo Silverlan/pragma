@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 export module pragma.client:scripting.lua.bindings.scene;
 export import :entities.components;
@@ -11,7 +10,7 @@ export import :entities.components;
 export namespace pragma::scripting::lua::bindings {
 	void register_renderers(lua::State *l, luabind::module_ &entsMod)
 	{
-		auto defRenderer = pragma::lua::create_entity_component_class<pragma::CRendererComponent, pragma::BaseEntityComponent>("RendererComponent");
+		auto defRenderer = pragma::LuaCore::create_entity_component_class<pragma::CRendererComponent, pragma::BaseEntityComponent>("RendererComponent");
 		defRenderer.def("GetWidth", &pragma::CRendererComponent::GetWidth);
 		defRenderer.def("GetHeight", &pragma::CRendererComponent::GetHeight);
 		defRenderer.def("InitializeRenderTarget",
@@ -30,7 +29,7 @@ export namespace pragma::scripting::lua::bindings {
 		defRenderer.def("GetHDRPresentationTexture", &pragma::CRendererComponent::GetHDRPresentationTexture, luabind::shared_from_this_policy<0> {});
 		entsMod[defRenderer];
 
-		auto defRaster = pragma::lua::create_entity_component_class<pragma::CRasterizationRendererComponent, pragma::BaseEntityComponent>("RasterizationRendererComponent");
+		auto defRaster = pragma::LuaCore::create_entity_component_class<pragma::CRasterizationRendererComponent, pragma::BaseEntityComponent>("RasterizationRendererComponent");
 		defRaster.add_static_constant("EVENT_ON_RECORD_PREPASS", pragma::CRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS);
 		defRaster.add_static_constant("EVENT_ON_RECORD_LIGHTING_PASS", pragma::CRasterizationRendererComponent::EVENT_ON_RECORD_LIGHTING_PASS);
 		defRaster.add_static_constant("EVENT_PRE_EXECUTE_PREPASS", pragma::CRasterizationRendererComponent::EVENT_PRE_EXECUTE_PREPASS);
@@ -114,7 +113,7 @@ export namespace pragma::scripting::lua::bindings {
 		defRaster.add_static_constant("PREPASS_MODE_EXTENDED", umath::to_integral(pragma::CRasterizationRendererComponent::PrepassMode::Extended));
 		entsMod[defRaster];
 
-		auto defRaytracing = pragma::lua::create_entity_component_class<pragma::CRaytracingComponent, pragma::BaseEntityComponent>("RaytracingRendererComponent");
+		auto defRaytracing = pragma::LuaCore::create_entity_component_class<pragma::CRaytracingComponent, pragma::BaseEntityComponent>("RaytracingRendererComponent");
 		entsMod[defRaytracing];
 	}
 }

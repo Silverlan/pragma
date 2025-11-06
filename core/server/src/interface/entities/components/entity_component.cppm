@@ -3,7 +3,7 @@
 
 module;
 
-#include "pragma/serverdefinitions.h"
+#include "definitions.hpp"
 
 export module pragma.server:entities.components.entity;
 

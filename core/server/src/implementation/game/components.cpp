@@ -125,4 +125,4 @@ void SGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	// --template-component-register-location
 }
 
-pragma::BaseEntityComponent *SGame::CreateLuaEntityComponent(pragma::ecs::BaseEntity &ent, std::string classname) { return pragma::Game::CreateLuaEntityComponent<pragma::SLuaBaseEntityComponent, pragma::lua::SLuaBaseEntityComponentHolder>(ent, classname); }
+pragma::BaseEntityComponent *SGame::CreateLuaEntityComponent(pragma::ecs::BaseEntity &ent, std::string classname) { return pragma::Game::CreateLuaEntityComponent<pragma::SLuaBaseEntityComponent, pragma::LuaCore::SLuaBaseEntityComponentHolder>(ent, classname); }

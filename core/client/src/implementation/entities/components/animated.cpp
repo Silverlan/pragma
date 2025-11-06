@@ -3,8 +3,6 @@
 
 module;
 
-#include "pragma/logging.hpp"
-#include "pragma/lua/core.hpp"
 #include <sharedutils/magic_enum.hpp>
 
 module pragma.client;
@@ -318,7 +316,7 @@ void CEOnBoneBufferInitialized::PushArguments(lua::State *l) { Lua::Push<std::sh
 void CAnimatedComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseAnimatedComponent::RegisterLuaBindings(l, modEnts);
-	auto defCAnimated = pragma::lua::create_entity_component_class<pragma::CAnimatedComponent, pragma::BaseAnimatedComponent>("AnimatedComponent");
+	auto defCAnimated = pragma::LuaCore::create_entity_component_class<pragma::CAnimatedComponent, pragma::BaseAnimatedComponent>("AnimatedComponent");
 	defCAnimated.def(
 	  "GetBoneBuffer", +[](lua::State *l, pragma::CAnimatedComponent &hAnim) -> std::optional<std::shared_ptr<prosper::IBuffer>> {
 		  auto *buf = hAnim.GetBoneBuffer();

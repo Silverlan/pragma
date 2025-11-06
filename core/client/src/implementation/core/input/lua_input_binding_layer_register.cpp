@@ -8,16 +8,16 @@ module pragma.client;
 import :core.lua_input_binding_layer_register;
 import :engine;
 
-pragma::LuaInputBindingLayerRegister::~LuaInputBindingLayerRegister() { Clear(); }
-void pragma::LuaInputBindingLayerRegister::Add(InputBindingLayer &layer) { m_layers.insert(&layer); }
-void pragma::LuaInputBindingLayerRegister::Remove(InputBindingLayer &layer)
+pragma::LuaCoreInputBindingLayerRegister::~LuaInputBindingLayerRegister() { Clear(); }
+void pragma::LuaCoreInputBindingLayerRegister::Add(InputBindingLayer &layer) { m_layers.insert(&layer); }
+void pragma::LuaCoreInputBindingLayerRegister::Remove(InputBindingLayer &layer)
 {
 	auto it = m_layers.find(&layer);
 	if(it == m_layers.end())
 		return;
 	pragma::get_cengine()->RemoveInputBindingLayer(layer.identifier);
 }
-void pragma::LuaInputBindingLayerRegister::Clear()
+void pragma::LuaCoreInputBindingLayerRegister::Clear()
 {
 	for(auto &layer : pragma::get_cengine()->GetInputBindingLayers()) {
 		auto it = m_layers.find(layer.get());

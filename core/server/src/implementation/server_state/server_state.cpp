@@ -3,9 +3,8 @@
 
 module;
 
-#include "pragma/logging.hpp"
 
-#include "pragma/serverdefinitions.h"
+#include "definitions.hpp"
 
 module pragma.server;
 import :server_state;

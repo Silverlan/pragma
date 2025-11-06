@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 module pragma.client;
 
@@ -522,5 +521,5 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 
 	prosperMod[defPcb];
 
-	pragma::lua::define_custom_constructor<prosper::util::PreparedCommandBuffer, +[]() -> std::shared_ptr<prosper::util::PreparedCommandBuffer> { return std::make_shared<prosper::util::PreparedCommandBuffer>(); }>(lua.GetState());
+	pragma::LuaCore::define_custom_constructor<prosper::util::PreparedCommandBuffer, +[]() -> std::shared_ptr<prosper::util::PreparedCommandBuffer> { return std::make_shared<prosper::util::PreparedCommandBuffer>(); }>(lua.GetState());
 }

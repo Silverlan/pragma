@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/serverdefinitions.h"
+#include "definitions.hpp"
 
 export import std.compat;
 

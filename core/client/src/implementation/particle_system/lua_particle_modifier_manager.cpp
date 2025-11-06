@@ -2,14 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/lua/core.hpp"
 
 module pragma.client;
 
 import :particle_system.lua_particle_modifier_manager;
 import :entities.components;
 
-CParticleModifierLua *pragma::LuaParticleModifierManager::CreateModifier(std::string className) const
+CParticleModifierLua *pragma::LuaCoreParticleModifierManager::CreateModifier(std::string className) const
 {
 	ustring::to_lower(className);
 	auto it = m_modifiers.find(className);
@@ -74,7 +73,7 @@ CParticleModifierLua *pragma::LuaParticleModifierManager::CreateModifier(std::st
 	return modifier;
 }
 
-bool pragma::LuaParticleModifierManager::RegisterModifier(Type type, std::string className, luabind::object &o)
+bool pragma::LuaCoreParticleModifierManager::RegisterModifier(Type type, std::string className, luabind::object &o)
 {
 	ustring::to_lower(className);
 	auto itShader = m_modifiers.find(className);
@@ -89,7 +88,7 @@ bool pragma::LuaParticleModifierManager::RegisterModifier(Type type, std::string
 	return true;
 }
 
-luabind::object *pragma::LuaParticleModifierManager::GetClassObject(std::string className)
+luabind::object *pragma::LuaCoreParticleModifierManager::GetClassObject(std::string className)
 {
 	ustring::to_lower(className);
 	auto it = m_modifiers.find(className);

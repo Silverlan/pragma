@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/lua/core.hpp"
 
 #include <sharedutils/BS_thread_pool.hpp>
 

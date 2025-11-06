@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/logging.hpp"
 #include <sharedutils/magic_enum.hpp>
 
 module pragma.client;

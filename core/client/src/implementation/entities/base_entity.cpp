@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "pragma/logging.hpp"
 
-#include "pragma/lua/core.hpp"
 
 #undef GetClassName
 

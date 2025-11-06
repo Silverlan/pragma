@@ -3,8 +3,7 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include "pragma/lua/core.hpp"
+#include "definitions.hpp"
 
 #undef DrawState
 
@@ -144,7 +143,7 @@ export {
 		std::unique_ptr<RenderData> m_renderData = nullptr;
 	};
 
-	namespace pragma::lua {
+	namespace pragma::LuaCore {
 		using WILuaBaseHolder = HandleHolder<WILuaBase>;
 	};
 };

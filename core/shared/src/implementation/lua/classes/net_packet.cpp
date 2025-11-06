@@ -112,7 +112,7 @@ void Lua::NetPacket::ReadEntity(lua::State *l, ::NetPacket &packet)
 	pragma::ecs::BaseEntity *ent = nwm::read_entity(packet);
 	if(ent == nullptr)
 		return;
-	lua_pushentity(l, ent);
+	ent->GetLuaObject().push(l);
 }
 
 void Lua::NetPacket::ReadALSound(lua::State *l, ::NetPacket &packet)

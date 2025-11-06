@@ -14,15 +14,15 @@ bool Lua::lua_value_to_string(lua::State *L, int arg, int *r, std::string *val)
 	}
 	Lua::PushValue(L, arg);
 	arg = Lua::GetStackTop(L);
-	lua_getglobal(L, "tostring");
+	Lua::GetGlobal(L, "tostring");
 	const char *s;
 	size_t l;
-	lua_pushvalue(L, -1);  /* function to be called */
-	lua_pushvalue(L, arg); /* value to print */
-	lua_call(L, 1, 1);
-	s = lua_tolstring(L, -1, &l); /* get result */
+	Lua::PushValue(L, -1);  /* function to be called */
+	Lua::PushValue(L, arg); /* value to print */
+	Lua::Call(L, 1, 1);
+	s = lua::to_string(L, -1, &l); /* get result */
 	if(s == nullptr) {
-		*r = luaL_error(L, "'tostring' must return a string to 'print'");
+		*r = lua::error(L, "'tostring' must return a string to 'print'");
 		return false;
 	}
 	*val = std::string(s, l);

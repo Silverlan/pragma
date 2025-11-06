@@ -6,8 +6,6 @@ module pragma.shared;
 
 import :scripting.lua.libraries.nav;
 
-lua_registercheck(NavConfig, pragma::nav::Config);
-
 void Lua::nav::register_library(Lua::Interface &lua)
 {
 	auto &modNav = lua.RegisterLibrary("nav");
@@ -16,7 +14,7 @@ void Lua::nav::register_library(Lua::Interface &lua)
 		auto &game = *nw.GetGameState();
 		std::string err;
 		std::shared_ptr<RcNavMesh> mesh = nullptr;
-		auto &navConfig = *Lua::CheckNavConfig(l, 1);
+		auto &navConfig = Lua::Check<pragma::nav::Config>(l, 1);
 		if(Lua::IsSet(l, 2) == false)
 			mesh = pragma::nav::generate(game, navConfig, &err);
 		else {

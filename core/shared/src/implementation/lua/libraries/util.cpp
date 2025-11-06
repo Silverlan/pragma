@@ -43,7 +43,7 @@ luabind::detail::class_rep *Lua::get_crep(luabind::object o)
 	luabind::detail::class_rep *crep = nullptr;
 	o.push(L);
 	if(luabind::detail::is_class_rep(L, -1)) {
-		crep = static_cast<luabind::detail::class_rep *>(lua_touserdata(L, -1));
+		crep = static_cast<luabind::detail::class_rep *>(lua::to_user_data(L, -1));
 		Lua::Pop(L, 1);
 	}
 	else {
@@ -364,7 +364,7 @@ void Lua::util::register_shared_generic(lua::State *l, luabind::module_ &mod)
 	  luabind::def("get_pretty_duration", static_cast<std::string (*)(lua::State *, uint32_t, uint32_t, bool)>(Lua::util::get_pretty_duration)), luabind::def("get_pretty_duration", static_cast<std::string (*)(lua::State *, uint32_t, uint32_t)>(Lua::util::get_pretty_duration)),
 	  luabind::def("get_pretty_duration", static_cast<std::string (*)(lua::State *, uint32_t)>(Lua::util::get_pretty_duration)), luabind::def("get_pretty_time", Lua::util::get_pretty_time),
 	  luabind::def(
-	    "get_object_hash", +[](Lua::userData o) { return std::hash<void *> {}(lua_touserdata(o.interpreter(), 1)); }),
+	    "get_object_hash", +[](Lua::userData o) { return std::hash<void *> {}(lua::to_user_data(o.interpreter(), 1)); }),
 	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LColorProperty &, const ::Color &, float)>(Lua::util::fade_property)),
 	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LVector2iProperty &, const ::Vector2i &, float)>(Lua::util::fade_property)),
 	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LVector3Property &, const Vector3 &, float)>(Lua::util::fade_property)),
@@ -690,13 +690,13 @@ bool Lua::util::is_valid(lua::State *l, const luabind::object &o)
 {
 	if(!o)
 		return false;
-	auto type = luabind::type(o);
+	auto type = static_cast<Lua::Type>(luabind::type(o));
 	switch(type) {
-	case LUA_TUSERDATA:
+	case Lua::Type::UserData:
 		return check_valid_lua_object(l, o);
-	case LUA_TBOOLEAN:
+	case Lua::Type::Bool:
 		return luabind::object_cast<bool>(o);
-	case LUA_TTABLE:
+	case Lua::Type::Table:
 		{
 			for(luabind::iterator i {o}, e; i != e; ++i) {
 				auto child = luabind::object {*i};
@@ -752,11 +752,11 @@ static void safely_remove(const luabind::object &o, const char *removeFunction, 
 }
 void Lua::util::remove(lua::State *l, const luabind::object &o, bool removeSafely)
 {
-	auto type = luabind::type(o);
-	if(type != LUA_TTABLE && is_valid(l, o) == false)
+	auto type = static_cast<Lua::Type>(luabind::type(o));
+	if(type != Lua::Type::Table && is_valid(l, o) == false)
 		return;
 	auto *removeFunction = removeSafely ? "RemoveSafely" : "Remove";
-	if(type == LUA_TTABLE) {
+	if(type == Lua::Type::Table) {
 		for(luabind::iterator i(o), e; i != e; ++i) {
 			auto o = luabind::object {*i};
 			if(is_valid(l, o) == false)
@@ -768,7 +768,7 @@ void Lua::util::remove(lua::State *l, const luabind::object &o, bool removeSafel
 	safely_remove(o, removeFunction, removeSafely);
 }
 void Lua::util::remove(lua::State *l, const luabind::object &o) { return remove(l, o, false); }
-bool Lua::util::is_table(luabind::argument arg) { return luabind::type(arg) == LUA_TTABLE; }
+bool Lua::util::is_table(luabind::argument arg) { return static_cast<Lua::Type>(luabind::type(arg)) == Lua::Type::Table; }
 bool Lua::util::is_table() { return false; }
 std::string Lua::util::date_time(const std::string &format) { return pragma::Engine::Get()->GetDate(format); }
 std::string Lua::util::date_time() { return pragma::Engine::Get()->GetDate(); }
@@ -921,7 +921,7 @@ static luabind::object register_class(lua::State *l, const std::string &pclassNa
 		// Check if class already exists
 		auto oBase = baseTable ? luabind::object {*baseTable} : luabind::globals(l);
 		auto o = oBase[className];
-		if(luabind::type(o) == LUA_TUSERDATA) {
+		if(static_cast<Lua::Type>(luabind::type(o)) == Lua::Type::UserData) {
 			auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 			auto *game = nw->GetGameState();
 			auto *classInfo = game->GetLuaClassManager().FindClassInfo(fullClassName);
@@ -995,7 +995,7 @@ static luabind::object register_class(lua::State *l, const std::string &pclassNa
 }
 static luabind::object register_class(lua::State *l, const std::string &className, const luabind::object &oBase0, uint32_t idxBaseClassStart, const luabind::table<> *baseTable = nullptr)
 {
-	if(luabind::type(oBase0) == LUA_TTABLE) {
+	if(static_cast<Lua::Type>(luabind::type(oBase0)) == Lua::Type::Table) {
 		uint32_t n = 0;
 		for(luabind::iterator i(oBase0), e; i != e; ++i) {
 			(*i).push(l);
@@ -1180,7 +1180,7 @@ std::string Lua::util::get_pretty_bytes(uint32_t bytes) { return ::util::get_pre
 std::string Lua::util::get_pretty_duration(lua::State *l, uint32_t ms) { return get_pretty_duration(l, ms, 0, true); }
 std::string Lua::util::get_pretty_duration(lua::State *l, uint32_t ms, uint32_t segments) { return get_pretty_duration(l, ms, segments, true); }
 std::string Lua::util::get_pretty_duration(lua::State *l, uint32_t ms, uint32_t segments, bool noMs) { return ::util::get_pretty_duration(ms, segments, noMs); }
-bool Lua::util::is_same_object(lua::State *l, const luabind::object &o0, const luabind::object &o1) { return lua_rawequal(l, 1, 2) == 1; }
+bool Lua::util::is_same_object(lua::State *l, const luabind::object &o0, const luabind::object &o1) { return lua::raw_equal(l, 1, 2) == 1; }
 std::string Lua::util::get_pretty_time(lua::State *l, float t)
 {
 	auto sign = umath::sign(static_cast<float>(t));
@@ -1356,7 +1356,7 @@ std::string Lua::util::get_type_name(lua::State *l, const luabind::object &o)
 	auto *crep = Lua::get_crep(o);
 	if(crep)
 		return crep->name();
-	return lua_typename(l, Lua::GetType(l, -1));
+	return lua::get_type(l, -1);
 }
 std::string Lua::util::variable_type_to_string(::util::VarType varType) { return ::util::variable_type_to_string(varType); }
 std::string Lua::util::get_string_hash(const std::string &str) { return std::to_string(std::hash<std::string> {}(str)); }
@@ -1401,7 +1401,7 @@ Lua::var<bool, ::util::ParallelJob<luabind::object>> Lua::util::pack_zip_archive
 		for(luabind::iterator i(t), e; i != e; ++i) {
 			auto zipFileName = luabind::object_cast<std::string>(i.key());
 			auto value = *i;
-			if(luabind::type(value) == LUA_TTABLE) {
+			if(static_cast<Lua::Type>(luabind::type(value)) == Lua::Type::Table) {
 				auto *ds = luabind::object_cast_nothrow<::util::DataStream *>(value["contents"], static_cast<::util::DataStream *>(nullptr));
 				if(ds)
 					customBinaryFiles[zipFileName] = *ds;

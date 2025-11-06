@@ -71,7 +71,7 @@ static void strip_path_until_lua_dir(std::string &shortSrc)
 		shortSrc = "..." + shortSrc.substr(shortSrc.size() - maxLuaPathLen);
 }
 
-static void transform_path(const lua_Debug &d, std::string &errPath, int32_t currentLine)
+static void transform_path(const lua::DebugInfo &d, std::string &errPath, int32_t currentLine)
 {
 	auto start = errPath.find("[string \"");
 	if(start == std::string::npos)
@@ -97,12 +97,12 @@ static void transform_path(const lua_Debug &d, std::string &errPath, int32_t cur
 bool Lua::get_callstack(lua::State *l, std::stringstream &ss)
 {
 	int32_t level = 1;
-	lua_Debug d {};
-	auto r = lua_getstack(l, level, &d);
+	lua::DebugInfo d {};
+	auto r = lua::get_stack(l, level, &d);
 	if(r == 0)
 		return false;
 	while(r == 1) {
-		if(lua_getinfo(l, "Sln", &d) != 0) {
+		if(lua::get_debug_info(l, "Sln", &d) != 0) {
 			std::string t(level * 4, ' ');
 			if(level >= 10) {
 				ss << "\n" << t << "...";
@@ -114,19 +114,19 @@ bool Lua::get_callstack(lua::State *l, std::stringstream &ss)
 			}
 		}
 		++level;
-		r = lua_getstack(l, level, &d);
+		r = lua::get_stack(l, level, &d);
 	}
 	return true;
 }
 
 bool Lua::PrintTraceback(lua::State *l, std::stringstream &ssOut, const std::string *pOptErrMsg, std::string *optOutFormattedErrMsg)
 {
-	lua_Debug d {};
+	lua::DebugInfo d {};
 	int32_t level = 1;
 	auto bFoundSrc = false;
 	auto bNl = false;
-	while(bFoundSrc == false && lua_getstack(l, level, &d) == 1) {
-		if(lua_getinfo(l, "Sln", &d) != 0 && (strcmp(d.what, "Lua") == 0 || strcmp(d.what, "main") == 0)) {
+	while(bFoundSrc == false && lua::get_stack(l, level, &d) == 1) {
+		if(lua::get_debug_info(l, "Sln", &d) != 0 && (strcmp(d.what, "Lua") == 0 || strcmp(d.what, "main") == 0)) {
 			bFoundSrc = true;
 			break;
 		}
@@ -239,7 +239,7 @@ void Lua::HandleSyntaxError(lua::State *l, Lua::StatusCode r) { handle_syntax_er
 
 void Lua::initialize_error_handler()
 {
-	luabind::register_exception_handler<Lua::Exception>(+[](lua::State *L, const Lua::Exception &e) { lua_pushstring(L, e.what()); });
+	luabind::register_exception_handler<Lua::Exception>(+[](lua::State *L, const Lua::Exception &e) { Lua::PushString(L, e.what()); });
 	luabind::set_pcall_callback([](lua::State *l) -> void {
 		Lua::PushCFunction(l, [](lua::State *l) -> int32_t {
 			if(Lua::IsString(l, -1) == false)

@@ -338,7 +338,7 @@ void Lua::ModelSubMesh::AddUVSet(lua::State *l, pragma::ModelSubMesh &mdl, const
 void Lua::ModelSubMesh::GetVertices(lua::State *l, pragma::ModelSubMesh &mesh)
 {
 	auto &verts = mesh.GetVertices();
-	lua_newtable(l);
+	Lua::CreateTable(l);
 	int top = Lua::GetStackTop(l);
 	for(int i = 0; i < verts.size(); i++) {
 		Lua::Push<Vector3>(l, verts[i].position);
@@ -347,7 +347,7 @@ void Lua::ModelSubMesh::GetVertices(lua::State *l, pragma::ModelSubMesh &mesh)
 }
 void Lua::ModelSubMesh::GetTriangles(lua::State *l, pragma::ModelSubMesh &mesh)
 {
-	lua_newtable(l);
+	Lua::CreateTable(l);
 	mesh.VisitIndices([l](auto *indexData, uint32_t numIndices) {
 		int top = Lua::GetStackTop(l);
 		for(int i = 0; i < numIndices; i++) {
@@ -359,7 +359,7 @@ void Lua::ModelSubMesh::GetTriangles(lua::State *l, pragma::ModelSubMesh &mesh)
 void Lua::ModelSubMesh::GetUVMapping(lua::State *l, pragma::ModelSubMesh &mesh)
 {
 	auto &verts = mesh.GetVertices();
-	lua_newtable(l);
+	Lua::CreateTable(l);
 	int top = Lua::GetStackTop(l);
 	for(int i = 0; i < verts.size(); i++) {
 		Lua::Push<::Vector2>(l, verts[i].uv);
@@ -387,7 +387,7 @@ luabind::object Lua::ModelSubMesh::GetUVSetNames(lua::State *l, pragma::ModelSub
 void Lua::ModelSubMesh::GetNormalMapping(lua::State *l, pragma::ModelSubMesh &mesh)
 {
 	auto &verts = mesh.GetVertices();
-	lua_newtable(l);
+	Lua::CreateTable(l);
 	int top = Lua::GetStackTop(l);
 	for(int i = 0; i < verts.size(); i++) {
 		Lua::Push<Vector3>(l, verts[i].normal);

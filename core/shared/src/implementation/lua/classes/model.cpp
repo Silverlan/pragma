@@ -1445,7 +1445,7 @@ void Lua::Model::GetCollisionMeshes(lua::State *l, pragma::Model &mdl)
 {
 	//Lua::CheckModel(l,1);
 	auto &meshes = mdl.GetCollisionMeshes();
-	lua_newtable(l);
+	Lua::CreateTable(l);
 	int top = Lua::GetStackTop(l);
 	for(auto i = decltype(meshes.size()) {0}; i < meshes.size(); ++i) {
 		Lua::Push<std::shared_ptr<pragma::physics::CollisionMesh>>(l, meshes[i]);
@@ -1704,11 +1704,11 @@ void Lua::Model::GetAnimationNames(lua::State *l, pragma::Model &mdl)
 	std::unordered_map<std::string, unsigned int> *anims;
 	mdl.GetAnimations(&anims);
 	std::unordered_map<std::string, unsigned int>::iterator i;
-	lua_newtable(l);
+	Lua::CreateTable(l);
 	int top = Lua::GetStackTop(l);
 	int n = 1;
 	for(i = anims->begin(); i != anims->end(); i++) {
-		lua_pushstring(l, i->first.c_str());
+		Lua::PushString(l, i->first.c_str());
 		Lua::SetTableValue(l, top, n);
 		n++;
 	}

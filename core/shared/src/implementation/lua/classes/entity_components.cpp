@@ -2284,7 +2284,7 @@ void pragma::LuaCore::base_sound_emitter_component::register_class(luabind::modu
 	def.def("GetSounds", static_cast<void (*)(lua::State *, pragma::BaseSoundEmitterComponent &)>([](lua::State *l, pragma::BaseSoundEmitterComponent &hEnt) {
 		std::vector<std::shared_ptr<ALSound>> *sounds;
 		hEnt.GetSounds(&sounds);
-		lua_newtable(l);
+		Lua::CreateTable(l);
 		int top = Lua::GetStackTop(l);
 		for(int i = 0; i < sounds->size(); i++) {
 			luabind::object(l, (*sounds)[i]).push(l);

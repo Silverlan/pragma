@@ -215,7 +215,7 @@ std::pair<bool, int> Lua::game::load_map(lua::State *l, std::string &mapName, pr
 			if(hEnt.valid() == false)
 				continue;
 			Lua::PushInt(l, entIdx++);
-			lua_pushentity(l, hEnt.get());
+			hEnt.get()->GetLuaObject().push(l);
 			Lua::SetTableValue(l, t);
 		}
 		return {r, 2};

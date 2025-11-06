@@ -467,7 +467,7 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 	/*if((memberFlags &MemberFlags::StoreBit) != MemberFlags::None)
 	{
 		std::string err = "If store flag is set, version number mustn't be 0! Please check 'lua_help ents.BaseEntityComponent.RegisterMember' for more information!";
-		lua_pushstring(l,err.c_str());
+		Lua::PushString(l,err.c_str());
 		Lua::Error(l);
 		return INVALID_MEMBER;
 	}*/

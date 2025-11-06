@@ -157,8 +157,8 @@ void LuaWorker::AddLuaTask(const Lua::func<TaskStatus> &luaFunc, const Lua::func
 		}
 		catch(const luabind::cast_failed &err) {
 			luaFunc.push(l);
-			lua_Debug ar;
-			lua_getinfo(l, ">S", &ar);
+			lua::DebugInfo ar;
+			lua::get_debug_info(l, ">S", &ar);
 
 			auto t = static_cast<Lua::Type>(luabind::type(o));
 			std::stringstream ss;

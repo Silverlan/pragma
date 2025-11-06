@@ -158,7 +158,7 @@ static luabind::object copy_table(lua::State *l, const luabind::object &t, bool 
 	}
 	for(luabind::iterator i {t}, e; i != e; ++i) {
 		auto val = *i;
-		if(luabind::type(val) == LUA_TTABLE)
+		if(static_cast<Lua::Type>(luabind::type(val)) == Lua::Type::Table)
 			val = copy_table(l, val, true);
 		tCpy[i.key()] = val;
 	}
@@ -182,10 +182,10 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 {
 	// Remove sensitive functions and libraries
 	Lua::PushNil(lua.GetState());
-	lua_setglobal(lua.GetState(), "dofile");
+	Lua::SetGlobal(lua.GetState(), "dofile");
 
 	Lua::PushNil(lua.GetState());
-	lua_setglobal(lua.GetState(), "loadfile");
+	Lua::SetGlobal(lua.GetState(), "loadfile");
 
 	std::array<std::string, 7> fRemoveOs = {"execute", "rename", "setlocale" /*, "getenv"*/, "remove", "exit", "tmpname"};
 	Lua::GetGlobal(lua.GetState(), "os"); /* 1 */
@@ -198,7 +198,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	Lua::Pop(lua.GetState(), 1); /* 0 */
 
 	//Lua::PushNil(lua.GetState());
-	//lua_setglobal(lua.GetState(),"os");
+	//Lua::SetGlobal(lua.GetState(),"os");
 	//
 
 	luabind::globals(lua.GetState())["print"] = luabind::nil;
@@ -256,8 +256,8 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "noise", {{"QUALITY_FAST", umath::to_integral(noise::NoiseQuality::QUALITY_FAST)}, {"QUALITY_STD", umath::to_integral(noise::NoiseQuality::QUALITY_STD)}, {"QUALITY_BEST", umath::to_integral(noise::NoiseQuality::QUALITY_BEST)}});
 
-	//lua_pushtablecfunction(lua.GetState(),"table","has_value",Lua::table::has_value); // Function is incomplete
-	lua_pushtablecfunction(lua.GetState(), "table", "table_to_map", [](lua::State *l) -> int32_t {
+	//Lua::SetTableCFunction(lua.GetState(),"table","has_value",Lua::table::has_value); // Function is incomplete
+	Lua::SetTableCFunction(lua.GetState(), "table", "table_to_map", [](lua::State *l) -> int32_t {
 		Lua::CheckTable(l, 1);
 		auto t = luabind::object {luabind::from_stack(l, 1)};
 		auto val = luabind::object {luabind::from_stack(l, 2)};
@@ -267,10 +267,10 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		Lua::Push(l, nt);
 		return 1;
 	});
-	lua_pushtablecfunction(lua.GetState(), "table", "random", Lua::table::random);
-	lua_pushtablecfunction(lua.GetState(), "table", "count", Lua::table::count);
-	lua_pushtablecfunction(lua.GetState(), "table", "is_empty", Lua::table::is_empty);
-	lua_pushtablecfunction(lua.GetState(), "table", "randomize", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
+	Lua::SetTableCFunction(lua.GetState(), "table", "random", Lua::table::random);
+	Lua::SetTableCFunction(lua.GetState(), "table", "count", Lua::table::count);
+	Lua::SetTableCFunction(lua.GetState(), "table", "is_empty", Lua::table::is_empty);
+	Lua::SetTableCFunction(lua.GetState(), "table", "randomize", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
 		int32_t t = 1;
 		Lua::CheckTable(l, t);
 		auto n = Lua::GetObjectLength(l, t);
@@ -296,7 +296,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		}
 		return 1;
 	}));
-	lua_pushtablecfunction(lua.GetState(), "table", "merge", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
+	Lua::SetTableCFunction(lua.GetState(), "table", "merge", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
 		auto t0 = 1;
 		auto t1 = 2;
 		Lua::CheckTable(l, t0);
@@ -330,7 +330,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		Lua::PushValue(l, 1);
 		return 1;
 	}));
-	lua_pushtablecfunction(lua.GetState(), "table", "copy", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
+	Lua::SetTableCFunction(lua.GetState(), "table", "copy", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
 		Lua::CheckTable(l, 1);
 		auto deepCopy = false;
 		if(Lua::IsSet(l, 2))
@@ -338,7 +338,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		copy_table(l, luabind::object {luabind::from_stack(l, 1)}, deepCopy).push(l);
 		return 1;
 	}));
-	lua_pushtablecfunction(lua.GetState(), "table", "is_empty", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
+	Lua::SetTableCFunction(lua.GetState(), "table", "is_empty", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
 		Lua::CheckTable(l, 1);
 		luabind::iterator it {luabind::object {luabind::from_stack(l, 1)}};
 		Lua::PushBool(l, it == luabind::iterator {});
@@ -474,12 +474,12 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		luabind::def("is_negative_axis",static_cast<bool(*)(pragma::SignedAxis)>(&pragma::is_negative_axis))
 	)];
 
-	lua_pushtablecfunction(lua.GetState(), "math", "parse_expression", parse_math_expression);
-	lua_pushtablecfunction(lua.GetState(), "math", "solve_quadric", Lua::math::solve_quadric);
-	lua_pushtablecfunction(lua.GetState(), "math", "solve_cubic", Lua::math::solve_cubic);
-	lua_pushtablecfunction(lua.GetState(), "math", "solve_quartic", Lua::math::solve_quartic);
+	Lua::SetTableCFunction(lua.GetState(), "math", "parse_expression", parse_math_expression);
+	Lua::SetTableCFunction(lua.GetState(), "math", "solve_quadric", Lua::math::solve_quadric);
+	Lua::SetTableCFunction(lua.GetState(), "math", "solve_cubic", Lua::math::solve_cubic);
+	Lua::SetTableCFunction(lua.GetState(), "math", "solve_quartic", Lua::math::solve_quartic);
 
-	lua_pushtablecfunction(lua.GetState(), "math", "max_abs", Lua::math::abs_max);
+	Lua::SetTableCFunction(lua.GetState(), "math", "max_abs", Lua::math::abs_max);
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "math",
 	  {{"EXPRESSION_CODE_BRACKET_OPENING", mup::ECmdCode::cmBO}, {"EXPRESSION_CODE_BRACKET_CLOSING", mup::ECmdCode::cmBC}, {"EXPRESSION_CODE_INDEX_OPERATOR_OPENING", mup::ECmdCode::cmIO}, {"EXPRESSION_CODE_INDEX_OPERATOR_CLOSING", mup::ECmdCode::cmIC},
@@ -604,8 +604,8 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	auto modDebug = luabind::module_(lua.GetState(), "debug");
 	modDebug[(luabind::def("format_error_message", +[](lua::State *l, const std::string &msg) -> std::string { return pragma::scripting::lua_core::format_error_message(l, msg, Lua::StatusCode::ErrorRun); }))];
 	modDebug[(luabind::def("move_state_to_string", Lua::debug::move_state_to_string), luabind::def("beep", Lua::debug::beep))];
-	lua_pushtablecfunction(lua.GetState(), "debug", "print", Lua::debug::print);
-	lua_pushtablecfunction(
+	Lua::SetTableCFunction(lua.GetState(), "debug", "print", Lua::debug::print);
+	Lua::SetTableCFunction(
 	  lua.GetState(), "debug", "start_debugger_server", +[](lua::State *l) -> int {
 		  auto res = Lua::util::start_debugger_server(l);
 		  return 1;
@@ -626,46 +626,46 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 
 	auto isBreakDefined = false;
 	if(Lua::get_extended_lua_modules_enabled()) {
-		lua_pushtablecfunction(lua.GetState(), "debug", "snapshot", &lua::snapshot);
+		Lua::SetTableCFunction(lua.GetState(), "debug", "snapshot", &lua::snapshot);
 		isBreakDefined = true;
-		lua_pushtablecfunction(lua.GetState(), "debug", "breakpoint", static_cast<int (*)(lua::State *)>([](lua::State *l) -> int {
+		Lua::SetTableCFunction(lua.GetState(), "debug", "breakpoint", static_cast<int (*)(lua::State *)>([](lua::State *l) -> int {
 			debug_break();
 			return 0;
-		}))
+		}));
 	}
 	if(isBreakDefined == false) {
-		lua_pushtablecfunction(lua.GetState(), "debug", "breakpoint", static_cast<int (*)(lua::State *)>([](lua::State *l) -> int { return 0; }))
+		Lua::SetTableCFunction(lua.GetState(), "debug", "breakpoint", static_cast<int (*)(lua::State *)>([](lua::State *l) -> int { return 0; }));
 	}
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	lua_pushtablecfunction(
+	Lua::SetTableCFunction(
 	  lua.GetState(), "debug", "start_profiling_task",
 	  +[](lua::State *l) -> int {
 		  std::string name = Lua::CheckString(l, 1);
 		  debug::get_domain().BeginTask(name);
 		  return 0;
-	  })
-	  lua_pushtablecfunction(
+	  });
+	  Lua::SetTableCFunction(
 	    lua.GetState(), "debug", "stop_profiling_task",
 	    +[](lua::State *l) -> int {
 		    debug::get_domain().EndTask();
 		    return 0;
-	    })
+	    });
 #else
-	lua_pushtablecfunction(
+	Lua::SetTableCFunction(
 	  lua.GetState(), "debug", "start_profiling_task",
 	  +[](lua::State *l) -> int {
 		  // Do nothing
 		  return 0;
-	  })
-	  lua_pushtablecfunction(
+	  });
+	  Lua::SetTableCFunction(
 	    lua.GetState(), "debug", "stop_profiling_task",
 	    +[](lua::State *l) -> int {
 		    // Do nothing
 		    return 0;
-	    })
+	    });
 #endif
 
-	    lua_register(lua.GetState(), "print", Lua::console::print);
+	    //lua_register(lua.GetState(), "print", Lua::console::print);
 	Lua::RegisterLibrary(lua.GetState(), "console",
 	  {{"print", Lua::console::print}, {"printc", Lua::console::msgc}, {"print_table", static_cast<int (*)(lua::State *)>(Lua::console::print_table)}, {"print_message", static_cast<int (*)(lua::State *)>(Lua::console::msg)}, {"print_messageln", Lua::console::msgn},
 	    {"print_color", Lua::console::msgc}, {"print_warning", Lua::console::msgw}, {"print_error", Lua::console::msge},
@@ -1186,7 +1186,7 @@ static int log(lua::State *l, spdlog::level::level_enum logLevel)
 template<spdlog::level::level_enum TLevel>
 static void add_log_func(lua::State *l, luabind::object &oLogger, const char *name)
 {
-	lua_pushcfunction(l, +[](lua::State *l) -> int { return log(l, TLevel); });
+	Lua::PushCFunction(l, +[](lua::State *l) -> int { return log(l, TLevel); });
 	oLogger[name] = luabind::object {luabind::from_stack(l, -1)};
 	Lua::Pop(l, 1);
 }
@@ -1251,7 +1251,7 @@ void pragma::Game::RegisterLuaLibraries()
 		{NULL,NULL}
 	};
 	luaL_newlib(GetLuaState(),funcs_recast);
-	lua_setglobal(GetLuaState(),"recast");*/
+	Lua::SetGlobal(GetLuaState(),"recast");*/
 
 	Lua::nav::register_library(GetLuaInterface());
 

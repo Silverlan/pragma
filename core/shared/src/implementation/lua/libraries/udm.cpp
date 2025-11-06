@@ -95,20 +95,20 @@ void Lua::udm::table_to_udm(const Lua::tb<void> &t, ::udm::LinkedPropertyWrapper
 	for(luabind::iterator it {t}, end; it != end; ++it) {
 		luabind::object val = *it;
 		std::string key = luabind::object_cast<std::string>(luabind::object {it.key()});
-		if(luabind::type(val) == LUA_TTABLE) {
+		if(static_cast<Lua::Type>(luabind::type(val)) == Lua::Type::Table) {
 			auto *l = val.interpreter();
 			auto len = Lua::GetObjectLength(l, val);
 			uint32_t actualLen = 0;
 			auto isArrayType = true;
-			std::pair<int, luabind::detail::class_rep *> typeInfo {-1, nullptr};
+			std::pair<Lua::Type, luabind::detail::class_rep *> typeInfo {Lua::Type::None, nullptr};
 			for(luabind::iterator it {val}, end; it != end; ++it) {
-				auto t = luabind::type(*it);
-				if(t != LUA_TUSERDATA) {
+				auto t = static_cast<Lua::Type>(luabind::type(*it));
+				if(t != Lua::Type::UserData) {
 					if(typeInfo.second != nullptr) {
 						isArrayType = false;
 						break;
 					}
-					if(typeInfo.first == -1)
+					if(typeInfo.first == Lua::Type::None)
 						typeInfo.first = t;
 					else if(t != typeInfo.first) {
 						isArrayType = false;
@@ -119,7 +119,7 @@ void Lua::udm::table_to_udm(const Lua::tb<void> &t, ::udm::LinkedPropertyWrapper
 				}
 				else {
 					auto *crep = Lua::get_crep(val);
-					if(!crep || typeInfo.first != -1) {
+					if(!crep || typeInfo.first != Lua::Type::None) {
 						isArrayType = false;
 						break;
 					}

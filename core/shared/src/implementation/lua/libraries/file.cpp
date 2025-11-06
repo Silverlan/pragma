@@ -142,7 +142,7 @@ DLLNETWORK void Lua_LFile_ReadString(lua::State *l, LFile &f)
 		return;
 	auto file = f.GetHandle();
 	std::string str = file->ReadString();
-	lua_pushstring(l, str.c_str());
+	Lua::PushString(l, str.c_str());
 }
 
 DLLNETWORK void Lua_LFile_WriteString(lua::State *, LFile &f, std::string str, bool bNullTerminated)

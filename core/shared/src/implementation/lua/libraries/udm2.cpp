@@ -861,7 +861,7 @@ void register_property_methods(TClassDef &classDef)
 	    +[](lua::State *l, T &v) -> Lua::tb<void> {
 		    auto prop = static_cast<TPropertyWrapper>(v);
 		    auto o = Lua::udm::udm_to_value(l, prop);
-		    if(luabind::type(o) == LUA_TTABLE)
+		    if(static_cast<Lua::Type>(luabind::type(o)) == Lua::Type::Table)
 			    return o;
 		    return luabind::newtable(l);
 	    })
@@ -1283,7 +1283,7 @@ void Lua::udm::register_types(Lua::Interface &lua, luabind::module_ &modUdm)
 	// Attempts below don't work
 	/*auto *reg = luabind::detail::class_registry::get_registry(lua.GetState());
 	auto *cls = reg->find_class(typeid(::udm::Property));
-	lua_rawgeti(lua.GetState(), LUA_REGISTRYINDEX, cls->metatable_ref());
+	lua::raw_get(lua.GetState(), Lua::RegistryIndex, cls->metatable_ref());
 	auto o = luabind::object{luabind::from_stack(lua.GetState(),-1)};
 	Lua::Pop(lua.GetState(),1);
 	o["__index"] = luabind::make_function(lua.GetState(),static_cast<void(*)()>([]() {

@@ -18,7 +18,7 @@ get_submodule("networkmanager","https://github.com/Silverlan/networkmanager.git"
 get_submodule("oskit","https://github.com/Silverlan/oskit.git","892cc8a1f6298e80ffe86a7342e198d49ccc6868", "feat/cxx_module")
 get_submodule("panima","https://github.com/Silverlan/panima.git","397e557ada0daf320dbfc2271a7dd2362c21088e", "feat/cxx_module")
 get_submodule("prosper","https://github.com/Silverlan/prosper.git","330698ff2caceb43552cf9fb8c5ece50af217048", "feat/cxx_module")
-get_submodule("sharedutils","https://github.com/Silverlan/sharedutils.git","d04d03c91fcf1b51bbe9bf98fa930412ff29efa1", "feat/cxx_module")
+get_submodule("sharedutils","https://github.com/Silverlan/sharedutils.git","1c124e0ee9e1fe278644883df94b4427d154f8f9", "feat/cxx_module")
 get_submodule("util_bsp","https://github.com/Silverlan/util_bsp.git","8b0e95931f6c27b728999d021cea80379abdc0e9", "feat/cxx_module")
 get_submodule("util_formatted_text","https://github.com/Silverlan/util_formatted_text.git","a90e94bda2d29578d4fda8159170c08e393108db", "feat/cxx_module")
 get_submodule("util_image","https://github.com/Silverlan/util_image.git","81000f64876c6fae95023596e04bd4e7881a2d83", "feat/cxx_module")

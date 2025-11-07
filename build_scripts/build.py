@@ -303,10 +303,10 @@ if platform == "linux" and (c_compiler == "clang-21" or c_compiler == "clang++-2
 	if build_all:
 		curDir = os.getcwd()
 		os.chdir(deps_dir)
-		clang20_root = os.getcwd() +"/LLVM-21.1.4-Linux-X64"
+		clang20_root = os.getcwd() +"/LLVM-21.1.5-Linux-X64"
 		if not Path(clang20_root).is_dir():
 			print_msg("Downloading clang-21...")
-			http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.4/LLVM-21.1.4-Linux-X64.tar.xz",format="tar.xz")
+			http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.5/LLVM-21.1.5-Linux-X64.tar.xz",format="tar.xz")
 		os.chdir(curDir)
 
 		copy_preserving_symlink(Path(clang20_root +"/bin/clang"), Path(clang_staging_path +"/bin"))

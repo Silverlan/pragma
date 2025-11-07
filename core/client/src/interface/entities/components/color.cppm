@@ -9,6 +9,9 @@ export module pragma.client:entities.components.color;
 export import :entities.components.entity;
 
 export namespace pragma {
+	namespace cColorComponent {
+		using namespace baseColorComponent;
+	}
 	class DLLCLIENT CColorComponent final : public BaseColorComponent, public CBaseNetComponent {
 	  public:
 		CColorComponent(pragma::ecs::BaseEntity &ent) : BaseColorComponent(ent) {}

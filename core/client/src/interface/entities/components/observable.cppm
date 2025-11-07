@@ -9,6 +9,9 @@ export module pragma.client:entities.components.observable;
 export import :entities.components.entity;
 
 export namespace pragma {
+	namespace cObservableComponent {
+		using namespace baseObservableComponent;
+	}
 	class DLLCLIENT CObservableComponent final : public BaseObservableComponent, public CBaseNetComponent {
 	  public:
 		CObservableComponent(pragma::ecs::BaseEntity &ent);

@@ -4,6 +4,7 @@
 module;
 
 #include <bvh/v2/stream.h>
+#include <cassert>
 
 module pragma.client;
 

@@ -389,8 +389,8 @@ ShaderMaterial::ShaderMaterial(const pragma::GString &name) : ShaderInputDescrip
 		Property propFlags {"flags", pragma::shadergraph::DataType::UInt};
 		propFlags->defaultValue = static_cast<uint32_t>(MaterialFlags::None);
 		propFlags.propertyFlags |= Property::Flags::HideInEditor;
-		auto names = magic_enum::flags::enum_names<MaterialFlags>();
-		auto values = magic_enum::flags::enum_values<MaterialFlags>();
+		auto names = magic_enum::enum_names<MaterialFlags>();
+		auto values = magic_enum::enum_values<MaterialFlags>();
 		std::unordered_map<std::string, uint32_t> flags;
 		flags.reserve(names.size());
 		for(size_t i = 0; i < names.size(); ++i) {

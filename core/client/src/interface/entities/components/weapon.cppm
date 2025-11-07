@@ -12,6 +12,7 @@ export import :entities.components.view_model;
 
 export namespace pragma {
 		namespace cWeaponComponent {
+			using namespace baseWeaponComponent;
 		STATIC_DLL_COMPAT ComponentEventId EVENT_ATTACH_TO_OWNER;
 	}
 class DLLCLIENT CWeaponComponent final : public BaseWeaponComponent, public CBaseNetComponent {

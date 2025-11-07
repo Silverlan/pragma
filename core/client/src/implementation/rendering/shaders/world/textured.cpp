@@ -4,6 +4,7 @@
 module;
 
 #include <cstddef>
+#include <cassert>
 
 module pragma.client;
 

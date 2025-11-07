@@ -3,8 +3,7 @@
 
 module;
 
-
-#undef AddJob
+#include <cassert>
 
 module pragma.client;
 
@@ -13,6 +12,8 @@ import :client_state;
 import :engine;
 import :game;
 import :rendering.render_queue_instancer;
+
+#undef AddJob
 
 SceneRenderDesc::SceneRenderDesc(pragma::CSceneComponent &scene) : m_scene {scene}
 {

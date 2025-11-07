@@ -15,6 +15,7 @@ export namespace pragma {
 	class CSceneComponent;
 };
 namespace cBaseEntity {
+	using namespace pragma::ecs::baseEntity;
 	STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_ON_SCENE_FLAGS_CHANGED;
 }
 export class DLLCLIENT CBaseEntity : public pragma::ecs::BaseEntity {

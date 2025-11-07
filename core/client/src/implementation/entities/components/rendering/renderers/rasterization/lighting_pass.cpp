@@ -38,7 +38,7 @@ void pragma::CRasterizationRendererComponent::RecordPrepass(const util::DrawScen
 		};
 
 		CEPrepassStageData evDataPrepassStage {rsys, shaderPrepass};
-		InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_PREPASS, evDataPrepassStage);
+		InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_PREPASS, evDataPrepassStage);
 		rsys.BindShader(shaderPrepass, umath::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
 		// Render static world geometry
 		if((renderPassDrawInfo.drawSceneInfo.renderFlags & RenderFlags::World) != RenderFlags::None) {
@@ -100,7 +100,7 @@ void pragma::CRasterizationRendererComponent::UpdatePrepassRenderBuffers(const u
 	}
 
 	CEUpdateRenderBuffers evData {drawSceneInfo};
-	InvokeEventCallbacks(EVENT_UPDATE_RENDER_BUFFERS, evData);
+	InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_UPDATE_RENDER_BUFFERS, evData);
 
 	pragma::get_cgame()->CallLuaCallbacks<void, const util::DrawSceneInfo *>("UpdateRenderBuffers", &drawSceneInfo);
 	//
@@ -146,17 +146,17 @@ void pragma::CRasterizationRendererComponent::ExecutePrepass(const util::DrawSce
 	drawCmd->RecordBufferBarrier(*scene.GetViewCameraBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 	CEDrawSceneInfo evData {drawSceneInfo};
-	InvokeEventCallbacks(EVENT_PRE_PREPASS, evData);
+	InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_PRE_PREPASS, evData);
 
 	prepass.BeginRenderPass(drawSceneInfo, nullptr, true);
 
-	InvokeEventCallbacks(EVENT_PRE_EXECUTE_PREPASS, evData);
+	InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_PRE_EXECUTE_PREPASS, evData);
 	m_prepassCommandBufferGroup->ExecuteCommands(*drawCmd);
-	InvokeEventCallbacks(EVENT_POST_EXECUTE_PREPASS, evData);
+	InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_POST_EXECUTE_PREPASS, evData);
 
 	prepass.EndRenderPass(drawSceneInfo);
 
-	InvokeEventCallbacks(EVENT_POST_PREPASS, evData);
+	InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_POST_PREPASS, evData);
 
 	pragma::get_cgame()->StopGPUProfilingStage(); // Prepass
 	pragma::get_cgame()->StopProfilingStage();    // Prepass
@@ -215,17 +215,17 @@ void pragma::CRasterizationRendererComponent::ExecuteLightingPass(const util::Dr
 	  prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 	CEDrawSceneInfo evData {drawSceneInfo};
-	InvokeEventCallbacks(EVENT_PRE_LIGHTING_PASS, evData);
+	InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_PRE_LIGHTING_PASS, evData);
 
 	BeginRenderPass(drawSceneInfo, nullptr, true);
 
-	InvokeEventCallbacks(EVENT_PRE_EXECUTE_LIGHTING_PASS, evData);
+	InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_PRE_EXECUTE_LIGHTING_PASS, evData);
 	m_lightingCommandBufferGroup->ExecuteCommands(*drawCmd);
-	InvokeEventCallbacks(EVENT_POST_EXECUTE_LIGHTING_PASS, evData);
+	InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_POST_EXECUTE_LIGHTING_PASS, evData);
 
 	EndRenderPass(drawSceneInfo);
 
-	InvokeEventCallbacks(EVENT_POST_LIGHTING_PASS, evData);
+	InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_POST_LIGHTING_PASS, evData);
 
 	pragma::get_cgame()->StopProfilingStage(); // ExecuteLightingPass
 }
@@ -252,7 +252,7 @@ void pragma::CRasterizationRendererComponent::StartPrepassRecording(const util::
 	if(!umath::is_flag_set(drawSceneInfo.flags, util::DrawSceneInfo::Flags::DisablePrepass)) {
 		RecordPrepass(drawSceneInfo);
 		CEDrawSceneInfo evData {drawSceneInfo};
-		InvokeEventCallbacks(EVENT_ON_RECORD_PREPASS, evData);
+		InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS, evData);
 	}
 
 	m_prepassCommandBufferGroup->EndRecording();
@@ -267,7 +267,7 @@ void pragma::CRasterizationRendererComponent::StartLightingPassRecording(const u
 	if(!umath::is_flag_set(drawSceneInfo.flags, util::DrawSceneInfo::Flags::DisableLightingPass)) {
 		RecordLightingPass(drawSceneInfo);
 		CEDrawSceneInfo evData {drawSceneInfo};
-		InvokeEventCallbacks(EVENT_ON_RECORD_LIGHTING_PASS, evData);
+		InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_ON_RECORD_LIGHTING_PASS, evData);
 	}
 
 	m_lightingCommandBufferGroup->EndRecording();
@@ -293,12 +293,12 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 		if((drawSceneInfo.renderFlags & RenderFlags::Skybox) != RenderFlags::None) {
 			pragma::get_cgame()->StartProfilingStage("Skybox");
 			pragma::get_cgame()->StartGPUProfilingStage("Skybox");
-			InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_SKYBOX, evDataLightingStage);
+			InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_SKYBOX, evDataLightingStage);
 
 			rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::Sky, false /* translucent */), lightingStageStats);
 			rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::Sky, true /* translucent */), lightingStageTranslucentStats);
 
-			InvokeEventCallbacks(EVENT_MT_END_RECORD_SKYBOX, evDataLightingStage);
+			InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_END_RECORD_SKYBOX, evDataLightingStage);
 			pragma::get_cgame()->StopGPUProfilingStage(); // Skybox
 			pragma::get_cgame()->StopProfilingStage();    // Skybox
 		}
@@ -310,7 +310,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 			if((drawSceneInfo.renderFlags & RenderFlags::World) != RenderFlags::None) {
 				pragma::get_cgame()->StartProfilingStage("World");
 				pragma::get_cgame()->StartGPUProfilingStage("World");
-				InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_WORLD, evDataLightingStage);
+				InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_WORLD, evDataLightingStage);
 
 				// For optimization purposes, world geometry is stored in separate render queues.
 				// This could be less efficient if many models in the scene use the same materials as
@@ -334,7 +334,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 				rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::World, false /* translucent */), lightingStageStats);
 				rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::World, true /* translucent */), lightingStageTranslucentStats);
 
-				InvokeEventCallbacks(EVENT_MT_END_RECORD_WORLD, evDataLightingStage);
+				InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_END_RECORD_WORLD, evDataLightingStage);
 				pragma::get_cgame()->StopGPUProfilingStage(); // World
 				pragma::get_cgame()->StopProfilingStage();    // World
 			}
@@ -405,7 +405,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 		if((drawSceneInfo.renderFlags & RenderFlags::Debug) == RenderFlags::Debug) {
 			pragma::get_cgame()->StartProfilingStage("Debug");
 			pragma::get_cgame()->StartGPUProfilingStage("Debug");
-			InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_DEBUG, evDataLightingStage);
+			InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_DEBUG, evDataLightingStage);
 
 			if(cam.valid())
 				DebugRenderer::Render(pcmd, *cam);
@@ -500,7 +500,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 			}
 #endif
 
-			InvokeEventCallbacks(EVENT_MT_END_RECORD_DEBUG, evDataLightingStage);
+			InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_END_RECORD_DEBUG, evDataLightingStage);
 			pragma::get_cgame()->StopGPUProfilingStage(); // Debug
 			pragma::get_cgame()->StopProfilingStage();    // Debug
 		}
@@ -508,7 +508,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 		if((drawSceneInfo.renderFlags & RenderFlags::View) != RenderFlags::None) {
 			pragma::get_cgame()->StartGPUProfilingStage("View");
 			pragma::get_cgame()->StartProfilingStage("View");
-			InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_VIEW, evDataLightingStage);
+			InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_VIEW, evDataLightingStage);
 
 			rsys.SetCameraType(pragma::rendering::BaseRenderProcessor::CameraType::View);
 			rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::View, false /* translucent */), lightingStageStats);
@@ -527,7 +527,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 			}
 			//RenderGlowMeshes(cam,true);
 
-			InvokeEventCallbacks(EVENT_MT_END_RECORD_VIEW, evDataLightingStage);
+			InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_END_RECORD_VIEW, evDataLightingStage);
 			pragma::get_cgame()->StopGPUProfilingStage(); // View
 			pragma::get_cgame()->StopProfilingStage();    // View
 		}

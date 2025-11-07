@@ -3,6 +3,8 @@
 
 module;
 
+#include <cassert>
+
 module pragma.client;
 
 import :rendering.render_processor;

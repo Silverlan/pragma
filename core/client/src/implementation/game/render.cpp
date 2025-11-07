@@ -166,7 +166,7 @@ static void print_component_properties(const pragma::ComponentMemberInfo &member
 		}
 	}
 
-	Con::cout << "Flags: " << magic_enum::flags::enum_name(memberInfo.GetFlags()) << Con::endl;
+	Con::cout << "Flags: " << magic_enum::enum_flags_name(memberInfo.GetFlags()) << Con::endl;
 	Con::cout << "Type: " << magic_enum::enum_name(memberInfo.type) << Con::endl;
 	Con::cout << "User Index: " << memberInfo.userIndex << Con::endl;
 
@@ -431,7 +431,7 @@ static void debug_dump_render_queues(const util::DrawSceneInfo &drawSceneInfo)
 {
 	std::stringstream ss;
 	ss << "Scene Info:\n";
-	ss << "Render Flags: " << magic_enum::flags::enum_name(drawSceneInfo.renderFlags) << "\n";
+	ss << "Render Flags: " << magic_enum::enum_flags_name(drawSceneInfo.renderFlags) << "\n";
 	if(drawSceneInfo.clearColor)
 		ss << "Clear Color: " << *drawSceneInfo.clearColor << "\n";
 	if(drawSceneInfo.toneMapping)
@@ -447,7 +447,7 @@ static void debug_dump_render_queues(const util::DrawSceneInfo &drawSceneInfo)
 		ss << "Output Image: " << umath::to_integral(img.GetFormat()) << ", " << img.GetWidth() << "x" << img.GetHeight() << "\n";
 	}
 	ss << "Output Layer Id: " << drawSceneInfo.outputLayerId << "\n";
-	ss << "Flags: " << magic_enum::flags::enum_name(drawSceneInfo.flags) << "\n";
+	ss << "Flags: " << magic_enum::enum_flags_name(drawSceneInfo.flags) << "\n";
 
 	ss << "Render Queues:\n";
 	auto fPrintQueue = [&ss](const pragma::rendering::RenderQueue &queue) {

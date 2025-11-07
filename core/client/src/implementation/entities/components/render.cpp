@@ -99,7 +99,7 @@ prosper::IDescriptorSet *CRenderComponent::GetRenderDescriptorSet() const { retu
 CRenderComponent::StateFlags CRenderComponent::GetStateFlags() const { return m_stateFlags; }
 util::EventReply CRenderComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(eventId == BaseChildComponent::EVENT_ON_PARENT_CHANGED) {
+	if(eventId == baseChildComponent::EVENT_ON_PARENT_CHANGED) {
 		UpdateAncestorHiddenState();
 		PropagateHiddenState();
 	}
@@ -143,9 +143,9 @@ void CRenderComponent::Initialize()
 {
 	BaseRenderComponent::Initialize();
 
-	BindEventUnhandled(CAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateBoneBuffer(); });
-	BindEventUnhandled(CColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { SetRenderBufferDirty(); });
-	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateBoneBuffer(); });
+	BindEventUnhandled(cColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { SetRenderBufferDirty(); });
+	BindEventUnhandled(cModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		m_localRenderBounds = {};
 		m_absoluteRenderBounds = {};
 		m_localRenderSphere = {};

@@ -9,6 +9,9 @@ export module pragma.client:entities.components.ownable;
 export import :entities.components.entity;
 
 export namespace pragma {
+	namespace cOwnableComponent {
+		using namespace baseOwnableComponent;
+	}
 	class DLLCLIENT COwnableComponent final : public BaseOwnableComponent, public CBaseNetComponent {
 	  public:
 		COwnableComponent(pragma::ecs::BaseEntity &ent) : BaseOwnableComponent(ent) {}

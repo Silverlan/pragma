@@ -9,6 +9,9 @@ export module pragma.client:entities.components.physics;
 export import :entities.components.entity;
 
 export namespace pragma {
+	namespace cPhysicsComponent {
+		using namespace basePhysicsComponent;
+	}
 	class DLLCLIENT CPhysicsComponent final : public BasePhysicsComponent, public CBaseNetComponent, public nwm::VelocityCorrection {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);

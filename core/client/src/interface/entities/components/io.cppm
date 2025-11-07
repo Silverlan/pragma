@@ -9,6 +9,9 @@ export module pragma.client:entities.components.io;
 export import pragma.shared;
 
 export namespace pragma {
+	namespace cIOComponent {
+		using namespace baseIOComponent;
+	}
 	class DLLCLIENT CIOComponent final : public BaseIOComponent {
 	  public:
 		CIOComponent(pragma::ecs::BaseEntity &ent) : BaseIOComponent(ent) {}

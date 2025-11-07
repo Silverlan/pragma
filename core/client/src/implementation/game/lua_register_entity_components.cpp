@@ -85,19 +85,6 @@ static bool reflection_probe_capture_ibl_reflections_from_scene(lua::State *l, p
 static bool reflection_probe_capture_ibl_reflections_from_scene(lua::State *l, pragma::CReflectionProbeComponent &hRp, bool renderJob) { return hRp.CaptureIBLReflectionsFromScene(nullptr, renderJob); }
 static bool reflection_probe_capture_ibl_reflections_from_scene(lua::State *l, pragma::CReflectionProbeComponent &hRp) { return hRp.CaptureIBLReflectionsFromScene(); }
 
-#ifdef _WIN32
-namespace pragma {
-	template<typename T>
-	    requires(std::is_same_v<T, pragma::CSoundDspChorusComponent> || std::is_same_v<T, pragma::CSoundDspDistortionComponent> || std::is_same_v<T, pragma::CSoundDspEAXReverbComponent> || std::is_same_v<T, pragma::CSoundDspEchoComponent>
-	      || std::is_same_v<T, pragma::CSoundDspEqualizerComponent> || std::is_same_v<T, pragma::CSoundDspFlangerComponent> || std::is_same_v<T, pragma::CLightDirectionalComponent> || std::is_same_v<T, pragma::CLightPointComponent> || std::is_same_v<T, pragma::CLightSpotComponent>
-	      || std::is_same_v<T, pragma::CLiquidComponent> || std::is_same_v<T, pragma::CWaterSurfaceComponent>)
-	static std::ostream &operator<<(std::ostream &os, const T &component)
-	{
-		return ::operator<<(os, static_cast<const pragma::BaseEntityComponent &>(component));
-	}
-};
-#endif
-
 static void bsp_register_class(lua::State *l, luabind::module_ &entsMod, luabind::class_<pragma::CWorldComponent, pragma::BaseWorldComponent> &defWorld)
 {
 	auto defBspTree = luabind::class_<::util::BSPTree>("BSPTree");
@@ -169,113 +156,6 @@ static void bsp_register_class(lua::State *l, luabind::module_ &entsMod, luabind
 	defBspTree.scope[defBspNode];
 	defWorld.scope[defBspTree];
 }
-
-#ifdef _WIN32
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CGamemodeComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CGameComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CInputComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CColorComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CScoreComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CFlammableComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CHealthComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CNameComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CNetworkedComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CObservableComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CObserverComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, ecs::CShooterComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CPhysicsComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CRadiusComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CFieldAngleComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CWorldComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CEyeComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CSceneComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CToggleComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CTransformComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CWheelComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CSoundDspComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CSoundDspChorusComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CSoundDspDistortionComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CSoundDspEAXReverbComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CSoundDspEchoComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CSoundDspEqualizerComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CSoundDspFlangerComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CCameraComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, COcclusionCullerComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CDecalComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CExplosionComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CFireComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CFogControllerComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CLightComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CLightDirectionalComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CLightPointComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CLightSpotComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CLightSpotVolComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CMicrophoneComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CQuakeComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CSmokeTrailComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CSoundComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CSoundScapeComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CSpriteComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CEnvTimescaleComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CWindComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CFilterClassComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CFilterNameComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CBrushComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CKinematicComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CFuncPhysicsComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CFuncSoftPhysicsComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CSurfaceComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CLiquidSurfaceComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CLiquidVolumeComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CBuoyancyComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CLiquidComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CButtonComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CBotComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CPointConstraintBallSocketComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CPointConstraintConeTwistComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CPointConstraintDoFComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CPointConstraintFixedComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CPointConstraintHingeComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CPointConstraintSliderComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CPointTargetComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CPropComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CPropDynamicComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CPropPhysicsComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CTouchComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CSkyboxComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CFlashlightComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CEnvSoundProbeComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CWeatherComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CReflectionProbeComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CSkyCameraComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CPBRConverterComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CShadowComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CShadowCSMComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CShadowManagerComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CWaterSurfaceComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CListenerComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CViewBodyComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CViewModelComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CSoftBodyComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CRaytracingComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CBSPLeafComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CIOComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CTimeScaleComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CAttachmentComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CChildComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, COwnableComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CDebugTextComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CDebugPointComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CDebugLineComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CDebugBoxComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CDebugSphereComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CDebugConeComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CDebugCylinderComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CDebugPlaneComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CPointAtTargetComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CBSPComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, CGenericComponent);
-#endif
 
 void RegisterLuaEntityComponents2_cl(lua::State *l, luabind::module_ &entsMod);
 void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)

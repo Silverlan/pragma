@@ -24,17 +24,17 @@ jobs:
             name: "Ubuntu 24.04"
     steps:
       # TODO: Remove this step once this branch has been merged!
-      - name: Download CMake 4.1.2
+      - name: Download CMake 4.2.0-rc2
         shell: bash
         if: ${{ runner.os == 'Linux' }}
         run: |
           set -euo pipefail
-          VERSION=4.1.2
+          VERSION=4.2.0-rc2
           ASSET="cmake-${VERSION}-linux-x86_64.tar.gz"
           URL="https://github.com/Kitware/CMake/releases/download/v${VERSION}/${ASSET}"
           wget --quiet --show-progress "$URL" -O "$ASSET"
           
-          VERSION=4.1.2
+          VERSION=4.2.0-rc2
           ASSET="cmake-${VERSION}-linux-x86_64.tar.gz"
           sudo rm -rf /opt/cmake-${VERSION} || true
           sudo tar -C /opt -xzf "$ASSET"

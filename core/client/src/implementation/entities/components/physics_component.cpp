@@ -20,7 +20,7 @@ void CPhysicsComponent::Initialize()
 
 #if 0
 	// TODO
-	BindEvent(CAnimatedComponent::EVENT_ON_SKELETON_UPDATED,[this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cAnimatedComponent::EVENT_ON_SKELETON_UPDATED,[this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto *phys = GetPhysicsObject();
 		if(phys != nullptr && GetPhysicsType() == pragma::physics::PHYSICSTYPE::DYNAMIC)
 		{
@@ -39,7 +39,7 @@ void CPhysicsComponent::Initialize()
 		}
 		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(CAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED,[this](std::reference_wrapper<ComponentEvent> evData) {
+	BindEventUnhandled(cAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED,[this](std::reference_wrapper<ComponentEvent> evData) {
 		auto &ent = GetEntity();
 		auto mdlComponent = ent.GetModelComponent();
 		auto animComponent = ent.GetAnimatedComponent();

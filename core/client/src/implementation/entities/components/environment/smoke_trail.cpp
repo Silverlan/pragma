@@ -36,9 +36,9 @@ util::EventReply CSmokeTrailComponent::HandleEvent(ComponentEventId eventId, Com
 {
 	if(BaseEnvSmokeTrailComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == BaseToggleComponent::EVENT_ON_TURN_ON)
+	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON)
 		InitializeParticle();
-	else if(eventId == BaseToggleComponent::EVENT_ON_TURN_OFF)
+	else if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF)
 		DestroyParticle();
 	return util::EventReply::Unhandled;
 }

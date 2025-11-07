@@ -27,6 +27,19 @@ export namespace pragma {
 	class CWorldComponent;
 };
 export namespace pragma {
+	namespace cRenderComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_UPDATE_RENDER_DATA_MT;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_RENDER_BUFFERS_INITIALIZED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_RENDER_BOUNDS_CHANGED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_RENDER_MODE_CHANGED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_SHOULD_DRAW;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_SHOULD_DRAW_SHADOW;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_UPDATE_RENDER_BUFFERS;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_UPDATE_RENDER_MATRICES;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_UPDATE_INSTANTIABILITY;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_CLIP_PLANE_CHANGED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DEPTH_BIAS_CHANGED;
+	}
 	class DLLCLIENT CRenderComponent final : public BaseRenderComponent, public CBaseNetComponent {
 	  public:
 		enum class StateFlags : uint16_t {
@@ -46,17 +59,6 @@ export namespace pragma {
 		};
 		static constexpr auto USE_HOST_MEMORY_FOR_RENDER_DATA = true;
 
-		static ComponentEventId EVENT_ON_UPDATE_RENDER_DATA_MT;
-		static ComponentEventId EVENT_ON_RENDER_BUFFERS_INITIALIZED;
-		static ComponentEventId EVENT_ON_RENDER_BOUNDS_CHANGED;
-		static ComponentEventId EVENT_ON_RENDER_MODE_CHANGED;
-		static ComponentEventId EVENT_SHOULD_DRAW;
-		static ComponentEventId EVENT_SHOULD_DRAW_SHADOW;
-		static ComponentEventId EVENT_ON_UPDATE_RENDER_BUFFERS;
-		static ComponentEventId EVENT_ON_UPDATE_RENDER_MATRICES;
-		static ComponentEventId EVENT_UPDATE_INSTANTIABILITY;
-		static ComponentEventId EVENT_ON_CLIP_PLANE_CHANGED;
-		static ComponentEventId EVENT_ON_DEPTH_BIAS_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);

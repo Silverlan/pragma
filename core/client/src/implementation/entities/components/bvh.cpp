@@ -24,7 +24,7 @@ void CBvhComponent::Initialize()
 {
 	BaseBvhComponent::Initialize();
 
-	BindEventUnhandled(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		if(static_cast<CEOnRenderMeshesUpdated &>(evData.get()).requireBoundingVolumeUpdate)
 			RebuildBvh();
 	});

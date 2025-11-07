@@ -3,7 +3,6 @@
 
 module;
 
-#include "sharedutils/BS_thread_pool.hpp"
 #include <bvh/v2/default_builder.h>
 #include <bvh/v2/stack.h>
 
@@ -20,7 +19,7 @@ using namespace pragma;
 static spdlog::logger &LOGGER = pragma::register_logger("bvh");
 
 static std::shared_ptr<pragma::bvh::HitboxBvhCache> g_hbBvhCache {};
-static std::unique_ptr<BS::thread_pool> g_hbThreadPool {};
+static std::unique_ptr<BS::light_thread_pool> g_hbThreadPool {};
 static size_t g_hbBvhCount = 0;
 
 pragma::bvh::HitboxBvhCache::HitboxBvhCache(pragma::Game &game) : m_game {game} {}
@@ -98,7 +97,7 @@ std::shared_future<void> pragma::bvh::HitboxBvhCache::GenerateModelCache(const M
 CHitboxBvhComponent::CHitboxBvhComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent)
 {
 	if(g_hbBvhCount++ == 0) {
-		g_hbThreadPool = std::make_unique<BS::thread_pool>(10);
+		g_hbThreadPool = std::make_unique<BS::light_thread_pool>(10);
 		g_hbBvhCache = std::make_shared<pragma::bvh::HitboxBvhCache>(GetGame());
 	}
 }
@@ -124,9 +123,9 @@ void CHitboxBvhComponent::Initialize()
 	auto animC = GetEntity().AddComponent<CAnimatedComponent>();
 	if(animC.valid())
 		animC->SetSkeletonUpdateCallbacksEnabled(true);
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnModelChanged(); });
-	BindEventUnhandled(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { InitializeHitboxMeshBvhs(); });
-	BindEventUnhandled(CAnimatedComponent::EVENT_ON_SKELETON_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateHitboxBvh(); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnModelChanged(); });
+	BindEventUnhandled(cModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { InitializeHitboxMeshBvhs(); });
+	BindEventUnhandled(cAnimatedComponent::EVENT_ON_SKELETON_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateHitboxBvh(); });
 
 	auto intersectionHandlerC = GetEntity().AddComponent<IntersectionHandlerComponent>();
 	if(intersectionHandlerC.valid()) {

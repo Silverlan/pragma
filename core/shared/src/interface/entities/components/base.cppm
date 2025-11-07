@@ -67,17 +67,7 @@ export {
 		};
 
 		template<typename... Args>
-#ifdef _WIN32
-
-#if __cpp_lib_format >= 202207L
-		using format_string_t = std::format_string<Args...>;
-#else
-		using format_string_t = std::string_view;
-#endif
-
-#else
-		using format_string_t = std::string_view;
-#endif
+		using format_string_t = spdlog::format_string_t<Args...>;
 
 		namespace baseEntityComponent {
 			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ENTITY_COMPONENT_ADDED;

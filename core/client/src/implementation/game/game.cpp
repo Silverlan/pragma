@@ -75,13 +75,13 @@ CGame::CGame(NetworkState *state)
       //m_shaderOverride(nullptr), // prosper TODO
       m_matLoad(), m_scene(nullptr),
       /*m_dummyVertexBuffer(nullptr),*/ m_tLastClientUpdate(0.0), // prosper TODO
-      m_snapshotTracker {}, m_userInputTracker {}, m_viewFov {util::FloatProperty::Create(pragma::BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV)}, m_luaInputBindingLayerRegister {std::make_unique<pragma::LuaCoreInputBindingLayerRegister>()}
+      m_snapshotTracker {}, m_userInputTracker {}, m_viewFov {util::FloatProperty::Create(pragma::BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV)}, m_luaInputBindingLayerRegister {std::make_unique<pragma::LuaInputBindingLayerRegister>()}
 {
 	std::fill(m_renderModesEnabled.begin(), m_renderModesEnabled.end(), true);
 	g_game = this;
 
-	m_luaShaderManager = std::make_shared<pragma::LuaCoreShaderManager>();
-	m_luaParticleModifierManager = std::make_shared<pragma::LuaCoreParticleModifierManager>();
+	m_luaShaderManager = std::make_shared<pragma::LuaShaderManager>();
+	m_luaParticleModifierManager = std::make_shared<pragma::LuaParticleModifierManager>();
 
 	umath::set_flag(m_stateFlags, StateFlags::PrepassShaderPipelineReloadRequired, false);
 	umath::set_flag(m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired, false);
@@ -930,9 +930,9 @@ WIBase *CGame::CreateGUIElement(std::string name, WIHandle *hParent)
 	return CreateGUIElement(name, pParent);
 }
 LuaGUIManager &CGame::GetLuaGUIManager() { return m_luaGUIElements; }
-pragma::LuaCoreShaderManager &CGame::GetLuaShaderManager() { return *m_luaShaderManager; }
+pragma::LuaShaderManager &CGame::GetLuaShaderManager() { return *m_luaShaderManager; }
 pragma::cxxm_LuaParticleModifierManager &CGame::GetLuaParticleModifierManager() { return *static_cast<pragma::cxxm_LuaParticleModifierManager *>(m_luaParticleModifierManager.get()); }
-pragma::LuaCoreInputBindingLayerRegister &CGame::GetLuaInputBindingLayerRegister() { return *m_luaInputBindingLayerRegister; }
+pragma::LuaInputBindingLayerRegister &CGame::GetLuaInputBindingLayerRegister() { return *m_luaInputBindingLayerRegister; }
 
 void CGame::SetUp()
 {

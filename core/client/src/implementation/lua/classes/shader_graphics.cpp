@@ -402,9 +402,9 @@ void Lua::GraphicsPipelineCreateInfo::IsDepthClampEnabled(lua::State *l, prosper
 void Lua::GraphicsPipelineCreateInfo::IsPrimitiveRestartEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { Lua::PushBool(l, pipelineInfo.IsPrimitiveRestartEnabled()); }
 void Lua::GraphicsPipelineCreateInfo::IsRasterizerDiscardEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { Lua::PushBool(l, pipelineInfo.IsRasterizerDiscardEnabled()); }
 void Lua::GraphicsPipelineCreateInfo::IsSampleMaskEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { Lua::PushBool(l, pipelineInfo.IsSampleMaskEnabled()); }
-void Lua::Shader::Graphics::AttachVertexAttribute(lua::State *l, pragma::LuaCoreShaderWrapperGraphicsBase &shader, const pragma::LuaCoreVertexBinding &binding, luabind::object attributes)
+void Lua::Shader::Graphics::AttachVertexAttribute(lua::State *l, pragma::LuaShaderWrapperGraphicsBase &shader, const pragma::LuaVertexBinding &binding, luabind::object attributes)
 {
-	auto vertexAttributes = Lua::get_table_values<pragma::LuaCoreVertexAttribute>(l, 3u, [](lua::State *l, int32_t idx) { return Lua::Check<pragma::LuaCoreVertexAttribute>(l, idx); });
+	auto vertexAttributes = Lua::get_table_values<pragma::LuaVertexAttribute>(l, 3u, [](lua::State *l, int32_t idx) { return Lua::Check<pragma::LuaVertexAttribute>(l, idx); });
 	shader.AttachVertexAttribute(binding, vertexAttributes);
 }
 void Lua::GraphicsPipelineCreateInfo::AddSpecializationConstant(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t shaderStage, uint32_t constantId, ::util::DataStream &ds)

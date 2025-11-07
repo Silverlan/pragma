@@ -9,10 +9,13 @@ export module pragma.client:entities.components.observer;
 export import :entities.components.entity;
 
 export namespace pragma {
-	class DLLCLIENT CObserverComponent final : public BaseObserverComponent, public CBaseNetComponent {
+		namespace cObserverComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_VIEW;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_VIEW_OFFSET;
+	}
+class DLLCLIENT CObserverComponent final : public BaseObserverComponent, public CBaseNetComponent {
 	  public:
-		static ComponentEventId EVENT_CALC_VIEW;
-		static ComponentEventId EVENT_CALC_VIEW_OFFSET;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		CObserverComponent(pragma::ecs::BaseEntity &ent);

@@ -4,7 +4,6 @@
 module;
 
 #include <bvh/v2/stream.h>
-#include <sharedutils/BS_thread_pool.hpp>
 
 module pragma.client;
 
@@ -155,7 +154,7 @@ static void serialize(pragma::Model &mdl, const std::string &boneName, pragma::b
 	bvh.serialize(outputStream);
 }
 
-pragma::bvh::HitboxMeshBvhBuildTask::HitboxMeshBvhBuildTask(BS::thread_pool &threadPool) : m_threadPool {threadPool} {}
+pragma::bvh::HitboxMeshBvhBuildTask::HitboxMeshBvhBuildTask(BS::light_thread_pool &threadPool) : m_threadPool {threadPool} {}
 
 bool pragma::bvh::HitboxMeshBvhBuildTask::Build(pragma::Model &mdl)
 {

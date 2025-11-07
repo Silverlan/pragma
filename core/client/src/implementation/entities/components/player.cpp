@@ -57,7 +57,7 @@ CPlayerComponent::CPlayerComponent(pragma::ecs::BaseEntity &ent) : BasePlayerCom
 {
 	s_players.push_back(this);
 
-	BindEventUnhandled(SubmergibleComponent::EVENT_ON_WATER_SUBMERGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_SUBMERGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ent = GetEntity();
 		auto pSoundEmitterComponent = ent.GetComponent<CSoundEmitterComponent>();
 		if(pSoundEmitterComponent.valid()) {
@@ -71,7 +71,7 @@ CPlayerComponent::CPlayerComponent(pragma::ecs::BaseEntity &ent) : BasePlayerCom
 			}
 		}
 	});
-	BindEventUnhandled(SubmergibleComponent::EVENT_ON_WATER_EMERGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_EMERGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		if(m_sndUnderwater != nullptr)
 			m_sndUnderwater->FadeOut(0.1f);
 	});
@@ -116,11 +116,11 @@ util::EventReply CPlayerComponent::HandleEvent(ComponentEventId eventId, Compone
 {
 	if(BasePlayerComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == BaseCharacterComponent::EVENT_ON_DEPLOY_WEAPON)
+	if(eventId == baseCharacterComponent::EVENT_ON_DEPLOY_WEAPON)
 		OnDeployWeapon(static_cast<const CEOnDeployWeapon &>(evData).weapon);
-	else if(eventId == BaseCharacterComponent::EVENT_ON_SET_ACTIVE_WEAPON)
+	else if(eventId == baseCharacterComponent::EVENT_ON_SET_ACTIVE_WEAPON)
 		OnSetActiveWeapon(static_cast<const CEOnSetActiveWeapon &>(evData).weapon);
-	else if(eventId == BaseCharacterComponent::EVENT_ON_CHARACTER_ORIENTATION_CHANGED)
+	else if(eventId == baseCharacterComponent::EVENT_ON_CHARACTER_ORIENTATION_CHANGED)
 		OnSetCharacterOrientation(static_cast<const CEOnSetCharacterOrientation &>(evData).up);
 	return util::EventReply::Unhandled;
 }
@@ -224,9 +224,9 @@ void CPlayerComponent::Initialize()
 {
 	BasePlayerComponent::Initialize();
 
-	BindEventUnhandled(SubmergibleComponent::EVENT_ON_WATER_SUBMERGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnWaterSubmerged(); });
-	BindEventUnhandled(SubmergibleComponent::EVENT_ON_WATER_EMERGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnWaterEmerged(); });
-	BindEvent(CRenderComponent::EVENT_SHOULD_DRAW_SHADOW, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_SUBMERGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnWaterSubmerged(); });
+	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_EMERGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnWaterEmerged(); });
+	BindEvent(cRenderComponent::EVENT_SHOULD_DRAW_SHADOW, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &shouldDrawData = static_cast<CEShouldDraw &>(evData.get());
 		if(ShouldDrawShadow() == false) {
 			shouldDrawData.shouldDraw = false;
@@ -234,7 +234,7 @@ void CPlayerComponent::Initialize()
 		}
 		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnUpdateMatrices(static_cast<CEOnUpdateRenderMatrices &>(evData.get()).transformation); });
+	BindEventUnhandled(cRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnUpdateMatrices(static_cast<CEOnUpdateRenderMatrices &>(evData.get()).transformation); });
 
 	auto &ent = static_cast<CBaseEntity &>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();

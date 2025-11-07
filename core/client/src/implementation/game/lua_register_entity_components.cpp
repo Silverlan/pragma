@@ -430,7 +430,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	// defCEye.add_static_constant("EVENT_ON_BLINK",pragma::CEyeComponent::EVENT_ON_BLINK);
 	entsMod[defCEye];
 
-	pragma::scripting::lua::bindings::register_renderers(l, entsMod);
+	pragma::scripting::lua_core::bindings::register_renderers(l, entsMod);
 
 	auto defCScene = pragma::LuaCore::create_entity_component_class<pragma::CSceneComponent, pragma::BaseEntityComponent>("SceneComponent");
 	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_BRUTE_FORCE", umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::BruteForce));
@@ -438,8 +438,8 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_BSP", umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::BSP));
 	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_OCTREE", umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::Octree));
 	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_INERT", umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::Inert));
-	defCScene.add_static_constant("EVENT_ON_ACTIVE_CAMERA_CHANGED", pragma::CSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED);
-	defCScene.add_static_constant("EVENT_ON_RENDERER_CHANGED", pragma::CSceneComponent::EVENT_ON_RENDERER_CHANGED);
+	defCScene.add_static_constant("EVENT_ON_ACTIVE_CAMERA_CHANGED", pragma::cSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED);
+	defCScene.add_static_constant("EVENT_ON_RENDERER_CHANGED", pragma::cSceneComponent::EVENT_ON_RENDERER_CHANGED);
 	defCScene.add_static_constant("DEBUG_MODE_NONE", umath::to_integral(pragma::SceneDebugMode::None));
 	defCScene.add_static_constant("DEBUG_MODE_AMBIENT_OCCLUSION", umath::to_integral(pragma::SceneDebugMode::AmbientOcclusion));
 	defCScene.add_static_constant("DEBUG_MODE_ALBEDO", umath::to_integral(pragma::SceneDebugMode::Albedo));
@@ -530,7 +530,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defCToggle];
 
 	auto defCTransform = pragma::LuaCore::create_entity_component_class<pragma::CTransformComponent, pragma::BaseTransformComponent>("TransformComponent");
-	defCTransform.add_static_constant("EVENT_ON_POSE_CHANGED", pragma::CTransformComponent::EVENT_ON_POSE_CHANGED);
+	defCTransform.add_static_constant("EVENT_ON_POSE_CHANGED", pragma::cTransformComponent::EVENT_ON_POSE_CHANGED);
 	entsMod[defCTransform];
 
 	auto defCWheel = pragma::LuaCore::create_entity_component_class<pragma::CWheelComponent, pragma::BaseWheelComponent>("WheelComponent");
@@ -590,13 +590,13 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCLight.add_static_constant("SHADOW_TYPE_STATIC_ONLY", umath::to_integral(ShadowType::StaticOnly));
 	defCLight.add_static_constant("SHADOW_TYPE_FULL", umath::to_integral(ShadowType::Full));
 
-	defCLight.add_static_constant("EVENT_SHOULD_PASS_ENTITY", pragma::CLightComponent::EVENT_SHOULD_PASS_ENTITY);
-	defCLight.add_static_constant("EVENT_SHOULD_PASS_ENTITY_MESH", pragma::CLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH);
-	defCLight.add_static_constant("EVENT_SHOULD_PASS_MESH", pragma::CLightComponent::EVENT_SHOULD_PASS_MESH);
-	defCLight.add_static_constant("EVENT_SHOULD_UPDATE_RENDER_PASS", pragma::CLightComponent::EVENT_SHOULD_UPDATE_RENDER_PASS);
-	defCLight.add_static_constant("EVENT_GET_TRANSFORMATION_MATRIX", pragma::CLightComponent::EVENT_GET_TRANSFORMATION_MATRIX);
-	defCLight.add_static_constant("EVENT_HANDLE_SHADOW_MAP", pragma::CLightComponent::EVENT_HANDLE_SHADOW_MAP);
-	defCLight.add_static_constant("EVENT_ON_SHADOW_BUFFER_INITIALIZED", pragma::CLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED);
+	defCLight.add_static_constant("EVENT_SHOULD_PASS_ENTITY", pragma::cLightComponent::EVENT_SHOULD_PASS_ENTITY);
+	defCLight.add_static_constant("EVENT_SHOULD_PASS_ENTITY_MESH", pragma::cLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH);
+	defCLight.add_static_constant("EVENT_SHOULD_PASS_MESH", pragma::cLightComponent::EVENT_SHOULD_PASS_MESH);
+	defCLight.add_static_constant("EVENT_SHOULD_UPDATE_RENDER_PASS", pragma::cLightComponent::EVENT_SHOULD_UPDATE_RENDER_PASS);
+	defCLight.add_static_constant("EVENT_GET_TRANSFORMATION_MATRIX", pragma::cLightComponent::EVENT_GET_TRANSFORMATION_MATRIX);
+	defCLight.add_static_constant("EVENT_HANDLE_SHADOW_MAP", pragma::cLightComponent::EVENT_HANDLE_SHADOW_MAP);
+	defCLight.add_static_constant("EVENT_ON_SHADOW_BUFFER_INITIALIZED", pragma::cLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED);
 	entsMod[defCLight];
 
 	auto defCLightDirectional = pragma::LuaCore::create_entity_component_class<pragma::CLightDirectionalComponent, pragma::BaseEnvLightDirectionalComponent>("LightDirectionalComponent");

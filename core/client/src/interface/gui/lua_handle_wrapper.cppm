@@ -7,7 +7,7 @@ module;
 
 export module pragma.client:gui.lua_handle_wrapper;
 
-export import luabind;
+export import pragma.lua;
 export import pragma.gui;
 
 export class DLLCLIENT WILuaHandleWrapper {

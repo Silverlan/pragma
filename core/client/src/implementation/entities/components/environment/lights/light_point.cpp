@@ -21,7 +21,7 @@ CLightPointComponent::CLightPointComponent(pragma::ecs::BaseEntity &ent) : BaseE
 void CLightPointComponent::Initialize()
 {
 	BaseEnvLightPointComponent::Initialize();
-	BindEvent(CLightComponent::EVENT_SHOULD_PASS_ENTITY, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cLightComponent::EVENT_SHOULD_PASS_ENTITY, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &shouldPassData = static_cast<CEShouldPassEntity &>(evData.get());
 		auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
 		if(pLightComponent.expired() || pLightComponent->IsInRange(shouldPassData.entity) == false) {
@@ -51,22 +51,22 @@ void CLightPointComponent::Initialize()
 		shouldPassData.shouldPass = (shouldPassData.renderFlags != 0) ? true : false;
 		return util::EventReply::Handled;
 	});
-	BindEvent(CLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &shouldPassData = static_cast<CEShouldPassEntityMesh &>(evData.get());
 		auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
 		shouldPassData.shouldPass = pLightComponent.valid() && pLightComponent->IsInRange(shouldPassData.entity, shouldPassData.mesh);
 		return util::EventReply::Handled;
 	});
-	BindEvent(CLightComponent::EVENT_GET_TRANSFORMATION_MATRIX, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cLightComponent::EVENT_GET_TRANSFORMATION_MATRIX, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &trData = static_cast<CEGetTransformationMatrix &>(evData.get());
 		trData.transformation = &MVPBias<6>::GetTransformationMatrix(trData.index);
 		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(CLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED, [this](std::reference_wrapper<ComponentEvent> evData) {
+	BindEventUnhandled(cLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		for(auto i = 0; i < 6; i++)
 			UpdateTransformationMatrix(i);
 	});
-	BindEvent(CLightComponent::EVENT_HANDLE_SHADOW_MAP, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cLightComponent::EVENT_HANDLE_SHADOW_MAP, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto shadowC = GetEntity().AddComponent<CShadowComponent>(true);
 		if(shadowC.expired())
 			return util::EventReply::Unhandled;
@@ -74,7 +74,7 @@ void CLightPointComponent::Initialize()
 		shadowC->SetType(CShadowComponent::Type::Cube);
 		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(CRadiusComponent::EVENT_ON_RADIUS_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateFrustumPlanes(); });
+	BindEventUnhandled(cRadiusComponent::EVENT_ON_RADIUS_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateFrustumPlanes(); });
 
 	m_bSkipMatrixUpdate = true;
 	UpdateProjectionMatrix();
@@ -129,7 +129,7 @@ void CLightPointComponent::OnEntityComponentAdded(BaseEntityComponent &component
 	}
 	else if(typeid(component) == typeid(CTransformComponent)) {
 		auto &trC = static_cast<CTransformComponent &>(component);
-		FlagCallbackForRemoval(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,
+		FlagCallbackForRemoval(trC.AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
 		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			                         if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged) == false)
 				                         return util::EventReply::Unhandled;

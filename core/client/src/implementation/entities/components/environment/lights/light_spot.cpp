@@ -18,13 +18,13 @@ void CLightSpotComponent::Initialize()
 {
 	BaseEnvLightSpotComponent::Initialize();
 
-	BindEvent(CLightComponent::EVENT_GET_TRANSFORMATION_MATRIX, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cLightComponent::EVENT_GET_TRANSFORMATION_MATRIX, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &trData = static_cast<CEGetTransformationMatrix &>(evData.get());
 		trData.transformation = &MVPBias<1>::GetTransformationMatrix(trData.index);
 		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(CLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateTransformMatrix(); });
-	BindEventUnhandled(CRadiusComponent::EVENT_ON_RADIUS_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
+	BindEventUnhandled(cLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateTransformMatrix(); });
+	BindEventUnhandled(cRadiusComponent::EVENT_ON_RADIUS_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		SetShadowDirty();
 		UpdateProjectionMatrix();
 	});
@@ -90,7 +90,7 @@ void CLightSpotComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 		static_cast<CLightComponent &>(component).SetLight(*this);
 	else if(typeid(component) == typeid(CTransformComponent)) {
 		auto &trC = static_cast<CTransformComponent &>(component);
-		FlagCallbackForRemoval(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,
+		FlagCallbackForRemoval(trC.AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
 		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			                         if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged | pragma::TransformChangeFlags::RotationChanged) == false)
 				                         return util::EventReply::Unhandled;

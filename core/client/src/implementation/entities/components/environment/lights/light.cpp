@@ -32,22 +32,22 @@ prosper::IUniformResizableBuffer &CLightComponent::GetGlobalShadowBuffer() { ret
 uint32_t CLightComponent::GetMaxLightCount() { return pragma::LightDataBufferManager::GetInstance().GetMaxCount(); }
 uint32_t CLightComponent::GetMaxShadowCount() { return pragma::ShadowDataBufferManager::GetInstance().GetMaxCount(); }
 uint32_t CLightComponent::GetLightCount() { return s_lightCount; }
-ComponentEventId CLightComponent::EVENT_SHOULD_PASS_ENTITY = pragma::INVALID_COMPONENT_ID;
-ComponentEventId CLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH = pragma::INVALID_COMPONENT_ID;
-ComponentEventId CLightComponent::EVENT_SHOULD_PASS_MESH = pragma::INVALID_COMPONENT_ID;
-ComponentEventId CLightComponent::EVENT_SHOULD_UPDATE_RENDER_PASS = pragma::INVALID_COMPONENT_ID;
-ComponentEventId CLightComponent::EVENT_GET_TRANSFORMATION_MATRIX = pragma::INVALID_COMPONENT_ID;
-ComponentEventId CLightComponent::EVENT_HANDLE_SHADOW_MAP = pragma::INVALID_COMPONENT_ID;
-ComponentEventId CLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId cLightComponent::EVENT_SHOULD_PASS_ENTITY = pragma::INVALID_COMPONENT_ID;
+ComponentEventId cLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH = pragma::INVALID_COMPONENT_ID;
+ComponentEventId cLightComponent::EVENT_SHOULD_PASS_MESH = pragma::INVALID_COMPONENT_ID;
+ComponentEventId cLightComponent::EVENT_SHOULD_UPDATE_RENDER_PASS = pragma::INVALID_COMPONENT_ID;
+ComponentEventId cLightComponent::EVENT_GET_TRANSFORMATION_MATRIX = pragma::INVALID_COMPONENT_ID;
+ComponentEventId cLightComponent::EVENT_HANDLE_SHADOW_MAP = pragma::INVALID_COMPONENT_ID;
+ComponentEventId cLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED = pragma::INVALID_COMPONENT_ID;
 void CLightComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_SHOULD_PASS_ENTITY = registerEvent("SHOULD_PASS_ENTITY", ComponentEventInfo::Type::Explicit);
-	EVENT_SHOULD_PASS_ENTITY_MESH = registerEvent("SHOULD_PASS_ENTITY_MESH", ComponentEventInfo::Type::Explicit);
-	EVENT_SHOULD_PASS_MESH = registerEvent("SHOULD_PASS_MESH", ComponentEventInfo::Type::Explicit);
-	EVENT_SHOULD_UPDATE_RENDER_PASS = registerEvent("SHOULD_UPDATE_RENDER_PASS", ComponentEventInfo::Type::Explicit);
-	EVENT_GET_TRANSFORMATION_MATRIX = registerEvent("GET_TRANSFORMATION_MATRIX", ComponentEventInfo::Type::Explicit);
-	EVENT_HANDLE_SHADOW_MAP = registerEvent("HANDLE_SHADOW_MAP", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_SHADOW_BUFFER_INITIALIZED = registerEvent("ON_SHADOW_BUFFER_INITIALIZED", ComponentEventInfo::Type::Broadcast);
+	cLightComponent::EVENT_SHOULD_PASS_ENTITY = registerEvent("SHOULD_PASS_ENTITY", ComponentEventInfo::Type::Explicit);
+	cLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH = registerEvent("SHOULD_PASS_ENTITY_MESH", ComponentEventInfo::Type::Explicit);
+	cLightComponent::EVENT_SHOULD_PASS_MESH = registerEvent("SHOULD_PASS_MESH", ComponentEventInfo::Type::Explicit);
+	cLightComponent::EVENT_SHOULD_UPDATE_RENDER_PASS = registerEvent("SHOULD_UPDATE_RENDER_PASS", ComponentEventInfo::Type::Explicit);
+	cLightComponent::EVENT_GET_TRANSFORMATION_MATRIX = registerEvent("GET_TRANSFORMATION_MATRIX", ComponentEventInfo::Type::Explicit);
+	cLightComponent::EVENT_HANDLE_SHADOW_MAP = registerEvent("HANDLE_SHADOW_MAP", ComponentEventInfo::Type::Broadcast);
+	cLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED = registerEvent("ON_SHADOW_BUFFER_INITIALIZED", ComponentEventInfo::Type::Broadcast);
 }
 void CLightComponent::InitializeBuffers()
 {
@@ -370,7 +370,7 @@ void CLightComponent::Initialize()
 	auto &ent = static_cast<CBaseEntity &>(GetEntity());
 	ent.AddComponent<CShadowComponent>();
 
-	BindEventUnhandled(BaseToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<ComponentEvent> evData) {
+	BindEventUnhandled(baseToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<ComponentEvent> evData) {
 		umath::set_flag(m_bufferData.flags, LightBufferData::BufferFlags::TurnedOn, true);
 		if(m_renderBuffer != nullptr)
 			pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), m_bufferData.flags);
@@ -384,7 +384,7 @@ void CLightComponent::Initialize()
 
 		(pragma::TickPolicy::Never);
 	});
-	BindEventUnhandled(BaseToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<ComponentEvent> evData) {
+	BindEventUnhandled(baseToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<ComponentEvent> evData) {
 		umath::set_flag(m_bufferData.flags, LightBufferData::BufferFlags::TurnedOn, false);
 		if(m_renderBuffer != nullptr)
 			pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), m_bufferData.flags);
@@ -393,7 +393,7 @@ void CLightComponent::Initialize()
 		SetTickPolicy(pragma::TickPolicy::Always);
 		SetNextTick(pragma::get_cgame()->CurTime() + 30.f);
 	});
-	BindEventUnhandled(CBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
+	BindEventUnhandled(cBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		m_bufferData.sceneFlags = static_cast<CBaseEntity &>(GetEntity()).GetSceneFlags();
 		if(m_renderBuffer != nullptr)
 			pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, sceneFlags), m_bufferData.sceneFlags);
@@ -497,7 +497,7 @@ void CLightComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	CBaseLightComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(CTransformComponent)) {
 		auto &trC = static_cast<CTransformComponent &>(component);
-		FlagCallbackForRemoval(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,
+		FlagCallbackForRemoval(trC.AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
 		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			                         if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged))
 				                         UpdatePos();

@@ -92,7 +92,7 @@ util::EventReply CBaseSoundDspComponent::HandleEvent(ComponentEventId eventId, C
 {
 	if(BaseEnvSoundDspComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == BaseToggleComponent::EVENT_ON_TURN_OFF)
+	if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF)
 		DetachAllSoundSources();
 	return util::EventReply::Unhandled;
 }

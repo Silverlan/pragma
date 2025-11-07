@@ -15,13 +15,18 @@ export namespace pragma {
 	void clear_articulated_buffers();
 	const std::shared_ptr<prosper::IUniformResizableBuffer> &get_instance_bone_buffer();
 
-	class DLLCLIENT CAnimatedComponent final : public BaseAnimatedComponent, public CBaseNetComponent {
+		namespace cAnimatedComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SKELETON_UPDATED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BONE_MATRICES_UPDATED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BONE_BUFFER_INITIALIZED;
+	}
+	namespace cAnimatedComponent {
+		using namespace baseAnimatedComponent;
+	}
+class DLLCLIENT CAnimatedComponent final : public BaseAnimatedComponent, public CBaseNetComponent {
 	  public:
 		enum class StateFlags : uint8_t { None = 0u, BoneBufferDirty = 1u, EnableSkeletonUpdateCallbacks = BoneBufferDirty << 1u };
 
-		static ComponentEventId EVENT_ON_SKELETON_UPDATED;
-		static ComponentEventId EVENT_ON_BONE_MATRICES_UPDATED;
-		static ComponentEventId EVENT_ON_BONE_BUFFER_INITIALIZED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 

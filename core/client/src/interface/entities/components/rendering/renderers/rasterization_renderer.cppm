@@ -131,33 +131,34 @@ export namespace pragma {
 		float bloomThreshold = 1.f;
 	};
 
-	class DLLCLIENT CRasterizationRendererComponent final : public BaseEntityComponent {
+		namespace cRasterizationRendererComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_RECORD_PREPASS;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_RECORD_LIGHTING_PASS;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_PRE_EXECUTE_PREPASS;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_POST_EXECUTE_PREPASS;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_PRE_EXECUTE_LIGHTING_PASS;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_POST_EXECUTE_LIGHTING_PASS;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_PRE_PREPASS;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_POST_PREPASS;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_PRE_LIGHTING_PASS;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_POST_LIGHTING_PASS;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_UPDATE_RENDER_BUFFERS;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_MT_BEGIN_RECORD_SKYBOX;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_MT_END_RECORD_SKYBOX;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_MT_BEGIN_RECORD_WORLD;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_MT_END_RECORD_WORLD;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_MT_BEGIN_RECORD_PARTICLES;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_MT_END_RECORD_PARTICLES;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_MT_BEGIN_RECORD_DEBUG;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_MT_END_RECORD_DEBUG;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_MT_BEGIN_RECORD_WATER;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_MT_END_RECORD_WATER;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_MT_BEGIN_RECORD_VIEW;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_MT_END_RECORD_VIEW;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_MT_BEGIN_RECORD_PREPASS;
+	}
+class DLLCLIENT CRasterizationRendererComponent final : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_ON_RECORD_PREPASS;
-		static ComponentEventId EVENT_ON_RECORD_LIGHTING_PASS;
-		static ComponentEventId EVENT_PRE_EXECUTE_PREPASS;
-		static ComponentEventId EVENT_POST_EXECUTE_PREPASS;
-		static ComponentEventId EVENT_PRE_EXECUTE_LIGHTING_PASS;
-		static ComponentEventId EVENT_POST_EXECUTE_LIGHTING_PASS;
-		static ComponentEventId EVENT_PRE_PREPASS;
-		static ComponentEventId EVENT_POST_PREPASS;
-		static ComponentEventId EVENT_PRE_LIGHTING_PASS;
-		static ComponentEventId EVENT_POST_LIGHTING_PASS;
-		static ComponentEventId EVENT_UPDATE_RENDER_BUFFERS;
-
-		static ComponentEventId EVENT_MT_BEGIN_RECORD_SKYBOX;
-		static ComponentEventId EVENT_MT_END_RECORD_SKYBOX;
-		static ComponentEventId EVENT_MT_BEGIN_RECORD_WORLD;
-		static ComponentEventId EVENT_MT_END_RECORD_WORLD;
-		static ComponentEventId EVENT_MT_BEGIN_RECORD_PARTICLES;
-		static ComponentEventId EVENT_MT_END_RECORD_PARTICLES;
-		static ComponentEventId EVENT_MT_BEGIN_RECORD_DEBUG;
-		static ComponentEventId EVENT_MT_END_RECORD_DEBUG;
-		static ComponentEventId EVENT_MT_BEGIN_RECORD_WATER;
-		static ComponentEventId EVENT_MT_END_RECORD_WATER;
-		static ComponentEventId EVENT_MT_BEGIN_RECORD_VIEW;
-		static ComponentEventId EVENT_MT_END_RECORD_VIEW;
-		static ComponentEventId EVENT_MT_BEGIN_RECORD_PREPASS;
 
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 

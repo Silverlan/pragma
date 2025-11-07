@@ -10,7 +10,7 @@ import :engine;
 
 void Lua::Entity::Client::register_class(luabind::class_<CBaseEntity, pragma::ecs::BaseEntity> &classDef)
 {
-	classDef.add_static_constant("EVENT_ON_SCENE_FLAGS_CHANGED", CBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED);
+	classDef.add_static_constant("EVENT_ON_SCENE_FLAGS_CHANGED", cBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED);
 	classDef.def("IsClientsideOnly", &CBaseEntity::IsClientsideOnly);
 	classDef.def("GetClientIndex", &CBaseEntity::GetClientIndex);
 	classDef.def("SendNetEvent", static_cast<void (*)(lua::State *, CBaseEntity &, nwm::Protocol, unsigned int, const ::NetPacket &)>(&SendNetEvent));

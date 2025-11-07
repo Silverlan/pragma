@@ -185,7 +185,7 @@ LightShadowRenderer::LightShadowRenderer(CLightComponent &l) : m_hLight {l.GetHa
 		for(auto &renderQueue : m_renderQueues)
 			renderQueue->Clear();
 	}));
-	m_cbOnSceneFlagsChanged = m_hLight->BindEventUnhandled(CBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED, [this, &ent](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateSceneCallbacks(); });
+	m_cbOnSceneFlagsChanged = m_hLight->BindEventUnhandled(cBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED, [this, &ent](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateSceneCallbacks(); });
 	// TODO: Render shadows AFTER prepass and BEFORE lighting pass
 	UpdateSceneCallbacks();
 }
@@ -218,14 +218,14 @@ void LightShadowRenderer::UpdateSceneCallbacks()
 	auto scenes = static_cast<CBaseEntity&>(m_hLight->GetEntity()).GetScenes();
 	for(auto *scene : scenes)
 	{
-		scene->AddEventCallback(CSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		scene->AddEventCallback(cSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			// TODO?
 			/// TODO: Only if in list of culled light sources
 			/// TODO: Seperate thread? (Or build AFTER prepass world)
 			//BuildRenderQueues(static_cast<CEDrawSceneInfo&>(evData.get()).drawSceneInfo);
 			return util::EventReply::Unhandled;
 		});
-		scene->AddEventCallback(CSceneComponent::EVENT_POST_RENDER_PREPASS,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		scene->AddEventCallback(cSceneComponent::EVENT_POST_RENDER_PREPASS,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			// TODO?
 			/// TODO: Only if in list of culled light sources
 			//Render(static_cast<CEDrawSceneInfo&>(evData.get()).drawSceneInfo);

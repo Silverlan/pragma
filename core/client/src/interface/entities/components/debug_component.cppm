@@ -48,8 +48,8 @@ export namespace pragma {
 		auto &ent = this->GetEntity();
 		ent.template AddComponent<LogicComponent>();
 
-		this->BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ReloadDebugObject(); });
-		this->BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ReloadDebugObject(); });
+		this->BindEventUnhandled(cToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ReloadDebugObject(); });
+		this->BindEventUnhandled(cToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ReloadDebugObject(); });
 	}
 	template<class TBaseComponent>
 	void TCBaseDebugComponent<TBaseComponent>::OnEntitySpawn()
@@ -103,7 +103,7 @@ export namespace pragma {
 			if(m_poseCallback.IsValid())
 				m_poseCallback.Remove();
 			auto &trC = static_cast<CTransformComponent &>(component);
-			m_poseCallback = trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED, [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			m_poseCallback = trC.AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED, [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 				if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged) == false)
 					return util::EventReply::Unhandled;
 				if(m_debugObject != nullptr)

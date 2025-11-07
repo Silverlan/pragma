@@ -52,9 +52,9 @@ util::EventReply CSpriteComponent::HandleEvent(ComponentEventId eventId, Compone
 {
 	if(BaseEnvSpriteComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == BaseToggleComponent::EVENT_ON_TURN_ON)
+	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON)
 		StartParticle();
-	else if(eventId == BaseToggleComponent::EVENT_ON_TURN_OFF)
+	else if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF)
 		StopParticle();
 	return util::EventReply::Unhandled;
 }

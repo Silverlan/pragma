@@ -4,7 +4,6 @@
 module;
 
 
-#include <sharedutils/BS_thread_pool.hpp>
 
 module pragma.client;
 
@@ -19,7 +18,7 @@ void CWorldComponent::Initialize()
 {
 	BaseWorldComponent::Initialize();
 
-	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		pragma::get_cgame()->UpdateEnvironmentLightSource();
 
 		m_lodBaseMeshIds.clear();
@@ -37,7 +36,7 @@ void CWorldComponent::Initialize()
 		ReloadMeshCache();
 		UpdateRenderMeshes();
 	});
-	BindEventUnhandled(CPhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cPhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		Vector3 min {};
 		Vector3 max {};
 		auto &ent = GetEntity();
@@ -48,12 +47,12 @@ void CWorldComponent::Initialize()
 		if(pRenderComponent.valid())
 			pRenderComponent->SetLocalRenderBounds(min, max);
 	});
-	BindEvent(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> ::util::EventReply {
+	BindEvent(cModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> ::util::EventReply {
 		SetRenderQueuesDirty();
 		return ::util::EventReply::Handled;
 	});
 #if 0
-	BindEventUnhandled(CColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &onColorChangedData = static_cast<pragma::CEOnColorChanged &>(evData.get());
 		pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<CLightDirectionalComponent>>();
@@ -261,7 +260,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 
 	clusterRenderQueues.resize(numClusters);
 	clusterRenderTranslucentQueues.resize(numClusters);
-	BS::thread_pool tp {std::thread::hardware_concurrency()};
+	BS::light_thread_pool tp {std::thread::hardware_concurrency()};
 	std::atomic<bool> failure {false};
 	auto &context = pragma::get_cengine()->GetRenderContext();
 	tp.submit_blocks<size_t>(0u, meshesPerClusters.size(), [&](size_t start, size_t end) {

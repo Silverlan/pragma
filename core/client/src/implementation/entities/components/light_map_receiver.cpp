@@ -87,14 +87,14 @@ void CLightMapReceiverComponent::InitializeLuaObject(lua::State *l) { return Bas
 void CLightMapReceiverComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
+	BindEventUnhandled(cModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		//m_isModelBakedWithLightMaps = (GetEntity().GetModelName() == m_modelName); // TODO
 		//if(m_isModelBakedWithLightMaps)
 		m_meshBufferIndices.clear();
 		UpdateModelMeshes();
 	});
-	BindEventUnhandled(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateRenderMeshBufferList(); });
-	BindEventUnhandled(CBaseEntity::EVENT_ON_SPAWN, [this](std::reference_wrapper<ComponentEvent> evData) {
+	BindEventUnhandled(cModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateRenderMeshBufferList(); });
+	BindEventUnhandled(cBaseEntity::EVENT_ON_SPAWN, [this](std::reference_wrapper<ComponentEvent> evData) {
 		//m_isModelBakedWithLightMaps = (GetEntity().GetModelName() == m_modelName); // TODO
 		//if(m_isModelBakedWithLightMaps)
 		UpdateModelMeshes();

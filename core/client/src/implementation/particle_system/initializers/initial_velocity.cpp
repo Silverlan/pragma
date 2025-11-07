@@ -14,7 +14,7 @@ void CParticleInitializerInitialVelocity::Initialize(pragma::BaseEnvParticleSyst
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+		ustring::to_lower(key)
 		if(key == "velocity") {
 			Vector3 velocity;
 			velocity = uvec::create(it->second);

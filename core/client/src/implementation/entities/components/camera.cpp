@@ -22,7 +22,7 @@ void CCameraComponent::Initialize()
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pTrComponent != nullptr) {
 		auto &trC = *pTrComponent;
-		FlagCallbackForRemoval(pTrComponent->AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,
+		FlagCallbackForRemoval(pTrComponent->AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
 		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			                         FlagViewMatrixAsDirty();
 			                         return util::EventReply::Unhandled;
@@ -74,7 +74,7 @@ util::EventReply CCameraComponent::HandleEvent(ComponentEventId eventId, Compone
 {
 	if(BaseEnvCameraComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == BaseToggleComponent::EVENT_ON_TURN_ON || eventId == BaseToggleComponent::EVENT_ON_TURN_OFF)
+	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON || eventId == baseToggleComponent::EVENT_ON_TURN_OFF)
 		UpdateState();
 	return util::EventReply::Unhandled;
 }

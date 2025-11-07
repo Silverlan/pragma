@@ -18,58 +18,58 @@ import :rendering.shaders;
 
 using namespace pragma;
 
-ComponentEventId CRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_ON_RECORD_LIGHTING_PASS = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_PRE_EXECUTE_PREPASS = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_POST_EXECUTE_PREPASS = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_PRE_EXECUTE_LIGHTING_PASS = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_POST_EXECUTE_LIGHTING_PASS = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_PRE_PREPASS = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_POST_PREPASS = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_PRE_LIGHTING_PASS = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_POST_LIGHTING_PASS = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_UPDATE_RENDER_BUFFERS = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_ON_RECORD_LIGHTING_PASS = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_PRE_EXECUTE_PREPASS = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_POST_EXECUTE_PREPASS = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_PRE_EXECUTE_LIGHTING_PASS = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_POST_EXECUTE_LIGHTING_PASS = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_PRE_PREPASS = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_POST_PREPASS = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_PRE_LIGHTING_PASS = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_POST_LIGHTING_PASS = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_UPDATE_RENDER_BUFFERS = INVALID_COMPONENT_ID;
 
-ComponentEventId CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_SKYBOX = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_MT_END_RECORD_SKYBOX = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_WORLD = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_MT_END_RECORD_WORLD = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_PARTICLES = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_MT_END_RECORD_PARTICLES = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_DEBUG = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_MT_END_RECORD_DEBUG = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_WATER = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_MT_END_RECORD_WATER = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_VIEW = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_MT_END_RECORD_VIEW = INVALID_COMPONENT_ID;
-ComponentEventId CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_PREPASS = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_SKYBOX = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_MT_END_RECORD_SKYBOX = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_WORLD = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_MT_END_RECORD_WORLD = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_PARTICLES = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_MT_END_RECORD_PARTICLES = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_DEBUG = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_MT_END_RECORD_DEBUG = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_WATER = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_MT_END_RECORD_WATER = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_VIEW = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_MT_END_RECORD_VIEW = INVALID_COMPONENT_ID;
+ComponentEventId cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_PREPASS = INVALID_COMPONENT_ID;
 void CRasterizationRendererComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_RECORD_PREPASS = registerEvent("ON_RECORD_PREPASS", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_RECORD_LIGHTING_PASS = registerEvent("ON_RECORD_LIGHTING_PASS", ComponentEventInfo::Type::Explicit);
-	EVENT_PRE_EXECUTE_PREPASS = registerEvent("PRE_EXECUTE_PREPASS", ComponentEventInfo::Type::Explicit);
-	EVENT_POST_EXECUTE_PREPASS = registerEvent("POST_EXECUTE_PREPASS", ComponentEventInfo::Type::Explicit);
-	EVENT_PRE_EXECUTE_LIGHTING_PASS = registerEvent("PRE_EXECUTE_LIGHTING_PASS", ComponentEventInfo::Type::Explicit);
-	EVENT_POST_EXECUTE_LIGHTING_PASS = registerEvent("POST_EXECUTE_LIGHTING_PASS", ComponentEventInfo::Type::Explicit);
-	EVENT_PRE_PREPASS = registerEvent("PRE_PREPASS", ComponentEventInfo::Type::Explicit);
-	EVENT_POST_PREPASS = registerEvent("POST_PREPASS", ComponentEventInfo::Type::Explicit);
-	EVENT_PRE_LIGHTING_PASS = registerEvent("PRE_LIGHTING_PASS", ComponentEventInfo::Type::Explicit);
-	EVENT_POST_LIGHTING_PASS = registerEvent("POST_LIGHTING_PASS", ComponentEventInfo::Type::Explicit);
-	EVENT_UPDATE_RENDER_BUFFERS = registerEvent("UPDATE_RENDER_BUFFERS", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS = registerEvent("ON_RECORD_PREPASS", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_ON_RECORD_LIGHTING_PASS = registerEvent("ON_RECORD_LIGHTING_PASS", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_PRE_EXECUTE_PREPASS = registerEvent("PRE_EXECUTE_PREPASS", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_POST_EXECUTE_PREPASS = registerEvent("POST_EXECUTE_PREPASS", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_PRE_EXECUTE_LIGHTING_PASS = registerEvent("PRE_EXECUTE_LIGHTING_PASS", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_POST_EXECUTE_LIGHTING_PASS = registerEvent("POST_EXECUTE_LIGHTING_PASS", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_PRE_PREPASS = registerEvent("PRE_PREPASS", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_POST_PREPASS = registerEvent("POST_PREPASS", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_PRE_LIGHTING_PASS = registerEvent("PRE_LIGHTING_PASS", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_POST_LIGHTING_PASS = registerEvent("POST_LIGHTING_PASS", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_UPDATE_RENDER_BUFFERS = registerEvent("UPDATE_RENDER_BUFFERS", ComponentEventInfo::Type::Explicit);
 
-	EVENT_MT_BEGIN_RECORD_SKYBOX = registerEvent("MT_BEGIN_RECORD_SKYBOX", ComponentEventInfo::Type::Explicit);
-	EVENT_MT_END_RECORD_SKYBOX = registerEvent("MT_END_RECORD_SKYBOX", ComponentEventInfo::Type::Explicit);
-	EVENT_MT_BEGIN_RECORD_WORLD = registerEvent("MT_BEGIN_RECORD_WORLD", ComponentEventInfo::Type::Explicit);
-	EVENT_MT_END_RECORD_WORLD = registerEvent("MT_END_RECORD_WORLD", ComponentEventInfo::Type::Explicit);
-	EVENT_MT_BEGIN_RECORD_PARTICLES = registerEvent("MT_BEGIN_RECORD_PARTICLES", ComponentEventInfo::Type::Explicit);
-	EVENT_MT_END_RECORD_PARTICLES = registerEvent("MT_END_RECORD_PARTICLES", ComponentEventInfo::Type::Explicit);
-	EVENT_MT_BEGIN_RECORD_DEBUG = registerEvent("MT_BEGIN_RECORD_DEBUG", ComponentEventInfo::Type::Explicit);
-	EVENT_MT_END_RECORD_DEBUG = registerEvent("MT_END_RECORD_DEBUG", ComponentEventInfo::Type::Explicit);
-	EVENT_MT_BEGIN_RECORD_WATER = registerEvent("MT_BEGIN_RECORD_WATER", ComponentEventInfo::Type::Explicit);
-	EVENT_MT_END_RECORD_WATER = registerEvent("MT_END_RECORD_WATER", ComponentEventInfo::Type::Explicit);
-	EVENT_MT_BEGIN_RECORD_VIEW = registerEvent("MT_BEGIN_RECORD_VIEW", ComponentEventInfo::Type::Explicit);
-	EVENT_MT_END_RECORD_VIEW = registerEvent("MT_END_RECORD_VIEW", ComponentEventInfo::Type::Explicit);
-	EVENT_MT_BEGIN_RECORD_PREPASS = registerEvent("MT_BEGIN_RECORD_PREPASS", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_SKYBOX = registerEvent("MT_BEGIN_RECORD_SKYBOX", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_MT_END_RECORD_SKYBOX = registerEvent("MT_END_RECORD_SKYBOX", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_WORLD = registerEvent("MT_BEGIN_RECORD_WORLD", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_MT_END_RECORD_WORLD = registerEvent("MT_END_RECORD_WORLD", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_PARTICLES = registerEvent("MT_BEGIN_RECORD_PARTICLES", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_MT_END_RECORD_PARTICLES = registerEvent("MT_END_RECORD_PARTICLES", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_DEBUG = registerEvent("MT_BEGIN_RECORD_DEBUG", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_MT_END_RECORD_DEBUG = registerEvent("MT_END_RECORD_DEBUG", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_WATER = registerEvent("MT_BEGIN_RECORD_WATER", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_MT_END_RECORD_WATER = registerEvent("MT_END_RECORD_WATER", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_VIEW = registerEvent("MT_BEGIN_RECORD_VIEW", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_MT_END_RECORD_VIEW = registerEvent("MT_END_RECORD_VIEW", ComponentEventInfo::Type::Explicit);
+	cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_PREPASS = registerEvent("MT_BEGIN_RECORD_PREPASS", ComponentEventInfo::Type::Explicit);
 }
 
 void CRasterizationRendererComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
@@ -132,30 +132,30 @@ void CRasterizationRendererComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(CRendererComponent::EVENT_RELOAD_RENDER_TARGET, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cRendererComponent::EVENT_RELOAD_RENDER_TARGET, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &reloadRenderTargetEv = static_cast<CEReloadRenderTarget &>(evData.get());
 		reloadRenderTargetEv.resultSuccess = ReloadRenderTarget(reloadRenderTargetEv.width, reloadRenderTargetEv.height);
 	});
-	BindEventUnhandled(CRendererComponent::EVENT_RELOAD_BLOOM_RENDER_TARGET, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { m_hdrInfo.ReloadBloomRenderTarget(static_cast<CEReloadBloomRenderTarget &>(evData.get()).width); });
-	BindEventUnhandled(CRendererComponent::EVENT_BEGIN_RENDERING, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { BeginRendering(static_cast<CEBeginRendering &>(evData.get()).drawSceneInfo); });
-	BindEventUnhandled(CRendererComponent::EVENT_END_RENDERING, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { EndRendering(); });
-	BindEventUnhandled(CRendererComponent::EVENT_UPDATE_CAMERA_DATA, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateFrustumPlanes(static_cast<CEUpdateCameraData &>(evData.get()).scene); });
-	BindEvent(CRendererComponent::EVENT_GET_SCENE_TEXTURE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(cRendererComponent::EVENT_RELOAD_BLOOM_RENDER_TARGET, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { m_hdrInfo.ReloadBloomRenderTarget(static_cast<CEReloadBloomRenderTarget &>(evData.get()).width); });
+	BindEventUnhandled(cRendererComponent::EVENT_BEGIN_RENDERING, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { BeginRendering(static_cast<CEBeginRendering &>(evData.get()).drawSceneInfo); });
+	BindEventUnhandled(cRendererComponent::EVENT_END_RENDERING, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { EndRendering(); });
+	BindEventUnhandled(cRendererComponent::EVENT_UPDATE_CAMERA_DATA, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateFrustumPlanes(static_cast<CEUpdateCameraData &>(evData.get()).scene); });
+	BindEvent(cRendererComponent::EVENT_GET_SCENE_TEXTURE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		static_cast<pragma::CEGetSceneTexture &>(evData.get()).resultTexture = m_hdrInfo.sceneRenderTarget ? &m_hdrInfo.sceneRenderTarget->GetTexture() : nullptr;
 		return util::EventReply::Handled;
 	});
-	BindEvent(CRendererComponent::EVENT_GET_PRESENTATION_TEXTURE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cRendererComponent::EVENT_GET_PRESENTATION_TEXTURE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		static_cast<pragma::CEGetPresentationTexture &>(evData.get()).resultTexture = m_hdrInfo.toneMappedRenderTarget ? &m_hdrInfo.toneMappedRenderTarget->GetTexture() : nullptr;
 		return util::EventReply::Handled;
 	});
-	BindEvent(CRendererComponent::EVENT_GET_HDR_PRESENTATION_TEXTURE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cRendererComponent::EVENT_GET_HDR_PRESENTATION_TEXTURE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		static_cast<pragma::CEGetHdrPresentationTexture &>(evData.get()).resultTexture = m_hdrInfo.sceneRenderTarget ? &m_hdrInfo.sceneRenderTarget->GetTexture() : nullptr;
 		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(CRendererComponent::EVENT_RECORD_COMMAND_BUFFERS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { RecordCommandBuffers(static_cast<CEDrawSceneInfo &>(evData.get()).drawSceneInfo); });
-	BindEventUnhandled(CRendererComponent::EVENT_RENDER, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { Render(static_cast<CERender &>(evData.get()).drawSceneInfo); });
-	BindEventUnhandled(CRendererComponent::EVENT_UPDATE_RENDER_SETTINGS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateRenderSettings(); });
-	BindEventUnhandled(CRendererComponent::EVENT_UPDATE_RENDERER_BUFFER, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateRendererBuffer(static_cast<CEUpdateRendererBuffer &>(evData.get()).drawCommandBuffer); });
+	BindEventUnhandled(cRendererComponent::EVENT_RECORD_COMMAND_BUFFERS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { RecordCommandBuffers(static_cast<CEDrawSceneInfo &>(evData.get()).drawSceneInfo); });
+	BindEventUnhandled(cRendererComponent::EVENT_RENDER, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { Render(static_cast<CERender &>(evData.get()).drawSceneInfo); });
+	BindEventUnhandled(cRendererComponent::EVENT_UPDATE_RENDER_SETTINGS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateRenderSettings(); });
+	BindEventUnhandled(cRendererComponent::EVENT_UPDATE_RENDERER_BUFFER, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateRendererBuffer(static_cast<CEUpdateRendererBuffer &>(evData.get()).drawCommandBuffer); });
 
 	auto &ent = GetEntity();
 	m_rendererComponent = ent.AddComponent<CRendererComponent>().get();

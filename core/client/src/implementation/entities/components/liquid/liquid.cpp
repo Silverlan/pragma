@@ -36,7 +36,7 @@ void CLiquidComponent::Initialize()
 		SetupWater();
 		ReloadSurfaceSimulator();
 	});*/
-	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		BaseFuncLiquidComponent::InitializeWaterSurface();
 		SetupWater();
 	});

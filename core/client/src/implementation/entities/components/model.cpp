@@ -15,14 +15,14 @@ import :model;
 
 using namespace pragma;
 
-ComponentEventId CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED = INVALID_COMPONENT_ID;
-ComponentEventId CModelComponent::EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED = INVALID_COMPONENT_ID;
+ComponentEventId cModelComponent::EVENT_ON_RENDER_MESHES_UPDATED = INVALID_COMPONENT_ID;
+ComponentEventId cModelComponent::EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED = INVALID_COMPONENT_ID;
 void CModelComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CModelComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseModelComponent::RegisterEvents(componentManager, registerEvent);
-	EVENT_ON_RENDER_MESHES_UPDATED = registerEvent("EVENT_ON_RENDER_MESHES_UPDATED", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED = registerEvent("EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED", ComponentEventInfo::Type::Broadcast);
+	cModelComponent::EVENT_ON_RENDER_MESHES_UPDATED = registerEvent("EVENT_ON_RENDER_MESHES_UPDATED", ComponentEventInfo::Type::Explicit);
+	cModelComponent::EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED = registerEvent("EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED", ComponentEventInfo::Type::Broadcast);
 }
 
 CModelComponent::CModelComponent(pragma::ecs::BaseEntity &ent) : BaseModelComponent(ent), m_baseShaderSpecializationConstantFlags {pragma::GameShaderSpecializationConstantFlag::None}, m_staticShaderSpecializationConstantFlags {pragma::GameShaderSpecializationConstantFlag::None} {}
@@ -36,14 +36,14 @@ void CModelComponent::Initialize()
 		pRenderComponent->SetRenderBufferDirty();
 	UpdateBaseShaderSpecializationFlags();
 
-	BindEventUnhandled(CRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateBaseShaderSpecializationFlags(); });
-	BindEventUnhandled(CRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateBaseShaderSpecializationFlags(); });
-	BindEventUnhandled(CColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateBaseShaderSpecializationFlags(); });
-	BindEventUnhandled(EVENT_ON_SKIN_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateBaseShaderSpecializationFlags(); });
+	BindEventUnhandled(cRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateBaseShaderSpecializationFlags(); });
+	BindEventUnhandled(cColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateBaseShaderSpecializationFlags(); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_SKIN_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		umath::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired);
 		SetTickPolicy(TickPolicy::Always);
 	});
-	BindEventUnhandled(EVENT_ON_BODY_GROUP_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(baseModelComponent::EVENT_ON_BODY_GROUP_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		umath::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired);
 		SetTickPolicy(TickPolicy::Always);
 	});
@@ -67,7 +67,7 @@ void CModelComponent::UpdateBaseShaderSpecializationFlags()
 
 	m_baseShaderSpecializationConstantFlags |= m_staticShaderSpecializationConstantFlags;
 
-	InvokeEventCallbacks(EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED);
+	InvokeEventCallbacks(cModelComponent::EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED);
 }
 
 CMaterialOverrideComponent *CModelComponent::GetMaterialOverrideComponent() { return m_materialOverrideComponent; }
@@ -298,7 +298,7 @@ void CModelComponent::UpdateRenderMeshes(bool requireBoundingVolumeUpdate)
 	}
 	UpdateRenderBufferList();
 	if(renderMeshesUpdated)
-		BroadcastEvent(EVENT_ON_RENDER_MESHES_UPDATED, CEOnRenderMeshesUpdated {requireBoundingVolumeUpdate});
+		BroadcastEvent(cModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, CEOnRenderMeshesUpdated {requireBoundingVolumeUpdate});
 }
 
 void CModelComponent::UpdateLOD(UInt32 lod)
@@ -515,8 +515,8 @@ void CModelComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEn
 {
 	BaseModelComponent::RegisterLuaBindings(l, modEnts);
 	auto defCModel = pragma::LuaCore::create_entity_component_class<pragma::CModelComponent, pragma::BaseModelComponent>("ModelComponent");
-	defCModel.add_static_constant("EVENT_ON_RENDER_MESHES_UPDATED", pragma::CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED);
-	defCModel.add_static_constant("EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED", pragma::CModelComponent::EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED);
+	defCModel.add_static_constant("EVENT_ON_RENDER_MESHES_UPDATED", pragma::cModelComponent::EVENT_ON_RENDER_MESHES_UPDATED);
+	defCModel.add_static_constant("EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED", pragma::cModelComponent::EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED);
 	//Lua::register_base_model_component_methods<luabind::class_<CModelHandle,BaseEntityComponentHandle>,CModelHandle>(l,defCModel);
 	defCModel.def("GetRenderMaterial", static_cast<msys::CMaterial *(pragma::CModelComponent::*)(uint32_t, uint32_t) const>(&pragma::CModelComponent::GetRenderMaterial));
 	defCModel.def("GetRenderMaterial", static_cast<msys::CMaterial *(pragma::CModelComponent::*)(uint32_t) const>(&pragma::CModelComponent::GetRenderMaterial));

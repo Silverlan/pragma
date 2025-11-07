@@ -255,9 +255,9 @@ export class DLLCLIENT CGame : public pragma::Game {
 	void SetAlphaScale(float a);
 	float GetAlphaScale();
 	LuaGUIManager &GetLuaGUIManager();
-	pragma::LuaCoreShaderManager &GetLuaShaderManager();
+	pragma::LuaShaderManager &GetLuaShaderManager();
 	pragma::cxxm_LuaParticleModifierManager &GetLuaParticleModifierManager();
-	pragma::LuaCoreInputBindingLayerRegister &GetLuaInputBindingLayerRegister();
+	pragma::LuaInputBindingLayerRegister &GetLuaInputBindingLayerRegister();
 	msys::Material *GetLoadMaterial();
 	virtual bool RunLua(const std::string &lua) override;
 	virtual bool InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject) override;
@@ -446,11 +446,11 @@ export class DLLCLIENT CGame : public pragma::Game {
 	std::vector<std::string> m_requestedResources;
 
 	LuaGUIManager m_luaGUIElements = {};
-	std::shared_ptr<pragma::LuaCoreShaderManager> m_luaShaderManager = nullptr;
+	std::shared_ptr<pragma::LuaShaderManager> m_luaShaderManager = nullptr;
 	std::shared_ptr<pragma::cxxm_LuaParticleModifierManager_vp> m_luaParticleModifierManager = nullptr;
 	double m_tServer = 0.0;
 	LuaCallbackHandler m_inputCallbackHandler;
-	std::unique_ptr<pragma::LuaCoreInputBindingLayerRegister> m_luaInputBindingLayerRegister {};
+	std::unique_ptr<pragma::LuaInputBindingLayerRegister> m_luaInputBindingLayerRegister {};
 
 	// Shaders
 	void InitShaders();

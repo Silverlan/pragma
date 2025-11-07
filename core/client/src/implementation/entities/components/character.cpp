@@ -22,7 +22,7 @@ CCharacterComponent::CCharacterComponent(pragma::ecs::BaseEntity &ent) : BaseCha
 void CCharacterComponent::Initialize()
 {
 	BaseCharacterComponent::Initialize();
-	BindEventUnhandled(CAnimatedComponent::EVENT_ON_BLEND_ANIMATION_MT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cAnimatedComponent::EVENT_ON_BLEND_ANIMATION_MT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ent = GetEntity();
 		auto animComponent = ent.GetAnimatedComponent();
 		auto &hMdl = ent.GetModel();
@@ -54,8 +54,8 @@ void CCharacterComponent::Initialize()
 			}
 		}
 	});
-	BindEventUnhandled(SubmergibleComponent::EVENT_ON_WATER_ENTERED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { CreateWaterSplash(); });
-	BindEventUnhandled(SubmergibleComponent::EVENT_ON_WATER_EXITED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { CreateWaterSplash(); });
+	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_ENTERED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { CreateWaterSplash(); });
+	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_EXITED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { CreateWaterSplash(); });
 	GetEntity().AddComponent<CEyeComponent>();
 }
 

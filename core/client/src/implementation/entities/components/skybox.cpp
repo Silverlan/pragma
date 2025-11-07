@@ -26,7 +26,7 @@ void CSkyboxComponent::Initialize()
 		pRenderComponent->SetDepthPassEnabled(false);
 	}
 
-	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		if(m_cbOnModelMaterialsLoaded.IsValid())
 			m_cbOnModelMaterialsLoaded.Remove();
 		auto &evMdl = static_cast<pragma::CEOnModelChanged &>(evData.get());

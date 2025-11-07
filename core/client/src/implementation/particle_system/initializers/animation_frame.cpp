@@ -14,7 +14,7 @@ void CParticleInitializerInitialAnimationFrame::Initialize(pragma::BaseEnvPartic
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+		ustring::to_lower(key);
 		if(key == "frame_min")
 			m_minFrame = util::to_float(it->second);
 		else if(key == "frame_max")

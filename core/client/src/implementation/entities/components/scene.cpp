@@ -23,12 +23,16 @@ CSceneComponent::CreateInfo::CreateInfo() : sampleCount {static_cast<prosper::Sa
 
 ///////////////////////////
 
+ComponentEventId cSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId cSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES = INVALID_COMPONENT_ID;
+ComponentEventId cSceneComponent::EVENT_ON_RENDERER_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId cSceneComponent::EVENT_POST_RENDER_PREPASS = INVALID_COMPONENT_ID;
 void CSceneComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_ACTIVE_CAMERA_CHANGED = registerEvent("ON_ACTIVE_CAMERA_CHANGED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_BUILD_RENDER_QUEUES = registerEvent("ON_BUILD_RENDER_QUEUES", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_RENDERER_CHANGED = registerEvent("ON_RENDERER_CHANGED", ComponentEventInfo::Type::Broadcast);
-	EVENT_POST_RENDER_PREPASS = registerEvent("POST_RENDER_PREPASS", ComponentEventInfo::Type::Explicit);
+	cSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED = registerEvent("ON_ACTIVE_CAMERA_CHANGED", ComponentEventInfo::Type::Broadcast);
+	cSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES = registerEvent("ON_BUILD_RENDER_QUEUES", ComponentEventInfo::Type::Explicit);
+	cSceneComponent::EVENT_ON_RENDERER_CHANGED = registerEvent("ON_RENDERER_CHANGED", ComponentEventInfo::Type::Broadcast);
+	cSceneComponent::EVENT_POST_RENDER_PREPASS = registerEvent("POST_RENDER_PREPASS", ComponentEventInfo::Type::Explicit);
 }
 
 static std::shared_ptr<rendering::EntityInstanceIndexBuffer> g_entityInstanceIndexBuffer = nullptr;
@@ -74,10 +78,6 @@ using SceneCount = uint32_t;
 static std::array<SceneCount, 32> g_sceneUseCount {};
 static std::array<CSceneComponent *, 32> g_scenes {};
 
-ComponentEventId CSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId CSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES = INVALID_COMPONENT_ID;
-ComponentEventId CSceneComponent::EVENT_ON_RENDERER_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId CSceneComponent::EVENT_POST_RENDER_PREPASS = INVALID_COMPONENT_ID;
 CSceneComponent *CSceneComponent::Create(const CreateInfo &createInfo, CSceneComponent *optParent)
 {
 	SceneIndex sceneIndex;
@@ -188,7 +188,7 @@ void CSceneComponent::Link(const CSceneComponent &other, bool linkCamera)
 		m_cbLink.Remove();
 	if(linkCamera == false)
 		return;
-	m_cbLink = const_cast<CSceneComponent &>(other).AddEventCallback(EVENT_ON_ACTIVE_CAMERA_CHANGED, [this, &other](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	m_cbLink = const_cast<CSceneComponent &>(other).AddEventCallback(cSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED, [this, &other](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &hCam = other.GetActiveCamera();
 		if(hCam.valid())
 			SetActiveCamera(const_cast<pragma::CCameraComponent &>(*hCam.get()));
@@ -420,7 +420,7 @@ void CSceneComponent::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 			shadowC->GetRenderer().BuildRenderQueues(drawSceneInfo);
 		}
 
-		InvokeEventCallbacks(pragma::CSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES, evData);
+		InvokeEventCallbacks(pragma::cSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES, evData);
 	});
 }
 
@@ -560,7 +560,7 @@ void CSceneComponent::SetRenderer(TCPPM *renderer)
 	m_renderer = renderer ? renderer->GetHandle() : pragma::ComponentHandle<BaseEntityComponent> {};
 	UpdateRenderSettings();
 	UpdateRendererLightMap();
-	BroadcastEvent(EVENT_ON_RENDERER_CHANGED);
+	BroadcastEvent(cSceneComponent::EVENT_ON_RENDERER_CHANGED);
 }
 template void CSceneComponent::SetRenderer(pragma::CRendererComponent *renderer);
 
@@ -621,13 +621,13 @@ void CSceneComponent::SetActiveCamera(pragma::CCameraComponent &cam)
 	m_renderSettings.nearZ = cam.GetNearZ();
 	m_renderSettings.farZ = cam.GetFarZ();
 
-	BroadcastEvent(EVENT_ON_ACTIVE_CAMERA_CHANGED);
+	BroadcastEvent(cSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED);
 }
 void CSceneComponent::SetActiveCamera()
 {
 	m_camera = decltype(m_camera) {};
 
-	BroadcastEvent(EVENT_ON_ACTIVE_CAMERA_CHANGED);
+	BroadcastEvent(cSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED);
 }
 
 /////////////////

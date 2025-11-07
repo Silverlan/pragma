@@ -12,11 +12,11 @@ import :game;
 
 using namespace pragma;
 
-ComponentEventId CWeaponComponent::EVENT_ATTACH_TO_OWNER = INVALID_COMPONENT_ID;
+ComponentEventId cWeaponComponent::EVENT_ATTACH_TO_OWNER = INVALID_COMPONENT_ID;
 void CWeaponComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseWeaponComponent::RegisterEvents(componentManager, registerEvent);
-	EVENT_ATTACH_TO_OWNER = registerEvent("ATTACH_TO_OWNER", ComponentEventInfo::Type::Explicit);
+	cWeaponComponent::EVENT_ATTACH_TO_OWNER = registerEvent("ATTACH_TO_OWNER", ComponentEventInfo::Type::Explicit);
 }
 
 std::vector<CWeaponComponent *> CWeaponComponent::s_weapons;
@@ -110,7 +110,7 @@ void CWeaponComponent::Initialize()
 {
 	BaseWeaponComponent::Initialize();
 
-	BindEvent(CRenderComponent::EVENT_SHOULD_DRAW, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cRenderComponent::EVENT_SHOULD_DRAW, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &shouldDrawData = static_cast<CEShouldDraw &>(evData.get());
 		auto &ent = static_cast<CBaseEntity &>(GetEntity());
 		auto pRenderComponent = ent.GetComponent<pragma::CRenderComponent>();
@@ -139,14 +139,14 @@ void CWeaponComponent::Initialize()
 		}
 		return util::EventReply::Unhandled;
 	});
-	BindEvent(CRenderComponent::EVENT_SHOULD_DRAW_SHADOW, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cRenderComponent::EVENT_SHOULD_DRAW_SHADOW, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		if(m_bDeployed == false) {
 			static_cast<CEShouldDraw &>(evData.get()).shouldDraw = false;
 			return util::EventReply::Handled;
 		}
 		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(COwnableComponent::EVENT_ON_OWNER_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cOwnableComponent::EVENT_ON_OWNER_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		UpdateOwnerAttachment();
 		ClearOwnerCallbacks();
 		auto &ownerChangedData = static_cast<pragma::CEOnOwnerChanged &>(evData.get());
@@ -154,7 +154,7 @@ void CWeaponComponent::Initialize()
 			auto plComponent = ownerChangedData.newOwner->GetPlayerComponent();
 			auto *observableC = plComponent->GetObservableComponent();
 			if(observableC) {
-				m_cbOnObserverChanged = observableC->AddEventCallback(CObservableComponent::EVENT_ON_OBSERVER_CHANGED, [this, observableC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+				m_cbOnObserverChanged = observableC->AddEventCallback(cObservableComponent::EVENT_ON_OBSERVER_CHANGED, [this, observableC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 					UpdateObserver(observableC->GetObserver());
 					return util::EventReply::Unhandled;
 				});
@@ -163,12 +163,12 @@ void CWeaponComponent::Initialize()
 			}
 		}
 	});
-	BindEventUnhandled(EVENT_ON_DEPLOY, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cWeaponComponent::EVENT_ON_DEPLOY, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto *renderC = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
 		if(renderC)
 			renderC->UpdateShouldDrawState();
 	});
-	BindEventUnhandled(EVENT_ON_HOLSTER, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cWeaponComponent::EVENT_ON_HOLSTER, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto *renderC = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
 		if(renderC)
 			renderC->UpdateShouldDrawState();
@@ -270,7 +270,7 @@ void CWeaponComponent::UpdateOwnerAttachment()
 	}
 
 	CEAttachToOwner evData {*owner, cVm};
-	if(BroadcastEvent(EVENT_ATTACH_TO_OWNER, evData) == util::EventReply::Unhandled) {
+	if(BroadcastEvent(cWeaponComponent::EVENT_ATTACH_TO_OWNER, evData) == util::EventReply::Unhandled) {
 		auto *parent = cVm ? &cVm->GetEntity() : owner;
 		auto pTransformComponent = ent.GetTransformComponent();
 		auto pTransformComponentParent = parent->GetTransformComponent();
@@ -413,6 +413,6 @@ void CWeaponComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modE
 	def.def("GetViewModelOffset", &pragma::CWeaponComponent::GetViewModelOffset);
 	def.def("SetViewFOV", &pragma::CWeaponComponent::SetViewFOV);
 	def.def("GetViewFOV", &pragma::CWeaponComponent::GetViewFOV);
-	def.add_static_constant("EVENT_ATTACH_TO_OWNER", pragma::CWeaponComponent::EVENT_ATTACH_TO_OWNER);
+	def.add_static_constant("EVENT_ATTACH_TO_OWNER", pragma::cWeaponComponent::EVENT_ATTACH_TO_OWNER);
 	modEnts[def];
 }

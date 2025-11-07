@@ -17,34 +17,34 @@ import :scripting.lua.libraries.vulkan;
 
 using namespace pragma;
 
-ComponentEventId CRendererComponent::EVENT_RELOAD_RENDER_TARGET = INVALID_COMPONENT_ID;
-ComponentEventId CRendererComponent::EVENT_RELOAD_BLOOM_RENDER_TARGET = INVALID_COMPONENT_ID;
-ComponentEventId CRendererComponent::EVENT_BEGIN_RENDERING = INVALID_COMPONENT_ID;
-ComponentEventId CRendererComponent::EVENT_END_RENDERING = INVALID_COMPONENT_ID;
-ComponentEventId CRendererComponent::EVENT_UPDATE_CAMERA_DATA = INVALID_COMPONENT_ID;
-ComponentEventId CRendererComponent::EVENT_UPDATE_RENDER_SETTINGS = INVALID_COMPONENT_ID;
-ComponentEventId CRendererComponent::EVENT_UPDATE_RENDERER_BUFFER = INVALID_COMPONENT_ID;
-ComponentEventId CRendererComponent::EVENT_GET_SCENE_TEXTURE = INVALID_COMPONENT_ID;
-ComponentEventId CRendererComponent::EVENT_GET_PRESENTATION_TEXTURE = INVALID_COMPONENT_ID;
-ComponentEventId CRendererComponent::EVENT_GET_HDR_PRESENTATION_TEXTURE = INVALID_COMPONENT_ID;
-ComponentEventId CRendererComponent::EVENT_RECORD_COMMAND_BUFFERS = INVALID_COMPONENT_ID;
-ComponentEventId CRendererComponent::EVENT_RENDER = INVALID_COMPONENT_ID;
-ComponentEventId CRendererComponent::EVENT_ON_RENDER_TARGET_RELOADED = INVALID_COMPONENT_ID;
+ComponentEventId cRendererComponent::EVENT_RELOAD_RENDER_TARGET = INVALID_COMPONENT_ID;
+ComponentEventId cRendererComponent::EVENT_RELOAD_BLOOM_RENDER_TARGET = INVALID_COMPONENT_ID;
+ComponentEventId cRendererComponent::EVENT_BEGIN_RENDERING = INVALID_COMPONENT_ID;
+ComponentEventId cRendererComponent::EVENT_END_RENDERING = INVALID_COMPONENT_ID;
+ComponentEventId cRendererComponent::EVENT_UPDATE_CAMERA_DATA = INVALID_COMPONENT_ID;
+ComponentEventId cRendererComponent::EVENT_UPDATE_RENDER_SETTINGS = INVALID_COMPONENT_ID;
+ComponentEventId cRendererComponent::EVENT_UPDATE_RENDERER_BUFFER = INVALID_COMPONENT_ID;
+ComponentEventId cRendererComponent::EVENT_GET_SCENE_TEXTURE = INVALID_COMPONENT_ID;
+ComponentEventId cRendererComponent::EVENT_GET_PRESENTATION_TEXTURE = INVALID_COMPONENT_ID;
+ComponentEventId cRendererComponent::EVENT_GET_HDR_PRESENTATION_TEXTURE = INVALID_COMPONENT_ID;
+ComponentEventId cRendererComponent::EVENT_RECORD_COMMAND_BUFFERS = INVALID_COMPONENT_ID;
+ComponentEventId cRendererComponent::EVENT_RENDER = INVALID_COMPONENT_ID;
+ComponentEventId cRendererComponent::EVENT_ON_RENDER_TARGET_RELOADED = INVALID_COMPONENT_ID;
 void CRendererComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_RELOAD_RENDER_TARGET = registerEvent("EVENT_RELOAD_RENDER_TARGET", ComponentEventInfo::Type::Explicit);
-	EVENT_RELOAD_BLOOM_RENDER_TARGET = registerEvent("EVENT_RELOAD_BLOOM_RENDER_TARGET", ComponentEventInfo::Type::Explicit);
-	EVENT_BEGIN_RENDERING = registerEvent("EVENT_BEGIN_RENDERING", ComponentEventInfo::Type::Explicit);
-	EVENT_END_RENDERING = registerEvent("EVENT_END_RENDERING", ComponentEventInfo::Type::Explicit);
-	EVENT_UPDATE_CAMERA_DATA = registerEvent("EVENT_UPDATE_CAMERA_DATA", ComponentEventInfo::Type::Explicit);
-	EVENT_UPDATE_RENDER_SETTINGS = registerEvent("EVENT_UPDATE_RENDER_SETTINGS", ComponentEventInfo::Type::Explicit);
-	EVENT_UPDATE_RENDERER_BUFFER = registerEvent("EVENT_UPDATE_RENDERER_BUFFER", ComponentEventInfo::Type::Explicit);
-	EVENT_GET_SCENE_TEXTURE = registerEvent("EVENT_GET_SCENE_TEXTURE", ComponentEventInfo::Type::Explicit);
-	EVENT_GET_PRESENTATION_TEXTURE = registerEvent("EVENT_GET_PRESENTATION_TEXTURE", ComponentEventInfo::Type::Explicit);
-	EVENT_GET_HDR_PRESENTATION_TEXTURE = registerEvent("EVENT_GET_HDR_PRESENTATION_TEXTURE", ComponentEventInfo::Type::Explicit);
-	EVENT_RECORD_COMMAND_BUFFERS = registerEvent("EVENT_RECORD_COMMAND_BUFFERS", ComponentEventInfo::Type::Explicit);
-	EVENT_RENDER = registerEvent("EVENT_RENDER", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_RENDER_TARGET_RELOADED = registerEvent("EVENT_ON_RENDER_TARGET_RELOADED", ComponentEventInfo::Type::Explicit);
+	cRendererComponent::EVENT_RELOAD_RENDER_TARGET = registerEvent("EVENT_RELOAD_RENDER_TARGET", ComponentEventInfo::Type::Explicit);
+	cRendererComponent::EVENT_RELOAD_BLOOM_RENDER_TARGET = registerEvent("EVENT_RELOAD_BLOOM_RENDER_TARGET", ComponentEventInfo::Type::Explicit);
+	cRendererComponent::EVENT_BEGIN_RENDERING = registerEvent("EVENT_BEGIN_RENDERING", ComponentEventInfo::Type::Explicit);
+	cRendererComponent::EVENT_END_RENDERING = registerEvent("EVENT_END_RENDERING", ComponentEventInfo::Type::Explicit);
+	cRendererComponent::EVENT_UPDATE_CAMERA_DATA = registerEvent("EVENT_UPDATE_CAMERA_DATA", ComponentEventInfo::Type::Explicit);
+	cRendererComponent::EVENT_UPDATE_RENDER_SETTINGS = registerEvent("EVENT_UPDATE_RENDER_SETTINGS", ComponentEventInfo::Type::Explicit);
+	cRendererComponent::EVENT_UPDATE_RENDERER_BUFFER = registerEvent("EVENT_UPDATE_RENDERER_BUFFER", ComponentEventInfo::Type::Explicit);
+	cRendererComponent::EVENT_GET_SCENE_TEXTURE = registerEvent("EVENT_GET_SCENE_TEXTURE", ComponentEventInfo::Type::Explicit);
+	cRendererComponent::EVENT_GET_PRESENTATION_TEXTURE = registerEvent("EVENT_GET_PRESENTATION_TEXTURE", ComponentEventInfo::Type::Explicit);
+	cRendererComponent::EVENT_GET_HDR_PRESENTATION_TEXTURE = registerEvent("EVENT_GET_HDR_PRESENTATION_TEXTURE", ComponentEventInfo::Type::Explicit);
+	cRendererComponent::EVENT_RECORD_COMMAND_BUFFERS = registerEvent("EVENT_RECORD_COMMAND_BUFFERS", ComponentEventInfo::Type::Explicit);
+	cRendererComponent::EVENT_RENDER = registerEvent("EVENT_RENDER", ComponentEventInfo::Type::Explicit);
+	cRendererComponent::EVENT_ON_RENDER_TARGET_RELOADED = registerEvent("EVENT_ON_RENDER_TARGET_RELOADED", ComponentEventInfo::Type::Explicit);
 }
 
 void CRendererComponent::Initialize()
@@ -59,49 +59,49 @@ void CRendererComponent::Initialize()
 }
 void CRendererComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void CRendererComponent::UpdateRenderSettings() { InvokeEventCallbacks(EVENT_UPDATE_RENDER_SETTINGS); }
+void CRendererComponent::UpdateRenderSettings() { InvokeEventCallbacks(cRendererComponent::EVENT_UPDATE_RENDER_SETTINGS); }
 
 void CRendererComponent::UpdateRendererBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	CEUpdateRendererBuffer evData {drawCmd};
-	InvokeEventCallbacks(EVENT_UPDATE_RENDERER_BUFFER, evData);
+	InvokeEventCallbacks(cRendererComponent::EVENT_UPDATE_RENDERER_BUFFER, evData);
 }
 
 void CRendererComponent::UpdateCameraData(pragma::CSceneComponent &scene, pragma::CameraData &cameraData)
 {
 	pragma::CEUpdateCameraData evData {scene, cameraData};
-	InvokeEventCallbacks(EVENT_UPDATE_CAMERA_DATA, evData);
+	InvokeEventCallbacks(cRendererComponent::EVENT_UPDATE_CAMERA_DATA, evData);
 }
 
 void CRendererComponent::RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo)
 {
 	pragma::CEDrawSceneInfo evData {drawSceneInfo};
-	InvokeEventCallbacks(EVENT_RECORD_COMMAND_BUFFERS, evData);
+	InvokeEventCallbacks(cRendererComponent::EVENT_RECORD_COMMAND_BUFFERS, evData);
 }
 void CRendererComponent::Render(const util::DrawSceneInfo &drawSceneInfo)
 {
 	BeginRendering(drawSceneInfo);
 	pragma::CERender evData {drawSceneInfo};
-	InvokeEventCallbacks(EVENT_RENDER, evData);
+	InvokeEventCallbacks(cRendererComponent::EVENT_RENDER, evData);
 	EndRendering();
 }
 
 prosper::Texture *CRendererComponent::GetSceneTexture()
 {
 	pragma::CEGetSceneTexture evData {};
-	InvokeEventCallbacks(EVENT_GET_SCENE_TEXTURE, evData);
+	InvokeEventCallbacks(cRendererComponent::EVENT_GET_SCENE_TEXTURE, evData);
 	return evData.resultTexture;
 }
 prosper::Texture *CRendererComponent::GetPresentationTexture()
 {
 	pragma::CEGetPresentationTexture evData {};
-	InvokeEventCallbacks(EVENT_GET_PRESENTATION_TEXTURE, evData);
+	InvokeEventCallbacks(cRendererComponent::EVENT_GET_PRESENTATION_TEXTURE, evData);
 	return evData.resultTexture;
 }
 prosper::Texture *CRendererComponent::GetHDRPresentationTexture()
 {
 	pragma::CEGetHdrPresentationTexture evData {};
-	InvokeEventCallbacks(EVENT_GET_HDR_PRESENTATION_TEXTURE, evData);
+	InvokeEventCallbacks(cRendererComponent::EVENT_GET_HDR_PRESENTATION_TEXTURE, evData);
 	return evData.resultTexture;
 }
 
@@ -112,20 +112,20 @@ bool CRendererComponent::ReloadRenderTarget(pragma::CSceneComponent &scene, uint
 	m_width = width;
 	m_height = height;
 	pragma::CEReloadRenderTarget evData {scene, width, height};
-	InvokeEventCallbacks(EVENT_RELOAD_RENDER_TARGET, evData);
+	InvokeEventCallbacks(cRendererComponent::EVENT_RELOAD_RENDER_TARGET, evData);
 	if(!evData.resultSuccess) {
 		m_width = oldWidth;
 		m_height = oldHeight;
 	}
 	CEOnRenderTargetReloaded evDataReloaded {evData.resultSuccess};
-	InvokeEventCallbacks(EVENT_ON_RENDER_TARGET_RELOADED, evDataReloaded);
+	InvokeEventCallbacks(cRendererComponent::EVENT_ON_RENDER_TARGET_RELOADED, evDataReloaded);
 	return evData.resultSuccess;
 }
 
 bool CRendererComponent::ReloadBloomRenderTarget(uint32_t width)
 {
 	pragma::CEReloadBloomRenderTarget evData {width};
-	InvokeEventCallbacks(EVENT_RELOAD_BLOOM_RENDER_TARGET, evData);
+	InvokeEventCallbacks(cRendererComponent::EVENT_RELOAD_BLOOM_RENDER_TARGET, evData);
 	return evData.resultSuccess;
 }
 
@@ -158,11 +158,11 @@ void CRendererComponent::RemovePostProcessingEffect(const std::string &name)
 
 const std::vector<PostProcessingEffectData> &CRendererComponent::GetPostProcessingEffects() const { return m_postProcessingEffects; }
 
-void CRendererComponent::EndRendering() { InvokeEventCallbacks(EVENT_END_RENDERING); }
+void CRendererComponent::EndRendering() { InvokeEventCallbacks(cRendererComponent::EVENT_END_RENDERING); }
 void CRendererComponent::BeginRendering(const util::DrawSceneInfo &drawSceneInfo)
 {
 	const_cast<pragma::CSceneComponent *>(drawSceneInfo.scene.get())->UpdateBuffers(drawSceneInfo.commandBuffer);
-	InvokeEventCallbacks(EVENT_BEGIN_RENDERING);
+	InvokeEventCallbacks(cRendererComponent::EVENT_BEGIN_RENDERING);
 }
 
 ////////////

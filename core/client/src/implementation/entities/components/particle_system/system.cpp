@@ -24,9 +24,9 @@ void ecs::CParticleSystemComponent::Initialize()
 {
 	BaseEnvParticleSystemComponent::Initialize();
 
-	BindEventUnhandled(BaseToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<ComponentEvent> evData) { Start(); });
-	BindEventUnhandled(BaseToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<ComponentEvent> evData) { Stop(); });
-	BindEvent(CIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(baseToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<ComponentEvent> evData) { Start(); });
+	BindEventUnhandled(baseToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<ComponentEvent> evData) { Stop(); });
+	BindEvent(cIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<pragma::CEInputData &>(evData.get());
 		if(ustring::compare<std::string>(inputData.input, "setcontinuous", false)) {
 			SetContinuous(util::to_boolean(inputData.data));
@@ -38,7 +38,7 @@ void ecs::CParticleSystemComponent::Initialize()
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		return HandleKeyValue(kvData.key, kvData.value);
 	});
-	BindEvent(CAnimatedComponent::EVENT_SHOULD_UPDATE_BONES, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cAnimatedComponent::EVENT_SHOULD_UPDATE_BONES, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		static_cast<CEShouldUpdateBones &>(evData.get()).shouldUpdate = IsActive();
 		return util::EventReply::Handled;
 	});
@@ -47,7 +47,7 @@ void ecs::CParticleSystemComponent::Initialize()
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pTrComponent != nullptr) {
 		auto &trC = *pTrComponent;
-		FlagCallbackForRemoval(pTrComponent->AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,
+		FlagCallbackForRemoval(pTrComponent->AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
 		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			                         if(IsActive() == false || umath::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged) == false)
 				                         return util::EventReply::Unhandled;
@@ -300,7 +300,7 @@ bool ecs::CParticleSystemComponent::LoadFromAssetData(CParticleSystemData &ptDat
 	return LoadFromAssetData(ptData, udm, outErr);
 }
 
-static void register_particle_modifier(lua::State *l, pragma::LuaCoreParticleModifierManager::Type type, const std::string &name, luabind::object oClass)
+static void register_particle_modifier(lua::State *l, pragma::LuaParticleModifierManager::Type type, const std::string &name, luabind::object oClass)
 {
 	Lua::CheckUserData(l, 2);
 	auto &particleModMan = reinterpret_cast<LuaParticleModifierManager &>(pragma::get_cgame()->GetLuaParticleModifierManager());
@@ -311,7 +311,7 @@ static void register_particle_modifier(lua::State *l, pragma::LuaCoreParticleMod
 	if(map == nullptr)
 		return;
 	switch(type) {
-	case pragma::LuaCoreParticleModifierManager::Type::Initializer:
+	case pragma::LuaParticleModifierManager::Type::Initializer:
 		map->AddInitializer(name, [name](pragma::ecs::CParticleSystemComponent &psc, const std::unordered_map<std::string, std::string> &keyValues) -> std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)> {
 			auto &particleModMan = reinterpret_cast<LuaParticleModifierManager &>(pragma::get_cgame()->GetLuaParticleModifierManager());
 			auto *modifier = dynamic_cast<CParticleInitializer *>(particleModMan.CreateModifier(name));
@@ -322,7 +322,7 @@ static void register_particle_modifier(lua::State *l, pragma::LuaCoreParticleMod
 			return std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)>(modifier, [](CParticleInitializer *p) {}); // Externally owned (by Lua state), so no delete
 		});
 		break;
-	case pragma::LuaCoreParticleModifierManager::Type::Operator:
+	case pragma::LuaParticleModifierManager::Type::Operator:
 		map->AddOperator(name, [name](pragma::ecs::CParticleSystemComponent &psc, const std::unordered_map<std::string, std::string> &keyValues) -> std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)> {
 			auto &particleModMan = reinterpret_cast<LuaParticleModifierManager &>(pragma::get_cgame()->GetLuaParticleModifierManager());
 			auto *modifier = dynamic_cast<CParticleOperator *>(particleModMan.CreateModifier(name));
@@ -333,7 +333,7 @@ static void register_particle_modifier(lua::State *l, pragma::LuaCoreParticleMod
 			return std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)>(modifier, [](CParticleOperator *p) {}); // Externally owned (by Lua state), so no delete
 		});
 		break;
-	case pragma::LuaCoreParticleModifierManager::Type::Renderer:
+	case pragma::LuaParticleModifierManager::Type::Renderer:
 		map->AddRenderer(name, [name](pragma::ecs::CParticleSystemComponent &psc, const std::unordered_map<std::string, std::string> &keyValues) -> std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)> {
 			auto &particleModMan = reinterpret_cast<LuaParticleModifierManager &>(pragma::get_cgame()->GetLuaParticleModifierManager());
 			auto *modifier = dynamic_cast<CParticleRenderer *>(particleModMan.CreateModifier(name));
@@ -344,7 +344,7 @@ static void register_particle_modifier(lua::State *l, pragma::LuaCoreParticleMod
 			return std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)>(modifier, [](CParticleRenderer *p) {}); // Externally owned (by Lua state), so no delete
 		});
 		break;
-	case pragma::LuaCoreParticleModifierManager::Type::Emitter:
+	case pragma::LuaParticleModifierManager::Type::Emitter:
 		// TODO
 		break;
 	}
@@ -659,14 +659,14 @@ static void register_modifier_class(luabind::class_<pragma::ecs::CParticleSystem
 	defPtRendererBase.def("OnParticleCreated", &CParticleRendererLua::Lua_OnParticleCreated, &CParticleRendererLua::Lua_default_OnParticleCreated);
 	defPtRendererBase.def("OnParticleDestroyed", &CParticleRendererLua::Lua_OnParticleDestroyed, &CParticleRendererLua::Lua_default_OnParticleDestroyed);
 	defPtRendererBase.def("Render", &CParticleRendererLua::Lua_Render, &CParticleRendererLua::Lua_default_Render);
-	defPtRendererBase.def("SetShader", static_cast<void (*)(lua::State *, ::CParticleRendererLua &, ::pragma::LuaCoreShaderWrapperParticle2D &)>([](lua::State *l, ::CParticleRendererLua &renderer, ::pragma::LuaCoreShaderWrapperParticle2D &shader) {
+	defPtRendererBase.def("SetShader", static_cast<void (*)(lua::State *, ::CParticleRendererLua &, ::pragma::LuaShaderWrapperParticle2D &)>([](lua::State *l, ::CParticleRendererLua &renderer, ::pragma::LuaShaderWrapperParticle2D &shader) {
 		renderer.SetShader(&static_cast<pragma::LShaderParticle2D &>(shader.GetShader()));
 	}));
 	defPtRendererBase.def("GetShader", static_cast<void (*)(lua::State *, ::CParticleRendererLua &)>([](lua::State *l, ::CParticleRendererLua &renderer) {
 		auto *shader = dynamic_cast<pragma::LShaderParticle2D *>(renderer.GetShader());
 		if(shader == nullptr)
 			return;
-		auto *wrapper = dynamic_cast<pragma::LuaCoreShaderWrapperParticle2D *>(shader->GetWrapper());
+		auto *wrapper = dynamic_cast<pragma::LuaShaderWrapperParticle2D *>(shader->GetWrapper());
 		if(wrapper) {
 			wrapper->GetLuaObject().push(l);
 			return;
@@ -1150,13 +1150,13 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua::State *l, luabind::
 		Lua::SetTableValue(l, t);
 	}))];
 	defCParticleSystem.scope[luabind::def("register_initializer",
-	  static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaCoreParticleModifierManager::Type::Initializer, name, oClass); }))];
+	  static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaParticleModifierManager::Type::Initializer, name, oClass); }))];
 	defCParticleSystem
-	  .scope[luabind::def("register_operator", static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaCoreParticleModifierManager::Type::Operator, name, oClass); }))];
+	  .scope[luabind::def("register_operator", static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaParticleModifierManager::Type::Operator, name, oClass); }))];
 	defCParticleSystem
-	  .scope[luabind::def("register_renderer", static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaCoreParticleModifierManager::Type::Renderer, name, oClass); }))];
+	  .scope[luabind::def("register_renderer", static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaParticleModifierManager::Type::Renderer, name, oClass); }))];
 	defCParticleSystem
-	  .scope[luabind::def("register_emitter", static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaCoreParticleModifierManager::Type::Emitter, name, oClass); }))];
+	  .scope[luabind::def("register_emitter", static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaParticleModifierManager::Type::Emitter, name, oClass); }))];
 
 	defCParticleSystem.scope[luabind::def("get_registered_initializers", static_cast<void (*)(lua::State *)>([](lua::State *l) {
 		auto t = Lua::CreateTable(l);

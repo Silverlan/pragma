@@ -5,6 +5,9 @@ module;
 #include "definitions.hpp"
 
 export module pragma.client:scripting.lua.libraries.global;
+
+export import pragma.lua;
+
 export namespace Lua {
 	DLLCLIENT double ServerTime(lua::State *l);
 	DLLCLIENT double FrameTime(lua::State *l);

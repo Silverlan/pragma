@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/console/helper.hpp"
-#include <sharedutils/magic_enum.hpp>
 
 module pragma.client;
 

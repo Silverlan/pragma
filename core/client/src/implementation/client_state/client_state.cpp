@@ -213,7 +213,7 @@ void ClientState::InitializeGUILua()
 	m_luaGUI = std::make_shared<Lua::Interface>();
 	m_luaGUI->Open();
 	m_luaGUI->SetIdentifier("gui");
-	Lua::initialize_lua::State(GetGUILuaInterface());
+	Lua::initialize_lua_state(GetGUILuaInterface());
 
 	auto utilMod = luabind::module(m_luaGUI->GetState(), "util");
 	Lua::util::register_shared_generic(m_luaGUI->GetState(), utilMod);
@@ -267,10 +267,10 @@ void ClientState::InitializeGUILua()
 
 	WGUILuaInterface::Initialize();
 
-	pragma::scripting::lua::execute_files_in_directory(GetGUILuaState(), "autorun/gui/");
+	pragma::scripting::lua_core::execute_files_in_directory(GetGUILuaState(), "autorun/gui/");
 	if(g_autoExecScripts.has_value()) {
 		for(auto &f : *g_autoExecScripts)
-			pragma::scripting::lua::execute_file(GetGUILuaState(), f);
+			pragma::scripting::lua_core::execute_file(GetGUILuaState(), f);
 	}
 }
 
@@ -552,7 +552,8 @@ CLNetMessage *ClientState::GetNetMessage(unsigned int ID)
 	return map->GetNetMessage(ID);
 }
 
-extern DLLNETWORK pragma::networking::ClientMessageMap *g_NetMessagesCl;
+extern pragma::networking::ClientMessageMap *g_NetMessagesCl;
+
 pragma::networking::ClientMessageMap *ClientState::GetNetMessageMap() { return g_NetMessagesCl; }
 
 bool ClientState::IsClient() const { return true; }

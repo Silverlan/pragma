@@ -30,12 +30,12 @@ void CLightSpotVolComponent::Initialize()
 				static_cast<pragma::CRasterizationRendererComponent*>(renderer)->SetFrameDepthBufferSamplingRequired();
 		}),CallbackType::Entity);*/
 	}
-	BindEventUnhandled(CRadiusComponent::EVENT_ON_RADIUS_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
+	BindEventUnhandled(cRadiusComponent::EVENT_ON_RADIUS_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		if(!m_model)
 			return;
 		UpdateMeshData();
 	});
-	BindEventUnhandled(CFieldAngleComponent::EVENT_ON_FIELD_ANGLE_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
+	BindEventUnhandled(cFieldAngleComponent::EVENT_ON_FIELD_ANGLE_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		if(!m_model)
 			return;
 		UpdateMeshData();
@@ -174,12 +174,12 @@ util::EventReply CLightSpotVolComponent::HandleEvent(ComponentEventId eventId, C
 {
 	if(BaseEnvLightSpotVolComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == BaseToggleComponent::EVENT_ON_TURN_ON) {
+	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON) {
 		auto pRenderComponent = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
 		if(pRenderComponent)
 			pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::World);
 	}
-	else if(eventId == BaseToggleComponent::EVENT_ON_TURN_OFF) {
+	else if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF) {
 		auto pRenderComponent = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
 		if(pRenderComponent)
 			pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::None);

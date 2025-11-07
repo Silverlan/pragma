@@ -22,7 +22,7 @@ void CFlashlightComponent::Initialize()
 	pragma::get_client_state()->PrecacheSound("fx\\flashlight_off.wav");
 
 	auto &ent = GetEntity();
-	BindEvent(CLightComponent::EVENT_SHOULD_PASS_ENTITY, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cLightComponent::EVENT_SHOULD_PASS_ENTITY, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto pAttComponent = GetEntity().GetComponent<CAttachmentComponent>();
 		auto *pParent = pAttComponent.valid() ? pAttComponent->GetParent() : nullptr;
 		if(pParent != nullptr && &static_cast<CEShouldPassEntity &>(evData.get()).entity == pParent) {
@@ -38,12 +38,12 @@ util::EventReply CFlashlightComponent::HandleEvent(ComponentEventId eventId, Com
 	if(BaseFlashlightComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	auto &ent = GetEntity();
-	if(eventId == BaseToggleComponent::EVENT_ON_TURN_ON) {
+	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON) {
 		auto pSoundEmitterCompnent = ent.GetComponent<pragma::CSoundEmitterComponent>();
 		if(pSoundEmitterCompnent.valid())
 			pSoundEmitterCompnent->EmitSound("fx\\flashlight_on.wav", pragma::audio::ALSoundType::Effect, 1.f);
 	}
-	else if(eventId == BaseToggleComponent::EVENT_ON_TURN_OFF) {
+	else if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF) {
 		auto pSoundEmitterCompnent = ent.GetComponent<pragma::CSoundEmitterComponent>();
 		if(pSoundEmitterCompnent.valid())
 			pSoundEmitterCompnent->EmitSound("fx\\flashlight_off.wav", pragma::audio::ALSoundType::Effect, 1.f);

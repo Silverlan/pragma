@@ -9,6 +9,9 @@ export module pragma.client:entities.components.radius;
 export import :entities.components.entity;
 
 export namespace pragma {
+	namespace cRadiusComponent {
+		using namespace baseRadiusComponent;
+	}
 	class DLLCLIENT CRadiusComponent final : public BaseRadiusComponent, public CBaseNetComponent {
 	  public:
 		CRadiusComponent(pragma::ecs::BaseEntity &ent);

@@ -15,8 +15,8 @@ using namespace pragma;
 void CFogControllerComponent::Initialize()
 {
 	BaseEnvFogControllerComponent::Initialize();
-	BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<ComponentEvent> evData) { GetFog().SetEnabled(true); });
-	BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<ComponentEvent> evData) { GetFog().SetEnabled(false); });
+	BindEventUnhandled(cToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<ComponentEvent> evData) { GetFog().SetEnabled(true); });
+	BindEventUnhandled(cToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<ComponentEvent> evData) { GetFog().SetEnabled(false); });
 }
 void CFogControllerComponent::OnRemove()
 {

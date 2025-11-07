@@ -72,8 +72,8 @@ void CBaseEntity::InitializeLuaObject(lua::State *lua) { pragma::BaseLuaHandle::
 
 //////////////////////////////////
 
-pragma::ComponentEventId CBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED = pragma::INVALID_COMPONENT_ID;
-void CBaseEntity::RegisterEvents(pragma::EntityComponentManager &componentManager) { CBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED = componentManager.RegisterEvent("ON_SCENE_FLAGS_CHANGED", typeid(pragma::ecs::BaseEntity), pragma::ComponentEventInfo::Type::Broadcast); }
+pragma::ComponentEventId cBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED = pragma::INVALID_COMPONENT_ID;
+void CBaseEntity::RegisterEvents(pragma::EntityComponentManager &componentManager) { cBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED = componentManager.RegisterEvent("ON_SCENE_FLAGS_CHANGED", typeid(pragma::ecs::BaseEntity), pragma::ComponentEventInfo::Type::Broadcast); }
 
 CBaseEntity::CBaseEntity() : pragma::ecs::BaseEntity(), m_sceneFlags {util::UInt32Property::Create(0)} {}
 
@@ -100,17 +100,17 @@ uint32_t CBaseEntity::GetSceneFlags() const { return *m_sceneFlags; }
 void CBaseEntity::AddToScene(pragma::CSceneComponent &scene)
 {
 	*m_sceneFlags = **m_sceneFlags | get_scene_flag(scene);
-	BroadcastEvent(EVENT_ON_SCENE_FLAGS_CHANGED);
+	BroadcastEvent(cBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED);
 }
 void CBaseEntity::RemoveFromScene(pragma::CSceneComponent &scene)
 {
 	*m_sceneFlags = **m_sceneFlags & ~get_scene_flag(scene);
-	BroadcastEvent(EVENT_ON_SCENE_FLAGS_CHANGED);
+	BroadcastEvent(cBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED);
 }
 void CBaseEntity::RemoveFromAllScenes()
 {
 	*m_sceneFlags = 0;
-	BroadcastEvent(EVENT_ON_SCENE_FLAGS_CHANGED);
+	BroadcastEvent(cBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED);
 }
 bool CBaseEntity::IsInScene(const pragma::CSceneComponent &scene) const { return (**m_sceneFlags & get_scene_flag(scene)) != 0; }
 std::vector<pragma::CSceneComponent *> CBaseEntity::GetScenes() const

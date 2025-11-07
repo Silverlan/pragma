@@ -3,7 +3,6 @@
 
 module;
 
-#include <sharedutils/magic_enum.hpp>
 
 module pragma.client;
 
@@ -16,15 +15,15 @@ import :scripting.lua.libraries.vulkan;
 
 using namespace pragma;
 
-ComponentEventId CAnimatedComponent::EVENT_ON_SKELETON_UPDATED = INVALID_COMPONENT_ID;
-ComponentEventId CAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED = INVALID_COMPONENT_ID;
-ComponentEventId CAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED = INVALID_COMPONENT_ID;
+ComponentEventId cAnimatedComponent::EVENT_ON_SKELETON_UPDATED = INVALID_COMPONENT_ID;
+ComponentEventId cAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED = INVALID_COMPONENT_ID;
+ComponentEventId cAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED = INVALID_COMPONENT_ID;
 void CAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseAnimatedComponent::RegisterEvents(componentManager, registerEvent);
-	EVENT_ON_SKELETON_UPDATED = registerEvent("ON_SKELETON_UPDATED", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_BONE_MATRICES_UPDATED = registerEvent("ON_BONE_MATRICES_UPDATED", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_BONE_BUFFER_INITIALIZED = registerEvent("ON_BONE_BUFFER_INITIALIZED", ComponentEventInfo::Type::Broadcast);
+	cAnimatedComponent::EVENT_ON_SKELETON_UPDATED = registerEvent("ON_SKELETON_UPDATED", ComponentEventInfo::Type::Explicit);
+	cAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED = registerEvent("ON_BONE_MATRICES_UPDATED", ComponentEventInfo::Type::Explicit);
+	cAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED = registerEvent("ON_BONE_BUFFER_INITIALIZED", ComponentEventInfo::Type::Broadcast);
 }
 void CAnimatedComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseAnimatedComponent)); }
 void CAnimatedComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
@@ -70,17 +69,17 @@ void CAnimatedComponent::Initialize()
 		if(pRenderComponent.valid())
 			pRenderComponent->UpdateRenderBounds();
 	});*/
-	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		if(AreSkeletonUpdateCallbacksEnabled())
 			return; // Bone matrices will be updated from main thread
 		UpdateBoneMatricesMT();
 	});
-	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto isDirty = umath::is_flag_set(m_stateFlags, StateFlags::BoneBufferDirty);
 		umath::set_flag(m_stateFlags, StateFlags::BoneBufferDirty, false);
 		UpdateBoneBuffer(*static_cast<pragma::CEOnUpdateRenderBuffers &>(evData.get()).commandBuffer, isDirty);
 	});
-	BindEvent(CRenderComponent::EVENT_UPDATE_INSTANTIABILITY, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cRenderComponent::EVENT_UPDATE_INSTANTIABILITY, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		// TODO: Allow instantiability for animated entities
 		static_cast<CEUpdateInstantiability &>(evData.get()).instantiable = false;
 		return util::EventReply::Handled;
@@ -209,7 +208,7 @@ void CAnimatedComponent::InitializeBoneBuffer()
 	m_boneBuffer = pragma::get_instance_bone_buffer()->AllocateBuffer();
 
 	CEOnBoneBufferInitialized evData {m_boneBuffer};
-	BroadcastEvent(EVENT_ON_BONE_BUFFER_INITIALIZED, evData);
+	BroadcastEvent(cAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED, evData);
 }
 void CAnimatedComponent::UpdateBoneBuffer(prosper::IPrimaryCommandBuffer &commandBuffer, bool flagAsDirty)
 {
@@ -258,7 +257,7 @@ void CAnimatedComponent::UpdateBoneMatricesMT()
 	auto callbacksEnabled = AreSkeletonUpdateCallbacksEnabled();
 	if(callbacksEnabled) {
 		CEOnSkeletonUpdated evData {physRootBoneId};
-		InvokeEventCallbacks(EVENT_ON_SKELETON_UPDATED, evData);
+		InvokeEventCallbacks(cAnimatedComponent::EVENT_ON_SKELETON_UPDATED, evData);
 	}
 
 	auto &refFrame = *bindPose;
@@ -292,7 +291,7 @@ void CAnimatedComponent::UpdateBoneMatricesMT()
 			Con::cwar << "Attempted to update bone " << i << " in " << mdl->GetName() << " which doesn't exist in the reference pose! Ignoring..." << Con::endl;
 	}
 	if(callbacksEnabled)
-		InvokeEventCallbacks(EVENT_ON_BONE_MATRICES_UPDATED);
+		InvokeEventCallbacks(cAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED);
 }
 
 uint32_t CAnimatedComponent::OnSkeletonUpdated() { return std::numeric_limits<uint32_t>::max(); }
@@ -352,8 +351,8 @@ void CAnimatedComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &mo
 	  }));
 	defCAnimated.def("AreSkeletonUpdateCallbacksEnabled", &pragma::CAnimatedComponent::AreSkeletonUpdateCallbacksEnabled);
 	defCAnimated.def("SetSkeletonUpdateCallbacksEnabled", &pragma::CAnimatedComponent::SetSkeletonUpdateCallbacksEnabled);
-	defCAnimated.add_static_constant("EVENT_ON_SKELETON_UPDATED", pragma::CAnimatedComponent::EVENT_ON_SKELETON_UPDATED);
-	defCAnimated.add_static_constant("EVENT_ON_BONE_MATRICES_UPDATED", pragma::CAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED);
-	defCAnimated.add_static_constant("EVENT_ON_BONE_BUFFER_INITIALIZED", pragma::CAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED);
+	defCAnimated.add_static_constant("EVENT_ON_SKELETON_UPDATED", pragma::cAnimatedComponent::EVENT_ON_SKELETON_UPDATED);
+	defCAnimated.add_static_constant("EVENT_ON_BONE_MATRICES_UPDATED", pragma::cAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED);
+	defCAnimated.add_static_constant("EVENT_ON_BONE_BUFFER_INITIALIZED", pragma::cAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED);
 	modEnts[defCAnimated];
 }

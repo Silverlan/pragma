@@ -18,21 +18,23 @@ export namespace pragma {
 		mutable CallbackHandle render;
 		std::function<PostProcessingEffectData::Flags()> getFlags = nullptr;
 	};
-	class DLLCLIENT CRendererComponent final : public BaseEntityComponent {
+		namespace cRendererComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_RELOAD_RENDER_TARGET;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_RELOAD_BLOOM_RENDER_TARGET;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_BEGIN_RENDERING;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_END_RENDERING;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_UPDATE_CAMERA_DATA;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_UPDATE_RENDER_SETTINGS;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_UPDATE_RENDERER_BUFFER;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_GET_SCENE_TEXTURE;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_GET_PRESENTATION_TEXTURE;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_GET_HDR_PRESENTATION_TEXTURE;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_RECORD_COMMAND_BUFFERS;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_RENDER;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_RENDER_TARGET_RELOADED;
+	}
+class DLLCLIENT CRendererComponent final : public BaseEntityComponent {
 	  public:
-		static ComponentEventId EVENT_RELOAD_RENDER_TARGET;
-		static ComponentEventId EVENT_RELOAD_BLOOM_RENDER_TARGET;
-		static ComponentEventId EVENT_BEGIN_RENDERING;
-		static ComponentEventId EVENT_END_RENDERING;
-		static ComponentEventId EVENT_UPDATE_CAMERA_DATA;
-		static ComponentEventId EVENT_UPDATE_RENDER_SETTINGS;
-		static ComponentEventId EVENT_UPDATE_RENDERER_BUFFER;
-		static ComponentEventId EVENT_GET_SCENE_TEXTURE;
-		static ComponentEventId EVENT_GET_PRESENTATION_TEXTURE;
-		static ComponentEventId EVENT_GET_HDR_PRESENTATION_TEXTURE;
-		static ComponentEventId EVENT_RECORD_COMMAND_BUFFERS;
-		static ComponentEventId EVENT_RENDER;
-		static ComponentEventId EVENT_ON_RENDER_TARGET_RELOADED;
 
 		enum class StandardPostProcessingWeight : uint32_t { Fog = 100'000, MotionBlur = 200'000, DoF = 300'000, Bloom = 400'000, ToneMapping = 500'000, Fxaa = 600'000 };
 

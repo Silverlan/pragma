@@ -20,10 +20,13 @@ export namespace pragma {
 	class CMaterialOverrideComponent;
 };
 export namespace pragma {
+	namespace cModelComponent {
+		using namespace baseModelComponent;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_RENDER_MESHES_UPDATED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED;
+	}
 	class DLLCLIENT CModelComponent final : public BaseModelComponent, public CBaseNetComponent {
 	  public:
-		static ComponentEventId EVENT_ON_RENDER_MESHES_UPDATED;
-		static ComponentEventId EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED;
 
 		enum class StateFlags : uint8_t {
 			None = 0u,

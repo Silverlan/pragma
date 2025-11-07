@@ -91,7 +91,7 @@ static std::vector<pragma::platform::Key> get_mapped_keys(const std::string &cva
 	return mappedKeys;
 }
 
-static pragma::LuaCoreInputBindingLayerRegister &get_input_binding_layer_register() { return pragma::get_cgame()->GetLuaInputBindingLayerRegister(); }
+static pragma::LuaInputBindingLayerRegister &get_input_binding_layer_register() { return pragma::get_cgame()->GetLuaInputBindingLayerRegister(); }
 static std::shared_ptr<InputBindingLayer> create_input_binding_layer()
 {
 	auto layer = std::shared_ptr<InputBindingLayer> {new InputBindingLayer {}, [](InputBindingLayer *layer) {
@@ -755,7 +755,7 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
 	  },
 	  const std::string &>(lua.GetState());
 
-	pragma::scripting::lua::bindings::register_audio(lua.GetState());
+	pragma::scripting::lua_core::bindings::register_audio(lua.GetState());
 
 	RegisterVulkanLuaInterface(lua);
 }

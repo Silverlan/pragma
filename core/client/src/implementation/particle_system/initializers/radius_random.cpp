@@ -13,7 +13,7 @@ void CParticleInitializerRadiusRandomBase::Initialize(pragma::BaseEnvParticleSys
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+		ustring::to_lower(key);
 		if(key == m_identifier + "_min")
 			m_radiusMin = util::to_float(it->second);
 		else if(key == m_identifier + "_max")

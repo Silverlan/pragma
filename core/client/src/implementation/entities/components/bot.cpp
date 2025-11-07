@@ -17,7 +17,7 @@ void CBotComponent::Initialize()
 {
 	BaseBotComponent::Initialize();
 
-	BindEvent(CAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		switch(static_cast<CEHandleAnimationEvent &>(evData.get()).animationEvent.eventID) {
 		case AnimationEvent::Type::FootstepLeft:
 			OnFootStep(BaseCharacterComponent::FootType::Left);
@@ -33,7 +33,7 @@ util::EventReply CBotComponent::HandleEvent(ComponentEventId eventId, ComponentE
 {
 	if(BaseBotComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == BaseCharacterComponent::EVENT_ON_FOOT_STEP)
+	if(eventId == baseCharacterComponent::EVENT_ON_FOOT_STEP)
 		OnFootStep(static_cast<CEOnFootStep &>(evData).footType);
 	return util::EventReply::Unhandled;
 }

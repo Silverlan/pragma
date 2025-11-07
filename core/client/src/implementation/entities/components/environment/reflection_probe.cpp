@@ -7,7 +7,6 @@ module;
 #include "pragma/console/helper.hpp"
 
 
-#include <spdlog/logger.h>
 
 module pragma.client;
 
@@ -344,6 +343,7 @@ void CReflectionProbeComponent::Initialize()
 void CReflectionProbeComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
+	auto &logger = InitLogger();
 	if(LoadIBLReflectionsFromFile() == false)
 		LogWarn("Invalid/missing IBL reflection resources for cubemap {}! Please run 'map_build_reflection_probes' to build all reflection probes!", GetCubemapIdentifier());
 }

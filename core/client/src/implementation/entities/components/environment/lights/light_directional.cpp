@@ -20,16 +20,16 @@ void CLightDirectionalComponent::Initialize()
 {
 	BaseEnvLightDirectionalComponent::Initialize();
 
-	BindEvent(CLightComponent::EVENT_GET_TRANSFORMATION_MATRIX, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cLightComponent::EVENT_GET_TRANSFORMATION_MATRIX, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &trData = static_cast<CEGetTransformationMatrix &>(evData.get());
 		trData.transformation = &MVPBias<1>::GetTransformationMatrix(trData.index);
 		return util::EventReply::Handled;
 	});
-	BindEvent(CLightComponent::EVENT_SHOULD_UPDATE_RENDER_PASS, [](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cLightComponent::EVENT_SHOULD_UPDATE_RENDER_PASS, [](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		static_cast<CEShouldUpdateRenderPass &>(evData.get()).shouldUpdate = true; // CSM Update requirements are determined through ShadowMapCasc::ShouldUpdateLayer
 		return util::EventReply::Handled;
 	});
-	BindEvent(CLightComponent::EVENT_SHOULD_PASS_ENTITY, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cLightComponent::EVENT_SHOULD_PASS_ENTITY, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &shouldPassData = static_cast<CEShouldPassEntity &>(evData.get());
 		auto &ent = shouldPassData.entity;
 		auto pTrComponent = ent.GetTransformComponent();
@@ -55,7 +55,7 @@ void CLightDirectionalComponent::Initialize()
 		}
 		return util::EventReply::Unhandled;
 	});
-	BindEvent(CLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &shouldPassData = static_cast<CEShouldPassEntityMesh &>(evData.get());
 		auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
 		if(hShadow.valid()) {
@@ -85,7 +85,7 @@ void CLightDirectionalComponent::Initialize()
 		}
 		return util::EventReply::Unhandled;
 	});
-	BindEvent(CLightComponent::EVENT_HANDLE_SHADOW_MAP, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cLightComponent::EVENT_HANDLE_SHADOW_MAP, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto csmC = GetEntity().AddComponent<CShadowCSMComponent>();
 		if(csmC.valid())
 			csmC->ReloadDepthTextures();
@@ -104,7 +104,7 @@ void CLightDirectionalComponent::Initialize()
 		auto dir = pTrComponent->GetForward();
 		SetViewMatrix(glm::gtc::lookAtRH(pos, pos + dir, uvec::get_perpendicular(dir)));
 		auto &trC = static_cast<CTransformComponent &>(*pTrComponent);
-		FlagCallbackForRemoval(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,
+		FlagCallbackForRemoval(trC.AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
 		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			                         if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::RotationChanged) == false)
 				                         return util::EventReply::Unhandled;
@@ -128,12 +128,12 @@ void CLightDirectionalComponent::Initialize()
 		// pLightComponent->SetStateFlag(CLightComponent::StateFlags::UseDualTextureSet,false);
 	}
 
-	BindEventUnhandled(BaseToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(baseToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		if(GetEntity().IsSpawned() == false)
 			return;
 		pragma::get_cgame()->UpdateEnvironmentLightSource();
 	});
-	BindEventUnhandled(BaseToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(baseToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		if(GetEntity().IsSpawned() == false)
 			return;
 		pragma::get_cgame()->UpdateEnvironmentLightSource();
@@ -180,7 +180,7 @@ util::EventReply CLightDirectionalComponent::HandleEvent(ComponentEventId eventI
 {
 	if(BaseEnvLightDirectionalComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == BaseToggleComponent::EVENT_ON_TURN_ON)
+	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON)
 		UpdateAmbientColor();
 	return util::EventReply::Unhandled;
 }
@@ -275,7 +275,7 @@ void CLightDirectionalComponent::OnEntityComponentAdded(BaseEntityComponent &com
 	BaseEnvLightDirectionalComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(CTransformComponent)) {
 		auto &trC = static_cast<CTransformComponent &>(component);
-		FlagCallbackForRemoval(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,
+		FlagCallbackForRemoval(trC.AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
 		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			                         if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::RotationChanged) == false)
 				                         return util::EventReply::Unhandled;

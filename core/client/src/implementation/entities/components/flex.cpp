@@ -15,11 +15,11 @@ using namespace pragma;
 
 static auto cvFlexPhonemeDrag = GetClientConVar("cl_flex_phoneme_drag");
 
-ComponentEventId CFlexComponent::EVENT_ON_FLEX_CONTROLLERS_UPDATED = INVALID_COMPONENT_ID;
+ComponentEventId cFlexComponent::EVENT_ON_FLEX_CONTROLLERS_UPDATED = INVALID_COMPONENT_ID;
 void CFlexComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseFlexComponent::RegisterEvents(componentManager, registerEvent);
-	EVENT_ON_FLEX_CONTROLLERS_UPDATED = registerEvent("ON_FLEX_CONTROLLERS_UPDATED", ComponentEventInfo::Type::Explicit);
+	cFlexComponent::EVENT_ON_FLEX_CONTROLLERS_UPDATED = registerEvent("ON_FLEX_CONTROLLERS_UPDATED", ComponentEventInfo::Type::Explicit);
 }
 
 void CFlexComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
@@ -38,7 +38,7 @@ void CFlexComponent::UpdateFlexControllers(float dt)
 			m_flexDataUpdateRequired = true;
 		info.value = newVal;
 	}
-	InvokeEventCallbacks(EVENT_ON_FLEX_CONTROLLERS_UPDATED);
+	InvokeEventCallbacks(cFlexComponent::EVENT_ON_FLEX_CONTROLLERS_UPDATED);
 }
 
 void CFlexComponent::SetFlexWeight(uint32_t flexIdx, float weight)
@@ -151,7 +151,7 @@ void CFlexComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &mdl)
 void CFlexComponent::Initialize()
 {
 	BaseFlexComponent::Initialize();
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnModelChanged(static_cast<pragma::CEOnModelChanged &>(evData.get()).model); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnModelChanged(static_cast<pragma::CEOnModelChanged &>(evData.get()).model); });
 	// This has been moved to vertex animated component
 	//BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 	//	UpdateFlexWeightsMT();
@@ -186,7 +186,7 @@ void CFlexComponent::SetFlexController(uint32_t flexId, float val, float duratio
 	//	InitializeVertexAnimationBuffer(); // prosper TODO
 	if(AreFlexControllerUpdateListenersEnabled()) {
 		CEOnFlexControllerChanged evData {flexId, flexInfo.targetValue};
-		InvokeEventCallbacks(EVENT_ON_FLEX_CONTROLLER_CHANGED, evData);
+		InvokeEventCallbacks(cFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED, evData);
 	}
 }
 bool CFlexComponent::GetFlexController(uint32_t flexId, float &val) const
@@ -443,6 +443,6 @@ void CFlexComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnt
 	defCFlex.def("SetFlexAnimationCycle", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, const std::string &, float)>([](lua::State *l, pragma::CFlexComponent &hEnt, const std::string &id, float cycle) { hEnt.SetFlexAnimationCycle(id, cycle); }));
 	defCFlex.def("SetFlexAnimationPlaybackRate", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, uint32_t, float)>([](lua::State *l, pragma::CFlexComponent &hEnt, uint32_t id, float playbackRate) { hEnt.SetFlexAnimationPlaybackRate(id, playbackRate); }));
 	defCFlex.def("SetFlexAnimationPlaybackRate", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, const std::string &, float)>([](lua::State *l, pragma::CFlexComponent &hEnt, const std::string &id, float playbackRate) { hEnt.SetFlexAnimationPlaybackRate(id, playbackRate); }));
-	defCFlex.add_static_constant("EVENT_ON_FLEX_CONTROLLERS_UPDATED", pragma::CFlexComponent::EVENT_ON_FLEX_CONTROLLERS_UPDATED);
+	defCFlex.add_static_constant("EVENT_ON_FLEX_CONTROLLERS_UPDATED", pragma::cFlexComponent::EVENT_ON_FLEX_CONTROLLERS_UPDATED);
 	modEnts[defCFlex];
 }

@@ -5,6 +5,9 @@ module;
 #include "definitions.hpp"
 
 export module pragma.client:scripting.lua.libraries.game;
+
+export import pragma.lua;
+
 export namespace Lua {
 	namespace game {
 		namespace Client {

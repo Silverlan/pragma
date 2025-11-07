@@ -43,7 +43,7 @@ void Lua::debug::stackdump(lua::State *l)
 			Con::cout << "number: " << lua::to_number(l, i) << Con::endl;
 			break;
 		default:
-			Con::cout << lua::type_name(l, i) << Con::endl;
+			Con::cout << lua::type_name(l, t) << Con::endl;
 			break;
 		}
 	}

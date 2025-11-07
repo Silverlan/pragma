@@ -5,6 +5,7 @@ module;
 
 
 #include "pragma/console/helper.hpp"
+#include <cstddef>
 
 module pragma.client;
 

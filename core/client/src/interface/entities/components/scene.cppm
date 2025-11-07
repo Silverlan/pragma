@@ -80,14 +80,15 @@ export class DLLCLIENT SceneRenderDesc {
 };
 
 export namespace pragma {
-	class DLLCLIENT CSceneComponent final : public BaseEntityComponent {
+		namespace cSceneComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ACTIVE_CAMERA_CHANGED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BUILD_RENDER_QUEUES;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_RENDERER_CHANGED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_POST_RENDER_PREPASS;
+	}
+class DLLCLIENT CSceneComponent final : public BaseEntityComponent {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-
-		static ComponentEventId EVENT_ON_ACTIVE_CAMERA_CHANGED;
-		static ComponentEventId EVENT_ON_BUILD_RENDER_QUEUES;
-		static ComponentEventId EVENT_ON_RENDERER_CHANGED;
-		static ComponentEventId EVENT_POST_RENDER_PREPASS;
 
 		friend SceneRenderDesc;
 		enum class FRenderSetting : uint32_t { None = 0, Unlit = 1 };

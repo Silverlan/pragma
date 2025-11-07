@@ -297,17 +297,17 @@ void Lua::gui::register_default_skin(const std::string &vars, const std::string 
 		return;
 	auto *l = pragma::get_client_state()->GetGUILuaState();
 	std::string errMsg;
-	auto resVars = pragma::scripting::lua::run_string(l, "return " + vars, "register_default_skin", 1, &errMsg);
+	auto resVars = pragma::scripting::lua_core::run_string(l, "return " + vars, "register_default_skin", 1, &errMsg);
 	Lua::CheckTable(l, -1);
 	if(resVars != Lua::StatusCode::Ok) {
-		pragma::scripting::lua::raise_error(l, errMsg);
+		pragma::scripting::lua_core::raise_error(l, errMsg);
 		return;
 	}
 	auto tVars = luabind::object {luabind::from_stack(l, -1)};
 	Lua::Pop(l);
-	auto resSkinData = pragma::scripting::lua::run_string(l, "return " + skinData, "register_default_skin", 1, &errMsg);
+	auto resSkinData = pragma::scripting::lua_core::run_string(l, "return " + skinData, "register_default_skin", 1, &errMsg);
 	if(resSkinData != Lua::StatusCode::Ok) {
-		pragma::scripting::lua::raise_error(l, errMsg);
+		pragma::scripting::lua_core::raise_error(l, errMsg);
 		return;
 	}
 	Lua::CheckTable(l, -1);

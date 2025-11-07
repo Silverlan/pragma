@@ -132,17 +132,17 @@ void CRendererPpMotionBlurComponent::Initialize()
 	auto *shaderMotionBlur = static_cast<pragma::ShaderPPMotionBlur *>(pragma::get_cengine()->GetShader("pp_motion_blur").get());
 	if(!velShader || !shaderMotionBlur)
 		return;
-	BindEventUnhandled(pragma::CRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(pragma::cRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		if(!m_valid)
 			return;
 		RecordVelocityPass(static_cast<CEDrawSceneInfo &>(evData.get()).drawSceneInfo);
 	});
-	BindEventUnhandled(pragma::CRasterizationRendererComponent::EVENT_POST_PREPASS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(pragma::cRasterizationRendererComponent::EVENT_POST_PREPASS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		if(!m_valid)
 			return;
 		ExecuteVelocityPass(static_cast<CEDrawSceneInfo &>(evData.get()).drawSceneInfo);
 	});
-	BindEventUnhandled(pragma::CRendererComponent::EVENT_ON_RENDER_TARGET_RELOADED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(pragma::cRendererComponent::EVENT_ON_RENDER_TARGET_RELOADED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		m_valid = false;
 		auto evDataReloaded = static_cast<CEOnRenderTargetReloaded &>(evData.get());
 		if(!evDataReloaded.success)

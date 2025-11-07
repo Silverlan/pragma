@@ -21,12 +21,12 @@ namespace pragma {
 	using ::operator<<;
 };
 
-ComponentEventId CObserverComponent::EVENT_CALC_VIEW = pragma::INVALID_COMPONENT_ID;
-ComponentEventId CObserverComponent::EVENT_CALC_VIEW_OFFSET = pragma::INVALID_COMPONENT_ID;
+ComponentEventId cObserverComponent::EVENT_CALC_VIEW = pragma::INVALID_COMPONENT_ID;
+ComponentEventId cObserverComponent::EVENT_CALC_VIEW_OFFSET = pragma::INVALID_COMPONENT_ID;
 void CObserverComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_CALC_VIEW = registerEvent("CALC_VIEW", ComponentEventInfo::Type::Explicit);
-	EVENT_CALC_VIEW = registerEvent("CALC_VIEW_OFFSET", ComponentEventInfo::Type::Explicit);
+	cObserverComponent::EVENT_CALC_VIEW = registerEvent("CALC_VIEW", ComponentEventInfo::Type::Explicit);
+	cObserverComponent::EVENT_CALC_VIEW = registerEvent("CALC_VIEW_OFFSET", ComponentEventInfo::Type::Explicit);
 }
 CObserverComponent::CObserverComponent(pragma::ecs::BaseEntity &ent) : BaseObserverComponent(ent) {}
 
@@ -264,7 +264,7 @@ void CObserverComponent::UpdateCameraPose()
 	orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetRotation();
 
 	auto rotModifier = uquat::identity();
-	InvokeEventCallbacks(EVENT_CALC_VIEW, CECalcView {pos, orientation, rotModifier});
+	InvokeEventCallbacks(cObserverComponent::EVENT_CALC_VIEW, CECalcView {pos, orientation, rotModifier});
 
 	ApplyCameraObservationMode(pos, orientation, rotModifier);
 
@@ -287,7 +287,7 @@ void CObserverComponent::UpdateCameraPose()
 			pAttComponent->UpdateAttachmentOffset();
 	}*/
 
-	InvokeEventCallbacks(EVENT_CALC_VIEW_OFFSET, CECalcViewOffset {pos, orientation});
+	InvokeEventCallbacks(cObserverComponent::EVENT_CALC_VIEW_OFFSET, CECalcViewOffset {pos, orientation});
 
 	auto &entCam = GetEntity();
 	entCam.SetPosition(pos);

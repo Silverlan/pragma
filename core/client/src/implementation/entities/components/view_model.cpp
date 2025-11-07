@@ -21,7 +21,7 @@ void CViewModelComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(CAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &ent = GetEntity();
 		auto pAttachableComponent = ent.GetComponent<CAttachmentComponent>();
 		auto *parent = pAttachableComponent.valid() ? pAttachableComponent->GetParent() : nullptr;
@@ -35,7 +35,7 @@ void CViewModelComponent::Initialize()
 		}
 		return util::EventReply::Handled; // Always overwrite
 	});
-	BindEventUnhandled(CAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ent = GetEntity();
 		auto &hMdl = ent.GetModel();
 		if(hMdl != nullptr) {
@@ -47,7 +47,7 @@ void CViewModelComponent::Initialize()
 		if(animComponent.valid())
 			animComponent->PlayActivity(pragma::Activity::VmIdle);
 	});
-	BindEventUnhandled(CAnimatedComponent::EVENT_ON_ANIMATION_RESET, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cAnimatedComponent::EVENT_ON_ANIMATION_RESET, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto *wepC = static_cast<pragma::CWeaponComponent *>(GetWeapon());
 		if(wepC)
 			wepC->UpdateDeployState();

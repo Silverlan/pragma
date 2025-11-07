@@ -1233,7 +1233,7 @@ namespace Lua {
 					auto &o = cbInfo.luaFunction;
 					auto bReturn = false;
 					auto n = Lua::GetStackTop(l);
-					auto r = pragma::scripting::lua::protected_call(
+					auto r = pragma::scripting::lua_core::protected_call(
 					  l,
 					  [&](lua::State *l) -> Lua::StatusCode {
 						  o.push(l);

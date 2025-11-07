@@ -9,13 +9,13 @@ module pragma.client;
 import :entities.components.material_override;
 
 using namespace pragma;
-ComponentEventId CMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDES_CLEARED = INVALID_COMPONENT_ID;
-ComponentEventId CMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDE_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId cMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDES_CLEARED = INVALID_COMPONENT_ID;
+ComponentEventId cMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDE_CHANGED = INVALID_COMPONENT_ID;
 void CMaterialOverrideComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseModelComponent::RegisterEvents(componentManager, registerEvent);
-	EVENT_ON_MATERIAL_OVERRIDES_CLEARED = registerEvent("EVENT_ON_MATERIAL_OVERRIDES_CLEARED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_MATERIAL_OVERRIDE_CHANGED = registerEvent("EVENT_ON_MATERIAL_OVERRIDE_CHANGED", ComponentEventInfo::Type::Broadcast);
+	cMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDES_CLEARED = registerEvent("EVENT_ON_MATERIAL_OVERRIDES_CLEARED", ComponentEventInfo::Type::Broadcast);
+	cMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDE_CHANGED = registerEvent("EVENT_ON_MATERIAL_OVERRIDE_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
 
 CMaterialOverrideComponent::CMaterialOverrideComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
@@ -25,7 +25,7 @@ void CMaterialOverrideComponent::InitializeLuaObject(lua::State *l) { return Bas
 void CMaterialOverrideComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		m_materialOverrides.clear();
 		if(GetEntity().IsSpawned())
 			PopulateProperties();
@@ -76,7 +76,7 @@ void CMaterialOverrideComponent::UpdateMaterialOverride(uint32_t matIdx, msys::C
 	if(mdlC)
 		mdlC->UpdateRenderBufferList();
 
-	BroadcastEvent(EVENT_ON_MATERIAL_OVERRIDE_CHANGED, CEOnMaterialOverrideChanged {matIdx, mat});
+	BroadcastEvent(cMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDE_CHANGED, CEOnMaterialOverrideChanged {matIdx, mat});
 }
 void CMaterialOverrideComponent::ClearMaterialOverride(uint32_t idx)
 {
@@ -98,7 +98,7 @@ void CMaterialOverrideComponent::ClearMaterialOverrides()
 	auto *mdlC = static_cast<CModelComponent *>(GetEntity().GetModelComponent());
 	if(mdlC)
 		mdlC->SetRenderBufferListUpdateRequired();
-	BroadcastEvent(EVENT_ON_MATERIAL_OVERRIDES_CLEARED);
+	BroadcastEvent(cMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDES_CLEARED);
 }
 msys::CMaterial *CMaterialOverrideComponent::GetMaterialOverride(uint32_t idx) const { return (idx < m_materialOverrides.size()) ? const_cast<msys::CMaterial *>(static_cast<const msys::CMaterial *>(m_materialOverrides.at(idx).materialOverride.get())) : nullptr; }
 
@@ -196,7 +196,7 @@ size_t CMaterialOverrideComponent::GetMaterialOverrideCount() const { return m_m
 void CMaterialOverrideComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	auto def = pragma::LuaCore::create_entity_component_class<pragma::CMaterialOverrideComponent, pragma::BaseEntityComponent>("MaterialOverrideComponent");
-	def.add_static_constant("EVENT_ON_MATERIAL_OVERRIDES_CLEARED", pragma::CMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDES_CLEARED);
+	def.add_static_constant("EVENT_ON_MATERIAL_OVERRIDES_CLEARED", pragma::cMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDES_CLEARED);
 	def.def("SetMaterialOverride", static_cast<void (pragma::CMaterialOverrideComponent::*)(uint32_t, const std::string &)>(&pragma::CMaterialOverrideComponent::SetMaterialOverride));
 	def.def("SetMaterialOverride", static_cast<void (pragma::CMaterialOverrideComponent::*)(uint32_t, msys::CMaterial &)>(&pragma::CMaterialOverrideComponent::SetMaterialOverride));
 	def.def(

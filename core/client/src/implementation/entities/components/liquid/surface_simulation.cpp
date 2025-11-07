@@ -45,12 +45,12 @@ void CLiquidSurfaceSimulationComponent::Initialize()
 {
 	BaseLiquidSurfaceSimulationComponent::Initialize();
 
-	BindEventUnhandled(CLiquidControlComponent::EVENT_ON_SPLASH, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cLiquidControlComponent::EVENT_ON_SPLASH, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &splashInfo = static_cast<CEOnSplash &>(evData.get()).splashInfo;
 		if(m_physSurfaceSim)
 			static_cast<CPhysWaterSurfaceSimulator &>(*m_physSurfaceSim).CreateSplash(splashInfo.origin, splashInfo.radius, splashInfo.force);
 	});
-	BindEventUnhandled(CLiquidControlComponent::EVENT_ON_PROPERTIES_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cLiquidControlComponent::EVENT_ON_PROPERTIES_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &controlC = *GetEntity().GetComponent<CLiquidControlComponent>();
 		if(m_physSurfaceSim) {
 			m_physSurfaceSim->SetStiffness(controlC.GetStiffness());

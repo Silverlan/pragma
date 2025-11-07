@@ -317,13 +317,13 @@ void CMaterialPropertyOverrideComponent::InitializeLuaObject(lua::State *l) { re
 void CMaterialPropertyOverrideComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEvent(CModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		m_materialOverrides.clear();
 		if(GetEntity().IsSpawned())
 			PopulateProperties();
 		return util::EventReply::Unhandled;
 	});
-	BindEvent(CMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &evOc = static_cast<CEOnMaterialOverrideChanged &>(evData.get());
 		UpdateMaterialOverride(evOc.materialIndex, evOc.material);
 		return util::EventReply::Unhandled;

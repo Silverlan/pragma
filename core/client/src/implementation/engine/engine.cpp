@@ -5,7 +5,7 @@ module;
 
 #include "pragma/console/helper.hpp"
 #include "definitions.hpp"
-#include <sharedutils/magic_enum.hpp>
+#include <cassert>
 #ifdef _WIN32
 
 #include <dwmapi.h>
@@ -29,6 +29,10 @@ import :rendering.shaders;
 import pragma.gui;
 import pragma.shadergraph;
 import pragma.string.unicode;
+
+#undef CreateWindow
+#undef CreateFile
+#undef max
 
 extern "C" {
 void DLLCLIENT RunCEngine(int argc, char *argv[])
@@ -917,7 +921,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 		auto tmp = *g_titleBarColor;
 		umath::swap(tmp.r, tmp.b);
 		auto hex = tmp.ToHexColorRGB();
-		COLORREF hexCol = ::util::to_hex_number("0x" + hex);
+		COLORREF hexCol = umath::to_hex_number("0x" + hex);
 		const DWORD ATTR_CAPTION_COLOR = 35; // See DWMWINDOWATTRIBUTE::DWMWA_CAPTION_COLOR, can't use the enum because it may not be available and there's no way to check for it
 		DwmSetWindowAttribute(h, ATTR_CAPTION_COLOR, &hexCol, sizeof(hexCol));
 	}
@@ -925,7 +929,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 		auto tmp = *g_borderColor;
 		umath::swap(tmp.r, tmp.b);
 		auto hex = tmp.ToHexColorRGB();
-		COLORREF hexCol = ::util::to_hex_number("0x" + hex);
+		COLORREF hexCol = umath::to_hex_number("0x" + hex);
 		const DWORD ATTR_BORDER_COLOR = 34; // See DWMWINDOWATTRIBUTE::DWMWA_BORDER_COLOR, can't use the enum because it may not be available and there's no way to check for it
 		DwmSetWindowAttribute(h, ATTR_BORDER_COLOR, &hexCol, sizeof(hexCol));
 	}

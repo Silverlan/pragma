@@ -9,7 +9,7 @@ export module pragma.client:scripting.lua.bindings.audio;
 export import :audio;
 export import se_script;
 
-export namespace pragma::scripting::lua::bindings {
+export namespace pragma::scripting::lua_core::bindings {
 	void register_audio(lua::State *l);
 };
 
@@ -94,7 +94,7 @@ Lua::opt<luabind::tableT<void>> Lua::ALBuffer::GetPhonemeData(lua::State *l, al:
 	return t;
 }
 
-void pragma::scripting::lua::bindings::register_audio(lua::State *l)
+void pragma::scripting::lua_core::bindings::register_audio(lua::State *l)
 {
 	auto classDefAlEffect = luabind::class_<al::PEffect>("Effect");
 	classDefAlEffect.def("SetProperties", +[](lua::State *, al::PEffect &effect, const al::EfxEaxReverbProperties &props) { effect->SetProperties(props); });

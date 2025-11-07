@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/console/helper.hpp"
-#include <sharedutils/magic_enum.hpp>
 //#include "shader_gaussianblur.h" // prosper TODO
 
 module pragma.client;

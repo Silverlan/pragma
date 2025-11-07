@@ -72,7 +72,7 @@ void CAnimatedBvhComponent::Initialize()
 
 	auto animC = GetEntity().GetComponent<CAnimatedComponent>();
 	if(animC.valid()) {
-		m_cbOnMatricesUpdated = animC->AddEventCallback(CAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		m_cbOnMatricesUpdated = animC->AddEventCallback(cAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			UpdateDirtyBones();
 			return util::EventReply::Unhandled;
 		});
@@ -81,12 +81,12 @@ void CAnimatedBvhComponent::Initialize()
 
 	auto bvhC = GetEntity().GetComponent<CBvhComponent>();
 	if(bvhC.valid()) {
-		m_cbOnBvhCleared = bvhC->AddEventCallback(CBvhComponent::EVENT_ON_CLEAR_BVH, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		m_cbOnBvhCleared = bvhC->AddEventCallback(cBvhComponent::EVENT_ON_CLEAR_BVH, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			Clear();
 			m_tmpBvhData = nullptr;
 			return util::EventReply::Unhandled;
 		});
-		m_cbOnBvhUpdateRequested = bvhC->AddEventCallback(CBvhComponent::EVENT_ON_BVH_UPDATE_REQUESTED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		m_cbOnBvhUpdateRequested = bvhC->AddEventCallback(cBvhComponent::EVENT_ON_BVH_UPDATE_REQUESTED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			/*if(m_updateLazily && m_rebuildScheduled)
 			{
 				RebuildAnimatedBvh(true);
@@ -94,7 +94,7 @@ void CAnimatedBvhComponent::Initialize()
 			}*/
 			return util::EventReply::Unhandled;
 		});
-		m_cbOnBvhRebuilt = bvhC->AddEventCallback(CBvhComponent::EVENT_ON_BVH_REBUILT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		m_cbOnBvhRebuilt = bvhC->AddEventCallback(cBvhComponent::EVENT_ON_BVH_REBUILT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			RebuildTemporaryBvhData();
 			return util::EventReply::Unhandled;
 		});

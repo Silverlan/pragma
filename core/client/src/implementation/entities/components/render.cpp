@@ -3,7 +3,6 @@
 
 module;
 
-#include <sharedutils/magic_enum.hpp>
 
 module pragma.client;
 
@@ -22,30 +21,30 @@ using namespace pragma;
 
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBuffer = nullptr;
 decltype(CRenderComponent::s_ocExemptEntities) CRenderComponent::s_ocExemptEntities = {};
-ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT = INVALID_COMPONENT_ID;
-ComponentEventId CRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED = INVALID_COMPONENT_ID;
-ComponentEventId CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId CRenderComponent::EVENT_ON_RENDER_MODE_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId CRenderComponent::EVENT_SHOULD_DRAW = INVALID_COMPONENT_ID;
-ComponentEventId CRenderComponent::EVENT_SHOULD_DRAW_SHADOW = INVALID_COMPONENT_ID;
-ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS = INVALID_COMPONENT_ID;
-ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES = INVALID_COMPONENT_ID;
-ComponentEventId CRenderComponent::EVENT_UPDATE_INSTANTIABILITY = INVALID_COMPONENT_ID;
-ComponentEventId CRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId CRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId cRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT = INVALID_COMPONENT_ID;
+ComponentEventId cRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED = INVALID_COMPONENT_ID;
+ComponentEventId cRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId cRenderComponent::EVENT_ON_RENDER_MODE_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId cRenderComponent::EVENT_SHOULD_DRAW = INVALID_COMPONENT_ID;
+ComponentEventId cRenderComponent::EVENT_SHOULD_DRAW_SHADOW = INVALID_COMPONENT_ID;
+ComponentEventId cRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS = INVALID_COMPONENT_ID;
+ComponentEventId cRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES = INVALID_COMPONENT_ID;
+ComponentEventId cRenderComponent::EVENT_UPDATE_INSTANTIABILITY = INVALID_COMPONENT_ID;
+ComponentEventId cRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId cRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED = INVALID_COMPONENT_ID;
 void CRenderComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_UPDATE_RENDER_DATA_MT = registerEvent("ON_UPDATE_RENDER_DATA_MT", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_RENDER_BUFFERS_INITIALIZED = registerEvent("ON_RENDER_BUFFERS_INITIALIZED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_RENDER_BOUNDS_CHANGED = registerEvent("ON_RENDER_BOUNDS_CHANGED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_RENDER_MODE_CHANGED = registerEvent("ON_RENDER_MODE_CHANGED", ComponentEventInfo::Type::Broadcast);
-	EVENT_SHOULD_DRAW = registerEvent("SHOULD_DRAW", ComponentEventInfo::Type::Explicit);
-	EVENT_SHOULD_DRAW_SHADOW = registerEvent("SHOULD_DRAW_SHADOW", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_UPDATE_RENDER_BUFFERS = registerEvent("ON_UPDATE_RENDER_BUFFERS", ComponentEventInfo::Type::Explicit);
-	EVENT_ON_UPDATE_RENDER_MATRICES = registerEvent("ON_UPDATE_RENDER_MATRICES", ComponentEventInfo::Type::Explicit);
-	EVENT_UPDATE_INSTANTIABILITY = registerEvent("UPDATE_INSTANTIABILITY", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_CLIP_PLANE_CHANGED = registerEvent("ON_CLIP_PLANE_CHANGED", ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_DEPTH_BIAS_CHANGED = registerEvent("ON_DEPTH_BIAS_CHANGED", ComponentEventInfo::Type::Broadcast);
+	cRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT = registerEvent("ON_UPDATE_RENDER_DATA_MT", ComponentEventInfo::Type::Explicit);
+	cRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED = registerEvent("ON_RENDER_BUFFERS_INITIALIZED", ComponentEventInfo::Type::Broadcast);
+	cRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED = registerEvent("ON_RENDER_BOUNDS_CHANGED", ComponentEventInfo::Type::Broadcast);
+	cRenderComponent::EVENT_ON_RENDER_MODE_CHANGED = registerEvent("ON_RENDER_MODE_CHANGED", ComponentEventInfo::Type::Broadcast);
+	cRenderComponent::EVENT_SHOULD_DRAW = registerEvent("SHOULD_DRAW", ComponentEventInfo::Type::Explicit);
+	cRenderComponent::EVENT_SHOULD_DRAW_SHADOW = registerEvent("SHOULD_DRAW_SHADOW", ComponentEventInfo::Type::Explicit);
+	cRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS = registerEvent("ON_UPDATE_RENDER_BUFFERS", ComponentEventInfo::Type::Explicit);
+	cRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES = registerEvent("ON_UPDATE_RENDER_MATRICES", ComponentEventInfo::Type::Explicit);
+	cRenderComponent::EVENT_UPDATE_INSTANTIABILITY = registerEvent("UPDATE_INSTANTIABILITY", ComponentEventInfo::Type::Broadcast);
+	cRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED = registerEvent("ON_CLIP_PLANE_CHANGED", ComponentEventInfo::Type::Broadcast);
+	cRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED = registerEvent("ON_DEPTH_BIAS_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
 void CRenderComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
@@ -113,14 +112,14 @@ void CRenderComponent::SetRenderClipPlane(const Vector4 &plane)
 	if(plane == m_renderClipPlane)
 		return;
 	m_renderClipPlane = plane;
-	BroadcastEvent(EVENT_ON_CLIP_PLANE_CHANGED);
+	BroadcastEvent(cRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED);
 }
 void CRenderComponent::ClearRenderClipPlane()
 {
 	if(!m_renderClipPlane.has_value())
 		return;
 	m_renderClipPlane = {};
-	BroadcastEvent(EVENT_ON_CLIP_PLANE_CHANGED);
+	BroadcastEvent(cRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED);
 }
 const Vector4 *CRenderComponent::GetRenderClipPlane() const { return m_renderClipPlane.has_value() ? &*m_renderClipPlane : nullptr; }
 void CRenderComponent::SetDepthBias(float d, float delta)
@@ -128,14 +127,14 @@ void CRenderComponent::SetDepthBias(float d, float delta)
 	if(m_depthBias.has_value() && m_depthBias->x == d && m_depthBias->y == delta)
 		return;
 	m_depthBias = {d, delta};
-	BroadcastEvent(EVENT_ON_DEPTH_BIAS_CHANGED);
+	BroadcastEvent(cRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED);
 }
 void CRenderComponent::ClearDepthBias()
 {
 	if(!m_depthBias.has_value())
 		return;
 	m_depthBias = {};
-	BroadcastEvent(EVENT_ON_DEPTH_BIAS_CHANGED);
+	BroadcastEvent(cRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED);
 }
 const Vector2 *CRenderComponent::GetDepthBias() const { return m_depthBias.has_value() ? &*m_depthBias : nullptr; }
 void CRenderComponent::SetReceiveShadows(bool enabled) { umath::set_flag(m_stateFlags, StateFlags::DisableShadows, !enabled); }
@@ -157,7 +156,7 @@ void CRenderComponent::Initialize()
 		auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 		if(mdl == nullptr) {
 			UpdateRenderMeshes();
-			BroadcastEvent(EVENT_ON_RENDER_MODE_CHANGED);
+			BroadcastEvent(cRenderComponent::EVENT_ON_RENDER_MODE_CHANGED);
 			return;
 		}
 
@@ -170,7 +169,7 @@ void CRenderComponent::Initialize()
 		SetLocalRenderBounds(rMin, rMax);
 
 		UpdateRenderMeshes();
-		BroadcastEvent(EVENT_ON_RENDER_MODE_CHANGED);
+		BroadcastEvent(cRenderComponent::EVENT_ON_RENDER_MODE_CHANGED);
 	});
 	UpdateInstantiability();
 	UpdateAncestorHiddenState();
@@ -300,7 +299,7 @@ void CRenderComponent::SetLocalRenderBounds(Vector3 min, Vector3 max)
 	m_localRenderSphere.radius = uvec::length(bounds);
 
 	CEOnRenderBoundsChanged ceData {min, max, m_localRenderSphere};
-	BroadcastEvent(EVENT_ON_RENDER_BOUNDS_CHANGED);
+	BroadcastEvent(cRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED);
 }
 
 #if 0
@@ -325,7 +324,7 @@ void CRenderComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseRenderComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(pragma::CTransformComponent)) {
-		FlagCallbackForRemoval(static_cast<pragma::CTransformComponent &>(component).AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,
+		FlagCallbackForRemoval(static_cast<pragma::CTransformComponent &>(component).AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
 		                         [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			                         SetRenderBufferDirty();
 			                         SetRenderBoundsDirty();
@@ -366,13 +365,13 @@ void CRenderComponent::UpdateInstantiability()
 	if(m_renderBuffer == nullptr || umath::is_flag_set(m_stateFlags, StateFlags::InstantiationDisabled))
 		return;
 	auto instantiable = true;
-	BroadcastEvent(EVENT_UPDATE_INSTANTIABILITY, CEUpdateInstantiability {instantiable});
+	BroadcastEvent(cRenderComponent::EVENT_UPDATE_INSTANTIABILITY, CEUpdateInstantiability {instantiable});
 	umath::set_flag(m_stateFlags, StateFlags::IsInstantiable, instantiable);
 }
 void CRenderComponent::UpdateShouldDrawState()
 {
 	auto shouldDraw = true;
-	BroadcastEvent(EVENT_SHOULD_DRAW, CEShouldDraw {shouldDraw});
+	BroadcastEvent(cRenderComponent::EVENT_SHOULD_DRAW, CEShouldDraw {shouldDraw});
 	umath::set_flag(m_stateFlags, StateFlags::ShouldDraw, shouldDraw);
 
 	UpdateShouldDrawShadowState();
@@ -381,7 +380,7 @@ void CRenderComponent::UpdateShouldDrawShadowState()
 {
 	auto shouldDraw = GetCastShadows();
 	if(shouldDraw)
-		BroadcastEvent(EVENT_SHOULD_DRAW_SHADOW, CEShouldDraw {shouldDraw});
+		BroadcastEvent(cRenderComponent::EVENT_SHOULD_DRAW_SHADOW, CEShouldDraw {shouldDraw});
 	umath::set_flag(m_stateFlags, StateFlags::ShouldDrawShadow, shouldDraw);
 }
 CModelComponent *CRenderComponent::GetModelComponent() const { return static_cast<CModelComponent *>(GetEntity().GetModelComponent()); }
@@ -448,7 +447,7 @@ void CRenderComponent::UpdateMatrices()
 	m_matTransformation = pose.ToMatrix();
 
 	CEOnUpdateRenderMatrices evData {pose, m_matTransformation};
-	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_MATRICES, evData);
+	InvokeEventCallbacks(cRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES, evData);
 }
 uint64_t CRenderComponent::GetLastRenderFrame() const { return m_lastRender; }
 void CRenderComponent::SetLastRenderFrame(unsigned long long &t) { m_lastRender = t; }
@@ -638,7 +637,7 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 	}
 
 	CEOnUpdateRenderBuffers evData {drawCmd};
-	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_BUFFERS, evData);
+	InvokeEventCallbacks(cRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS, evData);
 }
 const pragma::rendering::InstanceData &CRenderComponent::GetInstanceData() const { return m_instanceData; }
 void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene, const CCameraComponent &cam, const Mat4 &vp)
@@ -661,7 +660,7 @@ void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene, const CC
 		mdlC->UpdateLOD(scene, cam, vp); // TODO: Don't update this every frame for every entity!
 
 	CEOnUpdateRenderData evData {};
-	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_DATA_MT, evData);
+	InvokeEventCallbacks(cRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT, evData);
 
 	auto pAttComponent = GetAttachmentComponent();
 	if(pAttComponent) {
@@ -794,7 +793,7 @@ void CRenderComponent::SetRenderGroups(pragma::rendering::RenderGroup mode)
 	*m_renderGroups = mode;
 
 	UpdateShouldDrawState();
-	BroadcastEvent(EVENT_ON_RENDER_MODE_CHANGED);
+	BroadcastEvent(cRenderComponent::EVENT_ON_RENDER_MODE_CHANGED);
 }
 void CRenderComponent::InitializeRenderBuffers()
 {
@@ -813,7 +812,7 @@ void CRenderComponent::InitializeRenderBuffers()
 	m_renderDescSetGroup->GetDescriptorSet()->Update();
 	UpdateInstantiability();
 
-	BroadcastEvent(EVENT_ON_RENDER_BUFFERS_INITIALIZED);
+	BroadcastEvent(cRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED);
 }
 void CRenderComponent::UpdateBoneBuffer()
 {
@@ -1280,14 +1279,14 @@ void CRenderComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modE
 	defCRender.def("ShouldIgnoreAncestorVisibility", &pragma::CRenderComponent::ShouldIgnoreAncestorVisibility);
 
 	// defCRender.add_static_constant("EVENT_ON_UPDATE_RENDER_DATA",pragma::CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA);
-	defCRender.add_static_constant("EVENT_ON_RENDER_BOUNDS_CHANGED", pragma::CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED);
-	defCRender.add_static_constant("EVENT_ON_RENDER_MODE_CHANGED", pragma::CRenderComponent::EVENT_ON_RENDER_MODE_CHANGED);
-	defCRender.add_static_constant("EVENT_ON_RENDER_BUFFERS_INITIALIZED", pragma::CRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED);
-	defCRender.add_static_constant("EVENT_SHOULD_DRAW", pragma::CRenderComponent::EVENT_SHOULD_DRAW);
-	defCRender.add_static_constant("EVENT_SHOULD_DRAW_SHADOW", pragma::CRenderComponent::EVENT_SHOULD_DRAW_SHADOW);
-	defCRender.add_static_constant("EVENT_ON_UPDATE_RENDER_MATRICES", pragma::CRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES);
-	defCRender.add_static_constant("EVENT_UPDATE_INSTANTIABILITY", pragma::CRenderComponent::EVENT_UPDATE_INSTANTIABILITY);
-	defCRender.add_static_constant("EVENT_ON_CLIP_PLANE_CHANGED", pragma::CRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED);
-	defCRender.add_static_constant("EVENT_ON_DEPTH_BIAS_CHANGED", pragma::CRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED);
+	defCRender.add_static_constant("EVENT_ON_RENDER_BOUNDS_CHANGED", pragma::cRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED);
+	defCRender.add_static_constant("EVENT_ON_RENDER_MODE_CHANGED", pragma::cRenderComponent::EVENT_ON_RENDER_MODE_CHANGED);
+	defCRender.add_static_constant("EVENT_ON_RENDER_BUFFERS_INITIALIZED", pragma::cRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED);
+	defCRender.add_static_constant("EVENT_SHOULD_DRAW", pragma::cRenderComponent::EVENT_SHOULD_DRAW);
+	defCRender.add_static_constant("EVENT_SHOULD_DRAW_SHADOW", pragma::cRenderComponent::EVENT_SHOULD_DRAW_SHADOW);
+	defCRender.add_static_constant("EVENT_ON_UPDATE_RENDER_MATRICES", pragma::cRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES);
+	defCRender.add_static_constant("EVENT_UPDATE_INSTANTIABILITY", pragma::cRenderComponent::EVENT_UPDATE_INSTANTIABILITY);
+	defCRender.add_static_constant("EVENT_ON_CLIP_PLANE_CHANGED", pragma::cRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED);
+	defCRender.add_static_constant("EVENT_ON_DEPTH_BIAS_CHANGED", pragma::cRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED);
 	modEnts[defCRender];
 }

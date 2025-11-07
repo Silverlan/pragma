@@ -9,6 +9,9 @@ export module pragma.client:entities.components.field_angle;
 export import :entities.components.entity;
 
 export namespace pragma {
+	namespace cFieldAngleComponent {
+		using namespace baseFieldAngleComponent;
+	}
 	class DLLCLIENT CFieldAngleComponent final : public BaseFieldAngleComponent, public CBaseNetComponent {
 	  public:
 		CFieldAngleComponent(pragma::ecs::BaseEntity &ent) : BaseFieldAngleComponent(ent) {}

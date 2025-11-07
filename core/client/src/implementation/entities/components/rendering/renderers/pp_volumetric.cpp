@@ -55,7 +55,7 @@ void CRendererPpVolumetricComponent::ReloadRenderTarget()
 void CRendererPpVolumetricComponent::Initialize()
 {
 	CRendererPpBaseComponent::Initialize();
-	BindEventUnhandled(pragma::CRendererComponent::EVENT_ON_RENDER_TARGET_RELOADED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(pragma::cRendererComponent::EVENT_ON_RENDER_TARGET_RELOADED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		if(!GetEntity().IsSpawned())
 			return;
 		ReloadRenderTarget();

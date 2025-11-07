@@ -14,6 +14,10 @@ export namespace pragma {
 		struct RenderBufferData;
 	};
 
+	namespace cBvhComponent {
+		using namespace baseBvhComponent;
+	}
+
 	class DLLCLIENT CBvhComponent final : public BaseBvhComponent {
 	  public:
 		static bool ShouldConsiderMesh(const pragma::ModelSubMesh &mesh, const rendering::RenderBufferData &bufferData);

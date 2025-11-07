@@ -4,7 +4,6 @@
 module;
 
 #include "definitions.hpp"
-#include <sharedutils/BS_thread_pool.hpp>
 
 export module pragma.client:model.hitbox_mesh_bvh_builder;
 
@@ -24,7 +23,7 @@ export namespace pragma::bvh {
 			std::stringstream serializedBvh;
 		};
 
-		HitboxMeshBvhBuildTask(BS::thread_pool &threadPool);
+		HitboxMeshBvhBuildTask(BS::light_thread_pool &threadPool);
 		bool Build(pragma::Model &mdl);
 		const std::unordered_map<BoneName, std::vector<std::shared_ptr<BoneMeshInfo>>> &GetResult() const { return m_boneMeshMap; }
 	  private:
@@ -33,7 +32,7 @@ export namespace pragma::bvh {
 		void BuildHitboxMesh(pragma::Model &mdl, pragma::ModelSubMesh &subMesh);
 		void BuildMeshBvh(pragma::Model &mdl, pragma::ModelSubMesh &subMesh);
 
-		BS::thread_pool &m_threadPool;
+		BS::light_thread_pool &m_threadPool;
 		std::unordered_map<BoneName, std::vector<std::shared_ptr<BoneMeshInfo>>> m_boneMeshMap;
 	};
 
@@ -41,8 +40,8 @@ export namespace pragma::bvh {
 	  public:
 		HitboxMeshBvhBuilder();
 		HitboxMeshBvhBuildTask BuildModel(pragma::Model &mdl);
-		BS::thread_pool &GetThreadPool() { return m_threadPool; }
+		BS::light_thread_pool &GetThreadPool() { return m_threadPool; }
 	  private:
-		BS::thread_pool m_threadPool;
+		BS::light_thread_pool m_threadPool;
 	};
 };

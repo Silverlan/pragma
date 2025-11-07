@@ -9,6 +9,9 @@ export module pragma.client:entities.components.toggle;
 export import :entities.components.entity;
 
 export namespace pragma {
+	namespace cToggleComponent {
+		using namespace baseToggleComponent;
+	}
 	class DLLCLIENT CToggleComponent final : public BaseToggleComponent, public CBaseNetComponent {
 	  public:
 		CToggleComponent(pragma::ecs::BaseEntity &ent) : BaseToggleComponent(ent) {}

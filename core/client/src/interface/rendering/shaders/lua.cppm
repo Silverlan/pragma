@@ -149,7 +149,7 @@ export namespace pragma {
 
 	class DLLCLIENT LuaShaderWrapperGraphicsBase : public LuaShaderWrapperBase {
 	  public:
-		bool AttachVertexAttribute(const pragma::LuaCoreVertexBinding &binding, const std::vector<pragma::LuaCoreVertexAttribute> &attributes);
+		bool AttachVertexAttribute(const pragma::LuaVertexBinding &binding, const std::vector<pragma::LuaVertexAttribute> &attributes);
 	  protected:
 		LuaShaderWrapperGraphicsBase();
 		void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);

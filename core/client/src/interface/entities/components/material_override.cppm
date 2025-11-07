@@ -12,10 +12,12 @@ export import pragma.cmaterialsystem;
 export import pragma.shared;
 
 export namespace pragma {
-	class DLLCLIENT CMaterialOverrideComponent final : public BaseEntityComponent, public DynamicMemberRegister {
+		namespace cMaterialOverrideComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_MATERIAL_OVERRIDES_CLEARED;
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_MATERIAL_OVERRIDE_CHANGED;
+	}
+class DLLCLIENT CMaterialOverrideComponent final : public BaseEntityComponent, public DynamicMemberRegister {
 	  public:
-		static ComponentEventId EVENT_ON_MATERIAL_OVERRIDES_CLEARED;
-		static ComponentEventId EVENT_ON_MATERIAL_OVERRIDE_CHANGED;
 
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);

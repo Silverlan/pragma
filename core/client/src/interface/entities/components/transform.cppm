@@ -9,6 +9,9 @@ export module pragma.client:entities.components.transform;
 export import :entities.components.entity;
 
 export namespace pragma {
+	namespace cTransformComponent {
+		using namespace baseTransformComponent;
+	}
 	class DLLCLIENT CTransformComponent final : public BaseTransformComponent, public CBaseNetComponent {
 	  public:
 		CTransformComponent(pragma::ecs::BaseEntity &ent) : BaseTransformComponent(ent) {}

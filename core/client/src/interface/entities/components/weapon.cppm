@@ -11,9 +11,12 @@ export import :entities.components.entity;
 export import :entities.components.view_model;
 
 export namespace pragma {
-	class DLLCLIENT CWeaponComponent final : public BaseWeaponComponent, public CBaseNetComponent {
+		namespace cWeaponComponent {
+		STATIC_DLL_COMPAT ComponentEventId EVENT_ATTACH_TO_OWNER;
+	}
+class DLLCLIENT CWeaponComponent final : public BaseWeaponComponent, public CBaseNetComponent {
 	  public:
-		static ComponentEventId EVENT_ATTACH_TO_OWNER;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 

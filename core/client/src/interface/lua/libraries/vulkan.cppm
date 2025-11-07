@@ -76,7 +76,7 @@ export {
 	// PCB Argument converter
 	namespace luabind {
 		template<>
-		struct DLLNETWORK default_converter<Lua::Vulkan::PreparedCommandLuaArg> : native_converter_base<Lua::Vulkan::PreparedCommandLuaArg> {
+		struct default_converter<Lua::Vulkan::PreparedCommandLuaArg> : native_converter_base<Lua::Vulkan::PreparedCommandLuaArg> {
 			enum { consumed_args = 1 };
 
 			template<typename U>
@@ -99,13 +99,13 @@ export {
 		};
 
 		template<>
-		struct DLLNETWORK default_converter<const Lua::Vulkan::PreparedCommandLuaArg> : default_converter<Lua::Vulkan::PreparedCommandLuaArg> {};
+		struct default_converter<const Lua::Vulkan::PreparedCommandLuaArg> : default_converter<Lua::Vulkan::PreparedCommandLuaArg> {};
 
 		template<>
-		struct DLLNETWORK default_converter<Lua::Vulkan::PreparedCommandLuaArg const &> : default_converter<Lua::Vulkan::PreparedCommandLuaArg> {};
+		struct default_converter<Lua::Vulkan::PreparedCommandLuaArg const &> : default_converter<Lua::Vulkan::PreparedCommandLuaArg> {};
 
 		template<>
-		struct DLLNETWORK default_converter<Lua::Vulkan::PreparedCommandLuaArg &&> : default_converter<Lua::Vulkan::PreparedCommandLuaArg> {};
+		struct default_converter<Lua::Vulkan::PreparedCommandLuaArg &&> : default_converter<Lua::Vulkan::PreparedCommandLuaArg> {};
 	}
 
 	namespace luabind {

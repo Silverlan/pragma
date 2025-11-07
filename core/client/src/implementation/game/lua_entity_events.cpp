@@ -13,7 +13,7 @@ bool CGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t e
 	if(pragma::Game::InvokeEntityEvent(component, eventId, argsIdx, bInject))
 		return true;
 	auto *l = GetLuaState();
-	if(eventId == pragma::CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED) {
+	if(eventId == pragma::cRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto &min = Lua::Check<Vector3>(l, -1);

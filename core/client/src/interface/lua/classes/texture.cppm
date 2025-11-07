@@ -8,6 +8,7 @@ module;
 export module pragma.client:scripting.lua.classes.texture;
 
 export import pragma.cmaterialsystem;
+export import pragma.lua;
 export import pragma.prosper;
 
 export namespace Lua {

@@ -7,7 +7,7 @@ module;
 export module pragma.client:scripting.lua.bindings.scene;
 export import :entities.components;
 
-export namespace pragma::scripting::lua::bindings {
+export namespace pragma::scripting::lua_core::bindings {
 	void register_renderers(lua::State *l, luabind::module_ &entsMod)
 	{
 		auto defRenderer = pragma::LuaCore::create_entity_component_class<pragma::CRendererComponent, pragma::BaseEntityComponent>("RendererComponent");
@@ -30,16 +30,16 @@ export namespace pragma::scripting::lua::bindings {
 		entsMod[defRenderer];
 
 		auto defRaster = pragma::LuaCore::create_entity_component_class<pragma::CRasterizationRendererComponent, pragma::BaseEntityComponent>("RasterizationRendererComponent");
-		defRaster.add_static_constant("EVENT_ON_RECORD_PREPASS", pragma::CRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS);
-		defRaster.add_static_constant("EVENT_ON_RECORD_LIGHTING_PASS", pragma::CRasterizationRendererComponent::EVENT_ON_RECORD_LIGHTING_PASS);
-		defRaster.add_static_constant("EVENT_PRE_EXECUTE_PREPASS", pragma::CRasterizationRendererComponent::EVENT_PRE_EXECUTE_PREPASS);
-		defRaster.add_static_constant("EVENT_POST_EXECUTE_PREPASS", pragma::CRasterizationRendererComponent::EVENT_POST_EXECUTE_PREPASS);
-		defRaster.add_static_constant("EVENT_PRE_EXECUTE_LIGHTING_PASS", pragma::CRasterizationRendererComponent::EVENT_PRE_EXECUTE_LIGHTING_PASS);
-		defRaster.add_static_constant("EVENT_POST_EXECUTE_LIGHTING_PASS", pragma::CRasterizationRendererComponent::EVENT_POST_EXECUTE_LIGHTING_PASS);
-		defRaster.add_static_constant("EVENT_PRE_PREPASS", pragma::CRasterizationRendererComponent::EVENT_PRE_PREPASS);
-		defRaster.add_static_constant("EVENT_POST_PREPASS", pragma::CRasterizationRendererComponent::EVENT_POST_PREPASS);
-		defRaster.add_static_constant("EVENT_PRE_LIGHTING_PASS", pragma::CRasterizationRendererComponent::EVENT_PRE_LIGHTING_PASS);
-		defRaster.add_static_constant("EVENT_POST_LIGHTING_PASS", pragma::CRasterizationRendererComponent::EVENT_POST_LIGHTING_PASS);
+		defRaster.add_static_constant("EVENT_ON_RECORD_PREPASS", pragma::cRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS);
+		defRaster.add_static_constant("EVENT_ON_RECORD_LIGHTING_PASS", pragma::cRasterizationRendererComponent::EVENT_ON_RECORD_LIGHTING_PASS);
+		defRaster.add_static_constant("EVENT_PRE_EXECUTE_PREPASS", pragma::cRasterizationRendererComponent::EVENT_PRE_EXECUTE_PREPASS);
+		defRaster.add_static_constant("EVENT_POST_EXECUTE_PREPASS", pragma::cRasterizationRendererComponent::EVENT_POST_EXECUTE_PREPASS);
+		defRaster.add_static_constant("EVENT_PRE_EXECUTE_LIGHTING_PASS", pragma::cRasterizationRendererComponent::EVENT_PRE_EXECUTE_LIGHTING_PASS);
+		defRaster.add_static_constant("EVENT_POST_EXECUTE_LIGHTING_PASS", pragma::cRasterizationRendererComponent::EVENT_POST_EXECUTE_LIGHTING_PASS);
+		defRaster.add_static_constant("EVENT_PRE_PREPASS", pragma::cRasterizationRendererComponent::EVENT_PRE_PREPASS);
+		defRaster.add_static_constant("EVENT_POST_PREPASS", pragma::cRasterizationRendererComponent::EVENT_POST_PREPASS);
+		defRaster.add_static_constant("EVENT_PRE_LIGHTING_PASS", pragma::cRasterizationRendererComponent::EVENT_PRE_LIGHTING_PASS);
+		defRaster.add_static_constant("EVENT_POST_LIGHTING_PASS", pragma::cRasterizationRendererComponent::EVENT_POST_LIGHTING_PASS);
 		defRaster.def("GetPrepassDepthTexture", +[](lua::State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::Texture> { return renderer.GetPrepass().textureDepth; });
 		defRaster.def("GetPrepassNormalTexture", +[](lua::State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::Texture> { return renderer.GetPrepass().textureNormals; });
 		defRaster.def("GetRenderTarget", +[](lua::State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::RenderTarget> { return renderer.GetHDRInfo().sceneRenderTarget; });

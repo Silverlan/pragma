@@ -68,12 +68,12 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 		}
 		auto pGenericComponent = ent->GetComponent<pragma::CGenericComponent>();
 		if(pGenericComponent.valid()) {
-			it->second.push_back(pGenericComponent->BindEventUnhandled(pragma::CModelComponent::EVENT_ON_MODEL_CHANGED, [this, pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
+			it->second.push_back(pGenericComponent->BindEventUnhandled(pragma::cModelComponent::EVENT_ON_MODEL_CHANGED, [this, pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
 				SceneRenderDesc::AssertRenderQueueThreadInactive();
 				auto *ent = static_cast<CBaseEntity *>(&pGenericComponent->GetEntity());
 				m_occlusionOctree->UpdateObject(ent);
 			}));
-			it->second.push_back(pGenericComponent->BindEventUnhandled(pragma::CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED, [this, pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
+			it->second.push_back(pGenericComponent->BindEventUnhandled(pragma::cRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED, [this, pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
 				SceneRenderDesc::AssertRenderQueueThreadInactive();
 				auto *ent = static_cast<CBaseEntity *>(&pGenericComponent->GetEntity());
 				m_occlusionOctree->UpdateObject(ent);
@@ -118,7 +118,7 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 			occlusionTree.RemoveObject(&ent);
 		return util::EventReply::Unhandled;
 	});
-	pRenderComponent->AddEventCallback(CRenderComponent::EVENT_ON_RENDER_MODE_CHANGED, cbRenderMode);
+	pRenderComponent->AddEventCallback(cRenderComponent::EVENT_ON_RENDER_MODE_CHANGED, cbRenderMode);
 	auto renderMode = pRenderComponent->GetSceneRenderPass();
 	if(renderMode != pragma::rendering::SceneRenderPass::World && renderMode != pragma::rendering::SceneRenderPass::Sky)
 		return;

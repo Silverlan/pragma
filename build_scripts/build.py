@@ -501,11 +501,11 @@ print_msg("Building third-party libraries...")
 if build_all:
 	execscript(scripts_dir +"/build_third_party_libs.py")
 
-# Add our CMake to PATH
-new_path = str(Path(get_library_root_dir("cmake") +"bin").resolve())
-paths = os.environ.get('PATH', '').split(os.pathsep)
-if new_path not in paths:
-    os.environ['PATH'] = os.pathsep.join([new_path] + paths)
+# We need at least CMake 4.1.2 for proper C++20 module and C++23 "import std" support.
+# Since the CMake version that is shipped with most operating systems is older, we'll
+# ship it ourselves for now and use our shipped version.
+cmake_bin = (Path(get_library_root_dir("cmake")) / "bin").resolve()
+os.environ["PATH"] = os.pathsep.join([os.environ.get("PATH", ""), os.fspath(cmake_bin)])
 
 ########## Modules ##########
 print_msg("Downloading modules...")

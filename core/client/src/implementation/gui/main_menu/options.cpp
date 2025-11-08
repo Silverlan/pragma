@@ -352,7 +352,7 @@ void WIMainMenuOptions::UpdateMemoryUsage()
 			continue;
 		auto *l = luaMemUsageStates.at(i);
 		auto *pSlider = static_cast<WISlider *>(hSlider.get());
-		auto allocatedMemory = (l != nullptr) ? (lua::gc(l, GarbageCollectorTask::CurrentMemoryInUseInKb, -1) * 1'024 + lua::gc(l, GarbageCollectorTask::CurrentMemoryRemainderBytes, -1)) : 0;
+		auto allocatedMemory = (l != nullptr) ? (lua::gc(l, lua::GarbageCollectorTask::CurrentMemoryInUseInKb, -1) * 1'024 + lua::gc(l, lua::GarbageCollectorTask::CurrentMemoryRemainderBytes, -1)) : 0;
 		pSlider->SetValue(allocatedMemory);
 	}
 }

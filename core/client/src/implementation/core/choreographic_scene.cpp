@@ -10,8 +10,11 @@ import :client_state;
 import :entities.components;
 
 choreography::Scene::Scene() : uts::TimelineScene() {}
+choreography::Scene::~Scene() {}
 choreography::Channel::Channel(uts::TimelineScene &scene, const std::string &name) : uts::Channel(scene, name) {}
+choreography::Channel::~Channel() {}
 choreography::Event::Event(uts::Channel &channel) : uts::Event(channel) {}
+choreography::Event::~Event() {}
 CBaseEntity *choreography::Event::GetActor() const { return static_cast<CBaseEntity *>(m_actor.get()); }
 void choreography::Event::SetActor(CBaseEntity &actor) { m_actor = actor.GetHandle(); }
 void choreography::Event::ClearActor() { m_actor = EntityHandle {}; }

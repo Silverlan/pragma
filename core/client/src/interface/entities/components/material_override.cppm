@@ -13,8 +13,8 @@ export import pragma.shared;
 
 export namespace pragma {
 		namespace cMaterialOverrideComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_MATERIAL_OVERRIDES_CLEARED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_MATERIAL_OVERRIDE_CHANGED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_MATERIAL_OVERRIDES_CLEARED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_MATERIAL_OVERRIDE_CHANGED;
 	}
 class DLLCLIENT CMaterialOverrideComponent final : public BaseEntityComponent, public DynamicMemberRegister {
 	  public:

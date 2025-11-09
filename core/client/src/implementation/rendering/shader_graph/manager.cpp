@@ -28,7 +28,7 @@ std::shared_ptr<pragma::shadergraph::Graph> ShaderGraphTypeManager::RegisterGrap
 	auto strFragFilePath = fragFilePath.GetString();
 	auto &shaderManager = pragma::get_cengine()->GetShaderManager();
 	auto shader = shaderManager.GetShader(identifier);
-	auto graphData = std::make_shared<ShaderGraphData>(m_typeName, identifier, graph);
+	auto graphData = ::util::make_shared<ShaderGraphData>(m_typeName, identifier, graph);
 	if(shader.valid()) {
 		auto *sgShader = dynamic_cast<pragma::ShaderGraph *>(shader.get());
 		if(!sgShader)
@@ -51,7 +51,7 @@ std::shared_ptr<pragma::shadergraph::Graph> ShaderGraphTypeManager::RegisterGrap
 	return graph;
 }
 
-std::shared_ptr<pragma::shadergraph::Graph> ShaderGraphTypeManager::CreateGraph() const { return std::make_shared<pragma::shadergraph::Graph>(m_nodeRegistry); }
+std::shared_ptr<pragma::shadergraph::Graph> ShaderGraphTypeManager::CreateGraph() const { return ::util::make_shared<pragma::shadergraph::Graph>(m_nodeRegistry); }
 
 void ShaderGraphTypeManager::ReloadShader(const std::string &identifier)
 {
@@ -87,7 +87,7 @@ ShaderGraphManager::ShaderGraphManager() : m_moduleManager {std::make_unique<Sha
 ShaderGraphManager::~ShaderGraphManager() {}
 ShaderGraphModuleManager &ShaderGraphManager::GetModuleManager() { return *m_moduleManager; }
 const ShaderGraphModuleManager &ShaderGraphManager::GetModuleManager() const { return *m_moduleManager; }
-void ShaderGraphManager::RegisterGraphTypeManager(const std::string &type, std::shared_ptr<pragma::shadergraph::NodeRegistry> nodeRegistry) { m_shaderGraphTypeManagers[type] = std::make_shared<ShaderGraphTypeManager>(type, nodeRegistry); }
+void ShaderGraphManager::RegisterGraphTypeManager(const std::string &type, std::shared_ptr<pragma::shadergraph::NodeRegistry> nodeRegistry) { m_shaderGraphTypeManagers[type] = ::util::make_shared<ShaderGraphTypeManager>(type, nodeRegistry); }
 std::shared_ptr<pragma::shadergraph::Graph> ShaderGraphManager::RegisterGraph(const std::string &type, const std::string &identifier)
 {
 	auto itType = m_shaderNameToType.find(identifier);
@@ -118,7 +118,7 @@ std::shared_ptr<pragma::shadergraph::Graph> ShaderGraphManager::LoadShader(const
 		auto path = GetShaderGraphFilePath(typeName, identifier);
 		if(!filemanager::exists(path))
 			continue;
-		auto graph = std::make_shared<pragma::shadergraph::Graph>(typeManager->GetNodeRegistry());
+		auto graph = ::util::make_shared<pragma::shadergraph::Graph>(typeManager->GetNodeRegistry());
 		auto result = graph->Load(path, outErr);
 		if(!result)
 			return nullptr;
@@ -161,7 +161,7 @@ void ShaderGraphManager::SyncGraph(const std::string &type, const std::string &i
 		auto it = m_shaderGraphTypeManagers.find(type);
 		if(it == m_shaderGraphTypeManagers.end())
 			return;
-		auto newGraph = std::make_shared<pragma::shadergraph::Graph>(graph.GetNodeRegistry());
+		auto newGraph = ::util::make_shared<pragma::shadergraph::Graph>(graph.GetNodeRegistry());
 		it->second->RegisterGraph(identifier, newGraph);
 		graphData = GetGraph(identifier);
 		if(!graphData)

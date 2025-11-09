@@ -80,8 +80,8 @@ CGame::CGame(NetworkState *state)
 	std::fill(m_renderModesEnabled.begin(), m_renderModesEnabled.end(), true);
 	g_game = this;
 
-	m_luaShaderManager = std::make_shared<pragma::LuaShaderManager>();
-	m_luaParticleModifierManager = std::make_shared<pragma::LuaParticleModifierManager>();
+	m_luaShaderManager = ::util::make_shared<pragma::LuaShaderManager>();
+	m_luaParticleModifierManager = ::util::make_shared<pragma::LuaParticleModifierManager>();
 
 	umath::set_flag(m_stateFlags, StateFlags::PrepassShaderPipelineReloadRequired, false);
 	umath::set_flag(m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired, false);
@@ -360,7 +360,7 @@ pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *CGame::GetP
 bool CGame::StartProfilingStage(const char *stage) { return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage); }
 bool CGame::StopProfilingStage() { return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(); }
 
-std::shared_ptr<pragma::EntityComponentManager> CGame::InitializeEntityComponentManager() { return std::make_shared<pragma::CEntityComponentManager>(); }
+std::shared_ptr<pragma::EntityComponentManager> CGame::InitializeEntityComponentManager() { return ::util::make_shared<pragma::CEntityComponentManager>(); }
 
 void CGame::OnReceivedRegisterNetEvent(NetPacket &packet)
 {
@@ -1088,8 +1088,8 @@ const util::WeakHandle<prosper::Shader> &CGame::GetGameShader(GameShader shader)
 
 LuaCallbackHandler &CGame::GetInputCallbackHandler() { return m_inputCallbackHandler; }
 
-std::shared_ptr<ModelMesh> CGame::CreateModelMesh() const { return std::make_shared<CModelMesh>(); }
-std::shared_ptr<pragma::ModelSubMesh> CGame::CreateModelSubMesh() const { return std::make_shared<CModelSubMesh>(); }
+std::shared_ptr<ModelMesh> CGame::CreateModelMesh() const { return ::util::make_shared<CModelMesh>(); }
+std::shared_ptr<pragma::ModelSubMesh> CGame::CreateModelSubMesh() const { return ::util::make_shared<CModelSubMesh>(); }
 
 Float CGame::GetHDRExposure() const
 {

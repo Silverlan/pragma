@@ -18,9 +18,9 @@ export namespace pragma {
 		DamageInfo *damageInfo;
 	};
 	namespace baseActorComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_KILLED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_RESPAWN;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DEATH;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_KILLED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_RESPAWN;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_DEATH;
 	}
 	class DLLNETWORK BaseActorComponent : public BaseEntityComponent {
 	  public:

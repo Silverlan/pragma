@@ -11,7 +11,7 @@ import :entities.components;
 using namespace pragma;
 
 std::shared_ptr<ai::Schedule> ai::Schedule::Create() { return std::shared_ptr<Schedule>(new Schedule()); }
-ai::Schedule::Schedule() : std::enable_shared_from_this<Schedule>(), m_rootTask(std::make_shared<ai::BehaviorNode>(ai::BehaviorNode::Type::Sequence)) { m_rootTask->SetDebugName("Root"); }
+ai::Schedule::Schedule() : std::enable_shared_from_this<Schedule>(), m_rootTask(::util::make_shared<ai::BehaviorNode>(ai::BehaviorNode::Type::Sequence)) { m_rootTask->SetDebugName("Root"); }
 void ai::Schedule::Cancel() const
 {
 	if(m_rootTask->IsActive() == false)

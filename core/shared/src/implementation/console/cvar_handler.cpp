@@ -84,7 +84,7 @@ std::shared_ptr<ConCommand> CVarHandler::RegisterConCommand(const std::string &s
 			return nullptr;
 		return std::static_pointer_cast<ConCommand>(it->second);
 	}
-	it = m_conVars.insert(decltype(m_conVars)::value_type(scmd, std::make_shared<ConCommand>(fc, flags, help))).first;
+	it = m_conVars.insert(decltype(m_conVars)::value_type(scmd, ::util::make_shared<ConCommand>(fc, flags, help))).first;
 	return std::static_pointer_cast<ConCommand>(it->second);
 }
 template<typename T>

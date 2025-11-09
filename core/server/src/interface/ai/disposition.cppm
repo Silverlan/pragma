@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module;
+
 #include "definitions.hpp"
 
-export import std.compat;
-
 export module pragma.server:ai.disposition;
+
+export import std.compat;
 
 export {
 	enum class DISPOSITION : uint32_t { HATE, FEAR, NEUTRAL, LIKE, COUNT };

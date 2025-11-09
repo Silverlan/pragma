@@ -729,7 +729,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 		if(m_bRecordConsoleOutput == false)
 			return;
 		m_consoleOutputMutex.lock();
-		m_consoleOutput.push({std::string {output}, flags, color ? std::make_shared<Color>(*color) : nullptr});
+		m_consoleOutput.push({std::string {output}, flags, color ? ::util::make_shared<Color>(*color) : nullptr});
 		m_consoleOutputMutex.unlock();
 	});
 

@@ -11,7 +11,7 @@ export import :entities.universal_reference;
 
 export namespace pragma {
 	namespace baseChildComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PARENT_CHANGED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_PARENT_CHANGED;
 	}
 	class DLLNETWORK BaseChildComponent : public BaseEntityComponent {
 	  public:

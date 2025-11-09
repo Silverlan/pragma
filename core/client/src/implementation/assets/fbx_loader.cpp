@@ -883,7 +883,7 @@ bool FbxImporter::LoadAnimations(std::string &outErr)
 		m_model->AddAnimation(name, anim);
 
 #if 0
-		auto panim = std::make_shared<panima::Animation>();
+		auto panim = ::util::make_shared<panima::Animation>();
 		bool data_found = false;
 		for(int k = 0; anim_layer->getCurveNode(k); ++k) {
 			const ofbx::AnimationCurveNode *node = anim_layer->getCurveNode(k);
@@ -971,7 +971,7 @@ bool FbxImporter::LoadAnimations(std::string &outErr)
 							duration = umath::max(duration, ftimes.back());
 						}
 
-						auto channel = std::make_shared<panima::Channel>();
+						auto channel = ::util::make_shared<panima::Channel>();
 						std::string basePath = "ec/animated/bone/" + std::string {bone->name} + "/";
 						if(isBoneTranslation || isBoneScaling) {
 							std::vector<Vector3> values;

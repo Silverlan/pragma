@@ -575,7 +575,7 @@ void Lua::Model::register_class(lua::State *l, luabind::class_<pragma::Model> &c
 	classDef.def("GetFlexAnimationNames", static_cast<luabind::object (*)(lua::State *, pragma::Model &)>([](lua::State *l, pragma::Model &mdl) -> luabind::object { return Lua::vector_to_table(l, mdl.GetFlexAnimationNames()); }));
 	classDef.def("GetFlexAnimationCount", static_cast<uint32_t (*)(lua::State *, pragma::Model &)>([](lua::State *l, pragma::Model &mdl) -> uint32_t { return mdl.GetFlexAnimations().size(); }));
 	classDef.def("AddFlexAnimation", static_cast<std::shared_ptr<FlexAnimation> (*)(lua::State *, pragma::Model &, const std::string &)>([](lua::State *l, pragma::Model &mdl, const std::string &name) -> std::shared_ptr<FlexAnimation> {
-		auto anim = std::make_shared<FlexAnimation>();
+		auto anim = ::util::make_shared<FlexAnimation>();
 		mdl.AddFlexAnimation(name, *anim);
 		return anim;
 	}));
@@ -973,7 +973,7 @@ void Lua::Model::register_class(lua::State *l, luabind::class_<pragma::Model> &c
 		  auto udmData = ::udm::Data::Load(fileName);
 		  if(!udmData)
 			  return luabind::object {l, std::pair<bool, std::string> {false, "Failed to load file '" + fileName + "'!"}};
-		  auto metaRig = std::make_shared<pragma::animation::MetaRig>();
+		  auto metaRig = ::util::make_shared<pragma::animation::MetaRig>();
 		  std::string err;
 		  auto res = metaRig->Load(skeleton, udmData->GetAssetData(), err);
 		  if(!res)
@@ -1266,7 +1266,7 @@ void Lua::Model::register_class(lua::State *l, luabind::class_<pragma::Model> &c
 	classDefVertexAnimation.scope[classDefMeshVertexAnimation];
 
 	auto classDefSkeleton = luabind::class_<pragma::animation::Skeleton>("Skeleton");
-	classDefSkeleton.scope[luabind::def("create", +[]() { return std::make_shared<pragma::animation::Skeleton>(); })];
+	classDefSkeleton.scope[luabind::def("create", +[]() { return ::util::make_shared<pragma::animation::Skeleton>(); })];
 	classDefSkeleton.def(
 	  "DebugPrint", +[](const pragma::animation::Skeleton &skeleton) {
 		  std::stringstream ss;

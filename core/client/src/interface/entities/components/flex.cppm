@@ -11,7 +11,7 @@ import :audio;
 export namespace pragma {
 		namespace cFlexComponent {
 		using namespace baseFlexComponent;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_FLEX_CONTROLLERS_UPDATED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_FLEX_CONTROLLERS_UPDATED;
 	}
 class DLLCLIENT CFlexComponent final : public BaseFlexComponent {
 	  public:

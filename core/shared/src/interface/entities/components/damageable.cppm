@@ -11,7 +11,7 @@ export import :game.damage_info;
 
 export namespace pragma {
 	namespace damageableComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TAKE_DAMAGE;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_TAKE_DAMAGE;
 	}
 	class DLLNETWORK DamageableComponent final : public BaseEntityComponent {
 	  public:

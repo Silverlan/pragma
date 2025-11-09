@@ -10,12 +10,9 @@ export import :entities.components.base;
 export import pragma.util;
 
 export namespace pragma {
-	namespace baseObserverComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_OBSERVATION_MODE_CHANGED;
-	}
 	class BaseObservableComponent;
 	namespace baseObserverComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_OBSERVATION_MODE_CHANGED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_OBSERVATION_MODE_CHANGED;
 	}
 	class DLLNETWORK BaseObserverComponent : public BaseEntityComponent {
 	  public:

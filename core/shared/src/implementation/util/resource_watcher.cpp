@@ -309,7 +309,7 @@ bool ResourceWatcherManager::MountDirectory(const std::string &path, bool bAbsol
 		m_watchers.reserve(m_watchers.size() + watchPaths.size());
 		for(auto &watchPath : watchPaths) {
 			auto pwatchPath = util::DirPath(watchPath);
-			m_watchers.push_back(std::make_shared<DirectoryWatcherCallback>(util::DirPath(path, pwatchPath).GetString(), [this, pwatchPath = std::move(pwatchPath)](const std::string &fName) { OnResourceChanged(pwatchPath, fName); }, watchFlags, m_watcherManager.get()));
+			m_watchers.push_back(::util::make_shared<DirectoryWatcherCallback>(util::DirPath(path, pwatchPath).GetString(), [this, pwatchPath = std::move(pwatchPath)](const std::string &fName) { OnResourceChanged(pwatchPath, fName); }, watchFlags, m_watcherManager.get()));
 		}
 		m_watcherMutex.unlock();
 	}

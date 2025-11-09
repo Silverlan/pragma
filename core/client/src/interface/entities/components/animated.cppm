@@ -16,9 +16,9 @@ export namespace pragma {
 	const std::shared_ptr<prosper::IUniformResizableBuffer> &get_instance_bone_buffer();
 
 		namespace cAnimatedComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SKELETON_UPDATED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BONE_MATRICES_UPDATED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BONE_BUFFER_INITIALIZED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_SKELETON_UPDATED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_BONE_MATRICES_UPDATED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_BONE_BUFFER_INITIALIZED;
 	}
 	namespace cAnimatedComponent {
 		using namespace baseAnimatedComponent;

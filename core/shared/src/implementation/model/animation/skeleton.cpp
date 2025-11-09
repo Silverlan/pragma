@@ -8,7 +8,7 @@ import :model.animation.skeleton;
 
 std::shared_ptr<pragma::animation::Skeleton> pragma::animation::Skeleton::Load(const udm::AssetData &data, std::string &outErr)
 {
-	auto skeleton = std::make_shared<Skeleton>();
+	auto skeleton = ::util::make_shared<Skeleton>();
 	if(skeleton->LoadFromAssetData(data, outErr) == false)
 		return nullptr;
 	return skeleton;
@@ -17,7 +17,7 @@ pragma::animation::Skeleton::Skeleton(const Skeleton &other)
 {
 	m_bones.reserve(other.m_bones.size());
 	for(auto &bone : other.m_bones)
-		m_bones.push_back(std::make_shared<Bone>(*bone));
+		m_bones.push_back(::util::make_shared<Bone>(*bone));
 	m_rootBones = other.m_rootBones;
 	for(auto &pair : m_rootBones)
 		pair.second = m_bones[pair.first];
@@ -192,7 +192,7 @@ bool pragma::animation::Skeleton::LoadFromAssetData(const udm::AssetData &data, 
 			outErr = "Bone index is out of bounds of bone list!";
 			return false;
 		}
-		bones[boneInfo.index] = std::make_shared<Bone>();
+		bones[boneInfo.index] = ::util::make_shared<Bone>();
 		bones[boneInfo.index]->ID = boneInfo.index;
 	}
 
@@ -261,7 +261,7 @@ void pragma::animation::Skeleton::Merge(Skeleton &other)
 			auto it = std::find_if(bones.begin(), bones.end(), [&otherBone](const std::shared_ptr<Bone> &bone) { return ustring::compare(bone->name.c_str(), otherBone->name.c_str(), true); });
 			if(it == bones.end()) {
 				// Bone doesn't exist yet; Add to hierarchy
-				bones.push_back(std::make_shared<Bone>());
+				bones.push_back(::util::make_shared<Bone>());
 				auto &newBone = bones.back();
 				newBone->ID = bones.size() - 1;
 				newBone->name = otherBone->name;

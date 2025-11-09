@@ -9,7 +9,8 @@ get_filename_component(_cxx_name "${CMAKE_CXX_COMPILER}" NAME)
 string(TOLOWER "${_cxx_name}" _cxx_name_lower)
 if (_cxx_name_lower MATCHES "clang")
     # Required for "import std" when using clang compiler
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+    add_compile_options(-stdlib=libstdc++)
+    add_link_options(-stdlib=libstdc++)
 endif()
 
 include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)

@@ -30,7 +30,7 @@ std::string pragma::AddonInstallManager::AddonUpdateQuery::GetUpdateFilePath() c
 
 ////////////////////
 
-pragma::AddonInstallManager::AddonInstallManager() : m_curlQueryHandler(std::make_shared<CurlQueryHandler>()) {}
+pragma::AddonInstallManager::AddonInstallManager() : m_curlQueryHandler(::util::make_shared<CurlQueryHandler>()) {}
 
 void pragma::AddonInstallManager::CancelDownload() { m_curlQueryHandler->CancelDownload(); }
 
@@ -90,7 +90,7 @@ void pragma::AddonInstallManager::QueryFile(const std::shared_ptr<AddonUpdateQue
 
 								  auto size = updateFile->Read<uint64_t>();
 								  auto sizeUncompressed = updateFile->Read<uint64_t>();
-								  auto data = std::make_shared<std::vector<uint8_t>>(size);
+								  auto data = ::util::make_shared<std::vector<uint8_t>>(size);
 								  updateFile->Read(data->data(), data->size());
 
 								  uint32_t idx = 0;
@@ -154,7 +154,7 @@ void pragma::AddonInstallManager::QueryUpdateFileInfo(const std::shared_ptr<Addo
 				  uint64_t fileSize;
 				  float progress = 0.f;
 			  };
-			  auto queries = std::make_shared<std::vector<FileQuery>>();
+			  auto queries = ::util::make_shared<std::vector<FileQuery>>();
 			  queries->reserve(fileHeaders.size());
 			  addon->fileIds.reserve(fileHeaders.size());
 			  uint64_t totalSize = 0;
@@ -206,7 +206,7 @@ void pragma::AddonInstallManager::QueryUpdateFileInfo(const std::shared_ptr<Addo
 
 void pragma::AddonInstallManager::CheckForUpdates(const std::shared_ptr<AddonInfo> &addon, const std::shared_ptr<std::atomic<float>> &totalProgress)
 {
-	auto updateQuery = std::make_shared<AddonUpdateQuery>(addon);
+	auto updateQuery = ::util::make_shared<AddonUpdateQuery>(addon);
 	updateQuery->totalProgress = totalProgress;
 	m_curlQueryHandler->AddRequest(get_query_url() + "query_addon_version.php", {{"addonid", addon->GetUniqueId()}}, [this, updateQuery](int32_t code, const std::string &response) {
 		if(m_curlQueryHandler->IsErrorCode(code) == false) {

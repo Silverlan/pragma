@@ -15,7 +15,7 @@ export {
 		CONSTEXPR_DLL_COMPAT Color DEFAULT_TRACER_COLOR = Color(510, 510, 180, 510);
 		CONSTEXPR_DLL_COMPAT float DEFAULT_TRACER_LENGTH = 200.f;
 		CONSTEXPR_DLL_COMPAT float DEFAULT_TRACER_SPEED = 6'000.f;
-		CONSTEXPR_DLL_COMPAT std::string DEFAULT_TRACER_MATERIAL = "particles/beam_tracer";
+		CONSTEXPR_DLL_COMPAT std::string_view DEFAULT_TRACER_MATERIAL = "particles/beam_tracer";
 		CONSTEXPR_DLL_COMPAT float DEFAULT_TRACER_BLOOM = 0.25f;
 	}
 	struct DLLNETWORK BulletInfo {
@@ -34,7 +34,7 @@ export {
 		Color tracerColor = bulletInfo::DEFAULT_TRACER_COLOR;
 		float tracerLength = bulletInfo::DEFAULT_TRACER_LENGTH;
 		float tracerSpeed = bulletInfo::DEFAULT_TRACER_SPEED;
-		std::string tracerMaterial = bulletInfo::DEFAULT_TRACER_MATERIAL;
+		std::string tracerMaterial {bulletInfo::DEFAULT_TRACER_MATERIAL};
 		float tracerBloom = bulletInfo::DEFAULT_TRACER_BLOOM;
 		std::string ammoType = "";
 		// TODO Additional Filter

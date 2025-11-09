@@ -22,8 +22,8 @@ export namespace pragma {
 export namespace pragma {
 	namespace cModelComponent {
 		using namespace baseModelComponent;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_RENDER_MESHES_UPDATED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_RENDER_MESHES_UPDATED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED;
 	}
 	class DLLCLIENT CModelComponent final : public BaseModelComponent, public CBaseNetComponent {
 	  public:

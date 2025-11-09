@@ -62,7 +62,7 @@ void Lua::CollisionMesh::register_class(luabind::class_<::pragma::physics::Colli
 		tris.clear();
 		Lua::table_to_vector(l, tTriangles, 2, tris);
 	}));
-	classDef.def("Copy", static_cast<std::shared_ptr<::pragma::physics::CollisionMesh> (*)(lua::State *, ::pragma::physics::CollisionMesh &)>([](lua::State *l, ::pragma::physics::CollisionMesh &mesh) { return std::make_shared<::pragma::physics::CollisionMesh>(mesh); }));
+	classDef.def("Copy", static_cast<std::shared_ptr<::pragma::physics::CollisionMesh> (*)(lua::State *, ::pragma::physics::CollisionMesh &)>([](lua::State *l, ::pragma::physics::CollisionMesh &mesh) { return ::util::make_shared<::pragma::physics::CollisionMesh>(mesh); }));
 
 	classDef.def("SetSoftBody", &::pragma::physics::CollisionMesh::SetSoftBody);
 	classDef.def("IsSoftBody", &::pragma::physics::CollisionMesh::IsSoftBody);

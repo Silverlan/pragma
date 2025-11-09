@@ -78,7 +78,7 @@ bool BaseEntityIterator::operator!=(const BaseEntityIterator &other) { return !o
 
 /////////////////
 
-pragma::ecs::EntityIterator::EntityIterator(pragma::Game &game, bool) : m_iteratorData(std::make_shared<EntityIteratorData>(game)) {}
+pragma::ecs::EntityIterator::EntityIterator(pragma::Game &game, bool) : m_iteratorData(::util::make_shared<EntityIteratorData>(game)) {}
 pragma::ecs::EntityIterator::EntityIterator(pragma::Game &game, FilterFlags filterFlags) : pragma::ecs::EntityIterator(game, false)
 {
 	if(filterFlags != FilterFlags::None)
@@ -89,7 +89,7 @@ pragma::ecs::EntityIterator::EntityIterator(pragma::Game &game, pragma::Componen
 	if(componentId != pragma::INVALID_COMPONENT_ID) {
 		std::size_t count;
 		auto &components = game.GetEntityComponentManager().GetComponents(componentId, count);
-		m_iteratorData = std::make_shared<EntityIteratorData>(game, components, count); // AttachFilter<EntityIteratorFilterComponent>(componentId);
+		m_iteratorData = ::util::make_shared<EntityIteratorData>(game, components, count); // AttachFilter<EntityIteratorFilterComponent>(componentId);
 	}
 	if(m_iteratorData == nullptr)
 		return;
@@ -102,7 +102,7 @@ pragma::ecs::EntityIterator::EntityIterator(pragma::Game &game, const std::strin
 	if(game.GetEntityComponentManager().GetComponentTypeId(componentName, componentId) == true && componentId != pragma::INVALID_COMPONENT_ID) {
 		std::size_t count;
 		auto &components = game.GetEntityComponentManager().GetComponents(componentId, count);
-		m_iteratorData = std::make_shared<EntityIteratorData>(game, components, count);
+		m_iteratorData = ::util::make_shared<EntityIteratorData>(game, components, count);
 	}
 	if(m_iteratorData == nullptr)
 		return;

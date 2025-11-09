@@ -16,14 +16,14 @@ export {
 	namespace pragma {
 		namespace physics {
 			namespace baseLiquidControlComponent {
-				STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SPLASH;
-				STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PROPERTIES_CHANGED;
+				CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_SPLASH;
+				CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_PROPERTIES_CHANGED;
 			}
 			class ICollisionObject;
 		};
 		namespace baseLiquidControlComponent {
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SPLASH;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PROPERTIES_CHANGED;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_SPLASH;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_PROPERTIES_CHANGED;
 		}
 		class DLLNETWORK BaseLiquidControlComponent : public BaseEntityComponent {
 		  public:

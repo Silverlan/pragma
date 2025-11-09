@@ -29,10 +29,10 @@ void ai::BehaviorNode::SetSelectorType(SelectorType selectorType)
 {
 	switch(selectorType) {
 	case SelectorType::RandomShuffle:
-		m_selector = std::make_shared<TaskSelectorRandomShuffle>();
+		m_selector = ::util::make_shared<TaskSelectorRandomShuffle>();
 		break;
 	default:
-		m_selector = std::make_shared<TaskSelectorSequential>();
+		m_selector = ::util::make_shared<TaskSelectorSequential>();
 		break;
 	}
 }

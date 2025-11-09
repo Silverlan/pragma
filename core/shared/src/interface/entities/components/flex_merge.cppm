@@ -16,7 +16,7 @@ export import :types;
 export {
 	namespace pragma {
 		namespace flexMergeComponent {
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TARGET_CHANGED;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_TARGET_CHANGED;
 		}
 		class DLLNETWORK FlexMergeComponent final : public BaseEntityComponent {
 		  public:

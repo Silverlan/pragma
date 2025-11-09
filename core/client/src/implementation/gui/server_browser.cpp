@@ -332,7 +332,7 @@ void WIServerBrowser::AddServer(const pragma::networking::MasterServerQueryResul
 		data.queryResult = queryResult;
 		data.row = row->GetHandle();
 		int idx = CInt32(m_servers.size() - 1);
-		row->SetUserData3(std::make_shared<int32_t>(idx));
+		row->SetUserData3(::util::make_shared<int32_t>(idx));
 		auto hTableRow = row->GetHandle();
 		row->AddCallback("OnDoubleClick", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this, hTableRow, idx](util::EventReply *reply) -> CallbackReturnType {
 			*reply = util::EventReply::Handled;

@@ -526,8 +526,8 @@ int Lua::game::Client::test(lua::State *l)
 			ike->renderScene();
 		}));*/
 		/*#define RADIAN(X)	((X)*RadiansToDegrees)
-		auto ikTree = std::make_shared<Tree>();
-		auto jacobian = std::make_shared<Jacobian>(ikTree.get());
+		auto ikTree = ::util::make_shared<Tree>();
+		auto jacobian = ::util::make_shared<Jacobian>(ikTree.get());
 
 		Reset(*ikTree,jacobian.get());
 
@@ -542,28 +542,28 @@ int Lua::game::Client::test(lua::State *l)
 		const VectorR3& unitz = VectorR3::UnitZ;
 		const VectorR3& zero = VectorR3::Zero;
 
-		m_ikNodes.push_back(std::make_shared<Node>(VectorR3(0.100000, 0.000000, 0.087500), unitz, 0.08, JOINT, -1e30, 1e30, RADIAN(0.)));
+		m_ikNodes.push_back(::util::make_shared<Node>(VectorR3(0.100000, 0.000000, 0.087500), unitz, 0.08, JOINT, -1e30, 1e30, RADIAN(0.)));
 		ikTree->InsertRoot(m_ikNodes[0].get());
 
-		m_ikNodes.push_back(std::make_shared<Node>(VectorR3(0.100000, -0.000000, 0.290000), unity, 0.08, JOINT, -0.5, 0.4, RADIAN(0.)));
+		m_ikNodes.push_back(::util::make_shared<Node>(VectorR3(0.100000, -0.000000, 0.290000), unity, 0.08, JOINT, -0.5, 0.4, RADIAN(0.)));
 		ikTree->InsertLeftChild(m_ikNodes[0].get(), m_ikNodes[1].get());
 
-		m_ikNodes.push_back(std::make_shared<Node>(VectorR3(0.100000, -0.000000, 0.494500), unitz, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
+		m_ikNodes.push_back(::util::make_shared<Node>(VectorR3(0.100000, -0.000000, 0.494500), unitz, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
 		ikTree->InsertLeftChild(m_ikNodes[1].get(), m_ikNodes[2].get());
 
-		m_ikNodes.push_back(std::make_shared<Node>(VectorR3(0.100000, 0.000000, 0.710000), -unity, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
+		m_ikNodes.push_back(::util::make_shared<Node>(VectorR3(0.100000, 0.000000, 0.710000), -unity, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
 		ikTree->InsertLeftChild(m_ikNodes[2].get(), m_ikNodes[3].get());
 
-		m_ikNodes.push_back(std::make_shared<Node>(VectorR3(0.100000, 0.000000, 0.894500), unitz, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
+		m_ikNodes.push_back(::util::make_shared<Node>(VectorR3(0.100000, 0.000000, 0.894500), unitz, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
 		ikTree->InsertLeftChild(m_ikNodes[3].get(), m_ikNodes[4].get());
 
-		m_ikNodes.push_back(std::make_shared<Node>(VectorR3(0.100000, 0.000000, 1.110000), unity, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
+		m_ikNodes.push_back(::util::make_shared<Node>(VectorR3(0.100000, 0.000000, 1.110000), unity, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
 		ikTree->InsertLeftChild(m_ikNodes[4].get(), m_ikNodes[5].get());
 
-		m_ikNodes.push_back(std::make_shared<Node>(VectorR3(0.100000, 0.000000, 1.191000), unitz, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
+		m_ikNodes.push_back(::util::make_shared<Node>(VectorR3(0.100000, 0.000000, 1.191000), unitz, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
 		ikTree->InsertLeftChild(m_ikNodes[5].get(), m_ikNodes[6].get());
 
-		m_ikNodes.push_back(std::make_shared<Node>(VectorR3(0.100000, 0.000000, 1.20000), zero, 0.08, EFFECTOR));
+		m_ikNodes.push_back(::util::make_shared<Node>(VectorR3(0.100000, 0.000000, 1.20000), zero, 0.08, EFFECTOR));
 		ikTree->InsertLeftChild(m_ikNodes[6].get(), m_ikNodes[7].get());
 
 		ikTree->Init();
@@ -816,7 +816,7 @@ int Lua::game::Client::open_dropped_file(lua::State *l)
 	auto f = FileManager::OpenSystemFile(fullPath->c_str(), (bBinary == true) ? "rb" : "r");
 	if(f == nullptr)
 		return 0;
-	auto r = std::make_shared<LFile>();
+	auto r = ::util::make_shared<LFile>();
 	r->Construct(f);
 	Lua::Push<std::shared_ptr<LFile>>(l, r);
 	return 1;

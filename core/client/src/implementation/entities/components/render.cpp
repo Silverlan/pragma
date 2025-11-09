@@ -510,7 +510,7 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 		result.hitValue = res->distance;
 		result.result = umath::intersection::Result::Intersect;
 		if(precise) {
-			result.precise = std::make_shared<Intersection::LineMeshResult::Precise>();
+			result.precise = ::util::make_shared<Intersection::LineMeshResult::Precise>();
 			result.precise->subMesh = res->mesh;
 			result.precise->triIdx = res->primitiveIndex;
 			result.precise->u = res->u;

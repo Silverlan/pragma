@@ -35,7 +35,7 @@ void Faction::SetDisposition(Faction &faction, DISPOSITION disp, bool revert, in
 			++it;
 		}
 	}
-	m_relationships[static_cast<int>(disp)].push_back(std::make_shared<FactionDisposition>(faction, priority));
+	m_relationships[static_cast<int>(disp)].push_back(::util::make_shared<FactionDisposition>(faction, priority));
 }
 void Faction::SetEnemyFaction(Faction &faction, bool revert, int priority) { SetDisposition(faction, DISPOSITION::HATE, revert, priority); }
 void Faction::SetAlliedFaction(Faction &faction, bool revert, int priority) { SetDisposition(faction, DISPOSITION::LIKE, revert, priority); }

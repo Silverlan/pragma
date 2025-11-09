@@ -5,10 +5,12 @@ module;
 #ifdef _WIN32
 #include <Windows.h>
 #endif
+#include <cstdio>
 
 export module pragma.shared:console.spdlog_anycolor_sink;
 
 import :console.output;
+export import std.compat;
 
 export namespace pragma::console {
 	// Based on wincolor_sink

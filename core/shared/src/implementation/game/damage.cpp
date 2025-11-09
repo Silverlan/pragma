@@ -42,7 +42,7 @@ void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, DamageInfo 
 	auto *inflictor = dmg.GetInflictor();
 	if(inflictor != nullptr)
 		entsFilter.push_back(inflictor->GetHandle());
-	auto traceFilter = std::make_shared<::pragma::physics::MultiEntityRayCastFilterCallback>(std::move(entsFilter));
+	auto traceFilter = ::util::make_shared<::pragma::physics::MultiEntityRayCastFilterCallback>(std::move(entsFilter));
 
 	auto *entOrigin = (attacker != nullptr) ? attacker : inflictor;
 	for(auto it = ents.begin(); it != ents.end(); ++it) {

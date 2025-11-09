@@ -36,8 +36,8 @@ export {
 		};
 
 		namespace baseShooterComponent {
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_FIRE_BULLETS;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BULLETS_FIRED;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_FIRE_BULLETS;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_BULLETS_FIRED;
 		};
 		class DLLNETWORK BaseShooterComponent : public BaseEntityComponent {
 		  public:

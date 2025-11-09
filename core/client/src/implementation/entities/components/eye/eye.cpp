@@ -24,7 +24,7 @@ void CEyeComponent::RegisterMembers(pragma::EntityComponentManager &componentMan
 	using T = CEyeComponent;
 
 	{
-		auto coordMetaData = std::make_shared<ents::CoordinateTypeMetaData>();
+		auto coordMetaData = ::util::make_shared<ents::CoordinateTypeMetaData>();
 		coordMetaData->space = umath::CoordinateSpace::Local;
 
 		using TViewTarget = Vector3;

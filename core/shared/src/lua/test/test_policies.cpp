@@ -60,7 +60,7 @@ struct TestSharedFromThis
 	float x = 5.f;
 };
 
-static std::shared_ptr<TestSharedFromThis> g_shared_from_this = std::make_shared<TestSharedFromThis>();
+static std::shared_ptr<TestSharedFromThis> g_shared_from_this = ::util::make_shared<TestSharedFromThis>();
 static TestSharedFromThis *test_shared_from_this_policy_ret()
 {
 	return g_shared_from_this.get();

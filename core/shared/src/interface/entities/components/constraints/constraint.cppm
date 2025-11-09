@@ -12,20 +12,13 @@ export import :game.coordinate_system;
 export import :game.enums;
 
 export namespace pragma {
-	namespace constraintComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_APPLY_CONSTRAINT;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DRIVER_CHANGED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DRIVEN_OBJECT_CHANGED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ORDER_INDEX_CHANGED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PARTICIPANTS_FLAGGED_DIRTY;
-	}
 	class ConstraintManagerComponent;
 	namespace constraintComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_APPLY_CONSTRAINT;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DRIVER_CHANGED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DRIVEN_OBJECT_CHANGED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ORDER_INDEX_CHANGED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_PARTICIPANTS_FLAGGED_DIRTY;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_APPLY_CONSTRAINT;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_DRIVER_CHANGED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_DRIVEN_OBJECT_CHANGED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_ORDER_INDEX_CHANGED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_PARTICIPANTS_FLAGGED_DIRTY;
 	}
 	class DLLNETWORK ConstraintComponent final : public BaseEntityComponent {
 	  public:

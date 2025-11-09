@@ -5,9 +5,9 @@ module;
 
 #include "definitions.hpp"
 
-export import std;
-
 export module pragma.server:core.cache_info;
+
+export import std;
 
 export struct DLLSERVER CacheInfo {
 	CacheInfo() : cache(""), size(0) {}

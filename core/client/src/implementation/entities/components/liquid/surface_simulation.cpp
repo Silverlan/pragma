@@ -70,7 +70,7 @@ void CLiquidSurfaceSimulationComponent::ReceiveData(NetPacket &packet)
 std::shared_ptr<PhysWaterSurfaceSimulator> CLiquidSurfaceSimulationComponent::InitializeSurfaceSimulator(const Vector2 &min, const Vector2 &max, float originY)
 {
 	auto controlC = GetEntity().GetComponent<CLiquidControlComponent>();
-	return controlC.valid() ? std::make_shared<CPhysWaterSurfaceSimulator>(min, max, originY, GetSpacing(), controlC->GetStiffness(), controlC->GetPropagation()) : nullptr;
+	return controlC.valid() ? ::util::make_shared<CPhysWaterSurfaceSimulator>(min, max, originY, GetSpacing(), controlC->GetStiffness(), controlC->GetPropagation()) : nullptr;
 }
 
 void CLiquidSurfaceSimulationComponent::OnEntitySpawn()

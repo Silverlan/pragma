@@ -834,7 +834,7 @@ void register_property_methods(TClassDef &classDef)
 		    auto p = static_cast<TPropertyWrapper>(prop).prop;
 		    if(!p)
 			    return nullptr;
-		    return std::make_shared<::udm::Property>(*p);
+		    return ::util::make_shared<::udm::Property>(*p);
 	    })
 	  .def(
 	    "ToAscii",

@@ -26,7 +26,7 @@ bool ModelMesh::IsEqual(const ModelMesh &other) const
 	}
 	return true;
 }
-std::shared_ptr<ModelMesh> ModelMesh::Copy() const { return std::make_shared<ModelMesh>(*this); }
+std::shared_ptr<ModelMesh> ModelMesh::Copy() const { return ::util::make_shared<ModelMesh>(*this); }
 void ModelMesh::Rotate(const Quat &rot)
 {
 	for(auto &subMesh : m_subMeshes)
@@ -144,8 +144,8 @@ void umath::normalize_uv_coordinates(Vector2 &uv)
 }
 
 pragma::ModelSubMesh::ModelSubMesh()
-    : std::enable_shared_from_this<pragma::ModelSubMesh>(), m_skinTextureIndex(0), m_numAlphas(0), m_alphas(std::make_shared<std::vector<Vector2>>()), m_indexData(std::make_shared<std::vector<uint8_t>>()), m_vertexWeights(std::make_shared<std::vector<umath::VertexWeight>>()),
-      m_extendedVertexWeights(std::make_shared<std::vector<umath::VertexWeight>>()), m_vertices(std::make_shared<std::vector<umath::Vertex>>()), m_uvSets {std::make_shared<std::unordered_map<std::string, std::vector<Vector2>>>()}, m_extensions {udm::Property::Create(udm::Type::Element)},
+    : std::enable_shared_from_this<pragma::ModelSubMesh>(), m_skinTextureIndex(0), m_numAlphas(0), m_alphas(::util::make_shared<std::vector<Vector2>>()), m_indexData(::util::make_shared<std::vector<uint8_t>>()), m_vertexWeights(::util::make_shared<std::vector<umath::VertexWeight>>()),
+      m_extendedVertexWeights(::util::make_shared<std::vector<umath::VertexWeight>>()), m_vertices(::util::make_shared<std::vector<umath::Vertex>>()), m_uvSets {::util::make_shared<std::unordered_map<std::string, std::vector<Vector2>>>()}, m_extensions {udm::Property::Create(udm::Type::Element)},
       m_uuid {util::generate_uuid_v4()}
 {
 }
@@ -252,12 +252,12 @@ void pragma::ModelSubMesh::Copy(pragma::ModelSubMesh &cpy, bool fullCopy) const
 {
 	cpy.m_name = m_name;
 	if(fullCopy) {
-		cpy.m_vertices = std::make_shared<std::vector<umath::Vertex>>(*cpy.m_vertices);
-		cpy.m_alphas = std::make_shared<std::vector<Vector2>>(*cpy.m_alphas);
-		cpy.m_indexData = std::make_shared<std::vector<uint8_t>>(*cpy.m_indexData);
-		cpy.m_vertexWeights = std::make_shared<std::vector<umath::VertexWeight>>(*cpy.m_vertexWeights);
-		cpy.m_extendedVertexWeights = std::make_shared<std::vector<umath::VertexWeight>>(*cpy.m_extendedVertexWeights);
-		cpy.m_uvSets = std::make_shared<std::unordered_map<std::string, std::vector<Vector2>>>(*cpy.m_uvSets);
+		cpy.m_vertices = ::util::make_shared<std::vector<umath::Vertex>>(*cpy.m_vertices);
+		cpy.m_alphas = ::util::make_shared<std::vector<Vector2>>(*cpy.m_alphas);
+		cpy.m_indexData = ::util::make_shared<std::vector<uint8_t>>(*cpy.m_indexData);
+		cpy.m_vertexWeights = ::util::make_shared<std::vector<umath::VertexWeight>>(*cpy.m_vertexWeights);
+		cpy.m_extendedVertexWeights = ::util::make_shared<std::vector<umath::VertexWeight>>(*cpy.m_extendedVertexWeights);
+		cpy.m_uvSets = ::util::make_shared<std::unordered_map<std::string, std::vector<Vector2>>>(*cpy.m_uvSets);
 
 		// Copy extension data
 		std::stringstream extStream {};
@@ -273,7 +273,7 @@ void pragma::ModelSubMesh::Copy(pragma::ModelSubMesh &cpy, bool fullCopy) const
 }
 std::shared_ptr<pragma::ModelSubMesh> pragma::ModelSubMesh::Copy(bool fullCopy) const
 {
-	auto cpy = std::make_shared<pragma::ModelSubMesh>(*this);
+	auto cpy = ::util::make_shared<pragma::ModelSubMesh>(*this);
 	if(fullCopy == false)
 		return cpy;
 	Copy(*cpy, fullCopy);
@@ -324,7 +324,7 @@ void pragma::ModelSubMesh::Merge(const pragma::ModelSubMesh &other)
 	std::size_t newVertCount = 0;
 	if(other.m_vertices != nullptr) {
 		if(m_vertices == nullptr)
-			m_vertices = std::make_shared<std::vector<umath::Vertex>>();
+			m_vertices = ::util::make_shared<std::vector<umath::Vertex>>();
 		vertCount = m_vertices->size();
 		m_vertices->reserve(m_vertices->size() + other.m_vertices->size());
 		for(auto &v : *other.m_vertices)
@@ -334,7 +334,7 @@ void pragma::ModelSubMesh::Merge(const pragma::ModelSubMesh &other)
 
 	if(other.m_indexData != nullptr) {
 		if(m_indexData == nullptr)
-			m_indexData = std::make_shared<std::vector<uint8_t>>();
+			m_indexData = ::util::make_shared<std::vector<uint8_t>>();
 		if(GetIndexType() == pragma::model::IndexType::UInt16) {
 			// Check if we need to increase our index size
 			uint32_t maxIndex = 0;
@@ -355,7 +355,7 @@ void pragma::ModelSubMesh::Merge(const pragma::ModelSubMesh &other)
 
 	if(other.m_alphas != nullptr && ((m_alphas && !m_alphas->empty()) || !other.m_alphas->empty())) {
 		if(m_alphas == nullptr)
-			m_alphas = std::make_shared<std::vector<Vector2>>();
+			m_alphas = ::util::make_shared<std::vector<Vector2>>();
 		m_alphas->reserve(newVertCount);
 		m_alphas->resize(vertCount);
 		for(auto &alpha : *other.m_alphas)
@@ -364,7 +364,7 @@ void pragma::ModelSubMesh::Merge(const pragma::ModelSubMesh &other)
 
 	if(other.m_vertexWeights != nullptr && ((m_vertexWeights && !m_vertexWeights->empty()) || !other.m_vertexWeights->empty())) {
 		if(m_vertexWeights == nullptr)
-			m_vertexWeights = std::make_shared<std::vector<umath::VertexWeight>>();
+			m_vertexWeights = ::util::make_shared<std::vector<umath::VertexWeight>>();
 		m_vertexWeights->reserve(newVertCount);
 		m_vertexWeights->resize(vertCount);
 		for(auto &vw : *other.m_vertexWeights)
@@ -373,7 +373,7 @@ void pragma::ModelSubMesh::Merge(const pragma::ModelSubMesh &other)
 
 	if(other.m_extendedVertexWeights != nullptr && ((m_extendedVertexWeights && !m_extendedVertexWeights->empty()) || !other.m_extendedVertexWeights->empty())) {
 		if(m_extendedVertexWeights == nullptr)
-			m_extendedVertexWeights = std::make_shared<std::vector<umath::VertexWeight>>();
+			m_extendedVertexWeights = ::util::make_shared<std::vector<umath::VertexWeight>>();
 		m_extendedVertexWeights->reserve(newVertCount);
 		m_extendedVertexWeights->resize(vertCount);
 		for(auto &vw : *other.m_extendedVertexWeights)
@@ -403,7 +403,7 @@ void pragma::ModelSubMesh::SetShared(const pragma::ModelSubMesh &other, ShareMod
 		m_extendedVertexWeights = other.m_extendedVertexWeights;
 	}
 }
-void pragma::ModelSubMesh::ClearTriangles() { m_indexData = std::make_shared<std::vector<uint8_t>>(); }
+void pragma::ModelSubMesh::ClearTriangles() { m_indexData = ::util::make_shared<std::vector<uint8_t>>(); }
 void pragma::ModelSubMesh::Centralize(const Vector3 &origin)
 {
 	for(auto &v : *m_vertices)

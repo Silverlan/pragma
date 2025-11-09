@@ -225,8 +225,8 @@ bool PolyMesh::IsValid() { return m_bValid; }
 
 std::shared_ptr<pragma::Model> PolyMesh::GenerateModel()
 {
-	/*auto mdl = std::make_shared<Model>();
-	auto meshCol = std::make_shared<CollisionMesh>();
+	/*auto mdl = ::util::make_shared<Model>();
+	auto meshCol = ::util::make_shared<CollisionMesh>();
 	std::vector<Vector3> &colVerts = meshCol->GetVertices();
 	for(int i=0;i<m_polys.size();i++) {
 		Poly *poly = m_polys[i];

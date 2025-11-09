@@ -226,7 +226,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<pragma::Model> 
 
 		std::shared_ptr<ents::ParentTypeMetaData> parentMetaData {};
 		if(!parentPathName.empty()) {
-			parentMetaData = std::make_shared<ents::ParentTypeMetaData>();
+			parentMetaData = ::util::make_shared<ents::ParentTypeMetaData>();
 			parentMetaData->parentProperty = parentPathName;
 		}
 
@@ -237,15 +237,15 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<pragma::Model> 
 		auto posPathName = "bone/" + lname + "/position";
 		auto rotPathName = "bone/" + lname + "/rotation";
 		auto scalePathName = "bone/" + lname + "/scale";
-		auto poseMetaData = std::make_shared<ents::PoseTypeMetaData>();
+		auto poseMetaData = ::util::make_shared<ents::PoseTypeMetaData>();
 		poseMetaData->posProperty = posPathName;
 		poseMetaData->rotProperty = rotPathName;
 		poseMetaData->scaleProperty = scalePathName;
 
-		auto poseComponentMetaData = std::make_shared<ents::PoseComponentTypeMetaData>();
+		auto poseComponentMetaData = ::util::make_shared<ents::PoseComponentTypeMetaData>();
 		poseComponentMetaData->poseProperty = posePathName;
 
-		auto coordMetaData = std::make_shared<ents::CoordinateTypeMetaData>();
+		auto coordMetaData = ::util::make_shared<ents::CoordinateTypeMetaData>();
 		coordMetaData->space = umath::CoordinateSpace::Local;
 		coordMetaData->parentProperty = parentPathName;
 

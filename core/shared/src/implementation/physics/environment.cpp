@@ -21,7 +21,7 @@ pragma::physics::IEnvironment::IEnvironment(NetworkState &state) : m_nwState {st
 	for(auto i = 0; i < umath::to_integral(Event::Count); i++)
 		m_callbacks.insert(std::unordered_map<Event, std::vector<CallbackHandle>>::value_type(static_cast<Event>(i), std::vector<CallbackHandle>()));
 
-	m_buoyancySim = std::make_shared<physics::WaterBuoyancySimulator>();
+	m_buoyancySim = ::util::make_shared<physics::WaterBuoyancySimulator>();
 	m_surfTypeManager.RegisterType("generic");
 }
 void pragma::physics::IEnvironment::OnRemove()

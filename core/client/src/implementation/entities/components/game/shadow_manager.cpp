@@ -87,7 +87,7 @@ CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(T
 		data.renderTargetHandle = nullptr; // Invalidate previous handle (Reclaim ownership)
 
 		// Create new handle
-		data.renderTargetHandle = std::make_shared<std::weak_ptr<RenderTarget>>(data.renderTarget);
+		data.renderTargetHandle = ::util::make_shared<std::weak_ptr<RenderTarget>>(data.renderTarget);
 		data.lastPriority = priority;
 		return data.renderTargetHandle;
 	}
@@ -119,7 +119,7 @@ CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(T
 	texCreateInfo.flags = prosper::util::TextureCreateInfo::Flags::CreateImageViewForEachLayer;
 	auto depthTexture = pragma::get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
 
-	auto rt = std::make_shared<RenderTarget>();
+	auto rt = ::util::make_shared<RenderTarget>();
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	rtCreateInfo.useLayerFramebuffers = true;
 	rt->renderTarget = pragma::get_cengine()->GetRenderContext().CreateRenderTarget({depthTexture}, static_cast<prosper::ShaderGraphics *>(m_whShadowShader.get())->GetRenderPass(), rtCreateInfo);
@@ -128,7 +128,7 @@ CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(T
 	auto &data = set.buffers.back();
 	data.lastPriority = priority;
 	data.renderTarget = rt;
-	data.renderTargetHandle = std::make_shared<std::weak_ptr<RenderTarget>>(data.renderTarget);
+	data.renderTargetHandle = ::util::make_shared<std::weak_ptr<RenderTarget>>(data.renderTarget);
 
 	rt->index = set.buffers.size() - 1;
 	m_descSetGroup->GetDescriptorSet()->SetBindingArrayTexture(*depthTexture, umath::to_integral((type != Type::Cube) ? pragma::ShaderSceneLit::ShadowBinding::ShadowMaps : pragma::ShaderSceneLit::ShadowBinding::ShadowCubeMaps), rt->index);

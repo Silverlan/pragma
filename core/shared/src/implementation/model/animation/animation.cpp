@@ -366,7 +366,7 @@ bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data,
 			auto id = pragma::animation::Animation::GetEventEnumRegister().RegisterEnum(name);
 			if(id == util::INVALID_ENUM)
 				continue;
-			auto ev = std::make_shared<pragma::AnimationEvent>();
+			auto ev = ::util::make_shared<pragma::AnimationEvent>();
 			ev->eventID = static_cast<pragma::AnimationEvent::Type>(id);
 			udmEvent["args"](ev->arguments);
 			frameEvents.push_back(ev);
@@ -463,7 +463,7 @@ template<class TChannel>
 static void write_channel_value(std::shared_ptr<Channel> &channel, uint32_t numFrames, uint32_t frameIdx, float t, const std::function<const void *()> &fGetValue)
 {
 	if(!channel) {
-		channel = std::make_shared<TChannel>();
+		channel = ::util::make_shared<TChannel>();
 		channel->times.reserve(numFrames);
 		static_cast<TChannel *>(channel.get())->values.reserve(numFrames);
 	}
@@ -685,7 +685,7 @@ bool pragma::animation::Animation::Save(udm::AssetDataArg outData, std::string &
 			auto &channels = nodeChannels[*nodeMove];
 			auto &moveChannel = channels["offset"];
 			if(!moveChannel) {
-				moveChannel = std::make_shared<MoveChannel>();
+				moveChannel = ::util::make_shared<MoveChannel>();
 				moveChannel->times.reserve(numFrames);
 				static_cast<MoveChannel *>(moveChannel.get())->values.reserve(numFrames);
 			}
@@ -1255,7 +1255,7 @@ std::shared_ptr<panima::Animation> pragma::animation::Animation::ToPanimaAnimati
 	};
 	std::unordered_map<std::string, std::shared_ptr<BoneChannelData>> boneNameToChannelData;
 	boneNameToChannelData.reserve(boneValues.size());
-	auto panimaAnim = std::make_shared<panima::Animation>();
+	auto panimaAnim = ::util::make_shared<panima::Animation>();
 	for(auto &pair : boneValues) {
 		auto &boneName = pair.first;
 		auto &valueData = pair.second;
@@ -1349,7 +1349,7 @@ std::shared_ptr<panima::Animation> pragma::animation::Animation::ToPanimaAnimati
 			if(times.empty())
 				return nullptr;
 
-			auto channel = std::make_shared<panima::Channel>();
+			auto channel = ::util::make_shared<panima::Channel>();
 			auto valueType = (eComponent != PoseComponent::Rotation) ? udm::Type::Vector3 : udm::Type::Quaternion;
 			auto &timeArray = channel->GetTimesArray();
 			auto &valueArray = channel->GetValueArray();

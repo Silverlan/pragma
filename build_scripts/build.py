@@ -19,8 +19,8 @@ prebuilt_tag = "2025-11-04"
 
 # See https://stackoverflow.com/a/43357954/1879228 for boolean args
 if platform == "linux":
-	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-21')
-	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-21')
+	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-22')
+	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-22')
 else:
 	defaultToolset = "msvc"
 
@@ -295,18 +295,23 @@ if build_all == False:
     else:
         print(f"Directory '{base_path}' is already up-to-date.")
 
-########## clang-21 ##########
-# Due to a compiler bug with C++20 Modules in clang, we have to use clang-21 for now,
+########## clang-22 ##########
+# Due to a compiler bug with C++20 Modules in clang, we have to use clang-22 for now,
 # which is not available in package managers yet.
-if platform == "linux" and (c_compiler == "clang-21" or c_compiler == "clang++-21"):
+if platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++-22"):
 	clang_staging_path = get_library_root_dir("clang")
 	if build_all:
 		curDir = os.getcwd()
 		os.chdir(deps_dir)
-		clang20_root = os.getcwd() +"/LLVM-21.1.5-Linux-X64"
+		# We need clang-22, which is not actually available as a release yet, so we use our own prebuilt binaries for now.
+		clang20_root = os.getcwd() +"/LLVM-22.git-Linux-X64"
 		if not Path(clang20_root).is_dir():
-			print_msg("Downloading clang-21...")
-			http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.5/LLVM-21.1.5-Linux-X64.tar.xz",format="tar.xz")
+			print_msg("Downloading clang-22...")
+			http_extract("https://github.com/Silverlan/clang_prebuilt/releases/download/2025-11-09/linux_x64.tar.xz",format="tar.xz")
+		#clang20_root = os.getcwd() +"/LLVM-21.1.5-Linux-X64"
+		#if not Path(clang20_root).is_dir():
+		#	print_msg("Downloading clang-21...")
+		#	http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.5/LLVM-21.1.5-Linux-X64.tar.xz",format="tar.xz")
 		os.chdir(curDir)
 
 		copy_preserving_symlink(Path(clang20_root +"/bin/clang"), Path(clang_staging_path +"/bin"))
@@ -325,9 +330,9 @@ if platform == "linux" and (c_compiler == "clang-21" or c_compiler == "clang++-2
 		copytree(clang20_root +"/libexec", clang_staging_path +"/libexec")
 		copytree(clang20_root +"/share", clang_staging_path +"/share")
 
-	if c_compiler == "clang-21":
+	if c_compiler == "clang-22":
 		c_compiler = clang_staging_path +"/bin/clang"
-	if cxx_compiler == "clang++-21":
+	if cxx_compiler == "clang++-22":
 		cxx_compiler = clang_staging_path +"/bin/clang++"
 	print_msg("Setting c_compiler override to '" +c_compiler +"'")
 	print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")
@@ -423,62 +428,68 @@ if platform == "linux":
 	if(no_sudo):
 		print_msg("--no-sudo has been specified. System packages will be skipped, this may cause errors later on...")
 	else:
-		commands = [
-			# Required for the build script
-			"apt-get install python3",
-			
-			# Required for Pragma core
-			"apt install build-essential",
-			# "add-apt-repository ppa:savoury1/llvm-defaults-14",
-			"apt update",
-			"apt install clang-18",
-			"apt-get install clang-tools-18", # Required for C++20 Modules
-			"apt install libstdc++-12-dev",
-			"apt install libstdc++6",
-			"apt-get install patchelf",
+		if(prefer_pacman()):
+			commands = [
+				"pacman -S --needed cmake",
+				"pacman -S --needed ninja"
+			]
+		else:
+			commands = [
+				# Required for the build script
+				"apt-get install python3",
+				
+				# Required for Pragma core
+				"apt install build-essential",
+				# "add-apt-repository ppa:savoury1/llvm-defaults-14",
+				"apt update",
+				"apt install clang-18",
+				"apt-get install clang-tools-18", # Required for C++20 Modules
+				"apt install libstdc++-12-dev",
+				"apt install libstdc++6",
+				"apt-get install patchelf",
 
-			# Required for Vulkan
-			"apt-get -qq install -y libwayland-dev libxrandr-dev",
+				# Required for Vulkan
+				"apt-get -qq install -y libwayland-dev libxrandr-dev",
 
-			"apt-get install libxcb-keysyms1-dev",
-			"apt-get install xcb libxcb-xkb-dev x11-xkb-utils libx11-xcb-dev libxkbcommon-x11-dev",
+				"apt-get install libxcb-keysyms1-dev",
+				"apt-get install xcb libxcb-xkb-dev x11-xkb-utils libx11-xcb-dev libxkbcommon-x11-dev",
 
-			# Required for GLFW
-			"apt install xorg-dev",
+				# Required for GLFW
+				"apt install xorg-dev",
 
-			# Required for OIDN
-			"apt install git-lfs",
+				# Required for OIDN
+				"apt install git-lfs",
 
-			# Required for Cycles
-			"apt-get install subversion",
-			"apt-get install meson", # epoxy
-			
-			# CMake
-			"apt-get install cmake",
+				# Required for Cycles
+				"apt-get install subversion",
+				"apt-get install meson", # epoxy
+				
+				# CMake
+				"apt-get install cmake",
 
-			# Required for Curl
-			"apt-get install libssl-dev",
-			
-			# Curl
-			"apt-get install curl zip unzip tar",
+				# Required for Curl
+				"apt-get install libssl-dev",
+				
+				# Curl
+				"apt-get install curl zip unzip tar",
 
-			# Required for OIIO
-			# "apt-get install python3-distutils",
+				# Required for OIIO
+				# "apt-get install python3-distutils",
 
-			#install freetype for linking. X server frontends (Gnome, KDE etc) already include it somewhere down the line. Also install pkg-config for easy export of flags.
-			"apt-get install pkg-config libfreetype-dev",
+				#install freetype for linking. X server frontends (Gnome, KDE etc) already include it somewhere down the line. Also install pkg-config for easy export of flags.
+				"apt-get install pkg-config libfreetype-dev",
 
-			# Ninja
-			"apt-get install ninja-build",
+				# Ninja
+				"apt-get install ninja-build",
 
-			# libdecor (required for Wayland)
-			"apt-get install wayland-protocols",
-			"apt-get install libdbus-1-dev",
-			"apt-get install libgtk-3-dev",
+				# libdecor (required for Wayland)
+				"apt-get install wayland-protocols",
+				"apt-get install libdbus-1-dev",
+				"apt-get install libgtk-3-dev",
 
-			# Required for libsdbus-c++
-			"apt-get install meson ninja-build libcap-dev libsystemd-dev pkg-config gperf"
-		]
+				# Required for libsdbus-c++
+				"apt-get install meson ninja-build libcap-dev libsystemd-dev pkg-config gperf"
+			]
 		install_system_packages(commands, no_confirm)
 
 module_list = []
@@ -504,8 +515,8 @@ if build_all:
 # We need at least CMake 4.1.2 for proper C++20 module and C++23 "import std" support.
 # Since the CMake version that is shipped with most operating systems is older, we'll
 # ship it ourselves for now and use our shipped version.
-cmake_bin = (Path(get_library_root_dir("cmake")) / "bin").resolve()
-os.environ["PATH"] = os.pathsep.join([os.environ.get("PATH", ""), os.fspath(cmake_bin)])
+#cmake_bin = (Path(get_library_root_dir("cmake")) / "bin").resolve()
+#os.environ["PATH"] = os.pathsep.join([os.environ.get("PATH", ""), os.fspath(cmake_bin)])
 
 ########## Modules ##########
 print_msg("Downloading modules...")

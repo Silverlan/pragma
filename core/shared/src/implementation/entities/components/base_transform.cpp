@@ -19,7 +19,7 @@ void BaseTransformComponent::RegisterMembers(pragma::EntityComponentManager &com
 {
 	using T = BaseTransformComponent;
 
-	auto poseMetaData = std::make_shared<ents::PoseTypeMetaData>();
+	auto poseMetaData = ::util::make_shared<ents::PoseTypeMetaData>();
 	poseMetaData->posProperty = "position";
 	poseMetaData->rotProperty = "rotation";
 	poseMetaData->scaleProperty = "scale";
@@ -31,7 +31,7 @@ void BaseTransformComponent::RegisterMembers(pragma::EntityComponentManager &com
 	memberInfoPose.AddTypeMetaData(poseMetaData);
 	registerMember(std::move(memberInfoPose));
 
-	auto poseComponentMetaData = std::make_shared<ents::PoseComponentTypeMetaData>();
+	auto poseComponentMetaData = ::util::make_shared<ents::PoseComponentTypeMetaData>();
 	poseComponentMetaData->poseProperty = posePathName;
 
 	using TPosition = Vector3;

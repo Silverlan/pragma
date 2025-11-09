@@ -251,7 +251,7 @@ spdlog::logger &pragma::get_logger(const std::string &name)
 	auto it = g_customLoggers.find(name);
 	if(it != g_customLoggers.end())
 		return *it->second;
-	auto logger = std::make_shared<spdlog::logger>(name);
+	auto logger = ::util::make_shared<spdlog::logger>(name);
 	init_logger(name, logger);
 	return *logger;
 }
@@ -376,7 +376,7 @@ spdlog::logger &pragma::register_logger(const std::string &name, const std::opti
 	auto it = get_pre_registered_loggers().find(name);
 	if(it != get_pre_registered_loggers().end())
 		return *it->second;
-	auto logger = std::make_shared<spdlog::logger>(name);
+	auto logger = ::util::make_shared<spdlog::logger>(name);
 	if(defaultLogLevel)
 		logger->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(*defaultLogLevel)));
 	get_pre_registered_loggers()[name] = logger;
@@ -388,7 +388,7 @@ void pragma::detail::initialize_logger(::util::LogSeverity conLogLevel, ::util::
 	if(g_loggerInitialized)
 		return;
 	g_logFileName = logFile;
-	auto consoleSink = std::make_shared<console::anycolor_color_sink_mt>();
+	auto consoleSink = ::util::make_shared<console::anycolor_color_sink_mt>();
 	if(g_ansiColorCodesEnabled) {
 		consoleSink->set_color(spdlog::level::trace, util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Red | pragma::console::ConsoleColorFlags::Green | pragma::console::ConsoleColorFlags::Blue));
 		consoleSink->set_color(spdlog::level::debug, util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Green | pragma::console::ConsoleColorFlags::Blue));
@@ -412,7 +412,7 @@ void pragma::detail::initialize_logger(::util::LogSeverity conLogLevel, ::util::
 	sinks.push_back(consoleSink);
 	if(logFile.has_value()) {
 		auto fullLogFilePath = util::FilePath(filemanager::get_program_write_path(), *logFile);
-		auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(fullLogFilePath.GetString(), true);
+		auto fileSink = ::util::make_shared<spdlog::sinks::basic_file_sink_mt>(fullLogFilePath.GetString(), true);
 		fileSink->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(fileLogLevel)));
 		auto formatter = std::make_unique<spdlog::pattern_formatter>();
 		formatter->add_flag<short_level_formatter_c>('q');
@@ -425,13 +425,13 @@ void pragma::detail::initialize_logger(::util::LogSeverity conLogLevel, ::util::
 		sinks.push_back(fileSink);
 
 		// We want to log all regular console output to file, so we'll create an additional logger to handle that
-		auto conFileLogger = std::make_shared<spdlog::logger>(PRAGMA_FILE_LOGGER_NAME, spdlog::sinks_init_list {fileSink});
+		auto conFileLogger = ::util::make_shared<spdlog::logger>(PRAGMA_FILE_LOGGER_NAME, spdlog::sinks_init_list {fileSink});
 		conFileLogger->set_level(spdlog::level::trace); // Always log all regular console output to file
 		pragma::logging::detail::shouldLogOutput = true;
 		pragma::logging::detail::consoleOutputLogger = conFileLogger;
 	}
 
-	auto logger = std::make_shared<spdlog::logger>(PRAGMA_LOGGER_NAME, sinks.begin(), sinks.end());
+	auto logger = ::util::make_shared<spdlog::logger>(PRAGMA_LOGGER_NAME, sinks.begin(), sinks.end());
 	logger->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(static_cast<::util::LogSeverity>(umath::min(umath::to_integral(conLogLevel), umath::to_integral(fileLogLevel))))));
 	spdlog::set_default_logger(logger);
 

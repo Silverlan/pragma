@@ -9,24 +9,12 @@ export module pragma.shared:entities.components.base_static_bvh_user;
 export import :entities.components.base;
 
 export namespace pragma {
-	namespace baseStaticBvhUserComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ACTIVATION_STATE_CHANGED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_STATIC_BVH_COMPONENT_CHANGED;
-	}
 	class BaseBvhComponent;
-	namespace baseStaticBvhUserComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ACTIVATION_STATE_CHANGED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_STATIC_BVH_COMPONENT_CHANGED;
-	}
 	class BaseStaticBvhCacheComponent;
-	namespace baseStaticBvhUserComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ACTIVATION_STATE_CHANGED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_STATIC_BVH_COMPONENT_CHANGED;
-	}
 	class PanimaComponent;
 	namespace baseStaticBvhUserComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ACTIVATION_STATE_CHANGED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_STATIC_BVH_COMPONENT_CHANGED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_ACTIVATION_STATE_CHANGED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_STATIC_BVH_COMPONENT_CHANGED;
 	}
 	class DLLNETWORK BaseStaticBvhUserComponent : public BaseEntityComponent {
 	  public:

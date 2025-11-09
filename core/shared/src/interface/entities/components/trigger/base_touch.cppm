@@ -27,11 +27,11 @@ export {
 			pragma::ecs::BaseEntity *entity;
 		};
 		namespace baseTouchComponent {
-			STATIC_DLL_COMPAT ComponentEventId EVENT_CAN_TRIGGER;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_START_TOUCH;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_END_TOUCH;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TRIGGER;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_TRIGGER_INITIALIZED;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_CAN_TRIGGER;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_START_TOUCH;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_END_TOUCH;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_TRIGGER;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_TRIGGER_INITIALIZED;
 		}
 		class DLLNETWORK BaseTouchComponent : public BaseEntityComponent {
 		  public:

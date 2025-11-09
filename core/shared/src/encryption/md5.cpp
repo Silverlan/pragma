@@ -32,6 +32,7 @@ documentation and/or software.
 
 /* interface header */
 #include "encryption/md5.h"
+#include <cstring>
 
 /* system implementation headers */
 

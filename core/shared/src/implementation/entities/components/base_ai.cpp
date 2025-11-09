@@ -137,7 +137,7 @@ void BaseAIComponent::ReloadNavThread(pragma::Game &game)
 	auto wpNavMesh = std::weak_ptr<pragma::nav::Mesh>(game.GetNavMesh());
 	if(wpNavMesh.expired() == true)
 		return;
-	s_navThread = std::make_shared<ai::navigation::NavThread>();
+	s_navThread = ::util::make_shared<ai::navigation::NavThread>();
 	auto cb = FunctionCallback<void>::Create(nullptr);
 	cb.get<Callback<void>>()->SetFunction([cb]() mutable {
 		if(cb.IsValid())
@@ -162,7 +162,7 @@ void BaseAIComponent::ReloadNavThread(pragma::Game &game)
 				auto navMesh = wpNavMesh.lock();
 				std::shared_ptr<RcPathResult> path = nullptr;
 				if(navMesh != nullptr && (path = navMesh->FindPath(item->start, item->end)) != nullptr)
-					item->pathInfo = std::make_shared<ai::navigation::PathInfo>(path);
+					item->pathInfo = ::util::make_shared<ai::navigation::PathInfo>(path);
 				s_navThread->queryQueue.pop();
 				item->complete = true;
 

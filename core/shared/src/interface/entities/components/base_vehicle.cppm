@@ -12,8 +12,8 @@ export import :entities.components.base_wheel;
 export {
 	namespace pragma {
 		namespace baseVehicleComponent {
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DRIVER_ENTERED;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_DRIVER_EXITED;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_DRIVER_ENTERED;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_DRIVER_EXITED;
 		}
 		class DLLNETWORK BaseVehicleComponent : public BaseEntityComponent {
 		  public:

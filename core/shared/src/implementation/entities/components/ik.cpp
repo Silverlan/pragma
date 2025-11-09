@@ -63,7 +63,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 		std::array<std::shared_ptr<Node>, 3> nodes = {};
 	};
 
-	auto ikTreeInfo = std::make_shared<IKTreeInfo>();
+	auto ikTreeInfo = ::util::make_shared<IKTreeInfo>();
 	std::vector<IKJointInfo> ikJoints;
 	ikJoints.reserve(chainLen);
 	ikJoints.push_back({static_cast<uint32_t>(boneId)});
@@ -102,7 +102,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 	// Effector is always bottom-most element in tree (= first element in ikJoints)
 	auto &ikJointEffector = ikJoints.front();
 	auto &effectorPos = ikJointEffector.referenceTransform.pos;
-	ikJointEffector.nodes.at(0) = std::make_shared<Node>(VectorR3(effectorPos.x, effectorPos.y, effectorPos.z), VectorR3(0.f, 0.f, 0.f), 0.0, Purpose::EFFECTOR);
+	ikJointEffector.nodes.at(0) = ::util::make_shared<Node>(VectorR3(effectorPos.x, effectorPos.y, effectorPos.z), VectorR3(0.f, 0.f, 0.f), 0.0, Purpose::EFFECTOR);
 
 	for(auto it = ikJoints.begin() + 1; it < ikJoints.end(); ++it) {
 		auto &ikJoint = *it;
@@ -157,17 +157,17 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 
 		auto &rot = ikJoint.referenceTransform.rot;
 		auto rotAxis = uquat::up(rot);
-		ikJoint.nodes.at(2) = std::make_shared<Node>(VectorR3(pos.x, pos.y, pos.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, Purpose::JOINT, umath::deg_to_rad(min.y), umath::deg_to_rad(max.y), umath::deg_to_rad(0.0));
+		ikJoint.nodes.at(2) = ::util::make_shared<Node>(VectorR3(pos.x, pos.y, pos.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, Purpose::JOINT, umath::deg_to_rad(min.y), umath::deg_to_rad(max.y), umath::deg_to_rad(0.0));
 
 		rotAxis = uquat::forward(rot); // TODO: Does this axis have to be negated?
-		ikJoint.nodes.at(1) = std::make_shared<Node>(VectorR3(pos.x, pos.y, pos.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, Purpose::JOINT, umath::deg_to_rad(min.r), umath::deg_to_rad(max.r), umath::deg_to_rad(0.0));
+		ikJoint.nodes.at(1) = ::util::make_shared<Node>(VectorR3(pos.x, pos.y, pos.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, Purpose::JOINT, umath::deg_to_rad(min.r), umath::deg_to_rad(max.r), umath::deg_to_rad(0.0));
 
 		rotAxis = -uquat::right(rot);
-		ikJoint.nodes.at(0) = std::make_shared<Node>(VectorR3(pos.x, pos.y, pos.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, Purpose::JOINT, umath::deg_to_rad(min.p), umath::deg_to_rad(max.p), umath::deg_to_rad(0.0));
+		ikJoint.nodes.at(0) = ::util::make_shared<Node>(VectorR3(pos.x, pos.y, pos.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, Purpose::JOINT, umath::deg_to_rad(min.p), umath::deg_to_rad(max.p), umath::deg_to_rad(0.0));
 	}
 
 	// Initialize IK Tree
-	auto ikTree = std::make_shared<Tree>();
+	auto ikTree = ::util::make_shared<Tree>();
 	ikTree->InsertRoot(ikJoints.back().nodes.at(0).get());
 
 	for(auto it = ikJoints.rbegin(); it != (ikJoints.rend() - 1); ++it) {
@@ -179,7 +179,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 		ikTree->InsertLeftChild(ikJoint.nodes.at(2).get(), ikJointNext.nodes.at(0).get());
 	}
 
-	ikTreeInfo->jacobian = std::make_shared<Jacobian>(ikTree.get());
+	ikTreeInfo->jacobian = ::util::make_shared<Jacobian>(ikTree.get());
 
 	if(ustring::compare<std::string>(ikController->GetType(), "foot", false) == true) {
 		auto &ent = GetEntity();
@@ -208,9 +208,9 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 		auto &ikJoint = *it;
 		auto bEffector = (it == ikJoints.rend() - 1) ? true : false;
 		if(bEffector == false)
-			childNodes->push_back(std::make_shared<IKTreeInfo::NodeInfo>());
+			childNodes->push_back(::util::make_shared<IKTreeInfo::NodeInfo>());
 		else
-			childNodes->push_back(std::make_shared<IKTreeInfo::EffectorInfo>());
+			childNodes->push_back(::util::make_shared<IKTreeInfo::EffectorInfo>());
 		auto &nodeInfo = childNodes->back();
 		nodeInfo->ikNodes = ikJoint.nodes;
 		nodeInfo->boneId = ikJoint.boneId;

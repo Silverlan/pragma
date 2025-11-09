@@ -180,7 +180,7 @@ void AddonSystem::MountAddons()
 
 	// Initialize watcher for new addons
 	try {
-		m_addonWatcher = std::make_shared<DirectoryWatcherCallback>(
+		m_addonWatcher = ::util::make_shared<DirectoryWatcherCallback>(
 		  "addons",
 		  [](const std::string &fName) {
 			  std::string ext;

@@ -11,7 +11,7 @@ export import timeline_scene;
 export namespace choreography {
 	class Event : public uts::Event {
 	  public:
-		virtual ~Event() override = default;
+		virtual ~Event() override;
 		CBaseEntity *GetActor() const;
 		void SetActor(CBaseEntity &actor);
 		void ClearActor();
@@ -63,14 +63,14 @@ export namespace choreography {
 
 	class Channel : public uts::Channel {
 	  public:
-		virtual ~Channel() override = default;
+		virtual ~Channel() override;
 	  protected:
 		Channel(uts::TimelineScene &scene, const std::string &name);
 		friend uts::Channel;
 	};
 	class Scene : public uts::TimelineScene {
 	  public:
-		virtual ~Scene() override = default;
+		virtual ~Scene() override;
 	  protected:
 		Scene();
 		friend uts::TimelineScene;

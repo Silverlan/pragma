@@ -50,7 +50,7 @@ static void register_shader_graph(lua::State *l, luabind::module_ &modShader)
 {
 	modShader[luabind::def(
 	  "get_test_node_register", +[]() -> std::shared_ptr<pragma::shadergraph::NodeRegistry> {
-		  auto reg = std::make_shared<pragma::shadergraph::NodeRegistry>();
+		  auto reg = ::util::make_shared<pragma::shadergraph::NodeRegistry>();
 		  reg->RegisterNode<pragma::shadergraph::MathNode>("math");
 		  return reg;
 	  })];
@@ -66,7 +66,7 @@ static void register_shader_graph(lua::State *l, luabind::module_ &modShader)
 			  LOGGER_SG.error("Failed to load shader graph of type '{}' with name '{}' - no registry found!", type, name);
 			  return {std::shared_ptr<pragma::shadergraph::Graph> {}, std::optional<std::string> {}};
 		  }
-		  auto graph = std::make_shared<pragma::shadergraph::Graph>(reg);
+		  auto graph = ::util::make_shared<pragma::shadergraph::Graph>(reg);
 		  std::string err;
 		  auto result = graph->Load(filePath, err);
 		  if(!result)
@@ -75,7 +75,7 @@ static void register_shader_graph(lua::State *l, luabind::module_ &modShader)
 	  })];
 	defGraph.scope[luabind::def(
 	  "load", +[](udm::AssetData &assetData, const std::shared_ptr<pragma::shadergraph::NodeRegistry> &nodeReg) -> std::pair<std::shared_ptr<pragma::shadergraph::Graph>, std::optional<std::string>> {
-		  auto graph = std::make_shared<pragma::shadergraph::Graph>(nodeReg);
+		  auto graph = ::util::make_shared<pragma::shadergraph::Graph>(nodeReg);
 		  std::string err;
 		  auto data = assetData.GetData();
 		  auto result = graph->Load(data, err);
@@ -102,7 +102,7 @@ static void register_shader_graph(lua::State *l, luabind::module_ &modShader)
 	  });
 	defGraph.def(
 	  "Copy", +[](const pragma::shadergraph::Graph &graph) -> std::shared_ptr<pragma::shadergraph::Graph> {
-		  auto cpy = std::make_shared<pragma::shadergraph::Graph>(graph.GetNodeRegistry());
+		  auto cpy = ::util::make_shared<pragma::shadergraph::Graph>(graph.GetNodeRegistry());
 		  cpy->Merge(graph);
 		  return cpy;
 	  });

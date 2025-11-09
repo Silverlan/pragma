@@ -112,7 +112,7 @@ void CWaterSurfaceComponent::InitializeSurface()
 	auto mdl = pragma::get_cgame()->CreateModel();
 	auto meshGroup = mdl->GetMeshGroup(0);
 
-	auto subMesh = std::make_shared<CModelSubMesh>();
+	auto subMesh = ::util::make_shared<CModelSubMesh>();
 	// Initialize surface
 	auto &verts = subMesh->GetVertices();
 	subMesh->SetIndexType(pragma::model::IndexType::UInt16);
@@ -135,7 +135,7 @@ void CWaterSurfaceComponent::InitializeSurface()
 	}
 	subMesh->SetSkinTextureIndex(0);
 
-	auto mesh = std::make_shared<CModelMesh>();
+	auto mesh = ::util::make_shared<CModelMesh>();
 	mesh->AddSubMesh(subMesh);
 	meshGroup->AddMesh(mesh);
 	mdl->Update(pragma::model::ModelUpdateFlags::All); // TODO: Don't update vertex and index buffers

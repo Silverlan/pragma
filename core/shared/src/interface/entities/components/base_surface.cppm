@@ -14,8 +14,8 @@ export {
 	namespace pragma {
 		class ModelSubMesh;
 		namespace baseSurfaceComponent {
-			STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_ON_SURFACE_PLANE_CHANGED;
-			STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_ON_SURFACE_MESH_CHANGED;
+			CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_ON_SURFACE_PLANE_CHANGED;
+			CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_ON_SURFACE_MESH_CHANGED;
 		}
 		class DLLNETWORK BaseSurfaceComponent : public BaseEntityComponent {
 		  public:

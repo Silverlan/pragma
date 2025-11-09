@@ -55,7 +55,7 @@ std::shared_ptr<PhysWaterSurfaceSimulator> BaseLiquidSurfaceSimulationComponent:
 	auto *controlC = static_cast<BaseLiquidControlComponent *>(GetEntity().FindComponent("liquid_control").get());
 	if(!controlC)
 		return nullptr;
-	return std::make_shared<PhysWaterSurfaceSimulator>(min, max, originY, GetSpacing(), controlC->GetStiffness(), controlC->GetPropagation());
+	return ::util::make_shared<PhysWaterSurfaceSimulator>(min, max, originY, GetSpacing(), controlC->GetStiffness(), controlC->GetPropagation());
 }
 
 void BaseLiquidSurfaceSimulationComponent::ClearSurfaceSimulator()

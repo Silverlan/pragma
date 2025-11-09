@@ -164,7 +164,7 @@ bool ClientState::PrecacheSound(std::string snd, std::pair<al::ISoundBuffer *, a
 	if(ufile::get_extension(path, &ext) == true && ustring::compare<std::string>(ext, "wav", false) == true) {
 		auto f = FileManager::OpenFile(path.c_str(), "rb");
 		if(f != nullptr) {
-			auto phonemeData = std::make_shared<source_engine::script::SoundPhonemeData>();
+			auto phonemeData = ::util::make_shared<source_engine::script::SoundPhonemeData>();
 			if(source_engine::script::read_wav_phonemes(f, *phonemeData) == util::MarkupFile::ResultCode::Ok) {
 				if(tgtBuffers->first != nullptr)
 					tgtBuffers->first->SetUserData(phonemeData);

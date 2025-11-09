@@ -47,7 +47,7 @@ int Lua::noise::generate_height_map(lua::State *l)
 	auto &destSize = Lua::Check<::Vector2>(l, 2);
 	auto &bottomLeft = Lua::Check<::Vector2>(l, 3);
 	auto &upperRight = Lua::Check<::Vector2>(l, 4);
-	auto heightMap = std::make_shared<::noise::utils::NoiseMap>();
+	auto heightMap = ::util::make_shared<::noise::utils::NoiseMap>();
 	::noise::utils::NoiseMapBuilderPlane heightMapBuilder;
 	heightMapBuilder.SetSourceModule(noiseModule);
 	heightMapBuilder.SetDestNoiseMap(*heightMap.get());

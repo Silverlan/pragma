@@ -24,7 +24,7 @@ void SAIComponent::SetRelationship(pragma::ecs::BaseEntity *ent, DISPOSITION dis
 	if(ent == nullptr)
 		return;
 	ClearRelationship(ent);
-	m_entityRelationships[umath::to_integral(disp)].push_back(std::make_shared<NPCRelationship>(std::shared_ptr<EntityHandle>(new EntityHandle(ent->GetHandle())), priority));
+	m_entityRelationships[umath::to_integral(disp)].push_back(::util::make_shared<NPCRelationship>(std::shared_ptr<EntityHandle>(new EntityHandle(ent->GetHandle())), priority));
 	if(revert == true && ent->IsNPC()) {
 		auto sAiComponent = ent->GetComponent<SAIComponent>();
 		if(sAiComponent.expired() == false)
@@ -41,12 +41,12 @@ void SAIComponent::SetRelationship(std::string className, DISPOSITION disp, int 
 {
 	ustring::to_lower(className);
 	ClearRelationship(className);
-	m_classRelationships[umath::to_integral(disp)].push_back(std::make_shared<NPCRelationship>(std::make_shared<std::string>(className), priority));
+	m_classRelationships[umath::to_integral(disp)].push_back(::util::make_shared<NPCRelationship>(::util::make_shared<std::string>(className), priority));
 }
 void SAIComponent::SetRelationship(Faction &faction, DISPOSITION disp, int priority)
 {
 	ClearRelationship(faction);
-	m_factionRelationships[static_cast<int>(disp)].push_back(std::make_shared<NPCRelationship>(faction.shared_from_this(), priority));
+	m_factionRelationships[static_cast<int>(disp)].push_back(::util::make_shared<NPCRelationship>(faction.shared_from_this(), priority));
 }
 void SAIComponent::ClearRelationships()
 {

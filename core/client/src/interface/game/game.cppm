@@ -220,7 +220,7 @@ export class DLLCLIENT CGame : public pragma::Game {
 
 	template<typename TCPPM>
 	TCPPM *CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius = bulletInfo::DEFAULT_TRACER_RADIUS, const Color &col = bulletInfo::DEFAULT_TRACER_COLOR, float length = bulletInfo::DEFAULT_TRACER_LENGTH, float speed = bulletInfo::DEFAULT_TRACER_SPEED,
-	  const std::string &material = bulletInfo::DEFAULT_TRACER_MATERIAL, float bloomScale = bulletInfo::DEFAULT_TRACER_BLOOM);
+	  const std::string &material = std::string{bulletInfo::DEFAULT_TRACER_MATERIAL}, float bloomScale = bulletInfo::DEFAULT_TRACER_BLOOM);
 
 	virtual bool IsPhysicsSimulationEnabled() const override;
 

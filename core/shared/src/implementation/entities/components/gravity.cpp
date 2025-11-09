@@ -13,7 +13,7 @@ void BaseGravity::SetGravityScale(float scale) { m_gravityScale = scale; }
 void BaseGravity::SetGravityOverride(const Vector3 &dir)
 {
 	if(m_gravityDir == nullptr)
-		m_gravityDir = std::make_shared<Vector3>();
+		m_gravityDir = ::util::make_shared<Vector3>();
 	m_gravityDir->x = dir.x;
 	m_gravityDir->y = dir.y;
 	m_gravityDir->z = dir.z;
@@ -26,7 +26,7 @@ void BaseGravity::SetGravityOverride(const Vector3 &dir, float gravity)
 void BaseGravity::SetGravityOverride(float gravity)
 {
 	if(m_gravity == nullptr)
-		m_gravity = std::make_shared<float>();
+		m_gravity = ::util::make_shared<float>();
 	*m_gravity = gravity;
 }
 void BaseGravity::SetGravityOverride()

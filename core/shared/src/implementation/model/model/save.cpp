@@ -125,7 +125,7 @@ std::shared_ptr<pragma::Model> pragma::Model::Copy(pragma::Game *game, CopyFlags
 	mdl->m_flexControllers = m_flexControllers;
 	mdl->m_flexes = m_flexes;
 	for(auto &ikController : mdl->m_ikControllers)
-		ikController = std::make_shared<IKController>(*ikController);
+		ikController = ::util::make_shared<IKController>(*ikController);
 	std::unordered_map<ModelMesh *, ModelMesh *> oldMeshToNewMesh;
 	std::unordered_map<pragma::ModelSubMesh *, pragma::ModelSubMesh *> oldSubMeshToNewSubMesh;
 	if((copyFlags & CopyFlags::CopyMeshesBit) != CopyFlags::None) {
@@ -180,7 +180,7 @@ std::shared_ptr<pragma::Model> pragma::Model::Copy(pragma::Game *game, CopyFlags
 	}
 	if((copyFlags & CopyFlags::CopyFlexAnimationsBit) != CopyFlags::None) {
 		for(auto &flexAnim : mdl->m_flexAnimations)
-			flexAnim = std::make_shared<FlexAnimation>(*flexAnim);
+			flexAnim = ::util::make_shared<FlexAnimation>(*flexAnim);
 	}
 	// TODO: Copy collision mesh soft body sub mesh reference
 
@@ -461,7 +461,7 @@ bool pragma::Model::LoadFromAssetData(pragma::Game &game, const udm::AssetData &
 		for(auto meshIdx = decltype(numMeshes) {0u}; meshIdx < numMeshes; ++meshIdx) {
 			auto &mesh = meshes[meshIdx];
 			auto udmMesh = udmMeshes[meshIdx];
-			mesh = std::make_shared<ModelMesh>();
+			mesh = ::util::make_shared<ModelMesh>();
 			auto referenceId = std::numeric_limits<uint32_t>::max();
 			udmMesh["referenceId"](referenceId);
 			mesh->SetReferenceId(referenceId);

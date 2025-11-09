@@ -171,7 +171,7 @@ MeshVertexAnimation::MeshVertexAnimation(const MeshVertexAnimation &other) : std
 {
 	m_frames.reserve(other.m_frames.size());
 	for(auto &frame : m_frames)
-		m_frames.push_back(std::make_shared<pragma::MeshVertexFrame>(*frame));
+		m_frames.push_back(::util::make_shared<pragma::MeshVertexFrame>(*frame));
 	static_assert(sizeof(MeshVertexAnimation) == 72, "Update this function when making changes to this class!");
 }
 ModelMesh *MeshVertexAnimation::GetMesh() const { return m_wpMesh.lock().get(); }
@@ -189,7 +189,7 @@ std::shared_ptr<pragma::MeshVertexFrame> MeshVertexAnimation::AddFrame()
 {
 	if(m_wpSubMesh.expired() == true)
 		return nullptr;
-	m_frames.push_back(std::make_shared<pragma::MeshVertexFrame>());
+	m_frames.push_back(::util::make_shared<pragma::MeshVertexFrame>());
 	m_frames.back()->SetVertexCount(m_wpSubMesh.lock()->GetVertexCount());
 	return m_frames.back();
 }
@@ -231,7 +231,7 @@ VertexAnimation::VertexAnimation(const VertexAnimation &other) : m_name(other.m_
 {
 	m_meshAnims.reserve(other.m_meshAnims.size());
 	for(auto &anim : m_meshAnims)
-		m_meshAnims.push_back(std::make_shared<MeshVertexAnimation>(*anim));
+		m_meshAnims.push_back(::util::make_shared<MeshVertexAnimation>(*anim));
 	static_assert(VertexAnimation::layout_version == 1, "Update this function when making changes to this class!");
 }
 
@@ -369,7 +369,7 @@ bool VertexAnimation::LoadFromAssetData(pragma::Model &mdl, const udm::AssetData
 	meshAnims.resize(numMeshAnims);
 	for(auto i = decltype(numMeshAnims) {0u}; i < numMeshAnims; ++i) {
 		auto &ma = meshAnims[i];
-		ma = std::make_shared<MeshVertexAnimation>();
+		ma = ::util::make_shared<MeshVertexAnimation>();
 		auto udmMa = udmMeshAnims[i];
 		auto groupIdx = std::numeric_limits<uint32_t>::max();
 		auto meshIdx = std::numeric_limits<uint32_t>::max();
@@ -389,7 +389,7 @@ bool VertexAnimation::LoadFromAssetData(pragma::Model &mdl, const udm::AssetData
 		frames.resize(numFrames);
 		for(auto frameIdx = decltype(numFrames) {0u}; frameIdx < numFrames; ++frameIdx) {
 			auto &meshFrame = frames[frameIdx];
-			meshFrame = std::make_shared<pragma::MeshVertexFrame>();
+			meshFrame = ::util::make_shared<pragma::MeshVertexFrame>();
 			auto udmFrame = udmFrames[frameIdx];
 			auto flags = meshFrame->GetFlags();
 			readFlag(udmFrame, pragma::MeshVertexFrame::Flags::HasDeltaValues, "hasDeltaValues", flags);
@@ -453,7 +453,7 @@ std::shared_ptr<pragma::MeshVertexFrame> VertexAnimation::AddMeshFrame(ModelMesh
 {
 	auto *anim = GetMeshAnimation(subMesh);
 	if(anim == nullptr) {
-		auto meshAnim = std::make_shared<MeshVertexAnimation>();
+		auto meshAnim = ::util::make_shared<MeshVertexAnimation>();
 		meshAnim->SetMesh(mesh, subMesh);
 		m_meshAnims.push_back(meshAnim);
 		anim = meshAnim.get();

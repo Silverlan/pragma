@@ -59,7 +59,7 @@ bool util::steam::vdf::get_external_steam_locations(const std::string &steamRoot
 	f->Read(dsContents->GetData(), lenContents);
 
 	util::MarkupFile mf {dsContents};
-	auto vdfData = std::make_shared<Data>();
+	auto vdfData = ::util::make_shared<Data>();
 	auto r = read_vdf_block(mf, vdfData->dataBlock);
 	if(r != util::MarkupFile::ResultCode::Ok)
 		return false;

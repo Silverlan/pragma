@@ -82,7 +82,7 @@ bool LuaDirectoryWatcherManager::MountDirectory(const std::string &path, bool st
 	try {
 		auto watchFlags = DirectoryWatcherCallback::WatchFlags::WatchSubDirectories;
 		auto basePath = util::DirPath(path);
-		m_watchers.push_back(std::make_shared<DirectoryWatcherCallback>(
+		m_watchers.push_back(::util::make_shared<DirectoryWatcherCallback>(
 		  path,
 		  [this, basePath = std::move(basePath)](const std::string &fName) {
 			  auto relName = util::FilePath(fName);

@@ -16,7 +16,7 @@ std::shared_ptr<pragma::physics::CollisionMesh> pragma::physics::CollisionMesh::
 	auto result = mesh->LoadFromAssetData(game, mdl, data, outErr);
 	return result ? mesh : nullptr;
 }
-pragma::physics::CollisionMesh::SoftBodyInfo::SoftBodyInfo() { info = std::make_shared<PhysSoftBodyInfo>(); }
+pragma::physics::CollisionMesh::SoftBodyInfo::SoftBodyInfo() { info = ::util::make_shared<PhysSoftBodyInfo>(); }
 bool pragma::physics::CollisionMesh::SoftBodyInfo::operator==(const SoftBodyInfo &other) const
 {
 	static_assert(sizeof(SoftBodyInfo) == 80, "Update this function when making changes to this class!");
@@ -48,7 +48,7 @@ pragma::physics::CollisionMesh::CollisionMesh(const pragma::physics::CollisionMe
 	m_centerOfMass = other.m_centerOfMass;
 	m_volume = other.m_volume;
 	m_mass = other.m_mass;
-	m_softBodyInfo = (m_softBodyInfo != nullptr) ? std::make_shared<SoftBodyInfo>(*other.m_softBodyInfo) : nullptr;
+	m_softBodyInfo = (m_softBodyInfo != nullptr) ? ::util::make_shared<SoftBodyInfo>(*other.m_softBodyInfo) : nullptr;
 	static_assert(sizeof(pragma::physics::CollisionMesh) == 216, "Update this function when making changes to this class!");
 }
 bool pragma::physics::CollisionMesh::operator==(const pragma::physics::CollisionMesh &other) const
@@ -314,7 +314,7 @@ void pragma::physics::CollisionMesh::SetSoftBody(bool b)
 		m_softBodyInfo = nullptr;
 		return;
 	}
-	m_softBodyInfo = std::make_shared<SoftBodyInfo>();
+	m_softBodyInfo = ::util::make_shared<SoftBodyInfo>();
 }
 bool pragma::physics::CollisionMesh::IsSoftBody() const { return m_softBodyInfo != nullptr; }
 pragma::ModelSubMesh *pragma::physics::CollisionMesh::GetSoftBodyMesh() const

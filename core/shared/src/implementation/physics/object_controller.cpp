@@ -79,7 +79,7 @@ void ControllerPhysObj::PostSimulate()
 	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
 	data.SetCollisionFilterGroup(owner->GetCollisionFilter());
 	data.SetCollisionFilterMask(owner->GetCollisionFilterMask() &~CollisionMask::Trigger &~CollisionMask::Water &~CollisionMask::WaterSurface);
-	m_groundRayResult = std::make_shared<TraceResult>(game->Overlap(data));*/
+	m_groundRayResult = ::util::make_shared<TraceResult>(game->Overlap(data));*/
 
 	/* // Obsolete; Now handled by simulation and ControllerPhysObj::SetGroundContactPoint
 	auto pTrComponent = owner->GetEntity().GetTransformComponent();
@@ -103,15 +103,15 @@ void ControllerPhysObj::PostSimulate()
 	if(bFirst == true)
 	{
 		bFirst = false;
-		m_groundRayResult = std::make_shared<TraceResult>(game->RayCast(data));
+		m_groundRayResult = ::util::make_shared<TraceResult>(game->RayCast(data));
 		m_groundRayResult->hit = false;
 	}
 	*/
 
 	// See also: BaseCharacter::GetAimTraceData
 
-	//m_groundRayResult = std::make_shared<TraceResult>(game->Overlap(data));
-	//m_groundRayResult = std::make_shared<TraceResult>(game->RayCast(data));
+	//m_groundRayResult = ::util::make_shared<TraceResult>(game->Overlap(data));
+	//m_groundRayResult = ::util::make_shared<TraceResult>(game->RayCast(data));
 	/*auto origin = t.GetOrigin();
 	origin.y -= 100.f;//0.5f;
 	//auto pos = GetPosition();
@@ -128,8 +128,8 @@ void ControllerPhysObj::PostSimulate()
 	data.SetCollisionFilterMask(owner->GetCollisionFilterMask() &~CollisionMask::Trigger &~CollisionMask::Water &~CollisionMask::WaterSurface);
 	// See also: BaseCharacter::GetAimTraceData
 
-	//m_groundRayResult = std::make_shared<TraceResult>(game->Overlap(data));
-	m_groundRayResult = std::make_shared<TraceResult>(game->RayCast(data));*/
+	//m_groundRayResult = ::util::make_shared<TraceResult>(game->Overlap(data));
+	m_groundRayResult = ::util::make_shared<TraceResult>(game->RayCast(data));*/
 
 	//auto bOnGround = m_bOnGround;
 	//if(r.hit == true && r.position.y > pos.y)

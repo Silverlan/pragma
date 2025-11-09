@@ -158,7 +158,7 @@ void CGame::RegisterLua()
 
 	    /*{"debug_vehicle",static_cast<int32_t(*)(lua::State*)>([](lua::State *l) -> int32_t {
 			Con::cout<<"Creating vehicle..."<<Con::endl;
-			static auto vhc = std::make_shared<debug::Vehicle>();
+			static auto vhc = ::util::make_shared<debug::Vehicle>();
 			return 0;
 		})}*/
 	  });

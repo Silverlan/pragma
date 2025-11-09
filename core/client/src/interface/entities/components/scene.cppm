@@ -81,10 +81,10 @@ export class DLLCLIENT SceneRenderDesc {
 
 export namespace pragma {
 		namespace cSceneComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ACTIVE_CAMERA_CHANGED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BUILD_RENDER_QUEUES;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_RENDERER_CHANGED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_POST_RENDER_PREPASS;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_ACTIVE_CAMERA_CHANGED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_BUILD_RENDER_QUEUES;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_RENDERER_CHANGED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_POST_RENDER_PREPASS;
 	}
 class DLLCLIENT CSceneComponent final : public BaseEntityComponent {
 	  public:

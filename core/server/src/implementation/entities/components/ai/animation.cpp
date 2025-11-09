@@ -37,13 +37,13 @@ void SAIComponent::AIAnimationInfo::SetFaceTarget(const Vector3 &position)
 {
 	umath::set_flag(m_aiAnimFlags, AIAnimFlags::FaceEntity | AIAnimFlags::FacePrimaryTarget, false);
 	umath::set_flag(m_aiAnimFlags, AIAnimFlags::FacePosition, true);
-	m_faceTarget = std::make_shared<Vector3>(position);
+	m_faceTarget = ::util::make_shared<Vector3>(position);
 }
 void SAIComponent::AIAnimationInfo::SetFaceTarget(pragma::ecs::BaseEntity &target)
 {
 	umath::set_flag(m_aiAnimFlags, AIAnimFlags::FacePosition | AIAnimFlags::FacePrimaryTarget, false);
 	umath::set_flag(m_aiAnimFlags, AIAnimFlags::FaceEntity, true);
-	m_faceTarget = std::make_shared<EntityHandle>(target.GetHandle());
+	m_faceTarget = ::util::make_shared<EntityHandle>(target.GetHandle());
 }
 int32_t SAIComponent::AIAnimationInfo::GetAnimation() const { return m_animation.animation; }
 pragma::Activity SAIComponent::AIAnimationInfo::GetActivity() const { return m_animation.activity; }
@@ -72,7 +72,7 @@ bool SAIComponent::PlayAnimation(const AIAnimationInfo &info)
 	if(umath::is_flag_set(flags, AIAnimationInfo::AIAnimFlags::PlayAsSchedule)) {
 		// TODO: Use info.GetPlayFlags()
 		auto sched = ai::Schedule::Create();
-		auto taskAnim = bPlayActivity ? std::make_shared<ai::TaskPlayActivity>() : std::make_shared<ai::TaskPlayAnimation>();
+		auto taskAnim = bPlayActivity ? ::util::make_shared<ai::TaskPlayActivity>() : ::util::make_shared<ai::TaskPlayAnimation>();
 		taskAnim->SetScheduleParameter(0, 0);
 		taskAnim->SetScheduleParameter(1, 1);
 		sched->GetRootNode().AddNode(taskAnim);

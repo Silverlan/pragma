@@ -664,7 +664,7 @@ void CLightMapComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &mo
 	auto defCache = luabind::class_<pragma::LightmapDataCache>("DataCache");
 	defCache.scope[luabind::def(
 	  "load", +[](lua::State *l, const std::string &path) -> Lua::var<pragma::LightmapDataCache, std::pair<bool, std::string>> {
-		  auto cache = std::make_shared<pragma::LightmapDataCache>();
+		  auto cache = ::util::make_shared<pragma::LightmapDataCache>();
 		  std::string err;
 		  if(!pragma::LightmapDataCache::Load(path, *cache, err))
 			  return luabind::object {l, std::pair<bool, std::string> {false, err}};
@@ -709,7 +709,7 @@ void CLightMapComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &mo
 	defCache.def("GetLightmapEntity", +[](lua::State *l, pragma::LightmapDataCache &cache) -> std::string { return util::uuid_to_string(cache.lightmapEntityId); });
 	defCLightMap.scope[defCache];
 	modEnts[defCLightMap];
-	pragma::LuaCore::define_custom_constructor<pragma::LightmapDataCache, +[]() -> std::shared_ptr<pragma::LightmapDataCache> { return std::make_shared<pragma::LightmapDataCache>(); }>(l);
+	pragma::LuaCore::define_custom_constructor<pragma::LightmapDataCache, +[]() -> std::shared_ptr<pragma::LightmapDataCache> { return ::util::make_shared<pragma::LightmapDataCache>(); }>(l);
 
 	auto defCLightMapReceiver = pragma::LuaCore::create_entity_component_class<pragma::CLightMapReceiverComponent, pragma::BaseEntityComponent>("LightMapReceiverComponent");
 	defCLightMapReceiver.def("UpdateLightmapUvData", &pragma::CLightMapReceiverComponent::UpdateLightMapUvData);

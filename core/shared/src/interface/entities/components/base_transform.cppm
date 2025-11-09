@@ -18,8 +18,8 @@ export {
 			TransformChangeFlags changeFlags;
 		};
 		namespace baseTransformComponent {
-			STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_ON_POSE_CHANGED;
-			STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_ON_TELEPORT;
+			CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_ON_POSE_CHANGED;
+			CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_ON_TELEPORT;
 		}
 		class DLLNETWORK BaseTransformComponent : public BaseEntityComponent {
 		  public:

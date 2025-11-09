@@ -19,10 +19,10 @@ void OriginComponent::RegisterMembers(pragma::EntityComponentManager &componentM
 	using TRot = Quat;
 
 	constexpr auto *posePathName = "pose";
-	auto poseComponentMetaData = std::make_shared<ents::PoseComponentTypeMetaData>();
+	auto poseComponentMetaData = ::util::make_shared<ents::PoseComponentTypeMetaData>();
 	poseComponentMetaData->poseProperty = posePathName;
 
-	auto poseMetaData = std::make_shared<ents::PoseTypeMetaData>();
+	auto poseMetaData = ::util::make_shared<ents::PoseTypeMetaData>();
 	poseMetaData->posProperty = "pos";
 	poseMetaData->rotProperty = "rot";
 

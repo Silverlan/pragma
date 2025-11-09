@@ -10,8 +10,8 @@ export import :entities.components.base;
 
 export namespace pragma {
 	namespace baseFlammableComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_IGNITED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_EXTINGUISHED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_IGNITED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_EXTINGUISHED;
 	}
 	class DLLNETWORK BaseFlammableComponent : public BaseEntityComponent {
 	  public:

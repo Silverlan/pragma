@@ -9,7 +9,7 @@ import :gui.progress_bar;
 
 import pragma.string.unicode;
 
-WIProgressBar::WIProgressBar() : WIBase(), m_progress(std::make_shared<util::FloatProperty>(0.f)), m_min(0.f), m_max(100.f), m_stepSize(1.f), m_numDecimals(0)
+WIProgressBar::WIProgressBar() : WIBase(), m_progress(::util::make_shared<util::FloatProperty>(0.f)), m_min(0.f), m_max(100.f), m_stepSize(1.f), m_numDecimals(0)
 {
 	RegisterCallback<void, float, float>("OnChange");
 	RegisterCallback<bool, float, std::reference_wrapper<std::string>>("TranslateValue");

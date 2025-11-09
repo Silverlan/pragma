@@ -11,7 +11,7 @@ export import pragma.util;
 
 export namespace pragma {
 	namespace baseScoreComponent {
-		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_ON_SCORE_CHANGED;
+		CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_ON_SCORE_CHANGED;
 	}
 	class DLLNETWORK BaseScoreComponent : public BaseEntityComponent {
 	  public:

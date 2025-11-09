@@ -17,7 +17,7 @@ static constexpr uint64_t GLOBAL_MESH_ALPHA_BUFFER_SIZE = MEGABYTE * 16;        
 static constexpr uint64_t GLOBAL_MESH_INDEX_BUFFER_SIZE = MEGABYTE * 32;         // 524'288 instances per MiB
 
 CModelMesh::CModelMesh() : ModelMesh() {}
-std::shared_ptr<ModelMesh> CModelMesh::Copy() const { return std::make_shared<CModelMesh>(*this); }
+std::shared_ptr<ModelMesh> CModelMesh::Copy() const { return ::util::make_shared<CModelMesh>(*this); }
 
 void CModelMesh::AddSubMesh(const std::shared_ptr<pragma::ModelSubMesh> &subMesh)
 {
@@ -34,16 +34,16 @@ static std::shared_ptr<prosper::IDynamicResizableBuffer> s_vertexBuffer = nullpt
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_vertexWeightBuffer = nullptr;
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_alphaBuffer = nullptr;
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_indexBuffer = nullptr;
-CModelSubMesh::CModelSubMesh() : pragma::ModelSubMesh(), m_sceneMesh(std::make_shared<pragma::SceneMesh>()) {}
+CModelSubMesh::CModelSubMesh() : pragma::ModelSubMesh(), m_sceneMesh(::util::make_shared<pragma::SceneMesh>()) {}
 
-CModelSubMesh::CModelSubMesh(const CModelSubMesh &other) : pragma::ModelSubMesh(other), m_sceneMesh(std::make_shared<pragma::SceneMesh>(*other.m_sceneMesh)) {}
+CModelSubMesh::CModelSubMesh(const CModelSubMesh &other) : pragma::ModelSubMesh(other), m_sceneMesh(::util::make_shared<pragma::SceneMesh>(*other.m_sceneMesh)) {}
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalVertexBuffer() { return s_vertexBuffer; }
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalVertexWeightBuffer() { return s_vertexWeightBuffer; }
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalAlphaBuffer() { return s_alphaBuffer; }
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalIndexBuffer() { return s_indexBuffer; }
 std::shared_ptr<pragma::ModelSubMesh> CModelSubMesh::Copy(bool fullCopy) const
 {
-	auto cpy = std::make_shared<CModelSubMesh>(*this);
+	auto cpy = ::util::make_shared<CModelSubMesh>(*this);
 	pragma::ModelSubMesh::Copy(*cpy, fullCopy);
 	return cpy;
 }

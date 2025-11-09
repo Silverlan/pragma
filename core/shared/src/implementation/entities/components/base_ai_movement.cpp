@@ -90,7 +90,7 @@ void BaseAIComponent::ResetPath()
 	m_navInfo.bTargetReached = false;
 	m_navInfo.pathState = PathResult::Updating;
 	if(s_navThread != nullptr) {
-		m_navInfo.queuedPath = std::make_shared<ai::navigation::PathQuery>(pTrComponent->GetPosition(), GetMoveTarget());
+		m_navInfo.queuedPath = ::util::make_shared<ai::navigation::PathQuery>(pTrComponent->GetPosition(), GetMoveTarget());
 		s_navThread->pendingQueueMutex.lock();
 		s_navThread->pendingQueue.push(m_navInfo.queuedPath);
 		s_navThread->pendingQueueMutex.unlock();

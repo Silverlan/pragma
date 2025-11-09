@@ -24,7 +24,7 @@ pragma::animation::BoneId pragma::animation::MetaRig::GetBoneId(pragma::animatio
 
 std::shared_ptr<pragma::animation::MetaRig> pragma::animation::MetaRig::Load(const Skeleton &skeleton, const udm::AssetData &data, std::string &outErr)
 {
-	auto metaRig = std::make_shared<MetaRig>();
+	auto metaRig = ::util::make_shared<MetaRig>();
 	if(metaRig->LoadFromAssetData(skeleton, data, outErr) == false)
 		return nullptr;
 	return metaRig;

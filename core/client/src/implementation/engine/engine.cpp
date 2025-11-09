@@ -85,8 +85,8 @@ CEngine::CEngine(int argc, char *argv[])
 		m_cpuProfilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>>();
 		m_cpuProfilingStageManager->InitializeProfilingStageManager(cpuProfiler);
 	});
-	m_coreInputBindingLayer = std::make_shared<CoreInputBindingLayer>();
-	auto inputLayer = std::make_shared<InputBindingLayer>();
+	m_coreInputBindingLayer = ::util::make_shared<CoreInputBindingLayer>();
+	auto inputLayer = ::util::make_shared<InputBindingLayer>();
 	inputLayer->identifier = "core";
 	AddInputBindingLayer(inputLayer);
 
@@ -1098,7 +1098,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 #endif
 
 	{
-		auto regBase = std::make_shared<pragma::shadergraph::NodeRegistry>();
+		auto regBase = ::util::make_shared<pragma::shadergraph::NodeRegistry>();
 		//regBase->RegisterNode<pragma::shadergraph::BlackbodyNode>("blackbody");
 		regBase->RegisterNode<pragma::shadergraph::BrightContrastNode>("bright_contrast");
 		regBase->RegisterNode<pragma::shadergraph::ClampNode>("clamp");
@@ -1128,7 +1128,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 		//regBase->RegisterNode<pragma::shadergraph::VectorTransformNode>("vector_transform");
 		//regBase->RegisterNode<pragma::shadergraph::WavelengthNode>("wavelength");
 
-		auto regScene = std::make_shared<pragma::shadergraph::NodeRegistry>();
+		auto regScene = ::util::make_shared<pragma::shadergraph::NodeRegistry>();
 		regScene->RegisterNode<pragma::rendering::shader_graph::SceneOutputNode>("output");
 		regScene->RegisterNode<pragma::rendering::shader_graph::CameraNode>("camera");
 		regScene->RegisterNode<pragma::rendering::shader_graph::FogNode>("fog");
@@ -1168,13 +1168,13 @@ bool CEngine::Initialize(int argc, char *argv[])
 		for(auto &[name, mat] : cache.GetShaderMaterials()) {
 			auto nodeName = name;
 			nodeName = "sm_" + nodeName;
-			auto node = std::make_shared<pragma::rendering::shader_graph::ShaderMaterialNode>(pragma::GString {nodeName}, *mat);
+			auto node = ::util::make_shared<pragma::rendering::shader_graph::ShaderMaterialNode>(pragma::GString {nodeName}, *mat);
 			regScene->RegisterNode(node);
 		}
 
 		regScene->AddChildRegistry(regBase);
 
-		auto regPp = std::make_shared<pragma::shadergraph::NodeRegistry>();
+		auto regPp = ::util::make_shared<pragma::shadergraph::NodeRegistry>();
 		regPp->AddChildRegistry(regBase);
 
 		m_shaderGraphManager = std::make_unique<pragma::rendering::ShaderGraphManager>();

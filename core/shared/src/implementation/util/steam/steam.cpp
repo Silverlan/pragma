@@ -1,6 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
+
 module;
+
+#ifdef __linux__
+#include <limits.h>
+#include <stdlib.h>
+#endif
 
 module pragma.shared;
 
@@ -64,7 +70,7 @@ bool util::steam::get_external_steam_locations(const std::string &steamRootPath,
 	f->Read(dsContents->GetData(), lenContents);
 
 	util::MarkupFile mf {dsContents};
-	auto vdfData = std::make_shared<util::steam::vdf::Data>();
+	auto vdfData = ::util::make_shared<util::steam::vdf::Data>();
 	auto r = util::steam::vdf::read_vdf_block(mf, vdfData->dataBlock);
 	if(r != util::MarkupFile::ResultCode::Ok)
 		return false;

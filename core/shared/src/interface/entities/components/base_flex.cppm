@@ -11,12 +11,9 @@ export import :model.animation.enums;
 
 export {
 	namespace pragma {
-		namespace baseFlexComponent {
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_FLEX_CONTROLLER_CHANGED;
-		}
 		class Model;
 		namespace baseFlexComponent {
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_FLEX_CONTROLLER_CHANGED;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_FLEX_CONTROLLER_CHANGED;
 		}
 		class DLLNETWORK BaseFlexComponent : public BaseEntityComponent, public DynamicMemberRegister {
 		  public:

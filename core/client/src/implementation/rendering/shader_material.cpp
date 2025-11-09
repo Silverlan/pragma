@@ -31,7 +31,7 @@ std::shared_ptr<ShaderMaterial> ShaderMaterialCache::Load(const std::string &id)
 	}
 	if(!udmData)
 		return nullptr;
-	auto shaderMat = std::make_shared<ShaderMaterial>(id);
+	auto shaderMat = ::util::make_shared<ShaderMaterial>(id);
 	std::string err;
 	if(shaderMat->LoadFromUdmData(udmData->GetAssetData().GetData()["shader_material"], err) == false) {
 		LOGGER.error("Failed to load shader material '" + id + "'!");

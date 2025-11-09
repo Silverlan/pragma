@@ -1264,7 +1264,7 @@ void pragma::Game::RegisterLuaLibraries()
 		    std::vector<uint8_t> data;
 		    data.resize(contents.size());
 		    memcpy(data.data(), contents.data(), contents.size());
-		    auto vf = std::make_shared<ufile::VectorFile>(std::move(data));
+		    auto vf = ::util::make_shared<ufile::VectorFile>(std::move(data));
 		    LFile lf {};
 		    lf.Construct(vf);
 		    return lf;

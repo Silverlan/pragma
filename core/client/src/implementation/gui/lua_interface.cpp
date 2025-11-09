@@ -397,7 +397,7 @@ luabind::object WGUILuaInterface::GetLuaObject(lua::State *l, WIBase &p)
 		auto userData = p.GetUserData();
 		if(userData == nullptr) {
 			o = CreateLuaObject(l, p);
-			p.SetUserData(std::make_shared<luabind::object>(o));
+			p.SetUserData(::util::make_shared<luabind::object>(o));
 		}
 		else
 			o = *static_cast<luabind::object *>(userData.get());
@@ -406,7 +406,7 @@ luabind::object WGUILuaInterface::GetLuaObject(lua::State *l, WIBase &p)
 		auto userData2 = std::static_pointer_cast<luabind::object>(p.GetUserData2());
 		if(userData2 == nullptr) {
 			o = CreateLuaObject(l, p);
-			p.SetUserData2(std::make_shared<luabind::object>(o));
+			p.SetUserData2(::util::make_shared<luabind::object>(o));
 		}
 		else
 			o = *static_cast<luabind::object *>(userData2.get());

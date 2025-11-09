@@ -162,7 +162,7 @@ static bool pcb_record_bind_descriptor_set(prosper::util::PreparedCommandBuffer 
 	return true;
 }
 
-static std::shared_ptr<prosper::util::PreparedCommandBuffer> create_pcb() { return std::make_shared<prosper::util::PreparedCommandBuffer>(); }
+static std::shared_ptr<prosper::util::PreparedCommandBuffer> create_pcb() { return ::util::make_shared<prosper::util::PreparedCommandBuffer>(); }
 
 void register_vulkan_lua_interface2(Lua::Interface &lua, luabind::module_ &prosperMod)
 {
@@ -521,5 +521,5 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 
 	prosperMod[defPcb];
 
-	pragma::LuaCore::define_custom_constructor<prosper::util::PreparedCommandBuffer, +[]() -> std::shared_ptr<prosper::util::PreparedCommandBuffer> { return std::make_shared<prosper::util::PreparedCommandBuffer>(); }>(lua.GetState());
+	pragma::LuaCore::define_custom_constructor<prosper::util::PreparedCommandBuffer, +[]() -> std::shared_ptr<prosper::util::PreparedCommandBuffer> { return ::util::make_shared<prosper::util::PreparedCommandBuffer>(); }>(lua.GetState());
 }

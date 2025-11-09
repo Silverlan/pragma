@@ -12,16 +12,11 @@ export import :entities.components.intersection_handler;
 export import :model.model_mesh;
 
 export namespace pragma {
-	namespace baseBvhComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_CLEAR_BVH;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BVH_UPDATE_REQUESTED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BVH_REBUILT;
-	}
 	class BaseStaticBvhCacheComponent;
 	namespace baseBvhComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_CLEAR_BVH;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BVH_UPDATE_REQUESTED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BVH_REBUILT;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_CLEAR_BVH;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_BVH_UPDATE_REQUESTED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_BVH_REBUILT;
 	}
 	class DLLNETWORK BaseBvhComponent : public BaseEntityComponent {
 	  public:

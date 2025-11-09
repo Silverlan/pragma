@@ -78,13 +78,13 @@ export namespace pragma {
 	using LightBufferIndex = uint32_t;
 	using ShadowBufferIndex = uint32_t;
 	namespace cLightComponent {
-		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_SHOULD_PASS_ENTITY;
-		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_SHOULD_PASS_ENTITY_MESH;
-		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_SHOULD_PASS_MESH;
-		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_SHOULD_UPDATE_RENDER_PASS;
-		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_GET_TRANSFORMATION_MATRIX;
-		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_HANDLE_SHADOW_MAP;
-		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_ON_SHADOW_BUFFER_INITIALIZED;
+		CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_SHOULD_PASS_ENTITY;
+		CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_SHOULD_PASS_ENTITY_MESH;
+		CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_SHOULD_PASS_MESH;
+		CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_SHOULD_UPDATE_RENDER_PASS;
+		CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_GET_TRANSFORMATION_MATRIX;
+		CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_HANDLE_SHADOW_MAP;
+		CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_ON_SHADOW_BUFFER_INITIALIZED;
 	}
 	class DLLCLIENT CLightComponent final : public CBaseLightComponent {
 	  public:

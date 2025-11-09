@@ -28,7 +28,7 @@ IKController *pragma::Model::AddIKController(const std::string &name, uint32_t c
 	auto it = FindIKController(name);
 	if(it != m_ikControllers.end())
 		return it->get();
-	m_ikControllers.push_back(std::make_shared<IKController>(name, chainLength, type, method));
+	m_ikControllers.push_back(::util::make_shared<IKController>(name, chainLength, type, method));
 	return m_ikControllers.back().get();
 }
 void pragma::Model::RemoveIKController(uint32_t id)

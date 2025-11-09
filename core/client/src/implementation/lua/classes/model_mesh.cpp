@@ -8,8 +8,8 @@ module pragma.client;
 import :scripting.lua.classes.model_mesh;
 import :model;
 
-void Lua::ModelMesh::Client::Create(lua::State *l) { Lua::Push<std::shared_ptr<::ModelMesh>>(l, std::make_shared<::CModelMesh>()); }
-void Lua::ModelSubMesh::Client::Create(lua::State *l) { Lua::Push<std::shared_ptr<pragma::ModelSubMesh>>(l, std::make_shared<::CModelSubMesh>()); }
+void Lua::ModelMesh::Client::Create(lua::State *l) { Lua::Push<std::shared_ptr<::ModelMesh>>(l, ::util::make_shared<::CModelMesh>()); }
+void Lua::ModelSubMesh::Client::Create(lua::State *l) { Lua::Push<std::shared_ptr<pragma::ModelSubMesh>>(l, ::util::make_shared<::CModelSubMesh>()); }
 void Lua::ModelSubMesh::Client::GetVkMesh(lua::State *l, pragma::ModelSubMesh &mesh) { Lua::Push<std::shared_ptr<::pragma::SceneMesh>>(l, static_cast<CModelSubMesh &>(mesh).GetSceneMesh()); }
 void Lua::ModelSubMesh::Client::GetTangents(lua::State *l, pragma::ModelSubMesh &mesh)
 {

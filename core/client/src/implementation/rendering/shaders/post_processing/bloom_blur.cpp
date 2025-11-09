@@ -25,7 +25,7 @@ std::shared_ptr<BloomPipelineInfo> ShaderPPBloomBlurBase::AddPipeline(uint32_t r
 		if(pInfo->radius == radius && pInfo->sigma == sigma)
 			return pInfo;
 	}
-	auto info = std::make_shared<BloomPipelineInfo>(radius, sigma);
+	auto info = ::util::make_shared<BloomPipelineInfo>(radius, sigma);
 	m_pipelineInfos.push_back(info);
 	return info;
 }

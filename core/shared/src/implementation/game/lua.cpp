@@ -14,7 +14,7 @@ lua::State *pragma::Game::GetLuaState() { return (m_lua != nullptr) ? m_lua->Get
 void pragma::Game::InitializeLua()
 {
 	m_luaIncludeStack.clear();
-	m_lua = std::make_shared<Lua::Interface>();
+	m_lua = ::util::make_shared<Lua::Interface>();
 	m_lua->Open();
 
 	m_luaClassManager = std::make_unique<pragma::LuaCore::ClassManager>(*m_lua->GetState());

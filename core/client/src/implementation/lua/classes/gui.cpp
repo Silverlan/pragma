@@ -1292,7 +1292,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, ::WIBase &panel, std::str
 
 	auto callbackPtr = std::static_pointer_cast<LuaCallbacks>(panel.GetUserData4());
 	if(callbackPtr == nullptr) {
-		callbackPtr = std::make_shared<LuaCallbacks>();
+		callbackPtr = ::util::make_shared<LuaCallbacks>();
 		panel.SetUserData4(callbackPtr);
 	}
 	auto hPanel = panel.GetHandle();

@@ -20,7 +20,7 @@ export {
 			const std::string &data;
 		};
 		namespace baseIOComponent {
-			STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_HANDLE_INPUT;
+			CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_HANDLE_INPUT;
 		}
 		class DLLNETWORK BaseIOComponent : public BaseEntityComponent {
 		  public:

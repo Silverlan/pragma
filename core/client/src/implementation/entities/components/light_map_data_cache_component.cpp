@@ -104,7 +104,7 @@ void CLightMapDataCacheComponent::InitializeUvBuffers()
 void CLightMapDataCacheComponent::ReloadCache()
 {
 	CLightMapComponent::LOGGER.info("Reloading lightmap data cache from cache file '{}'...", m_lightmapDataCacheFile);
-	m_lightmapDataCache = std::make_shared<LightmapDataCache>();
+	m_lightmapDataCache = ::util::make_shared<LightmapDataCache>();
 	std::string err;
 	if(!LightmapDataCache::Load(m_lightmapDataCacheFile, *m_lightmapDataCache, err))
 		m_lightmapDataCache = nullptr;

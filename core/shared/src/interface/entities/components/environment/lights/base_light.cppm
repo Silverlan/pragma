@@ -10,24 +10,12 @@ export import :entities.components.base;
 
 export {
 	namespace pragma {
-		namespace baseEnvLightComponent {
-			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_DIRECTION_TO_POINT;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_INTENSITY_AT_POINT;
-		}
 		class BaseEnvLightSpotComponent;
-		namespace baseEnvLightComponent {
-			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_DIRECTION_TO_POINT;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_INTENSITY_AT_POINT;
-		}
 		class BaseEnvLightPointComponent;
-		namespace baseEnvLightComponent {
-			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_DIRECTION_TO_POINT;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_INTENSITY_AT_POINT;
-		}
 		class BaseEnvLightDirectionalComponent;
 		namespace baseEnvLightComponent {
-			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_DIRECTION_TO_POINT;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_LIGHT_INTENSITY_AT_POINT;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_CALC_LIGHT_DIRECTION_TO_POINT;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_CALC_LIGHT_INTENSITY_AT_POINT;
 		}
 		class DLLNETWORK BaseEnvLightComponent : public BaseEntityComponent {
 		  public:

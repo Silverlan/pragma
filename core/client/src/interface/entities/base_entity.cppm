@@ -16,7 +16,7 @@ export namespace pragma {
 };
 namespace cBaseEntity {
 	using namespace pragma::ecs::baseEntity;
-	STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_ON_SCENE_FLAGS_CHANGED;
+	CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_ON_SCENE_FLAGS_CHANGED;
 }
 export class DLLCLIENT CBaseEntity : public pragma::ecs::BaseEntity {
   public:

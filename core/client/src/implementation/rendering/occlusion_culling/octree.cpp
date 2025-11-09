@@ -76,7 +76,7 @@ void BaseOcclusionOctree::Node::InitializeChildren(bool bPopulateChildren)
 	if(m_children != nullptr || m_bIsFinal == true)
 		return;
 	// THIS CAUSES ERROR
-	m_children = std::make_shared<std::array<std::shared_ptr<Node>, 8>>();
+	m_children = ::util::make_shared<std::array<std::shared_ptr<Node>, 8>>();
 	for(auto &c : *m_children)
 		c = m_tree->CreateNode(this);
 	//

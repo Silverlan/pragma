@@ -32,10 +32,10 @@ export {
 			std::shared_ptr<pragma::Model> model;
 		};
 		namespace baseModelComponent {
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_MODEL_CHANGED;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_MODEL_MATERIALS_LOADED;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SKIN_CHANGED;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_BODY_GROUP_CHANGED;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_MODEL_CHANGED;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_MODEL_MATERIALS_LOADED;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_SKIN_CHANGED;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_BODY_GROUP_CHANGED;
 		}
 		class DLLNETWORK BaseModelComponent : public BaseEntityComponent, public DynamicMemberRegister {
 		  public:

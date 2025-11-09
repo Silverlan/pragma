@@ -21,7 +21,7 @@ void COcclusionCullerComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	m_occlusionOctree = std::make_shared<OcclusionOctree<CBaseEntity *>>(256.f, 1'073'741'824.f, 4096.f, [](const CBaseEntity *ent, Vector3 &min, Vector3 &max) {
+	m_occlusionOctree = ::util::make_shared<OcclusionOctree<CBaseEntity *>>(256.f, 1'073'741'824.f, 4096.f, [](const CBaseEntity *ent, Vector3 &min, Vector3 &max) {
 		auto &renderBounds = ent->GetAbsoluteRenderBounds();
 		min = renderBounds.min;
 		max = renderBounds.max;

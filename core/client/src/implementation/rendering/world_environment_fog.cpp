@@ -8,12 +8,12 @@ module pragma.client;
 import :rendering.world_environment;
 WorldEnvironment::Fog::Fog()
 {
-	m_color = std::make_shared<util::ColorProperty>(colors::White);
-	m_start = std::make_shared<util::FloatProperty>(0.f);
-	m_end = std::make_shared<util::FloatProperty>(0.f);
-	m_maxDensity = std::make_shared<util::FloatProperty>(0.f);
-	m_type = std::make_shared<util::UInt8Property>(umath::to_integral(util::FogType::Linear));
-	m_bEnabled = std::make_shared<util::BoolProperty>(false);
+	m_color = ::util::make_shared<util::ColorProperty>(colors::White);
+	m_start = ::util::make_shared<util::FloatProperty>(0.f);
+	m_end = ::util::make_shared<util::FloatProperty>(0.f);
+	m_maxDensity = ::util::make_shared<util::FloatProperty>(0.f);
+	m_type = ::util::make_shared<util::UInt8Property>(umath::to_integral(util::FogType::Linear));
+	m_bEnabled = ::util::make_shared<util::BoolProperty>(false);
 }
 void WorldEnvironment::Fog::SetColor(const Color &col) { *m_color = col; }
 const Color &WorldEnvironment::Fog::GetColor() const { return *m_color; }

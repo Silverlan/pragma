@@ -157,7 +157,7 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 	auto detailSampleMaxError = config.sampleDetailMaxError;
 	auto partitionType = config.partitionType;
 
-	auto ctx = std::make_shared<rcContext>();
+	auto ctx = ::util::make_shared<rcContext>();
 	auto keepInterResults = false;
 
 	Vector3 min(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
@@ -504,7 +504,7 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 
 	auto m_totalBuildTimeMs = ctx->getAccumulatedTime(RC_TIMER_TOTAL) / 1000.f;
 
-	return std::make_shared<RcNavMesh>(std::move(m_pmesh), std::move(m_dmesh), std::move(m_navMesh));
+	return ::util::make_shared<RcNavMesh>(std::move(m_pmesh), std::move(m_dmesh), std::move(m_navMesh));
 
 	// Obsolete
 	/*for(unsigned int i=0;i<meshes->size();i++)
@@ -1025,7 +1025,7 @@ bool pragma::nav::Mesh::LoadFromAssetData(pragma::Game &game, const udm::AssetDa
 		outErr = "Unable to allocate dtNavMesh!";
 		return false;
 	}
-	auto navMesh = std::make_shared<RcNavMesh>(polyMesh, polyMeshDetail, dtMesh);
+	auto navMesh = ::util::make_shared<RcNavMesh>(polyMesh, polyMeshDetail, dtMesh);
 	if(navMesh == nullptr) {
 		outErr = "Unable to allocate RcNavMesh!";
 		return false;
@@ -1129,7 +1129,7 @@ std::shared_ptr<RcPathResult> pragma::nav::Mesh::FindPath(const Vector3 &start, 
 		auto statusEnd = navQuery->findNearestPoly(&end[0], &extents[0], &filter, &endRef, &endPoint[0]);
 		if(!dtStatusFailed(statusEnd) && endRef != 0) {
 			int maxPath = 128;                                                                      // TODO
-			auto r = std::make_shared<RcPathResult>(mesh, navQuery, startPoint, endPoint, maxPath); // TODO
+			auto r = ::util::make_shared<RcPathResult>(mesh, navQuery, startPoint, endPoint, maxPath); // TODO
 			int32_t pathCount = 0;
 			auto findStatus = navQuery->findPath(startRef, endRef, &startPoint[0], &endPoint[0], &filter, &r->path[0], &pathCount, maxPath);
 			r->pathCount = pathCount + 2;

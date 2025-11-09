@@ -23,7 +23,7 @@ void SceneSnapshot::AddModel(pragma::Model &mdl, uint32_t skin)
 	for(auto &meshGroup : mdl.GetMeshGroups()) {
 		for(auto &mesh : meshGroup->GetMeshes()) {
 			for(auto &subMesh : mesh->GetSubMeshes()) {
-				auto snapshotMesh = std::make_shared<Mesh>();
+				auto snapshotMesh = ::util::make_shared<Mesh>();
 
 				auto &verts = subMesh->GetVertices();
 				snapshotMesh->verts.reserve(verts.size());

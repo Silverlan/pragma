@@ -12,7 +12,7 @@ static bool is_permitted_root_dir(const std::string_view &str) { return str == "
 
 LFile::LFile() {}
 
-void LFile::Construct(const VFilePtr &f) { m_file = std::make_shared<fsys::File>(f); }
+void LFile::Construct(const VFilePtr &f) { m_file = ::util::make_shared<fsys::File>(f); }
 void LFile::Construct(const std::shared_ptr<ufile::IFile> &f) { m_file = f; }
 
 bool LFile::Construct(const char *path, const char *mode, fsys::SearchFlags fsearchmode, std::string *optOutErr)
@@ -20,7 +20,7 @@ bool LFile::Construct(const char *path, const char *mode, fsys::SearchFlags fsea
 	auto f = FileManager::OpenFile(path, mode, nullptr, fsearchmode);
 	if(!f)
 		return false;
-	m_file = std::make_shared<fsys::File>(f);
+	m_file = ::util::make_shared<fsys::File>(f);
 	return true;
 }
 
@@ -419,7 +419,7 @@ std::pair<std::shared_ptr<LFile>, std::optional<std::string>> Lua::file::Open(lu
 		if(validate_write_operation(l, path) == false)
 			return std::pair<std::shared_ptr<LFile>, std::optional<std::string>> {nullptr, {}};
 	}
-	auto f = std::make_shared<LFile>();
+	auto f = ::util::make_shared<LFile>();
 	std::string errMsg;
 	if(f->Construct(path.c_str(), mode.c_str(), searchFlags, &errMsg) == false)
 		return std::pair<std::shared_ptr<LFile>, std::optional<std::string>> {nullptr, errMsg};
@@ -472,7 +472,7 @@ std::shared_ptr<LFile> Lua::file::open_external_asset_file(lua::State *l, const 
 	fOpenFile(path, f, game);
 	if(f == nullptr)
 		return nullptr;
-	auto lf = std::make_shared<LFile>();
+	auto lf = ::util::make_shared<LFile>();
 	lf->Construct(f);
 	return lf;
 }

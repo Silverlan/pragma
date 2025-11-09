@@ -68,7 +68,7 @@ static void create_directory_change_listener(lua::State *l, const std::string &p
 {
 	Lua::CheckFunction(l, 2);
 	try {
-		auto listener = std::make_shared<DirectoryWatcherCallback>(path, [callback](const std::string &fileName) mutable { callback(fileName); }, flags);
+		auto listener = ::util::make_shared<DirectoryWatcherCallback>(path, [callback](const std::string &fileName) mutable { callback(fileName); }, flags);
 		Lua::Push(l, listener);
 	}
 	catch(const std::runtime_error &err) {
@@ -648,7 +648,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modUtil[defLuaParallelJob];
 	modUtil[luabind::def(
 	  "create_parallel_job", +[](pragma::Game &game, const std::string &name, const Lua::func<void> &func, const Lua::func<void> &cancelFunc) -> std::shared_ptr<util::ParallelJob<luabind::object>> {
-		  auto job = std::make_shared<util::ParallelJob<luabind::object>>(util::create_parallel_job<pragma::LuaCore::LuaWorker>(game, name));
+		  auto job = ::util::make_shared<util::ParallelJob<luabind::object>>(util::create_parallel_job<pragma::LuaCore::LuaWorker>(game, name));
 		  static_cast<pragma::LuaCore::LuaWorker &>(job->GetWorker()).AddLuaTask(func, cancelFunc, 0.f);
 		  return job;
 	  })];

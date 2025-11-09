@@ -1920,7 +1920,7 @@ void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, st
 		res.normal = {};
 		res.distance = uvec::distance(closestMesh->hitPos, trData.GetSourceOrigin());
 		if(closestMesh->precise) {
-			res.meshInfo = std::make_shared<TraceResult::MeshInfo>();
+			res.meshInfo = ::util::make_shared<TraceResult::MeshInfo>();
 			res.meshInfo->mesh = closestMesh->precise->mesh.get();
 			res.meshInfo->subMesh = closestMesh->precise->subMesh.get();
 		}
@@ -2108,7 +2108,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 		ent = nwm::read_entity(packet);
 		if(ent == nullptr)
 			return;
-		dbgTree = std::make_shared<DebugBehaviorTreeNode>();
+		dbgTree = ::util::make_shared<DebugBehaviorTreeNode>();
 		std::function<void(NetPacket &, DebugBehaviorTreeNode &)> fReadTree = nullptr;
 		fReadTree = [&fReadTree](NetPacket &p, DebugBehaviorTreeNode &node) {
 			node.name = p->ReadString();
@@ -2122,7 +2122,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 			auto numChildren = p->Read<uint32_t>();
 			node.children.reserve(numChildren);
 			for(auto i = decltype(numChildren) {0}; i < numChildren; ++i) {
-				node.children.push_back(std::make_shared<DebugBehaviorTreeNode>());
+				node.children.push_back(::util::make_shared<DebugBehaviorTreeNode>());
 				fReadTree(p, *node.children.back());
 			}
 		};
@@ -2245,7 +2245,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 			cbOnRemove.Remove();
 	});
 	dbgAiSchedule->SetUserData(0, dbgTree);
-	dbgAiSchedule->SetUserData(1, std::make_shared<EntityHandle>(ent->GetHandle()));
+	dbgAiSchedule->SetUserData(1, ::util::make_shared<EntityHandle>(ent->GetHandle()));
 }
 
 void NET_cl_CMD_CALL_RESPONSE(NetPacket packet)

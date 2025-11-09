@@ -70,10 +70,10 @@ export {
 		using format_string_t = spdlog::format_string_t<Args...>;
 
 		namespace baseEntityComponent {
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ENTITY_COMPONENT_ADDED;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ENTITY_COMPONENT_REMOVED;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_MEMBERS_CHANGED;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ACTIVE_STATE_CHANGED;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_ENTITY_COMPONENT_ADDED;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_ENTITY_COMPONENT_REMOVED;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_MEMBERS_CHANGED;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_ACTIVE_STATE_CHANGED;
 		}
 
 		class DLLNETWORK BaseEntityComponent : public pragma::BaseLuaHandle, public std::enable_shared_from_this<BaseEntityComponent> {

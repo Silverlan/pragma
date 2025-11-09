@@ -465,7 +465,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	physMod[classDefWheelCreateInfo];
 
 	auto classTreeIkTree = luabind::class_<Tree>("IKTree");
-	classTreeIkTree.scope[luabind::def("Create", static_cast<std::shared_ptr<Tree> (*)(lua::State *)>([](lua::State *l) { return std::make_shared<Tree>(); }))];
+	classTreeIkTree.scope[luabind::def("Create", static_cast<std::shared_ptr<Tree> (*)(lua::State *)>([](lua::State *l) { return ::util::make_shared<Tree>(); }))];
 #ifdef ENABLE_DEPRECATED_PHYSICS
 	classTreeIkTree.def("Draw", static_cast<void (*)(lua::State *, Tree &)>([](lua::State *l, Tree &tree) {
 		auto *game = pragma::Engine::Get()->GetNetworkState(l)->GetGameState();
@@ -576,10 +576,10 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classTreeIkTreeNode.add_static_constant("PURPOSE_EFFECTOR", EFFECTOR);
 	classTreeIkTreeNode.scope[luabind::def("Create",
 	  static_cast<std::shared_ptr<Node> (*)(lua::State *, const Vector3 &, const Vector3 &, uint32_t, double, double, double)>([](lua::State *l, const Vector3 &origin, const Vector3 &rotAxis, uint32_t purpose, double minTheta, double maxTheta, double restAngle) -> std::shared_ptr<Node> {
-		  return std::make_shared<Node>(VectorR3(origin.x, origin.y, origin.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, static_cast<Purpose>(purpose), minTheta, maxTheta, restAngle);
+		  return ::util::make_shared<Node>(VectorR3(origin.x, origin.y, origin.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, static_cast<Purpose>(purpose), minTheta, maxTheta, restAngle);
 	  }))];
 	classTreeIkTreeNode.scope[luabind::def("Create", static_cast<std::shared_ptr<Node> (*)(lua::State *, const Vector3 &, const Vector3 &, uint32_t)>([](lua::State *l, const Vector3 &origin, const Vector3 &rotAxis, uint32_t purpose) -> std::shared_ptr<Node> {
-		return std::make_shared<Node>(VectorR3(origin.x, origin.y, origin.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, static_cast<Purpose>(purpose));
+		return ::util::make_shared<Node>(VectorR3(origin.x, origin.y, origin.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, static_cast<Purpose>(purpose));
 	}))];
 	classTreeIkTreeNode.def("GetLocalTransform", static_cast<umath::Transform (*)(lua::State *, Node &)>([](lua::State *l, Node &node) {
 		umath::Transform t {};
@@ -643,7 +643,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classTreeIkTreeNode.def("UnFreeze", &Node::UnFreeze);
 
 	auto classIkJacobian = luabind::class_<Jacobian>("IKJacobian");
-	classIkJacobian.scope[luabind::def("Create", static_cast<std::shared_ptr<Jacobian> (*)(lua::State *, Tree &)>([](lua::State *l, Tree &tree) { return std::make_shared<Jacobian>(&tree); }))];
+	classIkJacobian.scope[luabind::def("Create", static_cast<std::shared_ptr<Jacobian> (*)(lua::State *, Tree &)>([](lua::State *l, Tree &tree) { return ::util::make_shared<Jacobian>(&tree); }))];
 	classIkJacobian.def("ComputeJacobian", static_cast<void (*)(lua::State *, Jacobian &, const luabind::tableT<Vector3> &)>([](lua::State *l, Jacobian &jacobian, const luabind::tableT<Vector3> &vTargets) {
 		auto numTargets = Lua::GetObjectLength(l, vTargets);
 		std::vector<VectorR3> targets;

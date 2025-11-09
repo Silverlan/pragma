@@ -48,7 +48,7 @@ void pragma::MetaRigComponent::RegisterMembers(pragma::EntityComponentManager &c
 			parentPathName = "bone/" + std::string {animation::get_meta_rig_bone_type_name(*parentType)} + "/pose";
 		std::shared_ptr<ents::ParentTypeMetaData> parentMetaData {};
 		if(!parentPathName.empty()) {
-			parentMetaData = std::make_shared<ents::ParentTypeMetaData>();
+			parentMetaData = ::util::make_shared<ents::ParentTypeMetaData>();
 			parentMetaData->parentProperty = parentPathName;
 		}
 
@@ -56,15 +56,15 @@ void pragma::MetaRigComponent::RegisterMembers(pragma::EntityComponentManager &c
 		auto posPathName = "bone/" + name + "/position";
 		auto rotPathName = "bone/" + name + "/rotation";
 		auto scalePathName = "bone/" + name + "/scale";
-		auto poseMetaData = std::make_shared<ents::PoseTypeMetaData>();
+		auto poseMetaData = ::util::make_shared<ents::PoseTypeMetaData>();
 		poseMetaData->posProperty = posPathName;
 		poseMetaData->rotProperty = rotPathName;
 		poseMetaData->scaleProperty = scalePathName;
 
-		auto poseComponentMetaData = std::make_shared<ents::PoseComponentTypeMetaData>();
+		auto poseComponentMetaData = ::util::make_shared<ents::PoseComponentTypeMetaData>();
 		poseComponentMetaData->poseProperty = posePathName;
 
-		auto coordMetaData = std::make_shared<ents::CoordinateTypeMetaData>();
+		auto coordMetaData = ::util::make_shared<ents::CoordinateTypeMetaData>();
 		coordMetaData->space = umath::CoordinateSpace::Local;
 		coordMetaData->parentProperty = parentPathName;
 

@@ -121,7 +121,7 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::sha
 		std::function<std::shared_ptr<DebugBehaviorTreeNode>(const ai::BehaviorNode &)> fAddNode = nullptr;
 		fAddNode = [&fAddNode, &sched](const ai::BehaviorNode &node) {
 			auto &dbgInfo = node.GetDebugInfo();
-			auto dbgChildNode = std::make_shared<DebugBehaviorTreeNode>();
+			auto dbgChildNode = ::util::make_shared<DebugBehaviorTreeNode>();
 			auto *luaTask = dynamic_cast<const AILuaBehaviorNode *>(&node);
 			if(dbgInfo.debugName.empty() == false)
 				dbgChildNode->name = dbgInfo.debugName;

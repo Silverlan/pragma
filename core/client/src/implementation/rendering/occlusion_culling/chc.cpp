@@ -484,7 +484,7 @@ void CHC::IssueMultiQueries()
 			m_invisQueue.pop();
 			if(hNode.IsValid())
 			{
-				auto query = std::make_shared<CHCQuery>(*hNode.get());
+				auto query = ::util::make_shared<CHCQuery>(*hNode.get());
 				query->Run();
 				m_queryQueue.push(query);
 			}
@@ -519,7 +519,7 @@ void CHC::HandleReturnedQuery(CHCQuery *query)
 
 void CHC::IssueQuery(CHCNode *node)
 {
-	auto query = std::make_shared<CHCQuery>(*node);
+	auto query = ::util::make_shared<CHCQuery>(*node);
 	query->Run();
 	m_queryQueue.push(query);
 }

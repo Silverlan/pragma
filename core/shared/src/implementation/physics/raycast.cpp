@@ -10,7 +10,7 @@ void TraceResult::InitializeMeshes()
 {
 	if(meshInfo != nullptr)
 		return;
-	meshInfo = std::make_shared<MeshInfo>();
+	meshInfo = ::util::make_shared<MeshInfo>();
 	if(entity.valid() == false)
 		return;
 	auto mdlComponent = entity->GetModelComponent();

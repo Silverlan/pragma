@@ -90,7 +90,7 @@ void CWorldComponent::ReloadCHCController()
 {
 	/*auto &scene = pragma::get_cgame()->GetScene();
 	auto &cam = scene->GetCamera();
-	m_chcController = std::make_shared<CHC>(*cam);
+	m_chcController = ::util::make_shared<CHC>(*cam);
 	m_chcController->Reset(m_meshTree);*/ // prosper TODO
 }
 void CWorldComponent::SetBSPTree(const std::shared_ptr<::util::BSPTree> &bspTree, const std::vector<std::vector<RenderMeshIndex>> &meshesPerCluster)
@@ -108,7 +108,7 @@ void CWorldComponent::ReloadMeshCache()
 	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
 		return;
-	m_meshTree = std::make_shared<OcclusionOctree<std::shared_ptr<ModelMesh>>>(256.f, 1'073'741'824.f, 4096.f, [](const std::weak_ptr<ModelMesh> ptrSubMesh, Vector3 &min, Vector3 &max) {
+	m_meshTree = ::util::make_shared<OcclusionOctree<std::shared_ptr<ModelMesh>>>(256.f, 1'073'741'824.f, 4096.f, [](const std::weak_ptr<ModelMesh> ptrSubMesh, Vector3 &min, Vector3 &max) {
 		if(ptrSubMesh.expired() == true) {
 			min = {};
 			max = {};

@@ -193,7 +193,7 @@ std::shared_ptr<pragma::Model> pragma::asset::ModelManager::CreateModel(const st
 		mdl->CreateTextureGroup();
 	}
 	if(addToCache) {
-		auto asset = std::make_shared<util::Asset>();
+		auto asset = ::util::make_shared<util::Asset>();
 		asset->assetObject = mdl;
 		AddToCache(name, asset);
 	}
@@ -231,7 +231,7 @@ std::shared_ptr<pragma::Model> pragma::asset::ModelManager::LoadModel(const std:
 	auto jobId = m_loader->AddJob(m_nw,cacheName,ext,std::move(fp));
 	return jobId.has_value();
 	mdl->Update();
-	AddToCache(mdlName,std::make_shared<ModelAsset>(mdl));
+	AddToCache(mdlName,::util::make_shared<ModelAsset>(mdl));
 	if(outIsNewModel != nullptr)
 		*outIsNewModel = true;
 	return mdl;
@@ -268,7 +268,7 @@ std::shared_ptr<pragma::Model> pragma::asset::ModelManager::LoadModel(const std:
 	if(mdl == nullptr)
 		return nullptr;
 	mdl->Update();
-	AddToCache(mdlName,std::make_shared<ModelAsset>(mdl));
+	AddToCache(mdlName,::util::make_shared<ModelAsset>(mdl));
 	if(outIsNewModel != nullptr)
 		*outIsNewModel = true;
 	return mdl;

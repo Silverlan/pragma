@@ -36,10 +36,10 @@ export {
 #pragma warning(disable : 4251)
 	namespace pragma::ecs {
 		namespace baseEntity {
-			STATIC_DLL_COMPAT ComponentEventId EVENT_HANDLE_KEY_VALUE;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_SPAWN;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_POST_SPAWN;
-			STATIC_DLL_COMPAT ComponentEventId EVENT_ON_REMOVE;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_HANDLE_KEY_VALUE;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_SPAWN;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_POST_SPAWN;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_REMOVE;
 		}
 		class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseEntityComponentSystem {
 		  public:

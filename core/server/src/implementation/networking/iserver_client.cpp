@@ -36,7 +36,7 @@ bool pragma::networking::IServerClient::AddResource(const std::string &fileName,
 		(*it)->stream = stream;
 		return true;
 	}
-	auto res = std::make_shared<Resource>(canonName, stream);
+	auto res = ::util::make_shared<Resource>(canonName, stream);
 	if(res->Construct() == false)
 		return false;
 	it = m_resourceTransfer.end();

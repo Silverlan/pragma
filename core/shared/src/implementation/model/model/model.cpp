@@ -1938,7 +1938,7 @@ bool pragma::Model::GenerateMetaRig()
 	auto *generateMetaRig = libRig->FindSymbolAddress<bool (*)(const pragma::Model &, pragma::animation::MetaRig &)>("generate_meta_rig");
 	if(!generateMetaRig)
 		return false;
-	auto metaRig = std::make_shared<pragma::animation::MetaRig>();
+	auto metaRig = ::util::make_shared<pragma::animation::MetaRig>();
 	if(!generateMetaRig(*this, *metaRig))
 		return false;
 	m_metaRig = std::move(metaRig);
@@ -1978,8 +1978,8 @@ std::shared_ptr<pragma::animation::Animation> pragma::Model::GetAnimation(uint32
 	return m_animations[ID];
 }
 uint32_t pragma::Model::GetAnimationCount() const { return static_cast<uint32_t>(m_animations.size()); }
-std::shared_ptr<ModelMesh> pragma::Model::CreateMesh() const { return std::make_shared<ModelMesh>(); }
-std::shared_ptr<pragma::ModelSubMesh> pragma::Model::CreateSubMesh() const { return std::make_shared<pragma::ModelSubMesh>(); }
+std::shared_ptr<ModelMesh> pragma::Model::CreateMesh() const { return ::util::make_shared<ModelMesh>(); }
+std::shared_ptr<pragma::ModelSubMesh> pragma::Model::CreateSubMesh() const { return ::util::make_shared<pragma::ModelSubMesh>(); }
 void pragma::Model::RemoveBone(pragma::animation::BoneId boneId)
 {
 	auto &bones = m_skeleton->GetBones();

@@ -190,7 +190,7 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 	g_collectRenderStats = enabled;
 	if(enabled == false)
 		return;
-	auto stats = std::make_shared<RenderStatsQueue>();
+	auto stats = ::util::make_shared<RenderStatsQueue>();
 	auto first = true;
 	g_cbPreRenderScene = pragma::get_cgame()->AddCallback("OnRenderScenes", FunctionCallback<void>::Create([stats, first, full, print]() mutable {
 		auto swapchainIdx = pragma::get_cengine()->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();

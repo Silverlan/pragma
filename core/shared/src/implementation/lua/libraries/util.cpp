@@ -1479,8 +1479,8 @@ Lua::var<bool, ::util::ParallelJob<luabind::object>> Lua::util::pack_zip_archive
 			worker.SetStatus(::util::JobStatus::Successful);
 		}
 	});
-	auto pjob = std::make_shared<::util::ParallelJob<ResultData>>(job);
-	auto jobWrapper = std::make_shared<::util::ParallelJob<luabind::object>>(::util::create_parallel_job<pragma::LuaCore::LuaWorker>(game, "pack_zip_archive"));
+	auto pjob = ::util::make_shared<::util::ParallelJob<ResultData>>(job);
+	auto jobWrapper = ::util::make_shared<::util::ParallelJob<luabind::object>>(::util::create_parallel_job<pragma::LuaCore::LuaWorker>(game, "pack_zip_archive"));
 	auto &workerWrapper = static_cast<pragma::LuaCore::LuaWorker &>(jobWrapper->GetWorker());
 	workerWrapper.AddCppTask(
 	  pjob,

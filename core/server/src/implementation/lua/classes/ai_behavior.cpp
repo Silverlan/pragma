@@ -160,7 +160,7 @@ void AILuaBehaviorNode::SetScheduleParameter(uint8_t taskParamId, uint8_t schedu
 	CallLuaMember<void, uint8_t, uint8_t>("OnSetScheduleParameter", taskParamId, scheduleParamId);
 }
 
-AILuaBehaviorNodeWrapper::AILuaBehaviorNodeWrapper(uint32_t nodeType, uint32_t selectorType) : BaseBehaviorTask(std::make_shared<AILuaBehaviorNode>(static_cast<pragma::ai::BehaviorNode::Type>(nodeType), static_cast<pragma::ai::SelectorType>(selectorType))), luabind::wrap_base() {}
+AILuaBehaviorNodeWrapper::AILuaBehaviorNodeWrapper(uint32_t nodeType, uint32_t selectorType) : BaseBehaviorTask(::util::make_shared<AILuaBehaviorNode>(static_cast<pragma::ai::BehaviorNode::Type>(nodeType), static_cast<pragma::ai::SelectorType>(selectorType))), luabind::wrap_base() {}
 
 AILuaBehaviorNodeWrapper::AILuaBehaviorNodeWrapper(uint32_t nodeType) : AILuaBehaviorNodeWrapper(nodeType, umath::to_integral(pragma::ai::SelectorType::Sequential)) {}
 

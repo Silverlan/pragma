@@ -368,7 +368,7 @@ std::shared_ptr<ConCommand> ConVarMap::PreRegisterConCommand(const std::string &
 	ustring::to_lower(lscmd);
 	if(m_conVars.find(lscmd) != m_conVars.end())
 		return nullptr;
-	auto cmd = std::make_shared<ConCommand>(static_cast<void (*)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(nullptr), flags, help);
+	auto cmd = ::util::make_shared<ConCommand>(static_cast<void (*)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(nullptr), flags, help);
 	cmd->m_ID = m_conVarID;
 	m_conVars.insert(decltype(m_conVars)::value_type(lscmd, cmd));
 	m_conVarIDs.insert(decltype(m_conVarIDs)::value_type(lscmd, m_conVarID));
@@ -403,7 +403,7 @@ std::shared_ptr<ConCommand> ConVarMap::RegisterConCommand(const std::string &scm
 		}
 		return nullptr;
 	}
-	auto cmd = std::make_shared<ConCommand>(fc, flags, help, autoCompleteCallback);
+	auto cmd = ::util::make_shared<ConCommand>(fc, flags, help, autoCompleteCallback);
 	cmd->m_ID = m_conVarID;
 	m_conVars.insert(decltype(m_conVars)::value_type(lscmd, cmd));
 	m_conVarIDs.insert(decltype(m_conVarIDs)::value_type(lscmd, m_conVarID));

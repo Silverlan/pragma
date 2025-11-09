@@ -48,9 +48,9 @@ namespace pragma::LuaCore {
 		                      .def("GetCompletedTaskCount", &LuaThreadPool::GetCompletedTaskCount);
 		classDefPool.scope[classDefTask];
 		modUtil[classDefPool];
-		pragma::LuaCore::define_custom_constructor<LuaThreadPool, +[](lua::State *l, uint32_t threadCount) -> std::shared_ptr<LuaThreadPool> { return std::make_shared<LuaThreadPool>(l, threadCount); }, lua::State *, uint32_t>(l);
-		pragma::LuaCore::define_custom_constructor<LuaThreadPool, +[](lua::State *l, uint32_t threadCount, const std::string &name) -> std::shared_ptr<LuaThreadPool> { return std::make_shared<LuaThreadPool>(l, threadCount, name); }, lua::State *, uint32_t, const std::string &>(l);
-		pragma::LuaCore::define_custom_constructor<LuaThreadTask, +[]() -> std::shared_ptr<LuaThreadTask> { return std::make_shared<LuaThreadTask>(); }>(l);
+		pragma::LuaCore::define_custom_constructor<LuaThreadPool, +[](lua::State *l, uint32_t threadCount) -> std::shared_ptr<LuaThreadPool> { return ::util::make_shared<LuaThreadPool>(l, threadCount); }, lua::State *, uint32_t>(l);
+		pragma::LuaCore::define_custom_constructor<LuaThreadPool, +[](lua::State *l, uint32_t threadCount, const std::string &name) -> std::shared_ptr<LuaThreadPool> { return ::util::make_shared<LuaThreadPool>(l, threadCount, name); }, lua::State *, uint32_t, const std::string &>(l);
+		pragma::LuaCore::define_custom_constructor<LuaThreadTask, +[]() -> std::shared_ptr<LuaThreadTask> { return ::util::make_shared<LuaThreadTask>(); }>(l);
 	}
 };
 

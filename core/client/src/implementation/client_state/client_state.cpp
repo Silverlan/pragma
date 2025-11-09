@@ -210,7 +210,7 @@ std::optional<std::vector<std::string>> g_autoExecScripts {};
 
 void ClientState::InitializeGUILua()
 {
-	m_luaGUI = std::make_shared<Lua::Interface>();
+	m_luaGUI = ::util::make_shared<Lua::Interface>();
 	m_luaGUI->Open();
 	m_luaGUI->SetIdentifier("gui");
 	Lua::initialize_lua_state(GetGUILuaInterface());
@@ -657,13 +657,13 @@ static void init_shader(msys::Material *mat)
 	auto *info = mat->GetShaderInfo();
 	if(info != nullptr) {
 		auto shader = pragma::get_cengine()->GetShader(info->GetIdentifier());
-		const_cast<util::ShaderInfo *>(info)->SetShader(std::make_shared<::util::WeakHandle<prosper::Shader>>(shader));
+		const_cast<util::ShaderInfo *>(info)->SetShader(::util::make_shared<::util::WeakHandle<prosper::Shader>>(shader));
 	}
 }
 msys::MaterialHandle ClientState::CreateMaterial(const std::string &path, const std::string &shader)
 {
 	auto settings = ds::create_data_settings({});
-	auto mat = GetMaterialManager().CreateMaterial(path, shader, std::make_shared<ds::Block>(*settings));
+	auto mat = GetMaterialManager().CreateMaterial(path, shader, ::util::make_shared<ds::Block>(*settings));
 	if(mat == nullptr)
 		return {};
 	static_cast<msys::CMaterial *>(mat.get())->SetOnLoadedCallback(std::bind(init_shader, mat.get()));
@@ -673,7 +673,7 @@ msys::MaterialHandle ClientState::CreateMaterial(const std::string &path, const 
 msys::MaterialHandle ClientState::CreateMaterial(const std::string &shader)
 {
 	auto settings = ds::create_data_settings({});
-	auto mat = GetMaterialManager().CreateMaterial(shader, std::make_shared<ds::Block>(*settings));
+	auto mat = GetMaterialManager().CreateMaterial(shader, ::util::make_shared<ds::Block>(*settings));
 	if(mat == nullptr)
 		return {};
 	static_cast<msys::CMaterial *>(mat.get())->SetOnLoadedCallback(std::bind(init_shader, mat.get()));
@@ -734,7 +734,7 @@ msys::Material *ClientState::LoadMaterial(const std::string &path, const std::fu
 	}
 
 	//bLoadInstantly = true;
-	auto bShaderInitialized = std::make_shared<bool>(false);
+	auto bShaderInitialized = ::util::make_shared<bool>(false);
 
 	bool bFirstTimeError;
 	auto loadInfo = std::make_unique<msys::MaterialLoadInfo>();

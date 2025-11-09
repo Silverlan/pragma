@@ -11,8 +11,8 @@ export import :input.enums;
 
 export namespace pragma {
 	namespace actionInputControllerComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_HANDLE_ACTION_INPUT;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_ACTION_INPUT_CHANGED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_HANDLE_ACTION_INPUT;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_ACTION_INPUT_CHANGED;
 	}
 	class DLLNETWORK ActionInputControllerComponent final : public BaseEntityComponent {
 	  public:

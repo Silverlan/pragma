@@ -10,8 +10,8 @@ export import :entities.components.entity;
 
 export namespace pragma {
 		namespace cObserverComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_VIEW;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_CALC_VIEW_OFFSET;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_CALC_VIEW;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_CALC_VIEW_OFFSET;
 	}
 class DLLCLIENT CObserverComponent final : public BaseObserverComponent, public CBaseNetComponent {
 	  public:

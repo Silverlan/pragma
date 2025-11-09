@@ -160,7 +160,7 @@ void CSceneComponent::Setup(const CreateInfo &createInfo, SceneIndex sceneIndex)
 	InitializeShadowDescriptorSet();
 
 	if(g_entityInstanceIndexBuffer == nullptr)
-		g_entityInstanceIndexBuffer = std::make_shared<rendering::EntityInstanceIndexBuffer>();
+		g_entityInstanceIndexBuffer = ::util::make_shared<rendering::EntityInstanceIndexBuffer>();
 }
 
 void CSceneComponent::Link(const CSceneComponent &other, bool linkCamera)

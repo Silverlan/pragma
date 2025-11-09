@@ -128,7 +128,7 @@ void ClientState::LoadLuaCache(std::string cache, unsigned int cacheSize)
 			offset += CUInt32(path.size()) + 1;
 			std::string content = ustring::read_until_etx(dest + offset);
 			offset += CUInt32(content.length()) + 1;
-			auto data = std::make_shared<std::vector<uint8_t>>();
+			auto data = ::util::make_shared<std::vector<uint8_t>>();
 			data->resize(content.length() + 1);
 			memcpy(data->data(), content.c_str(), content.length() + 1);
 			FileManager::AddVirtualFile((Lua::SCRIPT_DIRECTORY_SLASH + path).c_str(), data);

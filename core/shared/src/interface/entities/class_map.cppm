@@ -4,7 +4,7 @@ module;
 
 export module pragma.shared:entities.class_map;
 
-export import std;
+export import std.compat;
 
 export {
 	template<class T>

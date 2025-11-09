@@ -235,7 +235,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoints(const std::
 {
 	if(vertexCount == 0)
 		return nullptr;
-	auto o = std::make_shared<DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
+	auto o = ::util::make_shared<DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
 	init_debug_object(*o, renderInfo);
 	if(o->InitializeBuffers(vertexBuffer, vertexCount) == false)
 		return nullptr;
@@ -249,7 +249,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoints(const std::
 {
 	if(points.empty())
 		return nullptr;
-	auto o = std::make_shared<DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
+	auto o = ::util::make_shared<DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
 	init_debug_object(*o, renderInfo);
 	auto &oVerts = o->GetVertices();
 	oVerts = points;
@@ -268,7 +268,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoint(const DebugR
 }
 std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawLines(const std::vector<Vector3> &lines, const DebugRenderInfo &renderInfo)
 {
-	auto o = std::make_shared<DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
+	auto o = ::util::make_shared<DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
 	init_debug_object(*o, renderInfo);
 	auto &oVerts = o->GetVertices();
 	oVerts = lines;
@@ -282,7 +282,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawLines(const std::v
 std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawLine(const Vector3 &start, const Vector3 &end, const DebugRenderInfo &renderInfo) { return DrawLines(std::vector<Vector3> {start, end}, renderInfo); }
 static std::shared_ptr<DebugRenderer::BaseObject> draw_box(const Vector3 &center, const Vector3 &min, const Vector3 &max, const DebugRenderInfo &renderInfo, const Color *outlineColor)
 {
-	auto r = std::make_shared<DebugRenderer::CollectionObject>();
+	auto r = ::util::make_shared<DebugRenderer::CollectionObject>();
 	if(outlineColor != nullptr) {
 		DebugRenderInfo outlineDrawInfo {};
 		outlineDrawInfo.color = renderInfo.color;
@@ -295,7 +295,7 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_box(const Vector3 &center
 			r->AddObject(oMesh);
 	}
 
-	auto oOutline = std::make_shared<DebugRenderer::WorldObject>(((outlineColor != nullptr) ? *outlineColor : renderInfo.color).ToVector4());
+	auto oOutline = ::util::make_shared<DebugRenderer::WorldObject>(((outlineColor != nullptr) ? *outlineColor : renderInfo.color).ToVector4());
 	init_debug_object(*oOutline, renderInfo);
 	auto &verts = oOutline->GetVertices();
 	auto start = min;
@@ -337,7 +337,7 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_text(WIText *el, const Ve
 		return nullptr;
 	Vector2 szUnits {(worldSize.x / 2.f) /* /static_cast<float>(el->GetWidth())*/, (worldSize.y / 2.f) /* /static_cast<float>(el->GetHeight())*/};
 
-	auto o = std::make_shared<DebugRenderer::TextObject>(el);
+	auto o = ::util::make_shared<DebugRenderer::TextObject>(el);
 	o->SetPos(pos);
 	auto *ptrO = o.get();
 	auto hEl = el->GetHandle();
@@ -426,7 +426,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawMesh(const std::ve
 {
 	if(verts.empty() == true)
 		return nullptr;
-	auto o = std::make_shared<DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
+	auto o = ::util::make_shared<DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
 	init_debug_object(*o, renderInfo);
 	auto &oVerts = o->GetVertices();
 	oVerts = verts;
@@ -515,7 +515,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPlane(const Vector
 	std::vector<Vector3> mesh = {v0, v1, v2, v2, v3, v0,
 
 	  v2, v1, v0, v0, v3, v2};
-	auto r = std::make_shared<CollectionObject>();
+	auto r = ::util::make_shared<CollectionObject>();
 	auto rMesh = DrawMesh(mesh, renderInfo);
 	if(rMesh != nullptr)
 		r->AddObject(rMesh);
@@ -535,7 +535,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawFrustum(const std:
 		return nullptr;
 	auto a = uint16_t {64};
 	auto col = Color(255, 0, 0, a);
-	auto r = std::make_shared<CollectionObject>();
+	auto r = ::util::make_shared<CollectionObject>();
 	// Near
 	r->AddObject(DrawMesh(
 	  {

@@ -38,14 +38,14 @@ void BaseEntityTriggerGravityComponent::Initialize()
 }
 void BaseEntityTriggerGravityComponent::OnStartTouch(pragma::ecs::BaseEntity *ent)
 {
-	auto &settings = m_gravityReset.insert(std::make_pair(std::make_shared<EntityHandle>(ent->GetHandle()), GravitySettings {})).first->second;
+	auto &settings = m_gravityReset.insert(std::make_pair(::util::make_shared<EntityHandle>(ent->GetHandle()), GravitySettings {})).first->second;
 	auto pEntGravityComponent = ent->GetComponent<pragma::GravityComponent>();
 	settings.scale = pEntGravityComponent.valid() ? pEntGravityComponent->GetGravityScale() : 1.f;
 	if(pEntGravityComponent.valid()) {
 		if(pEntGravityComponent->HasGravityForceOverride())
-			settings.force = std::make_shared<float>(pEntGravityComponent->GetGravity());
+			settings.force = ::util::make_shared<float>(pEntGravityComponent->GetGravity());
 		if(pEntGravityComponent->HasGravityDirectionOverride())
-			settings.dir = std::make_shared<Vector3>(pEntGravityComponent->GetGravityDirection());
+			settings.dir = ::util::make_shared<Vector3>(pEntGravityComponent->GetGravityDirection());
 	}
 
 	auto &entThis = GetEntity();

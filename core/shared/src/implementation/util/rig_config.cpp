@@ -217,7 +217,7 @@ pragma::ik::PRigConfigBone pragma::ik::RigConfig::AddBone(const pragma::GString 
 	auto bone = FindBone(name);
 	if(bone)
 		return bone;
-	m_bones.push_back(std::make_shared<RigConfigBone>());
+	m_bones.push_back(::util::make_shared<RigConfigBone>());
 	bone = m_bones.back();
 	bone->name = name;
 	return bone;
@@ -259,7 +259,7 @@ bool pragma::ik::RigConfig::HasControl(const pragma::GString &name) const { retu
 pragma::ik::PRigConfigControl pragma::ik::RigConfig::AddControl(const pragma::GString &bone, RigConfigControl::Type type, float rigidity)
 {
 	RemoveControl(bone);
-	m_controls.push_back(std::make_shared<RigConfigControl>());
+	m_controls.push_back(::util::make_shared<RigConfigControl>());
 	auto &ctrl = m_controls.back();
 	ctrl->bone = bone;
 	ctrl->type = type;
@@ -296,7 +296,7 @@ void pragma::ik::RigConfig::RemoveJoint(const RigConfigJoint &joint)
 }
 pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddBallSocketJoint(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &anchorPosition, float rigidity)
 {
-	m_joints.push_back(std::make_shared<RigConfigJoint>());
+	m_joints.push_back(::util::make_shared<RigConfigJoint>());
 	auto &j = m_joints.back();
 	j->bone0 = bone0;
 	j->bone1 = bone1;
@@ -307,7 +307,7 @@ pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddBallSocketJoint(const prag
 }
 pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddSwingLimit(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, umath::Degree maxAngle, float rigidity)
 {
-	m_joints.push_back(std::make_shared<RigConfigJoint>());
+	m_joints.push_back(::util::make_shared<RigConfigJoint>());
 	auto &j = m_joints.back();
 	j->bone0 = bone0;
 	j->bone1 = bone1;
@@ -320,7 +320,7 @@ pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddSwingLimit(const pragma::G
 }
 pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddTwistLimit(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, umath::Degree maxAngle, float rigidity, const std::optional<Vector3> &measurementAxisA)
 {
-	m_joints.push_back(std::make_shared<RigConfigJoint>());
+	m_joints.push_back(::util::make_shared<RigConfigJoint>());
 	auto &j = m_joints.back();
 	j->bone0 = bone0;
 	j->bone1 = bone1;
@@ -334,7 +334,7 @@ pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddTwistLimit(const pragma::G
 }
 pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddSwivelHingeJoint(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity)
 {
-	m_joints.push_back(std::make_shared<RigConfigJoint>());
+	m_joints.push_back(::util::make_shared<RigConfigJoint>());
 	auto &j = m_joints.back();
 	j->bone0 = bone0;
 	j->bone1 = bone1;
@@ -346,7 +346,7 @@ pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddSwivelHingeJoint(const pra
 }
 pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddTwistJoint(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity)
 {
-	m_joints.push_back(std::make_shared<RigConfigJoint>());
+	m_joints.push_back(::util::make_shared<RigConfigJoint>());
 	auto &j = m_joints.back();
 	j->bone0 = bone0;
 	j->bone1 = bone1;
@@ -358,7 +358,7 @@ pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddTwistJoint(const pragma::G
 }
 pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddDistanceJoint(const pragma::GString &bone0, const pragma::GString &bone1, float rigidity)
 {
-	m_joints.push_back(std::make_shared<RigConfigJoint>());
+	m_joints.push_back(::util::make_shared<RigConfigJoint>());
 	auto &j = m_joints.back();
 	j->bone0 = bone0;
 	j->bone1 = bone1;
@@ -368,7 +368,7 @@ pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddDistanceJoint(const pragma
 }
 pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddAngularJoint(const pragma::GString &bone0, const pragma::GString &bone1, float rigidity)
 {
-	m_joints.push_back(std::make_shared<RigConfigJoint>());
+	m_joints.push_back(::util::make_shared<RigConfigJoint>());
 	auto &j = m_joints.back();
 	j->bone0 = bone0;
 	j->bone1 = bone1;
@@ -378,7 +378,7 @@ pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddAngularJoint(const pragma:
 }
 pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddParentJoint(const pragma::GString &bone0, const pragma::GString &bone1)
 {
-	m_joints.push_back(std::make_shared<RigConfigJoint>());
+	m_joints.push_back(::util::make_shared<RigConfigJoint>());
 	auto &j = m_joints.back();
 	j->bone0 = bone0;
 	j->bone1 = bone1;
@@ -433,7 +433,7 @@ void pragma::ik::RigConfig::RemoveBone(const RigConfigBone &bone)
 
 pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddFixedConstraint(const pragma::GString &bone0, const pragma::GString &bone1)
 {
-	m_constraints.push_back(std::make_shared<RigConfigConstraint>());
+	m_constraints.push_back(::util::make_shared<RigConfigConstraint>());
 	auto &c = m_constraints.back();
 	c->bone0 = bone0;
 	c->bone1 = bone1;
@@ -442,7 +442,7 @@ pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddFixedConstraint(const
 }
 pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddHingeConstraint(const pragma::GString &bone0, const pragma::GString &bone1, umath::Degree minAngle, umath::Degree maxAngle, const Quat &offsetRotation)
 {
-	m_constraints.push_back(std::make_shared<RigConfigConstraint>());
+	m_constraints.push_back(::util::make_shared<RigConfigConstraint>());
 	auto &c = m_constraints.back();
 	c->bone0 = bone0;
 	c->bone1 = bone1;
@@ -454,7 +454,7 @@ pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddHingeConstraint(const
 }
 pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddBallSocketConstraint(const pragma::GString &bone0, const pragma::GString &bone1, const EulerAngles &minAngles, const EulerAngles &maxAngles, SignedAxis axis)
 {
-	m_constraints.push_back(std::make_shared<RigConfigConstraint>());
+	m_constraints.push_back(::util::make_shared<RigConfigConstraint>());
 	auto &c = m_constraints.back();
 	c->bone0 = bone0;
 	c->bone1 = bone1;

@@ -627,3 +627,6 @@ def update_content_version(base_path: str, commit_id: str, filename: str) -> Non
 	target_file = base / filename
 	print(f"Writing content version to '{target_file}'...")
 	target_file.write_text(commit_id, encoding="utf-8")
+
+def prefer_pacman():
+    return shutil.which("pacman") is not None

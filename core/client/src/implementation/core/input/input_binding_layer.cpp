@@ -31,7 +31,7 @@ bool InputBindingLayer::Save(const std::vector<std::shared_ptr<InputBindingLayer
 bool InputBindingLayer::Load(const udm::AssetData &data, std::vector<std::shared_ptr<InputBindingLayer>> &outLayers, std::string &outErr)
 {
 	for(auto &pair : data.GetData().ElIt()) {
-		auto layer = std::make_shared<InputBindingLayer>();
+		auto layer = ::util::make_shared<InputBindingLayer>();
 		layer->identifier = pair.key;
 		for(auto &pair : pair.property.ElIt()) {
 			auto val = pair.property.ToValue<udm::String>();

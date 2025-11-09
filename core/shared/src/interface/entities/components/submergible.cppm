@@ -10,10 +10,10 @@ export import :entities.components.base;
 
 export namespace pragma {
 	namespace submergibleComponent {
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_WATER_SUBMERGED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_WATER_EMERGED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_WATER_ENTERED;
-		STATIC_DLL_COMPAT ComponentEventId EVENT_ON_WATER_EXITED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_WATER_SUBMERGED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_WATER_EMERGED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_WATER_ENTERED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_WATER_EXITED;
 	}
 	class DLLNETWORK SubmergibleComponent final : public BaseEntityComponent {
 	  public:

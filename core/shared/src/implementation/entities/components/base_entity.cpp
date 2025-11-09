@@ -147,7 +147,7 @@ void BaseEntityComponent::SetPropertyAnimated(const std::string &property, bool 
 	if(hasChannel == false) {
 		auto &player = baseManager->GetPlayer();
 		if(!player.GetAnimation()) {
-			auto anim = std::make_shared<panima::Animation>();
+			auto anim = ::util::make_shared<panima::Animation>();
 			panimaC->PlayAnimation(*baseManager, *anim);
 		}
 		auto *anim = const_cast<panima::Animation *>(player.GetAnimation());

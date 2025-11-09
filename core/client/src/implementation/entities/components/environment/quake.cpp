@@ -34,7 +34,7 @@ void CQuakeComponent::StartShake()
 	BaseEnvQuakeComponent::StartShake();
 	if(ShouldShakeView() == false)
 		return;
-	auto perlin = std::make_shared<noise::module::Perlin>();
+	auto perlin = ::util::make_shared<noise::module::Perlin>();
 	perlin->SetSeed(CInt32(pragma::get_cengine()->GetTickCount()));
 	m_tStartShake = CFloat(pragma::get_cgame()->CurTime());
 	m_cbScreenShake = pragma::get_cgame()->AddCallback("CalcView",

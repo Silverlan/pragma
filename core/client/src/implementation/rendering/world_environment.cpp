@@ -10,9 +10,9 @@ std::shared_ptr<WorldEnvironment> WorldEnvironment::Create() { return std::share
 
 WorldEnvironment::WorldEnvironment()
 {
-	m_shaderQuality = std::make_shared<util::Int32Property>(int32_t {0});
-	m_bUnlit = std::make_shared<util::BoolProperty>(bool {false});
-	m_shadowResolution = std::make_shared<util::UInt32Property>(uint32_t {0});
+	m_shaderQuality = ::util::make_shared<util::Int32Property>(int32_t {0});
+	m_bUnlit = ::util::make_shared<util::BoolProperty>(bool {false});
+	m_shadowResolution = ::util::make_shared<util::UInt32Property>(uint32_t {0});
 }
 int32_t WorldEnvironment::GetShaderQuality() const { return *m_shaderQuality; }
 void WorldEnvironment::SetShaderQuality(int32_t quality) { *m_shaderQuality = quality; }

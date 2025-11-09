@@ -23,8 +23,8 @@ export namespace pragma {
 		bool canUse = true;
 	};
 	namespace usableComponent {
-		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_ON_USE;
-		STATIC_DLL_COMPAT pragma::ComponentEventId EVENT_CAN_USE;
+		CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_ON_USE;
+		CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_CAN_USE;
 	}
 	class DLLNETWORK UsableComponent final : public BaseEntityComponent {
 	  public:

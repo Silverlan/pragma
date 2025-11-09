@@ -178,7 +178,7 @@ bool ServerState::ConnectLocalHostPlayerClient()
 {
 	if(m_server == nullptr)
 		return false;
-	m_localClient = std::make_shared<pragma::networking::LocalServerClient>();
+	m_localClient = ::util::make_shared<pragma::networking::LocalServerClient>();
 	m_server->AddClient(m_localClient);
 	return true;
 }
@@ -186,7 +186,7 @@ void ServerState::ResetGameServer()
 {
 	m_server = std::make_unique<pragma::networking::LocalServer>();
 	//if(m_localClient == nullptr)
-	//	m_localClient = std::make_shared<pragma::networking::LocalServerClient>();
+	//	m_localClient = ::util::make_shared<pragma::networking::LocalServerClient>();
 	//m_server->AddClient(m_localClient);
 }
 

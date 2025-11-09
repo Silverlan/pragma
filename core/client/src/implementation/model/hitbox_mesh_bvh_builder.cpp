@@ -207,7 +207,7 @@ bool pragma::bvh::HitboxMeshBvhBuildTask::Build(pragma::Model &mdl, pragma::anim
 				}
 
 				std::string boneName = bone->name;
-				auto bm = std::make_shared<pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo>();
+				auto bm = ::util::make_shared<pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo>();
 				auto genResult = m_threadPool.submit_task([&mdl, subMesh, planes, hbMin, hbMax, pose, uuid, boneName, bm, boneId]() -> bool {
 					auto success = calc_bone_mesh_info(*bm, boneId, subMesh, planes, hbMin, hbMax, pose, uuid);
 					if(!success)

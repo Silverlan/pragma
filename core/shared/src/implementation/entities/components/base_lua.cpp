@@ -477,7 +477,7 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 	auto &members = get_class_member_list(l);
 	auto it = std::find_if(members.begin(), members.end(), [&oClass](const std::shared_ptr<ClassMembers> &classMembers) { return oClass == classMembers->classObject; });
 	if(it == members.end()) {
-		members.push_back(std::make_shared<ClassMembers>(oClass));
+		members.push_back(::util::make_shared<ClassMembers>(oClass));
 		it = members.end() - 1;
 	}
 	auto itMember = std::find_if((*it)->memberDeclarations.begin(), (*it)->memberDeclarations.end(), [&functionName](const MemberInfo &memberInfo) { return ustring::compare<std::string_view>(functionName, memberInfo.functionName, false); });

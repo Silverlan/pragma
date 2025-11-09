@@ -62,8 +62,8 @@ void pragma::bvh::HitboxBvhCache::InitializeModelHitboxBvhCache(pragma::Model &m
 		for(auto &boneMeshInfo : boneMeshInfos) {
 			auto it = boneCaches.find(boneId);
 			if(it == boneCaches.end())
-				it = boneCaches.insert(std::make_pair(boneId, std::make_shared<pragma::bvh::BoneHitboxBvhCache>())).first;
-			auto meshBvhCache = std::make_shared<pragma::bvh::MeshHitboxBvhCache>();
+				it = boneCaches.insert(std::make_pair(boneId, ::util::make_shared<pragma::bvh::BoneHitboxBvhCache>())).first;
+			auto meshBvhCache = ::util::make_shared<pragma::bvh::MeshHitboxBvhCache>();
 			meshBvhCache->bvhTree = std::move(boneMeshInfo->meshBvhTree);
 			meshBvhCache->bvhTriToOriginalTri = std::move(boneMeshInfo->usedTris);
 			meshBvhCache->mesh = boneMeshInfo->subMesh;
@@ -83,7 +83,7 @@ std::shared_future<void> pragma::bvh::HitboxBvhCache::GenerateModelCache(const M
 	PrepareModel(mdl);
 
 	auto &builder = m_builder;
-	auto mdlCache = std::make_shared<ModelHitboxBvhCache>();
+	auto mdlCache = ::util::make_shared<ModelHitboxBvhCache>();
 	auto buildModelTask = builder.GetThreadPool().submit_task([this, &builder, &mdl, &mdlCache = *mdlCache]() {
 		auto task = builder.BuildModel(mdl);
 		InitializeModelHitboxBvhCache(mdl, task, mdlCache);
@@ -98,7 +98,7 @@ CHitboxBvhComponent::CHitboxBvhComponent(pragma::ecs::BaseEntity &ent) : BaseEnt
 {
 	if(g_hbBvhCount++ == 0) {
 		g_hbThreadPool = std::make_unique<BS::light_thread_pool>(10);
-		g_hbBvhCache = std::make_shared<pragma::bvh::HitboxBvhCache>(GetGame());
+		g_hbBvhCache = ::util::make_shared<pragma::bvh::HitboxBvhCache>(GetGame());
 	}
 }
 CHitboxBvhComponent::~CHitboxBvhComponent()

@@ -372,7 +372,7 @@ ComponentId EntityComponentManager::RegisterComponentType(const std::string &nam
 		m_typeIndexToComponentId.insert(std::make_pair(*typeIndex, componentId));
 		if(componentId >= m_componentIdToTypeIndex.size())
 			m_componentIdToTypeIndex.resize(componentId + 1u, nullptr);
-		m_componentIdToTypeIndex.at(componentId) = std::make_shared<std::type_index>(*typeIndex);
+		m_componentIdToTypeIndex.at(componentId) = ::util::make_shared<std::type_index>(*typeIndex);
 	}
 	m_preRegistered.erase(itPre);
 

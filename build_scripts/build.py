@@ -307,7 +307,7 @@ if platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++-2
 		clang20_root = os.getcwd() +"/LLVM-22.git-Linux-X64"
 		if not Path(clang20_root).is_dir():
 			print_msg("Downloading clang-22...")
-			http_extract("https://github.com/Silverlan/clang_prebuilt/releases/download/2025-11-09/linux_x64.tar.xz",format="tar.xz")
+			http_extract("https://github.com/Silverlan/clang_prebuilt/releases/download/2025-11-10/linux_x64.tar.xz",format="tar.xz")
 		#clang20_root = os.getcwd() +"/LLVM-21.1.5-Linux-X64"
 		#if not Path(clang20_root).is_dir():
 		#	print_msg("Downloading clang-21...")
@@ -322,10 +322,10 @@ if platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++-2
 		copytree(clang20_root +"/include/c++", clang_staging_path +"/include/c++")
 		copytree(clang20_root +"/include/clang", clang_staging_path +"/include/clang")
 		copytree(clang20_root +"/include/clang-c", clang_staging_path +"/include/clang-c")
-		copytree(clang20_root +"/include/x86_64-unknown-linux-gnu", clang_staging_path +"/include/x86_64-unknown-linux-gnu")
+		#copytree(clang20_root +"/include/x86_64-unknown-linux-gnu", clang_staging_path +"/include/x86_64-unknown-linux-gnu")
 
 		copytree(clang20_root +"/lib/clang", clang_staging_path +"/lib/clang")
-		copytree(clang20_root +"/lib/x86_64-unknown-linux-gnu", clang_staging_path +"/lib/x86_64-unknown-linux-gnu")
+		#copytree(clang20_root +"/lib/x86_64-unknown-linux-gnu", clang_staging_path +"/lib/x86_64-unknown-linux-gnu")
 
 		copytree(clang20_root +"/libexec", clang_staging_path +"/libexec")
 		copytree(clang20_root +"/share", clang_staging_path +"/share")

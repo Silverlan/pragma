@@ -7,7 +7,7 @@ module pragma.shared;
 import :console.enums;
 import :console.output;
 import :core.logging;
-#if 0
+
 const std::string PRAGMA_LOGGER_NAME = "pragma_logger";
 const std::string PRAGMA_FILE_LOGGER_NAME = "pragma_logger_file";
 
@@ -449,4 +449,3 @@ void pragma::detail::initialize_logger(::util::LogSeverity conLogLevel, ::util::
 		init_logger(pair.first, pair.second);
 	get_pre_registered_loggers().clear();
 }
-#endif

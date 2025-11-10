@@ -316,7 +316,7 @@ if platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++-2
 
 		copy_preserving_symlink(Path(clang20_root +"/bin/clang"), Path(clang_staging_path +"/bin"))
 		copy_preserving_symlink(Path(clang20_root +"/bin/clang++"), Path(clang_staging_path +"/bin"))
-		copy_preserving_symlink(Path(clang20_root +"/bin/clang-21"), Path(clang_staging_path +"/bin"))
+		copy_preserving_symlink(Path(clang20_root +"/bin/clang-22"), Path(clang_staging_path +"/bin"))
 		copy_preserving_symlink(Path(clang20_root +"/bin/clang-scan-deps"), Path(clang_staging_path +"/bin"))
 
 		copytree(clang20_root +"/include/c++", clang_staging_path +"/include/c++")

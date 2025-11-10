@@ -16,12 +16,15 @@ jobs:
   build:
     name: Build - ${{ matrix.config.os }}
     runs-on: ${{ matrix.config.os }}
+    container:
+      image: ubuntu:25.04
+      options: --init
     strategy:
       fail-fast: false
       matrix:
         config:
-          - os: ubuntu-24.04
-            name: "Ubuntu 24.04"
+          - os: ubuntu-latest
+            name: "Ubuntu Latest"
     steps:
       # TODO: Remove this step once this branch has been merged!
       - name: Download CMake 4.1.2

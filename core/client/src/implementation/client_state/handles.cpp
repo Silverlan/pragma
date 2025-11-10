@@ -143,8 +143,8 @@ void ClientState::LoadLuaCache(std::string cache, unsigned int cacheSize)
 #endif
 }
 
-extern CBaseEntity *NET_cl_ent_create(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false);
-extern CBaseEntity *NET_cl_ent_create_lua(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false);
+extern CBaseEntity *NET_cl_ENT_CREATE(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false);
+extern CBaseEntity *NET_cl_ENT_CREATE_LUA(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false);
 
 void ClientState::ReadEntityData(NetPacket &packet)
 {
@@ -155,11 +155,11 @@ void ClientState::ReadEntityData(NetPacket &packet)
 		auto bScripted = packet->Read<Bool>();
 		CBaseEntity *ent = nullptr;
 		if(bScripted == false)
-			ent = NET_cl_ent_create(packet, false, true);
+			ent = NET_cl_ENT_CREATE(packet, false, true);
 		else {
 			auto offset = packet->GetOffset();
 			auto entSize = packet->Read<UInt32>(); // Insurance, in case entity couldn't be created, or data hasn't been received properly
-			ent = NET_cl_ent_create_lua(packet, false, true);
+			ent = NET_cl_ENT_CREATE_LUA(packet, false, true);
 			packet->SetOffset(offset + entSize);
 		}
 		if(ent != nullptr) {

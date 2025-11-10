@@ -304,3 +304,7 @@ endif()
 pr_find_library(rectanglebinpack NAMES "rectangle_bin_pack" PATHS "third_party_libs/rectangle_bin_pack/${BINARY_PRAGMA_DIR}")
 # target_include_directories(freetype PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 #
+
+# tinygltf
+pr_include_third_party_library(tinygltf)
+#

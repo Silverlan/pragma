@@ -625,6 +625,7 @@ TCPPM *CGame::CreateCamera(uint32_t width, uint32_t height, float fov, float nea
 {
 	return CreateCamera<TCPPM>(width / static_cast<float>(height), fov, nearZ, farZ);
 }
+template pragma::CCameraComponent *CGame::CreateCamera(uint32_t width, uint32_t height, float fov, float nearZ, float farZ);
 
 void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 {
@@ -743,6 +744,8 @@ const TCPPM *CGame::GetRenderScene() const
 {
 	return const_cast<CGame *>(this)->GetRenderScene<pragma::CSceneComponent>();
 }
+template pragma::CSceneComponent *CGame::GetRenderScene();
+template const pragma::CSceneComponent *CGame::GetRenderScene() const;
 template<typename TCPPM>
 TCPPM *CGame::GetRenderCamera() const
 {
@@ -750,6 +753,7 @@ TCPPM *CGame::GetRenderCamera() const
 		return nullptr;
 	return const_cast<pragma::CCameraComponent *>(static_cast<const pragma::CSceneComponent *>(m_renderScene.get())->GetActiveCamera().get());
 }
+template pragma::CCameraComponent *CGame::GetRenderCamera() const;
 template<typename TCPPM>
 void CGame::SetGameplayControlCamera(TCPPM &cam)
 {

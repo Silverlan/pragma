@@ -40,8 +40,6 @@ ClientState *pragma::get_client_state() { return g_client; }
 std::vector<std::string> &get_required_game_textures();
 ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo(nullptr), m_resDownload(nullptr), m_volMaster(1.f), m_hMainMenu(), m_luaGUI(nullptr)
 {
-	pragma::networking::register_client_net_messages();
-
 	g_client = this;
 	m_soundScriptManager = std::make_unique<CSoundScriptManager>();
 
@@ -552,9 +550,7 @@ CLNetMessage *ClientState::GetNetMessage(unsigned int ID)
 	return map->GetNetMessage(ID);
 }
 
-extern pragma::networking::ClientMessageMap *g_NetMessagesCl;
-
-pragma::networking::ClientMessageMap *ClientState::GetNetMessageMap() { return g_NetMessagesCl; }
+pragma::networking::ClientMessageMap *ClientState::GetNetMessageMap() { return GetClientMessageMap(); }
 
 bool ClientState::IsClient() const { return true; }
 

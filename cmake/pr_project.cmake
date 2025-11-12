@@ -82,6 +82,12 @@ function(pr_add_library TARGET_NAME LIB_TYPE)
         )
     endif()
 
+    if(WIN32)
+        target_compile_definitions(${TARGET_NAME} PRIVATE "PR_EXPORT=__declspec(dllexport)")
+    else()
+        target_compile_definitions(${TARGET_NAME} PRIVATE "PR_EXPORT=__attribute__((visibility(\"default\")))")
+    endif()
+
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
         set(_tmp "${CMAKE_MODULE_PATH}")
         list(APPEND _tmp "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")

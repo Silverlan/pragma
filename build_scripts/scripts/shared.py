@@ -67,7 +67,7 @@ def mkpath(path):
 	pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
 def git_clone(url,directory=None,branch=None):
-	args = ["git", "clone", url, "--recurse-submodules"]
+	args = ["git", "clone", get_git_clone_url(url, config.prefer_git_https), "--recurse-submodules"]
 	if branch:
 		args.extend(["-b", branch])
 	if directory:
@@ -307,6 +307,68 @@ def check_repository_commit(path, commitId, libName=None):
 		return True
 	return False
 
+# Convert between https and ssh URL
+def get_git_clone_url(idOrUrl, preferGitHttps):
+    s = idOrUrl.strip()
+
+    def normalize_repo_part(part):
+        part = part.strip().rstrip('/')
+        if part.endswith('.git'):
+            part = part[:-4]
+        return part
+
+    # 1) SSH input e.g. git@github.com:owner/repo.git
+    if s.startswith('git@'):
+        try:
+            after_at = s.split('@', 1)[1]
+        except IndexError:
+            return s
+        if ':' in after_at:
+            host, repo = after_at.split(':', 1)
+            host = host.strip()
+            repo = normalize_repo_part(repo)
+            if host in ('github.com', 'gitlab.com'):
+                if preferGitHttps:
+                    return f"https://{host}/{repo}.git"
+                else:
+                    return f"git@{host}:{repo}.git"
+            else:
+                return s
+        else:
+            return s
+
+    # 2+3) URL with scheme OR host without scheme (e.g. "github.com/owner/repo" or "https://github.com/owner/repo")
+    if '://' in s or s.startswith('github.com') or s.startswith('gitlab.com'):
+        # If scheme present, split it off; otherwise treat the whole string as rest
+        if '://' in s:
+            _, rest = s.split('://', 1)
+        else:
+            rest = s
+
+        if '/' in rest:
+            host = rest.split('/', 1)[0].strip()
+            repo_part = rest.split('/', 1)[1]
+        else:
+            host = rest.strip()
+            repo_part = ''
+
+        repo = normalize_repo_part(repo_part)
+
+        if host in ('github.com', 'gitlab.com'):
+            if not repo:
+                # nothing after host -> return original (can't build repo)
+                return s
+            if preferGitHttps:
+                return f"https://{host}/{repo}.git"
+            else:
+                return f"git@{host}:{repo}.git"
+        else:
+            # other hosts unchanged
+            return s
+
+    return s
+
+
 def get_submodule(directory,url,commitId=None,branch=None):
 	from scripts.shared import print_msg
 	from scripts.shared import git_clone
@@ -344,6 +406,12 @@ def get_submodule(directory,url,commitId=None,branch=None):
 		subprocess.run(["git","pull"],check=True)
 	subprocess.run(["git","submodule","update","--init","--recursive"],check=True)
 	os.chdir(curDir)
+
+def get_gh_submodule(directory,ghRepoId,commitId=None,branch=None):
+	get_submodule(directory,"https://github.com/" +ghRepoId +".git",commitId,branch)
+
+def get_gl_submodule(directory,ghRepoId,commitId=None,branch=None):
+	get_submodule(directory,"https://gitlab.com/" +ghRepoId +".git",commitId,branch)
 
 def compile_lua_file(deps_dir, luaFile):
 	from scripts.shared import normalize_path

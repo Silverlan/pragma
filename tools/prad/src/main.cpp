@@ -4,16 +4,9 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#include <cstdlib>
 
-#include <iostream>
-#include <string>
-#include <filesystem>
-#include <sharedutils/util.h>
-#include <sharedutils/util_path.hpp>
-#include <sharedutils/util_string.h>
-#include <sharedutils/util_command_manager.hpp>
-#include <sharedutils/scope_guard.h>
-#include <udm.hpp>
+import pragma.filesystem;
 
 static bool launch_child_console_process(const char *childProcess, const char *args)
 {

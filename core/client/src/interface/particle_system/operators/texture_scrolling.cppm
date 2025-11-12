@@ -5,8 +5,6 @@ module;
 
 #include "definitions.hpp"
 
-#include "../../../../../../modules/pr_unirender/src/interface/definitions.hpp"
-
 export module pragma.client:particle_system.operator_texture_scrolling;
 
 export import :entities.components.particle_system;

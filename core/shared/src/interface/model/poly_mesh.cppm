@@ -46,7 +46,6 @@ export {
 		std::vector<std::shared_ptr<Poly>> &GetPolys();
 		void debug_print();
 		std::shared_ptr<pragma::Model> GenerateModel();
-		template<class TSide, class TPolyMesh, class TBrushMesh>
 		void GetBounds(Vector3 *min, Vector3 *max);
 		Vector3 GetCenter();
 		Vector3 *GetLocalizedCenter();

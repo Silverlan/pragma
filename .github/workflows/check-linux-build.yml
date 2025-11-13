@@ -16,9 +16,6 @@ jobs:
   build:
     name: Build - ${{ matrix.config.os }}
     runs-on: ${{ matrix.config.os }}
-    container:
-      image: ubuntu:25.04
-      options: --init
     strategy:
       fail-fast: false
       matrix:

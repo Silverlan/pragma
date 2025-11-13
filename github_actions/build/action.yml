@@ -63,7 +63,7 @@ runs:
     - name: Build Pragma
       if: runner.os == 'Windows'
       id: build-windows
-      # shell: bash
+      shell: pwsh
       working-directory: 'pragma'
       run: |
         # We write the dependencies and build files to c:/ because the workspace disk provided by the runner isn't large enough

@@ -23,19 +23,6 @@ jobs:
           - os: ubuntu-latest
             name: "Ubuntu Latest"
     steps:
-      - name: Setup Pragma
-        uses: Silverlan/pragma/github_actions/setup@main
-        with:
-          branch: ${{ github.ref_name }}
-          clone_url: "https://github.com/${{ github.repository }}.git"
-
-      - name: Setup cmake
-        uses: jwlawson/actions-setup-cmake@v2
-
-
-
-
-
       # Install GCC-15
       - name: Download release asset (latest)
         run: |
@@ -71,11 +58,14 @@ jobs:
           gcc --version
       ##
 
+      - name: Setup Pragma
+        uses: Silverlan/pragma/github_actions/setup@main
+        with:
+          branch: ${{ github.ref_name }}
+          clone_url: "https://github.com/${{ github.repository }}.git"
 
-
-
-
-
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v2
 
       - name: Build Pragma
         uses: ./pragma/github_actions/build

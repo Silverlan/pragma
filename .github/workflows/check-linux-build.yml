@@ -35,6 +35,51 @@ jobs:
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@v2
 
+
+
+
+
+      # Install GCC-15
+      - name: Download release asset (latest)
+        run: |
+          # asset filename must match what you uploaded in the build job.
+          # Use the releases/latest download shortcut:
+          curl -L -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -o /tmp/gcc-15.tar.gz \
+            "https://github.com/Silverlan/test_gcc15/releases/download/2025-11-13/gcc-15-main.tar.gz" || \
+          # fallback: try /releases/latest (if you want the latest regardless of tag name)
+            curl -L -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -o /tmp/gcc-15.tar.gz \
+            "https://github.com/Silverlan/test_gcc15/releases/download/2025-11-13/gcc-15-main.tar.gz"
+
+          # NOTE: The above URL pattern assumes your asset name is "gcc-15-${TAG}.tar.gz".
+          # If you want the latest regardless of tag, you can use:
+          # curl -L -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          #   -o /tmp/gcc-15.tar.gz \
+          #   "https://github.com/${{ github.repository }}/releases/latest/download/gcc-15-latest.tar.gz"
+
+      - name: Extract to /opt/gcc-15
+        run: |
+          sudo mkdir -p /opt
+          # our tarball contains the staging dir (e.g. gcc-15-install). Extract the folder under /opt/gcc-15
+          sudo tar -xzf /tmp/gcc-15.tar.gz -C /tmp
+          # example: if tar contained "gcc-15-install" top-level folder, move it to /opt/gcc-15
+          sudo rm -rf /opt/gcc-15
+          sudo mv /tmp/gcc-15-install /opt/gcc-15
+
+      - name: Register alternatives
+        run: |
+          sudo update-alternatives --install /usr/bin/gcc gcc /opt/gcc-15/bin/gcc 100
+          sudo update-alternatives --install /usr/bin/g++ g++ /opt/gcc-15/bin/g++ 100
+          gcc --version
+      ##
+
+
+
+
+
+
+
       - name: Build Pragma
         uses: ./pragma/github_actions/build
         id: build-pragma

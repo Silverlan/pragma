@@ -8,7 +8,7 @@ curDir = os.getcwd()
 
 third_party_libs_dir = curDir +"/third_party_libs"
 os.chdir(third_party_libs_dir)
-get_gh_submodule("7zpp",                "Silverlan/7zip-cpp",               "df81447")
+get_gh_submodule("7zpp",                "Silverlan/7zip-cpp",               "afed5bccd4faf4f825a640aa94a7ed78f54c178c")
 get_gh_submodule("bvh",                 "madmann91/bvh",                    "ac41ab8")
 get_gh_submodule("bzip2",               "Silverlan/bzip2",                  "6f08ffc2409d34a8f0f06ab3b0291bced4e9d08c")
 get_gh_submodule("clip2tri",            "raptor/clip2tri",                  "f62a734d22733814b8a970ed8a68a4d94c24fa5f")
@@ -22,7 +22,7 @@ get_gh_submodule("libnoise",            "qknight/libnoise",                 "9ce
 get_gh_submodule("libsamplerate",       "libsndfile/libsamplerate",         "15c392d")
 if platform == "linux":
     get_gh_submodule("linenoise.cpp",   "Silverlan/linenoise.cpp",          "74ae32ebf22d18a7e22afe1eeecf04171311ebcf")
-get_gh_submodule("luabind",             "Silverlan/luabind-deboostified",   "755448e723aa4f4eec388fcdcb187df674b7f1fd", "feat/cxx_module")
+get_gh_submodule("luabind",             "Silverlan/luabind-deboostified",   "ba7f7f7062e5217da14d752873ebc366b01359c9", "feat/cxx_module")
 get_gh_submodule("luajit",              "Silverlan/LuaJIT",                 "cb42653","v2.1")
 get_gh_submodule("lunasvg",             "sammycage/lunasvg",                "7b6970f") # v3.4.0
 get_gh_submodule("miniball",            "Silverlan/miniball",               "609fbf16e7a9cc3dc8f88e4d1c7a1d8ead842bb1")

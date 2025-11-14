@@ -13,6 +13,7 @@ import :console.output;
 export import std.compat;
 
 export namespace pragma::console {
+	spdlog::details::console_mutex::mutex_t &get_mutex();
 	// Based on wincolor_sink
 	template<typename ConsoleMutex>
 	class anycolor_sink : public spdlog::sinks::sink {
@@ -79,14 +80,14 @@ export namespace pragma::console {
 
 #ifdef _WIN32
 	template<typename ConsoleMutex>
-	inline anycolor_sink<ConsoleMutex>::anycolor_sink(void *out_handle, spdlog::color_mode mode) : out_handle_(out_handle), mutex_(ConsoleMutex::mutex()), formatter_(spdlog::details::make_unique<spdlog::pattern_formatter>())
+	inline anycolor_sink<ConsoleMutex>::anycolor_sink(void *out_handle, spdlog::color_mode mode) : out_handle_(out_handle), mutex_(get_mutex()), formatter_(spdlog::details::make_unique<spdlog::pattern_formatter>())
 	{
 
 		set_color_mode_impl(mode);
 	}
 #else
 	template<typename ConsoleMutex>
-	inline anycolor_sink<ConsoleMutex>::anycolor_sink(FILE *target_file, spdlog::color_mode mode) : target_file_(target_file), mutex_(ConsoleMutex::mutex()), formatter_(spdlog::details::make_unique<spdlog::pattern_formatter>())
+	inline anycolor_sink<ConsoleMutex>::anycolor_sink(FILE *target_file, spdlog::color_mode mode) : target_file_(target_file), mutex_(get_mutex()), formatter_(spdlog::details::make_unique<spdlog::pattern_formatter>())
 	{
 
 		set_color_mode_impl(mode);

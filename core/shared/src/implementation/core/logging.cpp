@@ -5,11 +5,24 @@ module;
 module pragma.shared;
 
 import :console.enums;
+import :console.spdlog_anycolor_sink;
 import :console.output;
 import :core.logging;
 
 const std::string PRAGMA_LOGGER_NAME = "pragma_logger";
 const std::string PRAGMA_FILE_LOGGER_NAME = "pragma_logger_file";
+
+spdlog::details::console_mutex::mutex_t &pragma::console::get_mutex()
+{
+#ifdef _WIN32
+	// We should be using spdlog::details::console_mutex::mutex() here, but that causes
+	// a compiler error with VS2022, so we're using our own static mutex instead.
+	static std::mutex mutex;
+	return mutex;
+#else
+	return spdlog::details::console_mutex::mutex();
+#endif
+}
 
 static bool g_ansiColorCodesEnabled = true;
 void pragma::logging::set_ansi_color_codes_enabled(bool enabled) { g_ansiColorCodesEnabled = enabled; }

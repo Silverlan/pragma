@@ -815,7 +815,7 @@ if with_networking:
 
 # These modules are shipped with the Pragma repository and will have to be excluded from the
 # CMake configuration explicitly if they should be disabled.
-shippedModules = ["pr_audio_dummy","pr_prosper_opengl","pr_prosper_vulkan","pr_curl"]
+shippedModules = []
 
 index = 0
 # The module list can be modified during iteration, so we have to use a while loop here.

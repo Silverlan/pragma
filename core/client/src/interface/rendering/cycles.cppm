@@ -44,9 +44,9 @@ export namespace pragma::rendering::cycles {
 		umath::Transform camPose {};
 		bool equirectPanorama = false;
 		Mat4 viewProjectionMatrix = {};
-		float nearZ = pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z;
-		float farZ = pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z;
-		umath::Degree fov = BaseEnvCameraComponent::DEFAULT_FOV;
+		float nearZ = pragma::baseEnvCameraComponent::DEFAULT_NEAR_Z;
+		float farZ = pragma::baseEnvCameraComponent::DEFAULT_FAR_Z;
+		umath::Degree fov = baseEnvCameraComponent::DEFAULT_FOV;
 
 		std::function<bool(pragma::ecs::BaseEntity &)> entityFilter = nullptr;
 		const std::vector<pragma::ecs::BaseEntity *> *entityList = nullptr;

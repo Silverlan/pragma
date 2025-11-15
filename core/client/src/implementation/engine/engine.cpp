@@ -53,8 +53,8 @@ static const auto SEPARATE_JOYSTICK_AXES = true;
 
 static CEngine *g_engine = nullptr;
 CEngine::CEngine(int argc, char *argv[])
-    : pragma::Engine(argc, argv), pragma::RenderContext(), m_nearZ(pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z), //10.0f), //0.1f
-      m_farZ(pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z), m_fps(0), m_tFPSTime(0.f), m_tLastFrame(util::Clock::now()), m_tDeltaFrameTime(0), m_audioAPI {"fmod"}
+    : pragma::Engine(argc, argv), pragma::RenderContext(), m_nearZ(pragma::baseEnvCameraComponent::DEFAULT_NEAR_Z), //10.0f), //0.1f
+      m_farZ(pragma::baseEnvCameraComponent::DEFAULT_FAR_Z), m_fps(0), m_tFPSTime(0.f), m_tLastFrame(util::Clock::now()), m_tDeltaFrameTime(0), m_audioAPI {"fmod"}
 {
 	g_engine = this;
 

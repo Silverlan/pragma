@@ -75,7 +75,7 @@ CGame::CGame(NetworkState *state)
       //m_shaderOverride(nullptr), // prosper TODO
       m_matLoad(), m_scene(nullptr),
       /*m_dummyVertexBuffer(nullptr),*/ m_tLastClientUpdate(0.0), // prosper TODO
-      m_snapshotTracker {}, m_userInputTracker {}, m_viewFov {util::FloatProperty::Create(pragma::BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV)}, m_luaInputBindingLayerRegister {std::make_unique<pragma::LuaInputBindingLayerRegister>()}
+      m_snapshotTracker {}, m_userInputTracker {}, m_viewFov {util::FloatProperty::Create(pragma::baseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV)}, m_luaInputBindingLayerRegister {std::make_unique<pragma::LuaInputBindingLayerRegister>()}
 {
 	std::fill(m_renderModesEnabled.begin(), m_renderModesEnabled.end(), true);
 	g_game = this;
@@ -595,8 +595,8 @@ Mat4 CGame::GetViewModelProjectionMatrix() const
 {
 	auto *cam = GetPrimaryCamera<pragma::CCameraComponent>();
 	auto aspectRatio = cam ? cam->GetAspectRatio() : 1.f;
-	auto nearZ = cam ? cam->GetNearZ() : pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z;
-	auto farZ = cam ? cam->GetFarZ() : pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z;
+	auto nearZ = cam ? cam->GetNearZ() : pragma::baseEnvCameraComponent::DEFAULT_NEAR_Z;
+	auto farZ = cam ? cam->GetFarZ() : pragma::baseEnvCameraComponent::DEFAULT_FAR_Z;
 	return pragma::BaseEnvCameraComponent::CalcProjectionMatrix(*m_viewFov, aspectRatio, nearZ, farZ);
 }
 

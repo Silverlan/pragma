@@ -17,16 +17,18 @@ export {
 	  public:
 		using util::ExtensibleEnum::ExtensibleEnum;
 
-		static const EResourceWatcherCallbackType Model;
-		static const EResourceWatcherCallbackType Material;
-		static const EResourceWatcherCallbackType Texture;
-		static const EResourceWatcherCallbackType Map;
-		static const EResourceWatcherCallbackType SoundScript;
-		static const EResourceWatcherCallbackType Sound;
-		static const EResourceWatcherCallbackType Count;
 	  protected:
 		enum class E : uint32_t { Model = 0u, Material, Texture, Map, SoundScript, Sound, Count };
 	};
+	namespace eResourceWatcherCallbackType {
+		CLASS_ENUM_COMPAT const EResourceWatcherCallbackType Model;
+		CLASS_ENUM_COMPAT const EResourceWatcherCallbackType Material;
+		CLASS_ENUM_COMPAT const EResourceWatcherCallbackType Texture;
+		CLASS_ENUM_COMPAT const EResourceWatcherCallbackType Map;
+		CLASS_ENUM_COMPAT const EResourceWatcherCallbackType SoundScript;
+		CLASS_ENUM_COMPAT const EResourceWatcherCallbackType Sound;
+		CLASS_ENUM_COMPAT const EResourceWatcherCallbackType Count;
+	}
 
 	namespace std {
 		template<>

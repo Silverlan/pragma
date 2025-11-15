@@ -9,13 +9,13 @@ module pragma.shared;
 import :locale;
 import :util.resource_watcher;
 
-decltype(EResourceWatcherCallbackType::Model) EResourceWatcherCallbackType::Model = EResourceWatcherCallbackType {umath::to_integral(E::Model)};
-decltype(EResourceWatcherCallbackType::Material) EResourceWatcherCallbackType::Material = EResourceWatcherCallbackType {umath::to_integral(E::Material)};
-decltype(EResourceWatcherCallbackType::Texture) EResourceWatcherCallbackType::Texture = EResourceWatcherCallbackType {umath::to_integral(E::Texture)};
-decltype(EResourceWatcherCallbackType::Map) EResourceWatcherCallbackType::Map = EResourceWatcherCallbackType {umath::to_integral(E::Map)};
-decltype(EResourceWatcherCallbackType::SoundScript) EResourceWatcherCallbackType::SoundScript = EResourceWatcherCallbackType {umath::to_integral(E::SoundScript)};
-decltype(EResourceWatcherCallbackType::Sound) EResourceWatcherCallbackType::Sound = EResourceWatcherCallbackType {umath::to_integral(E::Sound)};
-decltype(EResourceWatcherCallbackType::Count) EResourceWatcherCallbackType::Count = EResourceWatcherCallbackType {umath::to_integral(E::Count)};
+decltype(eResourceWatcherCallbackType::Model) eResourceWatcherCallbackType::Model = EResourceWatcherCallbackType {umath::to_integral(E::Model)};
+decltype(eResourceWatcherCallbackType::Material) eResourceWatcherCallbackType::Material = EResourceWatcherCallbackType {umath::to_integral(E::Material)};
+decltype(eResourceWatcherCallbackType::Texture) eResourceWatcherCallbackType::Texture = EResourceWatcherCallbackType {umath::to_integral(E::Texture)};
+decltype(eResourceWatcherCallbackType::Map) eResourceWatcherCallbackType::Map = EResourceWatcherCallbackType {umath::to_integral(E::Map)};
+decltype(eResourceWatcherCallbackType::SoundScript) eResourceWatcherCallbackType::SoundScript = EResourceWatcherCallbackType {umath::to_integral(E::SoundScript)};
+decltype(eResourceWatcherCallbackType::Sound) eResourceWatcherCallbackType::Sound = EResourceWatcherCallbackType {umath::to_integral(E::Sound)};
+decltype(eResourceWatcherCallbackType::Count) eResourceWatcherCallbackType::Count = EResourceWatcherCallbackType {umath::to_integral(E::Count)};
 ResourceWatcherManager::ResourceWatcherManager(NetworkState *nw) : m_networkState(nw), m_watcherManager {filemanager::create_directory_watcher_manager()} {}
 
 void ResourceWatcherManager::Poll()
@@ -169,7 +169,7 @@ void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const
 					}
 				}
 			}
-			CallChangeCallbacks(EResourceWatcherCallbackType::Model, strPath, ext);
+			CallChangeCallbacks(eResourceWatcherCallbackType::Model, strPath, ext);
 		}
 		else if(*assetType == pragma::asset::Type::Material) {
 #if RESOURCE_WATCHER_VERBOSE > 0
@@ -177,10 +177,10 @@ void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const
 			Con::cout << "[ResourceWatcher] Material has changed: " << matPath << ". Attempting to reload..." << Con::endl;
 #endif
 			ReloadMaterial(strPath);
-			CallChangeCallbacks(EResourceWatcherCallbackType::Material, strPath, ext);
+			CallChangeCallbacks(eResourceWatcherCallbackType::Material, strPath, ext);
 		}
 		else if(*assetType == pragma::asset::Type::Map)
-			CallChangeCallbacks(EResourceWatcherCallbackType::Map, strPath, ext);
+			CallChangeCallbacks(eResourceWatcherCallbackType::Map, strPath, ext);
 		else if(*assetType == pragma::asset::Type::Texture) {
 #if RESOURCE_WATCHER_VERBOSE > 0
 			auto texPath = "materials\\" + strPath;
@@ -239,7 +239,7 @@ void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const
 					ReloadMaterial(matName);
 				}
 			}
-			CallChangeCallbacks(EResourceWatcherCallbackType::Texture, strPath, ext);
+			CallChangeCallbacks(eResourceWatcherCallbackType::Texture, strPath, ext);
 		}
 		else if(*assetType == pragma::asset::Type::Sound) {
 			if(game != nullptr) {
@@ -250,7 +250,7 @@ void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const
 				// TODO: Reload sounds if they had been loaded previously
 				game->GetNetworkState()->PrecacheSound(strPath, ALChannel::Both); // TODO: Only precache whatever's been requested before?
 			}
-			CallChangeCallbacks(EResourceWatcherCallbackType::Sound, strPath, ext);
+			CallChangeCallbacks(eResourceWatcherCallbackType::Sound, strPath, ext);
 		}
 	}
 	else if(rootPath == "scripts/sounds/") {
@@ -263,7 +263,7 @@ void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const
 				// TODO: Reload sound-scripts if they had been loaded previously
 				game->LoadSoundScripts(strPath.c_str()); // TODO: Only reload if they have been requested before?
 			}
-			CallChangeCallbacks(EResourceWatcherCallbackType::SoundScript, strPath, ext);
+			CallChangeCallbacks(eResourceWatcherCallbackType::SoundScript, strPath, ext);
 		}
 	}
 	else if(rootPath == "scripts/localization/")

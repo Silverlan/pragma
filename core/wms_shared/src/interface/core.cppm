@@ -3,10 +3,9 @@
 
 module;
 
-#include <string>
-#include <cinttypes>
-
 export module pragma.wms:core;
+
+export import std.compat;
 
 export {
     constexpr uint32_t WMS_PROTOCOL_VERSION = 2;

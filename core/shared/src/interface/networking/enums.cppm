@@ -53,7 +53,7 @@ export namespace pragma::networking {
 	DLLNETWORK nwm::ClientDropped get_nwm_drop_reason(DropReason reason);
 	DLLNETWORK DropReason get_pragma_drop_reason(nwm::ClientDropped reason);
 
-	uint32_t FSYS_SEARCH_RESOURCES = 4'096;
+	CONSTEXPR_DLL_COMPAT uint32_t FSYS_SEARCH_RESOURCES = 4'096;
 
 	enum class WVQuery : unsigned int { FIRST = 1500, PING, LAST };
 };

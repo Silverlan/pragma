@@ -10,24 +10,24 @@ export import :types;
 export import pragma.materialsystem;
 
 export namespace pragma::asset {
-	constexpr auto FORMAT_MAP_BINARY = "pmap_b";
-	constexpr auto FORMAT_MAP_ASCII = "pmap";
-	constexpr auto FORMAT_MAP_LEGACY = "wld";
+	CONSTEXPR_DLL_COMPAT auto FORMAT_MAP_BINARY = "pmap_b";
+	CONSTEXPR_DLL_COMPAT auto FORMAT_MAP_ASCII = "pmap";
+	CONSTEXPR_DLL_COMPAT auto FORMAT_MAP_LEGACY = "wld";
 
-	constexpr auto FORMAT_MODEL_BINARY = "pmdl_b";
-	constexpr auto FORMAT_MODEL_ASCII = "pmdl";
-	constexpr auto FORMAT_MODEL_LEGACY = "wmd";
+	CONSTEXPR_DLL_COMPAT auto FORMAT_MODEL_BINARY = "pmdl_b";
+	CONSTEXPR_DLL_COMPAT auto FORMAT_MODEL_ASCII = "pmdl";
+	CONSTEXPR_DLL_COMPAT auto FORMAT_MODEL_LEGACY = "wmd";
 
-	constexpr auto FORMAT_PARTICLE_SYSTEM_BINARY = "pptsys_b";
-	constexpr auto FORMAT_PARTICLE_SYSTEM_ASCII = "pptsys";
-	constexpr auto FORMAT_PARTICLE_SYSTEM_LEGACY = "wpt";
+	CONSTEXPR_DLL_COMPAT auto FORMAT_PARTICLE_SYSTEM_BINARY = "pptsys_b";
+	CONSTEXPR_DLL_COMPAT auto FORMAT_PARTICLE_SYSTEM_ASCII = "pptsys";
+	CONSTEXPR_DLL_COMPAT auto FORMAT_PARTICLE_SYSTEM_LEGACY = "wpt";
 
-	constexpr auto FORMAT_MATERIAL_BINARY = msys::Material::FORMAT_MATERIAL_BINARY;
-	constexpr auto FORMAT_MATERIAL_ASCII = msys::Material::FORMAT_MATERIAL_ASCII;
-	constexpr auto FORMAT_MATERIAL_LEGACY = msys::Material::FORMAT_MATERIAL_LEGACY;
+	CONSTEXPR_DLL_COMPAT auto FORMAT_MATERIAL_BINARY = msys::material::FORMAT_MATERIAL_BINARY;
+	CONSTEXPR_DLL_COMPAT auto FORMAT_MATERIAL_ASCII = msys::material::FORMAT_MATERIAL_ASCII;
+	CONSTEXPR_DLL_COMPAT auto FORMAT_MATERIAL_LEGACY = msys::material::FORMAT_MATERIAL_LEGACY;
 
-	constexpr auto FORMAT_SHADER_GRAPH_BINARY = "psg_b";
-	constexpr auto FORMAT_SHADER_GRAPH_ASCII = "psg";
+	CONSTEXPR_DLL_COMPAT auto FORMAT_SHADER_GRAPH_BINARY = "psg_b";
+	CONSTEXPR_DLL_COMPAT auto FORMAT_SHADER_GRAPH_ASCII = "psg";
 
 	enum class Type : uint8_t {
 		Model = 0,

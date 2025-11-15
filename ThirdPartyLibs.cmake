@@ -306,5 +306,11 @@ pr_find_library(rectanglebinpack NAMES "rectangle_bin_pack" PATHS "third_party_l
 #
 
 # tinygltf
+set(BUILD_SHARED_LIBS
+    OFF
+    CACHE BOOL OFF FORCE)
 pr_include_third_party_library(tinygltf)
+set(BUILD_SHARED_LIBS
+    ON
+    CACHE BOOL ON FORCE)
 #

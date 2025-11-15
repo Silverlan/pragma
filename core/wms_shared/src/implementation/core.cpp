@@ -3,8 +3,6 @@
 
 module;
 
-#include <string>
-
 module pragma.wms;
 
 import :core;

@@ -3,7 +3,6 @@
 module;
 
 #include "definitions.hpp"
-#include <format>
 
 export module pragma.shared:scripting.lua.logging;
 

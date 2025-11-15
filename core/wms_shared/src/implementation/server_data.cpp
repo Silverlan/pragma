@@ -3,8 +3,6 @@
 
 module;
 
-#include <iostream>
-
 module pragma.wms;
 
 import :server_data;

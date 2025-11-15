@@ -552,7 +552,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 		  auto frustumCullingEnabled = cvFrustumCullingEnabled->GetBool();
 		  static std::vector<umath::Plane> frustumPlanesCube {};
 		  if(frustumCullingEnabled == false && frustumPlanesCube.empty()) {
-			  double d = pragma::CCameraComponent::DEFAULT_FAR_Z;
+			  double d = pragma::cCameraComponent::DEFAULT_FAR_Z;
 			  frustumPlanesCube = {umath::Plane {-uvec::RIGHT, d}, umath::Plane {uvec::RIGHT, d}, umath::Plane {uvec::UP, d}, umath::Plane {-uvec::UP, d}, umath::Plane {-uvec::FORWARD, d}, umath::Plane {uvec::FORWARD, d}};
 		  }
 		  std::vector<umath::Plane> frustumPlanes;

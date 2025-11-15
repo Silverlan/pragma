@@ -18,4 +18,4 @@ export import :console.line_noise;
 export import :console.output;
 export import :console.spdlog_anycolor_sink;
 
-export void register_shared_convars(ConVarMap &map);
+export PR_EXPORT void register_shared_convars(ConVarMap &map);

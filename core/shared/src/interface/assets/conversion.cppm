@@ -10,8 +10,8 @@ export import :types;
 export import pragma.filesystem;
 
 export namespace util {
-	const std::string IMPORT_PATH = "addons/imported/";
-	const std::string CONVERT_PATH = "addons/converted/";
+	DLLNETWORK const std::string IMPORT_PATH = "addons/imported/";
+	DLLNETWORK const std::string CONVERT_PATH = "addons/converted/";
 	namespace impl {
 		DLLNETWORK void *get_module_func(NetworkState *nw, const std::string &name);
 	};

@@ -2513,10 +2513,10 @@ void pragma::LuaCore::base_env_camera_component::register_class(luabind::module_
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvCameraComponent>("BaseEnvCameraComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
-	def.add_static_constant("DEFAULT_NEAR_Z", pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z);
-	def.add_static_constant("DEFAULT_FAR_Z", pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z);
-	def.add_static_constant("DEFAULT_FOV", pragma::BaseEnvCameraComponent::DEFAULT_FOV);
-	def.add_static_constant("DEFAULT_VIEWMODEL_FOV", pragma::BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV);
+	def.add_static_constant("DEFAULT_NEAR_Z", pragma::baseEnvCameraComponent::DEFAULT_NEAR_Z);
+	def.add_static_constant("DEFAULT_FAR_Z", pragma::baseEnvCameraComponent::DEFAULT_FAR_Z);
+	def.add_static_constant("DEFAULT_FOV", pragma::baseEnvCameraComponent::DEFAULT_FOV);
+	def.add_static_constant("DEFAULT_VIEWMODEL_FOV", pragma::baseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV);
 	def.scope[luabind::def("calc_projection_matrix", +[](umath::Radian fov, float aspectRatio, float nearZ, float farZ, const rendering::Tile *optTile) -> Mat4 { return pragma::BaseEnvCameraComponent::CalcProjectionMatrix(fov, aspectRatio, nearZ, farZ, optTile); })];
 	def.def("GetProjectionMatrix", &pragma::BaseEnvCameraComponent::GetProjectionMatrix, luabind::copy_policy<0> {});
 	def.def("GetViewMatrix", &pragma::BaseEnvCameraComponent::GetViewMatrix, luabind::copy_policy<0> {});

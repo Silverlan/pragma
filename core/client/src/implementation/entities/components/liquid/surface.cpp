@@ -298,9 +298,9 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos, const 
 	auto *cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
 	auto width = scene->GetWidth() / 2u;
 	auto height = scene->GetHeight() / 2u;
-	auto fov = cam ? cam->GetFOV() : pragma::BaseEnvCameraComponent::DEFAULT_FOV;
-	auto nearZ = cam ? cam->GetNearZ() : pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z;
-	auto farZ = cam ? cam->GetFarZ() : pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z; // TODO: shared Property?
+	auto fov = cam ? cam->GetFOV() : pragma::baseEnvCameraComponent::DEFAULT_FOV;
+	auto nearZ = cam ? cam->GetNearZ() : pragma::baseEnvCameraComponent::DEFAULT_NEAR_Z;
+	auto farZ = cam ? cam->GetFarZ() : pragma::baseEnvCameraComponent::DEFAULT_FAR_Z; // TODO: shared Property?
 	auto *camReflection = pragma::get_cgame()->CreateCamera<pragma::CCameraComponent>(width, height, fov, nearZ, farZ);
 	if(camReflection == nullptr)
 		return;

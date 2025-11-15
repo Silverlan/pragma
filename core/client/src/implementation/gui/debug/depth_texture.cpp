@@ -136,8 +136,8 @@ float WIDebugDepthTexture::GetContrastFactor() const { return m_contrastFactor; 
 
 void WIDebugDepthTexture::DoUpdate()
 {
-	auto nearZ = pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z;
-	auto farZ = pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z;
+	auto nearZ = pragma::baseEnvCameraComponent::DEFAULT_NEAR_Z;
+	auto farZ = pragma::baseEnvCameraComponent::DEFAULT_FAR_Z;
 	if(pragma::get_cgame()) {
 		auto *cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
 		if(cam) {

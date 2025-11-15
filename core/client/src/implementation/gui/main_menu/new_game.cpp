@@ -248,7 +248,7 @@ void WIMainMenuNewGame::InitializeGameSettings()
 	auto &resourceWatcher = pragma::get_client_state()->GetResourceWatcher();
 	if(m_cbMapListReload.IsValid())
 		m_cbMapListReload.Remove();
-	m_cbMapListReload = resourceWatcher.AddChangeCallback(EResourceWatcherCallbackType::Map, [this](std::reference_wrapper<const std::string> fileName, std::reference_wrapper<const std::string> ext) { ReloadMapList(); });
+	m_cbMapListReload = resourceWatcher.AddChangeCallback(eResourceWatcherCallbackType::Map, [this](std::reference_wrapper<const std::string> fileName, std::reference_wrapper<const std::string> ext) { ReloadMapList(); });
 
 	// Server Name
 	auto *pServerName = pList->AddTextEntry(pragma::locale::get_text("server_name"), "sv_servername");

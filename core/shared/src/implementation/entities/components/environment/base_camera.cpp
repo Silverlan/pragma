@@ -16,14 +16,14 @@ void BaseEnvCameraComponent::RegisterMembers(pragma::EntityComponentManager &com
 {
 	using T = BaseEnvCameraComponent;
 	{
-		auto memberInfo = create_component_member_info<T, float, static_cast<void (T::*)(float)>(&T::SetFOV), static_cast<float (T::*)() const>(&T::GetFOV)>("fov", DEFAULT_FOV, AttributeSpecializationType::Angle);
+		auto memberInfo = create_component_member_info<T, float, static_cast<void (T::*)(float)>(&T::SetFOV), static_cast<float (T::*)() const>(&T::GetFOV)>("fov", baseEnvCameraComponent::DEFAULT_FOV, AttributeSpecializationType::Angle);
 		memberInfo.SetMin(0.01f);
 		memberInfo.SetMax(179.99f);
 		registerMember(std::move(memberInfo));
 	}
 
 	{
-		auto memberInfo = create_component_member_info<T, float, static_cast<void (T::*)(float)>(&T::SetNearZ), static_cast<float (T::*)() const>(&T::GetNearZ)>("nearz", DEFAULT_NEAR_Z, AttributeSpecializationType::Distance);
+		auto memberInfo = create_component_member_info<T, float, static_cast<void (T::*)(float)>(&T::SetNearZ), static_cast<float (T::*)() const>(&T::GetNearZ)>("nearz", baseEnvCameraComponent::DEFAULT_NEAR_Z, AttributeSpecializationType::Distance);
 		memberInfo.SetMin(0.1f);
 		memberInfo.updateDependenciesFunction = [](BaseEntityComponent &component, std::vector<std::string> &outAffectedProps) {
 			auto &c = static_cast<T &>(component);
@@ -38,7 +38,7 @@ void BaseEnvCameraComponent::RegisterMembers(pragma::EntityComponentManager &com
 	}
 
 	{
-		auto memberInfo = create_component_member_info<T, float, static_cast<void (T::*)(float)>(&T::SetFarZ), static_cast<float (T::*)() const>(&T::GetFarZ)>("farz", DEFAULT_FAR_Z, AttributeSpecializationType::Distance);
+		auto memberInfo = create_component_member_info<T, float, static_cast<void (T::*)(float)>(&T::SetFarZ), static_cast<float (T::*)() const>(&T::GetFarZ)>("farz", baseEnvCameraComponent::DEFAULT_FAR_Z, AttributeSpecializationType::Distance);
 		memberInfo.SetMin(0.1f);
 		memberInfo.updateDependenciesFunction = [](BaseEntityComponent &component, std::vector<std::string> &outAffectedProps) {
 			auto &c = static_cast<T &>(component);
@@ -53,7 +53,7 @@ void BaseEnvCameraComponent::RegisterMembers(pragma::EntityComponentManager &com
 	}
 
 	{
-		auto memberInfo = create_component_member_info<T, float, static_cast<void (T::*)(float)>(&T::SetFocalDistance), static_cast<float (T::*)() const>(&T::GetFocalDistance)>("focalDistance", DEFAULT_FOCAL_DISTANCE, AttributeSpecializationType::Distance);
+		auto memberInfo = create_component_member_info<T, float, static_cast<void (T::*)(float)>(&T::SetFocalDistance), static_cast<float (T::*)() const>(&T::GetFocalDistance)>("focalDistance", baseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE, AttributeSpecializationType::Distance);
 		memberInfo.SetMin(0.f);
 		registerMember(std::move(memberInfo));
 	}
@@ -65,13 +65,13 @@ void BaseEnvCameraComponent::RegisterMembers(pragma::EntityComponentManager &com
 	}
 }
 
-decltype(BaseEnvCameraComponent::DEFAULT_NEAR_Z) BaseEnvCameraComponent::DEFAULT_NEAR_Z = 1.f;
-decltype(BaseEnvCameraComponent::DEFAULT_FAR_Z) BaseEnvCameraComponent::DEFAULT_FAR_Z = 32'768.f;
-decltype(BaseEnvCameraComponent::DEFAULT_FOV) BaseEnvCameraComponent::DEFAULT_FOV = 90.f;
-decltype(BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV) BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV = 70.f;
-decltype(BaseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE) BaseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE = 72.f;
+decltype(baseEnvCameraComponent::DEFAULT_NEAR_Z) baseEnvCameraComponent::DEFAULT_NEAR_Z = 1.f;
+decltype(baseEnvCameraComponent::DEFAULT_FAR_Z) baseEnvCameraComponent::DEFAULT_FAR_Z = 32'768.f;
+decltype(baseEnvCameraComponent::DEFAULT_FOV) baseEnvCameraComponent::DEFAULT_FOV = 90.f;
+decltype(baseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV) baseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV = 70.f;
+decltype(baseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE) baseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE = 72.f;
 BaseEnvCameraComponent::BaseEnvCameraComponent(pragma::ecs::BaseEntity &ent)
-    : BaseEntityComponent {ent}, m_nearZ(util::FloatProperty::Create(DEFAULT_NEAR_Z)), m_farZ(util::FloatProperty::Create(DEFAULT_FAR_Z)), m_focalDistance(util::FloatProperty::Create(DEFAULT_FOCAL_DISTANCE)), m_projectionMatrix(util::Matrix4Property::Create()),
+    : BaseEntityComponent {ent}, m_nearZ(util::FloatProperty::Create(baseEnvCameraComponent::DEFAULT_NEAR_Z)), m_farZ(util::FloatProperty::Create(baseEnvCameraComponent::DEFAULT_FAR_Z)), m_focalDistance(util::FloatProperty::Create(baseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE)), m_projectionMatrix(util::Matrix4Property::Create()),
       m_viewMatrix(util::Matrix4Property::Create()), m_aspectRatio(util::FloatProperty::Create(1.f))
 {
 }

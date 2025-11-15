@@ -414,6 +414,6 @@ export {
 	}
 
 	namespace Lua {
-		void register_base_entity_component(luabind::module_ &modEnts);
+		DLLNETWORK void register_base_entity_component(luabind::module_ &modEnts);
 	}
 };

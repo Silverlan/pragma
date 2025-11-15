@@ -355,7 +355,7 @@ std::shared_ptr<prosper::IImage> Lua::gui::create_color_image(uint32_t w, uint32
 	imgCreateInfo.usage = usageFlags;
 	imgCreateInfo.postCreateLayout = initialLayout;
 	if(msaa)
-		imgCreateInfo.samples = WGUI::GetInstance().MSAA_SAMPLE_COUNT;
+		imgCreateInfo.samples = wGUI::MSAA_SAMPLE_COUNT;
 	return context.CreateImage(imgCreateInfo);
 }
 
@@ -376,7 +376,7 @@ std::shared_ptr<prosper::RenderTarget> Lua::gui::create_render_target(uint32_t w
 	imgCreateInfo.width = w;
 	imgCreateInfo.height = h;
 	if(enableMsaa)
-		imgCreateInfo.samples = WGUI::GetInstance().MSAA_SAMPLE_COUNT;
+		imgCreateInfo.samples = wGUI::MSAA_SAMPLE_COUNT;
 	auto depthStencilImg = context.CreateImage(imgCreateInfo);
 
 	auto tex = context.CreateTexture(prosper::util::TextureCreateInfo {}, *img, prosper::util::ImageViewCreateInfo {}, prosper::util::SamplerCreateInfo {});

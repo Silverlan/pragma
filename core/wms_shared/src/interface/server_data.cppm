@@ -4,7 +4,6 @@
 module;
 
 #include "wms_shareddefinitions.hpp"
-#include <string>
 
 export module pragma.wms:server_data;
 

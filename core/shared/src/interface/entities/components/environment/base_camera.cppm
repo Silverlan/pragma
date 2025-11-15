@@ -13,14 +13,15 @@ import :util.render_tile;
 
 export {
 	namespace pragma {
+		namespace baseEnvCameraComponent {
+			CLASS_ENUM_COMPAT const float DEFAULT_NEAR_Z;
+			CLASS_ENUM_COMPAT const float DEFAULT_FAR_Z;
+			CLASS_ENUM_COMPAT const float DEFAULT_FOV;
+			CLASS_ENUM_COMPAT const float DEFAULT_VIEWMODEL_FOV;
+			CLASS_ENUM_COMPAT const float DEFAULT_FOCAL_DISTANCE;
+		}
 		class DLLNETWORK BaseEnvCameraComponent : public BaseEntityComponent {
 		  public:
-			static const float DEFAULT_NEAR_Z;
-			static const float DEFAULT_FAR_Z;
-			static const float DEFAULT_FOV;
-			static const float DEFAULT_VIEWMODEL_FOV;
-			static const float DEFAULT_FOCAL_DISTANCE;
-
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 			BaseEnvCameraComponent(pragma::ecs::BaseEntity &ent);
 			virtual void Initialize() override;

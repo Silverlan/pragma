@@ -22,7 +22,7 @@ get_gh_submodule("libnoise",            "qknight/libnoise",                 "9ce
 get_gh_submodule("libsamplerate",       "libsndfile/libsamplerate",         "15c392d")
 if platform == "linux":
     get_gh_submodule("linenoise.cpp",   "Silverlan/linenoise.cpp",          "74ae32ebf22d18a7e22afe1eeecf04171311ebcf")
-get_gh_submodule("luabind",             "Silverlan/luabind-deboostified",   "0637387f64ef5c3917130622caeace35540e332b", "feat/cxx_module")
+get_gh_submodule("luabind",             "Silverlan/luabind-deboostified",   "4279d7b2fd70b309b96c99fe7cb06f0523304239", "feat/cxx_module")
 get_gh_submodule("luajit",              "Silverlan/LuaJIT",                 "cb42653","v2.1")
 get_gh_submodule("lunasvg",             "sammycage/lunasvg",                "7b6970f") # v3.4.0
 get_gh_submodule("miniball",            "Silverlan/miniball",               "609fbf16e7a9cc3dc8f88e4d1c7a1d8ead842bb1")

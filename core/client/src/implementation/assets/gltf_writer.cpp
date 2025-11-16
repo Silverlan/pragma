@@ -1369,7 +1369,7 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 		gltfMat.name = ufile::get_file_from_filename(mat->GetName());
 		ufile::remove_extension_from_filename(gltfMat.name);
 
-		auto itAlbedo = texturePaths->find(msys::Material::ALBEDO_MAP_IDENTIFIER);
+		auto itAlbedo = texturePaths->find(msys::material::ALBEDO_MAP_IDENTIFIER);
 		if(itAlbedo != texturePaths->end())
 			gltfMat.pbrMetallicRoughness.baseColorTexture.index = fAddTexture(itAlbedo->second);
 
@@ -1378,13 +1378,13 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 		mat->GetProperty("alpha_factor", &colorFactor.a);
 		gltfMat.pbrMetallicRoughness.baseColorFactor = {colorFactor[0], colorFactor[1], colorFactor[2], colorFactor[3]};
 
-		auto itNormal = texturePaths->find(msys::Material::NORMAL_MAP_IDENTIFIER);
+		auto itNormal = texturePaths->find(msys::material::NORMAL_MAP_IDENTIFIER);
 		if(itNormal != texturePaths->end())
 			gltfMat.normalTexture.index = fAddTexture(itNormal->second);
 
 		auto metalnessFactor = 0.f;
 		auto roughnessFactor = 0.5f;
-		auto itRMA = texturePaths->find(msys::Material::RMA_MAP_IDENTIFIER);
+		auto itRMA = texturePaths->find(msys::material::RMA_MAP_IDENTIFIER);
 		if(itRMA != texturePaths->end()) {
 			gltfMat.pbrMetallicRoughness.metallicRoughnessTexture.index = fAddTexture(itRMA->second);
 			metalnessFactor = 1.f;
@@ -1410,7 +1410,7 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 		}
 		gltfMat.alphaCutoff = alphaCutoff;
 
-		auto itEmissive = texturePaths->find(msys::Material::EMISSION_MAP_IDENTIFIER);
+		auto itEmissive = texturePaths->find(msys::material::EMISSION_MAP_IDENTIFIER);
 		if(itEmissive != texturePaths->end())
 			gltfMat.emissiveTexture.index = fAddTexture(itEmissive->second);
 

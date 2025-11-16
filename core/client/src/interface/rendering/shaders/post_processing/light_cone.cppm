@@ -11,6 +11,9 @@ export import :model.mesh;
 export import :rendering.shaders.base;
 
 export namespace pragma {
+	namespace shaderPPLightCone {
+		using namespace shaderPPBase;
+	}
 	class DLLCLIENT ShaderPPLightCone : public ShaderPPBase {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;

@@ -14,11 +14,20 @@ export import pragma.materialsystem;
 
 export {
 	class DLLNETWORK EResourceWatcherCallbackType : public util::ExtensibleEnum {
-	  public:
-		using util::ExtensibleEnum::ExtensibleEnum;
-
-	  protected:
+	public:
+		// declare the enum first so it can be used in following declarations
 		enum class E : uint32_t { Model = 0u, Material, Texture, Map, SoundScript, Sound, Count };
+
+		// public factory that accepts the enum type (no cast needed at call site)
+		static EResourceWatcherCallbackType createFromEnum(E e) noexcept {
+			return EResourceWatcherCallbackType(static_cast<uint32_t>(e));
+		}
+
+	private:
+		// forwarding ctor that calls the base ctor (base ctor is protected)
+		// do NOT mark constexpr if the base ctor is not constexpr
+		explicit EResourceWatcherCallbackType(uint32_t v) noexcept
+			: util::ExtensibleEnum(v) {}
 	};
 	namespace eResourceWatcherCallbackType {
 		CLASS_ENUM_COMPAT const EResourceWatcherCallbackType Model;

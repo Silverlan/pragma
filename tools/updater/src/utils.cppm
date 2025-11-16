@@ -5,6 +5,7 @@ module;
 
 #ifdef _WIN32
 #include <windows.h>
+#include <tlhelp32.h>
 #else
 #include <signal.h>
 #include <glob.h>

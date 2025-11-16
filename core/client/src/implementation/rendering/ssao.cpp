@@ -16,7 +16,7 @@ import :rendering.shaders;
 
 bool SSAOInfo::Initialize(prosper::IPrContext &context, uint32_t width, uint32_t height, prosper::SampleCountFlags samples, const std::shared_ptr<prosper::Texture> &texNorm, const std::shared_ptr<prosper::Texture> &texDepth)
 {
-	if(pragma::ShaderSSAO::DESCRIPTOR_SET_PREPASS.IsValid() == false || pragma::ShaderSSAOBlur::DESCRIPTOR_SET_TEXTURE.IsValid() == false)
+	if(pragma::ShaderSSAO::DESCRIPTOR_SET_PREPASS.IsValid() == false || pragma::shaderSSAOBlur::DESCRIPTOR_SET_TEXTURE.IsValid() == false)
 		return false;
 	shader = pragma::get_cengine()->GetShader("ssao");
 	shaderBlur = pragma::get_cengine()->GetShader("ssao_blur");
@@ -46,7 +46,7 @@ bool SSAOInfo::Initialize(prosper::IPrContext &context, uint32_t width, uint32_t
 	descSetPrepass.SetBindingTexture(*texNorm, umath::to_integral(pragma::ShaderSSAO::PrepassBinding::NormalBuffer));
 	descSetPrepass.SetBindingTexture(*texDepth, umath::to_integral(pragma::ShaderSSAO::PrepassBinding::DepthBuffer));
 
-	descSetGroupOcclusion = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderSSAOBlur::DESCRIPTOR_SET_TEXTURE);
+	descSetGroupOcclusion = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::shaderSSAOBlur::DESCRIPTOR_SET_TEXTURE);
 	descSetGroupOcclusion->GetDescriptorSet()->SetBindingTexture(renderTarget->GetTexture(), 0u);
 	return true;
 }

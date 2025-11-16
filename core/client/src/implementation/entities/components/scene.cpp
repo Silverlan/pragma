@@ -3,6 +3,7 @@
 
 module;
 
+#include "definitions.hpp"
 #include <cassert>
 #include <cstddef>
 
@@ -283,13 +284,13 @@ TCPPM *CSceneComponent::FindOcclusionCuller()
 	auto *ent = (it != entIt.end()) ? *it : nullptr;
 	return ent ? ent->GetComponent<pragma::COcclusionCullerComponent>().get() : nullptr;
 }
-template pragma::COcclusionCullerComponent *CSceneComponent::FindOcclusionCuller();
+template DLLCLIENT pragma::COcclusionCullerComponent *CSceneComponent::FindOcclusionCuller();
 template<typename TCPPM>
 const TCPPM *CSceneComponent::FindOcclusionCuller() const
 {
 	return const_cast<CSceneComponent *>(this)->FindOcclusionCuller<TCPPM>();
 }
-template const pragma::COcclusionCullerComponent *CSceneComponent::FindOcclusionCuller() const;
+template DLLCLIENT const pragma::COcclusionCullerComponent *CSceneComponent::FindOcclusionCuller() const;
 const std::shared_ptr<prosper::IBuffer> &CSceneComponent::GetFogBuffer() const { return m_fogBuffer; }
 void CSceneComponent::UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, bool bView)
 {
@@ -481,7 +482,7 @@ void CSceneComponent::SetLightMap(TCPPM &lightMapC)
 	UpdateRenderSettings();
 	UpdateRendererLightMap();
 }
-template void CSceneComponent::SetLightMap(pragma::CLightMapComponent &lightMapC);
+template DLLCLIENT void CSceneComponent::SetLightMap(pragma::CLightMapComponent &lightMapC);
 void CSceneComponent::UpdateRendererLightMap()
 {
 	if(m_renderer.expired() || m_lightMap.expired())
@@ -562,21 +563,21 @@ void CSceneComponent::SetRenderer(TCPPM *renderer)
 	UpdateRendererLightMap();
 	BroadcastEvent(cSceneComponent::EVENT_ON_RENDERER_CHANGED);
 }
-template void CSceneComponent::SetRenderer(pragma::CRendererComponent *renderer);
+template DLLCLIENT void CSceneComponent::SetRenderer(pragma::CRendererComponent *renderer);
 
 template<typename TCPPM>
 TCPPM *CSceneComponent::GetRenderer()
 {
 	return static_cast<TCPPM *>(m_renderer.get());
 }
-template pragma::CRendererComponent *CSceneComponent::GetRenderer();
+template DLLCLIENT pragma::CRendererComponent *CSceneComponent::GetRenderer();
 
 template<typename TCPPM>
 const TCPPM *CSceneComponent::GetRenderer() const
 {
 	return const_cast<CSceneComponent *>(this)->GetRenderer<pragma::CRendererComponent>();
 }
-template const pragma::CRendererComponent *CSceneComponent::GetRenderer() const;
+template DLLCLIENT const pragma::CRendererComponent *CSceneComponent::GetRenderer() const;
 
 SceneDebugMode CSceneComponent::GetDebugMode() const { return m_debugMode; }
 void CSceneComponent::SetDebugMode(SceneDebugMode debugMode) { m_debugMode = debugMode; }

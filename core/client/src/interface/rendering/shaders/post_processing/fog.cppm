@@ -9,6 +9,9 @@ export module pragma.client:rendering.shaders.pp_fog;
 export import :rendering.shaders.base;
 
 export namespace pragma {
+	namespace shaderPPFog {
+		using namespace shaderPPBase;
+	}
 	class DLLCLIENT ShaderPPFog : public ShaderPPBase {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;

@@ -9,6 +9,9 @@ export module pragma.client:rendering.shaders.pp_motion_blur;
 export import :rendering.shaders.base;
 
 export namespace pragma {
+	namespace shaderPPMotionBlur {
+		using namespace shaderPPBase;
+	}
 	class DLLCLIENT ShaderPPMotionBlur : public ShaderPPBase {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;

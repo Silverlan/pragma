@@ -457,7 +457,7 @@ TCPPM *CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &end, flo
 	pragma::get_cgame()->AddCallback("Think", cb);
 	return reinterpret_cast<TCPPM *>(particle);
 }
-template pragma::ecs::CParticleSystemComponent *CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius, const Color &col, float length, float speed, const std::string &material, float bloomScale);
+template DLLCLIENT pragma::ecs::CParticleSystemComponent *CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius, const Color &col, float length, float speed, const std::string &material, float bloomScale);
 
 void CGame::SetRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode, bool bEnabled) { m_renderModesEnabled[umath::to_integral(renderMode)] = bEnabled; }
 void CGame::EnableRenderMode(pragma::rendering::SceneRenderPass renderMode) { SetRenderModeEnabled(renderMode, true); }
@@ -481,14 +481,14 @@ const TCPPM *CGame::GetGameComponent() const
 {
 	return const_cast<CGame *>(this)->GetGameComponent<TCPPM>();
 }
-template const pragma::CGameComponent *CGame::GetGameComponent() const;
+template DLLCLIENT const pragma::CGameComponent *CGame::GetGameComponent() const;
 
 template<typename TCPPM>
 TCPPM *CGame::GetGameComponent()
 {
 	return static_cast<TCPPM *>(m_gameComponent.get());
 }
-template pragma::CGameComponent *CGame::GetGameComponent();
+template DLLCLIENT pragma::CGameComponent *CGame::GetGameComponent();
 
 template<typename TCPPM>
 TCPPM *CGame::GetViewModel()
@@ -497,7 +497,7 @@ TCPPM *CGame::GetViewModel()
 		return nullptr;
 	return static_cast<TCPPM *>(m_viewModel.get());
 }
-template pragma::CViewModelComponent *CGame::GetViewModel<pragma::CViewModelComponent>();
+template DLLCLIENT pragma::CViewModelComponent *CGame::GetViewModel<pragma::CViewModelComponent>();
 
 template<typename TCPPM>
 TCPPM *CGame::GetViewBody()
@@ -506,7 +506,7 @@ TCPPM *CGame::GetViewBody()
 		return nullptr;
 	return static_cast<TCPPM *>(m_viewBody.get());
 }
-template pragma::CViewBodyComponent *CGame::GetViewBody<pragma::CViewBodyComponent>();
+template DLLCLIENT pragma::CViewBodyComponent *CGame::GetViewBody<pragma::CViewBodyComponent>();
 
 static void shader_handler(msys::Material *mat)
 {
@@ -625,7 +625,7 @@ TCPPM *CGame::CreateCamera(uint32_t width, uint32_t height, float fov, float nea
 {
 	return CreateCamera<TCPPM>(width / static_cast<float>(height), fov, nearZ, farZ);
 }
-template pragma::CCameraComponent *CGame::CreateCamera(uint32_t width, uint32_t height, float fov, float nearZ, float farZ);
+template DLLCLIENT pragma::CCameraComponent *CGame::CreateCamera(uint32_t width, uint32_t height, float fov, float nearZ, float farZ);
 
 void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 {
@@ -733,6 +733,7 @@ void CGame::SetRenderScene(TCPPM &scene)
 {
 	m_renderScene = scene.GetHandle();
 }
+template DLLCLIENT void CGame::SetRenderScene(pragma::CSceneComponent &scene);
 void CGame::ResetRenderScene() { m_renderScene = m_scene; }
 template<typename TCPPM>
 TCPPM *CGame::GetRenderScene()
@@ -744,8 +745,8 @@ const TCPPM *CGame::GetRenderScene() const
 {
 	return const_cast<CGame *>(this)->GetRenderScene<pragma::CSceneComponent>();
 }
-template pragma::CSceneComponent *CGame::GetRenderScene();
-template const pragma::CSceneComponent *CGame::GetRenderScene() const;
+template DLLCLIENT pragma::CSceneComponent *CGame::GetRenderScene();
+template DLLCLIENT const pragma::CSceneComponent *CGame::GetRenderScene() const;
 template<typename TCPPM>
 TCPPM *CGame::GetRenderCamera() const
 {
@@ -753,14 +754,14 @@ TCPPM *CGame::GetRenderCamera() const
 		return nullptr;
 	return const_cast<pragma::CCameraComponent *>(static_cast<const pragma::CSceneComponent *>(m_renderScene.get())->GetActiveCamera().get());
 }
-template pragma::CCameraComponent *CGame::GetRenderCamera() const;
+template DLLCLIENT pragma::CCameraComponent *CGame::GetRenderCamera() const;
 template<typename TCPPM>
 void CGame::SetGameplayControlCamera(TCPPM &cam)
 {
 	m_controlCamera = cam.template GetHandle<pragma::BaseEntityComponent>();
 	m_stateFlags &= ~StateFlags::DisableGamplayControlCamera;
 }
-template void CGame::SetGameplayControlCamera(pragma::CCameraComponent &);
+template DLLCLIENT void CGame::SetGameplayControlCamera(pragma::CCameraComponent &);
 void CGame::ResetGameplayControlCamera()
 {
 	m_controlCamera = pragma::ComponentHandle<pragma::BaseEntityComponent> {};
@@ -780,13 +781,13 @@ TCPPM *CGame::GetGameplayControlCamera()
 		return nullptr;
 	return GetRenderCamera<TCPPM>();
 }
-template pragma::CCameraComponent *CGame::GetGameplayControlCamera();
+template DLLCLIENT pragma::CCameraComponent *CGame::GetGameplayControlCamera();
 template<typename TCPPM>
 TCPPM *CGame::GetPrimaryCamera() const
 {
 	return const_cast<pragma::CCameraComponent *>(static_cast<const pragma::CCameraComponent *>(m_primaryCamera.get()));
 }
-template pragma::CCameraComponent *CGame::GetPrimaryCamera<pragma::CCameraComponent>() const;
+template DLLCLIENT pragma::CCameraComponent *CGame::GetPrimaryCamera<pragma::CCameraComponent>() const;
 
 void CGame::SetMaterialOverride(msys::Material *mat) { m_matOverride = mat; }
 msys::Material *CGame::GetMaterialOverride() { return m_matOverride; }
@@ -921,7 +922,7 @@ void CGame::CreateGiblet(const GibletCreateInfo &info, TCPPM **particle)
 	if(particle != nullptr)
 		*particle = reinterpret_cast<TCPPM *>(pt);
 }
-template void CGame::CreateGiblet(const GibletCreateInfo &info, pragma::ecs::CParticleSystemComponent **particle);
+template DLLCLIENT void CGame::CreateGiblet(const GibletCreateInfo &info, pragma::ecs::CParticleSystemComponent **particle);
 
 void CGame::CreateGiblet(const GibletCreateInfo &info) { CreateGiblet<pragma::ecs::CParticleSystemComponent>(info, nullptr); }
 
@@ -1663,7 +1664,7 @@ void CGame::RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd
 			static_cast<CPhysVisualDebugger &>(*pVisualDebugger).Render(drawCmd, cam);
 	}
 }
-template void CGame::RenderDebugPhysics<pragma::CCameraComponent>(std::shared_ptr<prosper::ICommandBuffer> &, pragma::CCameraComponent &);
+template DLLCLIENT void CGame::RenderDebugPhysics<pragma::CCameraComponent>(std::shared_ptr<prosper::ICommandBuffer> &, pragma::CCameraComponent &);
 
 bool CGame::LoadAuxEffects(const std::string &fname)
 {

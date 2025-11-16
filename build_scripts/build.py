@@ -720,13 +720,13 @@ if with_essential_client_modules:
 if with_common_modules:
 	add_pragma_module(
 		name="pr_bullet",
-		commitSha="4988f130feb503306aea84a7716e2a860e4d5109",
+		commitSha="2c934606c71b8d8f618c15ee9576807394d225d3",
 		repositoryUrl="https://github.com/Silverlan/pr_bullet.git",
 		branch="feat/cxx_module"
 	)
 	add_pragma_module(
 		name="pr_audio_soloud",
-		commitSha="2fa7a5a63b1d4ccba4a63f42847c4760baa0b0ac",
+		commitSha="48e18a96255cfbb21e19229cc0ed9e2dc1dd07db",
 		repositoryUrl="https://github.com/Silverlan/pr_soloud.git",
 		branch="feat/cxx_module"
 	)

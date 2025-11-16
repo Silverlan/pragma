@@ -141,7 +141,7 @@ bool CPBRConverterComponent::ShouldConvertMaterial(msys::CMaterial &mat) const
 {
 	if(m_convertedMaterials.find(mat.GetName()) != m_convertedMaterials.end() || IsPBR(mat) == false)
 		return false;
-	return mat.GetTextureInfo(msys::Material::RMA_MAP_IDENTIFIER) == nullptr;
+	return mat.GetTextureInfo(msys::material::RMA_MAP_IDENTIFIER) == nullptr;
 }
 
 bool CPBRConverterComponent::IsPBR(msys::CMaterial &mat) const
@@ -269,7 +269,7 @@ bool CPBRConverterComponent::ConvertToPBR(msys::CMaterial &matTraditional)
 		if(matTraditional.GetPropertyType("roughness_factor") == msys::PropertyType::None)
 			matTraditional.SetProperty("roughness_factor", 0.5f);
 	}
-	matTraditional.SetTextureProperty(msys::Material::RMA_MAP_IDENTIFIER, rmaMapName);
+	matTraditional.SetTextureProperty(msys::material::RMA_MAP_IDENTIFIER, rmaMapName);
 
 	// Note: If no surface material could be found in the material,
 	// the model's surface material will be checked as well in 'GenerateGeometryBasedTextures'.
@@ -294,7 +294,7 @@ std::shared_ptr<prosper::Texture> CPBRConverterComponent::ConvertSpecularMapToRo
 		return nullptr;
 	auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
 	// Specular descriptor set
-	auto dsgSpecular = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderSpecularToRoughness::DESCRIPTOR_SET_TEXTURE);
+	auto dsgSpecular = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::shaderSpecularToRoughness::DESCRIPTOR_SET_TEXTURE);
 	dsgSpecular->GetDescriptorSet()->SetBindingTexture(specularMap, 0u);
 
 	// Initialize roughness image

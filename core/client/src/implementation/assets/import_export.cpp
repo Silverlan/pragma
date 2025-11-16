@@ -480,8 +480,8 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 					if(shader) {
 						auto metallicRoughnessSet = shader->ConvertToMetalnessRoughness(pragma::get_cengine()->GetRenderContext(), diffuseTex, specularGlossinessTex, pushConstants, occlusionTex.get());
 						if(metallicRoughnessSet.has_value()) {
-							fWriteImage(msys::Material::ALBEDO_MAP_IDENTIFIER, matName + "_albedo", *metallicRoughnessSet->albedoMap, false /* greyScale */, false /* normalMap */, alphaMode);
-							fWriteImage(msys::Material::RMA_MAP_IDENTIFIER, matName + "_rma", *metallicRoughnessSet->rmaMap, false /* greyScale */, false /* normalMap */);
+							fWriteImage(msys::material::ALBEDO_MAP_IDENTIFIER, matName + "_albedo", *metallicRoughnessSet->albedoMap, false /* greyScale */, false /* normalMap */, alphaMode);
+							fWriteImage(msys::material::RMA_MAP_IDENTIFIER, matName + "_rma", *metallicRoughnessSet->rmaMap, false /* greyScale */, false /* normalMap */);
 						}
 					}
 
@@ -495,9 +495,9 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			auto &baseColorTexture = gltfMat.pbrMetallicRoughness.baseColorTexture;
 			auto baseColorImage = fGetImage(baseColorTexture.index);
 			if(baseColorImage)
-				fWriteImage(msys::Material::ALBEDO_MAP_IDENTIFIER, matName + "_albedo", *baseColorImage, false /* greyScale */, false /* normalMap */, alphaMode);
+				fWriteImage(msys::material::ALBEDO_MAP_IDENTIFIER, matName + "_albedo", *baseColorImage, false /* greyScale */, false /* normalMap */, alphaMode);
 			else
-				cmat->SetTexture(msys::Material::ALBEDO_MAP_IDENTIFIER, "white");
+				cmat->SetTexture(msys::material::ALBEDO_MAP_IDENTIFIER, "white");
 
 			auto &baseColorFactor = gltfMat.pbrMetallicRoughness.baseColorFactor;
 			if(baseColorFactor != std::vector<double> {1.0, 1.0, 1.0, 1.0})
@@ -506,7 +506,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			auto metallicRoughnessImg = fGetImage(gltfMat.pbrMetallicRoughness.metallicRoughnessTexture.index);
 			if(metallicRoughnessImg) {
 				auto rmaName = matName + "_rma";
-				fWriteImage(msys::Material::RMA_MAP_IDENTIFIER, rmaName, *metallicRoughnessImg, false /* greyScale */, false /* normalMap */);
+				fWriteImage(msys::material::RMA_MAP_IDENTIFIER, rmaName, *metallicRoughnessImg, false /* greyScale */, false /* normalMap */);
 
 				auto occlusionImg = fGetImage(gltfMat.occlusionTexture.index);
 				if(occlusionImg) {
@@ -526,13 +526,13 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		if(gltfMat.normalTexture.index != -1) {
 			auto &tex = inputData.textures.at(gltfMdl.textures.at(gltfMat.normalTexture.index).source);
 			if(tex)
-				fWriteImage(msys::Material::NORMAL_MAP_IDENTIFIER, matName + "_normal", tex->GetImage(), false /* greyScale */, true /* normalMap */);
+				fWriteImage(msys::material::NORMAL_MAP_IDENTIFIER, matName + "_normal", tex->GetImage(), false /* greyScale */, true /* normalMap */);
 		}
 
 		if(gltfMat.emissiveTexture.index != -1) {
 			auto &tex = inputData.textures.at(gltfMdl.textures.at(gltfMat.emissiveTexture.index).source);
 			if(tex)
-				fWriteImage(msys::Material::EMISSION_MAP_IDENTIFIER, matName + "_emission", tex->GetImage(), false /* greyScale */, false /* normalMap */);
+				fWriteImage(msys::material::EMISSION_MAP_IDENTIFIER, matName + "_emission", tex->GetImage(), false /* greyScale */, false /* normalMap */);
 		}
 		auto &emissiveFactor = gltfMat.emissiveFactor;
 		if(emissiveFactor != std::vector<double> {1.0, 1.0, 1.0, 1.0})
@@ -1718,14 +1718,14 @@ std::optional<pragma::asset::MaterialTexturePaths> pragma::asset::export_materia
 
 	std::string imgOutputPath;
 	if(fSaveTexture(mat.GetAlbedoMap(), false, alphaMode != AlphaMode::Opaque, imgOutputPath, name))
-		texturePaths.insert(std::make_pair(msys::Material::ALBEDO_MAP_IDENTIFIER, imgOutputPath));
+		texturePaths.insert(std::make_pair(msys::material::ALBEDO_MAP_IDENTIFIER, imgOutputPath));
 	if(fSaveTexture(mat.GetNormalMap(), true, false, imgOutputPath, name + "_normal"))
-		texturePaths.insert(std::make_pair(msys::Material::NORMAL_MAP_IDENTIFIER, imgOutputPath));
+		texturePaths.insert(std::make_pair(msys::material::NORMAL_MAP_IDENTIFIER, imgOutputPath));
 	if(fSaveTexture(mat.GetRMAMap(), true, false, imgOutputPath, name + "_rma"))
-		texturePaths.insert(std::make_pair(msys::Material::RMA_MAP_IDENTIFIER, imgOutputPath));
+		texturePaths.insert(std::make_pair(msys::material::RMA_MAP_IDENTIFIER, imgOutputPath));
 
 	if(fSaveTexture(mat.GetGlowMap(), false, false, imgOutputPath, name + "_emission"))
-		texturePaths.insert(std::make_pair(msys::Material::EMISSION_MAP_IDENTIFIER, imgOutputPath));
+		texturePaths.insert(std::make_pair(msys::material::EMISSION_MAP_IDENTIFIER, imgOutputPath));
 	return texturePaths;
 }
 
@@ -1813,7 +1813,7 @@ static bool save_ambient_occlusion(msys::Material &mat, std::string rmaPath, T &
 		outPath = mat.GetName();
 		outPath.RemoveFileExtension();
 		rmaPath = outPath.GetString() + "_rma";
-		mat.SetTextureProperty(msys::Material::RMA_MAP_IDENTIFIER, rmaPath);
+		mat.SetTextureProperty(msys::material::RMA_MAP_IDENTIFIER, rmaPath);
 		requiresSave = true;
 	}
 

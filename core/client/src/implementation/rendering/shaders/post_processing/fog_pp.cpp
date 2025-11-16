@@ -9,7 +9,7 @@ import :rendering.shaders.pp_fog;
 
 using namespace pragma;
 
-decltype(ShaderPPFog::DESCRIPTOR_SET_TEXTURE) ShaderPPFog::DESCRIPTOR_SET_TEXTURE = {ShaderPPBase::DESCRIPTOR_SET_TEXTURE};
+decltype(ShaderPPFog::DESCRIPTOR_SET_TEXTURE) ShaderPPFog::DESCRIPTOR_SET_TEXTURE = {pragma::shaderPPBase::DESCRIPTOR_SET_TEXTURE};
 decltype(ShaderPPFog::DESCRIPTOR_SET_DEPTH_BUFFER) ShaderPPFog::DESCRIPTOR_SET_DEPTH_BUFFER = {
   "DEPTH_BUFFER",
   {prosper::DescriptorSetInfo::Binding {"MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
@@ -26,7 +26,7 @@ void ShaderPPFog::InitializeShaderResources()
 {
 	ShaderGraphics::InitializeShaderResources();
 	AddDefaultVertexAttributes();
-	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
+	AddDescriptorSetGroup(shaderPPFog::DESCRIPTOR_SET_TEXTURE);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_DEPTH_BUFFER);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_FOG);

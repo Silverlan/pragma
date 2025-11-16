@@ -8,6 +8,8 @@
 
 import pragma.udm;
 
+#undef CreateFile
+
 int main(int argc, char *argv[])
 {
 	if(argc <= 1)

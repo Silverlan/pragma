@@ -9,13 +9,13 @@ module pragma.shared;
 import :locale;
 import :util.resource_watcher;
 
-decltype(eResourceWatcherCallbackType::Model) eResourceWatcherCallbackType::Model = EResourceWatcherCallbackType {umath::to_integral(E::Model)};
-decltype(eResourceWatcherCallbackType::Material) eResourceWatcherCallbackType::Material = EResourceWatcherCallbackType {umath::to_integral(E::Material)};
-decltype(eResourceWatcherCallbackType::Texture) eResourceWatcherCallbackType::Texture = EResourceWatcherCallbackType {umath::to_integral(E::Texture)};
-decltype(eResourceWatcherCallbackType::Map) eResourceWatcherCallbackType::Map = EResourceWatcherCallbackType {umath::to_integral(E::Map)};
-decltype(eResourceWatcherCallbackType::SoundScript) eResourceWatcherCallbackType::SoundScript = EResourceWatcherCallbackType {umath::to_integral(E::SoundScript)};
-decltype(eResourceWatcherCallbackType::Sound) eResourceWatcherCallbackType::Sound = EResourceWatcherCallbackType {umath::to_integral(E::Sound)};
-decltype(eResourceWatcherCallbackType::Count) eResourceWatcherCallbackType::Count = EResourceWatcherCallbackType {umath::to_integral(E::Count)};
+decltype(eResourceWatcherCallbackType::Model) eResourceWatcherCallbackType::Model = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Model);
+decltype(eResourceWatcherCallbackType::Material) eResourceWatcherCallbackType::Material = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Material);
+decltype(eResourceWatcherCallbackType::Texture) eResourceWatcherCallbackType::Texture = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Texture);
+decltype(eResourceWatcherCallbackType::Map) eResourceWatcherCallbackType::Map = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Map);
+decltype(eResourceWatcherCallbackType::SoundScript) eResourceWatcherCallbackType::SoundScript = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::SoundScript);
+decltype(eResourceWatcherCallbackType::Sound) eResourceWatcherCallbackType::Sound = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Sound);
+decltype(eResourceWatcherCallbackType::Count) eResourceWatcherCallbackType::Count = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Count);
 ResourceWatcherManager::ResourceWatcherManager(NetworkState *nw) : m_networkState(nw), m_watcherManager {filemanager::create_directory_watcher_manager()} {}
 
 void ResourceWatcherManager::Poll()

@@ -115,7 +115,7 @@ void CPBRConverterComponent::WriteAOMap(pragma::Model &mdl, msys::CMaterial &mat
 		outPath = mat.GetName();
 		outPath.RemoveFileExtension();
 		rmaName = outPath.GetString() + "_rma";
-		mat.SetTextureProperty(msys::Material::RMA_MAP_IDENTIFIER, rmaName);
+		mat.SetTextureProperty(msys::material::RMA_MAP_IDENTIFIER, rmaName);
 		requiresSave = true;
 	}
 

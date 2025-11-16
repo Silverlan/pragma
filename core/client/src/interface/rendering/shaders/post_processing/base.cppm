@@ -10,6 +10,9 @@ export module pragma.client:rendering.shaders.base;
 export import pragma.prosper;
 
 export namespace pragma {
+	namespace shaderPPBase {
+		using namespace prosper::shaderBaseImageProcessing;
+	}
 	class DLLCLIENT ShaderPPBase : public prosper::ShaderBaseImageProcessing {
 	  public:
 		ShaderPPBase(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader);

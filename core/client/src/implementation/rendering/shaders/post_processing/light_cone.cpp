@@ -10,7 +10,7 @@ import :rendering.shaders.pp_light_cone;
 
 using namespace pragma;
 
-decltype(ShaderPPLightCone::DESCRIPTOR_SET_TEXTURE) ShaderPPLightCone::DESCRIPTOR_SET_TEXTURE = {ShaderPPBase::DESCRIPTOR_SET_TEXTURE};
+decltype(ShaderPPLightCone::DESCRIPTOR_SET_TEXTURE) ShaderPPLightCone::DESCRIPTOR_SET_TEXTURE = {pragma::shaderPPBase::DESCRIPTOR_SET_TEXTURE};
 decltype(ShaderPPLightCone::DESCRIPTOR_SET_DEPTH_BUFFER) ShaderPPLightCone::DESCRIPTOR_SET_DEPTH_BUFFER = {
   "DEPTH_BUFFER",
   {prosper::DescriptorSetInfo::Binding {"MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
@@ -51,7 +51,7 @@ void ShaderPPLightCone::InitializeShaderResources()
 	AddVertexAttribute(VERTEX_ATTRIBUTE_NORMAL);
 
 	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
-	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
+	AddDescriptorSetGroup(shaderPPLightCone::DESCRIPTOR_SET_TEXTURE);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_DEPTH_BUFFER);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_INSTANCE);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_SCENE);

@@ -199,9 +199,9 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 		cmat->SetTexture(matIdentifier, relTexPath.GetString());
 		return texPath;
 	};
-	importAndAssignTexture(ofbx::Texture::TextureType::DIFFUSE, msys::Material::ALBEDO_MAP_IDENTIFIER);
-	importAndAssignTexture(ofbx::Texture::TextureType::NORMAL, msys::Material::NORMAL_MAP_IDENTIFIER);
-	importAndAssignTexture(ofbx::Texture::TextureType::EMISSIVE, msys::Material::EMISSION_MAP_IDENTIFIER);
+	importAndAssignTexture(ofbx::Texture::TextureType::DIFFUSE, msys::material::ALBEDO_MAP_IDENTIFIER);
+	importAndAssignTexture(ofbx::Texture::TextureType::NORMAL, msys::material::NORMAL_MAP_IDENTIFIER);
+	importAndAssignTexture(ofbx::Texture::TextureType::EMISSIVE, msys::material::EMISSION_MAP_IDENTIFIER);
 
 	auto applyColorFactor = [&fbxMat, mat](const ofbx::Color &fbxColor, double factor, const std::string &matProp) mutable {
 		Vector3 colorFactor {fbxColor.r, fbxColor.g, fbxColor.b};
@@ -243,7 +243,7 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 					if(metallicRoughnessSet.has_value()) {
 						auto texPath = matFilePath;
 						texPath.MakeRelative(util::CONVERT_PATH);
-						pragma::asset::assign_texture(*cmat, ::util::CONVERT_PATH, msys::Material::RMA_MAP_IDENTIFIER, texPath.GetString() + "_rma", *metallicRoughnessSet->rmaMap, false, false, ambientMap ? AlphaMode::Blend : AlphaMode::Opaque);
+						pragma::asset::assign_texture(*cmat, ::util::CONVERT_PATH, msys::material::RMA_MAP_IDENTIFIER, texPath.GetString() + "_rma", *metallicRoughnessSet->rmaMap, false, false, ambientMap ? AlphaMode::Blend : AlphaMode::Opaque);
 					}
 				}
 			}

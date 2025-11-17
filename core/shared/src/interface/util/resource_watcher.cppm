@@ -23,7 +23,7 @@ export {
 			return EResourceWatcherCallbackType(static_cast<uint32_t>(e));
 		}
 
-	private:
+	protected:
 		// forwarding ctor that calls the base ctor (base ctor is protected)
 		// do NOT mark constexpr if the base ctor is not constexpr
 		explicit EResourceWatcherCallbackType(uint32_t v) noexcept

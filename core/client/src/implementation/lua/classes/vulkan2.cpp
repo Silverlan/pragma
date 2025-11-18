@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :scripting.lua.classes.vulkan;
@@ -293,8 +292,9 @@ void register_vulkan_lua_interface2(Lua::Interface &lua, luabind::module_ &prosp
 	}));
 	defVkCommandBuffer.def("RecordBindVertexBuffer", &Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer);
 	defVkCommandBuffer.def("RecordBindVertexBuffer",
-	  static_cast<bool (*)(lua::State *, Lua::Vulkan::CommandBuffer &, prosper::ShaderGraphics &, Lua::Vulkan::Buffer &, uint32_t)>(
-	    [](lua::State *l, Lua::Vulkan::CommandBuffer &hCommandBuffer, prosper::ShaderGraphics &graphics, Lua::Vulkan::Buffer &vertexBuffer, uint32_t startBinding) { return Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer(l, hCommandBuffer, graphics, vertexBuffer, startBinding, 0u); }));
+	  static_cast<bool (*)(lua::State *, Lua::Vulkan::CommandBuffer &, prosper::ShaderGraphics &, Lua::Vulkan::Buffer &, uint32_t)>([](lua::State *l, Lua::Vulkan::CommandBuffer &hCommandBuffer, prosper::ShaderGraphics &graphics, Lua::Vulkan::Buffer &vertexBuffer, uint32_t startBinding) {
+		  return Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer(l, hCommandBuffer, graphics, vertexBuffer, startBinding, 0u);
+	  }));
 	defVkCommandBuffer.def("RecordBindVertexBuffer",
 	  static_cast<bool (*)(lua::State *, Lua::Vulkan::CommandBuffer &, prosper::ShaderGraphics &, Lua::Vulkan::Buffer &)>(
 	    [](lua::State *l, Lua::Vulkan::CommandBuffer &hCommandBuffer, prosper::ShaderGraphics &graphics, Lua::Vulkan::Buffer &vertexBuffer) { return Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer(l, hCommandBuffer, graphics, vertexBuffer, 0u, 0u); }));
@@ -419,13 +419,13 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 		return Lua::Vulkan::VKDescriptorSet::SetBindingTexture(l, hDescSet, bindingIdx, texture);
 	}));
 	defVkDescriptorSet.def("SetBindingArrayTexture", static_cast<bool (*)(lua::State *, Lua::Vulkan::DescriptorSet &, uint32_t, Lua::Vulkan::Texture &, uint32_t, uint32_t)>(&Lua::Vulkan::VKDescriptorSet::SetBindingArrayTexture));
-	defVkDescriptorSet.def("SetBindingArrayTexture", static_cast<bool (*)(lua::State *, Lua::Vulkan::DescriptorSet &, uint32_t, Lua::Vulkan::Texture &, uint32_t)>([](lua::State *l, Lua::Vulkan::DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Texture &texture, uint32_t arrayIdx) {
-		return Lua::Vulkan::VKDescriptorSet::SetBindingArrayTexture(l, hDescSet, bindingIdx, texture, arrayIdx);
-	}));
+	defVkDescriptorSet.def("SetBindingArrayTexture",
+	  static_cast<bool (*)(lua::State *, Lua::Vulkan::DescriptorSet &, uint32_t, Lua::Vulkan::Texture &, uint32_t)>(
+	    [](lua::State *l, Lua::Vulkan::DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Texture &texture, uint32_t arrayIdx) { return Lua::Vulkan::VKDescriptorSet::SetBindingArrayTexture(l, hDescSet, bindingIdx, texture, arrayIdx); }));
 	defVkDescriptorSet.def("SetBindingUniformBuffer", &Lua::Vulkan::VKDescriptorSet::SetBindingUniformBuffer);
-	defVkDescriptorSet.def("SetBindingUniformBuffer", static_cast<bool (*)(lua::State *, Lua::Vulkan::DescriptorSet &, uint32_t, Lua::Vulkan::Buffer &, uint32_t)>([](lua::State *l, Lua::Vulkan::DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Buffer &buffer, uint32_t startOffset) {
-		return Lua::Vulkan::VKDescriptorSet::SetBindingUniformBuffer(l, hDescSet, bindingIdx, buffer, startOffset, std::numeric_limits<uint32_t>::max());
-	}));
+	defVkDescriptorSet.def("SetBindingUniformBuffer",
+	  static_cast<bool (*)(lua::State *, Lua::Vulkan::DescriptorSet &, uint32_t, Lua::Vulkan::Buffer &, uint32_t)>(
+	    [](lua::State *l, Lua::Vulkan::DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Buffer &buffer, uint32_t startOffset) { return Lua::Vulkan::VKDescriptorSet::SetBindingUniformBuffer(l, hDescSet, bindingIdx, buffer, startOffset, std::numeric_limits<uint32_t>::max()); }));
 	defVkDescriptorSet.def("SetBindingUniformBuffer", static_cast<bool (*)(lua::State *, Lua::Vulkan::DescriptorSet &, uint32_t, Lua::Vulkan::Buffer &)>([](lua::State *l, Lua::Vulkan::DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Buffer &buffer) {
 		return Lua::Vulkan::VKDescriptorSet::SetBindingUniformBuffer(l, hDescSet, bindingIdx, buffer, 0u, std::numeric_limits<uint32_t>::max());
 	}));
@@ -438,9 +438,9 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 		return Lua::Vulkan::VKDescriptorSet::SetBindingUniformBufferDynamic(l, hDescSet, bindingIdx, buffer, 0u, std::numeric_limits<uint32_t>::max());
 	}));
 	defVkDescriptorSet.def("SetBindingStorageBuffer", &Lua::Vulkan::VKDescriptorSet::SetBindingStorageBuffer);
-	defVkDescriptorSet.def("SetBindingStorageBuffer", static_cast<bool (*)(lua::State *, Lua::Vulkan::DescriptorSet &, uint32_t, Lua::Vulkan::Buffer &, uint32_t)>([](lua::State *l, Lua::Vulkan::DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Buffer &buffer, uint32_t startOffset) {
-		return Lua::Vulkan::VKDescriptorSet::SetBindingStorageBuffer(l, hDescSet, bindingIdx, buffer, startOffset, std::numeric_limits<uint32_t>::max());
-	}));
+	defVkDescriptorSet.def("SetBindingStorageBuffer",
+	  static_cast<bool (*)(lua::State *, Lua::Vulkan::DescriptorSet &, uint32_t, Lua::Vulkan::Buffer &, uint32_t)>(
+	    [](lua::State *l, Lua::Vulkan::DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Buffer &buffer, uint32_t startOffset) { return Lua::Vulkan::VKDescriptorSet::SetBindingStorageBuffer(l, hDescSet, bindingIdx, buffer, startOffset, std::numeric_limits<uint32_t>::max()); }));
 	defVkDescriptorSet.def("SetBindingStorageBuffer", static_cast<bool (*)(lua::State *, Lua::Vulkan::DescriptorSet &, uint32_t, Lua::Vulkan::Buffer &)>([](lua::State *l, Lua::Vulkan::DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Buffer &buffer) {
 		return Lua::Vulkan::VKDescriptorSet::SetBindingStorageBuffer(l, hDescSet, bindingIdx, buffer, 0u, std::numeric_limits<uint32_t>::max());
 	}));

@@ -41,7 +41,8 @@ export namespace luabind {
 		{
 		}
 
-		void to_lua(lua::State *L, T const &x) {
+		void to_lua(lua::State *L, T const &x)
+		{
 			if constexpr(std::is_pointer_v<T>) {
 				if(!x)
 					Lua::PushNil(L);

@@ -71,8 +71,8 @@ decltype(baseEnvCameraComponent::DEFAULT_FOV) baseEnvCameraComponent::DEFAULT_FO
 decltype(baseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV) baseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV = 70.f;
 decltype(baseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE) baseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE = 72.f;
 BaseEnvCameraComponent::BaseEnvCameraComponent(pragma::ecs::BaseEntity &ent)
-    : BaseEntityComponent {ent}, m_nearZ(util::FloatProperty::Create(baseEnvCameraComponent::DEFAULT_NEAR_Z)), m_farZ(util::FloatProperty::Create(baseEnvCameraComponent::DEFAULT_FAR_Z)), m_focalDistance(util::FloatProperty::Create(baseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE)), m_projectionMatrix(util::Matrix4Property::Create()),
-      m_viewMatrix(util::Matrix4Property::Create()), m_aspectRatio(util::FloatProperty::Create(1.f))
+    : BaseEntityComponent {ent}, m_nearZ(util::FloatProperty::Create(baseEnvCameraComponent::DEFAULT_NEAR_Z)), m_farZ(util::FloatProperty::Create(baseEnvCameraComponent::DEFAULT_FAR_Z)), m_focalDistance(util::FloatProperty::Create(baseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE)),
+      m_projectionMatrix(util::Matrix4Property::Create()), m_viewMatrix(util::Matrix4Property::Create()), m_aspectRatio(util::FloatProperty::Create(1.f))
 {
 }
 void BaseEnvCameraComponent::Initialize()

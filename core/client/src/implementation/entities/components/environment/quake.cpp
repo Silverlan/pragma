@@ -3,7 +3,6 @@
 
 module;
 
-
 #include "noise/noise.h"
 
 module pragma.client;

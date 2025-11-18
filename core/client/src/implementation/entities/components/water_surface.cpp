@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :entities.components.water_surface;

@@ -638,31 +638,27 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	}
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	Lua::SetTableCFunction(
-	  lua.GetState(), "debug", "start_profiling_task",
-	  +[](lua::State *l) -> int {
+	  lua.GetState(), "debug", "start_profiling_task", +[](lua::State *l) -> int {
 		  std::string name = Lua::CheckString(l, 1);
 		  debug::get_domain().BeginTask(name);
 		  return 0;
 	  });
-	  Lua::SetTableCFunction(
-	    lua.GetState(), "debug", "stop_profiling_task",
-	    +[](lua::State *l) -> int {
-		    debug::get_domain().EndTask();
-		    return 0;
-	    });
+	Lua::SetTableCFunction(
+	  lua.GetState(), "debug", "stop_profiling_task", +[](lua::State *l) -> int {
+		  debug::get_domain().EndTask();
+		  return 0;
+	  });
 #else
 	Lua::SetTableCFunction(
-	  lua.GetState(), "debug", "start_profiling_task",
-	  +[](lua::State *l) -> int {
+	  lua.GetState(), "debug", "start_profiling_task", +[](lua::State *l) -> int {
 		  // Do nothing
 		  return 0;
 	  });
-	  Lua::SetTableCFunction(
-	    lua.GetState(), "debug", "stop_profiling_task",
-	    +[](lua::State *l) -> int {
-		    // Do nothing
-		    return 0;
-	    });
+	Lua::SetTableCFunction(
+	  lua.GetState(), "debug", "stop_profiling_task", +[](lua::State *l) -> int {
+		  // Do nothing
+		  return 0;
+	  });
 #endif
 
 	lua::register_function(lua.GetState(), "print", Lua::console::print);

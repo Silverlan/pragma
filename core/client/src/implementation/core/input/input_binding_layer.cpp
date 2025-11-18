@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :core.input_binding_layer;

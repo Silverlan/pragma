@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :entities.components.env_sky_camera;

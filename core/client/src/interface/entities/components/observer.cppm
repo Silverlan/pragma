@@ -9,13 +9,12 @@ export module pragma.client:entities.components.observer;
 export import :entities.components.entity;
 
 export namespace pragma {
-		namespace cObserverComponent {
+	namespace cObserverComponent {
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_CALC_VIEW;
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_CALC_VIEW_OFFSET;
 	}
-class DLLCLIENT CObserverComponent final : public BaseObserverComponent, public CBaseNetComponent {
+	class DLLCLIENT CObserverComponent final : public BaseObserverComponent, public CBaseNetComponent {
 	  public:
-
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		CObserverComponent(pragma::ecs::BaseEntity &ent);

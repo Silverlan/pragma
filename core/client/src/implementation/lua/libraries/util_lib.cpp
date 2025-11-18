@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :scripting.lua.libraries.util;
@@ -34,7 +33,7 @@ int Lua::util::Client::create_particle_tracer(lua::State *l)
 	const auto &col = Lua::IsSet(l, 4) ? Lua::Check<::Color>(l, 4) : bulletInfo::DEFAULT_TRACER_COLOR;
 	auto length = Lua::IsSet(l, 5) ? Lua::CheckNumber(l, 5) : bulletInfo::DEFAULT_TRACER_LENGTH;
 	auto speed = Lua::IsSet(l, 6) ? Lua::CheckNumber(l, 6) : bulletInfo::DEFAULT_TRACER_SPEED;
-	std::string mat = Lua::IsSet(l, 7) ? Lua::CheckString(l, 7) : std::string{bulletInfo::DEFAULT_TRACER_MATERIAL};
+	std::string mat = Lua::IsSet(l, 7) ? Lua::CheckString(l, 7) : std::string {bulletInfo::DEFAULT_TRACER_MATERIAL};
 	auto bloomScale = Lua::IsSet(l, 8) ? Lua::CheckNumber(l, 8) : bulletInfo::DEFAULT_TRACER_BLOOM;
 
 	auto *particle = pragma::get_cgame()->CreateParticleTracer<pragma::ecs::CParticleSystemComponent>(start, end, static_cast<float>(radius), col, static_cast<float>(length), static_cast<float>(speed), mat, static_cast<float>(bloomScale));

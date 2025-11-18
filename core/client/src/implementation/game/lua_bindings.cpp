@@ -3,7 +3,6 @@
 
 module;
 
-
 #undef LEFT
 #undef RIGHT
 #undef TOP

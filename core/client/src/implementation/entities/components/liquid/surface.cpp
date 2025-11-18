@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :entities.components.liquid_surface;

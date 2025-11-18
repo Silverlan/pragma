@@ -3,7 +3,6 @@
 
 module;
 
-
 #undef GetClassName
 
 module pragma.client;

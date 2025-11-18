@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.server;
 import :scripting.lua.libraries.ai;
 
@@ -116,8 +115,9 @@ void Lua::ai::server::register_library(Lua::Interface &lua)
 	auto cdPlayLayeredActivity = luabind::class_<TaskWrapperPlayLayeredActivity, Lua::ai::TaskWrapper>("TaskPlayLayeredActivity");
 	cdPlayLayeredActivity.add_static_constant("PARAMETER_ACTIVITY", umath::to_integral(pragma::ai::TaskPlayLayeredActivity::Parameter::Activity));
 	cdPlayLayeredActivity.add_static_constant("PARAMETER_ANIMATION_SLOT", umath::to_integral(pragma::ai::TaskPlayLayeredActivity::Parameter::AnimationSlot));
-	cdPlayLayeredActivity.def("SetActivity",
-	  static_cast<void (*)(lua::State *, TaskWrapperPlayLayeredActivity &, std::underlying_type_t<pragma::Activity>)>([](lua::State *l, TaskWrapperPlayLayeredActivity &task, std::underlying_type_t<pragma::Activity> activity) { task->SetActivity(static_cast<pragma::Activity>(activity)); }));
+	cdPlayLayeredActivity.def("SetActivity", static_cast<void (*)(lua::State *, TaskWrapperPlayLayeredActivity &, std::underlying_type_t<pragma::Activity>)>([](lua::State *l, TaskWrapperPlayLayeredActivity &task, std::underlying_type_t<pragma::Activity> activity) {
+		task->SetActivity(static_cast<pragma::Activity>(activity));
+	}));
 	cdPlayLayeredActivity.def("SetAnimationSlot", static_cast<void (*)(lua::State *, TaskWrapperPlayLayeredActivity &, int32_t)>([](lua::State *l, TaskWrapperPlayLayeredActivity &task, int32_t animationSlot) { task->SetAnimationSlot(animationSlot); }));
 	modAi[cdPlayLayeredActivity];
 

@@ -3,8 +3,6 @@
 
 module;
 
-
-
 module pragma.client;
 
 import :client_state;

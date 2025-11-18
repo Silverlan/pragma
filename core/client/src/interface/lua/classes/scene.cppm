@@ -3,7 +3,6 @@
 
 module;
 
-
 export module pragma.client:scripting.lua.bindings.scene;
 export import :entities.components;
 
@@ -53,12 +52,13 @@ export namespace pragma::scripting::lua_core::bindings {
 		defRaster.def("GetPrepassMode", &pragma::CRasterizationRendererComponent::GetPrepassMode);
 		defRaster.def("SetSSAOEnabled", &pragma::CRasterizationRendererComponent::SetSSAOEnabled);
 		defRaster.def("IsSSAOEnabled", &pragma::CRasterizationRendererComponent::IsSSAOEnabled);
-		defRaster.def("GetLightSourceDescriptorSet", static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua::State *, pragma::CRasterizationRendererComponent &)>([](lua::State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> {
-			auto *ds = pragma::CShadowManagerComponent::GetShadowManager()->GetDescriptorSet();
-			if(ds == nullptr)
-				return nullptr;
-			return ds->GetDescriptorSetGroup().shared_from_this();
-		}));
+		defRaster.def("GetLightSourceDescriptorSet",
+		  static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua::State *, pragma::CRasterizationRendererComponent &)>([](lua::State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> {
+			  auto *ds = pragma::CShadowManagerComponent::GetShadowManager()->GetDescriptorSet();
+			  if(ds == nullptr)
+				  return nullptr;
+			  return ds->GetDescriptorSetGroup().shared_from_this();
+		  }));
 		defRaster.def("GetPostPrepassDepthTexture",
 		  static_cast<std::shared_ptr<prosper::Texture> (*)(lua::State *, pragma::CRasterizationRendererComponent &)>([](lua::State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::Texture> { return renderer.GetPrepass().textureDepth; }));
 		defRaster.def("GetPostProcessingDepthDescriptorSet",

@@ -33,10 +33,7 @@ static LaunchParaMap g_LaunchParameters;
 
 LaunchParaMap *GetLaunchParaMap() { return &g_LaunchParameters; }
 
-void RegisterLaunchParameter(std::string name, const LaunchParameterFunc &function)
-{
-	g_LaunchParameters.RegisterParameter(name, function);
-}
+void RegisterLaunchParameter(std::string name, const LaunchParameterFunc &function) { g_LaunchParameters.RegisterParameter(name, function); }
 
 void RegisterLaunchParameterHelp(std::string name, const LaunchParameterFunc &function, std::string descCmd, std::string descHelp)
 {

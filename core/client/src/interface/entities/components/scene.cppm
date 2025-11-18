@@ -80,13 +80,13 @@ export class DLLCLIENT SceneRenderDesc {
 };
 
 export namespace pragma {
-		namespace cSceneComponent {
+	namespace cSceneComponent {
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_ACTIVE_CAMERA_CHANGED;
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_BUILD_RENDER_QUEUES;
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_RENDERER_CHANGED;
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_POST_RENDER_PREPASS;
 	}
-class DLLCLIENT CSceneComponent final : public BaseEntityComponent {
+	class DLLCLIENT CSceneComponent final : public BaseEntityComponent {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 

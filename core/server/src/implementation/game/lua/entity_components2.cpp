@@ -5,7 +5,6 @@ module;
 
 #include "pragma/lua/ostream_operator_alias.hpp"
 
-
 // --template-include-location
 
 module pragma.server;

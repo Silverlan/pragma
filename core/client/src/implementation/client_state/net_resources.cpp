@@ -3,7 +3,6 @@
 
 module;
 
-
 #define RESOURCE_TRANSFER_VERBOSE 0
 
 module pragma.client;

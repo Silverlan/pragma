@@ -4,7 +4,6 @@
 #ifndef __LUA_SHADER_CONVERTERS_HPP__
 #define __LUA_SHADER_CONVERTERS_HPP__
 
-
 namespace prosper {
 	class Shader;
 };

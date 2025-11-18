@@ -145,8 +145,8 @@ void umath::normalize_uv_coordinates(Vector2 &uv)
 
 pragma::ModelSubMesh::ModelSubMesh()
     : std::enable_shared_from_this<pragma::ModelSubMesh>(), m_skinTextureIndex(0), m_numAlphas(0), m_alphas(::util::make_shared<std::vector<Vector2>>()), m_indexData(::util::make_shared<std::vector<uint8_t>>()), m_vertexWeights(::util::make_shared<std::vector<umath::VertexWeight>>()),
-      m_extendedVertexWeights(::util::make_shared<std::vector<umath::VertexWeight>>()), m_vertices(::util::make_shared<std::vector<umath::Vertex>>()), m_uvSets {::util::make_shared<std::unordered_map<std::string, std::vector<Vector2>>>()}, m_extensions {udm::Property::Create(udm::Type::Element)},
-      m_uuid {util::generate_uuid_v4()}
+      m_extendedVertexWeights(::util::make_shared<std::vector<umath::VertexWeight>>()), m_vertices(::util::make_shared<std::vector<umath::Vertex>>()), m_uvSets {::util::make_shared<std::unordered_map<std::string, std::vector<Vector2>>>()},
+      m_extensions {udm::Property::Create(udm::Type::Element)}, m_uuid {util::generate_uuid_v4()}
 {
 }
 pragma::ModelSubMesh::ModelSubMesh(const pragma::ModelSubMesh &other)
@@ -1163,18 +1163,42 @@ void pragma::model::create_box(pragma::ModelSubMesh &mesh, const BoxCreateInfo &
 	  Vector3(min.x, max.y, max.z)  // 7
 	};
 	std::vector<Vector3> verts {
-	  uniqueVertices[0], uniqueVertices[6], uniqueVertices[7], // 1
-	  uniqueVertices[0], uniqueVertices[7], uniqueVertices[5], // 1
-	  uniqueVertices[3], uniqueVertices[0], uniqueVertices[5], // 2
-	  uniqueVertices[3], uniqueVertices[1], uniqueVertices[0], // 2
-	  uniqueVertices[2], uniqueVertices[0], uniqueVertices[1], // 3
-	  uniqueVertices[2], uniqueVertices[6], uniqueVertices[0], // 3
-	  uniqueVertices[7], uniqueVertices[6], uniqueVertices[2], // 4
-	  uniqueVertices[4], uniqueVertices[7], uniqueVertices[2], // 4
-	  uniqueVertices[4], uniqueVertices[1], uniqueVertices[3], // 5
-	  uniqueVertices[1], uniqueVertices[4], uniqueVertices[2], // 5
-	  uniqueVertices[4], uniqueVertices[3], uniqueVertices[5], // 6
-	  uniqueVertices[4], uniqueVertices[5], uniqueVertices[7], // 6
+	  uniqueVertices[0],
+	  uniqueVertices[6],
+	  uniqueVertices[7], // 1
+	  uniqueVertices[0],
+	  uniqueVertices[7],
+	  uniqueVertices[5], // 1
+	  uniqueVertices[3],
+	  uniqueVertices[0],
+	  uniqueVertices[5], // 2
+	  uniqueVertices[3],
+	  uniqueVertices[1],
+	  uniqueVertices[0], // 2
+	  uniqueVertices[2],
+	  uniqueVertices[0],
+	  uniqueVertices[1], // 3
+	  uniqueVertices[2],
+	  uniqueVertices[6],
+	  uniqueVertices[0], // 3
+	  uniqueVertices[7],
+	  uniqueVertices[6],
+	  uniqueVertices[2], // 4
+	  uniqueVertices[4],
+	  uniqueVertices[7],
+	  uniqueVertices[2], // 4
+	  uniqueVertices[4],
+	  uniqueVertices[1],
+	  uniqueVertices[3], // 5
+	  uniqueVertices[1],
+	  uniqueVertices[4],
+	  uniqueVertices[2], // 5
+	  uniqueVertices[4],
+	  uniqueVertices[3],
+	  uniqueVertices[5], // 6
+	  uniqueVertices[4],
+	  uniqueVertices[5],
+	  uniqueVertices[7], // 6
 	};
 	std::vector<Vector3> faceNormals {Vector3(-1, 0, 0), Vector3(-1, 0, 0), Vector3(0, 0, -1), Vector3(0, 0, -1), Vector3(0, -1, 0), Vector3(0, -1, 0), Vector3(0, 0, 1), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(1, 0, 0), Vector3(0, 1, 0), Vector3(0, 1, 0)};
 	std::vector<::Vector2> uvs {

@@ -3,7 +3,6 @@
 
 module;
 
-
 #include <cassert>
 
 module pragma.client;

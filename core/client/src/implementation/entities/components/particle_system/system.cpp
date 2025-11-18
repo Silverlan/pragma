@@ -1151,10 +1151,10 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua::State *l, luabind::
 	}))];
 	defCParticleSystem.scope[luabind::def("register_initializer",
 	  static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaParticleModifierManager::Type::Initializer, name, oClass); }))];
-	defCParticleSystem
-	  .scope[luabind::def("register_operator", static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaParticleModifierManager::Type::Operator, name, oClass); }))];
-	defCParticleSystem
-	  .scope[luabind::def("register_renderer", static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaParticleModifierManager::Type::Renderer, name, oClass); }))];
+	defCParticleSystem.scope[luabind::def("register_operator",
+	  static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaParticleModifierManager::Type::Operator, name, oClass); }))];
+	defCParticleSystem.scope[luabind::def("register_renderer",
+	  static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaParticleModifierManager::Type::Renderer, name, oClass); }))];
 	defCParticleSystem
 	  .scope[luabind::def("register_emitter", static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &name, luabind::object oClass) { register_particle_modifier(l, pragma::LuaParticleModifierManager::Type::Emitter, name, oClass); }))];
 

@@ -4,7 +4,6 @@
 #ifndef __LUA_GUI_ELEMENT_CONVERTERS_HPP__
 #define __LUA_GUI_ELEMENT_CONVERTERS_HPP__
 
-
 import pragma.gui;
 
 namespace luabind {

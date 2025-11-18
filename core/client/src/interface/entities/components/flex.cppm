@@ -9,13 +9,12 @@ export module pragma.client:entities.components.flex;
 import :audio;
 
 export namespace pragma {
-		namespace cFlexComponent {
+	namespace cFlexComponent {
 		using namespace baseFlexComponent;
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_FLEX_CONTROLLERS_UPDATED;
 	}
-class DLLCLIENT CFlexComponent final : public BaseFlexComponent {
+	class DLLCLIENT CFlexComponent final : public BaseFlexComponent {
 	  public:
-
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 

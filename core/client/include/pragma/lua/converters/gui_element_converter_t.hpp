@@ -4,7 +4,6 @@
 #ifndef __LUA_GUI_ELEMENT_CONVERTERS_T_HPP__
 #define __LUA_GUI_ELEMENT_CONVERTERS_T_HPP__
 
-
 template<typename T, typename TConverter>
 template<class U>
 T luabind::gui_element_converter<T, TConverter>::to_cpp(lua_State *L, U u, int index)

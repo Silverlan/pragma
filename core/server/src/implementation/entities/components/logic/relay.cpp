@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.server;
 import :entities.components.logic.relay;
 

@@ -18,7 +18,7 @@ export namespace pragma {
 		mutable CallbackHandle render;
 		std::function<PostProcessingEffectData::Flags()> getFlags = nullptr;
 	};
-		namespace cRendererComponent {
+	namespace cRendererComponent {
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_RELOAD_RENDER_TARGET;
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_RELOAD_BLOOM_RENDER_TARGET;
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_BEGIN_RENDERING;
@@ -33,9 +33,8 @@ export namespace pragma {
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_RENDER;
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_RENDER_TARGET_RELOADED;
 	}
-class DLLCLIENT CRendererComponent final : public BaseEntityComponent {
+	class DLLCLIENT CRendererComponent final : public BaseEntityComponent {
 	  public:
-
 		enum class StandardPostProcessingWeight : uint32_t { Fog = 100'000, MotionBlur = 200'000, DoF = 300'000, Bloom = 400'000, ToneMapping = 500'000, Fxaa = 600'000 };
 
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);

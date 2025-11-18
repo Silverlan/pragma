@@ -4,7 +4,6 @@
 #ifndef __LUA_SHADER_CONVERTERS_T_HPP__
 #define __LUA_SHADER_CONVERTERS_T_HPP__
 
-
 namespace pragma {
 	class ShaderEntity;
 	class ShaderSceneLit;

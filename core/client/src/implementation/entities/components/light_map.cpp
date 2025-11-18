@@ -3,8 +3,6 @@
 
 module;
 
-
-
 #include <GuillotineBinPack.h>
 
 module pragma.client;

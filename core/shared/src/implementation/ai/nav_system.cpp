@@ -1128,7 +1128,7 @@ std::shared_ptr<RcPathResult> pragma::nav::Mesh::FindPath(const Vector3 &start, 
 		Vector3 endPoint;
 		auto statusEnd = navQuery->findNearestPoly(&end[0], &extents[0], &filter, &endRef, &endPoint[0]);
 		if(!dtStatusFailed(statusEnd) && endRef != 0) {
-			int maxPath = 128;                                                                      // TODO
+			int maxPath = 128;                                                                         // TODO
 			auto r = ::util::make_shared<RcPathResult>(mesh, navQuery, startPoint, endPoint, maxPath); // TODO
 			int32_t pathCount = 0;
 			auto findStatus = navQuery->findPath(startRef, endRef, &startPoint[0], &endPoint[0], &filter, &r->path[0], &pathCount, maxPath);

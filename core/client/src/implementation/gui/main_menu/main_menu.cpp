@@ -3,7 +3,6 @@
 
 module;
 
-
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
 
 #undef PlaySound

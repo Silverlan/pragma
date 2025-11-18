@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.server;
 import :scripting.lua.classes.model_mesh;
 

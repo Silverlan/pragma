@@ -3,7 +3,6 @@
 
 module;
 
-
 #undef DrawState
 
 module pragma.client;

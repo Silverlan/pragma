@@ -3,7 +3,6 @@
 
 module;
 
-
 export module pragma.client:scripting.lua.classes.vulkan;
 
 export import :rendering.shaders;

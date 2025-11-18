@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 static std::optional<std::string> find_asset_file(const std::string &name, pragma::asset::Type type)
@@ -260,7 +259,8 @@ void CGame::RegisterLuaLibraries()
 	  luabind::def(
 	    "save_image", +[](lua::State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format, float quality) { return save_image(l, imgBuffer, fileName, format, quality); }),
 	  luabind::def(
-	    "save_image", +[](lua::State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format, float quality, const pragma::LuaCore::LuaThreadWrapper &tw) { return save_image(l, imgBuffer, fileName, format, quality, const_cast<pragma::LuaCore::LuaThreadWrapper *>(&tw)); }),
+	    "save_image",
+	    +[](lua::State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format, float quality, const pragma::LuaCore::LuaThreadWrapper &tw) { return save_image(l, imgBuffer, fileName, format, quality, const_cast<pragma::LuaCore::LuaThreadWrapper *>(&tw)); }),
 	  luabind::def("save_image", static_cast<std::pair<bool, std::optional<std::string>> (*)(lua::State *, uimg::ImageBuffer &, std::string, uimg::ImageFormat)>(save_image)),
 	  luabind::def("save_image", static_cast<bool (*)(lua::State *, luabind::table<>, std::string, uimg::TextureInfo &, bool)>(save_image)), luabind::def("save_image", static_cast<bool (*)(lua::State *, luabind::table<>, std::string, uimg::TextureInfo &)>(save_image)),
 	  luabind::def("save_image", static_cast<bool (*)(lua::State *, prosper::IImage &, std::string, uimg::TextureInfo &)>(save_image)), luabind::def("load_image", static_cast<luabind::object (*)(lua::State *, const std::string &, bool, uimg::Format)>(load_image)),
@@ -275,15 +275,15 @@ void CGame::RegisterLuaLibraries()
 	  luabind::def(
 	    "cubemap_to_equirectangular_texture",
 	    +[](lua::State *l, prosper::Texture &cubemap) -> luabind::
-	                                                   object {
-		                                                   auto *shader = static_cast<pragma::ShaderCubemapToEquirectangular *>(pragma::get_cengine()->GetShader("cubemap_to_equirectangular").get());
-		                                                   if(shader == nullptr)
-			                                                   return {};
-		                                                   auto equiRect = shader->CubemapToEquirectangularTexture(cubemap);
-		                                                   if(equiRect == nullptr)
-			                                                   return {};
-		                                                   return {l, equiRect};
-	                                                   }),
+	                                                    object {
+		                                                    auto *shader = static_cast<pragma::ShaderCubemapToEquirectangular *>(pragma::get_cengine()->GetShader("cubemap_to_equirectangular").get());
+		                                                    if(shader == nullptr)
+			                                                    return {};
+		                                                    auto equiRect = shader->CubemapToEquirectangularTexture(cubemap);
+		                                                    if(equiRect == nullptr)
+			                                                    return {};
+		                                                    return {l, equiRect};
+	                                                    }),
 	  luabind::def(
 	    "equirectangular_to_cubemap_texture", +[](lua::State *l, prosper::Texture &equiRect, uint32_t resolution) -> luabind::object {
 		    auto *shader = static_cast<pragma::ShaderEquirectangularToCubemap *>(pragma::get_cengine()->GetShader("equirectangular_to_cubemap").get());

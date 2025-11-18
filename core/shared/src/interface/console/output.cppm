@@ -48,7 +48,7 @@ export {
 		  public:
 			friend DLLNETWORK std::basic_ostream<char, std::char_traits<char>> &endl(std::basic_ostream<char, std::char_traits<char>> &os);
 			template<class T>
-			friend Con::c_crit & ::operator<<(Con::c_crit &con, const T &t);
+			friend Con::c_crit & ::operator<<(Con::c_crit & con, const T & t);
 		};
 		class DLLNETWORK c_csv {};
 		class DLLNETWORK c_ccl {};

@@ -131,7 +131,7 @@ export namespace pragma {
 		float bloomThreshold = 1.f;
 	};
 
-		namespace cRasterizationRendererComponent {
+	namespace cRasterizationRendererComponent {
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_RECORD_PREPASS;
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_RECORD_LIGHTING_PASS;
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_PRE_EXECUTE_PREPASS;
@@ -157,9 +157,8 @@ export namespace pragma {
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_MT_END_RECORD_VIEW;
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_MT_BEGIN_RECORD_PREPASS;
 	}
-class DLLCLIENT CRasterizationRendererComponent final : public BaseEntityComponent {
+	class DLLCLIENT CRasterizationRendererComponent final : public BaseEntityComponent {
 	  public:
-
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		static void UpdateLightmap(CLightMapComponent &lightMapC);

@@ -27,7 +27,6 @@ export namespace pragma {
 	}
 	class DLLCLIENT CModelComponent final : public BaseModelComponent, public CBaseNetComponent {
 	  public:
-
 		enum class StateFlags : uint8_t {
 			None = 0u,
 			AutoLodDisabled = 1u,

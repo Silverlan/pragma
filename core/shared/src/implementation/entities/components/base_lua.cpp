@@ -1661,12 +1661,8 @@ void Lua::register_base_entity_component(luabind::module_ &modEnts)
 	// classDef.def("OnEntityComponentRemoved",&::pragma::BaseLuaBaseEntityComponent::Lua_OnEntityComponentRemoved,&::pragma::BaseLuaBaseEntityComponent::default_Lua_OnEntityComponentRemoved);
 	// HandleEvent is variadic and can't be defined like this in luabind!
 	//classDef.def("HandleEvent",&::pragma::BaseLuaBaseEntityComponent::Lua_HandleEvent,&::pragma::BaseLuaBaseEntityComponent::default_Lua_HandleEvent);
-	classDef.def("Save", &::pragma::BaseLuaBaseEntityComponent::Lua_Save, +[](lua::State *l, BaseLuaBaseEntityComponent *hComponent, ::udm::LinkedPropertyWrapper udm) {
-		::pragma::BaseLuaBaseEntityComponent::default_Lua_Save(l, *hComponent, udm);
-	});
-	classDef.def("Load", &::pragma::BaseLuaBaseEntityComponent::Lua_Load, +[](lua::State *l, BaseLuaBaseEntityComponent *hComponent, ::udm::LinkedPropertyWrapper udm, uint32_t version) {
-		::pragma::BaseLuaBaseEntityComponent::default_Lua_Load(l, *hComponent, udm, version);
-	});
+	classDef.def("Save", &::pragma::BaseLuaBaseEntityComponent::Lua_Save, +[](lua::State *l, BaseLuaBaseEntityComponent *hComponent, ::udm::LinkedPropertyWrapper udm) { ::pragma::BaseLuaBaseEntityComponent::default_Lua_Save(l, *hComponent, udm); });
+	classDef.def("Load", &::pragma::BaseLuaBaseEntityComponent::Lua_Load, +[](lua::State *l, BaseLuaBaseEntityComponent *hComponent, ::udm::LinkedPropertyWrapper udm, uint32_t version) { ::pragma::BaseLuaBaseEntityComponent::default_Lua_Load(l, *hComponent, udm, version); });
 	modEnts[classDef];
 }
 

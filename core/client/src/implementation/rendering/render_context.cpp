@@ -3,7 +3,6 @@
 
 module;
 
-
 module pragma.client;
 
 import :rendering.render_apis;

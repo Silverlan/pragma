@@ -15,7 +15,7 @@ export namespace pragma {
 	void clear_articulated_buffers();
 	const std::shared_ptr<prosper::IUniformResizableBuffer> &get_instance_bone_buffer();
 
-		namespace cAnimatedComponent {
+	namespace cAnimatedComponent {
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_SKELETON_UPDATED;
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_BONE_MATRICES_UPDATED;
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_BONE_BUFFER_INITIALIZED;
@@ -23,7 +23,7 @@ export namespace pragma {
 	namespace cAnimatedComponent {
 		using namespace baseAnimatedComponent;
 	}
-class DLLCLIENT CAnimatedComponent final : public BaseAnimatedComponent, public CBaseNetComponent {
+	class DLLCLIENT CAnimatedComponent final : public BaseAnimatedComponent, public CBaseNetComponent {
 	  public:
 		enum class StateFlags : uint8_t { None = 0u, BoneBufferDirty = 1u, EnableSkeletonUpdateCallbacks = BoneBufferDirty << 1u };
 

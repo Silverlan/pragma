@@ -29,17 +29,13 @@ void LaunchParaMap::RegisterParameterHelp(std::string name, const LaunchParamete
 	LAUNCHPARAMETERS_HELP << pre.str() << sp << descHelp << "\n";
 }
 
-static LaunchParaMap *g_LaunchParameters = nullptr;
+static LaunchParaMap g_LaunchParameters;
 
-LaunchParaMap *GetLaunchParaMap() { return g_LaunchParameters; }
+LaunchParaMap *GetLaunchParaMap() { return &g_LaunchParameters; }
 
 void RegisterLaunchParameter(std::string name, const LaunchParameterFunc &function)
 {
-	if(g_LaunchParameters == nullptr) {
-		static LaunchParaMap map;
-		g_LaunchParameters = &map;
-	}
-	g_LaunchParameters->RegisterParameter(name, function);
+	g_LaunchParameters.RegisterParameter(name, function);
 }
 
 void RegisterLaunchParameterHelp(std::string name, const LaunchParameterFunc &function, std::string descCmd, std::string descHelp)
@@ -55,5 +51,5 @@ void RegisterLaunchParameterHelp(std::string name, const LaunchParameterFunc &fu
 	}
 	for(int j = 0; j < l; j++)
 		sp += " ";
-	g_LaunchParameters->LAUNCHPARAMETERS_HELP << pre.str() << sp << descHelp << "\n";
+	g_LaunchParameters.LAUNCHPARAMETERS_HELP << pre.str() << sp << descHelp << "\n";
 }

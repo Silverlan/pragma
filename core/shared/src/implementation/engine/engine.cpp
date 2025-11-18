@@ -85,6 +85,8 @@ pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullpt
 {
 	g_engine = this;
 
+	ds::register_base_types();
+	ds::Texture::register_type();
 	register_shared_convars(*console_system::server::get_convar_map());
 	register_launch_parameters(*GetLaunchParaMap());
 

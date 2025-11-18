@@ -285,7 +285,10 @@ static void initialize_convar_map(ConVarMap *&r)
 		return register_concommand(cvar, function, pragma::console::ConVarFlags::None, help);                                                                                                                                                                                                    \
 	}                                                                                                                                                                                                                                                                                            \
 	bool console_system::glname::register_concommand(const std::string &cvar, void (*function)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &), const std::string &help) { return register_concommand(cvar, function, pragma::console::ConVarFlags::None, help); }    \
-	ConVarMap *console_system::glname::get_convar_map() { return g_ConVars##suffix; }
+	ConVarMap *console_system::glname::get_convar_map() {    \
+		initialize_convar_map(g_ConVars##suffix);    \
+		return g_ConVars##suffix;    \
+	}
 
 cvar_newglobal(Sv, server);
 cvar_newglobal(Cl, client);

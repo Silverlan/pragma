@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 #ifdef _WIN32
 	deleteFromUpdateFiles(std::string {"bin"} + pathSeparator + "updater.exe");
 #else
-    //This shouldn't be the case here, as we can still replace an file during self-run.
+	//This shouldn't be the case here, as we can still replace an file during self-run.
 	deleteFromUpdateFiles(std::string {"bin"} + pathSeparator + "updater");
 #endif
 
@@ -80,8 +80,8 @@ int main(int argc, char *argv[])
 
 	// Copy files from update folder to root folder
 	auto pUpdatePath = std::filesystem::path(updatePath).lexically_normal();
-	for (const auto &entry : std::filesystem::recursive_directory_iterator(updatePath)) {
-		if (std::filesystem::is_regular_file(entry)) {
+	for(const auto &entry : std::filesystem::recursive_directory_iterator(updatePath)) {
+		if(std::filesystem::is_regular_file(entry)) {
 			auto fullSrcPath = entry.path().string();
 			auto relPath = std::filesystem::path(fullSrcPath).lexically_normal().lexically_relative(pUpdatePath);
 
@@ -93,11 +93,11 @@ int main(int argc, char *argv[])
 				std::filesystem::create_directories(newPath.parent_path());
 				success = std::filesystem::copy_file(fullSrcPath, newPath, std::filesystem::copy_options::overwrite_existing);
 			}
-			catch (const std::filesystem::filesystem_error &err) {
+			catch(const std::filesystem::filesystem_error &err) {
 				std::cout << "Failed to copy file '" << relPath << "': " << err.what() << "!" << std::endl;
 				return update_failed();
 			}
-			if (success == false) {
+			if(success == false) {
 				std::cout << "Failed to copy file '" << relPath << "'!" << std::endl;
 				return update_failed();
 			}

@@ -17,12 +17,12 @@ get_gl_submodule("eigen",               "libeigen/eigen",                   "b66
 get_gh_submodule("exprtk",              "ArashPartow/exprtk",               "f46bffcd6966d38a09023fb37ba9335214c9b959")
 get_gh_submodule("freetype",            "aseprite/freetype2",               "9a2d6d97b2d8a5d22d02948b783df12b764afa2d")
 get_gh_submodule("glfw",                "Silverlan/glfw",                   "8d6f5d9bc8477057dccc1190d46b0945219e2f33", "feat/drag-callback")
-get_gh_submodule("gli",                 "Silverlan/gli",                    "20afe70e57c334b44925f864906da910934d93bb", "feat/cxx_module")
+get_gh_submodule("gli",                 "Silverlan/gli",                    "2938076944739166235750f3ccdce37c6cac2d31")
 get_gh_submodule("libnoise",            "qknight/libnoise",                 "9ce0737b55812f7de907e86dc633724524e3a8e8")
 get_gh_submodule("libsamplerate",       "libsndfile/libsamplerate",         "15c392d")
 if platform == "linux":
     get_gh_submodule("linenoise.cpp",   "Silverlan/linenoise.cpp",          "74ae32ebf22d18a7e22afe1eeecf04171311ebcf")
-get_gh_submodule("luabind",             "Silverlan/luabind-deboostified",   "d1f90453ae6d95de69ac383b09be7a5a547d27ad", "feat/cxx_module")
+get_gh_submodule("luabind",             "Silverlan/luabind-deboostified",   "4c1c1f998f6dc3eb631c14a46a7e61a9c18b1179)
 get_gh_submodule("luajit",              "Silverlan/LuaJIT",                 "cb42653","v2.1")
 get_gh_submodule("lunasvg",             "sammycage/lunasvg",                "7b6970f") # v3.4.0
 get_gh_submodule("miniball",            "Silverlan/miniball",               "609fbf16e7a9cc3dc8f88e4d1c7a1d8ead842bb1")
@@ -39,7 +39,7 @@ get_gh_submodule("spdlog",              "Silverlan/spdlog",                 "d1e
 get_gh_submodule("squish",              "ivan-kulikov-dev/squish",          "aeb01b8f88f97c994baff8453870f3e8a347afd7")
 get_gh_submodule("tinygltf",            "syoyo/tinygltf",                   "37250b3","release") # v2.9.6
 get_gh_submodule("vorbis",              "xiph/vorbis",                      "43bbff0141028e58d476c1d5fd45dd5573db576d")
-get_gh_submodule("vkvparser",           "Silverlan/VKVParser",              "702184a5aa4c9fdfa8ab9cf3614626c67970ff5c", "feat/cxx_module")
+get_gh_submodule("vkvparser",           "Silverlan/VKVParser",              "380f5527ec57ac7ce540da67a86a23dbfdb593d9")
 get_gh_submodule("vtflib",              "Silverlan/VTFLib",                 "3e6b80bcd6dacf6bd4a35666869464fac55051cc")
 
 os.chdir(curDir)

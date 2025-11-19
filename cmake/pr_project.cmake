@@ -29,8 +29,8 @@ function(pr_setup_default_project_settings TARGET_NAME)
         target_compile_definitions(${TARGET_NAME} PRIVATE "_WIN32_WINNT=0x0A00") # Windows 10
     endif()
 
-    if(UNIX)
-        target_link_options(${TARGET_NAME} PRIVATE --no-undefined)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_link_options(${TARGET_NAME} PRIVATE "-Wl,--no-undefined")
     endif()
 
     # Due to msvc compiler bugs, we introduce a few macros as temporary workarounds.

@@ -516,6 +516,17 @@ print_msg("Building third-party libraries...")
 if build_all:
 	execscript(scripts_dir +"/build_third_party_libs.py")
 
+# gcc
+os.chdir(deps_dir)
+gcc_root = normalize_path(os.getcwd() +"/gcc")
+if platform == "linux":
+	if not Path(gcc_root).is_dir():
+		print_msg("gcc not found. Downloading...")
+		mkdir("gcc",cd=True)
+		http_extract("https://github.com/Silverlan/test_gcc15/releases/download/2025-11-17/gcc-15.2.0.tar.xz",format="tar.xz")
+	os.chdir(gcc_root)
+	modules_json_path = gcc_root +"/lib64/libstdc++.modules.json"
+
 # We need at least CMake 4.1.2 for proper C++20 module and C++23 "import std" support.
 # Since the CMake version that is shipped with most operating systems is older, we'll
 # ship it ourselves for now and use our shipped version.
@@ -869,6 +880,9 @@ if not deps_only:
 	cmake_args += [
 		"-DCMAKE_INSTALL_PREFIX:PATH=" +install_dir +""
 	]
+
+	if platform == "linux":
+		cmake_args += ["-DCMAKE_CXX_STDLIB_MODULES_JSON=" +modules_json_path]
 
 	vtune_enabled = False
 	if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:

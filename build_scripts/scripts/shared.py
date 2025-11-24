@@ -98,17 +98,15 @@ def cmake_configure(scriptPath,generator,toolsetArgs=None,additionalArgs=[],cfla
 	# print("Running CMake configure command...")
 
 	def _quote(arg: str) -> str:
-		# Handle -DKEY=VALUE specially
 		if arg.startswith("-D") and "=" in arg:
 			key, val = arg.split("=", 1)
 			if " " in val:
 				val = f'"{val}"'
 			return f"{key}={val}"
-		# Otherwise, only quote if there's whitespace
 		return f'"{arg}"' if " " in arg else arg
 
 	cmd = shlex.join(args)
-	print("Running CMake configure command:", cmd)
+	print("Running CMake configure command:", cmd, flush=True)
 
 	try:
 		subprocess.run(args,check=True)
@@ -117,7 +115,7 @@ def cmake_configure(scriptPath,generator,toolsetArgs=None,additionalArgs=[],cfla
 			cmd_line = subprocess.list2cmdline(e.cmd)
 		else:
 			cmd_line = shlex.join(e.cmd)
-		print("Configure command failed:\n\n", cmd_line)
+		print("Configure command failed:\n\n", cmd_line, flush=True)
 		raise
 
 def cmake_build(buildConfig,targets=None):

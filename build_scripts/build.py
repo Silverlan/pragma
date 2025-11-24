@@ -224,7 +224,7 @@ toolsetCFlags = None
 def cmake_configure_def_toolset(scriptPath,generator,additionalArgs=[],additionalCFlags=[]):
 	cflags = additionalCFlags
 	if toolsetCFlags is not None:
-		cflags += toolsetCFlags;
+		cflags += toolsetCFlags
 	cmake_configure(scriptPath,generator,toolsetArgs,additionalArgs,cflags)
 
 if platform == "win32":
@@ -882,7 +882,6 @@ if not deps_only:
 	print_msg("Configuring Pragma...")
 	os.chdir(build_dir)
 
-	print_msg("Running CMake configure...")
 	cmake_args += [
 		"-DCMAKE_INSTALL_PREFIX:PATH=" +install_dir +""
 	]

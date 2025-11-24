@@ -17,7 +17,7 @@ runs:
       shell: bash
       if: ${{ runner.os == 'Linux' }}
       run: |
-        sudo apt-get purge needrestart
+        apt-get purge needrestart
 
     - name: Set PIP_BREAK_SYSTEM_PACKAGES env variable
       shell: bash

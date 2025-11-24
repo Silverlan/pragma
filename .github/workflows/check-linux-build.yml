@@ -30,6 +30,7 @@ jobs:
         run: |
           apt-get -y install sudo
           apt install python-is-python3
+          apt install libfreetype6-dev
 
       - name: Setup Pragma
         uses: Silverlan/pragma/github_actions/setup@feat/cxx_modules3

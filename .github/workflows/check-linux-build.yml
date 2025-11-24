@@ -25,8 +25,13 @@ jobs:
           - os: ubuntu-latest
             name: "Ubuntu Latest"
     steps:
+      - name: Install sudo (for container)
+        shell: bash
+        run: |
+          install sudo
+
       - name: Setup Pragma
-        uses: Silverlan/pragma/github_actions/setup@feat/cxx_modules3
+        uses: Silverlan/pragma/github_actions/setup@main
         with:
           branch: ${{ github.ref_name }}
           clone_url: "https://github.com/${{ github.repository }}.git"

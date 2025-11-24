@@ -19,7 +19,7 @@ runs:
         name: "pragma > setup"
   
     - name: Install Requirements
-      uses: Silverlan/pragma/github_actions/install_requirements@feat/cxx_modules3
+      uses: Silverlan/pragma/github_actions/install_requirements@main
       with:
         with_cuda: ${{ inputs.with_cuda }}
       

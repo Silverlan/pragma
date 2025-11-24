@@ -47,6 +47,7 @@ parser.add_argument('--deps-directory', help='Directory to write the dependency 
 parser.add_argument("--deps-only", type=str2bool, nargs='?', const=True, default=False, help="Configuration, build and installation of Pragma will be skipped.")
 parser.add_argument('--install-directory', help='Installation directory. Can be relative (to build directory) or absolute.', default='install')
 parser.add_argument('--cmake-arg', help='Additional cmake argument for configuring Pragma. This parameter can be used multiple times.', action='append', default=[])
+parser.add_argument("--cmake-cxx-flag", action="append", help="Additional flags to add to CMAKE_CXX_FLAGS.")
 parser.add_argument('--module', help='Custom modules to install. Use this parameter multiple times to use multiple modules. Usage example: --module pr_physx:\"https://github.com/Silverlan/pr_physx.git\"', action='append', default=[])
 # parser.add_argument('--log-file', help='Script output will be written to this file.', default='build_log.txt')
 parser.add_argument("--verbose", type=str2bool, nargs='?', const=True, default=False, help="Print additional verbose output.")
@@ -139,6 +140,7 @@ deps_directory = args["deps_directory"]
 deps_only = args["deps_only"]
 install_directory = args["install_directory"]
 additional_cmake_args = args["cmake_arg"]
+additional_cmake_flags = args["cmake_cxx_flag"]
 skip_repository_updates = args["skip_repository_updates"]
 scripts_dir = os.getcwd() +"/build_scripts"
 #log_file = args["log_file"]
@@ -214,12 +216,16 @@ if platform == "linux":
 	print("no_confirm: " +str(no_confirm))
 	print("enable_assertions: " +str(enable_assertions))
 print("cmake_args: " +', '.join(additional_cmake_args))
+print("cmake_flags: " +', '.join(additional_cmake_flags))
 print("modules: " +', '.join(modules))
 
 toolsetArgs = None
 toolsetCFlags = None
-def cmake_configure_def_toolset(scriptPath,generator,additionalArgs=[]):
-	cmake_configure(scriptPath,generator,toolsetArgs,additionalArgs,toolsetCFlags)
+def cmake_configure_def_toolset(scriptPath,generator,additionalArgs=[],additionalCFlags=[]):
+	cflags = additionalCFlags
+	if toolsetCFlags is not None:
+		cflags += toolsetCFlags;
+	cmake_configure(scriptPath,generator,toolsetArgs,additionalArgs,cflags)
 
 if platform == "win32":
 	if toolset == "msvc":
@@ -904,7 +910,7 @@ if not deps_only:
 	cmake_args += additional_cmake_args
 	cmake_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=4.0")
 	cmake_args.append("-DPRAGMA_DEPS_DIR=" +config.deps_dir +"/" +config.deps_staging_dir)
-	cmake_configure_def_toolset(root,generator,cmake_args)
+	cmake_configure_def_toolset(root,generator,cmake_args,additional_cmake_flags)
 
 	print_msg("Build files have been written to \"" +build_dir +"\".")
 

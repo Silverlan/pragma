@@ -28,7 +28,7 @@ jobs:
       - name: Install sudo (for container)
         shell: bash
         run: |
-          install sudo
+          apt-get -y install sudo
 
       - name: Setup Pragma
         uses: Silverlan/pragma/github_actions/setup@main

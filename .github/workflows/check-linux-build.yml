@@ -38,6 +38,12 @@ jobs:
           apt-get -y install python-is-python3
           # apt install libfreetype6-dev
 
+      - name: Install LVM and helper tools
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y lvm2 util-linux
+          rm -rf /var/lib/apt/lists/*
+
       - name: Setup Pragma
         uses: Silverlan/pragma/github_actions/setup@feat/cxx_modules3
         with:

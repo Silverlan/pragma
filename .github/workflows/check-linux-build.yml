@@ -18,6 +18,12 @@ jobs:
     runs-on: ${{ matrix.config.os }}
     container:
       image: ghcr.io/mattkretz/cplusplus-ci/gcc16
+      options: >-
+        --user root:root
+        --cap-add=SYS_ADMIN
+        --device=/dev/loop-control
+        --device=/dev/loop0
+        --privileged
     strategy:
       fail-fast: false
       matrix:

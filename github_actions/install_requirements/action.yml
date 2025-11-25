@@ -50,7 +50,7 @@ runs:
 
     - name: Maximize build space
       if: ${{ runner.os == 'Linux' && !github.event.repository.private }}
-      uses: Silverlan/maximize-build-space@master
+      uses: easimon/maximize-build-space@master
       with:
         root-reserve-mb: 512
         swap-size-mb: 1024

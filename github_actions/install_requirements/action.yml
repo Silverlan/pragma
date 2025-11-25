@@ -36,25 +36,25 @@ runs:
         echo "Available disk space:"
         df -h
 
-    - name: Free Disk Space
-      if: runner.os == 'Linux'
-      uses: jlumbroso/free-disk-space@main
-      with:
-        tool-cache: false
-        android: true
-        dotnet: true
-        haskell: true
-        large-packages: true
-        docker-images: true
-        swap-storage: true
-
-    #- name: Maximize build space
-    #  if: ${{ runner.os == 'Linux' && !github.event.repository.private }}
-    #  uses: easimon/maximize-build-space@master
+    #- name: Free Disk Space
+    #  if: runner.os == 'Linux'
+    #  uses: jlumbroso/free-disk-space@main
     #  with:
-    #    root-reserve-mb: 512
-    #    swap-size-mb: 1024
-    #    remove-dotnet: 'true'
+    #    tool-cache: false
+    #    android: true
+    #    dotnet: true
+    #    haskell: true
+    #    large-packages: true
+    #    docker-images: true
+    #    swap-storage: true
+
+    - name: Maximize build space
+      if: ${{ runner.os == 'Linux' && !github.event.repository.private }}
+      uses: easimon/maximize-build-space@master
+      with:
+        root-reserve-mb: 512
+        swap-size-mb: 1024
+        remove-dotnet: 'true'
         
     - name: Print Disk Space Post-Optimization
       shell: bash

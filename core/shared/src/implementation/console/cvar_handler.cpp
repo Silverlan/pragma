@@ -7,8 +7,7 @@ module pragma.shared;
 import :console.convar;
 import :console.cvar_handler;
 
-static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = nullptr;
-std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &CVarHandler::GetConVarPtrs() { return *conVarPtrs; }
+std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &CVarHandler::GetConVarPtrs() { throw std::runtime_error {"Not implemented!"}; }
 ConVarHandle CVarHandler::GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ptrs, std::string scvar)
 {
 	std::unordered_map<std::string, std::shared_ptr<PtrConVar>>::iterator i = ptrs.find(scvar);

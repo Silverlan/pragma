@@ -60,15 +60,16 @@ void DLLNETWORK RunEngine(int argc, char *argv[])
 }
 }
 
-static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = nullptr;
-std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &pragma::Engine::GetConVarPtrs() { return *conVarPtrs; }
+static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &get_convar_ptrs()
+{
+	static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> ptrs;
+	return ptrs;
+}
+
+std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &pragma::Engine::GetConVarPtrs() { return get_convar_ptrs(); }
 ConVarHandle pragma::Engine::GetConVarHandle(std::string scvar)
 {
-	if(conVarPtrs == nullptr) {
-		static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> ptrs;
-		conVarPtrs = &ptrs;
-	}
-	return CVarHandler::GetConVarHandle(*conVarPtrs, scvar);
+	return CVarHandler::GetConVarHandle(get_convar_ptrs(), scvar);
 }
 
 static pragma::Engine *g_engine = nullptr;
@@ -735,8 +736,8 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 		m_consoleOutputMutex.unlock();
 	});
 
-	CVarHandler::Initialize();
 	RegisterConsoleCommands();
+	CVarHandler::Initialize();
 
 	// Initialize Server Instance
 	auto matManager = msys::MaterialManager::Create();

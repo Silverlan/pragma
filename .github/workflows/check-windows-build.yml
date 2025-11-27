@@ -63,11 +63,11 @@ jobs:
           working-directory: "${{ steps.build-pragma.outputs.install-dir }}"
           import-tests-token: ${{ secrets.PRAGMA_TESTS_IMPORT_TOKEN }}
 
-      - name: Handle Error
-        uses: Silverlan/common_actions/action_handle_error@main
-        if: failure()
-        with:
-          timeout-minutes: 1500
+      #- name: Handle Error
+      #  uses: Silverlan/common_actions/action_handle_error@main
+      #  if: failure()
+      #  with:
+      #    timeout-minutes: 1500
 
       - name: Upload Debug Artifacts
         if: ${{ !cancelled() }}

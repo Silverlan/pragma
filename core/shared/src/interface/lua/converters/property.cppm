@@ -10,9 +10,6 @@ export import :scripting.lua.classes.property;
 export import pragma.util;
 
 export namespace luabind {
-	template<typename T>
-	using base_type = typename std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>;
-
 	// Note: Method definitions for these should be moved to "property_converter_t.hpp", but due to a msvc compile error (21-08-08)
 	// this is currently not possible
 
@@ -20,7 +17,7 @@ export namespace luabind {
 	void push_property(lua::State *l, T &prop);
 
 	template<typename T>
-	    requires(std::derived_from<base_type<T>, util::BaseProperty>)
+	    requires(std::derived_from<util::base_type<T>, util::BaseProperty>)
 	struct default_converter<T> : detail::default_converter_generator<T>::type {
 		enum { consumed_args = 1 };
 
@@ -62,7 +59,7 @@ export namespace luabind {
 	};
 
 	template<typename TProp>
-	    requires(std::derived_from<base_type<TProp>, util::BaseProperty>)
+	    requires(std::derived_from<util::base_type<TProp>, util::BaseProperty>)
 	struct property_converter : default_converter<TProp *> {
 		using is_native = std::false_type;
 

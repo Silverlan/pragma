@@ -17,6 +17,7 @@ export import :scripting.lua.classes.shader;
 export import :scripting.lua.classes.texture;
 export import :scripting.lua.classes.vulkan;
 export import :scripting.lua.classes.world_environment;
+export import :scripting.lua.converters;
 
 export import :scripting.lua.gui_manager;
 

@@ -27,7 +27,7 @@ AttachmentData *SAttachmentComponent::SetupAttachment(pragma::ecs::BaseEntity *e
 		p->Write<pragma::FAttachmentMode>(attInfo.flags);
 		p->Write<Vector3>(attData->offset);
 		p->Write<Quat>(attData->rotation);
-		ServerState::Get()->SendPacket("ent_setparent", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_SETPARENT, p, pragma::networking::Protocol::SlowReliable);
 	}
 	return attData;
 }
@@ -40,7 +40,7 @@ void SAttachmentComponent::SetAttachmentFlags(pragma::FAttachmentMode flags)
 		NetPacket p;
 		nwm::write_entity(p, &entThis);
 		p->Write<pragma::FAttachmentMode>(flags);
-		ServerState::Get()->SendPacket("ent_setparentmode", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_SETPARENTMODE, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 

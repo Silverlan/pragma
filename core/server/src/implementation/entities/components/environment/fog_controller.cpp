@@ -17,7 +17,7 @@ void SFogControllerComponent::SetFogStart(float start)
 	NetPacket p;
 	nwm::write_entity(p, &GetEntity());
 	p->Write<float>(m_kvFogStart);
-	ServerState::Get()->SendPacket("env_fogcon_setstartdist", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENV_FOGCON_SETSTARTDIST, p, pragma::networking::Protocol::SlowReliable);
 }
 void SFogControllerComponent::SetFogEnd(float end)
 {
@@ -25,7 +25,7 @@ void SFogControllerComponent::SetFogEnd(float end)
 	NetPacket p;
 	nwm::write_entity(p, &GetEntity());
 	p->Write<float>(m_kvFogEnd);
-	ServerState::Get()->SendPacket("env_fogcon_setenddist", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENV_FOGCON_SETENDDIST, p, pragma::networking::Protocol::SlowReliable);
 }
 void SFogControllerComponent::SetMaxDensity(float density)
 {
@@ -33,7 +33,7 @@ void SFogControllerComponent::SetMaxDensity(float density)
 	NetPacket p;
 	nwm::write_entity(p, &GetEntity());
 	p->Write<float>(m_kvMaxDensity);
-	ServerState::Get()->SendPacket("env_fogcon_setmaxdensity", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENV_FOGCON_SETMAXDENSITY, p, pragma::networking::Protocol::SlowReliable);
 }
 void SFogControllerComponent::SetFogType(util::FogType type) { BaseEnvFogControllerComponent::SetFogType(type); }
 void SFogControllerComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)

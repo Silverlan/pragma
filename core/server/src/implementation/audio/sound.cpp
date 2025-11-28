@@ -46,9 +46,9 @@ void SALSound::SendEvent(NetEvent evId, const std::function<void(NetPacket &)> &
 	if(write != nullptr)
 		write(p);
 	if(bUDP == true)
-		ServerState::Get()->SendPacket("snd_ev", p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::SND_EV, p, pragma::networking::Protocol::FastUnreliable);
 	else
-		ServerState::Get()->SendPacket("snd_ev", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::SND_EV, p, pragma::networking::Protocol::SlowReliable);
 }
 
 void SALSound::SetState(ALState state)

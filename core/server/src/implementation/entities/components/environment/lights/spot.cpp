@@ -36,7 +36,7 @@ void SLightSpotComponent::SetOuterConeAngle(float ang)
 	NetPacket p;
 	nwm::write_entity(p, &ent);
 	p->Write<float>(ang);
-	ServerState::Get()->SendPacket("env_light_spot_outercutoff_angle", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENV_LIGHT_SPOT_OUTERCUTOFF_ANGLE, p, pragma::networking::Protocol::SlowReliable);
 }
 
 void SLightSpotComponent::SetBlendFraction(float ang)
@@ -48,7 +48,7 @@ void SLightSpotComponent::SetBlendFraction(float ang)
 	NetPacket p;
 	nwm::write_entity(p, &ent);
 	p->Write<float>(ang);
-	ServerState::Get()->SendPacket("env_light_spot_innercutoff_angle", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENV_LIGHT_SPOT_INNERCUTOFF_ANGLE, p, pragma::networking::Protocol::SlowReliable);
 }
 
 void SLightSpotComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

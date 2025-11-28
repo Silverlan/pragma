@@ -14,7 +14,7 @@ import :game;
 import :model_manager;
 import :server_state;
 
-#undef GetClassName;
+#undef GetClassName
 
 SBaseEntity::SBaseEntity() : pragma::ecs::BaseEntity(), m_bShared(false), m_bSynchronized(true) {}
 
@@ -87,6 +87,7 @@ void SBaseEntity::Initialize()
 		return;
 	m_bShared = true;
 }
+
 void SBaseEntity::InitializeLuaObject(lua::State *lua) { pragma::BaseLuaHandle::InitializeLuaObject<SBaseEntity>(lua); }
 bool SBaseEntity::IsShared() const { return m_bShared; }
 void SBaseEntity::SetShared(bool b) { m_bShared = b; }
@@ -150,7 +151,7 @@ void SBaseEntity::SendNetEvent(pragma::NetEventId eventId, NetPacket &packet, pr
 		return;
 	nwm::write_entity(packet, this);
 	packet->Write<UInt32>(eventId);
-	ServerState::Get()->SendPacket("ent_event", packet, protocol, rf);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_EVENT, packet, protocol, rf);
 }
 void SBaseEntity::SendNetEvent(pragma::NetEventId eventId, NetPacket &packet, pragma::networking::Protocol protocol)
 {
@@ -242,6 +243,6 @@ pragma::ComponentHandle<pragma::BaseEntityComponent> SBaseEntity::AddNetworkedCo
 	NetPacket packet {};
 	nwm::write_entity(packet, this);
 	packet->Write<pragma::ComponentId>(componentId);
-	static_cast<ServerState *>(GetNetworkState())->SendPacket("add_shared_component", packet, pragma::networking::Protocol::SlowReliable);
+	static_cast<ServerState *>(GetNetworkState())->SendPacket(pragma::networking::net_messages::client::ADD_SHARED_COMPONENT, packet, pragma::networking::Protocol::SlowReliable);
 	return c;
 }

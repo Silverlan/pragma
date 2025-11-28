@@ -275,7 +275,7 @@ static void register_net_messages(pragma::networking::ClientMessageMap &netMessa
 	REGISTER_NET_MSG(DEBUG_DRAWTRUNCATEDCONE);
 	REGISTER_NET_MSG(DEBUG_DRAWCYLINDER);
 }
-void register_client_net_messages()
+void pragma::networking::register_client_net_messages()
 {
 	static auto netMessagesRegistered = false;
 	if(netMessagesRegistered)
@@ -1839,7 +1839,7 @@ void CMD_debug_ai_schedule(NetworkState *state, pragma::BasePlayerComponent *pl,
 	Con::cout << "Querying schedule data for NPC " << *npc << "..." << Con::endl;
 	NetPacket p;
 	nwm::write_entity(p, npc);
-	pragma::get_client_state()->SendPacket("debug_ai_schedule_tree", p, pragma::networking::Protocol::SlowReliable);
+	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::DEBUG_AI_SCHEDULE_TREE, p, pragma::networking::Protocol::SlowReliable);
 }
 
 void CMD_debug_draw_line(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
@@ -2288,7 +2288,7 @@ namespace {
 			  s_aiNavDebugObjects.clear();
 		  NetPacket p {};
 		  p->Write<bool>(val);
-		  pragma::get_client_state()->SendPacket("debug_ai_navigation", p, pragma::networking::Protocol::SlowReliable);
+		  pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::DEBUG_AI_NAVIGATION, p, pragma::networking::Protocol::SlowReliable);
 	  });
 }
 

@@ -208,7 +208,7 @@ void CMD_sv_send(NetworkState *, pragma::BasePlayerComponent *, std::vector<std:
 	NetPacket packet;
 	packet->WriteString(argv[(argv.size() == 1) ? 0 : 1]);
 	if(argv.size() == 1)
-		ServerState::Get()->SendPacket("sv_send", packet, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::SV_SEND, packet, pragma::networking::Protocol::SlowReliable);
 	else {
 		/*ServerState::Get()->
 		ClientSession *cs = GetSessionByPlayerID(atoi(argv[0]));
@@ -217,7 +217,7 @@ void CMD_sv_send(NetworkState *, pragma::BasePlayerComponent *, std::vector<std:
 			Con::cout<<"No player with ID "<<atoi(argv[0])<<" found!"<<Con::endl;
 			return;
 		}
-		ServerState::Get()->SendTCPMessage("sv_send",&packet,cs);*/
+		ServerState::Get()->SendTCPMessage(pragma::networking::net_messages::client::SV_SEND, &packet,cs);*/
 	}
 }
 
@@ -228,7 +228,7 @@ void CMD_sv_send_udp(NetworkState *, pragma::BasePlayerComponent *, std::vector<
 	NetPacket packet;
 	packet->WriteString(argv[(argv.size() == 1) ? 0 : 1]);
 	if(argv.size() == 1)
-		ServerState::Get()->SendPacket("sv_send", packet, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::SV_SEND, packet, pragma::networking::Protocol::FastUnreliable);
 	else {
 		/*ClientSession *cs = GetSessionByPlayerID(atoi(argv[0]));
 		if(!cs)
@@ -236,7 +236,7 @@ void CMD_sv_send_udp(NetworkState *, pragma::BasePlayerComponent *, std::vector<
 			Con::cout<<"No player with ID "<<atoi(argv[0])<<" found!"<<Con::endl;
 			return;
 		}
-		ServerState::Get()->SendUDPMessage("sv_send",&packet,cs);*/
+		ServerState::Get()->SendUDPMessage(pragma::networking::net_messages::client::SV_SEND,&packet,cs);*/
 	}
 }
 

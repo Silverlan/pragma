@@ -36,7 +36,7 @@ void SAIComponent::_debugSendNavInfo(pragma::SPlayerComponent &pl)
 	}
 	auto *session = pl.GetClientSession();
 	if(session)
-		ServerState::Get()->SendPacket("debug_ai_navigation", p, pragma::networking::Protocol::SlowReliable, *session);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::DEBUG_AI_NAVIGATION, p, pragma::networking::Protocol::SlowReliable, *session);
 }
 
 void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::shared_ptr<DebugBehaviorTreeNode> &dbgTree, std::shared_ptr<::ai::Schedule> &aiSchedule, float &tLastSchedUpdate)
@@ -51,7 +51,7 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::sha
 				p->Write<uint8_t>(static_cast<uint8_t>(0));
 				auto *session = pl.GetClientSession();
 				if(session)
-					ServerState::Get()->SendPacket("debug_ai_schedule_tree", p, pragma::networking::Protocol::SlowReliable, *session);
+					ServerState::Get()->SendPacket(pragma::networking::net_messages::client::DEBUG_AI_SCHEDULE_TREE, p, pragma::networking::Protocol::SlowReliable, *session);
 				aiSchedule = nullptr;
 			}
 		}
@@ -167,5 +167,5 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::sha
 	}
 	auto *session = pl.GetClientSession();
 	if(session)
-		ServerState::Get()->SendPacket("debug_ai_schedule_tree", p, pragma::networking::Protocol::SlowReliable, *session);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::DEBUG_AI_SCHEDULE_TREE, p, pragma::networking::Protocol::SlowReliable, *session);
 }

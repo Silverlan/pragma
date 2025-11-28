@@ -19,7 +19,7 @@ void ClientState::StartResourceTransfer()
 		m_client->SetTimeoutDuration(0.0); // Disable timeout until resource transfer has been completed
 	NetPacket resourceReq;
 	resourceReq->Write<bool>(GetConVarBool("cl_allowdownload"));
-	SendPacket("resource_begin", resourceReq, pragma::networking::Protocol::SlowReliable);
+	SendPacket(pragma::networking::net_messages::server::RESOURCE_BEGIN, resourceReq, pragma::networking::Protocol::SlowReliable);
 }
 
 void ClientState::HandleClientResource(NetPacket &packet)
@@ -28,7 +28,7 @@ void ClientState::HandleClientResource(NetPacket &packet)
 	if(!IsValidResource(file)) {
 		NetPacket response;
 		response->Write<bool>(false);
-		SendPacket("resourceinfo_response", response, pragma::networking::Protocol::SlowReliable);
+		SendPacket(pragma::networking::net_messages::server::RESOURCEINFO_RESPONSE, response, pragma::networking::Protocol::SlowReliable);
 		return;
 	}
 	auto bDefaultPath = true;
@@ -71,7 +71,7 @@ void ClientState::HandleClientResource(NetPacket &packet)
 			m_resDownload = std::make_unique<ResourceDownload>(std::static_pointer_cast<VFilePtrInternalReal>(f), fileDst, CUInt32(size));
 		}
 	}
-	SendPacket("resourceinfo_response", response, pragma::networking::Protocol::SlowReliable);
+	SendPacket(pragma::networking::net_messages::server::RESOURCEINFO_RESPONSE, response, pragma::networking::Protocol::SlowReliable);
 }
 
 void ClientState::HandleClientResourceFragment(NetPacket &packet)
@@ -101,5 +101,5 @@ void ClientState::HandleClientResourceFragment(NetPacket &packet)
 	}
 	else
 		resourceReq->Write<bool>(false);
-	SendPacket("resource_request", resourceReq, pragma::networking::Protocol::SlowReliable);
+	SendPacket(pragma::networking::net_messages::server::RESOURCE_REQUEST, resourceReq, pragma::networking::Protocol::SlowReliable);
 }

@@ -76,7 +76,7 @@ void ServerState::DropClient(pragma::networking::IServerClient &session, pragma:
 	NetPacket packet;
 	packet->Write<unsigned int>(ent.GetIndex());
 	game->RemoveEntity(&ent);
-	SendPacket("playerdisconnect", packet, pragma::networking::Protocol::SlowReliable);
+	// SendPacket("playerdisconnect", packet, pragma::networking::Protocol::SlowReliable);
 }
 pragma::networking::IServerClient *ServerState::GetLocalClient() { return m_localClient.get(); }
 

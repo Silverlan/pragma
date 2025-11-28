@@ -257,7 +257,7 @@ void CBaseEntity::SendNetEventTCP(UInt32 eventId, NetPacket &data) const
 	}
 	nwm::write_entity(data, this);
 	data->Write<UInt32>(eventId);
-	pragma::get_client_state()->SendPacket("ent_event", data, pragma::networking::Protocol::SlowReliable);
+	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::ENT_EVENT, data, pragma::networking::Protocol::SlowReliable);
 }
 void CBaseEntity::SendNetEventUDP(UInt32 eventId) const
 {
@@ -278,7 +278,7 @@ void CBaseEntity::SendNetEventUDP(UInt32 eventId, NetPacket &data) const
 	}
 	nwm::write_entity(data, this);
 	data->Write<UInt32>(eventId);
-	pragma::get_client_state()->SendPacket("ent_event", data, pragma::networking::Protocol::FastUnreliable);
+	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::ENT_EVENT, data, pragma::networking::Protocol::FastUnreliable);
 }
 pragma::ComponentHandle<pragma::BaseAnimatedComponent> CBaseEntity::GetAnimatedComponent() const
 {

@@ -58,8 +58,14 @@ CEngine::CEngine(int argc, char *argv[])
 {
 	g_engine = this;
 
-	register_shared_convars(*console_system::client::get_convar_map());
-	register_client_launch_parameters(*GetLaunchParaMap());
+	static auto registeredGlobals = false;
+	if (!registeredGlobals) {
+		registeredGlobals = true;
+		register_shared_convars(*console_system::client::get_convar_map());
+		register_client_launch_parameters(*GetLaunchParaMap());
+		client_entities::register_entities();
+		pragma::networking::register_client_net_messages();
+	}
 
 	RegisterCallback<void, std::reference_wrapper<const pragma::platform::Joystick>, bool>("OnJoystickStateChanged");
 	RegisterCallback<void, std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("DrawFrame");

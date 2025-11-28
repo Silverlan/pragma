@@ -22,7 +22,7 @@ void CModel::OnMaterialMissing(const std::string &matName)
 	NetPacket p {};
 	p->WriteString(GetName());
 	p->WriteString(matName);
-	pragma::get_client_state()->SendPacket("query_model_texture", p, pragma::networking::Protocol::FastUnreliable);
+	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::QUERY_MODEL_TEXTURE, p, pragma::networking::Protocol::FastUnreliable);
 }
 
 void CModel::PrecacheTexture(uint32_t texId, bool bReload) { pragma::Model::PrecacheTexture(texId, bReload); }

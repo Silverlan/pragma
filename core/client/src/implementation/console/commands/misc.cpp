@@ -213,7 +213,7 @@ void CMD_setpos(NetworkState *state, pragma::BasePlayerComponent *, std::vector<
 	Vector3 pos(atof(argv[0].c_str()), atof(argv[1].c_str()), atof(argv[2].c_str()));
 	NetPacket p;
 	nwm::write_vector(p, pos);
-	cstate->SendPacket("cmd_setpos", p, pragma::networking::Protocol::SlowReliable);
+	cstate->SendPacket(pragma::networking::net_messages::server::CMD_SETPOS, p, pragma::networking::Protocol::SlowReliable);
 }
 
 void CMD_getpos(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
@@ -650,7 +650,7 @@ void CMD_debug_ai_schedule_print(NetworkState *state, pragma::BasePlayerComponen
 	Con::cout << "Querying schedule data for NPC " << *npc << "..." << Con::endl;
 	NetPacket p;
 	nwm::write_entity(p, npc);
-	pragma::get_client_state()->SendPacket("debug_ai_schedule_print", p, pragma::networking::Protocol::SlowReliable);
+	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::DEBUG_AI_SCHEDULE_PRINT, p, pragma::networking::Protocol::SlowReliable);
 }
 
 void CMD_reloadmaterial(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)

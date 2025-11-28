@@ -7,6 +7,7 @@ module;
 export module pragma.shared:scripting.lua.api;
 
 export import pragma.lua;
+import :scripting.lua.handles;
 
 export namespace luabind {
 	// Additional types for overload resolution

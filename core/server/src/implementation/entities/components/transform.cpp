@@ -42,5 +42,5 @@ void STransformComponent::SetEyeOffset(const Vector3 &offset)
 	NetPacket p;
 	nwm::write_entity(p, &ent);
 	nwm::write_vector(p, offset);
-	ServerState::Get()->SendPacket("ent_eyeoffset", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_EYEOFFSET, p, pragma::networking::Protocol::SlowReliable);
 }

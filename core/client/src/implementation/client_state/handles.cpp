@@ -33,7 +33,7 @@ void ClientState::RequestServerInfo()
 	Con::ccl << "Sending serverinfo request..." << Con::endl;
 	NetPacket packet;
 	packet->WriteString(GetConVarString("password"));
-	SendPacket("serverinfo_request", packet, pragma::networking::Protocol::SlowReliable);
+	SendPacket(pragma::networking::net_messages::server::SERVERINFO_REQUEST, packet, pragma::networking::Protocol::SlowReliable);
 }
 
 void ClientState::HandleClientReceiveServerInfo(NetPacket &packet)
@@ -80,7 +80,7 @@ void ClientState::HandleClientReceiveServerInfo(NetPacket &packet)
 		outAuthPacket->Write<uint16_t>(token.size());
 		outAuthPacket->Write(reinterpret_cast<uint8_t *>(token.data()), token.size() * sizeof(token.front()));
 	}
-	SendPacket("authenticate", outAuthPacket, pragma::networking::Protocol::SlowReliable);
+	SendPacket(pragma::networking::net_messages::server::AUTHENTICATE, outAuthPacket, pragma::networking::Protocol::SlowReliable);
 }
 
 void ClientState::HandleClientStartResourceTransfer(NetPacket &packet)
@@ -304,6 +304,6 @@ void ClientState::SetGameReady()
 {
 	if(!m_game)
 		return;
-	SendPacket("game_ready", pragma::networking::Protocol::SlowReliable);
+	SendPacket(pragma::networking::net_messages::server::GAME_READY, pragma::networking::Protocol::SlowReliable);
 	m_game->OnGameReady();
 }

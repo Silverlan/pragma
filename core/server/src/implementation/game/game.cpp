@@ -106,7 +106,7 @@ void SGame::SetTimeScale(float t)
 	pragma::Game::SetTimeScale(t);
 	NetPacket p;
 	p->Write<float>(t);
-	ServerState::Get()->SendPacket("game_timescale", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::GAME_TIMESCALE, p, pragma::networking::Protocol::SlowReliable);
 }
 
 static void CVAR_CALLBACK_host_timescale(NetworkState *, const ConVar &, float, float val) { SGame::Get()->SetTimeScale(val); }
@@ -125,7 +125,7 @@ void SGame::Initialize()
 	//p->Write<float>(GetTimeScale());
 	//auto *gameMode = GetGameMode();
 	//p->WriteString((gameMode != nullptr) ? gameMode->id : "");
-	//ServerState::Get()->SendPacket("game_start",p,pragma::networking::Protocol::SlowReliable);
+	//ServerState::Get()->SendPacket(pragma::networking::net_messages::client::GAME_START,p,pragma::networking::Protocol::SlowReliable);
 	SetUp();
 	if(m_surfaceMaterialManager)
 		m_surfaceMaterialManager->Load("scripts/physics/materials.udm");
@@ -156,7 +156,7 @@ bool SGame::LoadMap(const std::string &map, const Vector3 &origin, std::vector<E
 	bool b = pragma::Game::LoadMap(map, origin, entities);
 	if(b == false)
 		return false;
-	ServerState::Get()->SendPacket("map_ready", pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::MAP_READY, pragma::networking::Protocol::SlowReliable);
 	LoadNavMesh();
 
 	m_flags |= GameFlags::MapLoaded;
@@ -272,7 +272,7 @@ bool SGame::RegisterNetMessage(std::string name)
 		return false;
 	NetPacket packet;
 	packet->WriteString(name);
-	ServerState::Get()->SendPacket("luanet_reg", packet, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::LUANET_REG, packet, pragma::networking::Protocol::SlowReliable);
 	return true;
 }
 
@@ -304,7 +304,7 @@ void SGame::CreateGiblet(const GibletCreateInfo &info)
 {
 	NetPacket packet {};
 	packet->Write<GibletCreateInfo>(info);
-	ServerState::Get()->SendPacket("create_giblet", packet, pragma::networking::Protocol::FastUnreliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CREATE_GIBLET, packet, pragma::networking::Protocol::FastUnreliable);
 }
 
 bool SGame::IsValidGameResource(const std::string &fileName)
@@ -387,7 +387,7 @@ void SGame::CreateExplosion(const Vector3 &origin, Float radius, DamageInfo &dmg
 	NetPacket p;
 	p->Write<Vector3>(origin);
 	p->Write<float>(radius);
-	ServerState::Get()->SendPacket("create_explosion", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CREATE_EXPLOSION, p, pragma::networking::Protocol::SlowReliable);
 }
 void SGame::CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback)
 {
@@ -412,7 +412,7 @@ void SGame::OnClientDropped(pragma::networking::IServerClient &client, pragma::n
 	NetPacket p;
 	nwm::write_player(p, pl);
 	p->Write<int32_t>(umath::to_integral(reason));
-	ServerState::Get()->SendPacket("client_dropped", p, pragma::networking::Protocol::SlowReliable, {client, pragma::networking::ClientRecipientFilter::FilterType::Exclude});
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CLIENT_DROPPED, p, pragma::networking::Protocol::SlowReliable, {client, pragma::networking::ClientRecipientFilter::FilterType::Exclude});
 	OnPlayerDropped(*pl, reason);
 	ent.RemoveSafely();
 }
@@ -425,7 +425,7 @@ void SGame::ReceiveGameReady(pragma::networking::IServerClient &session, NetPack
 	pl->SetGameReady(true);
 	NetPacket p;
 	nwm::write_player(p, pl);
-	ServerState::Get()->SendPacket("client_ready", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CLIENT_READY, p, pragma::networking::Protocol::SlowReliable);
 	OnPlayerReady(*pl);
 }
 
@@ -602,14 +602,14 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, NetPacke
 
 	auto *ptrWorld = GetWorld();
 	nwm::write_entity(packetInf, (ptrWorld != nullptr) ? &ptrWorld->GetEntity() : nullptr);
-	ServerState::Get()->SendPacket("gameinfo", packetInf, pragma::networking::Protocol::SlowReliable, rp);
-	ServerState::Get()->SendPacket("pl_local", p, pragma::networking::Protocol::SlowReliable, session);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::GAMEINFO, packetInf, pragma::networking::Protocol::SlowReliable, rp);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_LOCAL, p, pragma::networking::Protocol::SlowReliable, session);
 	NetPacket tmp {};
-	ServerState::Get()->SendPacket("game_ready", tmp, pragma::networking::Protocol::SlowReliable, rp);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::GAME_READY, tmp, pragma::networking::Protocol::SlowReliable, rp);
 
 	NetPacket pJoinedInfo;
 	nwm::write_player(pJoinedInfo, pl);
-	ServerState::Get()->SendPacket("client_joined", pJoinedInfo, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CLIENT_JOINED, pJoinedInfo, pragma::networking::Protocol::SlowReliable);
 
 	if(IsMapInitialized() == true)
 		SpawnPlayer(*pl);
@@ -631,7 +631,7 @@ pragma::NetEventId SGame::RegisterNetEvent(const std::string &name)
 	NetPacket packet;
 	packet->WriteString(name);
 	packet->Write<pragma::NetEventId>(id);
-	ServerState::Get()->SendPacket("register_net_event", packet, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::REGISTER_NET_EVENT, packet, pragma::networking::Protocol::SlowReliable);
 	return id;
 }
 
@@ -659,7 +659,7 @@ void SGame::OnClientConVarChanged(pragma::BasePlayerComponent &pl, std::string c
 		NetPacket p;
 		nwm::write_player(p, &pl);
 		p->WriteString(value);
-		ServerState::Get()->SendPacket("pl_changedname", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_CHANGEDNAME, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 

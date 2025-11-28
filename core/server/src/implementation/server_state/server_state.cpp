@@ -11,6 +11,7 @@ import :server_state;
 import :console.register_commands;
 import :core;
 import :entities;
+import :entities.registration;
 import :game;
 import :model_manager;
 import :networking;
@@ -169,7 +170,7 @@ void ServerState::OnClientAuthenticated(pragma::networking::IServerClient &sessi
 	NetPacket p;
 	unsigned int numResources = ResourceManager::GetResourceCount();
 	p->Write<unsigned int>(numResources);
-	SendPacket("start_resource_transfer", p, pragma::networking::Protocol::SlowReliable, session);
+	SendPacket(pragma::networking::net_messages::client::START_RESOURCE_TRANSFER, p, pragma::networking::Protocol::SlowReliable, session);
 }
 bool ServerState::ConnectLocalHostPlayerClient()
 {
@@ -352,7 +353,7 @@ ConVar *ServerState::SetConVar(std::string scmd, std::string value, bool bApplyI
 		NetPacket p;
 		p->WriteString(scmd);
 		p->WriteString(cvar->GetString());
-		SendPacket("cvar_set", p, pragma::networking::Protocol::SlowReliable);
+		SendPacket(pragma::networking::net_messages::client::CVAR_SET, p, pragma::networking::Protocol::SlowReliable);
 	}
 	return cvar;
 }
@@ -389,7 +390,7 @@ ConCommand *ServerState::CreateConCommand(const std::string &scmd, LuaFunction f
 	NetPacket packet;
 	packet->WriteString(scmd);
 	packet->Write<unsigned int>(cmd->GetID());
-	SendPacket("luacmd_reg", packet, pragma::networking::Protocol::SlowReliable);
+	SendPacket(pragma::networking::net_messages::client::LUACMD_REG, packet, pragma::networking::Protocol::SlowReliable);
 	return cmd;
 }
 WMServerData &ServerState::GetServerData() { return m_serverData; }
@@ -448,6 +449,22 @@ namespace {
 ////////////////
 
 extern "C" {
+DLLSERVER void pr_sv_register_server_entities()
+{
+	static auto entitiesRegistered = false;
+	if(entitiesRegistered)
+		return;
+	entitiesRegistered = true;
+	server_entities::register_entities();
+}
+DLLSERVER void pr_sv_register_server_net_messages()
+{
+	static auto netMessagesRegistered = false;
+	if(netMessagesRegistered)
+		return;
+	netMessagesRegistered = true;
+	register_server_net_messages();
+}
 DLLSERVER void pr_sv_create_server_state(std::unique_ptr<NetworkState> &outState) { outState = std::make_unique<ServerState>(); }
 DLLSERVER void pr_sv_start_server(bool singlePlayer)
 {

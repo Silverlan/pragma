@@ -129,7 +129,7 @@ void NET_sv_RESOURCE_BEGIN(pragma::networking::IServerClient &session, NetPacket
 		Con::csv << "[ResourceManager] All resources have been sent to: " << session->GetIdentifier() << Con::endl;
 #endif
 		NetPacket p;
-		ServerState::Get()->SendPacket("resourcecomplete", p, pragma::networking::Protocol::SlowReliable, session);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::RESOURCECOMPLETE, p, pragma::networking::Protocol::SlowReliable, session);
 	}
 }
 
@@ -290,7 +290,7 @@ void NET_sv_CMD_CALL(pragma::networking::IServerClient &session, NetPacket packe
 			p->WriteString("");
 		}
 	}
-	ServerState::Get()->SendPacket("cmd_call_response", p, pragma::networking::Protocol::SlowReliable, session);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CMD_CALL_RESPONSE, p, pragma::networking::Protocol::SlowReliable, session);
 }
 
 void NET_sv_RCON(pragma::networking::IServerClient &session, NetPacket packet)
@@ -319,7 +319,7 @@ void NET_sv_SERVERINFO_REQUEST(pragma::networking::IServerClient &session, NetPa
 	std::string passSv = ServerState::Get()->GetConVarString("sv_password").c_str();
 	if(passSv.empty() == false && passSv != password && session.IsListenServerHost() == false) {
 		NetPacket p;
-		ServerState::Get()->SendPacket("invalidpassword", p, pragma::networking::Protocol::SlowReliable, session);
+		// ServerState::Get()->SendPacket("invalidpassword", p, pragma::networking::Protocol::SlowReliable, session);
 		ServerState::Get()->DropClient(session);
 		return;
 	}
@@ -334,7 +334,7 @@ void NET_sv_SERVERINFO_REQUEST(pragma::networking::IServerClient &session, NetPa
 		p->Write<unsigned char>((unsigned char)(0));
 
 	p->Write<bool>(ServerState::Get()->IsClientAuthenticationRequired());
-	ServerState::Get()->SendPacket("serverinfo", p, pragma::networking::Protocol::SlowReliable, session);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::SERVERINFO, p, pragma::networking::Protocol::SlowReliable, session);
 }
 
 void NET_sv_AUTHENTICATE(pragma::networking::IServerClient &session, NetPacket packet)
@@ -415,7 +415,7 @@ void NET_sv_NOCLIP(pragma::networking::IServerClient &session, NetPacket packet)
 	NetPacket p;
 	nwm::write_entity(p, &pl->GetEntity());
 	p->Write<bool>(bNoclip);
-	ServerState::Get()->SendPacket("pl_toggle_noclip", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_TOGGLE_NOCLIP, p, pragma::networking::Protocol::SlowReliable);
 }
 
 void NET_sv_LUANET(pragma::networking::IServerClient &session, ::NetPacket packet) { ServerState::Get()->HandleLuaNetPacket(session, packet); }
@@ -573,7 +573,7 @@ void NET_sv_DEBUG_AI_SCHEDULE_PRINT(pragma::networking::IServerClient &session, 
 		schedule->DebugPrint(ss);
 		response->WriteString(ss.str());
 	}
-	ServerState::Get()->SendPacket("debug_ai_schedule_print", response, pragma::networking::Protocol::SlowReliable, session);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::DEBUG_AI_SCHEDULE_PRINT, response, pragma::networking::Protocol::SlowReliable, session);
 }
 
 void NET_sv_DEBUG_AI_SCHEDULE_TREE(pragma::networking::IServerClient &session, NetPacket packet)

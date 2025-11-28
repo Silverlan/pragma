@@ -257,7 +257,7 @@ void SPlayerComponent::OnSetSlopeLimit(float limit)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(limit);
-		ServerState::Get()->SendPacket("pl_slopelimit", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_SLOPELIMIT, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPlayerComponent::OnSetStepOffset(float offset)
@@ -267,7 +267,7 @@ void SPlayerComponent::OnSetStepOffset(float offset)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(offset);
-		ServerState::Get()->SendPacket("pl_stepoffset", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_STEPOFFSET, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -316,7 +316,7 @@ void SPlayerComponent::SetWalkSpeed(float speed)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(speed);
-		ServerState::Get()->SendPacket("pl_speed_walk", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_SPEED_WALK, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -328,7 +328,7 @@ void SPlayerComponent::SetRunSpeed(float speed)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(speed);
-		ServerState::Get()->SendPacket("pl_speed_run", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_SPEED_RUN, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -340,7 +340,7 @@ void SPlayerComponent::SetCrouchedWalkSpeed(float speed)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(speed);
-		ServerState::Get()->SendPacket("pl_speed_crouch_walk", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_SPEED_CROUCH_WALK, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -352,7 +352,7 @@ void SPlayerComponent::SetStandHeight(float height)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(height);
-		ServerState::Get()->SendPacket("pl_height_stand", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_HEIGHT_STAND, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPlayerComponent::SetCrouchHeight(float height)
@@ -363,7 +363,7 @@ void SPlayerComponent::SetCrouchHeight(float height)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(height);
-		ServerState::Get()->SendPacket("pl_height_crouch", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_HEIGHT_CROUCH, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPlayerComponent::SetStandEyeLevel(float eyelevel)
@@ -374,7 +374,7 @@ void SPlayerComponent::SetStandEyeLevel(float eyelevel)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(eyelevel);
-		ServerState::Get()->SendPacket("pl_eyelevel_stand", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_EYELEVEL_STAND, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPlayerComponent::SetCrouchEyeLevel(float eyelevel)
@@ -385,7 +385,7 @@ void SPlayerComponent::SetCrouchEyeLevel(float eyelevel)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(eyelevel);
-		ServerState::Get()->SendPacket("pl_eyelevel_crouch", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_EYELEVEL_CROUCH, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -404,7 +404,7 @@ void SPlayerComponent::SetSprintSpeed(float speed)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<float>(speed);
-		ServerState::Get()->SendPacket("pl_speed_sprint", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_SPEED_SPRINT, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPlayerComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BasePlayerComponent)); }

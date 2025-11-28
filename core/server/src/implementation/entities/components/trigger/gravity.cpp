@@ -42,7 +42,7 @@ void STriggerGravityComponent::OnResetGravity(pragma::ecs::BaseEntity *ent, Grav
 	p->Write<Vector3>((settings.dir != nullptr) ? *settings.dir : Vector3 {});
 	p->Write<float>((settings.force != nullptr) ? *settings.force : 0.f);
 	p->Write<Vector3>((settings.dirMove != nullptr) ? *settings.dirMove : Vector3 {});
-	ServerState::Get()->SendPacket("ent_trigger_gravity_onstarttouch", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_TRIGGER_GRAVITY_ONSTARTTOUCH, p, pragma::networking::Protocol::SlowReliable);
 }
 
 void STriggerGravityComponent::OnStartTouch(pragma::ecs::BaseEntity *ent)
@@ -58,7 +58,7 @@ void STriggerGravityComponent::OnStartTouch(pragma::ecs::BaseEntity *ent)
 	p->Write<uint32_t>(entThis.GetSpawnFlags());
 	p->Write<Vector3>(m_kvGravityDir);
 	p->Write<float>(m_kvGravityForce);
-	ServerState::Get()->SendPacket("ent_trigger_gravity_onstarttouch", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_TRIGGER_GRAVITY_ONSTARTTOUCH, p, pragma::networking::Protocol::SlowReliable);
 }
 
 ////////////

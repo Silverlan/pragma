@@ -47,7 +47,7 @@ void CMD_cl_rcon(NetworkState *, pragma::BasePlayerComponent *, std::vector<std:
 	NetPacket p;
 	p->WriteString(pass);
 	p->WriteString(argv[0]);
-	client->SendPacket("rcon", p, pragma::networking::Protocol::SlowReliable);
+	client->SendPacket(pragma::networking::net_messages::server::RCON, p, pragma::networking::Protocol::SlowReliable);
 }
 
 void CMD_connect(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
@@ -128,7 +128,7 @@ void CMD_cl_send(NetworkState *, pragma::BasePlayerComponent *, std::vector<std:
 		return;
 	NetPacket packet;
 	packet->WriteString(argv[0]);
-	pragma::get_client_state()->SendPacket("cl_send", packet, pragma::networking::Protocol::SlowReliable);
+	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::CL_SEND, packet, pragma::networking::Protocol::SlowReliable);
 }
 
 void CMD_cl_send_udp(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
@@ -137,7 +137,7 @@ void CMD_cl_send_udp(NetworkState *, pragma::BasePlayerComponent *, std::vector<
 		return;
 	NetPacket packet;
 	packet->WriteString(argv[0]);
-	pragma::get_client_state()->SendPacket("cl_send", packet, pragma::networking::Protocol::FastUnreliable);
+	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::CL_SEND, packet, pragma::networking::Protocol::FastUnreliable);
 }
 
 void CMD_cl_debug_netmessages(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)

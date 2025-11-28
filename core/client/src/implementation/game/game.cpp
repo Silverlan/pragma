@@ -700,7 +700,7 @@ void CGame::RequestResource(const std::string &fileName)
 	m_requestedResources.push_back(fName);
 	NetPacket p;
 	p->WriteString(fName);
-	pragma::get_client_state()->SendPacket("query_resource", p, pragma::networking::Protocol::SlowReliable);
+	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::QUERY_RESOURCE, p, pragma::networking::Protocol::SlowReliable);
 	Con::ccl << "[CGame] Request sent!" << Con::endl;
 }
 
@@ -1386,7 +1386,7 @@ void CGame::SendUserInput()
 			p->Write<float>(magnitude);
 		}
 	}
-	pragma::get_client_state()->SendPacket("userinput", p, pragma::networking::Protocol::FastUnreliable);
+	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::USERINPUT, p, pragma::networking::Protocol::FastUnreliable);
 }
 
 double &CGame::ServerTime() { return m_tServer; }

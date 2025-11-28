@@ -77,9 +77,9 @@ void ServerState::SendSoundSourceToClient(SALSound &sound, bool sendFullUpdate, 
 		nwm::write_unique_entity(p, sound.GetSource());
 	}
 	if(rf != nullptr)
-		SendPacket("snd_create", p, pragma::networking::Protocol::FastUnreliable, *rf);
+		SendPacket(pragma::networking::net_messages::client::SND_CREATE, p, pragma::networking::Protocol::FastUnreliable, *rf);
 	else
-		SendPacket("snd_create", p, pragma::networking::Protocol::FastUnreliable);
+		SendPacket(pragma::networking::net_messages::client::SND_CREATE, p, pragma::networking::Protocol::FastUnreliable);
 }
 std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags)
 {
@@ -237,6 +237,6 @@ bool ServerState::PrecacheSound(std::string snd, ALChannel mode)
 	NetPacket p;
 	p->WriteString(snd);
 	p->Write<uint8_t>(umath::to_integral(mode));
-	SendPacket("snd_precache", p, pragma::networking::Protocol::SlowReliable);
+	SendPacket(pragma::networking::net_messages::client::SND_PRECACHE, p, pragma::networking::Protocol::SlowReliable);
 	return true;
 }

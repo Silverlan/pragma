@@ -23,7 +23,7 @@ void SModelComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &model
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->WriteString(GetModelName());
-		ServerState::Get()->SendPacket("ent_model", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_MODEL, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -55,7 +55,7 @@ void SModelComponent::SetSkin(unsigned int skin)
 	NetPacket p;
 	nwm::write_entity(p, &ent);
 	p->Write<unsigned int>(skin);
-	ServerState::Get()->SendPacket("ent_skin", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_SKIN, p, pragma::networking::Protocol::SlowReliable);
 }
 
 void SModelComponent::SetMaxDrawDistance(float maxDist)

@@ -30,7 +30,7 @@ void SPhysicsComponent::SetKinematic(bool b)
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<bool>(b);
-		ServerState::Get()->SendPacket("ent_setkinematic", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_SETKINEMATIC, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -43,7 +43,7 @@ void SPhysicsComponent::SetMoveType(pragma::physics::MOVETYPE movetype)
 	NetPacket p;
 	nwm::write_entity(p, &ent);
 	p->Write<unsigned char>(static_cast<unsigned char>(movetype));
-	ServerState::Get()->SendPacket("ent_movetype", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_MOVETYPE, p, pragma::networking::Protocol::SlowReliable);
 }
 void SPhysicsComponent::OnPhysicsInitialized()
 {
@@ -53,7 +53,7 @@ void SPhysicsComponent::OnPhysicsInitialized()
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<unsigned int>(static_cast<unsigned int>(m_physicsType));
-		ServerState::Get()->SendPacket("ent_phys_init", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_PHYS_INIT, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPhysicsComponent::OnPhysicsDestroyed()
@@ -63,7 +63,7 @@ void SPhysicsComponent::OnPhysicsDestroyed()
 	if(ent.IsShared()) {
 		NetPacket p;
 		nwm::write_entity(p, &ent);
-		ServerState::Get()->SendPacket("ent_phys_destroy", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_PHYS_DESTROY, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPhysicsComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BasePhysicsComponent)); }
@@ -96,7 +96,7 @@ void SPhysicsComponent::SetCollisionType(pragma::physics::COLLISIONTYPE collisio
 	NetPacket p;
 	nwm::write_entity(p, &ent);
 	p->Write<unsigned char>(static_cast<unsigned char>(collisiontype));
-	ServerState::Get()->SendPacket("ent_collisiontype", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_COLLISIONTYPE, p, pragma::networking::Protocol::SlowReliable);
 }
 
 void SPhysicsComponent::SetCollisionFilter(pragma::physics::CollisionMask filterGroup, pragma::physics::CollisionMask filterMask)
@@ -108,7 +108,7 @@ void SPhysicsComponent::SetCollisionFilter(pragma::physics::CollisionMask filter
 		nwm::write_entity(p, &ent);
 		p->Write<unsigned int>(static_cast<unsigned int>(filterGroup));
 		p->Write<unsigned int>(static_cast<unsigned int>(filterMask));
-		ServerState::Get()->SendPacket("ent_setcollisionfilter", p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_SETCOLLISIONFILTER, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 

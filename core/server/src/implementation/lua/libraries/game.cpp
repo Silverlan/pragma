@@ -83,7 +83,7 @@ int Lua::game::Server::load_map(lua::State *l)
 	SGame::Get()->WriteEntityData(packet, ptrEnts.data(), ptrEnts.size(), filter);
 	packet->Write<bool>((entWorld != nullptr) ? true : false);
 
-	ServerState::Get()->SendPacket("map_load", packet, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::MAP_LOAD, packet, pragma::networking::Protocol::SlowReliable);
 	return pair.second;
 }
 

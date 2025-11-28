@@ -238,7 +238,7 @@ static void noclip(NetworkState *state, pragma::BasePlayerComponent *, std::vect
 	if(!check_cheats("noclip", state))
 		return;
 	ClientState *client = static_cast<ClientState *>(state);
-	client->SendPacket("noclip", pragma::networking::Protocol::SlowReliable);
+	client->SendPacket(pragma::networking::net_messages::server::NOCLIP, pragma::networking::Protocol::SlowReliable);
 }
 
 static void notarget(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
@@ -246,7 +246,7 @@ static void notarget(NetworkState *state, pragma::BasePlayerComponent *, std::ve
 	if(!check_cheats("notarget", state))
 		return;
 	ClientState *client = static_cast<ClientState *>(state);
-	client->SendPacket("notarget", pragma::networking::Protocol::SlowReliable);
+	client->SendPacket(pragma::networking::net_messages::server::NOTARGET, pragma::networking::Protocol::SlowReliable);
 }
 
 static void godmode(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
@@ -254,7 +254,7 @@ static void godmode(NetworkState *state, pragma::BasePlayerComponent *, std::vec
 	if(!check_cheats("godmode", state))
 		return;
 	auto *client = static_cast<ClientState *>(state);
-	client->SendPacket("godmode", pragma::networking::Protocol::SlowReliable);
+	client->SendPacket(pragma::networking::net_messages::server::GODMODE, pragma::networking::Protocol::SlowReliable);
 }
 
 static void suicide(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
@@ -262,7 +262,7 @@ static void suicide(NetworkState *state, pragma::BasePlayerComponent *, std::vec
 	if(!check_cheats("suicide", state))
 		return;
 	auto *client = static_cast<ClientState *>(state);
-	client->SendPacket("suicide", pragma::networking::Protocol::SlowReliable);
+	client->SendPacket(pragma::networking::net_messages::server::SUICIDE, pragma::networking::Protocol::SlowReliable);
 }
 
 static void hurtme(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &args)
@@ -273,7 +273,7 @@ static void hurtme(NetworkState *state, pragma::BasePlayerComponent *, std::vect
 	NetPacket p;
 	p->Write<uint16_t>(static_cast<uint16_t>(dmg));
 	auto *client = static_cast<ClientState *>(state);
-	client->SendPacket("hurtme", p, pragma::networking::Protocol::SlowReliable);
+	client->SendPacket(pragma::networking::net_messages::server::HURTME, p, pragma::networking::Protocol::SlowReliable);
 }
 
 static void give_weapon(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
@@ -285,7 +285,7 @@ static void give_weapon(NetworkState *state, pragma::BasePlayerComponent *, std:
 		return;
 	NetPacket p;
 	p->WriteString(argv.front());
-	client->SendPacket("give_weapon", p, pragma::networking::Protocol::SlowReliable);
+	client->SendPacket(pragma::networking::net_messages::server::GIVE_WEAPON, p, pragma::networking::Protocol::SlowReliable);
 }
 
 static void strip_weapons(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
@@ -296,19 +296,19 @@ static void strip_weapons(NetworkState *state, pragma::BasePlayerComponent *, st
 	if(!check_cheats("strip_weapons", state))
 		return;
 	NetPacket p;
-	client->SendPacket("strip_weapons", p, pragma::networking::Protocol::SlowReliable);
+	client->SendPacket(pragma::networking::net_messages::server::STRIP_WEAPONS, p, pragma::networking::Protocol::SlowReliable);
 }
 
 static void next_weapon(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args)
 {
 	auto *client = static_cast<ClientState *>(state);
-	client->SendPacket("weapon_next", pragma::networking::Protocol::FastUnreliable);
+	client->SendPacket(pragma::networking::net_messages::server::WEAPON_NEXT, pragma::networking::Protocol::FastUnreliable);
 }
 
 static void previous_weapon(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args)
 {
 	auto *client = static_cast<ClientState *>(state);
-	client->SendPacket("weapon_previous", pragma::networking::Protocol::FastUnreliable);
+	client->SendPacket(pragma::networking::net_messages::server::WEAPON_PREVIOUS, pragma::networking::Protocol::FastUnreliable);
 }
 
 static void give_ammo(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
@@ -322,7 +322,7 @@ static void give_ammo(NetworkState *state, pragma::BasePlayerComponent *, std::v
 	NetPacket p;
 	p->WriteString(argv.front());
 	p->Write<uint32_t>(amount);
-	client->SendPacket("give_ammo", p, pragma::networking::Protocol::SlowReliable);
+	client->SendPacket(pragma::networking::net_messages::server::GIVE_AMMO, p, pragma::networking::Protocol::SlowReliable);
 }
 
 const float defaultTurnSpeed = 3.f;

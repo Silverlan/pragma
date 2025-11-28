@@ -55,7 +55,7 @@ void SGame::RemoveEntity(pragma::ecs::BaseEntity *ent)
 		if(ID != std::nullopt) {
 			NetPacket p;
 			nwm::write_entity(p, ent);
-			ServerState::Get()->SendPacket("ent_remove", p, pragma::networking::Protocol::SlowReliable);
+			ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_REMOVE, p, pragma::networking::Protocol::SlowReliable);
 		}
 	}
 	if(ent->IsPlayer())
@@ -97,7 +97,7 @@ void SGame::SpawnEntity(pragma::ecs::BaseEntity *ent) // Don't call directly
 		p->Write<unsigned int>(ent->GetIndex());
 		p->Write<unsigned int>(pMapComponent.valid() ? pMapComponent->GetMapIndex() : 0u);
 		sent->SendData(p, rp);
-		ServerState::Get()->SendPacket("ent_create", p, pragma::networking::Protocol::SlowReliable, rp);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_CREATE, p, pragma::networking::Protocol::SlowReliable, rp);
 	}
 	auto hEnt = ent->GetHandle();
 	CallCallbacks<void, pragma::ecs::BaseEntity *>("OnEntitySpawned", ent); // TODO: Call this after transmission for lua-entities has finished (Entity:OnPostSpawn)

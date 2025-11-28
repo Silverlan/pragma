@@ -42,7 +42,7 @@ void Lua::net::server::broadcast(pragma::networking::Protocol protocol, const st
 		Con::cwar << Con::PREFIX_SERVER << "Attempted to send unindexed lua net message: " << identifier << Con::endl;
 		return;
 	}
-	::ServerState::Get()->SendPacket("luanet", packetNew, protocol);
+	::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::LUANET, packetNew, protocol);
 }
 
 static void send(lua::State *l, pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet, const pragma::networking::TargetRecipientFilter &rp)
@@ -52,7 +52,7 @@ static void send(lua::State *l, pragma::networking::Protocol protocol, const std
 		Con::cwar << Con::PREFIX_SERVER << "Attempted to send unindexed lua net message: " << identifier << Con::endl;
 		return;
 	}
-	::ServerState::Get()->SendPacket("luanet", packetNew, protocol, rp);
+	::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::LUANET, packetNew, protocol, rp);
 }
 
 void Lua::net::server::send(lua::State *l, pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet, const luabind::tableT<pragma::SPlayerComponent> &recipients)

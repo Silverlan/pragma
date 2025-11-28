@@ -22,7 +22,7 @@ void SRenderComponent::SetUnlit(bool b)
 	NetPacket p;
 	nwm::write_entity(p, &ent);
 	p->Write<bool>(b);
-	ServerState::Get()->SendPacket("ent_setunlit", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_SETUNLIT, p, pragma::networking::Protocol::SlowReliable);
 }
 void SRenderComponent::SetCastShadows(bool b)
 {
@@ -33,5 +33,5 @@ void SRenderComponent::SetCastShadows(bool b)
 	NetPacket p;
 	nwm::write_entity(p, &ent);
 	p->Write<bool>(b);
-	ServerState::Get()->SendPacket("ent_setcastshadows", p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_SETCASTSHADOWS, p, pragma::networking::Protocol::SlowReliable);
 }

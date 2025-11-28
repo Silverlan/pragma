@@ -2,12 +2,22 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include <cassert>
+
 module pragma.shared;
 
 import :util.server_state_interface;
 
 void pragma::IServerState::Initialize(util::Library &lib)
 {
+	auto *register_server_entities = lib.FindSymbolAddress<void(*)()>("pr_sv_register_server_entities");
+	assert(register_server_entities != nullptr);
+	register_server_entities();
+
+	auto *register_server_net_messages = lib.FindSymbolAddress<void(*)()>("pr_sv_register_server_net_messages");
+	assert(register_server_net_messages != nullptr);
+	register_server_net_messages();
+	
 	create_server_state = lib.FindSymbolAddress<decltype(create_server_state)>("pr_sv_create_server_state");
 	start_server = lib.FindSymbolAddress<decltype(start_server)>("pr_sv_start_server");
 	close_server = lib.FindSymbolAddress<decltype(close_server)>("pr_sv_close_server");

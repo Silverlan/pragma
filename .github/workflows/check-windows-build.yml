@@ -69,6 +69,10 @@ jobs:
       #  with:
       #    timeout-minutes: 1500
 
+      - name: Analyze Disk Space
+        uses: Silverlan/common_actions/analyze_disk_space@main
+        if: failure()
+
       - name: Upload Debug Artifacts
         if: ${{ !cancelled() }}
         uses: ./pragma/github_actions/upload_debug_artifacts

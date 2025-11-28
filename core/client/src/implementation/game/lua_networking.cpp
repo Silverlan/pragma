@@ -44,10 +44,10 @@ void Lua::net::client::send(nwm::Protocol protocol, const std::string &identifie
 	}
 	switch(protocol) {
 	case nwm::Protocol::TCP:
-		client->SendPacket("luanet", packetNew, pragma::networking::Protocol::SlowReliable);
+		client->SendPacket(pragma::networking::net_messages::server::LUANET, packetNew, pragma::networking::Protocol::SlowReliable);
 		break;
 	case nwm::Protocol::UDP:
-		client->SendPacket("luanet", packetNew, pragma::networking::Protocol::FastUnreliable);
+		client->SendPacket(pragma::networking::net_messages::server::LUANET, packetNew, pragma::networking::Protocol::FastUnreliable);
 		break;
 	}
 }

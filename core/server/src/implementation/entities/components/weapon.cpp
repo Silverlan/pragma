@@ -143,7 +143,7 @@ void SWeaponComponent::Deploy()
 	if(ent.IsShared()) {
 		NetPacket p;
 		nwm::write_entity(p, &ent);
-		ServerState::Get()->SendPacket("wep_deploy", p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_DEPLOY, p, pragma::networking::Protocol::FastUnreliable);
 	}
 }
 
@@ -154,7 +154,7 @@ void SWeaponComponent::Holster()
 	if(ent.IsShared()) {
 		NetPacket p;
 		nwm::write_entity(p, &ent);
-		ServerState::Get()->SendPacket("wep_holster", p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_HOLSTER, p, pragma::networking::Protocol::FastUnreliable);
 	}
 }
 
@@ -172,7 +172,7 @@ void SWeaponComponent::PrimaryAttack()
 		nwm::write_entity(p, &ent);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket("wep_primaryattack", p, pragma::networking::Protocol::FastUnreliable, rpFilter);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_PRIMARYATTACK, p, pragma::networking::Protocol::FastUnreliable, rpFilter);
 	}
 }
 void SWeaponComponent::SecondaryAttack()
@@ -186,7 +186,7 @@ void SWeaponComponent::SecondaryAttack()
 		nwm::write_entity(p, &ent);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket("wep_secondaryattack", p, pragma::networking::Protocol::FastUnreliable, rpFilter);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_SECONDARYATTACK, p, pragma::networking::Protocol::FastUnreliable, rpFilter);
 	}
 }
 void SWeaponComponent::TertiaryAttack()
@@ -198,7 +198,7 @@ void SWeaponComponent::TertiaryAttack()
 		nwm::write_entity(p, &ent);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket("wep_attack3", p, pragma::networking::Protocol::FastUnreliable, rpFilter);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_ATTACK3, p, pragma::networking::Protocol::FastUnreliable, rpFilter);
 	}
 }
 void SWeaponComponent::Attack4()
@@ -210,7 +210,7 @@ void SWeaponComponent::Attack4()
 		nwm::write_entity(p, &ent);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket("wep_attack4", p, pragma::networking::Protocol::FastUnreliable, rpFilter);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_ATTACK4, p, pragma::networking::Protocol::FastUnreliable, rpFilter);
 	}
 }
 void SWeaponComponent::Reload()
@@ -222,7 +222,7 @@ void SWeaponComponent::Reload()
 		nwm::write_entity(p, &ent);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket("wep_reload", p, pragma::networking::Protocol::FastUnreliable, rpFilter);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_RELOAD, p, pragma::networking::Protocol::FastUnreliable, rpFilter);
 	}
 }
 void SWeaponComponent::SetPrimaryClipSize(UInt16 size)
@@ -235,7 +235,7 @@ void SWeaponComponent::SetPrimaryClipSize(UInt16 size)
 		p->Write<UInt16>(*m_clipPrimary);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket("wep_prim_clip_size", p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_PRIM_CLIP_SIZE, p, pragma::networking::Protocol::FastUnreliable);
 	}
 }
 void SWeaponComponent::SetSecondaryClipSize(UInt16 size)
@@ -248,7 +248,7 @@ void SWeaponComponent::SetSecondaryClipSize(UInt16 size)
 		p->Write<UInt16>(*m_clipSecondary);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket("wep_sec_clip_size", p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_SEC_CLIP_SIZE, p, pragma::networking::Protocol::FastUnreliable);
 	}
 }
 void SWeaponComponent::SetMaxPrimaryClipSize(UInt16 size)
@@ -261,7 +261,7 @@ void SWeaponComponent::SetMaxPrimaryClipSize(UInt16 size)
 		p->Write<UInt16>(*m_maxPrimaryClipSize);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket("wep_prim_max_clip_size", p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_PRIM_MAX_CLIP_SIZE, p, pragma::networking::Protocol::FastUnreliable);
 	}
 }
 void SWeaponComponent::SetMaxSecondaryClipSize(UInt16 size)
@@ -274,7 +274,7 @@ void SWeaponComponent::SetMaxSecondaryClipSize(UInt16 size)
 		p->Write<UInt16>(*m_maxSecondaryClipSize);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket("wep_sec_max_clip_size", p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_SEC_MAX_CLIP_SIZE, p, pragma::networking::Protocol::FastUnreliable);
 	}
 }
 void SWeaponComponent::SetPrimaryAmmoType(UInt32 type)
@@ -287,7 +287,7 @@ void SWeaponComponent::SetPrimaryAmmoType(UInt32 type)
 		p->Write<UInt32>(type);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket("wep_prim_ammo_type", p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_PRIM_AMMO_TYPE, p, pragma::networking::Protocol::FastUnreliable);
 	}
 }
 void SWeaponComponent::SetSecondaryAmmoType(UInt32 type)
@@ -300,7 +300,7 @@ void SWeaponComponent::SetSecondaryAmmoType(UInt32 type)
 		p->Write<UInt32>(type);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket("wep_sec_ammo_type", p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_SEC_AMMO_TYPE, p, pragma::networking::Protocol::FastUnreliable);
 	}
 }
 void SWeaponComponent::AddPrimaryClip(UInt16 num) { SetPrimaryClipSize(umath::limit<UInt16>(CUInt32(GetPrimaryClipSize()) + CUInt32(num))); }

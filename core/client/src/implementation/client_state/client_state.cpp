@@ -403,7 +403,7 @@ bool ClientState::RunConsoleCommand(std::string scmd, std::vector<std::string> &
 	p->Write<unsigned char>(CUChar(argv.size()));
 	for(unsigned char i = 0; i < argv.size(); i++)
 		p->WriteString(argv[i]);
-	SendPacket("cmd_call", p, pragma::networking::Protocol::SlowReliable);
+	SendPacket(pragma::networking::net_messages::server::CMD_CALL, p, pragma::networking::Protocol::SlowReliable);
 	return true;
 }
 
@@ -417,7 +417,7 @@ ConVar *ClientState::SetConVar(std::string scmd, std::string value, bool bApplyI
 		NetPacket p;
 		p->WriteString(scmd);
 		p->WriteString(cvar->GetString());
-		SendPacket("cvar_set", p, pragma::networking::Protocol::SlowReliable);
+		SendPacket(pragma::networking::net_messages::server::CVAR_SET, p, pragma::networking::Protocol::SlowReliable);
 	}
 	return cvar;
 }
@@ -602,7 +602,7 @@ void ClientState::SendUserInfo()
 		}
 	}
 	packet->Write<unsigned int>(numUserInfo, &sz);
-	client->SendPacket("clientinfo", packet, pragma::networking::Protocol::SlowReliable);
+	client->SendPacket(pragma::networking::net_messages::server::CLIENTINFO, packet, pragma::networking::Protocol::SlowReliable);
 }
 
 std::string ClientState::GetMessagePrefix() const { return std::string {Con::PREFIX_CLIENT}; }

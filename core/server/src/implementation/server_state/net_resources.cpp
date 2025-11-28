@@ -100,7 +100,7 @@ void ServerState::SendRoughModel(const std::string &f, const std::vector<pragma:
 		}
 	}
 	for(auto *cl : clients) {
-		ServerState::Get()->SendPacket("resource_mdl_rough", pOut, pragma::networking::Protocol::FastUnreliable, *cl);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::RESOURCE_MDL_ROUGH, pOut, pragma::networking::Protocol::FastUnreliable, *cl);
 		//#if RESOURCE_TRANSFER_VERBOSE == 1
 		Con::csv << "[ResourceManager] Sent rough model to: " << cl->GetIdentifier() << "..." << Con::endl;
 		//#endif
@@ -158,7 +158,7 @@ void ServerState::HandleServerNextResource(pragma::networking::IServerClient &se
 			session.SetInitialResourceTransferState(pragma::networking::IServerClient::TransferState::Complete);
 			Con::csv << "All resources have been sent to client '" << session.GetIdentifier() << "'!" << Con::endl;
 			NetPacket p;
-			SendPacket("resourcecomplete", p, pragma::networking::Protocol::SlowReliable, session);
+			SendPacket(pragma::networking::net_messages::client::RESOURCECOMPLETE, p, pragma::networking::Protocol::SlowReliable, session);
 		}
 		if(numResources == 0) {
 			session.SetTransferComplete(true);
@@ -171,7 +171,7 @@ void ServerState::HandleServerNextResource(pragma::networking::IServerClient &se
 	NetPacket packetRes;
 	packetRes->WriteString(r->name);
 	packetRes->Write<UInt64>(size);
-	SendPacket("resourceinfo", packetRes, pragma::networking::Protocol::SlowReliable, session);
+	SendPacket(pragma::networking::net_messages::client::RESOURCEINFO, packetRes, pragma::networking::Protocol::SlowReliable, session);
 }
 
 void ServerState::HandleServerResourceStart(pragma::networking::IServerClient &session, NetPacket &packet)
@@ -210,7 +210,7 @@ void ServerState::HandleServerResourceFragment(pragma::networking::IServerClient
 	fragment->Write<unsigned int>(read);
 	fragment->Write(buf.data(), read);
 	r->offset += read;
-	SendPacket("resource_fragment", fragment, pragma::networking::Protocol::SlowReliable, session);
+	SendPacket(pragma::networking::net_messages::client::RESOURCE_FRAGMENT, fragment, pragma::networking::Protocol::SlowReliable, session);
 }
 
 void ServerState::ReceiveUserInput(pragma::networking::IServerClient &client, NetPacket &packet)
@@ -257,9 +257,9 @@ void ServerState::ReceiveUserInput(pragma::networking::IServerClient &client, Ne
 		actionInputC->SetActionInputs(actions, bController);
 	//Con::csv<<"Action inputs "<<actions<<" for player "<<pl<<" ("<<pl->GetClientSession()->GetIP()<<")"<<Con::endl;
 
-	SendPacket("playerinput", pOut, pragma::networking::Protocol::FastUnreliable, {client, pragma::networking::ClientRecipientFilter::FilterType::Exclude});
+	SendPacket(pragma::networking::net_messages::client::PLAYERINPUT, pOut, pragma::networking::Protocol::FastUnreliable, {client, pragma::networking::ClientRecipientFilter::FilterType::Exclude});
 
 	NetPacket plPacket;
 	plPacket->Write<uint8_t>(userInputId);
-	SendPacket("playerinput", plPacket, pragma::networking::Protocol::FastUnreliable, client);
+	SendPacket(pragma::networking::net_messages::client::PLAYERINPUT, plPacket, pragma::networking::Protocol::FastUnreliable, client);
 }

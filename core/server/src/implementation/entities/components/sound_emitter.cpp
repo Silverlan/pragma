@@ -60,7 +60,7 @@ std::shared_ptr<ALSound> SSoundEmitterComponent::CreateSound(std::string sndname
 		NetPacket p;
 		nwm::write_entity(p, &ent);
 		p->Write<unsigned int>(snd->GetIndex());
-		ServerState::Get()->SendPacket("ent_sound", p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_SOUND, p, pragma::networking::Protocol::FastUnreliable);
 	}
 	return ptrSnd;
 }

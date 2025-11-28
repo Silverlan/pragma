@@ -154,7 +154,7 @@ void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 		}
 	}
 	packet->Write<unsigned char>(numPlayersValid, &posNumPls);
-	ServerState::Get()->SendPacket("snapshot", packet, pragma::networking::Protocol::FastUnreliable, *session);
+	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::SNAPSHOT, packet, pragma::networking::Protocol::FastUnreliable, *session);
 }
 
 void SGame::SendSnapshot()

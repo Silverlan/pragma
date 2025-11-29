@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.client:particle_system.modifier_random_color;
 
@@ -25,10 +27,7 @@ export {
 		CParticleModifierComponentRandomVariable<std::uniform_int_distribution<int16_t>, int16_t> m_blue;
 		CParticleModifierComponentRandomVariable<std::uniform_int_distribution<int16_t>, int16_t> m_alpha;
 	};
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<CParticleModifierComponentRandomColor::ComponentFlags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(CParticleModifierComponentRandomColor::ComponentFlags)
 };
 
 CParticleModifierComponentRandomColor::CParticleModifierComponentRandomColor(const std::string &suffix, const std::unordered_map<std::string, std::string> &values) { Initialize(suffix, values); }

@@ -3,6 +3,7 @@
 module;
 
 #include "pragma/lua/ostream_operator_alias.hpp"
+#include "util_enum_flags.hpp"
 
 module pragma.shared;
 
@@ -79,10 +80,7 @@ namespace pragma {
 	};
 	using namespace umath::scoped_enum::bitwise;
 }
-namespace umath::scoped_enum::bitwise {
-	template<>
-	struct enable_bitwise_operators<pragma::BvhIntersectionFlags> : std::true_type {};
-}
+REGISTER_ENUM_FLAGS(pragma::BvhIntersectionFlags)
 using IntersectionTestResult = Lua::type<std::pair<bool, Lua::var<std::optional<std::vector<uint64_t>>, std::optional<std::vector<pragma::MeshIntersectionInfo::MeshInfo>>>>>;
 static IntersectionTestResult bvh_intersection_test(lua::State *l, const std::function<bool(pragma::IntersectionInfo *)> &fTest, pragma::BvhIntersectionFlags flags)
 {

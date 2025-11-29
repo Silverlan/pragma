@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 #include <cassert>
 
 module pragma.shared;
@@ -15,10 +16,7 @@ namespace pragma {
 	enum class CollisionMeshLoadFlags : uint64_t { None = 0u, SoftBody = 1u, Convex = SoftBody << 1u };
 	using namespace umath::scoped_enum::bitwise;
 }
-namespace umath::scoped_enum::bitwise {
-	template<>
-	struct enable_bitwise_operators<pragma::CollisionMeshLoadFlags> : std::true_type {};
-}
+REGISTER_ENUM_FLAGS(pragma::CollisionMeshLoadFlags)
 
 struct DLLNETWORK FWMDBone {
 	std::string name;

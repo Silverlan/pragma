@@ -1222,7 +1222,7 @@ static void write_anim_flags(udm::LinkedPropertyWrapperArg udm, FPlayAnim flags)
 	udm::write_flag(udm["flags"], flags, FPlayAnim::Transmit, "transmit");
 	udm::write_flag(udm["flags"], flags, FPlayAnim::SnapTo, "snapTo");
 	udm::write_flag(udm["flags"], flags, FPlayAnim::Loop, "loop");
-	static_assert(magic_enum::enum_count<FPlayAnim>() == 5);
+	static_assert(magic_enum::enum_count<FPlayAnim>() == 4);
 }
 
 static FPlayAnim read_anim_flags(udm::LinkedPropertyWrapperArg &udm)
@@ -1232,7 +1232,7 @@ static FPlayAnim read_anim_flags(udm::LinkedPropertyWrapperArg &udm)
 	udm::read_flag(udm["flags"], flags, FPlayAnim::Transmit, "transmit");
 	udm::read_flag(udm["flags"], flags, FPlayAnim::SnapTo, "snapTo");
 	udm::read_flag(udm["flags"], flags, FPlayAnim::Loop, "loop");
-	static_assert(magic_enum::enum_count<FPlayAnim>() == 5);
+	static_assert(magic_enum::enum_count<FPlayAnim>() == 4);
 	return flags;
 }
 

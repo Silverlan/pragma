@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 #include <cassert>
 
 export module pragma.shared:entities.manager;
@@ -151,10 +152,7 @@ export {
 		};
 		using namespace umath::scoped_enum::bitwise;
 	};
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::ComponentFlags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::ComponentFlags)
 
 	namespace pragma {
 		template<class TComponent, typename>

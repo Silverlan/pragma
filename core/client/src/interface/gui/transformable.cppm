@@ -3,6 +3,7 @@
 
 module;
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.client:gui.transformable;
 
@@ -93,8 +94,5 @@ export {
 		void UpdateResizeRect();
 		void UpdateResizeRectPos();
 	};
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<WITransformable::StateFlags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(WITransformable::StateFlags)
 };

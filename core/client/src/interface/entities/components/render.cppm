@@ -4,6 +4,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 #define ENTITY_RENDER_BUFFER_USE_STORAGE_BUFFER 1
 
@@ -290,9 +291,4 @@ export namespace pragma {
 	};
 	using namespace umath::scoped_enum::bitwise;
 };
-export {
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::CRenderComponent::StateFlags> : std::true_type {};
-	}
-};
+export {REGISTER_ENUM_FLAGS(pragma::CRenderComponent::StateFlags)}

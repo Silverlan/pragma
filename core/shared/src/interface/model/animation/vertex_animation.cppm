@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.shared:model.animation.vertex_animation;
 
@@ -65,10 +66,7 @@ export {
 		};
 		using namespace umath::scoped_enum::bitwise;
 	}
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::MeshVertexFrame::Flags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::MeshVertexFrame::Flags)
 
 	class DLLNETWORK MeshVertexAnimation : public std::enable_shared_from_this<MeshVertexAnimation> {
 	  public:

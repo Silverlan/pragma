@@ -51,7 +51,7 @@ void ShaderPPLightCone::InitializeShaderResources()
 	AddVertexAttribute(VERTEX_ATTRIBUTE_NORMAL);
 
 	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
-	AddDescriptorSetGroup(shaderPPLightCone::DESCRIPTOR_SET_TEXTURE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_DEPTH_BUFFER);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_INSTANCE);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_SCENE);

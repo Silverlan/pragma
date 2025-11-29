@@ -4,6 +4,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.client:rendering.model_render_buffer_data;
 
@@ -31,9 +32,4 @@ export namespace pragma::rendering {
 	};
 	using namespace umath::scoped_enum::bitwise;
 };
-export {
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::rendering::RenderBufferData::StateFlags> : std::true_type {};
-	}
-};
+export {REGISTER_ENUM_FLAGS(pragma::rendering::RenderBufferData::StateFlags)}

@@ -4,6 +4,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.client:rendering.shaders.scene;
 
@@ -238,15 +239,6 @@ export namespace pragma {
 	};
 	using namespace umath::scoped_enum::bitwise;
 };
-export {
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::rendering::InstanceData::RenderFlags> : std::true_type {};
-
-		template<>
-		struct enable_bitwise_operators<pragma::ShaderScene::DebugFlags> : std::true_type {};
-
-		template<>
-		struct enable_bitwise_operators<pragma::ShaderGameWorld::SceneFlags> : std::true_type {};
-	}
-};
+export {REGISTER_ENUM_FLAGS(pragma::rendering::InstanceData::RenderFlags)}
+export {REGISTER_ENUM_FLAGS(pragma::ShaderScene::DebugFlags)}
+export {REGISTER_ENUM_FLAGS(pragma::ShaderGameWorld::SceneFlags)}

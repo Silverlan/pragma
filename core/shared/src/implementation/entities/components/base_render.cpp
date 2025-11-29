@@ -53,12 +53,12 @@ void BaseRenderComponent::Save(udm::LinkedPropertyWrapperArg udm)
 	BaseEntityComponent::Save(udm);
 	udm::write_flag(udm["renderFlags"], m_renderFlags, FRenderFlags::CastShadows, "castShadows");
 	udm::write_flag(udm["renderFlags"], m_renderFlags, FRenderFlags::Unlit, "unlit");
-	static_assert(magic_enum::enum_count<FRenderFlags>() == 3);
+	static_assert(magic_enum::enum_count<FRenderFlags>() == 2);
 }
 void BaseRenderComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version)
 {
 	BaseEntityComponent::Load(udm, version);
 	udm::read_flag(udm["renderFlags"], m_renderFlags, FRenderFlags::CastShadows, "castShadows");
 	udm::read_flag(udm["renderFlags"], m_renderFlags, FRenderFlags::Unlit, "unlit");
-	static_assert(magic_enum::enum_count<FRenderFlags>() == 3);
+	static_assert(magic_enum::enum_count<FRenderFlags>() == 2);
 }

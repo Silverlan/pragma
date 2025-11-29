@@ -10,6 +10,8 @@ static spdlog::logger &LOGGER = pragma::register_logger("lua");
 
 std::optional<std::pair<std::string, int32_t>> pragma::scripting::lua_core::util::parse_syntax_error_message(const std::string &msg, size_t *optOutStartMsgPos)
 {
+	if (optOutStartMsgPos)
+		*optOutStartMsgPos = std::string::npos;
 	auto &err = msg;
 	auto brSt = err.find('[');
 	auto brEn = err.find(']', brSt + 1);
@@ -36,6 +38,8 @@ std::optional<std::pair<std::string, int32_t>> pragma::scripting::lua_core::util
 	auto cEn = err.find(':', cSt + 1);
 	if(cSt == std::string::npos || cEn == std::string::npos)
 		return {};
+	if(optOutStartMsgPos)
+		*optOutStartMsgPos = err.find_first_not_of(ustring::WHITESPACE, cEn);
 	auto lineId = ::util::to_int(err.substr(cSt + 1, cEn - cSt - 1));
 	return std::pair<std::string, int32_t> {filename, lineId};
 }
@@ -121,9 +125,9 @@ void pragma::scripting::lua_core::util::get_lua_doc_info(std::stringstream &outM
 
 std::string pragma::scripting::lua_core::format_error_message(lua::State *l, const std::string &msg, Lua::StatusCode statusCode, const std::string *optFilename, ErrorType errType)
 {
-	if(msg.find('\n') != std::string::npos) {
-		// Default Lua messages don't contain new-line characters (TODO: Confirm this).
-		// If there is a new-line character, that means the error message has already been formatted
+	const char *prefixMarker = "error info: "; // A marker to indicate whether the message has already been formatted
+	if(msg.find(prefixMarker) != std::string::npos) {
+		// The error message has already been formatted
 		// and there is nothing for us to do.
 		return msg;
 	}
@@ -150,7 +154,10 @@ std::string pragma::scripting::lua_core::format_error_message(lua::State *l, con
 						filename = errInfo->first;
 					auto formattedFilename = util::make_clickable_lua_script_link(filename, errInfo->second);
 					ssMsg << formattedFilename;
-					ssMsg << " " << formattedMsg.substr(startMsgPos);
+					if (startMsgPos != std::string::npos)
+						ssMsg << " " << formattedMsg.substr(startMsgPos);
+					else
+						ssMsg << " " << formattedMsg;
 					auto bNl = util::get_code_snippet(ssMsg, ::util::FilePath(Lua::SCRIPT_DIRECTORY, filename).GetString(), errInfo->second, ":");
 					if(bNl == true)
 						ssMsg << "\n\n";
@@ -174,7 +181,7 @@ std::string pragma::scripting::lua_core::format_error_message(lua::State *l, con
 
 	std::stringstream ss;
 	util::get_lua_doc_info(ss, formattedMsg);
-	return ss.str();
+	return prefixMarker +ss.str();
 }
 
 void pragma::scripting::lua_core::raise_error(lua::State *l, const std::string &msg) { Lua::Error(l, msg); }

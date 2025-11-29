@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.shared:networking.enums;
 
@@ -63,8 +64,5 @@ export {
 		enum class SnapshotFlags : uint8_t { None = 0u, PhysicsData = 1u, ComponentData = PhysicsData << 1u };
 		using namespace umath::scoped_enum::bitwise;
 	};
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::SnapshotFlags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::SnapshotFlags)
 };

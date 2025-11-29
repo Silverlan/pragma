@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.shared:map.entity_data;
 
@@ -65,8 +66,5 @@ export {
 		using namespace umath::scoped_enum::bitwise;
 	};
 	DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::asset::EntityData &entityData);
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::asset::EntityData::Flags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::asset::EntityData::Flags)
 };

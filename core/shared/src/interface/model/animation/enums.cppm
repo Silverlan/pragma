@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.shared:model.animation.enums;
 
@@ -86,10 +87,7 @@ export {
 		};
 		using namespace umath::scoped_enum::bitwise;
 	}
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::Activity> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::Activity)
 
 	extern DLLNETWORK std::unordered_map<int32_t, std::string> ACTIVITY_NAMES;
 
@@ -122,13 +120,8 @@ export {
 		};
 		using namespace umath::scoped_enum::bitwise;
 	};
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::FPlayAnim> : std::true_type {};
-
-		template<>
-		struct enable_bitwise_operators<pragma::FAnim> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::FPlayAnim)
+	REGISTER_ENUM_FLAGS(pragma::FAnim)
 
 	namespace pragma::animation {
 		using BoneId = uint16_t;

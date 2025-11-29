@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.shared:scripting.lua.libraries.file;
 
@@ -13,10 +14,7 @@ export {
 		enum class FileOpenMode : uint32_t { None = 0u, Read = 1u, Write = Read << 1u, Append = Write << 1u, Update = Append << 1u, Binary = Update << 1u };
 		using namespace umath::scoped_enum::bitwise;
 	}
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::FileOpenMode> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::FileOpenMode)
 
 	class DLLNETWORK LFile {
 	  public:

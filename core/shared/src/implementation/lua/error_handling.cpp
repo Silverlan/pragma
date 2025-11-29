@@ -151,7 +151,7 @@ bool Lua::PrintTraceback(lua::State *l, std::stringstream &ssOut, const std::str
 				shortSrc = ustring::substr(shortSrc, offset);
 				if(shortSrc.length() > maxLuaPathLen)
 					shortSrc = "..." + shortSrc.substr(shortSrc.size() - maxLuaPathLen);
-				shortSrc = "[string \"" + shortSrc + "\"]";
+				//shortSrc = "[string \"" + shortSrc + "\"]";
 				//open_lua_file(fname,lineId);
 			}
 			std::stringstream ssErrMsg;

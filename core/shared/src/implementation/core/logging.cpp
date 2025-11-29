@@ -228,6 +228,11 @@ std::optional<std::string> pragma::detail::get_log_file_name() { return g_logFil
 
 void pragma::detail::close_logger()
 {
+	static auto loggerClosed = false;
+	if (loggerClosed)
+		return;
+	loggerClosed = true;
+
 	pragma::logging::detail::shouldLogOutput = false;
 	pragma::logging::detail::consoleOutputLogger = nullptr;
 

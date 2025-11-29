@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.shared:scripting.lua.include;
 
@@ -31,7 +32,4 @@ export namespace pragma::scripting::lua_core {
 	DLLNETWORK void execute_files_in_directory(lua::State *l, const std::string &path);
 	DLLNETWORK Lua::StatusCode execute_file(lua::State *l, const std::string &path, std::string *optOutErrMsg = nullptr);
 };
-namespace umath::scoped_enum::bitwise {
-	template<>
-	struct enable_bitwise_operators<pragma::scripting::lua_core::IncludeFlags> : std::true_type {};
-}
+export {REGISTER_ENUM_FLAGS(pragma::scripting::lua_core::IncludeFlags)}

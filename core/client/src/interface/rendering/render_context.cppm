@@ -4,6 +4,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.client:rendering.render_context;
 export import pragma.platform;
@@ -70,9 +71,6 @@ namespace pragma {
 	using namespace umath::scoped_enum::bitwise;
 }
 export {
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::RenderContext::StateFlags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::RenderContext::StateFlags)
 };
 #pragma warning(pop)

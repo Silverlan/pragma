@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.shared:game.animation_channel_cache_data;
 
@@ -25,8 +26,5 @@ export {
 		};
 		using namespace umath::scoped_enum::bitwise;
 	};
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::AnimationChannelCacheData::State> : std::true_type {};
-	};
+	REGISTER_ENUM_FLAGS(pragma::AnimationChannelCacheData::State);
 };

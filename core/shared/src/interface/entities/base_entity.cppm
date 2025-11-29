@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 #include <format>
 
 export module pragma.shared:entities.base_entity;
@@ -293,10 +294,8 @@ export {
 		}
 		using ::operator<<;
 	}
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::ecs::BaseEntity::StateFlags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::ecs::BaseEntity::StateFlags)
+
 #pragma warning(pop)
 
 	DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const EntityHandle &ent);

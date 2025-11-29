@@ -4,6 +4,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 #define DEBUG_RENDER_PERFORMANCE_TEST_ENABLED 0
 
@@ -387,13 +388,8 @@ export namespace pragma {
 	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::CRasterizationRendererComponent::StateFlags> : std::true_type {};
-
-		template<>
-		struct enable_bitwise_operators<pragma::RendererData::Flags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::CRasterizationRendererComponent::StateFlags)
+	REGISTER_ENUM_FLAGS(pragma::RendererData::Flags)
 
 	class DLLCLIENT CRasterizationRenderer : public CBaseEntity {
 	  public:

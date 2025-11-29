@@ -26,7 +26,7 @@ void ShaderPPFog::InitializeShaderResources()
 {
 	ShaderGraphics::InitializeShaderResources();
 	AddDefaultVertexAttributes();
-	AddDescriptorSetGroup(shaderPPFog::DESCRIPTOR_SET_TEXTURE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_DEPTH_BUFFER);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_FOG);

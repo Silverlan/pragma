@@ -4,6 +4,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.client:rendering.enums;
 
@@ -11,10 +12,7 @@ export import pragma.math;
 
 export {
 	enum class ShadowType : uint8_t { None = 0, StaticOnly = 1, Full = StaticOnly | 2 };
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<ShadowType> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(ShadowType)
 
 	namespace pragma::rendering {
 		DLLCLIENT bool VERBOSE_RENDER_OUTPUT_ENABLED = false;
@@ -41,10 +39,7 @@ export {
 		HDR = Reflection << 1,
 		ParticleDepth = HDR << 1
 	};
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<RenderFlags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(RenderFlags)
 
 	namespace pragma::rendering {
 		enum class SceneRenderPass : uint8_t { None = 0, World, View, Sky, Count };
@@ -52,10 +47,7 @@ export {
 		enum class RenderMask : uint64_t { None = 0u };
 		using RenderGroup = RenderMask;
 	};
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::rendering::RenderMask> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::rendering::RenderMask)
 
 	namespace pragma::rendering {
 		enum class AntiAliasing : uint8_t { None = 0u, MSAA, FXAA };

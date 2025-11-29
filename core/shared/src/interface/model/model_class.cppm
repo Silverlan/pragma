@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.shared:model.model;
 
@@ -656,18 +657,10 @@ export {
 
 		using namespace umath::scoped_enum::bitwise;
 	}
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::Model::CopyFlags> : std::true_type {};
+	REGISTER_ENUM_FLAGS(pragma::Model::CopyFlags)
+	REGISTER_ENUM_FLAGS(pragma::Model::MergeFlags)
+	REGISTER_ENUM_FLAGS(pragma::Model::Flags)
+	REGISTER_ENUM_FLAGS(pragma::Model::StateFlags)
 
-		template<>
-		struct enable_bitwise_operators<pragma::Model::MergeFlags> : std::true_type {};
-
-		template<>
-		struct enable_bitwise_operators<pragma::Model::Flags> : std::true_type {};
-
-		template<>
-		struct enable_bitwise_operators<pragma::Model::StateFlags> : std::true_type {};
-	}
 #pragma warning(pop)
 };

@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.shared:entities.components.base_networked;
 
@@ -55,10 +56,7 @@ export {
 		};
 		using namespace umath::scoped_enum::bitwise;
 	};
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::BaseNetworkedComponent::NetworkFlags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::BaseNetworkedComponent::NetworkFlags)
 
 #if NETWORKED_VARS_ENABLED != 0
 	template<typename T>

@@ -22,6 +22,15 @@ ALSound *CALSound::FindByServerIndex(uint32_t idx)
 	return it->second.lock().get();
 }
 
+std::shared_ptr<CALSound> CALSound::Create(NetworkState *nw, const al::PSoundChannel &channel) {
+	auto als = std::shared_ptr<CALSound> {new CALSound {nw, channel}, [](CALSound *snd) {
+		snd->OnRelease();
+		delete snd;
+	}};
+	als->InitializeHandle(std::static_pointer_cast<al::SoundSource>(als));
+	return als;
+}
+
 CALSound::CALSound(NetworkState *nw, const al::PSoundChannel &channel) : ALSound(nw), al::SoundSource {channel}
 {
 	UpdateVolume();

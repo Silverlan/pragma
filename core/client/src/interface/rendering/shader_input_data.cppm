@@ -4,6 +4,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.client:rendering.shader_input_data;
 
@@ -125,8 +126,5 @@ export namespace pragma::rendering {
 	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::rendering::Property::Flags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::rendering::Property::Flags)
 };

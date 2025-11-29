@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.client:rendering.shaders.pp_dof;
 
@@ -63,8 +65,5 @@ export namespace pragma {
 };
 
 export {
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::ShaderPPDoF::Flags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::ShaderPPDoF::Flags)
 };

@@ -115,7 +115,7 @@ static void register_directory_watcher(lua::State *l, luabind::module_ &modUtil)
 	defListener->add_static_constant("LISTENER_FLAG_ABSOLUTE_PATH", umath::to_integral(DirectoryWatcherCallback::WatchFlags::AbsolutePath));
 	defListener->add_static_constant("LISTENER_FLAG_START_DISABLED", umath::to_integral(DirectoryWatcherCallback::WatchFlags::StartDisabled));
 	defListener->add_static_constant("LISTENER_FLAG_WATCH_DIRECTORY_CHANGES", umath::to_integral(DirectoryWatcherCallback::WatchFlags::WatchDirectoryChanges));
-	static_assert(magic_enum::enum_count<DirectoryWatcherCallback::WatchFlags>() == 5);
+	static_assert(magic_enum::enum_count<DirectoryWatcherCallback::WatchFlags>() == 4);
 	defListener
 	  ->scope[luabind::def("create", static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &path, luabind::object callback) { create_directory_change_listener(l, path, callback, DirectoryWatcherCallback::WatchFlags::None); }))];
 	defListener->scope[luabind::def("create", static_cast<void (*)(lua::State *, const std::string &, luabind::object, DirectoryWatcherCallback::WatchFlags)>([](lua::State *l, const std::string &path, luabind::object callback, DirectoryWatcherCallback::WatchFlags flags) {

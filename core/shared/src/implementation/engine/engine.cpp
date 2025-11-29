@@ -1015,6 +1015,19 @@ void pragma::Engine::Start()
 
 void pragma::Engine::UpdateTickCount() { m_ctTick.Update(); }
 
+static void add_zip_file(uzip::ZIPFile &zip, const std::string &fileName, const std::string &zipFileName) {
+	std::string path;
+	if(!filemanager::find_absolute_path(fileName, path))
+		return;
+	std::ifstream t {path};
+	if(t.is_open()) {
+		std::stringstream buffer;
+		buffer << t.rdbuf();
+		std::string log = buffer.str();
+		zip.AddFile(zipFileName, log);
+	}
+};
+
 std::unique_ptr<uzip::ZIPFile> pragma::Engine::GenerateEngineDump(const std::string &baseName, std::string &outZipFileName, std::string &outErr)
 {
 	auto programPath = util::Path::CreatePath(filemanager::get_program_write_path());
@@ -1036,8 +1049,24 @@ std::unique_ptr<uzip::ZIPFile> pragma::Engine::GenerateEngineDump(const std::str
 	zipFile->AddFile("stack_backtrace.txt", util::debug::get_formatted_stack_backtrace_string());
 
 	// Write Info
-	if(pragma::Engine::Get() != nullptr)
+	if(pragma::Engine::Get() != nullptr) {
 		pragma::Engine::Get()->DumpDebugInformation(*zipFile.get());
+
+		auto logFileName = pragma::detail::get_log_file_name();
+		if(logFileName.has_value()) {
+			pragma::detail::close_logger();
+			pragma::flush_loggers();
+
+			/* For some reason this will fail sometimes
+			auto logContents = filemanager::read_file(*logFileName);
+			if(logContents.has_value()) {
+				zip.AddFile("log.txt", *logContents);
+			}
+			*/
+
+			add_zip_file(*zipFile, *logFileName, "log.txt");
+		}
+	}
 	return zipFile;
 }
 
@@ -1068,34 +1097,7 @@ void pragma::Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 	}
 	zip.AddFile("engine.txt", engineInfo.str());
 
-	auto fAddFile = [&zip](const std::string &fileName, const std::string &zipFileName) {
-		std::string path;
-		if(!filemanager::find_absolute_path(fileName, path))
-			return;
-		std::ifstream t {path};
-		if(t.is_open()) {
-			std::stringstream buffer;
-			buffer << t.rdbuf();
-			std::string log = buffer.str();
-			zip.AddFile(zipFileName, log);
-		}
-	};
-
-	auto logFileName = pragma::detail::get_log_file_name();
-	if(logFileName.has_value()) {
-		pragma::flush_loggers();
-
-		/* For some reason this will fail sometimes
-		auto logContents = filemanager::read_file(*logFileName);
-		if(logContents.has_value()) {
-			zip.AddFile("log.txt", *logContents);
-		}
-		*/
-
-		fAddFile(*logFileName, "log.txt");
-	}
-
-	fAddFile("git_info.txt", "git_info.txt");
+	add_zip_file(zip, "git_info.txt", "git_info.txt");
 
 	auto fWriteConvars = [&zip](const std::map<std::string, std::shared_ptr<ConConf>> &cvarMap, const std::string &fileName) {
 		std::stringstream convars;

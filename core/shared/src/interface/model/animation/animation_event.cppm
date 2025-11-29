@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.shared:model.animation.animation_event;
 
@@ -19,10 +20,7 @@ export {
 		};
 		using namespace umath::scoped_enum::bitwise;
 	}
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::AnimationEvent::Type> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::AnimationEvent::Type)
 
 	extern DLLNETWORK std::unordered_map<int32_t, std::string> ANIMATION_EVENT_NAMES;
 

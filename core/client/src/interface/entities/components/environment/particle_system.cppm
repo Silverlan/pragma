@@ -4,6 +4,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.client:entities.components.particle_system;
 
@@ -405,15 +406,9 @@ export namespace pragma::ecs {
 		void OnComplete();
 	};
 };
+export {REGISTER_ENUM_FLAGS(pragma::ecs::CParticleSystemComponent::Flags)}
+export {REGISTER_ENUM_FLAGS(pragma::ecs::ParticleRenderFlags)}
 export {
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::ecs::CParticleSystemComponent::Flags> : std::true_type {};
-
-		template<>
-		struct enable_bitwise_operators<pragma::ecs::ParticleRenderFlags> : std::true_type {};
-	}
-
 	namespace pragma::ecs {
 		class DLLCLIENT CEnvParticleSystem : public CBaseEntity {
 		  public:

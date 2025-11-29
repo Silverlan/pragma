@@ -4,6 +4,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.server:entities.components.ai;
 
@@ -312,8 +313,5 @@ export {
 		};
 		using namespace umath::scoped_enum::bitwise;
 	};
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::SAIComponent::AIAnimationInfo::AIAnimFlags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::SAIComponent::AIAnimationInfo::AIAnimFlags)
 };

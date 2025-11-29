@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module;
+
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.client:gui.scroll_container;
 
@@ -63,8 +65,5 @@ export {
 		static void OnChildReleased(WIBase *child);
 		static void OnChildSetSize(WIBase *child);
 	};
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<WIScrollContainer::StateFlags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(WIScrollContainer::StateFlags)
 };

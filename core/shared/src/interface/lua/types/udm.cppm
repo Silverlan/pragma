@@ -4,6 +4,7 @@ module;
 
 export module pragma.shared:scripting.lua.types.udm;
 
+import :scripting.lua.core;
 export import pragma.lua;
 export import pragma.udm;
 
@@ -38,8 +39,7 @@ export namespace luabind {
 			for(auto type : types) {
 				auto r = udm::visit<LENABLE_NUMERIC, LENABLE_GENERIC, LENABLE_NON_TRIVIAL>(type, [L, idx](auto tag) {
 					using T = typename decltype(tag)::type;
-					luabind::object o(luabind::from_stack(L, idx));
-					return luabind::object_cast_nothrow<T *>(o, static_cast<T *>(nullptr)) != nullptr;
+					return Lua::IsType<T>(L, idx);
 				});
 				if(r)
 					return true;

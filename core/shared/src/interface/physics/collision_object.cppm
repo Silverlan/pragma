@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.shared:physics.collision_object;
 
@@ -323,8 +324,5 @@ export {
 
 		using ::operator<<;
 	};
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::physics::ICollisionObject::StateFlags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::physics::ICollisionObject::StateFlags)
 };

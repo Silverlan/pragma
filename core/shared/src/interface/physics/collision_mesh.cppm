@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.shared:physics.collision_mesh;
 
@@ -132,10 +133,7 @@ export {
 		};
 		using namespace umath::scoped_enum::bitwise;
 	}
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::physics::CollisionMesh::SoftBodyAnchor::Flags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::physics::CollisionMesh::SoftBodyAnchor::Flags)
 
 	DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::physics::CollisionMesh &o);
 };

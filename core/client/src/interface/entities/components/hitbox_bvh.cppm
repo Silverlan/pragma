@@ -4,6 +4,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 #include <bvh/v2/default_builder.h>
 
 export module pragma.client:entities.components.hitbox_bvh;
@@ -122,9 +123,4 @@ export namespace pragma {
 		DLLCLIENT bool test_bvh_intersection_with_kdop(const ObbBvhTree &bvhData, const std::vector<umath::ScaledTransform> &effectivePoses, const std::vector<umath::Plane> &kdop, size_t nodeIdx = 0, IntersectionInfo *outIntersectionInfo = nullptr);
 	};
 };
-export {
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::bvh::DebugDrawInfo::Flags> : std::true_type {};
-	}
-};
+export {REGISTER_ENUM_FLAGS(pragma::bvh::DebugDrawInfo::Flags)}

@@ -4,6 +4,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.client:engine;
 
@@ -72,6 +73,7 @@ export {
 
 		bool IsWindowless() const;
 		bool IsCPURenderingOnly() const;
+		bool IsClosed() const;
 
 		virtual bool Initialize(int argc, char *argv[]) override;
 		virtual StateInstance &GetStateInstance(NetworkState &nw) override;
@@ -300,10 +302,7 @@ export {
 		void Input(int key, pragma::platform::KeyState inputState, pragma::platform::KeyState pressState, pragma::platform::Modifier mods, float magnitude = 1.f);
 		void UpdateFPS(float t);
 	};
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<CEngine::StateFlags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(CEngine::StateFlags)
 
 	namespace pragma {
 		DLLCLIENT CEngine *get_cengine();

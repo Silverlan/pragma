@@ -3,6 +3,8 @@
 
 module;
 
+#include "util_enum_flags.hpp"
+
 export module pragma.client:rendering.shader_material_enums;
 
 export import pragma.math;
@@ -41,9 +43,4 @@ export namespace pragma::rendering::shader_material {
 	constexpr uint32_t MAX_NUMBER_OF_SRGB_TEXTURES = 4;
 	using namespace umath::scoped_enum::bitwise;
 };
-export {
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::rendering::shader_material::MaterialFlags> : std::true_type {};
-	}
-};
+export {REGISTER_ENUM_FLAGS(pragma::rendering::shader_material::MaterialFlags)}

@@ -3,6 +3,8 @@
 
 module;
 
+#include "util_enum_flags.hpp"
+
 export module pragma.client:rendering.light_data;
 
 export import pragma.math;
@@ -39,8 +41,5 @@ export namespace pragma {
 	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::LightBufferData::BufferFlags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::LightBufferData::BufferFlags)
 };

@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.shared:model.model_mesh;
 
@@ -202,10 +203,7 @@ export {
 		};
 		using namespace umath::scoped_enum::bitwise;
 	}
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::ModelSubMesh::ShareMode> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::ModelSubMesh::ShareMode)
 
 	class DLLNETWORK ModelMesh : public std::enable_shared_from_this<ModelMesh> {
 	  public:

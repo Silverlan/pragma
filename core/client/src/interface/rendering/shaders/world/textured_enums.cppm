@@ -3,6 +3,8 @@
 
 module;
 
+#include "util_enum_flags.hpp"
+
 export module pragma.client:rendering.shaders.textured_enums;
 
 export import pragma.math;
@@ -40,8 +42,5 @@ export namespace pragma {
 	using namespace umath::scoped_enum::bitwise;
 };
 export {
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::GameShaderSpecializationConstantFlag> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::GameShaderSpecializationConstantFlag)
 };

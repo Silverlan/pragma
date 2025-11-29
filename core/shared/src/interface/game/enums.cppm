@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include "util_enum_flags.hpp"
+
 export module pragma.shared:game.enums;
 
 export import pragma.math;
@@ -42,10 +44,7 @@ export {
 		};
 		using namespace umath::scoped_enum::bitwise;
 	}
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::GameLimits> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::GameLimits)
 
 	namespace pragma {
 		enum class CoordinateSpace : uint8_t {

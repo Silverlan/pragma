@@ -736,7 +736,7 @@ if with_essential_client_modules:
 if with_common_modules:
 	add_pragma_module(
 		name="pr_bullet",
-		commitSha="5eee47a37b75d026627f369f1f323886710d02d1",
+		commitSha="34249e0a45e72f0d8287e62032b12db5e8dc2931",
 		repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
 	)
 	add_pragma_module(
@@ -770,12 +770,12 @@ if with_pfm:
 	if with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_chromium",
-			commitSha="2192dc350064967a86dcf3479146ef4e8f98f550",
+			commitSha="e9a5a19de36ef5ead806661bd4d24f0ec8757300",
 			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="7e8ee0aaafbfa99856b82c1437134de1b1d09a7b",
+			commitSha="f75e43b9a37c3ceac57734031ed0deb0537db7a1",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(

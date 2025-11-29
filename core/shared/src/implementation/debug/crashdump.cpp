@@ -325,9 +325,9 @@ bool CrashHandler::GenerateCrashDump() const
 	if(saveDump) {
 		std::string err;
 		std::string zipFileName;
-		LOGGER.debug("Closing logger...");
-		pragma::detail::close_logger();
 		auto zipFile = pragma::Engine::GenerateEngineDump("crashdumps/crashdump", zipFileName, err);
+		// Logger should already be closed at this point, but to make sure...
+		pragma::detail::close_logger();
 		if(zipFile) {
 #ifdef _WIN32
 			std::string dumpErr;

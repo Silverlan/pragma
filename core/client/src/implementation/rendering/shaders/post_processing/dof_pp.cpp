@@ -21,7 +21,7 @@ void ShaderPPDoF::InitializeShaderResources()
 {
 	ShaderGraphics::InitializeShaderResources();
 	AddDefaultVertexAttributes();
-	AddDescriptorSetGroup(shaderPPDoF::DESCRIPTOR_SET_TEXTURE);
+	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_DEPTH_BUFFER);
 	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }

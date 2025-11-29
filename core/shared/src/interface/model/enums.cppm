@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include "util_enum_flags.hpp"
+
 export module pragma.shared:model.enums;
 
 import pragma.math;
@@ -29,8 +31,5 @@ export {
 		};
 		using namespace umath::scoped_enum::bitwise;
 	};
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::model::ModelUpdateFlags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::model::ModelUpdateFlags)
 };

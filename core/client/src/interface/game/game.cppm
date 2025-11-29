@@ -4,6 +4,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.client:game;
 
@@ -522,18 +523,10 @@ export class DLLCLIENT CGame : public pragma::Game {
 	virtual void InitializeEntityComponents(pragma::EntityComponentManager &componentManager) override;
 	void InitializeWorldEnvironment();
 };
+export {REGISTER_ENUM_FLAGS(CGame::SoundCacheFlags)}
+export {REGISTER_ENUM_FLAGS(CGame::GameShader)}
+export {REGISTER_ENUM_FLAGS(CGame::StateFlags)}
 export {
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<CGame::SoundCacheFlags> : std::true_type {};
-
-		template<>
-		struct enable_bitwise_operators<CGame::GameShader> : std::true_type {};
-
-		template<>
-		struct enable_bitwise_operators<CGame::StateFlags> : std::true_type {};
-	}
-
 	namespace pragma {
 		DLLCLIENT CGame *get_cgame();
 	};

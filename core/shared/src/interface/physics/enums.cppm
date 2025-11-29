@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.shared:physics.enums;
 
@@ -58,10 +59,6 @@ export {
 		enum class PHYSICSTYPE : int { NONE, DYNAMIC, STATIC, SOFTBODY, BOXCONTROLLER, CAPSULECONTROLLER };
 		enum class RayCastHitType : uint8_t { None = 0, Touch, Block };
 	};
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::physics::CollisionMask> : std::true_type {};
-		template<>
-		struct enable_bitwise_operators<pragma::physics::RayCastFlags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::physics::CollisionMask)
+	REGISTER_ENUM_FLAGS(pragma::physics::RayCastFlags)
 }

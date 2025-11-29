@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.shared:entities.components.triggers.base_gravity;
 
@@ -42,11 +43,6 @@ export {
 		};
 		using namespace umath::scoped_enum::bitwise;
 	};
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::Entity::TriggerGravity::SpawnFlags> : std::true_type {};
-
-		template<>
-		struct enable_bitwise_operators<pragma::Entity::TriggerGravity::NetFlags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::Entity::TriggerGravity::SpawnFlags)
+	REGISTER_ENUM_FLAGS(pragma::Entity::TriggerGravity::NetFlags)
 };

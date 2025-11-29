@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -101,10 +102,7 @@ export {
 		DLLNETWORK extern std::string PREFIX_GUI;
 		using namespace umath::scoped_enum::bitwise;
 	};
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<Con::MessageFlags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(Con::MessageFlags)
 
 	namespace pragma::logging::detail {
 		enum class Type : uint8_t { None = 0, Info, Warn, Err, Crit };

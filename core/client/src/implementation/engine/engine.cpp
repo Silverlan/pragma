@@ -217,29 +217,31 @@ void CEngine::DumpDebugInformation(uzip::ZIPFile &zip) const
 	zip.AddFile("engine_cl.txt", engineInfo.str());
 
 	auto &context = pragma::get_cengine()->GetRenderContext();
-	auto layers = context.DumpLayers();
-	if(layers)
-		zip.AddFile("prosper_layers.txt", *layers);
+	if (!context.IsClosed()) {
+		auto layers = context.DumpLayers();
+		if(layers)
+			zip.AddFile("prosper_layers.txt", *layers);
 
-	auto extensions = context.DumpExtensions();
-	if(extensions)
-		zip.AddFile("prosper_extensions.txt", *extensions);
+		auto extensions = context.DumpExtensions();
+		if(extensions)
+			zip.AddFile("prosper_extensions.txt", *extensions);
 
-	auto limits = context.DumpLimits();
-	if(limits)
-		zip.AddFile("prosper_limits.txt", *limits);
+		auto limits = context.DumpLimits();
+		if(limits)
+			zip.AddFile("prosper_limits.txt", *limits);
 
-	auto features = context.DumpFeatures();
-	if(features)
-		zip.AddFile("prosper_features.txt", *features);
+		auto features = context.DumpFeatures();
+		if(features)
+			zip.AddFile("prosper_features.txt", *features);
 
-	auto imageFormatProperties = context.DumpImageFormatProperties();
-	if(imageFormatProperties)
-		zip.AddFile("prosper_image_format_properties.txt", *imageFormatProperties);
+		auto imageFormatProperties = context.DumpImageFormatProperties();
+		if(imageFormatProperties)
+			zip.AddFile("prosper_image_format_properties.txt", *imageFormatProperties);
 
-	auto formatProperties = context.DumpFormatProperties();
-	if(formatProperties)
-		zip.AddFile("prosper_format_properties.txt", *formatProperties);
+		auto formatProperties = context.DumpFormatProperties();
+		if(formatProperties)
+			zip.AddFile("prosper_format_properties.txt", *formatProperties);
+	}
 }
 
 void CEngine::SetRenderResolution(std::optional<Vector2i> resolution)
@@ -637,6 +639,7 @@ void register_game_shaders();
 
 bool CEngine::IsWindowless() const { return g_windowless; }
 bool CEngine::IsCPURenderingOnly() const { return g_cpuRendering; }
+bool CEngine::IsClosed() const { return umath::is_flag_set(m_stateFlags, StateFlags::CEClosed); }
 
 void CEngine::HandleOpenGLFallback()
 {
@@ -1609,7 +1612,7 @@ CEngine *pragma::get_cengine() { return g_engine; }
 void CEngine::HandleLocalHostPlayerClientPacket(NetPacket &p)
 {
 	auto *client = GetClientState();
-	if(client != nullptr)
+	if(client == nullptr)
 		return;
 	auto *cl = static_cast<ClientState *>(client)->GetClient();
 	if(cl == nullptr)
@@ -1751,8 +1754,8 @@ void CEngine::Close()
 	CloseSoundEngine(); // Has to be closed after client state (since clientstate may still have some references at this point)
 	m_clInstance = nullptr;
 	WGUI::Close(); // Has to be closed after client state
-	g_engine = nullptr;
 	pragma::RenderContext::Release();
+	g_engine = nullptr;
 
 	pragma::Engine::Close();
 }

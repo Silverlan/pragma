@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 #ifdef _WIN32
 #if __cpp_lib_format >= 202207L
@@ -320,10 +321,7 @@ export {
 
 		using namespace umath::scoped_enum::bitwise;
 	};
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::BaseEntityComponent::StateFlags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::BaseEntityComponent::StateFlags)
 
 	namespace pragma {
 		template<class TComponent>

@@ -4,6 +4,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.client:entities.components.raytracing;
 
@@ -75,12 +76,5 @@ export namespace pragma {
 	};
 	using namespace umath::scoped_enum::bitwise;
 };
-export {
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::CRaytracingComponent::StateFlags> : std::true_type {};
-
-		template<>
-		struct enable_bitwise_operators<pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags> : std::true_type {};
-	}
-};
+export {REGISTER_ENUM_FLAGS(pragma::CRaytracingComponent::StateFlags)}
+export {REGISTER_ENUM_FLAGS(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags)}

@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.shared:util.font_set;
 
@@ -20,10 +21,7 @@ export {
 		};
 		using namespace umath::scoped_enum::bitwise;
 	}
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<pragma::FontSetFlag> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(pragma::FontSetFlag)
 
 	struct DLLNETWORK FontSetFileData {
 		pragma::FontSetFlag flags = pragma::FontSetFlag::None;

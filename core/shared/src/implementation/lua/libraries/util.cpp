@@ -1356,7 +1356,7 @@ std::string Lua::util::get_type_name(lua::State *l, const luabind::object &o)
 	auto *crep = Lua::get_crep(o);
 	if(crep)
 		return crep->name();
-	return lua::get_type(l, -1);
+	return lua::get_type(l, 1);
 }
 std::string Lua::util::variable_type_to_string(::util::VarType varType) { return ::util::variable_type_to_string(varType); }
 std::string Lua::util::get_string_hash(const std::string &str) { return std::to_string(std::hash<std::string> {}(str)); }

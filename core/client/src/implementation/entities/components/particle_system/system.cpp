@@ -3,7 +3,6 @@
 
 module;
 
-#include "pragma/cxxmodules.hpp"
 #include <cassert>
 
 module pragma.client;
@@ -161,7 +160,7 @@ std::shared_ptr<pragma::Model> ecs::CParticleSystemComponent::GenerateModel(prag
 		if(skinTexIdx.has_value() == false)
 			continue;
 		auto orientationType = pts->GetOrientationType();
-		pShader->GetParticleSystemOrientationInfo(cam->GetProjectionMatrix() * cam->GetViewMatrix(), *CXXM_RCAST(const pragma::ecs::CParticleSystemComponent *, pts), CXXM_SCAST(pragma::ecs::ParticleOrientationType, orientationType), camUpWs, camRightWs, ptNearZ, ptFarZ, mat, nearZ, farZ);
+		pShader->GetParticleSystemOrientationInfo(cam->GetProjectionMatrix() * cam->GetViewMatrix(), *pts, orientationType, camUpWs, camRightWs, ptNearZ, ptFarZ, mat, nearZ, farZ);
 
 		auto *spriteSheetAnim = pts->GetSpriteSheetAnimation();
 		auto &particles = pts->GetRenderParticleData();
@@ -194,7 +193,7 @@ std::shared_ptr<pragma::Model> ecs::CParticleSystemComponent::GenerateModel(prag
 				uvEnd = frame.uvEnd;
 			}
 			for(auto vertIdx = decltype(numVerts) {0u}; vertIdx < numVerts; ++vertIdx) {
-				auto vertPos = pShader->CalcVertexPosition(*CXXM_RCAST(const pragma::ecs::CParticleSystemComponent *, pts), pts->TranslateBufferIndex(i), vertIdx, posCam, camUpWs, camRightWs, nearZ, farZ);
+				auto vertPos = pShader->CalcVertexPosition(*pts, pts->TranslateBufferIndex(i), vertIdx, posCam, camUpWs, camRightWs, nearZ, farZ);
 				auto uv = pragma::ShaderParticle2DBase::GetVertexUV(vertIdx);
 				auto &v = verts.at(vertOffset + vertIdx);
 				v.position = vertPos;

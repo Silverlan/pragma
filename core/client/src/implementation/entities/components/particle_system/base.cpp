@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-#include "pragma/cxxmodules.hpp"
-
 module pragma.client;
 
 import :entities.components.particle_system;
@@ -769,7 +766,7 @@ CParticleInitializer *ecs::CParticleSystemComponent::AddInitializer(std::string 
 		Con::cwar << "Attempted to create unknown particle initializer '" << identifier << "'! Ignoring..." << Con::endl;
 		return nullptr;
 	}
-	auto initializer = factory(*CXXM_RCAST(pragma::ecs::CParticleSystemComponent *, this), values);
+	auto initializer = factory(*this, values);
 	if(initializer == nullptr)
 		return nullptr;
 	if(IsRecordingKeyValues())
@@ -786,7 +783,7 @@ CParticleOperator *ecs::CParticleSystemComponent::AddOperator(std::string identi
 		Con::cwar << "Attempted to create unknown particle operator '" << identifier << "'! Ignoring..." << Con::endl;
 		return nullptr;
 	}
-	auto op = factory(*CXXM_RCAST(pragma::ecs::CParticleSystemComponent *, this), values);
+	auto op = factory(*this, values);
 	if(op == nullptr)
 		return nullptr;
 	if(IsRecordingKeyValues())
@@ -803,7 +800,7 @@ CParticleRenderer *ecs::CParticleSystemComponent::AddRenderer(std::string identi
 		Con::cwar << "Attempted to create unknown particle renderer '" << identifier << "'! Ignoring..." << Con::endl;
 		return nullptr;
 	}
-	auto op = factory(*CXXM_RCAST(pragma::ecs::CParticleSystemComponent *, this), values);
+	auto op = factory(*this, values);
 	if(op == nullptr)
 		return nullptr;
 	if(IsRecordingKeyValues())
@@ -1326,7 +1323,7 @@ void ecs::CParticleSystemComponent::RecordRender(prosper::ICommandBuffer &drawCm
 
 	if(m_bufParticles != nullptr) {
 		for(auto &r : m_renderers)
-			r->RecordRender(drawCmd, scene, renderer, CXXM_SCAST(pragma::ecs::ParticleRenderFlags, renderFlags));
+			r->RecordRender(drawCmd, scene, renderer, renderFlags);
 	}
 	umath::set_flag(m_flags, Flags::RendererBufferUpdateRequired, false);
 }

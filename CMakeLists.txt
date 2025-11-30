@@ -21,6 +21,7 @@ project(pragma)
 
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 
+option(PRAGMA_DEBUG "Build in debug mode?" OFF)
 option(WITH_PFM "Build with Pragma Filmmaker?" OFF)
 option(WITH_VR "Build with VR support?" OFF)
 option(WITH_COMMON_ENTITIES "Build with common entity scripts?" OFF)

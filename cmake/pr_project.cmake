@@ -23,6 +23,17 @@ function(pr_setup_default_project_settings TARGET_NAME)
 
         target_compile_options(${TARGET_NAME} PUBLIC -stdlib=libstdc++)
         target_link_options(${TARGET_NAME} PUBLIC -stdlib=libstdc++)
+
+        if(PRAGMA_DEBUG)
+            target_compile_options(${TARGET_NAME} PRIVATE
+                -g
+                -fno-omit-frame-pointer
+                -O0
+                -gsplit-dwarf
+            )
+
+            set_property(TARGET ${TARGET_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION OFF)
+        endif()
     endif()
 
     if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")

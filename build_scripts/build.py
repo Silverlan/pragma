@@ -58,7 +58,7 @@ parser.add_argument("--skip-repository-updates", type=str2bool, nargs='?', const
 if platform == "linux":
 	parser.add_argument("--no-sudo", type=str2bool, nargs='?', const=True, default=False, help="Will not run sudo commands. System packages will have to be installed manually.")
 	parser.add_argument("--no-confirm", type=str2bool, nargs='?', const=True, default=False, help="Disable any interaction with user (suitable for automated run).")
-	parser.add_argument("--enable-assertions", type=str2bool, nargs='?', const=True, default=False, help="Enable debug assertions.")
+	parser.add_argument("--debug", type=str2bool, nargs='?', const=True, default=False, help="Enable debug assertions and disable code optimizations.")
 else:
 	parser.add_argument('--toolset', help='The toolset to use. Supported toolsets: msvc, clang, clang-cl', default=defaultToolset)
 args,unknown = parser.parse_known_args()
@@ -115,7 +115,7 @@ if platform == "linux":
 	cxx_compiler = args["cxx_compiler"]
 	no_sudo = args["no_sudo"]
 	no_confirm = args["no_confirm"]
-	enable_assertions = args["enable_assertions"]
+	with_debug = args["debug"]
 else:
 	toolset = args["toolset"]
 generator = args["generator"]
@@ -214,7 +214,7 @@ print("install_directory: " +install_directory)
 if platform == "linux":
 	print("no_sudo: " +str(no_sudo))
 	print("no_confirm: " +str(no_confirm))
-	print("enable_assertions: " +str(enable_assertions))
+	print("debug: " +str(with_debug))
 print("cmake_args: " +', '.join(additional_cmake_args))
 print("cmake_flags: " +', '.join(additional_cmake_flags))
 print("modules: " +', '.join(modules))
@@ -254,7 +254,7 @@ if platform == "win32":
 			print_warning(f"Generator {generator} for platform {platform} is currently not supported!")
 			sys.exit(1)
 
-if platform == "linux" and enable_assertions:
+if platform == "linux" and with_debug:
 	toolsetCFlags = ["-D_GLIBCXX_ASSERTIONS"]
 
 if update:
@@ -905,6 +905,7 @@ if not deps_only:
 	cmake_args += [f"-DWITH_VR={1 if with_vr else 0}"]
 	cmake_args += [f"-DWITH_COMMON_ENTITIES={1 if with_common_entities else 0}"]
 	cmake_args += [f"-DWITH_COMMON_MODULES={1 if with_common_modules else 0}"]
+	cmake_args += [f"-DPRAGMA_DEBUG={1 if with_debug else 0}"]
 
 	cmake_args += additional_cmake_args
 	cmake_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=4.0")

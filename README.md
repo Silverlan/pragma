@@ -119,7 +119,7 @@ Running the build-script with the arguments above will build and install Pragma 
 | `--cxx-compiler`                        | [Linux only] The C++-compiler to use.                                                        | `clang++-18`     |
 | `--no-sudo`                             | [Linux only] Will not run sudo commands. System packages will have to be installed manually. | `0`              |
 | `--no-confirm`                          | [Linux only] Disable any interaction with user (suitable for automated run).                 | `0`              |
-| `--enable-assertions`                   | [Linux only] Enable additional sanity assertions.                                            | `0`              |
+| `--debug`                               | [Linux only] Enable debug assertions and disable code optimizations.                         | `0`              |
 | `--with-essential-client-modules <1/0>` | Include essential modules required to run Pragma.                                            | `1`              |
 | `--with-common-modules <1/0>`           | Include non-essential but commonly used modules (e.g. audio and physics modules).            | `1`              |
 | `--with-pfm <1/0>`                      | Include the Pragma Filmmaker.                                                                | `0`              |

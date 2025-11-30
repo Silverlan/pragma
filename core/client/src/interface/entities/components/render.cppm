@@ -6,8 +6,6 @@ module;
 #include "definitions.hpp"
 #include "util_enum_flags.hpp"
 
-#define ENTITY_RENDER_BUFFER_USE_STORAGE_BUFFER 1
-
 export module pragma.client:entities.components.render;
 
 export import :entities.components.entity;

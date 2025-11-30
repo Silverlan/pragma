@@ -4,8 +4,6 @@
 module;
 #include "definitions.hpp"
 
-#define ENABLE_BLOB_DEPTH_TEST 0
-
 export module pragma.client:particle_system.renderer_blob;
 
 export import :particle_system.modifier;

@@ -10,8 +10,6 @@ export import :networking.util;
 export import :types;
 export import pragma.materialsystem;
 
-#define RESOURCE_WATCHER_VERBOSE 0
-
 export {
 	class DLLNETWORK EResourceWatcherCallbackType : public util::ExtensibleEnum {
 	  public:

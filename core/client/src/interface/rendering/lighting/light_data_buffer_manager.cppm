@@ -3,8 +3,6 @@
 
 module;
 
-#define USE_LIGHT_SOURCE_UNIFORM_BUFFER 1
-
 export module pragma.client:rendering.light_data_buffer_manager;
 
 export import :entities.components.lights.light;

@@ -6,8 +6,6 @@ module;
 #include "definitions.hpp"
 #include <cassert>
 
-#define ENABLE_OCCLUSION_DEBUG_MODE 0
-
 export module pragma.client:rendering.occlusion_culling.octree;
 
 export import pragma.shared;

@@ -6,8 +6,6 @@ module;
 
 export module pragma.shared:debug.performance_profiler;
 
-#define ENABLE_DEBUG_HISTORY 0
-
 import pragma.util;
 
 export {

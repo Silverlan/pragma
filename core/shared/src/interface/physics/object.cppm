@@ -17,9 +17,6 @@ export import :physics.object_handle;
 export import :scripting.lua.base_lua_handle;
 export import :entities.components.handle;
 
-// Very expensive
-#define PHYS_KEEP_SIMULATION_TRANSFORM 0
-
 export {
 	namespace pragma::ecs {
 		class BaseEntity;

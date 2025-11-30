@@ -30,6 +30,22 @@ pr_add_dependency(${PROJ_NAME} tinygltf TARGET)
 pr_add_third_party_dependency(${PROJ_NAME} rapidxml)
 
 pr_add_compile_definitions(${PROJ_NAME} -DNOISE_STATIC)
+pr_add_compile_definitions(
+    ${PROJ_NAME}
+        -DMOTION_BLUR_DEBUG_ELEMENT_ENABLED=0
+        -DENABLE_BLOB_DEPTH_TEST=0
+        -DCHC_DEBUGGING_ENABLED=0
+        -DENABLE_OCCLUSION_DEBUG_MODE=0
+)
+pr_add_compile_definitions(
+    ${PROJ_NAME}
+        -DENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
+        -DENTITY_RENDER_BUFFER_USE_STORAGE_BUFFER=1
+        -DDEBUG_RENDER_PERFORMANCE_TEST_ENABLED=0
+        -DUSE_LIGHT_SOURCE_UNIFORM_BUFFER=1
+
+        PUBLIC
+)
 
 pr_add_headers(${PROJ_NAME} "include/")
 pr_add_sources(${PROJ_NAME} "src/")

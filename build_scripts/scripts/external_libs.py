@@ -14,7 +14,7 @@ get_gh_submodule("iglfw",                   "Silverlan/iglfw",                  
 get_gh_submodule("luasystem",               "Silverlan/luasystem",              "6a67d304e2725779ce3d4ad23e9e2282d08a4b4f")
 get_gh_submodule("materialsystem",          "Silverlan/materialsystem",         "dac3c2e9d35a13f126b5c79dd2847016b5163712")
 get_gh_submodule("mathutil",                "Silverlan/mathutil",               "7b086dd545b1f4f21ce58c2f6ef551e6a2f2073d")
-get_gh_submodule("networkmanager",          "Silverlan/networkmanager",         "bd4f1a047f03eb20c2e02fdf9acb6d372859884f")
+get_gh_submodule("networkmanager",          "Silverlan/networkmanager",         "dd21c506c0b982b99cd5b004503bd964739aa67a")
 get_gh_submodule("oskit",                   "Silverlan/oskit",                  "2c13e0963ef719d8c3a806f5c4ea0e151db58367")
 get_gh_submodule("panima",                  "Silverlan/panima",                 "84968030fd1d423b276d69021d63946f1a59bde3")
 get_gh_submodule("prosper",                 "Silverlan/prosper",                "66062ac2ddb28a1cfaf4e12a0d6784240a4c3eed")

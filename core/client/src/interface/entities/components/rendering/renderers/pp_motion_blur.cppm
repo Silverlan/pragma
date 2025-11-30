@@ -5,8 +5,6 @@ module;
 
 #include "definitions.hpp"
 
-#define MOTION_BLUR_DEBUG_ELEMENT_ENABLED 0
-
 export module pragma.client:entities.components.pp_motion_blur;
 
 export import :entities.components.pp_base;

@@ -4,10 +4,6 @@ module;
 
 #include "definitions.hpp"
 
-#ifdef _WIN32
-#define ENABLE_LAD 1
-#endif
-
 export module pragma.shared:scripting.lua.auto_doc;
 
 export import pragma.doc;

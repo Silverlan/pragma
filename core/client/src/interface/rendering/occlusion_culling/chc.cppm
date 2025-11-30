@@ -5,8 +5,6 @@ module;
 
 #include "definitions.hpp"
 
-#define CHC_DEBUGGING_ENABLED 0
-
 export module pragma.client:rendering.occlusion_culling.chc;
 
 export import :entities.base_entity;

@@ -9,8 +9,6 @@ export module pragma.shared:entities.components.base_networked;
 
 export import :entities.components.base;
 
-#define NETWORKED_VARS_ENABLED 0
-
 export {
 	namespace pragma {
 		class DLLNETWORK BaseNetworkedComponent : public BaseEntityComponent {

@@ -38,6 +38,18 @@ endif()
 pr_add_dependency(${PROJ_NAME} noise-static TARGET)
 pr_add_dependency(${PROJ_NAME} noiseutils-static TARGET)
 pr_add_compile_definitions(${PROJ_NAME} -DNOISE_STATIC)
+pr_add_compile_definitions(
+	${PROJ_NAME}
+		-DPHYS_KEEP_SIMULATION_TRANSFORM=0
+		-DENABLE_DEBUG_HISTORY=0
+)
+pr_add_compile_definitions(
+	${PROJ_NAME}
+		-DNETWORKED_VARS_ENABLED=0
+		-DRESOURCE_WATCHER_VERBOSE=0
+
+		PUBLIC
+)
 
 # Required by sound_ogg.cpp
 pr_add_dependency(${PROJ_NAME} vorbis TARGET)

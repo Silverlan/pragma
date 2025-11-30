@@ -5,8 +5,6 @@ module;
 
 #include "definitions.hpp"
 
-#define ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
-
 export module pragma.client:model.vertex_buffer_data;
 
 export import pragma.math;

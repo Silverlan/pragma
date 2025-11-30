@@ -6,8 +6,6 @@ module;
 #include "definitions.hpp"
 #include "util_enum_flags.hpp"
 
-#define DEBUG_RENDER_PERFORMANCE_TEST_ENABLED 0
-
 export module pragma.client:entities.components.rasterization_renderer;
 
 export import :entities.components.light_map;

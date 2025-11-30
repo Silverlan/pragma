@@ -27,7 +27,6 @@ std::shared_ptr<CALSound> CALSound::Create(NetworkState *nw, const al::PSoundCha
 		snd->OnRelease();
 		delete snd;
 	}};
-	als->InitializeHandle(std::static_pointer_cast<al::SoundSource>(als));
 	return als;
 }
 

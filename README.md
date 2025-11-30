@@ -47,17 +47,21 @@ Please consider creating a [binary module](https://github.com/Silverlan/pragma#m
 
 Build Requirements
 ------
-- ~60 GiB of disk space
-- CMake 3.28.3 or newer
+- ~30 GiB of disk space (~60 GiB for a full build with third-party dependencies)
+- CMake 4.2.0 or newer
+- Ninja-build (https://ninja-build.org/)
 - Python 3.9.5 or newer, with NumPy
+- Recommended IDE: CLion
 
 ###### Windows
-- Visual Studio 2022 or newer
+- Visual Studio 2022
+  - Visual Studio 2026 is currently *not* supported and will fail to compile
+  - The Visual Studio generator is currently *not* supported as CMake does not support "import std;" for it yet. Use the Ninja generator for the time being.
 - Windows SDK 10.0.22000.0 or newer
 
 ###### Linux
 - Ubuntu 24.04 or newer
-- clang-19 or newer (Pragma is *not* compatible with gcc!)
+- clang-22 or newer (Pragma is currently *not* compatible with gcc!)
 
 Build Instructions
 ------

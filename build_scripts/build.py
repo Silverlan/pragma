@@ -360,7 +360,7 @@ elif platform == "win32":
 		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.6/clang+llvm-21.1.6-x86_64-pc-windows-msvc.tar.xz",format="tar.xz")
 	os.chdir(curDir)
 	
-	mv("clang+llvm-21.1.6-x86_64-pc-windows-msvc", "clang")
+	mv(clang20_root, os.getcwd() +"/clang")
 
 if platform == "linux":
 	os.environ["CC"] = c_compiler
@@ -914,7 +914,8 @@ if not deps_only:
 	cmake_args += [f"-DWITH_VR={1 if with_vr else 0}"]
 	cmake_args += [f"-DWITH_COMMON_ENTITIES={1 if with_common_entities else 0}"]
 	cmake_args += [f"-DWITH_COMMON_MODULES={1 if with_common_modules else 0}"]
-	cmake_args += [f"-DPRAGMA_DEBUG={1 if with_debug else 0}"]
+	if platform == "linux":
+		cmake_args += [f"-DPRAGMA_DEBUG={1 if with_debug else 0}"]
 
 	cmake_args += additional_cmake_args
 	cmake_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=4.0")

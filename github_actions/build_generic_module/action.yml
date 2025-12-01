@@ -76,7 +76,6 @@ runs:
         if [ -z "$build_args" ]; then
           build_args="--module ${{ inputs.module }}"
         fi
-        build_args="$build_args --cmake-arg=-DCMAKE_CXX_STDLIB_MODULES_JSON=\"/opt/gcc-16/lib64/libstdc++.modules.json\" --cmake-arg=-DCMAKE_EXE_LINKER_FLAGS=\"-Wl,-rpath,/opt/gcc-16/lib64 -L/opt/gcc-16/lib64\" --cmake-cxx-flag=\"--gcc-toolchain=/opt/gcc-16\""
         echo "build-args=$build_args" >> $GITHUB_OUTPUT
 
     - name: "Download Module"
@@ -90,7 +89,7 @@ runs:
 
     - name: Build Pragma
       id: build-pragma
-      uses: Silverlan/pragma/github_actions/build@main
+      uses: Silverlan/pragma/github_actions/build@develop
       with:
         build-args: '--with-lua-debugger=0 --with-common-modules=0 --with-essential-client-modules=0 --cmake-arg=${{ steps.set-cmake-args.outputs.cmake-args }} ${{ steps.set-cmake-args.outputs.build-args }}'
 

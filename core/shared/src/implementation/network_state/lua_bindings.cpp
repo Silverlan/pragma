@@ -320,6 +320,13 @@ static int util_dir_path(lua::State *l)
 	return 1;
 }
 
+template<typename T>
+void glm_type_to_string(lua::State *l, const T &v) {
+	std::stringstream ss;
+	ss<<v;
+	Lua::PushString(l, ss.str());
+}
+
 void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 {
 	auto modString = luabind::module_(lua.GetState(), "string");
@@ -1103,7 +1110,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modMath[noiseMap];
 	//
 
-	auto defVectori = pragma::LuaCore::register_class<Vector3i>(lua.GetState(), "Vectori");
+	auto defVectori = pragma::LuaCore::register_class<Vector3i>(lua.GetState(), "Vectori", &glm_type_to_string<Vector3i>);
 	defVectori->def(luabind::constructor<>());
 	defVectori->def(luabind::constructor<int32_t, int32_t, int32_t>());
 	defVectori->def(-luabind::const_self);
@@ -1122,7 +1129,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modMath[*defVectori];
 	register_string_to_vector_type_constructor<Vector3i>(lua.GetState());
 
-	auto defVector2i = pragma::LuaCore::register_class<Vector2i>(lua.GetState(), "Vector2i");
+	auto defVector2i = pragma::LuaCore::register_class<Vector2i>(lua.GetState(), "Vector2i", &glm_type_to_string<Vector2i>);
 	defVector2i->def(luabind::constructor<>());
 	defVector2i->def(luabind::constructor<int32_t, int32_t>());
 	defVector2i->def(-luabind::const_self);
@@ -1140,7 +1147,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modMath[*defVector2i];
 	register_string_to_vector_type_constructor<Vector2i>(lua.GetState());
 
-	auto defVector4i = pragma::LuaCore::register_class<Vector4i>(lua.GetState(), "Vector4i");
+	auto defVector4i = pragma::LuaCore::register_class<Vector4i>(lua.GetState(), "Vector4i", &glm_type_to_string<Vector4i>);
 	defVector4i->def(luabind::constructor<>());
 	defVector4i->def(luabind::constructor<int32_t, int32_t, int32_t, int32_t>());
 	defVector4i->def(-luabind::const_self);
@@ -1161,7 +1168,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modMath[*defVector4i];
 	register_string_to_vector_type_constructor<Vector4i>(lua.GetState());
 
-	auto defVector = pragma::LuaCore::register_class<Vector3>(lua.GetState(), "Vector");
+	auto defVector = pragma::LuaCore::register_class<Vector3>(lua.GetState(), "Vector", &glm_type_to_string<Vector3>);
 	defVector->def(luabind::constructor<>());
 	defVector->def(luabind::constructor<float, float, float>());
 	defVector->def(luabind::constructor<const Vector2 &, float>());
@@ -1233,7 +1240,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modMath[*defVector];
 	register_string_to_vector_type_constructor<Vector3>(lua.GetState());
 
-	auto defVector2 = pragma::LuaCore::register_class<Vector2>(lua.GetState(), "Vector2");
+	auto defVector2 = pragma::LuaCore::register_class<Vector2>(lua.GetState(), "Vector2", &glm_type_to_string<Vector2>);
 	defVector2->def(luabind::constructor<>());
 	defVector2->def(luabind::constructor<float, float>());
 	defVector2->def(-luabind::const_self);
@@ -1267,7 +1274,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modMath[*defVector2];
 	register_string_to_vector_type_constructor<Vector2>(lua.GetState());
 
-	auto defVector4 = pragma::LuaCore::register_class<Vector4>(lua.GetState(), "Vector4");
+	auto defVector4 = pragma::LuaCore::register_class<Vector4>(lua.GetState(), "Vector4", &glm_type_to_string<Vector4>);
 	defVector4->def(luabind::constructor<>());
 	defVector4->def(luabind::constructor<float, float, float, float>());
 	defVector4->def(luabind::constructor<const Vector3 &, float>());
@@ -1305,7 +1312,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modMath[*defVector4];
 	register_string_to_vector_type_constructor<Vector4>(lua.GetState());
 
-	auto defEulerAngles = pragma::LuaCore::register_class<EulerAngles>(lua.GetState(), "EulerAngles");
+	auto defEulerAngles = pragma::LuaCore::register_class<EulerAngles>(lua.GetState(), "EulerAngles", &glm_type_to_string<EulerAngles>);
 	defEulerAngles->def(luabind::constructor<>());
 	defEulerAngles->def(luabind::constructor<float, float, float>());
 	defEulerAngles->def(luabind::constructor<const EulerAngles &>());
@@ -1346,7 +1353,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defEulerAngles->def("Get", static_cast<float (*)(lua::State *, const EulerAngles &, uint32_t)>([](lua::State *l, const EulerAngles &ang, uint32_t idx) { return ang[idx]; }));
 	modMath[*defEulerAngles];
 
-	auto defQuat = pragma::LuaCore::register_class<Quat>(lua.GetState(), "Quaternion");
+	auto defQuat = pragma::LuaCore::register_class<Quat>(lua.GetState(), "Quaternion", &glm_type_to_string<Quat>);
 	defQuat->def(luabind::constructor<float, float, float, float>());
 	defQuat->def(luabind::constructor<const Quat &>());
 	defQuat->def_readwrite("w", &Quat::w);
@@ -1931,7 +1938,7 @@ void pragma::Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	defMat.def(luabind::const_self *float());                                                                                                                                                                                                                                                    \
 	defMat.def(float() / luabind::const_self);                                                                                                                                                                                                                                                   \
 	defMat.def(float() * luabind::const_self);                                                                                                                                                                                                                                                   \
-	defMat.def(luabind::tostring(luabind::self));                                                                                                                                                                                                                                                \
+	defMat.def("__tostring", &glm_type_to_string<Mat##type>);                                                                                                                                                                                                                                    \
 	defMat.def(luabind::constructor<Mat2>());                                                                                                                                                                                                                                                    \
 	defMat.def(luabind::constructor<Mat2x3>());                                                                                                                                                                                                                                                  \
 	defMat.def(luabind::constructor<Mat2x4>());                                                                                                                                                                                                                                                  \

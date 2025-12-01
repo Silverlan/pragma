@@ -37,7 +37,7 @@ export namespace pragma {
 			return def;
 		}
 		template<typename TBase, typename... Types>
-		ClassWrapper<TBase, Types...> register_class(lua::State *l, const char *name, void (*tostring)(const TBase &))
+		ClassWrapper<TBase, Types...> register_class(lua::State *l, const char *name, void (*tostring)(lua::State*, const TBase &))
 		{
 			ClassWrapper<TBase, Types...> def {l, name, typeid(TBase)};
 			def->def("__tostring", tostring);

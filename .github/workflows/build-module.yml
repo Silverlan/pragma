@@ -78,7 +78,7 @@ jobs:
 
       - name: Build Module
         id: build-module
-        uses: Silverlan/pragma/github_actions/build_generic_module@main
+        uses: Silverlan/pragma/github_actions/build_generic_module@develop
         with:
           module: '${{ steps.module-info.outputs.module_name }}'
           repository: '${{ inputs.repository }}'

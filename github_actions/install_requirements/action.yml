@@ -12,6 +12,14 @@ runs:
       with:
         name: "pragma > install_requirements"
 
+    - name: Setup cmake
+      uses: jwlawson/actions-setup-cmake@v2
+
+    - name: Install Dependencies
+      shell: bash
+      run: |
+        sudo apt install ninja-build
+
     # This is a temporary fix until https://github.com/actions/runner-images/pull/9956 has been merged
     - name: Purge needrestart
       shell: bash

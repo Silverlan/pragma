@@ -23,25 +23,11 @@ jobs:
           - os: ubuntu-latest
             name: "Ubuntu Latest"
     steps:
-      - name: Setup cmake
-        uses: jwlawson/actions-setup-cmake@v2
-
-      - name: Install Dependencies
-        shell: bash
-        run: |
-          sudo apt install ninja-build
-
       - name: Setup Pragma
         uses: Silverlan/pragma/github_actions/setup@develop
         with:
           branch: ${{ github.ref_name }}
           clone_url: "https://github.com/${{ github.repository }}.git"
-
-      - name: Clear Disk Space
-        uses: Silverlan/common_actions/clear_disk_space@main
-
-      - name: Setup GCC
-        uses: Silverlan/common_actions/setup_gcc@main
 
       - name: Build Pragma
         uses: ./pragma/github_actions/build

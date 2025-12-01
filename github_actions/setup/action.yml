@@ -23,6 +23,12 @@ runs:
       with:
         with_cuda: ${{ inputs.with_cuda }}
       
+    - name: Clear Disk Space
+      uses: Silverlan/common_actions/clear_disk_space@main
+
+    - name: Setup GCC
+      uses: Silverlan/common_actions/setup_gcc@main
+
     - name: Download Pragma
       shell: bash
       run: |

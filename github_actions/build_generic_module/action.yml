@@ -50,7 +50,7 @@ runs:
   using: "composite"
   steps:
     - name: Setup Pragma
-      uses: Silverlan/pragma/github_actions/setup@main
+      uses: Silverlan/pragma/github_actions/setup@develop
       with:
         with_cuda: ${{ inputs.with-cuda }}
         branch: ${{ inputs.branch }}
@@ -76,6 +76,7 @@ runs:
         if [ -z "$build_args" ]; then
           build_args="--module ${{ inputs.module }}"
         fi
+        build_args="$build_args --cmake-arg=-DCMAKE_CXX_STDLIB_MODULES_JSON=\"/opt/gcc-16/lib64/libstdc++.modules.json\" --cmake-arg=-DCMAKE_EXE_LINKER_FLAGS=\"-Wl,-rpath,/opt/gcc-16/lib64 -L/opt/gcc-16/lib64\" --cmake-cxx-flag=\"--gcc-toolchain=/opt/gcc-16\""
         echo "build-args=$build_args" >> $GITHUB_OUTPUT
 
     - name: "Download Module"

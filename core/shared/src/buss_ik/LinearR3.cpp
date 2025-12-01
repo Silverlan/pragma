@@ -1,3 +1,6 @@
+
+#include "cassert"
+
 /*
 *
 * Mathematics Subpackage (VrMath)
@@ -24,10 +27,9 @@ subject to the following restrictions:
 //Alterations:
 //Remove register keyword to fix compile errors with some linux compilers (clang)
 
-#include "stdafx_shared.h"
-#include "pragma/buss_ik/MathMisc.h"
-#include "pragma/buss_ik/LinearR3.h"
-#include "pragma/buss_ik/Spherical.h"
+#include "buss_ik/MathMisc.h"
+#include "buss_ik/LinearR3.h"
+#include "buss_ik/Spherical.h"
 
 // ******************************************************
 // * VectorR3 class - math library functions				*

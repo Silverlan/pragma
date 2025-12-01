@@ -1,0 +1,33 @@
+// SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
+// SPDX-License-Identifier: MIT
+module;
+
+#include "definitions.hpp"
+
+export module pragma.shared:entities.components.damageable;
+
+export import :entities.components.base;
+export import :game.damage_info;
+
+export namespace pragma {
+	namespace damageableComponent {
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_TAKE_DAMAGE;
+	}
+	class DLLNETWORK DamageableComponent final : public BaseEntityComponent {
+	  public:
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		DamageableComponent(pragma::ecs::BaseEntity &ent);
+		virtual void Initialize() override;
+
+		// Called right before the entity is about to take damage
+		virtual void OnTakeDamage(DamageInfo &info);
+
+		virtual void TakeDamage(DamageInfo &info);
+		virtual void InitializeLuaObject(lua::State *l) override;
+	};
+	struct DLLNETWORK CEOnTakeDamage : public ComponentEvent {
+		CEOnTakeDamage(DamageInfo &damageInfo);
+		virtual void PushArguments(lua::State *l) override;
+		DamageInfo &damageInfo;
+	};
+};

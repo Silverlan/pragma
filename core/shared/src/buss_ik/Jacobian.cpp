@@ -1,3 +1,6 @@
+
+#include "cassert"
+
 /*
 *
 * Inverse Kinematics software, with several solvers including
@@ -27,15 +30,10 @@ subject to the following restrictions:
 //Alterations:
 //Remove register keyword to fix compile errors with some linux compilers (clang)
 
-#include "stdafx_shared.h"
-#include <stdlib.h>
-#include <math.h>
-#include <assert.h>
-#include <iostream>
 using namespace std;
 
 
-#include "pragma/buss_ik/Jacobian.h"
+#include "buss_ik/Jacobian.h"
 void Arrow(const VectorR3& tail, const VectorR3& head);
 
 //extern RestPositionOn;

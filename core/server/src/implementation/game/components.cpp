@@ -1,0 +1,128 @@
+// SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
+// SPDX-License-Identifier: MIT
+
+module;
+
+// --template-include-location
+
+module pragma.server;
+import :game;
+
+import :entities.components;
+
+void SGame::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
+{
+	pragma::Game::InitializeEntityComponents(componentManager);
+	constexpr auto hideInEditor = pragma::ComponentRegInfo::Flags::HideInEditor;
+	componentManager.RegisterComponentType<pragma::SAIComponent>("ai", {"ai", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SCharacterComponent>("character", {"gameplay", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SColorComponent>("color", {"rendering"});
+	componentManager.RegisterComponentType<pragma::SSurfaceComponent>("surface", {"world/bounds"});
+	componentManager.RegisterComponentType<pragma::SScoreComponent>("score", {"gameplay", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SFlammableComponent>("flammable", {"gameplay"});
+	componentManager.RegisterComponentType<pragma::SHealthComponent>("health", {"gameplay"});
+	componentManager.RegisterComponentType<pragma::SNameComponent>("name", {"name", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SNetworkedComponent>("networked", {"networking", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SObservableComponent>("observable", {"gameplay"});
+	componentManager.RegisterComponentType<pragma::SObserverComponent>("observer", {"gameplay", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SPhysicsComponent>("physics", {"physics"});
+	componentManager.RegisterComponentType<pragma::SPlayerComponent>("player", {"gameplay", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SRadiusComponent>("radius", {"world/bounds"});
+	componentManager.RegisterComponentType<pragma::SFieldAngleComponent>("field_angle", {"world/bounds"});
+	componentManager.RegisterComponentType<pragma::SRenderComponent>("render", {"rendering", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SSoundEmitterComponent>("sound_emitter", {"audio"});
+	componentManager.RegisterComponentType<pragma::SToggleComponent>("toggle", {"gameplay", hideInEditor});
+	componentManager.RegisterComponentType<pragma::STransformComponent>("transform", {"world/transform"});
+	componentManager.RegisterComponentType<pragma::SVehicleComponent>("vehicle", {"gameplay"});
+	componentManager.RegisterComponentType<pragma::SWeaponComponent>("weapon", {"gameplay"});
+	componentManager.RegisterComponentType<pragma::SWheelComponent>("wheel", {"gameplay", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SSoundDspComponent>("sound_dsp", {"audio/dsp"});
+	componentManager.RegisterComponentType<pragma::SSoundDspChorusComponent>("sound_dsp_chorus", {"audio/dsp"});
+	componentManager.RegisterComponentType<pragma::SSoundDspDistortionComponent>("sound_dsp_distortion", {"audio/dsp"});
+	componentManager.RegisterComponentType<pragma::SSoundDspEAXReverbComponent>("sound_dsp_eax_reverb", {"audio/dsp"});
+	componentManager.RegisterComponentType<pragma::SSoundDspEchoComponent>("sound_dsp_echo", {"audio/dsp"});
+	componentManager.RegisterComponentType<pragma::SSoundDspEqualizerComponent>("sound_dsp_equalizer", {"audio/dsp"});
+	componentManager.RegisterComponentType<pragma::SSoundDspFlangerComponent>("sound_dsp_flanger", {"audio/dsp"});
+	componentManager.RegisterComponentType<pragma::SCameraComponent>("camera", {"rendering/camera"});
+	componentManager.RegisterComponentType<pragma::SDecalComponent>("decal", {"rendering"});
+	componentManager.RegisterComponentType<pragma::SExplosionComponent>("explosion", {"gameplay/effects"});
+	componentManager.RegisterComponentType<pragma::SFireComponent>("fire", {"gameplay/effects"});
+	componentManager.RegisterComponentType<pragma::SFogControllerComponent>("fog_controller", {"rendering/effects"});
+	componentManager.RegisterComponentType<pragma::SLightComponent>("light", {"rendering/lighting"});
+	componentManager.RegisterComponentType<pragma::SLightDirectionalComponent>("light_directional", {"rendering/lighting"});
+	componentManager.RegisterComponentType<pragma::SLightPointComponent>("light_point", {"rendering/lighting"});
+	componentManager.RegisterComponentType<pragma::SLightSpotComponent>("light_spot", {"rendering/lighting"});
+	componentManager.RegisterComponentType<pragma::SLightSpotVolComponent>("light_spot_volume", {"rendering/lighting"});
+	componentManager.RegisterComponentType<pragma::SMicrophoneComponent>("microphone", {"audio"});
+	componentManager.RegisterComponentType<pragma::SParticleSystemComponent>("particle_system", {"rendering/effects"});
+	componentManager.RegisterComponentType<pragma::SQuakeComponent>("quake", {"gameplay/effects"});
+	componentManager.RegisterComponentType<pragma::SSmokeTrailComponent>("smoke_trail", {"rendering/effects"});
+	componentManager.RegisterComponentType<pragma::SSoundComponent>("sound", {"audio"});
+	componentManager.RegisterComponentType<pragma::SSoundScapeComponent>("sound_scape", {"audio"});
+	componentManager.RegisterComponentType<pragma::SSpriteComponent>("sprite", {"rendering/effects"});
+	componentManager.RegisterComponentType<pragma::SEnvTimescaleComponent>("env_time_scale", {"world"});
+	componentManager.RegisterComponentType<pragma::SWindComponent>("wind", {"world"});
+	componentManager.RegisterComponentType<pragma::SFilterClassComponent>("filter_class", {"core", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SFilterNameComponent>("filter_name", {"core", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SBrushComponent>("brush", {"world", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SKinematicComponent>("kinematic", {"physics", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SFuncPhysicsComponent>("func_physics", {"physics", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SFuncSoftPhysicsComponent>("func_soft_physics", {"physics", hideInEditor});
+	// componentManager.RegisterComponentType<pragma::SFuncPortalComponent>("func_portal", {"physics", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SButtonComponent>("button", {"physics", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SPlayerSpawnComponent>("player_spawn", {"gameplay", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SLogicRelayComponent>("relay", {"logic", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SBotComponent>("bot", {"ai", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SPointConstraintBallSocketComponent>("constraint_ball_socket", {"physics/constraints"});
+	componentManager.RegisterComponentType<pragma::SPointConstraintConeTwistComponent>("constraint_cone_twist", {"physics/constraints"});
+	componentManager.RegisterComponentType<pragma::SPointConstraintDoFComponent>("constraint_dof", {"physics/constraints"});
+	componentManager.RegisterComponentType<pragma::SPointConstraintFixedComponent>("constraint_fixed", {"physics/constraints"});
+	componentManager.RegisterComponentType<pragma::SPointConstraintHingeComponent>("constraint_hinge", {"physics/constraints"});
+	componentManager.RegisterComponentType<pragma::SPointConstraintSliderComponent>("constraint_slider", {"physics/constraints"});
+	componentManager.RegisterComponentType<pragma::SPathNodeComponent>("path_node", {"ai", hideInEditor});
+	// componentManager.RegisterComponentType<pragma::SRenderTargetComponent>("render_target", {"rendering"});
+	componentManager.RegisterComponentType<pragma::SPointTargetComponent>("target", {"world", hideInEditor});
+	componentManager.RegisterComponentType<pragma::PropComponent>("prop", {"physics"});
+	componentManager.RegisterComponentType<pragma::SPropDynamicComponent>("prop_dynamic", {"physics"});
+	componentManager.RegisterComponentType<pragma::SPropPhysicsComponent>("prop_physics", {"physics"});
+	componentManager.RegisterComponentType<pragma::STriggerGravityComponent>("trigger_gravity", {"gameplay/triggers"});
+	componentManager.RegisterComponentType<pragma::STriggerHurtComponent>("trigger_hurt", {"gameplay/triggers"});
+	componentManager.RegisterComponentType<pragma::STriggerPushComponent>("trigger_push", {"gameplay/triggers"});
+	componentManager.RegisterComponentType<pragma::STriggerRemoveComponent>("trigger_remove", {"gameplay/triggers"});
+	componentManager.RegisterComponentType<pragma::STriggerTeleportComponent>("trigger_teleport", {"gameplay/triggers"});
+	componentManager.RegisterComponentType<pragma::STouchComponent>("touch", {"gameplay", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SSkyboxComponent>("skybox", {"world"});
+	componentManager.RegisterComponentType<pragma::SWorldComponent>("world", {"world", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SFlashlightComponent>("flashlight", {"gameplay", hideInEditor});
+	componentManager.RegisterComponentType<pragma::ecs::SShooterComponent>("shooter", {"gameplay"});
+	componentManager.RegisterComponentType<pragma::SModelComponent>("model", {"rendering/model"});
+	componentManager.RegisterComponentType<pragma::SAnimatedComponent>("animated", {"animation"});
+	componentManager.RegisterComponentType<pragma::SGenericComponent>("entity", {"core", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SIOComponent>("io", {"core", hideInEditor});
+	componentManager.RegisterComponentType<pragma::STimeScaleComponent>("time_scale", {"world", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SInfoLandmarkComponent>("info_landmark", {"world", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SAttachmentComponent>("attachment", {"world", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SChildComponent>("child", {"core", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SOwnableComponent>("ownable", {"core", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SDebugTextComponent>("debug_text", {"debug"});
+	componentManager.RegisterComponentType<pragma::SDebugPointComponent>("debug_point", {"debug"});
+	componentManager.RegisterComponentType<pragma::SDebugLineComponent>("debug_line", {"debug"});
+	componentManager.RegisterComponentType<pragma::SDebugBoxComponent>("debug_box", {"debug"});
+	componentManager.RegisterComponentType<pragma::SDebugSphereComponent>("debug_sphere", {"debug"});
+	componentManager.RegisterComponentType<pragma::SDebugConeComponent>("debug_cone", {"debug"});
+	componentManager.RegisterComponentType<pragma::SDebugCylinderComponent>("debug_cylinder", {"debug"});
+	componentManager.RegisterComponentType<pragma::SDebugPlaneComponent>("debug_plane", {"debug"});
+	componentManager.RegisterComponentType<pragma::SPointAtTargetComponent>("point_at_target", {"gameplay", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SGamemodeComponent>("gamemode", {"gameplay", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SGameComponent>("game", {"gameplay", hideInEditor});
+
+	componentManager.RegisterComponentType<pragma::SLiquidComponent>("liquid", {"physics/fluid", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SBuoyancyComponent>("buoyancy", {"physics"});
+	componentManager.RegisterComponentType<pragma::SLiquidSurfaceComponent>("liquid_surface", {"physics/fluid", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SLiquidVolumeComponent>("liquid_volume", {"physics/fluid", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SLiquidControlComponent>("liquid_control", {"physics/fluid", hideInEditor});
+	componentManager.RegisterComponentType<pragma::SLiquidSurfaceSimulationComponent>("liquid_surface_simulation", {"physics/fluid", hideInEditor});
+	// --template-component-register-location
+}
+
+pragma::BaseEntityComponent *SGame::CreateLuaEntityComponent(pragma::ecs::BaseEntity &ent, std::string classname) { return pragma::Game::CreateLuaEntityComponent<pragma::SLuaBaseEntityComponent, pragma::LuaCore::SLuaBaseEntityComponentHolder>(ent, classname); }

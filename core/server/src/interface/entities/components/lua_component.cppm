@@ -1,0 +1,30 @@
+// SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
+// SPDX-License-Identifier: MIT
+
+module;
+#include "definitions.hpp"
+
+export module pragma.server:entities.components.lua;
+
+import :entities.components.entity;
+
+export namespace pragma {
+	class DLLSERVER SLuaBaseEntityComponent final : public BaseLuaBaseEntityComponent, public SBaseSnapshotComponent {
+	  public:
+		SLuaBaseEntityComponent(pragma::ecs::BaseEntity &ent);
+
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual Bool ReceiveNetEvent(pragma::BasePlayerComponent &pl, pragma::NetEventId, NetPacket &packet) override;
+		virtual void SendSnapshotData(NetPacket &packet, pragma::BasePlayerComponent &pl) override;
+		virtual bool ShouldTransmitNetData() const override;
+		virtual bool ShouldTransmitSnapshotData() const override;
+
+		virtual void OnMemberValueChanged(uint32_t memberIdx) override;
+	  protected:
+		virtual void InvokeNetEventHandle(const std::string &methodName, NetPacket &packet, pragma::BasePlayerComponent *pl) override;
+	};
+};
+
+export namespace pragma::LuaCore {
+	using SLuaBaseEntityComponentHolder = HandleHolder<SLuaBaseEntityComponent>;
+};

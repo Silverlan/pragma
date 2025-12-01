@@ -1,6 +1,6 @@
 # Luabind
 set(BUILD_SHARED_LIBS
-    ON
+    OFF
     CACHE BOOL ".." FORCE)
 set(LUA_INCLUDE_DIR ${DEPENDENCY_LUAJIT_INCLUDE} CACHE STRING "" FORCE)
 set(LUA_LIBRARY ${DEPENDENCY_LUA_LIBRARY} CACHE STRING "" FORCE)
@@ -47,37 +47,10 @@ pr_include_third_party_library(
     "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vkvparser/include")
 #
 
-# spdlog
-set(SPDLOG_BUILD_SHARED
-    ON
-    CACHE BOOL ON FORCE)
-set(SPDLOG_BUILD_PIC
-    ON
-    CACHE BOOL ON FORCE)
-set(SPDLOG_USE_STD_FORMAT
-    ON
-    CACHE BOOL ON FORCE)
-set(SPDLOG_CLOCK_COARSE
-    ON
-    CACHE BOOL ON FORCE)
-set(CMAKE_CXX_STANDARD 20) # bump to c++23 after we change scope ops in luabind.
-pr_include_third_party_library(spdlog)
-pr_set_target_folder(spdlog third_party_libs)
-unset(CMAKE_CXX_STANDARD)
-#
-
-# fmt
+# gli
 unset(BUILD_SHARED_LIBS CACHE)
-set(FMT_TEST
-    OFF
-    CACHE BOOL OFF FORCE)
-set(FMT_DOC
-    OFF
-    CACHE BOOL OFF FORCE)
-pr_include_third_party_library(fmt)
-set(BUILD_SHARED_LIBS
-    ON
-    CACHE BOOL ".." FORCE)
+add_subdirectory("third_party_libs/gli/gli")
+set(BUILD_SHARED_LIBS ON CACHE BOOL ".." FORCE)
 #
 
 # 7zip cpp
@@ -330,4 +303,14 @@ if(WIN32)
 endif()
 pr_find_library(rectanglebinpack NAMES "rectangle_bin_pack" PATHS "third_party_libs/rectangle_bin_pack/${BINARY_PRAGMA_DIR}")
 # target_include_directories(freetype PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
+#
+
+# tinygltf
+set(BUILD_SHARED_LIBS
+    OFF
+    CACHE BOOL OFF FORCE)
+pr_include_third_party_library(tinygltf)
+set(BUILD_SHARED_LIBS
+    ON
+    CACHE BOOL ON FORCE)
 #

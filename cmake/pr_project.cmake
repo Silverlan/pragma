@@ -17,13 +17,53 @@ function(pr_setup_default_project_settings TARGET_NAME)
         target_compile_options(${TARGET_NAME} PRIVATE -Wno-c++11-narrowing)
         target_compile_options(${TARGET_NAME} PUBLIC -Wno-missing-template-arg-list-after-template-kw)
         target_compile_options(${TARGET_NAME} PUBLIC -Wno-macro-redefined -Wno-potentially-evaluated-expression -Wno-switch)
+
+        # TODO: These are just to shut up the compiler, but it would be better to fix the warnings
+        target_compile_options(${TARGET_NAME} PUBLIC -Wno-macro-redefined -Wno-undefined-bool-conversion -Wno-instantiation-after-specialization)
+
+        # Required for "import std;" with clang
+        target_compile_options(${TARGET_NAME} PUBLIC -stdlib=libstdc++)
+        target_link_options(${TARGET_NAME} PUBLIC -stdlib=libstdc++)
+
+        if(PRAGMA_DEBUG)
+            target_compile_options(${TARGET_NAME} PRIVATE
+                -g
+                -fno-omit-frame-pointer
+                -O0
+                -gsplit-dwarf
+            )
+
+            set_property(TARGET ${TARGET_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION OFF)
+        endif()
     endif()
 
-    if(UNIX)
-        target_link_options(${TARGET_NAME} PRIVATE --no-undefined)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "_WIN32_WINNT=0x0A00") # Windows 10
     endif()
 
-    target_compile_features(${TARGET_NAME} PRIVATE cxx_std_20)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_link_options(${TARGET_NAME} PRIVATE "-Wl,--no-undefined")
+    endif()
+
+    # Due to msvc compiler bugs, we introduce a few macros as temporary workarounds.
+    # Once constexpr works with modules under msvc, the macro can be removed.
+    # CLASS_ENUM_COMPAT is used for cases where enums had to be moved from a class to a namespace.
+    # Once msvc issues have been fixed, these should be moved back to their respective classes.
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "CONSTEXPR_COMPAT=inline const")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "CONSTEXPR_DLL_COMPAT=__declspec(dllexport) const")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "STATIC_CONST_COMPAT=inline const")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "STATIC_DLL_COMPAT=extern __declspec(dllexport)")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "CLASS_ENUM_COMPAT=extern __declspec(dllexport)")
+    else()
+        target_compile_definitions(${TARGET_NAME} PRIVATE "CONSTEXPR_COMPAT=constexpr")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "CONSTEXPR_DLL_COMPAT=constexpr")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "STATIC_CONST_COMPAT=static const")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "STATIC_DLL_COMPAT=static")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "CLASS_ENUM_COMPAT=extern __attribute__((visibility(\"default\")))")
+    endif()
+
+    target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
     set_target_properties(${TARGET_NAME} PROPERTIES LINKER_LANGUAGE CXX)
     set_target_properties(${TARGET_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endfunction()
@@ -52,6 +92,12 @@ function(pr_add_library TARGET_NAME LIB_TYPE)
         set_target_properties(${TARGET_NAME} PROPERTIES
             INSTALL_RPATH "$ORIGIN"
         )
+    endif()
+
+    if(WIN32)
+        target_compile_definitions(${TARGET_NAME} PRIVATE "PR_EXPORT=__declspec(dllexport)")
+    else()
+        target_compile_definitions(${TARGET_NAME} PRIVATE "PR_EXPORT=__attribute__((visibility(\"default\")))")
     endif()
 
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")

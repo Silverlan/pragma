@@ -1,0 +1,210 @@
+// SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
+// SPDX-License-Identifier: MIT
+
+module;
+
+#include "pragma/lua/ostream_operator_alias.hpp"
+
+module pragma.server;
+import :game;
+
+import :entities;
+import :entities.components;
+import pragma.shared;
+
+void RegisterLuaEntityComponents2_sv(lua::State *l, luabind::module_ &entsMod);
+
+void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
+{
+	pragma::Game::RegisterLuaEntityComponents(entsMod);
+
+	auto defSGamemode = pragma::LuaCore::create_entity_component_class<pragma::SGamemodeComponent, pragma::BaseGamemodeComponent>("GamemodeComponent");
+	entsMod[defSGamemode];
+
+	auto defSGame = pragma::LuaCore::create_entity_component_class<pragma::SGameComponent, pragma::BaseGameComponent>("GameComponent");
+	entsMod[defSGame];
+
+	auto defSColor = pragma::LuaCore::create_entity_component_class<pragma::SColorComponent, pragma::BaseColorComponent>("ColorComponent");
+	entsMod[defSColor];
+
+	auto defSScore = pragma::LuaCore::create_entity_component_class<pragma::SScoreComponent, pragma::BaseScoreComponent>("ScoreComponent");
+	entsMod[defSScore];
+
+	auto defSFlammable = pragma::LuaCore::create_entity_component_class<pragma::SFlammableComponent, pragma::BaseFlammableComponent>("FlammableComponent");
+	entsMod[defSFlammable];
+
+	auto defSHealth = pragma::LuaCore::create_entity_component_class<pragma::SHealthComponent, pragma::BaseHealthComponent>("HealthComponent");
+	entsMod[defSHealth];
+
+	auto defSName = pragma::LuaCore::create_entity_component_class<pragma::SNameComponent, pragma::BaseNameComponent>("NameComponent");
+	entsMod[defSName];
+
+	auto defSNetworked = pragma::LuaCore::create_entity_component_class<pragma::SNetworkedComponent, pragma::BaseNetworkedComponent>("NetworkedComponent");
+	entsMod[defSNetworked];
+
+	auto defSObservable = pragma::LuaCore::create_entity_component_class<pragma::SObservableComponent, pragma::BaseObservableComponent>("ObservableComponent");
+	entsMod[defSObservable];
+
+	auto defSObserver = pragma::LuaCore::create_entity_component_class<pragma::SObserverComponent, pragma::BaseObserverComponent>("ObserverComponent");
+	entsMod[defSObserver];
+
+	auto defSShooter = pragma::LuaCore::create_entity_component_class<pragma::ecs::SShooterComponent, pragma::ecs::BaseShooterComponent>("ShooterComponent");
+	entsMod[defSShooter];
+
+	auto defSPhysics = pragma::LuaCore::create_entity_component_class<pragma::SPhysicsComponent, pragma::BasePhysicsComponent>("PhysicsComponent");
+	entsMod[defSPhysics];
+
+	auto defSRadius = pragma::LuaCore::create_entity_component_class<pragma::SRadiusComponent, pragma::BaseRadiusComponent>("RadiusComponent");
+	entsMod[defSRadius];
+
+	auto defSFieldAngle = pragma::LuaCore::create_entity_component_class<pragma::SFieldAngleComponent, pragma::BaseFieldAngleComponent>("FieldAngleComponent");
+	entsMod[defSFieldAngle];
+
+	auto defSRender = pragma::LuaCore::create_entity_component_class<pragma::SRenderComponent, pragma::BaseRenderComponent>("RenderComponent");
+	entsMod[defSRender];
+
+	auto defSSoundEmitter = pragma::LuaCore::create_entity_component_class<pragma::SSoundEmitterComponent, pragma::BaseSoundEmitterComponent>("SoundEmitterComponent");
+	defSSoundEmitter.scope[Lua::SoundEmitter::RegisterSoundInfo()];
+	entsMod[defSSoundEmitter];
+
+	auto defSToggle = pragma::LuaCore::create_entity_component_class<pragma::SToggleComponent, pragma::BaseToggleComponent>("ToggleComponent");
+	entsMod[defSToggle];
+
+	auto defSTransform = pragma::LuaCore::create_entity_component_class<pragma::STransformComponent, pragma::BaseTransformComponent>("TransformComponent");
+	defSTransform.add_static_constant("EVENT_ON_POSE_CHANGED", pragma::sTransformComponent::EVENT_ON_POSE_CHANGED);
+	defSTransform.add_static_constant("EVENT_ON_TELEPORT", pragma::sTransformComponent::EVENT_ON_TELEPORT);
+	defSTransform.def("Teleport", &pragma::STransformComponent::Teleport);
+	entsMod[defSTransform];
+
+	auto defSWheel = pragma::LuaCore::create_entity_component_class<pragma::SWheelComponent, pragma::BaseWheelComponent>("WheelComponent");
+	entsMod[defSWheel];
+
+	auto defSSoundDsp = pragma::LuaCore::create_entity_component_class<pragma::SSoundDspComponent, pragma::BaseEnvSoundDspComponent>("SoundDspComponent");
+	entsMod[defSSoundDsp];
+
+	auto defSSoundDspChorus = pragma::LuaCore::create_entity_component_class<pragma::SSoundDspChorusComponent, pragma::BaseEnvSoundDspComponent>("SoundDspChorusComponent");
+	entsMod[defSSoundDspChorus];
+
+	auto defSSoundDspDistortion = pragma::LuaCore::create_entity_component_class<pragma::SSoundDspDistortionComponent, pragma::BaseEnvSoundDspComponent>("SoundDspDistortionComponent");
+	entsMod[defSSoundDspDistortion];
+
+	auto defSSoundDspEAXReverb = pragma::LuaCore::create_entity_component_class<pragma::SSoundDspEAXReverbComponent, pragma::BaseEnvSoundDspComponent>("SoundDspEAXReverbComponent");
+	entsMod[defSSoundDspEAXReverb];
+
+	auto defSSoundDspEcho = pragma::LuaCore::create_entity_component_class<pragma::SSoundDspEchoComponent, pragma::BaseEnvSoundDspComponent>("SoundDspEchoComponent");
+	entsMod[defSSoundDspEcho];
+
+	auto defSSoundDspEqualizer = pragma::LuaCore::create_entity_component_class<pragma::SSoundDspEqualizerComponent, pragma::BaseEnvSoundDspComponent>("SoundDspEqualizerComponent");
+	entsMod[defSSoundDspEqualizer];
+
+	auto defSSoundDspFlanger = pragma::LuaCore::create_entity_component_class<pragma::SSoundDspFlangerComponent, pragma::BaseEnvSoundDspComponent>("SoundDspFlangerComponent");
+	entsMod[defSSoundDspFlanger];
+
+	auto defSCamera = pragma::LuaCore::create_entity_component_class<pragma::SCameraComponent, pragma::BaseEnvCameraComponent>("CameraComponent");
+	entsMod[defSCamera];
+
+	auto defSDecal = pragma::LuaCore::create_entity_component_class<pragma::SDecalComponent, pragma::BaseEnvDecalComponent>("DecalComponent");
+	entsMod[defSDecal];
+
+	auto defSExplosion = pragma::LuaCore::create_entity_component_class<pragma::SExplosionComponent, pragma::BaseEnvExplosionComponent>("ExplosionComponent");
+	entsMod[defSExplosion];
+
+	auto defSFire = pragma::LuaCore::create_entity_component_class<pragma::SFireComponent, pragma::BaseEnvFireComponent>("FireComponent");
+	entsMod[defSFire];
+
+	auto defSFogController = pragma::LuaCore::create_entity_component_class<pragma::SFogControllerComponent, pragma::BaseEnvFogControllerComponent>("FogControllerComponent");
+	entsMod[defSFogController];
+
+	auto defSLight = pragma::LuaCore::create_entity_component_class<pragma::SLightComponent, pragma::BaseEnvLightComponent>("LightComponent");
+	entsMod[defSLight];
+
+	auto defSLightDirectional = pragma::LuaCore::create_entity_component_class<pragma::SLightDirectionalComponent, pragma::BaseEnvLightDirectionalComponent>("LightDirectionalComponent");
+	entsMod[defSLightDirectional];
+
+	auto defSLightPoint = pragma::LuaCore::create_entity_component_class<pragma::SLightPointComponent, pragma::BaseEnvLightPointComponent>("LightPointComponent");
+	entsMod[defSLightPoint];
+
+	auto defSLightSpot = pragma::LuaCore::create_entity_component_class<pragma::SLightSpotComponent, pragma::BaseEnvLightSpotComponent>("LightSpotComponent");
+	entsMod[defSLightSpot];
+
+	auto defSLightSpotVol = pragma::LuaCore::create_entity_component_class<pragma::SLightSpotVolComponent, pragma::BaseEnvLightSpotVolComponent>("LightSpotVolComponent");
+	entsMod[defSLightSpotVol];
+
+	auto defSMicrophone = pragma::LuaCore::create_entity_component_class<pragma::SMicrophoneComponent, pragma::BaseEnvMicrophoneComponent>("MicrophoneComponent");
+	entsMod[defSMicrophone];
+
+	auto defSParticleSystem = pragma::LuaCore::create_entity_component_class<pragma::SParticleSystemComponent, pragma::BaseEnvParticleSystemComponent>("ParticleSystemComponent");
+	entsMod[defSParticleSystem];
+
+	auto defSQuake = pragma::LuaCore::create_entity_component_class<pragma::SQuakeComponent, pragma::BaseEnvQuakeComponent>("QuakeComponent");
+	entsMod[defSQuake];
+
+	auto defSSmokeTrail = pragma::LuaCore::create_entity_component_class<pragma::SSmokeTrailComponent, pragma::BaseEnvSmokeTrailComponent>("SmokeTrailComponent");
+	entsMod[defSSmokeTrail];
+
+	auto defSSound = pragma::LuaCore::create_entity_component_class<pragma::SSoundComponent, pragma::BaseEnvSoundComponent>("SoundComponent");
+	entsMod[defSSound];
+
+	auto defSSoundScape = pragma::LuaCore::create_entity_component_class<pragma::SSoundScapeComponent, pragma::BaseEnvSoundScapeComponent>("SoundScapeComponent");
+	entsMod[defSSoundScape];
+
+	auto defSSprite = pragma::LuaCore::create_entity_component_class<pragma::SSpriteComponent, pragma::BaseEnvSpriteComponent>("SpriteComponent");
+	entsMod[defSSprite];
+
+	auto defSTimescale = pragma::LuaCore::create_entity_component_class<pragma::SEnvTimescaleComponent, pragma::BaseEnvTimescaleComponent>("EnvTimeScaleComponent");
+	entsMod[defSTimescale];
+
+	auto defSWind = pragma::LuaCore::create_entity_component_class<pragma::SWindComponent, pragma::BaseEnvWindComponent>("WindComponent");
+	entsMod[defSWind];
+
+	auto defSFilterClass = pragma::LuaCore::create_entity_component_class<pragma::SFilterClassComponent, pragma::BaseFilterClassComponent>("FilterClassComponent");
+	entsMod[defSFilterClass];
+
+	auto defSFilterName = pragma::LuaCore::create_entity_component_class<pragma::SFilterNameComponent, pragma::BaseFilterNameComponent>("FilterNameComponent");
+	entsMod[defSFilterName];
+
+	auto defSBrush = pragma::LuaCore::create_entity_component_class<pragma::SBrushComponent, pragma::BaseFuncBrushComponent>("BrushComponent");
+	entsMod[defSBrush];
+
+	auto defSKinematic = pragma::LuaCore::create_entity_component_class<pragma::SKinematicComponent, pragma::BaseFuncKinematicComponent>("KinematicComponent");
+	entsMod[defSKinematic];
+
+	auto defSFuncPhysics = pragma::LuaCore::create_entity_component_class<pragma::SFuncPhysicsComponent, pragma::BaseFuncPhysicsComponent>("FuncPhysicsComponent");
+	entsMod[defSFuncPhysics];
+
+	auto defSFuncSoftPhysics = pragma::LuaCore::create_entity_component_class<pragma::SFuncSoftPhysicsComponent, pragma::BaseFuncSoftPhysicsComponent>("FuncSoftPhysicsComponent");
+	entsMod[defSFuncSoftPhysics];
+
+	auto defSSurface = pragma::LuaCore::create_entity_component_class<pragma::SSurfaceComponent, pragma::BaseSurfaceComponent>("SurfaceComponent");
+	entsMod[defSSurface];
+
+	// auto defSFuncPortal = pragma::LuaCore::create_entity_component_class<pragma::SFuncPortalComponent,pragma::BaseFuncPortalComponent>("FuncPortalComponent");
+	// entsMod[defSFuncPortal];
+
+	auto defSLiquidSurf = pragma::LuaCore::create_entity_component_class<pragma::SLiquidSurfaceComponent, pragma::BaseLiquidSurfaceComponent>("LiquidSurfaceComponent");
+	entsMod[defSLiquidSurf];
+
+	auto defSLiquidVol = pragma::LuaCore::create_entity_component_class<pragma::SLiquidVolumeComponent, pragma::BaseLiquidVolumeComponent>("LiquidVolumeComponent");
+	entsMod[defSLiquidVol];
+
+	auto defSBuoyancy = pragma::LuaCore::create_entity_component_class<pragma::SBuoyancyComponent, pragma::BaseBuoyancyComponent>("BuoyancyComponent");
+	entsMod[defSBuoyancy];
+
+	auto defSWater = pragma::LuaCore::create_entity_component_class<pragma::SLiquidComponent, pragma::BaseFuncLiquidComponent>("LiquidComponent");
+	entsMod[defSWater];
+
+	auto defSButton = pragma::LuaCore::create_entity_component_class<pragma::SButtonComponent, pragma::BaseFuncButtonComponent>("ButtonComponent");
+	entsMod[defSButton];
+
+	auto defSPlayerSpawn = pragma::LuaCore::create_entity_component_class<pragma::SPlayerSpawnComponent, pragma::BaseEntityComponent>("PlayerSpawnComponent");
+	entsMod[defSPlayerSpawn];
+
+	auto defSLogicRelay = pragma::LuaCore::create_entity_component_class<pragma::SLogicRelayComponent, pragma::BaseLogicRelayComponent>("LogicRelayComponent");
+	entsMod[defSLogicRelay];
+
+	auto defSBot = pragma::LuaCore::create_entity_component_class<pragma::SBotComponent, pragma::BaseBotComponent>("BotComponent");
+	entsMod[defSBot];
+
+	auto *l = GetLuaState();
+	RegisterLuaEntityComponents2_sv(l, entsMod); // Split up to prevent compiler errors
+}

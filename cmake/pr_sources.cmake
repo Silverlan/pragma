@@ -102,6 +102,11 @@ function(pr_add_modules TARGET_NAME MODULE_LOCATION)
 
     # 2. Get all .cppm files in ${MODULE_LOCATION} recursively excluding the ones in ${MODULE_LOCATION}implementation/
     file(GLOB_RECURSE ALL_MODULE_LIST "${MODULE_LOCATION}*.cppm")
+    if (ALL_MODULE_LIST)
+        foreach(EXCLUDED_FILE ${EXCLUSION_MODULE_LIST})
+            list(REMOVE_ITEM ALL_MODULE_LIST "${EXCLUDED_FILE}")
+        endforeach()
+    endif()
 
     # Filter out the implementation files from ALL_MODULE_LIST
     set(PUBLIC_MODULE_LIST "")

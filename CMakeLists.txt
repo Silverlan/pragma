@@ -1,4 +1,10 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.3)
+
+message(STATUS "CMake version: ${CMAKE_VERSION}")
+# Required for "import std;" as long as its experimental in CMake
+set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_MODULE_STD 1)
 
 include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/pr_legacy.cmake)
@@ -8,6 +14,7 @@ project(pragma)
 
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 
+option(PRAGMA_DEBUG "Build in debug mode?" OFF)
 option(WITH_PFM "Build with Pragma Filmmaker?" OFF)
 option(WITH_VR "Build with VR support?" OFF)
 option(WITH_COMMON_ENTITIES "Build with common entity scripts?" OFF)
@@ -179,7 +186,9 @@ add_subdirectory(tools)
 message("Processing modules...")
 add_subdirectory(modules)
 
-target_include_directories(libcurl_shared PRIVATE ${DEPENDENCY_ZLIB_INCLUDE})
+if(WIN32)
+    target_include_directories(libcurl_shared PRIVATE ${DEPENDENCY_ZLIB_INCLUDE})
+endif()
 target_include_directories(materialsystem PRIVATE ${DEPENDENCY_ZLIB_INCLUDE})
 
 if(WIN32)
@@ -243,7 +252,6 @@ pr_install_targets(
     vorbis
     vorbisfile
     VTFLib13
-    spdlog
     mpaheader
     bz2
     KVParser

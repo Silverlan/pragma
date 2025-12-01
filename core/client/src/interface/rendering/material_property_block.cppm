@@ -3,10 +3,11 @@
 
 module;
 
-#include "pragma/clientdefinitions.h"
-#include <udm.hpp>
+#include "definitions.hpp"
 
-export module pragma.client.rendering.material_property_block;
+export module pragma.client:rendering.material_property_block;
+
+export import pragma.udm;
 
 export namespace pragma::rendering {
 	class DLLCLIENT MaterialPropertyBlock {

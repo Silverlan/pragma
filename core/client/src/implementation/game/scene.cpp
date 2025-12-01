@@ -1,0 +1,55 @@
+// SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
+// SPDX-License-Identifier: MIT
+
+module;
+
+#include "definitions.hpp"
+#include "pragma/console/helper.hpp"
+
+module pragma.client;
+
+import :game;
+
+template<typename TCPPM>
+TCPPM *CGame::GetScene()
+{
+	return static_cast<pragma::CSceneComponent *>(m_scene.get());
+}
+template DLLCLIENT pragma::CSceneComponent *CGame::GetScene<pragma::CSceneComponent>();
+template DLLCLIENT const pragma::CSceneComponent *CGame::GetScene<const pragma::CSceneComponent>();
+
+template<typename TCPPM>
+const TCPPM *CGame::GetScene() const
+{
+	return const_cast<CGame *>(this)->GetScene<TCPPM>();
+}
+template DLLCLIENT const pragma::CSceneComponent *CGame::GetScene<pragma::CSceneComponent>() const;
+template DLLCLIENT const pragma::CSceneComponent *CGame::GetScene<const pragma::CSceneComponent>() const;
+
+static void cl_fov_callback(NetworkState *, const ConVar &, float, float val)
+{
+	if(pragma::get_cgame() == nullptr)
+		return;
+	auto *cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
+	if(cam == nullptr)
+		return;
+	cam->SetFOV(CFloat(val));
+	cam->UpdateMatrices();
+}
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<float>("cl_fov", &cl_fov_callback);
+}
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<float>("cl_render_fov", &cl_fov_callback);
+}
+
+static void cl_fov_viewmodel_callback(NetworkState *, const ConVar &, int, int val)
+{
+	if(pragma::get_cgame() == nullptr)
+		return;
+	pragma::get_cgame()->SetViewModelFOV(CFloat(val));
+}
+
+namespace {
+	auto UVN = pragma::console::client::register_variable_listener<int>("cl_fov_viewmodel", &cl_fov_viewmodel_callback);
+}

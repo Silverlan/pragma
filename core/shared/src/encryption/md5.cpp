@@ -1,4 +1,3 @@
-#include "stdafx_shared.h"
 /* MD5
  converted to C++ class by Frank Thilo (thilo@unix-ag.org)
  for bzflag (http://www.bzflag.org)
@@ -32,11 +31,10 @@ documentation and/or software.
 */
 
 /* interface header */
-#include "pragma/encryption/md5.h"
+#include "encryption/md5.h"
+#include <cstring>
 
 /* system implementation headers */
-#include <stdio.h>
-#include <cstring>
 
 
 // Constants for MD5Transform routine.

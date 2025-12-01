@@ -1,6 +1,7 @@
 import os
 import pathlib
 import datetime
+import time
 import sys
 import subprocess
 import shutil
@@ -67,7 +68,7 @@ def mkpath(path):
 	pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
 def git_clone(url,directory=None,branch=None):
-	args = ["git", "clone", url, "--recurse-submodules"]
+	args = ["git", "clone", get_git_clone_url(url, config.prefer_git_https), "--recurse-submodules"]
 	if branch:
 		args.extend(["-b", branch])
 	if directory:
@@ -98,17 +99,15 @@ def cmake_configure(scriptPath,generator,toolsetArgs=None,additionalArgs=[],cfla
 	# print("Running CMake configure command...")
 
 	def _quote(arg: str) -> str:
-		# Handle -DKEY=VALUE specially
 		if arg.startswith("-D") and "=" in arg:
 			key, val = arg.split("=", 1)
 			if " " in val:
 				val = f'"{val}"'
 			return f"{key}={val}"
-		# Otherwise, only quote if there's whitespace
 		return f'"{arg}"' if " " in arg else arg
 
 	cmd = shlex.join(args)
-	print("Running CMake configure command:", cmd)
+	print("Running CMake configure command:", cmd, flush=True)
 
 	try:
 		subprocess.run(args,check=True)
@@ -117,7 +116,7 @@ def cmake_configure(scriptPath,generator,toolsetArgs=None,additionalArgs=[],cfla
 			cmd_line = subprocess.list2cmdline(e.cmd)
 		else:
 			cmd_line = shlex.join(e.cmd)
-		print("Configure command failed:\n\n", cmd_line)
+		print("Configure command failed:\n\n", cmd_line, flush=True)
 		raise
 
 def cmake_build(buildConfig,targets=None):
@@ -145,28 +144,55 @@ def mkdir(dirName,cd=False):
 	if cd:
 		os.chdir(dirName)
 
-def http_download_report_hook(block_num, block_size, total_size):
-    downloaded = block_num * block_size
-    if total_size > 0:
-        percent = downloaded * 100.0 / total_size
-        if percent > 100:
-            percent = 100.0
-        bar_len = 40
-        filled = int(bar_len * downloaded / total_size)
-        bar = '=' * filled + ' ' * (bar_len - filled)
-        sys.stdout.write(
-            f"\rDownloading: [{bar}] {percent:6.2f}% "
-            f"({downloaded/1024/1024:6.2f}MB/{total_size/1024/1024:6.2f}MB)")
-    else:
-        sys.stdout.write(f"\rDownloading: {downloaded} bytes")
-    sys.stdout.flush()
+def make_reporthook(bar_len=40, min_interval_tty=0.05, min_interval_nontty=2.0, nontty_step_percent=5.0):
+	is_tty = sys.stdout.isatty()
+	last_time = [0.0]
+	last_percent = [-1.0]
+
+	def reporthook(block_num, block_size, total_size):
+		downloaded = block_num * block_size
+		now = time.time()
+
+		if total_size > 0:
+			percent = downloaded * 100.0 / total_size
+			if percent > 100:
+				percent = 100.0
+
+			if is_tty:
+				# interactive terminal: update inline, but not *too* frequently
+				if now - last_time[0] >= min_interval_tty or percent == 100.0:
+					last_time[0] = now
+					filled = int(bar_len * downloaded / total_size)
+					bar = '=' * filled + ' ' * (bar_len - filled)
+					sys.stdout.write(
+						f"\rDownloading: [{bar}] {percent:6.2f}% "
+						f"({downloaded/1024/1024:6.2f}MB/{total_size/1024/1024:6.2f}MB)")
+					sys.stdout.flush()
+			else:
+				# non-interactive (CI): print only at coarse steps or end
+				if percent - last_percent[0] >= nontty_step_percent or percent == 100.0:
+					last_percent[0] = percent
+					print(f"Downloading: {percent:6.2f}% "
+						  f"({downloaded/1024/1024:6.2f}MB/{total_size/1024/1024:6.2f}MB)")
+		else:
+			# unknown total_size: behave similarly but with bytes
+			if is_tty:
+				sys.stdout.write(f"\rDownloading: {downloaded} bytes")
+				sys.stdout.flush()
+			else:
+				# rate-limit by time for unknown length
+				if now - last_time[0] >= min_interval_nontty:
+					last_time[0] = now
+					print(f"Downloading: {downloaded} bytes")
+	return reporthook
 
 def http_download(url,fileName=None):
 	if not fileName:
 		a = urlparse(url)
 		fileName = os.path.basename(a.path)
+	hook = make_reporthook()
 	try:
-		urllib.request.urlretrieve(url, fileName, reporthook=http_download_report_hook)
+		urllib.request.urlretrieve(url, fileName, reporthook=hook)
 	except PermissionError as e:
 		print_warning("Failed to download '" +url +"' as '" +fileName +"' (PermissionError) (cwd: " + os.getcwd() +"): {}".format(e))
 		raise
@@ -307,6 +333,67 @@ def check_repository_commit(path, commitId, libName=None):
 		return True
 	return False
 
+def get_git_clone_url(idOrUrl, preferGitHttps):
+    s = idOrUrl.strip()
+
+    def normalize_repo_part(part):
+        part = part.strip().rstrip('/')
+        if part.endswith('.git'):
+            part = part[:-4]
+        return part
+
+    # 1) SSH input e.g. git@github.com:owner/repo.git
+    if s.startswith('git@'):
+        try:
+            after_at = s.split('@', 1)[1]
+        except IndexError:
+            return s
+        if ':' in after_at:
+            host, repo = after_at.split(':', 1)
+            host = host.strip()
+            repo = normalize_repo_part(repo)
+            if host in ('github.com', 'gitlab.com'):
+                if preferGitHttps:
+                    return f"https://{host}/{repo}.git"
+                else:
+                    return f"git@{host}:{repo}.git"
+            else:
+                return s
+        else:
+            return s
+
+    # 2+3) URL with scheme OR host without scheme (e.g. "github.com/owner/repo" or "https://github.com/owner/repo")
+    if '://' in s or s.startswith('github.com') or s.startswith('gitlab.com'):
+        # If scheme present, split it off; otherwise treat the whole string as rest
+        if '://' in s:
+            _, rest = s.split('://', 1)
+        else:
+            rest = s
+
+        if '/' in rest:
+            host = rest.split('/', 1)[0].strip()
+            repo_part = rest.split('/', 1)[1]
+        else:
+            host = rest.strip()
+            repo_part = ''
+
+        repo = normalize_repo_part(repo_part)
+
+        if host in ('github.com', 'gitlab.com'):
+            if not repo:
+                # nothing after host -> return original (can't build repo)
+                return s
+            if preferGitHttps:
+                return f"https://{host}/{repo}.git"
+            else:
+                return f"git@{host}:{repo}.git"
+        else:
+            # other hosts unchanged
+            return s
+
+    return s
+
+
 def get_submodule(directory,url,commitId=None,branch=None):
 	from scripts.shared import print_msg
 	from scripts.shared import git_clone
@@ -344,6 +431,12 @@ def get_submodule(directory,url,commitId=None,branch=None):
 		subprocess.run(["git","pull"],check=True)
 	subprocess.run(["git","submodule","update","--init","--recursive"],check=True)
 	os.chdir(curDir)
+
+def get_gh_submodule(directory,ghRepoId,commitId=None,branch=None):
+	get_submodule(directory,"https://github.com/" +ghRepoId +".git",commitId,branch)
+
+def get_gl_submodule(directory,ghRepoId,commitId=None,branch=None):
+	get_submodule(directory,"https://gitlab.com/" +ghRepoId +".git",commitId,branch)
 
 def compile_lua_file(deps_dir, luaFile):
 	from scripts.shared import normalize_path
@@ -605,3 +698,28 @@ def get_library_include_dir(lib_name):
 
 def get_library_lib_dir(lib_name):
 	return get_library_root_dir(lib_name) +"lib/"
+
+def check_content_version(base_path: str, contents: str, filename: str) -> bool:
+	target_file = Path(base_path) / filename
+	if not target_file.exists():
+		return False
+	try:
+		return target_file.read_text(encoding="utf-8").strip() == contents
+	except Exception:
+		return False
+
+def update_content_version(base_path: str, commit_id: str, filename: str) -> None:
+	base = Path(base_path)
+	if base.exists():
+		print(f"Removing directory '{base}'...")
+		shutil.rmtree(base)
+
+	print(f"Creating directory '{base}'...")
+	base.mkdir(parents=True, exist_ok=True)
+
+	target_file = base / filename
+	print(f"Writing content version to '{target_file}'...")
+	target_file.write_text(commit_id, encoding="utf-8")
+
+def prefer_pacman():
+    return shutil.which("pacman") is not None

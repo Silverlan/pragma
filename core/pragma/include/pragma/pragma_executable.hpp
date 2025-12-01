@@ -7,6 +7,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <filesystem>
 
 // If gDEbugger Support is enabled, all .dll-files will have to be copied to the .exe directory!
 #define ENABLE_GDEBUGGER_SUPPORT 0
@@ -141,10 +142,15 @@ namespace pragma {
 		std::replace(path.begin(), path.end(), '\\', '/');
 		void *hEngine = dlopen(path.c_str(), RTLD_LAZY);
 		if(hEngine == nullptr) {
-			char *err = dlerror();
-			std::cout << "Unable to load library 'lib/" << library << "': " << err << std::endl;
-			sleep(5);
-			return MODULE_NULL;
+			// Failed to load library, try again with absolute path
+			std::filesystem::path fullPath = std::filesystem::current_path() / "lib" / path;
+			hEngine = dlopen(fullPath.c_str(), RTLD_LAZY);
+			if(hEngine == nullptr) {
+				char *err = dlerror();
+				std::cout << "Unable to load library 'lib/" << library << "': " << err << std::endl;
+				sleep(5);
+				return MODULE_NULL;
+			}
 		}
 		auto wrapper = ModuleWrapper::Create(hEngine);
 #if 0

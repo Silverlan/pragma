@@ -1,16 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/lua/util.hpp"
-#include "pragma/engine.h"
-#include <scripting/lua/lua.hpp>
+module pragma.shared;
 
-//import pragma.scripting.lua;
-
-module pragma.console.commands;
+import :console.commands;
 
 // We have to access some members of luabind::detail::class_rep which are inaccessable,
 // so we'll force them to be accessable.
@@ -40,14 +34,14 @@ static void check_autocomplete(const std::string &arg, std::vector<std::string> 
 	autoCompleteOptions.push_back(std::string {candidate});
 }
 
-static void get_crep_autocomplete(lua_State *l, luabind::detail::class_rep *crep, const std::string &arg, std::vector<std::string> &autoCompleteOptions)
+static void get_crep_autocomplete(lua::State *l, luabind::detail::class_rep *crep, const std::string &arg, std::vector<std::string> &autoCompleteOptions)
 {
 	crep->get_table(l);
 	luabind::object table(luabind::from_stack(l, -1));
-	lua_pop(l, 1);
+	Lua::Pop(l, 1);
 
 	for(luabind::iterator i(table), e; i != e; ++i) {
-		if(luabind::type(*i) != LUA_TFUNCTION)
+		if(static_cast<Lua::Type>(luabind::type(*i)) != Lua::Type::Function)
 			continue;
 
 		// We have to create a temporary `object` here, otherwise the proxy
@@ -143,7 +137,7 @@ static std::vector<std::pair<std::string, size_t>> split_chain(const std::string
 	return tokens;
 }
 
-void pragma::console::commands::lua_run_autocomplete(lua_State *l, const std::string &arg, std::vector<std::string> &autoCompleteOptions)
+void pragma::console::commands::lua_run_autocomplete(lua::State *l, const std::string &arg, std::vector<std::string> &autoCompleteOptions)
 {
 	auto chain = split_chain(arg);
 	if(chain.empty())
@@ -155,9 +149,9 @@ void pragma::console::commands::lua_run_autocomplete(lua_State *l, const std::st
 		o = o[el];
 		if(!o)
 			break;
-		auto type = luabind::type(o);
-		if(type == LUA_TFUNCTION) {
-			luabind::detail::function_object *fobj = pragma::scripting::lua::util::get_function_object(o);
+		auto type = static_cast<Lua::Type>(luabind::type(o));
+		if(type == Lua::Type::Function) {
+			luabind::detail::function_object *fobj = pragma::scripting::lua_core::util::get_function_object(o);
 			if(fobj) {
 				auto *functionName = fobj->name.c_str();
 				for(luabind::detail::function_object const *f = fobj; f != 0; f = f->next) {
@@ -189,8 +183,8 @@ void pragma::console::commands::lua_run_autocomplete(lua_State *l, const std::st
 			get_crep_autocomplete(l, crep, lastSegment.first, autoCompleteOptions);
 		}
 		else {
-			auto t = luabind::type(o);
-			if(t == LUA_TTABLE) {
+			auto t = static_cast<Lua::Type>(luabind::type(o));
+			if(t == Lua::Type::Table) {
 				for(luabind::iterator it {o}, end; it != end; ++it) {
 					auto strKey = luabind::object_cast_nothrow<std::string>(it.key(), std::string {});
 					if(strKey.empty())

@@ -1,20 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#define MUTIL_STATIC
-#define SHUTIL_STATIC
-
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#include <cstdlib>
 
-#include <iostream>
-#include <string>
-#include <filesystem>
-#include <sharedutils/util.h>
-#include <sharedutils/util_path.hpp>
-#include <sharedutils/util_string.h>
-#include <udm.hpp>
+import pragma.udm;
+
+#undef CreateFile
 
 int main(int argc, char *argv[])
 {

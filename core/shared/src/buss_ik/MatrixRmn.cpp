@@ -1,3 +1,6 @@
+
+#include "cassert"
+
 /*
 *
 * Mathematics Subpackage (VrMath)
@@ -27,8 +30,7 @@ subject to the following restrictions:
 //    Not very sophisticated yet.  Needs more functionality
 //		To do: better handling of resizing.
 //
-#include "stdafx_shared.h"
-#include "pragma/buss_ik/MatrixRmn.h"
+#include "buss_ik/MatrixRmn.h"
 MatrixRmn MatrixRmn::WorkMatrix;		// Temporary work matrix
 
 // Fill the diagonal entries with the value d.  The rest of the matrix is unchanged.

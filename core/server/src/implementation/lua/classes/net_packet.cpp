@@ -1,0 +1,35 @@
+// SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
+// SPDX-License-Identifier: MIT
+
+module;
+
+module pragma.server;
+import :scripting.lua.classes.net_packet;
+
+import :networking.util;
+
+void Lua::NetPacket::Server::register_class(luabind::class_<::NetPacket> &classDef)
+{
+	Lua::NetPacket::register_class(classDef);
+	classDef.def("WriteSoundSource", &WriteALSound);
+	classDef.def("WriteUniqueEntity", static_cast<void (*)(lua::State *, ::NetPacket &, pragma::ecs::BaseEntity *)>(&WriteUniqueEntity));
+	classDef.def("WriteUniqueEntity", static_cast<void (*)(lua::State *, ::NetPacket &)>(&WriteUniqueEntity));
+}
+
+void Lua::NetPacket::Server::WriteALSound(lua::State *, ::NetPacket &packet, std::shared_ptr<::ALSound> snd)
+{
+	unsigned int idx = snd->GetIndex();
+	packet->Write<unsigned int>(idx);
+}
+
+void Lua::NetPacket::Server::WriteUniqueEntity(lua::State *l, ::NetPacket &packet, pragma::ecs::BaseEntity *hEnt)
+{
+	//LUA_CHECK_ENTITY(l,hEnt);
+	if(hEnt == nullptr) {
+		nwm::write_unique_entity(packet, nullptr);
+		return;
+	}
+	nwm::write_unique_entity(packet, hEnt);
+}
+
+void Lua::NetPacket::Server::WriteUniqueEntity(lua::State *, ::NetPacket &packet) { nwm::write_unique_entity(packet, nullptr); }

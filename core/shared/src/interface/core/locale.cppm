@@ -1,17 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-#include <pragma/networkdefinitions.h>
-#include <string>
-#include <vector>
-#include <optional>
-#include <unordered_map>
+#include "definitions.hpp"
 
-export module pragma.locale;
+export module pragma.shared:locale;
 
-import pragma.string.unicode;
+export import pragma.string.unicode;
+export import pragma.udm;
 
 export namespace pragma::locale {
 	struct DLLNETWORK LanguageInfo {

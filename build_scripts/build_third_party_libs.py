@@ -140,11 +140,11 @@ if not Path(icu_root).is_dir():
 	print_msg("icu not found. Downloading...")
 	mkpath(icu_root)
 	os.chdir(icu_root)
-	base_url = "https://github.com/unicode-org/icu/releases/download/release-77-1/"
+	base_url = "https://github.com/unicode-org/icu/releases/download/release-78.1/"
 	if platform == "win32":
-		http_extract(base_url +"icu4c-77_1-Win64-MSVC2022.zip")
+		http_extract(base_url +"icu4c-78.1-Win64-MSVC2022.zip")
 	else:
-		http_extract(base_url +"icu4c-77_1-Ubuntu22.04-x64.tgz",format="tar.gz")
+		http_extract(base_url +"icu4c-78.1-Ubuntu22.04-x64.tgz",format="tar.gz")
 
 if platform == "win32":
 	copy_prebuilt_binaries(icu_root +"/lib64/", "icu")
@@ -262,7 +262,7 @@ copy_prebuilt_headers(luajit_root +"src/", "luajit")
 
 ########## GeometricTools ##########
 os.chdir(deps_dir)
-commit_sha = "979d94e"
+commit_sha = "7cac1e1"
 geometric_tools_root = normalize_path(os.getcwd() +"/GeometricTools")
 if not check_repository_commit(geometric_tools_root, commit_sha, "GeometricTools"):
 	if not Path(geometric_tools_root).is_dir():
@@ -488,34 +488,48 @@ if not check_repository_commit(cpptrace_root, commit_sha, "cpptrace"):
 #	compressonator_targets.append("Image_EXR")
 #cmake_build("Release", compressonator_targets)
 
-# On Windows NVTT is used
-if platform == "linux":
-	########## ISPC ##########
-	# Required for ISPCTextureCompressor
-	os.chdir(deps_dir)
+# On Windows NVTT is used, unless the clang compiler is used (which is not compatible with NVTT). In this case it falls back to ISPCTC.
+########## ISPCTC ##########
+# Required for ISPCTextureCompressor
+os.chdir(deps_dir)
+if platform == "win32":
+	ispc_root = normalize_path(os.getcwd() +"/ispc-v1.28.0-windows")
+	if not Path(ispc_root).is_dir():
+		print_msg("ISPC not found. Downloading...")
+		http_extract("https://github.com/ispc/ispc/releases/download/v1.28.0/ispc-v1.28.0-windows.zip",format="zip")
+else:
 	ispc_root = normalize_path(os.getcwd() +"/ispc-v1.28.0-linux")
 	if not Path(ispc_root).is_dir():
 		print_msg("ISPC not found. Downloading...")
 		http_extract("https://github.com/ispc/ispc/releases/download/v1.28.0/ispc-v1.28.0-linux.tar.gz",format="tar.gz")
-	os.chdir(ispc_root)
+os.chdir(ispc_root)
 
-	########## ISPCTextureCompressor ##########
-	os.chdir(deps_dir)
-	commit_sha = "79ddbc90334fc31edd438e68ccb0fe99b4e15aab"
-	ispctc_root = normalize_path(os.getcwd() +"/ISPCTextureCompressor")
-	if not check_repository_commit(ispctc_root, commit_sha, "ISPCTextureCompressor"): 
-		if not Path(ispctc_root).is_dir():
-			print_msg("ISPCTextureCompressor not found. Downloading...")
-			git_clone("https://github.com/GameTechDev/ISPCTextureCompressor.git")
-			cp(ispc_root +"/bin/ispc",ispctc_root +"/ISPC/linux/")
-		os.chdir(ispctc_root)
-		reset_to_commit(commit_sha)
+########## ISPCTextureCompressor ##########
+os.chdir(deps_dir)
+commit_sha = "d35ab81a5c22924438a90969285b4dcd764bd706"
+ispctc_root = normalize_path(os.getcwd() +"/ISPCTextureCompressor")
+if not check_repository_commit(ispctc_root, commit_sha, "ISPCTextureCompressor"): 
+	if not Path(ispctc_root).is_dir():
+		print_msg("ISPCTextureCompressor not found. Downloading...")
+		git_clone("https://github.com/sarc-acl/ISPCTextureCompressor.git")
+	os.chdir(ispctc_root)
+	reset_to_commit(commit_sha)
 
-		print_msg("Building ISPCTextureCompressor...")
-		subprocess.run(["make","-f","Makefile.linux"],check=True)
+	mkdir("build",cd=True)
+	ispctc_args = [
+		"-DCMAKE_BUILD_TYPE=" +build_config_tp,
+		"-DVulkan_INCLUDE_DIR=" +get_library_include_dir("vulkan"),	
+		"-DVulkan_LIBRARY=" +get_library_lib_dir("vulkan")
+	]
+	if platform == "win32":
+		ispctc_args.append("-DISPC_EXECUTABLE:FILEPATH=" +ispc_root +"/bin/ispc.exe")
+	else:
+		ispctc_args.append("-DISPC_EXECUTABLE:FILEPATH=" +ispc_root +"/bin/ispc")
+	cmake_configure_def_toolset("..",generator,ispctc_args)
+	cmake_build(build_config_tp)
 
-		copy_prebuilt_binaries(ispctc_root +"/build", "ispctc")
-		copy_prebuilt_headers(ispctc_root +"/ispc_texcomp", "ispctc")
+	copy_prebuilt_binaries(ispctc_root +"/build/" +build_config_tp, "ispctc")
+	copy_prebuilt_headers(ispctc_root +"/ispc_texcomp", "ispctc")
 
 if platform == "linux":
 	########## sdbus-cpp ##########

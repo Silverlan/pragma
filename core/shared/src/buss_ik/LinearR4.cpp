@@ -1,3 +1,6 @@
+
+#include "cassert"
+
 /*
 *
 * Mathematics Subpackage (VrMath)
@@ -24,10 +27,8 @@ subject to the following restrictions:
 //Alterations:
 //Remove register keyword to fix compile errors with some linux compilers (clang)
 
-#include "stdafx_shared.h"
-#include "pragma/buss_ik/LinearR4.h"
+#include "buss_ik/LinearR4.h"
 
-#include <assert.h>
 const VectorR4 VectorR4::Zero(0.0, 0.0, 0.0, 0.0);
 const VectorR4 VectorR4::UnitX( 1.0, 0.0, 0.0, 0.0);
 const VectorR4 VectorR4::UnitY( 0.0, 1.0, 0.0, 0.0);

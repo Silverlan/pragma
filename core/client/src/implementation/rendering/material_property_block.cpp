@@ -3,8 +3,9 @@
 
 module;
 
-module pragma.client.rendering.material_property_block;
+module pragma.client;
 
+import :rendering.material_property_block;
 pragma::rendering::MaterialPropertyBlock::MaterialPropertyBlock() : m_propertyBlock {udm::Property::Create(udm::Type::Element)}
 {
 	(*m_propertyBlock)["properties"] = udm::Property::Create(udm::Type::Element);

@@ -1,19 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/logging.hpp"
-#include <fsys/directory_watcher.h>
-#include <fsys/filesystem.h>
-#include <sharedutils/util_string.h>
-#include <sharedutils/util_path.hpp>
-#include <sharedutils/magic_enum.hpp>
+#include <cassert>
+
+module pragma.shared;
+
+import :console.output;
+import :locale;
 
 #undef CreateFile
-
-module pragma.locale;
 
 static std::vector<std::string> g_loadedFiles;
 static std::string g_language;

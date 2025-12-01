@@ -4,7 +4,6 @@ option(CONFIG_BUILD_WITH_VTUNE_SUPPORT "Build with VTune profiler support?" OFF)
 
 set(PROJ_NAME shared)
 pr_add_library(${PROJ_NAME} SHARED)
-pr_precompile_headers(${PROJ_NAME} "stdafx_shared.h")
 
 pr_add_dependency(${PROJ_NAME} panima TARGET PUBLIC)
 pr_add_dependency(${PROJ_NAME} materialsystem TARGET PUBLIC)
@@ -22,16 +21,10 @@ pr_add_dependency(${PROJ_NAME} oskit TARGET PRIVATE)
 
 pr_add_dependency(${PROJ_NAME} Recast TARGET)
 pr_add_dependency(${PROJ_NAME} Detour TARGET)
-pr_add_dependency(${PROJ_NAME} spdlog TARGET PUBLIC)
-pr_add_dependency(${PROJ_NAME} fmt TARGET)
 pr_add_dependency(${PROJ_NAME} clip2tri-static TARGET)
 pr_add_dependency(${PROJ_NAME} poly2tri-static TARGET)
 pr_add_dependency(${PROJ_NAME} clipper-static TARGET)
 pr_add_dependency(${PROJ_NAME} muparserx TARGET)
-
-# We need these for the convar headers
-target_include_directories(${PROJ_NAME} PRIVATE "../server/include/")
-target_include_directories(${PROJ_NAME} PRIVATE "../client/include/")
 
 pr_add_third_party_dependency(${PROJ_NAME} bvh PUBLIC)
 pr_add_third_party_dependency(${PROJ_NAME} eigen)
@@ -45,17 +38,31 @@ endif()
 pr_add_dependency(${PROJ_NAME} noise-static TARGET)
 pr_add_dependency(${PROJ_NAME} noiseutils-static TARGET)
 pr_add_compile_definitions(${PROJ_NAME} -DNOISE_STATIC)
+pr_add_compile_definitions(
+	${PROJ_NAME}
+		-DPHYS_KEEP_SIMULATION_TRANSFORM=0
+		-DENABLE_DEBUG_HISTORY=0
+)
+pr_add_compile_definitions(
+	${PROJ_NAME}
+		-DNETWORKED_VARS_ENABLED=0
+		-DRESOURCE_WATCHER_VERBOSE=0
+
+		PUBLIC
+)
 
 # Required by sound_ogg.cpp
 pr_add_dependency(${PROJ_NAME} vorbis TARGET)
 pr_add_dependency(${PROJ_NAME} vorbisfile TARGET)
 
-pr_add_headers(${PROJ_NAME} "src/implementation/" PRIVATE)
-pr_add_headers(${PROJ_NAME} "src/interface" PRIVATE)
-pr_add_modules(${PROJ_NAME} "src/interface")
+if(WIN32)
+    set(SOURCE_EXCLUSION_FILTER)
+else()
+    set(SOURCE_EXCLUSION_FILTER "src/debug/StackWalker/*")
+endif()
 
-pr_add_headers(${PROJ_NAME} "include/")
-pr_add_sources(${PROJ_NAME} "src/")
+pr_init_module(${PROJ_NAME} EXCLUDE "${SOURCE_EXCLUSION_FILTER}")
+pr_add_headers(${PROJ_NAME} "include/" EXCLUDE "${SOURCE_EXCLUSION_FILTER}")
 
 pr_add_compile_definitions(${PROJ_NAME} -DDLLNETWORK_EX -DENGINE_NETWORK)
 

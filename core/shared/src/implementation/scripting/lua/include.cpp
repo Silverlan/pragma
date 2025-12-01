@@ -1,23 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
+module;
 
-#include "interface/scripting/lua/include.hpp"
-#include "interface/scripting/lua/error_handling.hpp"
+#include <cassert>
 
-// module;
+module pragma.shared;
 
-#include "stdafx_shared.h"
-#include <pragma/engine.h>
-#include <sharedutils/util_path.hpp>
-#include <luainterface.hpp>
-#include <stack>
+import :scripting.lua.include;
 
-// module pragma.scripting.lua;
-
-// import :error_handling;
-
-static pragma::scripting::lua::IncludeResult include_file(lua_State *l, const util::Path &fileName, pragma::scripting::lua::IncludeFlags flags, Lua::IncludeCache *optIncludeCache = nullptr);
-static pragma::scripting::lua::IncludeResult include_directory(lua_State *l, const util::Path &fullLuaPath, const util::Path &relLuaPath, pragma::scripting::lua::IncludeFlags flags, Lua::IncludeCache *optIncludeCache = nullptr)
+static pragma::scripting::lua_core::IncludeResult include_file(lua::State *l, const util::Path &fileName, pragma::scripting::lua_core::IncludeFlags flags, Lua::IncludeCache *optIncludeCache = nullptr);
+static pragma::scripting::lua_core::IncludeResult include_directory(lua::State *l, const util::Path &fullLuaPath, const util::Path &relLuaPath, pragma::scripting::lua_core::IncludeFlags flags, Lua::IncludeCache *optIncludeCache = nullptr)
 {
 	// Note: relLuaPath is the path relative to the current Lua include path (see Lua::GetIncludePath)
 
@@ -44,10 +36,10 @@ static pragma::scripting::lua::IncludeResult include_directory(lua_State *l, con
 				return result;
 		}
 	}
-	return pragma::scripting::lua::IncludeResult {Lua::StatusCode::Ok};
+	return pragma::scripting::lua_core::IncludeResult {Lua::StatusCode::Ok};
 }
 
-void pragma::scripting::lua::execute_files_in_directory(lua_State *l, const std::string &path)
+void pragma::scripting::lua_core::execute_files_in_directory(lua::State *l, const std::string &path)
 {
 	auto normPath = ::util::DirPath(path);
 	auto fullNormPath = ::util::DirPath(Lua::SCRIPT_DIRECTORY, normPath);
@@ -82,7 +74,7 @@ struct CallInfo {
 // We need to use a stack to account for recursion.
 static std::stack<CallInfo> g_callInfoStack;
 // format_error_message may only be called from include_file
-static std::optional<std::string> format_error_message(lua_State *l, Lua::StatusCode statusCode, pragma::scripting::lua::ErrorType errType, bool useIncludeCallInfoStack)
+static std::optional<std::string> format_error_message(lua::State *l, Lua::StatusCode statusCode, pragma::scripting::lua_core::ErrorType errType, bool useIncludeCallInfoStack)
 {
 	if(!Lua::IsString(l, -1))
 		return {};
@@ -95,31 +87,31 @@ static std::optional<std::string> format_error_message(lua_State *l, Lua::Status
 		auto &item = g_callInfoStack.top();
 		fileName = &item.fileName;
 	}
-	auto formattedMsg = pragma::scripting::lua::format_error_message(l, errorMessage, statusCode, fileName, errType);
+	auto formattedMsg = pragma::scripting::lua_core::format_error_message(l, errorMessage, statusCode, fileName, errType);
 	if(useIncludeCallInfoStack)
 		g_callInfoStack.top().errorMessage = formattedMsg;
 	return formattedMsg;
 }
 
 template<bool useIncludeCallInfoStack>
-static Lua::StatusCode execute_file(lua_State *l, const std::string &path, std::string *optOutErrMsg)
+static Lua::StatusCode execute_file(lua::State *l, const std::string &path, std::string *optOutErrMsg)
 {
 	auto pathNorm = path;
 	std::string errMsg;
 	auto statusCode = Lua::ExecuteFile(
 	  l, pathNorm, errMsg,
-	  [](lua_State *l) -> int32_t {
-		  auto newErrMsg = format_error_message(l, Lua::StatusCode::ErrorRun, pragma::scripting::lua::ErrorType::RuntimeError, useIncludeCallInfoStack);
+	  [](lua::State *l) -> int32_t {
+		  auto newErrMsg = format_error_message(l, Lua::StatusCode::ErrorRun, pragma::scripting::lua_core::ErrorType::RuntimeError, useIncludeCallInfoStack);
 		  if(!newErrMsg)
 			  return 0;
 		  Lua::PushString(l, *newErrMsg);
 		  return 1; // We don't have to pop the original error message
 	  },
-	  LUA_MULTRET,
-	  [](lua_State *l, Lua::StatusCode statusCode) {
+	  lua::MultiReturn,
+	  [](lua::State *l, Lua::StatusCode statusCode) {
 		  // File failed to load, most likely a syntax error.
 		  // Possible error codes are: ErrorFile (file not found), ErrorSyntax, ErrorMemory
-		  auto newErrMsg = format_error_message(l, statusCode, pragma::scripting::lua::ErrorType::LoadError, useIncludeCallInfoStack);
+		  auto newErrMsg = format_error_message(l, statusCode, pragma::scripting::lua_core::ErrorType::LoadError, useIncludeCallInfoStack);
 		  if(!newErrMsg)
 			  return;
 		  Lua::Pop(l, 1); // Pop the original error message
@@ -130,19 +122,19 @@ static Lua::StatusCode execute_file(lua_State *l, const std::string &path, std::
 	if(optOutErrMsg)
 		*optOutErrMsg = std::move(errMsg);
 	else
-		pragma::scripting::lua::submit_error(l, errMsg);
+		pragma::scripting::lua_core::submit_error(l, errMsg);
 	return statusCode;
 }
 
-Lua::StatusCode pragma::scripting::lua::execute_file(lua_State *l, const std::string &path, std::string *optOutErrMsg) { return ::execute_file<false>(l, path, optOutErrMsg); }
+Lua::StatusCode pragma::scripting::lua_core::execute_file(lua::State *l, const std::string &path, std::string *optOutErrMsg) { return ::execute_file<false>(l, path, optOutErrMsg); }
 
-pragma::scripting::lua::IncludeResult include_file(lua_State *l, const util::Path &fileName, pragma::scripting::lua::IncludeFlags flags, Lua::IncludeCache *optIncludeCache)
+pragma::scripting::lua_core::IncludeResult include_file(lua::State *l, const util::Path &fileName, pragma::scripting::lua_core::IncludeFlags flags, Lua::IncludeCache *optIncludeCache)
 {
 	auto includeFileName = Lua::GetIncludePath(fileName.GetString());
 
 	if(optIncludeCache) {
-		if(umath::is_flag_set(flags, pragma::scripting::lua::IncludeFlags::SkipIfCached) && optIncludeCache->Contains(includeFileName))
-			return pragma::scripting::lua::IncludeResult {Lua::StatusCode::Ok};
+		if(umath::is_flag_set(flags, pragma::scripting::lua_core::IncludeFlags::SkipIfCached) && optIncludeCache->Contains(includeFileName))
+			return pragma::scripting::lua_core::IncludeResult {Lua::StatusCode::Ok};
 	}
 
 	g_callInfoStack.push({includeFileName});
@@ -152,19 +144,19 @@ pragma::scripting::lua::IncludeResult include_file(lua_State *l, const util::Pat
 	auto callInfo = std::move(g_callInfoStack.top());
 	g_callInfoStack.pop();
 	if(statusCode == Lua::StatusCode::Ok) {
-		if(optIncludeCache && umath::is_flag_set(flags, pragma::scripting::lua::IncludeFlags::AddToCache))
+		if(optIncludeCache && umath::is_flag_set(flags, pragma::scripting::lua_core::IncludeFlags::AddToCache))
 			optIncludeCache->Add(includeFileName);
 		return {Lua::StatusCode::Ok};
 	}
 
-	pragma::scripting::lua::IncludeResult result {};
+	pragma::scripting::lua_core::IncludeResult result {};
 	result.statusCode = statusCode;
 	result.errorFilePath = std::move(includeFileName);
 	result.errorMessage = std::move(errMsg);
 	return result;
 }
 
-pragma::scripting::lua::IncludeResult pragma::scripting::lua::include(lua_State *l, const std::string &path, IncludeFlags flags)
+pragma::scripting::lua_core::IncludeResult pragma::scripting::lua_core::include(lua::State *l, const std::string &path, IncludeFlags flags)
 {
 	static Lua::IncludeCache tmpCache;
 	static uint32_t recursionDepth = 0;

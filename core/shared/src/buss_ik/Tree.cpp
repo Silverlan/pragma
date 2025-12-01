@@ -1,3 +1,6 @@
+
+#include "cassert"
+
 /*
 *
 * Inverse Kinematics software, with several solvers including
@@ -28,16 +31,14 @@ subject to the following restrictions:
 // VectorRn:  Vector over Rn  (Variable length vector)
 //
 
-#include "stdafx_shared.h"
-#include <iostream>
 using namespace std;
 
 
 
 
-#include "pragma/buss_ik/LinearR3.h"
-#include "pragma/buss_ik/Tree.h"
-#include "pragma/buss_ik/Node.h"
+#include "buss_ik/LinearR3.h"
+#include "buss_ik/Tree.h"
+#include "buss_ik/Node.h"
 Tree::Tree()
 {
 	root = 0;
@@ -104,11 +105,11 @@ Node* Tree::SearchJoint(Node* node, int index)
 			if ((ret = SearchJoint(node->right, index))) {
 				return ret;
 			}
-			return NULL;
+			return nullptr;
 		}
 	} 
 	else {
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -133,10 +134,10 @@ Node* Tree::SearchEffector(Node* node, int index)
 			if ((ret = SearchEffector(node->right, index))) {
 				return ret;
 			}
-			return NULL;
+			return nullptr;
 		}
 	} else {
-		return NULL;
+		return nullptr;
 	}
 }
 

@@ -1,21 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/debug/debug_utils.hpp"
-#include "pragma/logging.hpp"
-#include "crashdump_helper.hpp"
-#include <fsys/filesystem.h>
-#include <sharedutils/util_debug.h>
-#include <sharedutils/util_clock.hpp>
-#include <sharedutils/util.h>
-#include <sharedutils/util_file.h>
-#include <exception>
-#include "pragma/engine_info.hpp"
 #ifdef _WIN32
+#include <Windows.h>
 #include <tchar.h>
 #include <signal.h>
 #else
@@ -23,10 +11,15 @@ module;
 #include <execinfo.h>
 #endif
 
-module pragma.debug.crashdump;
+#include "crashdump_helper.hpp"
 
+module pragma.shared;
+
+import :debug.crashdump;
+import :locale;
 import util_zip;
-import pragma.locale;
+
+#undef CreateDirectory
 
 using namespace pragma::debug;
 
@@ -288,7 +281,7 @@ bool CrashHandler::GenerateCrashDump() const
 	// ask the user if they want to save a dump file
 	auto saveDump = false;
 	auto *engine = pragma::get_engine();
-	auto shouldShowMsBox = !engine->IsNonInteractiveMode();
+	auto shouldShowMsBox = !pragma::Engine::Get()->IsNonInteractiveMode();
 #ifdef _WIN32
 	shouldShowMsBox = (shouldShowMsBox && util::get_subsystem() == util::SubSystem::GUI);
 #endif
@@ -332,9 +325,9 @@ bool CrashHandler::GenerateCrashDump() const
 	if(saveDump) {
 		std::string err;
 		std::string zipFileName;
-		LOGGER.debug("Closing logger...");
+		auto zipFile = pragma::Engine::GenerateEngineDump("crashdumps/crashdump", zipFileName, err);
+		// Logger should already be closed at this point, but to make sure...
 		pragma::detail::close_logger();
-		auto zipFile = Engine::GenerateEngineDump("crashdumps/crashdump", zipFileName, err);
 		if(zipFile) {
 #ifdef _WIN32
 			std::string dumpErr;
@@ -395,7 +388,7 @@ bool CrashHandler::GenerateCrashDump() const
 #endif
 	if(crashInProsperModule) {
 		// Probably a rendering related crash.
-		engine->HandleOpenGLFallback();
+		pragma::Engine::Get()->HandleOpenGLFallback();
 	}
 
 	// We've done all we can, just force quit at this point

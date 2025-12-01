@@ -20,21 +20,35 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - os: ubuntu-24.04
-            name: "Ubuntu 24.04"
+          - os: ubuntu-latest
+            name: "Ubuntu Latest"
     steps:
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v2
+
+      - name: Install Dependencies
+        shell: bash
+        run: |
+          sudo apt install ninja-build
+
       - name: Setup Pragma
-        uses: Silverlan/pragma/github_actions/setup@main
+        uses: Silverlan/pragma/github_actions/setup@develop
         with:
           branch: ${{ github.ref_name }}
           clone_url: "https://github.com/${{ github.repository }}.git"
+
+      - name: Clear Disk Space
+        uses: Silverlan/common_actions/clear_disk_space@main
+
+      - name: Setup GCC
+        uses: Silverlan/common_actions/setup_gcc@main
 
       - name: Build Pragma
         uses: ./pragma/github_actions/build
         id: build-pragma
         with:
-          build-args: "--with-pfm --with-all-pfm-modules --with-vr --with-networking --with-lua-debugger=0 --with-swiftshader"
-
+          build-args: '--with-pfm --with-all-pfm-modules --with-vr --with-networking --with-lua-debugger=0 --with-swiftshader --cmake-arg=-DCMAKE_CXX_STDLIB_MODULES_JSON="/opt/gcc-16/lib64/libstdc++.modules.json" --cmake-arg=-DCMAKE_EXE_LINKER_FLAGS="-Wl,-rpath,/opt/gcc-16/lib64 -L/opt/gcc-16/lib64" --cmake-cxx-flag="--gcc-toolchain=/opt/gcc-16"'
+            
       - name: Run Tests
         uses: ./pragma/github_actions/run_common_tests
         timeout-minutes: 60
@@ -47,6 +61,10 @@ jobs:
       #  if: failure()
       #  with:
       #    timeout-minutes: 15
+
+      - name: Analyze Disk Space
+        uses: Silverlan/common_actions/analyze_disk_space@main
+        if: failure()
 
       - name: Upload Debug Artifacts
         if: ${{ !cancelled() }}

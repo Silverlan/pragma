@@ -58,7 +58,7 @@ runs:
     # We need the latest Windows SDK
     - name: Install Windows SDK
       if: runner.os == 'Windows'
-      uses: GuillaumeFalourd/setup-windows10-sdk-action@v1.11
+      uses: GuillaumeFalourd/setup-windows10-sdk-action@v2.4
       with:
         sdk-version: 22621
 

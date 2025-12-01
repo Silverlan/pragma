@@ -21,8 +21,8 @@ set(LIB_VALUES "${${PCK}_LIBRARY}")
 
 set(REQ_VARS ${PCK}_INCLUDE_DIR)
 if(UNIX)
-  find_library(${PCK}_LIBRARY_77
-    NAMES libicuuc.so.77
+  find_library(${PCK}_LIBRARY_78
+    NAMES libicuuc.so.78
     HINTS
       ${PRAGMA_DEPS_DIR}/icu/lib
   )
@@ -33,23 +33,23 @@ if(UNIX)
       ${PRAGMA_DEPS_DIR}/icu/lib
   )
 
-  find_library(${PCK}_DATA_LIBRARY_77
-    NAMES libicudata.so.77
+  find_library(${PCK}_DATA_LIBRARY_78
+    NAMES libicudata.so.78
     HINTS
       ${PRAGMA_DEPS_DIR}/icu/lib
   )
-  set(LIB_VARS ${LIB_VARS} ${PCK}_LIBRARY_77 ${PCK}_DATA_LIBRARY ${PCK}_DATA_LIBRARY_77)
-  set(LIB_VALUES ${LIB_VALUES} ${${PCK}_LIBRARY_77} ${${PCK}_DATA_LIBRARY} ${${PCK}_DATA_LIBRARY_77})
+  set(LIB_VARS ${LIB_VARS} ${PCK}_LIBRARY_78 ${PCK}_DATA_LIBRARY ${PCK}_DATA_LIBRARY_78)
+  set(LIB_VALUES ${LIB_VALUES} ${${PCK}_LIBRARY_78} ${${PCK}_DATA_LIBRARY} ${${PCK}_DATA_LIBRARY_78})
   set(REQ_VARS ${REQ_VARS} ${LIB_VARS})
 else()
   find_file(
     ${PCK}_ICUUC_RUNTIME
-    NAMES icuuc77.dll
+    NAMES icuuc78.dll
     HINTS ${PRAGMA_DEPS_DIR}/icu/bin
   )
   find_file(
     ${PCK}_ICUDT_RUNTIME
-    NAMES icudt77.dll
+    NAMES icudt78.dll
     HINTS ${PRAGMA_DEPS_DIR}/icu/bin
   )
   set(REQ_VARS ${REQ_VARS} ${PCK}_ICUUC_RUNTIME ${PCK}_ICUDT_RUNTIME)

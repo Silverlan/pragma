@@ -21,7 +21,7 @@ os.chdir(config.prebuilt_bin_dir)
 if platform == "linux":
 	os.chdir(deps_dir)
 	libdecor_root = os.getcwd() +"/libdecor"
-	commit_sha = "c4540b4a92d371b47e14fd10ff42efb3826c89b9"
+	commit_sha = "700aa1e6fb5dddc085d94dddf480e74b84c0ad88"
 	if not check_repository_commit(libdecor_root, commit_sha, "libdecor"): 
 		if not Path(libdecor_root).is_dir():
 			print_msg("libdecor not found. Downloading...")

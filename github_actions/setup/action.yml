@@ -27,6 +27,7 @@ runs:
       uses: Silverlan/common_actions/clear_disk_space@main
 
     - name: Setup GCC
+      if: ${{ runner.os == 'Linux' }}
       uses: Silverlan/common_actions/setup_gcc@main
 
     - name: Download Pragma

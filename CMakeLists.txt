@@ -186,9 +186,6 @@ add_subdirectory(tools)
 message("Processing modules...")
 add_subdirectory(modules)
 
-if(WIN32)
-    target_include_directories(libcurl_shared PRIVATE ${DEPENDENCY_ZLIB_INCLUDE})
-endif()
 target_include_directories(materialsystem PRIVATE ${DEPENDENCY_ZLIB_INCLUDE})
 
 if(WIN32)

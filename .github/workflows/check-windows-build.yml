@@ -37,14 +37,6 @@ jobs:
           branch: ${{ github.ref_name }}
           clone_url: "https://github.com/${{ github.repository }}.git"
 
-      - name: Setup cmake
-        uses: jwlawson/actions-setup-cmake@v2
-
-      - name: Setup Visual Studio Developer Prompt
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: amd64
-
       # We need the latest Windows SDK
       - uses: GuillaumeFalourd/setup-windows10-sdk-action@v2.4
         with:

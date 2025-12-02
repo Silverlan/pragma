@@ -21,6 +21,12 @@ runs:
       run: |
         sudo apt install ninja-build
 
+    - name: Setup Visual Studio Developer Prompt
+      if: ${{ runner.os == 'Windows' }}
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64
+
     # This is a temporary fix until https://github.com/actions/runner-images/pull/9956 has been merged
     - name: Purge needrestart
       shell: bash

@@ -17,6 +17,7 @@ runs:
 
     - name: Install Dependencies
       shell: bash
+      if: ${{ runner.os == 'Linux' }}
       run: |
         sudo apt install ninja-build
 

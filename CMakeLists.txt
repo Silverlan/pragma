@@ -204,7 +204,7 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT p
 # Installation
 pr_install_targets(pragma pragma_server INSTALL_DIR ".")
 if(WIN32)
-    pr_install_targets(pragma_console INSTALL_DIR ".")
+    pr_install_targets(pragma_console INSTALL_DIR "." RENAME "pragma.com")
 endif()
 pr_install_targets(
     alsoundsystem

@@ -23,12 +23,9 @@ if(WIN32)
     pr_add_headers(${PROJ_NAME} "include/")
     pr_add_sources(${PROJ_NAME} "src/")
 
-    if(UNIX)
-        target_link_libraries(${PROJ_NAME} PRIVATE "dl")
-        target_link_libraries(${PROJ_NAME} PRIVATE "pthread")
-    endif()
-
-    set_target_properties(${PROJ_NAME} PROPERTIES OUTPUT_NAME "pragma" SUFFIX ".com")
+    # Note: The executable will be renamed to "pragma.com" on install, but we can't call the build target that due to
+    # a msvc bug that causes a naming conflict with the "pragma" executable above.
+    set_target_properties(${PROJ_NAME} PROPERTIES OUTPUT_NAME "pragma_console" SUFFIX ".com")
 
     pr_finalize(${PROJ_NAME})
 endif()

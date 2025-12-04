@@ -121,7 +121,7 @@ endfunction(pr_install_libraries)
 
 function(pr_install_targets)
     set(options)
-    set(oneValueArgs INSTALL_DIR)
+    set(oneValueArgs INSTALL_DIR RENAME)
     set(multiValueArgs)
     cmake_parse_arguments(PARSE_ARGV 0 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
@@ -140,6 +140,11 @@ function(pr_install_targets)
         pragma-install-full
     )
 
+    set(additional_args "")
+    if(DEFINED PA_RENAME)
+        set(additional_args RENAME "${PA_RENAME}")
+    endif()
+
     foreach(TARGET ${PA_UNPARSED_ARGUMENTS})
         get_target_property(_type ${TARGET} TYPE)
         if(UNIX AND _type STREQUAL "EXECUTABLE")
@@ -150,6 +155,7 @@ function(pr_install_targets)
                     $<TARGET_FILE:${TARGET}>
                     OPTIONAL
                     DESTINATION "${PA_INSTALL_DIR}"
+                    ${additional_args}
                     COMPONENT ${component}
                 )
             endforeach()
@@ -162,6 +168,7 @@ function(pr_install_targets)
                     FILES "${FILE_PATH}"
                     OPTIONAL
                     DESTINATION "${PA_INSTALL_DIR}"
+                    ${additional_args}
                     COMPONENT ${component})
             endforeach()
             if(UNIX)
@@ -170,6 +177,7 @@ function(pr_install_targets)
                         TARGETS "${TARGET}"
                         RUNTIME DESTINATION "${PA_INSTALL_DIR}"
                         LIBRARY DESTINATION "${PA_INSTALL_DIR}"
+                        ${additional_args}
                         OPTIONAL
                         COMPONENT ${component})
                 endforeach()

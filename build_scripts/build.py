@@ -240,7 +240,8 @@ if platform == "win32":
 		print_warning(f"Toolset {toolset} for platform {platform} is currently not supported!")
 		sys.exit(1)
 	elif toolset == "clang-cl":
-		clang_dir = deps_dir +"/clang/bin"
+		clang_dir = get_library_root_dir("clang") +"/bin"
+		
 		toolsetArgs = [
 			"-DCMAKE_C_COMPILER=" +clang_dir +"/clang-cl.exe",
 			"-DCMAKE_CXX_COMPILER=" +clang_dir +"/clang-cl.exe",
@@ -360,7 +361,7 @@ elif platform == "win32":
 		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.6/clang+llvm-21.1.6-x86_64-pc-windows-msvc.tar.xz",format="tar.xz")
 	os.chdir(curDir)
 	
-	mv(clang20_root, os.getcwd() +"/clang")
+	mv(clang20_root, clang_staging_path)
 
 if platform == "linux":
 	os.environ["CC"] = c_compiler

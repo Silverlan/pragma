@@ -32,7 +32,7 @@ jobs:
             build_dir: 'build'
     steps:
       - name: Setup Pragma
-        uses: Silverlan/pragma/github_actions/setup@main
+        uses: Silverlan/pragma/github_actions/setup@develop
         with:
           branch: ${{ github.ref_name }}
           clone_url: "https://github.com/${{ github.repository }}.git"
@@ -42,6 +42,39 @@ jobs:
         with:
           sdk-version: 22621
           
+      - name: Free disk space
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "=== Disk before ==="
+          powershell -NoProfile -Command "Get-PSDrive C | Select-Object Used,Free,Name | Format-List"
+
+          safe_rm() {
+            target="$1"
+            if [ -e "$target" ]; then
+              echo "Removing: $target"
+              rm -rf "$target" || true
+            else
+              echo "Not found, skipping: $target"
+            fi
+          }
+
+          safe_rm "/c/Users/runneradmin/AppData/Local/Temp/WindowsSDK/winsdk_22621.iso"
+
+          if [ -d "/c/Program Files/MongoDB" ]; then
+            echo "Removing MongoDB .pdb files (if any)"
+            find "/c/Program Files/MongoDB" -type f -iname '*.pdb' -print -delete || true
+          fi
+
+          safe_rm "/c/Program Files (x86)/Android"
+          safe_rm "/c/Program Files/dotnet"
+          safe_rm "/c/Windows/Installer/32dbbb.msi"
+          safe_rm "/c/Windows/Installer/32dbbf.msi"
+
+          echo "=== Disk after ==="
+          powershell -NoProfile -Command "Get-PSDrive C | Select-Object Used,Free,Name | Format-List"
+
       - name: Build Pragma
         uses: ./pragma/github_actions/build
         id: build-pragma

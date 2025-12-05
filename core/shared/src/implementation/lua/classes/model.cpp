@@ -260,7 +260,9 @@ void Lua::Model::register_class(lua::State *l, luabind::class_<pragma::Model> &c
 	classDef.def("GetMeshGroup", static_cast<void (*)(lua::State *, pragma::Model &, uint32_t)>(&GetMeshGroup));
 	classDef.def("GetMeshes", static_cast<void (*)(lua::State *, pragma::Model &, const std::string &)>(&Lua::Model::GetMeshes));
 	classDef.def("GetMeshes", static_cast<void (*)(lua::State *, pragma::Model &, luabind::object)>(&Lua::Model::GetMeshes));
-	classDef.def("GetMeshGroups", &Lua::Model::GetMeshGroups);
+	classDef.def("GetMeshGroups", +[](pragma::Model &mdl) -> std::vector<std::shared_ptr<pragma::ModelMeshGroup>> {
+		return mdl.GetMeshGroups();
+	});
 	classDef.def("AddMeshGroup", static_cast<void (*)(lua::State *, pragma::Model &, const std::string &)>(&Lua::Model::AddMeshGroup));
 	classDef.def("AddMeshGroup", static_cast<void (*)(lua::State *, pragma::Model &, pragma::ModelMeshGroup &)>(&Lua::Model::AddMeshGroup));
 	classDef.def("UpdateCollisionBounds", &Lua::Model::UpdateCollisionBounds);
@@ -1906,20 +1908,6 @@ void Lua::Model::GetMeshes(lua::State *l, pragma::Model &mdl, luabind::object o)
 	for(auto &mesh : meshes) {
 		Lua::PushInt(l, n);
 		Lua::Push<std::shared_ptr<::ModelMesh>>(l, mesh);
-		Lua::SetTableValue(l, t);
-		++n;
-	}
-}
-
-void Lua::Model::GetMeshGroups(lua::State *l, pragma::Model &mdl)
-{
-	//Lua::CheckModel(l,1);
-	auto &meshGroups = mdl.GetMeshGroups();
-	auto t = Lua::CreateTable(l);
-	int32_t n = 1;
-	for(auto &meshGroup : meshGroups) {
-		Lua::PushInt(l, n);
-		Lua::Push<std::shared_ptr<pragma::ModelMeshGroup>>(l, meshGroup);
 		Lua::SetTableValue(l, t);
 		++n;
 	}

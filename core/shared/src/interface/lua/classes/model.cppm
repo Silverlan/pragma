@@ -88,7 +88,6 @@ export namespace Lua {
 		DLLNETWORK void GetMeshGroup(lua::State *l, pragma::Model &mdl, uint32_t groupId);
 		DLLNETWORK void GetMeshes(lua::State *l, pragma::Model &mdl, const std::string &meshGroup);
 		DLLNETWORK void GetMeshes(lua::State *l, pragma::Model &mdl, luabind::object meshIds);
-		DLLNETWORK void GetMeshGroups(lua::State *l, pragma::Model &mdl);
 		DLLNETWORK void AddMeshGroup(lua::State *l, pragma::Model &mdl, const std::string &name);
 		DLLNETWORK void AddMeshGroup(lua::State *l, pragma::Model &mdl, pragma::ModelMeshGroup &meshGroup);
 		DLLNETWORK void UpdateCollisionBounds(lua::State *l, pragma::Model &mdl);

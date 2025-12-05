@@ -15,7 +15,7 @@ export import pragma.soundsystem;
 export namespace pragma::audio {
 	class DLLCLIENT CALSound : public al::SoundSource, public ALSound {
 	public:
-		static std::shared_ptr<CALSound> Create(NetworkState *nw, const al::PSoundChannel &channel);
+		static std::shared_ptr<CALSound> Create(pragma::NetworkState *nw, const al::PSoundChannel &channel);
 		static ALSound *FindByServerIndex(uint32_t idx);
 		static void SetIndex(ALSound *snd, uint32_t idx);
 
@@ -110,7 +110,7 @@ export namespace pragma::audio {
 
 		void UpdateVolume();
 	protected:
-		CALSound(NetworkState *nw, const al::PSoundChannel &channel);
+		CALSound(pragma::NetworkState *nw, const al::PSoundChannel &channel);
 		static std::unordered_map<uint32_t, std::weak_ptr<pragma::audio::ALSound>> s_svIndexedSounds; // Sounds created by the server
 		float m_modPitch = 1.f;
 		float m_modVol = 1.f;

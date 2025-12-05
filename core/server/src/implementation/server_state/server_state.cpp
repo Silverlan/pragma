@@ -19,8 +19,8 @@ import :networking;
 #undef GetMessage
 
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = nullptr;
-std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ServerState::GetConVarPtrs() { return *conVarPtrs; }
-ConVarHandle ServerState::GetConVarHandle(std::string scvar)
+std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &pragma::ServerState::GetConVarPtrs() { return *conVarPtrs; }
+ConVarHandle pragma::ServerState::GetConVarHandle(std::string scvar)
 {
 	if(conVarPtrs == nullptr) {
 		static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> ptrs;
@@ -29,9 +29,9 @@ ConVarHandle ServerState::GetConVarHandle(std::string scvar)
 	return NetworkState::GetConVarHandle(*conVarPtrs, scvar);
 }
 
-static ServerState *g_server = nullptr;
-ServerState *ServerState::Get() { return g_server; }
-ServerState::ServerState() : NetworkState(), m_server(nullptr)
+static pragma::ServerState *g_server = nullptr;
+pragma::ServerState *pragma::ServerState::Get() { return g_server; }
+pragma::ServerState::ServerState() : NetworkState(), m_server(nullptr)
 {
 	m_alsoundID = 1;
 	g_server = this;
@@ -51,7 +51,7 @@ ServerState::ServerState() : NetworkState(), m_server(nullptr)
 	ResetGameServer();
 }
 
-ServerState::~ServerState()
+pragma::ServerState::~ServerState()
 {
 	CloseServer();
 	FileManager::RemoveCustomMountDirectory("cache");
@@ -65,7 +65,7 @@ ServerState::~ServerState()
 	ClearCommands();
 }
 
-void ServerState::InitializeGameServer(bool singlePlayerLocalGame)
+void pragma::ServerState::InitializeGameServer(bool singlePlayerLocalGame)
 {
 	m_server = nullptr;
 	m_serverReg = nullptr;
@@ -90,7 +90,7 @@ void ServerState::InitializeGameServer(bool singlePlayerLocalGame)
 		std::string err;
 		auto dllHandle = InitializeLibrary(netModPath, &err);
 		if(dllHandle) {
-			auto *fInitNetLib = dllHandle->FindSymbolAddress<void (*)(NetworkState &, std::unique_ptr<pragma::networking::IServer> &)>("initialize_game_server");
+			auto *fInitNetLib = dllHandle->FindSymbolAddress<void (*)(pragma::NetworkState &, std::unique_ptr<pragma::networking::IServer> &)>("initialize_game_server");
 			if(fInitNetLib != nullptr) {
 				fInitNetLib(*this, m_server);
 				if(m_server) {
@@ -160,7 +160,7 @@ void ServerState::InitializeGameServer(bool singlePlayerLocalGame)
 	if(m_server == nullptr)
 		ResetGameServer();
 }
-void ServerState::OnClientAuthenticated(pragma::networking::IServerClient &session, std::optional<bool> wasAuthenticationSuccessful)
+void pragma::ServerState::OnClientAuthenticated(pragma::networking::IServerClient &session, std::optional<bool> wasAuthenticationSuccessful)
 {
 	if(wasAuthenticationSuccessful.has_value() && *wasAuthenticationSuccessful == false) {
 		spdlog::info("Authentication for client with steam id '{}' has failed, dropping client...", session.GetSteamId());
@@ -172,7 +172,7 @@ void ServerState::OnClientAuthenticated(pragma::networking::IServerClient &sessi
 	p->Write<unsigned int>(numResources);
 	SendPacket(pragma::networking::net_messages::client::START_RESOURCE_TRANSFER, p, pragma::networking::Protocol::SlowReliable, session);
 }
-bool ServerState::ConnectLocalHostPlayerClient()
+bool pragma::ServerState::ConnectLocalHostPlayerClient()
 {
 	if(m_server == nullptr)
 		return false;
@@ -180,7 +180,7 @@ bool ServerState::ConnectLocalHostPlayerClient()
 	m_server->AddClient(m_localClient);
 	return true;
 }
-void ServerState::ResetGameServer()
+void pragma::ServerState::ResetGameServer()
 {
 	m_server = std::make_unique<pragma::networking::LocalServer>();
 	//if(m_localClient == nullptr)
@@ -188,7 +188,7 @@ void ServerState::ResetGameServer()
 	//m_server->AddClient(m_localClient);
 }
 
-void ServerState::Initialize()
+void pragma::ServerState::Initialize()
 {
 	ClearConCommands();
 
@@ -208,7 +208,7 @@ void ServerState::Initialize()
 	NetworkState::Initialize();
 }
 
-bool ServerState::LoadSoundScripts(const char *file, bool bPrecache)
+bool pragma::ServerState::LoadSoundScripts(const char *file, bool bPrecache)
 {
 	auto r = NetworkState::LoadSoundScripts(file, bPrecache);
 	if(SGame::Get() != nullptr && r != false)
@@ -216,18 +216,18 @@ bool ServerState::LoadSoundScripts(const char *file, bool bPrecache)
 	return r;
 }
 
-void ServerState::InitializeResourceManager() { m_resourceWatcher = std::make_unique<SResourceWatcherManager>(this); }
+void pragma::ServerState::InitializeResourceManager() { m_resourceWatcher = std::make_unique<SResourceWatcherManager>(this); }
 
-void ServerState::Close()
+void pragma::ServerState::Close()
 {
 	pragma::Engine::Get()->SaveEngineConfig();
 	pragma::Engine::Get()->SaveServerConfig();
 	NetworkState::Close();
 }
 
-pragma::NwStateType ServerState::GetType() const { return pragma::NwStateType::Server; }
+pragma::NwStateType pragma::ServerState::GetType() const { return pragma::NwStateType::Server; }
 
-void ServerState::Think()
+void pragma::ServerState::Think()
 {
 	NetworkState::Think();
 	if(m_server) {
@@ -241,9 +241,9 @@ void ServerState::Think()
 	}
 }
 
-void ServerState::Tick() { NetworkState::Tick(); }
+void pragma::ServerState::Tick() { NetworkState::Tick(); }
 
-void ServerState::implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const
+void pragma::ServerState::implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const
 {
 	NetworkState::implFindSimilarConVars(input, similarCmds);
 
@@ -251,11 +251,11 @@ void ServerState::implFindSimilarConVars(const std::string &input, std::vector<S
 	NetworkState::FindSimilarConVars(input, svMap->GetConVars(), similarCmds);
 }
 
-SGame *ServerState::GetGameState() { return static_cast<SGame *>(NetworkState::GetGameState()); }
+SGame *pragma::ServerState::GetGameState() { return static_cast<SGame *>(pragma::NetworkState::GetGameState()); }
 
-bool ServerState::IsGameActive() { return m_game != nullptr; }
+bool pragma::ServerState::IsGameActive() { return m_game != nullptr; }
 
-void ServerState::EndGame()
+void pragma::ServerState::EndGame()
 {
 	if(!IsGameActive())
 		return;
@@ -276,7 +276,7 @@ void ServerState::EndGame()
 	ClearConCommands();
 }
 
-std::shared_ptr<pragma::audio::ALSound> ServerState::GetSoundByIndex(unsigned int idx)
+std::shared_ptr<pragma::audio::ALSound> pragma::ServerState::GetSoundByIndex(unsigned int idx)
 {
 	auto &snds = GetSounds();
 	auto it = std::find_if(snds.begin(), snds.end(), [idx](const pragma::audio::ALSoundRef &rsound) { return (rsound.get().GetIndex() == idx) ? true : false; });
@@ -285,7 +285,7 @@ std::shared_ptr<pragma::audio::ALSound> ServerState::GetSoundByIndex(unsigned in
 	return it->get().shared_from_this();
 }
 
-void ServerState::StartGame(bool singlePlayer)
+void pragma::ServerState::StartGame(bool singlePlayer)
 {
 	NetworkState::StartGame(singlePlayer);
 	StartServer(singlePlayer);
@@ -320,9 +320,9 @@ void ServerState::StartGame(bool singlePlayer)
 		RegisterServerInfo();
 }
 
-std::string ServerState::GetMessagePrefix() const { return std::string {Con::PREFIX_SERVER}; }
+std::string pragma::ServerState::GetMessagePrefix() const { return std::string {Con::PREFIX_SERVER}; }
 
-void ServerState::ChangeLevel(const std::string &map)
+void pragma::ServerState::ChangeLevel(const std::string &map)
 {
 	NetworkState::ChangeLevel(map);
 	auto *game = GetGameState();
@@ -334,10 +334,10 @@ void ServerState::ChangeLevel(const std::string &map)
 	game->OnGameReady();
 }
 
-bool ServerState::IsMultiPlayer() const { return m_server && typeid(*m_server) != typeid(pragma::networking::LocalServer); }
-bool ServerState::IsSinglePlayer() const { return !IsMultiPlayer(); }
+bool pragma::ServerState::IsMultiPlayer() const { return m_server && typeid(*m_server) != typeid(pragma::networking::LocalServer); }
+bool pragma::ServerState::IsSinglePlayer() const { return !IsMultiPlayer(); }
 
-ConVar *ServerState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
+ConVar *pragma::ServerState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
 {
 	auto *cvar = NetworkState::SetConVar(scmd, value, bApplyIfEqual);
 	if(cvar == nullptr)
@@ -358,11 +358,11 @@ ConVar *ServerState::SetConVar(std::string scmd, std::string value, bool bApplyI
 	return cvar;
 }
 
-pragma::SPlayerComponent *ServerState::GetPlayer(const pragma::networking::IServerClient &session) { return static_cast<pragma::SPlayerComponent *>(session.GetPlayer()); }
-bool ServerState::IsServer() const { return true; }
-ConVarMap *ServerState::GetConVarMap() { return console_system::server::get_convar_map(); }
+pragma::SPlayerComponent *pragma::ServerState::GetPlayer(const pragma::networking::IServerClient &session) { return static_cast<pragma::SPlayerComponent *>(session.GetPlayer()); }
+bool pragma::ServerState::IsServer() const { return true; }
+ConVarMap *pragma::ServerState::GetConVarMap() { return console_system::server::get_convar_map(); }
 
-void ServerState::ClearConCommands()
+void pragma::ServerState::ClearConCommands()
 {
 	m_luaConCommands.clear();
 	m_conCommandIDs.clear();
@@ -373,9 +373,9 @@ void ServerState::ClearConCommands()
 		m_conCommandID = map->GetConVarCount() + 1;
 }
 
-bool ServerState::IsClientAuthenticationRequired() const { return IsMultiPlayer() && ServerState::Get()->GetConVarBool("sv_require_authentication"); }
+bool pragma::ServerState::IsClientAuthenticationRequired() const { return IsMultiPlayer() && ServerState::Get()->GetConVarBool("sv_require_authentication"); }
 
-ConCommand *ServerState::CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags, const std::string &help)
+ConCommand *pragma::ServerState::CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags, const std::string &help)
 {
 	auto lscmd = scmd;
 	ustring::to_lower(lscmd);
@@ -393,11 +393,11 @@ ConCommand *ServerState::CreateConCommand(const std::string &scmd, LuaFunction f
 	SendPacket(pragma::networking::net_messages::client::LUACMD_REG, packet, pragma::networking::Protocol::SlowReliable);
 	return cmd;
 }
-WMServerData &ServerState::GetServerData() { return m_serverData; }
+WMServerData &pragma::ServerState::GetServerData() { return m_serverData; }
 
-void ServerState::GetLuaConCommands(std::unordered_map<std::string, ConCommand *> **cmds) { *cmds = &m_luaConCommands; }
+void pragma::ServerState::GetLuaConCommands(std::unordered_map<std::string, ConCommand *> **cmds) { *cmds = &m_luaConCommands; }
 
-msys::Material *ServerState::LoadMaterial(const std::string &path, bool precache, bool bReload)
+msys::Material *pragma::ServerState::LoadMaterial(const std::string &path, bool precache, bool bReload)
 {
 	auto &matManager = GetMaterialManager();
 	auto success = true;
@@ -433,13 +433,13 @@ msys::Material *ServerState::LoadMaterial(const std::string &path, bool precache
 	return mat;
 }
 
-msys::MaterialManager &ServerState::GetMaterialManager() { return *pragma::Engine::Get()->GetServerStateInstance().materialManager; }
-pragma::ModelSubMesh *ServerState::CreateSubMesh() const { return new pragma::ModelSubMesh; }
-ModelMesh *ServerState::CreateMesh() const { return new ModelMesh; }
+msys::MaterialManager &pragma::ServerState::GetMaterialManager() { return *pragma::Engine::Get()->GetServerStateInstance().materialManager; }
+pragma::ModelSubMesh *pragma::ServerState::CreateSubMesh() const { return new pragma::ModelSubMesh; }
+ModelMesh *pragma::ServerState::CreateMesh() const { return new ModelMesh; }
 
 namespace {
 	auto _ = pragma::console::server::register_variable_listener<int>(
-	  "sv_tickrate", +[](NetworkState *, const ConVar &, int, int val) {
+	  "sv_tickrate", +[](pragma::NetworkState *, const ConVar &, int, int val) {
 		  if(val < 0)
 			  val = 0;
 		  pragma::Engine::Get()->SetTickRate(val);
@@ -465,45 +465,45 @@ DLLSERVER void pr_sv_register_server_net_messages()
 	netMessagesRegistered = true;
 	register_server_net_messages();
 }
-DLLSERVER void pr_sv_create_server_state(std::unique_ptr<NetworkState> &outState) { outState = std::make_unique<ServerState>(); }
+DLLSERVER void pr_sv_create_server_state(std::unique_ptr<pragma::NetworkState> &outState) { outState = std::make_unique<pragma::ServerState>(); }
 DLLSERVER void pr_sv_start_server(bool singlePlayer)
 {
-	if(ServerState::Get() == nullptr)
+	if(pragma::ServerState::Get() == nullptr)
 		return;
-	ServerState::Get()->StartServer(singlePlayer);
+	pragma::ServerState::Get()->StartServer(singlePlayer);
 }
 DLLSERVER void pr_sv_close_server()
 {
-	if(ServerState::Get() == nullptr)
+	if(pragma::ServerState::Get() == nullptr)
 		return;
-	ServerState::Get()->CloseServer();
+	pragma::ServerState::Get()->CloseServer();
 }
 DLLSERVER bool pr_sv_is_server_running()
 {
-	if(ServerState::Get() == nullptr)
+	if(pragma::ServerState::Get() == nullptr)
 		return false;
-	return ServerState::Get()->IsServerRunning();
+	return pragma::ServerState::Get()->IsServerRunning();
 }
 DLLSERVER void pr_sv_get_server_steam_id(std::optional<uint64_t> &outSteamId)
 {
 	outSteamId = {};
-	if(ServerState::Get() == nullptr)
+	if(pragma::ServerState::Get() == nullptr)
 		return;
-	auto *sv = ServerState::Get()->GetServer();
+	auto *sv = pragma::ServerState::Get()->GetServer();
 	outSteamId = sv ? sv->GetSteamId() : std::optional<uint64_t> {};
 }
-DLLSERVER ServerState *pr_sv_get_server_state() { return ServerState::Get(); }
+DLLSERVER pragma::ServerState *pr_sv_get_server_state() { return pragma::ServerState::Get(); }
 DLLSERVER void pr_sv_clear_server_state() { g_server = nullptr; }
 DLLSERVER void pr_sv_handle_local_host_player_server_packet(NetPacket &packet)
 {
-	if(ServerState::Get() == nullptr)
+	if(pragma::ServerState::Get() == nullptr)
 		return;
-	ServerState::Get()->HandlePacket(*ServerState::Get()->GetLocalClient(), packet);
+	pragma::ServerState::Get()->HandlePacket(*pragma::ServerState::Get()->GetLocalClient(), packet);
 }
 DLLSERVER bool pr_sv_connect_local_host_player_client()
 {
-	if(ServerState::Get() == nullptr)
+	if(pragma::ServerState::Get() == nullptr)
 		return false;
-	return ServerState::Get()->ConnectLocalHostPlayerClient();
+	return pragma::ServerState::Get()->ConnectLocalHostPlayerClient();
 }
 }

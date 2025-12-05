@@ -40,7 +40,7 @@ bool BaseGravity::HasGravityDirectionOverride() const { return (m_gravityDir != 
 //~#PDOC f-ents-gravitycomponent-getgravityscale
 float BaseGravity::GetGravityScale() const { return m_gravityScale; }
 
-Vector3 BaseGravity::GetGravityDirection(NetworkState *state) const
+Vector3 BaseGravity::GetGravityDirection(pragma::NetworkState *state) const
 {
 	if(m_gravityDir != nullptr)
 		return *m_gravityDir;
@@ -49,7 +49,7 @@ Vector3 BaseGravity::GetGravityDirection(NetworkState *state) const
 	pragma::Game *game = state->GetGameState();
 	return glm::normalize(game->GetGravity());
 }
-float BaseGravity::GetGravity(NetworkState *state) const
+float BaseGravity::GetGravity(pragma::NetworkState *state) const
 {
 	if(m_gravity != nullptr)
 		return *m_gravity;
@@ -58,7 +58,7 @@ float BaseGravity::GetGravity(NetworkState *state) const
 	pragma::Game *game = state->GetGameState();
 	return glm::length(game->GetGravity());
 }
-Vector3 BaseGravity::GetGravityForce(NetworkState *state) const
+Vector3 BaseGravity::GetGravityForce(pragma::NetworkState *state) const
 {
 	if(state == nullptr)
 		return Vector3(0, 0, 0);

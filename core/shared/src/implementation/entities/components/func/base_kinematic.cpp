@@ -56,7 +56,7 @@ void BaseFuncKinematicComponent::OnEntitySpawn()
 		pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::DYNAMIC);
 		pPhysComponent->SetKinematic(true);
 	}
-	NetworkState *state = ent.GetNetworkState();
+	auto *state = ent.GetNetworkState();
 	if(m_kvFirstNode.empty() == false) {
 		pragma::Game *game = state->GetGameState();
 		pragma::ecs::EntityIterator entIt {*game};

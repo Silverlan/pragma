@@ -11,7 +11,7 @@ export import :model.mesh;
 
 export class DLLCLIENT CModel : public pragma::Model {
   public:
-	CModel(NetworkState *nw, uint32_t numBones, const std::string &name = "");
+	CModel(pragma::NetworkState *nw, uint32_t numBones, const std::string &name = "");
 	void AddMesh(const std::string &meshGroup, const std::shared_ptr<CModelMesh> &mesh);
 	virtual void PrecacheTextureGroup(uint32_t i) override;
 	virtual void PrecacheTexture(uint32_t texId, bool bReload = false) override;

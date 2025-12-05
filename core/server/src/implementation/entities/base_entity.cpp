@@ -21,7 +21,7 @@ SBaseEntity::SBaseEntity() : pragma::ecs::BaseEntity(), m_bShared(false), m_bSyn
 void SBaseEntity::DoSpawn()
 {
 	pragma::ecs::BaseEntity::DoSpawn();
-	pragma::Game *game = ServerState::Get()->GetGameState();
+	pragma::Game *game = pragma::ServerState::Get()->GetGameState();
 	game->SpawnEntity(this);
 }
 
@@ -139,11 +139,11 @@ void SBaseEntity::Remove()
 	if(umath::is_flag_set(GetStateFlags(), pragma::ecs::BaseEntity::StateFlags::Removed))
 		return;
 	pragma::ecs::BaseEntity::Remove();
-	pragma::Game *game = ServerState::Get()->GetGameState();
+	pragma::Game *game = pragma::ServerState::Get()->GetGameState();
 	game->RemoveEntity(this);
 }
 
-NetworkState *SBaseEntity::GetNetworkState() const { return ServerState::Get(); }
+pragma::NetworkState *SBaseEntity::GetNetworkState() const { return pragma::ServerState::Get(); }
 
 void SBaseEntity::SendNetEvent(pragma::NetEventId eventId, NetPacket &packet, pragma::networking::Protocol protocol, const pragma::networking::ClientRecipientFilter &rf)
 {
@@ -151,7 +151,7 @@ void SBaseEntity::SendNetEvent(pragma::NetEventId eventId, NetPacket &packet, pr
 		return;
 	nwm::write_entity(packet, this);
 	packet->Write<UInt32>(eventId);
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_EVENT, packet, protocol, rf);
+	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_EVENT, packet, protocol, rf);
 }
 void SBaseEntity::SendNetEvent(pragma::NetEventId eventId, NetPacket &packet, pragma::networking::Protocol protocol)
 {
@@ -243,6 +243,6 @@ pragma::ComponentHandle<pragma::BaseEntityComponent> SBaseEntity::AddNetworkedCo
 	NetPacket packet {};
 	nwm::write_entity(packet, this);
 	packet->Write<pragma::ComponentId>(componentId);
-	static_cast<ServerState *>(GetNetworkState())->SendPacket(pragma::networking::net_messages::client::ADD_SHARED_COMPONENT, packet, pragma::networking::Protocol::SlowReliable);
+	static_cast<pragma::ServerState *>(GetNetworkState())->SendPacket(pragma::networking::net_messages::client::ADD_SHARED_COMPONENT, packet, pragma::networking::Protocol::SlowReliable);
 	return c;
 }

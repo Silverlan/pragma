@@ -15,7 +15,7 @@ import :gui;
 import :rendering.light_data_buffer_manager;
 import :rendering.shaders;
 
-static void cmd_forwardplus_tile_size(NetworkState *, const ConVar &, int32_t, int32_t val)
+static void cmd_forwardplus_tile_size(pragma::NetworkState *, const ConVar &, int32_t, int32_t val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;

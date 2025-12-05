@@ -81,7 +81,7 @@ void RigidPhysObj::UpdateVelocity()
 	// m_velocity =
 	/*if(m_owner == nullptr || !m_owner->IsValid())
 		return;
-	NetworkState *state = (*m_owner)->GetNetworkState();
+	auto *state = (*m_owner)->GetNetworkState();
 	Game *game = state->GetGameState();
 	double delta = game->DeltaTickTime();
 	float scale;

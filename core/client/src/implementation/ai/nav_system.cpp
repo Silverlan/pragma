@@ -208,7 +208,7 @@ void pragma::nav::CMesh::Clear()
 static auto cvShowNavMeshes = GetClientConVar("debug_nav_show_meshes");
 namespace {
 	auto _ = pragma::console::client::register_variable_listener<bool>(
-	  "debug_nav_show_meshes", +[](NetworkState *, const ConVar &, bool, bool val) {
+	  "debug_nav_show_meshes", +[](pragma::NetworkState *, const ConVar &, bool, bool val) {
 		  if(pragma::get_cgame() == nullptr || pragma::get_cgame()->LoadNavMesh() == false)
 			  return;
 		  auto &navMesh = pragma::get_cgame()->GetNavMesh();
@@ -220,7 +220,7 @@ namespace {
 
 ////////////////////////////////////
 
-void CMD_debug_nav_path_start(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
+void CMD_debug_nav_path_start(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
 	if(!check_cheats("debug_nav_path_start", state))
 		return;
@@ -248,7 +248,7 @@ void CMD_debug_nav_path_start(NetworkState *state, pragma::BasePlayerComponent *
 	static_cast<pragma::nav::CMesh &>(*navMesh).SetDebugPathStart(r.position);
 }
 
-void CMD_debug_nav_path_end(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
+void CMD_debug_nav_path_end(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
 	if(!check_cheats("debug_nav_path_end", state))
 		return;

@@ -9,7 +9,7 @@ module pragma.client;
 
 import :console.commands;
 
-static void forward_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float magnitude)
+static void forward_in(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float magnitude)
 {
 	if(!state->IsGameActive())
 		return;
@@ -17,7 +17,7 @@ static void forward_in(NetworkState *state, pragma::BasePlayerComponent *, std::
 	game->SetActionInput(pragma::Action::MoveForward, true, magnitude);
 }
 
-static void forward_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
+static void forward_out(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	if(!state->IsGameActive())
 		return;
@@ -25,7 +25,7 @@ static void forward_out(NetworkState *state, pragma::BasePlayerComponent *, std:
 	game->SetActionInput(pragma::Action::MoveForward, false);
 }
 
-static void backward_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float magnitude)
+static void backward_in(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float magnitude)
 {
 	if(!state->IsGameActive())
 		return;
@@ -33,7 +33,7 @@ static void backward_in(NetworkState *state, pragma::BasePlayerComponent *, std:
 	game->SetActionInput(pragma::Action::MoveBackward, true, magnitude);
 }
 
-static void backward_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
+static void backward_out(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	if(!state->IsGameActive())
 		return;
@@ -41,7 +41,7 @@ static void backward_out(NetworkState *state, pragma::BasePlayerComponent *, std
 	game->SetActionInput(pragma::Action::MoveBackward, false);
 }
 
-static void left_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float magnitude)
+static void left_in(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float magnitude)
 {
 	if(!state->IsGameActive())
 		return;
@@ -49,7 +49,7 @@ static void left_in(NetworkState *state, pragma::BasePlayerComponent *, std::vec
 	game->SetActionInput(pragma::Action::MoveLeft, true, magnitude);
 }
 
-static void left_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
+static void left_out(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	if(!state->IsGameActive())
 		return;
@@ -57,7 +57,7 @@ static void left_out(NetworkState *state, pragma::BasePlayerComponent *, std::ve
 	game->SetActionInput(pragma::Action::MoveLeft, false);
 }
 
-static void right_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float magnitude)
+static void right_in(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float magnitude)
 {
 	if(!state->IsGameActive())
 		return;
@@ -65,7 +65,7 @@ static void right_in(NetworkState *state, pragma::BasePlayerComponent *, std::ve
 	game->SetActionInput(pragma::Action::MoveRight, true, magnitude);
 }
 
-static void right_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
+static void right_out(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	if(!state->IsGameActive())
 		return;
@@ -73,7 +73,7 @@ static void right_out(NetworkState *state, pragma::BasePlayerComponent *, std::v
 	game->SetActionInput(pragma::Action::MoveRight, false);
 }
 
-static void sprint_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void sprint_in(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -81,7 +81,7 @@ static void sprint_in(NetworkState *state, pragma::BasePlayerComponent *, std::v
 	game->SetActionInput(pragma::Action::Sprint, true);
 }
 
-static void sprint_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void sprint_out(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -89,7 +89,7 @@ static void sprint_out(NetworkState *state, pragma::BasePlayerComponent *, std::
 	game->SetActionInput(pragma::Action::Sprint, false);
 }
 
-static void walk_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void walk_in(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -97,7 +97,7 @@ static void walk_in(NetworkState *state, pragma::BasePlayerComponent *, std::vec
 	game->SetActionInput(pragma::Action::Walk, true);
 }
 
-static void walk_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void walk_out(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -105,7 +105,7 @@ static void walk_out(NetworkState *state, pragma::BasePlayerComponent *, std::ve
 	game->SetActionInput(pragma::Action::Walk, false);
 }
 
-static void jump_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void jump_in(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -113,7 +113,7 @@ static void jump_in(NetworkState *state, pragma::BasePlayerComponent *, std::vec
 	game->SetActionInput(pragma::Action::Jump, true);
 }
 
-static void jump_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void jump_out(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -121,7 +121,7 @@ static void jump_out(NetworkState *state, pragma::BasePlayerComponent *, std::ve
 	game->SetActionInput(pragma::Action::Jump, false);
 }
 
-static void crouch_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void crouch_in(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -129,7 +129,7 @@ static void crouch_in(NetworkState *state, pragma::BasePlayerComponent *, std::v
 	game->SetActionInput(pragma::Action::Crouch, true);
 }
 
-static void crouch_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void crouch_out(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -137,7 +137,7 @@ static void crouch_out(NetworkState *state, pragma::BasePlayerComponent *, std::
 	game->SetActionInput(pragma::Action::Crouch, false);
 }
 
-static void attack_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void attack_in(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -145,7 +145,7 @@ static void attack_in(NetworkState *state, pragma::BasePlayerComponent *, std::v
 	game->SetActionInput(pragma::Action::Attack, true);
 }
 
-static void attack_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void attack_out(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -153,7 +153,7 @@ static void attack_out(NetworkState *state, pragma::BasePlayerComponent *, std::
 	game->SetActionInput(pragma::Action::Attack, false);
 }
 
-static void attack2_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void attack2_in(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -161,7 +161,7 @@ static void attack2_in(NetworkState *state, pragma::BasePlayerComponent *, std::
 	game->SetActionInput(pragma::Action::Attack2, true);
 }
 
-static void attack2_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void attack2_out(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -169,7 +169,7 @@ static void attack2_out(NetworkState *state, pragma::BasePlayerComponent *, std:
 	game->SetActionInput(pragma::Action::Attack2, false);
 }
 
-static void attack3_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void attack3_in(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -177,7 +177,7 @@ static void attack3_in(NetworkState *state, pragma::BasePlayerComponent *, std::
 	game->SetActionInput(pragma::Action::Attack3, true);
 }
 
-static void attack3_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void attack3_out(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -185,7 +185,7 @@ static void attack3_out(NetworkState *state, pragma::BasePlayerComponent *, std:
 	game->SetActionInput(pragma::Action::Attack3, false);
 }
 
-static void attack4_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void attack4_in(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -193,7 +193,7 @@ static void attack4_in(NetworkState *state, pragma::BasePlayerComponent *, std::
 	game->SetActionInput(pragma::Action::Attack4, true);
 }
 
-static void attack4_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void attack4_out(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -201,7 +201,7 @@ static void attack4_out(NetworkState *state, pragma::BasePlayerComponent *, std:
 	game->SetActionInput(pragma::Action::Attack4, false);
 }
 
-static void reload_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void reload_in(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -209,7 +209,7 @@ static void reload_in(NetworkState *state, pragma::BasePlayerComponent *, std::v
 	game->SetActionInput(pragma::Action::Reload, true);
 }
 
-static void reload_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void reload_out(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -217,7 +217,7 @@ static void reload_out(NetworkState *state, pragma::BasePlayerComponent *, std::
 	game->SetActionInput(pragma::Action::Reload, false);
 }
 
-static void use_in(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void use_in(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -225,7 +225,7 @@ static void use_in(NetworkState *state, pragma::BasePlayerComponent *, std::vect
 	game->SetActionInput(pragma::Action::Use, true);
 }
 
-static void use_out(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void use_out(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -233,50 +233,50 @@ static void use_out(NetworkState *state, pragma::BasePlayerComponent *, std::vec
 	game->SetActionInput(pragma::Action::Use, false);
 }
 
-static void noclip(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void noclip(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!check_cheats("noclip", state))
 		return;
-	ClientState *client = static_cast<ClientState *>(state);
+	auto *client = static_cast<pragma::ClientState *>(state);
 	client->SendPacket(pragma::networking::net_messages::server::NOCLIP, pragma::networking::Protocol::SlowReliable);
 }
 
-static void notarget(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void notarget(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!check_cheats("notarget", state))
 		return;
-	ClientState *client = static_cast<ClientState *>(state);
+	auto *client = static_cast<pragma::ClientState *>(state);
 	client->SendPacket(pragma::networking::net_messages::server::NOTARGET, pragma::networking::Protocol::SlowReliable);
 }
 
-static void godmode(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void godmode(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!check_cheats("godmode", state))
 		return;
-	auto *client = static_cast<ClientState *>(state);
+	auto *client = static_cast<pragma::ClientState *>(state);
 	client->SendPacket(pragma::networking::net_messages::server::GODMODE, pragma::networking::Protocol::SlowReliable);
 }
 
-static void suicide(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void suicide(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!check_cheats("suicide", state))
 		return;
-	auto *client = static_cast<ClientState *>(state);
+	auto *client = static_cast<pragma::ClientState *>(state);
 	client->SendPacket(pragma::networking::net_messages::server::SUICIDE, pragma::networking::Protocol::SlowReliable);
 }
 
-static void hurtme(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &args)
+static void hurtme(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &args)
 {
 	if(!check_cheats("hurtme", state))
 		return;
 	auto dmg = !args.empty() ? atoi(args.front().c_str()) : 1;
 	NetPacket p;
 	p->Write<uint16_t>(static_cast<uint16_t>(dmg));
-	auto *client = static_cast<ClientState *>(state);
+	auto *client = static_cast<pragma::ClientState *>(state);
 	client->SendPacket(pragma::networking::net_messages::server::HURTME, p, pragma::networking::Protocol::SlowReliable);
 }
 
-static void give_weapon(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+static void give_weapon(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	auto *client = pragma::get_client_state();
 	if(argv.empty() || !client->IsGameActive())
@@ -288,7 +288,7 @@ static void give_weapon(NetworkState *state, pragma::BasePlayerComponent *, std:
 	client->SendPacket(pragma::networking::net_messages::server::GIVE_WEAPON, p, pragma::networking::Protocol::SlowReliable);
 }
 
-static void strip_weapons(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+static void strip_weapons(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
@@ -299,19 +299,19 @@ static void strip_weapons(NetworkState *state, pragma::BasePlayerComponent *, st
 	client->SendPacket(pragma::networking::net_messages::server::STRIP_WEAPONS, p, pragma::networking::Protocol::SlowReliable);
 }
 
-static void next_weapon(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args)
+static void next_weapon(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args)
 {
-	auto *client = static_cast<ClientState *>(state);
+	auto *client = static_cast<pragma::ClientState *>(state);
 	client->SendPacket(pragma::networking::net_messages::server::WEAPON_NEXT, pragma::networking::Protocol::FastUnreliable);
 }
 
-static void previous_weapon(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args)
+static void previous_weapon(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &args)
 {
-	auto *client = static_cast<ClientState *>(state);
+	auto *client = static_cast<pragma::ClientState *>(state);
 	client->SendPacket(pragma::networking::net_messages::server::WEAPON_PREVIOUS, pragma::networking::Protocol::FastUnreliable);
 }
 
-static void give_ammo(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+static void give_ammo(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	auto *client = pragma::get_client_state();
 	if(argv.empty() || !client->IsGameActive())
@@ -364,7 +364,7 @@ static void update_turn_callbacks()
 	}
 }
 
-static void turn_left_in(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float magnitude)
+static void turn_left_in(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float magnitude)
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
@@ -372,7 +372,7 @@ static void turn_left_in(NetworkState *, pragma::BasePlayerComponent *, std::vec
 	turn_speeds.left = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
 	update_turn_callbacks();
 }
-static void turn_left_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
+static void turn_left_out(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
@@ -380,7 +380,7 @@ static void turn_left_out(NetworkState *, pragma::BasePlayerComponent *, std::ve
 	turn_speeds.left = 0.f;
 	update_turn_callbacks();
 }
-static void turn_right_in(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float magnitude)
+static void turn_right_in(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float magnitude)
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
@@ -388,7 +388,7 @@ static void turn_right_in(NetworkState *, pragma::BasePlayerComponent *, std::ve
 	turn_speeds.right = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
 	update_turn_callbacks();
 }
-static void turn_right_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
+static void turn_right_out(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
@@ -396,7 +396,7 @@ static void turn_right_out(NetworkState *, pragma::BasePlayerComponent *, std::v
 	turn_speeds.right = 0.f;
 	update_turn_callbacks();
 }
-static void turn_up_in(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float magnitude)
+static void turn_up_in(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float magnitude)
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
@@ -404,7 +404,7 @@ static void turn_up_in(NetworkState *, pragma::BasePlayerComponent *, std::vecto
 	turn_speeds.up = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
 	update_turn_callbacks();
 }
-static void turn_up_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
+static void turn_up_out(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
@@ -412,7 +412,7 @@ static void turn_up_out(NetworkState *, pragma::BasePlayerComponent *, std::vect
 	turn_speeds.up = 0.f;
 	update_turn_callbacks();
 }
-static void turn_down_in(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float magnitude)
+static void turn_down_in(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float magnitude)
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
@@ -420,7 +420,7 @@ static void turn_down_in(NetworkState *, pragma::BasePlayerComponent *, std::vec
 	turn_speeds.down = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
 	update_turn_callbacks();
 }
-static void turn_down_out(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
+static void turn_down_out(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())

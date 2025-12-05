@@ -53,7 +53,7 @@ static uint32_t get_quality_lod_offset()
 }
 
 static CVar cvTextureFiltering = GetClientConVar("cl_render_texture_filtering");
-static void CVAR_CALLBACK_cl_render_texture_quality(NetworkState *, const ConVar &, int, int)
+static void CVAR_CALLBACK_cl_render_texture_quality(pragma::NetworkState *, const ConVar &, int, int)
 {
 	if(pragma::get_client_state() == nullptr)
 		return;

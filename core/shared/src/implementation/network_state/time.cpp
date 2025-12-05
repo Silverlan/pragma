@@ -6,6 +6,6 @@ module pragma.shared;
 
 import :network_state;
 
-double &NetworkState::RealTime() { return m_tReal; }
-double &NetworkState::DeltaTime() { return m_tDelta; }
-double &NetworkState::LastThink() { return m_tLast; }
+double &pragma::NetworkState::RealTime() { return m_tReal; }
+double &pragma::NetworkState::DeltaTime() { return m_tDelta; }
+double &pragma::NetworkState::LastThink() { return m_tLast; }

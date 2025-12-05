@@ -34,7 +34,7 @@ export class DLLSERVER SBaseEntity : public pragma::ecs::BaseEntity {
 	// Alias for !IsShared
 	bool IsServersideOnly() const;
 	virtual bool IsNetworkLocal() const override;
-	virtual NetworkState *GetNetworkState() const override final;
+	virtual pragma::NetworkState *GetNetworkState() const override final;
 	// Returns the client-side representation of this entity (If the entity isn't serverside only)
 	// This only works for single-player / listen servers!
 	pragma::ecs::BaseEntity *GetClientsideEntity() const;

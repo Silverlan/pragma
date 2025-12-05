@@ -9,7 +9,7 @@ import :audio.sound_script;
 #undef CreateEvent
 
 #pragma warning(disable : 4056)
-pragma::audio::ALSoundScript::ALSoundScript(NetworkState *nw, unsigned int idx, SoundScript *script, NetworkState *state, bool bStream) : ALSound(nw), m_script(script), m_networkState(state), m_bStream(bStream) { m_index = idx; }
+pragma::audio::ALSoundScript::ALSoundScript(pragma::NetworkState *nw, unsigned int idx, SoundScript *script, pragma::NetworkState *state, bool bStream) : ALSound(nw), m_script(script), m_networkState(state), m_bStream(bStream) { m_index = idx; }
 #pragma warning(default : 4056)
 
 pragma::audio::ALSoundScript::~ALSoundScript()

@@ -133,7 +133,7 @@ void SGame::RegisterLua()
 
 	auto classDefClRp = luabind::class_<pragma::networking::ClientRecipientFilter>("ClientRecipientFilter");
 	classDefClRp.def("GetRecipients", static_cast<void (*)(lua::State *, pragma::networking::ClientRecipientFilter &)>([](lua::State *l, pragma::networking::ClientRecipientFilter &rp) {
-		auto *sv = ServerState::Get()->GetServer();
+		auto *sv = pragma::ServerState::Get()->GetServer();
 		if(sv == nullptr)
 			return;
 		auto t = Lua::CreateTable(l);
@@ -141,7 +141,7 @@ void SGame::RegisterLua()
 		for(auto &cl : sv->GetClients()) {
 			if(rp(*cl) == false)
 				continue;
-			auto *pl = ServerState::Get()->GetPlayer(*cl);
+			auto *pl = pragma::ServerState::Get()->GetPlayer(*cl);
 			if(pl == nullptr)
 				continue;
 			Lua::PushInt(l, idx++);

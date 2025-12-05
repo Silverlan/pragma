@@ -76,7 +76,7 @@ export {
 		bool IsClosed() const;
 
 		virtual bool Initialize(int argc, char *argv[]) override;
-		virtual StateInstance &GetStateInstance(NetworkState &nw) override;
+		virtual StateInstance &GetStateInstance(pragma::NetworkState &nw) override;
 		StateInstance &GetClientStateInstance();
 		const std::string &GetDefaultFontSetName() const;
 		const FontSet &GetDefaultFontSet() const;
@@ -153,7 +153,7 @@ export {
 		}
 		std::shared_ptr<al::IEffect> GetAuxEffect(const std::string &name);
 		// Lua
-		virtual NetworkState *GetNetworkState(lua::State *l) override;
+		virtual pragma::NetworkState *GetNetworkState(lua::State *l) override;
 		virtual Lua::Interface *GetLuaInterface(lua::State *l) override;
 
 		float GetNearZ();
@@ -180,8 +180,8 @@ export {
 		virtual ConConf *GetConVar(const std::string &cv) override;
 		virtual bool RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(ConConf *, float &)> &callback = nullptr) override;
 		// ClientState
-		virtual NetworkState *GetClientState() const override;
-		ClientState *OpenClientState();
+		virtual pragma::NetworkState *GetClientState() const override;
+		pragma::ClientState *OpenClientState();
 		void CloseClientState();
 		void Connect(const std::string &ip, const std::string &port = "29150");
 		// Peer-to-peer only

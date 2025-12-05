@@ -38,7 +38,7 @@ static void reload_all_shadow_maps()
 	}
 }
 
-static void cmd_render_shadow_quality(NetworkState *, const ConVar &, int, int quality)
+static void cmd_render_shadow_quality(pragma::NetworkState *, const ConVar &, int, int quality)
 {
 	reload_all_shadow_maps();
 	auto *client = pragma::get_client_state();
@@ -51,7 +51,7 @@ namespace {
 }
 
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_render_shadow_dynamic", +[](NetworkState *, const ConVar &, bool, bool) { reload_all_shadow_maps(); });
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_render_shadow_dynamic", +[](pragma::NetworkState *, const ConVar &, bool, bool) { reload_all_shadow_maps(); });
 }
 
 prosper::IDescriptorSet *CShadowComponent::GetDescriptorSet()

@@ -99,7 +99,7 @@ int Lua::console::msg(lua::State *l, int st)
 {
 	int argc = Lua::GetStackTop(l);
 	if(argc > 0) {
-		NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+		auto *state = pragma::Engine::Get()->GetNetworkState(l);
 		if(state == nullptr)
 			::util::set_console_color(::pragma::console::ConsoleColorFlags::White | ::pragma::console::ConsoleColorFlags::Intensity);
 		else if(state->IsServer())

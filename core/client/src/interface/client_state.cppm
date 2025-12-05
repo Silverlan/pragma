@@ -16,7 +16,7 @@ export import pragma.string.unicode;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-export {
+export namespace pragma {
 	struct DLLCLIENT ServerInfo {
 	  private:
 		std::string m_downloadPath;
@@ -234,8 +234,6 @@ export {
 		void ReadEntityData(NetPacket &packet);
 	};
 
-	namespace pragma {
-		DLLCLIENT ClientState *get_client_state();
-	};
+	DLLCLIENT ClientState *get_client_state();
 };
 #pragma warning(pop)

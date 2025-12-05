@@ -8,7 +8,7 @@ import :util.core;
 
 import pragma.oskit;
 
-util::ParallelJob<std::vector<Vector2> &> util::generate_lightmap_uvs(NetworkState &nwState, uint32_t atlastWidth, uint32_t atlasHeight, const std::vector<umath::Vertex> &verts, const std::vector<uint32_t> &tris)
+util::ParallelJob<std::vector<Vector2> &> util::generate_lightmap_uvs(pragma::NetworkState &nwState, uint32_t atlastWidth, uint32_t atlasHeight, const std::vector<umath::Vertex> &verts, const std::vector<uint32_t> &tris)
 {
 	auto lib = nwState.InitializeLibrary("pr_uvatlas");
 	if(lib == nullptr)

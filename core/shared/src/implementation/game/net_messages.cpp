@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :game.game;
 
-bool NetIncludePacketID(NetworkState *state, std::string identifier, NetPacket &src, NetPacket &tgt)
+bool NetIncludePacketID(pragma::NetworkState *state, std::string identifier, NetPacket &src, NetPacket &tgt)
 {
 	if(!state->IsGameActive())
 		return false;

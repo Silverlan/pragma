@@ -16,7 +16,7 @@ decltype(ECResourceWatcherCallbackType::ParticleSystem) ECResourceWatcherCallbac
 decltype(ECResourceWatcherCallbackType::Count) ECResourceWatcherCallbackType::Count = ECResourceWatcherCallbackType {umath::to_integral(E::Count)};
 static auto cvMatStreaming = GetClientConVar("cl_material_streaming_enabled");
 
-CResourceWatcherManager::CResourceWatcherManager(NetworkState *nw) : ResourceWatcherManager(nw) {}
+CResourceWatcherManager::CResourceWatcherManager(pragma::NetworkState *nw) : ResourceWatcherManager(nw) {}
 
 void CResourceWatcherManager::ReloadTexture(const std::string &path)
 {

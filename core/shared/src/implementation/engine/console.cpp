@@ -218,7 +218,7 @@ bool pragma::Engine::RunEngineConsoleCommand(std::string scmd, std::vector<std::
 	}
 	auto *cmd = static_cast<ConCommand *>(cv);
 	if(type == ConType::Cmd) {
-		std::function<void(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> func = nullptr;
+		std::function<void(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> func = nullptr;
 		cmd->GetFunction(func);
 		if(scmd.empty() == false && scmd.front() == '-')
 			magnitude = 0.f;

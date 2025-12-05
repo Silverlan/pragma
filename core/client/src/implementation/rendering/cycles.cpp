@@ -37,7 +37,7 @@ struct CyclesModuleInterface {
 	bool m_bValid = true;
 };
 
-static std::optional<CyclesModuleInterface> initialize_library(ClientState &client)
+static std::optional<CyclesModuleInterface> initialize_library(pragma::ClientState &client)
 {
 	std::string err;
 	auto hLib = client.InitializeLibrary("unirender/pr_unirender", &err);
@@ -49,7 +49,7 @@ static std::optional<CyclesModuleInterface> initialize_library(ClientState &clie
 	return cyclesInterface.IsValid() ? cyclesInterface : std::optional<CyclesModuleInterface> {};
 }
 
-util::ParallelJob<uimg::ImageLayerSet> cycles::render_image(ClientState &client, const SceneInfo &sceneInfo, const RenderImageInfo &renderImageInfo)
+util::ParallelJob<uimg::ImageLayerSet> cycles::render_image(pragma::ClientState &client, const SceneInfo &sceneInfo, const RenderImageInfo &renderImageInfo)
 {
 	auto cyclesInterface = initialize_library(client);
 	if(cyclesInterface.has_value() == false)
@@ -61,7 +61,7 @@ util::ParallelJob<uimg::ImageLayerSet> cycles::render_image(ClientState &client,
 		return {};
 	return job;
 }
-util::ParallelJob<uimg::ImageLayerSet> cycles::bake_ambient_occlusion(ClientState &client, const SceneInfo &sceneInfo, pragma::ecs::BaseEntity &ent, uint32_t materialIndex)
+util::ParallelJob<uimg::ImageLayerSet> cycles::bake_ambient_occlusion(pragma::ClientState &client, const SceneInfo &sceneInfo, pragma::ecs::BaseEntity &ent, uint32_t materialIndex)
 {
 	auto cyclesInterface = initialize_library(client);
 	if(cyclesInterface.has_value() == false)
@@ -72,7 +72,7 @@ util::ParallelJob<uimg::ImageLayerSet> cycles::bake_ambient_occlusion(ClientStat
 		return {};
 	return job;
 }
-util::ParallelJob<uimg::ImageLayerSet> cycles::bake_ambient_occlusion(ClientState &client, const SceneInfo &sceneInfo, pragma::Model &mdl, uint32_t materialIndex)
+util::ParallelJob<uimg::ImageLayerSet> cycles::bake_ambient_occlusion(pragma::ClientState &client, const SceneInfo &sceneInfo, pragma::Model &mdl, uint32_t materialIndex)
 {
 	auto cyclesInterface = initialize_library(client);
 	if(cyclesInterface.has_value() == false)
@@ -83,7 +83,7 @@ util::ParallelJob<uimg::ImageLayerSet> cycles::bake_ambient_occlusion(ClientStat
 		return {};
 	return job;
 }
-util::ParallelJob<uimg::ImageLayerSet> cycles::bake_lightmaps(ClientState &client, const SceneInfo &sceneInfo)
+util::ParallelJob<uimg::ImageLayerSet> cycles::bake_lightmaps(pragma::ClientState &client, const SceneInfo &sceneInfo)
 {
 	auto cyclesInterface = initialize_library(client);
 	if(cyclesInterface.has_value() == false)

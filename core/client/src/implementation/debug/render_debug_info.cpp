@@ -22,7 +22,7 @@ void RenderDebugInfo::Reset()
 
 RenderDebugInfo &get_render_debug_info() { return render_debug_info; }
 
-static void debug_render_info(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+static void debug_render_info(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	auto &info = get_render_debug_info();
 	std::cout << "-------------- Render Info --------------" << std::endl;

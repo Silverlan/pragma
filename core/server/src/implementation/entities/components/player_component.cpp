@@ -174,7 +174,7 @@ void SPlayerComponent::OnEntitySpawn()
 
 void SPlayerComponent::InitializeFlashlight()
 {
-	SGame *game = ServerState::Get()->GetGameState();
+	SGame *game = pragma::ServerState::Get()->GetGameState();
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
@@ -246,8 +246,8 @@ void SPlayerComponent::Initialize()
 	BasePlayerComponent::Initialize();
 
 	BindEventUnhandled(damageableComponent::EVENT_ON_TAKE_DAMAGE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnTakeDamage(static_cast<CEOnTakeDamage &>(evData.get()).damageInfo); });
-	BindEventUnhandled(baseScoreComponent::EVENT_ON_SCORE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ServerState::Get()->UpdatePlayerScore(*this, static_cast<CEOnScoreChanged &>(evData.get()).score); });
-	BindEventUnhandled(baseNameComponent::EVENT_ON_NAME_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ServerState::Get()->UpdatePlayerName(*this, static_cast<CEOnNameChanged &>(evData.get()).name); });
+	BindEventUnhandled(baseScoreComponent::EVENT_ON_SCORE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {pragma::ServerState::Get()->UpdatePlayerScore(*this, static_cast<CEOnScoreChanged &>(evData.get()).score); });
+	BindEventUnhandled(baseNameComponent::EVENT_ON_NAME_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {pragma::ServerState::Get()->UpdatePlayerName(*this, static_cast<CEOnNameChanged &>(evData.get()).name); });
 }
 
 void SPlayerComponent::OnSetSlopeLimit(float limit)

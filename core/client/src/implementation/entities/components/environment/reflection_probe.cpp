@@ -27,7 +27,7 @@ struct RenderSettings {
 	float skyStrength = 0.3f;
 	float exposure = 50.f;
 } static g_renderSettings;
-static void map_build_reflection_probes(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void map_build_reflection_probes(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -906,7 +906,7 @@ void CEnvReflectionProbe::Initialize()
 
 ////////
 
-static void debug_pbr_ibl(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;

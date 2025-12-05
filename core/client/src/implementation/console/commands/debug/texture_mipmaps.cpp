@@ -9,7 +9,7 @@ module pragma.client;
 
 import :console.commands;
 
-static void debug_font(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+static void debug_font(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
 		Con::cout << "Available fonts:" << Con::endl;
@@ -60,7 +60,7 @@ namespace {
 	auto UVN = pragma::console::client::register_command("debug_font", &debug_font, pragma::console::ConVarFlags::None, "Displays the glyph map for the specified font. If no arguments are specified, all available fonts will be listed. Usage: debug_font <fontName>");
 }
 
-static void debug_texture_mipmaps(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+static void debug_texture_mipmaps(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
 		Con::cwar << "No texture given!" << Con::endl;

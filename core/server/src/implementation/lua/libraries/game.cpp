@@ -12,12 +12,12 @@ import :server_state;
 
 void Lua::game::Server::set_gravity(const Vector3 &gravity)
 {
-	pragma::Game *game = ServerState::Get()->GetGameState();
+	pragma::Game *game = pragma::ServerState::Get()->GetGameState();
 	game->SetGravity(const_cast<Vector3 &>(gravity));
 }
 Vector3 Lua::game::Server::get_gravity()
 {
-	pragma::Game *game = ServerState::Get()->GetGameState();
+	pragma::Game *game = pragma::ServerState::Get()->GetGameState();
 	return game->GetGravity();
 }
 luabind::object Lua::game::Server::load_model(lua::State *l, const std::string &name)
@@ -83,7 +83,7 @@ int Lua::game::Server::load_map(lua::State *l)
 	SGame::Get()->WriteEntityData(packet, ptrEnts.data(), ptrEnts.size(), filter);
 	packet->Write<bool>((entWorld != nullptr) ? true : false);
 
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::MAP_LOAD, packet, pragma::networking::Protocol::SlowReliable);
+	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::MAP_LOAD, packet, pragma::networking::Protocol::SlowReliable);
 	return pair.second;
 }
 

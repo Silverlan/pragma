@@ -100,7 +100,7 @@ static prosper::BlendOp name_to_blend_op(const std::string &name)
 	return prosper::BlendOp::Add;
 }
 
-static void debug_particle_alpha_mode(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_particle_alpha_mode(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	g_customAlphaBlendMode = {};
 	if(argv.size() > 0)

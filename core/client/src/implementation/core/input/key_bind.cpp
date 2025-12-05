@@ -134,7 +134,7 @@ bool KeyBind::Execute(pragma::platform::KeyState inputState, pragma::platform::K
 		{
 			if(pressState != pragma::platform::KeyState::Press && pressState != pragma::platform::KeyState::Release)
 				return false;
-			auto *clState = static_cast<ClientState *>(pragma::get_cengine()->GetClientState());
+			auto *clState = static_cast<pragma::ClientState *>(pragma::get_cengine()->GetClientState());
 			if(clState == nullptr)
 				return false;
 			auto *game = clState->GetGameState();

@@ -15,7 +15,7 @@ using namespace pragma;
 static std::vector<SLiquidSurfaceSimulationComponent *> s_waterEntities = {};
 namespace {
 	auto _ = pragma::console::server::register_variable_listener<float>(
-	  "sv_water_surface_simulation_shared", +[](NetworkState *, const ConVar &, float, float val) {
+	  "sv_water_surface_simulation_shared", +[](pragma::NetworkState *, const ConVar &, float, float val) {
 		  for(auto *entWater : s_waterEntities)
 			  entWater->UpdateSurfaceSimulator();
 	  });

@@ -21,7 +21,7 @@ export {
 			DLLNETWORK std::shared_ptr<pragma::Model> get_model(lua::State *l, const std::string &mdlName);
 			DLLNETWORK var<bool, std::string> LoadLibrary(lua::State *l, const std::string &path);
 			DLLNETWORK bool UnloadLibrary(lua::State *l, const std::string &path);
-			DLLNETWORK bool IsLibraryLoaded(NetworkState &nw, const std::string &path);
+			DLLNETWORK bool IsLibraryLoaded(pragma::NetworkState &nw, const std::string &path);
 			DLLNETWORK bool LibraryExists(lua::State *l, const std::string &library);
 			DLLNETWORK uint64_t GetTickCount();
 			DLLNETWORK tb<void> get_info(lua::State *l);

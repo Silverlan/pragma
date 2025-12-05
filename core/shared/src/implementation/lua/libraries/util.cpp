@@ -163,7 +163,7 @@ void Lua::util::register_world_data(lua::State *l, luabind::module_ &mod)
 	auto defWorldData = luabind::class_<pragma::asset::WorldData>("WorldData");
 	defWorldData.def(luabind::tostring(luabind::self));
 	defWorldData.scope[luabind::def(
-	  "load", +[](NetworkState &nw, const std::string &fileName) -> std::pair<std::shared_ptr<pragma::asset::WorldData>, std::optional<std::string>> {
+	  "load", +[](pragma::NetworkState &nw, const std::string &fileName) -> std::pair<std::shared_ptr<pragma::asset::WorldData>, std::optional<std::string>> {
 		  std::string err;
 		  auto worldData = pragma::asset::WorldData::load(nw, fileName, err);
 		  if(!worldData)
@@ -171,7 +171,7 @@ void Lua::util::register_world_data(lua::State *l, luabind::module_ &mod)
 		  return {worldData, {}};
 	  })];
 	defWorldData.scope[luabind::def(
-	  "load_from_udm_data", +[](NetworkState &nw, ::udm::LinkedPropertyWrapper &prop) -> std::pair<std::shared_ptr<pragma::asset::WorldData>, std::optional<std::string>> {
+	  "load_from_udm_data", +[](pragma::NetworkState &nw, ::udm::LinkedPropertyWrapper &prop) -> std::pair<std::shared_ptr<pragma::asset::WorldData>, std::optional<std::string>> {
 		  std::string err;
 		  auto worldData = pragma::asset::WorldData::load_from_udm_data(nw, prop, err);
 		  if(!worldData)
@@ -264,7 +264,7 @@ void Lua::util::register_world_data(lua::State *l, luabind::module_ &mod)
 	mod[defWorldData];
 	pragma::LuaCore::define_custom_constructor<pragma::asset::ComponentData, +[]() -> std::shared_ptr<pragma::asset::ComponentData> { return pragma::asset::ComponentData::Create(); }>(l);
 	pragma::LuaCore::define_custom_constructor<pragma::asset::EntityData, +[]() -> std::shared_ptr<pragma::asset::EntityData> { return pragma::asset::EntityData::Create(); }>(l);
-	pragma::LuaCore::define_custom_constructor<pragma::asset::WorldData, +[](NetworkState &nw) -> std::shared_ptr<pragma::asset::WorldData> { return pragma::asset::WorldData::Create(nw); }, NetworkState &>(l);
+	pragma::LuaCore::define_custom_constructor<pragma::asset::WorldData, +[](pragma::NetworkState &nw) -> std::shared_ptr<pragma::asset::WorldData> { return pragma::asset::WorldData::Create(nw); }, pragma::NetworkState &>(l);
 }
 void Lua::util::register_os(lua::State *l, luabind::module_ &mod)
 {

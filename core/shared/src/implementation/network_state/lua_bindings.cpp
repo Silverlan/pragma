@@ -327,7 +327,7 @@ void glm_type_to_string(lua::State *l, const T &v) {
 	Lua::PushString(l, ss.str());
 }
 
-void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
+void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 {
 	auto modString = luabind::module_(lua.GetState(), "string");
 	register_utf8_string(lua.GetState(), modString);
@@ -1466,7 +1466,7 @@ namespace pragma::LuaCore {
 
 void pragma::Game::RegisterLuaClasses()
 {
-	NetworkState::RegisterSharedLuaClasses(GetLuaInterface());
+	pragma::NetworkState::RegisterSharedLuaClasses(GetLuaInterface());
 
 	// Entity
 	auto &modUtil = GetLuaInterface().RegisterLibrary("util");

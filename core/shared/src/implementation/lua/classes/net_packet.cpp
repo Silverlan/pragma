@@ -118,7 +118,7 @@ void Lua::NetPacket::ReadEntity(lua::State *l, ::NetPacket &packet)
 void Lua::NetPacket::ReadALSound(lua::State *l, ::NetPacket &packet)
 {
 	unsigned int idx = packet->Read<unsigned int>();
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	std::shared_ptr<pragma::audio::ALSound> als = state->GetSoundByIndex(idx);
 	if(als == nullptr)
 		return;

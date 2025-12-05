@@ -75,7 +75,7 @@ std::shared_ptr<ConVar> CVarHandler::RegisterConVar(const std::string &scmd, udm
 		return nullptr;
 	return std::static_pointer_cast<ConVar>(it->second);
 }
-std::shared_ptr<ConCommand> CVarHandler::RegisterConCommand(const std::string &scmd, const std::function<void(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> &fc, pragma::console::ConVarFlags flags, const std::string &help)
+std::shared_ptr<ConCommand> CVarHandler::RegisterConCommand(const std::string &scmd, const std::function<void(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> &fc, pragma::console::ConVarFlags flags, const std::string &help)
 {
 	auto it = m_conVars.find(scmd);
 	if(it != m_conVars.end()) {
@@ -87,12 +87,12 @@ std::shared_ptr<ConCommand> CVarHandler::RegisterConCommand(const std::string &s
 	return std::static_pointer_cast<ConCommand>(it->second);
 }
 template<typename T>
-CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, T, T)> &function)
+CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(pragma::NetworkState *, const ConVar &, T, T)> &function)
 {
 	auto it = m_cvarCallbacks.find(scvar);
 	if(it == m_cvarCallbacks.end())
 		it = m_cvarCallbacks.insert(decltype(m_cvarCallbacks)::value_type(scvar, {})).first;
-	auto f = [function](NetworkState *nw, const ConVar &cvar, const void *poldVal, const void *pnewVal) {
+	auto f = [function](pragma::NetworkState *nw, const ConVar &cvar, const void *poldVal, const void *pnewVal) {
 		udm::visit(cvar.GetVarType(), [poldVal, pnewVal, &function, &nw, &cvar](auto tag) {
 			using TCvar = typename decltype(tag)::type;
 			if constexpr(udm::is_convertible<TCvar, T>()) {
@@ -106,10 +106,10 @@ CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, con
 	callbacks.push_back(CvarCallback {f});
 	return callbacks.back().GetFunction();
 }
-CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, int, int)> &function) { return RegisterConVarCallback<int>(scvar, function); }
-CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, std::string, std::string)> &function) { return RegisterConVarCallback<std::string>(scvar, function); }
-CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, float, float)> &function) { return RegisterConVarCallback<float>(scvar, function); }
-CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, bool, bool)> &function) { return RegisterConVarCallback<bool>(scvar, function); }
+CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(pragma::NetworkState *, const ConVar &, int, int)> &function) { return RegisterConVarCallback<int>(scvar, function); }
+CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(pragma::NetworkState *, const ConVar &, std::string, std::string)> &function) { return RegisterConVarCallback<std::string>(scvar, function); }
+CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(pragma::NetworkState *, const ConVar &, float, float)> &function) { return RegisterConVarCallback<float>(scvar, function); }
+CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(pragma::NetworkState *, const ConVar &, bool, bool)> &function) { return RegisterConVarCallback<bool>(scvar, function); }
 
 bool CVarHandler::InvokeConVarChangeCallbacks(const std::string &cvarName)
 {
@@ -156,7 +156,7 @@ ConVar *CVarHandler::SetConVar(std::string scmd, std::string value, bool bApplyI
 					itCb = it->second.erase(itCb);
 				else {
 					if(!ptrCb.IsLuaFunction())
-						fc.Call<void, NetworkState *, const ConVar &, const void *, const void *>(nullptr, *cvar, &prevVal, &newVal);
+						fc.Call<void, pragma::NetworkState *, const ConVar &, const void *, const void *>(nullptr, *cvar, &prevVal, &newVal);
 					++itCb;
 				}
 			}

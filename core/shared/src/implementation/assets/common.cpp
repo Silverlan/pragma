@@ -310,7 +310,7 @@ std::optional<std::string> pragma::asset::find_file(const std::string &name, Typ
 	static_assert(umath::to_integral(Type::Count) == 7, "New asset type added, please update find_file");
 	return {};
 }
-bool pragma::asset::is_loaded(NetworkState &nw, const std::string &name, Type type)
+bool pragma::asset::is_loaded(pragma::NetworkState &nw, const std::string &name, Type type)
 {
 	switch(type) {
 	case Type::Model:

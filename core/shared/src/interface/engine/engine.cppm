@@ -29,8 +29,8 @@ export {
 	constexpr uint32_t ENGINE_DEFAULT_TICK_RATE = 60;
 #endif
 
-	class NetworkState;
 	namespace pragma {
+		class NetworkState;
 		class DLLNETWORK Engine : public CVarHandler, public util::CallbackHandler {
 		  public:
 			static const uint32_t DEFAULT_TICK_RATE;
@@ -209,7 +209,7 @@ export {
 			// NetState
 			virtual NetworkState *GetActiveState();
 
-			virtual StateInstance &GetStateInstance(NetworkState &nw);
+			virtual StateInstance &GetStateInstance(pragma::NetworkState &nw);
 			StateInstance &GetServerStateInstance();
 
 			std::optional<ConsoleOutput> PollConsoleOutput();
@@ -219,7 +219,7 @@ export {
 
 			virtual bool IsMultiPlayer() const;
 			bool IsSinglePlayer() const;
-			bool IsActiveState(NetworkState *state);
+			bool IsActiveState(pragma::NetworkState *state);
 			bool IsServerRunning();
 			// Same as GetServerState, but returns base pointer
 			NetworkState *GetServerNetworkState() const;

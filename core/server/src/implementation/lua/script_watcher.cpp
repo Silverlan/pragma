@@ -22,5 +22,5 @@ void SLuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &path)
 	if(res == nullptr)
 		return;
 	SGame::Get()->UpdateLuaCache(res->fileName);
-	ServerState::Get()->SendResourceFile(res->fileName);
+	pragma::ServerState::Get()->SendResourceFile(res->fileName);
 }

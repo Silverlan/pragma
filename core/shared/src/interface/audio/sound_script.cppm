@@ -11,7 +11,7 @@ export import :audio.sound_base;
 export import :audio.sound_script_events;
 export import :audio.sound_script_manager;
 
-export {
+export namespace pragma {
 	class NetworkState;
 }
 export namespace pragma::audio {
@@ -29,7 +29,7 @@ export namespace pragma::audio {
 		bool HandleEvents(SoundScriptEvent *ev, float eventOffset, float lastOffset, float newOffset);
 		void InitializeEvent(SoundScriptEvent *ev);
 	public:
-		ALSoundScript(NetworkState *nw, unsigned int idx, SoundScript *script, NetworkState *state, bool bStream);
+		ALSoundScript(pragma::NetworkState *nw, unsigned int idx, SoundScript *script, pragma::NetworkState *state, bool bStream);
 		virtual ~ALSoundScript() override;
 		virtual void Initialize() override;
 		virtual ALState GetState() const override;

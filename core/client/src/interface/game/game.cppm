@@ -50,7 +50,7 @@ export namespace pragma {
 export class CBaseEntity;
 export class DLLCLIENT CGame : public pragma::Game {
   public:
-	CGame(NetworkState *state);
+	CGame(pragma::NetworkState *state);
 	virtual ~CGame() override;
 	virtual void OnRemove() override;
 

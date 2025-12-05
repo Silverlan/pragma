@@ -55,7 +55,7 @@ Quat nwm::read_quat(NetPacket &packet)
 
 static pragma::ecs::BaseEntity *read_entity(NetPacket &packet, const std::function<void(pragma::ecs::BaseEntity *)> &onCreated = nullptr, CallbackHandle *hCallback = nullptr)
 {
-	NetworkState *state;
+	pragma::NetworkState *state;
 	if(!packet.IsClient())
 		state = pragma::Engine::Get()->GetServerNetworkState();
 	else

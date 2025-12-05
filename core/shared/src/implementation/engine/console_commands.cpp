@@ -53,7 +53,7 @@ void pragma::Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 	map.RegisterConVar<udm::String>("rcon_password", "", pragma::console::ConVarFlags::Password, "Specifies a password which can be used to run console commands remotely on a server. If no password is specified, this feature is disabled.");
 	map.RegisterConCommand(
 	  "exec",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty())
 			  return;
 		  ExecConfig(argv[0]);
@@ -70,7 +70,7 @@ void pragma::Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 	  });
 	map.RegisterConCommand(
 	  "udm_convert",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
 			  Con::cwar << "No file specified to convert!" << Con::endl;
 			  return;
@@ -93,7 +93,7 @@ void pragma::Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 	  pragma::console::ConVarFlags::None, "Converts a UDM file from binary to ASCII or the other way around.");
 	map.RegisterConCommand(
 	  "udm_validate",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
 			  Con::cwar << "No file specified to convert!" << Con::endl;
 			  return;
@@ -155,12 +155,12 @@ void pragma::Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 	map.RegisterConVar<bool>("sv_require_authentication", false, pragma::console::ConVarFlags::Archive | pragma::console::ConVarFlags::Replicated, "If enabled, clients will have to authenticate via steam to join the server.");
 
 	map.RegisterConVar<bool>("asset_multithreading_enabled", true, pragma::console::ConVarFlags::Archive, "If enabled, assets will be loaded in the background.");
-	map.RegisterConVarCallback("asset_multithreading_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[this](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void { SetAssetMultiThreadedLoadingEnabled(newVal); }});
+	map.RegisterConVarCallback("asset_multithreading_enabled", std::function<void(pragma::NetworkState *, const ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void { SetAssetMultiThreadedLoadingEnabled(newVal); }});
 
 	map.RegisterConVar<bool>("asset_file_cache_enabled", true, pragma::console::ConVarFlags::Archive, "If enabled, all Pragma files will be indexed to improve lookup times.");
-	map.RegisterConVarCallback("asset_file_cache_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[this](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void { filemanager::set_use_file_index_cache(newVal); }});
+	map.RegisterConVarCallback("asset_file_cache_enabled", std::function<void(pragma::NetworkState *, const ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void { filemanager::set_use_file_index_cache(newVal); }});
 
-	map.RegisterConVarCallback("sv_gravity", std::function<void(NetworkState *, const ConVar &, std::string, std::string)> {[](NetworkState *state, const ConVar &, std::string prev, std::string val) {
+	map.RegisterConVarCallback("sv_gravity", std::function<void(pragma::NetworkState *, const ConVar &, std::string, std::string)> {[](pragma::NetworkState *state, const ConVar &, std::string prev, std::string val) {
 		if(!state->IsGameActive())
 			return;
 		Vector3 gravity = uvec::create(val);
@@ -169,7 +169,7 @@ void pragma::Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 	}});
 	map.RegisterConCommand(
 	  "list",
-	  +[](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float) {
+	  +[](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &, float) {
 		  auto &convars = state->GetConVars();
 		  std::vector<std::string> cvars(convars.size());
 		  size_t idx = 0;
@@ -188,7 +188,7 @@ void pragma::Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 
 	map.RegisterConCommand(
 	  "find",
-	  +[](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  +[](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
 			  Con::cwar << "No argument given!" << Con::endl;
 			  return;
@@ -225,9 +225,9 @@ static void compile_lua_file(lua::State *l, pragma::Game &game, std::string f)
 		Con::cout << "Successfully compiled as '" << path.c_str() << "'." << Con::endl;
 }
 
-static void cmdExit(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float) { pragma::Engine::Get()->ShutDown(); }
+static void cmdExit(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float) { pragma::Engine::Get()->ShutDown(); }
 
-static void debug_profiling_print(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
+static void debug_profiling_print(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	Con::cout << "-------- CPU-Profiler Query Results --------" << Con::endl;
 	Con::cout << std::left << std::setw(30) << "Stage Name" << std::setw(20) << "Time (ms)" << std::setw(20) << "Time (ns)" << std::setw(10) << "Count" << std::setw(10) << "Thread" << Con::endl;
@@ -280,7 +280,7 @@ static void debug_profiling_print(NetworkState *, pragma::BasePlayerComponent *,
 	Con::cout << "--------------------------------------------" << Con::endl;
 }
 
-static void debug_profiling_physics_start(NetworkState *nw, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
+static void debug_profiling_physics_start(pragma::NetworkState *nw, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	auto *game = nw->GetGameState();
 	auto *physEnv = game ? game->GetPhysicsEnvironment() : nullptr;
@@ -288,7 +288,7 @@ static void debug_profiling_physics_start(NetworkState *nw, pragma::BasePlayerCo
 		return;
 	physEnv->StartProfiling();
 }
-static void debug_profiling_physics_end(NetworkState *nw, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
+static void debug_profiling_physics_end(pragma::NetworkState *nw, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	auto *game = nw->GetGameState();
 	auto *physEnv = game ? game->GetPhysicsEnvironment() : nullptr;
@@ -297,7 +297,7 @@ static void debug_profiling_physics_end(NetworkState *nw, pragma::BasePlayerComp
 	physEnv->EndProfiling();
 }
 
-static void debug_dump_scene_graph(NetworkState *nw)
+static void debug_dump_scene_graph(pragma::NetworkState *nw)
 {
 	auto *game = nw->GetGameState();
 	if(!game)
@@ -346,7 +346,7 @@ static void debug_dump_scene_graph(NetworkState *nw)
 	Con::cout << Con::endl;
 }
 
-static void debug_dump_scene_graph(NetworkState *nw, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
+static void debug_dump_scene_graph(pragma::NetworkState *nw, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
 	auto *sv = pragma::Engine::Get()->GetServerNetworkState();
 	if(sv)
@@ -364,7 +364,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	// Note: Serverside ConVars HAVE to be registered shared if the command is replicated!
 	conVarMap.RegisterConCommand(
 	  "map",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
 			  Con::cout << state->GetMap() << Con::endl;
 			  return;
@@ -412,7 +412,7 @@ void pragma::Engine::RegisterConsoleCommands()
 		  }
 	  });
 	conVarMap.RegisterConCommand("lua_exec", &pragma::console::commands::lua_exec, pragma::console::ConVarFlags::None, "Opens and executes a lua-file on the server.", &pragma::console::commands::lua_exec_autocomplete);
-	conVarMap.RegisterConCommand("lua_run", static_cast<void (*)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(&pragma::console::commands::lua_run), pragma::console::ConVarFlags::None, "Runs a lua command on the server lua state.",
+	conVarMap.RegisterConCommand("lua_run", static_cast<void (*)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(&pragma::console::commands::lua_run), pragma::console::ConVarFlags::None, "Runs a lua command on the server lua state.",
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 		  auto *sv = pragma::get_engine()->GetServerNetworkState();
 		  auto *game = sv ? sv->GetGameState() : nullptr;
@@ -425,7 +425,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  });
 	conVarMap.RegisterConCommand(
 	  "save",
-	  [](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  auto *game = state ? state->GetGameState() : nullptr;
 		  if(game == nullptr) {
 			  Con::cwar << "Cannot create savegame: No active game!" << Con::endl;
@@ -443,7 +443,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  pragma::console::ConVarFlags::None);
 	conVarMap.RegisterConCommand(
 	  "load",
-	  [](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
 			  Con::cwar << "Cannot load savegame: No savegame specified!" << Con::endl;
 			  return;
@@ -470,7 +470,7 @@ void pragma::Engine::RegisterConsoleCommands()
 
 	conVarMap.RegisterConCommand(
 	  "lua_help",
-	  [](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty())
 			  return;
 		  std::stringstream ss;
@@ -488,7 +488,7 @@ void pragma::Engine::RegisterConsoleCommands()
 
 	conVarMap.RegisterConCommand(
 	  "help",
-	  [](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
 			  Con::cout << "Usage: help <cvarname>" << Con::endl;
 			  Con::cout << "Run \"list\" to get a list of all available console commands and variables." << Con::endl;
@@ -548,13 +548,13 @@ void pragma::Engine::RegisterConsoleCommands()
 			  autoCompleteOptions.push_back(std::string {candidate});
 	  });
 
-	conVarMap.RegisterConCommand("clear_cache", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearCache(); }, pragma::console::ConVarFlags::None, "Clears all of the cached engine files.");
+	conVarMap.RegisterConCommand("clear_cache", [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearCache(); }, pragma::console::ConVarFlags::None, "Clears all of the cached engine files.");
 
-	conVarMap.RegisterConCommand("loc_reload", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { pragma::locale::reload_files(); }, pragma::console::ConVarFlags::None, "Reloads all localization files.");
+	conVarMap.RegisterConCommand("loc_reload", [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { pragma::locale::reload_files(); }, pragma::console::ConVarFlags::None, "Reloads all localization files.");
 
 	conVarMap.RegisterConCommand(
 	  "loc_find",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
 			  Con::cwar << "No argument specified!" << Con::endl;
 			  return;
@@ -579,12 +579,12 @@ void pragma::Engine::RegisterConsoleCommands()
 	  pragma::console::ConVarFlags::None, "Searches for the specified text in all currently loaded text strings.");
 
 	conVarMap.RegisterConCommand(
-	  "asset_clear_unused_models", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(pragma::asset::Type::Model, true); }, pragma::console::ConVarFlags::None, "Clears all unused models from memory.");
+	  "asset_clear_unused_models", [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(pragma::asset::Type::Model, true); }, pragma::console::ConVarFlags::None, "Clears all unused models from memory.");
 	conVarMap.RegisterConCommand(
-	  "asset_clear_unused_materials", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(pragma::asset::Type::Material, true); }, pragma::console::ConVarFlags::None, "Clears all unused materials from memory.");
+	  "asset_clear_unused_materials", [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(pragma::asset::Type::Material, true); }, pragma::console::ConVarFlags::None, "Clears all unused materials from memory.");
 	conVarMap.RegisterConCommand(
 	  "asset_clear_unused",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  std::vector<pragma::asset::Type> types;
 		  auto n = umath::to_integral(pragma::asset::Type::Count);
 		  types.reserve(n);
@@ -595,7 +595,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  pragma::console::ConVarFlags::None, "Clears all unused assets from memory.");
 	conVarMap.RegisterConCommand(
 	  "install_module",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
 			  Con::cwar << "No module specified!" << Con::endl;
 			  return;
@@ -609,18 +609,18 @@ void pragma::Engine::RegisterConsoleCommands()
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	conVarMap.RegisterConCommand(
 	  "debug_vtune_prof_start",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  std::string name = "cmd";
 		  if(!argv.empty())
 			  name = argv.front();
 		  ::debug::get_domain().BeginTask(name);
 	  },
 	  pragma::console::ConVarFlags::None, "Start the VTune profiler.");
-	conVarMap.RegisterConCommand("debug_vtune_prof_end", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ::debug::get_domain().EndTask(); }, pragma::console::ConVarFlags::None, "End the VTune profiler.");
+	conVarMap.RegisterConCommand("debug_vtune_prof_end", [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ::debug::get_domain().EndTask(); }, pragma::console::ConVarFlags::None, "End the VTune profiler.");
 #endif
 	conVarMap.RegisterConCommand(
 	  "log_level_console",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
 			  auto logLevel = pragma::get_console_log_level();
 			  Con::cout << "Current console log level: " << magic_enum::enum_name(logLevel) << Con::endl;
@@ -631,7 +631,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  pragma::console::ConVarFlags::None, "Changes the console logging level. Usage: log_level_con <level>. Level can be: 0 = trace, 1 = debug, 2 = info, 3 = warning, 4 = error, 5 = critical, 6 = disabled.");
 	conVarMap.RegisterConCommand(
 	  "log_level_file",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
 			  auto logLevel = pragma::get_file_log_level();
 			  Con::cout << "Current file log level: " << magic_enum::enum_name(logLevel) << Con::endl;
@@ -642,7 +642,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  pragma::console::ConVarFlags::None, "Changes the file logging level. Usage: log_level_file <level>. Level can be: 0 = trace, 1 = debug, 2 = info, 3 = warning, 4 = error, 5 = critical, 6 = disabled.");
 	conVarMap.RegisterConCommand(
 	  "debug_start_lua_debugger_server_sv",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  auto *l = state->GetLuaState();
 		  if(!l) {
 			  Con::cwar << "Unable to start debugger server: No active Lua state!" << Con::endl;
@@ -655,7 +655,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	auto &conVarMapEn = *console_system::engine::get_convar_map();
 	conVarMapEn.RegisterConCommand(
 	  "log",
-	  [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [](pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty())
 			  return;
 		  pragma::Engine::Get()->WriteToLog(argv[0]);
@@ -663,7 +663,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  pragma::console::ConVarFlags::None, "Adds the specified message to the engine log. Usage: log <msg>.");
 	conVarMapEn.RegisterConCommand(
 	  "clear_cache",
-	  [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [](pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty())
 			  return;
 		  pragma::Engine::Get()->ClearCache();
@@ -679,7 +679,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  "0 = Remote debugging is disabled; 1 = Remote debugging is enabled serverside; 2 = Remote debugging is enabled clientside.\nCannot be changed during an active game. Also requires the \"-luaext\" launch parameter.\nRemote debugging cannot be enabled clientside and serverside at the same time.");
 	conVarMapEn.RegisterConVar<udm::Boolean>("lua_open_editor_on_error", true, pragma::console::ConVarFlags::Archive, "1 = Whenever there's a Lua error, the engine will attempt to automatically open a Lua IDE and open the file and line which caused the error.");
 	conVarMapEn.RegisterConVar<udm::Boolean>("steam_steamworks_enabled", true, pragma::console::ConVarFlags::Archive, "Enables or disables steamworks.");
-	conVarMapEn.RegisterConVarCallback("steam_steamworks_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[](NetworkState *, const ConVar &, bool prev, bool val) {
+	conVarMapEn.RegisterConVarCallback("steam_steamworks_enabled", std::function<void(pragma::NetworkState *, const ConVar &, bool, bool)> {[](pragma::NetworkState *, const ConVar &, bool prev, bool val) {
 		static std::weak_ptr<util::Library> wpSteamworks = {};
 		static std::unique_ptr<ISteamworks> isteamworks = nullptr;
 		auto *nwSv = pragma::Engine::Get()->GetServerNetworkState();
@@ -725,10 +725,10 @@ void pragma::Engine::RegisterConsoleCommands()
 			nwCl->CallCallbacks<void>("OnSteamworksShutdown");
 	}});
 
-	conVarMapEn.RegisterConVarCallback("sh_mount_external_game_resources", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[](NetworkState *, const ConVar &, bool prev, bool val) { pragma::Engine::Get()->SetMountExternalGameResources(val); }});
+	conVarMapEn.RegisterConVarCallback("sh_mount_external_game_resources", std::function<void(pragma::NetworkState *, const ConVar &, bool, bool)> {[](pragma::NetworkState *, const ConVar &, bool prev, bool val) { pragma::Engine::Get()->SetMountExternalGameResources(val); }});
 	conVarMapEn.RegisterConCommand(
 	  "toggle",
-	  [](NetworkState *nw, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv, float) {
+	  [](pragma::NetworkState *nw, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv, float) {
 		  if(argv.empty() == true)
 			  return;
 		  auto &cvName = argv.front();
@@ -746,7 +746,7 @@ void pragma::Engine::RegisterConsoleCommands()
 
 	conVarMapEn.RegisterConCommand(
 	  "lua_compile",
-	  +[](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  +[](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty() || !state->IsGameActive())
 			  return;
 		  pragma::Game *game = state->GetGameState();
@@ -776,7 +776,7 @@ void pragma::Engine::RegisterConsoleCommands()
 
 	conVarMapEn.RegisterConCommand(
 	  "toggleconsole",
-	  [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float) {
+	  [](pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float) {
 		  if(pragma::Engine::Get()->IsServerOnly())
 			  return;
 		  if(pragma::Engine::Get()->IsConsoleOpen())
@@ -788,7 +788,7 @@ void pragma::Engine::RegisterConsoleCommands()
 
 	conVarMapEn.RegisterConCommand(
 	  "echo",
-	  [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [](pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty())
 			  return;
 		  Con::cout << argv[0] << Con::endl;
@@ -800,7 +800,7 @@ void pragma::Engine::RegisterConsoleCommands()
 
 	conVarMapEn.RegisterConCommand(
 	  "listmaps",
-	  [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float) {
+	  [](pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float) {
 		  std::vector<std::string> resFiles;
 		  auto exts = pragma::asset::get_supported_extensions(pragma::asset::Type::Map);
 		  for(auto &ext : exts)
@@ -812,24 +812,24 @@ void pragma::Engine::RegisterConsoleCommands()
 	  },
 	  pragma::console::ConVarFlags::None, "");
 
-	conVarMapEn.RegisterConCommand("clear", [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float) { pragma::Engine::Get()->ClearConsole(); }, pragma::console::ConVarFlags::None, "Clears everything in the console.");
+	conVarMapEn.RegisterConCommand("clear", [](pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float) { pragma::Engine::Get()->ClearConsole(); }, pragma::console::ConVarFlags::None, "Clears everything in the console.");
 
 	conVarMapEn.RegisterConCommand(
 	  "credits",
-	  [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float) {
+	  [](pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float) {
 		  Con::cout << "Silverlan" << Con::endl;
 		  Con::cout << "Contact: " << engine_info::get_author_mail_address() << Con::endl;
 		  Con::cout << "Website: " << engine_info::get_website_url() << Con::endl;
 	  },
 	  pragma::console::ConVarFlags::None, "Prints a list of developers.");
 
-	conVarMapEn.RegisterConCommand("version", [](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float) { Con::cout << get_pretty_engine_version() << Con::endl; }, pragma::console::ConVarFlags::None, "Prints the current engine version to the console.");
+	conVarMapEn.RegisterConCommand("version", [](pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float) { Con::cout << get_pretty_engine_version() << Con::endl; }, pragma::console::ConVarFlags::None, "Prints the current engine version to the console.");
 	conVarMapEn.RegisterConCommand("debug_profiling_print", debug_profiling_print, pragma::console::ConVarFlags::None, "Prints the last profiled times.");
 	conVarMapEn.RegisterConCommand("debug_profiling_physics_start", debug_profiling_physics_start, pragma::console::ConVarFlags::None, "Prints physics profiling information for the last simulation step.");
 	conVarMapEn.RegisterConCommand("debug_profiling_physics_end", debug_profiling_physics_end, pragma::console::ConVarFlags::None, "Prints physics profiling information for the last simulation step.");
-	conVarMapEn.RegisterConCommand("debug_dump_scene_graph", static_cast<void (*)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(debug_dump_scene_graph), pragma::console::ConVarFlags::None, "Prints the game scene graph.");
+	conVarMapEn.RegisterConCommand("debug_dump_scene_graph", static_cast<void (*)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(debug_dump_scene_graph), pragma::console::ConVarFlags::None, "Prints the game scene graph.");
 
-	conVarMap.RegisterConVarCallback("asset_multithreading_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[this](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void {
+	conVarMap.RegisterConVarCallback("asset_multithreading_enabled", std::function<void(pragma::NetworkState *, const ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void {
 		if(pragma::Engine::Get() == nullptr)
 			return;
 		pragma::Engine::Get()->SetProfilingEnabled(newVal);

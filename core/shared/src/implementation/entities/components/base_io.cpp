@@ -99,7 +99,7 @@ bool BaseIOComponent::FireSingleOutput(Output &output, pragma::ecs::BaseEntity *
 	if(output.times == 0)
 		return false;
 	auto &entThis = GetEntity();
-	NetworkState *state = entThis.GetNetworkState();
+	auto *state = entThis.GetNetworkState();
 	pragma::Game *game = state->GetGameState();
 	std::vector<pragma::ecs::BaseEntity *> ents;
 	if(output.entities == "!activator")

@@ -10,13 +10,13 @@ module pragma.shared;
 
 import :network_state;
 
-ConVarHandle NetworkState::GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ptrs, std::string scvar) { return CVarHandler::GetConVarHandle(ptrs, scvar); }
+ConVarHandle pragma::NetworkState::GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ptrs, std::string scvar) { return CVarHandler::GetConVarHandle(ptrs, scvar); }
 
-UInt8 NetworkState::STATE_COUNT = 0;
+UInt8 pragma::NetworkState::STATE_COUNT = 0;
 
-decltype(NetworkState::s_loadedLibraries) NetworkState::s_loadedLibraries = {};
+decltype(pragma::NetworkState::s_loadedLibraries) pragma::NetworkState::s_loadedLibraries = {};
 
-NetworkState::NetworkState() : util::CallbackHandler(), CVarHandler()
+pragma::NetworkState::NetworkState() : util::CallbackHandler(), CVarHandler()
 {
 	m_ctReal.Reset(static_cast<int64_t>(pragma::Engine::Get()->GetTickCount()));
 	m_tReal = CDouble(m_ctReal());
@@ -46,7 +46,7 @@ NetworkState::NetworkState() : util::CallbackHandler(), CVarHandler()
 		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler);
 	});
 }
-NetworkState::~NetworkState()
+pragma::NetworkState::~NetworkState()
 {
 	STATE_COUNT--;
 	if(STATE_COUNT == 0)
@@ -87,13 +87,13 @@ NetworkState::~NetworkState()
 	}
 }
 
-std::vector<CallbackHandle> &NetworkState::GetLuaEnumRegisterCallbacks() { return m_luaEnumRegisterCallbacks; }
+std::vector<CallbackHandle> &pragma::NetworkState::GetLuaEnumRegisterCallbacks() { return m_luaEnumRegisterCallbacks; }
 
-ResourceWatcherManager &NetworkState::GetResourceWatcher() { return *m_resourceWatcher; }
+ResourceWatcherManager &pragma::NetworkState::GetResourceWatcher() { return *m_resourceWatcher; }
 
-bool NetworkState::ShouldRemoveSound(pragma::audio::ALSound &snd) { return snd.IsPlaying() == false; }
+bool pragma::NetworkState::ShouldRemoveSound(pragma::audio::ALSound &snd) { return snd.IsPlaying() == false; }
 
-void NetworkState::UpdateSounds(std::vector<std::shared_ptr<pragma::audio::ALSound>> &sounds)
+void pragma::NetworkState::UpdateSounds(std::vector<std::shared_ptr<pragma::audio::ALSound>> &sounds)
 {
 	for(auto i = static_cast<int32_t>(sounds.size()) - 1; i >= 0; --i) {
 		auto psnd = sounds.at(i);
@@ -113,7 +113,7 @@ void NetworkState::UpdateSounds(std::vector<std::shared_ptr<pragma::audio::ALSou
 	}
 }
 
-bool NetworkState::PortMaterial(const std::string &path)
+bool pragma::NetworkState::PortMaterial(const std::string &path)
 {
 	auto pathWithoutExt = path;
 	auto extensions = pragma::asset::get_supported_extensions(pragma::asset::Type::Material);
@@ -157,7 +157,7 @@ bool NetworkState::PortMaterial(const std::string &path)
 	return (mat != nullptr) ? true : false;
 }
 
-util::FileAssetManager *NetworkState::GetAssetManager(pragma::asset::Type type)
+util::FileAssetManager *pragma::NetworkState::GetAssetManager(pragma::asset::Type type)
 {
 	switch(type) {
 	case pragma::asset::Type::Model:
@@ -168,7 +168,7 @@ util::FileAssetManager *NetworkState::GetAssetManager(pragma::asset::Type type)
 	return nullptr;
 }
 
-void NetworkState::ClearGameConVars()
+void pragma::NetworkState::ClearGameConVars()
 {
 #pragma message("TODO: What about ConVars that have been created ingame?")
 	for(auto it = m_conVars.begin(); it != m_conVars.end();) {
@@ -179,17 +179,17 @@ void NetworkState::ClearGameConVars()
 	}
 }
 
-bool NetworkState::CheatsEnabled() const
+bool pragma::NetworkState::CheatsEnabled() const
 {
 	if(!IsMultiPlayer())
 		return true;
 	return pragma::Engine::Get()->GetConVarBool("sv_cheats");
 }
 
-msys::Material *NetworkState::PrecacheMaterial(const std::string &path) { return LoadMaterial(path, true, false); }
-msys::Material *NetworkState::LoadMaterial(const std::string &path, bool bReload) { return LoadMaterial(path, false, bReload); }
+msys::Material *pragma::NetworkState::PrecacheMaterial(const std::string &path) { return LoadMaterial(path, true, false); }
+msys::Material *pragma::NetworkState::LoadMaterial(const std::string &path, bool bReload) { return LoadMaterial(path, false, bReload); }
 
-msys::Material *NetworkState::LoadMaterial(const std::string &path, bool precache, bool bReload)
+msys::Material *pragma::NetworkState::LoadMaterial(const std::string &path, bool precache, bool bReload)
 {
 	static auto bSkipPort = false;
 	auto &matManager = GetMaterialManager();
@@ -238,15 +238,15 @@ msys::Material *NetworkState::LoadMaterial(const std::string &path, bool precach
 	return mat;
 }
 
-MapInfo *NetworkState::GetMapInfo() { return m_mapInfo.get(); }
-std::string NetworkState::GetMap()
+MapInfo *pragma::NetworkState::GetMapInfo() { return m_mapInfo.get(); }
+std::string pragma::NetworkState::GetMap()
 {
 	if(m_mapInfo == nullptr)
 		return "";
 	return m_mapInfo->name;
 }
 
-float NetworkState::GetSoundDuration(std::string snd)
+float pragma::NetworkState::GetSoundDuration(std::string snd)
 {
 	auto it = m_soundsPrecached.find(snd);
 	if(it == m_soundsPrecached.end())
@@ -254,7 +254,7 @@ float NetworkState::GetSoundDuration(std::string snd)
 	return it->second->duration;
 }
 
-void NetworkState::StartNewGame(const std::string &map, bool singlePlayer)
+void pragma::NetworkState::StartNewGame(const std::string &map, bool singlePlayer)
 {
 	if(!IsGameActive()) {
 		spdlog::info("Starting new {} game...", singlePlayer ? "single-player" : "multi-player");
@@ -263,7 +263,7 @@ void NetworkState::StartNewGame(const std::string &map, bool singlePlayer)
 	ChangeLevel(map);
 }
 
-void NetworkState::ChangeLevel(const std::string &map)
+void pragma::NetworkState::ChangeLevel(const std::string &map)
 {
 	spdlog::info("Changing map to '{}'...", map);
 	m_mapInfo = std::make_unique<MapInfo>();
@@ -277,32 +277,32 @@ void NetworkState::ChangeLevel(const std::string &map)
 	game->LoadMap(map);
 }
 
-void NetworkState::Close()
+void pragma::NetworkState::Close()
 {
 	EndGame();
 	CallCallbacks("OnClose");
 }
 
-lua::State *NetworkState::GetLuaState()
+lua::State *pragma::NetworkState::GetLuaState()
 {
 	if(!IsGameActive())
 		return nullptr;
 	return GetGameState()->GetLuaState();
 }
 
-void NetworkState::StartGame(bool singlePlayer)
+void pragma::NetworkState::StartGame(bool singlePlayer)
 {
 	if(IsGameActive())
 		EndGame();
 }
 
-void NetworkState::EndGame() { ClearGameConVars(); }
+void pragma::NetworkState::EndGame() { ClearGameConVars(); }
 
-bool NetworkState::IsGameActive() { return false; }
+bool pragma::NetworkState::IsGameActive() { return false; }
 
-pragma::Game *NetworkState::GetGameState() { return m_game.get(); }
+pragma::Game *pragma::NetworkState::GetGameState() { return m_game.get(); }
 
-void NetworkState::Initialize()
+void pragma::NetworkState::Initialize()
 {
 	CVarHandler::Initialize();
 	if(IsClient())
@@ -330,12 +330,12 @@ void NetworkState::Initialize()
 		m_resourceWatcher->MountDirectory(info.GetLocalPath(), true);
 }
 
-bool NetworkState::IsClient() const { return false; }
-bool NetworkState::IsServer() const { return false; }
+bool pragma::NetworkState::IsClient() const { return false; }
+bool pragma::NetworkState::IsServer() const { return false; }
 
-void NetworkState::InitializeResourceManager() { m_resourceWatcher = std::make_unique<ResourceWatcherManager>(this); }
+void pragma::NetworkState::InitializeResourceManager() { m_resourceWatcher = std::make_unique<ResourceWatcherManager>(this); }
 
-ConVar *NetworkState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
+ConVar *pragma::NetworkState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
 {
 	auto *cv = GetConVar(scmd);
 	if(cv == nullptr)
@@ -352,7 +352,7 @@ ConVar *NetworkState::SetConVar(std::string scmd, std::string value, bool bApply
 		cvarCallbackList.at(1) = &game->GetConVarCallbacks();
 	udm::visit(cvar->GetVarType(), [this, &cvarCallbackList, &scmd, cvar, &value](auto tag) {
 		using T = typename decltype(tag)::type;
-		if constexpr(console::is_valid_convar_type_v<T>) {
+		if constexpr(::console::is_valid_convar_type_v<T>) {
 			auto &rawValPrev = cvar->GetRawValue();
 			auto prevVal = rawValPrev ? *static_cast<T *>(rawValPrev.get()) : T {};
 			cvar->SetValue(value);
@@ -372,7 +372,7 @@ ConVar *NetworkState::SetConVar(std::string scmd, std::string value, bool bApply
 						if(!fc.IsValid())
 							itCb = cvarCallbacks.erase(itCb);
 						else {
-							fc.Call<void, NetworkState *, const ConVar &, const void *, const void *>(this, *cvar, &prevVal, &newVal);
+							fc.Call<void, pragma::NetworkState *, const ConVar &, const void *, const void *>(this, *cvar, &prevVal, &newVal);
 							++itCb;
 						}
 					}
@@ -383,30 +383,30 @@ ConVar *NetworkState::SetConVar(std::string scmd, std::string value, bool bApply
 	return cvar;
 }
 
-void NetworkState::implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const
+void pragma::NetworkState::implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const
 {
 	pragma::Engine::Get()->implFindSimilarConVars(input, similarCmds);
 	CVarHandler::implFindSimilarConVars(input, similarCmds);
 }
 
-void NetworkState::TranslateConsoleCommand(std::string &cmd)
+void pragma::NetworkState::TranslateConsoleCommand(std::string &cmd)
 {
 	auto it = m_conOverrides.find(cmd);
 	if(it == m_conOverrides.end())
 		return;
 	cmd = it->second;
 }
-void NetworkState::SetConsoleCommandOverride(const std::string &src, const std::string &dst) { m_conOverrides[src] = dst; }
-void NetworkState::ClearConsoleCommandOverride(const std::string &src)
+void pragma::NetworkState::SetConsoleCommandOverride(const std::string &src, const std::string &dst) { m_conOverrides[src] = dst; }
+void pragma::NetworkState::ClearConsoleCommandOverride(const std::string &src)
 {
 	auto it = m_conOverrides.find(src);
 	if(it == m_conOverrides.end())
 		return;
 	m_conOverrides.erase(it);
 }
-void NetworkState::ClearConsoleCommandOverrides() { m_conOverrides.clear(); }
+void pragma::NetworkState::ClearConsoleCommandOverrides() { m_conOverrides.clear(); }
 
-bool check_cheats(const std::string &scmd, NetworkState *state)
+bool pragma::check_cheats(const std::string &scmd, pragma::NetworkState *state)
 {
 	if(state->CheatsEnabled() == false) {
 		Con::cout << "Can't use cheat cvar " << scmd << " in multiplayer, unless the server has sv_cheats set to 1." << Con::endl;
@@ -415,7 +415,7 @@ bool check_cheats(const std::string &scmd, NetworkState *state)
 	return true;
 }
 
-bool NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl, KeyState pressState, float magnitude, const std::function<bool(ConConf *, float &)> &callback)
+bool pragma::NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl, KeyState pressState, float magnitude, const std::function<bool(ConConf *, float &)> &callback)
 {
 	TranslateConsoleCommand(scmd);
 	auto *cv = GetConVar(scmd);
@@ -452,7 +452,7 @@ bool NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::string> 
 	}
 	auto *cmd = static_cast<ConCommand *>(cv);
 	if(type == ConType::Cmd) {
-		std::function<void(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> func = nullptr;
+		std::function<void(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> func = nullptr;
 		cmd->GetFunction(func);
 		if(scmd.empty() == false && scmd.front() == '-')
 			magnitude = 0.f;
@@ -486,7 +486,7 @@ bool NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::string> 
 	return true;
 }
 
-std::shared_ptr<util::Library> NetworkState::LoadLibraryModule(const std::string &lib, const std::vector<std::string> &additionalSearchDirectories, std::string *err)
+std::shared_ptr<util::Library> pragma::NetworkState::LoadLibraryModule(const std::string &lib, const std::vector<std::string> &additionalSearchDirectories, std::string *err)
 {
 	auto pathLib = util::Path::CreateFile(lib);
 	static std::unordered_set<std::string> cache;
@@ -500,7 +500,7 @@ std::shared_ptr<util::Library> NetworkState::LoadLibraryModule(const std::string
 	return libModule;
 }
 
-std::shared_ptr<util::Library> NetworkState::GetLibraryModule(const std::string &library) const
+std::shared_ptr<util::Library> pragma::NetworkState::GetLibraryModule(const std::string &library) const
 {
 	auto lib = util::get_normalized_module_path(library, IsClient());
 	auto it = s_loadedLibraries.find(lib);
@@ -511,7 +511,7 @@ std::shared_ptr<util::Library> NetworkState::GetLibraryModule(const std::string 
 	return *it->second.library;
 }
 
-void NetworkState::InitializeLuaModules(lua::State *l)
+void pragma::NetworkState::InitializeLuaModules(lua::State *l)
 {
 	for(auto &pair : s_loadedLibraries) {
 		if(!pair.second.WasLoadedInState(*this))
@@ -520,7 +520,7 @@ void NetworkState::InitializeLuaModules(lua::State *l)
 	}
 }
 
-void NetworkState::InitializeDLLModule(lua::State *l, std::shared_ptr<util::Library> module)
+void pragma::NetworkState::InitializeDLLModule(lua::State *l, std::shared_ptr<util::Library> module)
 {
 	auto it = m_initializedLibraries.find(l);
 	if(it != m_initializedLibraries.end()) {
@@ -540,7 +540,7 @@ void NetworkState::InitializeDLLModule(lua::State *l, std::shared_ptr<util::Libr
 	}
 }
 
-bool NetworkState::UnloadLibrary(const std::string &library)
+bool pragma::NetworkState::UnloadLibrary(const std::string &library)
 {
 	auto libAbs = util::get_normalized_module_path(library, IsClient());
 	auto it = s_loadedLibraries.find(libAbs);
@@ -572,7 +572,7 @@ bool NetworkState::UnloadLibrary(const std::string &library)
 	return true;
 }
 
-std::shared_ptr<util::Library> NetworkState::InitializeLibrary(std::string library, std::string *err, lua::State *l)
+std::shared_ptr<util::Library> pragma::NetworkState::InitializeLibrary(std::string library, std::string *err, lua::State *l)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("load_library_module_" + library);
@@ -643,7 +643,7 @@ std::shared_ptr<util::Library> NetworkState::InitializeLibrary(std::string libra
 	return nullptr;
 }
 
-void NetworkState::TerminateLuaModules(lua::State *l)
+void pragma::NetworkState::TerminateLuaModules(lua::State *l)
 {
 	auto it = m_initializedLibraries.find(l);
 	if(it == m_initializedLibraries.end())
@@ -657,7 +657,7 @@ void NetworkState::TerminateLuaModules(lua::State *l)
 		}
 	}
 }
-void NetworkState::DeregisterLuaModules(void *l, const std::string &identifier)
+void pragma::NetworkState::DeregisterLuaModules(void *l, const std::string &identifier)
 {
 	auto it = m_initializedLibraries.find(reinterpret_cast<lua::State *>(l));
 	if(it == m_initializedLibraries.end())
@@ -670,9 +670,9 @@ void NetworkState::DeregisterLuaModules(void *l, const std::string &identifier)
 	m_initializedLibraries.erase(it);
 }
 
-ConVarMap *NetworkState::GetConVarMap() { return nullptr; }
+ConVarMap *pragma::NetworkState::GetConVarMap() { return nullptr; }
 
-void NetworkState::UnregisterConVar(const std::string &scmd)
+void pragma::NetworkState::UnregisterConVar(const std::string &scmd)
 {
 	auto lcmd = scmd;
 	ustring::to_lower(lcmd);
@@ -681,7 +681,7 @@ void NetworkState::UnregisterConVar(const std::string &scmd)
 		m_conVars.erase(it);
 }
 
-ConVar *NetworkState::RegisterConVar(const std::string &scmd, const std::shared_ptr<ConVar> &cvar)
+ConVar *pragma::NetworkState::RegisterConVar(const std::string &scmd, const std::shared_ptr<ConVar> &cvar)
 {
 	auto lcmd = scmd;
 	ustring::to_lower(lcmd);
@@ -703,19 +703,19 @@ ConVar *NetworkState::RegisterConVar(const std::string &scmd, const std::shared_
 	}
 	return cv;
 }
-ConVar *NetworkState::CreateConVar(const std::string &scmd, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help)
+ConVar *pragma::NetworkState::CreateConVar(const std::string &scmd, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help)
 {
 	return udm::visit(type, [this, &scmd, &value, flags, &help](auto tag) -> ConVar * {
 		using T = typename decltype(tag)::type;
-		if constexpr(console::is_valid_convar_type_v<T> && udm::is_convertible<std::string, T>())
+		if constexpr(::console::is_valid_convar_type_v<T> && udm::is_convertible<std::string, T>())
 			return RegisterConVar(scmd, ConVar::Create<T>(udm::convert<std::string, T>(value), flags, help));
 		return nullptr;
 	});
 }
 
-std::unordered_map<std::string, unsigned int> &NetworkState::GetConCommandIDs() { return m_conCommandIDs; }
+std::unordered_map<std::string, unsigned int> &pragma::NetworkState::GetConCommandIDs() { return m_conCommandIDs; }
 
-ConCommand *NetworkState::CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags, const std::string &help)
+ConCommand *pragma::NetworkState::CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags, const std::string &help)
 {
 	auto lcmd = scmd;
 	ustring::to_lower(lcmd);
@@ -726,12 +726,12 @@ ConCommand *NetworkState::CreateConCommand(const std::string &scmd, LuaFunction 
 	return cmd;
 }
 
-pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *NetworkState::GetProfilingStageManager() { return m_profilingStageManager.get(); }
-bool NetworkState::StartProfilingStage(const char *stage) { return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage); }
-bool NetworkState::StopProfilingStage() { return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(); }
+pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *pragma::NetworkState::GetProfilingStageManager() { return m_profilingStageManager.get(); }
+bool pragma::NetworkState::StartProfilingStage(const char *stage) { return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage); }
+bool pragma::NetworkState::StopProfilingStage() { return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(); }
 
 const double MS_THOUSAND = 1000;
-void NetworkState::Think()
+void pragma::NetworkState::Think()
 {
 	m_ctReal.Update();
 	m_tReal = CDouble(m_ctReal());
@@ -753,12 +753,12 @@ void NetworkState::Think()
 		m_thinkCallbacks[i]();
 }
 
-const pragma::asset::ModelManager &NetworkState::GetModelManager() const { return const_cast<NetworkState *>(this)->GetModelManager(); }
-pragma::asset::ModelManager &NetworkState::GetModelManager() { return *m_modelManager; }
+const pragma::asset::ModelManager &pragma::NetworkState::GetModelManager() const { return const_cast<NetworkState *>(this)->GetModelManager(); }
+pragma::asset::ModelManager &pragma::NetworkState::GetModelManager() { return *m_modelManager; }
 
-void NetworkState::CallOnNextTick(const std::function<void()> &f) { m_tickCallQueue.push(f); }
+void pragma::NetworkState::CallOnNextTick(const std::function<void()> &f) { m_tickCallQueue.push(f); }
 
-void NetworkState::Tick()
+void pragma::NetworkState::Tick()
 {
 	while(!m_tickCallQueue.empty()) {
 		m_tickCallQueue.front()();
@@ -781,6 +781,6 @@ void NetworkState::Tick()
 		m_tickCallbacks[i]();
 }
 
-void NetworkState::AddThinkCallback(CallbackHandle callback) { m_thinkCallbacks.push_back(callback); }
+void pragma::NetworkState::AddThinkCallback(CallbackHandle callback) { m_thinkCallbacks.push_back(callback); }
 
-void NetworkState::AddTickCallback(CallbackHandle callback) { m_tickCallbacks.push_back(callback); }
+void pragma::NetworkState::AddTickCallback(CallbackHandle callback) { m_tickCallbacks.push_back(callback); }

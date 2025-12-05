@@ -19,7 +19,7 @@ static std::optional<std::string> find_asset_file(const std::string &name, pragm
 	}
 	return find_file(name, type);
 }
-static bool is_asset_loaded(NetworkState &nw, const std::string &name, pragma::asset::Type type)
+static bool is_asset_loaded(pragma::NetworkState &nw, const std::string &name, pragma::asset::Type type)
 {
 	switch(type) {
 	case pragma::asset::Type::Texture:
@@ -221,7 +221,7 @@ static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua::
 static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua::State *l, uint32_t width, uint32_t height, uint32_t samples) { return capture_raytraced_screenshot(l, width, height, samples, false, true); }
 static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua::State *l, uint32_t width, uint32_t height) { return capture_raytraced_screenshot(l, width, height, 1'024, false, true); }
 
-static bool asset_import(NetworkState &nw, const std::string &name, const std::string &outputName, pragma::asset::Type type)
+static bool asset_import(pragma::NetworkState &nw, const std::string &name, const std::string &outputName, pragma::asset::Type type)
 {
 	if(type == pragma::asset::Type::Map)
 		return util::port_hl2_map(&nw, name);
@@ -377,7 +377,7 @@ void CGame::RegisterLuaLibraries()
 	Lua::ai::client::register_library(GetLuaInterface());
 
 	pragma::Game::RegisterLuaLibraries();
-	ClientState::RegisterSharedLuaLibraries(GetLuaInterface());
+	pragma::ClientState::RegisterSharedLuaLibraries(GetLuaInterface());
 
 	auto consoleMod = luabind::module(GetLuaState(), "console");
 	consoleMod[luabind::def("save_config", +[](CEngine &engine) { engine.SaveClientConfig(); })];
@@ -547,8 +547,8 @@ void CGame::RegisterLuaLibraries()
 		    return luabind::object {};
 	    }),
 	  luabind::def(
-	    "import", +[](NetworkState &nw, const std::string &name, pragma::asset::Type type) -> bool { return asset_import(nw, name, name, type); }),
-	  luabind::def("import", +[](NetworkState &nw, const std::string &name, const std::string &outputName, pragma::asset::Type type) -> bool { return asset_import(nw, name, outputName, type); }))];
+	    "import", +[](pragma::NetworkState &nw, const std::string &name, pragma::asset::Type type) -> bool { return asset_import(nw, name, name, type); }),
+	  luabind::def("import", +[](pragma::NetworkState &nw, const std::string &name, const std::string &outputName, pragma::asset::Type type) -> bool { return asset_import(nw, name, outputName, type); }))];
 	auto defMapExportInfo = luabind::class_<pragma::asset::MapExportInfo>("MapExportInfo");
 	defMapExportInfo.def(luabind::constructor<>());
 	defMapExportInfo.def_readwrite("includeMapLightSources", &pragma::asset::MapExportInfo::includeMapLightSources);

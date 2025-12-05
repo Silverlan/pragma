@@ -12,7 +12,7 @@ import :game.value_driver;
 
 Lua::opt<Lua::type<CallbackHandle>> Lua::game::add_callback(lua::State *l, const std::string &identifier, const func<void> &function)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	if(state == nullptr)
 		return nil;
 	if(!state->IsGameActive())

@@ -6,10 +6,10 @@ module pragma.shared;
 
 import :network_state;
 
-pragma::audio::SoundScriptManager *NetworkState::GetSoundScriptManager() { return m_soundScriptManager.get(); }
-pragma::audio::SoundScript *NetworkState::FindSoundScript(const char *name) { return m_soundScriptManager->FindScript(name); }
+pragma::audio::SoundScriptManager *pragma::NetworkState::GetSoundScriptManager() { return m_soundScriptManager.get(); }
+pragma::audio::SoundScript *pragma::NetworkState::FindSoundScript(const char *name) { return m_soundScriptManager->FindScript(name); }
 
-bool NetworkState::LoadSoundScripts(const char *file, bool bPrecache)
+bool pragma::NetworkState::LoadSoundScripts(const char *file, bool bPrecache)
 {
 	std::string path = pragma::audio::SoundScriptManager::GetSoundScriptPath();
 	path += file;

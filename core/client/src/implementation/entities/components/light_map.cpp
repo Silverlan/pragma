@@ -534,7 +534,7 @@ bool CLightMapComponent::BakeLightmaps(const LightmapBakeSettings &bakeSettings)
 	return true;
 }
 
-static void map_rebuild_lightmaps(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void map_rebuild_lightmaps(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	std::unordered_map<std::string, pragma::console::CommandOption> commandOptions {};
 	pragma::console::parse_command_options(argv, commandOptions);

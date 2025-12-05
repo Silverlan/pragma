@@ -25,10 +25,10 @@ export {
 		class PhysObj;
 	}
 	using PhysObjHandle = util::TWeakSharedHandle<pragma::physics::PhysObj>;
-	class NetworkState;
 
 	namespace pragma {
 		class BaseEntityComponent;
+		class NetworkState;
 	};
 	namespace pragma::physics {
 		class DLLNETWORK PhysObj : public pragma::BaseLuaHandle {

@@ -113,7 +113,7 @@ void pragma::networking::NWMActiveServer::OnClientDropped(nwm::ServerClient *cl,
 	if(it == m_nwmToPragmaClient.end())
 		return;
 	auto *prCl = it->second;
-	auto *pl = ServerState::Get()->GetPlayer(*prCl);
+	auto *pl = pragma::ServerState::Get()->GetPlayer(*prCl);
 	if(pl)
 		pl->GetEntity().RemoveSafely();
 #if DEBUG_SERVER_VERBOSE == 1
@@ -149,7 +149,7 @@ void pragma::networking::NWMActiveServer::Heartbeat()
 {
 	if(m_dispatcher == nullptr || !ServerState::Get()->IsGameActive())
 		return;
-	auto &data = ServerState::Get()->GetServerData();
+	auto &data = pragma::ServerState::Get()->GetServerData();
 	util::DataStream body;
 	data.Write(body);
 
@@ -220,11 +220,11 @@ bool pragma::networking::StandardServerClient::SendPacket(pragma::networking::Pr
 void pragma::networking::StandardServerClient::SetNWMClient(nwm::ServerClient *cl) { m_nwmClient = cl; }
 nwm::ServerClient &pragma::networking::StandardServerClient::GetNWMClient() const { return *m_nwmClient; }
 
-static void sv_timeout_duration_callback(NetworkState *, const ConVar &, float, float val)
+static void sv_timeout_duration_callback(pragma::NetworkState *, const ConVar &, float, float val)
 {
-	if(ServerState::Get() == nullptr)
+	if(pragma::ServerState::Get() == nullptr)
 		return;
-	auto *sv = ServerState::Get()->GetServer();
+	auto *sv = pragma::ServerState::Get()->GetServer();
 	if(sv == nullptr)
 		return;
 	sv->SetTimeoutDuration(GET_TIMEOUT_DURATION(val));

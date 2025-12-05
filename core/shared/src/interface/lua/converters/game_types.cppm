@@ -46,7 +46,7 @@ export namespace luabind {
 
 	// NetworkState
 	namespace detail {
-		DLLNETWORK NetworkState *get_network_state(lua::State *l);
+		DLLNETWORK pragma::NetworkState *get_network_state(lua::State *l);
 		template<typename T>
 		T get_network_state(lua::State *l)
 		{
@@ -57,7 +57,7 @@ export namespace luabind {
 		}
 	};
 	template<typename T>
-	    requires(is_type_or_derived<T, NetworkState>)
+	    requires(is_type_or_derived<T, pragma::NetworkState>)
 	struct default_converter<T> : parameter_emplacement_converter<T, detail::get_network_state<T>> {};
 
 	// Engine

@@ -21,7 +21,7 @@ ConConf *CEngine::GetConVar(const std::string &cv)
 bool CEngine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(ConConf *, float &)> &callback)
 {
 	ustring::to_lower(cmd);
-	ClientState *stateCl = static_cast<ClientState *>(GetClientState());
+	auto *stateCl = static_cast<pragma::ClientState *>(GetClientState());
 	pragma::BasePlayerComponent *pl = nullptr;
 	if(stateCl != nullptr) {
 		CGame *game = stateCl->GetGameState();

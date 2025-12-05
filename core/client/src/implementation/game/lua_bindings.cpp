@@ -552,4 +552,4 @@ std::string CGame::GetLuaNetworkFileName() const { return "cl_init" + Lua::DOT_F
 
 //////////////////////////////////////////////
 
-void ClientState::RegisterSharedLuaGlobals(Lua::Interface &lua) {}
+void pragma::ClientState::RegisterSharedLuaGlobals(Lua::Interface &lua) {}

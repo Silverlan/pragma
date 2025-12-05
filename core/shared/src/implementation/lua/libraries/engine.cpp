@@ -63,7 +63,7 @@ std::shared_ptr<pragma::Model> Lua::engine::get_model(lua::State *l, const std::
 
 void Lua::engine::LoadSoundScripts(lua::State *l, const std::string &fileName, bool precache)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	state->LoadSoundScripts(fileName.c_str(), precache);
 }
 void Lua::engine::LoadSoundScripts(lua::State *l, const std::string &fileName) { LoadSoundScripts(l, fileName, false); }
@@ -76,16 +76,16 @@ bool Lua::engine::LibraryExists(lua::State *l, const std::string &library)
 
 bool Lua::engine::UnloadLibrary(lua::State *l, const std::string &path)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	std::string err;
 	return state->UnloadLibrary(path);
 }
 
-bool Lua::engine::IsLibraryLoaded(NetworkState &nw, const std::string &path) { return nw.GetLibraryModule(path) != nullptr; }
+bool Lua::engine::IsLibraryLoaded(pragma::NetworkState &nw, const std::string &path) { return nw.GetLibraryModule(path) != nullptr; }
 
 Lua::var<bool, std::string> Lua::engine::LoadLibrary(lua::State *l, const std::string &path)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	std::string err;
 	bool b = state->InitializeLibrary(path, &err, l) != nullptr;
 	if(b)

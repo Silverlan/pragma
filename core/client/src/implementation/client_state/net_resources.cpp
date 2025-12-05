@@ -11,7 +11,7 @@ import :client_state;
 import :game;
 import :model;
 
-void ClientState::StartResourceTransfer()
+void pragma::ClientState::StartResourceTransfer()
 {
 	FileManager::CreatePath(m_svInfo->GetDownloadPath().c_str());
 
@@ -22,7 +22,7 @@ void ClientState::StartResourceTransfer()
 	SendPacket(pragma::networking::net_messages::server::RESOURCE_BEGIN, resourceReq, pragma::networking::Protocol::SlowReliable);
 }
 
-void ClientState::HandleClientResource(NetPacket &packet)
+void pragma::ClientState::HandleClientResource(NetPacket &packet)
 {
 	std::string file = packet->ReadString();
 	if(!IsValidResource(file)) {
@@ -74,7 +74,7 @@ void ClientState::HandleClientResource(NetPacket &packet)
 	SendPacket(pragma::networking::net_messages::server::RESOURCEINFO_RESPONSE, response, pragma::networking::Protocol::SlowReliable);
 }
 
-void ClientState::HandleClientResourceFragment(NetPacket &packet)
+void pragma::ClientState::HandleClientResourceFragment(NetPacket &packet)
 {
 	if(m_resDownload == nullptr)
 		return;

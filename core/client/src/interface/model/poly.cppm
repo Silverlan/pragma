@@ -13,7 +13,7 @@ export class DLLCLIENT CPoly : public Poly {
   private:
 	void CalculateTextureAxes();
   public:
-	CPoly(NetworkState *nw);
+	CPoly(pragma::NetworkState *nw);
 	virtual void SortVertices() override;
 	virtual void SetTextureData(std::string texture, Vector3 nu, Vector3 nv, float ou, float ov, float su, float sv, float rot = 0) override;
 };

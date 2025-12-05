@@ -22,7 +22,7 @@ pragma::audio::ALSound *pragma::audio::CALSound::FindByServerIndex(uint32_t idx)
 	return it->second.lock().get();
 }
 
-std::shared_ptr<pragma::audio::CALSound> pragma::audio::CALSound::Create(NetworkState *nw, const al::PSoundChannel &channel) {
+std::shared_ptr<pragma::audio::CALSound> pragma::audio::CALSound::Create(pragma::NetworkState *nw, const al::PSoundChannel &channel) {
 	auto als = std::shared_ptr<CALSound> {new CALSound {nw, channel}, [](CALSound *snd) {
 		snd->OnRelease();
 		delete snd;
@@ -30,7 +30,7 @@ std::shared_ptr<pragma::audio::CALSound> pragma::audio::CALSound::Create(Network
 	return als;
 }
 
-pragma::audio::CALSound::CALSound(NetworkState *nw, const al::PSoundChannel &channel) : ALSound(nw), al::SoundSource {channel}
+pragma::audio::CALSound::CALSound(pragma::NetworkState *nw, const al::PSoundChannel &channel) : ALSound(nw), al::SoundSource {channel}
 {
 	UpdateVolume();
 	RegisterCallback<void, std::reference_wrapper<float>>("UpdateGain");
@@ -641,5 +641,5 @@ void pragma::audio::CALSound::SetType(pragma::audio::ALSoundType type)
 	UpdateVolume();
 }
 namespace {
-	auto _ = pragma::console::client::register_variable_listener<bool>("cl_audio_always_play", +[](NetworkState *, const ConVar &, bool, bool) { pragma::get_client_state()->UpdateSoundVolume(); });
+	auto _ = pragma::console::client::register_variable_listener<bool>("cl_audio_always_play", +[](pragma::NetworkState *, const ConVar &, bool, bool) { pragma::get_client_state()->UpdateSoundVolume(); });
 }

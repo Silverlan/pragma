@@ -51,13 +51,13 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 {
 	auto modAsset = luabind::module_(lua.GetState(), "asset");
 	modAsset[(
-		luabind::def("clear_unused",+[](NetworkState &nw,pragma::asset::Type type) -> std::optional<uint32_t> {
+		luabind::def("clear_unused",+[](pragma::NetworkState &nw,pragma::asset::Type type) -> std::optional<uint32_t> {
 			auto *assetManager = nw.GetAssetManager(type);
 			if(!assetManager)
 				return {};
 			return assetManager->ClearUnused();
 		}),
-		luabind::def("clear_unused",+[](NetworkState &nw) -> std::optional<uint32_t> {
+		luabind::def("clear_unused",+[](pragma::NetworkState &nw) -> std::optional<uint32_t> {
 			auto num = umath::to_integral(pragma::asset::Type::Count);
 			uint32_t numCleared = 0;
 			for (decltype(num) i=0u;i<num;++i)

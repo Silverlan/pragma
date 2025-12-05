@@ -30,7 +30,7 @@ export namespace pragma::audio {
 		void SendEvent(NetEvent evId, const std::function<void(NetPacket &)> &write = nullptr, bool bUDP = true) const;
 		uint32_t m_entityIndex = std::numeric_limits<uint32_t>::max();
 	  public:
-		SALSound(NetworkState *nw, unsigned int idx, float duration, const std::string &soundName, pragma::audio::ALCreateFlags createFlags);
+		SALSound(pragma::NetworkState *nw, unsigned int idx, float duration, const std::string &soundName, pragma::audio::ALCreateFlags createFlags);
 		virtual ~SALSound() override;
 		const std::string &GetSoundName() const;
 		pragma::audio::ALCreateFlags GetCreateFlags() const;

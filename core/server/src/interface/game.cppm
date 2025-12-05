@@ -71,7 +71,7 @@ export class DLLSERVER SGame : public pragma::Game {
 	virtual void Tick() override;
 	virtual void Initialize() override;
 	static SGame *Get();
-	SGame(NetworkState *state);
+	SGame(pragma::NetworkState *state);
 	virtual ~SGame() override;
 	virtual void OnRemove() override;
 	virtual bool IsServer() override;

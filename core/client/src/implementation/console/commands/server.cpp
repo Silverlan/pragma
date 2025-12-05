@@ -9,12 +9,12 @@ module pragma.client;
 
 import :console.commands;
 
-static void CMD_cl_send(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_cl_send_udp(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_cl_rcon(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_connect(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_disconnect(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_cl_debug_netmessages(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_cl_send(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_cl_send_udp(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_cl_rcon(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_connect(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_disconnect(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_cl_debug_netmessages(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 namespace {
 	using namespace pragma::console::client;
 
@@ -38,7 +38,7 @@ namespace {
 
 ///////////////////////////
 
-void CMD_cl_rcon(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_cl_rcon(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsConnected() || argv.empty())
@@ -50,10 +50,10 @@ void CMD_cl_rcon(NetworkState *, pragma::BasePlayerComponent *, std::vector<std:
 	client->SendPacket(pragma::networking::net_messages::server::RCON, p, pragma::networking::Protocol::SlowReliable);
 }
 
-void CMD_connect(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_connect(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
-		auto &lastConnection = static_cast<ClientState *>(state)->GetLastConnectionInfo();
+		auto &lastConnection = static_cast<pragma::ClientState *>(state)->GetLastConnectionInfo();
 		if(lastConnection.address.has_value() == false && lastConnection.steamId.has_value() == false) {
 			Con::cout << "No previous connection attempt has been made! Please supply a destination address." << Con::endl;
 			return;
@@ -120,9 +120,9 @@ void CMD_connect(NetworkState *state, pragma::BasePlayerComponent *pl, std::vect
 	pragma::get_cengine()->Connect(argv[0], argv[1]);
 }
 
-void CMD_disconnect(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { pragma::get_cengine()->EndGame(); }
+void CMD_disconnect(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { pragma::get_cengine()->EndGame(); }
 
-void CMD_cl_send(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_cl_send(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
@@ -131,7 +131,7 @@ void CMD_cl_send(NetworkState *, pragma::BasePlayerComponent *, std::vector<std:
 	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::CL_SEND, packet, pragma::networking::Protocol::SlowReliable);
 }
 
-void CMD_cl_send_udp(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_cl_send_udp(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
@@ -140,7 +140,7 @@ void CMD_cl_send_udp(NetworkState *, pragma::BasePlayerComponent *, std::vector<
 	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::CL_SEND, packet, pragma::networking::Protocol::FastUnreliable);
 }
 
-void CMD_cl_debug_netmessages(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_cl_debug_netmessages(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto *cl = pragma::get_client_state()->GetClient();
 	if(cl == nullptr) {

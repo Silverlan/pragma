@@ -20,7 +20,7 @@ import :audio.sound;
 
 pragma::audio::SoundEffectParams::SoundEffectParams(float pgain, float pgainHF, float pgainLF) : gain(pgain), gainHF(pgainHF), gainLF(pgainLF) {}
 
-pragma::audio::ALSound::ALSound(NetworkState *nw) : util::inheritable_enable_shared_from_this<pragma::audio::ALSound>(), util::CallbackHandler(), LuaCallbackHandler(), m_type(pragma::audio::ALSoundType::Generic), m_networkState(nw)
+pragma::audio::ALSound::ALSound(pragma::NetworkState *nw) : util::inheritable_enable_shared_from_this<pragma::audio::ALSound>(), util::CallbackHandler(), LuaCallbackHandler(), m_type(pragma::audio::ALSoundType::Generic), m_networkState(nw)
 {
 	RegisterCallback<void>("OnDestroyed");
 	RegisterCallback<void, ALState, ALState>("OnStateChanged");
@@ -56,7 +56,7 @@ std::pair<float, float> pragma::audio::ALSound::GetRangeOffsets() const
 }
 
 bool pragma::audio::ALSound::IsSoundScript() const { return false; }
-NetworkState *pragma::audio::ALSound::GetNetworkState() const { return m_networkState; }
+pragma::NetworkState *pragma::audio::ALSound::GetNetworkState() const { return m_networkState; }
 
 void pragma::audio::ALSound::SetSource(pragma::ecs::BaseEntity *ent) { m_hSourceEntity = (ent != nullptr) ? ent->GetHandle() : EntityHandle {}; }
 pragma::ecs::BaseEntity *pragma::audio::ALSound::GetSource() const { return const_cast<pragma::ecs::BaseEntity *>(m_hSourceEntity.get()); }

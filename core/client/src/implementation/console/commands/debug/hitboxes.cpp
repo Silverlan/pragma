@@ -7,7 +7,7 @@ module pragma.client;
 
 import :console.commands;
 
-static void debug_hitboxes(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_hitboxes(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	static auto g_debugOverlayEnabled = false;
 	if(g_debugOverlayEnabled) {

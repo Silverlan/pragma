@@ -80,7 +80,7 @@ export class DLLCLIENT CBaseEntity : public pragma::ecs::BaseEntity {
 	void SendNetEventUDP(UInt32 eventId, NetPacket &data) const;
 	void SendNetEventUDP(UInt32 eventId) const;
 
-	virtual NetworkState *GetNetworkState() const override final;
+	virtual pragma::NetworkState *GetNetworkState() const override final;
   protected:
 	virtual void DoSpawn() override;
 	virtual void OnComponentAdded(pragma::BaseEntityComponent &component) override;

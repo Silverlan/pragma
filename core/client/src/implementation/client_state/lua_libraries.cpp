@@ -237,11 +237,11 @@ static void register_gui(Lua::Interface &lua)
 			    monitor = &primaryMonitor;
 		    return monitor->GetSupportedVideoModes();
 	    }),
-		  luabind::def("open_main_menu",+[](ClientState *cl) { cl->OpenMainMenu();
+		  luabind::def("open_main_menu",+[](pragma::ClientState *cl) { cl->OpenMainMenu();
 			}),
-		  luabind::def("close_main_menu",+[](ClientState *cl) { cl->CloseMainMenu();
+		  luabind::def("close_main_menu",+[](pragma::ClientState *cl) { cl->CloseMainMenu();
 			}),
-		  luabind::def("is_main_menu_open",+[](ClientState *cl) -> bool { return cl->IsMainMenuOpen();
+		  luabind::def("is_main_menu_open",+[](pragma::ClientState *cl) -> bool { return cl->IsMainMenuOpen();
 		}),
 	  luabind::def(
 	    "reload_text_elements", +[]() {
@@ -543,7 +543,7 @@ static void register_gui(Lua::Interface &lua)
 	guiMod[wiScrollBarClassDef];
 }
 
-void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
+void pragma::ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
 {
 	register_gui(lua);
 

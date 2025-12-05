@@ -48,7 +48,7 @@ std::shared_ptr<pragma::audio::ALSound> SSoundEmitterComponent::CreateSound(std:
 	auto flags = pragma::audio::ALCreateFlags::Mono;
 	if(sndInfo.transmit == false)
 		flags |= pragma::audio::ALCreateFlags::DontTransmit;
-	auto ptrSnd = ServerState::Get()->CreateSound(sndname, type, flags);
+	auto ptrSnd = pragma::ServerState::Get()->CreateSound(sndname, type, flags);
 	auto *snd = static_cast<pragma::audio::ALSound *>(ptrSnd.get());
 	if(snd == nullptr)
 		return ptrSnd;

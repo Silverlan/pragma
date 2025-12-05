@@ -617,7 +617,7 @@ void CLightComponent::SetShadowBuffer(const std::shared_ptr<prosper::IBuffer> &r
 
 ///////////////////
 
-static void debug_light_sources(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_light_sources(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto &context = pragma::get_cengine()->GetRenderContext();
 	context.WaitIdle();

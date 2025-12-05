@@ -298,7 +298,7 @@ void CSkybox::Initialize()
 	AddComponent<CSkyboxComponent>();
 }
 
-static void sky_override(NetworkState *, const ConVar &, std::string, std::string skyMat)
+static void sky_override(pragma::NetworkState *, const ConVar &, std::string, std::string skyMat)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -419,8 +419,8 @@ static void util_convert_cubemap_equirect(std::vector<std::string> &argv, Conver
 	}
 	Con::cout << "Successfully saved output file '" << outputFileName.GetString() << "'!" << Con::endl;
 }
-static void util_convert_cubemap_to_equirectangular_image(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv) { util_convert_cubemap_equirect(argv, ConversionMode::CubemapToEquirectangular); }
-static void util_convert_equirectangular_image_to_cubemap(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv) { util_convert_cubemap_equirect(argv, ConversionMode::EquirectangularToCubemap); }
+static void util_convert_cubemap_to_equirectangular_image(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv) { util_convert_cubemap_equirect(argv, ConversionMode::CubemapToEquirectangular); }
+static void util_convert_equirectangular_image_to_cubemap(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv) { util_convert_cubemap_equirect(argv, ConversionMode::EquirectangularToCubemap); }
 
 namespace {
 	auto UVN = pragma::console::client::register_command("util_convert_cubemap_to_equirectangular_image", &util_convert_cubemap_to_equirectangular_image, pragma::console::ConVarFlags::None, "Converts a cubemap to a equirectangular image.");

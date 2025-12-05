@@ -63,7 +63,7 @@ void GPUProfiler::InitializeQueries()
 
 /////////////////////////
 
-static void cl_gpu_timer_queries_dump(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void cl_gpu_timer_queries_dump(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto extended = false;
 	if(argv.empty() == false)

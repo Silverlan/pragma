@@ -69,7 +69,7 @@ static CGame *g_game = nullptr;
 CGame *pragma::get_client_game() { return g_game; }
 CGame *pragma::get_cgame() { return g_game; }
 
-CGame::CGame(NetworkState *state)
+CGame::CGame(pragma::NetworkState *state)
     : pragma::Game(state), m_tServer(0), m_renderScene(util::TWeakSharedHandle<pragma::BaseEntityComponent> {}), m_matOverride(nullptr), m_colScale(1, 1, 1, 1),
       //m_shaderOverride(nullptr), // prosper TODO
       m_matLoad(), m_scene(nullptr),
@@ -194,7 +194,7 @@ CGame::CGame(NetworkState *state)
 
 	m_globalShaderInputDataManager = std::make_unique<pragma::rendering::GlobalShaderInputDataManager>();
 
-	auto &texManager = static_cast<msys::CMaterialManager &>(static_cast<ClientState *>(GetNetworkState())->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<msys::CMaterialManager &>(static_cast<pragma::ClientState *>(GetNetworkState())->GetMaterialManager()).GetTextureManager();
 	for(auto &tex : g_requiredGameTextures) {
 		texManager.LoadAsset(tex); // Pre-loaded in ClientState constructor
 		texManager.FlagAssetAsAlwaysInUse(tex, true);
@@ -296,7 +296,7 @@ void CGame::OnGameWorldShaderSettingsChanged(const pragma::rendering::GameWorldS
 	}
 }
 
-static void cmd_render_ibl_enabled(NetworkState *, const ConVar &, bool, bool enabled)
+static void cmd_render_ibl_enabled(pragma::NetworkState *, const ConVar &, bool, bool enabled)
 {
 	auto *client = pragma::get_client_state();
 	if(client == nullptr)
@@ -313,7 +313,7 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<bool>("render_dynamic_shadows_enabled", &cmd_render_ibl_enabled);
 }
 
-static void cmd_render_queue_worker_thread_count(NetworkState *, const ConVar &, int, int val)
+static void cmd_render_queue_worker_thread_count(pragma::NetworkState *, const ConVar &, int, int val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -324,7 +324,7 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>("render_queue_worker_thread_count", &cmd_render_queue_worker_thread_count);
 }
 
-static void cmd_render_queue_worker_jobs_per_batch(NetworkState *, const ConVar &, int, int val)
+static void cmd_render_queue_worker_jobs_per_batch(pragma::NetworkState *, const ConVar &, int, int val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -564,7 +564,7 @@ void CGame::Initialize()
 	m_matLoad = mat ? mat->GetHandle() : nullptr;
 }
 
-static void render_debug_mode(NetworkState *, const ConVar &, int32_t, int32_t debugMode)
+static void render_debug_mode(pragma::NetworkState *, const ConVar &, int32_t, int32_t debugMode)
 {
 	auto *client = pragma::get_client_state();
 	if(client == nullptr)
@@ -581,7 +581,7 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int32_t>("render_debug_mode", &render_debug_mode);
 }
 
-static void CVAR_CALLBACK_render_unlit(NetworkState *nw, const ConVar &cv, bool prev, bool val) { render_debug_mode(nw, cv, prev, umath::to_integral(pragma::SceneDebugMode::Unlit)); }
+static void CVAR_CALLBACK_render_unlit(pragma::NetworkState *nw, const ConVar &cv, bool prev, bool val) { render_debug_mode(nw, cv, prev, umath::to_integral(pragma::SceneDebugMode::Unlit)); }
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<bool>("render_unlit", &CVAR_CALLBACK_render_unlit);
 }
@@ -1198,7 +1198,7 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 {
 	pragma::Game::InitializeWorldData(worldData);
 
-	auto &texManager = static_cast<msys::CMaterialManager &>(static_cast<ClientState *>(GetNetworkState())->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<msys::CMaterialManager &>(static_cast<pragma::ClientState *>(GetNetworkState())->GetMaterialManager()).GetTextureManager();
 	auto texture = texManager.LoadAsset(worldData.GetLightmapAtlasTexturePath(GetMapName()));
 	if(texture) {
 		prosper::util::SamplerCreateInfo samplerCreateInfo {};

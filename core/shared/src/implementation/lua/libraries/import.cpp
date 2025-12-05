@@ -307,7 +307,7 @@ int Lua::import::import_obj(lua::State *l)
 
 int Lua::import::export_model_asset(lua::State *l) { return 0; }
 
-bool Lua::import::import_model_asset(NetworkState &nw, const std::string &outputPath, std::string &outFilePath, std::string &outErr)
+bool Lua::import::import_model_asset(pragma::NetworkState &nw, const std::string &outputPath, std::string &outFilePath, std::string &outErr)
 {
 	auto mdlPath = outputPath + ".blend";
 	auto f = filemanager::open_file("models/" + mdlPath, filemanager::FileMode::Read | filemanager::FileMode::Binary);

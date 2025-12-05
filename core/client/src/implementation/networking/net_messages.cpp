@@ -1813,7 +1813,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_PRINT(NetPacket packet)
 }
 
 static std::unique_ptr<DebugGameGUI> dbgAiSchedule = nullptr;
-void CMD_debug_ai_schedule(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_debug_ai_schedule(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	dbgAiSchedule = nullptr;
 	if(!check_cheats("debug_ai_schedule", state))
@@ -1842,7 +1842,7 @@ void CMD_debug_ai_schedule(NetworkState *state, pragma::BasePlayerComponent *pl,
 	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::DEBUG_AI_SCHEDULE_TREE, p, pragma::networking::Protocol::SlowReliable);
 }
 
-void CMD_debug_draw_line(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_debug_draw_line(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
 		Con::cwar << "No position has been specified!" << Con::endl;
@@ -1867,7 +1867,7 @@ void CMD_debug_draw_line(NetworkState *state, pragma::BasePlayerComponent *pl, s
 	pragma::get_cgame()->DrawLine(tgtPos, tgtPos + uvec::FORWARD, colors::Blue, 12.f);
 }
 
-void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_debug_aim_info(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(pl == nullptr)
 		return;
@@ -2279,7 +2279,7 @@ void NET_cl_ADD_SHARED_COMPONENT(NetPacket packet)
 
 namespace {
 	auto _ = pragma::console::client::register_variable_listener<bool>(
-	  "debug_ai_navigation", +[](NetworkState *state, const ConVar &, bool, bool val) {
+	  "debug_ai_navigation", +[](pragma::NetworkState *state, const ConVar &, bool, bool val) {
 		  if(!check_cheats("debug_ai_navigation", state))
 			  return;
 		  if(pragma::get_cgame() == nullptr)

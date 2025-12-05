@@ -42,7 +42,7 @@ const ResourceManager::ResourceInfo *ResourceManager::FindResource(const std::st
 
 bool ResourceManager::AddResource(std::string res, bool stream)
 {
-	if(ServerState::Get()->IsSinglePlayer())
+	if(pragma::ServerState::Get()->IsSinglePlayer())
 		return false; // We don't need resources in SinglePlayer
 	res = FileManager::GetCanonicalizedPath(res);
 	auto checkName = res;
@@ -71,7 +71,7 @@ bool ResourceManager::AddResource(std::string res, bool stream)
 	m_resources.push_back({res, stream});
 
 	// Send resource to all connected clients
-	ServerState::Get()->SendResourceFile(res);
+	pragma::ServerState::Get()->SendResourceFile(res);
 	//
 	return true;
 }

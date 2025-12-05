@@ -13,7 +13,7 @@ Con::c_cout &operator<<(Con::c_cout &os, const Poly &poly)
 }
 
 static const double EPSILON = 4.9406564584125e-2; //4.9406564584125e-4;//4.94065645841247e-324;
-Poly::Poly(NetworkState *nw) : m_nwState {nw} {}
+Poly::Poly(pragma::NetworkState *nw) : m_nwState {nw} {}
 
 TextureData *Poly::GetTextureData() { return m_texData.get(); }
 

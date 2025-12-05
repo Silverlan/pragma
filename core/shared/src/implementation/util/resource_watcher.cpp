@@ -16,7 +16,7 @@ decltype(eResourceWatcherCallbackType::Map) eResourceWatcherCallbackType::Map = 
 decltype(eResourceWatcherCallbackType::SoundScript) eResourceWatcherCallbackType::SoundScript = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::SoundScript);
 decltype(eResourceWatcherCallbackType::Sound) eResourceWatcherCallbackType::Sound = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Sound);
 decltype(eResourceWatcherCallbackType::Count) eResourceWatcherCallbackType::Count = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Count);
-ResourceWatcherManager::ResourceWatcherManager(NetworkState *nw) : m_networkState(nw), m_watcherManager {filemanager::create_directory_watcher_manager()} {}
+ResourceWatcherManager::ResourceWatcherManager(pragma::NetworkState *nw) : m_networkState(nw), m_watcherManager {filemanager::create_directory_watcher_manager()} {}
 
 void ResourceWatcherManager::Poll()
 {

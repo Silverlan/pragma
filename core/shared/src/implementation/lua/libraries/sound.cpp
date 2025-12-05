@@ -86,13 +86,13 @@ bool Lua::sound::is_music_playing(lua::State *l)
 
 float Lua::sound::get_duration(lua::State *l, const std::string &snd)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	return state->GetSoundDuration(snd);
 }
 
 std::vector<std::shared_ptr<pragma::audio::ALSound>> Lua::sound::get_all(lua::State *l)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto &sounds = state->GetSounds();
 	std::vector<std::shared_ptr<pragma::audio::ALSound>> rsounds;
 	rsounds.reserve(sounds.size());
@@ -123,20 +123,20 @@ std::vector<std::shared_ptr<pragma::audio::ALSound>> Lua::sound::find_by_type(lu
 
 bool Lua::sound::precache(lua::State *l, const std::string &snd, pragma::audio::ALChannel mode)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	return state->PrecacheSound(snd.c_str(), mode);
 }
 bool Lua::sound::precache(lua::State *l, const std::string &snd) { return precache(l, snd, pragma::audio::ALChannel::Auto); }
 
 void Lua::sound::stop_all(lua::State *l)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	state->StopSounds();
 }
 
 void Lua::sound::load_scripts(lua::State *l, const std::string &file)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	state->LoadSoundScripts(file.c_str());
 }
 

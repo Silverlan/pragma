@@ -995,7 +995,7 @@ luabind::tableT<SurfaceMaterial> Lua::physenv::get_surface_materials(lua::State 
 void Lua::physenv::create_character_controller(lua::State *)
 {
 	/*
-	NetworkState *state = Engine::Get()->GetNetworkState(l);
+	auto *state = Engine::Get()->GetNetworkState(l);
 	Game *game = state->GetGameState();
 	btTransform startTransform;
 	startTransform.setIdentity();

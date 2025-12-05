@@ -210,7 +210,7 @@ void CEngine::DumpDebugInformation(uzip::ZIPFile &zip) const
 		zip.AddFile("lua_traceback_" + identifier + ".txt", ss.str());
 	};
 	if(GetClientState())
-		fWriteLuaTraceback(static_cast<ClientState *>(GetClientState())->GetGUILuaState(), "gui");
+		fWriteLuaTraceback(static_cast<pragma::ClientState *>(GetClientState())->GetGUILuaState(), "gui");
 
 	std::stringstream engineInfo;
 	engineInfo << "Render API: " << GetRenderAPI();
@@ -275,7 +275,7 @@ float CEngine::GetFarZ() { return m_farZ; }
 
 bool CEngine::IsClientConnected()
 {
-	auto *cl = static_cast<ClientState *>(GetClientState());
+	auto *cl = static_cast<pragma::ClientState *>(GetClientState());
 	if(cl == nullptr)
 		return false;
 	return cl->IsConnected();
@@ -645,7 +645,7 @@ void CEngine::HandleOpenGLFallback()
 {
 	if(ustring::compare(GetRenderAPI(), std::string {"opengl"}, false))
 		return;
-	auto *cl = static_cast<ClientState *>(GetClientState());
+	auto *cl = static_cast<pragma::ClientState *>(GetClientState());
 	if(!cl)
 		return;
 	auto msg = pragma::locale::get_text("prompt_fallback_to_opengl");
@@ -685,7 +685,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 #endif
 
 	if(Lua::get_extended_lua_modules_enabled())
-		RegisterConCommand("lc", [this](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { RunConsoleCommand("lua_run_cl", argv); });
+		RegisterConCommand("lc", [this](pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { RunConsoleCommand("lua_run_cl", argv); });
 	auto &cmds = *m_clConfig;
 	auto findCmdArg = [&cmds](const std::string &cmd) -> std::optional<std::string> {
 		auto *args = cmds.Find(cmd);
@@ -1544,7 +1544,7 @@ void CEngine::SetControllersEnabled(bool b)
 	pragma::platform::set_joystick_state_callback([this](const pragma::platform::Joystick &joystick, bool bConnected) { pragma::get_cengine()->CallCallbacks<void, std::reference_wrapper<const pragma::platform::Joystick>, bool>("OnJoystickStateChanged", std::ref(joystick), bConnected); });
 }
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_controller_enabled", +[](NetworkState *, const ConVar &, bool, bool newVal) { pragma::get_cengine()->SetControllersEnabled(newVal); });
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_controller_enabled", +[](pragma::NetworkState *, const ConVar &, bool, bool newVal) { pragma::get_cengine()->SetControllersEnabled(newVal); });
 }
 
 float CEngine::GetRawJoystickAxisMagnitude() const { return m_rawInputJoystickMagnitude; }
@@ -1555,7 +1555,7 @@ std::unique_ptr<CEngine::ConVarInfoList> &CEngine::GetConVarConfig(pragma::NwSta
 		return m_clConfig;
 	return pragma::Engine::GetConVarConfig(type);
 }
-pragma::Engine::StateInstance &CEngine::GetStateInstance(NetworkState &nw)
+pragma::Engine::StateInstance &CEngine::GetStateInstance(pragma::NetworkState &nw)
 {
 	if(m_clInstance->state.get() == &nw)
 		return *m_clInstance;
@@ -1613,7 +1613,7 @@ void CEngine::HandleLocalHostPlayerClientPacket(NetPacket &p)
 	auto *client = GetClientState();
 	if(client == nullptr)
 		return;
-	auto *cl = static_cast<ClientState *>(client)->GetClient();
+	auto *cl = static_cast<pragma::ClientState *>(client)->GetClient();
 	if(cl == nullptr)
 		return;
 	cl->HandlePacket(p);
@@ -1621,7 +1621,7 @@ void CEngine::HandleLocalHostPlayerClientPacket(NetPacket &p)
 
 void CEngine::Connect(const std::string &ip, const std::string &port)
 {
-	auto *cl = static_cast<ClientState *>(GetClientState());
+	auto *cl = static_cast<pragma::ClientState *>(GetClientState());
 	if(cl == nullptr)
 		return;
 	cl->Disconnect();
@@ -1640,7 +1640,7 @@ void CEngine::Connect(const std::string &ip, const std::string &port)
 
 void CEngine::Connect(uint64_t steamId)
 {
-	auto *cl = static_cast<ClientState *>(GetClientState());
+	auto *cl = static_cast<pragma::ClientState *>(GetClientState());
 	if(cl == nullptr)
 		return;
 	cl->Disconnect();
@@ -1650,7 +1650,7 @@ void CEngine::Connect(uint64_t steamId)
 
 void CEngine::Disconnect()
 {
-	auto *cl = static_cast<ClientState *>(GetClientState());
+	auto *cl = static_cast<pragma::ClientState *>(GetClientState());
 	if(cl == nullptr)
 		return;
 	if(cl->IsGameActive()) {
@@ -1664,7 +1664,7 @@ bool CEngine::IsMultiPlayer() const
 {
 	if(pragma::Engine::IsMultiPlayer())
 		return true;
-	auto *clState = static_cast<ClientState *>(GetClientState());
+	auto *clState = static_cast<pragma::ClientState *>(GetClientState());
 	if(clState == nullptr)
 		return false;
 	auto *cl = clState ? clState->GetClient() : nullptr;
@@ -1688,7 +1688,7 @@ void CEngine::StartDefaultGame(const std::string &map) { StartDefaultGame(map, t
 
 Lua::Interface *CEngine::GetLuaInterface(lua::State *l)
 {
-	auto *cl = static_cast<ClientState *>(GetClientState());
+	auto *cl = static_cast<pragma::ClientState *>(GetClientState());
 	if(cl != nullptr) {
 		if(cl->GetGUILuaState() == l)
 			return &cl->GetGUILuaInterface();
@@ -1708,9 +1708,9 @@ bool CEngine::IsProgramInFocus() const
 	return false;
 }
 
-NetworkState *CEngine::GetNetworkState(lua::State *l)
+pragma::NetworkState *CEngine::GetNetworkState(lua::State *l)
 {
-	auto *cl = static_cast<ClientState *>(GetClientState());
+	auto *cl = static_cast<pragma::ClientState *>(GetClientState());
 	if(cl == nullptr)
 		return nullptr;
 	if(cl->GetLuaState() == l || cl->GetGUILuaState() == l)
@@ -1886,7 +1886,7 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 		StopProfilingStage(); // RecordGUI
 	}
 
-	auto *cl = static_cast<ClientState *>(GetClientState());
+	auto *cl = static_cast<pragma::ClientState *>(GetClientState());
 	auto tStart = util::Clock::now();
 	if(cl != nullptr) {
 		StartProfilingStage("RecordScene");
@@ -2192,7 +2192,7 @@ CEngine::DroppedFile::DroppedFile(const std::string &rootPath, const std::string
 
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int32_t>(
-	  "cl_render_monitor", +[](NetworkState *, const ConVar &, int32_t, int32_t monitor) {
+	  "cl_render_monitor", +[](pragma::NetworkState *, const ConVar &, int32_t, int32_t monitor) {
 		  auto monitors = pragma::platform::get_monitors();
 		  if(monitor < monitors.size() && monitor >= 0)
 			  pragma::get_cengine()->GetWindow().SetMonitor(monitors[monitor]);
@@ -2200,14 +2200,14 @@ namespace {
 }
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int32_t>(
-	  "cl_render_window_mode", +[](NetworkState *, const ConVar &, int32_t, int32_t val) {
+	  "cl_render_window_mode", +[](pragma::NetworkState *, const ConVar &, int32_t, int32_t val) {
 		  pragma::get_cengine()->GetWindow().SetWindowedMode(val != 0);
 		  pragma::get_cengine()->GetWindow().SetNoBorder(val == 2);
 	  });
 }
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<std::string>(
-	  "cl_window_resolution", +[](NetworkState *, const ConVar &, std::string, std::string val) {
+	  "cl_window_resolution", +[](pragma::NetworkState *, const ConVar &, std::string, std::string val) {
 		  std::vector<std::string> vals;
 		  ustring::explode(val, "x", vals);
 		  if(vals.size() < 2)
@@ -2216,7 +2216,7 @@ namespace {
 		  auto y = util::to_int(vals[1]);
 		  Vector2i resolution(x, y);
 		  pragma::get_cengine()->GetWindow().SetResolution(resolution);
-		  auto *client = static_cast<ClientState *>(pragma::get_cengine()->GetClientState());
+		  auto *client = static_cast<pragma::ClientState *>(pragma::get_cengine()->GetClientState());
 		  if(client != nullptr)
 			  return;
 		  auto &wgui = WGUI::GetInstance();
@@ -2232,7 +2232,7 @@ namespace {
 }
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<std::string>(
-	  "cl_render_resolution", +[](NetworkState *, const ConVar &, std::string, std::string val) {
+	  "cl_render_resolution", +[](pragma::NetworkState *, const ConVar &, std::string, std::string val) {
 		  std::vector<std::string> vals;
 		  ustring::explode(val, "x", vals);
 		  if(vals.size() < 2) {
@@ -2247,7 +2247,7 @@ namespace {
 }
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<bool>(
-	  "cl_gpu_timer_queries_enabled", +[](NetworkState *, const ConVar &, bool, bool enabled) {
+	  "cl_gpu_timer_queries_enabled", +[](pragma::NetworkState *, const ConVar &, bool, bool enabled) {
 		  if(pragma::get_cengine() == nullptr)
 			  return;
 		  pragma::get_cengine()->SetGPUProfilingEnabled(enabled);
@@ -2257,7 +2257,7 @@ namespace {
 static void dump_traceback_gui()
 {
 	auto *en = pragma::get_cengine();
-	auto *state = en ? static_cast<ClientState *>(en->GetClientState()) : nullptr;
+	auto *state = en ? static_cast<pragma::ClientState *>(en->GetClientState()) : nullptr;
 	auto *l = state ? state->GetGUILuaState() : nullptr;
 	if(!l)
 		return;
@@ -2266,7 +2266,7 @@ static void dump_traceback_gui()
 static void dump_stack_gui()
 {
 	auto *en = pragma::get_cengine();
-	auto *state = en ? static_cast<ClientState *>(en->GetClientState()) : nullptr;
+	auto *state = en ? static_cast<pragma::ClientState *>(en->GetClientState()) : nullptr;
 	auto *l = state ? state->GetGUILuaState() : nullptr;
 	if(!l)
 		return;

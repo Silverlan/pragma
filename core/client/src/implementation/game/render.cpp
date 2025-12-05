@@ -19,14 +19,14 @@ import :physics;
 import :rendering.shaders;
 import :scripting.lua;
 
-static void CVAR_CALLBACK_render_vsync_enabled(NetworkState *, const ConVar &, int, int val) { pragma::platform::set_swap_interval((val == 0) ? 0 : 1); }
+static void CVAR_CALLBACK_render_vsync_enabled(pragma::NetworkState *, const ConVar &, int, int val) { pragma::platform::set_swap_interval((val == 0) ? 0 : 1); }
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>("render_vsync_enabled", &CVAR_CALLBACK_render_vsync_enabled);
 }
 
 static CallbackHandle cbDrawPhysics;
 static CallbackHandle cbDrawPhysicsEnd;
-static void CVAR_CALLBACK_debug_physics_draw(NetworkState *, const ConVar &, int, int val, bool serverside)
+static void CVAR_CALLBACK_debug_physics_draw(pragma::NetworkState *, const ConVar &, int, int val, bool serverside)
 {
 	if(cbDrawPhysics.IsValid())
 		cbDrawPhysics.Remove();
@@ -103,13 +103,13 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState *, const ConVar &, int
 	visDebugger->SetDebugMode(mode);
 }
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<int>("debug_physics_draw", +[](NetworkState *nw, const ConVar &cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, false); });
+	auto UVN = pragma::console::client::register_variable_listener<int>("debug_physics_draw", +[](pragma::NetworkState *nw, const ConVar &cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, false); });
 }
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<int>("sv_debug_physics_draw", +[](NetworkState *nw, const ConVar &cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, true); });
+	auto UVN = pragma::console::client::register_variable_listener<int>("sv_debug_physics_draw", +[](pragma::NetworkState *nw, const ConVar &cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, true); });
 }
 
-static void debug_render_validation_error_enabled(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_render_validation_error_enabled(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
 		Con::cwar << "No validation error id specified!" << Con::endl;
@@ -202,7 +202,7 @@ static void print_component_properties(const pragma::ComponentMemberInfo &member
 	});
 	Con::cout << Con::endl << Con::endl;
 }
-static void debug_dump_component_properties(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_dump_component_properties(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto &ent = pl->GetEntity();
 	if(ent.IsCharacter() == false)
@@ -242,7 +242,7 @@ namespace {
 	auto UVN = pragma::console::client::register_command("debug_dump_component_properties", &debug_dump_component_properties, pragma::console::ConVarFlags::None, "Dumps entity component property values to the console.");
 }
 
-static void debug_render_depth_buffer(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_render_depth_buffer(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	pragma::get_cengine()->GetRenderContext().WaitIdle();
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;

@@ -25,7 +25,7 @@ void CEngine::RegisterConsoleCommands()
 	RegisterSharedConsoleCommands(conVarMap);
 	conVarMap.RegisterConCommand("lua_exec_cl", &pragma::console::commands::lua_exec, pragma::console::ConVarFlags::None, "Opens and executes a lua-file on the client.", &pragma::console::commands::lua_exec_autocomplete);
 
-	conVarMap.RegisterConCommand("lua_run_cl", static_cast<void (*)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(&pragma::console::commands::lua_run), pragma::console::ConVarFlags::None, "Runs a lua command on the client lua state.",
+	conVarMap.RegisterConCommand("lua_run_cl", static_cast<void (*)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(&pragma::console::commands::lua_run), pragma::console::ConVarFlags::None, "Runs a lua command on the client lua state.",
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 		  auto *game = pragma::get_client_game();
 		  if(!game)
@@ -38,7 +38,7 @@ void CEngine::RegisterConsoleCommands()
 
 	conVarMap.RegisterConCommand(
 	  "lua_run_gui",
-	  +[](NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv, float v) {
+	  +[](pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv, float v) {
 		  auto *cl = pragma::get_client_state();
 		  auto *l = cl ? cl->GetGUILuaState() : nullptr;
 		  if(!l) {
@@ -59,7 +59,7 @@ void CEngine::RegisterConsoleCommands()
 	  });
 
 	conVarMap.RegisterConVar<bool>("cl_downscale_imported_high_resolution_rma_textures", true, pragma::console::ConVarFlags::Archive, "If enabled, imported high-resolution RMA textures will be downscaled to a more memory-friendly size.");
-	conVarMap.RegisterConVarCallback("cl_downscale_imported_high_resolution_rma_textures", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void {
+	conVarMap.RegisterConVarCallback("cl_downscale_imported_high_resolution_rma_textures", std::function<void(pragma::NetworkState *, const ConVar &, bool, bool)> {[](pragma::NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void {
 		//static_cast<msys::CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).SetDownscaleImportedRMATextures(newVal);
 	}});
 	conVarMap.RegisterConVar<uint8_t>("render_debug_mode", 0, pragma::console::ConVarFlags::None,
@@ -92,7 +92,7 @@ void CEngine::RegisterConsoleCommands()
 	});
 	conVarMap.RegisterConCommand(
 	  "render_api_info",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  auto &renderAPI = GetRenderAPI();
 		  auto &context = GetRenderContext();
 		  Con::cout << "Active render API: " << renderAPI << " (" << context.GetAPIAbbreviation() << ")" << Con::endl;
@@ -100,7 +100,7 @@ void CEngine::RegisterConsoleCommands()
 	  pragma::console::ConVarFlags::None, "Prints information about the current render API to the console.");
 	conVarMap.RegisterConCommand(
 	  "debug_render_stats",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  std::unordered_map<std::string, pragma::console::CommandOption> commandOptions {};
 		  pragma::console::parse_command_options(argv, commandOptions);
 		  auto full = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions, "full", "0"));
@@ -108,11 +108,11 @@ void CEngine::RegisterConsoleCommands()
 	  },
 	  pragma::console::ConVarFlags::None, "Prints information about the next frame.");
 	conVarMap.RegisterConVar<bool>("render_multithreaded_rendering_enabled", true, pragma::console::ConVarFlags::Archive, "Enables or disables multi-threaded rendering. Some renderers (like OpenGL) don't support multi-threaded rendering and will ignore this flag.");
-	conVarMap.RegisterConVarCallback("render_multithreaded_rendering_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[this](NetworkState *nw, const ConVar &cv, bool, bool enabled) -> void { GetRenderContext().SetMultiThreadedRenderingEnabled(enabled); }});
-	conVarMap.RegisterConVarCallback("render_enable_verbose_output", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[this](NetworkState *nw, const ConVar &cv, bool, bool enabled) -> void { pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED = enabled; }});
+	conVarMap.RegisterConVarCallback("render_multithreaded_rendering_enabled", std::function<void(pragma::NetworkState *, const ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const ConVar &cv, bool, bool enabled) -> void { GetRenderContext().SetMultiThreadedRenderingEnabled(enabled); }});
+	conVarMap.RegisterConVarCallback("render_enable_verbose_output", std::function<void(pragma::NetworkState *, const ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const ConVar &cv, bool, bool enabled) -> void { pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED = enabled; }});
 	conVarMap.RegisterConCommand(
 	  "crash",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  Con::cwar << "Crash command has been invoked. Crashing intentionally..." << Con::endl;
 		  if(!argv.empty() && argv.front() == "exception") {
 			  throw std::runtime_error {"Crash!"};
@@ -123,14 +123,14 @@ void CEngine::RegisterConsoleCommands()
 	  pragma::console::ConVarFlags::None, "Forces the engine to crash.");
 	conVarMap.RegisterConCommand(
 	  "crash_gpu",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  Con::cwar << "GPU Crash command has been invoked. Crashing intentionally..." << Con::endl;
 		  GetRenderContext().Crash();
 	  },
 	  pragma::console::ConVarFlags::None, "Forces a GPU crash.");
 	conVarMap.RegisterConCommand(
 	  "debug_render_memory_budget",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  auto budget = GetRenderContext().DumpMemoryBudget();
 		  if(!budget.has_value()) {
 			  Con::cout << "No memory budget information available!" << Con::endl;
@@ -141,7 +141,7 @@ void CEngine::RegisterConsoleCommands()
 	  pragma::console::ConVarFlags::None, "Prints information about the current GPU memory budget.");
 	conVarMap.RegisterConCommand(
 	  "debug_render_memory_stats",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  auto stats = GetRenderContext().DumpMemoryStats();
 		  if(!stats.has_value()) {
 			  Con::cout << "No memory stats information available!" << Con::endl;
@@ -152,7 +152,7 @@ void CEngine::RegisterConsoleCommands()
 	  pragma::console::ConVarFlags::None, "Prints statistics about the current GPU memory usage.");
 	conVarMap.RegisterConCommand(
 	  "debug_dump_shader_code",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
 			  Con::cwar << "No shader specified!" << Con::endl;
 			  return;
@@ -214,11 +214,11 @@ void CEngine::RegisterConsoleCommands()
 		  Con::cout << "Done! Written shader files to '" << path << "'!" << Con::endl;
 	  },
 	  pragma::console::ConVarFlags::None, "Dumps the glsl code for the specified shader.");
-	conVarMap.RegisterConCommand("debug_dump_render_queues", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { g_dumpRenderQueues = true; }, pragma::console::ConVarFlags::None, "Prints all render queues for the next frame to the console.");
+	conVarMap.RegisterConCommand("debug_dump_render_queues", [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { g_dumpRenderQueues = true; }, pragma::console::ConVarFlags::None, "Prints all render queues for the next frame to the console.");
 	conVarMap.RegisterConVar<bool>("debug_hide_gui", false, pragma::console::ConVarFlags::None, "Disables GUI rendering.");
 
 	conVarMap.RegisterConVar<bool>("render_vsync_enabled", true, pragma::console::ConVarFlags::Archive, "Enables or disables vsync. OpenGL only.");
-	conVarMap.RegisterConVarCallback("render_vsync_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[this](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void { GetRenderContext().GetWindow()->SetVSyncEnabled(newVal); }});
+	conVarMap.RegisterConVarCallback("render_vsync_enabled", std::function<void(pragma::NetworkState *, const ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void { GetRenderContext().GetWindow()->SetVSyncEnabled(newVal); }});
 
 	conVarMap.RegisterConVar<std::string>("audio_api", "fmod", pragma::console::ConVarFlags::Archive | pragma::console::ConVarFlags::Replicated, "The underlying audio API to use.", "<audioApi>", [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 		auto audioAPIs = pragma::audio::get_available_audio_apis();
@@ -251,8 +251,8 @@ void CEngine::RegisterConsoleCommands()
 
 	conVarMap.RegisterConCommand(
 	  "debug_textures",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
-		  auto &texManager = static_cast<msys::CMaterialManager &>(static_cast<ClientState *>(GetClientState())->GetMaterialManager()).GetTextureManager();
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  auto &texManager = static_cast<msys::CMaterialManager &>(static_cast<pragma::ClientState *>(GetClientState())->GetMaterialManager()).GetTextureManager();
 		  std::vector<std::shared_ptr<msys::Texture>> textures;
 		  auto &cache = texManager.GetCache();
 		  textures.reserve(cache.size());
@@ -447,7 +447,7 @@ void CEngine::RegisterConsoleCommands()
 #if LUA_ENABLE_RUN_GUI == 1
 	conVarMap.RegisterConCommand(
 	  "lua_exec_gui",
-	  [](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty())
 			  return;
 		  Lua::set_ignore_include_cache(true);
@@ -469,11 +469,11 @@ void CEngine::RegisterConsoleCommands()
 	  });
 #endif
 	conVarMap.RegisterConCommand(
-	  "asset_clear_unused_textures", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(pragma::asset::Type::Texture, true); }, pragma::console::ConVarFlags::None, "Clears all unused textures from memory.");
+	  "asset_clear_unused_textures", [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(pragma::asset::Type::Texture, true); }, pragma::console::ConVarFlags::None, "Clears all unused textures from memory.");
 	conVarMap.RegisterConCommand(
 	  "vr_preinitialize",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
-		  auto *cl = static_cast<ClientState *>(GetClientState());
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  auto *cl = static_cast<pragma::ClientState *>(GetClientState());
 		  if(!cl)
 			  return;
 		  std::string err;
@@ -498,7 +498,7 @@ void CEngine::RegisterConsoleCommands()
 	  pragma::console::ConVarFlags::None, "Pre-initializes openvr.");
 	conVarMap.RegisterConCommand(
 	  "locale_localize",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.size() < 4) {
 			  Con::cwar << "Insufficient arguments supplied!" << Con::endl;
 			  std::vector<std::string> files;
@@ -525,7 +525,7 @@ void CEngine::RegisterConsoleCommands()
 	  pragma::console::ConVarFlags::None, "Adds the specified text to the localization files. Usage: locale_localize <group> <language> <textIdentifier> <localizedText>");
 	conVarMap.RegisterConCommand(
 	  "locale_relocalize",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.size() < 4) {
 			  Con::cwar << "Insufficient arguments supplied!" << Con::endl;
 			  return;
@@ -544,7 +544,7 @@ void CEngine::RegisterConsoleCommands()
 	  pragma::console::ConVarFlags::None, "Moves the specified localized string to a different category with a different identifier. Usage: locale_localize <identifier> <newIdentifier> <category> <newCategory>");
 	conVarMap.RegisterConCommand(
 	  "debug_start_lua_debugger_server_cl",
-	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  auto *l = state->GetLuaState();
 		  if(!l) {
 			  Con::cwar << "Unable to start debugger server: No active Lua state!" << Con::endl;

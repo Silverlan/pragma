@@ -10,28 +10,28 @@ module pragma.server;
 import :console.register_commands;
 import pragma.shared;
 
-static void CMD_entities_sv(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);
-static void CMD_map(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);
-static void CMD_list_maps(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);
-static void CMD_status_sv(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);
-static void CMD_drop(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_kick(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_entities_sv(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);
+static void CMD_map(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);
+static void CMD_list_maps(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);
+static void CMD_status_sv(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);
+static void CMD_drop(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_kick(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 #ifdef _DEBUG
-static void CMD_sv_dump_netmessages(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_sv_dump_netmessages(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 #endif
 
-static void CMD_sv_send(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv);
-static void CMD_sv_send_udp(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv);
-static void CMD_ent_input(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_ent_scale(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_ent_remove(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_ent_create(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_nav_reload(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_nav_generate(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &);
-static void CMD_heartbeat(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &);
-static void CMD_sv_debug_netmessages(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_startserver(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv);
-static void CMD_closeserver(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &);
+static void CMD_sv_send(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv);
+static void CMD_sv_send_udp(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv);
+static void CMD_ent_input(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_ent_scale(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_ent_remove(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_ent_create(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_nav_reload(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_nav_generate(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &);
+static void CMD_heartbeat(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &);
+static void CMD_sv_debug_netmessages(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_startserver(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv);
+static void CMD_closeserver(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &);
 
 namespace {
 	using namespace pragma::console::server;
@@ -58,7 +58,7 @@ namespace {
 	auto UVN = register_command("sv_debug_netmessages", &CMD_sv_debug_netmessages, pragma::console::ConVarFlags::None, "Prints out debug information about recent net-messages.");
 }
 
-void CMD_drop(NetworkState *, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
+void CMD_drop(pragma::NetworkState *, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
 	if(pl == nullptr)
 		return;
@@ -67,7 +67,7 @@ void CMD_drop(NetworkState *, pragma::BasePlayerComponent *pl, std::vector<std::
 		sCharComponent.get()->DropActiveWeapon();
 }
 
-void CMD_kick(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_kick(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty() || argv.front().empty())
 		return;
@@ -101,7 +101,7 @@ void CMD_kick(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::st
 }
 
 #ifdef _DEBUG
-void CMD_sv_dump_netmessages(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_sv_dump_netmessages(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	auto *map = GetServerMessageMap();
 	std::unordered_map<std::string, unsigned int> *netmessages;
@@ -122,7 +122,7 @@ void CMD_sv_dump_netmessages(NetworkState *, pragma::BasePlayerComponent *, std:
 }
 #endif
 
-void CMD_entities_sv(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_entities_sv(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(!state->IsGameActive())
 		return;
@@ -142,7 +142,7 @@ void CMD_entities_sv(NetworkState *state, pragma::BasePlayerComponent *pl, std::
 	}
 }
 
-void CMD_list_maps(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
+void CMD_list_maps(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
 	std::vector<std::string> files;
 	auto exts = pragma::asset::get_supported_extensions(pragma::asset::Type::Map);
@@ -159,11 +159,11 @@ void CMD_list_maps(NetworkState *state, pragma::BasePlayerComponent *pl, std::ve
 	Con::cout << Con::endl;
 }
 
-void CMD_status_sv(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void CMD_status_sv(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	auto &players = pragma::SPlayerComponent::GetAll();
 	std::string ip;
-	auto *sv = ServerState::Get()->GetServer();
+	auto *sv = pragma::ServerState::Get()->GetServer();
 	if(sv == nullptr) {
 		std::stringstream str;
 		str << "[::1]";
@@ -173,13 +173,13 @@ void CMD_status_sv(NetworkState *, pragma::BasePlayerComponent *, std::vector<st
 		auto hostIp = sv->GetHostIP();
 		ip = hostIp.has_value() ? *hostIp : "Unknown";
 	}
-	auto &serverData = ServerState::Get()->GetServerData();
+	auto &serverData = pragma::ServerState::Get()->GetServerData();
 	Con::cout << "hostname:\t" << serverData.name << Con::endl;
 	Con::cout << "udp/ip:\t\t" << ip << Con::endl;
 	Con::cout << "map:\t\t" << serverData.map << Con::endl;
 	Con::cout << "players:\t" << players.size() << " (" << serverData.maxPlayers << " max)" << Con::endl << Con::endl;
 	Con::cout << "#  userid\tname    \tconnected\tping";
-	auto bServerRunning = ServerState::Get()->IsServerRunning();
+	auto bServerRunning = pragma::ServerState::Get()->IsServerRunning();
 	if(bServerRunning == true)
 		Con::cout << "\tadr";
 	Con::cout << Con::endl;
@@ -201,14 +201,14 @@ void CMD_status_sv(NetworkState *, pragma::BasePlayerComponent *, std::vector<st
 	}
 }
 
-void CMD_sv_send(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_sv_send(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
 	NetPacket packet;
 	packet->WriteString(argv[(argv.size() == 1) ? 0 : 1]);
 	if(argv.size() == 1)
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::SV_SEND, packet, pragma::networking::Protocol::SlowReliable);
+		pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::SV_SEND, packet, pragma::networking::Protocol::SlowReliable);
 	else {
 		/*ServerState::Get()->
 		ClientSession *cs = GetSessionByPlayerID(atoi(argv[0]));
@@ -221,14 +221,14 @@ void CMD_sv_send(NetworkState *, pragma::BasePlayerComponent *, std::vector<std:
 	}
 }
 
-void CMD_sv_send_udp(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_sv_send_udp(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
 	NetPacket packet;
 	packet->WriteString(argv[(argv.size() == 1) ? 0 : 1]);
 	if(argv.size() == 1)
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::SV_SEND, packet, pragma::networking::Protocol::FastUnreliable);
+		pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::SV_SEND, packet, pragma::networking::Protocol::FastUnreliable);
 	else {
 		/*ClientSession *cs = GetSessionByPlayerID(atoi(argv[0]));
 		if(!cs)
@@ -240,7 +240,7 @@ void CMD_sv_send_udp(NetworkState *, pragma::BasePlayerComponent *, std::vector<
 	}
 }
 
-void CMD_ent_input(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_ent_input(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(!check_cheats("ent_input", state))
 		return;
@@ -283,7 +283,7 @@ void CMD_ent_input(NetworkState *state, pragma::BasePlayerComponent *pl, std::ve
 		Con::cwar << "No raycast target found!" << Con::endl;
 }
 
-void CMD_ent_scale(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_ent_scale(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(!check_cheats("ent_scale", state))
 		return;
@@ -314,7 +314,7 @@ void CMD_ent_scale(NetworkState *state, pragma::BasePlayerComponent *pl, std::ve
 	}
 }
 
-void CMD_ent_remove(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_ent_remove(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(!check_cheats("ent_remove", state))
 		return;
@@ -333,7 +333,7 @@ void CMD_ent_remove(NetworkState *state, pragma::BasePlayerComponent *pl, std::v
 		ent->Remove();
 }
 
-void CMD_ent_create(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_ent_create(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(!check_cheats("ent_create", state))
 		return;
@@ -380,14 +380,14 @@ void CMD_ent_create(NetworkState *state, pragma::BasePlayerComponent *pl, std::v
 	entNew->Spawn();
 }
 
-void CMD_nav_reload(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_nav_reload(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(SGame::Get() == nullptr)
 		return;
 	SGame::Get()->LoadNavMesh(true);
 }
 
-void CMD_nav_generate(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void CMD_nav_generate(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(SGame::Get() == nullptr)
 		return;
@@ -415,19 +415,19 @@ void CMD_nav_generate(NetworkState *, pragma::BasePlayerComponent *, std::vector
 	}
 }
 
-void CMD_heartbeat(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void CMD_heartbeat(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	if(ServerState::Get() == nullptr)
+	if(pragma::ServerState::Get() == nullptr)
 		return;
-	auto *sv = ServerState::Get()->GetServer();
+	auto *sv = pragma::ServerState::Get()->GetServer();
 	if(sv == nullptr)
 		return;
 	sv->Heartbeat();
 }
 
-void CMD_sv_debug_netmessages(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_sv_debug_netmessages(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	auto *sv = ServerState::Get()->GetServer();
+	auto *sv = pragma::ServerState::Get()->GetServer();
 	if(sv == nullptr) {
 		Con::cwar << "No server is active!" << Con::endl;
 		return;
@@ -450,5 +450,5 @@ void CMD_sv_debug_netmessages(NetworkState *state, pragma::BasePlayerComponent *
 	sv->DebugDump("sv_netmessages.dump", *svMsgs, *clMsgs);
 }
 
-static void CMD_startserver(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv) { pragma::Engine::Get()->StartServer(false); }
-static void CMD_closeserver(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { pragma::Engine::Get()->CloseServer(); }
+static void CMD_startserver(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv) { pragma::Engine::Get()->StartServer(false); }
+static void CMD_closeserver(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { pragma::Engine::Get()->CloseServer(); }

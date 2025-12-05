@@ -29,30 +29,30 @@ static bool GetRecipients(pragma::SPlayerComponent &pl, pragma::networking::Targ
 
 bool Lua::net::server::register_net_message(const std::string &identifier)
 {
-	if(!::ServerState::Get()->IsGameActive())
+	if(!pragma::ServerState::Get()->IsGameActive())
 		return false;
-	pragma::Game *game = ::ServerState::Get()->GetGameState();
+	pragma::Game *game = pragma::ServerState::Get()->GetGameState();
 	return game->RegisterNetMessage(identifier);
 }
 
 void Lua::net::server::broadcast(pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet)
 {
 	::NetPacket packetNew;
-	if(!NetIncludePacketID(::ServerState::Get(), identifier, packet, packetNew)) {
+	if(!NetIncludePacketID(pragma::ServerState::Get(), identifier, packet, packetNew)) {
 		Con::cwar << Con::PREFIX_SERVER << "Attempted to send unindexed lua net message: " << identifier << Con::endl;
 		return;
 	}
-	::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::LUANET, packetNew, protocol);
+	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::LUANET, packetNew, protocol);
 }
 
 static void send(lua::State *l, pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet, const pragma::networking::TargetRecipientFilter &rp)
 {
 	::NetPacket packetNew;
-	if(!NetIncludePacketID(::ServerState::Get(), identifier, packet, packetNew)) {
+	if(!NetIncludePacketID(pragma::ServerState::Get(), identifier, packet, packetNew)) {
 		Con::cwar << Con::PREFIX_SERVER << "Attempted to send unindexed lua net message: " << identifier << Con::endl;
 		return;
 	}
-	::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::LUANET, packetNew, protocol, rp);
+	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::LUANET, packetNew, protocol, rp);
 }
 
 void Lua::net::server::send(lua::State *l, pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet, const luabind::tableT<pragma::SPlayerComponent> &recipients)
@@ -71,9 +71,9 @@ void Lua::net::server::send(lua::State *l, pragma::networking::Protocol protocol
 
 void Lua::net::server::receive(lua::State *l, const std::string &name, const Lua::func<void> &function)
 {
-	if(!::ServerState::Get()->IsGameActive())
+	if(!pragma::ServerState::Get()->IsGameActive())
 		return;
-	pragma::Game *game = ::ServerState::Get()->GetGameState();
+	pragma::Game *game = pragma::ServerState::Get()->GetGameState();
 	function.push(l);
 	int fc = Lua::create_reference(l, -1);
 	Lua::Pop(l, 1);

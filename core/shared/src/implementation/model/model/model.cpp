@@ -67,7 +67,7 @@ pragma::Model::MetaInfo::MetaInfo() {}
 
 pragma::Model::Model() : m_reference(Frame::Create(0)) { Construct(); }
 
-pragma::Model::Model(NetworkState *nw, uint32_t numBones, const std::string &name) : pragma::Model()
+pragma::Model::Model(pragma::NetworkState *nw, uint32_t numBones, const std::string &name) : pragma::Model()
 {
 	m_networkState = nw;
 	m_name = name;
@@ -597,7 +597,7 @@ void pragma::Model::Construct()
 	uvec::zero(&m_renderMax);
 }
 
-bool pragma::Model::Load(pragma::Model &mdl, NetworkState &nw, const udm::AssetData &data, std::string &outErr)
+bool pragma::Model::Load(pragma::Model &mdl, pragma::NetworkState &nw, const udm::AssetData &data, std::string &outErr)
 {
 	assert(nw.GetGameState());
 	if(mdl.LoadFromAssetData(*nw.GetGameState(), data, outErr) == false)

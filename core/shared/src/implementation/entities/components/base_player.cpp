@@ -103,7 +103,7 @@ void BasePlayerComponent::OnTick(double tDelta)
 		if((!m_actionController || m_actionController->GetActionInput(pragma::Action::Crouch) == false) && m_crouchTransition != CrouchTransition::Uncrouching)
 			UnCrouch();
 		else if(m_crouchTransition != CrouchTransition::None) {
-			NetworkState *state = ent.GetNetworkState();
+			auto *state = ent.GetNetworkState();
 			pragma::Game *game = state->GetGameState();
 			if(game->CurTime() >= m_tCrouch) {
 				m_tCrouch = 0.f;
@@ -408,7 +408,7 @@ void BasePlayerComponent::OnPhysicsInitialized()
 pragma::ecs::BaseEntity *BasePlayerComponent::FindUseEntity() const
 {
 	auto &ent = GetEntity();
-	NetworkState *state = ent.GetNetworkState();
+	auto *state = ent.GetNetworkState();
 	pragma::Game *game = state->GetGameState();
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
@@ -536,7 +536,7 @@ void BasePlayerComponent::OnEntitySpawn()
 	BaseEntityComponent::OnEntitySpawn();
 
 	auto &ent = GetEntity();
-	NetworkState *state = ent.GetNetworkState();
+	auto *state = ent.GetNetworkState();
 	m_timeConnected = state->RealTime();
 
 	auto pPhysComponent = ent.GetPhysicsComponent();
@@ -636,7 +636,7 @@ void BasePlayerComponent::Crouch()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	m_shapeStand = nullptr;
-	NetworkState *state = ent.GetNetworkState();
+	auto *state = ent.GetNetworkState();
 	pragma::Game *game = state->GetGameState();
 	if(phys != nullptr && phys->IsController()) {
 		auto *controllerPhys = static_cast<ControllerPhysObj *>(phys);
@@ -671,7 +671,7 @@ void BasePlayerComponent::UnCrouch(bool bForce)
 	m_shapeStand = nullptr;
 	m_crouchTransition = CrouchTransition::Uncrouching;
 	auto &ent = GetEntity();
-	NetworkState *state = ent.GetNetworkState();
+	auto *state = ent.GetNetworkState();
 	pragma::Game *game = state->GetGameState();
 	m_bForceAnimationUpdate = true;
 	m_tCrouch = CFloat(game->CurTime()) + 0.4f;

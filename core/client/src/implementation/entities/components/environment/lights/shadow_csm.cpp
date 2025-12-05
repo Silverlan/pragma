@@ -30,7 +30,7 @@ Frustum::Frustum() : radius(0.f)
 	projection = umat::identity();
 }
 
-static void cmd_cl_render_shadow_pssm_split_count(NetworkState *, const ConVar &, int, int val)
+static void cmd_cl_render_shadow_pssm_split_count(pragma::NetworkState *, const ConVar &, int, int val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -48,7 +48,7 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_shadow_pssm_split_count", &cmd_cl_render_shadow_pssm_split_count);
 }
 
-static void cmd_render_csm_max_distance(NetworkState *, const ConVar &, float, float val)
+static void cmd_render_csm_max_distance(pragma::NetworkState *, const ConVar &, float, float val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;

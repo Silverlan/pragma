@@ -186,7 +186,7 @@ export {
 			//
 		  public:
 			//
-			Game(NetworkState *state);
+			Game(pragma::NetworkState *state);
 			virtual ~Game();
 			virtual void OnRemove();
 			virtual bool IsServer();
@@ -470,5 +470,5 @@ export {
 		}
 	}
 
-	DLLNETWORK bool NetIncludePacketID(NetworkState *state, std::string identifier, NetPacket &packet, NetPacket &packetNew);
+	DLLNETWORK bool NetIncludePacketID(pragma::NetworkState *state, std::string identifier, NetPacket &packet, NetPacket &packetNew);
 };

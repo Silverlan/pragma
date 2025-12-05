@@ -150,7 +150,7 @@ void COcclusionCuller::Initialize()
 	AddComponent<COcclusionCullerComponent>();
 }
 
-DLLCLIENT void CMD_debug_render_octree_static_print(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+DLLCLIENT void CMD_debug_render_octree_static_print(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -167,7 +167,7 @@ DLLCLIENT void CMD_debug_render_octree_static_print(NetworkState *, pragma::Base
 	meshTree->DebugPrint();
 }
 
-DLLCLIENT void CMD_debug_render_octree_dynamic_print(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+DLLCLIENT void CMD_debug_render_octree_dynamic_print(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -179,7 +179,7 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_print(NetworkState *state, pragma
 	octree.DebugPrint();
 }
 
-DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+DLLCLIENT void CMD_debug_render_octree_dynamic_find(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(pragma::get_client_state() == nullptr || pl == nullptr)
 		return;
@@ -229,7 +229,7 @@ namespace {
 	auto UVN = pragma::console::client::register_command("debug_render_octree_dynamic_find", &CMD_debug_render_octree_dynamic_find, pragma::console::ConVarFlags::None, "Finds the specified entity in the octree for dynamic objects.");
 }
 
-static void CVAR_CALLBACK_debug_render_octree_static_draw(NetworkState *, const ConVar &, bool, bool val)
+static void CVAR_CALLBACK_debug_render_octree_static_draw(pragma::NetworkState *, const ConVar &, bool, bool val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -265,7 +265,7 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<bool>("debug_render_octree_static_draw", &CVAR_CALLBACK_debug_render_octree_static_draw);
 }
 
-static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(NetworkState *, const ConVar &, bool, bool val)
+static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(pragma::NetworkState *, const ConVar &, bool, bool val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;

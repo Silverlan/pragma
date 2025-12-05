@@ -47,8 +47,8 @@ export {
 	namespace pragma {
 		class Game;
 	}
-	class NetworkState;
 	namespace pragma {
+		class NetworkState;
 		class EntityComponentManager;
 		class BaseEntityComponentSystem;
 		struct ComponentMemberInfo;

@@ -291,7 +291,7 @@ struct DebugFreezeCamData {
 	std::vector<umath::Plane> frustumPlanes;
 };
 static std::optional<DebugFreezeCamData> g_debugFreezeCamData = {};
-static void cmd_debug_occlusion_culling_freeze_camera(NetworkState *, const ConVar &, bool, bool val)
+static void cmd_debug_occlusion_culling_freeze_camera(pragma::NetworkState *, const ConVar &, bool, bool val)
 {
 	g_debugFreezeCamData = {};
 	if(val == false)

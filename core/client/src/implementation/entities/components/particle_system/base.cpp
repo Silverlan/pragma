@@ -89,7 +89,7 @@ bool ecs::CParticleSystemComponent::IsParticleFilePrecached(const std::string &f
 	return (it != s_precached.end()) ? true : false;
 }
 
-std::optional<ecs::ParticleSystemFileHeader> ecs::CParticleSystemComponent::ReadHeader(NetworkState &nw, const std::string &fileName)
+std::optional<ecs::ParticleSystemFileHeader> ecs::CParticleSystemComponent::ReadHeader(pragma::NetworkState &nw, const std::string &fileName)
 {
 	auto ptPath = pragma::asset::find_file(fileName, pragma::asset::Type::ParticleSystem);
 	if(ptPath.has_value() == false)

@@ -17,6 +17,7 @@ export {
 		class ModelMeshGroup;
 		class ModelSubMesh;
 		class PanimaComponent;
+		class NetworkState;
 
 		namespace audio {
 			class ALSound;
@@ -65,5 +66,4 @@ export {
 	}
 	class DamageInfo;
 	class ModelMesh;
-	class NetworkState;
 }

@@ -43,7 +43,7 @@ export {
 	class DLLNETWORK ResourceWatcherManager {
 	  public:
 		using TypeHandler = std::function<void(const util::Path &, const std::string &)>;
-		ResourceWatcherManager(NetworkState *nw);
+		ResourceWatcherManager(pragma::NetworkState *nw);
 		bool MountDirectory(const std::string &path, bool bAbsolutePath = false);
 		void Poll();
 
@@ -57,7 +57,7 @@ export {
 		CallbackHandle AddChangeCallback(EResourceWatcherCallbackType type, const std::function<void(std::reference_wrapper<const std::string>, std::reference_wrapper<const std::string>)> &fcallback);
 		void RegisterTypeHandler(const std::string &ext, const TypeHandler &handler);
 	  protected:
-		NetworkState *m_networkState = nullptr;
+		pragma::NetworkState *m_networkState = nullptr;
 		uint32_t m_lockedCount = 0;
 		std::recursive_mutex m_watcherMutex;
 		void OnResourceChanged(const util::Path &rootPath, const util::Path &path);

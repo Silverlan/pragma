@@ -11,7 +11,7 @@ export import :audio.enums;
 export import :entities.base_entity_handle;
 export import :scripting.lua.callback_handler;
 
-export {
+export namespace pragma {
 	class NetworkState;
 }
 export namespace pragma::audio {
@@ -99,7 +99,7 @@ export namespace pragma::audio {
 		void UpdateOffset();
 		void InitRange();
 	  public:
-		ALSound(NetworkState *nw);
+		ALSound(pragma::NetworkState *nw);
 		virtual ~ALSound();
 		virtual void Initialize();
 		virtual void OnRelease();

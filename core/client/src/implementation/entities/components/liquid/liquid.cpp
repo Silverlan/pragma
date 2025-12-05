@@ -129,7 +129,7 @@ void CFuncWater::Initialize()
 	AddComponent<CLiquidComponent>();
 }
 
-static void debug_water(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_water(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
 	dbg = nullptr;

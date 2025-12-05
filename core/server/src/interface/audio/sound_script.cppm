@@ -13,7 +13,7 @@ export namespace pragma::audio {
 	  protected:
 		virtual std::shared_ptr<pragma::audio::ALSound> CreateSound(const std::string &name, ALChannel channel, pragma::audio::ALCreateFlags createFlags) override;
 	  public:
-		SALSoundScript(NetworkState *nw, unsigned int idx, SoundScript *script, NetworkState *state, const std::string &soundName, pragma::audio::ALCreateFlags createFlags);
+		SALSoundScript(pragma::NetworkState *nw, unsigned int idx, SoundScript *script, pragma::NetworkState *state, const std::string &soundName, pragma::audio::ALCreateFlags createFlags);
 		virtual ALState GetState() const override;
 		virtual unsigned int GetIndex() const override;
 		virtual void FadeIn(float time) override;

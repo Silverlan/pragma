@@ -359,7 +359,7 @@ static void register_shader_graph(lua::State *l, luabind::module_ &modShader)
 	oGraph["CATEGORY_UTILITY"] = pragma::shadergraph::CATEGORY_UTILITY;
 }
 
-void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
+void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 {
 	auto &modEngine = lua.RegisterLibrary("engine");
 	auto defFontInfo = luabind::class_<FontInfo>("FontInfo");
@@ -1128,7 +1128,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 void CGame::RegisterLuaClasses()
 {
 	pragma::Game::RegisterLuaClasses();
-	ClientState::RegisterSharedLuaClasses(GetLuaInterface());
+	pragma::ClientState::RegisterSharedLuaClasses(GetLuaInterface());
 
 	auto debugMod = luabind::module(GetLuaState(), "debug");
 	auto defDebugRendererObject = luabind::class_<DebugRenderer::BaseObject>("RendererObject");

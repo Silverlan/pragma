@@ -579,7 +579,7 @@ static void print_shader_material_data(msys::CMaterial &mat)
 	shaderMatData.DebugPrint();
 }
 
-static void debug_print_shader_material_data(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_print_shader_material_data(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
 		Con::cwar << "No material specified!" << Con::endl;

@@ -19,7 +19,7 @@ luabind::tableT<pragma::SPlayerComponent> Lua::RecipientFilter::GetRecipients(lu
 		auto &rp = recipients.at(i);
 		if(rp.expired())
 			continue;
-		auto *pl = ServerState::Get()->GetPlayer(*rp);
+		auto *pl = pragma::ServerState::Get()->GetPlayer(*rp);
 		if(!pl)
 			continue;
 		t[idx++] = pl->GetLuaObject();

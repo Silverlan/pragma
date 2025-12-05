@@ -78,7 +78,7 @@ luabind::object Lua::util::Server::fire_bullets(lua::State *l, const BulletInfo 
 		packet->Write<Vector3>(n);
 		packet->Write<int32_t>(surfaceMaterial);
 	}
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::FIRE_BULLET, packet, pragma::networking::Protocol::FastUnreliable);
+	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::FIRE_BULLET, packet, pragma::networking::Protocol::FastUnreliable);
 	return r;
 }
 

@@ -11,7 +11,7 @@ import :client_state;
 
 #undef GetMessage
 
-void ClientState::Connect(std::string ip, std::string sport)
+void pragma::ClientState::Connect(std::string ip, std::string sport)
 {
 	EndGame();
 	// "localhost" is ALWAYS single-player!
@@ -34,7 +34,7 @@ void ClientState::Connect(std::string ip, std::string sport)
 		Con::cwar << "Unable to connect to '" << ip << ":" << port << "': " << err.GetMessage() << "!" << Con::endl;
 }
 
-void ClientState::Connect(uint64_t steamId)
+void pragma::ClientState::Connect(uint64_t steamId)
 {
 	EndGame();
 	auto &lastConnection = GetLastConnectionInfo();

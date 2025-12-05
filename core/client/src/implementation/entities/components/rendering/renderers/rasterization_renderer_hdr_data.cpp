@@ -20,7 +20,7 @@ using namespace pragma::rendering;
 static const float EXPOSURE_FRAME_UPDATE = 0.25f; // Exposure will be updated every x seconds
 
 static CVar cvMaxExposure = GetClientConVar("render_hdr_max_exposure");
-static void CVAR_CALLBACK_render_hdr_max_exposure(NetworkState *, const ConVar &, float, float val)
+static void CVAR_CALLBACK_render_hdr_max_exposure(pragma::NetworkState *, const ConVar &, float, float val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -442,7 +442,7 @@ void HDRData::UpdateExposure()
 
 static auto cvAntiAliasing = GetClientConVar("cl_render_anti_aliasing");
 static auto cvMsaaSamples = GetClientConVar("cl_render_msaa_samples");
-static void CVAR_CALLBACK_render_msaa_enabled(NetworkState *, const ConVar &, int, int)
+static void CVAR_CALLBACK_render_msaa_enabled(pragma::NetworkState *, const ConVar &, int, int)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -483,7 +483,7 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_msaa_samples", &CVAR_CALLBACK_render_msaa_enabled);
 }
 
-static void CVAR_CALLBACK_render_bloom_resolution(NetworkState *, const ConVar &, int, int width)
+static void CVAR_CALLBACK_render_bloom_resolution(pragma::NetworkState *, const ConVar &, int, int width)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -494,7 +494,7 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>("render_bloom_resolution", &CVAR_CALLBACK_render_bloom_resolution);
 }
 
-static void debug_render_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_render_scene(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
 	if(dbg != nullptr) {

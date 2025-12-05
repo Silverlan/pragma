@@ -8,7 +8,7 @@ import :physics.object;
 
 ControllerPhysObj::~ControllerPhysObj()
 {
-	//NetworkState *state = m_networkState;
+	//auto *state = m_networkState;
 	//Game *game = state->GetGameState();
 	//PhysEnv *physEnv = game->GetPhysicsEnvironment();
 	if(m_controller.IsValid())
@@ -59,7 +59,7 @@ void ControllerPhysObj::PostSimulate()
 	auto *owner = GetOwner();
 	if(owner == nullptr)
 		return;
-	NetworkState *state = owner->GetEntity().GetNetworkState();
+	auto *state = owner->GetEntity().GetNetworkState();
 	pragma::Game *game = state->GetGameState();
 	//PhysTransform t = m_ghostObject->GetWorldTransform();
 	//auto shape = m_ghostObject->GetCollisionShape();
@@ -190,7 +190,7 @@ void ControllerPhysObj::Simulate(double tDelta, bool bIgnoreGravity)
 	auto *owner = GetOwner();
 	if(owner == nullptr || m_collisionObject == nullptr)
 		return;
-	//NetworkState *state = owner->GetNetworkState();
+	//auto *state = owner->GetNetworkState();
 	//Game *game = state->GetGameState();
 	//double tCur = game->CurTime();
 	//physx::PxControllerState controllerState;
@@ -230,7 +230,7 @@ void ControllerPhysObj::UpdateVelocity()
 {
 	if(m_owner.expired())
 		return;
-	NetworkState *state = m_owner->GetEntity().GetNetworkState();
+	auto *state = m_owner->GetEntity().GetNetworkState();
 	pragma::Game *game = state->GetGameState();
 	double delta = game->DeltaTickTime();
 	float scale;
@@ -259,7 +259,7 @@ bool BoxControllerPhysObj::Initialize(const Vector3 &halfExtents, unsigned int s
 	umath::Transform startTransform;
 	startTransform.SetIdentity();
 	startTransform.SetOrigin(pos);
-	NetworkState *state = m_networkState;
+	auto *state = m_networkState;
 	pragma::Game *game = state->GetGameState();
 	auto *physEnv = game->GetPhysicsEnvironment();
 	if(physEnv == nullptr)
@@ -330,7 +330,7 @@ bool CapsuleControllerPhysObj::Initialize(unsigned int width, unsigned int heigh
 	startTransform.SetIdentity();
 	startTransform.SetOrigin(pos);
 
-	NetworkState *state = m_networkState;
+	auto *state = m_networkState;
 	pragma::Game *game = state->GetGameState();
 	auto *physEnv = game->GetPhysicsEnvironment();
 	if(physEnv == nullptr)

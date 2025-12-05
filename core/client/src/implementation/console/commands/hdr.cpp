@@ -9,7 +9,7 @@ module pragma.client;
 
 import :console.commands;
 
-void CMD_debug_hdr_bloom(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_debug_hdr_bloom(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	auto &wgui = WGUI::GetInstance();
 	auto *pRoot = wgui.GetBaseElement();

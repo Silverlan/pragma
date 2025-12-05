@@ -18,7 +18,7 @@ export import :map.map_info;
 export import :types;
 export import :util.resource_watcher;
 
-export {
+export namespace pragma {
 	class DLLNETWORK NetworkState : public util::CallbackHandler, public CVarHandler {
 		// For internal use only! Not to be used directly!
 	  protected:
@@ -184,5 +184,5 @@ export {
 		virtual void implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const override;
 	};
 
-	DLLNETWORK bool check_cheats(const std::string &scmd, NetworkState *state);
+	DLLNETWORK bool check_cheats(const std::string &scmd, pragma::NetworkState *state);
 };

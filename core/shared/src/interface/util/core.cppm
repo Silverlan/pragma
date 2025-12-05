@@ -13,7 +13,7 @@ export import pragma.udm;
 
 export {
 	namespace util {
-		DLLNETWORK util::ParallelJob<std::vector<Vector2> &> generate_lightmap_uvs(NetworkState &nwState, uint32_t atlastWidth, uint32_t atlasHeight, const std::vector<umath::Vertex> &verts, const std::vector<uint32_t> &tris);
+		DLLNETWORK util::ParallelJob<std::vector<Vector2> &> generate_lightmap_uvs(pragma::NetworkState &nwState, uint32_t atlastWidth, uint32_t atlasHeight, const std::vector<umath::Vertex> &verts, const std::vector<uint32_t> &tris);
 		DLLNETWORK std::shared_ptr<udm::Data> load_udm_asset(const std::string &fileName, std::string *optOutErr = nullptr);
 		DLLNETWORK std::shared_ptr<udm::Data> load_udm_asset(std::unique_ptr<ufile::IFile> &&f, std::string *optOutErr = nullptr);
 

@@ -233,7 +233,7 @@ void CBaseEntity::Remove()
 	game->RemoveEntity(this);
 }
 
-NetworkState *CBaseEntity::GetNetworkState() const { return pragma::get_client_state(); }
+pragma::NetworkState *CBaseEntity::GetNetworkState() const { return pragma::get_client_state(); }
 
 bool CBaseEntity::IsClientsideOnly() const { return (GetIndex() == 0) ? true : false; }
 

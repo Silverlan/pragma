@@ -65,7 +65,7 @@ static int32_t exec(lua::State *l)
 	return numResults;
 }
 
-void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
+void pragma::NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 {
 	// To make sure Lua errors are handled properly, we need to use a regular Lua binding here
 	// without luabind
@@ -234,7 +234,7 @@ static pragma::ecs::BaseEntity *find_entity(lua::State *l, pragma::Game &game, l
 
 void pragma::Game::RegisterLuaGlobals()
 {
-	NetworkState::RegisterSharedLuaGlobals(GetLuaInterface());
+	pragma::NetworkState::RegisterSharedLuaGlobals(GetLuaInterface());
 
 	lua::register_function(GetLuaState(), "include_component", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
 		std::string componentName = Lua::CheckString(l, 1);

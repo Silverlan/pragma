@@ -344,7 +344,7 @@ void pragma::Engine::Close()
 #endif
 }
 
-static uint32_t clear_assets(NetworkState *state, pragma::asset::Type type, bool verbose)
+static uint32_t clear_assets(pragma::NetworkState *state, pragma::asset::Type type, bool verbose)
 {
 	if(!state)
 		return 0;
@@ -506,7 +506,7 @@ void pragma::Engine::ClearCache()
 	Con::cout << "Cache cleared successfully! Please restart the Engine." << Con::endl;
 }
 
-NetworkState *pragma::Engine::GetServerNetworkState() const
+pragma::NetworkState *pragma::Engine::GetServerNetworkState() const
 {
 	if(m_svInstance == nullptr)
 		return nullptr;
@@ -615,7 +615,7 @@ std::unique_ptr<pragma::Engine::ConVarInfoList> &pragma::Engine::GetConVarConfig
 	assert(type == NwStateType::Server);
 	return m_svConfig;
 }
-pragma::Engine::StateInstance &pragma::Engine::GetStateInstance(NetworkState &nw)
+pragma::Engine::StateInstance &pragma::Engine::GetStateInstance(pragma::NetworkState &nw)
 {
 	assert(m_svInstance != nullptr);
 	return *m_svInstance;
@@ -759,7 +759,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	//
 
 	if(Lua::get_extended_lua_modules_enabled()) {
-		RegisterConCommand("l", [this](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { RunConsoleCommand("lua_run", argv); });
+		RegisterConCommand("l", [this](pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { RunConsoleCommand("lua_run", argv); });
 	}
 	if(!IsServerOnly())
 		LoadConfig();
@@ -893,7 +893,7 @@ Lua::Interface *pragma::Engine::GetLuaInterface(lua::State *l)
 	return nullptr;
 }
 
-NetworkState *pragma::Engine::GetNetworkState(lua::State *l)
+pragma::NetworkState *pragma::Engine::GetNetworkState(lua::State *l)
 {
 	auto *sv = GetServerNetworkState();
 	if(sv == nullptr)
@@ -1151,7 +1151,7 @@ void pragma::Engine::Think()
 		sv->Think();
 }
 
-NetworkState *pragma::Engine::OpenServerState()
+pragma::NetworkState *pragma::Engine::OpenServerState()
 {
 	CloseServerState();
 	std::unique_ptr<NetworkState> svState;
@@ -1173,11 +1173,11 @@ void pragma::Engine::CloseServerState()
 	GetServerStateInterface().clear_server_state();
 }
 
-NetworkState *pragma::Engine::GetClientState() const { return nullptr; }
+pragma::NetworkState *pragma::Engine::GetClientState() const { return nullptr; }
 
-NetworkState *pragma::Engine::GetActiveState() { return GetServerNetworkState(); }
+pragma::NetworkState *pragma::Engine::GetActiveState() { return GetServerNetworkState(); }
 
-bool pragma::Engine::IsActiveState(NetworkState *state) { return state == GetActiveState(); }
+bool pragma::Engine::IsActiveState(pragma::NetworkState *state) { return state == GetActiveState(); }
 
 void pragma::Engine::AddLaunchConVar(std::string cvar, std::string val) { m_launchCommands.push_back({cvar, {val}}); }
 
@@ -1206,4 +1206,4 @@ pragma::Engine::~Engine()
 }
 
 pragma::Engine *pragma::get_engine() { return g_engine; }
-NetworkState *pragma::get_server_state() { return pragma::Engine::Get()->GetServerStateInterface().get_server_state(); }
+pragma::NetworkState *pragma::get_server_state() { return pragma::Engine::Get()->GetServerStateInterface().get_server_state(); }

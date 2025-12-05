@@ -10,7 +10,7 @@ import :engine;
 
 double Lua::ServerTime(lua::State *l)
 {
-	NetworkState *state = pragma::get_cengine()->GetNetworkState(l);
+	auto *state = pragma::get_cengine()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
 	return game->ServerTime();
 }

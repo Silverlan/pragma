@@ -12,7 +12,7 @@ import pragma.audio.util;
 import :audio;
 import :game;
 
-void ServerState::SendSoundSourceToClient(pragma::audio::SALSound &sound, bool sendFullUpdate, const pragma::networking::ClientRecipientFilter *rf)
+void pragma::ServerState::SendSoundSourceToClient(pragma::audio::SALSound &sound, bool sendFullUpdate, const pragma::networking::ClientRecipientFilter *rf)
 {
 	NetPacket p;
 	p->WriteString(sound.GetSoundName());
@@ -81,7 +81,7 @@ void ServerState::SendSoundSourceToClient(pragma::audio::SALSound &sound, bool s
 	else
 		SendPacket(pragma::networking::net_messages::client::SND_CREATE, p, pragma::networking::Protocol::FastUnreliable);
 }
-std::shared_ptr<pragma::audio::ALSound> ServerState::CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags)
+std::shared_ptr<pragma::audio::ALSound> pragma::ServerState::CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags)
 {
 	ustring::to_lower(snd);
 	snd = FileManager::GetNormalizedPath(snd);
@@ -168,17 +168,17 @@ std::shared_ptr<pragma::audio::ALSound> ServerState::CreateSound(std::string snd
 	return pAs;
 }
 
-void ServerState::UpdateSounds()
+void pragma::ServerState::UpdateSounds()
 {
 	assert(m_sounds.size() == m_serverSounds.size());
 	NetworkState::UpdateSounds(m_serverSounds);
 }
 
-void ServerState::StopSounds() {}
+void pragma::ServerState::StopSounds() {}
 
-void ServerState::StopSound(std::shared_ptr<pragma::audio::ALSound> pSnd) {}
+void pragma::ServerState::StopSound(std::shared_ptr<pragma::audio::ALSound> pSnd) {}
 
-bool ServerState::PrecacheSound(std::string snd, pragma::audio::ALChannel mode)
+bool pragma::ServerState::PrecacheSound(std::string snd, pragma::audio::ALChannel mode)
 {
 	ustring::to_lower(snd);
 	snd = FileManager::GetCanonicalizedPath(snd);

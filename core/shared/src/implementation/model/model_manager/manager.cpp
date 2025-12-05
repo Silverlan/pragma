@@ -117,7 +117,7 @@ static const std::vector<std::string> &get_model_extensions()
 	auto processor = std::make_unique<ModelProcessor>(nw,*this,std::move(file));
 	return IAssetLoader::AddJob(identifier,std::move(processor),priority);
 }*/
-pragma::asset::ModelManager::ModelManager(NetworkState &nw) : m_nw {nw}
+pragma::asset::ModelManager::ModelManager(pragma::NetworkState &nw) : m_nw {nw}
 {
 	auto fileHandler = std::make_unique<util::AssetFileHandler>();
 	fileHandler->open = [](const std::string &path, util::AssetFormatType formatType) -> std::unique_ptr<ufile::IFile> {

@@ -12,7 +12,7 @@ import :engine;
 import :entities.components.world;
 import :game;
 
-void ClientState::HandlePacket(NetPacket &packet)
+void pragma::ClientState::HandlePacket(NetPacket &packet)
 {
 	packet->SetClient(true);
 	CallCallbacks<void, std::reference_wrapper<NetPacket>>("OnReceivePacket", packet);
@@ -26,9 +26,9 @@ void ClientState::HandlePacket(NetPacket &packet)
 	msg->handler(packet);
 }
 
-void ClientState::HandleConnect() { RequestServerInfo(); }
+void pragma::ClientState::HandleConnect() { RequestServerInfo(); }
 
-void ClientState::RequestServerInfo()
+void pragma::ClientState::RequestServerInfo()
 {
 	Con::ccl << "Sending serverinfo request..." << Con::endl;
 	NetPacket packet;
@@ -36,7 +36,7 @@ void ClientState::RequestServerInfo()
 	SendPacket(pragma::networking::net_messages::server::SERVERINFO_REQUEST, packet, pragma::networking::Protocol::SlowReliable);
 }
 
-void ClientState::HandleClientReceiveServerInfo(NetPacket &packet)
+void pragma::ClientState::HandleClientReceiveServerInfo(NetPacket &packet)
 {
 	m_svInfo = std::make_unique<ServerInfo>();
 	if(IsConnected()) {
@@ -83,7 +83,7 @@ void ClientState::HandleClientReceiveServerInfo(NetPacket &packet)
 	SendPacket(pragma::networking::net_messages::server::AUTHENTICATE, outAuthPacket, pragma::networking::Protocol::SlowReliable);
 }
 
-void ClientState::HandleClientStartResourceTransfer(NetPacket &packet)
+void pragma::ClientState::HandleClientStartResourceTransfer(NetPacket &packet)
 {
 	if(m_svInfo == nullptr) {
 		Disconnect();
@@ -104,7 +104,7 @@ void ClientState::HandleClientStartResourceTransfer(NetPacket &packet)
 	StartResourceTransfer();
 }
 
-void ClientState::LoadLuaCache(std::string cache, unsigned int cacheSize)
+void pragma::ClientState::LoadLuaCache(std::string cache, unsigned int cacheSize)
 {
 	throw std::runtime_error {"Not implemented."};
 #if 0
@@ -146,7 +146,7 @@ void ClientState::LoadLuaCache(std::string cache, unsigned int cacheSize)
 extern CBaseEntity *NET_cl_ENT_CREATE(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false);
 extern CBaseEntity *NET_cl_ENT_CREATE_LUA(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false);
 
-void ClientState::ReadEntityData(NetPacket &packet)
+void pragma::ClientState::ReadEntityData(NetPacket &packet)
 {
 	unsigned int numEnts = packet->Read<unsigned int>();
 	std::vector<EntityHandle> ents;
@@ -175,7 +175,7 @@ void ClientState::ReadEntityData(NetPacket &packet)
 	}
 }
 
-void ClientState::HandleReceiveGameInfo(NetPacket &packet)
+void pragma::ClientState::HandleReceiveGameInfo(NetPacket &packet)
 {
 	if(IsGameActive())
 		EndGame();
@@ -300,7 +300,7 @@ void ClientState::HandleReceiveGameInfo(NetPacket &packet)
 	game->ReloadSoundCache();
 }
 
-void ClientState::SetGameReady()
+void pragma::ClientState::SetGameReady()
 {
 	if(!m_game)
 		return;

@@ -453,7 +453,7 @@ std::optional<umath::Transform> BaseAttachmentComponent::GetParentPose() const
 void BaseAttachmentComponent::UpdateAttachmentOffset(bool invokeUpdateEvents)
 {
 	auto &entThis = GetEntity();
-	NetworkState *state = entThis.GetNetworkState();
+	auto *state = entThis.GetNetworkState();
 	pragma::Game *game = state->GetGameState();
 	auto t = CFloat(game->CurTime());
 	if(t <= m_tLastAttachmentUpdate)

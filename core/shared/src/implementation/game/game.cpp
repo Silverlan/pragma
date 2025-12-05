@@ -132,7 +132,7 @@ void Lua::TableDump(lua::State *lua, int n)
 
 ////////////////
 
-pragma::Game::Game(NetworkState *state)
+pragma::Game::Game(pragma::NetworkState *state)
 {
 	m_stateNetwork = state;
 	m_mapInfo.name = "";
@@ -449,7 +449,7 @@ void pragma::Game::InitializeGame()
 	std::string err;
 	auto dllHandle = GetNetworkState()->InitializeLibrary(physEngineLibName, &err);
 	if(dllHandle) {
-		auto *fInitPhysicsEngine = dllHandle->FindSymbolAddress<void (*)(NetworkState &, std::unique_ptr<pragma::physics::IEnvironment, void (*)(pragma::physics::IEnvironment *)> &)>("initialize_physics_engine");
+		auto *fInitPhysicsEngine = dllHandle->FindSymbolAddress<void (*)(pragma::NetworkState &, std::unique_ptr<pragma::physics::IEnvironment, void (*)(pragma::physics::IEnvironment *)> &)>("initialize_physics_engine");
 		if(fInitPhysicsEngine != nullptr)
 			fInitPhysicsEngine(*GetNetworkState(), m_physEnvironment);
 		else
@@ -510,7 +510,7 @@ void pragma::Game::GetSpawnedEntities(std::vector<pragma::ecs::BaseEntity *> *en
 	}
 }
 
-NetworkState *pragma::Game::GetNetworkState() { return m_stateNetwork; }
+pragma::NetworkState *pragma::Game::GetNetworkState() { return m_stateNetwork; }
 
 void pragma::Game::UpdateTime()
 {

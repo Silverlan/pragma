@@ -10,7 +10,9 @@ import :console.output;
 export import pragma.materialsystem;
 
 export {
-	class NetworkState;
+	namespace pragma {
+		class NetworkState;
+	}
 	struct DLLNETWORK PolyVertex {
 		Vector3 pos = {};
 		Vector3 normal = {};
@@ -82,9 +84,9 @@ export {
 	class DLLNETWORK Poly {
 		friend Con::c_cout &operator<<(Con::c_cout &, const Poly &);
 	  public:
-		Poly(NetworkState *nw);
+		Poly(pragma::NetworkState *nw);
 	  protected:
-		NetworkState *m_nwState = nullptr;
+		pragma::NetworkState *m_nwState = nullptr;
 		std::vector<PolyVertex> m_vertices;
 		Vector3 m_normal = {};
 		Vector3 m__normal = {};

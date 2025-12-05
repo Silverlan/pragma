@@ -132,7 +132,7 @@ bool BasePointConstraintComponent::SetKeyValue(std::string key, std::string val)
 void BasePointConstraintComponent::GetTargetEntities(std::vector<pragma::ecs::BaseEntity *> &entsTgt)
 {
 	pragma::ecs::BaseEntity &ent = GetEntity();
-	NetworkState *state = ent.GetNetworkState();
+	auto *state = ent.GetNetworkState();
 	pragma::Game *game = state->GetGameState();
 	if(m_kvTarget.empty())
 		return;
@@ -148,7 +148,7 @@ void BasePointConstraintComponent::GetTargetEntities(std::vector<pragma::ecs::Ba
 pragma::ecs::BaseEntity *BasePointConstraintComponent::GetSourceEntity()
 {
 	pragma::ecs::BaseEntity &entThis = GetEntity();
-	NetworkState *state = entThis.GetNetworkState();
+	auto *state = entThis.GetNetworkState();
 	pragma::Game *game = state->GetGameState();
 	if(m_kvSource.empty()) {
 		auto *pWorld = game->GetWorld();

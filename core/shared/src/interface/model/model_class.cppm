@@ -24,10 +24,10 @@ export import :physics.joint_info;
 export import pragma.materialsystem;
 
 export {
-	class NetworkState;
 #pragma warning(push)
 #pragma warning(disable : 4251)
 	namespace pragma {
+		class NetworkState;
 		class DLLNETWORK ModelMeshGroup : public std::enable_shared_from_this<pragma::ModelMeshGroup> {
 		  public:
 			static constexpr std::uint32_t layout_version = 1;
@@ -227,9 +227,9 @@ export {
 		  public:
 			static constexpr auto PMDL_IDENTIFIER = "PMDL";
 			static constexpr udm::Version PMDL_VERSION = 1;
-			static bool Load(pragma::Model &mdl, NetworkState &nw, const udm::AssetData &data, std::string &outErr);
+			static bool Load(pragma::Model &mdl, pragma::NetworkState &nw, const udm::AssetData &data, std::string &outErr);
 			template<class TModel>
-			static std::shared_ptr<pragma::Model> Create(NetworkState *nw, uint32_t numBones, const std::string &name = "")
+			static std::shared_ptr<pragma::Model> Create(pragma::NetworkState *nw, uint32_t numBones, const std::string &name = "")
 			{
 				return std::shared_ptr<pragma::Model> {new TModel {nw, numBones, name}};
 			}
@@ -239,7 +239,7 @@ export {
 				return std::shared_ptr<pragma::Model> {new TModel {other}};
 			}
 			template<class TModel>
-			static std::shared_ptr<pragma::Model> Load(NetworkState &nw, const udm::AssetData &data, std::string &outErr)
+			static std::shared_ptr<pragma::Model> Load(pragma::NetworkState &nw, const udm::AssetData &data, std::string &outErr)
 			{
 				auto mdl = Create<TModel>(&nw, 0u);
 				if(Load(*mdl, nw, data, outErr) == false)
@@ -578,7 +578,7 @@ export {
 			std::optional<pragma::SignedAxis> FindBoneAxisForDirection(pragma::animation::BoneId boneId, const Vector3 &dir) const;
 			static Quat GetTwistAxisRotationOffset(pragma::SignedAxis axis);
 		  protected:
-			Model(NetworkState *nw, uint32_t numBones, const std::string &name = "");
+			Model(pragma::NetworkState *nw, uint32_t numBones, const std::string &name = "");
 			Model(const pragma::Model &other);
 			bool LoadFromAssetData(pragma::Game &game, const udm::AssetData &data, std::string &outErr);
 			virtual void OnMaterialMissing(const std::string &matName);

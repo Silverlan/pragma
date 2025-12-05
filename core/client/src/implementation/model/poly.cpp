@@ -9,7 +9,7 @@ import :model.poly;
 
 import :client_state;
 
-CPoly::CPoly(NetworkState *nw) : Poly(nw) {}
+CPoly::CPoly(pragma::NetworkState *nw) : Poly(nw) {}
 
 void CPoly::SortVertices()
 {

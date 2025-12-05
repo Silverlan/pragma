@@ -36,7 +36,7 @@ export namespace pragma::ecs {
 		static bool IsParticleFilePrecached(const std::string &fname);
 		static void InitializeBuffers();
 		static void ClearBuffers();
-		static std::optional<ParticleSystemFileHeader> ReadHeader(NetworkState &nw, const std::string &fileName);
+		static std::optional<ParticleSystemFileHeader> ReadHeader(pragma::NetworkState &nw, const std::string &fileName);
 		static std::optional<ParticleSystemFileHeader> ReadHeader(VFilePtr &f);
 		static bool Precache(std::string fname, bool bReload = false);
 		static bool PrecacheLegacy(std::string fname, bool bReload = false);

@@ -337,7 +337,7 @@ void GUIDebugCursorManager::OnThink()
 	}
 }
 
-static void debug_gui_cursor(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_gui_cursor(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	static std::unique_ptr<GUIDebugCursorManager> s_dbgManager = nullptr;
 	if(s_dbgManager != nullptr && argv.empty()) {
@@ -363,7 +363,7 @@ namespace {
 	auto UVN = pragma::console::client::register_command("debug_gui_cursor", &debug_gui_cursor, pragma::console::ConVarFlags::None, "Prints information about the GUI element currently hovered over by the cursor.");
 }
 
-static void debug_dump_font_glyph_map(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_dump_font_glyph_map(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto &wgui = WGUI::GetInstance();
 	if(argv.empty()) {
@@ -395,7 +395,7 @@ namespace {
 	auto UVN = pragma::console::client::register_command("debug_dump_font_glyph_map", &debug_dump_font_glyph_map, pragma::console::ConVarFlags::None, "Dumps the glyph map for the specified font to an image file.");
 }
 
-static void debug_font_glyph_map(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_font_glyph_map(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto &wgui = WGUI::GetInstance();
 	auto *el = static_cast<WITexturedRect *>(wgui.GetBaseElement()->FindDescendantByName("dbg_glyph_map"));

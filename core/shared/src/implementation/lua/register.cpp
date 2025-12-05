@@ -178,7 +178,7 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, util::HSV);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(std, std::match_results<const char *>);
 #endif
 
-void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
+void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 {
 	// Remove sensitive functions and libraries
 	Lua::PushNil(lua.GetState());
@@ -1189,7 +1189,7 @@ static void add_log_func(lua::State *l, luabind::object &oLogger, const char *na
 
 void pragma::Game::RegisterLuaLibraries()
 {
-	NetworkState::RegisterSharedLuaLibraries(GetLuaInterface());
+	pragma::NetworkState::RegisterSharedLuaLibraries(GetLuaInterface());
 
 	auto *l = GetLuaState();
 	Lua::RegisterLibrary(l, "import",

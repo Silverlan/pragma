@@ -987,7 +987,7 @@ bool pragma::rendering::RenderBufferData::IsDepthPrepassEnabled() const { return
 void pragma::rendering::RenderBufferData::SetGlowPassEnabled(bool enabled) { umath::set_flag(stateFlags, StateFlags::EnableGlowPass, enabled); }
 bool pragma::rendering::RenderBufferData::IsGlowPassEnabled() const { return umath::is_flag_set(stateFlags, StateFlags::EnableGlowPass); }
 
-static void debug_entity_render_buffer(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_entity_render_buffer(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
 	if(charComponent.expired())

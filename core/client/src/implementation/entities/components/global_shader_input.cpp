@@ -87,7 +87,7 @@ const std::string *UdmPropertyList::GetPropertyName(size_t index) const { return
 void CGlobalShaderInputComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	// TODO: This should be moved to a more appropriate location
-	pragma::get_client_state()->RegisterConCommand("debug_print_shader_input_properties", +[](NetworkState *nw, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv, float) { CGlobalShaderInputComponent::DebugPrintProperties(); });
+	pragma::get_client_state()->RegisterConCommand("debug_print_shader_input_properties", +[](pragma::NetworkState *nw, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv, float) { CGlobalShaderInputComponent::DebugPrintProperties(); });
 
 	auto def = pragma::LuaCore::create_entity_component_class<pragma::CGlobalShaderInputComponent, pragma::BaseEntityComponent>("GlobalShaderInputComponent");
 	modEnts[def];

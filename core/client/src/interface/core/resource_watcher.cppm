@@ -27,6 +27,6 @@ export {
 		virtual void ReloadTexture(const std::string &path) override;
 		virtual void GetWatchPaths(std::vector<std::string> &paths) override;
 	  public:
-		CResourceWatcherManager(NetworkState *nw);
+		CResourceWatcherManager(pragma::NetworkState *nw);
 	};
 };

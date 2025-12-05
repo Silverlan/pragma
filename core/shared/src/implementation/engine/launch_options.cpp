@@ -8,8 +8,6 @@ module pragma.shared;
 
 import :engine;
 
-void register_launch_parameters(LaunchParaMap &map);
-
 pragma::Engine::LaunchCommand::LaunchCommand(const std::string &cmd, const std::vector<std::string> &_args) : command(cmd), args(_args) {}
 
 void pragma::Engine::InitLaunchOptions(int argc, char *argv[])
@@ -191,7 +189,7 @@ DLLNETWORK void LPARAM_USE_VKV_PARSER(const std::vector<std::string> &argv)
 DLLNETWORK void LPARAM_help(const std::vector<std::string> &argv)
 {
 	pragma::Engine::Get()->OpenConsole();
-	LaunchParaMap *map = GetLaunchParaMap();
+	auto *map = pragma::GetLaunchParaMap();
 	if(map == nullptr)
 		return;
 	Con::cout << "Available parameters:" << Con::endl << map->LAUNCHPARAMETERS_HELP.str() << Con::endl;
@@ -248,7 +246,7 @@ static void LPARAM_resource_dir(const std::vector<std::string> &argv)
 		g_lpResourceDirs.insert(g_lpResourceDirs.begin(), arg);
 }
 
-void register_launch_parameters(LaunchParaMap &map)
+void pragma::register_launch_parameters(LaunchParaMap &map)
 {
 	map.RegisterParameterHelp("-console", LPARAM_console, "", "start with the console open");
 	map.RegisterParameterHelp("-dev", LPARAM_dev, "", "enable developer mode");

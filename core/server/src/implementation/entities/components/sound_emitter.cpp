@@ -22,7 +22,7 @@ void SSoundEmitterComponent::SendData(NetPacket &packet, networking::ClientRecip
 	packet->Write<uint8_t>(numSounds);
 	auto numWritten = decltype(numSounds) {0};
 	for(auto &snd : sounds) {
-		if(dynamic_cast<SALSoundBase *>(snd.get())->IsShared() == false)
+		if(dynamic_cast<audio::SALSoundBase *>(snd.get())->IsShared() == false)
 			continue;
 		packet->Write<uint32_t>(snd->GetIndex());
 		if(++numWritten == numSounds)
@@ -30,9 +30,9 @@ void SSoundEmitterComponent::SendData(NetPacket &packet, networking::ClientRecip
 	}
 	packet->Write<uint8_t>(numWritten, &offset);
 }
-void SSoundEmitterComponent::UpdateSoundTransform(ALSound &snd) const
+void SSoundEmitterComponent::UpdateSoundTransform(audio::ALSound &snd) const
 {
-	auto *baseSnd = SALSound::GetBase(&snd);
+	auto *baseSnd = audio::SALSound::GetBase(&snd);
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pTrComponent != nullptr) {
@@ -43,13 +43,13 @@ void SSoundEmitterComponent::UpdateSoundTransform(ALSound &snd) const
 	if(pVelComponent.valid())
 		baseSnd->SetVelocity(pVelComponent->GetVelocity(), true);
 }
-std::shared_ptr<ALSound> SSoundEmitterComponent::CreateSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo)
+std::shared_ptr<pragma::audio::ALSound> SSoundEmitterComponent::CreateSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo)
 {
 	auto flags = pragma::audio::ALCreateFlags::Mono;
 	if(sndInfo.transmit == false)
 		flags |= pragma::audio::ALCreateFlags::DontTransmit;
 	auto ptrSnd = ServerState::Get()->CreateSound(sndname, type, flags);
-	auto *snd = static_cast<ALSound *>(ptrSnd.get());
+	auto *snd = static_cast<pragma::audio::ALSound *>(ptrSnd.get());
 	if(snd == nullptr)
 		return ptrSnd;
 	InitializeSound(ptrSnd);
@@ -64,10 +64,10 @@ std::shared_ptr<ALSound> SSoundEmitterComponent::CreateSound(std::string sndname
 	}
 	return ptrSnd;
 }
-std::shared_ptr<ALSound> SSoundEmitterComponent::EmitSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo)
+std::shared_ptr<pragma::audio::ALSound> SSoundEmitterComponent::EmitSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo)
 {
-	std::shared_ptr<ALSound> snd = CreateSound(sndname, type, sndInfo);
-	ALSound *al = snd.get();
+	std::shared_ptr<pragma::audio::ALSound> snd = CreateSound(sndname, type, sndInfo);
+	auto *al = snd.get();
 	if(al == nullptr)
 		return snd;
 	auto &ent = GetEntity();

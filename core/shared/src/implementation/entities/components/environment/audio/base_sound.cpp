@@ -92,7 +92,7 @@ void BaseEnvSoundComponent::Initialize()
 	});
 	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
-		ALSound *snd = (m_sound != nullptr) ? m_sound.get() : nullptr;
+		auto *snd = (m_sound != nullptr) ? m_sound.get() : nullptr;
 		if(ustring::compare<std::string>(inputData.input, "play", false)) {
 			if(snd != nullptr)
 				snd->Play();
@@ -382,10 +382,10 @@ void BaseEnvSoundComponent::InitializeSound()
 	auto &ent = GetEntity();
 	auto *nw = ent.GetNetworkState();
 	auto spawnFlags = static_cast<SpawnFlags>(ent.GetSpawnFlags());
-	auto mode = ALChannel::Auto;
+	auto mode = audio::ALChannel::Auto;
 	auto createFlags = pragma::audio::ALCreateFlags::None;
 	if((spawnFlags & SpawnFlags::PlayEverywhere) == SpawnFlags::None) {
-		mode = ALChannel::Mono;
+		mode = audio::ALChannel::Mono;
 		createFlags = pragma::audio::ALCreateFlags::Mono;
 	}
 	nw->PrecacheSound(m_kvSoundName, mode);
@@ -405,7 +405,7 @@ void BaseEnvSoundComponent::InitializeSound()
 	if(snd != nullptr) {
 		snd->SetSource(&ent);
 
-		snd->AddCallback("OnStateChanged", FunctionCallback<void, ALState, ALState>::Create(std::bind(&BaseEnvSoundComponent::InjectStateChange, this, std::placeholders::_1, std::placeholders::_2)));
+		snd->AddCallback("OnStateChanged", FunctionCallback<void, audio::ALState, audio::ALState>::Create(std::bind(&BaseEnvSoundComponent::InjectStateChange, this, std::placeholders::_1, std::placeholders::_2)));
 		if((spawnFlags & SpawnFlags::IsLooped) != SpawnFlags::None)
 			snd->SetLooping(true);
 		if((spawnFlags & SpawnFlags::PlayEverywhere) != SpawnFlags::None) {
@@ -449,7 +449,7 @@ void BaseEnvSoundComponent::Pause()
 }
 bool BaseEnvSoundComponent::IsPlaying() const { return (m_sound != nullptr) ? m_sound->IsPlaying() : false; }
 bool BaseEnvSoundComponent::IsPaused() const { return (m_sound != nullptr) ? m_sound->IsPaused() : true; }
-const std::shared_ptr<ALSound> &BaseEnvSoundComponent::GetSound() const { return m_sound; }
+const std::shared_ptr<pragma::audio::ALSound> &BaseEnvSoundComponent::GetSound() const { return m_sound; }
 
 void BaseEnvSoundComponent::OnEntitySpawn()
 {
@@ -459,5 +459,5 @@ void BaseEnvSoundComponent::OnEntitySpawn()
 		Play();
 }
 
-void BaseEnvSoundComponent::InjectStateChange(ALState oldState, ALState newState) {}
-void BaseEnvSoundComponent::OnSoundCreated(ALSound &snd) {}
+void BaseEnvSoundComponent::InjectStateChange(audio::ALState oldState, audio::ALState newState) {}
+void BaseEnvSoundComponent::OnSoundCreated(audio::ALSound &snd) {}

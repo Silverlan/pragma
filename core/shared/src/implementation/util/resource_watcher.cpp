@@ -248,7 +248,7 @@ void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const
 				Con::cout << "[ResourceWatcher] Sound has changed: " << sndPath << ". Attempting to reload..." << Con::endl;
 #endif
 				// TODO: Reload sounds if they had been loaded previously
-				game->GetNetworkState()->PrecacheSound(strPath, ALChannel::Both); // TODO: Only precache whatever's been requested before?
+				game->GetNetworkState()->PrecacheSound(strPath, pragma::audio::ALChannel::Both); // TODO: Only precache whatever's been requested before?
 			}
 			CallChangeCallbacks(eResourceWatcherCallbackType::Sound, strPath, ext);
 		}

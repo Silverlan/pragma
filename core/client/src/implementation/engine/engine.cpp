@@ -62,7 +62,7 @@ CEngine::CEngine(int argc, char *argv[])
 	if (!registeredGlobals) {
 		registeredGlobals = true;
 		register_shared_convars(*console_system::client::get_convar_map());
-		register_client_launch_parameters(*GetLaunchParaMap());
+		register_client_launch_parameters(*pragma::GetLaunchParaMap());
 		client_entities::register_entities();
 		pragma::networking::register_client_net_messages();
 	}
@@ -1549,9 +1549,9 @@ namespace {
 
 float CEngine::GetRawJoystickAxisMagnitude() const { return m_rawInputJoystickMagnitude; }
 
-std::unique_ptr<CEngine::ConVarInfoList> &CEngine::GetConVarConfig(NwStateType type)
+std::unique_ptr<CEngine::ConVarInfoList> &CEngine::GetConVarConfig(pragma::NwStateType type)
 {
-	if(type == NwStateType::Client)
+	if(type == pragma::NwStateType::Client)
 		return m_clConfig;
 	return pragma::Engine::GetConVarConfig(type);
 }

@@ -19,21 +19,21 @@ std::string Lua::engine::get_working_directory()
 Lua::tb<void> Lua::engine::get_info(lua::State *l)
 {
 	auto t = luabind::newtable(l);
-	t["version"] = get_engine_version();
-	t["prettyVersion"] = get_pretty_engine_version();
-	t["identifier"] = engine_info::get_identifier();
-	t["discordURL"] = engine_info::get_discord_url();
-	t["steamAppId"] = engine_info::get_steam_app_id();
-	t["websiteURL"] = engine_info::get_website_url();
-	t["wikiURL"] = engine_info::get_wiki_url();
-	t["gitHubURL"] = engine_info::get_github_url();
-	t["name"] = engine_info::get_name();
+	t["version"] = pragma::get_engine_version();
+	t["prettyVersion"] = pragma::get_pretty_engine_version();
+	t["identifier"] = pragma::engine_info::get_identifier();
+	t["discordURL"] = pragma::engine_info::get_discord_url();
+	t["steamAppId"] = pragma::engine_info::get_steam_app_id();
+	t["websiteURL"] = pragma::engine_info::get_website_url();
+	t["wikiURL"] = pragma::engine_info::get_wiki_url();
+	t["gitHubURL"] = pragma::engine_info::get_github_url();
+	t["name"] = pragma::engine_info::get_name();
 	return t;
 }
 
 Lua::opt<Lua::tb<void>> Lua::engine::get_git_info(lua::State *l)
 {
-	auto gitInfo = engine_info::get_git_info();
+	auto gitInfo = pragma::engine_info::get_git_info();
 	if(!gitInfo.has_value())
 		return Lua::nil;
 	auto t = luabind::newtable(l);

@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :audio.util;
 
-void sound::get_full_sound_path(std::string &inOutPath, bool bPathRelativeToSounds)
+void pragma::audio::get_full_sound_path(std::string &inOutPath, bool bPathRelativeToSounds)
 {
 	std::string ext;
 	if(ufile::get_extension(inOutPath, &ext) == true)

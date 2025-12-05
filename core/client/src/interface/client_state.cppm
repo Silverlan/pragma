@@ -72,8 +72,8 @@ export {
 		bool GetServerConVarIdentifier(uint32_t id, std::string &cvar);
 
 		// Sound
-		void InitializeSound(CALSound &snd);
-		std::vector<std::shared_ptr<ALSound>> m_soundScripts; // 'Regular' sounds are already handled by sound engine, but we still have to take care of sound-scripts
+		void InitializeSound(pragma::audio::CALSound &snd);
+		std::vector<std::shared_ptr<pragma::audio::ALSound>> m_soundScripts; // 'Regular' sounds are already handled by sound engine, but we still have to take care of sound-scripts
 		float m_volMaster;
 		std::unordered_map<pragma::audio::ALSoundType, float> m_volTypes;
 
@@ -99,13 +99,13 @@ export {
 		virtual ~ClientState() override;
 		virtual bool IsClient() const override;
 	  public:
-		virtual bool ShouldRemoveSound(ALSound &snd) override;
+		virtual bool ShouldRemoveSound(pragma::audio::ALSound &snd) override;
 		msys::Material *LoadMaterial(const std::string &path, const std::function<void(msys::Material *)> &onLoaded, bool bReload, bool bLoadInstantly); // TODO
 		msys::MaterialHandle CreateMaterial(const std::string &path, const std::string &shader);
 		msys::MaterialHandle CreateMaterial(const std::string &shader);
 		bool LoadGUILuaFile(std::string f);
 		pragma::networking::IClient *GetClient();
-		virtual NwStateType GetType() const override;
+		virtual pragma::NwStateType GetType() const override;
 		virtual void Think() override;
 		virtual void Tick() override;
 		void Draw(util::DrawSceneInfo &drawSceneInfo);
@@ -155,21 +155,21 @@ export {
 
 		// Sound
 		virtual void StopSounds() override;
-		virtual void StopSound(std::shared_ptr<ALSound> pSnd) override;
-		bool PrecacheSound(std::string snd, std::pair<al::ISoundBuffer *, al::ISoundBuffer *> *buffers, ALChannel mode = ALChannel::Auto, bool bLoadInstantly = false);
-		virtual bool PrecacheSound(std::string snd, ALChannel mode = ALChannel::Auto) override;
+		virtual void StopSound(std::shared_ptr<pragma::audio::ALSound> pSnd) override;
+		bool PrecacheSound(std::string snd, std::pair<al::ISoundBuffer *, al::ISoundBuffer *> *buffers, pragma::audio::ALChannel mode = pragma::audio::ALChannel::Auto, bool bLoadInstantly = false);
+		virtual bool PrecacheSound(std::string snd, pragma::audio::ALChannel mode = pragma::audio::ALChannel::Auto) override;
 		virtual bool LoadSoundScripts(const char *file, bool bPrecache = false) override;
-		virtual std::shared_ptr<ALSound> CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None) override;
-		std::shared_ptr<ALSound> CreateSound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type);
-		std::shared_ptr<ALSound> CreateSound(al::Decoder &decoder, pragma::audio::ALSoundType type);
-		void IndexSound(std::shared_ptr<ALSound> snd, unsigned int idx);
-		std::shared_ptr<ALSound> PlaySound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None);
-		std::shared_ptr<ALSound> PlaySound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type);
-		std::shared_ptr<ALSound> PlaySound(al::Decoder &buffer, pragma::audio::ALSoundType type);
-		std::shared_ptr<ALSound> PlayWorldSound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type, const Vector3 &pos);
-		std::shared_ptr<ALSound> PlayWorldSound(al::Decoder &buffer, pragma::audio::ALSoundType type, const Vector3 &pos);
-		std::shared_ptr<ALSound> PlayWorldSound(std::string snd, pragma::audio::ALSoundType type, const Vector3 &pos);
-		virtual std::shared_ptr<ALSound> GetSoundByIndex(unsigned int idx) override;
+		virtual std::shared_ptr<pragma::audio::ALSound> CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None) override;
+		std::shared_ptr<pragma::audio::ALSound> CreateSound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type);
+		std::shared_ptr<pragma::audio::ALSound> CreateSound(al::Decoder &decoder, pragma::audio::ALSoundType type);
+		void IndexSound(std::shared_ptr<pragma::audio::ALSound> snd, unsigned int idx);
+		std::shared_ptr<pragma::audio::ALSound> PlaySound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None);
+		std::shared_ptr<pragma::audio::ALSound> PlaySound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type);
+		std::shared_ptr<pragma::audio::ALSound> PlaySound(al::Decoder &buffer, pragma::audio::ALSoundType type);
+		std::shared_ptr<pragma::audio::ALSound> PlayWorldSound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type, const Vector3 &pos);
+		std::shared_ptr<pragma::audio::ALSound> PlayWorldSound(al::Decoder &buffer, pragma::audio::ALSoundType type, const Vector3 &pos);
+		std::shared_ptr<pragma::audio::ALSound> PlayWorldSound(std::string snd, pragma::audio::ALSoundType type, const Vector3 &pos);
+		virtual std::shared_ptr<pragma::audio::ALSound> GetSoundByIndex(unsigned int idx) override;
 		virtual void UpdateSounds() override;
 		void SetMasterSoundVolume(float vol);
 		float GetMasterSoundVolume();

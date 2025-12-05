@@ -43,7 +43,7 @@ export namespace pragma {
 		CallbackHandle m_cbCalcOrientationView = {};
 		std::unique_ptr<DeltaOffset> m_crouchViewOffset = nullptr;
 		std::unique_ptr<DeltaTransform> m_upDirOffset = nullptr;
-		std::shared_ptr<ALSound> m_sndUnderwater = nullptr;
+		std::shared_ptr<pragma::audio::ALSound> m_sndUnderwater = nullptr;
 		EntityHandle m_cbUnderwaterDsp = {};
 		void OnWaterSubmerged();
 		void OnWaterEmerged();

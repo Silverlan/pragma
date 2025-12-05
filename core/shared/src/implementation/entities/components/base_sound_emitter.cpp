@@ -14,7 +14,7 @@ BaseSoundEmitterComponent::BaseSoundEmitterComponent(pragma::ecs::BaseEntity &en
 BaseSoundEmitterComponent::~BaseSoundEmitterComponent()
 {
 	for(int i = 0; i < m_sounds.size(); i++) {
-		ALSound *al = m_sounds[i].get();
+		auto *al = m_sounds[i].get();
 		if(al->IsLooping()) // Stop all looping sounds immediately
 			al->Stop();
 	}
@@ -26,13 +26,13 @@ void BaseSoundEmitterComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent("transform");
 }
-std::shared_ptr<ALSound> BaseSoundEmitterComponent::CreateSound(std::string snd, pragma::audio::ALSoundType, const SoundInfo &) { return std::shared_ptr<ALSound>(); }
-std::shared_ptr<ALSound> BaseSoundEmitterComponent::EmitSound(std::string snd, pragma::audio::ALSoundType, const SoundInfo &) { return std::shared_ptr<ALSound>(); }
+std::shared_ptr<pragma::audio::ALSound> BaseSoundEmitterComponent::CreateSound(std::string snd, pragma::audio::ALSoundType, const SoundInfo &) { return std::shared_ptr<pragma::audio::ALSound>(); }
+std::shared_ptr<pragma::audio::ALSound> BaseSoundEmitterComponent::EmitSound(std::string snd, pragma::audio::ALSoundType, const SoundInfo &) { return std::shared_ptr<pragma::audio::ALSound>(); }
 
 void BaseSoundEmitterComponent::StopSounds()
 {
 	for(int i = 0; i < m_sounds.size(); i++) {
-		ALSound *al = m_sounds[i].get();
+		audio::ALSound *al = m_sounds[i].get();
 		al->Stop();
 	}
 	m_sounds.clear();
@@ -40,9 +40,9 @@ void BaseSoundEmitterComponent::StopSounds()
 	SetTickPolicy(TickPolicy::Never);
 }
 
-void BaseSoundEmitterComponent::GetSounds(std::vector<std::shared_ptr<ALSound>> **sounds) { *sounds = &m_sounds; }
+void BaseSoundEmitterComponent::GetSounds(std::vector<std::shared_ptr<pragma::audio::ALSound>> **sounds) { *sounds = &m_sounds; }
 
-bool BaseSoundEmitterComponent::ShouldRemoveSound(ALSound &snd) const
+bool BaseSoundEmitterComponent::ShouldRemoveSound(audio::ALSound &snd) const
 {
 	// Index 0 = shared sound
 	return (/*snd.GetIndex() == 0 && */ snd.IsPlaying() == false) ? true : false;
@@ -63,10 +63,10 @@ void BaseSoundEmitterComponent::MaintainSounds()
 	}
 }
 
-void BaseSoundEmitterComponent::InitializeSound(const std::shared_ptr<ALSound> &ptrSnd)
+void BaseSoundEmitterComponent::InitializeSound(const std::shared_ptr<pragma::audio::ALSound> &ptrSnd)
 {
 	auto &ent = GetEntity();
-	auto *snd = static_cast<ALSound *>(ptrSnd.get());
+	auto *snd = static_cast<pragma::audio::ALSound *>(ptrSnd.get());
 	snd->SetSource(&ent);
 	snd->SetRolloffFactor(2.f);
 	snd->SetReferenceDistance(150.f);
@@ -83,7 +83,7 @@ void BaseSoundEmitterComponent::InitializeSound(const std::shared_ptr<ALSound> &
 
 void BaseSoundEmitterComponent::PrecacheSounds() {}
 
-void BaseSoundEmitterComponent::UpdateSoundTransform(ALSound &snd) const
+void BaseSoundEmitterComponent::UpdateSoundTransform(audio::ALSound &snd) const
 {
 	if(snd.IsRelative())
 		return; // TODO: Allow transforms for relative sound sources (but make sure 'global' flag isn't set if it's a sound-script!)
@@ -98,5 +98,5 @@ void BaseSoundEmitterComponent::UpdateSoundTransform(ALSound &snd) const
 
 /////////////////
 
-CEOnSoundCreated::CEOnSoundCreated(const std::shared_ptr<ALSound> &sound) : sound {sound} {}
-void CEOnSoundCreated::PushArguments(lua::State *l) { Lua::Push<std::shared_ptr<ALSound>>(l, sound); }
+CEOnSoundCreated::CEOnSoundCreated(const std::shared_ptr<pragma::audio::ALSound> &sound) : sound {sound} {}
+void CEOnSoundCreated::PushArguments(lua::State *l) { Lua::Push<std::shared_ptr<pragma::audio::ALSound>>(l, sound); }

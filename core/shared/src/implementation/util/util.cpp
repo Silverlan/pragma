@@ -402,12 +402,12 @@ bool util::show_notification(const std::string &summary, const std::string &body
 	if(pragma::get_engine()->IsProgramInFocus())
 		return false;
 
-	auto iconPath = engine_info::get_icon_path();
+	auto iconPath = pragma::engine_info::get_icon_path();
 	std::string absIconPath;
 	filemanager::find_absolute_path(iconPath.GetString(), absIconPath);
 
 	pragma::oskit::NotificationInfo info {};
-	info.appName = engine_info::get_name();
+	info.appName = pragma::engine_info::get_name();
 	info.title = summary;
 	info.appIcon = absIconPath;
 	info.body = body;

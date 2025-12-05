@@ -36,7 +36,7 @@ export namespace pragma {
 		float GetFlexWeight(uint32_t flexId) const;
 		bool GetFlexWeight(uint32_t flexId, float &outWeight) const;
 		void SetFlexWeight(uint32_t flexId, float weight);
-		void UpdateSoundPhonemes(CALSound &snd);
+		void UpdateSoundPhonemes(audio::CALSound &snd);
 		void UpdateFlexWeightsMT();
 		virtual void InitializeLuaObject(lua::State *l) override;
 

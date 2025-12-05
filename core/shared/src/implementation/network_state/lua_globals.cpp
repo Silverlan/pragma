@@ -163,11 +163,11 @@ void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 	    {"TYPE_ENVIRONMENT", umath::to_integral(pragma::audio::ALSoundType::Environment)},
 	    {"TYPE_GUI", umath::to_integral(pragma::audio::ALSoundType::GUI)},
 
-	    {"STATE_NO_ERROR", umath::to_integral(ALState::NoError)},
-	    {"STATE_INITIAL", umath::to_integral(ALState::Initial)},
-	    {"STATE_PLAYING", umath::to_integral(ALState::Playing)},
-	    {"STATE_PAUSED", umath::to_integral(ALState::Paused)},
-	    {"STATE_STOPPED", umath::to_integral(ALState::Stopped)},
+	    {"STATE_NO_ERROR", umath::to_integral(pragma::audio::ALState::NoError)},
+	    {"STATE_INITIAL", umath::to_integral(pragma::audio::ALState::Initial)},
+	    {"STATE_PLAYING", umath::to_integral(pragma::audio::ALState::Playing)},
+	    {"STATE_PAUSED", umath::to_integral(pragma::audio::ALState::Paused)},
+	    {"STATE_STOPPED", umath::to_integral(pragma::audio::ALState::Stopped)},
 	  });
 }
 
@@ -289,9 +289,9 @@ void pragma::Game::RegisterLuaGlobals()
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "sound",
 	  {
-	    {"CHANNEL_AUTO", umath::to_integral(ALChannel::Auto)},
-	    {"CHANNEL_MONO", umath::to_integral(ALChannel::Mono)},
-	    {"CHANNEL_BOTH", umath::to_integral(ALChannel::Both)},
+	    {"CHANNEL_AUTO", umath::to_integral(pragma::audio::ALChannel::Auto)},
+	    {"CHANNEL_MONO", umath::to_integral(pragma::audio::ALChannel::Mono)},
+	    {"CHANNEL_BOTH", umath::to_integral(pragma::audio::ALChannel::Both)},
 	  });
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "intersect",

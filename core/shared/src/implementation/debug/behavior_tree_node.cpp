@@ -7,7 +7,7 @@ module pragma.shared;
 
 import :debug.behavior_tree_node;
 
-bool operator==(const DebugBehaviorTreeNode &a, const DebugBehaviorTreeNode &b)
+bool operator==(const pragma::debug::DebugBehaviorTreeNode &a, const pragma::debug::DebugBehaviorTreeNode &b)
 {
 	if(a.name != b.name || /*a.startTime != b.startTime || a.endTime != b.endTime ||*/ a.state != b.state || a.children.size() != b.children.size())
 		return false;
@@ -19,4 +19,4 @@ bool operator==(const DebugBehaviorTreeNode &a, const DebugBehaviorTreeNode &b)
 	}
 	return true;
 }
-bool operator!=(const DebugBehaviorTreeNode &a, const DebugBehaviorTreeNode &b) { return (a == b) ? false : true; }
+bool operator!=(const pragma::debug::DebugBehaviorTreeNode &a, const pragma::debug::DebugBehaviorTreeNode &b) { return (a == b) ? false : true; }

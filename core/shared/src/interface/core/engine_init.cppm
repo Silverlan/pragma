@@ -13,7 +13,7 @@ export {
 	template<class T>
 	std::shared_ptr<T> InitializeEngine(int argc, char *argv[])
 	{
-		auto exe = engine_info::get_executable_name();
+		auto exe = pragma::engine_info::get_executable_name();
 		pragma::debug::CrashHandler::Get().SetAppName(exe);
 		auto en = std::shared_ptr<T> {new T {argc, argv}, [](T *p) {
 #ifdef _WIN32
@@ -38,7 +38,7 @@ export {
 
 	inline DLLNETWORK std::shared_ptr<pragma::Engine> InitializeServer(int argc, char *argv[])
 	{
-		auto exe = engine_info::get_executable_name();
+		auto exe = pragma::engine_info::get_executable_name();
 		pragma::debug::CrashHandler::Get().SetAppName(exe);
 		auto en = std::shared_ptr<pragma::Engine> {new pragma::Engine {argc, argv}, [](pragma::Engine *p) {
 			                                           if(std::uncaught_exceptions() > 0) {

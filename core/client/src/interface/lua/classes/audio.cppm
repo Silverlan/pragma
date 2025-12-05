@@ -16,7 +16,7 @@ export namespace pragma::scripting::lua_core::bindings {
 namespace Lua {
 	namespace ALSound {
 		namespace Client {
-			DLLCLIENT void register_class(luabind::class_<::ALSound> &classDef);
+			DLLCLIENT void register_class(luabind::class_<pragma::audio::ALSound> &classDef);
 			DLLCLIENT void register_buffer(luabind::class_<al::ISoundBuffer> &classDef);
 		};
 	};
@@ -25,12 +25,12 @@ namespace Lua {
 namespace Lua {
 	namespace ALSound {
 		namespace Client {
-			static void GetWorldPosition(lua::State *l, ::ALSound &snd);
+			static void GetWorldPosition(lua::State *l, pragma::audio::ALSound &snd);
 
 			//static void GetChannelConfigName(lua::State *l,::ALSound &snd);
 			//static void GetSampleTypeName(lua::State *l,::ALSound &snd);
-			static void IsMono(lua::State *l, ::ALSound &snd);
-			static void IsStereo(lua::State *l, ::ALSound &snd);
+			static void IsMono(lua::State *l, pragma::audio::ALSound &snd);
+			static void IsStereo(lua::State *l, pragma::audio::ALSound &snd);
 		};
 	};
 	namespace ALBuffer {
@@ -40,7 +40,7 @@ namespace Lua {
 
 void Lua::ALSound::Client::register_buffer(luabind::class_<al::ISoundBuffer> &classDef) { classDef.def("GetPhonemeData", &Lua::ALBuffer::GetPhonemeData); }
 
-void Lua::ALSound::Client::register_class(luabind::class_<::ALSound> &classDef)
+void Lua::ALSound::Client::register_class(luabind::class_<pragma::audio::ALSound> &classDef)
 {
 	ALSound::register_class(classDef);
 	classDef.def("GetWorldPos", &Lua::ALSound::Client::GetWorldPosition);
@@ -49,17 +49,17 @@ void Lua::ALSound::Client::register_class(luabind::class_<::ALSound> &classDef)
 	//classDef.def("GetSampleTypeName",&Lua::ALSound::Client::GetSampleTypeName);
 	classDef.def("IsMono", &Lua::ALSound::Client::IsMono);
 	classDef.def("IsStereo", &Lua::ALSound::Client::IsStereo);
-	classDef.def("SetPropagationIdentifier", static_cast<void (*)(::ALSound &, const std::string &)>([](::ALSound &sound, const std::string &identifier) { static_cast<CALSound &>(sound)->SetIdentifier(identifier); }));
-	classDef.def("GetPropagationIdentifier", static_cast<std::string (*)(::ALSound &)>([](::ALSound &sound) { return static_cast<CALSound &>(sound)->GetIdentifier(); }));
-	classDef.def("GetBuffer", static_cast<al::ISoundBuffer *(*)(::ALSound &)>([](::ALSound &sound) -> al::ISoundBuffer * { return static_cast<CALSound &>(sound)->GetBuffer(); }));
+	classDef.def("SetPropagationIdentifier", static_cast<void (*)(pragma::audio::ALSound &, const std::string &)>([](pragma::audio::ALSound &sound, const std::string &identifier) { static_cast<pragma::audio::CALSound &>(sound)->SetIdentifier(identifier); }));
+	classDef.def("GetPropagationIdentifier", static_cast<std::string (*)(pragma::audio::ALSound &)>([](pragma::audio::ALSound &sound) { return static_cast<pragma::audio::CALSound &>(sound)->GetIdentifier(); }));
+	classDef.def("GetBuffer", static_cast<al::ISoundBuffer *(*)(pragma::audio::ALSound &)>([](pragma::audio::ALSound &sound) -> al::ISoundBuffer * { return static_cast<pragma::audio::CALSound &>(sound)->GetBuffer(); }));
 }
 
-void Lua::ALSound::Client::GetWorldPosition(lua::State *l, ::ALSound &snd) { Lua::Push<Vector3>(l, static_cast<CALSound &>(snd)->GetWorldPosition()); }
+void Lua::ALSound::Client::GetWorldPosition(lua::State *l, pragma::audio::ALSound &snd) { Lua::Push<Vector3>(l, static_cast<pragma::audio::CALSound &>(snd)->GetWorldPosition()); }
 
-//void Lua::ALSound::Client::GetChannelConfigName(lua::State *l,::ALSound &snd) {Lua::PushString(l,static_cast<CALSound&>(snd)->GetChannelConfigName());}
-//void Lua::ALSound::Client::GetSampleTypeName(lua::State *l,::ALSound &snd) {Lua::PushString(l,static_cast<CALSound&>(snd)->GetSampleTypeName());}
-void Lua::ALSound::Client::IsMono(lua::State *l, ::ALSound &snd) { Lua::PushBool(l, static_cast<CALSound &>(snd)->IsMono()); }
-void Lua::ALSound::Client::IsStereo(lua::State *l, ::ALSound &snd) { Lua::PushBool(l, static_cast<CALSound &>(snd)->IsStereo()); }
+//void Lua::ALSound::Client::GetChannelConfigName(lua::State *l,pragma::audio::ALSound &snd) {Lua::PushString(l,static_cast<CALSound&>(snd)->GetChannelConfigName());}
+//void Lua::ALSound::Client::GetSampleTypeName(lua::State *l,pragma::audio::ALSound &snd) {Lua::PushString(l,static_cast<CALSound&>(snd)->GetSampleTypeName());}
+void Lua::ALSound::Client::IsMono(lua::State *l, pragma::audio::ALSound &snd) { Lua::PushBool(l, static_cast<pragma::audio::CALSound &>(snd)->IsMono()); }
+void Lua::ALSound::Client::IsStereo(lua::State *l, pragma::audio::ALSound &snd) { Lua::PushBool(l, static_cast<pragma::audio::CALSound &>(snd)->IsStereo()); }
 
 /////////////////
 
@@ -232,7 +232,7 @@ void pragma::scripting::lua_core::bindings::register_audio(lua::State *l)
 	classDefEqualizer.def_readwrite("highCutoff", &al::EfxEqualizer::flHighCutoff);
 	classDefAlEffect.scope[classDefEqualizer];
 
-	auto alSoundClassDef = luabind::class_<ALSound>("Source");
+	auto alSoundClassDef = luabind::class_<pragma::audio::ALSound>("Source");
 	Lua::ALSound::Client::register_class(alSoundClassDef);
 
 	auto alBufferClassDef = luabind::class_<al::ISoundBuffer>("Source");

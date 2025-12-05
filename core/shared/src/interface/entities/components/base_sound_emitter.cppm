@@ -31,23 +31,23 @@ export namespace pragma {
 
 		virtual void OnTick(double dt) override;
 		virtual void PrecacheSounds();
-		virtual std::shared_ptr<ALSound> CreateSound(std::string snd, pragma::audio::ALSoundType type, const SoundInfo &sndInfo = {});
-		virtual std::shared_ptr<ALSound> EmitSound(std::string snd, pragma::audio::ALSoundType type, const SoundInfo &sndInfo = {});
+		virtual std::shared_ptr<audio::ALSound> CreateSound(std::string snd, pragma::audio::ALSoundType type, const SoundInfo &sndInfo = {});
+		virtual std::shared_ptr<audio::ALSound> EmitSound(std::string snd, pragma::audio::ALSoundType type, const SoundInfo &sndInfo = {});
 		void StopSounds();
-		void GetSounds(std::vector<std::shared_ptr<ALSound>> **sounds);
+		void GetSounds(std::vector<std::shared_ptr<audio::ALSound>> **sounds);
 	  protected:
 		BaseSoundEmitterComponent(pragma::ecs::BaseEntity &ent);
-		void InitializeSound(const std::shared_ptr<ALSound> &snd);
-		virtual void UpdateSoundTransform(ALSound &snd) const;
-		virtual bool ShouldRemoveSound(ALSound &snd) const;
+		void InitializeSound(const std::shared_ptr<audio::ALSound> &snd);
+		virtual void UpdateSoundTransform(audio::ALSound &snd) const;
+		virtual bool ShouldRemoveSound(audio::ALSound &snd) const;
 		virtual void MaintainSounds();
 
-		std::vector<std::shared_ptr<ALSound>> m_sounds;
+		std::vector<std::shared_ptr<audio::ALSound>> m_sounds;
 	};
 
 	struct DLLNETWORK CEOnSoundCreated : public ComponentEvent {
-		CEOnSoundCreated(const std::shared_ptr<ALSound> &sound);
+		CEOnSoundCreated(const std::shared_ptr<audio::ALSound> &sound);
 		virtual void PushArguments(lua::State *l) override;
-		std::shared_ptr<ALSound> sound;
+		std::shared_ptr<audio::ALSound> sound;
 	};
 };

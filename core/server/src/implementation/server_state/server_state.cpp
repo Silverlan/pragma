@@ -35,7 +35,7 @@ ServerState::ServerState() : NetworkState(), m_server(nullptr)
 {
 	m_alsoundID = 1;
 	g_server = this;
-	m_soundScriptManager = std::make_unique<SoundScriptManager>();
+	m_soundScriptManager = std::make_unique<pragma::audio::SoundScriptManager>();
 
 	m_modelManager = std::make_unique<pragma::asset::SModelManager>(*this);
 	pragma::Engine::Get()->InitializeAssetManager(*m_modelManager);
@@ -118,14 +118,14 @@ void ServerState::InitializeGameServer(bool singlePlayerLocalGame)
 				GameModeInfo;
 				pragma::networking::GameServerInfo serverInfo {};
 				serverInfo.port = port;
-				serverInfo.gameName = engine_info::get_name();
+				serverInfo.gameName = pragma::engine_info::get_name();
 				serverInfo.gameDirectory = serverInfo.gameName;
 				serverInfo.gameMode = gameMode ? gameMode->name : "";
 
 				// Note: This version has to match the version specified in steamworks
-				serverInfo.version = get_engine_version();
+				serverInfo.version = pragma::get_engine_version();
 
-				serverInfo.name = engine_info::get_name(); // Temporary name until actual server name has been set
+				serverInfo.name = pragma::engine_info::get_name(); // Temporary name until actual server name has been set
 				serverInfo.maxPlayers = 0;
 				serverInfo.botCount = 0;
 				serverInfo.mapName = game ? game->GetMapName() : "";
@@ -162,7 +162,7 @@ void ServerState::InitializeGameServer(bool singlePlayerLocalGame)
 }
 void ServerState::OnClientAuthenticated(pragma::networking::IServerClient &session, std::optional<bool> wasAuthenticationSuccessful)
 {
-	if(wasAuthenticationSuccessful.has_value() && wasAuthenticationSuccessful == false) {
+	if(wasAuthenticationSuccessful.has_value() && *wasAuthenticationSuccessful == false) {
 		spdlog::info("Authentication for client with steam id '{}' has failed, dropping client...", session.GetSteamId());
 		DropClient(session, pragma::networking::DropReason::AuthenticationFailed);
 		return;
@@ -212,7 +212,7 @@ bool ServerState::LoadSoundScripts(const char *file, bool bPrecache)
 {
 	auto r = NetworkState::LoadSoundScripts(file, bPrecache);
 	if(SGame::Get() != nullptr && r != false)
-		SGame::Get()->RegisterGameResource(SoundScriptManager::GetSoundScriptPath() + std::string(file));
+		SGame::Get()->RegisterGameResource(pragma::audio::SoundScriptManager::GetSoundScriptPath() + std::string(file));
 	return r;
 }
 
@@ -225,7 +225,7 @@ void ServerState::Close()
 	NetworkState::Close();
 }
 
-NwStateType ServerState::GetType() const { return NwStateType::Server; }
+pragma::NwStateType ServerState::GetType() const { return pragma::NwStateType::Server; }
 
 void ServerState::Think()
 {
@@ -276,10 +276,10 @@ void ServerState::EndGame()
 	ClearConCommands();
 }
 
-std::shared_ptr<ALSound> ServerState::GetSoundByIndex(unsigned int idx)
+std::shared_ptr<pragma::audio::ALSound> ServerState::GetSoundByIndex(unsigned int idx)
 {
 	auto &snds = GetSounds();
-	auto it = std::find_if(snds.begin(), snds.end(), [idx](const ALSoundRef &rsound) { return (rsound.get().GetIndex() == idx) ? true : false; });
+	auto it = std::find_if(snds.begin(), snds.end(), [idx](const pragma::audio::ALSoundRef &rsound) { return (rsound.get().GetIndex() == idx) ? true : false; });
 	if(it == snds.end())
 		return nullptr;
 	return it->get().shared_from_this();
@@ -299,10 +299,10 @@ void ServerState::StartGame(bool singlePlayer)
 		GetGameState()->RegisterGameResource(f);
 	for(auto &pair : m_soundScriptManager->GetScripts()) {
 		auto &script = pair.second;
-		std::function<void(SoundScriptEventContainer &)> fIterateScript = nullptr;
-		fIterateScript = [this, &fIterateScript](SoundScriptEventContainer &c) {
+		std::function<void(pragma::audio::SoundScriptEventContainer &)> fIterateScript = nullptr;
+		fIterateScript = [this, &fIterateScript](pragma::audio::SoundScriptEventContainer &c) {
 			for(auto &ev : c.GetEvents()) {
-				auto *evPlaySound = dynamic_cast<SSEPlaySound *>(ev.get());
+				auto *evPlaySound = dynamic_cast<pragma::audio::SSEPlaySound *>(ev.get());
 				if(evPlaySound != nullptr) {
 					for(auto &src : evPlaySound->sources)
 						GetGameState()->RegisterGameResource("sounds\\" + src);

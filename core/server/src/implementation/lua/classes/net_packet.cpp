@@ -16,7 +16,7 @@ void Lua::NetPacket::Server::register_class(luabind::class_<::NetPacket> &classD
 	classDef.def("WriteUniqueEntity", static_cast<void (*)(lua::State *, ::NetPacket &)>(&WriteUniqueEntity));
 }
 
-void Lua::NetPacket::Server::WriteALSound(lua::State *, ::NetPacket &packet, std::shared_ptr<::ALSound> snd)
+void Lua::NetPacket::Server::WriteALSound(lua::State *, ::NetPacket &packet, std::shared_ptr<pragma::audio::ALSound> snd)
 {
 	unsigned int idx = snd->GetIndex();
 	packet->Write<unsigned int>(idx);

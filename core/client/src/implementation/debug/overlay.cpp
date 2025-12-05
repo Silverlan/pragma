@@ -21,7 +21,7 @@ namespace DebugRenderer {
 	RuntimeObject::RuntimeObject(const std::shared_ptr<DebugRenderer::BaseObject> &o, float duration) : obj(o), time(pragma::get_client_state()->RealTime() + duration) {}
 }
 
-static void init_debug_object(DebugRenderer::BaseObject &o, const DebugRenderInfo &renderInfo) { o.SetIgnoreDepth(renderInfo.ignoreDepthBuffer); }
+static void init_debug_object(DebugRenderer::BaseObject &o, const pragma::debug::DebugRenderInfo &renderInfo) { o.SetIgnoreDepth(renderInfo.ignoreDepthBuffer); }
 
 static constexpr uint32_t s_maxDebugObjectCount = 100'000;
 static std::unordered_map<DebugRenderer::Type, std::vector<DebugRenderer::RuntimeObject>> s_debugObjects {{DebugRenderer::Type::Triangles, {}}, {DebugRenderer::Type::Lines, {}}, {DebugRenderer::Type::LinesStrip, {}}, {DebugRenderer::Type::Points, {}},
@@ -231,7 +231,7 @@ DebugRenderer::ObjectType DebugRenderer::TextObject::GetType() const { return Ob
 
 ///////////////////////////
 
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoints(const std::shared_ptr<prosper::IBuffer> &vertexBuffer, uint32_t vertexCount, const DebugRenderInfo &renderInfo)
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoints(const std::shared_ptr<prosper::IBuffer> &vertexBuffer, uint32_t vertexCount, const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	if(vertexCount == 0)
 		return nullptr;
@@ -245,7 +245,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoints(const std::
 	return objs.back().obj;
 }
 
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoints(const std::vector<Vector3> &points, const DebugRenderInfo &renderInfo)
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoints(const std::vector<Vector3> &points, const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	if(points.empty())
 		return nullptr;
@@ -260,13 +260,13 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoints(const std::
 	objs.push_back(DebugRenderer::RuntimeObject {o, renderInfo.duration});
 	return objs.back().obj;
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoint(const DebugRenderInfo &renderInfo)
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoint(const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	auto r = DrawPoints(std::vector<Vector3> {Vector3 {0.f, 0.f, 0.f}}, renderInfo);
 	r->SetPos(renderInfo.pose.GetOrigin());
 	return r;
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawLines(const std::vector<Vector3> &lines, const DebugRenderInfo &renderInfo)
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawLines(const std::vector<Vector3> &lines, const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	auto o = ::util::make_shared<DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
 	init_debug_object(*o, renderInfo);
@@ -279,12 +279,12 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawLines(const std::v
 	objs.push_back(DebugRenderer::RuntimeObject {o, renderInfo.duration});
 	return objs.back().obj;
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawLine(const Vector3 &start, const Vector3 &end, const DebugRenderInfo &renderInfo) { return DrawLines(std::vector<Vector3> {start, end}, renderInfo); }
-static std::shared_ptr<DebugRenderer::BaseObject> draw_box(const Vector3 &center, const Vector3 &min, const Vector3 &max, const DebugRenderInfo &renderInfo, const Color *outlineColor)
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawLine(const Vector3 &start, const Vector3 &end, const pragma::debug::DebugRenderInfo &renderInfo) { return DrawLines(std::vector<Vector3> {start, end}, renderInfo); }
+static std::shared_ptr<DebugRenderer::BaseObject> draw_box(const Vector3 &center, const Vector3 &min, const Vector3 &max, const pragma::debug::DebugRenderInfo &renderInfo, const Color *outlineColor)
 {
 	auto r = ::util::make_shared<DebugRenderer::CollectionObject>();
 	if(outlineColor != nullptr) {
-		DebugRenderInfo outlineDrawInfo {};
+		pragma::debug::DebugRenderInfo outlineDrawInfo {};
 		outlineDrawInfo.color = renderInfo.color;
 		outlineDrawInfo.duration = renderInfo.duration;
 		std::vector<Vector3> meshVerts = {min, {min.x, min.y, max.z}, {min.x, max.y, max.z}, {max.x, max.y, min.z}, min, {min.x, max.y, min.z}, {max.x, min.y, max.z}, min, {max.x, min.y, min.z}, {max.x, max.y, min.z}, {max.x, min.y, min.z}, min, min, {min.x, max.y, max.z},
@@ -313,7 +313,7 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_box(const Vector3 &center
 	r->SetAngles(renderInfo.pose.GetRotation());
 	return r;
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawBox(const Vector3 &start, const Vector3 &end, const DebugRenderInfo &renderInfo)
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawBox(const Vector3 &start, const Vector3 &end, const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	auto center = (end + start) * 0.5f;
 	auto *poutlineColor = renderInfo.outlineColor ? &*renderInfo.outlineColor : nullptr;
@@ -379,7 +379,7 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_text(WIText *el, const Ve
 	objs.push_back(DebugRenderer::RuntimeObject {o, duration});
 	return objs.back().obj;
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawText(const DebugRenderInfo &renderInfo, const std::string &text, const Vector2 &worldSize)
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawText(const pragma::debug::DebugRenderInfo &renderInfo, const std::string &text, const Vector2 &worldSize)
 {
 	auto *pText = create_text_element(text);
 	if(!pText)
@@ -400,7 +400,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawText(const DebugRe
 	}
 	return r;
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawText(const DebugRenderInfo &renderInfo, const std::string &text, float sizeScale)
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawText(const pragma::debug::DebugRenderInfo &renderInfo, const std::string &text, float sizeScale)
 {
 	auto *pText = create_text_element(text);
 	if(!pText)
@@ -422,7 +422,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawText(const DebugRe
 	}
 	return r;
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawMesh(const std::vector<Vector3> &verts, const DebugRenderInfo &renderInfo)
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawMesh(const std::vector<Vector3> &verts, const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	if(verts.empty() == true)
 		return nullptr;
@@ -439,14 +439,14 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawMesh(const std::ve
 		static_cast<WorldObject *>(triangleObjs.back().obj.get())->SetOutlineColor(renderInfo.outlineColor->ToVector4());
 	return triangleObjs.back().obj;
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawSphere(const DebugRenderInfo &renderInfo, float radius, uint32_t recursionLevel)
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawSphere(const pragma::debug::DebugRenderInfo &renderInfo, float radius, uint32_t recursionLevel)
 {
 	std::vector<Vector3> verts;
 	IcoSphere::Create(Vector3 {0.f, 0.f, 0.f}, radius, verts, recursionLevel);
 	auto r = DrawMesh(verts, renderInfo);
 	return r;
 }
-static std::shared_ptr<DebugRenderer::BaseObject> draw_truncated_cone(const DebugRenderInfo &renderInfo, float startRadius, const Vector3 &dir, float dist, float endRadius, uint32_t segmentCount)
+static std::shared_ptr<DebugRenderer::BaseObject> draw_truncated_cone(const pragma::debug::DebugRenderInfo &renderInfo, float startRadius, const Vector3 &dir, float dist, float endRadius, uint32_t segmentCount)
 {
 	auto rot = uquat::create_look_rotation(dir, uvec::get_perpendicular(dir));
 
@@ -462,18 +462,18 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_truncated_cone(const Debu
 	auto r = DebugRenderer::DrawMesh(meshVerts, renderInfo);
 	return r;
 }
-static std::shared_ptr<DebugRenderer::BaseObject> draw_cone(const DebugRenderInfo &renderInfo, const Vector3 &dir, float dist, float angle, uint32_t segmentCount)
+static std::shared_ptr<DebugRenderer::BaseObject> draw_cone(const pragma::debug::DebugRenderInfo &renderInfo, const Vector3 &dir, float dist, float angle, uint32_t segmentCount)
 {
 	auto radius = dist * umath::tan(umath::deg_to_rad(angle));
 	return draw_truncated_cone(renderInfo, 0.f, dir, dist, radius, segmentCount);
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawCone(const DebugRenderInfo &renderInfo, const Vector3 &dir, float dist, float angle, uint32_t segmentCount) { return draw_cone(renderInfo, dir, dist, angle, segmentCount); }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawTruncatedCone(const DebugRenderInfo &renderInfo, float startRadius, const Vector3 &dir, float dist, float endRadius, uint32_t segmentCount)
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawCone(const pragma::debug::DebugRenderInfo &renderInfo, const Vector3 &dir, float dist, float angle, uint32_t segmentCount) { return draw_cone(renderInfo, dir, dist, angle, segmentCount); }
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawTruncatedCone(const pragma::debug::DebugRenderInfo &renderInfo, float startRadius, const Vector3 &dir, float dist, float endRadius, uint32_t segmentCount)
 {
 	return draw_truncated_cone(renderInfo, startRadius, dir, dist, endRadius, segmentCount);
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawCylinder(const DebugRenderInfo &renderInfo, const Vector3 &dir, float dist, float radius, uint32_t segmentCount) { return draw_truncated_cone(renderInfo, radius, dir, dist, radius, segmentCount); }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPath(const std::vector<Vector3> &path, const DebugRenderInfo &renderInfo)
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawCylinder(const pragma::debug::DebugRenderInfo &renderInfo, const Vector3 &dir, float dist, float radius, uint32_t segmentCount) { return draw_truncated_cone(renderInfo, radius, dir, dist, radius, segmentCount); }
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPath(const std::vector<Vector3> &path, const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	if(path.size() < 2)
 		return nullptr;
@@ -485,7 +485,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPath(const std::ve
 	}
 	return DrawLines(lines, renderInfo);
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawSpline(const std::vector<Vector3> &path, uint32_t segmentCount, float curvature, const DebugRenderInfo &renderInfo)
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawSpline(const std::vector<Vector3> &path, uint32_t segmentCount, float curvature, const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	if(path.size() < 2)
 		return nullptr;
@@ -501,7 +501,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawSpline(const std::
 	}
 	return DrawPath(splinePath, renderInfo);
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPlane(const Vector3 &n, float dist, const DebugRenderInfo &renderInfo)
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPlane(const Vector3 &n, float dist, const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	auto perp = uvec::get_perpendicular(n);
 	auto origin = n * dist;
@@ -528,8 +528,8 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPlane(const Vector
 		r->AddObject(rLines);
 	return r;
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPlane(const umath::Plane &plane, const DebugRenderInfo &renderInfo) { return DrawPlane(const_cast<umath::Plane &>(plane).GetNormal(), plane.GetDistance(), renderInfo); }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawFrustum(const std::vector<Vector3> &points, const DebugRenderInfo &renderInfo)
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPlane(const umath::Plane &plane, const pragma::debug::DebugRenderInfo &renderInfo) { return DrawPlane(const_cast<umath::Plane &>(plane).GetNormal(), plane.GetDistance(), renderInfo); }
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawFrustum(const std::vector<Vector3> &points, const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	if(points.size() < 8)
 		return nullptr;
@@ -580,7 +580,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawFrustum(const std:
 	  renderInfo));
 	return r;
 }
-std::array<std::shared_ptr<DebugRenderer::BaseObject>, 3> DebugRenderer::DrawAxis(const DebugRenderInfo &renderInfo, const Vector3 &x, const Vector3 &y, const Vector3 &z)
+std::array<std::shared_ptr<DebugRenderer::BaseObject>, 3> DebugRenderer::DrawAxis(const pragma::debug::DebugRenderInfo &renderInfo, const Vector3 &x, const Vector3 &y, const Vector3 &z)
 {
 	const float distance = 16.f;
 	auto rx = x;
@@ -599,7 +599,7 @@ std::array<std::shared_ptr<DebugRenderer::BaseObject>, 3> DebugRenderer::DrawAxi
 	auto o2 = DrawLine(origin, origin + rz * distance);
 	return {o0, o1, o2};
 }
-std::array<std::shared_ptr<DebugRenderer::BaseObject>, 3> DebugRenderer::DrawAxis(const DebugRenderInfo &renderInfo)
+std::array<std::shared_ptr<DebugRenderer::BaseObject>, 3> DebugRenderer::DrawAxis(const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	Vector3 x {1.f, 0.f, 0.f};
 	Vector3 y {0.f, 1.f, 0.f};

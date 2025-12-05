@@ -280,7 +280,7 @@ bool CFlexComponent::UpdateFlexWeight(uint32_t flexId, float &val, bool storeInC
 	}
 	return true;
 }
-void CFlexComponent::UpdateSoundPhonemes(CALSound &snd)
+void CFlexComponent::UpdateSoundPhonemes(pragma::audio::CALSound &snd)
 {
 	al::impl::BufferBase *buf = snd->GetBuffer();
 	if(buf == nullptr)

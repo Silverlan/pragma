@@ -91,12 +91,12 @@ void SGame::RegisterLuaLibraries()
 
 	auto utilDebug = luabind::module(GetLuaState(), "debug");
 	utilDebug[(luabind::def("draw_point", Lua::DebugRenderer::Server::DrawPoint), luabind::def("draw_line", Lua::DebugRenderer::Server::DrawLine), luabind::def("draw_box", &Lua::DebugRenderer::Server::DrawBox),
-	  luabind::def("draw_sphere", static_cast<void (*)(float, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSphere)), luabind::def("draw_sphere", static_cast<void (*)(float, const DebugRenderInfo &, uint32_t)>(Lua::DebugRenderer::Server::DrawSphere)),
+	  luabind::def("draw_sphere", static_cast<void (*)(float, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSphere)), luabind::def("draw_sphere", static_cast<void (*)(float, const pragma::debug::DebugRenderInfo &, uint32_t)>(Lua::DebugRenderer::Server::DrawSphere)),
 	  luabind::def("draw_cone", &Lua::DebugRenderer::Server::DrawCone), luabind::def("draw_truncated_cone", &Lua::DebugRenderer::Server::DrawTruncatedCone), luabind::def("draw_cylinder", &Lua::DebugRenderer::Server::DrawCylinder),
-	  luabind::def("draw_pose", &Lua::DebugRenderer::Server::DrawAxis), luabind::def("draw_text", static_cast<void (*)(const std::string &, const Vector2 &, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)),
-	  luabind::def("draw_text", static_cast<void (*)(const std::string &, float, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)), luabind::def("draw_path", &Lua::DebugRenderer::Server::DrawPath),
-	  luabind::def("draw_spline", static_cast<void (*)(lua::State *, luabind::table<>, uint32_t, float, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)),
-	  luabind::def("draw_spline", static_cast<void (*)(lua::State *, luabind::table<>, uint32_t, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)), luabind::def("draw_plane", &Lua::DebugRenderer::Server::DrawPlane), luabind::def("draw_mesh", &SGame::DrawMesh))];
+	  luabind::def("draw_pose", &Lua::DebugRenderer::Server::DrawAxis), luabind::def("draw_text", static_cast<void (*)(const std::string &, const Vector2 &, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)),
+	  luabind::def("draw_text", static_cast<void (*)(const std::string &, float, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)), luabind::def("draw_path", &Lua::DebugRenderer::Server::DrawPath),
+	  luabind::def("draw_spline", static_cast<void (*)(lua::State *, luabind::table<>, uint32_t, float, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)),
+	  luabind::def("draw_spline", static_cast<void (*)(lua::State *, luabind::table<>, uint32_t, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)), luabind::def("draw_plane", &Lua::DebugRenderer::Server::DrawPlane), luabind::def("draw_mesh", &SGame::DrawMesh))];
 
 	Lua::ai::server::register_library(GetLuaInterface());
 
@@ -105,7 +105,7 @@ void SGame::RegisterLuaLibraries()
 	Lua::sound::register_library(soundMod);
 	Lua::sound::register_enums(GetLuaState());
 
-	auto alSoundClassDef = luabind::class_<ALSound>("Source");
+	auto alSoundClassDef = luabind::class_<pragma::audio::ALSound>("Source");
 	Lua::ALSound::register_class(alSoundClassDef);
 	soundMod[alSoundClassDef];
 

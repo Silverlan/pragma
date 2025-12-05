@@ -12,7 +12,7 @@ export {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	struct ___itt_domain;
 	struct ___itt_string_handle;
-	namespace debug {
+	namespace pragma::debug {
 		struct DLLNETWORK VTuneTask {
 			void Begin();
 			void End();

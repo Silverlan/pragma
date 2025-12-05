@@ -13,8 +13,8 @@ import :console.register_commands;
 import :engine;
 import :networking.util;
 
-decltype(CALSound::s_svIndexedSounds) CALSound::s_svIndexedSounds = {};
-ALSound *CALSound::FindByServerIndex(uint32_t idx)
+decltype(pragma::audio::CALSound::s_svIndexedSounds) pragma::audio::CALSound::s_svIndexedSounds = {};
+pragma::audio::ALSound *pragma::audio::CALSound::FindByServerIndex(uint32_t idx)
 {
 	auto it = s_svIndexedSounds.find(idx);
 	if(it == s_svIndexedSounds.end())
@@ -22,7 +22,7 @@ ALSound *CALSound::FindByServerIndex(uint32_t idx)
 	return it->second.lock().get();
 }
 
-std::shared_ptr<CALSound> CALSound::Create(NetworkState *nw, const al::PSoundChannel &channel) {
+std::shared_ptr<pragma::audio::CALSound> pragma::audio::CALSound::Create(NetworkState *nw, const al::PSoundChannel &channel) {
 	auto als = std::shared_ptr<CALSound> {new CALSound {nw, channel}, [](CALSound *snd) {
 		snd->OnRelease();
 		delete snd;
@@ -30,15 +30,15 @@ std::shared_ptr<CALSound> CALSound::Create(NetworkState *nw, const al::PSoundCha
 	return als;
 }
 
-CALSound::CALSound(NetworkState *nw, const al::PSoundChannel &channel) : ALSound(nw), al::SoundSource {channel}
+pragma::audio::CALSound::CALSound(NetworkState *nw, const al::PSoundChannel &channel) : ALSound(nw), al::SoundSource {channel}
 {
 	UpdateVolume();
 	RegisterCallback<void, std::reference_wrapper<float>>("UpdateGain");
 }
 
-CALSound::~CALSound() {}
+pragma::audio::CALSound::~CALSound() {}
 
-void CALSound::OnRelease()
+void pragma::audio::CALSound::OnRelease()
 {
 	al::SoundSource::OnRelease();
 	ALSound::OnRelease();
@@ -53,7 +53,7 @@ void CALSound::OnRelease()
 	}
 }
 
-void CALSound::Terminate()
+void pragma::audio::CALSound::Terminate()
 {
 	if(m_bTerminated == true)
 		return;
@@ -61,31 +61,31 @@ void CALSound::Terminate()
 	m_bTerminated = true;
 }
 
-static_assert(sizeof(al::EffectParams) == sizeof(SoundEffectParams));
-bool CALSound::AddEffect(al::IEffect &effect, const SoundEffectParams &params) { return (*this)->AddEffect(effect, reinterpret_cast<const al::EffectParams &>(params)); }
-bool CALSound::AddEffect(al::IEffect &effect, uint32_t &slotId, const SoundEffectParams &params) { return (*this)->AddEffect(effect, slotId, reinterpret_cast<const al::EffectParams &>(params)); }
-bool CALSound::AddEffect(al::IEffect &effect, float gain) { return (*this)->AddEffect(effect, gain); }
-bool CALSound::AddEffect(al::IEffect &effect, uint32_t &slotId, float gain) { return (*this)->AddEffect(effect, slotId, gain); }
-void CALSound::RemoveEffect(al::IEffect &effect) { (*this)->RemoveEffect(effect); }
-void CALSound::RemoveEffect(uint32_t slotId) { (*this)->RemoveEffect(slotId); }
+static_assert(sizeof(al::EffectParams) == sizeof(pragma::audio::SoundEffectParams));
+bool pragma::audio::CALSound::AddEffect(al::IEffect &effect, const SoundEffectParams &params) { return (*this)->AddEffect(effect, reinterpret_cast<const al::EffectParams &>(params)); }
+bool pragma::audio::CALSound::AddEffect(al::IEffect &effect, uint32_t &slotId, const SoundEffectParams &params) { return (*this)->AddEffect(effect, slotId, reinterpret_cast<const al::EffectParams &>(params)); }
+bool pragma::audio::CALSound::AddEffect(al::IEffect &effect, float gain) { return (*this)->AddEffect(effect, gain); }
+bool pragma::audio::CALSound::AddEffect(al::IEffect &effect, uint32_t &slotId, float gain) { return (*this)->AddEffect(effect, slotId, gain); }
+void pragma::audio::CALSound::RemoveEffect(al::IEffect &effect) { (*this)->RemoveEffect(effect); }
+void pragma::audio::CALSound::RemoveEffect(uint32_t slotId) { (*this)->RemoveEffect(slotId); }
 
-void CALSound::SetPitchModifier(float mod)
+void pragma::audio::CALSound::SetPitchModifier(float mod)
 {
 	m_modPitch = mod;
 	UpdatePitch();
 }
-float CALSound::GetPitchModifier() const { return m_modPitch; }
-void CALSound::SetVolumeModifier(float mod)
+float pragma::audio::CALSound::GetPitchModifier() const { return m_modPitch; }
+void pragma::audio::CALSound::SetVolumeModifier(float mod)
 {
 	m_modVol = mod;
 	UpdateVolume();
 }
-float CALSound::GetVolumeModifier() const { return m_modVol; }
+float pragma::audio::CALSound::GetVolumeModifier() const { return m_modVol; }
 
 static auto cvAlwaysPlay = GetClientConVar("cl_audio_always_play");
-void CALSound::UpdateVolume()
+void pragma::audio::CALSound::UpdateVolume()
 {
-	// TODO: CALSound::GetEffectiveGain
+	// TODO: pragma::audio::CALSound::GetEffectiveGain
 	if(m_bTerminated == true)
 		return;
 	auto gain = m_gain;
@@ -109,9 +109,9 @@ void CALSound::UpdateVolume()
 	(*this)->SetGain(gain);
 }
 
-float CALSound::GetMaxAudibleDistance() const { return (*this)->GetMaxAudibleDistance(); }
+float pragma::audio::CALSound::GetMaxAudibleDistance() const { return (*this)->GetMaxAudibleDistance(); }
 
-void CALSound::UpdatePitch()
+void pragma::audio::CALSound::UpdatePitch()
 {
 	if(m_bTerminated == true)
 		return;
@@ -120,9 +120,9 @@ void CALSound::UpdatePitch()
 	(*this)->SetPitch(pitch);
 }
 
-unsigned int CALSound::GetIndex() const { return m_index; }
+unsigned int pragma::audio::CALSound::GetIndex() const { return m_index; }
 
-void CALSound::SetIndex(ALSound *snd, uint32_t idx)
+void pragma::audio::CALSound::SetIndex(ALSound *snd, uint32_t idx)
 {
 	auto it = s_svIndexedSounds.find(idx);
 	if(it != s_svIndexedSounds.end())
@@ -134,7 +134,7 @@ void CALSound::SetIndex(ALSound *snd, uint32_t idx)
 	s_svIndexedSounds.insert(decltype(s_svIndexedSounds)::value_type(idx, snd->shared_from_this()));
 }
 
-void CALSound::Update()
+void pragma::audio::CALSound::Update()
 {
 	if(m_bTerminated == true)
 		return;
@@ -159,14 +159,14 @@ void CALSound::Update()
 	}
 }
 
-void CALSound::PostUpdate()
+void pragma::audio::CALSound::PostUpdate()
 {
 	if(m_bTerminated == true)
 		return;
 	ALSound::PostUpdate();
 }
 
-ALState CALSound::GetState() const
+pragma::audio::ALState pragma::audio::CALSound::GetState() const
 {
 	if(IsPlaying())
 		return ALState::Playing;
@@ -178,7 +178,7 @@ ALState CALSound::GetState() const
 	return ALState::Initial; //static_cast<ALState>(m_state);
 }
 
-void CALSound::FadeIn(float time)
+void pragma::audio::CALSound::FadeIn(float time)
 {
 	float gain = GetGain();
 	SetGain(0);
@@ -188,7 +188,7 @@ void CALSound::FadeIn(float time)
 	m_fade = std::unique_ptr<SoundFade>(new SoundFade(true, pragma::get_client_state()->RealTime(), time, gain));
 }
 
-void CALSound::FadeOut(float time)
+void pragma::audio::CALSound::FadeOut(float time)
 {
 	if(!IsPlaying())
 		return;
@@ -197,13 +197,13 @@ void CALSound::FadeOut(float time)
 	m_fade = std::unique_ptr<SoundFade>(new SoundFade(false, pragma::get_client_state()->RealTime(), time, gain));
 }
 
-void CALSound::UpdateState()
+void pragma::audio::CALSound::UpdateState()
 {
 	if(m_bTerminated == true)
 		return;
 }
 
-void CALSound::Play()
+void pragma::audio::CALSound::Play()
 {
 	if(m_bTerminated == true)
 		return;
@@ -230,7 +230,7 @@ void CALSound::Play()
 		FadeIn(m_tFadeIn);
 }
 
-void CALSound::Stop()
+void pragma::audio::CALSound::Stop()
 {
 	if(m_bTerminated == true)
 		return;
@@ -241,7 +241,7 @@ void CALSound::Stop()
 	CheckStateChange(old);
 }
 
-void CALSound::Pause()
+void pragma::audio::CALSound::Pause()
 {
 	if(m_bTerminated == true)
 		return;
@@ -252,7 +252,7 @@ void CALSound::Pause()
 	CheckStateChange(old);
 }
 
-void CALSound::Rewind()
+void pragma::audio::CALSound::Rewind()
 {
 	if(m_bTerminated == true)
 		return;
@@ -263,83 +263,83 @@ void CALSound::Rewind()
 	CheckStateChange(old);
 }
 
-void CALSound::SetOffset(float offset)
+void pragma::audio::CALSound::SetOffset(float offset)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetOffset(offset);
 }
 
-float CALSound::GetOffset() const
+float pragma::audio::CALSound::GetOffset() const
 {
 	if(m_bTerminated == true)
 		return 0.f;
 	return (*this)->GetOffset();
 }
 
-void CALSound::SetPitch(float pitch)
+void pragma::audio::CALSound::SetPitch(float pitch)
 {
 	m_pitch = pitch;
 	UpdatePitch();
 }
 
-float CALSound::GetPitch() const { return m_pitch; }
+float pragma::audio::CALSound::GetPitch() const { return m_pitch; }
 
-void CALSound::SetLooping(bool loop)
+void pragma::audio::CALSound::SetLooping(bool loop)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetLooping(loop);
 }
 
-bool CALSound::IsIdle() const
+bool pragma::audio::CALSound::IsIdle() const
 {
 	if(GetIndex() > 0)
 		return false; // This is a server-side sound, keep it around until server-side representation is removed
 	return al::SoundSource::IsIdle();
 }
-bool CALSound::IsLooping() const
+bool pragma::audio::CALSound::IsLooping() const
 {
 	if(m_bTerminated == true)
 		return false;
 	return (*this)->IsLooping();
 }
-bool CALSound::IsPlaying() const
+bool pragma::audio::CALSound::IsPlaying() const
 {
 	if(m_bTerminated == true)
 		return false;
 	return (*this)->IsPlaying();
 }
-bool CALSound::IsPaused() const
+bool pragma::audio::CALSound::IsPaused() const
 {
 	if(m_bTerminated == true)
 		return false;
 	return (*this)->IsPaused();
 }
-bool CALSound::IsStopped() const
+bool pragma::audio::CALSound::IsStopped() const
 {
 	if(m_bTerminated == true)
 		return false;
 	return (*this)->IsStopped();
 }
-void CALSound::SetGain(float gain)
+void pragma::audio::CALSound::SetGain(float gain)
 {
 	m_gain = gain;
 	UpdateVolume();
 }
-float CALSound::GetGain() const
+float pragma::audio::CALSound::GetGain() const
 {
 	if(m_bTerminated == true)
 		return 0.f;
 	return glm::clamp((*this)->GetGain(), GetMinGain(), GetMaxGain());
 }
-void CALSound::SetPosition(const Vector3 &pos)
+void pragma::audio::CALSound::SetPosition(const Vector3 &pos)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetPosition(pos);
 }
-Vector3 CALSound::GetPosition() const
+Vector3 pragma::audio::CALSound::GetPosition() const
 {
 	if(m_bTerminated == true)
 		return Vector3(0.f, 0.f, 0.f);
@@ -350,260 +350,260 @@ Vector3 CALSound::GetPosition() const
 	}
 	return (*this)->GetPosition();
 }
-void CALSound::SetVelocity(const Vector3 &vel)
+void pragma::audio::CALSound::SetVelocity(const Vector3 &vel)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetVelocity(vel);
 }
-Vector3 CALSound::GetVelocity() const
+Vector3 pragma::audio::CALSound::GetVelocity() const
 {
 	if(m_bTerminated == true)
 		return Vector3(0.f, 0.f, 0.f);
 	return (*this)->GetVelocity();
 }
-void CALSound::SetDirection(const Vector3 &dir)
+void pragma::audio::CALSound::SetDirection(const Vector3 &dir)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetDirection(dir);
 }
-Vector3 CALSound::GetDirection() const
+Vector3 pragma::audio::CALSound::GetDirection() const
 {
 	if(m_bTerminated == true)
 		return Vector3(0.f, 0.f, 0.f);
 	return (*this)->GetDirection();
 }
-void CALSound::SetRelative(bool b)
+void pragma::audio::CALSound::SetRelative(bool b)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetRelative(b);
 }
-bool CALSound::IsRelative() const
+bool pragma::audio::CALSound::IsRelative() const
 {
 	if(m_bTerminated == true)
 		return false;
 	return (*this)->IsRelative();
 }
-float CALSound::GetDuration() const
+float pragma::audio::CALSound::GetDuration() const
 {
 	if(m_bTerminated == true)
 		return 0.f;
 	return (*this)->GetDuration();
 }
-float CALSound::GetReferenceDistance() const
+float pragma::audio::CALSound::GetReferenceDistance() const
 {
 	if(m_bTerminated == true)
 		return 0.f;
 	return (*this)->GetReferenceDistance();
 }
-void CALSound::SetReferenceDistance(float dist)
+void pragma::audio::CALSound::SetReferenceDistance(float dist)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetReferenceDistance(dist);
 }
-void CALSound::SetRoomRolloffFactor(float roomFactor)
+void pragma::audio::CALSound::SetRoomRolloffFactor(float roomFactor)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetRoomRolloffFactor(roomFactor);
 }
-float CALSound::GetRolloffFactor() const
+float pragma::audio::CALSound::GetRolloffFactor() const
 {
 	if(m_bTerminated == true)
 		return 0.f;
 	return (*this)->GetRolloffFactor();
 }
-float CALSound::GetRoomRolloffFactor() const
+float pragma::audio::CALSound::GetRoomRolloffFactor() const
 {
 	if(m_bTerminated == true)
 		return 0.f;
 	return (*this)->GetRoomRolloffFactor();
 }
-void CALSound::SetRolloffFactor(float rolloff)
+void pragma::audio::CALSound::SetRolloffFactor(float rolloff)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetRolloffFactors(rolloff);
 }
-float CALSound::GetMaxDistance() const
+float pragma::audio::CALSound::GetMaxDistance() const
 {
 	if(m_bTerminated == true)
 		return 0.f;
 	return (*this)->GetMaxDistance();
 }
-void CALSound::SetMaxDistance(float dist)
+void pragma::audio::CALSound::SetMaxDistance(float dist)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetMaxDistance(dist);
 }
-float CALSound::GetMinGain() const
+float pragma::audio::CALSound::GetMinGain() const
 {
 	if(m_bTerminated == true)
 		return 0.f;
 	return (*this)->GetMinGain();
 }
-void CALSound::SetMinGain(float gain)
+void pragma::audio::CALSound::SetMinGain(float gain)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetMinGain(gain);
 }
-float CALSound::GetMaxGain() const
+float pragma::audio::CALSound::GetMaxGain() const
 {
 	if(m_bTerminated == true)
 		return 0.f;
 	return (*this)->GetMaxGain();
 }
-void CALSound::SetMaxGain(float gain)
+void pragma::audio::CALSound::SetMaxGain(float gain)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetMaxGain(gain);
 }
-float CALSound::GetInnerConeAngle() const
+float pragma::audio::CALSound::GetInnerConeAngle() const
 {
 	if(m_bTerminated == true)
 		return 0.f;
 	return (*this)->GetInnerConeAngle();
 }
-void CALSound::SetInnerConeAngle(float ang)
+void pragma::audio::CALSound::SetInnerConeAngle(float ang)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetInnerConeAngle(ang);
 }
-float CALSound::GetOuterConeAngle() const
+float pragma::audio::CALSound::GetOuterConeAngle() const
 {
 	if(m_bTerminated == true)
 		return 0.f;
 	return (*this)->GetOuterConeAngle();
 }
-void CALSound::SetOuterConeAngle(float ang)
+void pragma::audio::CALSound::SetOuterConeAngle(float ang)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetOuterConeAngle(ang);
 }
-float CALSound::GetOuterConeGain() const
+float pragma::audio::CALSound::GetOuterConeGain() const
 {
 	if(m_bTerminated == true)
 		return 0.f;
 	return (*this)->GetOuterConeGain();
 }
-float CALSound::GetOuterConeGainHF() const
+float pragma::audio::CALSound::GetOuterConeGainHF() const
 {
 	if(m_bTerminated == true)
 		return 0.f;
 	return (*this)->GetOuterConeGainHF();
 }
-void CALSound::SetOuterConeGain(float gain)
+void pragma::audio::CALSound::SetOuterConeGain(float gain)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetOuterConeGain(gain);
 }
-void CALSound::SetOuterConeGainHF(float gain)
+void pragma::audio::CALSound::SetOuterConeGainHF(float gain)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetOuterConeGainHF(gain);
 }
 
-uint32_t CALSound::GetPriority()
+uint32_t pragma::audio::CALSound::GetPriority()
 {
 	if(m_bTerminated == true)
 		return 0;
 	return (*this)->GetPriority();
 }
-void CALSound::SetPriority(uint32_t priority)
+void pragma::audio::CALSound::SetPriority(uint32_t priority)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetPriority(priority);
 }
-void CALSound::SetOrientation(const Vector3 &at, const Vector3 &up)
+void pragma::audio::CALSound::SetOrientation(const Vector3 &at, const Vector3 &up)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetOrientation(at, up);
 }
-std::pair<Vector3, Vector3> CALSound::GetOrientation() const
+std::pair<Vector3, Vector3> pragma::audio::CALSound::GetOrientation() const
 {
 	if(m_bTerminated == true)
 		return {};
 	return (*this)->GetOrientation();
 }
-void CALSound::SetDopplerFactor(float factor)
+void pragma::audio::CALSound::SetDopplerFactor(float factor)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetDopplerFactor(factor);
 }
-float CALSound::GetDopplerFactor() const
+float pragma::audio::CALSound::GetDopplerFactor() const
 {
 	if(m_bTerminated == true)
 		return 0.f;
 	return (*this)->GetDopplerFactor();
 }
-void CALSound::SetLeftStereoAngle(float ang)
+void pragma::audio::CALSound::SetLeftStereoAngle(float ang)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetLeftStereoAngle(ang);
 }
-float CALSound::GetLeftStereoAngle() const
+float pragma::audio::CALSound::GetLeftStereoAngle() const
 {
 	if(m_bTerminated == true)
 		return 0.f;
 	return (*this)->GetLeftStereoAngle();
 }
-void CALSound::SetRightStereoAngle(float ang)
+void pragma::audio::CALSound::SetRightStereoAngle(float ang)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetRightStereoAngle(ang);
 }
-float CALSound::GetRightStereoAngle() const
+float pragma::audio::CALSound::GetRightStereoAngle() const
 {
 	if(m_bTerminated == true)
 		return 0.f;
 	return (*this)->GetRightStereoAngle();
 }
-void CALSound::SetAirAbsorptionFactor(float factor)
+void pragma::audio::CALSound::SetAirAbsorptionFactor(float factor)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetAirAbsorptionFactor(factor);
 }
-float CALSound::GetAirAbsorptionFactor() const
+float pragma::audio::CALSound::GetAirAbsorptionFactor() const
 {
 	if(m_bTerminated == true)
 		return 0.f;
 	return (*this)->GetAirAbsorptionFactor();
 }
-void CALSound::SetGainAuto(bool directHF, bool send, bool sendHF)
+void pragma::audio::CALSound::SetGainAuto(bool directHF, bool send, bool sendHF)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetGainAuto(directHF, send, sendHF);
 }
-std::tuple<bool, bool, bool> CALSound::GetGainAuto() const
+std::tuple<bool, bool, bool> pragma::audio::CALSound::GetGainAuto() const
 {
 	if(m_bTerminated == true)
 		return {false, false, false};
 	return (*this)->GetGainAuto();
 }
-void CALSound::SetDirectFilter(const SoundEffectParams &params)
+void pragma::audio::CALSound::SetDirectFilter(const SoundEffectParams &params)
 {
 	if(m_bTerminated == true)
 		return;
 	(*this)->SetDirectFilter(reinterpret_cast<const al::EffectParams &>(params));
 }
-const SoundEffectParams &CALSound::GetDirectFilter() const
+const pragma::audio::SoundEffectParams &pragma::audio::CALSound::GetDirectFilter() const
 {
 	if(m_bTerminated == true) {
 		static SoundEffectParams params {};
@@ -611,21 +611,21 @@ const SoundEffectParams &CALSound::GetDirectFilter() const
 	}
 	return reinterpret_cast<const SoundEffectParams &>((*this)->GetDirectFilter());
 }
-bool CALSound::AddEffect(const std::string &effectName, const SoundEffectParams &params)
+bool pragma::audio::CALSound::AddEffect(const std::string &effectName, const SoundEffectParams &params)
 {
 	auto effect = pragma::get_cengine()->GetAuxEffect(effectName);
 	if(effect == nullptr)
 		return false;
 	return (*this)->AddEffect(*effect, reinterpret_cast<const al::EffectParams &>(params));
 }
-void CALSound::RemoveEffect(const std::string &effectName)
+void pragma::audio::CALSound::RemoveEffect(const std::string &effectName)
 {
 	auto effect = pragma::get_cengine()->GetAuxEffect(effectName);
 	if(effect == nullptr)
 		return;
 	(*this)->RemoveEffect(*effect);
 }
-void CALSound::SetEffectParameters(const std::string &effectName, const SoundEffectParams &params)
+void pragma::audio::CALSound::SetEffectParameters(const std::string &effectName, const SoundEffectParams &params)
 {
 	auto effect = pragma::get_cengine()->GetAuxEffect(effectName);
 	if(effect == nullptr)
@@ -633,7 +633,7 @@ void CALSound::SetEffectParameters(const std::string &effectName, const SoundEff
 	(*this)->SetEffectParameters(*effect, reinterpret_cast<const al::EffectParams &>(params));
 }
 
-void CALSound::SetType(pragma::audio::ALSoundType type)
+void pragma::audio::CALSound::SetType(pragma::audio::ALSoundType type)
 {
 	if(m_bTerminated == true)
 		return;

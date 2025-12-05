@@ -9,7 +9,7 @@ export module pragma.server:audio.sound;
 
 export import pragma.shared;
 
-export {
+export namespace pragma::audio {
 	class DLLSERVER SALSoundBase {
 	  protected:
 		bool m_bShared;

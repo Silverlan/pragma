@@ -112,11 +112,11 @@ CGame::CGame(NetworkState *state)
 
 	LoadAuxEffects("fx_generic.udm");
 	for(auto &rsnd : pragma::get_client_state()->GetSounds()) {
-		auto &snd = static_cast<CALSound &>(rsnd.get());
+		auto &snd = static_cast<pragma::audio::CALSound &>(rsnd.get());
 		snd.SetPitchModifier(GetTimeScale()); // TODO Implement SetPitchModifier for SoundScripts
 	}
-	AddCallback("OnSoundCreated", FunctionCallback<void, ALSound *>::Create([](ALSound *snd) {
-		auto *csnd = dynamic_cast<CALSound *>(snd);
+	AddCallback("OnSoundCreated", FunctionCallback<void, pragma::audio::ALSound *>::Create([](pragma::audio::ALSound *snd) {
+		auto *csnd = dynamic_cast<pragma::audio::CALSound *>(snd);
 		if(csnd == nullptr)
 			return;
 		csnd->SetPitchModifier(pragma::get_cgame()->GetTimeScale());
@@ -1280,7 +1280,7 @@ void CGame::SetTimeScale(float t)
 {
 	pragma::Game::SetTimeScale(t);
 	for(auto &rsnd : pragma::get_client_state()->GetSounds()) {
-		auto &snd = static_cast<CALSound &>(rsnd.get());
+		auto &snd = static_cast<pragma::audio::CALSound &>(rsnd.get());
 		snd.SetPitchModifier(t); // TODO Implement SetPitchModifier for SoundScripts
 	}
 }
@@ -1626,7 +1626,7 @@ bool CGame::GetActionInput(pragma::Action action)
 void CGame::DrawLine(const Vector3 &start, const Vector3 &end, const Color &color, float duration) { DebugRenderer::DrawLine(start, end, {color, duration}); }
 void CGame::DrawBox(const Vector3 &origin, const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &colorOutline, const std::optional<Color> &fillColor, float duration)
 {
-	DebugRenderInfo renderInfo {};
+	pragma::debug::DebugRenderInfo renderInfo {};
 	renderInfo.SetOrigin(origin);
 	renderInfo.SetRotation(uquat::create(ang));
 	renderInfo.SetDuration(duration);

@@ -321,7 +321,7 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 	else if(eventId == pragma::baseSoundEmitterComponent::EVENT_ON_SOUND_CREATED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto snd = Lua::Check<std::shared_ptr<ALSound>>(l, -1);
+		auto snd = Lua::Check<std::shared_ptr<pragma::audio::ALSound>>(l, -1);
 		Lua::Pop(l, 1);
 
 		pragma::CEOnSoundCreated evData {snd};
@@ -556,7 +556,7 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 	else if(eventId == pragma::baseSoundEmitterComponent::EVENT_ON_SOUND_CREATED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &sound = Lua::Check<std::shared_ptr<ALSound>>(l, -1);
+		auto &sound = Lua::Check<std::shared_ptr<pragma::audio::ALSound>>(l, -1);
 		Lua::Pop(l, 1);
 		pragma::CEOnSoundCreated evData {sound};
 		if(bInject)

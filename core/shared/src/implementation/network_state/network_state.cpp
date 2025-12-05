@@ -91,9 +91,9 @@ std::vector<CallbackHandle> &NetworkState::GetLuaEnumRegisterCallbacks() { retur
 
 ResourceWatcherManager &NetworkState::GetResourceWatcher() { return *m_resourceWatcher; }
 
-bool NetworkState::ShouldRemoveSound(ALSound &snd) { return snd.IsPlaying() == false; }
+bool NetworkState::ShouldRemoveSound(pragma::audio::ALSound &snd) { return snd.IsPlaying() == false; }
 
-void NetworkState::UpdateSounds(std::vector<std::shared_ptr<ALSound>> &sounds)
+void NetworkState::UpdateSounds(std::vector<std::shared_ptr<pragma::audio::ALSound>> &sounds)
 {
 	for(auto i = static_cast<int32_t>(sounds.size()) - 1; i >= 0; --i) {
 		auto psnd = sounds.at(i);
@@ -311,9 +311,9 @@ void NetworkState::Initialize()
 		spdlog::info("Initializing server state...");
 		if(pragma::Engine::Get()->IsServerOnly()) {
 			Con::cout << "If you encounter problems, such as the server not showing up in the server browser, or clients not being able to connect to it, please make sure the following ports are forwarded:" << Con::endl;
-			Con::cout << engine_info::DEFAULT_SERVER_PORT << " (TCP): Required if the boost asio networking layer is used" << Con::endl;
-			Con::cout << engine_info::DEFAULT_SERVER_PORT << " (UDP): Required for clients to be able to connect to the server" << Con::endl;
-			Con::cout << engine_info::DEFAULT_QUERY_PORT << " (UDP): Required for the server to be registered with the master server and show up in the server browser" << Con::endl;
+			Con::cout << pragma::engine_info::DEFAULT_SERVER_PORT << " (TCP): Required if the boost asio networking layer is used" << Con::endl;
+			Con::cout << pragma::engine_info::DEFAULT_SERVER_PORT << " (UDP): Required for clients to be able to connect to the server" << Con::endl;
+			Con::cout << pragma::engine_info::DEFAULT_QUERY_PORT << " (UDP): Required for the server to be registered with the master server and show up in the server browser" << Con::endl;
 			Con::cout << Con::endl << "Here's a list of useful console commands:" << Con::endl;
 			Con::cout << "map <mapName>: Loads the specified map and starts the server." << Con::endl;
 			Con::cout << "sv_maxplayers <maxPlayers>: Specifies the maximum number of players that can play on the server at a time." << Con::endl;

@@ -610,18 +610,18 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		  auto res = Lua::util::start_debugger_server(l);
 		  return 1;
 	  });
-	auto classDefDrawInfo = luabind::class_<DebugRenderInfo>("DrawInfo");
+	auto classDefDrawInfo = luabind::class_<pragma::debug::DebugRenderInfo>("DrawInfo");
 	classDefDrawInfo.def(luabind::constructor<>());
 	classDefDrawInfo.def(luabind::constructor<const umath::Transform &, const Color &>());
 	classDefDrawInfo.def(luabind::constructor<const umath::Transform &, const Color &, const Color &>());
 	classDefDrawInfo.def(luabind::constructor<const umath::Transform &, const Color &, float>());
 	classDefDrawInfo.def(luabind::constructor<const umath::Transform &, const Color &, const Color &, float>());
-	classDefDrawInfo.def("SetOrigin", &DebugRenderInfo::SetOrigin, luabind::discard_result {});
-	classDefDrawInfo.def("SetRotation", &DebugRenderInfo::SetRotation, luabind::discard_result {});
-	classDefDrawInfo.def("SetColor", &DebugRenderInfo::SetColor, luabind::discard_result {});
-	classDefDrawInfo.def("SetOutlineColor", &DebugRenderInfo::SetOutlineColor, luabind::discard_result {});
-	classDefDrawInfo.def("SetDuration", &DebugRenderInfo::SetDuration, luabind::discard_result {});
-	classDefDrawInfo.def("SetIgnoreDepthBuffer", &DebugRenderInfo::SetIgnoreDepthBuffer, luabind::discard_result {});
+	classDefDrawInfo.def("SetOrigin", &pragma::debug::DebugRenderInfo::SetOrigin, luabind::discard_result {});
+	classDefDrawInfo.def("SetRotation", &pragma::debug::DebugRenderInfo::SetRotation, luabind::discard_result {});
+	classDefDrawInfo.def("SetColor", &pragma::debug::DebugRenderInfo::SetColor, luabind::discard_result {});
+	classDefDrawInfo.def("SetOutlineColor", &pragma::debug::DebugRenderInfo::SetOutlineColor, luabind::discard_result {});
+	classDefDrawInfo.def("SetDuration", &pragma::debug::DebugRenderInfo::SetDuration, luabind::discard_result {});
+	classDefDrawInfo.def("SetIgnoreDepthBuffer", &pragma::debug::DebugRenderInfo::SetIgnoreDepthBuffer, luabind::discard_result {});
 	modDebug[classDefDrawInfo];
 
 	auto isBreakDefined = false;

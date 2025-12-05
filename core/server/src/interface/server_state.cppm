@@ -36,7 +36,7 @@ export class DLLSERVER ServerState : public NetworkState {
 
 	std::deque<unsigned int> m_alsoundIndex;
 	// We need to keep shared pointer references to all serverside sounds (Network state only keeps references)
-	std::vector<std::shared_ptr<ALSound>> m_serverSounds;
+	std::vector<std::shared_ptr<pragma::audio::ALSound>> m_serverSounds;
   protected:
 	virtual void implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const override;
 	virtual msys::Material *LoadMaterial(const std::string &path, bool precache, bool bReload) override;
@@ -53,22 +53,22 @@ export class DLLSERVER ServerState : public NetworkState {
 	virtual void Think() override;
 	virtual void Tick() override;
 	virtual void Close() override;
-	virtual NwStateType GetType() const override;
+	virtual pragma::NwStateType GetType() const override;
 	WMServerData &GetServerData();
 	void SendResourceFile(const std::string &f, const std::vector<pragma::networking::IServerClient *> &clients);
 	void SendResourceFile(const std::string &f);
 	void SendRoughModel(const std::string &f, const std::vector<pragma::networking::IServerClient *> &clients);
 	void SendRoughModel(const std::string &f);
-	void SendSoundSourceToClient(SALSound &sound, bool sendFullUpdate, const pragma::networking::ClientRecipientFilter *rf = nullptr);
+	void SendSoundSourceToClient(pragma::audio::SALSound &sound, bool sendFullUpdate, const pragma::networking::ClientRecipientFilter *rf = nullptr);
 	// ConVars
 	virtual ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false) override;
 	// Sound
-	virtual std::shared_ptr<ALSound> CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None) override;
-	virtual std::shared_ptr<ALSound> GetSoundByIndex(unsigned int idx) override;
+	virtual std::shared_ptr<pragma::audio::ALSound> CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None) override;
+	virtual std::shared_ptr<pragma::audio::ALSound> GetSoundByIndex(unsigned int idx) override;
 	virtual void UpdateSounds() override;
-	virtual bool PrecacheSound(std::string snd, ALChannel mode = ALChannel::Auto) override;
+	virtual bool PrecacheSound(std::string snd, pragma::audio::ALChannel mode = pragma::audio::ALChannel::Auto) override;
 	virtual void StopSounds() override;
-	virtual void StopSound(std::shared_ptr<ALSound> pSnd) override;
+	virtual void StopSound(std::shared_ptr<pragma::audio::ALSound> pSnd) override;
 	// Game
 	virtual void StartGame(bool singlePlayer) override;
 	virtual void ChangeLevel(const std::string &map) override;

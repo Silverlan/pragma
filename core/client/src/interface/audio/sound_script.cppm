@@ -12,7 +12,7 @@ export import pragma.soundsystem;
 
 #undef CreateEvent
 
-export {
+export namespace pragma::audio {
 	class DLLCLIENT CSSEPlaySound : public SSEPlaySound {
 	  protected:
 		std::shared_ptr<al::IEffect> m_dspEffect = nullptr;
@@ -21,7 +21,7 @@ export {
 		CSSEPlaySound(SoundScriptManager *manager);
 		std::vector<std::shared_ptr<al::IEffect>> effects;
 		virtual void Initialize(udm::LinkedPropertyWrapper &prop) override;
-		virtual SSESound *CreateSound(double tStart, const std::function<std::shared_ptr<ALSound>(const std::string &, ALChannel, pragma::audio::ALCreateFlags)> &createSound) override;
+		virtual SSESound *CreateSound(double tStart, const std::function<std::shared_ptr<pragma::audio::ALSound>(const std::string &, ALChannel, pragma::audio::ALCreateFlags)> &createSound) override;
 	};
 
 	class DLLCLIENT CSoundScriptManager : public SoundScriptManager {

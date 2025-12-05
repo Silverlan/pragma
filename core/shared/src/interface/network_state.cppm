@@ -30,9 +30,9 @@ export {
 		std::vector<CallbackHandle> &GetLuaEnumRegisterCallbacks();
 		void TerminateLuaModules(lua::State *l);
 		void DeregisterLuaModules(void *l, const std::string &identifier);
-		virtual bool ShouldRemoveSound(ALSound &snd);
+		virtual bool ShouldRemoveSound(pragma::audio::ALSound &snd);
 
-		virtual NwStateType GetType() const = 0;
+		virtual pragma::NwStateType GetType() const = 0;
 
 		// Assets
 		const pragma::asset::ModelManager &GetModelManager() const;
@@ -79,9 +79,9 @@ export {
 		std::unordered_map<std::string, unsigned int> &GetConCommandIDs();
 
 		// Sound
-		std::vector<ALSoundRef> m_sounds;
-		std::unordered_map<std::string, std::shared_ptr<SoundCacheInfo>> m_soundsPrecached;
-		void UpdateSounds(std::vector<std::shared_ptr<ALSound>> &sounds);
+		std::vector<pragma::audio::ALSoundRef> m_sounds;
+		std::unordered_map<std::string, std::shared_ptr<pragma::audio::SoundCacheInfo>> m_soundsPrecached;
+		void UpdateSounds(std::vector<std::shared_ptr<pragma::audio::ALSound>> &sounds);
 	  public:
 		NetworkState();
 		virtual ~NetworkState();
@@ -110,17 +110,17 @@ export {
 
 		// Sound
 		float GetSoundDuration(std::string snd);
-		virtual std::shared_ptr<ALSound> CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None) = 0;
+		virtual std::shared_ptr<pragma::audio::ALSound> CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None) = 0;
 		virtual void UpdateSounds() = 0;
-		virtual bool PrecacheSound(std::string snd, ALChannel mode = ALChannel::Auto) = 0;
+		virtual bool PrecacheSound(std::string snd, pragma::audio::ALChannel mode = pragma::audio::ALChannel::Auto) = 0;
 		virtual void StopSounds() = 0;
-		virtual void StopSound(std::shared_ptr<ALSound> pSnd) = 0;
-		virtual std::shared_ptr<ALSound> GetSoundByIndex(unsigned int idx) = 0;
-		const std::vector<ALSoundRef> &GetSounds() const;
-		std::vector<ALSoundRef> &GetSounds();
+		virtual void StopSound(std::shared_ptr<pragma::audio::ALSound> pSnd) = 0;
+		virtual std::shared_ptr<pragma::audio::ALSound> GetSoundByIndex(unsigned int idx) = 0;
+		const std::vector<pragma::audio::ALSoundRef> &GetSounds() const;
+		std::vector<pragma::audio::ALSoundRef> &GetSounds();
 
-		SoundScriptManager *GetSoundScriptManager();
-		SoundScript *FindSoundScript(const char *name);
+		pragma::audio::SoundScriptManager *GetSoundScriptManager();
+		pragma::audio::SoundScript *FindSoundScript(const char *name);
 		virtual bool LoadSoundScripts(const char *file, bool bPrecache = false);
 		Bool IsSoundPrecached(const std::string &snd) const;
 
@@ -153,7 +153,7 @@ export {
 
 		std::unique_ptr<pragma::Game, void (*)(pragma::Game *)> m_game = std::unique_ptr<pragma::Game, void (*)(pragma::Game *)> {nullptr, [](pragma::Game *) {}};
 		std::shared_ptr<pragma::asset::ModelManager> m_modelManager = nullptr;
-		std::unique_ptr<SoundScriptManager> m_soundScriptManager;
+		std::unique_ptr<pragma::audio::SoundScriptManager> m_soundScriptManager;
 		std::unordered_set<std::string> m_missingSoundCache;
 		std::vector<CallbackHandle> m_thinkCallbacks;
 		std::vector<CallbackHandle> m_tickCallbacks;

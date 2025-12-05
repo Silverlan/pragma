@@ -20,6 +20,6 @@ export namespace pragma {
 		std::string m_kvUseSound;
 		float m_kvWaitTime = 0.f;
 		float m_tNextUse = 0.f;
-		std::shared_ptr<ALSound> m_useSound = nullptr;
+		std::shared_ptr<pragma::audio::ALSound> m_useSound = nullptr;
 	};
 };

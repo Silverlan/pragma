@@ -37,7 +37,7 @@ void ServerState::RegisterServerInfo()
 	m_serverData.players = SGame::Get()->GetPlayerCount();
 	m_serverData.tcpPort = port.has_value() ? *port : 0;
 	m_serverData.udpPort = port.has_value() ? *port : 0;
-	m_serverData.engineVersion = get_engine_version();
+	m_serverData.engineVersion = pragma::get_engine_version();
 	m_serverData.maxPlayers = GetConVarInt("sv_maxplayers");
 	m_serverData.password = password.empty() == false;
 	//m_serverData.bots

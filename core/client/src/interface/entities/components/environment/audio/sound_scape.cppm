@@ -24,7 +24,7 @@ export namespace pragma {
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void OnEntitySpawn() override;
 	  protected:
-		std::shared_ptr<ALSound> m_sound;
+		std::shared_ptr<pragma::audio::ALSound> m_sound;
 		static CSoundScapeComponent *s_active;
 		std::unordered_map<unsigned int, EntityHandle> m_targets;
 		void UpdateTargetPositions();

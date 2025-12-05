@@ -168,7 +168,7 @@ pragma::Game::Game(NetworkState *state)
 	RegisterCallback<void>("OnMapLoaded");
 	RegisterCallback<void>("OnPreLoadMap");
 	RegisterCallback<void>("OnGameReady");
-	RegisterCallback<void, ALSound *>("OnSoundCreated");
+	RegisterCallback<void, pragma::audio::ALSound *>("OnSoundCreated");
 	RegisterCallback<void, std::reference_wrapper<std::shared_ptr<pragma::Model>>>("OnModelLoaded");
 
 	RegisterCallback<void>("EndGame");

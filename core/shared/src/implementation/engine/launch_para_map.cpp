@@ -6,14 +6,14 @@ module pragma.shared;
 
 import :engine.launch_para_map;
 
-std::stringstream LaunchParaMap::LAUNCHPARAMETERS_HELP;
+std::stringstream pragma::LaunchParaMap::LAUNCHPARAMETERS_HELP;
 
-LaunchParaMap::~LaunchParaMap() { m_parameters.clear(); }
+pragma::LaunchParaMap::~LaunchParaMap() { m_parameters.clear(); }
 
-const std::unordered_map<std::string, LaunchParameterFunc> &LaunchParaMap::GetParameters() const { return m_parameters; }
-void LaunchParaMap::RegisterParameter(const std::string &name, const LaunchParameterFunc &f) { m_parameters.insert(std::make_pair(name, f)); }
+const std::unordered_map<std::string, pragma::LaunchParameterFunc> &pragma::LaunchParaMap::GetParameters() const { return m_parameters; }
+void pragma::LaunchParaMap::RegisterParameter(const std::string &name, const LaunchParameterFunc &f) { m_parameters.insert(std::make_pair(name, f)); }
 
-void LaunchParaMap::RegisterParameterHelp(std::string name, const LaunchParameterFunc &function, std::string descCmd, std::string descHelp)
+void pragma::LaunchParaMap::RegisterParameterHelp(std::string name, const LaunchParameterFunc &function, std::string descCmd, std::string descHelp)
 {
 	RegisterParameter(name, function);
 	std::stringstream pre;
@@ -29,13 +29,13 @@ void LaunchParaMap::RegisterParameterHelp(std::string name, const LaunchParamete
 	LAUNCHPARAMETERS_HELP << pre.str() << sp << descHelp << "\n";
 }
 
-static LaunchParaMap g_LaunchParameters;
+static pragma::LaunchParaMap g_LaunchParameters;
 
-LaunchParaMap *GetLaunchParaMap() { return &g_LaunchParameters; }
+pragma::LaunchParaMap *pragma::GetLaunchParaMap() { return &g_LaunchParameters; }
 
-void RegisterLaunchParameter(std::string name, const LaunchParameterFunc &function) { g_LaunchParameters.RegisterParameter(name, function); }
+void RegisterLaunchParameter(std::string name, const pragma::LaunchParameterFunc &function) { g_LaunchParameters.RegisterParameter(name, function); }
 
-void RegisterLaunchParameterHelp(std::string name, const LaunchParameterFunc &function, std::string descCmd, std::string descHelp)
+void RegisterLaunchParameterHelp(std::string name, const pragma::LaunchParameterFunc &function, std::string descCmd, std::string descHelp)
 {
 	RegisterLaunchParameter(name, function);
 	std::stringstream pre;

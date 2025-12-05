@@ -14,5 +14,5 @@ Bool NetworkState::IsSoundPrecached(const std::string &snd) const
 	auto i = m_soundsPrecached.find(lsnd);
 	return (i != m_soundsPrecached.end()) ? true : false;
 }
-const std::vector<ALSoundRef> &NetworkState::GetSounds() const { return m_sounds; }
-std::vector<ALSoundRef> &NetworkState::GetSounds() { return m_sounds; }
+const std::vector<pragma::audio::ALSoundRef> &NetworkState::GetSounds() const { return m_sounds; }
+std::vector<pragma::audio::ALSoundRef> &NetworkState::GetSounds() { return m_sounds; }

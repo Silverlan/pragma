@@ -228,7 +228,7 @@ export {
 		void SetGpuPerformanceTimersEnabled(bool enabled);
 		std::chrono::nanoseconds GetGpuExecutionTime(uint32_t swapchainIdx, GPUTimer timer) const;
 
-		virtual std::unique_ptr<ConVarInfoList> &GetConVarConfig(NwStateType type) override;
+		virtual std::unique_ptr<ConVarInfoList> &GetConVarConfig(pragma::NwStateType type) override;
 	  protected:
 		friend CoreInputBindingLayer;
 		void DrawScene(std::shared_ptr<prosper::RenderTarget> &rt);
@@ -248,7 +248,7 @@ export {
 		virtual void OnWindowInitialized() override;
 		virtual void LoadConfig() override;
 		virtual void InitializeExternalArchiveManager() override;
-		virtual void PreloadConfig(NwStateType type, const std::string &configName) override;
+		virtual void PreloadConfig(pragma::NwStateType type, const std::string &configName) override;
 
 		virtual void RegisterConsoleCommands() override;
 	  private:
@@ -310,4 +310,6 @@ export {
 };
 #pragma warning(pop)
 
-void register_client_launch_parameters(LaunchParaMap &map);
+namespace pragma {
+	void register_client_launch_parameters(LaunchParaMap &map);
+}

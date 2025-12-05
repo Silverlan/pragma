@@ -11,13 +11,13 @@ import :engine;
 
 #undef CreateEvent
 
-CSoundScript::CSoundScript(SoundScriptManager *manager, std::string identifier) : SoundScript(manager, identifier) {}
-CSoundScript::~CSoundScript() {}
+pragma::audio::CSoundScript::CSoundScript(SoundScriptManager *manager, std::string identifier) : SoundScript(manager, identifier) {}
+pragma::audio::CSoundScript::~CSoundScript() {}
 
 //////////////////////////////////////
 
-CSSEPlaySound::CSSEPlaySound(SoundScriptManager *manager) : SSEPlaySound(manager), m_dspEffect(nullptr) {}
-SSESound *CSSEPlaySound::CreateSound(double tStart, const std::function<std::shared_ptr<ALSound>(const std::string &, ALChannel, pragma::audio::ALCreateFlags)> &createSound)
+pragma::audio::CSSEPlaySound::CSSEPlaySound(SoundScriptManager *manager) : SSEPlaySound(manager), m_dspEffect(nullptr) {}
+pragma::audio::SSESound *pragma::audio::CSSEPlaySound::CreateSound(double tStart, const std::function<std::shared_ptr<pragma::audio::ALSound>(const std::string &, ALChannel, pragma::audio::ALCreateFlags)> &createSound)
 {
 	auto *s = SSEPlaySound::CreateSound(tStart, createSound);
 	if(s == nullptr)
@@ -31,8 +31,8 @@ SSESound *CSSEPlaySound::CreateSound(double tStart, const std::function<std::sha
 		cs->AddEffect(*effect);
 	return s;
 }
-void CSSEPlaySound::PrecacheSound(const char *name) { pragma::get_client_state()->PrecacheSound(name, GetChannel()); }
-void CSSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
+void pragma::audio::CSSEPlaySound::PrecacheSound(const char *name) { pragma::get_client_state()->PrecacheSound(name, GetChannel()); }
+void pragma::audio::CSSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 {
 	SSEPlaySound::Initialize(prop);
 	std::string dsp;
@@ -54,10 +54,10 @@ void CSSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 
 //////////////////////////////////////
 
-CSoundScriptManager::CSoundScriptManager() : SoundScriptManager() {}
-CSoundScriptManager::~CSoundScriptManager() {}
-bool CSoundScriptManager::Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts) { return SoundScriptManager::Load<CSoundScript>(fname, scripts); }
-SoundScriptEvent *CSoundScriptManager::CreateEvent(std::string name)
+pragma::audio::CSoundScriptManager::CSoundScriptManager() : SoundScriptManager() {}
+pragma::audio::CSoundScriptManager::~CSoundScriptManager() {}
+bool pragma::audio::CSoundScriptManager::Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts) { return SoundScriptManager::Load<CSoundScript>(fname, scripts); }
+pragma::audio::SoundScriptEvent *pragma::audio::CSoundScriptManager::CreateEvent(std::string name)
 {
 	if(name == "playsound")
 		return new CSSEPlaySound(this);

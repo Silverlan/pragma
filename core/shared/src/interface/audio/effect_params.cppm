@@ -6,7 +6,7 @@ module;
 
 export module pragma.shared:audio.effect_params;
 
-export {
+export namespace pragma::audio {
 	struct DLLNETWORK SoundEffectParams {
 		SoundEffectParams(float gain = 1.f, float gainHF = 1.f, float gainLF = 1.f);
 		float gain = 1.f;

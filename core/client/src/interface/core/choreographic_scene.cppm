@@ -31,7 +31,7 @@ export namespace choreography {
 		AudioEvent(uts::Channel &channel, const std::string &snd);
 		friend uts::Event;
 		virtual State HandleTick(double t, double dt) override;
-		std::shared_ptr<ALSound> m_sound = nullptr;
+		std::shared_ptr<pragma::audio::ALSound> m_sound = nullptr;
 		std::string m_soundSource;
 	};
 

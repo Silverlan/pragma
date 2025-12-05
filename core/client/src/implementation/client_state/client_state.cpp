@@ -40,7 +40,7 @@ std::vector<std::string> &get_required_game_textures();
 ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo(nullptr), m_resDownload(nullptr), m_volMaster(1.f), m_hMainMenu(), m_luaGUI(nullptr)
 {
 	g_client = this;
-	m_soundScriptManager = std::make_unique<CSoundScriptManager>();
+	m_soundScriptManager = std::make_unique<pragma::audio::CSoundScriptManager>();
 
 	m_modelManager = std::make_unique<pragma::asset::CModelManager>(*this);
 	// m_modelManager->SetVerbose(true);
@@ -151,7 +151,7 @@ void ClientState::Initialize()
 	NetworkState::Initialize();
 
 	pragma::get_cengine()->GetSoundSystem()->SetOnReleaseSoundCallback([this](const al::SoundSource &snd) {
-		auto it = std::find_if(m_sounds.begin(), m_sounds.end(), [&snd](const ALSoundRef &sndOther) { return (static_cast<CALSound *>(&sndOther.get()) == &snd) ? true : false; });
+		auto it = std::find_if(m_sounds.begin(), m_sounds.end(), [&snd](const pragma::audio::ALSoundRef &sndOther) { return (static_cast<pragma::audio::CALSound *>(&sndOther.get()) == &snd) ? true : false; });
 		if(it == m_sounds.end())
 			return;
 		m_sounds.erase(it);
@@ -318,7 +318,7 @@ void ClientState::ToggleMainMenu()
 		OpenMainMenu();
 }
 
-NwStateType ClientState::GetType() const { return NwStateType::Client; }
+pragma::NwStateType ClientState::GetType() const { return pragma::NwStateType::Client; }
 
 void ClientState::Close()
 {
@@ -515,14 +515,14 @@ void ClientState::HandleLuaNetPacket(NetPacket &packet)
 	game->HandleLuaNetPacket(packet);
 }
 
-bool ClientState::ShouldRemoveSound(ALSound &snd) { return (NetworkState::ShouldRemoveSound(snd) && snd.GetIndex() == 0) ? true : false; }
+bool ClientState::ShouldRemoveSound(pragma::audio::ALSound &snd) { return (NetworkState::ShouldRemoveSound(snd) && snd.GetIndex() == 0) ? true : false; }
 
-std::shared_ptr<ALSound> ClientState::GetSoundByIndex(unsigned int idx)
+std::shared_ptr<pragma::audio::ALSound> ClientState::GetSoundByIndex(unsigned int idx)
 {
-	auto *snd = CALSound::FindByServerIndex(idx);
+	auto *snd = pragma::audio::CALSound::FindByServerIndex(idx);
 	if(snd == nullptr)
 		return nullptr;
-	return snd->downcasted_shared_from_this<ALSound>();
+	return snd->downcasted_shared_from_this<pragma::audio::ALSound>();
 }
 
 void ClientState::Disconnect()
@@ -564,7 +564,7 @@ void ClientState::SendUserInfo()
 	Con::ccl << "Sending user info..." << Con::endl;
 
 	NetPacket packet;
-	auto &version = get_engine_version();
+	auto &version = pragma::get_engine_version();
 	packet->Write<util::Version>(version);
 
 	auto udpPort = m_client->GetLocalUDPPort();

@@ -11,8 +11,8 @@ export import :audio.sound;
 export {
 	namespace Lua {
 		namespace ALSound {
-			DLLNETWORK void register_class(luabind::class_<::ALSound> &classDef);
+			DLLNETWORK void register_class(luabind::class_<pragma::audio::ALSound> &classDef);
 		};
 	};
-	std::ostream &operator<<(std::ostream &out, const ::ALSound &snd);
+	std::ostream &operator<<(std::ostream &out, const pragma::audio::ALSound &snd);
 };

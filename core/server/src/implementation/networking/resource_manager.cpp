@@ -27,7 +27,7 @@ const ResourceManager::ResourceInfo *ResourceManager::FindResource(const std::st
 		if(ustring::compare(fileName.c_str(), sndPath.c_str(), false, sndPath.length()) == true) {
 			std::string ext;
 			if(ufile::get_extension(fileName, &ext) == false) {
-				for(auto &ext : engine_info::get_supported_audio_formats()) {
+				for(auto &ext : pragma::engine_info::get_supported_audio_formats()) {
 					auto extPath = fileName + '.' + ext;
 					auto *r = FindResource(extPath);
 					if(r != nullptr)

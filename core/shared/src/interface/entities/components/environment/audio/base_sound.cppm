@@ -38,7 +38,7 @@ export {
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 			virtual void Initialize() override;
 			virtual void OnRemove() override;
-			virtual void InjectStateChange(ALState oldState, ALState newState);
+			virtual void InjectStateChange(audio::ALState oldState, audio::ALState newState);
 			virtual void OnEntitySpawn() override;
 
 			const std::string &GetSoundSource() const;
@@ -79,10 +79,10 @@ export {
 
 			bool IsPaused() const;
 			bool IsPlaying() const;
-			const std::shared_ptr<ALSound> &GetSound() const;
+			const std::shared_ptr<audio::ALSound> &GetSound() const;
 		  protected:
 			void InitializeSound();
-			virtual void OnSoundCreated(ALSound &snd);
+			virtual void OnSoundCreated(audio::ALSound &snd);
 			std::string m_kvSoundName;
 			float m_kvPitch = 1.f;
 			float m_kvGain = 1.f;
@@ -95,7 +95,7 @@ export {
 			float m_kvReferenceDist = 1.f;
 			float m_kvMaxDist = 1024.f;
 			pragma::audio::ALSoundType m_soundTypes = pragma::audio::ALSoundType::Generic;
-			std::shared_ptr<ALSound> m_sound;
+			std::shared_ptr<audio::ALSound> m_sound;
 		};
 		using namespace umath::scoped_enum::bitwise;
 	};

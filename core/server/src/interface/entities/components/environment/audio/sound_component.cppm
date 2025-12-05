@@ -20,7 +20,7 @@ export {
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual void InitializeLuaObject(lua::State *l) override;
 		  protected:
-			virtual void OnSoundCreated(ALSound &snd) override;
+			virtual void OnSoundCreated(audio::ALSound &snd) override;
 		};
 	};
 

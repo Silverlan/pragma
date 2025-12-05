@@ -133,7 +133,7 @@ BaseAIComponent::MoveResult BaseAIComponent::MoveTo(const Vector3 &pos, const Mo
 	//auto &start = m_entity->GetPosition();
 	auto upDir = GetUpDirection();
 	auto d = uvec::planar_distance_sqr(m_moveInfo.moveTarget, m_navInfo.pathTarget, upDir);
-	if(d > umath::pow2(MAX_NODE_DISTANCE)) // If the new move target is too far away from our old one, we'll probably need a new path
+	if(d > umath::pow2(pragma::ai::MAX_NODE_DISTANCE)) // If the new move target is too far away from our old one, we'll probably need a new path
 	{
 		if(info.moveOnPath == false) // TODO Check if obstructed
 			return MoveResult::MovingToTarget;

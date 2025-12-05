@@ -12,21 +12,21 @@ module pragma.shared;
 import :network_state;
 import pragma.string.unicode;
 
-std::ostream &operator<<(std::ostream &out, const ALSound &snd)
+std::ostream &operator<<(std::ostream &out, const pragma::audio::ALSound &snd)
 {
 	auto state = snd.GetState();
 	out << "ALSound[" << snd.GetIndex() << "][";
 	switch(state) {
-	case ALState::Initial:
+	case pragma::audio::ALState::Initial:
 		out << "Initial";
 		break;
-	case ALState::Playing:
+	case pragma::audio::ALState::Playing:
 		out << "Playing";
 		break;
-	case ALState::Paused:
+	case pragma::audio::ALState::Paused:
 		out << "Paused";
 		break;
-	case ALState::Stopped:
+	case pragma::audio::ALState::Stopped:
 		out << "Stopped";
 		break;
 	}

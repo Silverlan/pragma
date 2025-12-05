@@ -62,7 +62,7 @@ al::ISoundSystem *CEngine::InitializeSoundEngine()
 	if(m_soundSystem == nullptr)
 		throw std::runtime_error {"Unable to load audio implementation library: " + err + "!"};
 	m_soundSystem->SetSoundSourceFactory([](const al::PSoundChannel &channel) -> al::PSoundSource {
-		return CALSound::Create(pragma::get_cengine()->GetClientState(), channel);
+		return pragma::audio::CALSound::Create(pragma::get_cengine()->GetClientState(), channel);
 	});
 	al::set_world_scale(pragma::units_to_metres(1.0));
 	return m_soundSystem.get();

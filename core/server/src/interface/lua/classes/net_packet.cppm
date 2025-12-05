@@ -14,7 +14,7 @@ export namespace Lua {
 	namespace NetPacket {
 		namespace Server {
 			DLLSERVER void register_class(luabind::class_<::NetPacket> &classDef);
-			DLLSERVER void WriteALSound(lua::State *l, ::NetPacket &packet, std::shared_ptr<::ALSound> snd);
+			DLLSERVER void WriteALSound(lua::State *l, ::NetPacket &packet, std::shared_ptr<pragma::audio::ALSound> snd);
 			DLLSERVER void WriteUniqueEntity(lua::State *l, ::NetPacket &packet, pragma::ecs::BaseEntity *hEnt);
 			DLLSERVER void WriteUniqueEntity(lua::State *l, ::NetPacket &packet);
 		};

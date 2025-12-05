@@ -57,7 +57,7 @@ WIConsole *WIConsole::Open()
 	pConsole->RequestFocus();
 	s_hConsole = pConsole->GetHandle();
 
-	auto wikiUrl = engine_info::get_wiki_url();
+	auto wikiUrl = pragma::engine_info::get_wiki_url();
 	pConsole->SetText("{[c:c2003b]}"
 	                  "    _____ ____  _   _  _____  ____  _      ______ \n"
 	                  "   / ____/ __ \\| \\ | |/ ____|/ __ \\| |    |  ____|\n"

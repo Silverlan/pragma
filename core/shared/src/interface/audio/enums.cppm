@@ -9,9 +9,9 @@ export module pragma.shared:audio.enums;
 
 export import pragma.math;
 
-export {
+export namespace pragma::audio {
 	class ALSound;
-	using ALSoundRef = std::reference_wrapper<ALSound>;
+	using ALSoundRef = std::reference_wrapper<pragma::audio::ALSound>;
 
 	CONSTEXPR_DLL_COMPAT float ALSOUND_DEFAULT_MAX_DISTANCE = std::numeric_limits<float>::max();
 
@@ -50,31 +50,32 @@ export {
 
 	enum class ALChannel : uint32_t { Auto = 0, Mono, Both };
 
-	namespace pragma::audio {
-		enum class ALCreateFlags : uint32_t {
-			None = 0,
-			Mono = 1,
-			Stream = Mono << 1,
-			DontTransmit = Stream << 1 // Serverside only
-		};
-		enum class ALSoundType : Int32 {
-			Generic = 0,
-			Effect = 1,
-			Music = Effect << 1,
-			Voice = Music << 1,
-			Weapon = Voice << 1,
-			NPC = Weapon << 1,
-			Player = NPC << 1,
-			Vehicle = Player << 1,
-			Physics = Vehicle << 1,
-			Environment = Physics << 1,
-			GUI = Environment << 1,
+	enum class ALCreateFlags : uint32_t {
+		None = 0,
+		Mono = 1,
+		Stream = Mono << 1,
+		DontTransmit = Stream << 1 // Serverside only
+	};
+	enum class ALSoundType : Int32 {
+		Generic = 0,
+		Effect = 1,
+		Music = Effect << 1,
+		Voice = Music << 1,
+		Weapon = Voice << 1,
+		NPC = Weapon << 1,
+		Player = NPC << 1,
+		Vehicle = Player << 1,
+		Physics = Vehicle << 1,
+		Environment = Physics << 1,
+		GUI = Environment << 1,
 
-			Count,
-			All = Effect | Music | Voice | Weapon | NPC | Player | Vehicle | Physics | Environment | GUI
-		};
-		using namespace umath::scoped_enum::bitwise;
-	}
+		Count,
+		All = Effect | Music | Voice | Weapon | NPC | Player | Vehicle | Physics | Environment | GUI
+	};
+	using namespace umath::scoped_enum::bitwise;
+};
+
+export {
 	REGISTER_ENUM_FLAGS(pragma::audio::ALCreateFlags)
 	REGISTER_ENUM_FLAGS(pragma::audio::ALSoundType)
-};
+}

@@ -11,16 +11,16 @@ import :client_state;
 
 using namespace pragma;
 
-static void apply_sound_identifier(ALSound &snd, const std::string &name)
+static void apply_sound_identifier(pragma::audio::ALSound &snd, const std::string &name)
 {
 	if(snd.IsSoundScript() == false) {
-		static_cast<CALSound &>(snd)->SetIdentifier(name);
+		static_cast<pragma::audio::CALSound &>(snd)->SetIdentifier(name);
 		return;
 	}
-	auto *sndScript = dynamic_cast<ALSoundScript *>(&snd);
+	auto *sndScript = dynamic_cast<pragma::audio::ALSoundScript *>(&snd);
 	if(sndScript == nullptr)
 		return;
-	sndScript->AddCallback("OnSoundCreated", FunctionCallback<void, ALSound *>::Create([name](ALSound *snd) { apply_sound_identifier(*snd, name); }));
+	sndScript->AddCallback("OnSoundCreated", FunctionCallback<void, pragma::audio::ALSound *>::Create([name](pragma::audio::ALSound *snd) { apply_sound_identifier(*snd, name); }));
 }
 
 void CSoundComponent::OnEntitySpawn()

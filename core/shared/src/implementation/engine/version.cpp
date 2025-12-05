@@ -6,10 +6,10 @@ module pragma.shared;
 
 import :engine.version;
 
-static util::Version engine_version(ENGINE_VERSION_MAJOR, ENGINE_VERSION_MINOR, ENGINE_VERSION_REVISION);
-util::Version &get_engine_version() { return engine_version; }
+static util::Version engine_version(pragma::ENGINE_VERSION_MAJOR, pragma::ENGINE_VERSION_MINOR, pragma::ENGINE_VERSION_REVISION);
+util::Version &pragma::get_engine_version() { return engine_version; }
 
-std::string get_pretty_engine_version()
+std::string pragma::get_pretty_engine_version()
 {
 	auto &version = get_engine_version();
 	std::stringstream ssVersion;

@@ -14,7 +14,7 @@ static std::string get_screenshot_name(pragma::Game *game, uimg::ImageFormat for
 {
 	std::string map;
 	if(game == nullptr)
-		map = engine_info::get_identifier();
+		map = pragma::engine_info::get_identifier();
 	else
 		map = game->GetMapName();
 	std::string path;

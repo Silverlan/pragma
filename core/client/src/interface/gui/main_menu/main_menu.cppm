@@ -52,7 +52,7 @@ export {
 		// Menu Tracks
 		CallbackHandle m_cbMenuTrack;
 		std::vector<std::string> m_menuTracks;
-		std::shared_ptr<ALSound> m_menuSound;
+		std::shared_ptr<pragma::audio::ALSound> m_menuSound;
 		//
 
 		WIHandle m_hActive;

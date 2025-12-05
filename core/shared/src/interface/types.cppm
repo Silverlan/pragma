@@ -7,7 +7,6 @@ export module pragma.shared:types;
 export import std.compat;
 
 export {
-	class ALSound;
 	namespace pragma {
 		class BaseEntityComponent;
 		class BaseFilterComponent;
@@ -18,6 +17,10 @@ export {
 		class ModelMeshGroup;
 		class ModelSubMesh;
 		class PanimaComponent;
+
+		namespace audio {
+			class ALSound;
+		}
 
 		namespace asset {
 			class ModelManager;

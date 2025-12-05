@@ -12,7 +12,7 @@ import :entities.components.radius;
 
 using namespace pragma;
 
-void CDebugTextComponent::DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) { m_debugObject = DebugRenderer::DrawText(renderInfo, m_debugText, m_size); }
+void CDebugTextComponent::DoReloadDebugObject(Color color, const Vector3 &pos, pragma::debug::DebugRenderInfo renderInfo) { m_debugObject = DebugRenderer::DrawText(renderInfo, m_debugText, m_size); }
 void CDebugTextComponent::SetText(const std::string &text)
 {
 	BaseDebugTextComponent::SetText(text);
@@ -54,7 +54,7 @@ void CBaseDebugOutlineComponent::ReceiveData(NetPacket &packet)
 
 void CDebugPointComponent::ReceiveData(NetPacket &packet) { m_bAxis = packet->Read<bool>(); }
 void CDebugPointComponent::InitializeLuaObject(lua::State *l) { return BaseDebugPointComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void CDebugPointComponent::DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) { m_debugObject = DebugRenderer::DrawPoint(renderInfo); }
+void CDebugPointComponent::DoReloadDebugObject(Color color, const Vector3 &pos, pragma::debug::DebugRenderInfo renderInfo) { m_debugObject = DebugRenderer::DrawPoint(renderInfo); }
 
 ////////////////
 
@@ -64,7 +64,7 @@ void CDebugLineComponent::ReceiveData(NetPacket &packet)
 	m_targetOrigin = packet->Read<Vector3>();
 }
 void CDebugLineComponent::InitializeLuaObject(lua::State *l) { return BaseDebugLineComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void CDebugLineComponent::DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo)
+void CDebugLineComponent::DoReloadDebugObject(Color color, const Vector3 &pos, pragma::debug::DebugRenderInfo renderInfo)
 {
 	auto origin = m_targetOrigin;
 	if(m_targetEntity.empty() == false) {
@@ -100,7 +100,7 @@ void CDebugBoxComponent::ReceiveData(NetPacket &packet)
 	m_bounds.second = packet->Read<Vector3>();
 }
 void CDebugBoxComponent::InitializeLuaObject(lua::State *l) { return BaseDebugBoxComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void CDebugBoxComponent::DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo)
+void CDebugBoxComponent::DoReloadDebugObject(Color color, const Vector3 &pos, pragma::debug::DebugRenderInfo renderInfo)
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	auto ang = pTrComponent != nullptr ? pTrComponent->GetAngles() : EulerAngles {};
@@ -129,7 +129,7 @@ void CDebugSphereComponent::ReceiveData(NetPacket &packet)
 	m_recursionLevel = packet->Read<uint32_t>();
 }
 void CDebugSphereComponent::InitializeLuaObject(lua::State *l) { return BaseDebugSphereComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void CDebugSphereComponent::DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo)
+void CDebugSphereComponent::DoReloadDebugObject(Color color, const Vector3 &pos, pragma::debug::DebugRenderInfo renderInfo)
 {
 	auto pRadiusComponent = GetEntity().GetComponent<CRadiusComponent>();
 	if(pRadiusComponent.expired())
@@ -164,7 +164,7 @@ void CDebugConeComponent::ReceiveData(NetPacket &packet)
 	m_segmentCount = packet->Read<uint32_t>();
 }
 void CDebugConeComponent::InitializeLuaObject(lua::State *l) { return BaseDebugConeComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void CDebugConeComponent::DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo)
+void CDebugConeComponent::DoReloadDebugObject(Color color, const Vector3 &pos, pragma::debug::DebugRenderInfo renderInfo)
 {
 	auto &ent = GetEntity();
 	auto pRadiusComponent = ent.GetComponent<CRadiusComponent>();
@@ -209,7 +209,7 @@ void CDebugCylinderComponent::ReceiveData(NetPacket &packet)
 	m_segmentCount = packet->Read<uint32_t>();
 }
 void CDebugCylinderComponent::InitializeLuaObject(lua::State *l) { return BaseDebugCylinderComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void CDebugCylinderComponent::DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo)
+void CDebugCylinderComponent::DoReloadDebugObject(Color color, const Vector3 &pos, pragma::debug::DebugRenderInfo renderInfo)
 {
 	auto &ent = GetEntity();
 	auto pRadiusComponent = ent.GetComponent<CRadiusComponent>();
@@ -232,7 +232,7 @@ Bool CDebugCylinderComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPac
 ////////////////
 
 void CDebugPlaneComponent::InitializeLuaObject(lua::State *l) { return BaseDebugPlaneComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void CDebugPlaneComponent::DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo)
+void CDebugPlaneComponent::DoReloadDebugObject(Color color, const Vector3 &pos, pragma::debug::DebugRenderInfo renderInfo)
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(pTrComponent == nullptr)

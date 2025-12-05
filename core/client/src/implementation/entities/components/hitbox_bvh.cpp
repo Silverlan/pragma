@@ -679,7 +679,7 @@ void CHitboxBvhComponent::DebugDraw()
 			continue;
 		auto pose = hObb.GetPose(effectivePoses);
 		auto &pos = pose.GetOrigin();
-		DebugRenderInfo renderInfo {color, outlineColor, duration};
+		pragma::debug::DebugRenderInfo renderInfo {color, outlineColor, duration};
 		renderInfo.pose.SetOrigin(pos);
 		renderInfo.pose.SetRotation(pose.GetRotation());
 		::DebugRenderer::DrawBox(-hObb.halfExtents, hObb.halfExtents, renderInfo);

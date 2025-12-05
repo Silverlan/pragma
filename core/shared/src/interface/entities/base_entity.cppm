@@ -126,8 +126,8 @@ export {
 			// These are quick-access functions for commonly used component functions.
 			// In some cases these may create the component, if it doesn't exist, and transmit
 			// it to the client if called serverside!
-			std::shared_ptr<ALSound> CreateSound(const std::string &snd, pragma::audio::ALSoundType type);
-			std::shared_ptr<ALSound> EmitSound(const std::string &snd, pragma::audio::ALSoundType type, float gain = 1.f, float pitch = 1.f);
+			std::shared_ptr<pragma::audio::ALSound> CreateSound(const std::string &snd, pragma::audio::ALSoundType type);
+			std::shared_ptr<pragma::audio::ALSound> EmitSound(const std::string &snd, pragma::audio::ALSoundType type, float gain = 1.f, float pitch = 1.f);
 
 			std::string GetName() const;
 			void SetName(const std::string &name);

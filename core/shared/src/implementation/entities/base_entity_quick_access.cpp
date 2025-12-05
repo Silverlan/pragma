@@ -15,14 +15,14 @@ pragma::ComponentHandle<pragma::BaseEntityComponent> pragma::ecs::BaseEntity::Ad
 		return c;
 	return AddComponent(name);
 }
-std::shared_ptr<ALSound> pragma::ecs::BaseEntity::CreateSound(const std::string &snd, pragma::audio::ALSoundType type)
+std::shared_ptr<pragma::audio::ALSound> pragma::ecs::BaseEntity::CreateSound(const std::string &snd, pragma::audio::ALSoundType type)
 {
 	auto *sndC = static_cast<pragma::BaseSoundEmitterComponent *>(AddNetworkedComponent("sound_emitter").get());
 	if(sndC == nullptr)
 		return nullptr;
 	return sndC->CreateSound(snd, type);
 }
-std::shared_ptr<ALSound> pragma::ecs::BaseEntity::EmitSound(const std::string &snd, pragma::audio::ALSoundType type, float gain, float pitch)
+std::shared_ptr<pragma::audio::ALSound> pragma::ecs::BaseEntity::EmitSound(const std::string &snd, pragma::audio::ALSoundType type, float gain, float pitch)
 {
 	auto *sndC = static_cast<pragma::BaseSoundEmitterComponent *>(AddNetworkedComponent("sound_emitter").get());
 	if(sndC == nullptr)

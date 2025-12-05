@@ -364,5 +364,7 @@ export {
 	};
 };
 
-export class LaunchParaMap;
-void register_launch_parameters(LaunchParaMap &map);
+export namespace pragma {
+	class LaunchParaMap;
+	void register_launch_parameters(LaunchParaMap &map);
+}

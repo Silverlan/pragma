@@ -470,7 +470,7 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, NetPacke
 	if(pl != nullptr)
 		return;
 	auto plVersion = packet->Read<util::Version>();
-	auto version = get_engine_version();
+	auto version = pragma::get_engine_version();
 	if(version != plVersion) {
 		Con::csv << "Client " << session.GetIdentifier() << " has a different engine version (" << plVersion.ToString() << ") from server's. Dropping client..." << Con::endl;
 		ServerState::Get()->DropClient(session, pragma::networking::DropReason::Kicked);
@@ -618,7 +618,7 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, NetPacke
 	// Send sound sources
 	auto &sounds = ServerState::Get()->GetSounds();
 	for(auto &sndRef : sounds) {
-		auto *snd = dynamic_cast<SALSound *>(&sndRef.get());
+		auto *snd = dynamic_cast<pragma::audio::SALSound *>(&sndRef.get());
 		if(snd == nullptr || umath::is_flag_set(snd->GetCreateFlags(), pragma::audio::ALCreateFlags::DontTransmit))
 			continue;
 		ServerState::Get()->SendSoundSourceToClient(*snd, true, &rp);

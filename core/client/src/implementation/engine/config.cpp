@@ -51,7 +51,7 @@ void CEngine::WriteClientConfig(VFilePtrReal f)
 	if(stateCl != nullptr) {
 		auto &cvars = stateCl->GetConVars();
 
-		auto &cfg = GetConVarConfig(NwStateType::Client);
+		auto &cfg = GetConVarConfig(pragma::NwStateType::Client);
 		if(cfg)
 			RestoreConVarsForUnknownCommands(f, *cfg, cvars);
 
@@ -73,22 +73,22 @@ void CEngine::WriteClientConfig(VFilePtrReal f)
 void CEngine::LoadConfig()
 {
 	pragma::Engine::LoadConfig();
-	PreloadConfig(NwStateType::Client, "client.cfg");
+	PreloadConfig(pragma::NwStateType::Client, "client.cfg");
 }
 
 void CEngine::LoadClientConfig()
 {
-	auto &cfg = GetConVarConfig(NwStateType::Client);
+	auto &cfg = GetConVarConfig(pragma::NwStateType::Client);
 	if(cfg)
 		ExecCommands(*cfg);
 }
 
-void CEngine::PreloadConfig(NwStateType type, const std::string &configName)
+void CEngine::PreloadConfig(pragma::NwStateType type, const std::string &configName)
 {
 	pragma::Engine::PreloadConfig(type, configName);
-	if(type != NwStateType::Client)
+	if(type != pragma::NwStateType::Client)
 		return;
-	auto &cfg = GetConVarConfig(NwStateType::Client);
+	auto &cfg = GetConVarConfig(pragma::NwStateType::Client);
 	if(!cfg)
 		return;
 	std::string lan = pragma::locale::determine_system_language();

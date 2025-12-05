@@ -46,7 +46,7 @@ void SAIComponent::SetHearingStrength(float strength) { m_hearingStrength = umat
 float SAIComponent::GetHearingStrength() const { return m_hearingStrength; }
 bool SAIComponent::CanHear() const { return (m_hearingStrength == 0.f) ? false : true; }
 
-bool SAIComponent::OnSuspiciousSoundHeared(std::shared_ptr<ALSound> &snd)
+bool SAIComponent::OnSuspiciousSoundHeared(std::shared_ptr<pragma::audio::ALSound> &snd)
 {
 	CEOnSuspiciousSoundHeared evData {snd};
 	return BroadcastEvent(sAIComponent::EVENT_ON_SUSPICIOUS_SOUND_HEARED, evData) == util::EventReply::Handled;

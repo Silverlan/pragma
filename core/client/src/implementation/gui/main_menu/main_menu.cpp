@@ -99,8 +99,8 @@ void WIMainMenu::PlayNextMenuTrack(bool newRound)
 		m_menuSound->SetType(pragma::audio::ALSoundType::Music | pragma::audio::ALSoundType::GUI);
 		// m_menuSound->SetPitch(0.4f);
 		// m_menuSound->SetGain(0.2f);
-		m_cbMenuTrack = FunctionCallback<void, ALState, ALState>::Create([this](ALState, ALState newstate) {
-			if(newstate != ALState::Playing)
+		m_cbMenuTrack = FunctionCallback<void, pragma::audio::ALState, pragma::audio::ALState>::Create([this](pragma::audio::ALState, pragma::audio::ALState newstate) {
+			if(newstate != pragma::audio::ALState::Playing)
 				this->PlayNextMenuTrack();
 		});
 		m_menuSound->AddCallback("OnStateChanged", m_cbMenuTrack);
@@ -155,7 +155,7 @@ void WIMainMenu::Initialize()
 		*it = "screenshots/" + *it;
 	pImageSlideShow->SetImages(imgFiles);
 
-	//std::shared_ptr<ALSound> PlaySound(std::string snd,int mode=AL_CHANNEL_AUTO,unsigned char priority=0);
+	//std::shared_ptr<pragma::audio::ALSound> PlaySound(std::string snd,int mode=AL_CHANNEL_AUTO,unsigned char priority=0);
 	m_hMain = CreateChild<WIMainMenuBase>();
 	WIMainMenuBase *menu = static_cast<WIMainMenuBase *>(m_hMain.get());
 	menu->SetVisible(false);
@@ -224,8 +224,8 @@ void WIMainMenu::Initialize()
 
 	m_hVersion = CreateChild<WIText>();
 
-	auto version = get_pretty_engine_version();
-	auto gitInfo = engine_info::get_git_info();
+	auto version = pragma::get_pretty_engine_version();
+	auto gitInfo = pragma::engine_info::get_git_info();
 	if(gitInfo.has_value())
 		version += " [" + ustring::substr(gitInfo->commitSha, 0, 7) + "]";
 	auto *pVersion = static_cast<WIText *>(m_hVersion.get());

@@ -251,7 +251,7 @@ void pragma::ServerState::implFindSimilarConVars(const std::string &input, std::
 	NetworkState::FindSimilarConVars(input, svMap->GetConVars(), similarCmds);
 }
 
-SGame *pragma::ServerState::GetGameState() { return static_cast<SGame *>(pragma::NetworkState::GetGameState()); }
+pragma::SGame *pragma::ServerState::GetGameState() { return static_cast<SGame *>(pragma::NetworkState::GetGameState()); }
 
 bool pragma::ServerState::IsGameActive() { return m_game != nullptr; }
 

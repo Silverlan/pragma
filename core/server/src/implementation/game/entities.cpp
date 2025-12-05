@@ -15,9 +15,9 @@ import :scripting.lua;
 import :server_state;
 import pragma.shared;
 
-pragma::SPlayerComponent *SGame::GetPlayer(pragma::networking::IServerClient &session) { return pragma::ServerState::Get()->GetPlayer(session); }
+pragma::SPlayerComponent *pragma::SGame::GetPlayer(pragma::networking::IServerClient &session) { return pragma::ServerState::Get()->GetPlayer(session); }
 
-SBaseEntity *SGame::CreateEntity(std::string classname)
+SBaseEntity *pragma::SGame::CreateEntity(std::string classname)
 {
 	if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
 		return nullptr;
@@ -44,7 +44,7 @@ SBaseEntity *SGame::CreateEntity(std::string classname)
 	return factory(pragma::ServerState::Get());
 }
 
-void SGame::RemoveEntity(pragma::ecs::BaseEntity *ent)
+void pragma::SGame::RemoveEntity(pragma::ecs::BaseEntity *ent)
 {
 	if(umath::is_flag_set(ent->GetStateFlags(), pragma::ecs::BaseEntity::StateFlags::Removed))
 		return;
@@ -80,7 +80,7 @@ void SGame::RemoveEntity(pragma::ecs::BaseEntity *ent)
 	m_numEnts--;
 }
 
-void SGame::SpawnEntity(pragma::ecs::BaseEntity *ent) // Don't call directly
+void pragma::SGame::SpawnEntity(pragma::ecs::BaseEntity *ent) // Don't call directly
 {
 	pragma::Game::SpawnEntity(ent);
 	auto ID = server_entities::ServerEntityRegistry::Instance().GetNetworkFactoryID(typeid(*ent));
@@ -125,16 +125,16 @@ void SGame::SpawnEntity(pragma::ecs::BaseEntity *ent) // Don't call directly
 	}
 }
 
-void SGame::GetEntities(std::vector<SBaseEntity *> **ents) { *ents = &m_ents; }
+void pragma::SGame::GetEntities(std::vector<SBaseEntity *> **ents) { *ents = &m_ents; }
 
-SBaseEntity *SGame::GetEntity(unsigned int idx)
+SBaseEntity *pragma::SGame::GetEntity(unsigned int idx)
 {
 	if(idx >= m_ents.size())
 		return nullptr;
 	return m_ents[idx];
 }
 
-void SGame::SetupEntity(pragma::ecs::BaseEntity *ent, unsigned int idx)
+void pragma::SGame::SetupEntity(pragma::ecs::BaseEntity *ent, unsigned int idx)
 {
 	if(idx < m_ents.size()) {
 		if(m_ents[idx] != nullptr) {
@@ -166,7 +166,7 @@ void SGame::SetupEntity(pragma::ecs::BaseEntity *ent, unsigned int idx)
 	OnEntityCreated(sEnt);
 }
 
-unsigned int SGame::GetFreeEntityIndex()
+unsigned int pragma::SGame::GetFreeEntityIndex()
 {
 	unsigned int idx;
 	if(!m_entIndices.empty()) {
@@ -178,7 +178,7 @@ unsigned int SGame::GetFreeEntityIndex()
 	return idx;
 }
 
-SBaseEntity *SGame::CreateLuaEntity(std::string classname, bool bLoadIfNotExists)
+SBaseEntity *pragma::SGame::CreateLuaEntity(std::string classname, bool bLoadIfNotExists)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("create_lua_entity");
@@ -247,38 +247,38 @@ SBaseEntity *SGame::CreateLuaEntity(std::string classname, bool bLoadIfNotExists
 	return ent;*/
 }
 
-void SGame::GetPlayers(std::vector<pragma::ecs::BaseEntity *> *ents) { GetPlayers<pragma::ecs::BaseEntity>(ents); }
-void SGame::GetNPCs(std::vector<pragma::ecs::BaseEntity *> *ents) { GetNPCs<pragma::ecs::BaseEntity>(ents); }
-void SGame::GetWeapons(std::vector<pragma::ecs::BaseEntity *> *ents) { GetWeapons<pragma::ecs::BaseEntity>(ents); }
-void SGame::GetVehicles(std::vector<pragma::ecs::BaseEntity *> *ents) { GetVehicles<pragma::ecs::BaseEntity>(ents); }
+void pragma::SGame::GetPlayers(std::vector<pragma::ecs::BaseEntity *> *ents) { GetPlayers<pragma::ecs::BaseEntity>(ents); }
+void pragma::SGame::GetNPCs(std::vector<pragma::ecs::BaseEntity *> *ents) { GetNPCs<pragma::ecs::BaseEntity>(ents); }
+void pragma::SGame::GetWeapons(std::vector<pragma::ecs::BaseEntity *> *ents) { GetWeapons<pragma::ecs::BaseEntity>(ents); }
+void pragma::SGame::GetVehicles(std::vector<pragma::ecs::BaseEntity *> *ents) { GetVehicles<pragma::ecs::BaseEntity>(ents); }
 
-void SGame::GetPlayers(std::vector<SBaseEntity *> *ents) { GetPlayers<SBaseEntity>(ents); }
-void SGame::GetNPCs(std::vector<SBaseEntity *> *ents) { GetNPCs<SBaseEntity>(ents); }
-void SGame::GetWeapons(std::vector<SBaseEntity *> *ents) { GetWeapons<SBaseEntity>(ents); }
-void SGame::GetVehicles(std::vector<SBaseEntity *> *ents) { GetVehicles<SBaseEntity>(ents); }
+void pragma::SGame::GetPlayers(std::vector<SBaseEntity *> *ents) { GetPlayers<SBaseEntity>(ents); }
+void pragma::SGame::GetNPCs(std::vector<SBaseEntity *> *ents) { GetNPCs<SBaseEntity>(ents); }
+void pragma::SGame::GetWeapons(std::vector<SBaseEntity *> *ents) { GetWeapons<SBaseEntity>(ents); }
+void pragma::SGame::GetVehicles(std::vector<SBaseEntity *> *ents) { GetVehicles<SBaseEntity>(ents); }
 
-void SGame::GetPlayers(std::vector<EntityHandle> *ents)
+void pragma::SGame::GetPlayers(std::vector<EntityHandle> *ents)
 {
 	auto &players = pragma::SPlayerComponent::GetAll();
 	ents->reserve(ents->size() + players.size());
 	for(auto *pl : players)
 		ents->push_back(pl->GetEntity().GetHandle());
 }
-void SGame::GetNPCs(std::vector<EntityHandle> *ents)
+void pragma::SGame::GetNPCs(std::vector<EntityHandle> *ents)
 {
 	auto &npcs = pragma::SAIComponent::GetAll();
 	ents->reserve(ents->size() + npcs.size());
 	for(auto *npc : npcs)
 		ents->push_back(npc->GetEntity().GetHandle());
 }
-void SGame::GetWeapons(std::vector<EntityHandle> *ents)
+void pragma::SGame::GetWeapons(std::vector<EntityHandle> *ents)
 {
 	auto &weapons = pragma::SWeaponComponent::GetAll();
 	ents->reserve(ents->size() + weapons.size());
 	for(auto *wep : weapons)
 		ents->push_back(wep->GetEntity().GetHandle());
 }
-void SGame::GetVehicles(std::vector<EntityHandle> *ents)
+void pragma::SGame::GetVehicles(std::vector<EntityHandle> *ents)
 {
 	auto &vehicles = pragma::SVehicleComponent::GetAll();
 	ents->reserve(ents->size() + vehicles.size());

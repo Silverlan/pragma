@@ -135,13 +135,13 @@ void NET_sv_RESOURCE_BEGIN(pragma::networking::IServerClient &session, NetPacket
 
 void NET_sv_QUERY_RESOURCE(pragma::networking::IServerClient &session, NetPacket packet)
 {
-	if(SGame::Get() == nullptr)
+	if(pragma::SGame::Get() == nullptr)
 		return;
 	auto fileName = packet->ReadString();
 	//#if RESOURCE_TRANSFER_VERBOSE == 1
 	Con::csv << "[ResourceManager] Query Resource: " << fileName << Con::endl;
 	//#endif
-	if(SGame::Get()->IsValidGameResource(fileName) == false) // Client isn't allowed to download this resource
+	if(pragma::SGame::Get()->IsValidGameResource(fileName) == false) // Client isn't allowed to download this resource
 	{
 		session.ScheduleResource(fileName); // Might be allowed to download the resource in the future, remember it!
 		return;
@@ -209,7 +209,7 @@ void NET_sv_ENT_EVENT(pragma::networking::IServerClient &session, NetPacket pack
 {
 	if(!pragma::ServerState::Get()->IsGameActive())
 		return;
-	auto *pl = SGame::Get()->GetPlayer(session);
+	auto *pl = pragma::SGame::Get()->GetPlayer(session);
 	if(pl == nullptr)
 		return;
 	packet->SetOffset(packet->GetDataSize() - sizeof(UInt32) - sizeof(unsigned int));
@@ -225,7 +225,7 @@ void NET_sv_CLIENTINFO(pragma::networking::IServerClient &session, NetPacket pac
 {
 	if(!pragma::ServerState::Get()->IsGameActive())
 		return;
-	SGame *game = pragma::ServerState::Get()->GetGameState();
+	pragma::SGame *game = pragma::ServerState::Get()->GetGameState();
 	game->ReceiveUserInfo(session, packet);
 }
 
@@ -243,7 +243,7 @@ void NET_sv_CMD_SETPOS(pragma::networking::IServerClient &session, NetPacket pac
 		return;
 	if(!pragma::ServerState::Get()->IsGameActive())
 		return;
-	auto *pl = SGame::Get()->GetPlayer(session);
+	auto *pl = pragma::SGame::Get()->GetPlayer(session);
 	if(pl == nullptr)
 		return;
 	auto pTrComponent = pl->GetEntity().GetTransformComponent();
@@ -255,7 +255,7 @@ void NET_sv_CMD_SETPOS(pragma::networking::IServerClient &session, NetPacket pac
 
 void NET_sv_CMD_CALL(pragma::networking::IServerClient &session, NetPacket packet)
 {
-	auto *pl = SGame::Get()->GetPlayer(session);
+	auto *pl = pragma::SGame::Get()->GetPlayer(session);
 	std::string cmd = packet->ReadString();
 	auto pressState = static_cast<KeyState>(packet->Read<uint8_t>());
 	auto magnitude = packet->Read<float>();
@@ -380,7 +380,7 @@ void NET_sv_CVAR_SET(pragma::networking::IServerClient &session, NetPacket packe
 {
 	if(!pragma::ServerState::Get()->IsGameActive())
 		return;
-	SGame *game = pragma::ServerState::Get()->GetGameState();
+	pragma::SGame *game = pragma::ServerState::Get()->GetGameState();
 	auto *pl = game->GetPlayer(session);
 	if(pl == nullptr)
 		return;
@@ -505,7 +505,7 @@ void NET_sv_WEAPON_PREVIOUS(pragma::networking::IServerClient &session, NetPacke
 
 void NET_sv_GIVE_WEAPON(pragma::networking::IServerClient &session, NetPacket packet)
 {
-	if(!pragma::ServerState::Get()->CheatsEnabled() || SGame::Get() == nullptr)
+	if(!pragma::ServerState::Get()->CheatsEnabled() || pragma::SGame::Get() == nullptr)
 		return;
 	auto *pl = pragma::ServerState::Get()->GetPlayer(session);
 	if(pl == nullptr)
@@ -522,7 +522,7 @@ void NET_sv_GIVE_WEAPON(pragma::networking::IServerClient &session, NetPacket pa
 
 void NET_sv_STRIP_WEAPONS(pragma::networking::IServerClient &session, NetPacket packet)
 {
-	if(!pragma::ServerState::Get()->CheatsEnabled() || SGame::Get() == nullptr)
+	if(!pragma::ServerState::Get()->CheatsEnabled() || pragma::SGame::Get() == nullptr)
 		return;
 	auto *pl = pragma::ServerState::Get()->GetPlayer(session);
 	if(pl == nullptr)
@@ -535,14 +535,14 @@ void NET_sv_STRIP_WEAPONS(pragma::networking::IServerClient &session, NetPacket 
 
 void NET_sv_GIVE_AMMO(pragma::networking::IServerClient &session, NetPacket packet)
 {
-	if(!pragma::ServerState::Get()->CheatsEnabled() || SGame::Get() == nullptr)
+	if(!pragma::ServerState::Get()->CheatsEnabled() || pragma::SGame::Get() == nullptr)
 		return;
 	auto *pl = pragma::ServerState::Get()->GetPlayer(session);
 	if(pl == nullptr)
 		return;
 	auto ammoTypeClass = packet->ReadString();
 	uint32_t ammoTypeId;
-	if(SGame::Get()->GetAmmoType(ammoTypeClass, &ammoTypeId) == nullptr)
+	if(pragma::SGame::Get()->GetAmmoType(ammoTypeClass, &ammoTypeId) == nullptr)
 		return;
 	auto sCharComponent = static_cast<pragma::SCharacterComponent *>(pl->GetEntity().GetCharacterComponent().get());
 	if(sCharComponent == nullptr)
@@ -554,7 +554,7 @@ void NET_sv_GIVE_AMMO(pragma::networking::IServerClient &session, NetPacket pack
 
 void NET_sv_DEBUG_AI_SCHEDULE_PRINT(pragma::networking::IServerClient &session, NetPacket packet)
 {
-	if(!pragma::ServerState::Get()->CheatsEnabled() || SGame::Get() == nullptr)
+	if(!pragma::ServerState::Get()->CheatsEnabled() || pragma::SGame::Get() == nullptr)
 		return;
 	auto *pl = pragma::ServerState::Get()->GetPlayer(session);
 	if(pl == nullptr)
@@ -578,7 +578,7 @@ void NET_sv_DEBUG_AI_SCHEDULE_PRINT(pragma::networking::IServerClient &session, 
 
 void NET_sv_DEBUG_AI_SCHEDULE_TREE(pragma::networking::IServerClient &session, NetPacket packet)
 {
-	if(!pragma::ServerState::Get()->CheatsEnabled() || SGame::Get() == nullptr)
+	if(!pragma::ServerState::Get()->CheatsEnabled() || pragma::SGame::Get() == nullptr)
 		return;
 	auto *pl = pragma::ServerState::Get()->GetPlayer(session);
 	if(pl == nullptr)
@@ -593,7 +593,7 @@ void NET_sv_DEBUG_AI_SCHEDULE_TREE(pragma::networking::IServerClient &session, N
 	std::shared_ptr<pragma::ai::Schedule> aiSchedule = nullptr;
 	auto tLastScheduleUpdate = 0.f;
 	auto hCbTick = FunctionCallback<void>::Create(nullptr);
-	auto hCbOnGameEnd = FunctionCallback<void, SGame *>::Create(nullptr);
+	auto hCbOnGameEnd = FunctionCallback<void, pragma::SGame *>::Create(nullptr);
 	auto fClearCallbacks = [hCbTick, hCbOnGameEnd]() mutable {
 		if(hCbTick.IsValid())
 			hCbTick.Remove();
@@ -607,14 +607,14 @@ void NET_sv_DEBUG_AI_SCHEDULE_TREE(pragma::networking::IServerClient &session, N
 		}
 		hSAiComponent.get()->_debugSendScheduleInfo(*hPl.get(), dbgTree, aiSchedule, tLastScheduleUpdate);
 	});
-	hCbOnGameEnd.get<Callback<void, SGame *>>()->SetFunction([fClearCallbacks](SGame *game) mutable { fClearCallbacks(); });
-	SGame::Get()->AddCallback("Tick", hCbTick);
-	SGame::Get()->AddCallback("OnGameEnd", hCbOnGameEnd);
+	hCbOnGameEnd.get<Callback<void, pragma::SGame *>>()->SetFunction([fClearCallbacks](pragma::SGame *game) mutable { fClearCallbacks(); });
+	pragma::SGame::Get()->AddCallback("Tick", hCbTick);
+	pragma::SGame::Get()->AddCallback("OnGameEnd", hCbOnGameEnd);
 }
 
 void NET_sv_DEBUG_AI_NAVIGATION(pragma::networking::IServerClient &session, NetPacket packet)
 {
-	if(!pragma::ServerState::Get()->CheatsEnabled() || SGame::Get() == nullptr)
+	if(!pragma::ServerState::Get()->CheatsEnabled() || pragma::SGame::Get() == nullptr)
 		return;
 	auto *pl = pragma::ServerState::Get()->GetPlayer(session);
 	if(pl == nullptr)

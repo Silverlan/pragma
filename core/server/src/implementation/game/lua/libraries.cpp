@@ -10,7 +10,7 @@ import :scripting.lua;
 
 #undef DrawText
 
-void SGame::RegisterLuaLibraries()
+void pragma::SGame::RegisterLuaLibraries()
 {
 	Lua::util::register_library(GetLuaState());
 
@@ -96,7 +96,7 @@ void SGame::RegisterLuaLibraries()
 	  luabind::def("draw_pose", &Lua::DebugRenderer::Server::DrawAxis), luabind::def("draw_text", static_cast<void (*)(const std::string &, const Vector2 &, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)),
 	  luabind::def("draw_text", static_cast<void (*)(const std::string &, float, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)), luabind::def("draw_path", &Lua::DebugRenderer::Server::DrawPath),
 	  luabind::def("draw_spline", static_cast<void (*)(lua::State *, luabind::table<>, uint32_t, float, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)),
-	  luabind::def("draw_spline", static_cast<void (*)(lua::State *, luabind::table<>, uint32_t, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)), luabind::def("draw_plane", &Lua::DebugRenderer::Server::DrawPlane), luabind::def("draw_mesh", &SGame::DrawMesh))];
+	  luabind::def("draw_spline", static_cast<void (*)(lua::State *, luabind::table<>, uint32_t, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)), luabind::def("draw_plane", &Lua::DebugRenderer::Server::DrawPlane), luabind::def("draw_mesh", &pragma::SGame::DrawMesh))];
 
 	Lua::ai::server::register_library(GetLuaInterface());
 

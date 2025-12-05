@@ -74,7 +74,7 @@ void CMD_kick(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector
 	pragma::SPlayerComponent *kickTarget = nullptr;
 	auto &identifier = argv.front();
 	auto name = identifier + "*";
-	pragma::ecs::EntityIterator entIt {*SGame::Get()};
+	pragma::ecs::EntityIterator entIt {*pragma::SGame::Get()};
 	entIt.AttachFilter<EntityIteratorFilterName>(name, false, false);
 	auto it = entIt.begin();
 	auto *ent = (it != entIt.end()) ? *it : nullptr;
@@ -126,7 +126,7 @@ void CMD_entities_sv(pragma::NetworkState *state, pragma::BasePlayerComponent *p
 {
 	if(!state->IsGameActive())
 		return;
-	auto sortedEnts = util::cmd::get_sorted_entities(*SGame::Get(), pl);
+	auto sortedEnts = util::cmd::get_sorted_entities(*pragma::SGame::Get(), pl);
 	std::optional<std::string> className = {};
 	if(argv.empty() == false)
 		className = '*' + argv.front() + '*';
@@ -244,7 +244,7 @@ void CMD_ent_input(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 {
 	if(!check_cheats("ent_input", state))
 		return;
-	if(SGame::Get() == nullptr)
+	if(pragma::SGame::Get() == nullptr)
 		return;
 	auto *activator = (pl != nullptr) ? &pl->GetEntity() : nullptr;
 	if(argv.size() >= 2) {
@@ -287,7 +287,7 @@ void CMD_ent_scale(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 {
 	if(!check_cheats("ent_scale", state))
 		return;
-	if(SGame::Get() == nullptr)
+	if(pragma::SGame::Get() == nullptr)
 		return;
 	if(argv.size() >= 2) {
 		auto ents = command::find_named_targets(state, argv[0]);
@@ -318,7 +318,7 @@ void CMD_ent_remove(pragma::NetworkState *state, pragma::BasePlayerComponent *pl
 {
 	if(!check_cheats("ent_remove", state))
 		return;
-	if(SGame::Get() == nullptr || pl == nullptr)
+	if(pragma::SGame::Get() == nullptr || pl == nullptr)
 		return;
 	auto &ent = pl->GetEntity();
 	if(ent.IsCharacter() == false)
@@ -337,7 +337,7 @@ void CMD_ent_create(pragma::NetworkState *state, pragma::BasePlayerComponent *pl
 {
 	if(!check_cheats("ent_create", state))
 		return;
-	if(SGame::Get() == nullptr)
+	if(pragma::SGame::Get() == nullptr)
 		return;
 	if(argv.empty() || pl == nullptr)
 		return;
@@ -353,13 +353,13 @@ void CMD_ent_create(pragma::NetworkState *state, pragma::BasePlayerComponent *pl
 	trData.SetTarget(origin + dir * static_cast<float>(pragma::GameLimits::MaxRayCastRange));
 	trData.SetFilter(ent);
 	trData.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::InvertFilter | pragma::physics::RayCastFlags::IgnoreDynamic);
-	auto r = SGame::Get()->RayCast(trData);
+	auto r = pragma::SGame::Get()->RayCast(trData);
 	if(r.hitType == pragma::physics::RayCastHitType::None) {
 		Con::cwar << "No place to spawn entity!" << Con::endl;
 		return;
 	}
 	std::string className = argv[0];
-	pragma::ecs::BaseEntity *entNew = SGame::Get()->CreateEntity(className);
+	pragma::ecs::BaseEntity *entNew = pragma::SGame::Get()->CreateEntity(className);
 	if(entNew == nullptr)
 		return;
 	auto pTrComponentNew = entNew->GetTransformComponent();
@@ -382,16 +382,16 @@ void CMD_ent_create(pragma::NetworkState *state, pragma::BasePlayerComponent *pl
 
 void CMD_nav_reload(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	if(SGame::Get() == nullptr)
+	if(pragma::SGame::Get() == nullptr)
 		return;
-	SGame::Get()->LoadNavMesh(true);
+	pragma::SGame::Get()->LoadNavMesh(true);
 }
 
 void CMD_nav_generate(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	if(SGame::Get() == nullptr)
+	if(pragma::SGame::Get() == nullptr)
 		return;
-	std::string map = SGame::Get()->GetMapName();
+	std::string map = pragma::SGame::Get()->GetMapName();
 	if(map.empty())
 		return;
 	std::string err;
@@ -401,7 +401,7 @@ void CMD_nav_generate(pragma::NetworkState *, pragma::BasePlayerComponent *, std
 	  20.f,                            /* maxClimbHeight */
 	  45.f                             /* walkableSlopeAngle */
 	};
-	auto rcNavMesh = pragma::nav::generate(*SGame::Get(), navCfg, &err);
+	auto rcNavMesh = pragma::nav::generate(*pragma::SGame::Get(), navCfg, &err);
 	if(rcNavMesh == nullptr)
 		Con::cwar << "Unable to generate navigation mesh: " << err << Con::endl;
 	else {
@@ -410,7 +410,7 @@ void CMD_nav_generate(pragma::NetworkState *, pragma::BasePlayerComponent *, std
 		std::string path = "maps\\" + map;
 		path += "." + std::string {pragma::nav::PNAV_EXTENSION_BINARY};
 		std::string err;
-		if(navMesh->Save(*SGame::Get(), path, err) == false)
+		if(navMesh->Save(*pragma::SGame::Get(), path, err) == false)
 			Con::cwar << "Unable to save navigation mesh as '" << path << "': " << err << "!" << Con::endl;
 	}
 }

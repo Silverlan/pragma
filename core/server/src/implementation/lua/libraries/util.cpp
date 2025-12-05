@@ -82,6 +82,6 @@ luabind::object Lua::util::Server::fire_bullets(lua::State *l, const BulletInfo 
 	return r;
 }
 
-void Lua::util::Server::create_giblet(lua::State *l, const GibletCreateInfo &gibletInfo) { SGame::Get()->CreateGiblet(gibletInfo); }
+void Lua::util::Server::create_giblet(lua::State *l, const GibletCreateInfo &gibletInfo) { pragma::SGame::Get()->CreateGiblet(gibletInfo); }
 
 void Lua::util::Server::create_explosion(lua::State *l, const ::util::SplashDamageInfo &splashDamageInfo) { Lua::util::splash_damage(l, splashDamageInfo); }

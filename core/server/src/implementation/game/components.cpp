@@ -10,7 +10,7 @@ import :game;
 
 import :entities.components;
 
-void SGame::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
+void pragma::SGame::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
 {
 	pragma::Game::InitializeEntityComponents(componentManager);
 	constexpr auto hideInEditor = pragma::ComponentRegInfo::Flags::HideInEditor;
@@ -125,4 +125,4 @@ void SGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	// --template-component-register-location
 }
 
-pragma::BaseEntityComponent *SGame::CreateLuaEntityComponent(pragma::ecs::BaseEntity &ent, std::string classname) { return pragma::Game::CreateLuaEntityComponent<pragma::SLuaBaseEntityComponent, pragma::LuaCore::SLuaBaseEntityComponentHolder>(ent, classname); }
+pragma::BaseEntityComponent *pragma::SGame::CreateLuaEntityComponent(pragma::ecs::BaseEntity &ent, std::string classname) { return pragma::Game::CreateLuaEntityComponent<pragma::SLuaBaseEntityComponent, pragma::LuaCore::SLuaBaseEntityComponentHolder>(ent, classname); }

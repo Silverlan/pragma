@@ -8,7 +8,7 @@ import :game;
 
 import :scripting.lua;
 
-void SGame::RegisterLuaClasses()
+void pragma::SGame::RegisterLuaClasses()
 {
 	pragma::Game::RegisterLuaClasses();
 

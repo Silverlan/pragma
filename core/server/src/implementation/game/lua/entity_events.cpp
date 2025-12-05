@@ -9,7 +9,7 @@ import :game;
 import :ai;
 import :entities.components;
 
-bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject)
+bool pragma::SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject)
 {
 	if(pragma::Game::InvokeEntityEvent(component, eventId, argsIdx, bInject))
 		return true;

@@ -14,7 +14,7 @@ import :scripting.lua;
 
 #undef LoadLibrary
 
-void SGame::RegisterLua()
+void pragma::SGame::RegisterLua()
 {
 	GetLuaInterface().SetIdentifier("sv");
 
@@ -155,13 +155,13 @@ void SGame::RegisterLua()
 	pragma::Game::RegisterLua();
 }
 
-void SGame::InitializeLua()
+void pragma::SGame::InitializeLua()
 {
 	pragma::Game::InitializeLua();
 	CallCallbacks<void, lua::State *>("OnLuaInitialized", GetLuaState());
 }
 
-void SGame::SetupLua()
+void pragma::SGame::SetupLua()
 {
 	pragma::Game::SetupLua();
 	RunLuaFiles("autorun\\");
@@ -172,7 +172,7 @@ void SGame::SetupLua()
 	//	LoadLuaEntities(subDir);
 }
 
-bool SGame::LoadLuaComponent(const std::string &luaFilePath, const std::string &mainPath, const std::string &componentName)
+bool pragma::SGame::LoadLuaComponent(const std::string &luaFilePath, const std::string &mainPath, const std::string &componentName)
 {
 	auto r = pragma::Game::LoadLuaComponent(luaFilePath, mainPath, componentName);
 	if(r == false)
@@ -201,5 +201,5 @@ bool SGame::LoadLuaComponent(const std::string &luaFilePath, const std::string &
 		ResourceManager::AddResource(fname);
 	return r;
 }
-std::string SGame::GetLuaNetworkDirectoryName() const { return "server"; }
-std::string SGame::GetLuaNetworkFileName() const { return "init" + Lua::DOT_FILE_EXTENSION; }
+std::string pragma::SGame::GetLuaNetworkDirectoryName() const { return "server"; }
+std::string pragma::SGame::GetLuaNetworkFileName() const { return "init" + Lua::DOT_FILE_EXTENSION; }

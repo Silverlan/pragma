@@ -14,16 +14,16 @@ void SResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, cons
 {
 	ResourceWatcherManager::OnResourceChanged(rootPath, path, ext);
 	auto &strPath = path.GetString();
-	if((ext == pragma::nav::PNAV_EXTENSION_BINARY || ext == pragma::nav::PNAV_EXTENSION_ASCII) && SGame::Get() != nullptr) {
+	if((ext == pragma::nav::PNAV_EXTENSION_BINARY || ext == pragma::nav::PNAV_EXTENSION_ASCII) && pragma::SGame::Get() != nullptr) {
 		auto fname = ufile::get_file_from_filename(strPath);
 		ufile::remove_extension_from_filename(fname);
-		auto mapName = SGame::Get()->GetMapName();
+		auto mapName = pragma::SGame::Get()->GetMapName();
 		if(ustring::compare(mapName, fname, false) == true) {
 #if RESOURCE_WATCHER_VERBOSE > 0
 			auto navPath = "maps\\" + strPath;
 			Con::cout << "[ResourceWatcher] Navigation mesh has changed: " << navPath << ". Attempting to reload..." << Con::endl;
 #endif
-			if(SGame::Get()->LoadNavMesh(true) == false) {
+			if(pragma::SGame::Get()->LoadNavMesh(true) == false) {
 #if RESOURCE_WATCHER_VERBOSE > 0
 				Con::cwar << "[ResourceWatcher] Unable to reload navigation mesh!" << Con::endl;
 #endif

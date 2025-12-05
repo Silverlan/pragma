@@ -21,6 +21,6 @@ void SLuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &path)
 	auto *res = ResourceManager::FindResource(Lua::SCRIPT_DIRECTORY_SLASH + path.substr(0, path.length() - 3) + Lua::FILE_EXTENSION_PRECOMPILED);
 	if(res == nullptr)
 		return;
-	SGame::Get()->UpdateLuaCache(res->fileName);
+	pragma::SGame::Get()->UpdateLuaCache(res->fileName);
 	pragma::ServerState::Get()->SendResourceFile(res->fileName);
 }

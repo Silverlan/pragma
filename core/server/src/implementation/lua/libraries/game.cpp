@@ -22,7 +22,7 @@ Vector3 Lua::game::Server::get_gravity()
 }
 luabind::object Lua::game::Server::load_model(lua::State *l, const std::string &name)
 {
-	auto mdl = SGame::Get()->LoadModel(name);
+	auto mdl = pragma::SGame::Get()->LoadModel(name);
 	if(mdl == nullptr)
 		return {};
 	return luabind::object {l, mdl};
@@ -31,17 +31,17 @@ int Lua::game::Server::create_model(lua::State *l)
 {
 	std::shared_ptr<pragma::Model> mdl = nullptr;
 	if(!Lua::IsSet(l, 1))
-		mdl = SGame::Get()->CreateModel();
+		mdl = pragma::SGame::Get()->CreateModel();
 	else {
 		if(Lua::IsBool(l, 1)) {
 			auto bAddReference = true;
 			if(Lua::IsSet(l, 1))
 				bAddReference = Lua::CheckBool(l, 1);
-			mdl = SGame::Get()->CreateModel(bAddReference);
+			mdl = pragma::SGame::Get()->CreateModel(bAddReference);
 		}
 		else {
 			std::string name = Lua::CheckString(l, 1);
-			mdl = SGame::Get()->CreateModel(name);
+			mdl = pragma::SGame::Get()->CreateModel(name);
 		}
 	}
 	if(mdl == nullptr)
@@ -53,7 +53,7 @@ int Lua::game::Server::create_model(lua::State *l)
 int Lua::game::Server::load_map(lua::State *l)
 {
 	std::vector<EntityHandle> ents;
-	auto hCb = ::util::make_shared<CallbackHandle>(SGame::Get()->AddCallback("OnEntityCreated", FunctionCallback<void, pragma::ecs::BaseEntity *>::Create([&ents](pragma::ecs::BaseEntity *ent) { ents.push_back(ent->GetHandle()); })));
+	auto hCb = ::util::make_shared<CallbackHandle>(pragma::SGame::Get()->AddCallback("OnEntityCreated", FunctionCallback<void, pragma::ecs::BaseEntity *>::Create([&ents](pragma::ecs::BaseEntity *ent) { ents.push_back(ent->GetHandle()); })));
 	::util::ScopeGuard sg([hCb]() {
 		if(hCb->IsValid() == true)
 			hCb->Remove();
@@ -80,12 +80,12 @@ int Lua::game::Server::load_map(lua::State *l)
 	}
 
 	pragma::networking::ClientRecipientFilter filter {};
-	SGame::Get()->WriteEntityData(packet, ptrEnts.data(), ptrEnts.size(), filter);
+	pragma::SGame::Get()->WriteEntityData(packet, ptrEnts.data(), ptrEnts.size(), filter);
 	packet->Write<bool>((entWorld != nullptr) ? true : false);
 
 	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::MAP_LOAD, packet, pragma::networking::Protocol::SlowReliable);
 	return pair.second;
 }
 
-void Lua::game::Server::change_level(const std::string &mapName, const std::string &landmarkName) { SGame::Get()->ChangeLevel(mapName, landmarkName); }
+void Lua::game::Server::change_level(const std::string &mapName, const std::string &landmarkName) { pragma::SGame::Get()->ChangeLevel(mapName, landmarkName); }
 void Lua::game::Server::change_level(const std::string &mapName) { change_level(mapName, ""); }

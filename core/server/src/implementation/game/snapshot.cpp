@@ -10,7 +10,7 @@ import :entities;
 import :entities.components;
 import :server_state;
 
-void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
+void pragma::SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 {
 	auto *session = pl ? pl->GetClientSession() : nullptr;
 	if(session == nullptr)
@@ -157,7 +157,7 @@ void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::SNAPSHOT, packet, pragma::networking::Protocol::FastUnreliable, *session);
 }
 
-void SGame::SendSnapshot()
+void pragma::SGame::SendSnapshot()
 {
 	//Con::csv<<"Sending snapshot.."<<Con::endl;
 	auto &players = pragma::SPlayerComponent::GetAll();

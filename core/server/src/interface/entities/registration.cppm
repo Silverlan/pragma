@@ -53,7 +53,7 @@ export namespace server_entities {
 		ServerEntityRegistry::Instance().RegisterEntity(std::string(localName), typeid(T), [](pragma::ServerState *server) -> SBaseEntity * {
 			if(!server)
 				return nullptr;
-			SGame *game = pragma::ServerState::Get()->GetGameState();
+			auto *game = pragma::ServerState::Get()->GetGameState();
 			if(!game)
 				return nullptr;
 			auto *ent = game->template CreateEntity<T>();

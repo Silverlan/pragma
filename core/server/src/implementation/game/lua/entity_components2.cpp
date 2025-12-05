@@ -137,7 +137,7 @@ void RegisterLuaEntityComponents2_sv(lua::State *l, luabind::module_ &entsMod)
 	auto defLiquidSurfaceSimulation = pragma::LuaCore::create_entity_component_class<pragma::SLiquidSurfaceSimulationComponent, pragma::BaseLiquidSurfaceSimulationComponent>("LiquidSurfaceSimulationComponent");
 	entsMod[defLiquidSurfaceSimulation];
 
-	SGame::Get()->GetEntityComponentManager().RegisterLuaBindings(l, entsMod);
+	pragma::SGame::Get()->GetEntityComponentManager().RegisterLuaBindings(l, entsMod);
 
 	// --template-component-register-location
 }

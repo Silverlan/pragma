@@ -101,7 +101,7 @@ void SBaseEntity::SendData(NetPacket &packet, pragma::networking::ClientRecipien
 	packet->Write<uint32_t>(GetSpawnFlags());
 	packet->Write(GetUuid());
 
-	auto &componentManager = SGame::Get()->GetEntityComponentManager();
+	auto &componentManager = pragma::SGame::Get()->GetEntityComponentManager();
 	auto &components = GetComponents();
 	auto offset = packet->GetOffset();
 	auto numComponents = umath::min(components.size(), static_cast<size_t>(std::numeric_limits<uint8_t>::max()));
@@ -132,7 +132,7 @@ void SBaseEntity::SendData(NetPacket &packet, pragma::networking::ClientRecipien
 
 void SBaseEntity::SendSnapshotData(NetPacket &, pragma::BasePlayerComponent &) {}
 
-pragma::NetEventId SBaseEntity::RegisterNetEvent(const std::string &name) const { return static_cast<SGame *>(GetNetworkState()->GetGameState())->RegisterNetEvent(name); }
+pragma::NetEventId SBaseEntity::RegisterNetEvent(const std::string &name) const { return static_cast<pragma::SGame *>(GetNetworkState()->GetGameState())->RegisterNetEvent(name); }
 
 void SBaseEntity::Remove()
 {

@@ -29,7 +29,7 @@ static std::string get_screenshot_name(pragma::Game *game, uimg::ImageFormat for
 	return path;
 }
 
-void util::rt_screenshot(CGame &game, uint32_t width, uint32_t height, const RtScreenshotSettings &settings, uimg::ImageFormat format)
+void util::rt_screenshot(pragma::CGame &game, uint32_t width, uint32_t height, const RtScreenshotSettings &settings, uimg::ImageFormat format)
 {
 	FileManager::CreateDirectory("screenshots");
 
@@ -95,7 +95,7 @@ void util::rt_screenshot(CGame &game, uint32_t width, uint32_t height, const RtS
 	}
 }
 
-std::optional<std::string> util::screenshot(CGame &game)
+std::optional<std::string> util::screenshot(pragma::CGame &game)
 {
 	FileManager::CreateDirectory("screenshots");
 

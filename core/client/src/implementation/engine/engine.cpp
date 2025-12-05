@@ -2127,7 +2127,7 @@ void CEngine::OnRenderResolutionChanged(uint32_t width, uint32_t height)
 	auto *cl = GetClientState();
 	if(cl == nullptr)
 		return;
-	auto *game = static_cast<CGame *>(cl->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(cl->GetGameState());
 	if(game == nullptr)
 		return;
 	game->Resize(true);

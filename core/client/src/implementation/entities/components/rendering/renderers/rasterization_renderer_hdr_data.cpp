@@ -183,7 +183,7 @@ void HDRData::ReloadPresentationRenderTarget(uint32_t width, uint32_t height, pr
 	auto postHdrImg = context.CreateImage(imgCreateInfo);
 	auto postHdrTex = context.CreateTexture(texCreateInfo, *postHdrImg, prosper::util::ImageViewCreateInfo {}, GetSamplerCreateInfo());
 
-	auto &hShaderTonemapping = pragma::get_cgame()->GetGameShader(CGame::GameShader::PPTonemapping);
+	auto &hShaderTonemapping = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::PPTonemapping);
 	toneMappedRenderTarget = context.CreateRenderTarget({postHdrTex}, static_cast<prosper::ShaderGraphics *>(hShaderTonemapping.get())->GetRenderPass());
 	toneMappedRenderTarget->SetDebugName("scene_post_hdr_rt");
 
@@ -199,7 +199,7 @@ bool HDRData::Initialize(uint32_t width, uint32_t height, prosper::SampleCountFl
 		return false;
 
 	auto wpShader = pragma::get_cengine()->GetShader("pbr");
-	auto &hShaderTonemapping = pragma::get_cgame()->GetGameShader(CGame::GameShader::PPTonemapping);
+	auto &hShaderTonemapping = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::PPTonemapping);
 	if(wpShader.expired() || hShaderTonemapping.expired() || pragma::ShaderPPHDR::DESCRIPTOR_SET_TEXTURE.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_TEXTURE.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_DEPTH_BUFFER.IsValid() == false)
 		return false;
 

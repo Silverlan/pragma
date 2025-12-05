@@ -231,7 +231,7 @@ static bool asset_import(pragma::NetworkState &nw, const std::string &name, cons
 	return manager->Import(name, outputName);
 }
 
-void CGame::RegisterLuaLibraries()
+void pragma::CGame::RegisterLuaLibraries()
 {
 	Lua::util::register_library(GetLuaState());
 

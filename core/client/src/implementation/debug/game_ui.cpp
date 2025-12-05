@@ -11,7 +11,7 @@ import :game;
 
 DebugGameGUI::DebugGameGUI(const std::function<WIHandle(void)> &guiFactory) : m_guiFactory(guiFactory)
 {
-	m_initCallback = pragma::get_client_state()->AddCallback("OnGameStart", FunctionCallback<void, CGame *>::Create([this](CGame *) { Initialize(); }));
+	m_initCallback = pragma::get_client_state()->AddCallback("OnGameStart", FunctionCallback<void, pragma::CGame *>::Create([this](pragma::CGame *) { Initialize(); }));
 	Initialize();
 }
 

@@ -20,11 +20,11 @@ export namespace Lua {
 			std::shared_ptr<prosper::ICommandBuffer> commandBuffer = nullptr;
 		};
 
-		DLLCLIENT ::WIBase *create(CGame *game, const std::string &name, ::WIBase &parent, int32_t x, int32_t y, uint32_t w, uint32_t h, float left, float top, float right, float bottom);
-		DLLCLIENT ::WIBase *create(CGame *game, const std::string &name, ::WIBase &parent, int32_t x, int32_t y, uint32_t w, uint32_t h);
-		DLLCLIENT ::WIBase *create(CGame *game, const std::string &name, ::WIBase &parent, int32_t x, int32_t y);
-		DLLCLIENT ::WIBase *create(CGame *game, const std::string &name, ::WIBase *parent);
-		DLLCLIENT ::WIBase *create(CGame *game, const std::string &name);
+		DLLCLIENT ::WIBase *create(pragma::CGame *game, const std::string &name, ::WIBase &parent, int32_t x, int32_t y, uint32_t w, uint32_t h, float left, float top, float right, float bottom);
+		DLLCLIENT ::WIBase *create(pragma::CGame *game, const std::string &name, ::WIBase &parent, int32_t x, int32_t y, uint32_t w, uint32_t h);
+		DLLCLIENT ::WIBase *create(pragma::CGame *game, const std::string &name, ::WIBase &parent, int32_t x, int32_t y);
+		DLLCLIENT ::WIBase *create(pragma::CGame *game, const std::string &name, ::WIBase *parent);
+		DLLCLIENT ::WIBase *create(pragma::CGame *game, const std::string &name);
 
 		DLLCLIENT ::WIBase *create_button(lua::State *l, const std::string &text);
 		DLLCLIENT ::WIBase *create_button(lua::State *l, const std::string &text, ::WIBase &parent);

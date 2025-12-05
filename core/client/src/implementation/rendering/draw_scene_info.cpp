@@ -63,7 +63,7 @@ Vector3 util::DrawSceneInfo::GetPvsOrigin() const
 
 ::pragma::rendering::RenderMask util::DrawSceneInfo::GetRenderMask(pragma::Game &game) const
 {
-	auto mask = static_cast<CGame &>(game).GetInclusiveRenderMasks();
+	auto mask = static_cast<pragma::CGame &>(game).GetInclusiveRenderMasks();
 	mask |= inclusionMask;
 	mask &= ~exclusionMask;
 	return mask;

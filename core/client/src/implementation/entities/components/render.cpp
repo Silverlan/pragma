@@ -671,7 +671,7 @@ void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene, const CC
 
 bool CRenderComponent::AddToRenderGroup(const std::string &name)
 {
-	auto mask = static_cast<CGame *>(GetEntity().GetNetworkState()->GetGameState())->GetRenderMask(name);
+	auto mask = static_cast<pragma::CGame *>(GetEntity().GetNetworkState()->GetGameState())->GetRenderMask(name);
 	if(!mask.has_value())
 		return false;
 	AddToRenderGroup(*mask);
@@ -777,7 +777,7 @@ bool CRenderComponent::IsInRenderGroup(pragma::rendering::RenderGroup group) con
 void CRenderComponent::AddToRenderGroup(pragma::rendering::RenderGroup group) { SetRenderGroups(GetRenderGroups() | group); }
 bool CRenderComponent::RemoveFromRenderGroup(const std::string &name)
 {
-	auto mask = static_cast<CGame *>(GetEntity().GetNetworkState()->GetGameState())->GetRenderMask(name);
+	auto mask = static_cast<pragma::CGame *>(GetEntity().GetNetworkState()->GetGameState())->GetRenderMask(name);
 	if(!mask.has_value())
 		return false;
 	RemoveFromRenderGroup(*mask);

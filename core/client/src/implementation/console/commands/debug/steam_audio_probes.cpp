@@ -59,7 +59,7 @@ static void debug_steam_audio_dump_scene(pragma::NetworkState *state, pragma::Ba
 	}
 	std::string mapName = "unknown";
 	auto *client = pragma::get_cengine()->GetClientState();
-	auto *game = (pragma::get_client_state() != nullptr) ? static_cast<CGame *>(pragma::get_client_state()->GetGameState()) : nullptr;
+	auto *game = (pragma::get_client_state() != nullptr) ? static_cast<pragma::CGame *>(pragma::get_client_state()->GetGameState()) : nullptr;
 	if(game != nullptr)
 		mapName = game->GetMapName();
 

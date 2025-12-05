@@ -24,7 +24,7 @@ bool CEngine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv,
 	auto *stateCl = static_cast<pragma::ClientState *>(GetClientState());
 	pragma::BasePlayerComponent *pl = nullptr;
 	if(stateCl != nullptr) {
-		CGame *game = stateCl->GetGameState();
+		auto *game = stateCl->GetGameState();
 		if(game != nullptr)
 			pl = game->GetLocalPlayer();
 	}

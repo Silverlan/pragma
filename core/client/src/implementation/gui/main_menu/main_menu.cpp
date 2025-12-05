@@ -286,7 +286,7 @@ void WIMainMenu::Initialize()
 	RequestFocus();
 	OpenMainMenu();
 
-	m_cbOnGameStart = client->AddCallback("OnGameStart", FunctionCallback<void, CGame *>::Create([this](CGame *) {
+	m_cbOnGameStart = client->AddCallback("OnGameStart", FunctionCallback<void, pragma::CGame *>::Create([this](pragma::CGame *) {
 		if(m_menuSound != nullptr) {
 			m_menuSound->FadeOut(5.f);
 			m_menuSound = nullptr;
@@ -297,7 +297,7 @@ void WIMainMenu::Initialize()
 			return;
 		m_hBgSlideShow->SetVisible(false);
 	}));
-	m_cbOnGameEnd = client->AddCallback("EndGame", FunctionCallback<void, CGame *>::Create([this](CGame *) {
+	m_cbOnGameEnd = client->AddCallback("EndGame", FunctionCallback<void, pragma::CGame *>::Create([this](pragma::CGame *) {
 		PlayNextMenuTrack();
 		if(!m_hBgSlideShow.IsValid())
 			return;

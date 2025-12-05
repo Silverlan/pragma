@@ -117,7 +117,7 @@ void CObserverComponent::UpdateCharacterViewOrientationFromMouseMovement()
 	const Vector3 right(-1, 0, 0);
 	const Vector3 up(0, 1, 0);
 
-	auto *gameC = static_cast<CGame &>(GetGame()).GetGameComponent<CGameComponent>();
+	auto *gameC = static_cast<pragma::CGame &>(GetGame()).GetGameComponent<pragma::CGameComponent>();
 	float xDelta = 0.f;
 	float yDelta = 0.f;
 	if(gameC) {

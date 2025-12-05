@@ -56,7 +56,7 @@ void CEnvSoundProbeComponent::OnEntitySpawn()
 		pPhysComponent->GetCollisionBounds(&min, &max);
 	s_probes.push_back({origin + min, origin + max, Placement::UniformFloor, m_spacing, m_heightAboveFloor});
 	if(s_probeCallback.IsValid() == false) {
-		s_probeCallback = pragma::get_client_state()->AddCallback("EndGame", FunctionCallback<void, CGame *>::Create([](CGame *game) {
+		s_probeCallback = pragma::get_client_state()->AddCallback("EndGame", FunctionCallback<void, pragma::CGame *>::Create([](pragma::CGame *game) {
 			CEnvSoundProbeComponent::ClearProbes();
 			s_probeCallback.Remove();
 		}));

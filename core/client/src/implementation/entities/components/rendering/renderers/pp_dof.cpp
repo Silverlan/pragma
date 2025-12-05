@@ -33,7 +33,7 @@ void CRendererPpDoFComponent::DoRenderEffect(const util::DrawSceneInfo &drawScen
 	auto &cam = scene.GetActiveCamera();
 	auto &hdrInfo = m_renderer->GetHDRInfo();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
-	auto &hShaderDof = pragma::get_cgame()->GetGameShader(CGame::GameShader::PPDoF);
+	auto &hShaderDof = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::PPDoF);
 	if(hShaderDof.expired() || cam.expired())
 		return;
 	auto opticalC = cam->GetEntity().GetComponent<pragma::COpticalCameraComponent>();

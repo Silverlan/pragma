@@ -54,7 +54,7 @@ export namespace client_entities {
 		ClientEntityRegistry::Instance().RegisterEntity(std::string(localName), typeid(T), [](pragma::ClientState *client) -> CBaseEntity * {
 			if(!client)
 				return nullptr;
-			CGame *game = client->GetGameState();
+			auto *game = client->GetGameState();
 			if(!game)
 				return nullptr;
 			auto *ent = game->template CreateEntity<T>();
@@ -66,7 +66,7 @@ export namespace client_entities {
 	uint32_t register_networked_entity()
 	{
 		return ClientEntityRegistry::Instance().RegisterNetworkedEntity([](pragma::ClientState *client, uint32_t idx) -> CBaseEntity * {
-			CGame *game = client->GetGameState();
+			auto *game = client->GetGameState();
 			if(game == nullptr)
 				return nullptr;
 			return static_cast<CBaseEntity *>(game->CreateEntity<T>(idx));

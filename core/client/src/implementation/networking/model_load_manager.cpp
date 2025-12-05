@@ -56,7 +56,7 @@ ModelLoadManager::ModelLoadManager()
 		}
 		m_completeMutex.unlock();
 	}));
-	m_hCbOnGameEnd = pragma::get_cgame()->AddCallback("OnGameEnd", FunctionCallback<void, CGame *>::Create([](CGame *) { s_manager = nullptr; }));
+	m_hCbOnGameEnd = pragma::get_cgame()->AddCallback("OnGameEnd", FunctionCallback<void, pragma::CGame *>::Create([](pragma::CGame *) { s_manager = nullptr; }));
 }
 
 ModelLoadManager::~ModelLoadManager()

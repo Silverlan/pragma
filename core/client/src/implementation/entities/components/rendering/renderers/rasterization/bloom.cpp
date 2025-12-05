@@ -19,7 +19,7 @@ void pragma::CRasterizationRendererComponent::RenderGlowObjects(const util::Draw
 	if(glowInfo.bGlowScheduled == false || drawSceneInfo.scene.expired())
 		return;
 	auto &scene = *drawSceneInfo.scene;
-	pragma::get_cgame()->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingGlow);
+	pragma::get_cgame()->StartProfilingStage(pragma::CGame::GPUProfilingPhase::PostProcessingGlow);
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	drawCmd->RecordBeginRenderPass(*glowInfo.renderTarget,{
 		prosper::ClearValue{prosper::ClearColorValue{std::array<float,4>{0.f,0.f,0.f,1.f}}},
@@ -59,7 +59,7 @@ void pragma::CRasterizationRendererComponent::RenderGlowObjects(const util::Draw
 	}
 
 	drawCmd->RecordImageBarrier(glowInfo.renderTarget->GetTexture().GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
-	pragma::get_cgame()->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingGlow);
+	pragma::get_cgame()->StopProfilingStage(pragma::CGame::GPUProfilingPhase::PostProcessingGlow);
 #endif
 }
 

@@ -116,7 +116,7 @@ void register_game_shaders()
 	shaderManager.RegisterShader("merge_2d_image_to_equirectangular", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderMerge2dImageIntoEquirectangular(context, identifier); });
 }
 
-void CGame::InitShaders()
+void pragma::CGame::InitShaders()
 {
 	Con::cout << "Loading shaders..." << Con::endl;
 
@@ -158,7 +158,7 @@ void CGame::InitShaders()
 	shaderManager.GetShader("particle");
 }
 
-void CGame::UpdateShaderTimeData()
+void pragma::CGame::UpdateShaderTimeData()
 {
 	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_globalRenderSettingsBufferData->timeBuffer, 0ull,
 	  pragma::ShaderGameWorldLightingPass::TimeData {static_cast<float>(CurTime()), static_cast<float>(DeltaTime()), static_cast<float>(RealTime()), static_cast<float>(DeltaRealTime())});

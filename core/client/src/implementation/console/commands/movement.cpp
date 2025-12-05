@@ -13,7 +13,7 @@ static void forward_in(pragma::NetworkState *state, pragma::BasePlayerComponent 
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::MoveForward, true, magnitude);
 }
 
@@ -21,7 +21,7 @@ static void forward_out(pragma::NetworkState *state, pragma::BasePlayerComponent
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::MoveForward, false);
 }
 
@@ -29,7 +29,7 @@ static void backward_in(pragma::NetworkState *state, pragma::BasePlayerComponent
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::MoveBackward, true, magnitude);
 }
 
@@ -37,7 +37,7 @@ static void backward_out(pragma::NetworkState *state, pragma::BasePlayerComponen
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::MoveBackward, false);
 }
 
@@ -45,7 +45,7 @@ static void left_in(pragma::NetworkState *state, pragma::BasePlayerComponent *, 
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::MoveLeft, true, magnitude);
 }
 
@@ -53,7 +53,7 @@ static void left_out(pragma::NetworkState *state, pragma::BasePlayerComponent *,
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::MoveLeft, false);
 }
 
@@ -61,7 +61,7 @@ static void right_in(pragma::NetworkState *state, pragma::BasePlayerComponent *,
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::MoveRight, true, magnitude);
 }
 
@@ -69,7 +69,7 @@ static void right_out(pragma::NetworkState *state, pragma::BasePlayerComponent *
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::MoveRight, false);
 }
 
@@ -77,7 +77,7 @@ static void sprint_in(pragma::NetworkState *state, pragma::BasePlayerComponent *
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Sprint, true);
 }
 
@@ -85,7 +85,7 @@ static void sprint_out(pragma::NetworkState *state, pragma::BasePlayerComponent 
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Sprint, false);
 }
 
@@ -93,7 +93,7 @@ static void walk_in(pragma::NetworkState *state, pragma::BasePlayerComponent *, 
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Walk, true);
 }
 
@@ -101,7 +101,7 @@ static void walk_out(pragma::NetworkState *state, pragma::BasePlayerComponent *,
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Walk, false);
 }
 
@@ -109,7 +109,7 @@ static void jump_in(pragma::NetworkState *state, pragma::BasePlayerComponent *, 
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Jump, true);
 }
 
@@ -117,7 +117,7 @@ static void jump_out(pragma::NetworkState *state, pragma::BasePlayerComponent *,
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Jump, false);
 }
 
@@ -125,7 +125,7 @@ static void crouch_in(pragma::NetworkState *state, pragma::BasePlayerComponent *
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Crouch, true);
 }
 
@@ -133,7 +133,7 @@ static void crouch_out(pragma::NetworkState *state, pragma::BasePlayerComponent 
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Crouch, false);
 }
 
@@ -141,7 +141,7 @@ static void attack_in(pragma::NetworkState *state, pragma::BasePlayerComponent *
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Attack, true);
 }
 
@@ -149,7 +149,7 @@ static void attack_out(pragma::NetworkState *state, pragma::BasePlayerComponent 
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Attack, false);
 }
 
@@ -157,7 +157,7 @@ static void attack2_in(pragma::NetworkState *state, pragma::BasePlayerComponent 
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Attack2, true);
 }
 
@@ -165,7 +165,7 @@ static void attack2_out(pragma::NetworkState *state, pragma::BasePlayerComponent
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Attack2, false);
 }
 
@@ -173,7 +173,7 @@ static void attack3_in(pragma::NetworkState *state, pragma::BasePlayerComponent 
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Attack3, true);
 }
 
@@ -181,7 +181,7 @@ static void attack3_out(pragma::NetworkState *state, pragma::BasePlayerComponent
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Attack3, false);
 }
 
@@ -189,7 +189,7 @@ static void attack4_in(pragma::NetworkState *state, pragma::BasePlayerComponent 
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Attack4, true);
 }
 
@@ -197,7 +197,7 @@ static void attack4_out(pragma::NetworkState *state, pragma::BasePlayerComponent
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Attack4, false);
 }
 
@@ -205,7 +205,7 @@ static void reload_in(pragma::NetworkState *state, pragma::BasePlayerComponent *
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Reload, true);
 }
 
@@ -213,7 +213,7 @@ static void reload_out(pragma::NetworkState *state, pragma::BasePlayerComponent 
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Reload, false);
 }
 
@@ -221,7 +221,7 @@ static void use_in(pragma::NetworkState *state, pragma::BasePlayerComponent *, s
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Use, true);
 }
 
@@ -229,7 +229,7 @@ static void use_out(pragma::NetworkState *state, pragma::BasePlayerComponent *, 
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	game->SetActionInput(pragma::Action::Use, false);
 }
 
@@ -354,7 +354,7 @@ static void update_turn_callbacks()
 		    }));
 	}
 	if(!cbGameEnd.IsValid()) {
-		cbGameEnd = pragma::get_cgame()->AddCallback("OnGameEnd", FunctionCallback<void, CGame *>::Create([](CGame *) {
+		cbGameEnd = pragma::get_cgame()->AddCallback("OnGameEnd", FunctionCallback<void, pragma::CGame *>::Create([](pragma::CGame *) {
 			turn_speeds.left = 0.f;
 			turn_speeds.right = 0.f;
 			turn_speeds.up = 0.f;

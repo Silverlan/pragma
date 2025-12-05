@@ -105,9 +105,9 @@ static void register_gui(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();
 	auto guiMod = luabind::module(l, "gui");
-	guiMod[(luabind::def("create", static_cast<::WIBase *(*)(CGame *, const std::string &, ::WIBase &, int32_t, int32_t, uint32_t, uint32_t, float, float, float, float)>(&Lua::gui::create)),
-	  luabind::def("create", static_cast<::WIBase *(*)(CGame *, const std::string &, ::WIBase &, int32_t, int32_t, uint32_t, uint32_t)>(&Lua::gui::create)), luabind::def("create", static_cast<::WIBase *(*)(CGame *, const std::string &, ::WIBase &, int32_t, int32_t)>(&Lua::gui::create)),
-	  luabind::def("create", static_cast<::WIBase *(*)(CGame *, const std::string &, ::WIBase *)>(&Lua::gui::create)), luabind::def("create", static_cast<::WIBase *(*)(CGame *, const std::string &)>(&Lua::gui::create)),
+	guiMod[(luabind::def("create", static_cast<::WIBase *(*)(pragma::CGame *, const std::string &, ::WIBase &, int32_t, int32_t, uint32_t, uint32_t, float, float, float, float)>(&Lua::gui::create)),
+	  luabind::def("create", static_cast<::WIBase *(*)(pragma::CGame *, const std::string &, ::WIBase &, int32_t, int32_t, uint32_t, uint32_t)>(&Lua::gui::create)), luabind::def("create", static_cast<::WIBase *(*)(pragma::CGame *, const std::string &, ::WIBase &, int32_t, int32_t)>(&Lua::gui::create)),
+	  luabind::def("create", static_cast<::WIBase *(*)(pragma::CGame *, const std::string &, ::WIBase *)>(&Lua::gui::create)), luabind::def("create", static_cast<::WIBase *(*)(pragma::CGame *, const std::string &)>(&Lua::gui::create)),
 
 	  luabind::def("create_label", static_cast<::WIBase *(*)(lua::State *, const std::string &, ::WIBase &, int32_t, int32_t)>(&Lua::gui::create_label)), luabind::def("create_label", static_cast<::WIBase *(*)(lua::State *, const std::string &, ::WIBase &)>(&Lua::gui::create_label)),
 	  luabind::def("create_label", static_cast<::WIBase *(*)(lua::State *, const std::string &)>(&Lua::gui::create_label)),

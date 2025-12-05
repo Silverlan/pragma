@@ -1125,7 +1125,7 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 	modShader[defShaderPbr];
 }
 
-void CGame::RegisterLuaClasses()
+void pragma::CGame::RegisterLuaClasses()
 {
 	pragma::Game::RegisterLuaClasses();
 	pragma::ClientState::RegisterSharedLuaClasses(GetLuaInterface());

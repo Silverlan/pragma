@@ -304,7 +304,7 @@ static CVar cvDrawTranslucent = GetClientConVar("render_draw_translucent");
 static CVar cvClearScene = GetClientConVar("render_clear_scene");
 static CVar cvClearSceneColor = GetClientConVar("render_clear_scene_color");
 static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
-void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
+void pragma::CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 {
 #ifdef PRAGMA_ENABLE_SHADER_DEBUG_PRINT
 	GetGlobalRenderSettingsBufferData().EvaluateDebugPrint();
@@ -408,7 +408,7 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	m_sceneRenderQueue.clear();
 }
 
-void CGame::GetPrimaryCameraRenderMask(::pragma::rendering::RenderMask &inclusionMask, ::pragma::rendering::RenderMask &exclusionMask) const
+void pragma::CGame::GetPrimaryCameraRenderMask(::pragma::rendering::RenderMask &inclusionMask, ::pragma::rendering::RenderMask &exclusionMask) const
 {
 	auto *lp = m_plLocal.get();
 	if(lp && lp->IsInFirstPersonMode()) {
@@ -524,7 +524,7 @@ static void debug_dump_render_queues(const std::vector<util::DrawSceneInfo> &dra
 }
 
 bool g_dumpRenderQueues = false;
-void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
+void pragma::CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 {
 	if(cvDrawScene->GetBool() == false)
 		return;
@@ -684,4 +684,4 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 	// to have completed their work for this frame. The scene is now safe for writing again.
 }
 
-bool CGame::IsInMainRenderPass() const { return m_bMainRenderPass; }
+bool pragma::CGame::IsInMainRenderPass() const { return m_bMainRenderPass; }

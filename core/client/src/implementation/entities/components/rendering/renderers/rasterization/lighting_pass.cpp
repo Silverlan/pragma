@@ -344,7 +344,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 #if 0
 		if(bShouldDrawParticles)
 		{
-			//pragma::get_cgame()->StartProfilingStage(CGame::GPUProfilingPhase::Particles);
+			//pragma::get_cgame()->StartProfilingStage(pragma::CGame::GPUProfilingPhase::Particles);
 			//InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_PARTICLES,evDataLightingStage);
 
 			//auto &glowInfo = GetGlowInfo();
@@ -394,7 +394,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 			//	glowInfo.bGlowScheduled = true;
 			
 			// InvokeEventCallbacks(EVENT_MT_END_RECORD_PARTICLES,evDataLightingStage);
-			// pragma::get_cgame()->StopProfilingStage(CGame::GPUProfilingPhase::Particles);
+			// pragma::get_cgame()->StopProfilingStage(pragma::CGame::GPUProfilingPhase::Particles);
 		}
 #endif
 		//pragma::get_cengine()->StopGPUTimer(GPUTimerEvent::Particles); // prosper TODO
@@ -466,7 +466,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 						}
 					}
 					else if(g_dbgMode == 1) {
-						auto &whDebugShader = pragma::get_cgame()->GetGameShader(CGame::GameShader::Debug);
+						auto &whDebugShader = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::Debug);
 						auto *shader = static_cast<pragma::ShaderDebug *>(whDebugShader.get());
 
 						auto m = umat::identity();

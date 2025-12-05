@@ -29,7 +29,7 @@ void CRendererPpToneMappingComponent::DoRenderEffect(const util::DrawSceneInfo &
 			(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuToneMapping, *drawSceneInfo.commandBuffer);
 	}};
 
-	auto hShaderTonemapping = pragma::get_cgame()->GetGameShader(CGame::GameShader::PPTonemapping);
+	auto hShaderTonemapping = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::PPTonemapping);
 	if(hShaderTonemapping.expired() || m_renderer.expired())
 		return;
 	auto &hdrInfo = m_renderer->GetHDRInfo();

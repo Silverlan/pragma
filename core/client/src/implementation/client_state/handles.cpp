@@ -214,7 +214,7 @@ void pragma::ClientState::HandleReceiveGameInfo(NetPacket &packet)
 	//if(IsConnected())
 	if(IsGameActive() == false)
 		StartNewGame(GetConVarString("sv_gamemode"));
-	auto *game = static_cast<CGame *>(GetGameState());
+	auto *game = static_cast<pragma::CGame *>(GetGameState());
 	game->InitializeGame();
 
 	auto luaPath = m_svInfo->GetDownloadPath() + "lua";

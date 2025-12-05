@@ -528,7 +528,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 
 	auto &cam = *hCam;
 	auto &rasterizer = *hRasterizer;
-	// pragma::get_cgame()->StartProfilingStage(CGame::CPUProfilingPhase::BuildRenderQueue);
+	// pragma::get_cgame()->StartProfilingStage(pragma::CGame::CPUProfilingPhase::BuildRenderQueue);
 	auto &posCam = g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->pos : drawSceneInfo.pvsOrigin.has_value() ? *drawSceneInfo.pvsOrigin : cam.GetEntity().GetPosition();
 
 	auto renderMask = drawSceneInfo.GetRenderMask(*pragma::get_cgame());
@@ -705,7 +705,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 				  (*stats)->AddTime(RenderQueueBuilderStats::Timer::QueueInstancing, std::chrono::steady_clock::now() - t);
 			  renderQueue->Unlock();
 		  }
-		  // pragma::get_cgame()->StopProfilingStage(CGame::CPUProfilingPhase::BuildRenderQueue);
+		  // pragma::get_cgame()->StopProfilingStage(pragma::CGame::CPUProfilingPhase::BuildRenderQueue);
 	  });
 
 	if(fBuildAdditionalQueues)

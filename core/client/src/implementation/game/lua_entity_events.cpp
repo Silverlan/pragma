@@ -8,7 +8,7 @@ module pragma.client;
 import :game;
 import :entities.components;
 
-bool CGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject)
+bool pragma::CGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject)
 {
 	if(pragma::Game::InvokeEntityEvent(component, eventId, argsIdx, bInject))
 		return true;

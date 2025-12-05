@@ -13,12 +13,12 @@ using namespace pragma;
 
 ShadowRenderer::ShadowRenderer()
 {
-	m_shader = pragma::get_cgame()->GetGameShader(CGame::GameShader::Shadow);
-	m_shaderTransparent = pragma::get_cgame()->GetGameShader(CGame::GameShader::ShadowTransparent);
-	m_shaderSpot = pragma::get_cgame()->GetGameShader(CGame::GameShader::ShadowSpot);
-	m_shaderSpotTransparent = pragma::get_cgame()->GetGameShader(CGame::GameShader::ShadowTransparentSpot);
-	m_shaderCSM = pragma::get_cgame()->GetGameShader(CGame::GameShader::ShadowCSM);
-	m_shaderCSMTransparent = pragma::get_cgame()->GetGameShader(CGame::GameShader::ShadowCSMTransparent);
+	m_shader = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::Shadow);
+	m_shaderTransparent = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::ShadowTransparent);
+	m_shaderSpot = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::ShadowSpot);
+	m_shaderSpotTransparent = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::ShadowTransparentSpot);
+	m_shaderCSM = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::ShadowCSM);
+	m_shaderCSMTransparent = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::ShadowCSMTransparent);
 
 	m_octreeCallbacks.nodeCallback = [this](const OcclusionOctree<std::shared_ptr<ModelMesh>>::Node &node) -> bool {
 		auto &bounds = node.GetWorldBounds();

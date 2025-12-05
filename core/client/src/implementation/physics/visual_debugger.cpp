@@ -19,7 +19,7 @@ void CPhysVisualDebugger::Render(std::shared_ptr<prosper::ICommandBuffer> &drawC
 {
 	auto vp = cam.GetProjectionMatrix() * cam.GetViewMatrix();
 	auto m = umat::identity();
-	auto &whDebugShader = pragma::get_cgame()->GetGameShader(CGame::GameShader::DebugVertex);
+	auto &whDebugShader = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::DebugVertex);
 	auto &shader = static_cast<pragma::ShaderDebugVertexColor &>(*whDebugShader.get());
 	prosper::ShaderBindState bindState {*drawCmd};
 	if(shader.RecordBeginDraw(bindState, pragma::ShaderDebugVertexColor::Pipeline::Line) == true) {

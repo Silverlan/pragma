@@ -34,7 +34,7 @@ void CRendererPpFxaaComponent::DoRenderEffect(const util::DrawSceneInfo &drawSce
 
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &hdrInfo = m_renderer->GetHDRInfo();
-	auto whShaderPPFXAA = pragma::get_cgame()->GetGameShader(CGame::GameShader::PPFXAA);
+	auto whShaderPPFXAA = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::PPFXAA);
 	if(whShaderPPFXAA.valid() == true) {
 		auto &shaderFXAA = static_cast<pragma::ShaderPPFXAA &>(*whShaderPPFXAA.get());
 		auto &prepass = hdrInfo.prepass;

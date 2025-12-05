@@ -158,7 +158,7 @@ static void bsp_register_class(lua::State *l, luabind::module_ &entsMod, luabind
 }
 
 void RegisterLuaEntityComponents2_cl(lua::State *l, luabind::module_ &entsMod);
-void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
+void pragma::CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {
 	pragma::Game::RegisterLuaEntityComponents(entsMod);
 	auto *l = GetLuaState();

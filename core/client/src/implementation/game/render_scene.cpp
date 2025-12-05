@@ -13,7 +13,7 @@ import :entities.components.render;
 import :entities.components.renderer;
 import :rendering.shaders;
 
-void CGame::RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, prosper::Texture &texPostHdr, prosper::IImage *optOutImage, uint32_t layerId)
+void pragma::CGame::RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, prosper::Texture &texPostHdr, prosper::IImage *optOutImage, uint32_t layerId)
 {
 	if(optOutImage) {
 		drawCmd->RecordImageBarrier(*optOutImage, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferDstOptimal);
@@ -25,9 +25,9 @@ void CGame::RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &
 	drawCmd->RecordImageBarrier(texPostHdr.GetImage(), prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 }
 
-std::shared_ptr<prosper::IPrimaryCommandBuffer> CGame::GetCurrentDrawCommandBuffer() const { return m_currentDrawCmd.lock(); }
+std::shared_ptr<prosper::IPrimaryCommandBuffer> pragma::CGame::GetCurrentDrawCommandBuffer() const { return m_currentDrawCmd.lock(); }
 
-void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 {
 	m_currentDrawCmd = drawSceneInfo.commandBuffer;
 	util::ScopeGuard sgCurrentDrawCmd {[this]() { m_currentDrawCmd = {}; }};

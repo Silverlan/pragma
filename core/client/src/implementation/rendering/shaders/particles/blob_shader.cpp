@@ -162,7 +162,7 @@ bool ShaderParticleBlob::RecordDraw(prosper::ShaderBindState &bindState, pragma:
 		return false;
 	if(RecordBindDescriptorSet(bindState, dsParticles, DESCRIPTOR_SET_PARTICLE_DATA.setIndex, {particleBufferOffset}) == false)
 		return false;
-	auto &shaderPbr = pragma::get_cgame()->GetGameShader(CGame::GameShader::Pbr);
+	auto &shaderPbr = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::Pbr);
 	assert(shaderPbr.valid());
 
 	float iblStrength = 1.f;

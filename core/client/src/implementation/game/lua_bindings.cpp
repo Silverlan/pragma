@@ -39,7 +39,7 @@ void Lua::register_shared_client_state(lua::State *l)
 	modLocale[luabind::def("parse", static_cast<Lua::opt<Lua::map<std::string, std::string>> (*)(lua::State *, const std::string &)>(Lua::Locale::parse))];
 }
 
-void CGame::RegisterLua()
+void pragma::CGame::RegisterLua()
 {
 	GetLuaInterface().SetIdentifier("cl");
 
@@ -172,11 +172,11 @@ void CGame::RegisterLua()
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua::State *, const LFile &, util::AssetLoadFlags)>(Lua::engine::load_texture)),
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua::State *, const LFile &)>(Lua::engine::load_texture)), luabind::def("precache_particle_system", static_cast<bool (*)(lua::State *, const std::string &, bool)>(Lua::engine::precache_particle_system)),
 	  luabind::def("precache_particle_system", static_cast<bool (*)(lua::State *, const std::string &)>(Lua::engine::precache_particle_system)), luabind::def("load_sound_scripts", static_cast<void (*)(lua::State *, const std::string &, bool)>(Lua::engine::LoadSoundScripts)),
-	  luabind::def("load_sound_scripts", static_cast<void (*)(lua::State *, const std::string &)>(Lua::engine::LoadSoundScripts)), luabind::def("get_model", Lua::engine::get_model), luabind::def("get_number_of_scenes_queued_for_rendering", &CGame::GetNumberOfScenesQueuedForRendering),
-	  luabind::def("get_queued_scene_render_info", &CGame::GetQueuedSceneRenderInfo),
+	  luabind::def("load_sound_scripts", static_cast<void (*)(lua::State *, const std::string &)>(Lua::engine::LoadSoundScripts)), luabind::def("get_model", Lua::engine::get_model), luabind::def("get_number_of_scenes_queued_for_rendering", &pragma::CGame::GetNumberOfScenesQueuedForRendering),
+	  luabind::def("get_queued_scene_render_info", &pragma::CGame::GetQueuedSceneRenderInfo),
 
-	  luabind::def("set_gameplay_control_camera", &CGame::SetGameplayControlCamera<pragma::CCameraComponent>), luabind::def("reset_gameplay_control_camera", &CGame::ResetGameplayControlCamera),
-	  luabind::def("get_gameplay_control_camera", &CGame::GetGameplayControlCamera<pragma::CCameraComponent>), luabind::def("clear_gameplay_control_camera", &CGame::ClearGameplayControlCamera),
+	  luabind::def("set_gameplay_control_camera", &pragma::CGame::SetGameplayControlCamera<pragma::CCameraComponent>), luabind::def("reset_gameplay_control_camera", &pragma::CGame::ResetGameplayControlCamera),
+	  luabind::def("get_gameplay_control_camera", &pragma::CGame::GetGameplayControlCamera<pragma::CCameraComponent>), luabind::def("clear_gameplay_control_camera", &pragma::CGame::ClearGameplayControlCamera),
 	  luabind::def(
 	    "get_primary_camera_render_mask", +[]() -> std::pair<::pragma::rendering::RenderMask, ::pragma::rendering::RenderMask> {
 		    auto inclusionMask = ::pragma::rendering::RenderMask::None;
@@ -513,13 +513,13 @@ void CGame::RegisterLua()
 	lua_registerglobalint(SHADER_NORMAL_BUFFER_LOCATION);*/ // Vulkan TODO
 }
 
-void CGame::InitializeLua()
+void pragma::CGame::InitializeLua()
 {
 	pragma::Game::InitializeLua();
 	CallCallbacks<void, lua::State *>("OnLuaInitialized", GetLuaState());
 }
 
-void CGame::SetupLua()
+void pragma::CGame::SetupLua()
 {
 	pragma::Game::SetupLua();
 	RunLuaFiles("autorun/");
@@ -531,7 +531,7 @@ void CGame::SetupLua()
 	LoadLuaShaders();
 }
 
-void CGame::LoadLuaShaders()
+void pragma::CGame::LoadLuaShaders()
 {
 	std::vector<std::string> files;
 	//FileManager::FindFiles(Lua::SCRIPT_DIRECTORY_SLASH +"shaders\\*.lua",&files,nullptr); // Deprecated; Shaders have to be explicitely included now
@@ -539,7 +539,7 @@ void CGame::LoadLuaShaders()
 		LoadLuaShader(files[i]);
 }
 
-void CGame::LoadLuaShader(std::string file)
+void pragma::CGame::LoadLuaShader(std::string file)
 {
 	ustring::to_lower(file);
 	std::string identifier = file.substr(0, file.length() - 4);
@@ -547,8 +547,8 @@ void CGame::LoadLuaShader(std::string file)
 	ExecuteLuaFile(file);
 }
 
-std::string CGame::GetLuaNetworkDirectoryName() const { return "client"; }
-std::string CGame::GetLuaNetworkFileName() const { return "cl_init" + Lua::DOT_FILE_EXTENSION; }
+std::string pragma::CGame::GetLuaNetworkDirectoryName() const { return "client"; }
+std::string pragma::CGame::GetLuaNetworkFileName() const { return "cl_init" + Lua::DOT_FILE_EXTENSION; }
 
 //////////////////////////////////////////////
 

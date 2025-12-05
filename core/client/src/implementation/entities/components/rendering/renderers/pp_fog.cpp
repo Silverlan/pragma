@@ -40,7 +40,7 @@ void CRendererPpFogComponent::DoRenderEffect(const util::DrawSceneInfo &drawScen
 		}
 	}
 	auto &drawCmd = drawSceneInfo.commandBuffer;
-	auto hShaderFog = pragma::get_cgame()->GetGameShader(CGame::GameShader::PPFog);
+	auto hShaderFog = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::PPFog);
 	if(descSetGroupFog == nullptr || hShaderFog.expired())
 		return;
 	auto &shaderFog = static_cast<pragma::ShaderPPFog &>(*hShaderFog.get());

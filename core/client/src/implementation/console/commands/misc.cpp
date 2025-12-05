@@ -116,7 +116,7 @@ void CMD_lua_reload_entity(pragma::NetworkState *state, pragma::BasePlayerCompon
 	if(argv.empty())
 		return;
 	auto *cstate = static_cast<pragma::ClientState *>(state);
-	CGame *game = cstate->GetGameState();
+	auto *game = cstate->GetGameState();
 	if(game == nullptr)
 		return;
 	game->LoadLuaEntity("entities", argv[0]);
@@ -127,7 +127,7 @@ void CMD_lua_reload_weapon(pragma::NetworkState *state, pragma::BasePlayerCompon
 	if(argv.empty())
 		return;
 	auto *cstate = static_cast<pragma::ClientState *>(state);
-	CGame *game = cstate->GetGameState();
+	auto *game = cstate->GetGameState();
 	if(game == nullptr)
 		return;
 	game->LoadLuaEntity("weapons", argv[0]);
@@ -220,7 +220,7 @@ void CMD_getpos(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, st
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	if(pl == nullptr) {
 		Con::cout << "0 0 0" << Con::endl;
 		return;
@@ -245,7 +245,7 @@ void CMD_setcampos(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 	if(!pragma::check_cheats("setpos", cstate))
 		return;
 	Vector3 pos(atof(argv[0].c_str()), atof(argv[1].c_str()), atof(argv[2].c_str()));
-	auto *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	auto *pCam = game->GetRenderCamera<pragma::CCameraComponent>();
 	if(pCam == nullptr)
 		return;
@@ -256,7 +256,7 @@ void CMD_getcampos(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 {
 	if(!state->IsGameActive())
 		return;
-	auto *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	auto *pCam = game->GetRenderCamera<pragma::CCameraComponent>();
 	if(pCam == nullptr)
 		return;
@@ -307,7 +307,7 @@ void CMD_setcamang(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 	if(!pragma::check_cheats("setpos", cstate))
 		return;
 	EulerAngles ang(util::to_float(argv[0]), util::to_float(argv[1]), util::to_float(argv[2]));
-	auto *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	auto *pCam = game->GetRenderCamera<pragma::CCameraComponent>();
 	if(pCam == nullptr)
 		return;
@@ -318,7 +318,7 @@ void CMD_getcamang(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 {
 	if(!state->IsGameActive())
 		return;
-	auto *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	auto *pCam = game->GetRenderCamera<pragma::CCameraComponent>();
 	if(pCam == nullptr)
 		return;
@@ -618,7 +618,7 @@ void CMD_shader_list(pragma::NetworkState *, pragma::BasePlayerComponent *, std:
 
 void CMD_flashlight_toggle(pragma::NetworkState *, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
-	CGame *game = pragma::get_client_state()->GetGameState();
+	auto *game = pragma::get_client_state()->GetGameState();
 	if(game == nullptr)
 		return;
 	if(pl == nullptr)

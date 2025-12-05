@@ -19,6 +19,6 @@ export namespace util {
 		float skyStrength = 1.f;
 		EulerAngles skyAngles {};
 	};
-	DLLCLIENT void rt_screenshot(CGame &game, uint32_t width, uint32_t height, const RtScreenshotSettings &settings, uimg::ImageFormat format = uimg::ImageFormat::PNG);
-	DLLCLIENT std::optional<std::string> screenshot(CGame &game);
+	DLLCLIENT void rt_screenshot(pragma::CGame &game, uint32_t width, uint32_t height, const RtScreenshotSettings &settings, uimg::ImageFormat format = uimg::ImageFormat::PNG);
+	DLLCLIENT std::optional<std::string> screenshot(pragma::CGame &game);
 };

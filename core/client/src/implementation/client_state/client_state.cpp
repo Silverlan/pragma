@@ -52,8 +52,8 @@ pragma::ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo
 	//CVarHandler::Initialize();
 	FileManager::AddCustomMountDirectory("downloads", static_cast<fsys::SearchFlags>(pragma::networking::FSYS_SEARCH_RESOURCES));
 
-	RegisterCallback<void, CGame *>("OnGameStart");
-	RegisterCallback<void, CGame *>("EndGame");
+	RegisterCallback<void, pragma::CGame *>("OnGameStart");
+	RegisterCallback<void, pragma::CGame *>("EndGame");
 	RegisterCallback<void, msys::CMaterial *>("OnMaterialLoaded");
 
 	RegisterCallback<void>("Draw");
@@ -94,7 +94,7 @@ void pragma::ClientState::UpdateGameWorldShaderSettings()
 
 	auto *game = GetGameState();
 	if(game)
-		static_cast<CGame *>(game)->OnGameWorldShaderSettingsChanged(m_worldShaderSettings, oldSettings);
+		static_cast<pragma::CGame *>(game)->OnGameWorldShaderSettingsChanged(m_worldShaderSettings, oldSettings);
 }
 
 void pragma::ClientState::InitializeGameClient(bool singlePlayerLocalGame)
@@ -482,7 +482,7 @@ void pragma::ClientState::EndGame()
 {
 	if(!IsGameActive())
 		return;
-	CallCallbacks<void, CGame *>("EndGame", GetGameState());
+	CallCallbacks<void, pragma::CGame *>("EndGame", GetGameState());
 	m_game->CallCallbacks<void>("EndGame");
 
 	// Game::OnRemove requires that NetworkState::GetGameState returns
@@ -505,13 +505,13 @@ void pragma::ClientState::EndGame()
 
 bool pragma::ClientState::IsGameActive() { return m_game != nullptr; }
 
-CGame *pragma::ClientState::GetGameState() { return static_cast<CGame *>(pragma::NetworkState::GetGameState()); }
+pragma::CGame *pragma::ClientState::GetGameState() { return static_cast<pragma::CGame *>(pragma::NetworkState::GetGameState()); }
 
 void pragma::ClientState::HandleLuaNetPacket(NetPacket &packet)
 {
 	if(!IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(GetGameState());
+	CGame *game = static_cast<pragma::CGame *>(GetGameState());
 	game->HandleLuaNetPacket(packet);
 }
 
@@ -616,7 +616,7 @@ void pragma::ClientState::StartNewGame(const std::string &gameMode)
 		          delete game;
 	          }};
 	m_game->SetGameMode(gameMode);
-	CallCallbacks<void, CGame *>("OnGameStart", GetGameState());
+	CallCallbacks<void, pragma::CGame *>("OnGameStart", GetGameState());
 	m_game->Initialize();
 	m_game->OnInitialized();
 	//if(!IsConnected())

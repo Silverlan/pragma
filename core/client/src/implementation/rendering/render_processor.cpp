@@ -615,7 +615,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 	}
 
 	auto &scene = *m_drawSceneInfo.drawSceneInfo.scene;
-	auto &referenceShader = isDepthPass ? pragma::get_cgame()->GetGameShader(CGame::GameShader::Prepass) : pragma::get_cgame()->GetGameShader(CGame::GameShader::Pbr);
+	auto &referenceShader = isDepthPass ? pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::Prepass) : pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::Pbr);
 	auto view = (m_camType == CameraType::View) ? true : false;
 	if(referenceShader.expired())
 		return 0;

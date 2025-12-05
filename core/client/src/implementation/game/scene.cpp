@@ -11,20 +11,20 @@ module pragma.client;
 import :game;
 
 template<typename TCPPM>
-TCPPM *CGame::GetScene()
+TCPPM *pragma::CGame::GetScene()
 {
 	return static_cast<pragma::CSceneComponent *>(m_scene.get());
 }
-template DLLCLIENT pragma::CSceneComponent *CGame::GetScene<pragma::CSceneComponent>();
-template DLLCLIENT const pragma::CSceneComponent *CGame::GetScene<const pragma::CSceneComponent>();
+template DLLCLIENT pragma::CSceneComponent *pragma::CGame::GetScene<pragma::CSceneComponent>();
+template DLLCLIENT const pragma::CSceneComponent *pragma::CGame::GetScene<const pragma::CSceneComponent>();
 
 template<typename TCPPM>
-const TCPPM *CGame::GetScene() const
+const TCPPM *pragma::CGame::GetScene() const
 {
-	return const_cast<CGame *>(this)->GetScene<TCPPM>();
+	return const_cast<pragma::CGame *>(this)->GetScene<TCPPM>();
 }
-template DLLCLIENT const pragma::CSceneComponent *CGame::GetScene<pragma::CSceneComponent>() const;
-template DLLCLIENT const pragma::CSceneComponent *CGame::GetScene<const pragma::CSceneComponent>() const;
+template DLLCLIENT const pragma::CSceneComponent *pragma::CGame::GetScene<pragma::CSceneComponent>() const;
+template DLLCLIENT const pragma::CSceneComponent *pragma::CGame::GetScene<const pragma::CSceneComponent>() const;
 
 static void cl_fov_callback(pragma::NetworkState *, const ConVar &, float, float val)
 {

@@ -29,7 +29,7 @@ static bool check_element(const std::string &name, ::WIBase *el)
 	Con::cwar << "Failed to create GUI element of type '" << name << "'!" << Con::endl;
 	return false;
 }
-::WIBase *Lua::gui::create(CGame *game, const std::string &name, ::WIBase &parent, int32_t x, int32_t y, uint32_t w, uint32_t h, float left, float top, float right, float bottom)
+::WIBase *Lua::gui::create(pragma::CGame *game, const std::string &name, ::WIBase &parent, int32_t x, int32_t y, uint32_t w, uint32_t h, float left, float top, float right, float bottom)
 {
 	auto *el = game ? game->CreateGUIElement(name, &parent) : WGUI::GetInstance().Create(name, &parent);
 	if(!check_element(name, el))
@@ -40,7 +40,7 @@ static bool check_element(const std::string &name, ::WIBase *el)
 	initialize_element(*el);
 	return el;
 }
-::WIBase *Lua::gui::create(CGame *game, const std::string &name, ::WIBase &parent, int32_t x, int32_t y, uint32_t w, uint32_t h)
+::WIBase *Lua::gui::create(pragma::CGame *game, const std::string &name, ::WIBase &parent, int32_t x, int32_t y, uint32_t w, uint32_t h)
 {
 	auto *el = game ? game->CreateGUIElement(name, &parent) : WGUI::GetInstance().Create(name, &parent);
 	if(!check_element(name, el))
@@ -50,7 +50,7 @@ static bool check_element(const std::string &name, ::WIBase *el)
 	initialize_element(*el);
 	return el;
 }
-::WIBase *Lua::gui::create(CGame *game, const std::string &name, ::WIBase &parent, int32_t x, int32_t y)
+::WIBase *Lua::gui::create(pragma::CGame *game, const std::string &name, ::WIBase &parent, int32_t x, int32_t y)
 {
 	auto *el = game ? game->CreateGUIElement(name, &parent) : WGUI::GetInstance().Create(name, &parent);
 	if(!check_element(name, el))
@@ -59,7 +59,7 @@ static bool check_element(const std::string &name, ::WIBase *el)
 	initialize_element(*el);
 	return el;
 }
-::WIBase *Lua::gui::create(CGame *game, const std::string &name, ::WIBase *parent)
+::WIBase *Lua::gui::create(pragma::CGame *game, const std::string &name, ::WIBase *parent)
 {
 	auto *el = game ? game->CreateGUIElement(name, parent) : WGUI::GetInstance().Create(name, parent);
 	if(!check_element(name, el))
@@ -67,7 +67,7 @@ static bool check_element(const std::string &name, ::WIBase *el)
 	initialize_element(*el);
 	return el;
 }
-::WIBase *Lua::gui::create(CGame *game, const std::string &name)
+::WIBase *Lua::gui::create(pragma::CGame *game, const std::string &name)
 {
 	auto *el = game ? game->CreateGUIElement(name) : WGUI::GetInstance().Create(name);
 	if(!check_element(name, el))

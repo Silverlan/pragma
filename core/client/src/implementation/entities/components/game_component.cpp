@@ -40,6 +40,6 @@ void CGameComponent::UpdateCamera(CCameraComponent *cam)
 void CGameEntity::Initialize()
 {
 	CBaseEntity::Initialize();
-	AddComponent<CGameComponent>();
+	AddComponent<pragma::CGameComponent>();
 	AddComponent<CInputComponent>();
 }

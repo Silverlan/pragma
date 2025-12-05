@@ -359,7 +359,7 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_text(WIText *el, const Ve
 
 		auto *ds = ptrO->GetTextDescriptorSet();
 		if(ds != nullptr) {
-			auto *pShader = static_cast<pragma::ShaderDebugTexture *>(pragma::get_cgame()->GetGameShader(CGame::GameShader::DebugTexture).get());
+			auto *pShader = static_cast<pragma::ShaderDebugTexture *>(pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::DebugTexture).get());
 			if(pShader != nullptr) {
 				auto drawCmd = pragma::get_cgame()->GetCurrentDrawCommandBuffer();
 				prosper::ShaderBindState bindState {*drawCmd};
@@ -615,8 +615,8 @@ void DebugRenderer::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pr
 {
 	if(s_debugObjects.empty())
 		return;
-	auto &whDebugShader = pragma::get_cgame()->GetGameShader(CGame::GameShader::Debug);
-	auto &whDebugVertexShader = pragma::get_cgame()->GetGameShader(CGame::GameShader::DebugVertex);
+	auto &whDebugShader = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::Debug);
+	auto &whDebugVertexShader = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::DebugVertex);
 	if(whDebugShader.expired() || whDebugVertexShader.expired())
 		return;
 	const std::unordered_map<DebugRenderer::Type, pragma::ShaderDebug::Pipeline> shaderPipeline = {

@@ -339,7 +339,7 @@ void NET_cl_REGISTER_NET_EVENT(NetPacket packet)
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	static_cast<CGame *>(client->GetGameState())->OnReceivedRegisterNetEvent(packet);
+	static_cast<pragma::CGame *>(client->GetGameState())->OnReceivedRegisterNetEvent(packet);
 }
 
 void NET_cl_SND_PRECACHE(NetPacket packet)
@@ -723,7 +723,7 @@ CBaseEntity *NET_cl_ENT_CREATE(NetPacket &packet, bool bSpawn, bool bIgnoreMapIn
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return nullptr;
-	CGame *game = client->GetGameState();
+	pragma::CGame *game = client->GetGameState();
 	unsigned int factoryID = packet->Read<unsigned int>();
 	auto *factory = client_entities::ClientEntityRegistry::Instance().GetNetworkedFactory(factoryID);
 	if(factory == nullptr) {
@@ -769,7 +769,7 @@ CBaseEntity *NET_cl_ENT_CREATE_LUA(NetPacket &packet, bool bSpawn, bool bIgnoreM
 	if(!client->IsGameActive())
 		return nullptr;
 
-	CGame *game = client->GetGameState();
+	pragma::CGame *game = client->GetGameState();
 	std::string classname = packet->ReadString();
 	unsigned int idx = packet->Read<unsigned int>();
 	unsigned int mapIdx = packet->Read<unsigned int>();
@@ -805,7 +805,7 @@ void NET_game_timescale(NetPacket packet)
 	if(!client->IsGameActive())
 		return;
 	float timeScale = packet->Read<float>();
-	CGame *game = client->GetGameState();
+	pragma::CGame *game = client->GetGameState();
 	game->SetTimeScale(timeScale);
 }
 
@@ -1190,7 +1190,7 @@ void NET_cl_GAME_START(NetPacket packet)
 	client->StartNewGame(gameMode);
 	if(!client->IsGameActive())
 		return;
-	CGame *game = client->GetGameState();
+	pragma::CGame *game = client->GetGameState();
 	game->SetTimeScale(timeScale);
 }
 
@@ -1200,7 +1200,7 @@ void NET_cl_GAME_TIMESCALE(NetPacket packet)
 	if(!client->IsGameActive())
 		return;
 	float timeScale = packet->Read<float>();
-	CGame *game = client->GetGameState();
+	pragma::CGame *game = client->GetGameState();
 	game->SetTimeScale(timeScale);
 }
 
@@ -1234,7 +1234,7 @@ void NET_cl_PL_LOCAL(NetPacket packet)
 	auto *pl = static_cast<pragma::CPlayerComponent *>(nwm::read_player(packet));
 	if(pl == nullptr)
 		return;
-	CGame *game = client->GetGameState();
+	pragma::CGame *game = client->GetGameState();
 	game->SetLocalPlayer(pl);
 }
 
@@ -1251,7 +1251,7 @@ void NET_cl_SNAPSHOT(NetPacket packet)
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	CGame *game = client->GetGameState();
+	pragma::CGame *game = client->GetGameState();
 	game->ReceiveSnapshot(packet);
 }
 

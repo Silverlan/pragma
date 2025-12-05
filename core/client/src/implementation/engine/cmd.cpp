@@ -379,7 +379,7 @@ void CEngine::RegisterConsoleCommands()
 		  Con::cout << "Total memory: " << util::get_pretty_bytes(totalSize) << Con::endl << Con::endl;
 
 		  auto *client = GetClientState();
-		  auto *game = client ? static_cast<CGame *>(client->GetGameState()) : nullptr;
+		  auto *game = client ? static_cast<pragma::CGame *>(client->GetGameState()) : nullptr;
 		  if(game) {
 			  auto cIt = EntityCIterator<pragma::CRasterizationRendererComponent> {*game};
 			  Con::cout << "Number of scenes: " << cIt.GetCount() << Con::endl;

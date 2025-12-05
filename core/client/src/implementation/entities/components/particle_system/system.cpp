@@ -123,7 +123,7 @@ void ecs::CParticleSystemComponent::Clear()
 
 std::shared_ptr<pragma::Model> ecs::CParticleSystemComponent::GenerateModel(pragma::Game &game, const std::vector<const ecs::CParticleSystemComponent *> &particleSystems)
 {
-	auto *cam = static_cast<CGame &>(game).GetRenderCamera<pragma::CCameraComponent>();
+	auto *cam = static_cast<pragma::CGame &>(game).GetRenderCamera<pragma::CCameraComponent>();
 	if(cam == nullptr)
 		return nullptr;
 	std::unordered_set<const ecs::CParticleSystemComponent *> particleSystemList {};
@@ -220,7 +220,7 @@ std::shared_ptr<pragma::Model> ecs::CParticleSystemComponent::GenerateModel(prag
 }
 std::shared_ptr<pragma::Model> ecs::CParticleSystemComponent::GenerateModel() const
 {
-	auto &game = static_cast<CGame &>(*GetEntity().GetNetworkState()->GetGameState());
+	auto &game = static_cast<pragma::CGame &>(*GetEntity().GetNetworkState()->GetGameState());
 	std::vector<const ecs::CParticleSystemComponent *> particleSystems {};
 	particleSystems.push_back(this);
 	return GenerateModel(game, particleSystems);
@@ -1109,7 +1109,7 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua::State *l, luabind::
 
 			Lua::Pop(l, 1);
 		}
-		auto mdl = pragma::ecs::CParticleSystemComponent::GenerateModel(static_cast<CGame &>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState()), particleSystems);
+		auto mdl = pragma::ecs::CParticleSystemComponent::GenerateModel(static_cast<pragma::CGame &>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState()), particleSystems);
 		if(mdl == nullptr)
 			return;
 		Lua::Push(l, mdl);

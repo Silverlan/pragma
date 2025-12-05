@@ -26,11 +26,11 @@ import :scripting.lua;
 
 DLLCLIENT pragma::physics::IEnvironment *c_physEnv = nullptr;
 
-CGame::MessagePacketTracker::MessagePacketTracker() : lastInMessageId(0), outMessageId(0) { std::fill(messageTimestamps.begin(), messageTimestamps.end(), 0); }
+pragma::CGame::MessagePacketTracker::MessagePacketTracker() : lastInMessageId(0), outMessageId(0) { std::fill(messageTimestamps.begin(), messageTimestamps.end(), 0); }
 
-bool CGame::MessagePacketTracker::IsMessageInOrder(uint8_t messageId) const { return (messageTimestamps[messageId] > messageTimestamps[lastInMessageId]) ? true : false; }
+bool pragma::CGame::MessagePacketTracker::IsMessageInOrder(uint8_t messageId) const { return (messageTimestamps[messageId] > messageTimestamps[lastInMessageId]) ? true : false; }
 
-void CGame::MessagePacketTracker::CheckMessages(uint8_t messageId, std::vector<double> &lostPacketTimestamps, const double &tCur)
+void pragma::CGame::MessagePacketTracker::CheckMessages(uint8_t messageId, std::vector<double> &lostPacketTimestamps, const double &tCur)
 {
 	if(messageId != static_cast<decltype(messageId)>(lastInMessageId + 1)) // We've lost at least 1 packet
 	{
@@ -40,7 +40,7 @@ void CGame::MessagePacketTracker::CheckMessages(uint8_t messageId, std::vector<d
 	lastInMessageId = messageId;
 }
 
-void CGame::MessagePacketTracker::CheckMessages(uint8_t messageId, std::vector<double> &lostPacketTimestamps)
+void pragma::CGame::MessagePacketTracker::CheckMessages(uint8_t messageId, std::vector<double> &lostPacketTimestamps)
 {
 	if(messageId != static_cast<decltype(messageId)>(lastInMessageId + 1)) // We've lost at least 1 packet
 	{
@@ -65,11 +65,11 @@ namespace pragma::rendering {
 };
 static auto cvWorkerThreadCount = GetClientConVar("render_queue_worker_thread_count");
 
-static CGame *g_game = nullptr;
-CGame *pragma::get_client_game() { return g_game; }
-CGame *pragma::get_cgame() { return g_game; }
+static pragma::CGame *g_game = nullptr;
+pragma::CGame *pragma::get_client_game() { return g_game; }
+pragma::CGame *pragma::get_cgame() { return g_game; }
 
-CGame::CGame(pragma::NetworkState *state)
+pragma::CGame::CGame(pragma::NetworkState *state)
     : pragma::Game(state), m_tServer(0), m_renderScene(util::TWeakSharedHandle<pragma::BaseEntityComponent> {}), m_matOverride(nullptr), m_colScale(1, 1, 1, 1),
       //m_shaderOverride(nullptr), // prosper TODO
       m_matLoad(), m_scene(nullptr),
@@ -89,7 +89,7 @@ CGame::CGame(pragma::NetworkState *state)
 	m_thirdPersonRenderMask = RegisterRenderMask("thirdperson", true);
 	m_firstPersonRenderMask = RegisterRenderMask("firstperson", false);
 
-	RegisterCallback<void, CGame *>("OnGameEnd");
+	RegisterCallback<void, pragma::CGame *>("OnGameEnd");
 	RegisterCallback<void, pragma::CLightDirectionalComponent *, pragma::CLightDirectionalComponent *>("OnEnvironmentLightSourceChanged");
 	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>("Render");
 	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes");
@@ -201,9 +201,9 @@ CGame::CGame(pragma::NetworkState *state)
 	}
 }
 
-CGame::~CGame() { g_game = nullptr; }
+pragma::CGame::~CGame() { g_game = nullptr; }
 
-void CGame::OnRemove()
+void pragma::CGame::OnRemove()
 {
 	m_flags |= GameFlags::ClosingGame;
 	m_renderQueueWorkerManager = nullptr;
@@ -220,7 +220,7 @@ void CGame::OnRemove()
 		m_cbGPUProfilingHandle.Remove();
 	if(m_cbProfilingHandle.IsValid())
 		m_cbProfilingHandle.Remove();
-	CallCallbacks<void, CGame *>("OnGameEnd", this);
+	CallCallbacks<void, pragma::CGame *>("OnGameEnd", this);
 	while(!m_luaGUIObjects.empty()) {
 		auto &hElement = m_luaGUIObjects.front();
 		if(hElement.IsValid())
@@ -268,16 +268,16 @@ void CGame::OnRemove()
 	pragma::Game::OnRemove();
 }
 
-pragma::rendering::GlobalShaderInputDataManager &CGame::GetGlobalShaderInputDataManager() { return *m_globalShaderInputDataManager; }
-const pragma::rendering::GlobalShaderInputDataManager &CGame::GetGlobalShaderInputDataManager() const { return const_cast<CGame *>(this)->GetGlobalShaderInputDataManager(); }
+pragma::rendering::GlobalShaderInputDataManager &pragma::CGame::GetGlobalShaderInputDataManager() { return *m_globalShaderInputDataManager; }
+const pragma::rendering::GlobalShaderInputDataManager &pragma::CGame::GetGlobalShaderInputDataManager() const { return const_cast<pragma::CGame *>(this)->GetGlobalShaderInputDataManager(); }
 
-void CGame::GetRegisteredEntities(std::vector<std::string> &classes, std::vector<std::string> &luaClasses) const
+void pragma::CGame::GetRegisteredEntities(std::vector<std::string> &classes, std::vector<std::string> &luaClasses) const
 {
 	client_entities::ClientEntityRegistry::Instance().GetRegisteredClassNames(classes);
 	GetLuaRegisteredEntities(luaClasses);
 }
 
-void CGame::OnGameWorldShaderSettingsChanged(const pragma::rendering::GameWorldShaderSettings &newSettings, const pragma::rendering::GameWorldShaderSettings &oldSettings)
+void pragma::CGame::OnGameWorldShaderSettingsChanged(const pragma::rendering::GameWorldShaderSettings &newSettings, const pragma::rendering::GameWorldShaderSettings &oldSettings)
 {
 	if(newSettings.fxaaEnabled != oldSettings.fxaaEnabled || newSettings.bloomEnabled != oldSettings.bloomEnabled) {
 		auto shader = pragma::get_cengine()->GetShaderManager().GetShader("pp_hdr");
@@ -335,10 +335,10 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>("render_queue_worker_jobs_per_batch", &cmd_render_queue_worker_jobs_per_batch);
 }
 
-pragma::rendering::RenderQueueBuilder &CGame::GetRenderQueueBuilder() { return *m_renderQueueBuilder; }
-pragma::rendering::RenderQueueWorkerManager &CGame::GetRenderQueueWorkerManager() { return *m_renderQueueWorkerManager; }
+pragma::rendering::RenderQueueBuilder &pragma::CGame::GetRenderQueueBuilder() { return *m_renderQueueBuilder; }
+pragma::rendering::RenderQueueWorkerManager &pragma::CGame::GetRenderQueueWorkerManager() { return *m_renderQueueWorkerManager; }
 
-void CGame::UpdateTime()
+void pragma::CGame::UpdateTime()
 {
 	// TODO: This also has to be applied serverside?
 	auto dt = pragma::get_cengine()->GetDeltaFrameTime();
@@ -351,17 +351,17 @@ void CGame::UpdateTime()
 	m_tDeltaReal = CDouble(m_tReal - m_tLastReal);
 }
 
-bool CGame::StartGPUProfilingStage(const char *stage) { return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StartProfilerStage(stage); }
-bool CGame::StopGPUProfilingStage() { return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StopProfilerStage(); }
-pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage> *CGame::GetGPUProfilingStageManager() { return m_gpuProfilingStageManager.get(); }
+bool pragma::CGame::StartGPUProfilingStage(const char *stage) { return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StartProfilerStage(stage); }
+bool pragma::CGame::StopGPUProfilingStage() { return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StopProfilerStage(); }
+pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage> *pragma::CGame::GetGPUProfilingStageManager() { return m_gpuProfilingStageManager.get(); }
 
-pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *CGame::GetProfilingStageManager() { return m_profilingStageManager.get(); }
-bool CGame::StartProfilingStage(const char *stage) { return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage); }
-bool CGame::StopProfilingStage() { return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(); }
+pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *pragma::CGame::GetProfilingStageManager() { return m_profilingStageManager.get(); }
+bool pragma::CGame::StartProfilingStage(const char *stage) { return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage); }
+bool pragma::CGame::StopProfilingStage() { return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(); }
 
-std::shared_ptr<pragma::EntityComponentManager> CGame::InitializeEntityComponentManager() { return ::util::make_shared<pragma::CEntityComponentManager>(); }
+std::shared_ptr<pragma::EntityComponentManager> pragma::CGame::InitializeEntityComponentManager() { return ::util::make_shared<pragma::CEntityComponentManager>(); }
 
-void CGame::OnReceivedRegisterNetEvent(NetPacket &packet)
+void pragma::CGame::OnReceivedRegisterNetEvent(NetPacket &packet)
 {
 	auto name = packet->ReadString();
 	auto localId = SetupNetEvent(name);
@@ -374,11 +374,11 @@ void CGame::OnReceivedRegisterNetEvent(NetPacket &packet)
 	m_clientNetEventData.sharedNetEventIdToLocalId[sharedId] = localId;
 }
 
-pragma::NetEventId CGame::SharedNetEventIdToLocal(pragma::NetEventId evId) const { return (evId < m_clientNetEventData.sharedNetEventIdToLocalId.size()) ? m_clientNetEventData.sharedNetEventIdToLocalId[evId] : std::numeric_limits<pragma::NetEventId>::max(); }
+pragma::NetEventId pragma::CGame::SharedNetEventIdToLocal(pragma::NetEventId evId) const { return (evId < m_clientNetEventData.sharedNetEventIdToLocalId.size()) ? m_clientNetEventData.sharedNetEventIdToLocalId[evId] : std::numeric_limits<pragma::NetEventId>::max(); }
 
-pragma::NetEventId CGame::LocalNetEventIdToShared(pragma::NetEventId evId) const { return (evId < m_clientNetEventData.localNetEventIdToSharedId.size()) ? m_clientNetEventData.localNetEventIdToSharedId[evId] : std::numeric_limits<pragma::NetEventId>::max(); }
+pragma::NetEventId pragma::CGame::LocalNetEventIdToShared(pragma::NetEventId evId) const { return (evId < m_clientNetEventData.localNetEventIdToSharedId.size()) ? m_clientNetEventData.localNetEventIdToSharedId[evId] : std::numeric_limits<pragma::NetEventId>::max(); }
 
-pragma::NetEventId CGame::FindNetEvent(const std::string &name) const
+pragma::NetEventId pragma::CGame::FindNetEvent(const std::string &name) const
 {
 	auto it = m_clientNetEventData.localNetEventIds.find(name);
 	if(it == m_clientNetEventData.localNetEventIds.end())
@@ -386,7 +386,7 @@ pragma::NetEventId CGame::FindNetEvent(const std::string &name) const
 	return it->second;
 }
 
-pragma::NetEventId CGame::SetupNetEvent(const std::string &name)
+pragma::NetEventId pragma::CGame::SetupNetEvent(const std::string &name)
 {
 	auto it = m_clientNetEventData.localNetEventIds.find(name);
 	if(it != m_clientNetEventData.localNetEventIds.end())
@@ -395,18 +395,18 @@ pragma::NetEventId CGame::SetupNetEvent(const std::string &name)
 	return m_clientNetEventData.nextLocalNetEventId - 1;
 }
 
-std::shared_ptr<pragma::nav::Mesh> CGame::LoadNavMesh(const std::string &fname) { return pragma::nav::CMesh::Load(*this, fname); }
+std::shared_ptr<pragma::nav::Mesh> pragma::CGame::LoadNavMesh(const std::string &fname) { return pragma::nav::CMesh::Load(*this, fname); }
 
-WorldEnvironment &CGame::GetWorldEnvironment() { return *m_worldEnvironment; }
-const WorldEnvironment &CGame::GetWorldEnvironment() const { return const_cast<CGame *>(this)->GetWorldEnvironment(); }
+WorldEnvironment &pragma::CGame::GetWorldEnvironment() { return *m_worldEnvironment; }
+const WorldEnvironment &pragma::CGame::GetWorldEnvironment() const { return const_cast<pragma::CGame *>(this)->GetWorldEnvironment(); }
 
-void CGame::InitializeWorldEnvironment() { m_worldEnvironment = WorldEnvironment::Create(); }
+void pragma::CGame::InitializeWorldEnvironment() { m_worldEnvironment = WorldEnvironment::Create(); }
 
-void CGame::SetRenderClipPlane(const Vector4 &clipPlane) { m_clipPlane = clipPlane; }
-const Vector4 &CGame::GetRenderClipPlane() const { return m_clipPlane; }
+void pragma::CGame::SetRenderClipPlane(const Vector4 &clipPlane) { m_clipPlane = clipPlane; }
+const Vector4 &pragma::CGame::GetRenderClipPlane() const { return m_clipPlane; }
 
 template<typename TCPPM>
-TCPPM *CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius, const Color &col, float length, float speed, const std::string &material, float bloomScale)
+TCPPM *pragma::CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius, const Color &col, float length, float speed, const std::string &material, float bloomScale)
 {
 	std::stringstream ssColor;
 	ssColor << col.r << " " << col.g << " " << col.b << " " << col.a;
@@ -456,17 +456,17 @@ TCPPM *CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &end, flo
 	pragma::get_cgame()->AddCallback("Think", cb);
 	return reinterpret_cast<TCPPM *>(particle);
 }
-template DLLCLIENT pragma::ecs::CParticleSystemComponent *CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius, const Color &col, float length, float speed, const std::string &material, float bloomScale);
+template DLLCLIENT pragma::ecs::CParticleSystemComponent *pragma::CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius, const Color &col, float length, float speed, const std::string &material, float bloomScale);
 
-void CGame::SetRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode, bool bEnabled) { m_renderModesEnabled[umath::to_integral(renderMode)] = bEnabled; }
-void CGame::EnableRenderMode(pragma::rendering::SceneRenderPass renderMode) { SetRenderModeEnabled(renderMode, true); }
-void CGame::DisableRenderMode(pragma::rendering::SceneRenderPass renderMode) { SetRenderModeEnabled(renderMode, false); }
-bool CGame::IsRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode) const { return m_renderModesEnabled[umath::to_integral(renderMode)]; }
+void pragma::CGame::SetRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode, bool bEnabled) { m_renderModesEnabled[umath::to_integral(renderMode)] = bEnabled; }
+void pragma::CGame::EnableRenderMode(pragma::rendering::SceneRenderPass renderMode) { SetRenderModeEnabled(renderMode, true); }
+void pragma::CGame::DisableRenderMode(pragma::rendering::SceneRenderPass renderMode) { SetRenderModeEnabled(renderMode, false); }
+bool pragma::CGame::IsRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode) const { return m_renderModesEnabled[umath::to_integral(renderMode)]; }
 
-void CGame::InitializeLuaScriptWatcher() { m_scriptWatcher = std::make_unique<CLuaDirectoryWatcherManager>(this); }
+void pragma::CGame::InitializeLuaScriptWatcher() { m_scriptWatcher = std::make_unique<CLuaDirectoryWatcherManager>(this); }
 
-msys::Material *CGame::GetLoadMaterial() { return m_matLoad.get(); }
-void CGame::OnEntityCreated(pragma::ecs::BaseEntity *ent)
+msys::Material *pragma::CGame::GetLoadMaterial() { return m_matLoad.get(); }
+void pragma::CGame::OnEntityCreated(pragma::ecs::BaseEntity *ent)
 {
 	pragma::Game::OnEntityCreated(ent);
 	if(typeid(*ent) == typeid(CGameEntity)) {
@@ -476,36 +476,36 @@ void CGame::OnEntityCreated(pragma::ecs::BaseEntity *ent)
 }
 
 template<typename TCPPM>
-const TCPPM *CGame::GetGameComponent() const
+const TCPPM *pragma::CGame::GetGameComponent() const
 {
-	return const_cast<CGame *>(this)->GetGameComponent<TCPPM>();
+	return const_cast<pragma::CGame *>(this)->GetGameComponent<TCPPM>();
 }
-template DLLCLIENT const pragma::CGameComponent *CGame::GetGameComponent() const;
+template DLLCLIENT const pragma::CGameComponent *pragma::CGame::GetGameComponent() const;
 
 template<typename TCPPM>
-TCPPM *CGame::GetGameComponent()
+TCPPM *pragma::CGame::GetGameComponent()
 {
 	return static_cast<TCPPM *>(m_gameComponent.get());
 }
-template DLLCLIENT pragma::CGameComponent *CGame::GetGameComponent();
+template DLLCLIENT pragma::CGameComponent *pragma::CGame::GetGameComponent();
 
 template<typename TCPPM>
-TCPPM *CGame::GetViewModel()
+TCPPM *pragma::CGame::GetViewModel()
 {
 	if(m_viewModel.expired())
 		return nullptr;
 	return static_cast<TCPPM *>(m_viewModel.get());
 }
-template DLLCLIENT pragma::CViewModelComponent *CGame::GetViewModel<pragma::CViewModelComponent>();
+template DLLCLIENT pragma::CViewModelComponent *pragma::CGame::GetViewModel<pragma::CViewModelComponent>();
 
 template<typename TCPPM>
-TCPPM *CGame::GetViewBody()
+TCPPM *pragma::CGame::GetViewBody()
 {
 	if(m_viewBody.expired())
 		return nullptr;
 	return static_cast<TCPPM *>(m_viewBody.get());
 }
-template DLLCLIENT pragma::CViewBodyComponent *CGame::GetViewBody<pragma::CViewBodyComponent>();
+template DLLCLIENT pragma::CViewBodyComponent *pragma::CGame::GetViewBody<pragma::CViewBodyComponent>();
 
 static void shader_handler(msys::Material *mat)
 {
@@ -532,7 +532,7 @@ static void shader_handler(msys::Material *mat)
 		prepass->InitializeMaterialDescriptorSet(cmat, false); // TODO: Only if this is a material with masked transparency?
 }
 
-void CGame::ReloadMaterialShader(msys::CMaterial *mat)
+void pragma::CGame::ReloadMaterialShader(msys::CMaterial *mat)
 {
 	auto *shader = static_cast<pragma::ShaderTexturedBase *>(mat->GetUserData());
 	if(shader == nullptr)
@@ -540,7 +540,7 @@ void CGame::ReloadMaterialShader(msys::CMaterial *mat)
 	shader->InitializeMaterialDescriptorSet(*mat, true);
 }
 
-void CGame::Initialize()
+void pragma::CGame::Initialize()
 {
 	pragma::Game::Initialize();
 	auto *client = pragma::get_client_state();
@@ -586,11 +586,11 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<bool>("render_unlit", &CVAR_CALLBACK_render_unlit);
 }
 
-void CGame::SetViewModelFOV(float fov) { *m_viewFov = fov; }
-const util::PFloatProperty &CGame::GetViewModelFOVProperty() const { return m_viewFov; }
-float CGame::GetViewModelFOV() const { return *m_viewFov; }
-float CGame::GetViewModelFOVRad() const { return umath::deg_to_rad(*m_viewFov); }
-Mat4 CGame::GetViewModelProjectionMatrix() const
+void pragma::CGame::SetViewModelFOV(float fov) { *m_viewFov = fov; }
+const util::PFloatProperty &pragma::CGame::GetViewModelFOVProperty() const { return m_viewFov; }
+float pragma::CGame::GetViewModelFOV() const { return *m_viewFov; }
+float pragma::CGame::GetViewModelFOVRad() const { return umath::deg_to_rad(*m_viewFov); }
+Mat4 pragma::CGame::GetViewModelProjectionMatrix() const
 {
 	auto *cam = GetPrimaryCamera<pragma::CCameraComponent>();
 	auto aspectRatio = cam ? cam->GetAspectRatio() : 1.f;
@@ -600,7 +600,7 @@ Mat4 CGame::GetViewModelProjectionMatrix() const
 }
 
 template<typename TCPPM>
-TCPPM *CGame::CreateCamera(float aspectRatio, float fov, float nearZ, float farZ)
+TCPPM *pragma::CGame::CreateCamera(float aspectRatio, float fov, float nearZ, float farZ)
 {
 	auto *cam = CreateEntity<CEnvCamera>();
 	auto whCamComponent = cam ? cam->GetComponent<pragma::CCameraComponent>() : pragma::ComponentHandle<pragma::CCameraComponent> {};
@@ -620,13 +620,13 @@ TCPPM *CGame::CreateCamera(float aspectRatio, float fov, float nearZ, float farZ
 }
 
 template<typename TCPPM>
-TCPPM *CGame::CreateCamera(uint32_t width, uint32_t height, float fov, float nearZ, float farZ)
+TCPPM *pragma::CGame::CreateCamera(uint32_t width, uint32_t height, float fov, float nearZ, float farZ)
 {
 	return CreateCamera<TCPPM>(width / static_cast<float>(height), fov, nearZ, farZ);
 }
-template DLLCLIENT pragma::CCameraComponent *CGame::CreateCamera(uint32_t width, uint32_t height, float fov, float nearZ, float farZ);
+template DLLCLIENT pragma::CCameraComponent *pragma::CGame::CreateCamera(uint32_t width, uint32_t height, float fov, float nearZ, float farZ);
 
-void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
+void pragma::CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 {
 	pragma::Game::InitializeGame();
 	SetupLua();
@@ -690,7 +690,7 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 		gmC->OnGameInitialized();
 }
 
-void CGame::RequestResource(const std::string &fileName)
+void pragma::CGame::RequestResource(const std::string &fileName)
 {
 	Con::ccl << "[CGame] RequestResource '" << fileName << "'" << Con::endl;
 	auto fName = FileManager::GetCanonicalizedPath(fileName);
@@ -704,7 +704,7 @@ void CGame::RequestResource(const std::string &fileName)
 	Con::ccl << "[CGame] Request sent!" << Con::endl;
 }
 
-void CGame::Resize(bool reloadRenderTarget)
+void pragma::CGame::Resize(bool reloadRenderTarget)
 {
 	if(reloadRenderTarget)
 		ReloadRenderFrameBuffer();
@@ -717,62 +717,62 @@ void CGame::Resize(bool reloadRenderTarget)
 	CallLuaCallbacks("OnRenderTargetResized");
 }
 
-void CGame::PreGUIDraw() { CallLuaCallbacks<void>("PreGUIDraw"); }
-void CGame::PostGUIDraw() { CallLuaCallbacks<void>("PostGUIDraw"); }
-void CGame::PreGUIRecord() { CallLuaCallbacks<void>("PreGUIRecord"); }
-void CGame::PostGUIRecord() { CallLuaCallbacks<void>("PostGUIRecord"); }
-void CGame::SetDefaultGameRenderEnabled(bool enabled) { m_defaultGameRenderEnabled = enabled; }
-bool CGame::IsDefaultGameRenderEnabled() const { return m_defaultGameRenderEnabled; }
-uint32_t CGame::GetNumberOfScenesQueuedForRendering() const { return m_sceneRenderQueue.size(); }
-util::DrawSceneInfo *CGame::GetQueuedSceneRenderInfo(uint32_t i) { return (i < m_sceneRenderQueue.size()) ? &m_sceneRenderQueue[i] : nullptr; }
-void CGame::QueueForRendering(const util::DrawSceneInfo &drawSceneInfo) { m_sceneRenderQueue.push_back(drawSceneInfo); }
-const std::vector<util::DrawSceneInfo> &CGame::GetQueuedRenderScenes() const { return m_sceneRenderQueue; }
+void pragma::CGame::PreGUIDraw() { CallLuaCallbacks<void>("PreGUIDraw"); }
+void pragma::CGame::PostGUIDraw() { CallLuaCallbacks<void>("PostGUIDraw"); }
+void pragma::CGame::PreGUIRecord() { CallLuaCallbacks<void>("PreGUIRecord"); }
+void pragma::CGame::PostGUIRecord() { CallLuaCallbacks<void>("PostGUIRecord"); }
+void pragma::CGame::SetDefaultGameRenderEnabled(bool enabled) { m_defaultGameRenderEnabled = enabled; }
+bool pragma::CGame::IsDefaultGameRenderEnabled() const { return m_defaultGameRenderEnabled; }
+uint32_t pragma::CGame::GetNumberOfScenesQueuedForRendering() const { return m_sceneRenderQueue.size(); }
+util::DrawSceneInfo *pragma::CGame::GetQueuedSceneRenderInfo(uint32_t i) { return (i < m_sceneRenderQueue.size()) ? &m_sceneRenderQueue[i] : nullptr; }
+void pragma::CGame::QueueForRendering(const util::DrawSceneInfo &drawSceneInfo) { m_sceneRenderQueue.push_back(drawSceneInfo); }
+const std::vector<util::DrawSceneInfo> &pragma::CGame::GetQueuedRenderScenes() const { return m_sceneRenderQueue; }
 template<typename TCPPM>
-void CGame::SetRenderScene(TCPPM &scene)
+void pragma::CGame::SetRenderScene(TCPPM &scene)
 {
 	m_renderScene = scene.GetHandle();
 }
-template DLLCLIENT void CGame::SetRenderScene(pragma::CSceneComponent &scene);
-void CGame::ResetRenderScene() { m_renderScene = m_scene; }
+template DLLCLIENT void pragma::CGame::SetRenderScene(pragma::CSceneComponent &scene);
+void pragma::CGame::ResetRenderScene() { m_renderScene = m_scene; }
 template<typename TCPPM>
-TCPPM *CGame::GetRenderScene()
+TCPPM *pragma::CGame::GetRenderScene()
 {
 	return static_cast<pragma::CSceneComponent *>(m_renderScene.get());
 }
 template<typename TCPPM>
-const TCPPM *CGame::GetRenderScene() const
+const TCPPM *pragma::CGame::GetRenderScene() const
 {
-	return const_cast<CGame *>(this)->GetRenderScene<pragma::CSceneComponent>();
+	return const_cast<pragma::CGame *>(this)->GetRenderScene<pragma::CSceneComponent>();
 }
-template DLLCLIENT pragma::CSceneComponent *CGame::GetRenderScene();
-template DLLCLIENT const pragma::CSceneComponent *CGame::GetRenderScene() const;
+template DLLCLIENT pragma::CSceneComponent *pragma::CGame::GetRenderScene();
+template DLLCLIENT const pragma::CSceneComponent *pragma::CGame::GetRenderScene() const;
 template<typename TCPPM>
-TCPPM *CGame::GetRenderCamera() const
+TCPPM *pragma::CGame::GetRenderCamera() const
 {
 	if(m_renderScene.expired())
 		return nullptr;
 	return const_cast<pragma::CCameraComponent *>(static_cast<const pragma::CSceneComponent *>(m_renderScene.get())->GetActiveCamera().get());
 }
-template DLLCLIENT pragma::CCameraComponent *CGame::GetRenderCamera() const;
+template DLLCLIENT pragma::CCameraComponent *pragma::CGame::GetRenderCamera() const;
 template<typename TCPPM>
-void CGame::SetGameplayControlCamera(TCPPM &cam)
+void pragma::CGame::SetGameplayControlCamera(TCPPM &cam)
 {
 	m_controlCamera = cam.template GetHandle<pragma::BaseEntityComponent>();
 	m_stateFlags &= ~StateFlags::DisableGamplayControlCamera;
 }
-template DLLCLIENT void CGame::SetGameplayControlCamera(pragma::CCameraComponent &);
-void CGame::ResetGameplayControlCamera()
+template DLLCLIENT void pragma::CGame::SetGameplayControlCamera(pragma::CCameraComponent &);
+void pragma::CGame::ResetGameplayControlCamera()
 {
 	m_controlCamera = pragma::ComponentHandle<pragma::BaseEntityComponent> {};
 	m_stateFlags &= ~StateFlags::DisableGamplayControlCamera;
 }
-void CGame::ClearGameplayControlCamera()
+void pragma::CGame::ClearGameplayControlCamera()
 {
 	m_controlCamera = pragma::ComponentHandle<pragma::BaseEntityComponent> {};
 	m_stateFlags |= StateFlags::DisableGamplayControlCamera;
 }
 template<typename TCPPM>
-TCPPM *CGame::GetGameplayControlCamera()
+TCPPM *pragma::CGame::GetGameplayControlCamera()
 {
 	if(m_controlCamera.valid())
 		return static_cast<pragma::CCameraComponent *>(m_controlCamera.get());
@@ -780,23 +780,23 @@ TCPPM *CGame::GetGameplayControlCamera()
 		return nullptr;
 	return GetRenderCamera<TCPPM>();
 }
-template DLLCLIENT pragma::CCameraComponent *CGame::GetGameplayControlCamera();
+template DLLCLIENT pragma::CCameraComponent *pragma::CGame::GetGameplayControlCamera();
 template<typename TCPPM>
-TCPPM *CGame::GetPrimaryCamera() const
+TCPPM *pragma::CGame::GetPrimaryCamera() const
 {
 	return const_cast<pragma::CCameraComponent *>(static_cast<const pragma::CCameraComponent *>(m_primaryCamera.get()));
 }
-template DLLCLIENT pragma::CCameraComponent *CGame::GetPrimaryCamera<pragma::CCameraComponent>() const;
+template DLLCLIENT pragma::CCameraComponent *pragma::CGame::GetPrimaryCamera<pragma::CCameraComponent>() const;
 
-void CGame::SetMaterialOverride(msys::Material *mat) { m_matOverride = mat; }
-msys::Material *CGame::GetMaterialOverride() { return m_matOverride; }
+void pragma::CGame::SetMaterialOverride(msys::Material *mat) { m_matOverride = mat; }
+msys::Material *pragma::CGame::GetMaterialOverride() { return m_matOverride; }
 
-void CGame::SetColorScale(const Vector4 &col) { m_colScale = col; }
-Vector4 &CGame::GetColorScale() { return m_colScale; }
-void CGame::SetAlphaScale(float a) { m_colScale.a = a; }
-float CGame::GetAlphaScale() { return m_colScale.a; }
+void pragma::CGame::SetColorScale(const Vector4 &col) { m_colScale = col; }
+Vector4 &pragma::CGame::GetColorScale() { return m_colScale; }
+void pragma::CGame::SetAlphaScale(float a) { m_colScale.a = a; }
+float pragma::CGame::GetAlphaScale() { return m_colScale.a; }
 
-WIBase *CGame::CreateGUIElement(std::string className, WIBase *parent)
+WIBase *pragma::CGame::CreateGUIElement(std::string className, WIBase *parent)
 {
 	auto *o = m_luaGUIElements.GetClassObject(className);
 	auto &gui = WGUI::GetInstance();
@@ -863,9 +863,9 @@ WIBase *CGame::CreateGUIElement(std::string className, WIBase *parent)
 }
 
 static CVar cvLODBias = GetClientConVar("cl_render_lod_bias");
-void CGame::SetLODBias(int32_t bias) { pragma::get_client_state()->SetConVar("cl_render_lod_bias", std::to_string(bias)); }
-int32_t CGame::GetLODBias() const { return cvLODBias->GetInt(); }
-uint32_t CGame::GetLOD(float dist, uint32_t maxLod) const
+void pragma::CGame::SetLODBias(int32_t bias) { pragma::get_client_state()->SetConVar("cl_render_lod_bias", std::to_string(bias)); }
+int32_t pragma::CGame::GetLODBias() const { return cvLODBias->GetInt(); }
+uint32_t pragma::CGame::GetLOD(float dist, uint32_t maxLod) const
 {
 	auto lod = CUInt32(dist / LOD_SWAP_DISTANCE) + GetLODBias();
 	if(lod < 0)
@@ -876,7 +876,7 @@ uint32_t CGame::GetLOD(float dist, uint32_t maxLod) const
 }
 
 template<typename TCPPM>
-void CGame::CreateGiblet(const GibletCreateInfo &info, TCPPM **particle)
+void pragma::CGame::CreateGiblet(const GibletCreateInfo &info, TCPPM **particle)
 {
 	if(particle != nullptr)
 		*particle = nullptr;
@@ -921,11 +921,11 @@ void CGame::CreateGiblet(const GibletCreateInfo &info, TCPPM **particle)
 	if(particle != nullptr)
 		*particle = reinterpret_cast<TCPPM *>(pt);
 }
-template DLLCLIENT void CGame::CreateGiblet(const GibletCreateInfo &info, pragma::ecs::CParticleSystemComponent **particle);
+template DLLCLIENT void pragma::CGame::CreateGiblet(const GibletCreateInfo &info, pragma::ecs::CParticleSystemComponent **particle);
 
-void CGame::CreateGiblet(const GibletCreateInfo &info) { CreateGiblet<pragma::ecs::CParticleSystemComponent>(info, nullptr); }
+void pragma::CGame::CreateGiblet(const GibletCreateInfo &info) { CreateGiblet<pragma::ecs::CParticleSystemComponent>(info, nullptr); }
 
-WIBase *CGame::CreateGUIElement(std::string name, WIHandle *hParent)
+WIBase *pragma::CGame::CreateGUIElement(std::string name, WIHandle *hParent)
 {
 	ustring::to_lower(name);
 	WIBase *pParent = nullptr;
@@ -933,12 +933,12 @@ WIBase *CGame::CreateGUIElement(std::string name, WIHandle *hParent)
 		pParent = hParent->get();
 	return CreateGUIElement(name, pParent);
 }
-LuaGUIManager &CGame::GetLuaGUIManager() { return m_luaGUIElements; }
-pragma::LuaShaderManager &CGame::GetLuaShaderManager() { return *m_luaShaderManager; }
-pragma::cxxm_LuaParticleModifierManager &CGame::GetLuaParticleModifierManager() { return *static_cast<pragma::cxxm_LuaParticleModifierManager *>(m_luaParticleModifierManager.get()); }
-pragma::LuaInputBindingLayerRegister &CGame::GetLuaInputBindingLayerRegister() { return *m_luaInputBindingLayerRegister; }
+LuaGUIManager &pragma::CGame::GetLuaGUIManager() { return m_luaGUIElements; }
+pragma::LuaShaderManager &pragma::CGame::GetLuaShaderManager() { return *m_luaShaderManager; }
+pragma::cxxm_LuaParticleModifierManager &pragma::CGame::GetLuaParticleModifierManager() { return *static_cast<pragma::cxxm_LuaParticleModifierManager *>(m_luaParticleModifierManager.get()); }
+pragma::LuaInputBindingLayerRegister &pragma::CGame::GetLuaInputBindingLayerRegister() { return *m_luaInputBindingLayerRegister; }
 
-void CGame::SetUp()
+void pragma::CGame::SetUp()
 {
 	pragma::Game::SetUp();
 	CListener *listener = CreateEntity<CListener>();
@@ -989,21 +989,21 @@ void WriteCubeMapSide(int w, int, int blockSize, int block, float *inPixels, uns
 
 static CVar cvAntiAliasing = GetClientConVar("cl_render_anti_aliasing");
 static CVar cvMsaaSamples = GetClientConVar("cl_render_msaa_samples");
-uint32_t CGame::GetMSAASampleCount()
+uint32_t pragma::CGame::GetMSAASampleCount()
 {
 	auto bMsaaEnabled = static_cast<pragma::rendering::AntiAliasing>(cvAntiAliasing->GetInt()) == pragma::rendering::AntiAliasing::MSAA;
 	unsigned int numSamples = bMsaaEnabled ? umath::pow(2, cvMsaaSamples->GetInt()) : 0;
 	ClampMSAASampleCount(&numSamples);
 	return numSamples;
 }
-void CGame::ReloadRenderFrameBuffer()
+void pragma::CGame::ReloadRenderFrameBuffer()
 {
 	auto *scene = GetScene<pragma::CSceneComponent>();
 	if(scene)
 		scene->ReloadRenderTarget(scene->GetWidth(), scene->GetHeight());
 }
 
-void CGame::Think()
+void pragma::CGame::Think()
 {
 	pragma::Game::Think();
 	auto *scene = GetRenderScene<pragma::CSceneComponent>();
@@ -1028,7 +1028,7 @@ void CGame::Think()
 }
 
 static CVar cvUpdateRate = GetClientConVar("cl_updaterate");
-void CGame::Tick()
+void pragma::CGame::Tick()
 {
 	pragma::Game::Tick();
 	//HandlePlayerMovement();
@@ -1043,19 +1043,19 @@ void CGame::Tick()
 	PostTick();
 }
 
-void CGame::ReloadGameWorldShaderPipelines() const
+void pragma::CGame::ReloadGameWorldShaderPipelines() const
 {
 	if(umath::is_flag_set(m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired))
 		return;
-	umath::set_flag(const_cast<CGame *>(this)->m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired);
+	umath::set_flag(const_cast<pragma::CGame *>(this)->m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired);
 
 	auto cb = FunctionCallback<void>::Create(nullptr);
 	static_cast<Callback<void> *>(cb.get())->SetFunction([this, cb]() mutable {
 		cb.Remove();
 
-		if(!umath::is_flag_set(const_cast<CGame *>(this)->m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired))
+		if(!umath::is_flag_set(const_cast<pragma::CGame *>(this)->m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired))
 			return;
-		umath::set_flag(const_cast<CGame *>(this)->m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired, false);
+		umath::set_flag(const_cast<pragma::CGame *>(this)->m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired, false);
 		auto &shaderManager = pragma::get_cengine()->GetShaderManager();
 		for(auto &shader : shaderManager.GetShaders()) {
 			auto *gameWorldShader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(shader.get());
@@ -1065,49 +1065,49 @@ void CGame::ReloadGameWorldShaderPipelines() const
 		}
 		pragma::get_cengine()->GetRenderContext().GetPipelineLoader().Flush();
 	});
-	const_cast<CGame *>(this)->AddCallback("PreRenderScenes", cb);
+	const_cast<pragma::CGame *>(this)->AddCallback("PreRenderScenes", cb);
 }
-void CGame::ReloadPrepassShaderPipelines() const
+void pragma::CGame::ReloadPrepassShaderPipelines() const
 {
 	if(umath::is_flag_set(m_stateFlags, StateFlags::PrepassShaderPipelineReloadRequired))
 		return;
-	umath::set_flag(const_cast<CGame *>(this)->m_stateFlags, StateFlags::PrepassShaderPipelineReloadRequired);
+	umath::set_flag(const_cast<pragma::CGame *>(this)->m_stateFlags, StateFlags::PrepassShaderPipelineReloadRequired);
 
 	auto cb = FunctionCallback<void>::Create(nullptr);
 	static_cast<Callback<void> *>(cb.get())->SetFunction([this, cb]() mutable {
 		cb.Remove();
 
-		umath::set_flag(const_cast<CGame *>(this)->m_stateFlags, StateFlags::PrepassShaderPipelineReloadRequired, false);
+		umath::set_flag(const_cast<pragma::CGame *>(this)->m_stateFlags, StateFlags::PrepassShaderPipelineReloadRequired, false);
 		auto &shader = GetGameShader(GameShader::Prepass);
 		if(shader.valid())
 			shader.get()->ReloadPipelines();
 	});
-	const_cast<CGame *>(this)->AddCallback("PreRenderScenes", cb);
+	const_cast<pragma::CGame *>(this)->AddCallback("PreRenderScenes", cb);
 }
 
 static CVar cvSimEnabled = GetClientConVar("cl_physics_simulation_enabled");
-bool CGame::IsPhysicsSimulationEnabled() const { return cvSimEnabled->GetBool(); }
+bool pragma::CGame::IsPhysicsSimulationEnabled() const { return cvSimEnabled->GetBool(); }
 
-const util::WeakHandle<prosper::Shader> &CGame::GetGameShader(GameShader shader) const { return m_gameShaders.at(umath::to_integral(shader)); }
+const util::WeakHandle<prosper::Shader> &pragma::CGame::GetGameShader(GameShader shader) const { return m_gameShaders.at(umath::to_integral(shader)); }
 
-LuaCallbackHandler &CGame::GetInputCallbackHandler() { return m_inputCallbackHandler; }
+LuaCallbackHandler &pragma::CGame::GetInputCallbackHandler() { return m_inputCallbackHandler; }
 
-std::shared_ptr<ModelMesh> CGame::CreateModelMesh() const { return ::util::make_shared<CModelMesh>(); }
-std::shared_ptr<pragma::ModelSubMesh> CGame::CreateModelSubMesh() const { return ::util::make_shared<CModelSubMesh>(); }
+std::shared_ptr<ModelMesh> pragma::CGame::CreateModelMesh() const { return ::util::make_shared<CModelMesh>(); }
+std::shared_ptr<pragma::ModelSubMesh> pragma::CGame::CreateModelSubMesh() const { return ::util::make_shared<CModelSubMesh>(); }
 
-Float CGame::GetHDRExposure() const
+Float pragma::CGame::GetHDRExposure() const
 {
 	auto *renderer = GetScene<pragma::CSceneComponent>()->GetRenderer<pragma::CRendererComponent>();
 	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	return raster.valid() ? raster->GetHDRExposure() : 0.f;
 }
-Float CGame::GetMaxHDRExposure() const
+Float pragma::CGame::GetMaxHDRExposure() const
 {
 	auto *renderer = GetScene<pragma::CSceneComponent>()->GetRenderer<pragma::CRendererComponent>();
 	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	return raster.valid() ? raster->GetMaxHDRExposure() : 0.f;
 }
-void CGame::SetMaxHDRExposure(Float exposure)
+void pragma::CGame::SetMaxHDRExposure(Float exposure)
 {
 	auto *renderer = GetScene<pragma::CSceneComponent>()->GetRenderer<pragma::CRendererComponent>();
 	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
@@ -1116,7 +1116,7 @@ void CGame::SetMaxHDRExposure(Float exposure)
 	raster->SetMaxHDRExposure(exposure);
 }
 
-void CGame::OnMapLoaded()
+void pragma::CGame::OnMapLoaded()
 {
 	pragma::Game::OnMapLoaded();
 
@@ -1129,7 +1129,7 @@ void CGame::OnMapLoaded()
 	// pragma::CReflectionProbeComponent::BuildAllReflectionProbes(*this);
 }
 
-void CGame::InitializeMapEntities(pragma::asset::WorldData &worldData, std::vector<EntityHandle> &outEnts)
+void pragma::CGame::InitializeMapEntities(pragma::asset::WorldData &worldData, std::vector<EntityHandle> &outEnts)
 {
 	auto &entityData = worldData.GetEntities();
 	outEnts.reserve(entityData.size());
@@ -1194,7 +1194,7 @@ void CGame::InitializeMapEntities(pragma::asset::WorldData &worldData, std::vect
 	}
 }
 
-void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
+void pragma::CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 {
 	pragma::Game::InitializeWorldData(worldData);
 
@@ -1249,7 +1249,7 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 	materialManager.ReloadMaterialShaders();
 }
 
-bool CGame::LoadMap(const std::string &map, const Vector3 &origin, std::vector<EntityHandle> *entities)
+bool pragma::CGame::LoadMap(const std::string &map, const Vector3 &origin, std::vector<EntityHandle> *entities)
 {
 	bool r = pragma::Game::LoadMap(map, origin, entities);
 	m_flags |= GameFlags::MapLoaded;
@@ -1268,15 +1268,15 @@ bool CGame::LoadMap(const std::string &map, const Vector3 &origin, std::vector<E
 	return r;
 }
 
-void CGame::BuildVMF(const char *)
+void pragma::CGame::BuildVMF(const char *)
 {
 	//Game::BuildVMF<CWorld,CPolyMesh,CPoly,CBrushMesh>(map);
 }
 
 static CVar cvTimescale = GetClientConVar("host_timescale");
-float CGame::GetTimeScale() { return cvTimescale->GetFloat(); }
+float pragma::CGame::GetTimeScale() { return cvTimescale->GetFloat(); }
 
-void CGame::SetTimeScale(float t)
+void pragma::CGame::SetTimeScale(float t)
 {
 	pragma::Game::SetTimeScale(t);
 	for(auto &rsnd : pragma::get_client_state()->GetSounds()) {
@@ -1285,10 +1285,10 @@ void CGame::SetTimeScale(float t)
 	}
 }
 
-bool CGame::IsServer() { return false; }
-bool CGame::IsClient() { return true; }
+bool pragma::CGame::IsServer() { return false; }
+bool pragma::CGame::IsClient() { return true; }
 
-void CGame::SetLocalPlayer(pragma::CPlayerComponent *pl)
+void pragma::CGame::SetLocalPlayer(pragma::CPlayerComponent *pl)
 {
 	m_plLocal = pl->GetHandle<pragma::CPlayerComponent>();
 	pl->SetLocalPlayer(true);
@@ -1305,7 +1305,7 @@ void CGame::SetLocalPlayer(pragma::CPlayerComponent *pl)
 	CallLuaCallbacks<void, luabind::object>("OnLocalPlayerSpawned", pl->GetLuaObject());
 }
 
-void CGame::OnReceivedPlayerInputResponse(uint8_t userInputId)
+void pragma::CGame::OnReceivedPlayerInputResponse(uint8_t userInputId)
 {
 	if(m_userInputTracker.IsMessageInOrder(userInputId) == false)
 		return;
@@ -1313,7 +1313,7 @@ void CGame::OnReceivedPlayerInputResponse(uint8_t userInputId)
 	//UpdateLatency(m_userInputTracker.messageTimestamps[userInputId]);
 }
 
-uint16_t CGame::GetLatency() const
+uint16_t pragma::CGame::GetLatency() const
 {
 	auto *cl = pragma::get_client_state()->GetClient();
 	if(cl == nullptr)
@@ -1321,11 +1321,11 @@ uint16_t CGame::GetLatency() const
 	return cl->GetLatency();
 }
 
-pragma::rendering::RenderMask CGame::GetInclusiveRenderMasks() const { return m_inclusiveRenderMasks; }
-pragma::rendering::RenderMask CGame::GetExclusiveRenderMasks() const { return m_exclusiveRenderMasks; }
-bool CGame::IsInclusiveRenderMask(pragma::rendering::RenderMask mask) const { return umath::is_flag_set(m_inclusiveRenderMasks, mask); }
-bool CGame::IsExclusiveRenderMask(pragma::rendering::RenderMask mask) const { return umath::is_flag_set(m_exclusiveRenderMasks, mask); }
-pragma::rendering::RenderMask CGame::RegisterRenderMask(const std::string &name, bool inclusiveByDefault)
+pragma::rendering::RenderMask pragma::CGame::GetInclusiveRenderMasks() const { return m_inclusiveRenderMasks; }
+pragma::rendering::RenderMask pragma::CGame::GetExclusiveRenderMasks() const { return m_exclusiveRenderMasks; }
+bool pragma::CGame::IsInclusiveRenderMask(pragma::rendering::RenderMask mask) const { return umath::is_flag_set(m_inclusiveRenderMasks, mask); }
+bool pragma::CGame::IsExclusiveRenderMask(pragma::rendering::RenderMask mask) const { return umath::is_flag_set(m_exclusiveRenderMasks, mask); }
+pragma::rendering::RenderMask pragma::CGame::RegisterRenderMask(const std::string &name, bool inclusiveByDefault)
 {
 	constexpr auto highestAllowedMask = (static_cast<uint64_t>(1) << (sizeof(uint64_t) * 8 - 1));
 	if(umath::to_integral(m_nextCustomRenderMaskIndex) == highestAllowedMask)
@@ -1342,12 +1342,12 @@ pragma::rendering::RenderMask CGame::RegisterRenderMask(const std::string &name,
 		m_exclusiveRenderMasks |= id;
 	return id;
 }
-std::optional<pragma::rendering::RenderMask> CGame::GetRenderMask(const std::string &name)
+std::optional<pragma::rendering::RenderMask> pragma::CGame::GetRenderMask(const std::string &name)
 {
 	auto it = m_customRenderMasks.find(name);
 	return (it != m_customRenderMasks.end()) ? it->second : std::optional<pragma::rendering::RenderMask> {};
 }
-const std::string *CGame::FindRenderMaskName(pragma::rendering::RenderMask mask) const
+const std::string *pragma::CGame::FindRenderMaskName(pragma::rendering::RenderMask mask) const
 {
 	auto it = std::find_if(m_customRenderMasks.begin(), m_customRenderMasks.end(), [mask](const std::pair<std::string, pragma::rendering::RenderMask> &pair) { return pair.second == mask; });
 	if(it == m_customRenderMasks.end())
@@ -1355,7 +1355,7 @@ const std::string *CGame::FindRenderMaskName(pragma::rendering::RenderMask mask)
 	return &it->first;
 }
 
-void CGame::SendUserInput()
+void pragma::CGame::SendUserInput()
 {
 	auto *pl = GetLocalPlayer();
 	if(pl == nullptr)
@@ -1389,25 +1389,25 @@ void CGame::SendUserInput()
 	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::USERINPUT, p, pragma::networking::Protocol::FastUnreliable);
 }
 
-double &CGame::ServerTime() { return m_tServer; }
-void CGame::SetServerTime(double t) { m_tServer = t; }
+double &pragma::CGame::ServerTime() { return m_tServer; }
+void pragma::CGame::SetServerTime(double t) { m_tServer = t; }
 
-bool CGame::RunLua(const std::string &lua) { return pragma::Game::RunLua(lua, "lua_run_cl"); }
+bool pragma::CGame::RunLua(const std::string &lua) { return pragma::Game::RunLua(lua, "lua_run_cl"); }
 
-void CGame::UpdateLostPackets()
+void pragma::CGame::UpdateLostPackets()
 {
 	auto &t = RealTime();
 	while(!m_lostPackets.empty() && t - m_lostPackets.front() > 1.0)
 		m_lostPackets.erase(m_lostPackets.begin());
 }
 
-uint32_t CGame::GetLostPacketCount()
+uint32_t pragma::CGame::GetLostPacketCount()
 {
 	UpdateLostPackets();
 	return static_cast<uint32_t>(m_lostPackets.size());
 }
 
-void CGame::ReceiveSnapshot(NetPacket &packet)
+void pragma::CGame::ReceiveSnapshot(NetPacket &packet)
 {
 	//Con::ccl<<"Received snapshot.."<<Con::endl;
 	//auto tOld = m_tServer;
@@ -1609,10 +1609,10 @@ static void set_action_input(pragma::Action action, bool b, bool bKeepMagnitude,
 		return;
 	actionInputC->SetActionInput(action, b, true);
 }
-void CGame::SetActionInput(pragma::Action action, bool b, bool bKeepMagnitude) { set_action_input(action, b, bKeepMagnitude); }
-void CGame::SetActionInput(pragma::Action action, bool b, float magnitude) { set_action_input(action, b, false, &magnitude); }
+void pragma::CGame::SetActionInput(pragma::Action action, bool b, bool bKeepMagnitude) { set_action_input(action, b, bKeepMagnitude); }
+void pragma::CGame::SetActionInput(pragma::Action action, bool b, float magnitude) { set_action_input(action, b, false, &magnitude); }
 
-bool CGame::GetActionInput(pragma::Action action)
+bool pragma::CGame::GetActionInput(pragma::Action action)
 {
 	auto *pl = GetLocalPlayer();
 	if(pl == nullptr)
@@ -1623,8 +1623,8 @@ bool CGame::GetActionInput(pragma::Action action)
 	return actionInputC->GetActionInput(action);
 }
 
-void CGame::DrawLine(const Vector3 &start, const Vector3 &end, const Color &color, float duration) { DebugRenderer::DrawLine(start, end, {color, duration}); }
-void CGame::DrawBox(const Vector3 &origin, const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &colorOutline, const std::optional<Color> &fillColor, float duration)
+void pragma::CGame::DrawLine(const Vector3 &start, const Vector3 &end, const Color &color, float duration) { DebugRenderer::DrawLine(start, end, {color, duration}); }
+void pragma::CGame::DrawBox(const Vector3 &origin, const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &colorOutline, const std::optional<Color> &fillColor, float duration)
 {
 	pragma::debug::DebugRenderInfo renderInfo {};
 	renderInfo.SetOrigin(origin);
@@ -1640,12 +1640,12 @@ void CGame::DrawBox(const Vector3 &origin, const Vector3 &start, const Vector3 &
 		DebugRenderer::DrawBox(start, end, renderInfo);
 	}
 }
-void CGame::DrawPlane(const Vector3 &n, float dist, const Color &color, float duration) { DebugRenderer::DrawPlane(n, dist, {color, duration}); }
-void CGame::DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration) { DebugRenderer::DrawMesh(meshVerts, {color, colorOutline, duration}); }
+void pragma::CGame::DrawPlane(const Vector3 &n, float dist, const Color &color, float duration) { DebugRenderer::DrawPlane(n, dist, {color, duration}); }
+void pragma::CGame::DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration) { DebugRenderer::DrawMesh(meshVerts, {color, colorOutline, duration}); }
 static auto cvRenderPhysics = GetClientConVar("debug_physics_draw");
 static auto cvSvRenderPhysics = GetClientConVar("sv_debug_physics_draw");
 template<typename TCPPM>
-void CGame::RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, TCPPM &cam)
+void pragma::CGame::RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, TCPPM &cam)
 {
 	if(cvRenderPhysics->GetBool()) {
 		auto *physEnv = GetPhysicsEnvironment();
@@ -1663,9 +1663,9 @@ void CGame::RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd
 			static_cast<CPhysVisualDebugger &>(*pVisualDebugger).Render(drawCmd, cam);
 	}
 }
-template DLLCLIENT void CGame::RenderDebugPhysics<pragma::CCameraComponent>(std::shared_ptr<prosper::ICommandBuffer> &, pragma::CCameraComponent &);
+template DLLCLIENT void pragma::CGame::RenderDebugPhysics<pragma::CCameraComponent>(std::shared_ptr<prosper::ICommandBuffer> &, pragma::CCameraComponent &);
 
-bool CGame::LoadAuxEffects(const std::string &fname)
+bool pragma::CGame::LoadAuxEffects(const std::string &fname)
 {
 	std::string path = "scripts/soundfx/";
 	path += fname;
@@ -1687,16 +1687,16 @@ bool CGame::LoadAuxEffects(const std::string &fname)
 	}
 	return true;
 }
-std::shared_ptr<al::IEffect> CGame::GetAuxEffect(const std::string &name) { return pragma::get_cengine()->GetAuxEffect(name); }
+std::shared_ptr<al::IEffect> pragma::CGame::GetAuxEffect(const std::string &name) { return pragma::get_cengine()->GetAuxEffect(name); }
 
-bool CGame::SaveImage(prosper::IImage &image, const std::string &fileName, const uimg::TextureInfo &imageWriteInfo) const
+bool pragma::CGame::SaveImage(prosper::IImage &image, const std::string &fileName, const uimg::TextureInfo &imageWriteInfo) const
 {
 	auto path = ufile::get_path_from_filename(fileName);
 	FileManager::CreatePath(path.c_str());
 	return prosper::util::save_texture(fileName, image, imageWriteInfo, [fileName](const std::string &err) { Con::cwar << "Unable to save image '" << fileName << "': " << err << Con::endl; });
 }
 
-bool CGame::SaveImage(const std::vector<std::vector<const void *>> &imgLayerMipmapData, uint32_t width, uint32_t height, uint32_t szPerPixel, const std::string &fileName, const uimg::TextureInfo &imageWriteInfo, bool cubemap) const
+bool pragma::CGame::SaveImage(const std::vector<std::vector<const void *>> &imgLayerMipmapData, uint32_t width, uint32_t height, uint32_t szPerPixel, const std::string &fileName, const uimg::TextureInfo &imageWriteInfo, bool cubemap) const
 {
 	auto path = ufile::get_path_from_filename(fileName);
 	FileManager::CreatePath(path.c_str());
@@ -1709,7 +1709,7 @@ bool CGame::SaveImage(const std::vector<std::vector<const void *>> &imgLayerMipm
 	return uimg::save_texture(fileName, imgLayerMipmapData, texSaveInfo, [fileName](const std::string &err) { Con::cwar << "Unable to save image '" << fileName << "': " << err << Con::endl; });
 }
 
-bool CGame::SaveImage(uimg::ImageBuffer &imgBuffer, const std::string &fileName, const uimg::TextureInfo &imageWriteInfo, bool cubemap) const
+bool pragma::CGame::SaveImage(uimg::ImageBuffer &imgBuffer, const std::string &fileName, const uimg::TextureInfo &imageWriteInfo, bool cubemap) const
 {
 	auto path = ufile::get_path_from_filename(fileName);
 	filemanager::create_path(path);
@@ -1720,6 +1720,6 @@ bool CGame::SaveImage(uimg::ImageBuffer &imgBuffer, const std::string &fileName,
 }
 
 static CVar cvFriction = GetClientConVar("sv_friction");
-Float CGame::GetFrictionScale() const { return cvFriction->GetFloat(); }
+Float pragma::CGame::GetFrictionScale() const { return cvFriction->GetFloat(); }
 static CVar cvRestitution = GetClientConVar("sv_restitution");
-Float CGame::GetRestitutionScale() const { return cvRestitution->GetFloat(); }
+Float pragma::CGame::GetRestitutionScale() const { return cvRestitution->GetFloat(); }

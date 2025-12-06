@@ -78,7 +78,7 @@ void CWeaponComponent::UpdateViewModel()
 	vm->SetViewFOV(GetViewFOV());
 }
 
-static auto cvViewFov = GetClientConVar("cl_fov_viewmodel");
+static auto cvViewFov = pragma::console::get_client_con_var("cl_fov_viewmodel");
 void CWeaponComponent::SetViewModelOffset(const Vector3 &offset)
 {
 	m_viewModelOffset = offset;

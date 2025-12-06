@@ -163,16 +163,16 @@ void FrameRenderStats::Print(bool full)
 	Con::cout << stats.size() << " scenes have been rendered:" << Con::endl;
 	auto accumulated = GetAccumulated();
 	for(auto &renderStats : stats) {
-		util::set_console_color(pragma::console::ConsoleColorFlags::BackgroundGreen);
+		pragma::console::set_console_color(pragma::console::ConsoleColorFlags::BackgroundGreen);
 		Con::cout << "########### " << renderStats.sceneName << ": ###########" << Con::endl;
-		util::reset_console_color();
+		pragma::console::reset_console_color();
 		print_debug_render_stats(*renderStats.stats, full);
 	}
 
 	if(stats.size() > 1) {
-		util::set_console_color(pragma::console::ConsoleColorFlags::BackgroundGreen);
+		pragma::console::set_console_color(pragma::console::ConsoleColorFlags::BackgroundGreen);
 		Con::cout << "\n----- Accumulated: -----" << Con::endl;
-		util::reset_console_color();
+		pragma::console::reset_console_color();
 		print_debug_render_stats(accumulated, full);
 	}
 }

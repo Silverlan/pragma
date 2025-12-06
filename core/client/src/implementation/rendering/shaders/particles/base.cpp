@@ -196,7 +196,7 @@ void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 		throw std::invalid_argument("Unknown alpha mode " + std::to_string(umath::to_integral(alphaMode)) + "!");
 	}
 }
-static auto cvParticleQuality = GetClientConVar("cl_render_particle_quality");
+static auto cvParticleQuality = pragma::console::get_client_con_var("cl_render_particle_quality");
 uint32_t ShaderParticleBase::GetDepthPipelineIndex() { return GetParticlePipelineCount() - 1; }
 ShaderParticleBase::RenderFlags ShaderParticleBase::GetRenderFlags(const pragma::ecs::CParticleSystemComponent &particle, pragma::ecs::ParticleRenderFlags ptRenderFlags) const
 {

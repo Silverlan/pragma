@@ -136,7 +136,7 @@ void SPlayerComponent::OnRespawn()
 	ent.SendNetEvent(m_netEvRespawn, pragma::networking::Protocol::SlowReliable);
 }
 
-void SPlayerComponent::PrintMessage(std::string message, MESSAGE type)
+void SPlayerComponent::PrintMessage(std::string message, pragma::console::MESSAGE type)
 {
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared() == false)

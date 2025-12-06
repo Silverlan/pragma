@@ -217,8 +217,8 @@ uint32_t CSceneComponent::GetSceneFlag(SceneIndex sceneIndex) { return 1 << scen
 
 CSceneComponent::SceneIndex CSceneComponent::GetSceneIndex(uint32_t flag) { return umath::get_least_significant_set_bit_index(flag); }
 
-static CVar cvShadowmapSize = GetClientConVar("cl_render_shadow_resolution");
-static CVar cvShaderQuality = GetClientConVar("cl_render_shader_quality");
+static auto cvShadowmapSize = pragma::console::get_client_con_var("cl_render_shadow_resolution");
+static auto cvShaderQuality = pragma::console::get_client_con_var("cl_render_shader_quality");
 void CSceneComponent::InitializeRenderSettingsBuffer()
 {
 	// Initialize Render Settings

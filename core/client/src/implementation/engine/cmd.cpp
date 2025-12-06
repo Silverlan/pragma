@@ -21,7 +21,7 @@ extern bool g_dumpRenderQueues;
 void CEngine::RegisterConsoleCommands()
 {
 	pragma::Engine::RegisterConsoleCommands();
-	auto &conVarMap = *console_system::client::get_convar_map();
+	auto &conVarMap = *pragma::console::client::get_convar_map();
 	RegisterSharedConsoleCommands(conVarMap);
 	conVarMap.RegisterConCommand("lua_exec_cl", &pragma::console::commands::lua_exec, pragma::console::ConVarFlags::None, "Opens and executes a lua-file on the client.", &pragma::console::commands::lua_exec_autocomplete);
 
@@ -59,7 +59,7 @@ void CEngine::RegisterConsoleCommands()
 	  });
 
 	conVarMap.RegisterConVar<bool>("cl_downscale_imported_high_resolution_rma_textures", true, pragma::console::ConVarFlags::Archive, "If enabled, imported high-resolution RMA textures will be downscaled to a more memory-friendly size.");
-	conVarMap.RegisterConVarCallback("cl_downscale_imported_high_resolution_rma_textures", std::function<void(pragma::NetworkState *, const ConVar &, bool, bool)> {[](pragma::NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void {
+	conVarMap.RegisterConVarCallback("cl_downscale_imported_high_resolution_rma_textures", std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool)> {[](pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool oldVal, bool newVal) -> void {
 		//static_cast<msys::CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).SetDownscaleImportedRMATextures(newVal);
 	}});
 	conVarMap.RegisterConVar<uint8_t>("render_debug_mode", 0, pragma::console::ConVarFlags::None,
@@ -108,8 +108,8 @@ void CEngine::RegisterConsoleCommands()
 	  },
 	  pragma::console::ConVarFlags::None, "Prints information about the next frame.");
 	conVarMap.RegisterConVar<bool>("render_multithreaded_rendering_enabled", true, pragma::console::ConVarFlags::Archive, "Enables or disables multi-threaded rendering. Some renderers (like OpenGL) don't support multi-threaded rendering and will ignore this flag.");
-	conVarMap.RegisterConVarCallback("render_multithreaded_rendering_enabled", std::function<void(pragma::NetworkState *, const ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const ConVar &cv, bool, bool enabled) -> void { GetRenderContext().SetMultiThreadedRenderingEnabled(enabled); }});
-	conVarMap.RegisterConVarCallback("render_enable_verbose_output", std::function<void(pragma::NetworkState *, const ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const ConVar &cv, bool, bool enabled) -> void { pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED = enabled; }});
+	conVarMap.RegisterConVarCallback("render_multithreaded_rendering_enabled", std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool, bool enabled) -> void { GetRenderContext().SetMultiThreadedRenderingEnabled(enabled); }});
+	conVarMap.RegisterConVarCallback("render_enable_verbose_output", std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool, bool enabled) -> void { pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED = enabled; }});
 	conVarMap.RegisterConCommand(
 	  "crash",
 	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
@@ -218,7 +218,7 @@ void CEngine::RegisterConsoleCommands()
 	conVarMap.RegisterConVar<bool>("debug_hide_gui", false, pragma::console::ConVarFlags::None, "Disables GUI rendering.");
 
 	conVarMap.RegisterConVar<bool>("render_vsync_enabled", true, pragma::console::ConVarFlags::Archive, "Enables or disables vsync. OpenGL only.");
-	conVarMap.RegisterConVarCallback("render_vsync_enabled", std::function<void(pragma::NetworkState *, const ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void { GetRenderContext().GetWindow()->SetVSyncEnabled(newVal); }});
+	conVarMap.RegisterConVarCallback("render_vsync_enabled", std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool oldVal, bool newVal) -> void { GetRenderContext().GetWindow()->SetVSyncEnabled(newVal); }});
 
 	conVarMap.RegisterConVar<std::string>("audio_api", "fmod", pragma::console::ConVarFlags::Archive | pragma::console::ConVarFlags::Replicated, "The underlying audio API to use.", "<audioApi>", [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 		auto audioAPIs = pragma::audio::get_available_audio_apis();
@@ -302,10 +302,10 @@ void CEngine::RegisterConsoleCommands()
 			  Con::cout << std::left << std::setw(35) << imgName;
 
 			  if(useCount == 0)
-				  util::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
+				  pragma::console::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
 			  Con::cout << std::setw(10) << useCount;
 			  if(useCount == 0)
-				  util::reset_console_color();
+				  pragma::console::reset_console_color();
 
 			  std::string res = std::to_string(img.GetWidth()) + "x" + std::to_string(img.GetHeight());
 			  Con::cout << std::setw(12) << res;
@@ -313,26 +313,26 @@ void CEngine::RegisterConsoleCommands()
 
 			  auto numMipmaps = img.GetMipmapCount();
 			  if(numMipmaps <= 1 && perfWarnings)
-				  util::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
+				  pragma::console::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
 			  Con::cout << std::setw(10) << numMipmaps;
 			  if(numMipmaps <= 1 && perfWarnings)
-				  util::reset_console_color();
+				  pragma::console::reset_console_color();
 
 			  auto tiling = img.GetTiling();
 			  auto optimal = tiling == prosper::ImageTiling::Optimal;
 			  if(!optimal)
-				  util::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
+				  pragma::console::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
 			  Con::cout << std::setw(10) << prosper::util::to_string(tiling);
 			  if(!optimal)
-				  util::reset_console_color();
+				  pragma::console::reset_console_color();
 
 			  auto format = img.GetFormat();
 			  auto isCompressed = prosper::util::is_compressed_format(format);
 			  if(!isCompressed && perfWarnings)
-				  util::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
+				  pragma::console::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
 			  Con::cout << std::setw(22) << prosper::util::to_string(format);
 			  if(!isCompressed && perfWarnings)
-				  util::reset_console_color();
+				  pragma::console::reset_console_color();
 
 			  Con::cout << std::setw(12) << util::get_pretty_bytes(fGetImageSize(img));
 
@@ -341,7 +341,7 @@ void CEngine::RegisterConsoleCommands()
 			  else {
 				  auto time = context.GetLastUsageTime(img);
 				  if(time.has_value() == false)
-					  util::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
+					  pragma::console::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
 				  Con::cout << std::setw(10);
 				  if(time.has_value()) {
 					  auto t = std::chrono::steady_clock::now();
@@ -351,7 +351,7 @@ void CEngine::RegisterConsoleCommands()
 				  else
 					  Con::cout << "Never";
 				  if(time.has_value() == false)
-					  util::reset_console_color();
+					  pragma::console::reset_console_color();
 			  }
 
 			  Con::cout << std::setw(30) << fileName << Con::endl;

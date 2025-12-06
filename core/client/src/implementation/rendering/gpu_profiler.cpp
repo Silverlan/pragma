@@ -10,7 +10,7 @@ import :engine;
 
 using namespace pragma::debug;
 
-static CVar cvTimerQueries = GetClientConVar("cl_gpu_timer_queries_enabled");
+static auto cvTimerQueries = pragma::console::get_client_con_var("cl_gpu_timer_queries_enabled");
 
 std::shared_ptr<GPUProfilingStage> GPUProfilingStage::Create(Profiler &profiler, std::thread::id tid, const std::string &name, prosper::PipelineStageFlags stage)
 {

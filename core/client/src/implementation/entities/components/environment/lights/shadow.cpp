@@ -38,7 +38,7 @@ static void reload_all_shadow_maps()
 	}
 }
 
-static void cmd_render_shadow_quality(pragma::NetworkState *, const ConVar &, int, int quality)
+static void cmd_render_shadow_quality(pragma::NetworkState *, const pragma::console::ConVar &, int, int quality)
 {
 	reload_all_shadow_maps();
 	auto *client = pragma::get_client_state();
@@ -51,7 +51,7 @@ namespace {
 }
 
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_render_shadow_dynamic", +[](pragma::NetworkState *, const ConVar &, bool, bool) { reload_all_shadow_maps(); });
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_render_shadow_dynamic", +[](pragma::NetworkState *, const pragma::console::ConVar &, bool, bool) { reload_all_shadow_maps(); });
 }
 
 prosper::IDescriptorSet *CShadowComponent::GetDescriptorSet()
@@ -95,8 +95,8 @@ void CShadowComponent::InitializeLuaObject(lua::State *l) { return BaseEntityCom
 LightShadowRenderer &CShadowComponent::GetRenderer() { return *m_lightShadowRenderer; }
 const LightShadowRenderer &CShadowComponent::GetRenderer() const { return const_cast<CShadowComponent *>(this)->GetRenderer(); }
 
-static CVar cvShadowmapSize = GetClientConVar("cl_render_shadow_resolution");
-static CVar cvShadowQuality = GetClientConVar("render_shadow_quality");
+static auto cvShadowmapSize = pragma::console::get_client_con_var("cl_render_shadow_resolution");
+static auto cvShadowQuality = pragma::console::get_client_con_var("render_shadow_quality");
 void CShadowComponent::ReloadDepthTextures()
 {
 	//Scene::ClearLightCache();
@@ -235,8 +235,8 @@ void LightShadowRenderer::UpdateSceneCallbacks()
 #endif
 }
 
-static auto cvLodBias = GetClientConVar("cl_render_shadow_lod_bias");
-static auto cvInstancingEnabled = GetClientConVar("render_instancing_enabled");
+static auto cvLodBias = pragma::console::get_client_con_var("cl_render_shadow_lod_bias");
+static auto cvInstancingEnabled = pragma::console::get_client_con_var("render_instancing_enabled");
 void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(m_hLight.expired())

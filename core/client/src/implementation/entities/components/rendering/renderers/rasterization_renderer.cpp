@@ -534,7 +534,7 @@ void CRasterizationRenderer::Initialize()
 	AddComponent<CRasterizationRendererComponent>();
 }
 
-static void cl_render_ssao_callback(pragma::NetworkState *, const ConVar &, bool, bool enabled)
+static void cl_render_ssao_callback(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool enabled)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;

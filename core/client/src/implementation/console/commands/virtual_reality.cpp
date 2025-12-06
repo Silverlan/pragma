@@ -105,7 +105,7 @@ static void cl_render_vr_enabled(bool b)
 	}
 }
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_render_vr_enabled", +[](pragma::NetworkState *, const ConVar &, bool, bool b) { cl_render_vr_enabled(b); });
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_render_vr_enabled", +[](pragma::NetworkState *, const pragma::console::ConVar &, bool, bool b) { cl_render_vr_enabled(b); });
 }
 
 /*REGISTER_CONVAR_CALLBACK_CL(cl_render_vr_resolution,[](pragma::NetworkState*,ConVar*,std::string,std::string val) {
@@ -113,7 +113,7 @@ namespace {
 })*/
 
 #if 0
-static auto cvHmdViewEnabled = GetClientConVar("cl_vr_hmd_view_enabled");
+static auto cvHmdViewEnabled = pragma::console::get_client_con_var("cl_vr_hmd_view_enabled");
 static void draw_vr(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::RenderTarget &rt)
 {
 	if(pragma::get_cgame() == nullptr || hHmdViewMessage.IsValid() == false || pragma::get_cgame()->IsInMainRenderPass() == false)
@@ -198,7 +198,7 @@ static void cl_vr_hmd_view_enabled(bool val)
 	}
 }
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_vr_hmd_view_enabled", +[](pragma::NetworkState *, const ConVar &, bool, bool val) { cl_vr_hmd_view_enabled(val); });
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_vr_hmd_view_enabled", +[](pragma::NetworkState *, const pragma::console::ConVar &, bool, bool val) { cl_vr_hmd_view_enabled(val); });
 }
 #endif
 
@@ -213,5 +213,5 @@ static void cl_vr_mirror_window_enabled(bool val)
 	fSetMirrorWindowEnabled(val);
 }
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_vr_mirror_window_enabled", +[](pragma::NetworkState *, const ConVar &, bool, bool val) { cl_vr_mirror_window_enabled(val); });
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_vr_mirror_window_enabled", +[](pragma::NetworkState *, const pragma::console::ConVar &, bool, bool val) { cl_vr_mirror_window_enabled(val); });
 }

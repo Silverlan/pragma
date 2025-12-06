@@ -18,12 +18,12 @@ import :networking;
 
 #undef GetMessage
 
-static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = nullptr;
-std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &pragma::ServerState::GetConVarPtrs() { return *conVarPtrs; }
-ConVarHandle pragma::ServerState::GetConVarHandle(std::string scvar)
+static std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> *conVarPtrs = nullptr;
+std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> &pragma::ServerState::GetConVarPtrs() { return *conVarPtrs; }
+pragma::console::ConVarHandle pragma::ServerState::GetConVarHandle(std::string scvar)
 {
 	if(conVarPtrs == nullptr) {
-		static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> ptrs;
+		static std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> ptrs;
 		conVarPtrs = &ptrs;
 	}
 	return NetworkState::GetConVarHandle(*conVarPtrs, scvar);
@@ -247,7 +247,7 @@ void pragma::ServerState::implFindSimilarConVars(const std::string &input, std::
 {
 	NetworkState::implFindSimilarConVars(input, similarCmds);
 
-	auto *svMap = console_system::server::get_convar_map();
+	auto *svMap = pragma::console::server::get_convar_map();
 	NetworkState::FindSimilarConVars(input, svMap->GetConVars(), similarCmds);
 }
 
@@ -337,7 +337,7 @@ void pragma::ServerState::ChangeLevel(const std::string &map)
 bool pragma::ServerState::IsMultiPlayer() const { return m_server && typeid(*m_server) != typeid(pragma::networking::LocalServer); }
 bool pragma::ServerState::IsSinglePlayer() const { return !IsMultiPlayer(); }
 
-ConVar *pragma::ServerState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
+pragma::console::ConVar *pragma::ServerState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
 {
 	auto *cvar = NetworkState::SetConVar(scmd, value, bApplyIfEqual);
 	if(cvar == nullptr)
@@ -360,13 +360,13 @@ ConVar *pragma::ServerState::SetConVar(std::string scmd, std::string value, bool
 
 pragma::SPlayerComponent *pragma::ServerState::GetPlayer(const pragma::networking::IServerClient &session) { return static_cast<pragma::SPlayerComponent *>(session.GetPlayer()); }
 bool pragma::ServerState::IsServer() const { return true; }
-ConVarMap *pragma::ServerState::GetConVarMap() { return console_system::server::get_convar_map(); }
+pragma::console::ConVarMap *pragma::ServerState::GetConVarMap() { return pragma::console::server::get_convar_map(); }
 
 void pragma::ServerState::ClearConCommands()
 {
 	m_luaConCommands.clear();
 	m_conCommandIDs.clear();
-	ConVarMap *map = GetConVarMap();
+	pragma::console::ConVarMap *map = GetConVarMap();
 	if(map == nullptr)
 		m_conCommandID = 0;
 	else
@@ -375,7 +375,7 @@ void pragma::ServerState::ClearConCommands()
 
 bool pragma::ServerState::IsClientAuthenticationRequired() const { return IsMultiPlayer() && ServerState::Get()->GetConVarBool("sv_require_authentication"); }
 
-ConCommand *pragma::ServerState::CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags, const std::string &help)
+pragma::console::ConCommand *pragma::ServerState::CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags, const std::string &help)
 {
 	auto lscmd = scmd;
 	ustring::to_lower(lscmd);
@@ -395,7 +395,7 @@ ConCommand *pragma::ServerState::CreateConCommand(const std::string &scmd, LuaFu
 }
 WMServerData &pragma::ServerState::GetServerData() { return m_serverData; }
 
-void pragma::ServerState::GetLuaConCommands(std::unordered_map<std::string, ConCommand *> **cmds) { *cmds = &m_luaConCommands; }
+void pragma::ServerState::GetLuaConCommands(std::unordered_map<std::string, pragma::console::ConCommand *> **cmds) { *cmds = &m_luaConCommands; }
 
 msys::Material *pragma::ServerState::LoadMaterial(const std::string &path, bool precache, bool bReload)
 {
@@ -439,7 +439,7 @@ ModelMesh *pragma::ServerState::CreateMesh() const { return new ModelMesh; }
 
 namespace {
 	auto _ = pragma::console::server::register_variable_listener<int>(
-	  "sv_tickrate", +[](pragma::NetworkState *, const ConVar &, int, int val) {
+	  "sv_tickrate", +[](pragma::NetworkState *, const pragma::console::ConVar &, int, int val) {
 		  if(val < 0)
 			  val = 0;
 		  pragma::Engine::Get()->SetTickRate(val);

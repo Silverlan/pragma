@@ -67,7 +67,7 @@ void pragma::ControlledBlurSettings::UpdateShaderPipelines()
 	}
 }
 
-static auto cvBloomAmount = GetClientConVar("render_bloom_amount");
+static auto cvBloomAmount = pragma::console::get_client_con_var("render_bloom_amount");
 void pragma::ControlledBlurSettings::RecordBlur(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmd, prosper::BlurSet &blurSet)
 {
 	static auto blurSize = 5.f;

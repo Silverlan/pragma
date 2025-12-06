@@ -8,7 +8,7 @@ import :scripting.lua.error_handling;
 
 static void print_lua_error_message(lua::State *l, const std::string &msg) { Con::cerr << Lua::GetErrorMessagePrefix(l) << Con::prefix << Con::PREFIX_LUA << Con::prefix << msg << Con::endl; }
 
-static auto cvOpenEditorOnError = GetConVar("lua_open_editor_on_error");
+static auto cvOpenEditorOnError = pragma::console::get_con_var("lua_open_editor_on_error");
 std::optional<std::string> Lua::GetLuaFilePath(const std::string &fname)
 {
 	std::string fullLocalPath;

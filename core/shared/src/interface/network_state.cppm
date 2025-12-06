@@ -19,12 +19,12 @@ export import :types;
 export import :util.resource_watcher;
 
 export namespace pragma {
-	class DLLNETWORK NetworkState : public util::CallbackHandler, public CVarHandler {
+	class DLLNETWORK NetworkState : public util::CallbackHandler, public console::CVarHandler {
 		// For internal use only! Not to be used directly!
 	  protected:
-		static ConVarHandle GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ptrs, std::string scvar);
+		static console::ConVarHandle GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> &ptrs, std::string scvar);
 	  public:
-		virtual std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &GetConVarPtrs() = 0;
+		virtual std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> &GetConVarPtrs() = 0;
 	  public:
 		// Internal
 		std::vector<CallbackHandle> &GetLuaEnumRegisterCallbacks();
@@ -125,16 +125,16 @@ export namespace pragma {
 		Bool IsSoundPrecached(const std::string &snd) const;
 
 		// ConVars
-		virtual ConVarMap *GetConVarMap() override;
-		virtual bool RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl = nullptr, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(ConConf *, float &)> &callback = nullptr);
-		virtual ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false) override;
+		virtual console::ConVarMap *GetConVarMap() override;
+		virtual bool RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl = nullptr, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr);
+		virtual console::ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false) override;
 
 		void CallOnNextTick(const std::function<void()> &f);
 
-		ConVar *CreateConVar(const std::string &scmd, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help = "");
-		ConVar *RegisterConVar(const std::string &scmd, const std::shared_ptr<ConVar> &cvar);
+		console::ConVar *CreateConVar(const std::string &scmd, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help = "");
+		console::ConVar *RegisterConVar(const std::string &scmd, const std::shared_ptr<console::ConVar> &cvar);
 		void UnregisterConVar(const std::string &scmd);
-		virtual ConCommand *CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags = pragma::console::ConVarFlags::None, const std::string &help = "");
+		virtual console::ConCommand *CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags = pragma::console::ConVarFlags::None, const std::string &help = "");
 	  protected:
 		virtual msys::Material *LoadMaterial(const std::string &path, bool precache, bool bReload);
 

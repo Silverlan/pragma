@@ -31,7 +31,7 @@ export {
 
 	namespace pragma {
 		class NetworkState;
-		class DLLNETWORK Engine : public CVarHandler, public util::CallbackHandler {
+		class DLLNETWORK Engine : public console::CVarHandler, public util::CallbackHandler {
 		  public:
 			static const uint32_t DEFAULT_TICK_RATE;
 			// For internal use only! Not to be used directly!
@@ -56,8 +56,8 @@ export {
 				std::unordered_map<std::string, ConVarArgs> m_cvarMap;
 			};
 
-			virtual std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &GetConVarPtrs() override;
-			static ConVarHandle GetConVarHandle(std::string scvar);
+			virtual std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> &GetConVarPtrs() override;
+			static console::ConVarHandle GetConVarHandle(std::string scvar);
 			//
 			class DLLNETWORK StateInstance {
 			  public:
@@ -68,7 +68,7 @@ export {
 			};
 			struct DLLNETWORK ConsoleOutput {
 				std::string output;
-				Con::MessageFlags messageFlags;
+				pragma::console::MessageFlags messageFlags;
 				std::shared_ptr<Color> color;
 			};
 			enum class ConsoleType : uint8_t { None = 0, Terminal, GUI, GUIDetached };
@@ -112,7 +112,7 @@ export {
 			virtual void CloseConsole();
 			void ToggleConsole();
 			virtual bool IsConsoleOpen() const;
-			DebugConsole *GetConsole();
+			console::DebugConsole *GetConsole();
 
 			virtual bool Initialize(int argc, char *argv[]);
 			virtual void Start();
@@ -197,15 +197,15 @@ export {
 			virtual bool IsClientConnected();
 			virtual void EndGame();
 			// Convars
-			virtual ConVarMap *GetConVarMap() override;
+			virtual console::ConVarMap *GetConVarMap() override;
 			virtual std::string GetConVarString(const std::string &cv);
 			virtual int GetConVarInt(const std::string &cv);
 			virtual float GetConVarFloat(const std::string &cv);
 			virtual bool GetConVarBool(const std::string &cv);
-			virtual ConConf *GetConVar(const std::string &cv);
+			virtual console::ConConf *GetConVar(const std::string &cv);
 			template<class T>
 			T *GetConVar(const std::string &cv);
-			virtual bool RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(ConConf *, float &)> &callback = nullptr);
+			virtual bool RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr);
 			// NetState
 			virtual NetworkState *GetActiveState();
 
@@ -271,11 +271,11 @@ export {
 			void SetReplicatedConVar(const std::string &cvar, const std::string &val);
 		  protected:
 			void UpdateParallelJobs();
-			bool RunEngineConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(ConConf *, float &)> &callback = nullptr);
+			bool RunEngineConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr);
 			void WriteServerConfig(VFilePtrReal f);
 			void WriteEngineConfig(VFilePtrReal f);
-			void RestoreConVarsForUnknownCommands(VFilePtrReal f, const ConVarInfoList &origCvarValues, const std::map<std::string, std::shared_ptr<ConConf>> &stateConVars);
-			void RegisterSharedConsoleCommands(ConVarMap &map);
+			void RestoreConVarsForUnknownCommands(VFilePtrReal f, const ConVarInfoList &origCvarValues, const std::map<std::string, std::shared_ptr<console::ConConf>> &stateConVars);
+			void RegisterSharedConsoleCommands(console::ConVarMap &map);
 			void RunTickEvents();
 			virtual uint32_t DoClearUnusedAssets(pragma::asset::Type type) const;
 			virtual void RegisterConsoleCommands();
@@ -293,7 +293,7 @@ export {
 			struct ConsoleInstance {
 				ConsoleInstance();
 				~ConsoleInstance();
-				std::unique_ptr<DebugConsole> console;
+				std::unique_ptr<console::DebugConsole> console;
 				std::unique_ptr<std::thread> consoleThread;
 			};
 			std::unique_ptr<ConsoleInstance> m_consoleInfo = nullptr;
@@ -356,7 +356,7 @@ export {
 		template<class T>
 		T *Engine::GetConVar(const std::string &scvar)
 		{
-			ConConf *cv = GetConVar(scvar);
+			console::ConConf *cv = GetConVar(scvar);
 			if(cv == nullptr)
 				return nullptr;
 			return static_cast<T *>(cv);

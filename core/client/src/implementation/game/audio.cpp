@@ -50,12 +50,12 @@ static void steam_audio_finalized_callback()
 }
 #endif
 
-static auto cvSteamAudioEnabled = GetClientConVar("cl_steam_audio_enabled");
-static auto cvSteamAudioNumRays = GetClientConVar("cl_steam_audio_number_of_rays");
-static auto cvSteamAudioNumDiffuseSamples = GetClientConVar("cl_steam_audio_number_of_diffuse_samples");
-static auto cvSteamAudioNumBounces = GetClientConVar("cl_steam_audio_number_of_bounces");
-static auto cvSteamAudioIrDuration = GetClientConVar("cl_steam_audio_ir_duration");
-static auto cvSteamAudioAmbisonicsOrder = GetClientConVar("cl_steam_audio_ambisonics_order");
+static auto cvSteamAudioEnabled = pragma::console::get_client_con_var("cl_steam_audio_enabled");
+static auto cvSteamAudioNumRays = pragma::console::get_client_con_var("cl_steam_audio_number_of_rays");
+static auto cvSteamAudioNumDiffuseSamples = pragma::console::get_client_con_var("cl_steam_audio_number_of_diffuse_samples");
+static auto cvSteamAudioNumBounces = pragma::console::get_client_con_var("cl_steam_audio_number_of_bounces");
+static auto cvSteamAudioIrDuration = pragma::console::get_client_con_var("cl_steam_audio_ir_duration");
+static auto cvSteamAudioAmbisonicsOrder = pragma::console::get_client_con_var("cl_steam_audio_ambisonics_order");
 void pragma::CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cacheFlags, float spacing)
 {
 	ClearSoundCache();

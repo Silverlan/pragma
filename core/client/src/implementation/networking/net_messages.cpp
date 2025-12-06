@@ -1824,7 +1824,7 @@ void CMD_debug_ai_schedule(pragma::NetworkState *state, pragma::BasePlayerCompon
 	if(ent.IsCharacter() == false)
 		return;
 	auto charComponent = ent.GetCharacterComponent();
-	auto ents = command::find_target_entity(state, *charComponent, argv);
+	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	pragma::ecs::BaseEntity *npc = nullptr;
 	for(auto *ent : ents) {
 		if(ent->IsNPC() == false)
@@ -1875,7 +1875,7 @@ void CMD_debug_aim_info(pragma::NetworkState *state, pragma::BasePlayerComponent
 	if(entPl.IsCharacter() == false)
 		return;
 	auto charComponent = entPl.GetCharacterComponent();
-	auto ents = command::find_target_entity(state, *charComponent, argv);
+	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	pragma::CCameraComponent *cam = nullptr;
 	if(ents.empty() == false) {
 		for(auto *ent : ents) {
@@ -2279,7 +2279,7 @@ void NET_cl_ADD_SHARED_COMPONENT(NetPacket packet)
 
 namespace {
 	auto _ = pragma::console::client::register_variable_listener<bool>(
-	  "debug_ai_navigation", +[](pragma::NetworkState *state, const ConVar &, bool, bool val) {
+	  "debug_ai_navigation", +[](pragma::NetworkState *state, const pragma::console::ConVar &, bool, bool val) {
 		  if(!check_cheats("debug_ai_navigation", state))
 			  return;
 		  if(pragma::get_cgame() == nullptr)

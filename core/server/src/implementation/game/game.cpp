@@ -98,7 +98,7 @@ bool pragma::SGame::RunLua(const std::string &lua) { return pragma::Game::RunLua
 
 void pragma::SGame::OnEntityCreated(pragma::ecs::BaseEntity *ent) { pragma::Game::OnEntityCreated(ent); }
 
-static CVar cvTimescale = GetServerConVar("host_timescale");
+static auto cvTimescale = pragma::console::get_server_con_var("host_timescale");
 float pragma::SGame::GetTimeScale() { return cvTimescale->GetFloat(); }
 
 void pragma::SGame::SetTimeScale(float t)
@@ -109,7 +109,7 @@ void pragma::SGame::SetTimeScale(float t)
 	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::GAME_TIMESCALE, p, pragma::networking::Protocol::SlowReliable);
 }
 
-static void CVAR_CALLBACK_host_timescale(pragma::NetworkState *, const ConVar &, float, float val) { pragma::SGame::Get()->SetTimeScale(val); }
+static void CVAR_CALLBACK_host_timescale(pragma::NetworkState *, const pragma::console::ConVar &, float, float val) { pragma::SGame::Get()->SetTimeScale(val); }
 namespace {
 	auto _ = pragma::console::server::register_variable_listener<float>("host_timescale", &CVAR_CALLBACK_host_timescale);
 }
@@ -168,7 +168,7 @@ bool pragma::SGame::LoadMap(const std::string &map, const Vector3 &origin, std::
 	return true;
 }
 
-static CVar cvSimEnabled = GetServerConVar("sv_physics_simulation_enabled");
+static auto cvSimEnabled = pragma::console::get_server_con_var("sv_physics_simulation_enabled");
 bool pragma::SGame::IsPhysicsSimulationEnabled() const { return cvSimEnabled->GetBool(); }
 
 std::shared_ptr<pragma::EntityComponentManager> pragma::SGame::InitializeEntityComponentManager() { return ::util::make_shared<pragma::SEntityComponentManager>(); }
@@ -534,8 +534,8 @@ void pragma::SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, 
 	packetInf->Write<uint32_t>(static_cast<uint32_t>(0));
 	for(auto &pair : conVars) {
 		auto &cf = pair.second;
-		if(cf->GetType() == ConType::Var) {
-			auto *cv = static_cast<ConVar *>(cf.get());
+		if(cf->GetType() == pragma::console::ConType::Var) {
+			auto *cv = static_cast<pragma::console::ConVar *>(cf.get());
 			if((cv->GetFlags() & pragma::console::ConVarFlags::Replicated) != pragma::console::ConVarFlags::None && cv->GetString() != cv->GetDefault()) {
 				auto id = cv->GetID();
 				packetInf->Write<uint32_t>(id);
@@ -674,9 +674,9 @@ void pragma::SGame::DrawBox(const Vector3 &origin, const Vector3 &start, const V
 void pragma::SGame::DrawPlane(const Vector3 &n, float dist, const Color &color, float duration) { SDebugRenderer::DrawPlane(n, dist, color, duration); }
 void pragma::SGame::DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration) { SDebugRenderer::DrawMesh(meshVerts, color, colorOutline, duration); }
 
-static CVar cvFriction = GetServerConVar("sv_friction");
+static auto cvFriction = pragma::console::get_server_con_var("sv_friction");
 Float pragma::SGame::GetFrictionScale() const { return cvFriction->GetFloat(); }
-static CVar cvRestitution = GetServerConVar("sv_restitution");
+static auto cvRestitution = pragma::console::get_server_con_var("sv_restitution");
 Float pragma::SGame::GetRestitutionScale() const { return cvRestitution->GetFloat(); }
 
 void pragma::SGame::HandleLuaNetPacket(pragma::networking::IServerClient &session, ::NetPacket &packet)

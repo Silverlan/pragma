@@ -729,4 +729,4 @@ float BasePlayerComponent::GetCrouchedWalkSpeed() const
 }
 void BasePlayerComponent::SetCrouchedWalkSpeed(float speed) { m_speedCrouchWalk = speed; }
 
-void BasePlayerComponent::PrintMessage(std::string message, MESSAGE) {}
+void BasePlayerComponent::PrintMessage(std::string message, pragma::console::MESSAGE) {}

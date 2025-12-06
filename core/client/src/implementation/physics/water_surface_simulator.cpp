@@ -24,7 +24,7 @@ CPhysWaterSurfaceSimulator::CPhysWaterSurfaceSimulator(Vector2 aabbMin, Vector2 
 	m_whShaderWaterSplash = pragma::get_cengine()->GetShader("watersplash");
 }
 
-static auto cvGPUAcceleration = GetClientConVar("cl_water_surface_simulation_enable_gpu_acceleration");
+static auto cvGPUAcceleration = pragma::console::get_client_con_var("cl_water_surface_simulation_enable_gpu_acceleration");
 void CPhysWaterSurfaceSimulator::InitializeSurface()
 {
 	PhysWaterSurfaceSimulator::InitializeSurface();
@@ -123,7 +123,7 @@ void CPhysWaterSurfaceSimulator::InitializeSurface()
 const std::shared_ptr<prosper::IBuffer> &CPhysWaterSurfaceSimulator::GetParticleBuffer() const { return m_particleBuffer; }
 const std::shared_ptr<prosper::IBuffer> &CPhysWaterSurfaceSimulator::GetPositionBuffer() const { return m_positionBuffer; }
 
-static auto cvEdgeIterationCount = GetClientConVar("cl_water_surface_simulation_edge_iteration_count");
+static auto cvEdgeIterationCount = pragma::console::get_client_con_var("cl_water_surface_simulation_edge_iteration_count");
 uint8_t CPhysWaterSurfaceSimulator::GetEdgeIterationCount() const { return cvEdgeIterationCount->GetInt(); }
 
 void CPhysWaterSurfaceSimulator::Simulate(double dt)

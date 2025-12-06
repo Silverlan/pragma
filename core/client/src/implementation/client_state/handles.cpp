@@ -199,8 +199,8 @@ void pragma::ClientState::HandleReceiveGameInfo(NetPacket &packet)
 		if(bIdentifier == true) {
 			auto *cf = GetConVar(cvar);
 			if(cf != nullptr) {
-				if(cf->GetType() == ConType::Var) {
-					auto *cv = static_cast<ConVar *>(cf);
+				if(cf->GetType() == pragma::console::ConType::Var) {
+					auto *cv = static_cast<pragma::console::ConVar *>(cf);
 					if((cv->GetFlags() & pragma::console::ConVarFlags::Replicated) != pragma::console::ConVarFlags::None)
 						SetConVar(cvar, value);
 				}

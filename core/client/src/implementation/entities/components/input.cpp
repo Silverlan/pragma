@@ -14,7 +14,7 @@ CInputComponent::~CInputComponent() {}
 void CInputComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CInputComponent::Initialize() { BaseEntityComponent::Initialize(); }
 
-static CVar cvAcceleration = GetClientConVar("cl_mouse_acceleration");
+static auto cvAcceleration = pragma::console::get_client_con_var("cl_mouse_acceleration");
 void CInputComponent::UpdateMouseMovementDeltaValues()
 {
 	auto xDelta = 0.f;

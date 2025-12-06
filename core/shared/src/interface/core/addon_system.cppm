@@ -9,7 +9,7 @@ export module pragma.shared:core.addon_system;
 import pragma.pad;
 export import pragma.filesystem;
 
-export {
+export namespace pragma {
 	uint64_t FSYS_SEARCH_ADDON = 2048;
 	class AddonSystem;
 #pragma warning(push)

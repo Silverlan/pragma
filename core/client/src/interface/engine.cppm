@@ -177,8 +177,8 @@ export {
 		// Util
 		virtual bool IsServerOnly() override;
 		// Convars
-		virtual ConConf *GetConVar(const std::string &cv) override;
-		virtual bool RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(ConConf *, float &)> &callback = nullptr) override;
+		virtual pragma::console::ConConf *GetConVar(const std::string &cv) override;
+		virtual bool RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(pragma::console::ConConf *, float &)> &callback = nullptr) override;
 		// ClientState
 		virtual pragma::NetworkState *GetClientState() const override;
 		pragma::ClientState *OpenClientState();

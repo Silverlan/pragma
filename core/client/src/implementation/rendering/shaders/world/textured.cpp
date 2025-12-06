@@ -323,7 +323,7 @@ std::shared_ptr<msys::Texture> ShaderGameWorldLightingPass::GetTexture(const std
 	return std::static_pointer_cast<msys::Texture>(ptrTex);
 }
 
-static auto cvNormalMappingEnabled = GetClientConVar("render_normalmapping_enabled");
+static auto cvNormalMappingEnabled = pragma::console::get_client_con_var("render_normalmapping_enabled");
 void ShaderGameWorldLightingPass::ApplyMaterialFlags(msys::CMaterial &mat, rendering::shader_material::MaterialFlags &outFlags) const {}
 void ShaderGameWorldLightingPass::UpdateRenderFlags(CModelSubMesh &mesh, SceneFlags &inOutFlags) {}
 bool ShaderGameWorldLightingPass::IsDepthPrepassEnabled() const { return m_depthPrepassEnabled; }

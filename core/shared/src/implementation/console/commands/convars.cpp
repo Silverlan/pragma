@@ -9,7 +9,7 @@ module pragma.shared;
 import :console;
 import :engine;
 
-void register_shared_convars(ConVarMap &map)
+void pragma::console::register_shared_convars(ConVarMap &map)
 {
 	map.RegisterConVar<udm::Boolean>("sv_cheats", false, pragma::console::ConVarFlags::Replicated | pragma::console::ConVarFlags::Notify, "Allows clients to run console commands which are marked as cheats if set to 1.");
 	map.RegisterConVar<udm::Float>("sv_player_air_move_scale", 0.05, pragma::console::ConVarFlags::Replicated | pragma::console::ConVarFlags::Archive,

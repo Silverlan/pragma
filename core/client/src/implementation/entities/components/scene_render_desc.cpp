@@ -26,11 +26,11 @@ SceneRenderDesc::SceneRenderDesc(pragma::CSceneComponent &scene) : m_scene {scen
 }
 SceneRenderDesc::~SceneRenderDesc() {}
 
-static auto cvDrawGlow = GetClientConVar("render_draw_glow");
-static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
-static auto cvDrawSky = GetClientConVar("render_draw_sky");
-static auto cvDrawWater = GetClientConVar("render_draw_water");
-static auto cvDrawView = GetClientConVar("render_draw_view");
+static auto cvDrawGlow = pragma::console::get_client_con_var("render_draw_glow");
+static auto cvDrawTranslucent = pragma::console::get_client_con_var("render_draw_translucent");
+static auto cvDrawSky = pragma::console::get_client_con_var("render_draw_sky");
+static auto cvDrawWater = pragma::console::get_client_con_var("render_draw_water");
+static auto cvDrawView = pragma::console::get_client_con_var("render_draw_view");
 static RenderFlags render_mode_to_render_flag(pragma::rendering::SceneRenderPass renderMode)
 {
 	switch(renderMode) {
@@ -184,7 +184,7 @@ bool SceneRenderDesc::ShouldCull(pragma::CRenderComponent &renderC, pragma::Rend
 }
 bool SceneRenderDesc::ShouldCull(const Vector3 &min, const Vector3 &max, const std::vector<umath::Plane> &frustumPlanes) { return umath::intersection::aabb_in_plane_mesh(min, max, frustumPlanes.begin(), frustumPlanes.end()) == umath::intersection::Intersect::Outside; }
 
-static auto cvEntitiesPerJob = GetClientConVar("render_queue_entities_per_worker_job");
+static auto cvEntitiesPerJob = pragma::console::get_client_con_var("render_queue_entities_per_worker_job");
 void SceneRenderDesc::CollectRenderMeshesFromOctree(pragma::CRasterizationRendererComponent *optRasterizationRenderer, RenderFlags renderFlags, bool enableClipping, const OcclusionOctree<CBaseEntity *> &tree, const pragma::CSceneComponent &scene, const pragma::CCameraComponent &cam,
   const Mat4 &vp, pragma::rendering::RenderMask renderMask, const std::function<pragma::rendering::RenderQueue *(pragma::rendering::SceneRenderPass, bool)> &getRenderQueue, const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull,
   const std::vector<util::BSPTree *> *bspTrees, const std::vector<util::BSPTree::Node *> *bspLeafNodes, int32_t lodBias, const std::function<bool(CBaseEntity &, const pragma::CSceneComponent &, RenderFlags)> &shouldConsiderEntity,
@@ -291,7 +291,7 @@ struct DebugFreezeCamData {
 	std::vector<umath::Plane> frustumPlanes;
 };
 static std::optional<DebugFreezeCamData> g_debugFreezeCamData = {};
-static void cmd_debug_occlusion_culling_freeze_camera(pragma::NetworkState *, const ConVar &, bool, bool val)
+static void cmd_debug_occlusion_culling_freeze_camera(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool val)
 {
 	g_debugFreezeCamData = {};
 	if(val == false)
@@ -324,7 +324,7 @@ void SceneRenderDesc::WaitForWorldRenderQueues() const
 		;
 }
 
-static auto cvInstancingEnabled = GetClientConVar("render_instancing_enabled");
+static auto cvInstancingEnabled = pragma::console::get_client_con_var("render_instancing_enabled");
 void SceneRenderDesc::BuildRenderQueueInstanceLists(pragma::rendering::RenderQueue &renderQueue)
 {
 	renderQueue.instanceSets.clear();
@@ -490,7 +490,7 @@ void SceneRenderDesc::BuildRenderQueueInstanceLists(pragma::rendering::RenderQue
 #endif
 }
 
-static auto cvDrawWorld = GetClientConVar("render_draw_world");
+static auto cvDrawWorld = pragma::console::get_client_con_var("render_draw_world");
 static std::atomic<uint32_t> g_activeRenderQueueThreads = 0;
 uint32_t SceneRenderDesc::GetActiveRenderQueueThreadCount() { return g_activeRenderQueueThreads; }
 bool SceneRenderDesc::AssertRenderQueueThreadInactive()
@@ -502,8 +502,8 @@ bool SceneRenderDesc::AssertRenderQueueThreadInactive()
 	throw std::logic_error {msg};
 	return false;
 }
-static auto cvLockRenderQueues = GetClientConVar("debug_render_lock_render_queues");
-static auto cvFrustumCullingEnabled = GetClientConVar("cl_render_frustum_culling_enabled");
+static auto cvLockRenderQueues = pragma::console::get_client_con_var("debug_render_lock_render_queues");
+static auto cvFrustumCullingEnabled = pragma::console::get_client_con_var("cl_render_frustum_culling_enabled");
 // Tag: render-queues
 void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo, const std::function<void()> &fBuildAdditionalQueues)
 {

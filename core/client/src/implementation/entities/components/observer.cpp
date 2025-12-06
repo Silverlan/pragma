@@ -75,9 +75,9 @@ void CObserverComponent::SetObserverMode(ObserverMode mode)
 		renderC->UpdateShouldDrawState();
 }
 
-static CVar cvSpeed = GetClientConVar("cl_mouse_sensitivity");
-static CVar cvYaw = GetClientConVar("cl_mouse_yaw");
-static CVar cvPitch = GetClientConVar("cl_mouse_pitch");
+static auto cvSpeed = pragma::console::get_client_con_var("cl_mouse_sensitivity");
+static auto cvYaw = pragma::console::get_client_con_var("cl_mouse_yaw");
+static auto cvPitch = pragma::console::get_client_con_var("cl_mouse_pitch");
 void CObserverComponent::UpdateCharacterViewOrientationFromMouseMovement()
 {
 	auto *target = GetObserverTarget();

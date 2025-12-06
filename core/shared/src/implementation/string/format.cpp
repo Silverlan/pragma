@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :string.format;
 
-std::string FormatTime(double dtm)
+std::string pragma::string::format_time(double dtm)
 {
 	int tm = static_cast<int>(floor(dtm + 0.5));
 	int minutes = tm / 60;

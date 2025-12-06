@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :console.find_entities;
 
-std::vector<pragma::ecs::BaseEntity *> command::find_trace_targets(pragma::NetworkState *state, pragma::BaseCharacterComponent &pl, const std::function<void(TraceData &)> &trCallback)
+std::vector<pragma::ecs::BaseEntity *> pragma::console::find_trace_targets(pragma::NetworkState *state, pragma::BaseCharacterComponent &pl, const std::function<void(TraceData &)> &trCallback)
 {
 	auto *game = state->GetGameState();
 	if(game == nullptr)
@@ -24,7 +24,7 @@ std::vector<pragma::ecs::BaseEntity *> command::find_trace_targets(pragma::Netwo
 	return ents;
 }
 
-std::vector<pragma::ecs::BaseEntity *> command::find_named_targets(pragma::NetworkState *state, const std::string &targetName)
+std::vector<pragma::ecs::BaseEntity *> pragma::console::find_named_targets(pragma::NetworkState *state, const std::string &targetName)
 {
 	auto *game = state->GetGameState();
 	if(game == nullptr)
@@ -57,14 +57,14 @@ std::vector<pragma::ecs::BaseEntity *> command::find_named_targets(pragma::Netwo
 	return ents;
 }
 
-std::vector<pragma::ecs::BaseEntity *> command::find_target_entity(pragma::NetworkState *state, pragma::BaseCharacterComponent &pl, std::vector<std::string> &argv, const std::function<void(TraceData &)> &trCallback)
+std::vector<pragma::ecs::BaseEntity *> pragma::console::find_target_entity(pragma::NetworkState *state, pragma::BaseCharacterComponent &pl, std::vector<std::string> &argv, const std::function<void(TraceData &)> &trCallback)
 {
 	if(argv.empty())
 		return find_trace_targets(state, pl, trCallback);
 	return find_named_targets(state, argv[0]);
 }
 
-std::vector<std::pair<pragma::ecs::BaseEntity *, float>> util::cmd::get_sorted_entities(pragma::Game &game, pragma::BasePlayerComponent *pl)
+std::vector<std::pair<pragma::ecs::BaseEntity *, float>> pragma::console::get_sorted_entities(pragma::Game &game, pragma::BasePlayerComponent *pl)
 {
 	std::vector<pragma::ecs::BaseEntity *> *entities;
 	game.GetEntities(&entities);

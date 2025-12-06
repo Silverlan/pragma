@@ -59,8 +59,8 @@ export namespace pragma {
 	class DLLCLIENT ClientState : public NetworkState {
 		// For internal use only! Not to be used directly!
 	  public:
-		virtual std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &GetConVarPtrs() override;
-		static ConVarHandle GetConVarHandle(std::string scvar);
+		virtual std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> &GetConVarPtrs() override;
+		static console::ConVarHandle GetConVarHandle(std::string scvar);
 		//
 	  private:
 		std::unique_ptr<pragma::networking::IClient> m_client;
@@ -111,7 +111,7 @@ export namespace pragma {
 		void Draw(util::DrawSceneInfo &drawSceneInfo);
 		void Render(util::DrawSceneInfo &drawSceneInfo, std::shared_ptr<prosper::RenderTarget> &rt);
 		virtual void Close() override;
-		virtual ConVarMap *GetConVarMap() override;
+		virtual console::ConVarMap *GetConVarMap() override;
 		bool IsConnected() const;
 		void AddGUILuaWrapperFactory(const std::function<luabind::object(lua::State *, WIBase &)> &f);
 		std::vector<std::function<luabind::object(lua::State *, WIBase &)>> &GetGUILuaWrapperFactories();
@@ -141,8 +141,8 @@ export namespace pragma {
 		static void RegisterVulkanLuaInterface(Lua::Interface &lua);
 		// CVars
 		void RegisterServerConVar(std::string scmd, unsigned int id);
-		virtual bool RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl = nullptr, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(ConConf *, float &)> &callback = nullptr) override;
-		virtual ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false) override;
+		virtual bool RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl = nullptr, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr) override;
+		virtual console::ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false) override;
 		// Sockets
 		void Connect(std::string ip, std::string port = sci::DEFAULT_PORT_TCP);
 		// Peer-to-peer only!

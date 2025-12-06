@@ -38,7 +38,7 @@ export {
 	namespace Con {
 		namespace detail {
 			extern DLLNETWORK std::atomic<::util::LogSeverity> currentLevel;
-			extern DLLNETWORK std::function<void(const std::string_view &, Con::MessageFlags, const Color *)> outputCallback;
+			extern DLLNETWORK std::function<void(const std::string_view &, pragma::console::MessageFlags, const Color *)> outputCallback;
 		};
 		class DLLNETWORK c_cout {};
 		class DLLNETWORK c_cwar {};
@@ -68,17 +68,17 @@ export {
 		DLLNETWORK int GetLogLevel();
 
 		DLLNETWORK void disable_ansi_color_codes();
-		DLLNETWORK void set_output_callback(const std::function<void(const std::string_view &, MessageFlags, const ::Color *)> &callback);
-		DLLNETWORK const std::function<void(const std::string_view &, MessageFlags, const ::Color *)> &get_output_callback();
-		DLLNETWORK void print(const std::string_view &sv, const ::Color &color, MessageFlags flags = MessageFlags::None);
-		DLLNETWORK void print(const std::string_view &sv, MessageFlags flags = MessageFlags::None);
+		DLLNETWORK void set_output_callback(const std::function<void(const std::string_view &, pragma::console::MessageFlags, const ::Color *)> &callback);
+		DLLNETWORK const std::function<void(const std::string_view &, pragma::console::MessageFlags, const ::Color *)> &get_output_callback();
+		DLLNETWORK void print(const std::string_view &sv, const ::Color &color, pragma::console::MessageFlags flags = pragma::console::MessageFlags::None);
+		DLLNETWORK void print(const std::string_view &sv, pragma::console::MessageFlags flags = pragma::console::MessageFlags::None);
 		template<typename T>
-		inline void invoke_output_callback(const T &value, MessageFlags flags)
+		inline void invoke_output_callback(const T &value, pragma::console::MessageFlags flags)
 		{
 			auto &outputCallback = Con::get_output_callback();
 			if(outputCallback == nullptr)
 				return;
-			auto color = util::console_color_flags_to_color(util::get_active_console_color_flags());
+			auto color = pragma::console::console_color_flags_to_color(pragma::console::get_active_console_color_flags());
 			std::stringstream ss;
 			ss << value;
 			outputCallback(ss.str(), flags, color.has_value() ? &(*color) : nullptr);
@@ -102,7 +102,7 @@ export {
 		DLLNETWORK extern std::string PREFIX_GUI;
 		using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_ENUM_FLAGS(Con::MessageFlags)
+	REGISTER_ENUM_FLAGS(pragma::console::MessageFlags)
 
 	namespace pragma::logging::detail {
 		enum class Type : uint8_t { None = 0, Info, Warn, Err, Crit };
@@ -131,7 +131,7 @@ export {
 		Con::detail::currentLevel = ::util::LogSeverity::Info;
 		std::cout << t;
 		PRAGMA_DETAIL_LOG_OUTPUT(t, pragma::logging::detail::Type::Info)
-		PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t, Con::MessageFlags::Generic);
+		PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t, pragma::console::MessageFlags::Generic);
 		return con;
 	}
 	typedef std::ostream &(*conmanipulator)(std::ostream &);
@@ -149,7 +149,7 @@ export {
 
 		std::cout << t;
 		PRAGMA_DETAIL_LOG_OUTPUT(t, pragma::logging::detail::Type::Warn)
-		PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t, Con::MessageFlags::Warning);
+		PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t, pragma::console::MessageFlags::Warning);
 		return con;
 	}
 	typedef std::ostream &(*conmanipulator)(std::ostream &);
@@ -167,7 +167,7 @@ export {
 
 		std::cout << t;
 		PRAGMA_DETAIL_LOG_OUTPUT(t, pragma::logging::detail::Type::Err)
-		PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t, Con::MessageFlags::Error);
+		PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t, pragma::console::MessageFlags::Error);
 		return con;
 	}
 	typedef std::ostream &(*conmanipulator)(std::ostream &);
@@ -186,7 +186,7 @@ export {
 
 		std::cout << t;
 		PRAGMA_DETAIL_LOG_OUTPUT(t, pragma::logging::detail::Type::Crit)
-		PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t, Con::MessageFlags::Critical);
+		PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t, pragma::console::MessageFlags::Critical);
 		return con;
 	}
 	typedef std::ostream &(*conmanipulator)(std::ostream &);
@@ -210,7 +210,7 @@ export {
 			pragma::logging::detail::logOutput << t;
 			pragma::logging::detail::logOutputMutex.unlock();
 		}
-		PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t, Con::MessageFlags::ServerSide);
+		PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t, pragma::console::MessageFlags::ServerSide);
 		return con;
 	}
 	typedef std::ostream &(*conmanipulator)(std::ostream &);
@@ -234,7 +234,7 @@ export {
 			pragma::logging::detail::logOutput << t;
 			pragma::logging::detail::logOutputMutex.unlock();
 		}
-		PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t, Con::MessageFlags::ClientSide);
+		PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t, pragma::console::MessageFlags::ClientSide);
 		return con;
 	}
 	typedef std::ostream &(*conmanipulator)(std::ostream &);

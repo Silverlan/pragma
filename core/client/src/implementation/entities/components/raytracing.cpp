@@ -60,7 +60,7 @@ void CRaytracingComponent::ClearBuffers()
 	s_gameSceneDsg = nullptr;
 	s_allResourcesInitialized = false;
 }
-static auto cvRenderTechnique = GetClientConVar("render_technique");
+static auto cvRenderTechnique = pragma::console::get_client_con_var("render_technique");
 bool CRaytracingComponent::IsRaytracingEnabled() { return cvRenderTechnique->GetBool() && s_allResourcesInitialized; }
 const std::shared_ptr<prosper::IUniformResizableBuffer> &CRaytracingComponent::GetEntityMeshInfoBuffer() { return s_entityMeshInfoBuffer; }
 uint32_t CRaytracingComponent::GetBufferMeshCount() { return m_entityMeshCount; }
@@ -210,7 +210,7 @@ void CRaytracingComponent::InitializeBufferUpdateCallback()
 	//});
 }
 
-static void cmd_render_technique(pragma::NetworkState *, const ConVar &, int32_t, int32_t val)
+static void cmd_render_technique(pragma::NetworkState *, const pragma::console::ConVar &, int32_t, int32_t val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;

@@ -51,7 +51,7 @@ void WIMainMenuMods::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer>
 	}
 }
 
-bool WIMainMenuMods::SetAddonSubscription(const std::shared_ptr<AddonInfo> &addon, bool bSubscribe)
+bool WIMainMenuMods::SetAddonSubscription(const std::shared_ptr<pragma::AddonInfo> &addon, bool bSubscribe)
 {
 	m_downloadMutex.lock();
 	auto &uniqueId = addon->GetUniqueId();
@@ -77,7 +77,7 @@ bool WIMainMenuMods::SetAddonSubscription(const std::shared_ptr<AddonInfo> &addo
 	return true;
 }
 
-bool WIMainMenuMods::SetAddonSubscription(const std::string &uniqueId, bool bSubscribe) { return SetAddonSubscription(::util::make_shared<AddonInfo>("", util::Version(0, 0, 0), uniqueId), bSubscribe); }
+bool WIMainMenuMods::SetAddonSubscription(const std::string &uniqueId, bool bSubscribe) { return SetAddonSubscription(::util::make_shared<pragma::AddonInfo>("", util::Version(0, 0, 0), uniqueId), bSubscribe); }
 
 void WIMainMenuMods::OnFirstEntered()
 {
@@ -87,14 +87,14 @@ void WIMainMenuMods::OnFirstEntered()
 	// SetInitialURL(engine_info::get_modding_hub_url() + "index_game.php?lan=" + lan);
 
 	try {
-		auto &addons = AddonSystem::GetMountedAddons();
+		auto &addons = pragma::AddonSystem::GetMountedAddons();
 		m_addonInstallManager = ::util::make_shared<pragma::AddonInstallManager>();
 
 		for(auto &addon : addons) {
 			auto &uniqueId = addon.GetUniqueId();
 			if(uniqueId.empty() == true)
 				continue;
-			SetAddonSubscription(::util::make_shared<AddonInfo>(addon), true);
+			SetAddonSubscription(::util::make_shared<pragma::AddonInfo>(addon), true);
 		}
 	}
 	catch(const std::runtime_error &e) {

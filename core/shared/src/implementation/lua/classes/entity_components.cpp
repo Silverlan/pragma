@@ -3265,8 +3265,8 @@ void pragma::LuaCore::base_player_component::register_class(luabind::module_ &mo
 	def.def("ApplyViewRotationOffset", static_cast<void (*)(lua::State *, pragma::BasePlayerComponent &, EulerAngles &)>([](lua::State *l, pragma::BasePlayerComponent &hPl, EulerAngles &ang) { hPl.ApplyViewRotationOffset(ang); }));
 	def.def("PrintMessage", &pragma::BasePlayerComponent::PrintMessage);
 
-	def.add_static_constant("MESSAGE_TYPE_CONSOLE", umath::to_integral(MESSAGE::PRINTCONSOLE));
-	def.add_static_constant("MESSAGE_TYPE_CHAT", umath::to_integral(MESSAGE::PRINTCHAT));
+	def.add_static_constant("MESSAGE_TYPE_CONSOLE", umath::to_integral(pragma::console::MESSAGE::PRINTCONSOLE));
+	def.add_static_constant("MESSAGE_TYPE_CHAT", umath::to_integral(pragma::console::MESSAGE::PRINTCHAT));
 }
 
 void pragma::LuaCore::base_observer_component::register_class(luabind::module_ &mod)

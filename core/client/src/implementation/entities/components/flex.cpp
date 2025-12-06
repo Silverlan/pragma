@@ -13,7 +13,7 @@ import se_script;
 
 using namespace pragma;
 
-static auto cvFlexPhonemeDrag = GetClientConVar("cl_flex_phoneme_drag");
+static auto cvFlexPhonemeDrag = pragma::console::get_client_con_var("cl_flex_phoneme_drag");
 
 ComponentEventId cFlexComponent::EVENT_ON_FLEX_CONTROLLERS_UPDATED = INVALID_COMPONENT_ID;
 void CFlexComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)

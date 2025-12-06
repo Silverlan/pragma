@@ -21,12 +21,12 @@ import :util;
 
 #undef GetMessage
 
-static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = nullptr;
-std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &pragma::ClientState::GetConVarPtrs() { return *conVarPtrs; }
-ConVarHandle pragma::ClientState::GetConVarHandle(std::string scvar)
+static std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> *conVarPtrs = nullptr;
+std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> &pragma::ClientState::GetConVarPtrs() { return *conVarPtrs; }
+pragma::console::ConVarHandle pragma::ClientState::GetConVarHandle(std::string scvar)
 {
 	if(conVarPtrs == nullptr) {
-		static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> ptrs;
+		static std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> ptrs;
 		conVarPtrs = &ptrs;
 	}
 	return NetworkState::GetConVarHandle(*conVarPtrs, scvar);
@@ -135,7 +135,7 @@ void pragma::ClientState::ResetGameClient()
 	//m_client = std::make_unique<pragma::networking::LocalClient>();
 }
 
-static auto cvSteamAudioEnabled = GetClientConVar("cl_steam_audio_enabled");
+static auto cvSteamAudioEnabled = pragma::console::get_client_con_var("cl_steam_audio_enabled");
 
 void pragma::ClientState::Initialize()
 {
@@ -191,7 +191,7 @@ void pragma::ClientState::ShowFPSCounter(bool b)
 
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<bool>(
-	  "cl_show_fps", +[](pragma::NetworkState *, const ConVar &, bool, bool val) {
+	  "cl_show_fps", +[](pragma::NetworkState *, const pragma::console::ConVar &, bool, bool val) {
 		  auto *client = pragma::get_client_state();
 		  if(client == nullptr)
 			  return;
@@ -338,8 +338,8 @@ void pragma::ClientState::Close()
 	TerminateLuaModules(state);
 	m_luaGUI = nullptr;
 	DeregisterLuaModules(state, identifier); // Has to be called AFTER Lua instance has been released!
-	std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &conVarPtrs = GetConVarPtrs();
-	std::unordered_map<std::string, std::shared_ptr<PtrConVar>>::iterator itHandles;
+	std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> &conVarPtrs = GetConVarPtrs();
+	std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>>::iterator itHandles;
 	for(itHandles = conVarPtrs.begin(); itHandles != conVarPtrs.end(); itHandles++)
 		itHandles->second->set(nullptr);
 	StopSounds();
@@ -353,10 +353,10 @@ void pragma::ClientState::implFindSimilarConVars(const std::string &input, std::
 {
 	NetworkState::implFindSimilarConVars(input, similarCmds);
 
-	auto *clMap = console_system::client::get_convar_map();
+	auto *clMap = pragma::console::client::get_convar_map();
 	NetworkState::FindSimilarConVars(input, clMap->GetConVars(), similarCmds);
 
-	auto *svMap = console_system::server::get_convar_map();
+	auto *svMap = pragma::console::server::get_convar_map();
 	NetworkState::FindSimilarConVars(input, svMap->GetConVars(), similarCmds);
 }
 
@@ -368,13 +368,13 @@ void pragma::ClientState::RegisterServerConVar(std::string scmd, unsigned int id
 	m_conCommandIDs.insert(std::unordered_map<std::string, unsigned int>::value_type(scmd, id));
 }
 
-bool pragma::ClientState::RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl, KeyState pressState, float magnitude, const std::function<bool(ConConf *, float &)> &callback)
+bool pragma::ClientState::RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl, KeyState pressState, float magnitude, const std::function<bool(pragma::console::ConConf *, float &)> &callback)
 {
-	auto *clMap = console_system::client::get_convar_map();
+	auto *clMap = pragma::console::client::get_convar_map();
 	auto conVarCl = clMap->GetConVar(scmd);
-	auto bUseClientside = (conVarCl != nullptr) ? (conVarCl->GetType() != ConType::Variable || argv.empty()) : false; // Console commands are ALWAYS executed clientside, if they exist clientside
+	auto bUseClientside = (conVarCl != nullptr) ? (conVarCl->GetType() != pragma::console::ConType::Variable || argv.empty()) : false; // Console commands are ALWAYS executed clientside, if they exist clientside
 	if(bUseClientside == false) {
-		auto *svMap = console_system::server::get_convar_map();
+		auto *svMap = pragma::console::server::get_convar_map();
 		auto conVarSv = svMap->GetConVar(scmd);
 		if(conVarSv == nullptr) {
 			auto it = m_conCommandIDs.find(scmd);
@@ -407,9 +407,9 @@ bool pragma::ClientState::RunConsoleCommand(std::string scmd, std::vector<std::s
 	return true;
 }
 
-ConVar *pragma::ClientState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
+pragma::console::ConVar *pragma::ClientState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
 {
-	ConVar *cvar = NetworkState::SetConVar(scmd, value, bApplyIfEqual);
+	pragma::console::ConVar *cvar = NetworkState::SetConVar(scmd, value, bApplyIfEqual);
 	if(cvar == nullptr)
 		return nullptr;
 	auto flags = cvar->GetFlags();
@@ -592,8 +592,8 @@ void pragma::ClientState::SendUserInfo()
 	packet->Write<unsigned int>((unsigned int)(0));
 	for(auto &pair : convars) {
 		auto &cv = pair.second;
-		if(cv->GetType() == ConType::Var) {
-			auto *cvar = static_cast<ConVar *>(cv.get());
+		if(cv->GetType() == pragma::console::ConType::Var) {
+			auto *cvar = static_cast<pragma::console::ConVar *>(cv.get());
 			if((cvar->GetFlags() & pragma::console::ConVarFlags::Userinfo) == pragma::console::ConVarFlags::Userinfo && cvar->GetString() != cvar->GetDefault()) {
 				packet->WriteString(pair.first);
 				packet->WriteString(cvar->GetString());
@@ -628,7 +628,7 @@ void pragma::ClientState::StartNewGame(const std::string &gameMode)
 	}
 }
 
-ConVarMap *pragma::ClientState::GetConVarMap() { return console_system::client::get_convar_map(); }
+pragma::console::ConVarMap *pragma::ClientState::GetConVarMap() { return pragma::console::client::get_convar_map(); }
 
 bool pragma::ClientState::IsMultiPlayer() const { return pragma::get_cengine()->IsMultiPlayer(); }
 bool pragma::ClientState::IsSinglePlayer() const { return pragma::get_cengine()->IsSinglePlayer(); }
@@ -637,7 +637,7 @@ msys::MaterialManager &pragma::ClientState::GetMaterialManager() { return *pragm
 pragma::ModelSubMesh *pragma::ClientState::CreateSubMesh() const { return new CModelSubMesh; }
 ModelMesh *pragma::ClientState::CreateMesh() const { return new CModelMesh; }
 
-static auto cvMatStreaming = GetClientConVar("cl_material_streaming_enabled");
+static auto cvMatStreaming = pragma::console::get_client_con_var("cl_material_streaming_enabled");
 msys::Material *pragma::ClientState::LoadMaterial(const std::string &path, bool precache, bool bReload)
 {
 	if(spdlog::get_level() <= spdlog::level::debug)
@@ -815,13 +815,13 @@ unsigned int pragma::ClientState::GetServerMessageID(std::string identifier)
 
 unsigned int pragma::ClientState::GetServerConVarID(std::string scmd)
 {
-	ConVarMap *map = console_system::server::get_convar_map();
+	auto *map = pragma::console::server::get_convar_map();
 	return map->GetConVarID(scmd);
 }
 
 bool pragma::ClientState::GetServerConVarIdentifier(uint32_t id, std::string &cvar)
 {
-	auto *map = console_system::server::get_convar_map();
+	auto *map = pragma::console::server::get_convar_map();
 	std::string *pCvar = nullptr;
 	auto r = map->GetConVarIdentifier(id, &pCvar);
 	if(r == true)
@@ -831,7 +831,7 @@ bool pragma::ClientState::GetServerConVarIdentifier(uint32_t id, std::string &cv
 
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>(
-	  "sv_tickrate", +[](pragma::NetworkState *, const ConVar &, int, int val) {
+	  "sv_tickrate", +[](pragma::NetworkState *, const pragma::console::ConVar &, int, int val) {
 		  if(val < 0)
 			  val = 0;
 		  pragma::get_cengine()->SetTickRate(val);

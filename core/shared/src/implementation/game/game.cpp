@@ -928,7 +928,7 @@ double &pragma::Game::DeltaTickTime() { return m_tDeltaTick; }
 float pragma::Game::GetTimeScale() { return 1.f; }
 void pragma::Game::SetTimeScale(float t) { m_stateNetwork->SetConVar("host_timescale", std::to_string(t)); }
 
-ConConf *pragma::Game::GetConVar(const std::string &scmd) { return m_stateNetwork->GetConVar(scmd); }
+pragma::console::ConConf *pragma::Game::GetConVar(const std::string &scmd) { return m_stateNetwork->GetConVar(scmd); }
 int pragma::Game::GetConVarInt(const std::string &scmd) { return m_stateNetwork->GetConVarInt(scmd); }
 std::string pragma::Game::GetConVarString(const std::string &scmd) { return m_stateNetwork->GetConVarString(scmd); }
 float pragma::Game::GetConVarFloat(const std::string &scmd) { return m_stateNetwork->GetConVarFloat(scmd); }

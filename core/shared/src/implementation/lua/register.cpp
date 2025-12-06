@@ -690,26 +690,26 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("get_convar_bool", &Lua::console::GetConVarBool), luabind::def("get_convar_flags", &Lua::console::GetConVarFlags), luabind::def("register_override", &Lua::console::register_override), luabind::def("clear_override", &Lua::console::clear_override),
 	  luabind::def("is_open", &pragma::Engine::IsConsoleOpen), luabind::def("toggle", &pragma::Engine::ToggleConsole), luabind::def("open", &pragma::Engine::OpenConsole), luabind::def("close", &pragma::Engine::CloseConsole))];
 
-	static const auto fGetConVarName = [](lua::State *l, ConVar &cvar) -> std::string {
+	static const auto fGetConVarName = [](lua::State *l, pragma::console::ConVar &cvar) -> std::string {
 		auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 		auto &conVars = nw->GetConVars();
-		auto it = std::find_if(conVars.begin(), conVars.end(), [&cvar](const std::pair<std::string, std::shared_ptr<ConConf>> &pair) { return pair.second.get() == &cvar; });
+		auto it = std::find_if(conVars.begin(), conVars.end(), [&cvar](const std::pair<std::string, std::shared_ptr<pragma::console::ConConf>> &pair) { return pair.second.get() == &cvar; });
 		if(it == conVars.end())
 			return "";
 		return it->first;
 	};
-	auto classDefConVar = luabind::class_<ConVar>("Var");
-	classDefConVar.def("GetString", &ConVar::GetString);
-	classDefConVar.def("GetInt", &ConVar::GetInt);
-	classDefConVar.def("GetFloat", &ConVar::GetFloat);
-	classDefConVar.def("GetBool", &ConVar::GetBool);
-	classDefConVar.def("GetFlags", &ConVar::GetFlags);
-	classDefConVar.def("GetDefault", &ConVar::GetDefault, luabind::copy_policy<0> {});
-	classDefConVar.def("GetHelpText", &ConVar::GetHelpText);
-	classDefConVar.def("AddChangeCallback", static_cast<void (*)(lua::State *, ConVar &, const Lua::func<void, Lua::var<std::string, int32_t, float, bool>> &)>([](lua::State *l, ConVar &cvar, const Lua::func<void, Lua::var<std::string, int32_t, float, bool>> &function) {
+	auto classDefConVar = luabind::class_<pragma::console::ConVar>("Var");
+	classDefConVar.def("GetString", &pragma::console::ConVar::GetString);
+	classDefConVar.def("GetInt", &pragma::console::ConVar::GetInt);
+	classDefConVar.def("GetFloat", &pragma::console::ConVar::GetFloat);
+	classDefConVar.def("GetBool", &pragma::console::ConVar::GetBool);
+	classDefConVar.def("GetFlags", &pragma::console::ConVar::GetFlags);
+	classDefConVar.def("GetDefault", &pragma::console::ConVar::GetDefault, luabind::copy_policy<0> {});
+	classDefConVar.def("GetHelpText", &pragma::console::ConVar::GetHelpText);
+	classDefConVar.def("AddChangeCallback", static_cast<void (*)(lua::State *, pragma::console::ConVar &, const Lua::func<void, Lua::var<std::string, int32_t, float, bool>> &)>([](lua::State *l, pragma::console::ConVar &cvar, const Lua::func<void, Lua::var<std::string, int32_t, float, bool>> &function) {
 		pragma::Engine::Get()->GetNetworkState(l)->GetGameState()->AddConVarCallback(fGetConVarName(l, cvar), function);
 	}));
-	classDefConVar.def("GetName", static_cast<std::string (*)(lua::State *, ConVar &)>([](lua::State *l, ConVar &cvar) { return fGetConVarName(l, cvar); }));
+	classDefConVar.def("GetName", static_cast<std::string (*)(lua::State *, pragma::console::ConVar &)>([](lua::State *l, pragma::console::ConVar &cvar) { return fGetConVarName(l, cvar); }));
 	consoleMod[classDefConVar];
 
 	// util
@@ -1663,8 +1663,8 @@ void pragma::Game::RegisterLuaLibraries()
 	    {"prefix", +[](lua::State *l) {
 		     std::string msg = Lua::CheckString(l, 1);
 		     auto colorFlags = static_cast<pragma::console::ConsoleColorFlags>(Lua::CheckInt(l, 2));
-		     auto strColorFlags = util::get_ansi_color_code(colorFlags);
-		     auto strColorFlagsClear = util::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
+		     auto strColorFlags = pragma::console::get_ansi_color_code(colorFlags);
+		     auto strColorFlagsClear = pragma::console::get_ansi_color_code(pragma::console::ConsoleColorFlags::Reset);
 		     auto prefix = strColorFlagsClear + "[" + strColorFlags + msg + strColorFlagsClear + "] ";
 		     Lua::PushString(l, prefix);
 		     return 1;

@@ -33,7 +33,7 @@ void pragma::CRasterizationRendererComponent::RecordRenderParticleSystems(prospe
 	}
 }
 
-static auto cvLockCommandBuffers = GetClientConVar("debug_render_lock_render_command_buffers");
+static auto cvLockCommandBuffers = pragma::console::get_client_con_var("debug_render_lock_render_command_buffers");
 void pragma::CRasterizationRendererComponent::RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo)
 {
 	// Debug

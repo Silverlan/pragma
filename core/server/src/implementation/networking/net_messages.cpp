@@ -266,7 +266,7 @@ void NET_sv_CMD_CALL(pragma::networking::IServerClient &session, NetPacket packe
 
 	auto bActionCmd = (cmd.empty() == false && cmd.front() == '+') ? true : false;
 	auto bReleased = (pressState == KeyState::Release) ? true : false;
-	auto r = pragma::ServerState::Get()->RunConsoleCommand(cmd, argv, pl, pressState, magnitude, [bActionCmd, bReleased](ConConf *cf, float &magnitude) -> bool {
+	auto r = pragma::ServerState::Get()->RunConsoleCommand(cmd, argv, pl, pressState, magnitude, [bActionCmd, bReleased](pragma::console::ConConf *cf, float &magnitude) -> bool {
 		if(bReleased == false || bActionCmd == true)
 			return true;
 		auto flags = cf->GetFlags();
@@ -281,9 +281,9 @@ void NET_sv_CMD_CALL(pragma::networking::IServerClient &session, NetPacket packe
 	if(r == false || cv == nullptr)
 		p->Write<uint8_t>(static_cast<uint8_t>(0));
 	else {
-		if(cv->GetType() == ConType::Var) {
+		if(cv->GetType() == pragma::console::ConType::Var) {
 			p->Write<uint8_t>(2);
-			p->WriteString(static_cast<ConVar *>(cv)->GetString());
+			p->WriteString(static_cast<pragma::console::ConVar *>(cv)->GetString());
 		}
 		else {
 			p->Write<uint8_t>(1);
@@ -431,7 +431,7 @@ void NET_sv_NOTARGET(pragma::networking::IServerClient &session, NetPacket packe
 	if(charComponent == nullptr)
 		return;
 	charComponent->SetNoTarget(!charComponent->GetNoTarget());
-	pl->PrintMessage(std::string("Notarget turned ") + ((charComponent->GetNoTarget() == true) ? "ON" : "OFF"), MESSAGE::PRINTCONSOLE);
+	pl->PrintMessage(std::string("Notarget turned ") + ((charComponent->GetNoTarget() == true) ? "ON" : "OFF"), pragma::console::MESSAGE::PRINTCONSOLE);
 }
 
 void NET_sv_GODMODE(pragma::networking::IServerClient &session, NetPacket packet)
@@ -445,7 +445,7 @@ void NET_sv_GODMODE(pragma::networking::IServerClient &session, NetPacket packet
 	if(charComponent == nullptr)
 		return;
 	charComponent->SetGodMode(!charComponent->GetGodMode());
-	pl->PrintMessage(std::string("God mode turned ") + ((charComponent->GetGodMode() == true) ? "ON" : "OFF"), MESSAGE::PRINTCONSOLE);
+	pl->PrintMessage(std::string("God mode turned ") + ((charComponent->GetGodMode() == true) ? "ON" : "OFF"), pragma::console::MESSAGE::PRINTCONSOLE);
 }
 
 void NET_sv_SUICIDE(pragma::networking::IServerClient &session, NetPacket packet)

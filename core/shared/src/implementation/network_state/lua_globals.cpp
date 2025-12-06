@@ -125,13 +125,13 @@ void pragma::NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 	    {"COLOR_FLAG_BACKGROUND_BLACK", umath::to_integral(pragma::console::ConsoleColorFlags::BackgroundBlack)},
 	    {"COLOR_FLAG_RESET_BIT", umath::to_integral(pragma::console::ConsoleColorFlags::Reset)},
 
-	    {"MESSAGE_FLAG_NONE", umath::to_integral(Con::MessageFlags::None)},
-	    {"MESSAGE_FLAG_BIT_GENERIC", umath::to_integral(Con::MessageFlags::Generic)},
-	    {"MESSAGE_FLAG_BIT_WARNING", umath::to_integral(Con::MessageFlags::Warning)},
-	    {"MESSAGE_FLAG_BIT_ERROR", umath::to_integral(Con::MessageFlags::Error)},
-	    {"MESSAGE_FLAG_BIT_CRITICAL", umath::to_integral(Con::MessageFlags::Critical)},
-	    {"MESSAGE_FLAG_BIT_SERVER_SIDE", umath::to_integral(Con::MessageFlags::ServerSide)},
-	    {"MESSAGE_FLAG_BIT_CLIENT_SIDE", umath::to_integral(Con::MessageFlags::ClientSide)},
+	    {"MESSAGE_FLAG_NONE", umath::to_integral(pragma::console::MessageFlags::None)},
+	    {"MESSAGE_FLAG_BIT_GENERIC", umath::to_integral(pragma::console::MessageFlags::Generic)},
+	    {"MESSAGE_FLAG_BIT_WARNING", umath::to_integral(pragma::console::MessageFlags::Warning)},
+	    {"MESSAGE_FLAG_BIT_ERROR", umath::to_integral(pragma::console::MessageFlags::Error)},
+	    {"MESSAGE_FLAG_BIT_CRITICAL", umath::to_integral(pragma::console::MessageFlags::Critical)},
+	    {"MESSAGE_FLAG_BIT_SERVER_SIDE", umath::to_integral(pragma::console::MessageFlags::ServerSide)},
+	    {"MESSAGE_FLAG_BIT_CLIENT_SIDE", umath::to_integral(pragma::console::MessageFlags::ClientSide)},
 	  });
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "console",

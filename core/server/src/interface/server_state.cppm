@@ -20,11 +20,11 @@ namespace pragma {
 	export class DLLSERVER ServerState : public NetworkState {
 		// For internal use only! Not to be used directly!
 	  public:
-		virtual std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &GetConVarPtrs() override;
-		static ConVarHandle GetConVarHandle(std::string scvar);
+		virtual std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> &GetConVarPtrs() override;
+		static console::ConVarHandle GetConVarHandle(std::string scvar);
 		//
 	  private:
-		std::unordered_map<std::string, ConCommand *> m_luaConCommands;
+		std::unordered_map<std::string, console::ConCommand *> m_luaConCommands;
 		unsigned int m_conCommandID;
 		std::unique_ptr<pragma::networking::IServer> m_server;
 		std::shared_ptr<pragma::networking::IServerClient> m_localClient = {};
@@ -62,7 +62,7 @@ namespace pragma {
 		void SendRoughModel(const std::string &f);
 		void SendSoundSourceToClient(pragma::audio::SALSound &sound, bool sendFullUpdate, const pragma::networking::ClientRecipientFilter *rf = nullptr);
 		// ConVars
-		virtual ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false) override;
+		virtual console::ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false) override;
 		// Sound
 		virtual std::shared_ptr<pragma::audio::ALSound> CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None) override;
 		virtual std::shared_ptr<pragma::audio::ALSound> GetSoundByIndex(unsigned int idx) override;
@@ -104,12 +104,12 @@ namespace pragma {
 		virtual pragma::ModelSubMesh *CreateSubMesh() const override;
 		virtual ModelMesh *CreateMesh() const override;
 		virtual bool IsServer() const override;
-		virtual ConVarMap *GetConVarMap() override;
+		virtual console::ConVarMap *GetConVarMap() override;
 		pragma::networking::ServerMessageMap *GetNetMessageMap();
 		SVNetMessage *GetNetMessage(unsigned int ID);
 		unsigned int GetClientMessageID(std::string identifier);
-		virtual ConCommand *CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags = pragma::console::ConVarFlags::None, const std::string &help = "") override;
-		void GetLuaConCommands(std::unordered_map<std::string, ConCommand *> **cmds);
+		virtual console::ConCommand *CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags = pragma::console::ConVarFlags::None, const std::string &help = "") override;
+		void GetLuaConCommands(std::unordered_map<std::string, console::ConCommand *> **cmds);
 
 		bool IsClientAuthenticationRequired() const;
 		void SetServerInterface(std::unique_ptr<pragma::networking::IServer> iserver);

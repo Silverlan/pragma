@@ -992,7 +992,7 @@ static void debug_entity_render_buffer(pragma::NetworkState *state, pragma::Base
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
 	if(charComponent.expired())
 		return;
-	auto ents = command::find_target_entity(state, *charComponent, argv);
+	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	if(ents.empty()) {
 		Con::cwar << "No target entity found!" << Con::endl;
 		return;

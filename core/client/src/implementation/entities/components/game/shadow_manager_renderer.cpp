@@ -242,7 +242,7 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(std::shared_ptr<
 	return RenderResultFlags::None;
 }
 
-static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
+static auto cvParticleQuality = pragma::console::get_client_con_var("cl_render_particle_quality");
 void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::rendering::ShadowMapType smType, pragma::LightType type, bool drawParticleShadows)
 {
 	auto hShadowMap = light.GetShadowMap<pragma::CShadowComponent>(smType);

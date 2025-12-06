@@ -30,7 +30,7 @@ export {
 			DLLNETWORK std::string get_working_directory();
 
 			DLLNETWORK void set_record_console_output(bool record);
-			DLLNETWORK opt<mult<std::string, Con::MessageFlags, opt<Color>>> poll_console_output(lua::State *l);
+			DLLNETWORK opt<mult<std::string, pragma::console::MessageFlags, opt<Color>>> poll_console_output(lua::State *l);
 
 			DLLNETWORK void register_shared_functions(lua::State *l, luabind::module_ &modEn);
 		};

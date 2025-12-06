@@ -15,14 +15,14 @@ import :rendering.shaders;
 
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>(
-	  "cl_render_shader_quality", +[](pragma::NetworkState *, const ConVar &, int, int val) {
+	  "cl_render_shader_quality", +[](pragma::NetworkState *, const pragma::console::ConVar &, int, int val) {
 		  if(pragma::get_cgame() == nullptr)
 			  return;
 		  pragma::get_cgame()->GetWorldEnvironment().SetShaderQuality(val);
 	  });
 }
 
-static void CVAR_CALLBACK_cl_render_shadow_resolution(pragma::NetworkState *, const ConVar &, int, int val)
+static void CVAR_CALLBACK_cl_render_shadow_resolution(pragma::NetworkState *, const pragma::console::ConVar &, int, int val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;

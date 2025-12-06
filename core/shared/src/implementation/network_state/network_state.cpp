@@ -10,7 +10,7 @@ module pragma.shared;
 
 import :network_state;
 
-ConVarHandle pragma::NetworkState::GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ptrs, std::string scvar) { return CVarHandler::GetConVarHandle(ptrs, scvar); }
+pragma::console::ConVarHandle pragma::NetworkState::GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> &ptrs, std::string scvar) { return CVarHandler::GetConVarHandle(ptrs, scvar); }
 
 UInt8 pragma::NetworkState::STATE_COUNT = 0;
 
@@ -172,7 +172,7 @@ void pragma::NetworkState::ClearGameConVars()
 {
 #pragma message("TODO: What about ConVars that have been created ingame?")
 	for(auto it = m_conVars.begin(); it != m_conVars.end();) {
-		if(it->second->GetType() == ConType::LuaCmd)
+		if(it->second->GetType() == pragma::console::ConType::LuaCmd)
 			it = m_conVars.erase(it);
 		else
 			++it;
@@ -335,24 +335,24 @@ bool pragma::NetworkState::IsServer() const { return false; }
 
 void pragma::NetworkState::InitializeResourceManager() { m_resourceWatcher = std::make_unique<ResourceWatcherManager>(this); }
 
-ConVar *pragma::NetworkState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
+pragma::console::ConVar *pragma::NetworkState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
 {
 	auto *cv = GetConVar(scmd);
 	if(cv == nullptr)
 		return nullptr;
-	if(cv->GetType() != ConType::Var)
+	if(cv->GetType() != pragma::console::ConType::Var)
 		return nullptr;
-	auto *cvar = static_cast<ConVar *>(cv);
+	auto *cvar = static_cast<pragma::console::ConVar *>(cv);
 	auto prev = cvar->GetString();
 	if(bApplyIfEqual == false && prev == value)
 		return nullptr;
-	std::array<const std::unordered_map<std::string, std::vector<CvarCallback>> *, 2> cvarCallbackList = {&m_cvarCallbacks, nullptr};
+	std::array<const std::unordered_map<std::string, std::vector<pragma::console::CvarCallback>> *, 2> cvarCallbackList = {&m_cvarCallbacks, nullptr};
 	auto *game = GetGameState();
 	if(game != nullptr)
 		cvarCallbackList.at(1) = &game->GetConVarCallbacks();
 	udm::visit(cvar->GetVarType(), [this, &cvarCallbackList, &scmd, cvar, &value](auto tag) {
 		using T = typename decltype(tag)::type;
-		if constexpr(::console::is_valid_convar_type_v<T>) {
+		if constexpr(pragma::console::is_valid_convar_type_v<T>) {
 			auto &rawValPrev = cvar->GetRawValue();
 			auto prevVal = rawValPrev ? *static_cast<T *>(rawValPrev.get()) : T {};
 			cvar->SetValue(value);
@@ -365,14 +365,14 @@ ConVar *pragma::NetworkState::SetConVar(std::string scmd, std::string value, boo
 					continue;
 				auto it = cvList->find(scmd);
 				if(it != cvList->end()) {
-					auto &cvarCallbacks = const_cast<std::vector<CvarCallback> &>(it->second);
+					auto &cvarCallbacks = const_cast<std::vector<pragma::console::CvarCallback> &>(it->second);
 					for(auto itCb = cvarCallbacks.begin(); itCb != cvarCallbacks.end();) {
 						auto &ptrCb = *itCb;
-						auto &fc = const_cast<CvarCallback &>(ptrCb).GetFunction();
+						auto &fc = const_cast<pragma::console::CvarCallback &>(ptrCb).GetFunction();
 						if(!fc.IsValid())
 							itCb = cvarCallbacks.erase(itCb);
 						else {
-							fc.Call<void, pragma::NetworkState *, const ConVar &, const void *, const void *>(this, *cvar, &prevVal, &newVal);
+							fc.Call<void, pragma::NetworkState *, const pragma::console::ConVar &, const void *, const void *>(this, *cvar, &prevVal, &newVal);
 							++itCb;
 						}
 					}
@@ -415,7 +415,7 @@ bool pragma::check_cheats(const std::string &scmd, pragma::NetworkState *state)
 	return true;
 }
 
-bool pragma::NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl, KeyState pressState, float magnitude, const std::function<bool(ConConf *, float &)> &callback)
+bool pragma::NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl, KeyState pressState, float magnitude, const std::function<bool(pragma::console::ConConf *, float &)> &callback)
 {
 	TranslateConsoleCommand(scmd);
 	auto *cv = GetConVar(scmd);
@@ -428,8 +428,8 @@ bool pragma::NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::
 		return true;
 
 	auto type = cv->GetType();
-	if(type == ConType::Var) {
-		auto *cvar = static_cast<ConVar *>(cv);
+	if(type == pragma::console::ConType::Var) {
+		auto *cvar = static_cast<pragma::console::ConVar *>(cv);
 		if(argv.empty()) {
 			cvar->Print(scmd);
 			return true;
@@ -450,8 +450,8 @@ bool pragma::NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::
 			SetConVar(scmd, argv[0]);
 		return true;
 	}
-	auto *cmd = static_cast<ConCommand *>(cv);
-	if(type == ConType::Cmd) {
+	auto *cmd = static_cast<pragma::console::ConCommand *>(cv);
+	if(type == pragma::console::ConType::Cmd) {
 		std::function<void(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> func = nullptr;
 		cmd->GetFunction(func);
 		if(scmd.empty() == false && scmd.front() == '-')
@@ -670,7 +670,7 @@ void pragma::NetworkState::DeregisterLuaModules(void *l, const std::string &iden
 	m_initializedLibraries.erase(it);
 }
 
-ConVarMap *pragma::NetworkState::GetConVarMap() { return nullptr; }
+pragma::console::ConVarMap *pragma::NetworkState::GetConVarMap() { return nullptr; }
 
 void pragma::NetworkState::UnregisterConVar(const std::string &scmd)
 {
@@ -681,19 +681,19 @@ void pragma::NetworkState::UnregisterConVar(const std::string &scmd)
 		m_conVars.erase(it);
 }
 
-ConVar *pragma::NetworkState::RegisterConVar(const std::string &scmd, const std::shared_ptr<ConVar> &cvar)
+pragma::console::ConVar *pragma::NetworkState::RegisterConVar(const std::string &scmd, const std::shared_ptr<pragma::console::ConVar> &cvar)
 {
 	auto lcmd = scmd;
 	ustring::to_lower(lcmd);
 	auto it = m_conVars.find(scmd);
 	if(it != m_conVars.end()) {
 		auto &cf = it->second;
-		if(cf->GetType() != ConType::Var)
+		if(cf->GetType() != pragma::console::ConType::Var)
 			return nullptr;
-		return static_cast<ConVar *>(cf.get());
+		return static_cast<pragma::console::ConVar *>(cf.get());
 	}
 	auto itNew = m_conVars.insert(decltype(m_conVars)::value_type(scmd, cvar));
-	auto *cv = static_cast<ConVar *>(itNew.first->second.get());
+	auto *cv = static_cast<pragma::console::ConVar *>(itNew.first->second.get());
 	auto &cfg = pragma::Engine::Get()->GetConVarConfig(GetType());
 	if(cfg) {
 		// Use value from loaded config
@@ -703,26 +703,26 @@ ConVar *pragma::NetworkState::RegisterConVar(const std::string &scmd, const std:
 	}
 	return cv;
 }
-ConVar *pragma::NetworkState::CreateConVar(const std::string &scmd, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help)
+pragma::console::ConVar *pragma::NetworkState::CreateConVar(const std::string &scmd, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help)
 {
-	return udm::visit(type, [this, &scmd, &value, flags, &help](auto tag) -> ConVar * {
+	return udm::visit(type, [this, &scmd, &value, flags, &help](auto tag) -> pragma::console::ConVar * {
 		using T = typename decltype(tag)::type;
-		if constexpr(::console::is_valid_convar_type_v<T> && udm::is_convertible<std::string, T>())
-			return RegisterConVar(scmd, ConVar::Create<T>(udm::convert<std::string, T>(value), flags, help));
+		if constexpr(pragma::console::is_valid_convar_type_v<T> && udm::is_convertible<std::string, T>())
+			return RegisterConVar(scmd, pragma::console::ConVar::Create<T>(udm::convert<std::string, T>(value), flags, help));
 		return nullptr;
 	});
 }
 
 std::unordered_map<std::string, unsigned int> &pragma::NetworkState::GetConCommandIDs() { return m_conCommandIDs; }
 
-ConCommand *pragma::NetworkState::CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags, const std::string &help)
+pragma::console::ConCommand *pragma::NetworkState::CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags, const std::string &help)
 {
 	auto lcmd = scmd;
 	ustring::to_lower(lcmd);
 	if(m_conVars.find(lcmd) != m_conVars.end())
 		return nullptr;
-	auto *cmd = new ConCommand(fc, flags, help);
-	m_conVars.insert(std::unordered_map<std::string, ConConf *>::value_type(scmd, static_cast<ConConf *>(cmd)));
+	auto *cmd = new pragma::console::ConCommand(fc, flags, help);
+	m_conVars.insert(std::unordered_map<std::string, pragma::console::ConConf *>::value_type(scmd, static_cast<pragma::console::ConConf *>(cmd)));
 	return cmd;
 }
 

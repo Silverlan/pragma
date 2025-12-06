@@ -199,7 +199,7 @@ bool CPlayerComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &pa
 	}
 	else if(eventId == m_netEvPrintMessage) {
 		auto msg = packet->ReadString();
-		auto type = static_cast<MESSAGE>(packet->Read<std::underlying_type_t<MESSAGE>>());
+		auto type = static_cast<pragma::console::MESSAGE>(packet->Read<std::underlying_type_t<pragma::console::MESSAGE>>());
 		PrintMessage(msg, type);
 	}
 	else if(eventId == m_netEvRespawn) {
@@ -466,13 +466,13 @@ void CPlayerComponent::ReceiveData(NetPacket &packet)
 	});
 }
 
-void CPlayerComponent::PrintMessage(std::string message, MESSAGE type)
+void CPlayerComponent::PrintMessage(std::string message, pragma::console::MESSAGE type)
 {
 	switch(type) {
-	case MESSAGE::PRINTCONSOLE:
+	case pragma::console::MESSAGE::PRINTCONSOLE:
 		Con::cout << message << Con::endl;
 		break;
-	case MESSAGE::PRINTCHAT:
+	case pragma::console::MESSAGE::PRINTCHAT:
 		{
 			// TODO
 			//auto *l = client->GetLuaState();

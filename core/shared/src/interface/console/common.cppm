@@ -8,7 +8,7 @@ export module pragma.shared:console.common;
 
 import :console.convar_handle;
 
-export {
-	DLLNETWORK ConVarHandle GetConVar(std::string scmd);
-	DLLNETWORK ConVarHandle GetEngineConVar(std::string scmd);
+export namespace pragma::console {
+	DLLNETWORK ConVarHandle get_con_var(std::string scmd);
+	DLLNETWORK ConVarHandle get_engine_con_var(std::string scmd);
 };

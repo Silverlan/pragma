@@ -9,7 +9,7 @@ export module pragma.shared:console.enums;
 
 export import pragma.math;
 
-export {
+export namespace pragma::console {
 	enum class MESSAGE : int { PRINTCONSOLE, PRINTCHAT };
 
 	enum class ConType : uint32_t {
@@ -23,86 +23,83 @@ export {
 		LuaCommand = 2
 	};
 
-	namespace pragma::console {
-		enum class ConVarFlags : uint32_t {
-			None = 0,
-			Cheat = 1,
-			Singleplayer = Cheat << 1,
-			Userinfo = Singleplayer << 1,
-			Replicated = Userinfo << 1,
-			Archive = Replicated << 1,
-			Notify = Archive << 1,
-			JoystickAxisContinuous = Notify << 1,
-			JoystickAxisSingle = JoystickAxisContinuous << 1,
-			Hidden = JoystickAxisSingle << 1,
-			Password = Hidden << 1u,
+	enum class ConVarFlags : uint32_t {
+		None = 0,
+		Cheat = 1,
+		Singleplayer = Cheat << 1,
+		Userinfo = Singleplayer << 1,
+		Replicated = Userinfo << 1,
+		Archive = Replicated << 1,
+		Notify = Archive << 1,
+		JoystickAxisContinuous = Notify << 1,
+		JoystickAxisSingle = JoystickAxisContinuous << 1,
+		Hidden = JoystickAxisSingle << 1,
+		Password = Hidden << 1u,
 
-			Last = Hidden
-		};
-		enum class ConsoleColorFlags : uint32_t {
-			None = 0u,
-			Red = 1u,
-			Green = Red << 1u,
-			Blue = Green << 1u,
-			Intensity = Blue << 1u,
+		Last = Hidden
+	};
+	enum class ConsoleColorFlags : uint32_t {
+		None = 0u,
+		Red = 1u,
+		Green = Red << 1u,
+		Blue = Green << 1u,
+		Intensity = Blue << 1u,
 
-			BackgroundRed = Intensity << 1u,
-			BackgroundGreen = BackgroundRed << 1u,
-			BackgroundBlue = BackgroundGreen << 1u,
-			BackgroundIntensity = BackgroundBlue << 1u,
+		BackgroundRed = Intensity << 1u,
+		BackgroundGreen = BackgroundRed << 1u,
+		BackgroundBlue = BackgroundGreen << 1u,
+		BackgroundIntensity = BackgroundBlue << 1u,
 
-			Reset = BackgroundIntensity << 1u,
+		Reset = BackgroundIntensity << 1u,
 
-			Yellow = Red | Green,
-			Magenta = Red | Blue,
-			Cyan = Blue | Green,
-			White = Red | Green | Blue,
-			Black = None,
+		Yellow = Red | Green,
+		Magenta = Red | Blue,
+		Cyan = Blue | Green,
+		White = Red | Green | Blue,
+		Black = None,
 
-			BackgroundYellow = BackgroundRed | BackgroundGreen,
-			BackgroundMagenta = BackgroundRed | BackgroundBlue,
-			BackgroundCyan = BackgroundBlue | BackgroundGreen,
-			BackgroundWhite = BackgroundRed | BackgroundGreen | BackgroundBlue,
-			BackgroundBlack = None
-		};
-		enum class ConsoleDecoratorFlags : uint32_t {
-			None = 0,
-			Bold = 1,
-			Underline = Bold << 1,
-			SlowBlink = Underline << 1,
-			Framed = SlowBlink << 1,
-			Encircled = Framed << 1,
-			Overlined = Encircled << 1,
-			Reset = Overlined << 1,
-		};
-		using namespace umath::scoped_enum::bitwise;
-	}
+		BackgroundYellow = BackgroundRed | BackgroundGreen,
+		BackgroundMagenta = BackgroundRed | BackgroundBlue,
+		BackgroundCyan = BackgroundBlue | BackgroundGreen,
+		BackgroundWhite = BackgroundRed | BackgroundGreen | BackgroundBlue,
+		BackgroundBlack = None
+	};
+	enum class ConsoleDecoratorFlags : uint32_t {
+		None = 0,
+		Bold = 1,
+		Underline = Bold << 1,
+		SlowBlink = Underline << 1,
+		Framed = SlowBlink << 1,
+		Encircled = Framed << 1,
+		Overlined = Encircled << 1,
+		Reset = Overlined << 1,
+	};
+
+	DLLNETWORK bool set_console_color(pragma::console::ConsoleColorFlags flags);
+	DLLNETWORK bool reset_console_color();
+	DLLNETWORK pragma::console::ConsoleColorFlags get_active_console_color_flags();
+	DLLNETWORK std::optional<Color> console_color_flags_to_color(pragma::console::ConsoleColorFlags flags);
+	DLLNETWORK pragma::console::ConsoleColorFlags color_to_console_color_flags(const Color &color);
+	DLLNETWORK std::string get_ansi_color_code(pragma::console::ConsoleColorFlags flags);
+
+	DLLNETWORK std::string get_true_color_code(std::optional<Color> foregroundColor, std::optional<Color> backgroundColor = {}, pragma::console::ConsoleDecoratorFlags flags = pragma::console::ConsoleDecoratorFlags::None);
+	DLLNETWORK std::string get_reset_color_code();
+
+	enum class MessageFlags : uint8_t {
+		None = 0u,
+		Generic = 1u,
+		Warning = Generic << 1u,
+		Error = Warning << 1u,
+		Critical = Error << 1u,
+
+		ServerSide = Critical << 1u,
+		ClientSide = ServerSide << 1u
+	};
+
+	using namespace umath::scoped_enum::bitwise;
+}
+export {
 	REGISTER_ENUM_FLAGS(pragma::console::ConVarFlags)
 	REGISTER_ENUM_FLAGS(pragma::console::ConsoleColorFlags)
 	REGISTER_ENUM_FLAGS(pragma::console::ConsoleDecoratorFlags)
-
-	namespace util {
-		DLLNETWORK bool set_console_color(pragma::console::ConsoleColorFlags flags);
-		DLLNETWORK bool reset_console_color();
-		DLLNETWORK pragma::console::ConsoleColorFlags get_active_console_color_flags();
-		DLLNETWORK std::optional<Color> console_color_flags_to_color(pragma::console::ConsoleColorFlags flags);
-		DLLNETWORK pragma::console::ConsoleColorFlags color_to_console_color_flags(const Color &color);
-		DLLNETWORK std::string get_ansi_color_code(pragma::console::ConsoleColorFlags flags);
-
-		DLLNETWORK std::string get_true_color_code(std::optional<Color> foregroundColor, std::optional<Color> backgroundColor = {}, pragma::console::ConsoleDecoratorFlags flags = pragma::console::ConsoleDecoratorFlags::None);
-		DLLNETWORK std::string get_reset_color_code();
-	};
-
-	namespace Con {
-		enum class MessageFlags : uint8_t {
-			None = 0u,
-			Generic = 1u,
-			Warning = Generic << 1u,
-			Error = Warning << 1u,
-			Critical = Error << 1u,
-
-			ServerSide = Critical << 1u,
-			ClientSide = ServerSide << 1u
-		};
-	};
-};
+}

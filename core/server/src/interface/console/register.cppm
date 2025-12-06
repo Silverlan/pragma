@@ -15,7 +15,7 @@ export namespace pragma::console {
 		template<typename T>
 		std::shared_ptr<ConVar> register_variable(const std::string &scmd, const T &value, pragma::console::ConVarFlags flags, const std::string &help = "", const std::optional<std::string> &usageHelp = {})
 		{
-			console_system::server::register_convar(scmd, udm::type_to_enum<T>(), udm::convert<T, udm::String>(value), flags, help);
+			server::register_convar(scmd, udm::type_to_enum<T>(), udm::convert<T, udm::String>(value), flags, help);
 			return {};
 		}
 
@@ -28,9 +28,9 @@ export namespace pragma::console {
 
 		template<typename T>
 		    requires(util::is_of_type<T, int, float, bool, std::string>)
-		DummyReturnValue register_variable_listener(const std::string &scvar, void (*function)(pragma::NetworkState *, const ConVar &, T, T))
+		DummyReturnValue register_variable_listener(const std::string &scvar, void (*function)(pragma::NetworkState *, const pragma::console::ConVar &, T, T))
 		{
-			console_system::server::register_convar_callback(scvar, function);
+			server::register_convar_callback(scvar, function);
 			return {};
 		}
 	}

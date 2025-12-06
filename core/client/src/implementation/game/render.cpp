@@ -19,14 +19,14 @@ import :physics;
 import :rendering.shaders;
 import :scripting.lua;
 
-static void CVAR_CALLBACK_render_vsync_enabled(pragma::NetworkState *, const ConVar &, int, int val) { pragma::platform::set_swap_interval((val == 0) ? 0 : 1); }
+static void CVAR_CALLBACK_render_vsync_enabled(pragma::NetworkState *, const pragma::console::ConVar &, int, int val) { pragma::platform::set_swap_interval((val == 0) ? 0 : 1); }
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>("render_vsync_enabled", &CVAR_CALLBACK_render_vsync_enabled);
 }
 
 static CallbackHandle cbDrawPhysics;
 static CallbackHandle cbDrawPhysicsEnd;
-static void CVAR_CALLBACK_debug_physics_draw(pragma::NetworkState *, const ConVar &, int, int val, bool serverside)
+static void CVAR_CALLBACK_debug_physics_draw(pragma::NetworkState *, const pragma::console::ConVar &, int, int val, bool serverside)
 {
 	if(cbDrawPhysics.IsValid())
 		cbDrawPhysics.Remove();
@@ -103,10 +103,10 @@ static void CVAR_CALLBACK_debug_physics_draw(pragma::NetworkState *, const ConVa
 	visDebugger->SetDebugMode(mode);
 }
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<int>("debug_physics_draw", +[](pragma::NetworkState *nw, const ConVar &cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, false); });
+	auto UVN = pragma::console::client::register_variable_listener<int>("debug_physics_draw", +[](pragma::NetworkState *nw, const pragma::console::ConVar &cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, false); });
 }
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<int>("sv_debug_physics_draw", +[](pragma::NetworkState *nw, const ConVar &cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, true); });
+	auto UVN = pragma::console::client::register_variable_listener<int>("sv_debug_physics_draw", +[](pragma::NetworkState *nw, const pragma::console::ConVar &cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, true); });
 }
 
 static void debug_render_validation_error_enabled(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
@@ -210,7 +210,7 @@ static void debug_dump_component_properties(pragma::NetworkState *state, pragma:
 	auto charComponent = ent.GetCharacterComponent();
 	if(charComponent.expired())
 		return;
-	auto ents = command::find_target_entity(state, *charComponent, argv);
+	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	if(ents.empty())
 		return;
 	auto *entTgt = ents.front();
@@ -254,7 +254,7 @@ static void debug_render_depth_buffer(pragma::NetworkState *state, pragma::BaseP
 	if(ent.IsCharacter() == false)
 		return;
 	auto charComponent = ent.GetCharacterComponent();
-	auto ents = command::find_target_entity(state, *charComponent, argv);
+	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	EntityHandle hEnt {};
 	if(ents.empty() == false)
 		hEnt = ents.front()->GetHandle();
@@ -296,14 +296,14 @@ namespace {
 	auto UVN = pragma::console::client::register_command("debug_render_depth_buffer", &debug_render_depth_buffer, pragma::console::ConVarFlags::None, "Draws the scene depth buffer to screen.");
 }
 
-static CVar cvDrawScene = GetClientConVar("render_draw_scene");
-static CVar cvDrawWorld = GetClientConVar("render_draw_world");
-static CVar cvDrawStatic = GetClientConVar("render_draw_static");
-static CVar cvDrawDynamic = GetClientConVar("render_draw_dynamic");
-static CVar cvDrawTranslucent = GetClientConVar("render_draw_translucent");
-static CVar cvClearScene = GetClientConVar("render_clear_scene");
-static CVar cvClearSceneColor = GetClientConVar("render_clear_scene_color");
-static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
+static auto cvDrawScene = pragma::console::get_client_con_var("render_draw_scene");
+static auto cvDrawWorld = pragma::console::get_client_con_var("render_draw_world");
+static auto cvDrawStatic = pragma::console::get_client_con_var("render_draw_static");
+static auto cvDrawDynamic = pragma::console::get_client_con_var("render_draw_dynamic");
+static auto cvDrawTranslucent = pragma::console::get_client_con_var("render_draw_translucent");
+static auto cvClearScene = pragma::console::get_client_con_var("render_clear_scene");
+static auto cvClearSceneColor = pragma::console::get_client_con_var("render_clear_scene_color");
+static auto cvParticleQuality = pragma::console::get_client_con_var("cl_render_particle_quality");
 void pragma::CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 {
 #ifdef PRAGMA_ENABLE_SHADER_DEBUG_PRINT
@@ -460,13 +460,13 @@ static void debug_dump_render_queues(const util::DrawSceneInfo &drawSceneInfo)
 			if(item.material != curMaterial) {
 				curMaterial = item.material;
 				auto *mat = item.GetMaterial();
-				ss << util::get_true_color_code(colors::Lime) << "Material" << util::get_reset_color_code() << ": " << (mat ? mat->GetName() : "NULL") << "\n";
+				ss << pragma::console::get_true_color_code(colors::Lime) << "Material" << pragma::console::get_reset_color_code() << ": " << (mat ? mat->GetName() : "NULL") << "\n";
 			}
 			if(item.pipelineId != curPipeline) {
 				curPipeline = item.pipelineId;
 				uint32_t pipelineIdx;
 				auto *shader = item.GetShader(pipelineIdx);
-				ss << util::get_true_color_code(colors::Aqua) << "Shader" << util::get_reset_color_code() << ": ";
+				ss << pragma::console::get_true_color_code(colors::Aqua) << "Shader" << pragma::console::get_reset_color_code() << ": ";
 				if(shader)
 					ss << shader->GetIdentifier() << " (" << pipelineIdx << ")\n";
 				else
@@ -475,10 +475,10 @@ static void debug_dump_render_queues(const util::DrawSceneInfo &drawSceneInfo)
 			if(item.entity != curEntity) {
 				curEntity = item.entity;
 				auto *ent = item.GetEntity();
-				ss << util::get_true_color_code(colors::Orange) << "Entity" << util::get_reset_color_code() << ": " << (ent ? ent->ToString() : "NULL") << "\n";
+				ss << pragma::console::get_true_color_code(colors::Orange) << "Entity" << pragma::console::get_reset_color_code() << ": " << (ent ? ent->ToString() : "NULL") << "\n";
 			}
 			auto *mesh = item.GetMesh();
-			ss << util::get_true_color_code(colors::White) << "Mesh" << util::get_reset_color_code() << ": ";
+			ss << pragma::console::get_true_color_code(colors::White) << "Mesh" << pragma::console::get_reset_color_code() << ": ";
 			if(!mesh)
 				ss << "NULL\n";
 			else
@@ -502,7 +502,7 @@ static void debug_dump_render_queues(const util::DrawSceneInfo &drawSceneInfo)
 			queue->WaitForCompletion();
 			if(queue->queue.empty())
 				continue;
-			ss << "\n" << util::get_true_color_code(colors::Magenta) << "Scene pass" << util::get_reset_color_code() << ": " << magic_enum::enum_name(static_cast<pragma::rendering::SceneRenderPass>(i));
+			ss << "\n" << pragma::console::get_true_color_code(colors::Magenta) << "Scene pass" << pragma::console::get_reset_color_code() << ": " << magic_enum::enum_name(static_cast<pragma::rendering::SceneRenderPass>(i));
 			if(translucent)
 				ss << " (translucent)\n";
 			else
@@ -518,7 +518,7 @@ static void debug_dump_render_queues(const std::vector<util::DrawSceneInfo> &dra
 	Con::cout << "Dumping render queues..." << Con::endl;
 	uint32_t i = 0;
 	for(auto &drawSceneInfo : drawSceneInfos) {
-		Con::cout << util::get_true_color_code(colors::Red) << "Scene #" << (i++) << util::get_reset_color_code() << Con::endl;
+		Con::cout << pragma::console::get_true_color_code(colors::Red) << "Scene #" << (i++) << pragma::console::get_reset_color_code() << Con::endl;
 		debug_dump_render_queues(drawSceneInfo);
 	}
 }

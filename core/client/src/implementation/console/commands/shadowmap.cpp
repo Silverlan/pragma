@@ -16,12 +16,12 @@ static int shadowmapWidth;
 static int shadowmapHeight;
 static CallbackHandle cbRenderShadowMap;
 static CallbackHandle cbReleaseShadowMap;
-static CVar cvShadowmapSize = GetClientConVar("cl_render_shadow_resolution");
+static auto cvShadowmapSize = pragma::console::get_client_con_var("cl_render_shadow_resolution");
 static bool get_shadow_map(pragma::NetworkState *nw, std::vector<std::string> &argv, pragma::CLightComponent **light, pragma::rendering::ShadowMapType smType)
 {
 	if(argv.empty())
 		return false;
-	auto ents = command::find_named_targets(nw, argv.front());
+	auto ents = pragma::console::find_named_targets(nw, argv.front());
 	if(ents.empty())
 		return false;
 	auto *ent = static_cast<CBaseEntity *>(ents.front());
@@ -77,7 +77,7 @@ namespace {
 	auto UVN = pragma::console::client::register_command("debug_light_shadowmap", &CMD_debug_light_shadowmap, pragma::console::ConVarFlags::None,
 	  "Displays the depth map for the given light on screen. Call without arguments to turn the display off. Usage: debug_light_shadowmap <lightEntityIndex>");
 }
-static void CVAR_CALLBACK_cl_render_shadow_pssm_split_count(pragma::NetworkState *state, const ConVar &, int, int)
+static void CVAR_CALLBACK_cl_render_shadow_pssm_split_count(pragma::NetworkState *state, const pragma::console::ConVar &, int, int)
 {
 	if(shadowmapTargetIdx == -1)
 		return;

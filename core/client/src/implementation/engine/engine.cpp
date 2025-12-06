@@ -37,7 +37,7 @@ import pragma.string.unicode;
 extern "C" {
 void DLLCLIENT RunCEngine(int argc, char *argv[])
 {
-	auto en = InitializeEngine<CEngine>(argc, argv);
+	auto en = pragma::initialize_engine<CEngine>(argc, argv);
 	if(en == nullptr)
 		return;
 	en->Release(); // Has to be called before object is actually destroyed, to make sure weak_ptr references are still valid
@@ -61,8 +61,8 @@ CEngine::CEngine(int argc, char *argv[])
 	static auto registeredGlobals = false;
 	if (!registeredGlobals) {
 		registeredGlobals = true;
-		register_shared_convars(*console_system::client::get_convar_map());
-		register_client_launch_parameters(*pragma::GetLaunchParaMap());
+		pragma::console::register_shared_convars(*pragma::console::client::get_convar_map());
+		pragma::register_client_launch_parameters(*pragma::GetLaunchParaMap());
 		client_entities::register_entities();
 		pragma::networking::register_client_net_messages();
 	}
@@ -151,7 +151,7 @@ pragma::debug::GPUProfiler &CEngine::GetGPUProfiler() const { return *m_gpuProfi
 pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage> *CEngine::GetGPUProfilingStageManager() { return m_gpuProfilingStageManager.get(); }
 pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *CEngine::GetProfilingStageManager() { return m_cpuProfilingStageManager.get(); }
 
-static auto cvGPUProfiling = GetClientConVar("cl_gpu_timer_queries_enabled");
+static auto cvGPUProfiling = pragma::console::get_client_con_var("cl_gpu_timer_queries_enabled");
 bool CEngine::IsGPUProfilingEnabled() const { return cvGPUProfiling->GetBool(); }
 
 void CEngine::DumpDebugInformation(uzip::ZIPFile &zip) const
@@ -264,7 +264,7 @@ double CEngine::GetFPS() const { return m_fps; }
 double CEngine::GetFrameTime() const { return m_tFPSTime * 1'000.0; }
 Double CEngine::GetDeltaFrameTime() const { return util::clock::to_seconds(m_tDeltaFrameTime); }
 
-static auto cvFrameLimit = GetClientConVar("cl_max_fps");
+static auto cvFrameLimit = pragma::console::get_client_con_var("cl_max_fps");
 float CEngine::GetFPSLimit() const { return cvFrameLimit->GetFloat(); }
 
 unsigned int CEngine::GetStereoSourceCount() { return 0; }
@@ -402,7 +402,7 @@ void CEngine::JoystickAxisInput(prosper::Window &window, const pragma::platform:
 		mods |= pragma::platform::Modifier::AxisRelease; // Axis represents actual button release
 	KeyboardInput(window, key, -1, state, mods, newVal);
 }
-static auto cvAxisInputThreshold = GetClientConVar("cl_controller_axis_input_threshold");
+static auto cvAxisInputThreshold = pragma::console::get_client_con_var("cl_controller_axis_input_threshold");
 bool CEngine::IsValidAxisInput(float axisInput) const
 {
 	if(!pragma::get_client_state())
@@ -1544,7 +1544,7 @@ void CEngine::SetControllersEnabled(bool b)
 	pragma::platform::set_joystick_state_callback([this](const pragma::platform::Joystick &joystick, bool bConnected) { pragma::get_cengine()->CallCallbacks<void, std::reference_wrapper<const pragma::platform::Joystick>, bool>("OnJoystickStateChanged", std::ref(joystick), bConnected); });
 }
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_controller_enabled", +[](pragma::NetworkState *, const ConVar &, bool, bool newVal) { pragma::get_cengine()->SetControllersEnabled(newVal); });
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_controller_enabled", +[](pragma::NetworkState *, const pragma::console::ConVar &, bool, bool newVal) { pragma::get_cengine()->SetControllersEnabled(newVal); });
 }
 
 float CEngine::GetRawJoystickAxisMagnitude() const { return m_rawInputJoystickMagnitude; }
@@ -1771,7 +1771,7 @@ void CEngine::OnClose()
 	pragma::ecs::CParticleSystemComponent::ClearBuffers();
 }
 
-static auto cvFpsDecayFactor = GetClientConVar("cl_fps_decay_factor");
+static auto cvFpsDecayFactor = pragma::console::get_client_con_var("cl_fps_decay_factor");
 void CEngine::UpdateFPS(float t)
 {
 	auto weightRatio = cvFpsDecayFactor->GetFloat();
@@ -1780,7 +1780,7 @@ void CEngine::UpdateFPS(float t)
 		m_fps = 1.0 / m_tFPSTime;
 }
 
-static CVar cvProfiling = GetEngineConVar("debug_profiling_enabled");
+static auto cvProfiling = pragma::console::get_engine_con_var("debug_profiling_enabled");
 void CEngine::DrawFrame()
 {
 	auto primWindowCmd = GetWindow().GetDrawCommandBuffer();
@@ -1848,7 +1848,7 @@ void CEngine::DrawFrame()
 	}
 }
 
-static auto cvHideGui = GetClientConVar("debug_hide_gui");
+static auto cvHideGui = pragma::console::get_client_con_var("debug_hide_gui");
 void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 {
 	auto perfTimers = umath::is_flag_set(m_stateFlags, StateFlags::EnableGpuPerformanceTimers);
@@ -2192,7 +2192,7 @@ CEngine::DroppedFile::DroppedFile(const std::string &rootPath, const std::string
 
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int32_t>(
-	  "cl_render_monitor", +[](pragma::NetworkState *, const ConVar &, int32_t, int32_t monitor) {
+	  "cl_render_monitor", +[](pragma::NetworkState *, const pragma::console::ConVar &, int32_t, int32_t monitor) {
 		  auto monitors = pragma::platform::get_monitors();
 		  if(monitor < monitors.size() && monitor >= 0)
 			  pragma::get_cengine()->GetWindow().SetMonitor(monitors[monitor]);
@@ -2200,14 +2200,14 @@ namespace {
 }
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int32_t>(
-	  "cl_render_window_mode", +[](pragma::NetworkState *, const ConVar &, int32_t, int32_t val) {
+	  "cl_render_window_mode", +[](pragma::NetworkState *, const pragma::console::ConVar &, int32_t, int32_t val) {
 		  pragma::get_cengine()->GetWindow().SetWindowedMode(val != 0);
 		  pragma::get_cengine()->GetWindow().SetNoBorder(val == 2);
 	  });
 }
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<std::string>(
-	  "cl_window_resolution", +[](pragma::NetworkState *, const ConVar &, std::string, std::string val) {
+	  "cl_window_resolution", +[](pragma::NetworkState *, const pragma::console::ConVar &, std::string, std::string val) {
 		  std::vector<std::string> vals;
 		  ustring::explode(val, "x", vals);
 		  if(vals.size() < 2)
@@ -2232,7 +2232,7 @@ namespace {
 }
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<std::string>(
-	  "cl_render_resolution", +[](pragma::NetworkState *, const ConVar &, std::string, std::string val) {
+	  "cl_render_resolution", +[](pragma::NetworkState *, const pragma::console::ConVar &, std::string, std::string val) {
 		  std::vector<std::string> vals;
 		  ustring::explode(val, "x", vals);
 		  if(vals.size() < 2) {
@@ -2247,7 +2247,7 @@ namespace {
 }
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<bool>(
-	  "cl_gpu_timer_queries_enabled", +[](pragma::NetworkState *, const ConVar &, bool, bool enabled) {
+	  "cl_gpu_timer_queries_enabled", +[](pragma::NetworkState *, const pragma::console::ConVar &, bool, bool enabled) {
 		  if(pragma::get_cengine() == nullptr)
 			  return;
 		  pragma::get_cengine()->SetGPUProfilingEnabled(enabled);

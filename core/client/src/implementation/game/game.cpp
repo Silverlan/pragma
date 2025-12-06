@@ -63,7 +63,7 @@ namespace pragma::rendering {
 	class LightingStageRenderProcessor;
 	class DepthStageRenderProcessor;
 };
-static auto cvWorkerThreadCount = GetClientConVar("render_queue_worker_thread_count");
+static auto cvWorkerThreadCount = pragma::console::get_client_con_var("render_queue_worker_thread_count");
 
 static pragma::CGame *g_game = nullptr;
 pragma::CGame *pragma::get_client_game() { return g_game; }
@@ -296,7 +296,7 @@ void pragma::CGame::OnGameWorldShaderSettingsChanged(const pragma::rendering::Ga
 	}
 }
 
-static void cmd_render_ibl_enabled(pragma::NetworkState *, const ConVar &, bool, bool enabled)
+static void cmd_render_ibl_enabled(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool enabled)
 {
 	auto *client = pragma::get_client_state();
 	if(client == nullptr)
@@ -313,7 +313,7 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<bool>("render_dynamic_shadows_enabled", &cmd_render_ibl_enabled);
 }
 
-static void cmd_render_queue_worker_thread_count(pragma::NetworkState *, const ConVar &, int, int val)
+static void cmd_render_queue_worker_thread_count(pragma::NetworkState *, const pragma::console::ConVar &, int, int val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -324,7 +324,7 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>("render_queue_worker_thread_count", &cmd_render_queue_worker_thread_count);
 }
 
-static void cmd_render_queue_worker_jobs_per_batch(pragma::NetworkState *, const ConVar &, int, int val)
+static void cmd_render_queue_worker_jobs_per_batch(pragma::NetworkState *, const pragma::console::ConVar &, int, int val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -564,7 +564,7 @@ void pragma::CGame::Initialize()
 	m_matLoad = mat ? mat->GetHandle() : nullptr;
 }
 
-static void render_debug_mode(pragma::NetworkState *, const ConVar &, int32_t, int32_t debugMode)
+static void render_debug_mode(pragma::NetworkState *, const pragma::console::ConVar &, int32_t, int32_t debugMode)
 {
 	auto *client = pragma::get_client_state();
 	if(client == nullptr)
@@ -581,7 +581,7 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int32_t>("render_debug_mode", &render_debug_mode);
 }
 
-static void CVAR_CALLBACK_render_unlit(pragma::NetworkState *nw, const ConVar &cv, bool prev, bool val) { render_debug_mode(nw, cv, prev, umath::to_integral(pragma::SceneDebugMode::Unlit)); }
+static void CVAR_CALLBACK_render_unlit(pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool prev, bool val) { render_debug_mode(nw, cv, prev, umath::to_integral(pragma::SceneDebugMode::Unlit)); }
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<bool>("render_unlit", &CVAR_CALLBACK_render_unlit);
 }
@@ -862,7 +862,7 @@ WIBase *pragma::CGame::CreateGUIElement(std::string className, WIBase *parent)
 	return el;
 }
 
-static CVar cvLODBias = GetClientConVar("cl_render_lod_bias");
+static auto cvLODBias = pragma::console::get_client_con_var("cl_render_lod_bias");
 void pragma::CGame::SetLODBias(int32_t bias) { pragma::get_client_state()->SetConVar("cl_render_lod_bias", std::to_string(bias)); }
 int32_t pragma::CGame::GetLODBias() const { return cvLODBias->GetInt(); }
 uint32_t pragma::CGame::GetLOD(float dist, uint32_t maxLod) const
@@ -987,8 +987,8 @@ void WriteCubeMapSide(int w, int, int blockSize, int block, float *inPixels, uns
 	}
 }
 
-static CVar cvAntiAliasing = GetClientConVar("cl_render_anti_aliasing");
-static CVar cvMsaaSamples = GetClientConVar("cl_render_msaa_samples");
+static auto cvAntiAliasing = pragma::console::get_client_con_var("cl_render_anti_aliasing");
+static auto cvMsaaSamples = pragma::console::get_client_con_var("cl_render_msaa_samples");
 uint32_t pragma::CGame::GetMSAASampleCount()
 {
 	auto bMsaaEnabled = static_cast<pragma::rendering::AntiAliasing>(cvAntiAliasing->GetInt()) == pragma::rendering::AntiAliasing::MSAA;
@@ -1027,7 +1027,7 @@ void pragma::CGame::Think()
 	PostThink();
 }
 
-static CVar cvUpdateRate = GetClientConVar("cl_updaterate");
+static auto cvUpdateRate = pragma::console::get_client_con_var("cl_updaterate");
 void pragma::CGame::Tick()
 {
 	pragma::Game::Tick();
@@ -1085,7 +1085,7 @@ void pragma::CGame::ReloadPrepassShaderPipelines() const
 	const_cast<pragma::CGame *>(this)->AddCallback("PreRenderScenes", cb);
 }
 
-static CVar cvSimEnabled = GetClientConVar("cl_physics_simulation_enabled");
+static auto cvSimEnabled = pragma::console::get_client_con_var("cl_physics_simulation_enabled");
 bool pragma::CGame::IsPhysicsSimulationEnabled() const { return cvSimEnabled->GetBool(); }
 
 const util::WeakHandle<prosper::Shader> &pragma::CGame::GetGameShader(GameShader shader) const { return m_gameShaders.at(umath::to_integral(shader)); }
@@ -1273,7 +1273,7 @@ void pragma::CGame::BuildVMF(const char *)
 	//Game::BuildVMF<CWorld,CPolyMesh,CPoly,CBrushMesh>(map);
 }
 
-static CVar cvTimescale = GetClientConVar("host_timescale");
+static auto cvTimescale = pragma::console::get_client_con_var("host_timescale");
 float pragma::CGame::GetTimeScale() { return cvTimescale->GetFloat(); }
 
 void pragma::CGame::SetTimeScale(float t)
@@ -1642,8 +1642,8 @@ void pragma::CGame::DrawBox(const Vector3 &origin, const Vector3 &start, const V
 }
 void pragma::CGame::DrawPlane(const Vector3 &n, float dist, const Color &color, float duration) { DebugRenderer::DrawPlane(n, dist, {color, duration}); }
 void pragma::CGame::DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration) { DebugRenderer::DrawMesh(meshVerts, {color, colorOutline, duration}); }
-static auto cvRenderPhysics = GetClientConVar("debug_physics_draw");
-static auto cvSvRenderPhysics = GetClientConVar("sv_debug_physics_draw");
+static auto cvRenderPhysics = pragma::console::get_client_con_var("debug_physics_draw");
+static auto cvSvRenderPhysics = pragma::console::get_client_con_var("sv_debug_physics_draw");
 template<typename TCPPM>
 void pragma::CGame::RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, TCPPM &cam)
 {
@@ -1719,7 +1719,7 @@ bool pragma::CGame::SaveImage(uimg::ImageBuffer &imgBuffer, const std::string &f
 	return uimg::save_texture(fileName, imgBuffer, texSaveInfo, [fileName](const std::string &err) { Con::cwar << "Unable to save image '" << fileName << "': " << err << Con::endl; });
 }
 
-static CVar cvFriction = GetClientConVar("sv_friction");
+static auto cvFriction = pragma::console::get_client_con_var("sv_friction");
 Float pragma::CGame::GetFrictionScale() const { return cvFriction->GetFloat(); }
-static CVar cvRestitution = GetClientConVar("sv_restitution");
+static auto cvRestitution = pragma::console::get_client_con_var("sv_restitution");
 Float pragma::CGame::GetRestitutionScale() const { return cvRestitution->GetFloat(); }

@@ -264,13 +264,13 @@ export {
 			// ConVars
 			template<class T>
 			T *GetConVar(const std::string &scmd);
-			ConConf *GetConVar(const std::string &scmd);
+			console::ConConf *GetConVar(const std::string &scmd);
 			int GetConVarInt(const std::string &scmd);
 			std::string GetConVarString(const std::string &scmd);
 			float GetConVarFloat(const std::string &scmd);
 			bool GetConVarBool(const std::string &scmd);
 			pragma::console::ConVarFlags GetConVarFlags(const std::string &scmd);
-			const std::unordered_map<std::string, std::vector<CvarCallback>> &GetConVarCallbacks() const;
+			const std::unordered_map<std::string, std::vector<console::CvarCallback>> &GetConVarCallbacks() const;
 
 			virtual Float GetFrictionScale() const = 0;
 			virtual Float GetRestitutionScale() const = 0;
@@ -309,7 +309,7 @@ export {
 			std::unique_ptr<pragma::LuaCore::ClassManager> m_luaClassManager;
 			std::unique_ptr<LuaDirectoryWatcherManager> m_scriptWatcher = nullptr;
 			std::unique_ptr<SurfaceMaterialManager> m_surfaceMaterialManager = nullptr;
-			std::unordered_map<std::string, std::vector<CvarCallback>> m_cvarCallbacks;
+			std::unordered_map<std::string, std::vector<console::CvarCallback>> m_cvarCallbacks;
 			std::vector<std::unique_ptr<Timer>> m_timers;
 			std::unordered_map<std::string, int> m_luaNetMessages;
 			std::vector<std::string> m_luaNetMessageIndex;
@@ -384,7 +384,7 @@ export {
 		template<class T>
 		T *Game::GetConVar(const std::string &scmd)
 		{
-			ConConf *cv = GetConVar(scmd);
+			console::ConConf *cv = GetConVar(scmd);
 			if(cv == nullptr)
 				return nullptr;
 			return static_cast<T *>(cv);

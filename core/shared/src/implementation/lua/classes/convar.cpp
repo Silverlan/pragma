@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :scripting.lua.classes.convar;
 
-ConVar *Lua::console::CreateConVar(lua::State *l, const std::string &cmd, ::udm::Type type, Lua::udm_type def, ::pragma::console::ConVarFlags flags, const std::string &help)
+pragma::console::ConVar *Lua::console::CreateConVar(lua::State *l, const std::string &cmd, ::udm::Type type, Lua::udm_type def, ::pragma::console::ConVarFlags flags, const std::string &help)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	if(state == nullptr)
@@ -15,10 +15,10 @@ ConVar *Lua::console::CreateConVar(lua::State *l, const std::string &cmd, ::udm:
 		using T = typename decltype(tag)::type;
 		constexpr auto type = ::udm::type_to_enum<T>();
 		if constexpr(type == ::udm::Type::Element || ::udm::is_array_type(type))
-			return std::shared_ptr<ConVar> {nullptr};
+			return std::shared_ptr<pragma::console::ConVar> {nullptr};
 		else {
 			auto v = luabind::object_cast<T>(def);
-			return ConVar::Create<T>(v, flags, help);
+			return pragma::console::ConVar::Create<T>(v, flags, help);
 		}
 	});
 	if(!cvar)
@@ -42,7 +42,7 @@ void Lua::console::CreateConCommand(lua::State *l, const std::string &name, cons
 	state->CreateConCommand(name, function, ::pragma::console::ConVarFlags::None, help);
 }
 
-ConVar *Lua::console::GetConVar(lua::State *l, const std::string &name)
+pragma::console::ConVar *Lua::console::GetConVar(lua::State *l, const std::string &name)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	if(state == nullptr)
@@ -50,20 +50,20 @@ ConVar *Lua::console::GetConVar(lua::State *l, const std::string &name)
 	auto *cv = state->GetConVar(name);
 	if(cv == nullptr)
 		return nullptr;
-	if(cv->GetType() != ConType::Var)
+	if(cv->GetType() != pragma::console::ConType::Var)
 		return nullptr;
-	return static_cast<ConVar *>(cv);
+	return static_cast<pragma::console::ConVar *>(cv);
 }
 
-static ConVar *get_con_var(lua::State *l, const std::string &conVar)
+static pragma::console::ConVar *get_con_var(lua::State *l, const std::string &conVar)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	if(state == nullptr)
 		return nullptr;
 	auto *cv = state->GetConVar(conVar);
-	if(cv == nullptr || cv->GetType() != ConType::Var)
+	if(cv == nullptr || cv->GetType() != pragma::console::ConType::Var)
 		return nullptr;
-	return static_cast<ConVar *>(cv);
+	return static_cast<pragma::console::ConVar *>(cv);
 }
 
 int32_t Lua::console::GetConVarInt(lua::State *l, const std::string &conVar)

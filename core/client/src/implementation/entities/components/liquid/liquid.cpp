@@ -136,7 +136,7 @@ static void debug_water(pragma::NetworkState *state, pragma::BasePlayerComponent
 	if(pragma::get_cgame() == nullptr || pl == nullptr)
 		return;
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
-	auto ents = command::find_target_entity(state, *charComponent, argv, [](TraceData &trData) { trData.SetCollisionFilterMask(trData.GetCollisionFilterGroup() | pragma::physics::CollisionMask::Water | pragma::physics::CollisionMask::WaterSurface); });
+	auto ents = pragma::console::find_target_entity(state, *charComponent, argv, [](TraceData &trData) { trData.SetCollisionFilterMask(trData.GetCollisionFilterGroup() | pragma::physics::CollisionMask::Water | pragma::physics::CollisionMask::WaterSurface); });
 	auto bFoundWater = false;
 	if(ents.empty() == false) {
 		for(auto *ent : ents) {
@@ -221,6 +221,6 @@ static void debug_water(pragma::NetworkState *state, pragma::BasePlayerComponent
 		Con::cwar << "No water entity found!" << Con::endl;
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_water", &debug_water, pragma::console::ConVarFlags::None,
+	auto UVN = console::client::register_command("debug_water", &debug_water, console::ConVarFlags::None,
 	  "Displays the reflection, refraction and refraction depth map for the given water-entity on screen. Call without arguments to turn the display off. Usage: debug_light_water <waterEntityIndex>");
 }

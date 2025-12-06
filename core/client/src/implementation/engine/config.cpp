@@ -58,8 +58,8 @@ void CEngine::WriteClientConfig(VFilePtrReal f)
 		for(auto &pair : cvars) {
 			if(stateSv == nullptr || stateSv->GetConVar(pair.first) == nullptr) {
 				auto &cf = pair.second;
-				if(cf->GetType() == ConType::Var) {
-					auto *cv = static_cast<ConVar *>(cf.get());
+				if(cf->GetType() == pragma::console::ConType::Var) {
+					auto *cv = static_cast<pragma::console::ConVar *>(cf.get());
 					if((cv->GetFlags() & pragma::console::ConVarFlags::Archive) == pragma::console::ConVarFlags::Archive && cv->GetString() != cv->GetDefault()) {
 						std::string l = pair.first + " \"" + cv->GetString() + "\"\n";
 						f->WriteString(l.c_str());

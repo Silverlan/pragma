@@ -126,7 +126,7 @@ void CMD_entities_sv(pragma::NetworkState *state, pragma::BasePlayerComponent *p
 {
 	if(!state->IsGameActive())
 		return;
-	auto sortedEnts = util::cmd::get_sorted_entities(*pragma::SGame::Get(), pl);
+	auto sortedEnts = pragma::console::get_sorted_entities(*pragma::SGame::Get(), pl);
 	std::optional<std::string> className = {};
 	if(argv.empty() == false)
 		className = '*' + argv.front() + '*';
@@ -190,7 +190,7 @@ void CMD_status_sv(pragma::NetworkState *, pragma::BasePlayerComponent *, std::v
 		auto nameC = pl->GetEntity().GetNameComponent();
 		Con::cout << "# \t" << i << "\t"
 		          << "\"" << (nameC.valid() ? nameC->GetName() : "") << "\""
-		          << "\t" << FormatTime(pl->TimeConnected()) << "     \t";
+		          << "\t" << pragma::string::format_time(pl->TimeConnected()) << "     \t";
 		if(session != nullptr)
 			Con::cout << session->GetLatency();
 		else
@@ -248,7 +248,7 @@ void CMD_ent_input(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 		return;
 	auto *activator = (pl != nullptr) ? &pl->GetEntity() : nullptr;
 	if(argv.size() >= 2) {
-		auto ents = command::find_named_targets(state, argv[0]);
+		auto ents = pragma::console::find_named_targets(state, argv[0]);
 		auto bFound = false;
 		for(auto *ent : ents) {
 			auto pInputComponent = ent->GetComponent<pragma::SIOComponent>();
@@ -264,7 +264,7 @@ void CMD_ent_input(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 	if(argv.size() < 1 || activator == nullptr || activator->IsCharacter() == false)
 		return;
 	auto charComponent = activator->GetCharacterComponent();
-	auto ents = command::find_trace_targets(state, *charComponent);
+	auto ents = pragma::console::find_trace_targets(state, *charComponent);
 	std::vector<std::string> substrings;
 	ustring::explode_whitespace(argv.front(), substrings);
 	if(substrings.empty() == true)
@@ -290,7 +290,7 @@ void CMD_ent_scale(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 	if(pragma::SGame::Get() == nullptr)
 		return;
 	if(argv.size() >= 2) {
-		auto ents = command::find_named_targets(state, argv[0]);
+		auto ents = pragma::console::find_named_targets(state, argv[0]);
 		auto scale = atof(argv[1].c_str());
 		for(auto *ent : ents) {
 			auto pTransformComponent = ent->GetTransformComponent();
@@ -306,7 +306,7 @@ void CMD_ent_scale(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 		return;
 	auto charComponent = ent.GetCharacterComponent();
 	auto scale = atof(argv.front().c_str());
-	auto ents = command::find_trace_targets(state, *charComponent);
+	auto ents = pragma::console::find_trace_targets(state, *charComponent);
 	for(auto *ent : ents) {
 		auto pTransformComponent = ent->GetTransformComponent();
 		if(pTransformComponent)
@@ -324,7 +324,7 @@ void CMD_ent_remove(pragma::NetworkState *state, pragma::BasePlayerComponent *pl
 	if(ent.IsCharacter() == false)
 		return;
 	auto charComponent = ent.GetCharacterComponent();
-	auto ents = command::find_target_entity(state, *charComponent, argv);
+	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	if(ents.empty()) {
 		Con::cwar << "No entity found to remove!" << Con::endl;
 		return;

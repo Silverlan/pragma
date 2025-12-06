@@ -67,7 +67,7 @@ void CViewModelComponent::Initialize()
 	ent.AddComponent<CAnimatedComponent>();
 }
 
-static auto cvViewFov = GetClientConVar("cl_fov_viewmodel");
+static auto cvViewFov = pragma::console::get_client_con_var("cl_fov_viewmodel");
 void CViewModelComponent::SetViewFOV(float fov)
 {
 	m_viewFov = fov;

@@ -18,4 +18,6 @@ export import :console.line_noise;
 export import :console.output;
 export import :console.spdlog_anycolor_sink;
 
-export PR_EXPORT void register_shared_convars(ConVarMap &map);
+export namespace pragma::console {
+    PR_EXPORT void register_shared_convars(ConVarMap &map);
+}

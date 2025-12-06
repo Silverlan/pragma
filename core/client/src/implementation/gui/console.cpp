@@ -230,8 +230,8 @@ void WIConsole::Initialize()
 		ustring::explode_whitespace(cmd, subStrings);
 		if(subStrings.empty() == false) {
 			auto *cf = pragma::get_cengine()->GetConVar(subStrings.front());
-			if(cf && cf->GetType() == ConType::Command) {
-				auto &c = static_cast<ConCommand &>(*cf);
+			if(cf && cf->GetType() == pragma::console::ConType::Command) {
+				auto &c = static_cast<pragma::console::ConCommand &>(*cf);
 				auto &fAutoComplete = c.GetAutoCompleteCallback();
 				if(fAutoComplete) {
 					auto arg = (subStrings.size() > 1) ? subStrings.at(1) : std::string {};
@@ -244,7 +244,7 @@ void WIConsole::Initialize()
 		}
 
 		std::vector<std::pair<std::string_view, float>> bestCandidates(pEntry->GetAutoCompleteEntryLimit(), std::pair<std::string_view, float> {std::string_view {}, std::numeric_limits<float>::max()});
-		const auto fProcessConVars = [&cmd, &bestCandidates](const std::map<std::string, std::shared_ptr<ConConf>> &conVars) {
+		const auto fProcessConVars = [&cmd, &bestCandidates](const std::map<std::string, std::shared_ptr<pragma::console::ConConf>> &conVars) {
 			for(auto &pair : conVars) {
 				auto percentage = ustring::calc_similarity(cmd, pair.first);
 				auto it = std::find_if(bestCandidates.begin(), bestCandidates.end(), [percentage](const std::pair<std::string_view, float> &pair) { return percentage < pair.second; });

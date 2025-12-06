@@ -18,7 +18,7 @@ using namespace pragma;
 static std::vector<CLiquidSurfaceSimulationComponent *> s_waterEntities = {};
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>(
-	  "cl_water_surface_simulation_spacing", +[](pragma::NetworkState *, const ConVar &, int, int val) {
+	  "cl_water_surface_simulation_spacing", +[](pragma::NetworkState *, const pragma::console::ConVar &, int, int val) {
 		  for(auto *entWater : s_waterEntities)
 			  entWater->ReloadSurfaceSimulator();
 	  });
@@ -26,7 +26,7 @@ namespace {
 
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<bool>(
-	  "cl_water_surface_simulation_enable_gpu_acceleration", +[](pragma::NetworkState *, const ConVar &, bool, bool val) {
+	  "cl_water_surface_simulation_enable_gpu_acceleration", +[](pragma::NetworkState *, const pragma::console::ConVar &, bool, bool val) {
 		  for(auto *entWater : s_waterEntities)
 			  entWater->ReloadSurfaceSimulator();
 	  });

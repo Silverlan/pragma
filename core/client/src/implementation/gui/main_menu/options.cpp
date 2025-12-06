@@ -1205,7 +1205,7 @@ void WIMainMenuOptions::InitializeControlSettings()
 
 	// Initialize custom control options from addons
 	auto *upadManager = dynamic_cast<pragma::pad::PackageManager *>(FileManager::GetPackageManager("upad"));
-	auto &mountedAddons = AddonSystem::GetMountedAddons();
+	auto &mountedAddons = pragma::AddonSystem::GetMountedAddons();
 	for(auto &info : mountedAddons) {
 		auto addonPath = info.GetAbsolutePath();
 		VFilePtr f = nullptr;

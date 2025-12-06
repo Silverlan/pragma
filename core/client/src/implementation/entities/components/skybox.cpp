@@ -298,7 +298,7 @@ void CSkybox::Initialize()
 	AddComponent<CSkyboxComponent>();
 }
 
-static void sky_override(pragma::NetworkState *, const ConVar &, std::string, std::string skyMat)
+static void sky_override(pragma::NetworkState *, const pragma::console::ConVar &, std::string, std::string skyMat)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;

@@ -13,7 +13,7 @@ import :rendering.shaders;
 
 using namespace pragma;
 
-static auto cvBloomEnabled = GetClientConVar("render_bloom_enabled");
+static auto cvBloomEnabled = pragma::console::get_client_con_var("render_bloom_enabled");
 
 void CRendererPpBloomComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {

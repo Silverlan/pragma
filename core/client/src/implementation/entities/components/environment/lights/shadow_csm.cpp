@@ -30,7 +30,7 @@ Frustum::Frustum() : radius(0.f)
 	projection = umat::identity();
 }
 
-static void cmd_cl_render_shadow_pssm_split_count(pragma::NetworkState *, const ConVar &, int, int val)
+static void cmd_cl_render_shadow_pssm_split_count(pragma::NetworkState *, const pragma::console::ConVar &, int, int val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -48,7 +48,7 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_shadow_pssm_split_count", &cmd_cl_render_shadow_pssm_split_count);
 }
 
-static void cmd_render_csm_max_distance(pragma::NetworkState *, const ConVar &, float, float val)
+static void cmd_render_csm_max_distance(pragma::NetworkState *, const pragma::console::ConVar &, float, float val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -65,8 +65,8 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<float>("render_csm_max_distance", &cmd_render_csm_max_distance);
 }
 
-static CVar cvCascadeCount = GetClientConVar("cl_render_shadow_pssm_split_count");
-static CVar cvRange = GetClientConVar("render_csm_max_distance");
+static auto cvCascadeCount = pragma::console::get_client_con_var("cl_render_shadow_pssm_split_count");
+static auto cvRange = pragma::console::get_client_con_var("render_csm_max_distance");
 CShadowCSMComponent::CShadowCSMComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent {ent}, m_maxDistance {cvRange->GetFloat()}, m_layerUpdate {false}
 {
 	SetSplitCount(cvCascadeCount->GetInt());
@@ -144,9 +144,9 @@ uint32_t CShadowCSMComponent::GetLayerCount() const { return m_layerCount; }
 
 void CShadowCSMComponent::SetFrustumUpdateCallback(const std::function<void(void)> &f) { m_onFrustumUpdated = f; }
 
-static CVar cvUpdateFrequency = GetClientConVar("cl_render_shadow_update_frequency");
-static CVar cvUpdateFrequencyOffset = GetClientConVar("cl_render_shadow_pssm_update_frequency_offset");
-static CVar cvShadowmapSize = GetClientConVar("cl_render_shadow_resolution");
+static auto cvUpdateFrequency = pragma::console::get_client_con_var("cl_render_shadow_update_frequency");
+static auto cvUpdateFrequencyOffset = pragma::console::get_client_con_var("cl_render_shadow_pssm_update_frequency_offset");
+static auto cvShadowmapSize = pragma::console::get_client_con_var("cl_render_shadow_resolution");
 void CShadowCSMComponent::UpdateFrustum(uint32_t splitId, pragma::CCameraComponent &cam, const Mat4 &matView, const Vector3 &dir)
 {
 	auto &frustumSplit = m_frustums.at(splitId);

@@ -187,7 +187,7 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_find(pragma::NetworkState *state,
 	if(entPl.IsCharacter() == false)
 		return;
 	auto charComponent = entPl.GetCharacterComponent();
-	auto ents = command::find_target_entity(state, *charComponent, argv);
+	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	if(ents.empty())
 		return;
 	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
@@ -229,7 +229,7 @@ namespace {
 	auto UVN = pragma::console::client::register_command("debug_render_octree_dynamic_find", &CMD_debug_render_octree_dynamic_find, pragma::console::ConVarFlags::None, "Finds the specified entity in the octree for dynamic objects.");
 }
 
-static void CVAR_CALLBACK_debug_render_octree_static_draw(pragma::NetworkState *, const ConVar &, bool, bool val)
+static void CVAR_CALLBACK_debug_render_octree_static_draw(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -265,7 +265,7 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<bool>("debug_render_octree_static_draw", &CVAR_CALLBACK_debug_render_octree_static_draw);
 }
 
-static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(pragma::NetworkState *, const ConVar &, bool, bool val)
+static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;

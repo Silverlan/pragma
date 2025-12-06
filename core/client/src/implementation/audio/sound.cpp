@@ -82,7 +82,7 @@ void pragma::audio::CALSound::SetVolumeModifier(float mod)
 }
 float pragma::audio::CALSound::GetVolumeModifier() const { return m_modVol; }
 
-static auto cvAlwaysPlay = GetClientConVar("cl_audio_always_play");
+static auto cvAlwaysPlay = pragma::console::get_client_con_var("cl_audio_always_play");
 void pragma::audio::CALSound::UpdateVolume()
 {
 	// TODO: pragma::audio::CALSound::GetEffectiveGain
@@ -641,5 +641,5 @@ void pragma::audio::CALSound::SetType(pragma::audio::ALSoundType type)
 	UpdateVolume();
 }
 namespace {
-	auto _ = pragma::console::client::register_variable_listener<bool>("cl_audio_always_play", +[](pragma::NetworkState *, const ConVar &, bool, bool) { pragma::get_client_state()->UpdateSoundVolume(); });
+	auto _ = pragma::console::client::register_variable_listener<bool>("cl_audio_always_play", +[](pragma::NetworkState *, const pragma::console::ConVar &, bool, bool) { pragma::get_client_state()->UpdateSoundVolume(); });
 }

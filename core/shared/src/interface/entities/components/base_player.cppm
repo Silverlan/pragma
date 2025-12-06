@@ -77,7 +77,7 @@ export {
 			virtual unsigned short GetClientPort();
 			double ConnectionTime() const;
 			double TimeConnected() const;
-			virtual void PrintMessage(std::string message, MESSAGE type) = 0;
+			virtual void PrintMessage(std::string message, pragma::console::MESSAGE type) = 0;
 			void GetConVars(std::unordered_map<std::string, std::string> **convars);
 			bool GetConVar(std::string cvar, std::string *val);
 			std::string GetConVarString(std::string cvar) const;

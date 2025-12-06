@@ -494,7 +494,7 @@ void CHC::IssueMultiQueries()
 #endif
 }
 
-static CVar cvCulling = GetClientConVar("cl_render_occlusion_culling");
+static auto cvCulling = pragma::console::get_client_con_var("cl_render_occlusion_culling");
 bool CHC::InsideViewFrustum(CHCNode *cNode)
 {
 	if(cvCulling->GetInt() == 0)

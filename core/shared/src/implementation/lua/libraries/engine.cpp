@@ -96,7 +96,7 @@ Lua::var<bool, std::string> Lua::engine::LoadLibrary(lua::State *l, const std::s
 uint64_t Lua::engine::GetTickCount() { return pragma::Engine::Get()->GetTickCount(); }
 
 void Lua::engine::set_record_console_output(bool record) { pragma::Engine::Get()->SetRecordConsoleOutput(record); }
-Lua::opt<Lua::mult<std::string, Con::MessageFlags, Lua::opt<Color>>> Lua::engine::poll_console_output(lua::State *l)
+Lua::opt<Lua::mult<std::string, pragma::console::MessageFlags, Lua::opt<Color>>> Lua::engine::poll_console_output(lua::State *l)
 {
 	auto output = pragma::Engine::Get()->PollConsoleOutput();
 	if(output.has_value() == false)
@@ -104,20 +104,20 @@ Lua::opt<Lua::mult<std::string, Con::MessageFlags, Lua::opt<Color>>> Lua::engine
 	luabind::object color {};
 	if(output->color)
 		color = {l, *output->color};
-	return Lua::mult<std::string, Con::MessageFlags, Lua::opt<::Color>> {l, output->output, output->messageFlags, opt<::Color> {color}};
+	return Lua::mult<std::string, pragma::console::MessageFlags, Lua::opt<::Color>> {l, output->output, output->messageFlags, opt<::Color> {color}};
 }
 
 void Lua::engine::register_shared_functions(lua::State *l, luabind::module_ &modEn)
 {
 	modEn[(luabind::def("set_record_console_output", Lua::engine::set_record_console_output), luabind::def("get_tick_count", &Lua::engine::GetTickCount), luabind::def("shutdown", &Lua::engine::exit), luabind::def("get_working_directory", Lua::engine::get_working_directory),
-	  luabind::def("get_git_info", Lua::engine::get_git_info), luabind::def("mount_addon", static_cast<bool (*)(const std::string &)>(&AddonSystem::MountAddon)),
+	  luabind::def("get_git_info", Lua::engine::get_git_info), luabind::def("mount_addon", static_cast<bool (*)(const std::string &)>(&pragma::AddonSystem::MountAddon)),
 	  luabind::def(
 	    "mount_sub_addon",
 	    +[](lua::State *l, const std::string &subAddon) {
 		    auto path = ::util::Path::CreatePath(Lua::util::get_addon_path(l));
 		    path.PopFront();
 		    path = path + "addons/" + subAddon;
-		    return AddonSystem::MountAddon(path.GetString());
+		    return pragma::AddonSystem::MountAddon(path.GetString());
 	    }),
 	  luabind::def("is_managed_by_package_manager", +[](lua::State *l) { return pragma::get_engine()->IsManagedByPackageManager(); }), luabind::def("is_application_sandboxed", +[](lua::State *l) { return pragma::get_engine()->IsSandboxed(); }))];
 }

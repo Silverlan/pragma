@@ -45,7 +45,7 @@ export namespace pragma {
 		bool IsGameReady() const;
 		void SetGameReady(bool b);
 		bool SendResource(const std::string &fileName) const;
-		virtual void PrintMessage(std::string message, MESSAGE type) override;
+		virtual void PrintMessage(std::string message, pragma::console::MESSAGE type) override;
 
 		virtual void SetViewRotation(const Quat &rot) override;
 

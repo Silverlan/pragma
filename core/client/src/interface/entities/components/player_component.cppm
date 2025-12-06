@@ -35,7 +35,7 @@ export namespace pragma {
 		bool IsInFirstPersonMode() const;
 
 		virtual void ApplyViewRotationOffset(const EulerAngles &ang, float dur = 0.5f) override;
-		virtual void PrintMessage(std::string message, MESSAGE type) override;
+		virtual void PrintMessage(std::string message, pragma::console::MESSAGE type) override;
 
 		void UpdateViewModelTransform();
 		void UpdateViewFOV();

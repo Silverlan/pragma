@@ -19,8 +19,8 @@ using namespace pragma::rendering;
 
 static const float EXPOSURE_FRAME_UPDATE = 0.25f; // Exposure will be updated every x seconds
 
-static CVar cvMaxExposure = GetClientConVar("render_hdr_max_exposure");
-static void CVAR_CALLBACK_render_hdr_max_exposure(pragma::NetworkState *, const ConVar &, float, float val)
+static auto cvMaxExposure = pragma::console::get_client_con_var("render_hdr_max_exposure");
+static void CVAR_CALLBACK_render_hdr_max_exposure(pragma::NetworkState *, const pragma::console::ConVar &, float, float val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -190,7 +190,7 @@ void HDRData::ReloadPresentationRenderTarget(uint32_t width, uint32_t height, pr
 	dsgTonemappedPostProcessing->GetDescriptorSet()->SetBindingTexture(*postHdrTex, umath::to_integral(pragma::ShaderPPFXAA::TextureBinding::SceneTexturePostToneMapping));
 }
 
-static auto cvBloomResolution = GetClientConVar("render_bloom_resolution");
+static auto cvBloomResolution = pragma::console::get_client_con_var("render_bloom_resolution");
 bool HDRData::Initialize(uint32_t width, uint32_t height, prosper::SampleCountFlags sampleCount, bool bEnableSSAO)
 {
 	// Initialize depth prepass
@@ -440,9 +440,9 @@ void HDRData::UpdateExposure()
 	exposure = umath::lerp(exposure, 1.f, inc);
 }
 
-static auto cvAntiAliasing = GetClientConVar("cl_render_anti_aliasing");
-static auto cvMsaaSamples = GetClientConVar("cl_render_msaa_samples");
-static void CVAR_CALLBACK_render_msaa_enabled(pragma::NetworkState *, const ConVar &, int, int)
+static auto cvAntiAliasing = pragma::console::get_client_con_var("cl_render_anti_aliasing");
+static auto cvMsaaSamples = pragma::console::get_client_con_var("cl_render_msaa_samples");
+static void CVAR_CALLBACK_render_msaa_enabled(pragma::NetworkState *, const pragma::console::ConVar &, int, int)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -483,7 +483,7 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_msaa_samples", &CVAR_CALLBACK_render_msaa_enabled);
 }
 
-static void CVAR_CALLBACK_render_bloom_resolution(pragma::NetworkState *, const ConVar &, int, int width)
+static void CVAR_CALLBACK_render_bloom_resolution(pragma::NetworkState *, const pragma::console::ConVar &, int, int width)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;

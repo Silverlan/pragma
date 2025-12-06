@@ -268,8 +268,8 @@ static void is_camera_submerged(const pragma::CCameraComponent &cam, const Vecto
 	camCenterPlaneSide = umath::geometry::PlaneSide::Front;
 }
 
-static auto cvReflectionQuality = GetClientConVar("cl_render_reflection_quality");
-static auto cvDrawWater = GetClientConVar("render_draw_water");
+static auto cvReflectionQuality = pragma::console::get_client_con_var("cl_render_reflection_quality");
+static auto cvDrawWater = pragma::console::get_client_con_var("render_draw_water");
 void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos, const Vector3 &planeNormal, const Vector3 &waterAabbMin, const Vector3 &waterAabbMax)
 {
 	pragma::get_cengine()->GetShaderManager().GetShader("water"); // Make sure water shader is loaded

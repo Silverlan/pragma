@@ -14,7 +14,7 @@ import pragma.shadergraph;
 decltype(ECResourceWatcherCallbackType::Shader) ECResourceWatcherCallbackType::Shader = ECResourceWatcherCallbackType {umath::to_integral(E::Shader)};
 decltype(ECResourceWatcherCallbackType::ParticleSystem) ECResourceWatcherCallbackType::ParticleSystem = ECResourceWatcherCallbackType {umath::to_integral(E::ParticleSystem)};
 decltype(ECResourceWatcherCallbackType::Count) ECResourceWatcherCallbackType::Count = ECResourceWatcherCallbackType {umath::to_integral(E::Count)};
-static auto cvMatStreaming = GetClientConVar("cl_material_streaming_enabled");
+static auto cvMatStreaming = pragma::console::get_client_con_var("cl_material_streaming_enabled");
 
 CResourceWatcherManager::CResourceWatcherManager(pragma::NetworkState *nw) : ResourceWatcherManager(nw) {}
 

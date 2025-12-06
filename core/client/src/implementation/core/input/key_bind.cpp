@@ -51,7 +51,7 @@ std::optional<luabind::function<>> KeyBind::GetFunction() const { return m_funct
 	auto *cf = pragma::get_cengine()->GetConVar(cmd);
 	if(cf == nullptr)
 		return;
-	if(cf->GetType() != ConType::Var)
+	if(cf->GetType() != pragma::console::ConType::Var)
 		return;
 	auto *cvar = static_cast<ConVar*>(cf);
 	if(cvar->GetBool() == true)
@@ -92,7 +92,7 @@ bool KeyBind::Execute(pragma::platform::KeyState inputState, pragma::platform::K
 			auto bExecutedCmd = false;
 			for(auto &info : m_cmds) {
 				auto bActionCmd = (info.cmd.empty() == false && info.cmd.front() == '+') ? true : false;
-				pragma::get_cengine()->RunConsoleCommand(info.cmd, info.argv, static_cast<KeyState>(pressState), magnitude, [&info, &bExecutedCmd, pressState, bReleased, bAxisInput, bNegativeAxis, bActionCmd](ConConf *cf, float &magnitude) -> bool {
+				pragma::get_cengine()->RunConsoleCommand(info.cmd, info.argv, static_cast<KeyState>(pressState), magnitude, [&info, &bExecutedCmd, pressState, bReleased, bAxisInput, bNegativeAxis, bActionCmd](pragma::console::ConConf *cf, float &magnitude) -> bool {
 					auto cmdReleased = bReleased;
 					auto flags = cf->GetFlags();
 					auto bSingleAxis = ((flags & pragma::console::ConVarFlags::JoystickAxisSingle) != pragma::console::ConVarFlags::None) ? true : false;

@@ -11,7 +11,7 @@ std::string pragma::Engine::GetConVarString(const std::string &cv)
 	auto *cvar = GetConVar(cv);
 	if(cvar == nullptr)
 		return "";
-	return static_cast<ConVar *>(cvar)->GetString();
+	return static_cast<pragma::console::ConVar *>(cvar)->GetString();
 }
 
 int pragma::Engine::GetConVarInt(const std::string &cv)
@@ -19,7 +19,7 @@ int pragma::Engine::GetConVarInt(const std::string &cv)
 	auto *cvar = GetConVar(cv);
 	if(cvar == nullptr)
 		return 0;
-	return static_cast<ConVar *>(cvar)->GetInt();
+	return static_cast<pragma::console::ConVar *>(cvar)->GetInt();
 }
 
 float pragma::Engine::GetConVarFloat(const std::string &cv)
@@ -27,7 +27,7 @@ float pragma::Engine::GetConVarFloat(const std::string &cv)
 	auto *cvar = GetConVar(cv);
 	if(cvar == nullptr)
 		return 0.f;
-	return static_cast<ConVar *>(cvar)->GetFloat();
+	return static_cast<pragma::console::ConVar *>(cvar)->GetFloat();
 }
 
 bool pragma::Engine::GetConVarBool(const std::string &cv)
@@ -35,10 +35,10 @@ bool pragma::Engine::GetConVarBool(const std::string &cv)
 	auto *cvar = GetConVar(cv);
 	if(cvar == nullptr)
 		return false;
-	return static_cast<ConVar *>(cvar)->GetBool();
+	return static_cast<pragma::console::ConVar *>(cvar)->GetBool();
 }
 
-ConConf *pragma::Engine::GetConVar(const std::string &cv)
+pragma::console::ConConf *pragma::Engine::GetConVar(const std::string &cv)
 {
 	auto *stateSv = GetServerNetworkState();
 	auto *cvar = (stateSv != nullptr) ? stateSv->GetConVar(cv) : nullptr;

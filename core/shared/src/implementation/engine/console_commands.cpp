@@ -48,7 +48,7 @@ static std::optional<std::string> udm_convert(const std::string &fileName)
 }
 
 static void install_binary_module(const std::string &module, const std::optional<std::string> &version = {});
-void pragma::Engine::RegisterSharedConsoleCommands(ConVarMap &map)
+void pragma::Engine::RegisterSharedConsoleCommands(pragma::console::ConVarMap &map)
 {
 	map.RegisterConVar<udm::String>("rcon_password", "", pragma::console::ConVarFlags::Password, "Specifies a password which can be used to run console commands remotely on a server. If no password is specified, this feature is disabled.");
 	map.RegisterConCommand(
@@ -155,12 +155,12 @@ void pragma::Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 	map.RegisterConVar<bool>("sv_require_authentication", false, pragma::console::ConVarFlags::Archive | pragma::console::ConVarFlags::Replicated, "If enabled, clients will have to authenticate via steam to join the server.");
 
 	map.RegisterConVar<bool>("asset_multithreading_enabled", true, pragma::console::ConVarFlags::Archive, "If enabled, assets will be loaded in the background.");
-	map.RegisterConVarCallback("asset_multithreading_enabled", std::function<void(pragma::NetworkState *, const ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void { SetAssetMultiThreadedLoadingEnabled(newVal); }});
+	map.RegisterConVarCallback("asset_multithreading_enabled", std::function<void(NetworkState *, const pragma::console::ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool oldVal, bool newVal) -> void { SetAssetMultiThreadedLoadingEnabled(newVal); }});
 
 	map.RegisterConVar<bool>("asset_file_cache_enabled", true, pragma::console::ConVarFlags::Archive, "If enabled, all Pragma files will be indexed to improve lookup times.");
-	map.RegisterConVarCallback("asset_file_cache_enabled", std::function<void(pragma::NetworkState *, const ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void { filemanager::set_use_file_index_cache(newVal); }});
+	map.RegisterConVarCallback("asset_file_cache_enabled", std::function<void(NetworkState *, const pragma::console::ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool oldVal, bool newVal) -> void { filemanager::set_use_file_index_cache(newVal); }});
 
-	map.RegisterConVarCallback("sv_gravity", std::function<void(pragma::NetworkState *, const ConVar &, std::string, std::string)> {[](pragma::NetworkState *state, const ConVar &, std::string prev, std::string val) {
+	map.RegisterConVarCallback("sv_gravity", std::function<void(NetworkState *, const pragma::console::ConVar &, std::string, std::string)> {[](pragma::NetworkState *state, const pragma::console::ConVar &, std::string prev, std::string val) {
 		if(!state->IsGameActive())
 			return;
 		Vector3 gravity = uvec::create(val);
@@ -359,7 +359,7 @@ static void debug_dump_scene_graph(pragma::NetworkState *nw, pragma::BasePlayerC
 
 void pragma::Engine::RegisterConsoleCommands()
 {
-	auto &conVarMap = *console_system::server::get_convar_map();
+	auto &conVarMap = *pragma::console::server::get_convar_map();
 	RegisterSharedConsoleCommands(conVarMap);
 	// Note: Serverside ConVars HAVE to be registered shared if the command is replicated!
 	conVarMap.RegisterConCommand(
@@ -497,7 +497,7 @@ void pragma::Engine::RegisterConsoleCommands()
 		  auto *en = pragma::get_engine();
 		  auto *cl = en ? en->GetClientState() : nullptr;
 		  auto *sv = en ? en->GetServerNetworkState() : nullptr;
-		  ConConf *cv = cl ? cl->GetConVar(argv[0]) : nullptr;
+		  pragma::console::ConConf *cv = cl ? cl->GetConVar(argv[0]) : nullptr;
 		  if(!cv)
 			  cv = sv->GetConVar(argv[0]);
 		  if(cv == nullptr) {
@@ -512,7 +512,7 @@ void pragma::Engine::RegisterConsoleCommands()
 		  std::vector<std::string_view> similarCandidates {};
 		  std::vector<float> similarities {};
 		  std::unordered_set<std::string_view> iteratedCvars = {};
-		  auto fItConVarMap = [&arg, &similarCandidates, &similarities, &iteratedCvars](ConVarMap &cvMap) {
+		  auto fItConVarMap = [&arg, &similarCandidates, &similarities, &iteratedCvars](pragma::console::ConVarMap &cvMap) {
 			  auto &conVars = cvMap.GetConVars();
 			  auto it = conVars.begin();
 
@@ -652,7 +652,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  },
 	  pragma::console::ConVarFlags::None, "Starts the Lua debugger server for the serverside lua state.");
 
-	auto &conVarMapEn = *console_system::engine::get_convar_map();
+	auto &conVarMapEn = *pragma::console::engine::get_convar_map();
 	conVarMapEn.RegisterConCommand(
 	  "log",
 	  [](pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
@@ -679,7 +679,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  "0 = Remote debugging is disabled; 1 = Remote debugging is enabled serverside; 2 = Remote debugging is enabled clientside.\nCannot be changed during an active game. Also requires the \"-luaext\" launch parameter.\nRemote debugging cannot be enabled clientside and serverside at the same time.");
 	conVarMapEn.RegisterConVar<udm::Boolean>("lua_open_editor_on_error", true, pragma::console::ConVarFlags::Archive, "1 = Whenever there's a Lua error, the engine will attempt to automatically open a Lua IDE and open the file and line which caused the error.");
 	conVarMapEn.RegisterConVar<udm::Boolean>("steam_steamworks_enabled", true, pragma::console::ConVarFlags::Archive, "Enables or disables steamworks.");
-	conVarMapEn.RegisterConVarCallback("steam_steamworks_enabled", std::function<void(pragma::NetworkState *, const ConVar &, bool, bool)> {[](pragma::NetworkState *, const ConVar &, bool prev, bool val) {
+	conVarMapEn.RegisterConVarCallback("steam_steamworks_enabled", std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool)> {[](pragma::NetworkState *, const pragma::console::ConVar &, bool prev, bool val) {
 		static std::weak_ptr<util::Library> wpSteamworks = {};
 		static std::unique_ptr<ISteamworks> isteamworks = nullptr;
 		auto *nwSv = pragma::Engine::Get()->GetServerNetworkState();
@@ -725,7 +725,7 @@ void pragma::Engine::RegisterConsoleCommands()
 			nwCl->CallCallbacks<void>("OnSteamworksShutdown");
 	}});
 
-	conVarMapEn.RegisterConVarCallback("sh_mount_external_game_resources", std::function<void(pragma::NetworkState *, const ConVar &, bool, bool)> {[](pragma::NetworkState *, const ConVar &, bool prev, bool val) { pragma::Engine::Get()->SetMountExternalGameResources(val); }});
+	conVarMapEn.RegisterConVarCallback("sh_mount_external_game_resources", std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool)> {[](pragma::NetworkState *, const pragma::console::ConVar &, bool prev, bool val) { pragma::Engine::Get()->SetMountExternalGameResources(val); }});
 	conVarMapEn.RegisterConCommand(
 	  "toggle",
 	  [](pragma::NetworkState *nw, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv, float) {
@@ -733,9 +733,9 @@ void pragma::Engine::RegisterConsoleCommands()
 			  return;
 		  auto &cvName = argv.front();
 		  auto *cf = pragma::Engine::Get()->GetConVar(cvName);
-		  if(cf == nullptr || cf->GetType() != ConType::Var)
+		  if(cf == nullptr || cf->GetType() != pragma::console::ConType::Var)
 			  return;
-		  auto *cvar = static_cast<ConVar *>(cf);
+		  auto *cvar = static_cast<pragma::console::ConVar *>(cf);
 		  std::vector<std::string> args = {(cvar->GetBool() == true) ? "0" : "1"};
 		  pragma::Engine::Get()->RunConsoleCommand(cvName, args);
 	  },
@@ -829,7 +829,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	conVarMapEn.RegisterConCommand("debug_profiling_physics_end", debug_profiling_physics_end, pragma::console::ConVarFlags::None, "Prints physics profiling information for the last simulation step.");
 	conVarMapEn.RegisterConCommand("debug_dump_scene_graph", static_cast<void (*)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(debug_dump_scene_graph), pragma::console::ConVarFlags::None, "Prints the game scene graph.");
 
-	conVarMap.RegisterConVarCallback("asset_multithreading_enabled", std::function<void(pragma::NetworkState *, const ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void {
+	conVarMap.RegisterConVarCallback("asset_multithreading_enabled", std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool oldVal, bool newVal) -> void {
 		if(pragma::Engine::Get() == nullptr)
 			return;
 		pragma::Engine::Get()->SetProfilingEnabled(newVal);

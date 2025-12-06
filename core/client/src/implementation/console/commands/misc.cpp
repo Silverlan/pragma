@@ -161,7 +161,7 @@ void CMD_entities_cl(pragma::NetworkState *state, pragma::BasePlayerComponent *p
 {
 	if(!state->IsGameActive())
 		return;
-	auto sortedEnts = util::cmd::get_sorted_entities(*pragma::get_cgame(), pl);
+	auto sortedEnts = pragma::console::get_sorted_entities(*pragma::get_cgame(), pl);
 	std::optional<std::string> className = {};
 	if(argv.empty() == false)
 		className = '*' + argv.front() + '*';
@@ -359,7 +359,7 @@ void CMD_status_cl(pragma::NetworkState *, pragma::BasePlayerComponent *, std::v
 		auto nameC = plComponent->GetEntity().GetNameComponent();
 		Con::cout << "# \t" << i << "\t"
 		          << "\"" << (nameC.valid() ? nameC->GetName() : "") << "\""
-		          << "\t" << FormatTime(plComponent->TimeConnected()) << "     \t";
+		          << "\t" << pragma::string::format_time(plComponent->TimeConnected()) << "     \t";
 		if(plComponent->IsLocalPlayer() == true)
 			Con::cout << cl->GetLatency();
 		else
@@ -635,7 +635,7 @@ void CMD_debug_ai_schedule_print(pragma::NetworkState *state, pragma::BasePlayer
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
 	if(charComponent.expired())
 		return;
-	auto ents = command::find_target_entity(state, *charComponent, argv);
+	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	pragma::ecs::BaseEntity *npc = nullptr;
 	for(auto *ent : ents) {
 		if(ent->IsNPC() == false)
@@ -988,5 +988,5 @@ static void cvar_net_graph(bool val)
 	dbg = nullptr;
 }
 namespace {
-	auto _ = pragma::console::client::register_variable_listener<bool>("net_graph", +[](pragma::NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void { cvar_net_graph(newVal); });
+	auto _ = pragma::console::client::register_variable_listener<bool>("net_graph", +[](pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool oldVal, bool newVal) -> void { cvar_net_graph(newVal); });
 }

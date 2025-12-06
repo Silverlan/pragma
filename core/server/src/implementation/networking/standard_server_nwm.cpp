@@ -220,7 +220,7 @@ bool pragma::networking::StandardServerClient::SendPacket(pragma::networking::Pr
 void pragma::networking::StandardServerClient::SetNWMClient(nwm::ServerClient *cl) { m_nwmClient = cl; }
 nwm::ServerClient &pragma::networking::StandardServerClient::GetNWMClient() const { return *m_nwmClient; }
 
-static void sv_timeout_duration_callback(pragma::NetworkState *, const ConVar &, float, float val)
+static void sv_timeout_duration_callback(pragma::NetworkState *, const pragma::console::ConVar &, float, float val)
 {
 	if(pragma::ServerState::Get() == nullptr)
 		return;

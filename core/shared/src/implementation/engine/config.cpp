@@ -108,7 +108,7 @@ void pragma::Engine::SaveEngineConfig()
 	WriteEngineConfig(f);
 }
 
-void pragma::Engine::RestoreConVarsForUnknownCommands(VFilePtrReal f, const ConVarInfoList &origCvarValues, const std::map<std::string, std::shared_ptr<ConConf>> &stateConVars)
+void pragma::Engine::RestoreConVarsForUnknownCommands(VFilePtrReal f, const ConVarInfoList &origCvarValues, const std::map<std::string, std::shared_ptr<console::ConConf>> &stateConVars)
 {
 	// We need to restore commands from the previous config in cases where we don't know the command.
 	// In this case the command may be from a script or module that hasn't been loaded during this instance and
@@ -132,8 +132,8 @@ void pragma::Engine::WriteEngineConfig(VFilePtrReal f)
 	auto &cvars = GetConVars();
 	for(auto it = cvars.begin(); it != cvars.end(); it++) {
 		auto &cf = it->second;
-		if(cf->GetType() == ConType::Var) {
-			auto *cv = static_cast<ConVar *>(cf.get());
+		if(cf->GetType() == pragma::console::ConType::Var) {
+			auto *cv = static_cast<console::ConVar *>(cf.get());
 			if((cv->GetFlags() & pragma::console::ConVarFlags::Archive) == pragma::console::ConVarFlags::Archive && cv->GetString() != cv->GetDefault()) {
 				std::string l = it->first + " \"" + cv->GetString() + "\"\n";
 				f->WriteString(l.c_str());
@@ -154,8 +154,8 @@ void pragma::Engine::WriteServerConfig(VFilePtrReal f)
 
 		for(auto it = cvars.begin(); it != cvars.end(); it++) {
 			auto &cf = it->second;
-			if(cf->GetType() == ConType::Var) {
-				auto *cv = static_cast<ConVar *>(cf.get());
+			if(cf->GetType() == pragma::console::ConType::Var) {
+				auto *cv = static_cast<console::ConVar *>(cf.get());
 				if((cv->GetFlags() & pragma::console::ConVarFlags::Archive) == pragma::console::ConVarFlags::Archive && cv->GetString() != cv->GetDefault()) {
 					std::string l = it->first + " \"" + cv->GetString() + "\"\n";
 					f->WriteString(l.c_str());

@@ -9,4 +9,6 @@ export module pragma.client:console.util;
 
 export import pragma.shared;
 
-export DLLCLIENT ConVarHandle GetClientConVar(std::string scmd);
+export namespace pragma::console {
+    DLLCLIENT ConVarHandle get_client_con_var(std::string scmd);
+}

@@ -17,9 +17,9 @@ using namespace pragma::rendering;
 
 #define ENABLE_PARTICLE_RENDERING 1
 
-static auto cvDrawParticles = GetClientConVar("render_draw_particles");
-static auto cvDrawGlow = GetClientConVar("render_draw_glow");
-static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
+static auto cvDrawParticles = pragma::console::get_client_con_var("render_draw_particles");
+static auto cvDrawGlow = pragma::console::get_client_con_var("render_draw_glow");
+static auto cvDrawTranslucent = pragma::console::get_client_con_var("render_draw_translucent");
 
 void pragma::CRasterizationRendererComponent::RecordPrepass(const util::DrawSceneInfo &drawSceneInfo)
 {

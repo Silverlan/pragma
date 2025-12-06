@@ -54,7 +54,7 @@ void pragma::AnimationUpdateManager::UpdateEntityAnimationDrivers(double dt)
 }
 void pragma::AnimationUpdateManager::UpdateConstraints(double dt) { pragma::ConstraintManagerComponent::ApplyConstraints(*game.GetNetworkState()); }
 
-static auto cvDisableAnimUpdates = GetConVar("debug_disable_animation_updates");
+static auto cvDisableAnimUpdates = pragma::console::get_con_var("debug_disable_animation_updates");
 void pragma::AnimationUpdateManager::UpdateAnimations(double dt)
 {
 	m_channelQueueProcessor.Reset();

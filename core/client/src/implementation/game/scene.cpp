@@ -26,7 +26,7 @@ const TCPPM *pragma::CGame::GetScene() const
 template DLLCLIENT const pragma::CSceneComponent *pragma::CGame::GetScene<pragma::CSceneComponent>() const;
 template DLLCLIENT const pragma::CSceneComponent *pragma::CGame::GetScene<const pragma::CSceneComponent>() const;
 
-static void cl_fov_callback(pragma::NetworkState *, const ConVar &, float, float val)
+static void cl_fov_callback(pragma::NetworkState *, const pragma::console::ConVar &, float, float val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -43,7 +43,7 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<float>("cl_render_fov", &cl_fov_callback);
 }
 
-static void cl_fov_viewmodel_callback(pragma::NetworkState *, const ConVar &, int, int val)
+static void cl_fov_viewmodel_callback(pragma::NetworkState *, const pragma::console::ConVar &, int, int val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;

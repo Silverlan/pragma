@@ -30,7 +30,7 @@ export namespace pragma {
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 		void ReloadDebugObject();
 		virtual void DoReloadDebugObject(class Color color, const Vector3 &pos, debug::DebugRenderInfo renderInfo) = 0;
-		std::shared_ptr<DebugRenderer::BaseObject> m_debugObject = nullptr;
+		std::shared_ptr<debug::DebugRenderer::BaseObject> m_debugObject = nullptr;
 		std::optional<Color> m_colorOverride {};
 		bool m_ignoreDepthBuffer = false;
 		CallbackHandle m_poseCallback = {};

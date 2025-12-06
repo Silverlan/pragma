@@ -310,7 +310,7 @@ static void draw_mesh(const pragma::bvh::MeshBvhTree &bvhTree, const umath::Scal
 		verts.push_back(pragma::bvh::from_bvh_vector(tri.p1));
 		verts.push_back(pragma::bvh::from_bvh_vector(tri.p2));
 	}
-	auto o = DebugRenderer::DrawMesh(verts, {color, outlineColor, duration});
+	auto o = pragma::debug::DebugRenderer::DrawMesh(verts, {color, outlineColor, duration});
 	if(o)
 		o->SetPose(pose);
 }
@@ -653,7 +653,7 @@ void CHitboxBvhComponent::DebugDrawHitboxMeshes(animation::BoneId boneId, float 
 			}
 		});
 
-		auto o = DebugRenderer::DrawMesh(dbgVerts, {col, colors::White, duration});
+		auto o = pragma::debug::DebugRenderer::DrawMesh(dbgVerts, {col, colors::White, duration});
 		if(o)
 			o->SetPose(pose);
 
@@ -682,7 +682,7 @@ void CHitboxBvhComponent::DebugDraw()
 		pragma::debug::DebugRenderInfo renderInfo {color, outlineColor, duration};
 		renderInfo.pose.SetOrigin(pos);
 		renderInfo.pose.SetRotation(pose.GetRotation());
-		::DebugRenderer::DrawBox(-hObb.halfExtents, hObb.halfExtents, renderInfo);
+		pragma::debug::DebugRenderer::DrawBox(-hObb.halfExtents, hObb.halfExtents, renderInfo);
 	}
 
 	auto &mdl = ent.GetModel();
@@ -710,7 +710,7 @@ void CHitboxBvhComponent::DebugDraw()
 				dbgMeshVerts.push_back(v2);
 			}
 		}
-		::DebugRenderer::DrawMesh(dbgMeshVerts, {color, outlineColor, duration});
+		pragma::debug::DebugRenderer::DrawMesh(dbgMeshVerts, {color, outlineColor, duration});
 	}
 }
 

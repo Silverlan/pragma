@@ -46,8 +46,8 @@ Bool CFlammableComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket 
 		SetIgnitable(packet->Read<bool>());
 	else if(eventId == m_netEvIgnite) {
 		auto duration = packet->Read<float>();
-		auto *attacker = nwm::read_entity(packet);
-		auto *inflictor = nwm::read_entity(packet);
+		auto *attacker = pragma::networking::read_entity(packet);
+		auto *inflictor = pragma::networking::read_entity(packet);
 		Ignite(duration, attacker, inflictor);
 	}
 	else if(eventId == m_netEvExtinguish)
@@ -67,8 +67,8 @@ void CFlammableComponent::ReceiveData(NetPacket &packet)
 	auto bOnFire = packet->Read<bool>();
 	if(bOnFire == true) {
 		auto t = packet->Read<float>();
-		auto *attacker = nwm::read_entity(packet);
-		auto *inflictor = nwm::read_entity(packet);
+		auto *attacker = pragma::networking::read_entity(packet);
+		auto *inflictor = pragma::networking::read_entity(packet);
 		Ignite(t, attacker, inflictor);
 	}
 }

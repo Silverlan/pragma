@@ -17,7 +17,7 @@ export {
 	namespace pragma {
 		class BasePlayerComponent;
 	};
-	namespace nwm {
+	namespace pragma::networking {
 		DLLNETWORK void write_vector(NetPacket &packet, const Vector3 &v);
 		DLLNETWORK void write_angles(NetPacket &packet, const EulerAngles &ang);
 		DLLNETWORK void write_quat(NetPacket &packet, const Quat &rot);
@@ -40,16 +40,16 @@ export {
 	};
 
 	/*template<class T>
-		T *nwm::read_entity(NetPacket &packet,const std::function<void(BaseEntity*)> &onCreated)
+		T *pragma::networking::read_entity(NetPacket &packet,const std::function<void(BaseEntity*)> &onCreated)
 	{
-		auto *ent = nwm::read_entity(packet,onCreated);
+		auto *ent = pragma::networking::read_entity(packet,onCreated);
 		return dynamic_cast<T*>(ent);
 	}*/
 
 	template<class T>
-	T *nwm::read_entity(NetPacket &packet)
+	T *pragma::networking::read_entity(NetPacket &packet)
 	{
-		pragma::ecs::BaseEntity *ent = nwm::read_entity(packet);
+		pragma::ecs::BaseEntity *ent = pragma::networking::read_entity(packet);
 		return dynamic_cast<T *>(ent);
 	}
 };

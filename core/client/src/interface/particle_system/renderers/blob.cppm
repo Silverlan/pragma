@@ -42,7 +42,7 @@ export class DLLCLIENT CParticleRendererBlob : public CParticleRenderer {
 
 	// Debug
 	struct DebugInfo {
-		std::array<std::shared_ptr<DebugRenderer::BaseObject>, pragma::ShaderParticleBlob::MAX_BLOB_NEIGHBORS - 1> renderObjects;
+		std::array<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject>, pragma::ShaderParticleBlob::MAX_BLOB_NEIGHBORS - 1> renderObjects;
 		bool hide = false;
 	};
 	std::vector<DebugInfo> m_dbgNeighborLinks;

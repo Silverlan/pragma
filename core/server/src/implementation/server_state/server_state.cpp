@@ -58,7 +58,7 @@ pragma::ServerState::~ServerState()
 	auto &conVarPtrs = GetConVarPtrs();
 	for(auto itHandles = conVarPtrs.begin(); itHandles != conVarPtrs.end(); itHandles++)
 		itHandles->second->set(nullptr);
-	ResourceManager::ClearResources();
+	networking::ResourceManager::ClearResources();
 	m_modelManager->Clear();
 	GetMaterialManager().ClearUnused();
 
@@ -168,7 +168,7 @@ void pragma::ServerState::OnClientAuthenticated(pragma::networking::IServerClien
 		return;
 	}
 	NetPacket p;
-	unsigned int numResources = ResourceManager::GetResourceCount();
+	unsigned int numResources = networking::ResourceManager::GetResourceCount();
 	p->Write<unsigned int>(numResources);
 	SendPacket(pragma::networking::net_messages::client::START_RESOURCE_TRANSFER, p, pragma::networking::Protocol::SlowReliable, session);
 }
@@ -328,7 +328,7 @@ void pragma::ServerState::ChangeLevel(const std::string &map)
 	auto *game = GetGameState();
 	if(game != nullptr) {
 		auto &mapInfo = game->GetMapInfo();
-		ResourceManager::AddResource(mapInfo.fileName);
+		networking::ResourceManager::AddResource(mapInfo.fileName);
 	}
 	RegisterServerInfo();
 	game->OnGameReady();
@@ -463,7 +463,7 @@ DLLSERVER void pr_sv_register_server_net_messages()
 	if(netMessagesRegistered)
 		return;
 	netMessagesRegistered = true;
-	register_server_net_messages();
+	pragma::networking::register_server_net_messages();
 }
 DLLSERVER void pr_sv_create_server_state(std::unique_ptr<pragma::NetworkState> &outState) { outState = std::make_unique<pragma::ServerState>(); }
 DLLSERVER void pr_sv_start_server(bool singlePlayer)

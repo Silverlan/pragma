@@ -16,10 +16,10 @@ import pragma.shared;
 bool pragma::ServerState::HandlePacket(pragma::networking::IServerClient &session, NetPacket &packet)
 {
 	unsigned int ID = packet.GetMessageID();
-	SVNetMessage *msg = GetNetMessage(ID);
+	networking::SVNetMessage *msg = GetNetMessage(ID);
 	if(msg == nullptr)
 		return false;
-	msg->handler(static_cast<ServerClientHandle>(&session), packet);
+	msg->handler(static_cast<networking::ServerClientHandle>(&session), packet);
 	return true;
 }
 
@@ -28,12 +28,12 @@ pragma::networking::MasterServerRegistration *pragma::ServerState::GetMasterServ
 bool pragma::ServerState::IsServerRunning() const { return m_server && m_server->IsRunning(); }
 unsigned int pragma::ServerState::GetClientMessageID(std::string identifier)
 {
-	auto *map = GetClientMessageMap();
+	auto *map = networking::get_client_message_map();
 	return map->GetNetMessageID(identifier);
 }
 
-pragma::networking::ServerMessageMap *pragma::ServerState::GetNetMessageMap() { return GetServerMessageMap(); }
-SVNetMessage *pragma::ServerState::GetNetMessage(unsigned int ID)
+pragma::networking::ServerMessageMap *pragma::ServerState::GetNetMessageMap() { return networking::get_server_message_map(); }
+pragma::networking::SVNetMessage *pragma::ServerState::GetNetMessage(unsigned int ID)
 {
 	auto *map = GetNetMessageMap();
 	return map->GetNetMessage(ID);

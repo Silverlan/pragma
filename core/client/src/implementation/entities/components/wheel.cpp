@@ -46,7 +46,7 @@ Bool CWheelComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &pac
 #if 0
 	if(eventId == m_netEvAttach)
 	{
-		auto *ent = nwm::read_entity(packet);
+		auto *ent = pragma::networking::read_entity(packet);
 		if(ent != nullptr && ent->IsVehicle())
 		{
 			auto wheelId = packet->Read<UChar>();

@@ -438,11 +438,11 @@ void CMD_sv_debug_netmessages(pragma::NetworkState *state, pragma::BasePlayerCom
 		Con::cout << "Debug backlog has been set to " << numBacklog << Con::endl;
 		return;
 	}
-	auto *svMap = GetServerMessageMap();
+	auto *svMap = pragma::networking::get_server_message_map();
 	util::StringMap<uint32_t> *svMsgs;
 	svMap->GetNetMessages(&svMsgs);
 
-	auto *clMap = GetClientMessageMap();
+	auto *clMap = pragma::networking::get_client_message_map();
 	util::StringMap<uint32_t> *clMsgs;
 	clMap->GetNetMessages(&clMsgs);
 

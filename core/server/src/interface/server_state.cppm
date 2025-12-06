@@ -106,7 +106,7 @@ namespace pragma {
 		virtual bool IsServer() const override;
 		virtual console::ConVarMap *GetConVarMap() override;
 		pragma::networking::ServerMessageMap *GetNetMessageMap();
-		SVNetMessage *GetNetMessage(unsigned int ID);
+		networking::SVNetMessage *GetNetMessage(unsigned int ID);
 		unsigned int GetClientMessageID(std::string identifier);
 		virtual console::ConCommand *CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags = pragma::console::ConVarFlags::None, const std::string &help = "") override;
 		void GetLuaConCommands(std::unordered_map<std::string, console::ConCommand *> **cmds);

@@ -12,7 +12,7 @@ void CPointConstraintBallSocketComponent::ReceiveData(NetPacket &packet)
 {
 	m_kvSource = packet->ReadString();
 	m_kvTarget = packet->ReadString();
-	m_posTarget = nwm::read_vector(packet);
+	m_posTarget = networking::read_vector(packet);
 }
 void CPointConstraintBallSocketComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 

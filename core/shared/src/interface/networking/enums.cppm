@@ -56,7 +56,7 @@ export namespace pragma::networking {
 
 	CONSTEXPR_DLL_COMPAT uint32_t FSYS_SEARCH_RESOURCES = 4'096;
 
-	enum class WVQuery : unsigned int { FIRST = 1500, PING, LAST };
+	enum class ServerQuery : uint32_t { First = 1500, Ping, Last };
 };
 
 export {

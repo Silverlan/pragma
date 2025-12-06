@@ -39,13 +39,13 @@ void SObserverComponent::SetObserverTarget(BaseObservableComponent *ent)
 	if(entThis.IsShared() == false)
 		return;
 	NetPacket p {};
-	nwm::write_entity(p, &ent->GetEntity());
+	pragma::networking::write_entity(p, &ent->GetEntity());
 	entThis.SendNetEvent(m_netEvSetObserverTarget, p, pragma::networking::Protocol::SlowReliable);
 }
 
 void SObserverComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	auto *target = GetObserverTarget();
-	nwm::write_entity(packet, target ? &target->GetEntity() : nullptr);
+	pragma::networking::write_entity(packet, target ? &target->GetEntity() : nullptr);
 	packet->Write<ObserverMode>(GetObserverMode());
 }

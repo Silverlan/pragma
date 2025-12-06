@@ -107,7 +107,7 @@ void SAIComponent::OnLookTargetChanged()
 			p->Write<Vector3>(m_neckInfo.lookTarget);
 			break;
 		case BaseAIComponent::LookTargetType::Entity:
-			nwm::write_entity(p, m_neckInfo.hEntityLookTarget);
+			pragma::networking::write_entity(p, m_neckInfo.hEntityLookTarget);
 			break;
 		}
 		ent.SendNetEvent(m_netEvSetLookTarget, p, pragma::networking::Protocol::SlowReliable);

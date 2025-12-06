@@ -22,8 +22,8 @@ AttachmentData *SAttachmentComponent::SetupAttachment(pragma::ecs::BaseEntity *e
 	auto &entThis = static_cast<SBaseEntity &>(GetEntity());
 	if(entThis.IsShared() && attData != nullptr) {
 		NetPacket p;
-		nwm::write_entity(p, &entThis);
-		nwm::write_entity(p, ent);
+		pragma::networking::write_entity(p, &entThis);
+		pragma::networking::write_entity(p, ent);
 		p->Write<pragma::FAttachmentMode>(attInfo.flags);
 		p->Write<Vector3>(attData->offset);
 		p->Write<Quat>(attData->rotation);
@@ -38,7 +38,7 @@ void SAttachmentComponent::SetAttachmentFlags(pragma::FAttachmentMode flags)
 	auto &entThis = static_cast<SBaseEntity &>(GetEntity());
 	if(entThis.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &entThis);
+		pragma::networking::write_entity(p, &entThis);
 		p->Write<pragma::FAttachmentMode>(flags);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_SETPARENTMODE, p, pragma::networking::Protocol::SlowReliable);
 	}

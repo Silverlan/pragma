@@ -44,7 +44,7 @@ void SLuaEntity::Remove()
 	if(IsSpawned()) {
 		// TODO: Do we need this? (If so, why?)
 		NetPacket p;
-		nwm::write_entity(p, this);
+		pragma::networking::write_entity(p, this);
 		pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_REMOVE, p, pragma::networking::Protocol::SlowReliable);
 	}
 	SBaseEntity::Remove();

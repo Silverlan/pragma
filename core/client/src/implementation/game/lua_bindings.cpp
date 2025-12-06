@@ -226,10 +226,10 @@ void pragma::CGame::RegisterLua()
 
 	auto netPacketClassDef = luabind::class_<NetPacket>("Packet");
 	Lua::NetPacket::Client::register_class(netPacketClassDef);
-	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, util::WeakHandle<pragma::CPlayerComponent> &)>([](lua::State *l, ::NetPacket &packet, util::WeakHandle<pragma::CPlayerComponent> &pl) { nwm::write_player(packet, pl.get()); }));
-	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, EntityHandle &)>([](lua::State *l, ::NetPacket &packet, EntityHandle &hEnt) { nwm::write_player(packet, hEnt.get()); }));
+	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, util::WeakHandle<pragma::CPlayerComponent> &)>([](lua::State *l, ::NetPacket &packet, util::WeakHandle<pragma::CPlayerComponent> &pl) { networking::write_player(packet, pl.get()); }));
+	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, EntityHandle &)>([](lua::State *l, ::NetPacket &packet, EntityHandle &hEnt) { networking::write_player(packet, hEnt.get()); }));
 	netPacketClassDef.def("ReadPlayer", static_cast<void (*)(lua::State *, ::NetPacket &)>([](lua::State *l, ::NetPacket &packet) {
-		auto *pl = static_cast<pragma::CPlayerComponent *>(nwm::read_player(packet));
+		auto *pl = static_cast<pragma::CPlayerComponent *>(pragma::networking::read_player(packet));
 		if(pl == nullptr)
 			return;
 		pl->PushLuaObject(l);

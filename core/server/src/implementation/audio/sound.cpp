@@ -192,7 +192,7 @@ void pragma::audio::SALSound::SetPosition(const Vector3 &pos, bool bDontTransmit
 	ALSoundBase::SetPosition(pos);
 	if(bDontTransmit == true)
 		return;
-	SendEvent(NetEvent::SetPos, [&pos](NetPacket &p) { nwm::write_vector(p, pos); });
+	SendEvent(NetEvent::SetPos, [&pos](NetPacket &p) { pragma::networking::write_vector(p, pos); });
 }
 void pragma::audio::SALSound::SetPosition(const Vector3 &pos) { SetPosition(pos, false); }
 
@@ -210,7 +210,7 @@ void pragma::audio::SALSound::SetVelocity(const Vector3 &vel, bool bDontTransmit
 	ALSoundBase::SetVelocity(vel);
 	if(bDontTransmit == true)
 		return;
-	SendEvent(NetEvent::SetVelocity, [&vel](NetPacket &p) { nwm::write_vector(p, vel); });
+	SendEvent(NetEvent::SetVelocity, [&vel](NetPacket &p) { pragma::networking::write_vector(p, vel); });
 }
 void pragma::audio::SALSound::SetVelocity(const Vector3 &vel) { SetVelocity(vel, false); }
 
@@ -220,7 +220,7 @@ void pragma::audio::SALSound::SetDirection(const Vector3 &dir, bool bDontTransmi
 	ALSoundBase::SetDirection(dir);
 	if(bDontTransmit == true)
 		return;
-	SendEvent(NetEvent::SetDirection, [&dir](NetPacket &p) { nwm::write_vector(p, dir); });
+	SendEvent(NetEvent::SetDirection, [&dir](NetPacket &p) { pragma::networking::write_vector(p, dir); });
 }
 void pragma::audio::SALSound::SetDirection(const Vector3 &dir) { SetDirection(dir, false); }
 
@@ -311,7 +311,7 @@ void pragma::audio::SALSound::SetFlags(unsigned int flags)
 void pragma::audio::SALSound::SetSource(pragma::ecs::BaseEntity *ent)
 {
 	ALSound::SetSource(ent);
-	SendEvent(NetEvent::SetSource, [&ent](NetPacket &p) { nwm::write_entity(p, ent); });
+	SendEvent(NetEvent::SetSource, [&ent](NetPacket &p) { pragma::networking::write_entity(p, ent); });
 }
 
 void pragma::audio::SALSound::SetFadeInDuration(float t)

@@ -145,7 +145,7 @@ bool CLightSpotVolComponent::UpdateMeshData()
 Bool CLightSpotVolComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetSpotlightTarget) {
-		auto *ent = nwm::read_entity(packet);
+		auto *ent = pragma::networking::read_entity(packet);
 		if(ent != nullptr)
 			SetSpotlightTarget(*ent);
 		else

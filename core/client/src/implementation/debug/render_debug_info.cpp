@@ -6,8 +6,8 @@ module;
 module pragma.client;
 
 import :debug.render_debug_info;
-static RenderDebugInfo render_debug_info;
-void RenderDebugInfo::Reset()
+static pragma::debug::RenderDebugInfo render_debug_info;
+void pragma::debug::RenderDebugInfo::Reset()
 {
 	triangleCount = 0;
 	vertexCount = 0;
@@ -20,11 +20,11 @@ void RenderDebugInfo::Reset()
 	shadowEntityCount = 0;
 }
 
-RenderDebugInfo &get_render_debug_info() { return render_debug_info; }
+pragma::debug::RenderDebugInfo &pragma::debug::get_render_debug_info() { return render_debug_info; }
 
 static void debug_render_info(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	auto &info = get_render_debug_info();
+	auto &info = pragma::debug::get_render_debug_info();
 	std::cout << "-------------- Render Info --------------" << std::endl;
 	std::cout << "Rendered in last frame:" << std::endl;
 	std::cout << "Triangles: " << info.triangleCount << std::endl;

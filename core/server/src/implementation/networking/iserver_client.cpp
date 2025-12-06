@@ -25,7 +25,7 @@ bool pragma::networking::IServerClient::IsInitialResourceTransferComplete() cons
 void pragma::networking::IServerClient::SetInitialResourceTransferState(TransferState state) { m_initialResourceTransferState = state; }
 pragma::networking::IServerClient::TransferState pragma::networking::IServerClient::GetInitialResourceTransferState() { return m_initialResourceTransferState; }
 void pragma::networking::IServerClient::SetPlayer(pragma::BasePlayerComponent &pl) { m_player = pl.GetHandle<pragma::BasePlayerComponent>(); }
-const std::vector<std::shared_ptr<Resource>> &pragma::networking::IServerClient::GetResourceTransfer() const { return m_resourceTransfer; }
+const std::vector<std::shared_ptr<pragma::networking::Resource>> &pragma::networking::IServerClient::GetResourceTransfer() const { return m_resourceTransfer; }
 bool pragma::networking::IServerClient::AddResource(const std::string &fileName, bool stream)
 {
 	auto canonName = FileManager::GetCanonicalizedPath(fileName);

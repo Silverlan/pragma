@@ -24,7 +24,7 @@ void CPointAtTargetComponent::InitializeLuaObject(lua::State *l) { return BaseEn
 Bool CPointAtTargetComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetPointAtTarget) {
-		auto *ent = nwm::read_entity(packet);
+		auto *ent = pragma::networking::read_entity(packet);
 		SetPointAtTarget(ent);
 	}
 	else

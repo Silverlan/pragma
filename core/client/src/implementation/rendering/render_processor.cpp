@@ -19,9 +19,9 @@ import :model;
 static bool g_collectRenderStats = false;
 static CallbackHandle g_cbPreRenderScene = {};
 static CallbackHandle g_cbPostRenderScene = {};
-static std::unique_ptr<DebugRenderFilter> g_debugRenderFilter = nullptr;
+static std::unique_ptr<pragma::debug::DebugRenderFilter> g_debugRenderFilter = nullptr;
 
-void set_debug_render_filter(std::unique_ptr<DebugRenderFilter> filter) { g_debugRenderFilter = std::move(filter); }
+void set_debug_render_filter(std::unique_ptr<pragma::debug::DebugRenderFilter> filter) { g_debugRenderFilter = std::move(filter); }
 static std::string nanoseconds_to_ms(std::chrono::nanoseconds t) { return std::to_string(static_cast<long double>(t.count()) / static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds {1}).count())) + "ms"; }
 static void print_pass_stats(const RenderPassStats &stats, bool full)
 {

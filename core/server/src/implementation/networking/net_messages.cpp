@@ -48,7 +48,7 @@ static void NET_sv_DEBUG_AI_SCHEDULE_TREE(pragma::networking::IServerClient &ses
 
 static void NET_sv_CL_SEND(pragma::networking::IServerClient &session, NetPacket packet);
 
-#define REGISTER_NET_MSG(NAME) netMessageMap.RegisterNetMessage(server::NAME, +[](ServerClientHandle session, NetPacket packet) { NET_sv_##NAME(*static_cast<pragma::networking::IServerClient *>(session), packet); })
+#define REGISTER_NET_MSG(NAME) netMessageMap.RegisterNetMessage(server::NAME, +[](pragma::networking::ServerClientHandle session, NetPacket packet) { NET_sv_##NAME(*static_cast<pragma::networking::IServerClient *>(session), packet); })
 
 static void register_net_messages(pragma::networking::ServerMessageMap &netMessageMap)
 {
@@ -88,14 +88,14 @@ static void register_net_messages(pragma::networking::ServerMessageMap &netMessa
 	REGISTER_NET_MSG(CL_SEND);
 }
 
-void register_server_net_messages()
+void pragma::networking::register_server_net_messages()
 {
 	static auto netMessagesRegistered = false;
 	if(netMessagesRegistered)
 		return;
 	netMessagesRegistered = true;
 
-	register_net_messages(*GetServerMessageMap());
+	::register_net_messages(*get_server_message_map());
 }
 
 #define RESOURCE_TRANSFER_VERBOSE 0
@@ -213,7 +213,7 @@ void NET_sv_ENT_EVENT(pragma::networking::IServerClient &session, NetPacket pack
 	if(pl == nullptr)
 		return;
 	packet->SetOffset(packet->GetDataSize() - sizeof(UInt32) - sizeof(unsigned int));
-	auto *ent = static_cast<SBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<SBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto eventId = packet->Read<UInt32>();
@@ -249,7 +249,7 @@ void NET_sv_CMD_SETPOS(pragma::networking::IServerClient &session, NetPacket pac
 	auto pTrComponent = pl->GetEntity().GetTransformComponent();
 	if(pTrComponent == nullptr)
 		return;
-	Vector3 pos = nwm::read_vector(packet);
+	Vector3 pos = pragma::networking::read_vector(packet);
 	pTrComponent->SetPosition(pos);
 }
 
@@ -413,7 +413,7 @@ void NET_sv_NOCLIP(pragma::networking::IServerClient &session, NetPacket packet)
 		//pl->SetCollisionsEnabled(false); // Bugged due to CCD
 	}
 	NetPacket p;
-	nwm::write_entity(p, &pl->GetEntity());
+	pragma::networking::write_entity(p, &pl->GetEntity());
 	p->Write<bool>(bNoclip);
 	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_TOGGLE_NOCLIP, p, pragma::networking::Protocol::SlowReliable);
 }
@@ -559,7 +559,7 @@ void NET_sv_DEBUG_AI_SCHEDULE_PRINT(pragma::networking::IServerClient &session, 
 	auto *pl = pragma::ServerState::Get()->GetPlayer(session);
 	if(pl == nullptr)
 		return;
-	auto *npc = nwm::read_entity(packet);
+	auto *npc = pragma::networking::read_entity(packet);
 	if(npc == nullptr || npc->IsNPC() == false)
 		return;
 	auto sAiComponent = npc->GetComponent<pragma::SAIComponent>();
@@ -583,7 +583,7 @@ void NET_sv_DEBUG_AI_SCHEDULE_TREE(pragma::networking::IServerClient &session, N
 	auto *pl = pragma::ServerState::Get()->GetPlayer(session);
 	if(pl == nullptr)
 		return;
-	auto *ent = nwm::read_entity(packet);
+	auto *ent = pragma::networking::read_entity(packet);
 	if(ent == nullptr || ent->IsNPC() == false)
 		return;
 	auto hPl = pl->GetHandle<pragma::SPlayerComponent>();

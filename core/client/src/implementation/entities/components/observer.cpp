@@ -40,7 +40,7 @@ Bool CObserverComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &
 	if(eventId == m_netEvSetObserverMode)
 		SetObserverMode(packet->Read<ObserverMode>());
 	else if(eventId == m_netEvSetObserverTarget) {
-		auto *ent = nwm::read_entity(packet);
+		auto *ent = pragma::networking::read_entity(packet);
 		auto pObsComponent = ent->GetComponent<pragma::CObservableComponent>();
 		SetObserverTarget(pObsComponent.get());
 	}
@@ -51,7 +51,7 @@ Bool CObserverComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &
 
 void CObserverComponent::ReceiveData(NetPacket &packet)
 {
-	auto *ent = nwm::read_entity(packet);
+	auto *ent = pragma::networking::read_entity(packet);
 	if(!ent)
 		SetObserverTarget(nullptr);
 	else {

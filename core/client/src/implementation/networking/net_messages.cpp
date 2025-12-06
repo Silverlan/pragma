@@ -282,7 +282,7 @@ void pragma::networking::register_client_net_messages()
 		return;
 	netMessagesRegistered = true;
 
-	register_net_messages(*GetClientMessageMap());
+	::register_net_messages(*get_client_message_map());
 }
 
 void NET_cl_RESOURCEINFO(NetPacket packet) { pragma::get_client_state()->HandleClientResource(packet); }
@@ -485,19 +485,19 @@ void NET_cl_SND_EV(NetPacket packet)
 		}
 	case pragma::audio::ALSound::NetEvent::SetPos:
 		{
-			Vector3 pos = nwm::read_vector(packet);
+			Vector3 pos = pragma::networking::read_vector(packet);
 			as->SetPosition(pos);
 			break;
 		}
 	case pragma::audio::ALSound::NetEvent::SetVelocity:
 		{
-			Vector3 vel = nwm::read_vector(packet);
+			Vector3 vel = pragma::networking::read_vector(packet);
 			as->SetVelocity(vel);
 			break;
 		}
 	case pragma::audio::ALSound::NetEvent::SetDirection:
 		{
-			Vector3 dir = nwm::read_vector(packet);
+			Vector3 dir = pragma::networking::read_vector(packet);
 			as->SetDirection(dir);
 			break;
 		}
@@ -581,7 +581,7 @@ void NET_cl_SND_EV(NetPacket packet)
 		}
 	case pragma::audio::ALSound::NetEvent::SetSource:
 		{
-			auto *ent = nwm::read_entity(packet);
+			auto *ent = pragma::networking::read_entity(packet);
 			as->SetSource(ent);
 			break;
 		}
@@ -757,7 +757,7 @@ void NET_cl_ENT_REMOVE(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	ent->Remove();
@@ -901,7 +901,7 @@ void NET_cl_ENT_SOUND(NetPacket packet)
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	unsigned int sndID = packet->Read<unsigned int>();
@@ -918,7 +918,7 @@ void NET_cl_ENT_SETUNLIT(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pRenderComponent = ent->GetRenderComponent();
@@ -932,7 +932,7 @@ void NET_cl_ENT_SETCASTSHADOWS(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pRenderComponent = ent->GetRenderComponent();
@@ -946,7 +946,7 @@ void NET_cl_ENT_SETHEALTH(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pHealthComponent = ent->GetComponent<pragma::CHealthComponent>();
@@ -960,7 +960,7 @@ void NET_cl_ENT_SETNAME(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pNameComponent = ent->GetComponent<pragma::CNameComponent>();
@@ -974,7 +974,7 @@ void NET_cl_ENT_MODEL(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	std::string mdl = packet->ReadString();
@@ -988,7 +988,7 @@ void NET_cl_ENT_SKIN(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	unsigned int skin = packet->Read<unsigned int>();
@@ -1001,7 +1001,7 @@ void NET_cl_ENT_ANIM_PLAY(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	int anim = packet->Read<int>();
@@ -1014,7 +1014,7 @@ void NET_cl_ENT_ANIM_GESTURE_PLAY(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	int slot = packet->Read<int>();
@@ -1028,7 +1028,7 @@ void NET_cl_ENT_ANIM_GESTURE_STOP(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	int slot = packet->Read<int>();
@@ -1041,10 +1041,10 @@ void NET_cl_ENT_SETPARENT(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
-	pragma::ecs::BaseEntity *parent = nwm::read_entity(packet);
+	pragma::ecs::BaseEntity *parent = pragma::networking::read_entity(packet);
 	if(parent == nullptr)
 		return;
 	auto flags = packet->Read<pragma::FAttachmentMode>();
@@ -1064,7 +1064,7 @@ void NET_cl_ENT_SETPARENTMODE(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto flags = packet->Read<pragma::FAttachmentMode>();
@@ -1077,7 +1077,7 @@ void NET_cl_ENT_PHYS_INIT(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
@@ -1091,7 +1091,7 @@ void NET_cl_ENT_PHYS_DESTROY(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
@@ -1105,7 +1105,7 @@ void NET_cl_ENT_EVENT(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	packet->SetOffset(packet->GetDataSize() - sizeof(UInt32) - sizeof(unsigned int));
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto eventId = packet->Read<UInt32>();
@@ -1122,7 +1122,7 @@ void NET_cl_ENT_MOVETYPE(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
@@ -1136,7 +1136,7 @@ void NET_cl_PL_TOGGLE_NOCLIP(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto bNoclip = packet->Read<bool>();
@@ -1158,7 +1158,7 @@ void NET_cl_ENT_COLLISIONTYPE(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
@@ -1172,13 +1172,13 @@ void NET_cl_ENT_EYEOFFSET(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pTrComponent = ent->GetTransformComponent();
 	if(pTrComponent == nullptr)
 		return;
-	Vector3 offset = nwm::read_vector(packet);
+	Vector3 offset = pragma::networking::read_vector(packet);
 	pTrComponent->SetEyeOffset(offset);
 }
 
@@ -1231,7 +1231,7 @@ void NET_cl_PL_LOCAL(NetPacket packet)
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	auto *pl = static_cast<pragma::CPlayerComponent *>(nwm::read_player(packet));
+	auto *pl = static_cast<pragma::CPlayerComponent *>(pragma::networking::read_player(packet));
 	if(pl == nullptr)
 		return;
 	pragma::CGame *game = client->GetGameState();
@@ -1276,8 +1276,8 @@ void NET_cl_PLAYERINPUT(NetPacket packet)
 		pragma::get_cgame()->OnReceivedPlayerInputResponse(id);
 		return;
 	}
-	auto *pl = nwm::read_player(packet);
-	auto orientation = nwm::read_quat(packet);
+	auto *pl = pragma::networking::read_player(packet);
+	auto orientation = pragma::networking::read_quat(packet);
 	if(pl != nullptr) {
 		auto &ent = pl->GetEntity();
 		if(ent.IsCharacter())
@@ -1300,7 +1300,7 @@ void NET_cl_PLAYERINPUT(NetPacket packet)
 
 void NET_cl_PL_SPEED_WALK(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float speed = packet->Read<float>();
@@ -1309,7 +1309,7 @@ void NET_cl_PL_SPEED_WALK(NetPacket packet)
 
 void NET_cl_PL_SLOPELIMIT(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsCharacter() == false)
 		return;
 	float limit = packet->Read<float>();
@@ -1318,7 +1318,7 @@ void NET_cl_PL_SLOPELIMIT(NetPacket packet)
 
 void NET_cl_PL_STEPOFFSET(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsCharacter() == false)
 		return;
 	float offset = packet->Read<float>();
@@ -1327,7 +1327,7 @@ void NET_cl_PL_STEPOFFSET(NetPacket packet)
 
 void NET_cl_PL_SPEED_RUN(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float speed = packet->Read<float>();
@@ -1336,7 +1336,7 @@ void NET_cl_PL_SPEED_RUN(NetPacket packet)
 
 void NET_cl_PL_SPEED_SPRINT(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float speed = packet->Read<float>();
@@ -1345,7 +1345,7 @@ void NET_cl_PL_SPEED_SPRINT(NetPacket packet)
 
 void NET_cl_PL_SPEED_CROUCH_WALK(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float speed = packet->Read<float>();
@@ -1354,7 +1354,7 @@ void NET_cl_PL_SPEED_CROUCH_WALK(NetPacket packet)
 
 void NET_cl_PL_HEIGHT_STAND(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float height = packet->Read<float>();
@@ -1363,7 +1363,7 @@ void NET_cl_PL_HEIGHT_STAND(NetPacket packet)
 
 void NET_cl_PL_HEIGHT_CROUCH(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float height = packet->Read<float>();
@@ -1372,7 +1372,7 @@ void NET_cl_PL_HEIGHT_CROUCH(NetPacket packet)
 
 void NET_cl_PL_EYELEVEL_STAND(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float eyelevel = packet->Read<float>();
@@ -1381,7 +1381,7 @@ void NET_cl_PL_EYELEVEL_STAND(NetPacket packet)
 
 void NET_cl_PL_EYELEVEL_CROUCH(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float eyelevel = packet->Read<float>();
@@ -1390,10 +1390,10 @@ void NET_cl_PL_EYELEVEL_CROUCH(NetPacket packet)
 
 void NET_cl_PL_UPDIRECTION(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsCharacter() == false)
 		return;
-	Vector3 direction = nwm::read_vector(packet);
+	Vector3 direction = pragma::networking::read_vector(packet);
 	auto charC = pl->GetCharacterComponent();
 	if(charC.valid()) {
 		auto *orientC = charC->GetOrientationComponent();
@@ -1404,7 +1404,7 @@ void NET_cl_PL_UPDIRECTION(NetPacket packet)
 
 void NET_cl_PL_CHANGEDNAME(NetPacket packet)
 {
-	auto *pl = nwm::read_player(packet);
+	auto *pl = pragma::networking::read_player(packet);
 	if(pl == nullptr)
 		return;
 	auto name = packet->ReadString();
@@ -1415,7 +1415,7 @@ void NET_cl_PL_CHANGEDNAME(NetPacket packet)
 
 void NET_cl_WEP_DEPLOY(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	auto wepComponent = wep->GetWeaponComponent();
@@ -1428,7 +1428,7 @@ void NET_cl_WEP_DEPLOY(NetPacket packet)
 
 void NET_cl_WEP_HOLSTER(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	auto wepComponent = wep->GetWeaponComponent();
@@ -1441,7 +1441,7 @@ void NET_cl_WEP_HOLSTER(NetPacket packet)
 
 void NET_cl_WEP_PRIMARYATTACK(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	wep->GetWeaponComponent()->PrimaryAttack();
@@ -1449,7 +1449,7 @@ void NET_cl_WEP_PRIMARYATTACK(NetPacket packet)
 
 void NET_cl_WEP_SECONDARYATTACK(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	wep->GetWeaponComponent()->SecondaryAttack();
@@ -1457,7 +1457,7 @@ void NET_cl_WEP_SECONDARYATTACK(NetPacket packet)
 
 void NET_cl_WEP_ATTACK3(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	wep->GetWeaponComponent()->TertiaryAttack();
@@ -1465,7 +1465,7 @@ void NET_cl_WEP_ATTACK3(NetPacket packet)
 
 void NET_cl_WEP_ATTACK4(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	wep->GetWeaponComponent()->Attack4();
@@ -1473,7 +1473,7 @@ void NET_cl_WEP_ATTACK4(NetPacket packet)
 
 void NET_cl_WEP_RELOAD(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	wep->GetWeaponComponent()->Reload();
@@ -1481,7 +1481,7 @@ void NET_cl_WEP_RELOAD(NetPacket packet)
 
 void NET_cl_WEP_PRIM_CLIP_SIZE(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	auto size = packet->Read<UInt16>();
@@ -1490,7 +1490,7 @@ void NET_cl_WEP_PRIM_CLIP_SIZE(NetPacket packet)
 
 void NET_cl_WEP_SEC_CLIP_SIZE(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	auto size = packet->Read<UInt16>();
@@ -1499,7 +1499,7 @@ void NET_cl_WEP_SEC_CLIP_SIZE(NetPacket packet)
 
 void NET_cl_WEP_PRIM_MAX_CLIP_SIZE(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	auto size = packet->Read<UInt16>();
@@ -1508,7 +1508,7 @@ void NET_cl_WEP_PRIM_MAX_CLIP_SIZE(NetPacket packet)
 
 void NET_cl_WEP_SEC_MAX_CLIP_SIZE(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	auto size = packet->Read<UInt16>();
@@ -1517,7 +1517,7 @@ void NET_cl_WEP_SEC_MAX_CLIP_SIZE(NetPacket packet)
 
 void NET_cl_WEP_PRIM_AMMO_TYPE(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	auto type = packet->Read<UInt32>();
@@ -1526,7 +1526,7 @@ void NET_cl_WEP_PRIM_AMMO_TYPE(NetPacket packet)
 
 void NET_cl_WEP_SEC_AMMO_TYPE(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	auto type = packet->Read<UInt32>();
@@ -1543,7 +1543,7 @@ void NET_cl_SV_SEND(NetPacket packet)
 
 void NET_cl_ENV_LIGHT_SPOT_OUTERCUTOFF_ANGLE(NetPacket packet)
 {
-	auto *light = nwm::read_entity(packet);
+	auto *light = pragma::networking::read_entity(packet);
 	auto pLightSpotComponent = (light != nullptr) ? light->GetComponent<pragma::CLightSpotComponent>() : pragma::ComponentHandle<pragma::CLightSpotComponent>();
 	if(pLightSpotComponent.expired())
 		return;
@@ -1553,7 +1553,7 @@ void NET_cl_ENV_LIGHT_SPOT_OUTERCUTOFF_ANGLE(NetPacket packet)
 
 void NET_cl_ENV_LIGHT_SPOT_INNERCUTOFF_ANGLE(NetPacket packet)
 {
-	auto *light = nwm::read_entity(packet);
+	auto *light = pragma::networking::read_entity(packet);
 	auto pLightSpotComponent = (light != nullptr) ? light->GetComponent<pragma::CLightSpotComponent>() : pragma::ComponentHandle<pragma::CLightSpotComponent>();
 	if(pLightSpotComponent.expired())
 		return;
@@ -1563,7 +1563,7 @@ void NET_cl_ENV_LIGHT_SPOT_INNERCUTOFF_ANGLE(NetPacket packet)
 
 void NET_cl_ENVLIGHT_SETSTATE(NetPacket packet)
 {
-	auto *light = nwm::read_entity(packet);
+	auto *light = pragma::networking::read_entity(packet);
 	auto *pToggleComponent = (light != nullptr) ? static_cast<pragma::BaseToggleComponent *>(light->FindComponent("toggle").get()) : nullptr;
 	if(pToggleComponent == nullptr)
 		return;
@@ -1576,7 +1576,7 @@ void NET_cl_ENVLIGHT_SETSTATE(NetPacket packet)
 
 void NET_cl_ENVEXPLOSION_EXPLODE(NetPacket packet)
 {
-	auto *exp = nwm::read_entity(packet);
+	auto *exp = pragma::networking::read_entity(packet);
 	auto *pExplosionComponent = (exp != nullptr) ? static_cast<pragma::CExplosionComponent *>(exp->FindComponent("explosion").get()) : nullptr;
 	if(pExplosionComponent == nullptr)
 		return;
@@ -1585,7 +1585,7 @@ void NET_cl_ENVEXPLOSION_EXPLODE(NetPacket packet)
 
 void NET_cl_ENT_TOGGLE(NetPacket packet)
 {
-	auto *ent = nwm::read_entity(packet);
+	auto *ent = pragma::networking::read_entity(packet);
 	if(ent == nullptr)
 		return;
 	bool bOn = packet->Read<bool>();
@@ -1600,7 +1600,7 @@ void NET_cl_ENT_TOGGLE(NetPacket packet)
 
 void NET_cl_ENT_SETCOLLISIONFILTER(NetPacket packet)
 {
-	auto *ent = nwm::read_entity(packet);
+	auto *ent = pragma::networking::read_entity(packet);
 	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
@@ -1613,7 +1613,7 @@ void NET_cl_ENT_SETCOLLISIONFILTER(NetPacket packet)
 
 void NET_cl_ENT_SETKINEMATIC(NetPacket packet)
 {
-	auto *ent = nwm::read_entity(packet);
+	auto *ent = pragma::networking::read_entity(packet);
 	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
@@ -1625,7 +1625,7 @@ void NET_cl_ENT_SETKINEMATIC(NetPacket packet)
 
 void NET_cl_ENV_FOGCON_SETSTARTDIST(NetPacket packet)
 {
-	auto *fog = nwm::read_entity(packet);
+	auto *fog = pragma::networking::read_entity(packet);
 	auto *pFogComponent = (fog != nullptr) ? static_cast<pragma::BaseEnvFogControllerComponent *>(fog->FindComponent("fog_controller").get()) : nullptr;
 	if(pFogComponent == nullptr)
 		return;
@@ -1634,7 +1634,7 @@ void NET_cl_ENV_FOGCON_SETSTARTDIST(NetPacket packet)
 
 void NET_cl_ENV_FOGCON_SETENDDIST(NetPacket packet)
 {
-	auto *fog = nwm::read_entity(packet);
+	auto *fog = pragma::networking::read_entity(packet);
 	auto *pFogComponent = (fog != nullptr) ? static_cast<pragma::BaseEnvFogControllerComponent *>(fog->FindComponent("fog_controller").get()) : nullptr;
 	if(pFogComponent == nullptr)
 		return;
@@ -1643,7 +1643,7 @@ void NET_cl_ENV_FOGCON_SETENDDIST(NetPacket packet)
 
 void NET_cl_ENV_FOGCON_SETMAXDENSITY(NetPacket packet)
 {
-	auto *fog = nwm::read_entity(packet);
+	auto *fog = pragma::networking::read_entity(packet);
 	auto *pFogComponent = (fog != nullptr) ? static_cast<pragma::BaseEnvFogControllerComponent *>(fog->FindComponent("fog_controller").get()) : nullptr;
 	if(pFogComponent == nullptr)
 		return;
@@ -1652,7 +1652,7 @@ void NET_cl_ENV_FOGCON_SETMAXDENSITY(NetPacket packet)
 
 void NET_cl_ENV_PRTSYS_SETCONTINUOUS(NetPacket packet)
 {
-	auto *prt = nwm::read_entity(packet);
+	auto *prt = pragma::networking::read_entity(packet);
 	auto *pParticleComponent = (prt != nullptr) ? static_cast<pragma::BaseEnvParticleSystemComponent *>(prt->FindComponent("particle_system").get()) : nullptr;
 	if(pParticleComponent == nullptr)
 		return;
@@ -1665,7 +1665,7 @@ void NET_cl_CLIENT_DROPPED(NetPacket packet)
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	auto *pl = nwm::read_player(packet);
+	auto *pl = pragma::networking::read_player(packet);
 	if(pl == nullptr)
 		return;
 	auto reason = packet->Read<int32_t>();
@@ -1677,7 +1677,7 @@ void NET_cl_CLIENT_READY(NetPacket packet)
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	auto *pl = nwm::read_player(packet);
+	auto *pl = pragma::networking::read_player(packet);
 	if(pl == nullptr)
 		return;
 	client->GetGameState()->OnPlayerReady(*pl);
@@ -1688,7 +1688,7 @@ void NET_cl_CLIENT_JOINED(NetPacket packet)
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	auto *pl = nwm::read_player(packet);
+	auto *pl = pragma::networking::read_player(packet);
 	if(pl == nullptr)
 		return;
 	client->GetGameState()->OnPlayerJoined(*pl);
@@ -1740,7 +1740,7 @@ void NET_cl_CREATE_EXPLOSION(NetPacket packet)
 void NET_cl_ENT_TRIGGER_GRAVITY_ONSTARTTOUCH(NetPacket packet)
 {
 	using namespace pragma;
-	auto *ent = nwm::read_entity(packet);
+	auto *ent = pragma::networking::read_entity(packet);
 	if(ent == nullptr)
 		return;
 	auto netFlags = static_cast<pragma::Entity::TriggerGravity::NetFlags>(packet->Read<uint8_t>());
@@ -1757,24 +1757,24 @@ void NET_cl_ENT_TRIGGER_GRAVITY_ONSTARTTOUCH(NetPacket packet)
 }
 
 struct NavDebugInfo {
-	NavDebugInfo(const std::shared_ptr<DebugRenderer::BaseObject> &path = nullptr, const std::shared_ptr<DebugRenderer::BaseObject> &spline = nullptr, const std::shared_ptr<DebugRenderer::BaseObject> &node = nullptr) : dbgPath(path), dbgSpline(spline), dbgNode(node) {}
-	std::shared_ptr<DebugRenderer::BaseObject> dbgPath;
-	std::shared_ptr<DebugRenderer::BaseObject> dbgSpline;
-	std::shared_ptr<DebugRenderer::BaseObject> dbgNode;
+	NavDebugInfo(const std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> &path = nullptr, const std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> &spline = nullptr, const std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> &node = nullptr) : dbgPath(path), dbgSpline(spline), dbgNode(node) {}
+	std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> dbgPath;
+	std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> dbgSpline;
+	std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> dbgNode;
 };
 static std::unordered_map<const CBaseEntity *, NavDebugInfo> s_aiNavDebugObjects {};
 void NET_cl_DEBUG_AI_NAVIGATION(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *npc = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *npc = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(npc == nullptr)
 		return;
 	std::vector<Vector3> points;
 	auto numNodes = packet->Read<uint32_t>();
 	auto currentNodeIdx = packet->Read<uint32_t>();
 	points.reserve(numNodes * 2 - 2);
-	std::shared_ptr<DebugRenderer::BaseObject> dbgNode = nullptr;
+	std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> dbgNode = nullptr;
 	Con::ccl << "New path for " << npc->GetClass() << ":" << Con::endl;
 	for(auto nodeId = decltype(numNodes) {0}; nodeId < numNodes; ++nodeId) {
 		auto pos = packet->Read<Vector3>() + Vector3(0.f, 20.f, 0.f);
@@ -1782,7 +1782,7 @@ void NET_cl_DEBUG_AI_NAVIGATION(NetPacket packet)
 		Con::ccl << "#" << (nodeId + 1) << ": " << pos << Con::endl;
 
 		if(nodeId == currentNodeIdx)
-			dbgNode = DebugRenderer::DrawLine(pos, pos + Vector3 {0.f, 100.f, 0.f}, colors::Lime);
+			dbgNode = pragma::debug::DebugRenderer::DrawLine(pos, pos + Vector3 {0.f, 100.f, 0.f}, colors::Lime);
 	}
 	Con::ccl << Con::endl;
 
@@ -1795,7 +1795,7 @@ void NET_cl_DEBUG_AI_NAVIGATION(NetPacket packet)
 			s_aiNavDebugObjects.erase(it);
 		});
 	}
-	s_aiNavDebugObjects[npc] = {DebugRenderer::DrawPath(points, colors::Yellow), DebugRenderer::DrawSpline(points, 10, 1.f, {colors::OrangeRed}), dbgNode};
+	s_aiNavDebugObjects[npc] = {pragma::debug::DebugRenderer::DrawPath(points, colors::Yellow), pragma::debug::DebugRenderer::DrawSpline(points, 10, 1.f, {colors::OrangeRed}), dbgNode};
 }
 
 void NET_cl_DEBUG_AI_SCHEDULE_PRINT(NetPacket packet)
@@ -1838,7 +1838,7 @@ void CMD_debug_ai_schedule(pragma::NetworkState *state, pragma::BasePlayerCompon
 	}
 	Con::cout << "Querying schedule data for NPC " << *npc << "..." << Con::endl;
 	NetPacket p;
-	nwm::write_entity(p, npc);
+	pragma::networking::write_entity(p, npc);
 	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::DEBUG_AI_SCHEDULE_TREE, p, pragma::networking::Protocol::SlowReliable);
 }
 
@@ -2105,7 +2105,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 	else if(updateState == 1) // Full update
 	{
 		dbgAiSchedule = nullptr;
-		ent = nwm::read_entity(packet);
+		ent = pragma::networking::read_entity(packet);
 		if(ent == nullptr)
 			return;
 		dbgTree = ::util::make_shared<pragma::debug::DebugBehaviorTreeNode>();
@@ -2265,7 +2265,7 @@ void NET_cl_CMD_CALL_RESPONSE(NetPacket packet)
 
 void NET_cl_ADD_SHARED_COMPONENT(NetPacket packet)
 {
-	auto *ent = nwm::read_entity(packet);
+	auto *ent = pragma::networking::read_entity(packet);
 	if(ent == nullptr || pragma::get_cgame() == nullptr)
 		return;
 	auto componentId = packet->Read<pragma::ComponentId>();
@@ -2301,7 +2301,7 @@ void NET_cl_DEBUG_DRAWPOINT(NetPacket packet)
 	renderInfo.SetOrigin(pos);
 	renderInfo.SetColor(col);
 	renderInfo.SetDuration(dur);
-	DebugRenderer::DrawPoint(renderInfo);
+	pragma::debug::DebugRenderer::DrawPoint(renderInfo);
 }
 void NET_cl_DEBUG_DRAWLINE(NetPacket packet)
 {
@@ -2312,7 +2312,7 @@ void NET_cl_DEBUG_DRAWLINE(NetPacket packet)
 	pragma::debug::DebugRenderInfo renderInfo {};
 	renderInfo.SetColor(col);
 	renderInfo.SetDuration(dur);
-	DebugRenderer::DrawLine(start, end, renderInfo);
+	pragma::debug::DebugRenderer::DrawLine(start, end, renderInfo);
 }
 void NET_cl_DEBUG_DRAWBOX(NetPacket packet)
 {
@@ -2333,7 +2333,7 @@ void NET_cl_DEBUG_DRAWBOX(NetPacket packet)
 		colOutline = packet->Read<Color>();
 		renderInfo.SetOutlineColor(colOutline);
 	}
-	DebugRenderer::DrawBox(min, max, renderInfo);
+	pragma::debug::DebugRenderer::DrawBox(min, max, renderInfo);
 }
 void NET_cl_DEBUG_DRAWTEXT(NetPacket packet)
 {
@@ -2357,9 +2357,9 @@ void NET_cl_DEBUG_DRAWTEXT(NetPacket packet)
 		renderInfo.SetColor(col);
 	renderInfo.SetDuration(duration);
 	if(bSize == true)
-		DebugRenderer::DrawText(renderInfo, text, size);
+		pragma::debug::DebugRenderer::DrawText(renderInfo, text, size);
 	else
-		DebugRenderer::DrawText(renderInfo, text, scale);
+		pragma::debug::DebugRenderer::DrawText(renderInfo, text, scale);
 }
 void NET_cl_DEBUG_DRAWSPHERE(NetPacket packet)
 {
@@ -2377,7 +2377,7 @@ void NET_cl_DEBUG_DRAWSPHERE(NetPacket packet)
 		auto colOutline = packet->Read<Color>();
 		renderInfo.SetOutlineColor(colOutline);
 	}
-	DebugRenderer::DrawSphere(renderInfo, radius, recursionLevel);
+	pragma::debug::DebugRenderer::DrawSphere(renderInfo, radius, recursionLevel);
 }
 void NET_cl_DEBUG_DRAWCONE(NetPacket packet)
 {
@@ -2397,7 +2397,7 @@ void NET_cl_DEBUG_DRAWCONE(NetPacket packet)
 		auto colOutline = packet->Read<Color>();
 		renderInfo.SetOutlineColor(colOutline);
 	}
-	DebugRenderer::DrawCone(renderInfo, dir, dist, angle, segmentCount);
+	pragma::debug::DebugRenderer::DrawCone(renderInfo, dir, dist, angle, segmentCount);
 }
 void NET_cl_DEBUG_DRAWAXIS(NetPacket packet)
 {
@@ -2408,7 +2408,7 @@ void NET_cl_DEBUG_DRAWAXIS(NetPacket packet)
 	renderInfo.SetOrigin(origin);
 	renderInfo.SetRotation(uquat::create(ang));
 	renderInfo.SetDuration(dur);
-	DebugRenderer::DrawAxis(renderInfo);
+	pragma::debug::DebugRenderer::DrawAxis(renderInfo);
 }
 void NET_cl_DEBUG_DRAWPATH(NetPacket packet)
 {
@@ -2422,7 +2422,7 @@ void NET_cl_DEBUG_DRAWPATH(NetPacket packet)
 	pragma::debug::DebugRenderInfo renderInfo {};
 	renderInfo.SetColor(col);
 	renderInfo.SetDuration(duration);
-	DebugRenderer::DrawPath(path, renderInfo);
+	pragma::debug::DebugRenderer::DrawPath(path, renderInfo);
 }
 void NET_cl_DEBUG_DRAWSPLINE(NetPacket packet)
 {
@@ -2438,7 +2438,7 @@ void NET_cl_DEBUG_DRAWSPLINE(NetPacket packet)
 	pragma::debug::DebugRenderInfo renderInfo {};
 	renderInfo.SetColor(col);
 	renderInfo.SetDuration(duration);
-	DebugRenderer::DrawSpline(path, numSegments, curvature, renderInfo);
+	pragma::debug::DebugRenderer::DrawSpline(path, numSegments, curvature, renderInfo);
 }
 void NET_cl_DEBUG_DRAWPLANE(NetPacket packet)
 {
@@ -2449,7 +2449,7 @@ void NET_cl_DEBUG_DRAWPLANE(NetPacket packet)
 	pragma::debug::DebugRenderInfo renderInfo {};
 	renderInfo.SetColor(col);
 	renderInfo.SetDuration(dur);
-	DebugRenderer::DrawPlane(n, d, renderInfo);
+	pragma::debug::DebugRenderer::DrawPlane(n, d, renderInfo);
 }
 void NET_cl_DEBUG_DRAW_MESH(NetPacket packet)
 {
@@ -2464,7 +2464,7 @@ void NET_cl_DEBUG_DRAW_MESH(NetPacket packet)
 	renderInfo.SetColor(color);
 	renderInfo.SetOutlineColor(colorOutline);
 	renderInfo.SetDuration(duration);
-	DebugRenderer::DrawMesh(verts, renderInfo);
+	pragma::debug::DebugRenderer::DrawMesh(verts, renderInfo);
 }
 void NET_cl_DEBUG_DRAWTRUNCATEDCONE(NetPacket packet)
 {
@@ -2485,7 +2485,7 @@ void NET_cl_DEBUG_DRAWTRUNCATEDCONE(NetPacket packet)
 		auto colOutline = packet->Read<Color>();
 		renderInfo.SetOutlineColor(colOutline);
 	}
-	DebugRenderer::DrawTruncatedCone(renderInfo, startRadius, dir, dist, endRadius, segmentCount);
+	pragma::debug::DebugRenderer::DrawTruncatedCone(renderInfo, startRadius, dir, dist, endRadius, segmentCount);
 }
 void NET_cl_DEBUG_DRAWCYLINDER(NetPacket packet)
 {
@@ -2505,5 +2505,5 @@ void NET_cl_DEBUG_DRAWCYLINDER(NetPacket packet)
 		auto colOutline = packet->Read<Color>();
 		renderInfo.SetOutlineColor(colOutline);
 	}
-	DebugRenderer::DrawCylinder(renderInfo, dir, dist, radius, segmentCount);
+	pragma::debug::DebugRenderer::DrawCylinder(renderInfo, dir, dist, radius, segmentCount);
 }

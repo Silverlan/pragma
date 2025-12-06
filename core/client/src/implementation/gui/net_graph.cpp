@@ -162,7 +162,7 @@ void pragma::gui::WINetGraph::Initialize()
 				pText->SizeToContents();
 			}
 			std::sort(m_netData.messages.begin(), m_netData.messages.end(), [](const std::pair<uint32_t, NetData::MessageInfo> &a, const std::pair<uint32_t, NetData::MessageInfo> &b) { return a.second.size > b.second.size; });
-			auto *map = GetClientMessageMap();
+			auto *map = networking::get_client_message_map();
 			util::StringMap<unsigned int> *netmessages;
 			map->GetNetMessages(&netmessages);
 			uint32_t idx = 0;

@@ -93,7 +93,7 @@ pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullpt
 		ds::Texture::register_type();
 		pragma::console::register_shared_convars(*pragma::console::server::get_convar_map());
 		register_launch_parameters(*GetLaunchParaMap());
-		register_net_messages();
+		pragma::networking::register_net_messages();
 	}
 
 #ifdef __linux__

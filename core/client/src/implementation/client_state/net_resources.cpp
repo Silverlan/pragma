@@ -25,7 +25,7 @@ void pragma::ClientState::StartResourceTransfer()
 void pragma::ClientState::HandleClientResource(NetPacket &packet)
 {
 	std::string file = packet->ReadString();
-	if(!IsValidResource(file)) {
+	if(!networking::is_valid_resource(file)) {
 		NetPacket response;
 		response->Write<bool>(false);
 		SendPacket(pragma::networking::net_messages::server::RESOURCEINFO_RESPONSE, response, pragma::networking::Protocol::SlowReliable);

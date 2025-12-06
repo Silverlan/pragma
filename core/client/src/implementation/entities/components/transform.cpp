@@ -12,8 +12,8 @@ void CTransformComponent::InitializeLuaObject(lua::State *l) { return BaseEntity
 void CTransformComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseTransformComponent)); }
 void CTransformComponent::ReceiveData(NetPacket &packet)
 {
-	Vector3 pos = nwm::read_vector(packet);
-	auto rot = nwm::read_quat(packet);
+	Vector3 pos = networking::read_vector(packet);
+	auto rot = pragma::networking::read_quat(packet);
 	SetPosition(pos);
 	SetRotation(rot);
 	SetEyeOffset(packet->Read<Vector3>());

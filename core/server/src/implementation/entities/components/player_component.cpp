@@ -205,7 +205,7 @@ void SPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang, float dur
 		return;
 
 	NetPacket p;
-	nwm::write_angles(p, ang);
+	pragma::networking::write_angles(p, ang);
 	p->Write<float>(dur);
 	ent.SendNetEvent(m_netEvApplyViewRotationOffset, p, pragma::networking::Protocol::SlowReliable, *session);
 }
@@ -255,7 +255,7 @@ void SPlayerComponent::OnSetSlopeLimit(float limit)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<float>(limit);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_SLOPELIMIT, p, pragma::networking::Protocol::SlowReliable);
 	}
@@ -265,7 +265,7 @@ void SPlayerComponent::OnSetStepOffset(float offset)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<float>(offset);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_STEPOFFSET, p, pragma::networking::Protocol::SlowReliable);
 	}
@@ -300,9 +300,9 @@ void SPlayerComponent::SendData(NetPacket &packet, networking::ClientRecipientFi
 {
 	packet->Write<double>(ConnectionTime());
 	if(m_entFlashlight.expired())
-		nwm::write_unique_entity(packet, nullptr);
+		pragma::networking::write_unique_entity(packet, nullptr);
 	else
-		nwm::write_unique_entity(packet, m_entFlashlight.get());
+		pragma::networking::write_unique_entity(packet, m_entFlashlight.get());
 }
 
 bool SPlayerComponent::IsAuthed() { return m_bAuthed; }
@@ -314,7 +314,7 @@ void SPlayerComponent::SetWalkSpeed(float speed)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<float>(speed);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_SPEED_WALK, p, pragma::networking::Protocol::SlowReliable);
 	}
@@ -326,7 +326,7 @@ void SPlayerComponent::SetRunSpeed(float speed)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<float>(speed);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_SPEED_RUN, p, pragma::networking::Protocol::SlowReliable);
 	}
@@ -338,7 +338,7 @@ void SPlayerComponent::SetCrouchedWalkSpeed(float speed)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<float>(speed);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_SPEED_CROUCH_WALK, p, pragma::networking::Protocol::SlowReliable);
 	}
@@ -350,7 +350,7 @@ void SPlayerComponent::SetStandHeight(float height)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<float>(height);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_HEIGHT_STAND, p, pragma::networking::Protocol::SlowReliable);
 	}
@@ -361,7 +361,7 @@ void SPlayerComponent::SetCrouchHeight(float height)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<float>(height);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_HEIGHT_CROUCH, p, pragma::networking::Protocol::SlowReliable);
 	}
@@ -372,7 +372,7 @@ void SPlayerComponent::SetStandEyeLevel(float eyelevel)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<float>(eyelevel);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_EYELEVEL_STAND, p, pragma::networking::Protocol::SlowReliable);
 	}
@@ -383,7 +383,7 @@ void SPlayerComponent::SetCrouchEyeLevel(float eyelevel)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<float>(eyelevel);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_EYELEVEL_CROUCH, p, pragma::networking::Protocol::SlowReliable);
 	}
@@ -402,7 +402,7 @@ void SPlayerComponent::SetSprintSpeed(float speed)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<float>(speed);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_SPEED_SPRINT, p, pragma::networking::Protocol::SlowReliable);
 	}

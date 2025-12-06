@@ -29,9 +29,9 @@ export namespace pragma {
 			uint32_t m_numPath = 0;
 			std::unique_ptr<Vector3> m_dbgPathStart = nullptr;
 			std::unique_ptr<Vector3> m_dbgPathEnd = nullptr;
-			std::array<std::shared_ptr<DebugRenderer::BaseObject>, 2> m_dbgPointLines = {nullptr, nullptr};
-			std::shared_ptr<DebugRenderer::BaseObject> m_dbgNavPath = nullptr;
-			std::shared_ptr<DebugRenderer::BaseObject> m_dbgNavMesh = nullptr;
+			std::array<std::shared_ptr<debug::DebugRenderer::BaseObject>, 2> m_dbgPointLines = {nullptr, nullptr};
+			std::shared_ptr<debug::DebugRenderer::BaseObject> m_dbgNavPath = nullptr;
+			std::shared_ptr<debug::DebugRenderer::BaseObject> m_dbgNavMesh = nullptr;
 
 			void UpdateDebugPath(Vector3 &start, Vector3 &end);
 			void UpdateDepthPathTargets();

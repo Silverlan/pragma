@@ -144,10 +144,10 @@ export namespace pragma {
 		virtual bool RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl = nullptr, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr) override;
 		virtual console::ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false) override;
 		// Sockets
-		void Connect(std::string ip, std::string port = sci::DEFAULT_PORT_TCP);
+		void Connect(std::string ip, std::string port = networking::DEFAULT_PORT_TCP);
 		// Peer-to-peer only!
 		void Connect(uint64_t steamId);
-		CLNetMessage *GetNetMessage(unsigned int ID);
+		networking::CLNetMessage *GetNetMessage(unsigned int ID);
 		pragma::networking::ClientMessageMap *GetNetMessageMap();
 		void SendUserInfo();
 

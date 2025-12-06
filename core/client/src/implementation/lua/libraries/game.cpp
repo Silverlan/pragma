@@ -900,7 +900,7 @@ int Lua::game::Client::render_scenes(lua::State *l)
 	pragma::get_cgame()->RenderScenes(scenes);
 	return 0;
 }
-extern void set_debug_render_filter(std::unique_ptr<DebugRenderFilter> filter);
+extern void set_debug_render_filter(std::unique_ptr<pragma::debug::DebugRenderFilter> filter);
 int Lua::game::Client::set_debug_render_filter(lua::State *l)
 {
 	if(Lua::IsSet(l, 1) == false) {
@@ -909,7 +909,7 @@ int Lua::game::Client::set_debug_render_filter(lua::State *l)
 	}
 	Lua::CheckTable(l, 1);
 	auto t = luabind::object {luabind::from_stack {l, 1}};
-	auto filter = std::make_unique<DebugRenderFilter>();
+	auto filter = std::make_unique<pragma::debug::DebugRenderFilter>();
 	if(t["shaderFilter"]) {
 		auto shaderFilter = luabind::object {t["shaderFilter"]};
 		filter->shaderFilter = [shaderFilter](pragma::ShaderGameWorld &shader) mutable -> bool {
@@ -940,7 +940,7 @@ int Lua::game::Client::set_debug_render_filter(lua::State *l)
 			return luabind::object_cast<bool>(r);
 		};
 	}
-	set_debug_render_filter(std::move(filter));
+	::set_debug_render_filter(std::move(filter));
 	return 0;
 }
 int Lua::game::Client::queue_scene_for_rendering(lua::State *l)

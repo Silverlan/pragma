@@ -9,7 +9,7 @@ export module pragma.client:debug.render_debug_info;
 
 export import std.compat;
 
-export {
+export namespace pragma::debug {
 	class DLLCLIENT RenderDebugInfo {
 	  public:
 		uint32_t triangleCount = 0;

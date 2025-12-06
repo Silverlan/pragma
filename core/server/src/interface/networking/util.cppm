@@ -9,7 +9,7 @@ export module pragma.server:networking.util;
 
 export import pragma.shared;
 
-export namespace nwm {
+export namespace pragma::networking {
 	DLLSERVER void write_unique_entity(NetPacket &packet, const pragma::ecs::BaseEntity *ent);
 	DLLSERVER void write_unique_entity(NetPacket &packet, const EntityHandle &hEnt);
 };

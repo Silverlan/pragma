@@ -207,7 +207,7 @@ static void debug_water(pragma::NetworkState *state, pragma::BasePlayerComponent
 					auto &vkMesh = meshSurface->GetSceneMesh();
 					auto *sim = static_cast<const pragma::physics::CPhysWaterSurfaceSimulator *>(pWaterComponent->GetSurfaceSimulator());
 					//auto &buf = sim->GetPositionBuffer();
-					auto dbgPoints = DebugRenderer::DrawPoints(vkMesh->GetVertexBuffer(), meshSurface->GetVertexCount(), colors::Yellow);
+					auto dbgPoints = pragma::debug::DebugRenderer::DrawPoints(vkMesh->GetVertexBuffer(), meshSurface->GetVertexCount(), colors::Yellow);
 					if(dbgPoints != nullptr) {
 						dbg->CallOnRemove([dbgPoints]() mutable { dbgPoints = nullptr; });
 					}

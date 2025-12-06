@@ -1131,79 +1131,79 @@ void pragma::CGame::RegisterLuaClasses()
 	pragma::ClientState::RegisterSharedLuaClasses(GetLuaInterface());
 
 	auto debugMod = luabind::module(GetLuaState(), "debug");
-	auto defDebugRendererObject = luabind::class_<DebugRenderer::BaseObject>("RendererObject");
-	defDebugRendererObject.def("Remove", &::DebugRenderer::BaseObject::Remove);
-	defDebugRendererObject.def("IsValid", &::DebugRenderer::BaseObject::IsValid);
-	defDebugRendererObject.def("SetPos", &::DebugRenderer::BaseObject::SetPos);
-	defDebugRendererObject.def("GetPos", &::DebugRenderer::BaseObject::GetPos, luabind::copy_policy<0> {});
-	defDebugRendererObject.def("SetRotation", &::DebugRenderer::BaseObject::SetRotation);
-	defDebugRendererObject.def("GetRotation", &::DebugRenderer::BaseObject::GetRotation, luabind::copy_policy<0> {});
-	defDebugRendererObject.def("SetAngles", &::DebugRenderer::BaseObject::SetAngles);
-	defDebugRendererObject.def("GetAngles", &::DebugRenderer::BaseObject::GetAngles);
-	defDebugRendererObject.def("IsVisible", &::DebugRenderer::BaseObject::IsVisible);
-	defDebugRendererObject.def("SetVisible", &::DebugRenderer::BaseObject::SetVisible);
-	defDebugRendererObject.def("ShouldIgnoreDepth", &::DebugRenderer::BaseObject::ShouldIgnoreDepth);
-	defDebugRendererObject.def("SetIgnoreDepth", &::DebugRenderer::BaseObject::SetIgnoreDepth);
-	defDebugRendererObject.def("SetScale", &::DebugRenderer::BaseObject::SetScale);
-	defDebugRendererObject.def("GetScale", &::DebugRenderer::BaseObject::GetScale, luabind::copy_policy<0> {});
-	defDebugRendererObject.def("SetPose", &::DebugRenderer::BaseObject::SetPose);
+	auto defDebugRendererObject = luabind::class_<pragma::debug::DebugRenderer::BaseObject>("RendererObject");
+	defDebugRendererObject.def("Remove", &pragma::debug::DebugRenderer::BaseObject::Remove);
+	defDebugRendererObject.def("IsValid", &pragma::debug::DebugRenderer::BaseObject::IsValid);
+	defDebugRendererObject.def("SetPos", &pragma::debug::DebugRenderer::BaseObject::SetPos);
+	defDebugRendererObject.def("GetPos", &pragma::debug::DebugRenderer::BaseObject::GetPos, luabind::copy_policy<0> {});
+	defDebugRendererObject.def("SetRotation", &pragma::debug::DebugRenderer::BaseObject::SetRotation);
+	defDebugRendererObject.def("GetRotation", &pragma::debug::DebugRenderer::BaseObject::GetRotation, luabind::copy_policy<0> {});
+	defDebugRendererObject.def("SetAngles", &pragma::debug::DebugRenderer::BaseObject::SetAngles);
+	defDebugRendererObject.def("GetAngles", &pragma::debug::DebugRenderer::BaseObject::GetAngles);
+	defDebugRendererObject.def("IsVisible", &pragma::debug::DebugRenderer::BaseObject::IsVisible);
+	defDebugRendererObject.def("SetVisible", &pragma::debug::DebugRenderer::BaseObject::SetVisible);
+	defDebugRendererObject.def("ShouldIgnoreDepth", &pragma::debug::DebugRenderer::BaseObject::ShouldIgnoreDepth);
+	defDebugRendererObject.def("SetIgnoreDepth", &pragma::debug::DebugRenderer::BaseObject::SetIgnoreDepth);
+	defDebugRendererObject.def("SetScale", &pragma::debug::DebugRenderer::BaseObject::SetScale);
+	defDebugRendererObject.def("GetScale", &pragma::debug::DebugRenderer::BaseObject::GetScale, luabind::copy_policy<0> {});
+	defDebugRendererObject.def("SetPose", &pragma::debug::DebugRenderer::BaseObject::SetPose);
 	defDebugRendererObject.def(
-	  "GetVertexCount", +[](DebugRenderer::BaseObject &bo) -> size_t {
-		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+	  "GetVertexCount", +[](pragma::debug::DebugRenderer::BaseObject &bo) -> size_t {
+		  auto *o = dynamic_cast<pragma::debug::DebugRenderer::WorldObject *>(&bo);
 		  if(!o)
 			  return 0;
 		  return o->GetVertexCount();
 	  });
 	defDebugRendererObject.def(
-	  "GetVertexPosition", +[](DebugRenderer::BaseObject &bo, size_t index) -> std::optional<Vector3> {
-		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+	  "GetVertexPosition", +[](pragma::debug::DebugRenderer::BaseObject &bo, size_t index) -> std::optional<Vector3> {
+		  auto *o = dynamic_cast<pragma::debug::DebugRenderer::WorldObject *>(&bo);
 		  if(!o)
 			  return {};
 		  return o->GetVertexPosition(index);
 	  });
 	defDebugRendererObject.def(
-	  "SetVertexPosition", +[](DebugRenderer::BaseObject &bo, size_t index, const Vector3 &pos) {
-		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+	  "SetVertexPosition", +[](pragma::debug::DebugRenderer::BaseObject &bo, size_t index, const Vector3 &pos) {
+		  auto *o = dynamic_cast<pragma::debug::DebugRenderer::WorldObject *>(&bo);
 		  if(!o)
 			  return;
 		  o->SetVertexPosition(index, pos);
 	  });
 	defDebugRendererObject.def(
-	  "UpdateVertexBuffer", +[](DebugRenderer::BaseObject &bo) {
-		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+	  "UpdateVertexBuffer", +[](pragma::debug::DebugRenderer::BaseObject &bo) {
+		  auto *o = dynamic_cast<pragma::debug::DebugRenderer::WorldObject *>(&bo);
 		  if(!o)
 			  return;
 		  o->UpdateVertexBuffer();
 	  });
 	defDebugRendererObject.def(
-	  "SetColor", +[](DebugRenderer::BaseObject &bo, const Vector4 &color) {
-		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+	  "SetColor", +[](pragma::debug::DebugRenderer::BaseObject &bo, const Vector4 &color) {
+		  auto *o = dynamic_cast<pragma::debug::DebugRenderer::WorldObject *>(&bo);
 		  if(!o)
 			  return;
 		  o->SetColor(color);
 	  });
 	defDebugRendererObject.def(
-	  "GetColor", +[](DebugRenderer::BaseObject &bo, const Vector4 &color) -> std::optional<Vector4> {
-		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+	  "GetColor", +[](pragma::debug::DebugRenderer::BaseObject &bo, const Vector4 &color) -> std::optional<Vector4> {
+		  auto *o = dynamic_cast<pragma::debug::DebugRenderer::WorldObject *>(&bo);
 		  if(!o)
 			  return {};
 		  return o->GetColor();
 	  });
 	defDebugRendererObject.def(
-	  "SetOutlineColor", +[](DebugRenderer::BaseObject &bo, const Vector4 &color) {
-		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+	  "SetOutlineColor", +[](pragma::debug::DebugRenderer::BaseObject &bo, const Vector4 &color) {
+		  auto *o = dynamic_cast<pragma::debug::DebugRenderer::WorldObject *>(&bo);
 		  if(!o)
 			  return;
 		  o->SetOutlineColor(color);
 	  });
 	defDebugRendererObject.def(
-	  "GetOutlineColor", +[](DebugRenderer::BaseObject &bo, const Vector4 &color) -> std::optional<Vector4> {
-		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+	  "GetOutlineColor", +[](pragma::debug::DebugRenderer::BaseObject &bo, const Vector4 &color) -> std::optional<Vector4> {
+		  auto *o = dynamic_cast<pragma::debug::DebugRenderer::WorldObject *>(&bo);
 		  if(!o)
 			  return {};
 		  return o->GetOutlineColor();
 	  });
-	defDebugRendererObject.def("GetPose", static_cast<const umath::ScaledTransform &(::DebugRenderer::BaseObject::*)() const>(&::DebugRenderer::BaseObject::GetPose), luabind::copy_policy<0> {});
+	defDebugRendererObject.def("GetPose", static_cast<const umath::ScaledTransform &(pragma::debug::DebugRenderer::BaseObject::*)() const>(&pragma::debug::DebugRenderer::BaseObject::GetPose), luabind::copy_policy<0> {});
 	debugMod[defDebugRendererObject];
 
 	auto &modGame = GetLuaInterface().RegisterLibrary("game");

@@ -12,7 +12,7 @@ export import :networking.iserver;
 export import :networking.iserver_client;
 export import pragma.server_manager;
 
-namespace pragma::networking {
+export namespace pragma::networking {
 	class StandardServer;
 	class StandardServerClient;
 	class DLLSERVER NWMActiveServer : public nwm::Server {

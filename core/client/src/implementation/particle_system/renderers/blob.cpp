@@ -94,7 +94,7 @@ void CParticleRendererBlob::UpdateDebugNeighborLinks()
 		dbgObjs0.hide = false;
 		for(auto i = decltype(cLinks0.links.size()) {1}; i < cLinks0.links.size(); ++i) {
 			auto particleIdx1 = cLinks0.links[i].targetParticleIdx;
-			auto &o = static_cast<DebugRenderer::WorldObject &>(*dbgObjs0.renderObjects[i - 1].get());
+			auto &o = static_cast<pragma::debug::DebugRenderer::WorldObject &>(*dbgObjs0.renderObjects[i - 1].get());
 			auto &verts = o.GetVertices();
 			assert(verts.size() == 2);
 			std::pair<Vector3, Vector3> newVerts;
@@ -130,7 +130,7 @@ void CParticleRendererBlob::UpdateDebugNeighborLinks()
 		if(info.hide == false)
 			continue;
 		for(auto &ptrO : info.renderObjects) {
-			auto &o = static_cast<DebugRenderer::WorldObject &>(*ptrO.get());
+			auto &o = static_cast<pragma::debug::DebugRenderer::WorldObject &>(*ptrO.get());
 			auto &verts = o.GetVertices();
 			assert(verts.size() == 2);
 			if(uvec::cmp(verts.front(), uvec::ORIGIN) == false || uvec::cmp(verts.back(), uvec::ORIGIN) == false) {

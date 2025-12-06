@@ -35,7 +35,7 @@ void pragma::networking::DefaultMasterServerQueryDispatcher::DoPingServer(uint32
 	if(queryResult == nullptr)
 		return;
 	::util::DataStream header;
-	header->Write<uint16_t>(static_cast<uint16_t>(WVQuery::PING));
+	header->Write<uint16_t>(static_cast<uint16_t>(ServerQuery::Ping));
 	header->Write<uint16_t>(static_cast<uint16_t>(0)); // Body Size
 
 	m_dispatcher->Dispatch(header, queryResult->ip, queryResult->serverInfo.port, [this, serverIdx](nwm::ErrorCode err, UDPMessageDispatcher::Message *msg) mutable {

@@ -58,7 +58,7 @@ std::shared_ptr<pragma::audio::ALSound> SSoundEmitterComponent::CreateSound(std:
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared() && sndInfo.transmit == true) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<unsigned int>(snd->GetIndex());
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_SOUND, p, pragma::networking::Protocol::FastUnreliable);
 	}

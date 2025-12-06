@@ -255,7 +255,7 @@ void CBaseEntity::SendNetEventTCP(UInt32 eventId, NetPacket &data) const
 		Con::cwar << "Attempted to send net event " << eventId << " which has no known serverside id associated!" << Con::endl;
 		return;
 	}
-	nwm::write_entity(data, this);
+	pragma::networking::write_entity(data, this);
 	data->Write<UInt32>(eventId);
 	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::ENT_EVENT, data, pragma::networking::Protocol::SlowReliable);
 }
@@ -276,7 +276,7 @@ void CBaseEntity::SendNetEventUDP(UInt32 eventId, NetPacket &data) const
 		Con::cwar << "Attempted to send net event " << eventId << " which has no known serverside id associated!" << Con::endl;
 		return;
 	}
-	nwm::write_entity(data, this);
+	pragma::networking::write_entity(data, this);
 	data->Write<UInt32>(eventId);
 	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::ENT_EVENT, data, pragma::networking::Protocol::FastUnreliable);
 }

@@ -129,7 +129,7 @@ void pragma::ServerState::HandleServerNextResource(pragma::networking::IServerCl
 	size_t numResources;
 	auto bComplete = session.IsInitialResourceTransferComplete();
 	if(bComplete == false && resTransfer.empty()) {
-		auto &resources = ResourceManager::GetResources();
+		auto &resources = networking::ResourceManager::GetResources();
 		numResources = resources.size();
 		if(numResources > 0) {
 			for(auto &res : resources) {
@@ -224,7 +224,7 @@ void pragma::ServerState::ReceiveUserInput(pragma::networking::IServerClient &cl
 	auto tDelta = static_cast<float>((latency + tActivated) / 1'000.0);
 
 	NetPacket pOut;
-	nwm::write_player(pOut, pl);
+	networking::write_player(pOut, pl);
 
 	auto userInputId = packet->Read<uint8_t>();
 
@@ -232,10 +232,10 @@ void pragma::ServerState::ReceiveUserInput(pragma::networking::IServerClient &cl
 	//client->SetLatency(latency); // Deprecated: Let the networkmanager handle it
 
 	auto sPlComponent = pl->GetEntity().GetComponent<pragma::SPlayerComponent>();
-	auto orientation = nwm::read_quat(packet);
+	auto orientation = pragma::networking::read_quat(packet);
 	if(sPlComponent.expired() == false)
 		sPlComponent.get()->UpdateViewOrientation(orientation);
-	nwm::write_quat(pOut, orientation);
+	networking::write_quat(pOut, orientation);
 	pl->SetViewPos(packet->Read<Vector3>());
 
 	auto actions = packet->Read<pragma::Action>();

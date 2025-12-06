@@ -14,8 +14,8 @@ using namespace pragma;
 void STransformComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseTransformComponent)); }
 void STransformComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
-	nwm::write_vector(packet, GetPosition());
-	nwm::write_quat(packet, GetRotation());
+	pragma::networking::write_vector(packet, GetPosition());
+	networking::write_quat(packet, GetRotation());
 	packet->Write<Vector3>(GetEyeOffset());
 	packet->Write<Vector3>(GetScale());
 }
@@ -40,7 +40,7 @@ void STransformComponent::SetEyeOffset(const Vector3 &offset)
 	if(!ent.IsShared())
 		return;
 	NetPacket p;
-	nwm::write_entity(p, &ent);
-	nwm::write_vector(p, offset);
+	pragma::networking::write_entity(p, &ent);
+	pragma::networking::write_vector(p, offset);
 	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_EYEOFFSET, p, pragma::networking::Protocol::SlowReliable);
 }

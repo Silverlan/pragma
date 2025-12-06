@@ -574,15 +574,15 @@ void pragma::CGame::RegisterLuaLibraries()
 
 	auto modDebug = luabind::module_(GetLuaState(), "debug");
 	modDebug[(luabind::def("draw_points", &Lua::DebugRenderer::Client::DrawPoints), luabind::def("draw_lines", &Lua::DebugRenderer::Client::DrawLines), luabind::def("draw_point", &Lua::DebugRenderer::Client::DrawPoint),
-	  luabind::def("draw_line", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const Vector3 &, const Vector3 &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawLine)),
-	  luabind::def("draw_line", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const Vector3 &, const Vector3 &)>(&Lua::DebugRenderer::Client::DrawLine)), luabind::def("draw_box", &Lua::DebugRenderer::Client::DrawBox),
+	  luabind::def("draw_line", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const Vector3 &, const Vector3 &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawLine)),
+	  luabind::def("draw_line", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const Vector3 &, const Vector3 &)>(&Lua::DebugRenderer::Client::DrawLine)), luabind::def("draw_box", &Lua::DebugRenderer::Client::DrawBox),
 	  luabind::def("draw_mesh", &Lua::DebugRenderer::Client::DrawMeshes), luabind::def("draw_mesh", &Lua::DebugRenderer::Client::DrawMesh), luabind::def("draw_sphere", &Lua::DebugRenderer::Client::DrawSphere, luabind::default_parameter_policy<3, 1> {}),
 	  luabind::def("draw_sphere", &Lua::DebugRenderer::Client::DrawSphere), luabind::def("draw_truncated_cone", &Lua::DebugRenderer::Client::DrawTruncatedCone, luabind::default_parameter_policy<6, 12u> {}),
 	  luabind::def("draw_truncated_cone", &Lua::DebugRenderer::Client::DrawTruncatedCone), luabind::def("draw_cylinder", &Lua::DebugRenderer::Client::DrawCylinder, luabind::default_parameter_policy<5, 12u> {}), luabind::def("draw_cylinder", &Lua::DebugRenderer::Client::DrawCylinder),
 	  luabind::def("draw_cone", &Lua::DebugRenderer::Client::DrawCone, luabind::default_parameter_policy<5, 12u> {}), luabind::def("draw_cone", &Lua::DebugRenderer::Client::DrawCone), luabind::def("draw_pose", &Lua::DebugRenderer::Client::DrawAxis),
-	  luabind::def("draw_text", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const std::string &, const Vector2 &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawText)),
-	  luabind::def("draw_text", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const std::string &, float, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawText)),
-	  luabind::def("draw_text", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const std::string &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawText)), luabind::def("draw_path", &Lua::DebugRenderer::Client::DrawPath),
+	  luabind::def("draw_text", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const std::string &, const Vector2 &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawText)),
+	  luabind::def("draw_text", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const std::string &, float, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawText)),
+	  luabind::def("draw_text", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const std::string &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawText)), luabind::def("draw_path", &Lua::DebugRenderer::Client::DrawPath),
 #ifdef __clang__
 	  luabind::def("draw_spline", &Lua::DebugRenderer::Client::DrawSpline),
 	  luabind::def(
@@ -590,9 +590,9 @@ void pragma::CGame::RegisterLuaLibraries()
 #else
 	  luabind::def("draw_spline", &Lua::DebugRenderer::Client::DrawSpline, luabind::default_parameter_policy<4, 1.f> {}),
 #endif
-	  luabind::def("draw_plane", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const umath::Plane &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawPlane)),
-	  luabind::def("draw_plane", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const Vector3 &, float, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawPlane)),
-	  luabind::def("draw_frustum", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(pragma::CCameraComponent &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawFrustum)),
-	  luabind::def("draw_frustum", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const std::vector<Vector3> &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawFrustum)),
-	  luabind::def("create_collection", +[](const std::vector<std::shared_ptr<::DebugRenderer::BaseObject>> &objects) -> std::shared_ptr<::DebugRenderer::BaseObject> { return ::util::make_shared<::DebugRenderer::CollectionObject>(objects); }))];
+	  luabind::def("draw_plane", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const umath::Plane &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawPlane)),
+	  luabind::def("draw_plane", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const Vector3 &, float, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawPlane)),
+	  luabind::def("draw_frustum", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(pragma::CCameraComponent &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawFrustum)),
+	  luabind::def("draw_frustum", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const std::vector<Vector3> &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawFrustum)),
+	  luabind::def("create_collection", +[](const std::vector<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject>> &objects) -> std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> { return ::util::make_shared<pragma::debug::DebugRenderer::CollectionObject>(objects); }))];
 }

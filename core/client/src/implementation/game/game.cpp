@@ -232,7 +232,7 @@ void pragma::CGame::OnRemove()
 	// This will make sure all lua-created input binding layers have been destroyed
 	m_luaInputBindingLayerRegister = nullptr;
 
-	DebugRenderer::ClearObjects();
+	pragma::debug::DebugRenderer::ClearObjects();
 
 	SetTimeScale(1.f);
 
@@ -1021,7 +1021,7 @@ void pragma::CGame::Think()
 	if(scene)
 		SetRenderScene(*scene);
 
-	auto &info = get_render_debug_info();
+	auto &info = debug::get_render_debug_info();
 	info.Reset();
 
 	PostThink();
@@ -1369,7 +1369,7 @@ void pragma::CGame::SendUserInput()
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
-	nwm::write_quat(p, orientation);
+	networking::write_quat(p, orientation);
 	p->Write<Vector3>(pl->GetViewPos());
 
 	auto *actionInputC = pl->GetActionInputController();
@@ -1429,11 +1429,11 @@ void pragma::CGame::ReceiveSnapshot(NetPacket &packet)
 	const auto maxCorrectionDistance = umath::pow2(10.f);
 	unsigned int numEnts = packet->Read<unsigned int>();
 	for(unsigned int i = 0; i < numEnts; i++) {
-		CBaseEntity *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
-		Vector3 pos = nwm::read_vector(packet);
-		Vector3 vel = nwm::read_vector(packet);
-		Vector3 angVel = nwm::read_vector(packet);
-		auto orientation = nwm::read_quat(packet);
+		CBaseEntity *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+		Vector3 pos = networking::read_vector(packet);
+		Vector3 vel = networking::read_vector(packet);
+		Vector3 angVel = networking::read_vector(packet);
+		auto orientation = pragma::networking::read_quat(packet);
 		auto entDataSize = packet->Read<UInt8>();
 		if(ent != nullptr) {
 			pos += vel * tDelta;
@@ -1559,9 +1559,9 @@ void pragma::CGame::ReceiveSnapshot(NetPacket &packet)
 
 	unsigned char numPlayers = packet->Read<unsigned char>();
 	for(int i = 0; i < numPlayers; i++) {
-		auto *plComponent = nwm::read_player(packet);
+		auto *plComponent = pragma::networking::read_player(packet);
 		auto *pl = (plComponent != nullptr) ? static_cast<CPlayer *>(plComponent->GetBasePlayer()) : nullptr;
-		auto orientation = nwm::read_quat(packet);
+		auto orientation = pragma::networking::read_quat(packet);
 		unsigned char numKeys = packet->Read<unsigned char>();
 		for(int i = 0; i < numKeys; i++) {
 			unsigned short key = packet->Read<unsigned short>();
@@ -1623,7 +1623,7 @@ bool pragma::CGame::GetActionInput(pragma::Action action)
 	return actionInputC->GetActionInput(action);
 }
 
-void pragma::CGame::DrawLine(const Vector3 &start, const Vector3 &end, const Color &color, float duration) { DebugRenderer::DrawLine(start, end, {color, duration}); }
+void pragma::CGame::DrawLine(const Vector3 &start, const Vector3 &end, const Color &color, float duration) { debug::DebugRenderer::DrawLine(start, end, {color, duration}); }
 void pragma::CGame::DrawBox(const Vector3 &origin, const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &colorOutline, const std::optional<Color> &fillColor, float duration)
 {
 	pragma::debug::DebugRenderInfo renderInfo {};
@@ -1633,15 +1633,15 @@ void pragma::CGame::DrawBox(const Vector3 &origin, const Vector3 &start, const V
 	if(fillColor) {
 		renderInfo.SetColor(*fillColor);
 		renderInfo.SetOutlineColor(colorOutline);
-		DebugRenderer::DrawBox(start, end, renderInfo);
+		debug::DebugRenderer::DrawBox(start, end, renderInfo);
 	}
 	else {
 		renderInfo.SetColor(colorOutline);
-		DebugRenderer::DrawBox(start, end, renderInfo);
+		debug::DebugRenderer::DrawBox(start, end, renderInfo);
 	}
 }
-void pragma::CGame::DrawPlane(const Vector3 &n, float dist, const Color &color, float duration) { DebugRenderer::DrawPlane(n, dist, {color, duration}); }
-void pragma::CGame::DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration) { DebugRenderer::DrawMesh(meshVerts, {color, colorOutline, duration}); }
+void pragma::CGame::DrawPlane(const Vector3 &n, float dist, const Color &color, float duration) { debug::DebugRenderer::DrawPlane(n, dist, {color, duration}); }
+void pragma::CGame::DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration) { debug::DebugRenderer::DrawMesh(meshVerts, {color, colorOutline, duration}); }
 static auto cvRenderPhysics = pragma::console::get_client_con_var("debug_physics_draw");
 static auto cvSvRenderPhysics = pragma::console::get_client_con_var("sv_debug_physics_draw");
 template<typename TCPPM>

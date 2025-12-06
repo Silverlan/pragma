@@ -25,7 +25,7 @@ void SAIComponent::_debugSendNavInfo(pragma::SPlayerComponent &pl)
 		return;
 	auto nodePrev = pTrComponent->GetPosition();
 	NetPacket p {};
-	nwm::write_entity(p, &ent);
+	pragma::networking::write_entity(p, &ent);
 	p->Write<uint32_t>(path.pathCount);
 	p->Write<uint32_t>(m_navInfo.pathInfo->pathIdx);
 	for(auto i = decltype(path.pathCount) {0}; i < path.pathCount; ++i) {
@@ -146,7 +146,7 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::sha
 
 		p->Write<uint8_t>(1);
 		*dbgTree = *dbgRootNode;
-		nwm::write_entity(p, &GetEntity());
+		pragma::networking::write_entity(p, &GetEntity());
 		std::function<void(NetPacket &, const debug::DebugBehaviorTreeNode &)> fWriteTree = nullptr;
 		fWriteTree = [&fWriteTree](NetPacket &p, const debug::DebugBehaviorTreeNode &node) {
 			p->WriteString(node.name);

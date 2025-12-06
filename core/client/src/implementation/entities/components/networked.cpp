@@ -135,7 +135,7 @@ Bool CNetworkedComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket 
 			}
 		case BaseNetworkedComponent::NetworkedVariable::Type::Entity:
 			{
-				auto *ent = nwm::read_entity(packet);
+				auto *ent = pragma::networking::read_entity(packet);
 				SetNetworkedVariable<EntityHandle>(id, (ent != nullptr) ? ent->GetHandle() : EntityHandle {});
 				break;
 			}

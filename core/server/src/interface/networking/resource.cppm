@@ -9,7 +9,7 @@ export module pragma.server:networking.resource;
 
 export import pragma.filesystem;
 
-export {
+export namespace pragma::networking {
 #pragma warning(push)
 #pragma warning(disable : 4251)
 	struct DLLSERVER Resource {

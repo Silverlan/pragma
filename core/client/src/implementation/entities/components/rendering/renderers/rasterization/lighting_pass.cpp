@@ -408,7 +408,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 			InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_DEBUG, evDataLightingStage);
 
 			if(cam.valid())
-				DebugRenderer::Render(pcmd, *cam);
+				pragma::debug::DebugRenderer::Render(pcmd, *cam);
 			pragma::get_cgame()->RenderDebugPhysics(pcmd, *cam);
 
 #if DEBUG_RENDER_PERFORMANCE_TEST_ENABLED == 1

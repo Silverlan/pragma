@@ -19,7 +19,7 @@ void SNameComponent::SetName(std::string name)
 	if(!ent.IsShared())
 		return;
 	NetPacket p;
-	nwm::write_entity(p, &ent);
+	pragma::networking::write_entity(p, &ent);
 	p->WriteString(name);
 	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_SETNAME, p, pragma::networking::Protocol::SlowReliable);
 }

@@ -543,13 +543,13 @@ void pragma::ClientState::DestroyClient()
 
 bool pragma::ClientState::IsConnected() const { return (m_client != nullptr) ? true : false; }
 
-CLNetMessage *pragma::ClientState::GetNetMessage(unsigned int ID)
+pragma::networking::CLNetMessage *pragma::ClientState::GetNetMessage(unsigned int ID)
 {
-	auto *map = GetClientMessageMap();
+	auto *map = networking::get_client_message_map();
 	return map->GetNetMessage(ID);
 }
 
-pragma::networking::ClientMessageMap *pragma::ClientState::GetNetMessageMap() { return GetClientMessageMap(); }
+pragma::networking::ClientMessageMap *pragma::ClientState::GetNetMessageMap() { return networking::get_client_message_map(); }
 
 bool pragma::ClientState::IsClient() const { return true; }
 
@@ -809,7 +809,7 @@ void pragma::ClientState::InitializeGUIModule()
 
 unsigned int pragma::ClientState::GetServerMessageID(std::string identifier)
 {
-	auto *map = GetServerMessageMap();
+	auto *map = networking::get_server_message_map();
 	return map->GetNetMessageID(identifier);
 }
 

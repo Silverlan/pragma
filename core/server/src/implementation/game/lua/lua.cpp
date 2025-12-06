@@ -107,10 +107,10 @@ void pragma::SGame::RegisterLua()
 	  luabind::def("register", &Lua::net::server::register_net_message), luabind::def("register_event", &Lua::net::register_event))];
 	auto netPacketClassDef = luabind::class_<NetPacket>("Packet");
 	Lua::NetPacket::Server::register_class(netPacketClassDef);
-	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, util::WeakHandle<pragma::SPlayerComponent> &)>([](lua::State *l, ::NetPacket &packet, util::WeakHandle<pragma::SPlayerComponent> &pl) { nwm::write_player(packet, pl.get()); }));
-	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, EntityHandle &)>([](lua::State *l, ::NetPacket &packet, EntityHandle &hEnt) { nwm::write_player(packet, hEnt.get()); }));
+	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, util::WeakHandle<pragma::SPlayerComponent> &)>([](lua::State *l, ::NetPacket &packet, util::WeakHandle<pragma::SPlayerComponent> &pl) { networking::write_player(packet, pl.get()); }));
+	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, EntityHandle &)>([](lua::State *l, ::NetPacket &packet, EntityHandle &hEnt) { networking::write_player(packet, hEnt.get()); }));
 	netPacketClassDef.def("ReadPlayer", static_cast<void (*)(lua::State *, ::NetPacket &)>([](lua::State *l, ::NetPacket &packet) {
-		auto *pl = static_cast<pragma::SPlayerComponent *>(nwm::read_player(packet));
+		auto *pl = static_cast<pragma::SPlayerComponent *>(pragma::networking::read_player(packet));
 		if(pl == nullptr)
 			return;
 		pl->PushLuaObject(l);
@@ -198,7 +198,7 @@ bool pragma::SGame::LoadLuaComponent(const std::string &luaFilePath, const std::
 		transferFiles.at(i) = componentPathClient + '\\' + transferFiles.at(i);
 
 	for(auto &fname : transferFiles)
-		ResourceManager::AddResource(fname);
+		pragma::networking::ResourceManager::AddResource(fname);
 	return r;
 }
 std::string pragma::SGame::GetLuaNetworkDirectoryName() const { return "server"; }

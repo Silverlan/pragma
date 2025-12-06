@@ -9,7 +9,7 @@ export module pragma.shared:networking.ports;
 
 export import std;
 
-export namespace sci {
+export namespace pragma::networking {
 	DLLNETWORK const std::string DEFAULT_PORT_TCP = "29150";
 	DLLNETWORK const std::string DEFAULT_PORT_UDP = "29150";
 };

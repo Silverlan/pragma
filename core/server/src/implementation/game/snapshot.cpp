@@ -31,11 +31,11 @@ void pragma::SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 			numEntitiesValid++;
 			auto pTrComponent = ent->GetTransformComponent();
 			auto pVelComponent = ent->GetComponent<pragma::VelocityComponent>();
-			nwm::write_entity(packet, ent);
-			nwm::write_vector(packet, pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {});
-			nwm::write_vector(packet, pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {});
-			nwm::write_vector(packet, pVelComponent.valid() ? pVelComponent->GetAngularVelocity() : Vector3 {});
-			nwm::write_quat(packet, pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity());
+			pragma::networking::write_entity(packet, ent);
+			pragma::networking::write_vector(packet, pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {});
+			pragma::networking::write_vector(packet, pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {});
+			pragma::networking::write_vector(packet, pVelComponent.valid() ? pVelComponent->GetAngularVelocity() : Vector3 {});
+			networking::write_quat(packet, pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity());
 
 			auto offsetEntData = packet->GetSize();
 			packet->Write<UInt8>(UInt8(0));
@@ -138,9 +138,9 @@ void pragma::SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 			auto *ent = static_cast<Player *>(plComponent->GetBasePlayer());
 			if(ent != nullptr) {
 				numPlayersValid++;
-				nwm::write_player(packet, plComponent);
+				networking::write_player(packet, plComponent);
 				auto charComponent = ent->GetCharacterComponent();
-				nwm::write_quat(packet, charComponent.valid() ? charComponent->GetViewOrientation() : uquat::identity());
+				networking::write_quat(packet, charComponent.valid() ? charComponent->GetViewOrientation() : uquat::identity());
 				std::vector<InputAction> &keyStack = pl->GetKeyStack();
 				auto sz = CUChar(keyStack.size());
 				packet->Write<UChar>(sz);

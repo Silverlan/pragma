@@ -103,7 +103,7 @@ Bool CCharacterComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket 
 		SetFrozen(b);
 	}
 	else if(eventId == m_netEvSetActiveWeapon) {
-		auto *ent = nwm::read_entity(packet);
+		auto *ent = pragma::networking::read_entity(packet);
 		SetActiveWeapon(ent);
 	}
 	else if(eventId == m_netEvSetAmmoCount) {

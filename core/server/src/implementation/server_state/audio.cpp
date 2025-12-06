@@ -74,7 +74,7 @@ void pragma::ServerState::SendSoundSourceToClient(pragma::audio::SALSound &sound
 		p->Write<float>(directFilter.gainHF);
 		p->Write<float>(directFilter.gainLF);
 
-		nwm::write_unique_entity(p, sound.GetSource());
+		pragma::networking::write_unique_entity(p, sound.GetSource());
 	}
 	if(rf != nullptr)
 		SendPacket(pragma::networking::net_messages::client::SND_CREATE, p, pragma::networking::Protocol::FastUnreliable, *rf);

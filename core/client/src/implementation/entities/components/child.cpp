@@ -16,7 +16,7 @@ void CChildComponent::OnRemove() { BaseChildComponent::OnRemove(); }
 bool CChildComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetParent) {
-		auto *ent = nwm::read_entity(packet);
+		auto *ent = pragma::networking::read_entity(packet);
 		if(ent)
 			SetParent(*ent);
 		else

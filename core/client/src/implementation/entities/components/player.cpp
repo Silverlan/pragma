@@ -193,7 +193,7 @@ void CPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang, float dur
 bool CPlayerComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvApplyViewRotationOffset) {
-		auto ang = nwm::read_angles(packet);
+		auto ang = pragma::networking::read_angles(packet);
 		auto dur = packet->Read<float>();
 		ApplyViewRotationOffset(ang, dur);
 	}

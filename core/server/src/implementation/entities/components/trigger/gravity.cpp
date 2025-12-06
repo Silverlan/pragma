@@ -36,7 +36,7 @@ void STriggerGravityComponent::OnResetGravity(pragma::ecs::BaseEntity *ent, Grav
 	BaseEntityTriggerGravityComponent::OnResetGravity(ent, settings);
 	auto &entThis = GetEntity();
 	NetPacket p {};
-	nwm::write_entity(p, ent);
+	pragma::networking::write_entity(p, ent);
 	p->Write<uint8_t>(umath::to_integral(pragma::Entity::TriggerGravity::NetFlags::None));
 	p->Write<uint32_t>(entThis.GetSpawnFlags());
 	p->Write<Vector3>((settings.dir != nullptr) ? *settings.dir : Vector3 {});
@@ -53,7 +53,7 @@ void STriggerGravityComponent::OnStartTouch(pragma::ecs::BaseEntity *ent)
 		netFlags |= pragma::Entity::TriggerGravity::NetFlags::UseForce;
 	auto &entThis = GetEntity();
 	NetPacket p {};
-	nwm::write_entity(p, ent);
+	pragma::networking::write_entity(p, ent);
 	p->Write<uint8_t>(umath::to_integral(netFlags));
 	p->Write<uint32_t>(entThis.GetSpawnFlags());
 	p->Write<Vector3>(m_kvGravityDir);

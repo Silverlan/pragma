@@ -17,7 +17,7 @@ void SChildComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComp
 void SChildComponent::OnParentChanged(pragma::ecs::BaseEntity *parent)
 {
 	NetPacket p;
-	nwm::write_entity(p, parent);
+	pragma::networking::write_entity(p, parent);
 	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetParent, p, pragma::networking::Protocol::SlowReliable);
 }
 
@@ -25,7 +25,7 @@ void SChildComponent::SendData(NetPacket &packet, networking::ClientRecipientFil
 {
 	auto *parent = GetParentEntity();
 	if(parent)
-		nwm::write_unique_entity(packet, parent);
+		pragma::networking::write_unique_entity(packet, parent);
 	else
-		nwm::write_unique_entity(packet, nullptr);
+		pragma::networking::write_unique_entity(packet, nullptr);
 }

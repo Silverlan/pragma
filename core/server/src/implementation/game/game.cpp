@@ -335,7 +335,7 @@ void pragma::SGame::UpdateLuaCache(const std::string &fName)
 
 void pragma::SGame::GenerateLuaCache()
 {
-	auto &resources = ResourceManager::GetResources();
+	auto &resources = networking::ResourceManager::GetResources();
 	filemanager::create_path("cache/" + Lua::SCRIPT_DIRECTORY);
 	Con::csv << "Generating lua cache..." << Con::endl;
 	for(auto &res : resources) {
@@ -374,7 +374,7 @@ bool pragma::SGame::InitializeGameMode()
 		transferFiles.at(i) = pathClient + '\\' + transferFiles.at(i);
 
 	for(auto &fname : transferFiles)
-		ResourceManager::AddResource(fname);
+		networking::ResourceManager::AddResource(fname);
 	return true;
 }
 
@@ -410,7 +410,7 @@ void pragma::SGame::OnClientDropped(pragma::networking::IServerClient &client, p
 		return;
 	auto &ent = pl->GetEntity();
 	NetPacket p;
-	nwm::write_player(p, pl);
+	networking::write_player(p, pl);
 	p->Write<int32_t>(umath::to_integral(reason));
 	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CLIENT_DROPPED, p, pragma::networking::Protocol::SlowReliable, {client, pragma::networking::ClientRecipientFilter::FilterType::Exclude});
 	OnPlayerDropped(*pl, reason);
@@ -424,7 +424,7 @@ void pragma::SGame::ReceiveGameReady(pragma::networking::IServerClient &session,
 		return;
 	pl->SetGameReady(true);
 	NetPacket p;
-	nwm::write_player(p, pl);
+	networking::write_player(p, pl);
 	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CLIENT_READY, p, pragma::networking::Protocol::SlowReliable);
 	OnPlayerReady(*pl);
 }
@@ -495,7 +495,7 @@ void pragma::SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, 
 	session.SetPlayer(*pl);
 	pl->SetClientSession(session);
 	NetPacket p;
-	nwm::write_player(p, pl);
+	networking::write_player(p, pl);
 	if(packet->Read<unsigned char>() == 1) // Does the player have UDP available?
 	{
 		unsigned short portUDP = packet->Read<unsigned short>();
@@ -601,14 +601,14 @@ void pragma::SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, 
 	WriteEntityData(packetInf, m_ents.data(), m_ents.size(), rp);
 
 	auto *ptrWorld = GetWorld();
-	nwm::write_entity(packetInf, (ptrWorld != nullptr) ? &ptrWorld->GetEntity() : nullptr);
+	pragma::networking::write_entity(packetInf, (ptrWorld != nullptr) ? &ptrWorld->GetEntity() : nullptr);
 	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::GAMEINFO, packetInf, pragma::networking::Protocol::SlowReliable, rp);
 	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_LOCAL, p, pragma::networking::Protocol::SlowReliable, session);
 	NetPacket tmp {};
 	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::GAME_READY, tmp, pragma::networking::Protocol::SlowReliable, rp);
 
 	NetPacket pJoinedInfo;
-	nwm::write_player(pJoinedInfo, pl);
+	networking::write_player(pJoinedInfo, pl);
 	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CLIENT_JOINED, pJoinedInfo, pragma::networking::Protocol::SlowReliable);
 
 	if(IsMapInitialized() == true)
@@ -657,22 +657,22 @@ void pragma::SGame::OnClientConVarChanged(pragma::BasePlayerComponent &pl, std::
 		if(nameC.valid())
 			nameC->SetName(value);
 		NetPacket p;
-		nwm::write_player(p, &pl);
+		networking::write_player(p, &pl);
 		p->WriteString(value);
 		pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_CHANGEDNAME, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
-void pragma::SGame::DrawLine(const Vector3 &start, const Vector3 &end, const Color &color, float duration) { SDebugRenderer::DrawLine(start, end, color, duration); }
+void pragma::SGame::DrawLine(const Vector3 &start, const Vector3 &end, const Color &color, float duration) { debug::SDebugRenderer::DrawLine(start, end, color, duration); }
 void pragma::SGame::DrawBox(const Vector3 &origin, const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &colorOutline, const std::optional<Color> &fillColor, float duration)
 {
 	if(fillColor)
-		SDebugRenderer::DrawBox(start, end, ang, *fillColor, colorOutline, duration);
+		debug::SDebugRenderer::DrawBox(start, end, ang, *fillColor, colorOutline, duration);
 	else
-		SDebugRenderer::DrawBox(start, end, ang, colorOutline, duration);
+		debug::SDebugRenderer::DrawBox(start, end, ang, colorOutline, duration);
 }
-void pragma::SGame::DrawPlane(const Vector3 &n, float dist, const Color &color, float duration) { SDebugRenderer::DrawPlane(n, dist, color, duration); }
-void pragma::SGame::DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration) { SDebugRenderer::DrawMesh(meshVerts, color, colorOutline, duration); }
+void pragma::SGame::DrawPlane(const Vector3 &n, float dist, const Color &color, float duration) { debug::SDebugRenderer::DrawPlane(n, dist, color, duration); }
+void pragma::SGame::DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration) { debug::SDebugRenderer::DrawMesh(meshVerts, color, colorOutline, duration); }
 
 static auto cvFriction = pragma::console::get_server_con_var("sv_friction");
 Float pragma::SGame::GetFrictionScale() const { return cvFriction->GetFloat(); }

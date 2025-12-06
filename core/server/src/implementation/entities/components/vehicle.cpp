@@ -57,7 +57,7 @@ void SVehicleComponent::ClearDriver()
 	if(!entThis.IsShared() || !entThis.IsSpawned())
 		return;
 	NetPacket p;
-	nwm::write_entity(p, nullptr);
+	pragma::networking::write_entity(p, nullptr);
 	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetDriver, p, pragma::networking::Protocol::SlowReliable);
 }
 void SVehicleComponent::OnActionInput(pragma::Action action, bool b)
@@ -108,7 +108,7 @@ void SVehicleComponent::SetDriver(pragma::ecs::BaseEntity *ent)
 	if(!entThis.IsShared() || !entThis.IsSpawned())
 		return;
 	NetPacket p;
-	nwm::write_entity(p, ent);
+	pragma::networking::write_entity(p, ent);
 	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetDriver, p, pragma::networking::Protocol::SlowReliable);
 }
 
@@ -134,8 +134,8 @@ void SVehicleComponent::WriteWheelInfo(NetPacket &p, WheelData &data, btWheelInf
 
 void SVehicleComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
-	nwm::write_entity(packet, m_steeringWheel);
-	nwm::write_entity(packet, GetDriver());
+	pragma::networking::write_entity(packet, m_steeringWheel);
+	pragma::networking::write_entity(packet, GetDriver());
 }
 
 void SVehicleComponent::SetupSteeringWheel(const std::string &mdl, umath::Degree maxSteeringAngle)
@@ -144,7 +144,7 @@ void SVehicleComponent::SetupSteeringWheel(const std::string &mdl, umath::Degree
 	if(m_steeringWheel.valid())
 		static_cast<SBaseEntity &>(*m_steeringWheel.get()).SetSynchronized(false);
 	NetPacket p;
-	nwm::write_entity(p, m_steeringWheel);
+	pragma::networking::write_entity(p, m_steeringWheel);
 	p->Write<float>(maxSteeringAngle);
 	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSteeringWheelModel, p, pragma::networking::Protocol::SlowReliable);
 }

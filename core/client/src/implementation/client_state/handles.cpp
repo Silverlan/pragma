@@ -17,7 +17,7 @@ void pragma::ClientState::HandlePacket(NetPacket &packet)
 	packet->SetClient(true);
 	CallCallbacks<void, std::reference_wrapper<NetPacket>>("OnReceivePacket", packet);
 	unsigned int ID = packet.GetMessageID();
-	CLNetMessage *msg = GetNetMessage(ID);
+	networking::CLNetMessage *msg = GetNetMessage(ID);
 	if(msg == nullptr) {
 		Con::cwar << "(CLIENT) Unhandled net message: " << ID << Con::endl;
 		return;
@@ -291,7 +291,7 @@ void pragma::ClientState::HandleReceiveGameInfo(NetPacket &packet)
 
 	ReadEntityData(packet);
 
-	pragma::ecs::BaseEntity *wrld = nwm::read_entity(packet);
+	pragma::ecs::BaseEntity *wrld = pragma::networking::read_entity(packet);
 	if(wrld != nullptr) {
 		auto pWorldComponent = wrld->GetComponent<pragma::CWorldComponent>();
 		game->SetWorld(pWorldComponent.get());

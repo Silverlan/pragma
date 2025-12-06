@@ -13,22 +13,22 @@ export import pragma.network_manager;
 export import std;
 
 export {
-	using ServerClientHandle = void *;
-	class DLLNETWORK SVNetMessage {
-	  public:
-		using Handler = void (*)(ServerClientHandle, NetPacket);
-		Handler handler;
-		unsigned int ID;
-	};
-
-	class DLLNETWORK CLNetMessage {
-	  public:
-		using Handler = void (*)(NetPacket);
-		Handler handler;
-		unsigned int ID;
-	};
-
 	namespace pragma::networking {
+		using ServerClientHandle = void *;
+		class DLLNETWORK SVNetMessage {
+		public:
+			using Handler = void (*)(ServerClientHandle, NetPacket);
+			Handler handler;
+			unsigned int ID;
+		};
+
+		class DLLNETWORK CLNetMessage {
+		public:
+			using Handler = void (*)(NetPacket);
+			Handler handler;
+			unsigned int ID;
+		};
+
 		class IBaseNetMessageMap {
 		  public:
 			virtual void RegisterNetMessage(const std::string_view &name) = 0;
@@ -131,9 +131,10 @@ export {
 
 		using ClientMessageMap = NetMessageMap<CLNetMessage>;
 		using ServerMessageMap = NetMessageMap<SVNetMessage>;
-	}
 
-	DLLNETWORK pragma::networking::ClientMessageMap *GetClientMessageMap();
-	DLLNETWORK pragma::networking::ServerMessageMap *GetServerMessageMap();
-	void register_net_messages();
+
+		DLLNETWORK ClientMessageMap *get_client_message_map();
+		DLLNETWORK ServerMessageMap *get_server_message_map();
+		void register_net_messages();
+	}
 };

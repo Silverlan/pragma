@@ -26,10 +26,10 @@ void Lua::NetPacket::Server::WriteUniqueEntity(lua::State *l, ::NetPacket &packe
 {
 	//LUA_CHECK_ENTITY(l,hEnt);
 	if(hEnt == nullptr) {
-		nwm::write_unique_entity(packet, nullptr);
+		pragma::networking::write_unique_entity(packet, nullptr);
 		return;
 	}
-	nwm::write_unique_entity(packet, hEnt);
+	pragma::networking::write_unique_entity(packet, hEnt);
 }
 
-void Lua::NetPacket::Server::WriteUniqueEntity(lua::State *, ::NetPacket &packet) { nwm::write_unique_entity(packet, nullptr); }
+void Lua::NetPacket::Server::WriteUniqueEntity(lua::State *, ::NetPacket &packet) { pragma::networking::write_unique_entity(packet, nullptr); }

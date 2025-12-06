@@ -149,7 +149,7 @@ void SBaseEntity::SendNetEvent(pragma::NetEventId eventId, NetPacket &packet, pr
 {
 	if(!IsShared() || !IsSpawned())
 		return;
-	nwm::write_entity(packet, this);
+	pragma::networking::write_entity(packet, this);
 	packet->Write<UInt32>(eventId);
 	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_EVENT, packet, protocol, rf);
 }
@@ -241,7 +241,7 @@ pragma::ComponentHandle<pragma::BaseEntityComponent> SBaseEntity::AddNetworkedCo
 		return c;
 	auto componentId = c->GetComponentId();
 	NetPacket packet {};
-	nwm::write_entity(packet, this);
+	pragma::networking::write_entity(packet, this);
 	packet->Write<pragma::ComponentId>(componentId);
 	static_cast<pragma::ServerState *>(GetNetworkState())->SendPacket(pragma::networking::net_messages::client::ADD_SHARED_COMPONENT, packet, pragma::networking::Protocol::SlowReliable);
 	return c;

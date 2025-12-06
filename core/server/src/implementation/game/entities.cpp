@@ -54,7 +54,7 @@ void pragma::SGame::RemoveEntity(pragma::ecs::BaseEntity *ent)
 		auto ID = server_entities::ServerEntityRegistry::Instance().GetNetworkFactoryID(typeid(*ent));
 		if(ID != std::nullopt) {
 			NetPacket p;
-			nwm::write_entity(p, ent);
+			pragma::networking::write_entity(p, ent);
 			pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_REMOVE, p, pragma::networking::Protocol::SlowReliable);
 		}
 	}

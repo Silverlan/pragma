@@ -14,7 +14,7 @@ import :game;
 import :model;
 import :rendering.shaders;
 
-CPhysWaterSurfaceSimulator::CPhysWaterSurfaceSimulator(Vector2 aabbMin, Vector2 aabbMax, float originY, uint32_t spacing, float stiffness, float propagation) : PhysWaterSurfaceSimulator(aabbMin, aabbMax, originY, spacing, stiffness, propagation)
+pragma::physics::CPhysWaterSurfaceSimulator::CPhysWaterSurfaceSimulator(Vector2 aabbMin, Vector2 aabbMax, float originY, uint32_t spacing, float stiffness, float propagation) : PhysWaterSurfaceSimulator(aabbMin, aabbMax, originY, spacing, stiffness, propagation)
 {
 	m_cmdBuffer = pragma::get_cengine()->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Compute, m_universalQueueFamilyIndex);
 	m_whShaderSurface = pragma::get_cengine()->GetShader("watersurface");
@@ -25,7 +25,7 @@ CPhysWaterSurfaceSimulator::CPhysWaterSurfaceSimulator(Vector2 aabbMin, Vector2 
 }
 
 static auto cvGPUAcceleration = pragma::console::get_client_con_var("cl_water_surface_simulation_enable_gpu_acceleration");
-void CPhysWaterSurfaceSimulator::InitializeSurface()
+void pragma::physics::CPhysWaterSurfaceSimulator::InitializeSurface()
 {
 	PhysWaterSurfaceSimulator::InitializeSurface();
 	if(m_particleField.empty() == true)
@@ -120,13 +120,13 @@ void CPhysWaterSurfaceSimulator::InitializeSurface()
 	descSetEdge.SetBindingStorageBuffer(*m_edgeBuffer, umath::to_integral(pragma::ShaderWaterSurfaceSolveEdges::WaterBinding::WaterEdgeData));
 }
 
-const std::shared_ptr<prosper::IBuffer> &CPhysWaterSurfaceSimulator::GetParticleBuffer() const { return m_particleBuffer; }
-const std::shared_ptr<prosper::IBuffer> &CPhysWaterSurfaceSimulator::GetPositionBuffer() const { return m_positionBuffer; }
+const std::shared_ptr<prosper::IBuffer> &pragma::physics::CPhysWaterSurfaceSimulator::GetParticleBuffer() const { return m_particleBuffer; }
+const std::shared_ptr<prosper::IBuffer> &pragma::physics::CPhysWaterSurfaceSimulator::GetPositionBuffer() const { return m_positionBuffer; }
 
 static auto cvEdgeIterationCount = pragma::console::get_client_con_var("cl_water_surface_simulation_edge_iteration_count");
-uint8_t CPhysWaterSurfaceSimulator::GetEdgeIterationCount() const { return cvEdgeIterationCount->GetInt(); }
+uint8_t pragma::physics::CPhysWaterSurfaceSimulator::GetEdgeIterationCount() const { return cvEdgeIterationCount->GetInt(); }
 
-void CPhysWaterSurfaceSimulator::Simulate(double dt)
+void pragma::physics::CPhysWaterSurfaceSimulator::Simulate(double dt)
 {
 	if(m_bUseComputeShaders == false) {
 		PhysWaterSurfaceSimulator::Simulate(dt);
@@ -209,9 +209,9 @@ void CPhysWaterSurfaceSimulator::Simulate(double dt)
 	pragma::get_cengine()->GetRenderContext().SubmitCommandBuffer(*computeCmd);
 }
 
-const std::vector<uint16_t> &CPhysWaterSurfaceSimulator::GetTriangleIndices() const { return m_triangleIndices; }
+const std::vector<uint16_t> &pragma::physics::CPhysWaterSurfaceSimulator::GetTriangleIndices() const { return m_triangleIndices; }
 
-void CPhysWaterSurfaceSimulator::Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, CModelSubMesh &mesh)
+void pragma::physics::CPhysWaterSurfaceSimulator::Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, CModelSubMesh &mesh)
 {
 	// TODO
 	auto &verts = mesh.GetVertices();

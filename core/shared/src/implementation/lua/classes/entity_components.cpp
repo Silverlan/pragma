@@ -2071,7 +2071,7 @@ namespace Lua::Shooter {
 	{
 		auto &bulletInfo = Lua::Check<BulletInfo>(l, 2);
 
-		std::vector<TraceResult> results;
+		std::vector<pragma::physics::TraceResult> results;
 		hEnt.FireBullets(bulletInfo, results, bMaster);
 		if(bHitReport == false)
 			return;
@@ -2120,10 +2120,10 @@ void pragma::LuaCore::base_physics_component::register_class(luabind::module_ &m
 	def.def("GetCollisionExtents", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) { luabind::object(l, hEnt.GetCollisionExtents()).push(l); }));
 	def.def("GetCollisionCenter", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) { luabind::object(l, hEnt.GetCollisionCenter()).push(l); }));
 	def.def("GetMoveType", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) {
-		pragma::physics::MOVETYPE mt = hEnt.GetMoveType();
+		pragma::physics::MoveType mt = hEnt.GetMoveType();
 		Lua::PushInt(l, int(mt));
 	}));
-	def.def("SetMoveType", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, int)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, int moveType) { hEnt.SetMoveType(pragma::physics::MOVETYPE(moveType)); }));
+	def.def("SetMoveType", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, int)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, int moveType) { hEnt.SetMoveType(pragma::physics::MoveType(moveType)); }));
 	def.def("GetPhysicsObject", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) {
 		pragma::physics::PhysObj *phys = hEnt.GetPhysicsObject();
 		if(phys == nullptr)
@@ -2131,12 +2131,12 @@ void pragma::LuaCore::base_physics_component::register_class(luabind::module_ &m
 		luabind::object(l, phys->GetHandle()).push(l);
 	}));
 	def.def("InitializePhysics", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, uint32_t, uint32_t)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, uint32_t type, uint32_t physFlags) {
-		pragma::physics::PhysObj *phys = hEnt.InitializePhysics(pragma::physics::PHYSICSTYPE(type), static_cast<pragma::BasePhysicsComponent::PhysFlags>(physFlags));
+		pragma::physics::PhysObj *phys = hEnt.InitializePhysics(pragma::physics::PhysicsType(type), static_cast<pragma::BasePhysicsComponent::PhysFlags>(physFlags));
 		if(phys != nullptr)
 			luabind::object(l, phys->GetHandle()).push(l);
 	}));
 	def.def("InitializePhysics", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, uint32_t)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, uint32_t type) {
-		pragma::physics::PhysObj *phys = hEnt.InitializePhysics(pragma::physics::PHYSICSTYPE(type));
+		pragma::physics::PhysObj *phys = hEnt.InitializePhysics(pragma::physics::PhysicsType(type));
 		if(phys != nullptr)
 			luabind::object(l, phys->GetHandle()).push(l);
 	}));
@@ -2209,7 +2209,7 @@ void pragma::LuaCore::base_physics_component::register_class(luabind::module_ &m
 	def.def("GetCollisionRadius", &pragma::BasePhysicsComponent::GetCollisionRadius);
 	def.def("IsPhysicsProp", static_cast<bool (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) {
 		auto physType = hEnt.GetPhysicsType();
-		return (physType != pragma::physics::PHYSICSTYPE::NONE && physType != pragma::physics::PHYSICSTYPE::STATIC && physType != pragma::physics::PHYSICSTYPE::BOXCONTROLLER && physType != pragma::physics::PHYSICSTYPE::CAPSULECONTROLLER) ? true : false;
+		return (physType != pragma::physics::PhysicsType::None && physType != pragma::physics::PhysicsType::Static && physType != pragma::physics::PhysicsType::BoxController && physType != pragma::physics::PhysicsType::CapsuleController) ? true : false;
 	}));
 
 	def.def("GetAABBDistance", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, const Vector3 &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, const Vector3 &p) { Lua::PushNumber(l, hEnt.GetAABBDistance(p)); }));
@@ -2237,12 +2237,12 @@ void pragma::LuaCore::base_physics_component::register_class(luabind::module_ &m
 	def.add_static_constant("EVENT_HANDLE_RAYCAST", pragma::basePhysicsComponent::EVENT_HANDLE_RAYCAST);
 	def.add_static_constant("EVENT_INITIALIZE_PHYSICS", pragma::basePhysicsComponent::EVENT_INITIALIZE_PHYSICS);
 
-	def.add_static_constant("MOVETYPE_NONE", umath::to_integral(pragma::physics::MOVETYPE::NONE));
-	def.add_static_constant("MOVETYPE_WALK", umath::to_integral(pragma::physics::MOVETYPE::WALK));
-	def.add_static_constant("MOVETYPE_NOCLIP", umath::to_integral(pragma::physics::MOVETYPE::NOCLIP));
-	def.add_static_constant("MOVETYPE_FLY", umath::to_integral(pragma::physics::MOVETYPE::FLY));
-	def.add_static_constant("MOVETYPE_FREE", umath::to_integral(pragma::physics::MOVETYPE::FREE));
-	def.add_static_constant("MOVETYPE_PHYSICS", umath::to_integral(pragma::physics::MOVETYPE::PHYSICS));
+	def.add_static_constant("MOVETYPE_NONE", umath::to_integral(pragma::physics::MoveType::None));
+	def.add_static_constant("MOVETYPE_WALK", umath::to_integral(pragma::physics::MoveType::Walk));
+	def.add_static_constant("MOVETYPE_NOCLIP", umath::to_integral(pragma::physics::MoveType::Noclip));
+	def.add_static_constant("MOVETYPE_FLY", umath::to_integral(pragma::physics::MoveType::Fly));
+	def.add_static_constant("MOVETYPE_FREE", umath::to_integral(pragma::physics::MoveType::Free));
+	def.add_static_constant("MOVETYPE_PHYSICS", umath::to_integral(pragma::physics::MoveType::Physics));
 }
 
 void pragma::LuaCore::base_render_component::register_class(luabind::module_ &mod)
@@ -3090,8 +3090,8 @@ void pragma::LuaCore::base_character_component::register_class(luabind::module_ 
 	def.def("GetWeaponCount", static_cast<size_t (*)(lua::State *, pragma::BaseCharacterComponent &)>([](lua::State *l, pragma::BaseCharacterComponent &hEnt) -> size_t { return hEnt.GetWeapons().size(); }));
 	def.def("GetActiveWeapon", &pragma::BaseCharacterComponent::GetActiveWeapon);
 	def.def("HasWeapon", &pragma::BaseCharacterComponent::HasWeapon);
-	def.def("GetAimRayData", static_cast<void (*)(lua::State *, pragma::BaseCharacterComponent &)>([](lua::State *l, pragma::BaseCharacterComponent &hEnt) { Lua::Push<::TraceData>(l, hEnt.GetAimTraceData()); }));
-	def.def("GetAimRayData", static_cast<void (*)(lua::State *, pragma::BaseCharacterComponent &, float)>([](lua::State *l, pragma::BaseCharacterComponent &hEnt, float maxDist) { Lua::Push<::TraceData>(l, hEnt.GetAimTraceData(maxDist)); }));
+	def.def("GetAimRayData", static_cast<void (*)(lua::State *, pragma::BaseCharacterComponent &)>([](lua::State *l, pragma::BaseCharacterComponent &hEnt) { Lua::Push<pragma::physics::TraceData>(l, hEnt.GetAimTraceData()); }));
+	def.def("GetAimRayData", static_cast<void (*)(lua::State *, pragma::BaseCharacterComponent &, float)>([](lua::State *l, pragma::BaseCharacterComponent &hEnt, float maxDist) { Lua::Push<pragma::physics::TraceData>(l, hEnt.GetAimTraceData(maxDist)); }));
 	def.def("FootStep", &pragma::BaseCharacterComponent::FootStep);
 	def.def("IsMoving", &pragma::BaseCharacterComponent::IsMoving);
 	def.def("SetNeckControllers", &pragma::BaseCharacterComponent::SetNeckControllers);

@@ -160,7 +160,7 @@ pragma::physics::PhysObj *pragma::ecs::BaseEntity::GetPhysicsObject() const
 	auto physC = GetPhysicsComponent();
 	return physC ? physC->GetPhysicsObject() : nullptr;
 }
-pragma::physics::PhysObj *pragma::ecs::BaseEntity::InitializePhysics(pragma::physics::PHYSICSTYPE type)
+pragma::physics::PhysObj *pragma::ecs::BaseEntity::InitializePhysics(pragma::physics::PhysicsType type)
 {
 	auto *physC = static_cast<pragma::BasePhysicsComponent *>(AddNetworkedComponent("physics").get());
 	if(physC == nullptr)

@@ -76,7 +76,7 @@ void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, DamageInfo 
 			if(l != 0.f)
 				dir /= l;
 
-			TraceData data;
+			pragma::physics::TraceData data;
 			data.SetSource(origin);
 			data.SetTarget(pos);
 			data.SetFilter(traceFilter);

@@ -40,10 +40,10 @@ export {
 		  public:
 			pragma::physics::IEnvironment *GetPhysicsEnvironment();
 			const pragma::physics::IEnvironment *GetPhysicsEnvironment() const;
-			SurfaceMaterial &CreateSurfaceMaterial(const std::string &identifier, Float friction = 0.5f, Float restitution = 0.5f);
-			SurfaceMaterial *GetSurfaceMaterial(const std::string &id);
-			SurfaceMaterial *GetSurfaceMaterial(UInt32 id);
-			std::vector<SurfaceMaterial> *GetSurfaceMaterials();
+			physics::SurfaceMaterial &CreateSurfaceMaterial(const std::string &identifier, Float friction = 0.5f, Float restitution = 0.5f);
+			physics::SurfaceMaterial *GetSurfaceMaterial(const std::string &id);
+			physics::SurfaceMaterial *GetSurfaceMaterial(UInt32 id);
+			std::vector<physics::SurfaceMaterial> *GetSurfaceMaterials();
 
 			enum class GameFlags : uint32_t {
 				None = 0u,
@@ -127,13 +127,13 @@ export {
 			void SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force = 0.f, pragma::ecs::BaseEntity *attacker = nullptr, pragma::ecs::BaseEntity *inflictor = nullptr, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback = nullptr);
 			void SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force = 0.f, const EntityHandle &attacker = EntityHandle(), const EntityHandle &inflictor = EntityHandle(), const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback = nullptr);
 
-			Bool Overlap(const TraceData &data, std::vector<TraceResult> *optOutResults) const;
-			Bool RayCast(const TraceData &data, std::vector<TraceResult> *optOutResults) const;
-			Bool Sweep(const TraceData &data, std::vector<TraceResult> *optOutResults) const;
+			Bool Overlap(const pragma::physics::TraceData &data, std::vector<pragma::physics::TraceResult> *optOutResults) const;
+			Bool RayCast(const pragma::physics::TraceData &data, std::vector<pragma::physics::TraceResult> *optOutResults) const;
+			Bool Sweep(const pragma::physics::TraceData &data, std::vector<pragma::physics::TraceResult> *optOutResults) const;
 
-			TraceResult Overlap(const TraceData &data) const;
-			TraceResult RayCast(const TraceData &data) const;
-			TraceResult Sweep(const TraceData &data) const;
+			pragma::physics::TraceResult Overlap(const pragma::physics::TraceData &data) const;
+			pragma::physics::TraceResult RayCast(const pragma::physics::TraceData &data) const;
+			pragma::physics::TraceResult Sweep(const pragma::physics::TraceData &data) const;
 
 			virtual void CreateGiblet(const GibletCreateInfo &info) = 0;
 
@@ -308,7 +308,7 @@ export {
 			std::shared_ptr<Lua::Interface> m_lua = nullptr;
 			std::unique_ptr<pragma::LuaCore::ClassManager> m_luaClassManager;
 			std::unique_ptr<LuaDirectoryWatcherManager> m_scriptWatcher = nullptr;
-			std::unique_ptr<SurfaceMaterialManager> m_surfaceMaterialManager = nullptr;
+			std::unique_ptr<pragma::physics::SurfaceMaterialManager> m_surfaceMaterialManager = nullptr;
 			std::unordered_map<std::string, std::vector<console::CvarCallback>> m_cvarCallbacks;
 			std::vector<std::unique_ptr<Timer>> m_timers;
 			std::unordered_map<std::string, int> m_luaNetMessages;

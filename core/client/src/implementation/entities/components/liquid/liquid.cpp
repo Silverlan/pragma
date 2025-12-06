@@ -47,7 +47,7 @@ void CLiquidComponent::OnEntitySpawn()
 	auto &ent = static_cast<CBaseEntity &>(GetEntity());
 	//auto pPhysComponent = ent.GetPhysicsComponent();
 	//if(pPhysComponent != nullptr)
-	//	pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::STATIC);
+	//	pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Static);
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(pRenderComponent) {
 		// pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::Water);
@@ -136,7 +136,7 @@ static void debug_water(pragma::NetworkState *state, pragma::BasePlayerComponent
 	if(pragma::get_cgame() == nullptr || pl == nullptr)
 		return;
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
-	auto ents = pragma::console::find_target_entity(state, *charComponent, argv, [](TraceData &trData) { trData.SetCollisionFilterMask(trData.GetCollisionFilterGroup() | pragma::physics::CollisionMask::Water | pragma::physics::CollisionMask::WaterSurface); });
+	auto ents = pragma::console::find_target_entity(state, *charComponent, argv, [](pragma::physics::TraceData &trData) { trData.SetCollisionFilterMask(trData.GetCollisionFilterGroup() | pragma::physics::CollisionMask::Water | pragma::physics::CollisionMask::WaterSurface); });
 	auto bFoundWater = false;
 	if(ents.empty() == false) {
 		for(auto *ent : ents) {
@@ -205,7 +205,7 @@ static void debug_water(pragma::NetworkState *state, pragma::BasePlayerComponent
 				auto *meshSurface = pWaterSurfComponent.valid() ? pWaterSurfComponent->GetWaterSurfaceMesh() : nullptr;
 				if(meshSurface != nullptr) {
 					auto &vkMesh = meshSurface->GetSceneMesh();
-					auto *sim = static_cast<const CPhysWaterSurfaceSimulator *>(pWaterComponent->GetSurfaceSimulator());
+					auto *sim = static_cast<const pragma::physics::CPhysWaterSurfaceSimulator *>(pWaterComponent->GetSurfaceSimulator());
 					//auto &buf = sim->GetPositionBuffer();
 					auto dbgPoints = DebugRenderer::DrawPoints(vkMesh->GetVertexBuffer(), meshSurface->GetVertexCount(), colors::Yellow);
 					if(dbgPoints != nullptr) {

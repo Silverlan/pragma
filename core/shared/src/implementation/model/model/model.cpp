@@ -569,11 +569,11 @@ bool pragma::Model::SetReferencePoses(const std::vector<umath::ScaledTransform> 
 Frame &pragma::Model::GetReference() { return *m_reference; }
 const Frame &pragma::Model::GetReference() const { return *m_reference; }
 void pragma::Model::SetReference(std::shared_ptr<Frame> frame) { m_reference = frame; }
-const std::vector<JointInfo> &pragma::Model::GetJoints() const { return const_cast<pragma::Model *>(this)->GetJoints(); }
-std::vector<JointInfo> &pragma::Model::GetJoints() { return m_joints; }
-JointInfo &pragma::Model::AddJoint(JointType type, pragma::animation::BoneId child, pragma::animation::BoneId parent)
+const std::vector<pragma::physics::JointInfo> &pragma::Model::GetJoints() const { return const_cast<pragma::Model *>(this)->GetJoints(); }
+std::vector<pragma::physics::JointInfo> &pragma::Model::GetJoints() { return m_joints; }
+pragma::physics::JointInfo &pragma::Model::AddJoint(physics::JointType type, pragma::animation::BoneId child, pragma::animation::BoneId parent)
 {
-	m_joints.push_back(JointInfo(type, child, parent));
+	m_joints.push_back(pragma::physics::JointInfo(type, child, parent));
 	return m_joints.back();
 }
 
@@ -2349,7 +2349,7 @@ int32_t pragma::Model::LookupBlendController(const std::string &name)
 const std::vector<BlendController> &pragma::Model::GetBlendControllers() const { return const_cast<pragma::Model *>(this)->GetBlendControllers(); }
 std::vector<BlendController> &pragma::Model::GetBlendControllers() { return m_blendControllers; }
 
-void pragma::Model::UpdateShape(const std::vector<SurfaceMaterial> *)
+void pragma::Model::UpdateShape(const std::vector<pragma::physics::SurfaceMaterial> *)
 {
 	for(auto &cmesh : m_collisionMeshes)
 		cmesh->UpdateShape();

@@ -49,7 +49,7 @@ void SLiquidSurfaceSimulationComponent::OnTick(double dt)
 {
 	if(m_bUsingClientsideSimulation == true || m_physSurfaceSim == nullptr)
 		return;
-	auto *sim = static_cast<PhysWaterSurfaceSimulator *>(m_physSurfaceSim.get());
+	auto *sim = static_cast<physics::PhysWaterSurfaceSimulator *>(m_physSurfaceSim.get());
 	if(sim == nullptr)
 		return;
 	sim->Simulate(0.01); // TODO

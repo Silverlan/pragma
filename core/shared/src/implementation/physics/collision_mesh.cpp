@@ -331,7 +331,7 @@ void pragma::physics::CollisionMesh::SetSoftBodyMesh(pragma::ModelSubMesh &mesh)
 }
 const std::vector<uint32_t> *pragma::physics::CollisionMesh::GetSoftBodyTriangles() const { return const_cast<pragma::physics::CollisionMesh *>(this)->GetSoftBodyTriangles(); }
 std::vector<uint32_t> *pragma::physics::CollisionMesh::GetSoftBodyTriangles() { return (m_softBodyInfo != nullptr) ? &m_softBodyInfo->triangles : nullptr; }
-PhysSoftBodyInfo *pragma::physics::CollisionMesh::GetSoftBodyInfo() const { return (m_softBodyInfo != nullptr) ? m_softBodyInfo->info.get() : nullptr; }
+pragma::physics::PhysSoftBodyInfo *pragma::physics::CollisionMesh::GetSoftBodyInfo() const { return (m_softBodyInfo != nullptr) ? m_softBodyInfo->info.get() : nullptr; }
 bool pragma::physics::CollisionMesh::AddSoftBodyAnchor(uint16_t vertIdx, uint32_t boneIdx, SoftBodyAnchor::Flags flags, float influence, uint32_t *anchorIdx)
 {
 	if(m_softBodyInfo == nullptr)

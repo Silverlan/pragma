@@ -22,5 +22,5 @@ void BaseFuncPortalComponent::OnEntitySpawn()
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
 		return;
-	pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::STATIC);
+	pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Static);
 }

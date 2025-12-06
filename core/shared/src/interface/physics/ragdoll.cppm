@@ -8,7 +8,9 @@ export module pragma.shared:physics.ragdoll;
 
 export import :physics.object;
 
-export class DLLNETWORK Ragdoll : public pragma::physics::PhysObj {
-  public:
-	Ragdoll();
-};
+export namespace pragma::physics {
+	class DLLNETWORK Ragdoll : public PhysObj {
+	public:
+		Ragdoll();
+	};
+}

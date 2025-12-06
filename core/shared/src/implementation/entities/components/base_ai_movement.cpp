@@ -444,7 +444,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 
 	auto dstPos = pos + dir * (pPhysComponent ? (pPhysComponent->GetCollisionRadius() * 1.1f) : 0.f);
 
-	const auto fCheckForObstruction = [this, &pTrComponent, &dir, t](TraceResult &r) -> bool {
+	const auto fCheckForObstruction = [this, &pTrComponent, &dir, t](pragma::physics::TraceResult &r) -> bool {
 		if(r.hitType != pragma::physics::RayCastHitType::None && (r.entity.valid() == false || IsObstruction(*r.entity.get()))) // Obstructed
 		{
 			m_obstruction.pathObstructed = true;
@@ -495,7 +495,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 	auto *physObj = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(physObj == nullptr || physObj->IsController() == false)
 		return;
-	auto *physController = static_cast<ControllerPhysObj *>(physObj);
+	auto *physController = static_cast<pragma::physics::ControllerPhysObj *>(physObj);
 	auto *shape = physController->GetController()->GetShape();
 	if(shape == nullptr)
 		return;
@@ -503,7 +503,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 	// so that the capsule sweep isn't inside the ground (since a capsule's origin is at its center, not near the feet, but the NPCs
 	// position is always at the feet).
 	if(physController->IsCapsule()) {
-		auto *capsuleController = static_cast<CapsuleControllerPhysObj *>(physObj);
+		auto *capsuleController = static_cast<pragma::physics::CapsuleControllerPhysObj *>(physObj);
 		auto rot = physObj->GetOrientation();
 		auto offset = Vector3(0, capsuleController->GetHeight() * 0.5f, 0);
 		uvec::rotate(&offset, rot);
@@ -511,7 +511,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 		dstPos += offset;
 	}
 
-	TraceData data {};
+	pragma::physics::TraceData data {};
 	data.SetSource(pos);
 	data.SetShape(*shape);
 	data.SetTarget(dstPos);
@@ -536,7 +536,7 @@ Vector2 BaseAIComponent::CalcMovementSpeed() const
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
-	if(pPhysComponent && (pPhysComponent->GetMoveType() != pragma::physics::MOVETYPE::WALK || pPhysComponent->IsOnGround() == false))
+	if(pPhysComponent && (pPhysComponent->GetMoveType() != pragma::physics::MoveType::Walk || pPhysComponent->IsOnGround() == false))
 		return {pVelComponent.valid() ? uvec::length(pVelComponent->GetVelocity()) : 0.f, 0.f};
 	auto speed = 0.f;
 	auto animComponent = ent.GetAnimatedComponent();
@@ -558,7 +558,7 @@ Vector3 BaseAIComponent::CalcMovementDirection() const
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
-	if(pPhysComponent && (pPhysComponent->GetMoveType() != pragma::physics::MOVETYPE::WALK || pPhysComponent->IsOnGround() == false)) {
+	if(pPhysComponent && (pPhysComponent->GetMoveType() != pragma::physics::MoveType::Walk || pPhysComponent->IsOnGround() == false)) {
 		auto vel = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {};
 		uvec::normalize(&vel);
 		return vel;

@@ -286,7 +286,7 @@ void pragma::asset::WmdFormatHandler::LoadHitboxes(uint16_t version, pragma::Mod
 		auto group = m_file->Read<uint32_t>();
 		auto min = m_file->Read<Vector3>();
 		auto max = m_file->Read<Vector3>();
-		mdl.AddHitbox(boneId, static_cast<HitGroup>(group), min, max);
+		mdl.AddHitbox(boneId, static_cast<physics::HitGroup>(group), min, max);
 	}
 }
 
@@ -558,7 +558,7 @@ void pragma::asset::WmdFormatHandler::LoadMeshes(unsigned short version, pragma:
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadCollisionMeshes(pragma::Game *game, unsigned short version, pragma::Model &mdl, SurfaceMaterial *smDefault)
+void pragma::asset::WmdFormatHandler::LoadCollisionMeshes(pragma::Game *game, unsigned short version, pragma::Model &mdl, physics::SurfaceMaterial *smDefault)
 {
 	if(smDefault == nullptr)
 		smDefault = m_gameState->GetSurfaceMaterial(0);
@@ -568,7 +568,7 @@ void pragma::asset::WmdFormatHandler::LoadCollisionMeshes(pragma::Game *game, un
 	Vector3 collisionMax(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
 	uint32_t numMeshes = (version < 30) ? m_file->Read<uint8_t>() : m_file->Read<uint32_t>();
 	auto massPerMesh = mass / static_cast<float>(numMeshes); // TODO: Allow individual mass per collision mesh
-	std::vector<JointInfo> oldJointSystemJoints;
+	std::vector<physics::JointInfo> oldJointSystemJoints;
 	for(auto i = decltype(numMeshes) {0u}; i < numMeshes; ++i) {
 		auto flags = CollisionMeshLoadFlags::None;
 		if(version >= 30)
@@ -624,9 +624,9 @@ void pragma::asset::WmdFormatHandler::LoadCollisionMeshes(pragma::Game *game, un
 		if(version >= 0x0002 && version < 38) {
 			auto numConstraints = m_file->Read<unsigned char>();
 			for(unsigned char iConstraint = 0; iConstraint < numConstraints; iConstraint++) {
-				auto type = m_file->Read<JointType>();
+				auto type = m_file->Read<physics::JointType>();
 				auto idTgt = m_file->Read<unsigned int>();
-				oldJointSystemJoints.push_back(JointInfo {type, static_cast<uint16_t>(i), static_cast<uint16_t>(idTgt)});
+				oldJointSystemJoints.push_back(physics::JointInfo {type, static_cast<uint16_t>(i), static_cast<uint16_t>(idTgt)});
 				auto &joint = oldJointSystemJoints.back();
 				joint.collide = m_file->Read<bool>();
 				auto numArgs = m_file->Read<unsigned char>();
@@ -1035,7 +1035,7 @@ void pragma::asset::WmdFormatHandler::LoadSoftBodyData(pragma::Model &mdl, pragm
 		auto matId = m_file->Read<uint32_t>();
 		auto it = sbInfo.materialStiffnessCoefficient.find(matId);
 		if(it == sbInfo.materialStiffnessCoefficient.end())
-			it = sbInfo.materialStiffnessCoefficient.insert(std::make_pair(matId, PhysSoftBodyInfo::MaterialStiffnessCoefficient {})).first;
+			it = sbInfo.materialStiffnessCoefficient.insert(std::make_pair(matId, physics::PhysSoftBodyInfo::MaterialStiffnessCoefficient {})).first;
 		it->second.linear = m_file->Read<float>();
 		it->second.angular = m_file->Read<float>();
 		it->second.volume = m_file->Read<float>();
@@ -1057,7 +1057,7 @@ void pragma::asset::WmdFormatHandler::LoadJoints(pragma::Model &mdl)
 {
 	auto numJoints = m_file->Read<uint32_t>();
 	for(auto i = decltype(numJoints) {0u}; i < numJoints; ++i) {
-		auto type = m_file->Read<JointType>();
+		auto type = m_file->Read<physics::JointType>();
 		auto child = m_file->Read<pragma::animation::BoneId>();
 		auto parent = m_file->Read<pragma::animation::BoneId>();
 		auto &joint = mdl.AddJoint(type, child, parent);

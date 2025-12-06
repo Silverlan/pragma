@@ -120,9 +120,9 @@ export {
 
 			RemainingDeltaTime StepSimulation(float timeStep, int maxSubSteps = 1, float fixedTimeStep = (1.f / 60.f));
 
-			virtual Bool Overlap(const TraceData &data, std::vector<TraceResult> *optOutResults = nullptr) const = 0;
-			virtual Bool RayCast(const TraceData &data, std::vector<TraceResult> *optOutResults = nullptr) const = 0;
-			virtual Bool Sweep(const TraceData &data, std::vector<TraceResult> *optOutResults = nullptr) const = 0;
+			virtual Bool Overlap(const pragma::physics::TraceData &data, std::vector<TraceResult> *optOutResults = nullptr) const = 0;
+			virtual Bool RayCast(const pragma::physics::TraceData &data, std::vector<TraceResult> *optOutResults = nullptr) const = 0;
+			virtual Bool Sweep(const pragma::physics::TraceData &data, std::vector<TraceResult> *optOutResults = nullptr) const = 0;
 
 			const std::vector<util::TSharedHandle<IConstraint>> &GetConstraints() const;
 			std::vector<util::TSharedHandle<IConstraint>> &GetConstraints();

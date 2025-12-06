@@ -464,7 +464,7 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 
 		Lua::PushInt(l, 2);
 		Lua::GetTableValue(l, argsIdx);
-		auto &surfMat = Lua::Check<SurfaceMaterial>(l, -1);
+		auto &surfMat = Lua::Check<pragma::physics::SurfaceMaterial>(l, -1);
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 3);

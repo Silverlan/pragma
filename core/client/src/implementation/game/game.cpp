@@ -1490,7 +1490,7 @@ void pragma::CGame::ReceiveSnapshot(NetPacket &packet)
 						auto vel = packet->Read<Vector3>();
 						auto angVel = packet->Read<Vector3>();
 						if(physObj->IsController()) {
-							auto *physController = static_cast<ControllerPhysObj *>(physObj);
+							auto *physController = static_cast<pragma::physics::ControllerPhysObj *>(physObj);
 							//physController->SetPosition(pos);
 							physController->SetOrientation(rot);
 							physController->SetLinearVelocity(vel);

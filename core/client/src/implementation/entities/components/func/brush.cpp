@@ -24,7 +24,7 @@ void CBrushComponent::OnEntitySpawn()
 	if(m_kvSolid) {
 		auto pPhysComponent = ent.GetPhysicsComponent();
 		if(pPhysComponent != nullptr)
-			pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::STATIC);
+			pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Static);
 		UpdateSurfaceMaterial(ent.GetNetworkState()->GetGameState());
 	}
 }

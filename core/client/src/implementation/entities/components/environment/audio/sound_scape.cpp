@@ -43,7 +43,7 @@ void CSoundScapeComponent::OnTick(double dt)
 			auto charComponentEnt = ent.GetCharacterComponent();
 			auto pTrComponentEnt = ent.GetTransformComponent();
 			if(charComponentEnt.valid() || pTrComponentEnt) {
-				TraceData tr;
+				pragma::physics::TraceData tr;
 				tr.SetSource(charComponentEnt.valid() ? charComponentEnt->GetEyePosition() : pTrComponentEnt->GetPosition());
 				tr.SetTarget(pTrComponent->GetPosition());
 				tr.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::IgnoreDynamic);

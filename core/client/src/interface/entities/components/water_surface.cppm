@@ -17,14 +17,14 @@ export namespace pragma {
 		virtual void Initialize() override;
 
 		virtual ~CWaterSurfaceComponent() override;
-		void SetSurfaceSimulator(const std::shared_ptr<PhysWaterSurfaceSimulator> &simulator);
+		void SetSurfaceSimulator(const std::shared_ptr<physics::PhysWaterSurfaceSimulator> &simulator);
 		msys::CMaterial *GetWaterMaterial() const;
 		void SetWaterObject(BaseLiquidSurfaceSimulationComponent *ent);
 		CModelSubMesh *GetWaterSurfaceMesh() const;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnEntitySpawn() override;
 	  protected:
-		std::shared_ptr<PhysWaterSurfaceSimulator> m_surfaceSimulator = nullptr;
+		std::shared_ptr<physics::PhysWaterSurfaceSimulator> m_surfaceSimulator = nullptr;
 		mutable std::weak_ptr<CModelSubMesh> m_waterSurfaceMesh = {};
 		CallbackHandle m_cbRenderSurface = {};
 		ComponentHandle<BaseLiquidSurfaceSimulationComponent> m_hFuncWater = {};

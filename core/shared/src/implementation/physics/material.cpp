@@ -12,5 +12,5 @@ void pragma::physics::IMaterial::SetFriction(Float friction)
 	SetDynamicFriction(friction);
 }
 void pragma::physics::IMaterial::SetSurfaceMaterial(SurfaceMaterial &surfMat) { m_surfMatIdx = surfMat.GetIndex(); }
-SurfaceMaterial *pragma::physics::IMaterial::GetSurfaceMaterial() const { return m_physEnv.GetNetworkState().GetGameState()->GetSurfaceMaterial(m_surfMatIdx); }
+pragma::physics::SurfaceMaterial *pragma::physics::IMaterial::GetSurfaceMaterial() const { return m_physEnv.GetNetworkState().GetGameState()->GetSurfaceMaterial(m_surfMatIdx); }
 void pragma::physics::IMaterial::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<IMaterial>(lua); }

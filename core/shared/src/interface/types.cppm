@@ -56,11 +56,11 @@ export {
 			class IShape;
 			class PhysObj;
 
-			enum class PHYSICSTYPE : int;
+			enum class PhysicsType : int32_t;
 			enum class CollisionMask : uint32_t;
 			enum class RayCastFlags : uint32_t;
-			enum class COLLISIONTYPE : int;
-			enum class MOVETYPE : int;
+			enum class CollisionType : int32_t;
+			enum class MoveType : int32_t;
 			enum class RayCastHitType : uint8_t;
 		}
 	}

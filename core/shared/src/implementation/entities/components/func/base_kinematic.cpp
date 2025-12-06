@@ -53,7 +53,7 @@ void BaseFuncKinematicComponent::OnEntitySpawn()
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr) {
-		pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::DYNAMIC);
+		pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Dynamic);
 		pPhysComponent->SetKinematic(true);
 	}
 	auto *state = ent.GetNetworkState();
@@ -94,7 +94,7 @@ void BaseFuncKinematicComponent::MoveToTarget(pragma::ecs::BaseEntity *node, flo
 	if(phys == nullptr || phys->IsStatic())
 		return;
 	auto pTrComponent = ent.GetTransformComponent();
-	auto *kinematic = dynamic_cast<PhysObjKinematic *>(phys);
+	auto *kinematic = dynamic_cast<pragma::physics::PhysObjKinematic *>(phys);
 	auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
 	auto pTrComponentNode = node->GetTransformComponent();
 	auto posTarget = pTrComponentNode ? pTrComponentNode->GetPosition() : Vector3 {};

@@ -346,17 +346,17 @@ void pragma::Game::RegisterLuaGlobals()
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "game",
 	  {
-	    {"HITGROUP_INVALID", umath::to_integral(HitGroup::Invalid)},
-	    {"HITGROUP_GENERIC", umath::to_integral(HitGroup::Generic)},
-	    {"HITGROUP_HEAD", umath::to_integral(HitGroup::Head)},
-	    {"HITGROUP_CHEST", umath::to_integral(HitGroup::Chest)},
-	    {"HITGROUP_STOMACH", umath::to_integral(HitGroup::Stomach)},
-	    {"HITGROUP_LEFT_ARM", umath::to_integral(HitGroup::LeftArm)},
-	    {"HITGROUP_RIGHT_ARM", umath::to_integral(HitGroup::RightArm)},
-	    {"HITGROUP_LEFT_LEG", umath::to_integral(HitGroup::LeftLeg)},
-	    {"HITGROUP_RIGHT_LEG", umath::to_integral(HitGroup::RightLeg)},
-	    {"HITGROUP_GEAR", umath::to_integral(HitGroup::Gear)},
-	    {"HITGROUP_TAIL", umath::to_integral(HitGroup::Tail)},
+	    {"HITGROUP_INVALID", umath::to_integral(physics::HitGroup::Invalid)},
+	    {"HITGROUP_GENERIC", umath::to_integral(physics::HitGroup::Generic)},
+	    {"HITGROUP_HEAD", umath::to_integral(physics::HitGroup::Head)},
+	    {"HITGROUP_CHEST", umath::to_integral(physics::HitGroup::Chest)},
+	    {"HITGROUP_STOMACH", umath::to_integral(physics::HitGroup::Stomach)},
+	    {"HITGROUP_LEFT_ARM", umath::to_integral(physics::HitGroup::LeftArm)},
+	    {"HITGROUP_RIGHT_ARM", umath::to_integral(physics::HitGroup::RightArm)},
+	    {"HITGROUP_LEFT_LEG", umath::to_integral(physics::HitGroup::LeftLeg)},
+	    {"HITGROUP_RIGHT_LEG", umath::to_integral(physics::HitGroup::RightLeg)},
+	    {"HITGROUP_GEAR", umath::to_integral(physics::HitGroup::Gear)},
+	    {"HITGROUP_TAIL", umath::to_integral(physics::HitGroup::Tail)},
 	  });
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "file",

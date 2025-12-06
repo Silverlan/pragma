@@ -8,10 +8,12 @@ export module pragma.shared:physics.controller_hit_data;
 
 export import :physics.object_handle;
 
-export struct DLLNETWORK ControllerHitData {
-	ControllerHitData();
-	~ControllerHitData();
-	PhysObjHandle *physObj = nullptr;
-	Vector3 hitNormal = {};
-	void Clear();
-};
+export namespace pragma::physics {
+	struct DLLNETWORK ControllerHitData {
+		ControllerHitData();
+		~ControllerHitData();
+		PhysObjHandle *physObj = nullptr;
+		Vector3 hitNormal = {};
+		void Clear();
+	};
+}

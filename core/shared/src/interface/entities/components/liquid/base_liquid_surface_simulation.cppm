@@ -25,8 +25,8 @@ export namespace pragma {
 		uint32_t GetSpacing() const;
 		void SetSpacing(uint32_t spacing);
 
-		const PhysWaterSurfaceSimulator *GetSurfaceSimulator() const;
-		PhysWaterSurfaceSimulator *GetSurfaceSimulator();
+		const pragma::physics::PhysWaterSurfaceSimulator *GetSurfaceSimulator() const;
+		pragma::physics::PhysWaterSurfaceSimulator *GetSurfaceSimulator();
 
 		virtual void ReloadSurfaceSimulator();
 		void ClearSurfaceSimulator();
@@ -36,12 +36,12 @@ export namespace pragma {
 		BaseLiquidSurfaceSimulationComponent(pragma::ecs::BaseEntity &ent);
 		BaseSurfaceComponent *GetSurfaceComponent() const;
 
-		virtual std::shared_ptr<PhysWaterSurfaceSimulator> InitializeSurfaceSimulator(const Vector2 &min, const Vector2 &max, float originY);
+		virtual std::shared_ptr<pragma::physics::PhysWaterSurfaceSimulator> InitializeSurfaceSimulator(const Vector2 &min, const Vector2 &max, float originY);
 		virtual bool ShouldSimulateSurface() const;
 		void SetMaxWaveHeight(float height);
 		float m_kvMaxWaveHeight = 100.f;
 		uint32_t m_spacing = 10;
-		std::shared_ptr<PhysWaterSurfaceSimulator> m_physSurfaceSim = nullptr;
+		std::shared_ptr<pragma::physics::PhysWaterSurfaceSimulator> m_physSurfaceSim = nullptr;
 		double m_originalWaterPlaneDistance = 0.0;
 	};
 };

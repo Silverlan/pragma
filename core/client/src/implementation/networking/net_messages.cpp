@@ -1084,7 +1084,7 @@ void NET_cl_ENT_PHYS_INIT(NetPacket packet)
 	if(pPhysComponent == nullptr)
 		return;
 	unsigned int type = packet->Read<unsigned int>();
-	pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE(type));
+	pPhysComponent->InitializePhysics(pragma::physics::PhysicsType(type));
 }
 
 void NET_cl_ENT_PHYS_DESTROY(NetPacket packet)
@@ -1128,7 +1128,7 @@ void NET_cl_ENT_MOVETYPE(NetPacket packet)
 	auto pPhysComponent = ent->GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
 		return;
-	pragma::physics::MOVETYPE movetype = pragma::physics::MOVETYPE(packet->Read<unsigned char>());
+	pragma::physics::MoveType movetype = pragma::physics::MoveType(packet->Read<unsigned char>());
 	pPhysComponent->SetMoveType(movetype);
 }
 
@@ -1144,11 +1144,11 @@ void NET_cl_PL_TOGGLE_NOCLIP(NetPacket packet)
 	if(pPhysComponent == nullptr)
 		return;
 	if(bNoclip == false) {
-		pPhysComponent->SetMoveType(pragma::physics::MOVETYPE::WALK);
+		pPhysComponent->SetMoveType(pragma::physics::MoveType::Walk);
 		pPhysComponent->SetCollisionFilterGroup(pragma::physics::CollisionMask::Player);
 	}
 	else {
-		pPhysComponent->SetMoveType(pragma::physics::MOVETYPE::NOCLIP);
+		pPhysComponent->SetMoveType(pragma::physics::MoveType::Noclip);
 		pPhysComponent->SetCollisionFilterGroup(pragma::physics::CollisionMask::NoCollision);
 		//pl->SetCollisionsEnabled(false); // Bugged due to CCD
 	}
@@ -1164,7 +1164,7 @@ void NET_cl_ENT_COLLISIONTYPE(NetPacket packet)
 	auto pPhysComponent = ent->GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
 		return;
-	pragma::physics::COLLISIONTYPE collisiontype = pragma::physics::COLLISIONTYPE(packet->Read<unsigned char>());
+	pragma::physics::CollisionType collisiontype = pragma::physics::CollisionType(packet->Read<unsigned char>());
 	pPhysComponent->SetCollisionType(collisiontype);
 }
 
@@ -1896,7 +1896,7 @@ void CMD_debug_aim_info(pragma::NetworkState *state, pragma::BasePlayerComponent
 	trData.SetFlags(pragma::physics::RayCastFlags::InvertFilter);
 	trData.SetFilter(entPl);
 
-	TraceResult res {};
+	pragma::physics::TraceResult res {};
 	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 	std::optional<Intersection::LineMeshResult> closestMesh {};
@@ -1920,7 +1920,7 @@ void CMD_debug_aim_info(pragma::NetworkState *state, pragma::BasePlayerComponent
 		res.normal = {};
 		res.distance = uvec::distance(closestMesh->hitPos, trData.GetSourceOrigin());
 		if(closestMesh->precise) {
-			res.meshInfo = ::util::make_shared<TraceResult::MeshInfo>();
+			res.meshInfo = ::util::make_shared<pragma::physics::TraceResult::MeshInfo>();
 			res.meshInfo->mesh = closestMesh->precise->mesh.get();
 			res.meshInfo->subMesh = closestMesh->precise->subMesh.get();
 		}

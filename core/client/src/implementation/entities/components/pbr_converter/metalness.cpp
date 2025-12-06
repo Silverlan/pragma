@@ -110,8 +110,8 @@ void CPBRConverterComponent::UpdateMetalness(pragma::Model &mdl, msys::CMaterial
 	auto accRoughness = 0.f;
 	auto accFlesh = 0.f;
 	auto accGlass = 0.f;
-	SurfaceMaterial *surfMatGlass = nullptr;
-	SurfaceMaterial *sufMatSSS = nullptr;
+	pragma::physics::SurfaceMaterial *surfMatGlass = nullptr;
+	pragma::physics::SurfaceMaterial *sufMatSSS = nullptr;
 	for(auto *colMesh : matColMeshes) {
 		auto surfMatIdx = colMesh->GetSurfaceMaterial();
 		auto &surfMats = colMesh->GetSurfaceMaterials();

@@ -94,7 +94,7 @@ void BaseBuoyancyComponent::SimulateBuoyancy() const
 
 	auto *sim = m_surfSim.valid() ? m_surfSim->GetSurfaceSimulator() : nullptr;
 	if(sim != nullptr)
-		const_cast<PhysWaterSurfaceSimulator *>(sim)->LockParticleHeights();
+		const_cast<pragma::physics::PhysWaterSurfaceSimulator *>(sim)->LockParticleHeights();
 	//const std::vector<PhysTouch> &BaseTouchComponent::GetTouchingInfo() const {return m_touching;}
 	if(touchComponent != nullptr) {
 		for(auto &touchInfo : touchComponent->GetTouchingInfo()) {
@@ -104,7 +104,7 @@ void BaseBuoyancyComponent::SimulateBuoyancy() const
 		} // TODO: Trigger has to be higher than max surface height
 	}
 	if(sim)
-		const_cast<PhysWaterSurfaceSimulator *>(sim)->UnlockParticleHeights();
+		const_cast<pragma::physics::PhysWaterSurfaceSimulator *>(sim)->UnlockParticleHeights();
 	/*if(m_physSurfaceSim != nullptr)
 		m_physSurfaceSim->LockParticleHeights();
 	auto *ent = m_entity->GetNetworkState()->GetGameState()->FindEntityByClass("prop_physics");

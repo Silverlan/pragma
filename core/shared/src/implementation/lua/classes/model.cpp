@@ -59,11 +59,11 @@ void Lua::ModelMeshGroup::AddMesh(lua::State *, pragma::ModelMeshGroup &meshGrou
 
 //////////////////////////
 
-void Lua::Joint::GetType(lua::State *l, JointInfo &joint) { Lua::PushInt(l, joint.type); }
-void Lua::Joint::GetChildBoneId(lua::State *l, JointInfo &joint) { Lua::PushInt(l, joint.child); }
-void Lua::Joint::GetParentBoneId(lua::State *l, JointInfo &joint) { Lua::PushInt(l, joint.parent); }
-void Lua::Joint::GetCollisionsEnabled(lua::State *l, JointInfo &joint) { Lua::PushBool(l, joint.collide); }
-void Lua::Joint::GetKeyValues(lua::State *l, JointInfo &joint)
+void Lua::Joint::GetType(lua::State *l, pragma::physics::JointInfo &joint) { Lua::PushInt(l, joint.type); }
+void Lua::Joint::GetChildBoneId(lua::State *l, pragma::physics::JointInfo &joint) { Lua::PushInt(l, joint.child); }
+void Lua::Joint::GetParentBoneId(lua::State *l, pragma::physics::JointInfo &joint) { Lua::PushInt(l, joint.parent); }
+void Lua::Joint::GetCollisionsEnabled(lua::State *l, pragma::physics::JointInfo &joint) { Lua::PushBool(l, joint.collide); }
+void Lua::Joint::GetKeyValues(lua::State *l, pragma::physics::JointInfo &joint)
 {
 	auto t = Lua::CreateTable(l);
 	for(auto &pair : joint.args) {
@@ -72,11 +72,11 @@ void Lua::Joint::GetKeyValues(lua::State *l, JointInfo &joint)
 		Lua::SetTableValue(l, t);
 	}
 }
-void Lua::Joint::SetType(lua::State *l, JointInfo &joint, uint32_t type) { joint.type = static_cast<JointType>(type); }
-void Lua::Joint::SetCollisionMeshId(lua::State *l, JointInfo &joint, uint32_t meshId) { joint.child = meshId; }
-void Lua::Joint::SetParentCollisionMeshId(lua::State *l, JointInfo &joint, uint32_t meshId) { joint.parent = meshId; }
-void Lua::Joint::SetCollisionsEnabled(lua::State *l, JointInfo &joint, bool bEnabled) { joint.collide = bEnabled; }
-void Lua::Joint::SetKeyValues(lua::State *l, JointInfo &joint, luabind::object keyValues)
+void Lua::Joint::SetType(lua::State *l, pragma::physics::JointInfo &joint, uint32_t type) { joint.type = static_cast<pragma::physics::JointType>(type); }
+void Lua::Joint::SetCollisionMeshId(lua::State *l, pragma::physics::JointInfo &joint, uint32_t meshId) { joint.child = meshId; }
+void Lua::Joint::SetParentCollisionMeshId(lua::State *l, pragma::physics::JointInfo &joint, uint32_t meshId) { joint.parent = meshId; }
+void Lua::Joint::SetCollisionsEnabled(lua::State *l, pragma::physics::JointInfo &joint, bool bEnabled) { joint.collide = bEnabled; }
+void Lua::Joint::SetKeyValues(lua::State *l, pragma::physics::JointInfo &joint, luabind::object keyValues)
 {
 	Lua::CheckTable(l, 2);
 
@@ -89,8 +89,8 @@ void Lua::Joint::SetKeyValues(lua::State *l, JointInfo &joint, luabind::object k
 		Lua::Pop(l, 1);
 	}
 }
-void Lua::Joint::SetKeyValue(lua::State *l, JointInfo &joint, const std::string &key, const std::string &val) { joint.args[key] = val; }
-void Lua::Joint::RemoveKeyValue(lua::State *l, JointInfo &joint, const std::string &key)
+void Lua::Joint::SetKeyValue(lua::State *l, pragma::physics::JointInfo &joint, const std::string &key, const std::string &val) { joint.args[key] = val; }
+void Lua::Joint::RemoveKeyValue(lua::State *l, pragma::physics::JointInfo &joint, const std::string &key)
 {
 	auto it = joint.args.find(key);
 	if(it == joint.args.end())
@@ -434,7 +434,7 @@ void Lua::Model::register_class(lua::State *l, luabind::class_<pragma::Model> &c
 	classDef.def("GetJoints", &Lua::Model::GetJoints);
 	classDef.def("SetReferencePoses", &pragma::Model::SetReferencePoses);
 	classDef.def("SetReferencePoses", &pragma::Model::SetReferencePoses, luabind::default_parameter_policy<3, false> {});
-	classDef.def("AddJoint", static_cast<JointInfo *(*)(lua::State *, pragma::Model &, JointType, pragma::animation::BoneId, pragma::animation::BoneId)>([](lua::State *l, pragma::Model &mdl, JointType type, pragma::animation::BoneId child, pragma::animation::BoneId parent) -> JointInfo * {
+	classDef.def("AddJoint", static_cast<pragma::physics::JointInfo *(*)(lua::State *, pragma::Model &, pragma::physics::JointType, pragma::animation::BoneId, pragma::animation::BoneId)>([](lua::State *l, pragma::Model &mdl, pragma::physics::JointType type, pragma::animation::BoneId child, pragma::animation::BoneId parent) -> pragma::physics::JointInfo * {
 		auto &joint = mdl.AddJoint(type, child, parent);
 		return &joint;
 	}));
@@ -1343,8 +1343,8 @@ void Lua::Model::register_class(lua::State *l, luabind::class_<pragma::Model> &c
 	classDef.scope[defVertWeight];
 
 	// Joint
-	auto defJoint = luabind::class_<JointInfo>("Joint");
-	defJoint.def_readwrite("collide", &JointInfo::collide);
+	auto defJoint = luabind::class_<pragma::physics::JointInfo>("Joint");
+	defJoint.def_readwrite("collide", &pragma::physics::JointInfo::collide);
 
 	defJoint.def("GetType", &Lua::Joint::GetType);
 	defJoint.def("GetChildBoneId", &Lua::Joint::GetChildBoneId);
@@ -1359,16 +1359,16 @@ void Lua::Model::register_class(lua::State *l, luabind::class_<pragma::Model> &c
 	defJoint.def("SetKeyValues", &Lua::Joint::SetKeyValues);
 	defJoint.def("SetKeyValue", &Lua::Joint::SetKeyValue);
 	defJoint.def("RemoveKeyValue", &Lua::Joint::RemoveKeyValue);
-	defJoint.def("GetArgs", static_cast<luabind::object (*)(lua::State *, JointInfo &)>([](lua::State *l, JointInfo &jointInfo) -> luabind::object { return Lua::map_to_table(l, jointInfo.args); }));
-	defJoint.def("SetArgs", static_cast<void (*)(lua::State *, JointInfo &, luabind::table<>)>([](lua::State *l, JointInfo &jointInfo, luabind::table<> t) { jointInfo.args = Lua::table_to_map<std::string, std::string>(l, t, 2); }));
+	defJoint.def("GetArgs", static_cast<luabind::object (*)(lua::State *, pragma::physics::JointInfo &)>([](lua::State *l, pragma::physics::JointInfo &jointInfo) -> luabind::object { return Lua::map_to_table(l, jointInfo.args); }));
+	defJoint.def("SetArgs", static_cast<void (*)(lua::State *, pragma::physics::JointInfo &, luabind::table<>)>([](lua::State *l, pragma::physics::JointInfo &jointInfo, luabind::table<> t) { jointInfo.args = Lua::table_to_map<std::string, std::string>(l, t, 2); }));
 
-	defJoint.add_static_constant("TYPE_NONE", umath::to_integral(JointType::None));
-	defJoint.add_static_constant("TYPE_FIXED", umath::to_integral(JointType::Fixed));
-	defJoint.add_static_constant("TYPE_BALLSOCKET", umath::to_integral(JointType::BallSocket));
-	defJoint.add_static_constant("TYPE_HINGE", umath::to_integral(JointType::Hinge));
-	defJoint.add_static_constant("TYPE_SLIDER", umath::to_integral(JointType::Slider));
-	defJoint.add_static_constant("TYPE_CONETWIST", umath::to_integral(JointType::ConeTwist));
-	defJoint.add_static_constant("TYPE_DOF", umath::to_integral(JointType::DOF));
+	defJoint.add_static_constant("TYPE_NONE", umath::to_integral(pragma::physics::JointType::None));
+	defJoint.add_static_constant("TYPE_FIXED", umath::to_integral(pragma::physics::JointType::Fixed));
+	defJoint.add_static_constant("TYPE_BALLSOCKET", umath::to_integral(pragma::physics::JointType::BallSocket));
+	defJoint.add_static_constant("TYPE_HINGE", umath::to_integral(pragma::physics::JointType::Hinge));
+	defJoint.add_static_constant("TYPE_SLIDER", umath::to_integral(pragma::physics::JointType::Slider));
+	defJoint.add_static_constant("TYPE_CONETWIST", umath::to_integral(pragma::physics::JointType::ConeTwist));
+	defJoint.add_static_constant("TYPE_DOF", umath::to_integral(pragma::physics::JointType::DOF));
 	classDef.scope[defJoint];
 
 	auto defBoxCreateInfo = luabind::class_<pragma::model::BoxCreateInfo>("BoxCreateInfo");
@@ -2105,7 +2105,7 @@ void Lua::Model::GetBodyGroup(lua::State *l, pragma::Model &mdl, uint32_t bgId)
 void Lua::Model::AddHitbox(lua::State *, pragma::Model &mdl, uint32_t boneId, uint32_t hitGroup, const Vector3 &min, const Vector3 &max)
 {
 	//Lua::CheckModel(l,1);
-	mdl.AddHitbox(boneId, static_cast<HitGroup>(hitGroup), min, max);
+	mdl.AddHitbox(boneId, static_cast<pragma::physics::HitGroup>(hitGroup), min, max);
 }
 void Lua::Model::GetHitboxCount(lua::State *l, pragma::Model &mdl)
 {
@@ -2129,7 +2129,7 @@ void Lua::Model::GetHitboxBounds(lua::State *l, pragma::Model &mdl, uint32_t bon
 void Lua::Model::GetHitboxBones(lua::State *l, pragma::Model &mdl, uint32_t hitGroup)
 {
 	//Lua::CheckModel(l,1);
-	auto boneIds = mdl.GetHitboxBones(static_cast<HitGroup>(hitGroup));
+	auto boneIds = mdl.GetHitboxBones(static_cast<pragma::physics::HitGroup>(hitGroup));
 	auto t = Lua::CreateTable(l);
 	for(auto i = decltype(boneIds.size()) {0}; i < boneIds.size(); ++i) {
 		Lua::PushInt(l, i + 1);
@@ -2155,7 +2155,7 @@ void Lua::Model::SetHitboxGroup(lua::State *l, pragma::Model &mdl, uint32_t bone
 	auto it = hitboxes.find(boneId);
 	if(it == hitboxes.end())
 		return;
-	it->second.group = static_cast<HitGroup>(hitGroup);
+	it->second.group = static_cast<pragma::physics::HitGroup>(hitGroup);
 }
 void Lua::Model::SetHitboxBounds(lua::State *l, pragma::Model &mdl, uint32_t boneId, const Vector3 &min, const Vector3 &max)
 {
@@ -2514,7 +2514,7 @@ void Lua::Model::GetJoints(lua::State *l, pragma::Model &mdl)
 	uint32_t idx = 1;
 	for(auto &joint : joints) {
 		Lua::PushInt(l, idx++);
-		Lua::Push<JointInfo *>(l, &joint);
+		Lua::Push<pragma::physics::JointInfo *>(l, &joint);
 		Lua::SetTableValue(l, t);
 	}
 }

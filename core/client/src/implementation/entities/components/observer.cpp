@@ -225,7 +225,7 @@ void CObserverComponent::ApplyCameraObservationMode(Vector3 &pos, Quat &rot, Qua
 		camPos += uquat::forward(rotPos) * (*obsCamData->offset)->z + uquat::up(rotPos) * (*obsCamData->offset)->y - uquat::right(rotPos) * (*obsCamData->offset)->x;
 
 	if(obsCamData != nullptr && uvec::length_sqr(*obsCamData->offset) > 0.f) {
-		TraceData data {};
+		pragma::physics::TraceData data {};
 		data.SetSource(camLookAtPos);
 		data.SetTarget(camPos);
 		data.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::InvertFilter);

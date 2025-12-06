@@ -33,16 +33,16 @@ export {
 				float force = 0.f;
 			};
 
-			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+			static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+			static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 			virtual void Initialize() override;
 			virtual void OnEntitySpawn() override;
 
 			const Vector3 &GetLiquidVelocity() const;
 			void SetLiquidVelocity(const Vector3 &velocity);
 
-			const PhysLiquid &GetLiquidDescription() const;
-			PhysLiquid &GetLiquidDescription();
+			const physics::PhysLiquid &GetLiquidDescription() const;
+			physics::PhysLiquid &GetLiquidDescription();
 
 			double GetDensity() const;
 			void SetDensity(double density);
@@ -60,19 +60,19 @@ export {
 
 			virtual void CreateSplash(const Vector3 &origin, float radius, float force);
 		  protected:
-			BaseLiquidControlComponent(pragma::ecs::BaseEntity &ent);
+			BaseLiquidControlComponent(ecs::BaseEntity &ent);
 			struct LocalRayResult {
 				float fraction;
 				float friction;
 				Vector3 hitNormalLocal;
 			};
-			virtual bool OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, pragma::physics::PhysObj *phys, pragma::physics::ICollisionObject *col, const LocalRayResult &result);
+			virtual bool OnBulletHit(const BulletInfo &bulletInfo, const physics::TraceData &data, physics::PhysObj *phys, physics::ICollisionObject *col, const LocalRayResult &result);
 			void SetSurfaceMaterial(const std::string &mat);
-			void SetSurfaceMaterial(const SurfaceMaterial *mat);
+			void SetSurfaceMaterial(const physics::SurfaceMaterial *mat);
 			Vector3 m_liquidVelocity;
-			PhysLiquid m_liquid = {};
+			physics::PhysLiquid m_liquid = {};
 			std::string m_kvSurfaceMaterial;
-			pragma::NetEventId m_netEvCreateSplash = pragma::INVALID_NET_EVENT;
+			NetEventId m_netEvCreateSplash = INVALID_NET_EVENT;
 
 			std::queue<SplashInfo> m_splashes;
 		};

@@ -239,7 +239,7 @@ void CPlayerComponent::Initialize()
 	auto pRenderComponent = ent.GetRenderComponent();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
-		pPhysComponent->SetCollisionType(pragma::physics::COLLISIONTYPE::AABB);
+		pPhysComponent->SetCollisionType(pragma::physics::CollisionType::AABB);
 
 	GetEntity().AddComponent<CObservableComponent>();
 	if(m_observableComponent)

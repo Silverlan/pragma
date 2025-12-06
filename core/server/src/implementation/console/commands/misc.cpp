@@ -348,7 +348,7 @@ void CMD_ent_create(pragma::NetworkState *state, pragma::BasePlayerComponent *pl
 	auto charComponent = ent.GetCharacterComponent();
 	Vector3 origin = pTrComponent->GetEyePosition();
 	Vector3 dir = charComponent.valid() ? charComponent->GetViewForward() : pTrComponent->GetForward();
-	TraceData trData;
+	pragma::physics::TraceData trData;
 	trData.SetSource(origin);
 	trData.SetTarget(origin + dir * static_cast<float>(pragma::GameLimits::MaxRayCastRange));
 	trData.SetFilter(ent);

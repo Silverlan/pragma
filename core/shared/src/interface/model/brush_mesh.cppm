@@ -22,7 +22,7 @@ export class DLLNETWORK BrushMesh {
 	Vector3 m_max;
 	bool m_bConvex;
 	std::shared_ptr<pragma::physics::IShape> m_shape;
-	void UpdateHullShape(pragma::physics::IEnvironment &env, const std::vector<SurfaceMaterial> *surfaceMaterials = nullptr);
+	void UpdateHullShape(pragma::physics::IEnvironment &env, const std::vector<pragma::physics::SurfaceMaterial> *surfaceMaterials = nullptr);
   public:
 	bool IsConvex();
 	void SetConvex(bool b);
@@ -33,7 +33,7 @@ export class DLLNETWORK BrushMesh {
 	std::vector<std::shared_ptr<Side>> &GetSides();
 	bool IntersectAABB(Vector3 *min, Vector3 *max) const;
 	bool IntersectAABB(const Vector3 &pos, const Vector3 &posNew, const Vector3 &extents, const Vector3 &posObj, float *entryTime, float *exitTime, Vector3 *hitnormal = nullptr) const;
-	void Calculate(pragma::physics::IEnvironment &env, const std::vector<SurfaceMaterial> *surfaceMaterials = nullptr);
+	void Calculate(pragma::physics::IEnvironment &env, const std::vector<pragma::physics::SurfaceMaterial> *surfaceMaterials = nullptr);
 	void GetBounds(Vector3 *min, Vector3 *max) const;
 	bool PointInside(Vector3 &p, double epsilon = 0);
 };

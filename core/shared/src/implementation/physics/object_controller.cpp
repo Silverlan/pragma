@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :physics.object;
 
-ControllerPhysObj::~ControllerPhysObj()
+pragma::physics::ControllerPhysObj::~ControllerPhysObj()
 {
 	//auto *state = m_networkState;
 	//Game *game = state->GetGameState();
@@ -16,7 +16,7 @@ ControllerPhysObj::~ControllerPhysObj()
 	m_hitData.Clear();
 }
 
-int32_t ControllerPhysObj::GetGroundSurfaceMaterial() const
+int32_t pragma::physics::ControllerPhysObj::GetGroundSurfaceMaterial() const
 {
 	auto *physMat = m_controller->GetGroundMaterial();
 	auto *surfMat = physMat ? physMat->GetSurfaceMaterial() : nullptr;
@@ -24,9 +24,9 @@ int32_t ControllerPhysObj::GetGroundSurfaceMaterial() const
 		return -1;
 	return surfMat->GetIndex();
 }
-pragma::physics::IMaterial *ControllerPhysObj::GetGroundMaterial() const { return m_controller->GetGroundMaterial(); }
-bool ControllerPhysObj::IsOnGround() const { return m_controller->IsTouchingGround(); }
-bool ControllerPhysObj::IsGroundWalkable() const
+pragma::physics::IMaterial *pragma::physics::ControllerPhysObj::GetGroundMaterial() const { return m_controller->GetGroundMaterial(); }
+bool pragma::physics::ControllerPhysObj::IsOnGround() const { return m_controller->IsTouchingGround(); }
+bool pragma::physics::ControllerPhysObj::IsGroundWalkable() const
 {
 	if(IsOnGround() == false)
 		return false;
@@ -38,22 +38,22 @@ bool ControllerPhysObj::IsGroundWalkable() const
 	auto bGroundWalkable = (angle <= umath::deg_to_rad(slopeLimit));
 	return bGroundWalkable;
 }
-pragma::ecs::BaseEntity *ControllerPhysObj::GetGroundEntity() const
+pragma::ecs::BaseEntity *pragma::physics::ControllerPhysObj::GetGroundEntity() const
 {
 	auto *o = GetGroundPhysObject();
 	auto *pOwner = (o != nullptr) ? o->GetOwner() : nullptr;
 	return (pOwner != nullptr) ? &pOwner->GetEntity() : nullptr;
 }
-pragma::physics::PhysObj *ControllerPhysObj::GetGroundPhysObject() const
+pragma::physics::PhysObj *pragma::physics::ControllerPhysObj::GetGroundPhysObject() const
 {
 	auto *o = GetGroundPhysCollisionObject();
 	return o ? o->GetPhysObj() : nullptr;
 }
-pragma::physics::ICollisionObject *ControllerPhysObj::GetGroundPhysCollisionObject() { return m_controller->GetGroundBody(); }
-const pragma::physics::ICollisionObject *ControllerPhysObj::GetGroundPhysCollisionObject() const { return const_cast<ControllerPhysObj *>(this)->GetGroundPhysCollisionObject(); }
+pragma::physics::ICollisionObject *pragma::physics::ControllerPhysObj::GetGroundPhysCollisionObject() { return m_controller->GetGroundBody(); }
+const pragma::physics::ICollisionObject *pragma::physics::ControllerPhysObj::GetGroundPhysCollisionObject() const { return const_cast<ControllerPhysObj *>(this)->GetGroundPhysCollisionObject(); }
 
-ControllerHitData &ControllerPhysObj::GetControllerHitData() { return m_hitData; }
-void ControllerPhysObj::PostSimulate()
+pragma::physics::ControllerHitData &pragma::physics::ControllerPhysObj::GetControllerHitData() { return m_hitData; }
+void pragma::physics::ControllerPhysObj::PostSimulate()
 {
 	PhysObjDynamic::PostSimulate();
 	auto *owner = GetOwner();
@@ -81,7 +81,7 @@ void ControllerPhysObj::PostSimulate()
 	data.SetCollisionFilterMask(owner->GetCollisionFilterMask() &~CollisionMask::Trigger &~CollisionMask::Water &~CollisionMask::WaterSurface);
 	m_groundRayResult = ::util::make_shared<TraceResult>(game->Overlap(data));*/
 
-	/* // Obsolete; Now handled by simulation and ControllerPhysObj::SetGroundContactPoint
+	/* // Obsolete; Now handled by simulation and pragma::physics::ControllerPhysObj::SetGroundContactPoint
 	auto pTrComponent = owner->GetEntity().GetTransformComponent();
 	auto up = pTrComponent != nullptr ? pTrComponent->GetUp() : uvec::UP;
 	auto origin = GetPosition();
@@ -136,43 +136,43 @@ void ControllerPhysObj::PostSimulate()
 	//	std::cout<<"DETECTED OVERLAP: "<<(r.position.y -pos.y)<<std::endl;
 	//std::cout<<"OnGround: "<<m_bOnGround<<std::endl;
 }
-void ControllerPhysObj::SetKinematic(bool) {}
+void pragma::physics::ControllerPhysObj::SetKinematic(bool) {}
 
-void ControllerPhysObj::SetOrientation(const Quat &rot)
+void pragma::physics::ControllerPhysObj::SetOrientation(const Quat &rot)
 {
 	//PhysObj::SetOrientation(rot);
 }
-pragma::BaseEntityComponent *ControllerPhysObj::GetOwner() { return pragma::physics::PhysObj::GetOwner(); }
-umath::Degree ControllerPhysObj::GetSlopeLimit() const
+pragma::BaseEntityComponent *pragma::physics::ControllerPhysObj::GetOwner() { return pragma::physics::PhysObj::GetOwner(); }
+umath::Degree pragma::physics::ControllerPhysObj::GetSlopeLimit() const
 {
 	if(m_controller == nullptr)
 		return 0.f;
 	return m_controller->GetSlopeLimit();
 }
-void ControllerPhysObj::SetSlopeLimit(umath::Degree limit)
+void pragma::physics::ControllerPhysObj::SetSlopeLimit(umath::Degree limit)
 {
 	if(m_controller == nullptr)
 		return;
 	m_controller->SetSlopeLimit(limit);
 }
-void ControllerPhysObj::SetCollisionBounds(const Vector3 &, const Vector3 &) {}
-void ControllerPhysObj::GetCollisionBounds(Vector3 *min, Vector3 *max)
+void pragma::physics::ControllerPhysObj::SetCollisionBounds(const Vector3 &, const Vector3 &) {}
+void pragma::physics::ControllerPhysObj::GetCollisionBounds(Vector3 *min, Vector3 *max)
 {
 	*min = Vector3(0, 0, 0);
 	*max = Vector3(0, 0, 0);
 }
 
-void ControllerPhysObj::SetLinearVelocity(const Vector3 &vel)
+void pragma::physics::ControllerPhysObj::SetLinearVelocity(const Vector3 &vel)
 {
 	m_velocity = vel;
 	m_controller->SetLinearVelocity(vel);
 }
 
-bool ControllerPhysObj::IsController() const { return true; }
-bool ControllerPhysObj::IsCapsule() const { return false; }
-Vector3 &ControllerPhysObj::GetOffset() { return m_offset; }
-void ControllerPhysObj::SetOffset(const Vector3 &offset) { m_offset = offset; }
-Vector3 ControllerPhysObj::GetGroundVelocity() const
+bool pragma::physics::ControllerPhysObj::IsController() const { return true; }
+bool pragma::physics::ControllerPhysObj::IsCapsule() const { return false; }
+Vector3 &pragma::physics::ControllerPhysObj::GetOffset() { return m_offset; }
+void pragma::physics::ControllerPhysObj::SetOffset(const Vector3 &offset) { m_offset = offset; }
+Vector3 pragma::physics::ControllerPhysObj::GetGroundVelocity() const
 {
 	auto *physColGround = GetGroundPhysCollisionObject();
 	if(physColGround == nullptr || physColGround->IsRigid() == false)
@@ -183,7 +183,7 @@ Vector3 ControllerPhysObj::GetGroundVelocity() const
 	return v;
 }
 
-void ControllerPhysObj::Simulate(double tDelta, bool bIgnoreGravity)
+void pragma::physics::ControllerPhysObj::Simulate(double tDelta, bool bIgnoreGravity)
 {
 	if(IsDisabled() || IsKinematic())
 		return;
@@ -226,7 +226,7 @@ void ControllerPhysObj::Simulate(double tDelta, bool bIgnoreGravity)
 	//m_controller->setVelocityForTimeInterval(disp,1);
 }
 
-void ControllerPhysObj::UpdateVelocity()
+void pragma::physics::ControllerPhysObj::UpdateVelocity()
 {
 	if(m_owner.expired())
 		return;
@@ -243,11 +243,11 @@ void ControllerPhysObj::UpdateVelocity()
 	m_originLast = pos;
 }
 
-bool CapsuleControllerPhysObj::IsCapsule() const { return true; }
+bool pragma::physics::CapsuleControllerPhysObj::IsCapsule() const { return true; }
 
-BoxControllerPhysObj::BoxControllerPhysObj(pragma::BaseEntityComponent *owner) : ControllerPhysObj(owner) {}
+pragma::physics::BoxControllerPhysObj::BoxControllerPhysObj(pragma::BaseEntityComponent *owner) : ControllerPhysObj(owner) {}
 
-bool BoxControllerPhysObj::Initialize(const Vector3 &halfExtents, unsigned int stepHeight, float maxSlopeDeg)
+bool pragma::physics::BoxControllerPhysObj::Initialize(const Vector3 &halfExtents, unsigned int stepHeight, float maxSlopeDeg)
 {
 	if(ControllerPhysObj::Initialize() == false)
 		return false;
@@ -276,24 +276,24 @@ bool BoxControllerPhysObj::Initialize(const Vector3 &halfExtents, unsigned int s
 	return true;
 }
 
-Vector3 &BoxControllerPhysObj::GetHalfExtents() { return m_halfExtents; }
+Vector3 &pragma::physics::BoxControllerPhysObj::GetHalfExtents() { return m_halfExtents; }
 
-ControllerPhysObj::ControllerPhysObj(pragma::BaseEntityComponent *owner) : pragma::physics::PhysObj(owner) {}
-float ControllerPhysObj::GetStepHeight() const { return m_stepHeight; }
-void ControllerPhysObj::SetStepOffset(float) {}
-Vector3 ControllerPhysObj::GetDimensions() const
+pragma::physics::ControllerPhysObj::ControllerPhysObj(pragma::BaseEntityComponent *owner) : pragma::physics::PhysObj(owner) {}
+float pragma::physics::ControllerPhysObj::GetStepHeight() const { return m_stepHeight; }
+void pragma::physics::ControllerPhysObj::SetStepOffset(float) {}
+Vector3 pragma::physics::ControllerPhysObj::GetDimensions() const
 {
 	if(m_controller == nullptr)
 		return Vector3(0.f, 0.f, 0.f);
 	return m_controller->GetDimensions();
 }
-void ControllerPhysObj::SetDimensions(const Vector3 &dimensions)
+void pragma::physics::ControllerPhysObj::SetDimensions(const Vector3 &dimensions)
 {
 	if(m_controller == nullptr)
 		return;
 	m_controller->SetDimensions(dimensions);
 }
-void ControllerPhysObj::SetPosition(const Vector3 &pos)
+void pragma::physics::ControllerPhysObj::SetPosition(const Vector3 &pos)
 {
 	if(m_controller == nullptr) {
 		pragma::physics::PhysObj::SetPosition(pos);
@@ -302,21 +302,21 @@ void ControllerPhysObj::SetPosition(const Vector3 &pos)
 	auto posCur = m_controller->GetFootPos();
 	m_controller->SetFootPos(pos);
 }
-Vector3 ControllerPhysObj::GetPosition() const
+Vector3 pragma::physics::ControllerPhysObj::GetPosition() const
 {
 	if(m_controller == nullptr)
 		return pragma::physics::PhysObj::GetPosition();
 	return m_controller->GetFootPos();
 }
-unsigned int ControllerPhysObj::Move(const Vector3 &, float, float) { return 0; }
-void BoxControllerPhysObj::SetCollisionBounds(const Vector3 &min, const Vector3 &max) { m_offset = max + min; }
-void BoxControllerPhysObj::GetCollisionBounds(Vector3 *min, Vector3 *max)
+unsigned int pragma::physics::ControllerPhysObj::Move(const Vector3 &, float, float) { return 0; }
+void pragma::physics::BoxControllerPhysObj::SetCollisionBounds(const Vector3 &min, const Vector3 &max) { m_offset = max + min; }
+void pragma::physics::BoxControllerPhysObj::GetCollisionBounds(Vector3 *min, Vector3 *max)
 {
 	*min = Vector3(0.f, 0.f, 0.f);
 	*max = Vector3(0.f, 0.f, 0.f);
 }
-CapsuleControllerPhysObj::CapsuleControllerPhysObj(pragma::BaseEntityComponent *owner) : ControllerPhysObj(owner) {}
-bool CapsuleControllerPhysObj::Initialize(unsigned int width, unsigned int height, unsigned int stepHeight, float maxSlopeDeg)
+pragma::physics::CapsuleControllerPhysObj::CapsuleControllerPhysObj(pragma::BaseEntityComponent *owner) : ControllerPhysObj(owner) {}
+bool pragma::physics::CapsuleControllerPhysObj::Initialize(unsigned int width, unsigned int height, unsigned int stepHeight, float maxSlopeDeg)
 {
 	if(ControllerPhysObj::Initialize() == false)
 		return false;
@@ -346,9 +346,9 @@ bool CapsuleControllerPhysObj::Initialize(unsigned int width, unsigned int heigh
 	collisionObject->SetAlwaysAwake(true);
 	return true;
 }
-float CapsuleControllerPhysObj::GetWidth() const { return m_width; }
-float CapsuleControllerPhysObj::GetHeight() const { return m_height; }
-void CapsuleControllerPhysObj::SetHeight(float height)
+float pragma::physics::CapsuleControllerPhysObj::GetWidth() const { return m_width; }
+float pragma::physics::CapsuleControllerPhysObj::GetHeight() const { return m_height; }
+void pragma::physics::CapsuleControllerPhysObj::SetHeight(float height)
 {
 	auto pos = GetPosition();
 	m_height = height;
@@ -360,11 +360,11 @@ void CapsuleControllerPhysObj::SetHeight(float height)
 	m_controller->SetDimensions(dimensions);
 	SetPosition(pos);*/
 }
-void CapsuleControllerPhysObj::SetCollisionBounds(const Vector3 &min, const Vector3 &max) { m_offset = max + min; }
-void CapsuleControllerPhysObj::GetCollisionBounds(Vector3 *min, Vector3 *max)
+void pragma::physics::CapsuleControllerPhysObj::SetCollisionBounds(const Vector3 &min, const Vector3 &max) { m_offset = max + min; }
+void pragma::physics::CapsuleControllerPhysObj::GetCollisionBounds(Vector3 *min, Vector3 *max)
 {
 	*min = Vector3(0.f, 0.f, 0.f);
 	*max = Vector3(0.f, 0.f, 0.f);
 }
-pragma::physics::IController *ControllerPhysObj::GetController() { return m_controller.Get(); }
-pragma::physics::ICollisionObject *ControllerPhysObj::GetCollisionObject() { return m_collisionObject.Get(); }
+pragma::physics::IController *pragma::physics::ControllerPhysObj::GetController() { return m_controller.Get(); }
+pragma::physics::ICollisionObject *pragma::physics::ControllerPhysObj::GetCollisionObject() { return m_collisionObject.Get(); }

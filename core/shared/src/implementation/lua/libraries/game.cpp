@@ -249,7 +249,7 @@ std::string Lua::game::get_map_name(lua::State *l)
 	return nw->GetMap();
 }
 pragma::Game::GameFlags Lua::game::get_game_state_flags(lua::State *l) { return pragma::Engine::Get()->GetNetworkState(l)->GetGameState()->GetGameFlags(); }
-bool Lua::game::raycast(lua::State *l, const ::TraceData &data)
+bool Lua::game::raycast(lua::State *l, const pragma::physics::TraceData &data)
 {
 	auto start = data.GetSourceOrigin();
 	auto end = data.GetTargetOrigin();

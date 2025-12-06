@@ -772,7 +772,7 @@ bool Lua::util::is_table(luabind::argument arg) { return static_cast<Lua::Type>(
 bool Lua::util::is_table() { return false; }
 std::string Lua::util::date_time(const std::string &format) { return pragma::Engine::Get()->GetDate(format); }
 std::string Lua::util::date_time() { return pragma::Engine::Get()->GetDate(); }
-luabind::object Lua::util::fire_bullets(lua::State *l, BulletInfo &bulletInfo, bool hitReport, const std::function<void(DamageInfo &, ::TraceData &, TraceResult &, uint32_t &)> &f)
+luabind::object Lua::util::fire_bullets(lua::State *l, BulletInfo &bulletInfo, bool hitReport, const std::function<void(DamageInfo &, pragma::physics::TraceData &, pragma::physics::TraceResult &, uint32_t &)> &f)
 {
 	DamageInfo dmg;
 	dmg.SetDamage(umath::min(CUInt16(bulletInfo.damage), CUInt16(std::numeric_limits<UInt16>::max())));
@@ -791,7 +791,7 @@ luabind::object Lua::util::fire_bullets(lua::State *l, BulletInfo &bulletInfo, b
 		auto randSpread = EulerAngles(umath::random(-bulletInfo.spread.p, bulletInfo.spread.p), umath::random(-bulletInfo.spread.y, bulletInfo.spread.y), 0);
 		auto bulletDir = bulletInfo.direction;
 		uvec::rotate(&bulletDir, randSpread);
-		::TraceData data;
+		pragma::physics::TraceData data;
 		data.SetSource(src);
 		data.SetTarget(src + bulletDir * bulletInfo.distance);
 		data.SetCollisionFilterMask(pragma::physics::CollisionMask::AllHitbox & ~pragma::physics::CollisionMask::Trigger); // Let everything pass (Except specific filters below)
@@ -818,12 +818,12 @@ luabind::object Lua::util::fire_bullets(lua::State *l, BulletInfo &bulletInfo, b
 		else
 			filterGroup = pragma::physics::CollisionMask::AllHitbox;
 		data.SetCollisionFilterGroup(filterGroup);
-		std::vector<TraceResult> results {};
+		std::vector<pragma::physics::TraceResult> results {};
 		if(game->RayCast(data, &results) && results.front().entity.valid()) {
 			auto &result = results.front();
 			auto pDamageableComponent = result.entity->GetComponent<pragma::DamageableComponent>();
 			if(pDamageableComponent.valid()) {
-				auto hitGroup = HitGroup::Generic;
+				auto hitGroup = pragma::physics::HitGroup::Generic;
 				if(result.collisionObj.IsValid()) {
 					auto charComponent = result.entity->GetCharacterComponent();
 					if(charComponent.valid())
@@ -837,7 +837,7 @@ luabind::object Lua::util::fire_bullets(lua::State *l, BulletInfo &bulletInfo, b
 		}
 		if(hitReport == true) {
 			if(results.empty())
-				t[tIdx++] = TraceResult {data};
+				t[tIdx++] = pragma::physics::TraceResult {data};
 			else {
 				for(auto &result : results)
 					t[tIdx++] = result;
@@ -845,7 +845,7 @@ luabind::object Lua::util::fire_bullets(lua::State *l, BulletInfo &bulletInfo, b
 		}
 		if(f != nullptr) {
 			if(results.empty()) {
-				TraceResult result {data};
+				pragma::physics::TraceResult result {data};
 				f(dmg, data, result, bulletInfo.tracerCount);
 			}
 			else {

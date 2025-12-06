@@ -57,7 +57,7 @@ void pragma::SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 				flags |= pragma::SnapshotFlags::PhysicsData;
 				if(physObj->IsController()) {
 					packet->Write<uint8_t>(1u);
-					auto *physController = static_cast<ControllerPhysObj *>(physObj);
+					auto *physController = static_cast<pragma::physics::ControllerPhysObj *>(physObj);
 					packet->Write<Vector3>(physController->GetPosition());
 					packet->Write<Quat>(physController->GetOrientation());
 					packet->Write<Vector3>(physController->GetLinearVelocity());

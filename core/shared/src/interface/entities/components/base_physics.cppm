@@ -133,10 +133,10 @@ export {
 			pragma::ecs::BaseEntity *GetGroundEntity() const;
 			pragma::physics::PhysObj *GetPhysicsObject() const;
 			pragma::physics::ICollisionObject *GetCollisionObject(UInt32 boneId) const;
-			virtual pragma::physics::PhysObj *InitializePhysics(pragma::physics::PHYSICSTYPE type, PhysFlags flags = PhysFlags::None);
+			virtual pragma::physics::PhysObj *InitializePhysics(pragma::physics::PhysicsType type, PhysFlags flags = PhysFlags::None);
 			pragma::physics::PhysObj *InitializePhysics(pragma::physics::IConvexShape &shape, PhysFlags flags = PhysFlags::None);
 			virtual void DestroyPhysicsObject();
-			pragma::physics::PHYSICSTYPE GetPhysicsType() const;
+			pragma::physics::PhysicsType GetPhysicsType() const;
 			void DropToFloor();
 			bool IsTrigger() const;
 			virtual void SetCollisionFilter(pragma::physics::CollisionMask filterGroup, pragma::physics::CollisionMask filterMask);
@@ -159,10 +159,10 @@ export {
 			bool IsRayResultCallbackEnabled() const;
 			void SetRayResultCallbackEnabled(bool b);
 
-			pragma::physics::MOVETYPE GetMoveType() const;
-			virtual void SetMoveType(pragma::physics::MOVETYPE movetype);
-			pragma::physics::COLLISIONTYPE GetCollisionType() const;
-			virtual void SetCollisionType(pragma::physics::COLLISIONTYPE collisiontype);
+			pragma::physics::MoveType GetMoveType() const;
+			virtual void SetMoveType(pragma::physics::MoveType movetype);
+			pragma::physics::CollisionType GetCollisionType() const;
+			virtual void SetCollisionType(pragma::physics::CollisionType collisiontype);
 
 			std::vector<PhysJoint> &GetPhysConstraints();
 
@@ -217,7 +217,7 @@ export {
 			pragma::NetEventId m_netEvSetSimEnabled = pragma::INVALID_NET_EVENT;
 
 			bool m_bRayResultCallbackEnabled = false;
-			pragma::physics::PHYSICSTYPE m_physicsType = pragma::physics::PHYSICSTYPE::NONE;
+			pragma::physics::PhysicsType m_physicsType = pragma::physics::PhysicsType::None;
 			util::TSharedHandle<pragma::physics::PhysObj> m_physObject = nullptr;
 			std::vector<PhysJoint> m_joints;
 			std::vector<CollisionInfo> m_customCollisions;
@@ -240,8 +240,8 @@ export {
 			void UpdateRagdollPose();
 
 			StateFlags m_stateFlags = StateFlags::CollisionsEnabled;
-			pragma::physics::MOVETYPE m_moveType = {};
-			pragma::physics::COLLISIONTYPE m_collisionType = {};
+			pragma::physics::MoveType m_moveType = {};
+			pragma::physics::CollisionType m_collisionType = {};
 			float m_colRadius = 0.f;
 			Vector3 m_colMin = {};
 			Vector3 m_colMax = {};
@@ -249,9 +249,9 @@ export {
 			void ClearAwakeStatus();
 		};
 		struct DLLNETWORK CEInitializePhysics : public ComponentEvent {
-			CEInitializePhysics(pragma::physics::PHYSICSTYPE type, BasePhysicsComponent::PhysFlags flags);
+			CEInitializePhysics(pragma::physics::PhysicsType type, BasePhysicsComponent::PhysFlags flags);
 			virtual void PushArguments(lua::State *l) override;
-			pragma::physics::PHYSICSTYPE physicsType;
+			pragma::physics::PhysicsType physicsType;
 			BasePhysicsComponent::PhysFlags flags;
 		};
 		struct DLLNETWORK CEPostPhysicsSimulate : public ComponentEvent {

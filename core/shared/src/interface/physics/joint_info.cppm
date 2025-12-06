@@ -8,7 +8,7 @@ export module pragma.shared:physics.joint_info;
 
 export import :model.animation.bone;
 
-export {
+export namespace pragma::physics {
 	enum class JointType : uint8_t { None = 0, Fixed, BallSocket, Hinge, Slider, ConeTwist, DOF };
 
 	struct DLLNETWORK JointInfo {

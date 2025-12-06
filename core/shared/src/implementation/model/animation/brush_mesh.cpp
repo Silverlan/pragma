@@ -29,7 +29,7 @@ BrushMesh::BrushMesh() : m_bConvex(true), m_shape(nullptr)
 }
 
 std::shared_ptr<pragma::physics::IShape> BrushMesh::GetShape() { return m_shape; }
-void BrushMesh::UpdateHullShape(pragma::physics::IEnvironment &env, const std::vector<SurfaceMaterial> *surfaceMaterials)
+void BrushMesh::UpdateHullShape(pragma::physics::IEnvironment &env, const std::vector<pragma::physics::SurfaceMaterial> *surfaceMaterials)
 {
 	if(m_shape != nullptr)
 		m_shape = nullptr;
@@ -68,12 +68,12 @@ void BrushMesh::UpdateHullShape(pragma::physics::IEnvironment &env, const std::v
 		auto &side = *it;
 		auto &verts = side->GetVertices();
 		auto *triangles = side->GetTriangles();
-		const SurfaceMaterial *surfaceMat = nullptr;
+		const pragma::physics::SurfaceMaterial *surfaceMat = nullptr;
 		auto *mat = side->GetMaterial();
 		if(mat != nullptr) {
 			std::string surfaceIdentifier;
 			if(mat->GetProperty("surfacematerial", &surfaceIdentifier) == true) {
-				auto it = std::find_if(surfaceMaterials->begin(), surfaceMaterials->end(), [&surfaceIdentifier](const SurfaceMaterial &mat) { return (mat.GetIdentifier() == surfaceIdentifier) ? true : false; });
+				auto it = std::find_if(surfaceMaterials->begin(), surfaceMaterials->end(), [&surfaceIdentifier](const pragma::physics::SurfaceMaterial &mat) { return (mat.GetIdentifier() == surfaceIdentifier) ? true : false; });
 				if(it != surfaceMaterials->end())
 					surfaceMat = &(*it);
 			}
@@ -130,7 +130,7 @@ void BrushMesh::Optimize()
 	}*/
 }
 
-void BrushMesh::Calculate(pragma::physics::IEnvironment &env, const std::vector<SurfaceMaterial> *surfaceMaterials)
+void BrushMesh::Calculate(pragma::physics::IEnvironment &env, const std::vector<pragma::physics::SurfaceMaterial> *surfaceMaterials)
 {
 	uvec::zero(&m_min);
 	uvec::zero(&m_max);

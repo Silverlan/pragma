@@ -21,8 +21,8 @@ void BaseCharacterComponent::UpdateOrientation()
 {
 	auto &ent = GetEntity();
 	auto physComponent = ent.GetPhysicsComponent();
-	auto physType = physComponent ? physComponent->GetPhysicsType() : pragma::physics::PHYSICSTYPE::NONE;
-	if(physType != pragma::physics::PHYSICSTYPE::BOXCONTROLLER && physType != pragma::physics::PHYSICSTYPE::CAPSULECONTROLLER)
+	auto physType = physComponent ? physComponent->GetPhysicsType() : pragma::physics::PhysicsType::None;
+	if(physType != pragma::physics::PhysicsType::BoxController && physType != pragma::physics::PhysicsType::CapsuleController)
 		return;
 	auto normal = uvec::UP;
 	if(m_orientationComponent)

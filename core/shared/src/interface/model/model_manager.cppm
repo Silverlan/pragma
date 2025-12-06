@@ -53,7 +53,7 @@ export namespace pragma::asset {
 		void LoadBodygroups(pragma::Model &mdl);
 		void LoadJoints(pragma::Model &mdl);
 		void LoadSoftBodyData(pragma::Model &mdl, pragma::physics::CollisionMesh &colMesh);
-		void LoadCollisionMeshes(pragma::Game *game, unsigned short version, pragma::Model &mdl, SurfaceMaterial *smDefault = nullptr);
+		void LoadCollisionMeshes(pragma::Game *game, unsigned short version, pragma::Model &mdl, physics::SurfaceMaterial *smDefault = nullptr);
 		void LoadBlendControllers(pragma::Model &mdl);
 		void LoadIKControllers(uint16_t version, pragma::Model &mdl);
 		void LoadAnimations(unsigned short version, pragma::Model &mdl);

@@ -243,7 +243,7 @@ pragma::physics::IEnvironment::RemainingDeltaTime pragma::physics::IEnvironment:
 	return DoStepSimulation(timeStep, maxSubSteps, fixedTimeStep);
 }
 
-bool PhysSoftBodyInfo::operator==(const PhysSoftBodyInfo &other) const
+bool pragma::physics::PhysSoftBodyInfo::operator==(const PhysSoftBodyInfo &other) const
 {
 	return poseMatchingCoefficient == other.poseMatchingCoefficient && anchorsHardness == other.anchorsHardness && dragCoefficient == other.dragCoefficient && rigidContactsHardness == other.rigidContactsHardness && softContactsHardness == other.softContactsHardness
 	  && liftCoefficient == other.liftCoefficient && kineticContactsHardness == other.kineticContactsHardness && dynamicFrictionCoefficient == other.dynamicFrictionCoefficient && dampingCoefficient == other.dampingCoefficient

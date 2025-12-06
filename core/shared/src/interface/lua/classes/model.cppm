@@ -17,19 +17,19 @@ export namespace Lua {
 		DLLNETWORK void AddMesh(lua::State *l, pragma::ModelMeshGroup &meshGroup, ::ModelMesh &mesh);
 	};
 	namespace Joint {
-		DLLNETWORK void GetType(lua::State *l, JointInfo &joint);
-		DLLNETWORK void GetChildBoneId(lua::State *l, JointInfo &joint);
-		DLLNETWORK void GetParentBoneId(lua::State *l, JointInfo &joint);
-		DLLNETWORK void GetCollisionsEnabled(lua::State *l, JointInfo &joint);
-		DLLNETWORK void GetKeyValues(lua::State *l, JointInfo &joint);
+		DLLNETWORK void GetType(lua::State *l, pragma::physics::JointInfo &joint);
+		DLLNETWORK void GetChildBoneId(lua::State *l, pragma::physics::JointInfo &joint);
+		DLLNETWORK void GetParentBoneId(lua::State *l, pragma::physics::JointInfo &joint);
+		DLLNETWORK void GetCollisionsEnabled(lua::State *l, pragma::physics::JointInfo &joint);
+		DLLNETWORK void GetKeyValues(lua::State *l, pragma::physics::JointInfo &joint);
 
-		DLLNETWORK void SetType(lua::State *l, JointInfo &joint, uint32_t type);
-		DLLNETWORK void SetCollisionMeshId(lua::State *l, JointInfo &joint, uint32_t meshId);
-		DLLNETWORK void SetParentCollisionMeshId(lua::State *l, JointInfo &joint, uint32_t meshId);
-		DLLNETWORK void SetCollisionsEnabled(lua::State *l, JointInfo &joint, bool bEnabled);
-		DLLNETWORK void SetKeyValues(lua::State *l, JointInfo &joint, luabind::object keyValues);
-		DLLNETWORK void SetKeyValue(lua::State *l, JointInfo &joint, const std::string &key, const std::string &val);
-		DLLNETWORK void RemoveKeyValue(lua::State *l, JointInfo &joint, const std::string &key);
+		DLLNETWORK void SetType(lua::State *l, pragma::physics::JointInfo &joint, uint32_t type);
+		DLLNETWORK void SetCollisionMeshId(lua::State *l, pragma::physics::JointInfo &joint, uint32_t meshId);
+		DLLNETWORK void SetParentCollisionMeshId(lua::State *l, pragma::physics::JointInfo &joint, uint32_t meshId);
+		DLLNETWORK void SetCollisionsEnabled(lua::State *l, pragma::physics::JointInfo &joint, bool bEnabled);
+		DLLNETWORK void SetKeyValues(lua::State *l, pragma::physics::JointInfo &joint, luabind::object keyValues);
+		DLLNETWORK void SetKeyValue(lua::State *l, pragma::physics::JointInfo &joint, const std::string &key, const std::string &val);
+		DLLNETWORK void RemoveKeyValue(lua::State *l, pragma::physics::JointInfo &joint, const std::string &key);
 	};
 	namespace Bone {
 		DLLNETWORK void register_class(lua::State *l, luabind::class_<pragma::animation::Skeleton> &classDef);

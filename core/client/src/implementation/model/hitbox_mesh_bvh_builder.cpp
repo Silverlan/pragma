@@ -177,7 +177,7 @@ bool pragma::bvh::HitboxMeshBvhBuildTask::Build(pragma::Model &mdl)
 	return true;
 }
 
-bool pragma::bvh::HitboxMeshBvhBuildTask::Build(pragma::Model &mdl, pragma::animation::BoneId boneId, const Hitbox &hb, const LODInfo &lodInfo)
+bool pragma::bvh::HitboxMeshBvhBuildTask::Build(pragma::Model &mdl, pragma::animation::BoneId boneId, const pragma::physics::Hitbox &hb, const LODInfo &lodInfo)
 {
 	auto &skeleton = mdl.GetSkeleton();
 	auto &ref = mdl.GetReference();

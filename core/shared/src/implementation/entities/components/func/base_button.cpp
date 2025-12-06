@@ -57,7 +57,7 @@ void BaseFuncButtonComponent::OnEntitySpawn()
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
-		pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::STATIC);
+		pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Static);
 	if(!m_kvUseSound.empty()) {
 		ent.GetNetworkState()->PrecacheSound(m_kvUseSound);
 		m_useSound = nullptr;

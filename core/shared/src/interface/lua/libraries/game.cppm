@@ -31,7 +31,7 @@ export {
 			DLLNETWORK float get_time_scale(lua::State *l);
 			DLLNETWORK void set_time_scale(lua::State *l, float timeScale);
 			DLLNETWORK bool is_game_mode_initialized(lua::State *l);
-			DLLNETWORK bool raycast(lua::State *l, const ::TraceData &data);
+			DLLNETWORK bool raycast(lua::State *l, const pragma::physics::TraceData &data);
 			;
 			DLLNETWORK opt<std::shared_ptr<pragma::nav::Mesh>> get_nav_mesh(lua::State *l);
 			DLLNETWORK bool load_nav_mesh(lua::State *l, bool reload = false);

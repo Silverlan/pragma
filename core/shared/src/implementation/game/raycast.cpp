@@ -6,52 +6,52 @@ module pragma.shared;
 
 import :game.game;
 
-Bool pragma::Game::Overlap(const TraceData &data, std::vector<TraceResult> *optOutResults) const
+Bool pragma::Game::Overlap(const pragma::physics::TraceData &data, std::vector<pragma::physics::TraceResult> *optOutResults) const
 {
 	auto *physEnv = GetPhysicsEnvironment();
 	if(physEnv == nullptr)
 		return false;
 	return physEnv->Overlap(data, optOutResults);
 }
-Bool pragma::Game::RayCast(const TraceData &data, std::vector<TraceResult> *optOutResults) const
+Bool pragma::Game::RayCast(const pragma::physics::TraceData &data, std::vector<pragma::physics::TraceResult> *optOutResults) const
 {
 	auto *physEnv = GetPhysicsEnvironment();
 	if(physEnv == nullptr)
 		return false;
 	return physEnv->RayCast(data, optOutResults);
 }
-Bool pragma::Game::Sweep(const TraceData &data, std::vector<TraceResult> *optOutResults) const
+Bool pragma::Game::Sweep(const pragma::physics::TraceData &data, std::vector<pragma::physics::TraceResult> *optOutResults) const
 {
 	auto *physEnv = GetPhysicsEnvironment();
 	if(physEnv == nullptr)
 		return false;
 	return physEnv->Sweep(data, optOutResults);
 }
-TraceResult pragma::Game::Overlap(const TraceData &data) const
+pragma::physics::TraceResult pragma::Game::Overlap(const pragma::physics::TraceData &data) const
 {
-	std::vector<TraceResult> results {};
+	std::vector<pragma::physics::TraceResult> results {};
 	if(Overlap(data, &results) == false) {
-		TraceResult result {};
+		pragma::physics::TraceResult result {};
 		result.hitType = pragma::physics::RayCastHitType::None;
 		return result;
 	}
 	return results.front();
 }
-TraceResult pragma::Game::RayCast(const TraceData &data) const
+pragma::physics::TraceResult pragma::Game::RayCast(const pragma::physics::TraceData &data) const
 {
-	std::vector<TraceResult> results {};
+	std::vector<pragma::physics::TraceResult> results {};
 	if(RayCast(data, &results) == false) {
-		TraceResult result {};
+		pragma::physics::TraceResult result {};
 		result.hitType = pragma::physics::RayCastHitType::None;
 		return result;
 	}
 	return results.front();
 }
-TraceResult pragma::Game::Sweep(const TraceData &data) const
+pragma::physics::TraceResult pragma::Game::Sweep(const pragma::physics::TraceData &data) const
 {
-	std::vector<TraceResult> results {};
+	std::vector<pragma::physics::TraceResult> results {};
 	if(Sweep(data, &results) == false) {
-		TraceResult result {};
+		pragma::physics::TraceResult result {};
 		result.hitType = pragma::physics::RayCastHitType::None;
 		return result;
 	}

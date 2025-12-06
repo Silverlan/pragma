@@ -15,7 +15,7 @@ export import :types;
 
 export import pragma.materialsystem;
 
-export {
+export namespace pragma::physics {
 	class DLLNETWORK TraceData {
 	  public:
 		TraceData();
@@ -73,7 +73,7 @@ export {
 			pragma::ModelSubMesh *subMesh = nullptr;
 		};
 		TraceResult() {}
-		TraceResult(const TraceData &data);
+		TraceResult(const pragma::physics::TraceData &data);
 		~TraceResult();
 		pragma::physics::RayCastHitType hitType = pragma::physics::RayCastHitType::None;
 		EntityHandle entity = {};

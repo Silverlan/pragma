@@ -32,7 +32,7 @@ void BasePhysicsComponent::RegisterEvents(pragma::EntityComponentManager &compon
 	basePhysicsComponent::EVENT_HANDLE_RAYCAST = registerEvent("HANDLE_RAYCAST", ComponentEventInfo::Type::Explicit);
 	basePhysicsComponent::EVENT_INITIALIZE_PHYSICS = registerEvent("INITIALIZE_PHYSICS", ComponentEventInfo::Type::Broadcast);
 }
-BasePhysicsComponent::BasePhysicsComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_collisionType(pragma::physics::COLLISIONTYPE::NONE), m_moveType(pragma::physics::MOVETYPE::NONE) {}
+BasePhysicsComponent::BasePhysicsComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_collisionType(pragma::physics::CollisionType::None), m_moveType(pragma::physics::MoveType::None) {}
 void BasePhysicsComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();
@@ -132,7 +132,7 @@ float BasePhysicsComponent::GetAABBDistance(const pragma::ecs::BaseEntity &ent) 
 void BasePhysicsComponent::UpdatePhysicsData()
 {
 	auto type = GetPhysicsType();
-	if(type == pragma::physics::PHYSICSTYPE::NONE)
+	if(type == pragma::physics::PhysicsType::None)
 		return;
 	pragma::physics::PhysObj *phys = GetPhysicsObject();
 	auto &ent = GetEntity();
@@ -223,7 +223,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 			umath::set_flag(m_stateFlags, StateFlags::ApplyingPhysicsPosition, false);
 		}
 	}
-	if(type == pragma::physics::PHYSICSTYPE::DYNAMIC) {
+	if(type == pragma::physics::PhysicsType::Dynamic) {
 		/*RigidPhysObj *phys = static_cast<RigidPhysObj*>(m_physObject);
 		std::vector<DynamicActorInfo> &actorInfo = phys->GetActorInfo();
 		Model *mdl = GetModel();
@@ -378,21 +378,21 @@ bool BasePhysicsComponent::RayResultCallback(pragma::physics::CollisionMask rayC
 	return evData.hit;
 }
 
-pragma::physics::PHYSICSTYPE BasePhysicsComponent::GetPhysicsType() const { return m_physicsType; }
+pragma::physics::PhysicsType BasePhysicsComponent::GetPhysicsType() const { return m_physicsType; }
 
-pragma::physics::COLLISIONTYPE BasePhysicsComponent::GetCollisionType() const { return m_collisionType; }
+pragma::physics::CollisionType BasePhysicsComponent::GetCollisionType() const { return m_collisionType; }
 
-void BasePhysicsComponent::SetCollisionType(pragma::physics::COLLISIONTYPE collisiontype) { m_collisionType = collisiontype; }
+void BasePhysicsComponent::SetCollisionType(pragma::physics::CollisionType collisiontype) { m_collisionType = collisiontype; }
 
-pragma::physics::MOVETYPE BasePhysicsComponent::GetMoveType() const { return m_moveType; }
+pragma::physics::MoveType BasePhysicsComponent::GetMoveType() const { return m_moveType; }
 
-void BasePhysicsComponent::SetMoveType(pragma::physics::MOVETYPE movetype) { m_moveType = movetype; }
+void BasePhysicsComponent::SetMoveType(pragma::physics::MoveType movetype) { m_moveType = movetype; }
 bool BasePhysicsComponent::IsOnGround() const
 {
 	pragma::physics::PhysObj *phys = GetPhysicsObject();
 	if(phys == nullptr || !phys->IsController())
 		return false;
-	ControllerPhysObj *physController = static_cast<ControllerPhysObj *>(phys);
+	auto *physController = static_cast<pragma::physics::ControllerPhysObj *>(phys);
 	return physController->IsOnGround();
 }
 bool BasePhysicsComponent::IsGroundWalkable() const
@@ -400,7 +400,7 @@ bool BasePhysicsComponent::IsGroundWalkable() const
 	pragma::physics::PhysObj *phys = GetPhysicsObject();
 	if(phys == nullptr || !phys->IsController())
 		return false;
-	ControllerPhysObj *physController = static_cast<ControllerPhysObj *>(phys);
+	auto *physController = static_cast<pragma::physics::ControllerPhysObj *>(phys);
 	return physController->IsGroundWalkable();
 }
 
@@ -408,7 +408,7 @@ const Vector3 &BasePhysicsComponent::GetLocalOrigin() const
 {
 	auto physType = GetPhysicsType();
 	auto *phys = GetPhysicsObject();
-	if(phys == nullptr || (physType != pragma::physics::PHYSICSTYPE::DYNAMIC && physType != pragma::physics::PHYSICSTYPE::STATIC))
+	if(phys == nullptr || (physType != pragma::physics::PhysicsType::Dynamic && physType != pragma::physics::PhysicsType::Static))
 		return uvec::ORIGIN;
 	auto *o = phys->GetCollisionObject();
 	if(o == nullptr)
@@ -420,7 +420,7 @@ Vector3 BasePhysicsComponent::GetOrigin() const
 {
 	auto physType = GetPhysicsType();
 	auto *phys = GetPhysicsObject();
-	if(phys == nullptr || (physType != pragma::physics::PHYSICSTYPE::DYNAMIC && physType != pragma::physics::PHYSICSTYPE::STATIC)) {
+	if(phys == nullptr || (physType != pragma::physics::PhysicsType::Dynamic && physType != pragma::physics::PhysicsType::Static)) {
 		auto pTrComponent = GetEntity().GetTransformComponent();
 		return pTrComponent ? pTrComponent->GetPosition() : Vector3 {};
 	}
@@ -444,7 +444,7 @@ void BasePhysicsComponent::SetCollisionBounds(const Vector3 &min, const Vector3 
 	auto extents = (max - min) * 0.5f;
 	m_colRadius = glm::length(extents);
 	if(m_physObject != nullptr && m_physObject->IsController()) {
-		auto *phys = static_cast<ControllerPhysObj *>(m_physObject.get());
+		auto *phys = static_cast<pragma::physics::ControllerPhysObj *>(m_physObject.get());
 		phys->SetCollisionBounds(min, max);
 	}
 }
@@ -481,7 +481,7 @@ void BasePhysicsComponent::PhysicsUpdate(double tDelta)
 	CEPhysicsUpdateData evData {tDelta};
 	auto movetype = GetMoveType();
 	if(phys != nullptr && m_physObject->IsStatic() == false) {
-		m_physObject->Simulate(tDelta, (movetype != pragma::physics::MOVETYPE::WALK && movetype != pragma::physics::MOVETYPE::PHYSICS) ? true : false);
+		m_physObject->Simulate(tDelta, (movetype != pragma::physics::MoveType::Walk && movetype != pragma::physics::MoveType::Physics) ? true : false);
 		InvokeEventCallbacks(basePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED, evData);
 	}
 	InvokeEventCallbacks(basePhysicsComponent::EVENT_ON_PHYSICS_UPDATED, evData);
@@ -493,7 +493,7 @@ void BasePhysicsComponent::PrePhysicsSimulate()
 	InvokeEventCallbacks(basePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE);
 	if(phys == nullptr || phys->IsStatic())
 		return;
-	dynamic_cast<PhysObjDynamic *>(phys)->PreSimulate();
+	dynamic_cast<pragma::physics::PhysObjDynamic *>(phys)->PreSimulate();
 }
 
 static void entity_space_to_bone_space(std::vector<umath::ScaledTransform> &transforms, pragma::animation::Bone &bone, Vector3 &pos, Quat &rot, Bool bSkip = true)
@@ -722,7 +722,7 @@ bool BasePhysicsComponent::PostPhysicsSimulate()
 	InvokeEventCallbacks(basePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE, evData);
 	if(phys == nullptr || phys->IsStatic())
 		return evData.keepAwake;
-	dynamic_cast<PhysObjDynamic *>(phys)->PostSimulate();
+	dynamic_cast<pragma::physics::PhysObjDynamic *>(phys)->PostSimulate();
 	UpdateRagdollPose();
 	return evData.keepAwake;
 }
@@ -761,7 +761,7 @@ void BasePhysicsComponent::DropToFloor()
 	auto dir = pGravity.valid() ? pGravity->GetGravityDirection() : -uvec::UP;
 	auto dest = origin + dir * static_cast<float>(pragma::GameLimits::MaxRayCastRange);
 
-	TraceData trace;
+	pragma::physics::TraceData trace;
 	trace.SetFilter(GetEntity());
 	trace.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::InvertFilter);
 	trace.SetSource(origin);
@@ -900,7 +900,7 @@ void CEHandleRaycast::PushArguments(lua::State *l) {}
 
 ///////////////
 
-CEInitializePhysics::CEInitializePhysics(pragma::physics::PHYSICSTYPE type, BasePhysicsComponent::PhysFlags flags) : physicsType {type}, flags {flags} {}
+CEInitializePhysics::CEInitializePhysics(pragma::physics::PhysicsType type, BasePhysicsComponent::PhysFlags flags) : physicsType {type}, flags {flags} {}
 void CEInitializePhysics::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, umath::to_integral(physicsType));

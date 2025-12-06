@@ -66,7 +66,7 @@ void BaseCharacterComponent::Initialize()
 		auto *phys = whPhysComponent ? whPhysComponent->GetPhysicsObject() : nullptr;
 		if(phys == nullptr || phys->IsController() == false)
 			return;
-		auto *physController = static_cast<ControllerPhysObj *>(phys);
+		auto *physController = static_cast<pragma::physics::ControllerPhysObj *>(phys);
 		auto contactNormal = physController->GetController()->GetGroundTouchNormal();
 		if(contactNormal.has_value() == false)
 			return;
@@ -101,7 +101,7 @@ void BaseCharacterComponent::SetSlopeLimit(float limit)
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys != nullptr && phys->IsController()) {
-		ControllerPhysObj *physController = static_cast<ControllerPhysObj *>(phys);
+		auto *physController = static_cast<pragma::physics::ControllerPhysObj *>(phys);
 		physController->SetSlopeLimit(limit);
 	}
 }
@@ -113,7 +113,7 @@ void BaseCharacterComponent::SetStepOffset(float offset)
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys != nullptr && phys->IsController()) {
-		ControllerPhysObj *physController = static_cast<ControllerPhysObj *>(phys);
+		auto *physController = static_cast<pragma::physics::ControllerPhysObj *>(phys);
 		physController->SetStepOffset(offset);
 	}
 }
@@ -369,7 +369,7 @@ void BaseCharacterComponent::RemoveAmmo(UInt32 ammoType, int16_t count)
 	SetAmmoCount(ammoType, umath::max(static_cast<int32_t>(GetAmmoCount(ammoType)) - static_cast<int32_t>(count), 0));
 }
 
-void BaseCharacterComponent::PlayFootStepSound(FootType foot, const SurfaceMaterial &surfMat, float scale)
+void BaseCharacterComponent::PlayFootStepSound(FootType foot, const pragma::physics::SurfaceMaterial &surfMat, float scale)
 {
 	CEPlayFootstepSound footStepInfo {foot, surfMat, scale};
 	if(BroadcastEvent(baseCharacterComponent::EVENT_PLAY_FOOTSTEP_SOUND, footStepInfo) == util::EventReply::Handled)
@@ -427,7 +427,7 @@ void BaseCharacterComponent::FootStep(FootType foot)
 		if(moveScale < 0.1f) //0.25f)
 			return;
 	}
-	auto *phys = static_cast<ControllerPhysObj *>(pPhysComponent->GetPhysicsObject());
+	auto *phys = static_cast<pragma::physics::ControllerPhysObj *>(pPhysComponent->GetPhysicsObject());
 	if(phys == nullptr || !phys->IsController())
 		return;
 	auto id = phys->GetGroundSurfaceMaterial();
@@ -438,7 +438,7 @@ void BaseCharacterComponent::FootStep(FootType foot)
 		return;
 	PlayFootStepSound(foot, *mat, moveScale); // TODO: Is Moving -> Blend move scale -> Same as player!
 }
-TraceData BaseCharacterComponent::GetAimTraceData(std::optional<float> maxDist) const
+pragma::physics::TraceData BaseCharacterComponent::GetAimTraceData(std::optional<float> maxDist) const
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
@@ -492,8 +492,8 @@ Vector3 BaseCharacterComponent::GetEyePosition() const
 	if(!pTrComponent)
 		return Vector3 {};
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto physType = pPhysComponent ? pPhysComponent->GetPhysicsType() : pragma::physics::PHYSICSTYPE::NONE;
-	if(physType != pragma::physics::PHYSICSTYPE::BOXCONTROLLER && physType != pragma::physics::PHYSICSTYPE::CAPSULECONTROLLER)
+	auto physType = pPhysComponent ? pPhysComponent->GetPhysicsType() : pragma::physics::PhysicsType::None;
+	if(physType != pragma::physics::PhysicsType::BoxController && physType != pragma::physics::PhysicsType::CapsuleController)
 		return pTrComponent->GetPosition();
 	Vector3 eyeOffset = pTrComponent->GetEyeOffset();
 	Vector3 forward, right, up;
@@ -566,11 +566,11 @@ void CEOnSetCharacterOrientation::PushArguments(lua::State *l) { Lua::Push<Vecto
 
 //////////////////
 
-CEPlayFootstepSound::CEPlayFootstepSound(BaseCharacterComponent::FootType footType, const SurfaceMaterial &surfaceMaterial, float scale) : footType(footType), surfaceMaterial(surfaceMaterial), scale(scale) {}
+CEPlayFootstepSound::CEPlayFootstepSound(BaseCharacterComponent::FootType footType, const pragma::physics::SurfaceMaterial &surfaceMaterial, float scale) : footType(footType), surfaceMaterial(surfaceMaterial), scale(scale) {}
 void CEPlayFootstepSound::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, umath::to_integral(footType));
-	Lua::Push<SurfaceMaterial *>(l, const_cast<SurfaceMaterial *>(&surfaceMaterial));
+	Lua::Push<pragma::physics::SurfaceMaterial *>(l, const_cast<pragma::physics::SurfaceMaterial *>(&surfaceMaterial));
 	Lua::PushNumber(l, scale);
 }
 

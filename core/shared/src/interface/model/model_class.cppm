@@ -471,22 +471,22 @@ export {
 			std::optional<uint32_t> AssignDistinctMaterial(const pragma::ModelMeshGroup &group, const ModelMesh &mesh, pragma::ModelSubMesh &subMesh);
 
 			// Hitboxes
-			void AddHitbox(uint32_t boneId, HitGroup group, const Vector3 &min, const Vector3 &max);
-			void AddHitbox(uint32_t boneId, const Hitbox &hitbox);
+			void AddHitbox(uint32_t boneId, pragma::physics::HitGroup group, const Vector3 &min, const Vector3 &max);
+			void AddHitbox(uint32_t boneId, const pragma::physics::Hitbox &hitbox);
 			uint32_t GetHitboxCount() const;
-			const std::unordered_map<uint32_t, Hitbox> &GetHitboxes() const;
-			std::unordered_map<uint32_t, Hitbox> &GetHitboxes();
-			const Hitbox *GetHitbox(uint32_t boneId) const;
-			HitGroup GetHitboxGroup(uint32_t boneId) const;
+			const std::unordered_map<uint32_t, pragma::physics::Hitbox> &GetHitboxes() const;
+			std::unordered_map<uint32_t, pragma::physics::Hitbox> &GetHitboxes();
+			const pragma::physics::Hitbox *GetHitbox(uint32_t boneId) const;
+			pragma::physics::HitGroup GetHitboxGroup(uint32_t boneId) const;
 			bool GetHitboxBounds(uint32_t boneId, Vector3 &min, Vector3 &max) const;
-			std::vector<uint32_t> GetHitboxBones(HitGroup group) const;
-			void GetHitboxBones(HitGroup group, std::vector<uint32_t> &boneIds) const;
+			std::vector<uint32_t> GetHitboxBones(pragma::physics::HitGroup group) const;
+			void GetHitboxBones(pragma::physics::HitGroup group, std::vector<uint32_t> &boneIds) const;
 			std::vector<uint32_t> GetHitboxBones() const;
 			void GetHitboxBones(std::vector<uint32_t> &boneIds) const;
-			std::unordered_map<pragma::animation::BoneId, Hitbox> CalcHitboxes() const;
+			std::unordered_map<pragma::animation::BoneId, pragma::physics::Hitbox> CalcHitboxes() const;
 			bool GenerateHitboxes();
 
-			void UpdateShape(const std::vector<SurfaceMaterial> *materials = nullptr);
+			void UpdateShape(const std::vector<physics::SurfaceMaterial> *materials = nullptr);
 			const std::vector<uint32_t> &GetBaseMeshes() const;
 			std::vector<uint32_t> &GetBaseMeshes();
 			uint32_t GetMeshGroupCount() const;
@@ -541,9 +541,9 @@ export {
 			std::vector<BodyGroup> &GetBodyGroups();
 			UInt32 GetBodyGroupCount() const;
 
-			const std::vector<JointInfo> &GetJoints() const;
-			std::vector<JointInfo> &GetJoints();
-			JointInfo &AddJoint(JointType type, pragma::animation::BoneId child, pragma::animation::BoneId parent);
+			const std::vector<pragma::physics::JointInfo> &GetJoints() const;
+			std::vector<pragma::physics::JointInfo> &GetJoints();
+			pragma::physics::JointInfo &AddJoint(pragma::physics::JointType type, pragma::animation::BoneId child, pragma::animation::BoneId parent);
 
 			const std::vector<Eyeball> &GetEyeballs() const;
 			std::vector<Eyeball> &GetEyeballs();
@@ -615,7 +615,7 @@ export {
 			std::vector<BlendController> m_blendControllers;
 			std::vector<std::shared_ptr<pragma::ModelMeshGroup>> m_meshGroups;
 			std::vector<BodyGroup> m_bodyGroups;
-			std::unordered_map<uint32_t, Hitbox> m_hitboxes;
+			std::unordered_map<uint32_t, pragma::physics::Hitbox> m_hitboxes;
 			std::vector<Eyeball> m_eyeballs;
 			//std::vector<std::vector<VertexWeight>*> m_weights;
 			static std::unordered_map<std::string, std::shared_ptr<pragma::Model>> m_models;
@@ -643,7 +643,7 @@ export {
 			Vector3 m_renderMin = {};
 			Vector3 m_renderMax = {};
 			std::vector<std::shared_ptr<pragma::physics::CollisionMesh>> m_collisionMeshes;
-			std::vector<JointInfo> m_joints;
+			std::vector<pragma::physics::JointInfo> m_joints;
 			std::vector<unsigned int> m_baseMeshes; // Meshes in LOD 0
 			std::vector<LODInfo> m_lods;            // LODs have to be in order!
 			std::vector<Attachment> m_attachments;

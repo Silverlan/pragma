@@ -113,10 +113,10 @@ void GravityComponent::ApplyGravity(double dt)
 	if(pPhys == nullptr || pPhys->IsDisabled() == true)
 		return;
 	auto moveType = pPhysComponent->GetMoveType();
-	if(moveType != pragma::physics::MOVETYPE::WALK && moveType != pragma::physics::MOVETYPE::PHYSICS)
+	if(moveType != pragma::physics::MoveType::Walk && moveType != pragma::physics::MoveType::Physics)
 		return;
 	if(pPhys->IsRigid()) {
-		auto *pPhysRigid = static_cast<RigidPhysObj *>(pPhys);
+		auto *pPhysRigid = static_cast<pragma::physics::RigidPhysObj *>(pPhys);
 		if(pPhysRigid->IsKinematic() || pPhysRigid->IsStatic())
 			return;
 		auto f = GetGravityForce();
@@ -129,7 +129,7 @@ void GravityComponent::ApplyGravity(double dt)
 		}
 	}
 	else if(pPhys->IsController()) {
-		auto *pPhysObjController = static_cast<ControllerPhysObj *>(pPhys);
+		auto *pPhysObjController = static_cast<pragma::physics::ControllerPhysObj *>(pPhys);
 		auto *pCollisionObject = pPhysObjController->GetCollisionObject();
 		if(pCollisionObject == nullptr)
 			return;
@@ -188,7 +188,7 @@ void GravityComponent::ApplyGravity(double dt)
 #endif
 	}
 	else if(pPhys->IsSoftBody()) {
-		auto *pPhysObjSoftBody = static_cast<SoftBodyPhysObj *>(pPhys);
+		auto *pPhysObjSoftBody = static_cast<pragma::physics::SoftBodyPhysObj *>(pPhys);
 		auto f = GetGravityForce() * CFloat(dt);
 		for(auto &hSoftBody : pPhysObjSoftBody->GetSoftBodies()) {
 			if(hSoftBody.IsValid() == false)

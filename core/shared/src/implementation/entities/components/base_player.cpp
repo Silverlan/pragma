@@ -110,9 +110,9 @@ void BasePlayerComponent::OnTick(double tDelta)
 				if(m_crouchTransition == CrouchTransition::Crouching) {
 					m_bCrouching = true;
 					if(phys != nullptr && phys->IsController()) {
-						auto *controller = static_cast<ControllerPhysObj *>(phys);
+						auto *controller = static_cast<pragma::physics::ControllerPhysObj *>(phys);
 						if(controller->IsCapsule()) {
-							auto *capsule = static_cast<CapsuleControllerPhysObj *>(controller);
+							auto *capsule = static_cast<pragma::physics::CapsuleControllerPhysObj *>(controller);
 							capsule->SetHeight(m_crouchHeight);
 						}
 						OnFullyCrouched();
@@ -121,9 +121,9 @@ void BasePlayerComponent::OnTick(double tDelta)
 				else {
 					m_bCrouching = false;
 					if(phys != nullptr && phys->IsController()) {
-						auto *controller = static_cast<ControllerPhysObj *>(phys);
+						auto *controller = static_cast<pragma::physics::ControllerPhysObj *>(phys);
 						if(controller->IsCapsule()) {
-							auto *capsule = static_cast<CapsuleControllerPhysObj *>(controller);
+							auto *capsule = static_cast<pragma::physics::CapsuleControllerPhysObj *>(controller);
 							capsule->SetHeight(m_standHeight);
 						}
 						OnFullyUnCrouched();
@@ -444,7 +444,7 @@ pragma::ecs::BaseEntity *BasePlayerComponent::FindUseEntity() const
 				uvec::normalize(&dir);
 				auto dot = uvec::dot(viewDir, dir);
 				if(dot >= dotMin && ((dot - dotClosest) >= 0.2f || (distClosest - dist) >= 20.f)) {
-					TraceData data;
+					pragma::physics::TraceData data;
 					data.SetSource(origin);
 					data.SetTarget(origin + dir * dist);
 					data.SetFilter(*entOther);
@@ -497,7 +497,7 @@ Vector2 BasePlayerComponent::CalcMovementSpeed() const
 {
 	float speed;
 	auto physComponent = GetEntity().GetPhysicsComponent();
-	if(physComponent && physComponent->GetMoveType() == pragma::physics::MOVETYPE::NOCLIP) {
+	if(physComponent && physComponent->GetMoveType() == pragma::physics::MoveType::Noclip) {
 		speed = GetEntity().GetNetworkState()->GetGameState()->GetConVarFloat("sv_noclip_speed");
 		if(IsWalking())
 			speed *= 0.5f;
@@ -639,7 +639,7 @@ void BasePlayerComponent::Crouch()
 	auto *state = ent.GetNetworkState();
 	pragma::Game *game = state->GetGameState();
 	if(phys != nullptr && phys->IsController()) {
-		auto *controllerPhys = static_cast<ControllerPhysObj *>(phys);
+		auto *controllerPhys = static_cast<pragma::physics::ControllerPhysObj *>(phys);
 		assert(controllerPhys->IsCapsule());
 		if(!controllerPhys->IsCapsule())
 			spdlog::warn("Box-controller crouching not implemented!");

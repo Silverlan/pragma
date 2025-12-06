@@ -17,10 +17,10 @@ export {
 	namespace pragma::ecs {
 		namespace events {
 			struct DLLNETWORK CEOnBulletsFired : public ComponentEvent {
-				CEOnBulletsFired(const BulletInfo &bulletInfo, const std::vector<TraceResult> &hitTargets);
+				CEOnBulletsFired(const BulletInfo &bulletInfo, const std::vector<pragma::physics::TraceResult> &hitTargets);
 				virtual void PushArguments(lua::State *l) override;
 				const BulletInfo &bulletInfo;
-				const std::vector<TraceResult> &hitTargets;
+				const std::vector<pragma::physics::TraceResult> &hitTargets;
 			};
 			struct DLLNETWORK CEOnFireBullets : public ComponentEvent {
 				CEOnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin);
@@ -45,10 +45,10 @@ export {
 
 			virtual void Initialize() override;
 
-			void GetBulletTraceData(const BulletInfo &bulletInfo, TraceData &data) const;
+			void GetBulletTraceData(const BulletInfo &bulletInfo, pragma::physics::TraceData &data) const;
 
 			virtual void OnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin = nullptr);
-			virtual void FireBullets(const BulletInfo &bulletInfo, std::vector<TraceResult> &outHitTargets, bool bMaster = true) = 0;
+			virtual void FireBullets(const BulletInfo &bulletInfo, std::vector<pragma::physics::TraceResult> &outHitTargets, bool bMaster = true) = 0;
 		  protected:
 			BaseShooterComponent(pragma::ecs::BaseEntity &ent);
 			struct DLLNETWORK NextBulletInfo {
@@ -58,7 +58,7 @@ export {
 			mutable std::unique_ptr<NextBulletInfo> m_nextBullet = nullptr;
 			void ReceiveBulletEvent(NetPacket &packet, pragma::BasePlayerComponent *pl = nullptr);
 			std::vector<Vector3> GetBulletDestinations(const Vector3 &origin, const Vector3 &dir, const BulletInfo &bulletInfo);
-			virtual pragma::physics::RayCastHitType OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, pragma::physics::PhysObj &phys, physics::ICollisionObject &col);
+			virtual pragma::physics::RayCastHitType OnBulletHit(const BulletInfo &bulletInfo, const pragma::physics::TraceData &data, pragma::physics::PhysObj &phys, physics::ICollisionObject &col);
 
 			pragma::NetEventId m_netEvFireBullets = pragma::INVALID_NET_EVENT;
 		};

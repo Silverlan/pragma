@@ -155,7 +155,7 @@ export {
 			bool IsParentOf(const pragma::ecs::BaseEntity &ent) const;
 
 			pragma::physics::PhysObj *GetPhysicsObject() const;
-			pragma::physics::PhysObj *InitializePhysics(pragma::physics::PHYSICSTYPE type);
+			pragma::physics::PhysObj *InitializePhysics(pragma::physics::PhysicsType type);
 			void DestroyPhysicsObject();
 			void DropToFloor();
 			std::pair<Vector3, Vector3> GetCollisionBounds() const;

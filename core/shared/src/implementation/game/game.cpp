@@ -458,7 +458,7 @@ void pragma::Game::InitializeGame()
 	else
 		Con::cerr << "Unable to initialize physics engine '" << physEngineName << "': " << err << Con::endl;
 	if(m_physEnvironment) {
-		m_surfaceMaterialManager = std::make_unique<SurfaceMaterialManager>(*m_physEnvironment);
+		m_surfaceMaterialManager = std::make_unique<pragma::physics::SurfaceMaterialManager>(*m_physEnvironment);
 		m_physEnvironment->SetEventCallback(std::make_unique<PhysEventCallback>());
 
 		auto &tireTypeManager = m_physEnvironment->GetTireTypeManager();
@@ -591,13 +591,13 @@ void pragma::Game::Tick()
 
 	auto &awakePhysics = GetAwakePhysicsComponents();
 	for(auto &hPhysC : awakePhysics) {
-		if(hPhysC.expired() || hPhysC->GetPhysicsType() == pragma::physics::PHYSICSTYPE::NONE)
+		if(hPhysC.expired() || hPhysC->GetPhysicsType() == pragma::physics::PhysicsType::None)
 			continue;
 		hPhysC->PrePhysicsSimulate(); // Has to be called BEFORE PhysicsUpdate (This is where stuff like Character movement is handled)!
 	}
 
 	for(auto &hPhysC : awakePhysics) {
-		if(hPhysC.expired() || hPhysC->GetPhysicsType() == pragma::physics::PHYSICSTYPE::NONE)
+		if(hPhysC.expired() || hPhysC->GetPhysicsType() == pragma::physics::PhysicsType::None)
 			continue;
 		hPhysC->PhysicsUpdate(m_tDeltaTick); // Has to be called AFTER PrePhysicsSimulate (This is where physics objects are updated)!
 	}
@@ -615,7 +615,7 @@ void pragma::Game::Tick()
 
 	for(auto it = awakePhysics.begin(); it != awakePhysics.end();) {
 		auto &hPhysC = *it;
-		if(hPhysC.expired() || hPhysC->GetPhysicsType() == pragma::physics::PHYSICSTYPE::NONE) {
+		if(hPhysC.expired() || hPhysC->GetPhysicsType() == pragma::physics::PhysicsType::None) {
 			++it;
 			continue;
 		}
@@ -903,9 +903,9 @@ std::vector<pragma::ComponentHandle<pragma::BasePhysicsComponent>> &pragma::Game
 const pragma::EntityComponentManager &pragma::Game::GetEntityComponentManager() const { return const_cast<pragma::Game *>(this)->GetEntityComponentManager(); }
 pragma::EntityComponentManager &pragma::Game::GetEntityComponentManager() { return *m_componentManager; }
 
-SurfaceMaterial &pragma::Game::CreateSurfaceMaterial(const std::string &identifier, Float friction, Float restitution) { return m_surfaceMaterialManager->Create(identifier, friction, restitution); }
-SurfaceMaterial *pragma::Game::GetSurfaceMaterial(const std::string &id) { return m_surfaceMaterialManager ? m_surfaceMaterialManager->GetMaterial(id) : nullptr; }
-SurfaceMaterial *pragma::Game::GetSurfaceMaterial(UInt32 id)
+pragma::physics::SurfaceMaterial &pragma::Game::CreateSurfaceMaterial(const std::string &identifier, Float friction, Float restitution) { return m_surfaceMaterialManager->Create(identifier, friction, restitution); }
+pragma::physics::SurfaceMaterial *pragma::Game::GetSurfaceMaterial(const std::string &id) { return m_surfaceMaterialManager ? m_surfaceMaterialManager->GetMaterial(id) : nullptr; }
+pragma::physics::SurfaceMaterial *pragma::Game::GetSurfaceMaterial(UInt32 id)
 {
 	if(m_surfaceMaterialManager == nullptr)
 		return nullptr;
@@ -914,7 +914,7 @@ SurfaceMaterial *pragma::Game::GetSurfaceMaterial(UInt32 id)
 		return nullptr;
 	return &materials[id];
 }
-std::vector<SurfaceMaterial> *pragma::Game::GetSurfaceMaterials() { return m_surfaceMaterialManager ? &m_surfaceMaterialManager->GetMaterials() : nullptr; }
+std::vector<pragma::physics::SurfaceMaterial> *pragma::Game::GetSurfaceMaterials() { return m_surfaceMaterialManager ? &m_surfaceMaterialManager->GetMaterials() : nullptr; }
 
 double &pragma::Game::RealTime() { return m_tReal; }
 double &pragma::Game::CurTime() { return m_tCur; }

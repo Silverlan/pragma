@@ -262,7 +262,7 @@ void pragma::Model::Merge(const pragma::Model &other, MergeFlags flags)
 		for(auto &pair : hitboxesOther) {
 			auto &hitboxOther = pair.second;
 			auto boneId = boneTranslations.at(pair.first);
-			Hitbox hb(hitboxOther.group, hitboxOther.min, hitboxOther.max);
+			physics::Hitbox hb(hitboxOther.group, hitboxOther.min, hitboxOther.max);
 			auto it = hitboxes.find(boneId);
 			if(it != hitboxes.end())
 				; // it->second = hb;
@@ -276,7 +276,7 @@ void pragma::Model::Merge(const pragma::Model &other, MergeFlags flags)
 		auto &joints = GetJoints();
 		joints.reserve(joints.size() + jointsOther.size());
 		for(auto &jointOther : jointsOther) {
-			joints.push_back(JointInfo(jointOther.type, boneTranslations.at(jointOther.parent), boneTranslations.at(jointOther.child)));
+			joints.push_back(physics::JointInfo(jointOther.type, boneTranslations.at(jointOther.parent), boneTranslations.at(jointOther.child)));
 			auto &joint = joints.back();
 			joint.args = jointOther.args;
 			joint.collide = jointOther.collide;

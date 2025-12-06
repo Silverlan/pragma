@@ -66,8 +66,8 @@ bool pragma::ecs::BaseEntity::IsStatic() const
 	if(GetAnimatedComponent().valid())
 		return false;
 	auto *physComponent = GetPhysicsComponent();
-	auto type = physComponent ? physComponent->GetPhysicsType() : pragma::physics::PHYSICSTYPE::NONE;
-	return (type == pragma::physics::PHYSICSTYPE::NONE || type == pragma::physics::PHYSICSTYPE::STATIC) ? true : false;
+	auto type = physComponent ? physComponent->GetPhysicsType() : pragma::physics::PhysicsType::None;
+	return (type == pragma::physics::PhysicsType::None || type == pragma::physics::PhysicsType::Static) ? true : false;
 }
 bool pragma::ecs::BaseEntity::IsDynamic() const { return !IsStatic(); }
 

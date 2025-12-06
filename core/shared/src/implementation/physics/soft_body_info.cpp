@@ -6,8 +6,8 @@ module pragma.shared;
 
 import :physics.soft_body_info;
 
-SoftBodyPhysObj::SoftBodyPhysObj(pragma::BaseEntityComponent *owner) : pragma::physics::PhysObj(owner), PhysObjDynamic() {}
-bool SoftBodyPhysObj::Initialize(pragma::physics::ISoftBody &body)
+pragma::physics::SoftBodyPhysObj::SoftBodyPhysObj(pragma::BaseEntityComponent *owner) : pragma::physics::PhysObj(owner), PhysObjDynamic() {}
+bool pragma::physics::SoftBodyPhysObj::Initialize(pragma::physics::ISoftBody &body)
 {
 	if(pragma::physics::PhysObj::Initialize() == false)
 		return false;
@@ -15,7 +15,7 @@ bool SoftBodyPhysObj::Initialize(pragma::physics::ISoftBody &body)
 	m_softBodies.push_back(util::shared_handle_cast<pragma::physics::IBase, pragma::physics::ISoftBody>(body.ClaimOwnership()));
 	return true;
 }
-bool SoftBodyPhysObj::Initialize(const std::vector<pragma::physics::ISoftBody *> &bodies)
+bool pragma::physics::SoftBodyPhysObj::Initialize(const std::vector<pragma::physics::ISoftBody *> &bodies)
 {
 	if(pragma::physics::PhysObj::Initialize() == false)
 		return false;
@@ -26,7 +26,7 @@ bool SoftBodyPhysObj::Initialize(const std::vector<pragma::physics::ISoftBody *>
 	}
 	return true;
 }
-void SoftBodyPhysObj::SetLinearVelocity(const Vector3 &vel)
+void pragma::physics::SoftBodyPhysObj::SetLinearVelocity(const Vector3 &vel)
 {
 	for(auto &hBody : m_softBodies) {
 		if(hBody.IsValid()) {
@@ -36,9 +36,9 @@ void SoftBodyPhysObj::SetLinearVelocity(const Vector3 &vel)
 		}
 	}
 }
-std::vector<util::TSharedHandle<pragma::physics::ISoftBody>> &SoftBodyPhysObj::GetSoftBodies() { return m_softBodies; }
-const pragma::physics::ISoftBody *SoftBodyPhysObj::GetSoftBody() const { return const_cast<SoftBodyPhysObj *>(this)->GetSoftBody(); }
-pragma::physics::ISoftBody *SoftBodyPhysObj::GetSoftBody()
+std::vector<util::TSharedHandle<pragma::physics::ISoftBody>> &pragma::physics::SoftBodyPhysObj::GetSoftBodies() { return m_softBodies; }
+const pragma::physics::ISoftBody *pragma::physics::SoftBodyPhysObj::GetSoftBody() const { return const_cast<SoftBodyPhysObj *>(this)->GetSoftBody(); }
+pragma::physics::ISoftBody *pragma::physics::SoftBodyPhysObj::GetSoftBody()
 {
 	if(m_softBodies.empty())
 		return nullptr;
@@ -47,9 +47,9 @@ pragma::physics::ISoftBody *SoftBodyPhysObj::GetSoftBody()
 		return nullptr;
 	return hBody.Get();
 }
-bool SoftBodyPhysObj::IsStatic() const { return false; }
-bool SoftBodyPhysObj::IsSoftBody() const { return true; }
-void SoftBodyPhysObj::AddCollisionObject(pragma::physics::ICollisionObject &o)
+bool pragma::physics::SoftBodyPhysObj::IsStatic() const { return false; }
+bool pragma::physics::SoftBodyPhysObj::IsSoftBody() const { return true; }
+void pragma::physics::SoftBodyPhysObj::AddCollisionObject(pragma::physics::ICollisionObject &o)
 {
 	auto *body = o.GetSoftBody();
 	if(body == nullptr)
@@ -58,37 +58,37 @@ void SoftBodyPhysObj::AddCollisionObject(pragma::physics::ICollisionObject &o)
 	m_softBodies.push_back(util::shared_handle_cast<pragma::physics::IBase, pragma::physics::ISoftBody>(body->ClaimOwnership()));
 }
 
-float SoftBodyPhysObj::GetMass() const
+float pragma::physics::SoftBodyPhysObj::GetMass() const
 {
 	auto *body = GetSoftBody();
 	if(body == nullptr)
 		return 0.f;
 	return body->GetMass();
 }
-void SoftBodyPhysObj::SetMass(float mass)
+void pragma::physics::SoftBodyPhysObj::SetMass(float mass)
 {
 	for(auto &hBody : m_softBodies) {
 		if(hBody.IsValid())
 			hBody->SetMass(mass);
 	}
 }
-pragma::BaseEntityComponent *SoftBodyPhysObj::GetOwner() { return m_owner.get(); }
-void SoftBodyPhysObj::Simulate(double tDelta, bool bIgnoreGravity) {}
-void SoftBodyPhysObj::PutToSleep()
+pragma::BaseEntityComponent *pragma::physics::SoftBodyPhysObj::GetOwner() { return m_owner.get(); }
+void pragma::physics::SoftBodyPhysObj::Simulate(double tDelta, bool bIgnoreGravity) {}
+void pragma::physics::SoftBodyPhysObj::PutToSleep()
 {
 	for(auto &hBody : m_softBodies) {
 		if(hBody.IsValid())
 			hBody->GetSoftBody()->SetActivationState(pragma::physics::ICollisionObject::ActivationState::WaitForDeactivation);
 	}
 }
-void SoftBodyPhysObj::WakeUp()
+void pragma::physics::SoftBodyPhysObj::WakeUp()
 {
 	for(auto &hBody : m_softBodies) {
 		if(hBody.IsValid())
 			hBody->WakeUp();
 	}
 }
-bool SoftBodyPhysObj::IsSleeping() const
+bool pragma::physics::SoftBodyPhysObj::IsSleeping() const
 {
 	auto *body = GetSoftBody();
 	if(body == nullptr)
@@ -96,7 +96,7 @@ bool SoftBodyPhysObj::IsSleeping() const
 	return body->IsAsleep();
 }
 
-void SoftBodyPhysObj::ApplyForce(const Vector3 &force)
+void pragma::physics::SoftBodyPhysObj::ApplyForce(const Vector3 &force)
 {
 	for(auto &hBody : m_softBodies) {
 		if(hBody.IsValid())

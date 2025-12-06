@@ -51,7 +51,7 @@ void SWeaponComponent::Drop()
 	pOwnerComponent->ClearOwner();
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *phys = pPhysComponent != nullptr ? pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::DYNAMIC) : nullptr;
+	auto *phys = pPhysComponent != nullptr ? pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Dynamic) : nullptr;
 	if(owner != nullptr && owner->IsPlayer()) {
 		auto &ent = GetEntity();
 		auto hEnt = ent.GetHandle();
@@ -118,7 +118,7 @@ void SWeaponComponent::OnEntitySpawn()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
-		pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::DYNAMIC);
+		pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Dynamic);
 }
 
 void SWeaponComponent::OnPhysicsInitialized() { BaseWeaponComponent::OnPhysicsInitialized(); }

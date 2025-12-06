@@ -22,7 +22,7 @@ export namespace pragma {
 		CWaterSurface *GetSurfaceEntity() const;
 	  protected:
 		virtual void OnEntitySpawn() override;
-		virtual std::shared_ptr<PhysWaterSurfaceSimulator> InitializeSurfaceSimulator(const Vector2 &min, const Vector2 &max, float originY) override;
+		virtual std::shared_ptr<physics::PhysWaterSurfaceSimulator> InitializeSurfaceSimulator(const Vector2 &min, const Vector2 &max, float originY) override;
 		mutable EntityHandle m_hWaterSurface = {};
 	};
 };

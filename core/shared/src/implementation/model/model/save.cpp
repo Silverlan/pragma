@@ -365,9 +365,9 @@ bool pragma::Model::LoadFromAssetData(pragma::Game &game, const udm::AssetData &
 		hitboxes.reserve(numHitboxes);
 		for(auto i = decltype(numHitboxes) {0u}; i < numHitboxes; ++i) {
 			auto udmHb = udmHitboxes[i];
-			Hitbox hb {};
+			pragma::physics::Hitbox hb {};
 
-			udm::to_enum_value<HitGroup>(udmHb["hitGroup"], hb.group);
+			udm::to_enum_value<pragma::physics::HitGroup>(udmHb["hitGroup"], hb.group);
 			udmHb["bounds"]["min"](hb.min);
 			udmHb["bounds"]["max"](hb.max);
 
@@ -435,7 +435,7 @@ bool pragma::Model::LoadFromAssetData(pragma::Game &game, const udm::AssetData &
 		auto &joint = joints[i];
 		auto udmJoint = udmJoints[i];
 
-		udm::to_enum_value<JointType>(udmJoint["type"], joint.type);
+		udm::to_enum_value<pragma::physics::JointType>(udmJoint["type"], joint.type);
 		udmJoint["parentBone"](joint.parent);
 		udmJoint["childBone"](joint.child);
 		udmJoint["enableCollisions"](joint.collide);
@@ -1355,7 +1355,7 @@ bool pragma::Model::SaveLegacy(pragma::Game *game, const std::string &name, cons
 	auto &joints = mdl.GetJoints();
 	f->Write<uint32_t>(joints.size());
 	for(auto &joint : joints) {
-		f->Write<JointType>(joint.type);
+		f->Write<pragma::physics::JointType>(joint.type);
 		f->Write<pragma::animation::BoneId>(joint.child);
 		f->Write<pragma::animation::BoneId>(joint.parent);
 		f->Write<bool>(joint.collide);

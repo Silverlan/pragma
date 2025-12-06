@@ -32,7 +32,7 @@ export {
 			double hitValue = std::numeric_limits<double>::max(); // Range if hit: [0,1]
 
 			// Only for imprecise results
-			Hitbox *hitbox = nullptr;
+			pragma::physics::Hitbox *hitbox = nullptr;
 			uint32_t boneId;
 
 			// Only for precise results

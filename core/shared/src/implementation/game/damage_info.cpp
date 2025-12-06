@@ -6,8 +6,8 @@ module pragma.shared;
 
 import :game.damage_info;
 
-HitGroup DamageInfo::GetHitGroup() const { return m_hitGroup; }
-void DamageInfo::SetHitGroup(HitGroup hitGroup) { m_hitGroup = hitGroup; }
+pragma::physics::HitGroup DamageInfo::GetHitGroup() const { return m_hitGroup; }
+void DamageInfo::SetHitGroup(pragma::physics::HitGroup hitGroup) { m_hitGroup = hitGroup; }
 void DamageInfo::SetDamage(unsigned short dmg) { m_damage = dmg; }
 void DamageInfo::AddDamage(unsigned short dmg)
 {

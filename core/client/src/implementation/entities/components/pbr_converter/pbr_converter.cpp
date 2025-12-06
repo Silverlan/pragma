@@ -152,7 +152,7 @@ bool CPBRConverterComponent::IsPBR(msys::CMaterial &mat) const
 
 void CPBRConverterComponent::PollEvents() { ProcessQueue(); }
 
-void CPBRConverterComponent::ApplyMiscMaterialProperties(msys::CMaterial &mat, const SurfaceMaterial &surfMat, const std::string &surfMatName)
+void CPBRConverterComponent::ApplyMiscMaterialProperties(msys::CMaterial &mat, const pragma::physics::SurfaceMaterial &surfMat, const std::string &surfMatName)
 {
 	auto ior = surfMat.GetIOR();
 	if(ior.has_value() == false)

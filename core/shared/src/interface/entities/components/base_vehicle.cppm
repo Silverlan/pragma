@@ -59,7 +59,7 @@ export {
 			EntityHandle m_driver = {};
 			StateFlags m_stateFlags = StateFlags::None;
 			float m_maxSteeringWheelAngle = 0.f;
-			void InitializeVehiclePhysics(pragma::physics::PHYSICSTYPE type, BasePhysicsComponent::PhysFlags flags);
+			void InitializeVehiclePhysics(pragma::physics::PhysicsType type, BasePhysicsComponent::PhysFlags flags);
 			void DestroyVehiclePhysics();
 			virtual BaseWheelComponent *CreateWheelEntity(uint8_t wheelIndex);
 			void InitializeWheelEntities();

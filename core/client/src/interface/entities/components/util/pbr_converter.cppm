@@ -60,7 +60,7 @@ export namespace pragma {
 		void UpdateMetalness(pragma::Model &mdl, msys::CMaterial &mat);
 		void UpdateAmbientOcclusion(pragma::Model &mdl, const AmbientOcclusionInfo &aoInfo = {}, pragma::ecs::BaseEntity *optEnt = nullptr);
 		void UpdateModel(pragma::Model &mdl, ModelUpdateInfo &updateInfo, pragma::ecs::BaseEntity *optEnt = nullptr);
-		void ApplyMiscMaterialProperties(msys::CMaterial &mat, const SurfaceMaterial &surfMat, const std::string &surfMatName);
+		void ApplyMiscMaterialProperties(msys::CMaterial &mat, const physics::SurfaceMaterial &surfMat, const std::string &surfMatName);
 		void ScheduleModelUpdate(pragma::Model &mdl, bool updateMetalness, std::optional<AmbientOcclusionInfo> updateAOInfo = {}, pragma::ecs::BaseEntity *optEnt = nullptr);
 
 		void ProcessQueue();

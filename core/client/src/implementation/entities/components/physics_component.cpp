@@ -21,7 +21,7 @@ void CPhysicsComponent::Initialize()
 	// TODO
 	BindEvent(cAnimatedComponent::EVENT_ON_SKELETON_UPDATED,[this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto *phys = GetPhysicsObject();
-		if(phys != nullptr && GetPhysicsType() == pragma::physics::PHYSICSTYPE::DYNAMIC)
+		if(phys != nullptr && GetPhysicsType() == pragma::physics::PhysicsType::Dynamic)
 		{
 			auto *o = phys->GetCollisionObject();
 			if(o != nullptr)
@@ -54,14 +54,14 @@ void CPhysicsComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { 
 void CPhysicsComponent::OnEntitySpawn()
 {
 	BasePhysicsComponent::OnEntitySpawn();
-	if(m_physicsType != pragma::physics::PHYSICSTYPE::NONE)
+	if(m_physicsType != pragma::physics::PhysicsType::None)
 		InitializePhysics(m_physicsType);
 }
 void CPhysicsComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CPhysicsComponent::PrePhysicsSimulate()
 {
 	auto dt = pragma::get_cgame()->DeltaTime();
-	if(dt > 0.0 && GetPhysicsType() != pragma::physics::PHYSICSTYPE::SOFTBODY) {
+	if(dt > 0.0 && GetPhysicsType() != pragma::physics::PhysicsType::SoftBody) {
 		auto pVelComponent = GetEntity().GetComponent<pragma::VelocityComponent>();
 		if(pVelComponent.valid())
 			pVelComponent->SetVelocity(pVelComponent->GetVelocity() + GetLinearCorrectionVelocity() / static_cast<float>(dt));
@@ -71,7 +71,7 @@ void CPhysicsComponent::PrePhysicsSimulate()
 bool CPhysicsComponent::PostPhysicsSimulate()
 {
 	auto dt = pragma::get_cgame()->DeltaTime();
-	if(dt > 0.0 && GetPhysicsType() != pragma::physics::PHYSICSTYPE::SOFTBODY) {
+	if(dt > 0.0 && GetPhysicsType() != pragma::physics::PhysicsType::SoftBody) {
 		auto pVelComponent = GetEntity().GetComponent<pragma::VelocityComponent>();
 		if(pVelComponent.valid())
 			pVelComponent->SetVelocity(pVelComponent->GetVelocity() - GetLinearCorrectionVelocity() / static_cast<float>(dt));
@@ -82,9 +82,9 @@ bool CPhysicsComponent::PostPhysicsSimulate()
 
 void CPhysicsComponent::ReceiveData(NetPacket &packet)
 {
-	auto physType = static_cast<pragma::physics::PHYSICSTYPE>(packet->Read<unsigned int>());
+	auto physType = static_cast<pragma::physics::PhysicsType>(packet->Read<unsigned int>());
 	m_physicsType = physType;
-	auto moveType = static_cast<pragma::physics::MOVETYPE>(packet->Read<uint32_t>());
+	auto moveType = static_cast<pragma::physics::MoveType>(packet->Read<uint32_t>());
 	SetMoveType(moveType);
 }
 

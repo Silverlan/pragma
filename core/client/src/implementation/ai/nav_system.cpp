@@ -237,7 +237,7 @@ void CMD_debug_nav_path_start(pragma::NetworkState *state, pragma::BasePlayerCom
 	auto origin = charComponent.valid() ? charComponent->GetEyePosition() : pTrComponent->GetPosition();
 	auto dir = charComponent.valid() ? charComponent->GetViewForward() : pTrComponent->GetForward();
 
-	TraceData data {};
+	pragma::physics::TraceData data {};
 	data.SetFilter(ent);
 	data.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::InvertFilter);
 	data.SetSource(origin);
@@ -265,7 +265,7 @@ void CMD_debug_nav_path_end(pragma::NetworkState *state, pragma::BasePlayerCompo
 	auto origin = charComponent.valid() ? charComponent->GetEyePosition() : pTrComponent->GetPosition();
 	auto dir = charComponent.valid() ? charComponent->GetViewForward() : pTrComponent->GetForward();
 
-	TraceData data {};
+	pragma::physics::TraceData data {};
 	data.SetFilter(ent);
 	data.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::InvertFilter);
 	data.SetSource(origin);

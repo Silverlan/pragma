@@ -374,22 +374,22 @@ static void register_gui(Lua::Interface &lua)
 	wiSnapAreaClassDef.def("GetTriggerArea", &WISnapArea::GetTriggerArea);
 	guiMod[wiSnapAreaClassDef];
 
-	auto wiDebugDepthTextureClassDef = luabind::class_<WIDebugDepthTexture, ::WIBase>("DebugDepthTexture");
-	wiDebugDepthTextureClassDef.def("SetContrastFactor", &WIDebugDepthTexture::SetContrastFactor);
-	wiDebugDepthTextureClassDef.def("GetContrastFactor", &WIDebugDepthTexture::GetContrastFactor);
-	wiDebugDepthTextureClassDef.def("SetTexture", static_cast<void (WIDebugDepthTexture::*)(prosper::Texture &, bool)>(&WIDebugDepthTexture::SetTexture));
-	wiDebugDepthTextureClassDef.def("SetTexture", static_cast<void (WIDebugDepthTexture::*)(prosper::Texture &, bool)>(&WIDebugDepthTexture::SetTexture), luabind::default_parameter_policy<3, false> {});
+	auto wiDebugDepthTextureClassDef = luabind::class_<pragma::gui::WIDebugDepthTexture, ::WIBase>("DebugDepthTexture");
+	wiDebugDepthTextureClassDef.def("SetContrastFactor", &pragma::gui::WIDebugDepthTexture::SetContrastFactor);
+	wiDebugDepthTextureClassDef.def("GetContrastFactor", &pragma::gui::WIDebugDepthTexture::GetContrastFactor);
+	wiDebugDepthTextureClassDef.def("SetTexture", static_cast<void (pragma::gui::WIDebugDepthTexture::*)(prosper::Texture &, bool)>(&pragma::gui::WIDebugDepthTexture::SetTexture));
+	wiDebugDepthTextureClassDef.def("SetTexture", static_cast<void (pragma::gui::WIDebugDepthTexture::*)(prosper::Texture &, bool)>(&pragma::gui::WIDebugDepthTexture::SetTexture), luabind::default_parameter_policy<3, false> {});
 	guiMod[wiDebugDepthTextureClassDef];
 
-	auto wiDebugShadowMapClassDef = luabind::class_<WIDebugShadowMap, ::WIBase>("DebugShadowMap");
-	wiDebugShadowMapClassDef.def("SetContrastFactor", &WIDebugShadowMap::SetContrastFactor);
-	wiDebugShadowMapClassDef.def("GetContrastFactor", &WIDebugShadowMap::GetContrastFactor);
-	wiDebugShadowMapClassDef.def("SetShadowMapSize", &WIDebugShadowMap::SetShadowMapSize);
-	wiDebugShadowMapClassDef.def("SetLightSource", &WIDebugShadowMap::SetLightSource);
+	auto wiDebugShadowMapClassDef = luabind::class_<pragma::gui::WIDebugShadowMap, ::WIBase>("DebugShadowMap");
+	wiDebugShadowMapClassDef.def("SetContrastFactor", &pragma::gui::WIDebugShadowMap::SetContrastFactor);
+	wiDebugShadowMapClassDef.def("GetContrastFactor", &pragma::gui::WIDebugShadowMap::GetContrastFactor);
+	wiDebugShadowMapClassDef.def("SetShadowMapSize", &pragma::gui::WIDebugShadowMap::SetShadowMapSize);
+	wiDebugShadowMapClassDef.def("SetLightSource", &pragma::gui::WIDebugShadowMap::SetLightSource);
 	guiMod[wiDebugShadowMapClassDef];
 
-	auto wiDebugSsaoClassDef = luabind::class_<WIDebugSSAO, luabind::bases<::WITexturedShape, WIShape, ::WIBase>>("DebugSSAO");
-	wiDebugSsaoClassDef.def("SetUseBlurredSSAOImage", &WIDebugSSAO::SetUseBlurredSSAOImage);
+	auto wiDebugSsaoClassDef = luabind::class_<pragma::gui::WIDebugSSAO, luabind::bases<::WITexturedShape, WIShape, ::WIBase>>("DebugSSAO");
+	wiDebugSsaoClassDef.def("SetUseBlurredSSAOImage", &pragma::gui::WIDebugSSAO::SetUseBlurredSSAOImage);
 	guiMod[wiDebugSsaoClassDef];
 
 	auto wiProgressBarClassDef = luabind::class_<WIProgressBar, ::WIBase>("ProgressBar");

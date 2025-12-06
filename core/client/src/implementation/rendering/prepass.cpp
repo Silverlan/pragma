@@ -167,7 +167,7 @@ static void debug_prepass(pragma::NetworkState *state, pragma::BasePlayerCompone
 			xOffset += 256;
 		}
 	}
-	auto *pPrepassDepth = wgui.Create<WIDebugDepthTexture>(pEl);
+	auto *pPrepassDepth = wgui.Create<pragma::gui::WIDebugDepthTexture>(pEl);
 	if(pPrepassDepth != nullptr) {
 		pPrepassDepth->SetX(xOffset);
 		pPrepassDepth->SetSize(256, 256);

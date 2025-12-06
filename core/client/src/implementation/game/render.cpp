@@ -276,7 +276,7 @@ static void debug_render_depth_buffer(pragma::NetworkState *state, pragma::BaseP
 			return WIHandle {};
 		auto &wgui = WGUI::GetInstance();
 
-		auto r = wgui.Create<WIDebugDepthTexture>();
+		auto r = wgui.Create<pragma::gui::WIDebugDepthTexture>();
 		r->SetTexture(*raster->GetPrepass().textureDepth, {prosper::PipelineStageFlags::LateFragmentTestsBit, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AccessFlags::DepthStencilAttachmentWriteBit},
 		  {prosper::PipelineStageFlags::EarlyFragmentTestsBit, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AccessFlags::DepthStencilAttachmentWriteBit});
 		r->SetShouldResolveImage(true);
@@ -289,7 +289,7 @@ static void debug_render_depth_buffer(pragma::NetworkState *state, pragma::BaseP
 		auto *el = d->GetGUIElement();
 		if(el == nullptr)
 			return;
-		static_cast<WIDebugDepthTexture *>(el)->Update();
+		static_cast<pragma::gui::WIDebugDepthTexture *>(el)->Update();
 	}));
 }
 namespace {

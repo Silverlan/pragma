@@ -102,7 +102,7 @@ static void debug_ssao(pragma::NetworkState *state, pragma::BasePlayerComponent 
 			pNormals->Update();
 			xOffset += 256;
 		}
-		auto *pPrepassDepth = wgui.Create<WIDebugDepthTexture>(pEl);
+		auto *pPrepassDepth = wgui.Create<pragma::gui::WIDebugDepthTexture>(pEl);
 		if(pPrepassDepth != nullptr) {
 			pPrepassDepth->SetX(xOffset);
 			pPrepassDepth->SetSize(256, 256);
@@ -111,14 +111,14 @@ static void debug_ssao(pragma::NetworkState *state, pragma::BasePlayerComponent 
 			xOffset += 256;
 		}
 	}
-	auto *pSsao = wgui.Create<WIDebugSSAO>(pEl);
+	auto *pSsao = wgui.Create<pragma::gui::WIDebugSSAO>(pEl);
 	if(pSsao != nullptr) {
 		pSsao->SetX(xOffset);
 		pSsao->SetSize(256, 256);
 		pSsao->Update();
 		xOffset += 256;
 	}
-	auto *pSsaoBlur = wgui.Create<WIDebugSSAO>(pEl);
+	auto *pSsaoBlur = wgui.Create<pragma::gui::WIDebugSSAO>(pEl);
 	if(pSsaoBlur != nullptr) {
 		pSsaoBlur->SetX(xOffset);
 		pSsaoBlur->SetSize(256, 256);

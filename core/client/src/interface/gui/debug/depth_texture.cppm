@@ -9,7 +9,7 @@ export module pragma.client:gui.debug_depth_texture;
 
 export import pragma.gui;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WIDebugDepthTexture : public WIBase {
 	  public:
 		WIDebugDepthTexture();

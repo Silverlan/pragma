@@ -46,7 +46,7 @@ static void debug_font(pragma::NetworkState *, pragma::BasePlayerComponent *, st
 	if(dbg == nullptr) {
 		dbg = std::make_unique<DebugGameGUI>([glyphMap, width, height]() {
 			auto &wgui = WGUI::GetInstance();
-			auto *r = wgui.Create<WIDebugMipMaps>();
+			auto *r = wgui.Create<pragma::gui::WIDebugMipMaps>();
 			r->SetSize(width, height);
 			r->SetTexture(glyphMap);
 			r->Update();
@@ -101,7 +101,7 @@ static void debug_texture_mipmaps(pragma::NetworkState *, pragma::BasePlayerComp
 			Con::cout << "File image type: " << magic_enum::enum_name(type) << Con::endl;
 		dbg = std::make_unique<DebugGameGUI>([vkTexture]() {
 			auto &wgui = WGUI::GetInstance();
-			auto *r = wgui.Create<WIDebugMipMaps>();
+			auto *r = wgui.Create<pragma::gui::WIDebugMipMaps>();
 			r->SetTexture(vkTexture);
 			r->Update();
 			return r->GetHandle();

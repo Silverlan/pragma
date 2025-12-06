@@ -9,7 +9,7 @@ export module pragma.client:gui.debug_mipmaps;
 
 export import pragma.gui;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WIDebugMipMaps : public WIBase {
 	  protected:
 		std::vector<WIHandle> m_hTextures;

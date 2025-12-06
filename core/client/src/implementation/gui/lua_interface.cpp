@@ -325,8 +325,8 @@ luabind::object WGUILuaInterface::CreateLuaObject(lua::State *l, WIBase &p)
 					return cast_to_type<WISilkIcon>(l, p);
 				return cast_to_type<WIIcon>(l, p);
 			}
-			else if(dynamic_cast<WIDebugSSAO *>(&p) != nullptr)
-				return cast_to_type<WIDebugSSAO>(l, p);
+			else if(dynamic_cast<pragma::gui::WIDebugSSAO *>(&p) != nullptr)
+				return cast_to_type<pragma::gui::WIDebugSSAO>(l, p);
 			return cast_to_type<WITexturedShape>(l, p);
 		}
 		else if(dynamic_cast<WIRoundedRect *>(&p) != nullptr)
@@ -371,10 +371,10 @@ luabind::object WGUILuaInterface::CreateLuaObject(lua::State *l, WIBase &p)
 			return cast_to_type<WIFrame>(l, p);
 		return cast_to_type<WITransformable>(l, p);
 	}
-	else if(dynamic_cast<WIDebugDepthTexture *>(&p) != nullptr)
-		return cast_to_type<WIDebugDepthTexture>(l, p);
-	else if(dynamic_cast<WIDebugShadowMap *>(&p) != nullptr)
-		return cast_to_type<WIDebugShadowMap>(l, p);
+	else if(dynamic_cast<pragma::gui::WIDebugDepthTexture *>(&p) != nullptr)
+		return cast_to_type<pragma::gui::WIDebugDepthTexture>(l, p);
+	else if(dynamic_cast<pragma::gui::WIDebugShadowMap *>(&p) != nullptr)
+		return cast_to_type<pragma::gui::WIDebugShadowMap>(l, p);
 	else if(dynamic_cast<WIProgressBar *>(&p) != nullptr) {
 		if(dynamic_cast<WISlider *>(&p) != nullptr)
 			return cast_to_type<WISlider>(l, p);

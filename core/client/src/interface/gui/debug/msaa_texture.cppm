@@ -9,7 +9,7 @@ export module pragma.client:gui.debug_msaa_texture;
 
 export import pragma.gui;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WIDebugMSAATexture : public WIBase {
 	  public:
 		WIDebugMSAATexture();

@@ -25,7 +25,7 @@ void CMD_debug_hdr_bloom(pragma::NetworkState *, pragma::BasePlayerComponent *, 
 	}
 	if(pEl != nullptr)
 		return;
-	pEl = wgui.Create<WIDebugHDRBloom>();
+	pEl = wgui.Create<pragma::gui::WIDebugHDRBloom>();
 	if(pEl == nullptr)
 		return;
 	pEl->SetName(name);

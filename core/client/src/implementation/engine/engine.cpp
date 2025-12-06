@@ -1244,12 +1244,12 @@ void pragma::CEngine::RegisterUiElementTypes()
 	gui.RegisterType<WITransformable>("WITransformable");
 	gui.RegisterType<WITreeList>("WITreeList");
 	gui.RegisterType<WITreeListElement>("WITreeListElement");
-	gui.RegisterType<WIDebugDepthTexture>("WIDebugDepthTexture");
-	gui.RegisterType<WIDebugHDRBloom>("WIDebugHDRBloom");
-	gui.RegisterType<WIDebugMipMaps>("WIDebugMipMaps");
-	gui.RegisterType<WIDebugMSAATexture>("WIDebugMSAATexture");
-	gui.RegisterType<WIDebugShadowMap>("WIDebugShadowMap");
-	gui.RegisterType<WIDebugSSAO>("WIDebugSSAO");
+	gui.RegisterType<pragma::gui::WIDebugDepthTexture>("WIDebugDepthTexture");
+	gui.RegisterType<pragma::gui::WIDebugHDRBloom>("WIDebugHDRBloom");
+	gui.RegisterType<pragma::gui::WIDebugMipMaps>("WIDebugMipMaps");
+	gui.RegisterType<pragma::gui::WIDebugMSAATexture>("WIDebugMSAATexture");
+	gui.RegisterType<pragma::gui::WIDebugShadowMap>("WIDebugShadowMap");
+	gui.RegisterType<pragma::gui::WIDebugSSAO>("WIDebugSSAO");
 	gui.RegisterType<WIMainMenuElement>("WIMainMenuElement");
 }
 

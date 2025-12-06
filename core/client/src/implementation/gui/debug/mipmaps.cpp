@@ -9,11 +9,11 @@ import :gui.debug_mipmaps;
 
 import :engine;
 
-WIDebugMipMaps::WIDebugMipMaps() : WIBase() {}
+pragma::gui::WIDebugMipMaps::WIDebugMipMaps() : WIBase() {}
 
-void WIDebugMipMaps::Initialize() { WIBase::Initialize(); }
+void pragma::gui::WIDebugMipMaps::Initialize() { WIBase::Initialize(); }
 
-void WIDebugMipMaps::SetTexture(const std::shared_ptr<prosper::Texture> &texture)
+void pragma::gui::WIDebugMipMaps::SetTexture(const std::shared_ptr<prosper::Texture> &texture)
 {
 	for(auto &hTex : m_hTextures) {
 		if(hTex.IsValid())

@@ -8,7 +8,7 @@ export module pragma.client:gui.debug_ssao;
 
 export import pragma.gui;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WIDebugSSAO : public WITexturedRect {
 	  public:
 		WIDebugSSAO();

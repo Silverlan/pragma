@@ -166,7 +166,7 @@ static void debug_water(pragma::NetworkState *state, pragma::BasePlayerComponent
 				pReflection->SetTexture(hdrInfo.sceneRenderTarget->GetTexture());
 				pReflection->SetName("dbg_water_reflection");
 
-				auto *pRefractionDepth = wgui.Create<WIDebugDepthTexture>(r);
+				auto *pRefractionDepth = wgui.Create<pragma::gui::WIDebugDepthTexture>(r);
 				pRefractionDepth->SetSize(size, size);
 				pRefractionDepth->SetX(size);
 				pRefractionDepth->SetTexture(*hdrInfo.prepass.textureDepth,
@@ -177,7 +177,7 @@ static void debug_water(pragma::NetworkState *state, pragma::BasePlayerComponent
 				pRefractionDepth->SetName("dbg_water_refraction_depth");
 				hDepthTex = pRefractionDepth->GetHandle();
 
-				auto *pSceneNoWater = wgui.Create<WIDebugMSAATexture>(r);
+				auto *pSceneNoWater = wgui.Create<pragma::gui::WIDebugMSAATexture>(r);
 				pSceneNoWater->SetSize(size, size);
 				pSceneNoWater->SetX(size * 2u);
 				pSceneNoWater->SetTexture(*waterScene.texScene);
@@ -192,7 +192,7 @@ static void debug_water(pragma::NetworkState *state, pragma::BasePlayerComponent
 				auto *cam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
 				// Update debug depth GUI element
 				if(hDepthTex.IsValid() && cam != nullptr) {
-					auto *pDepthTex = static_cast<WIDebugDepthTexture *>(hDepthTex.get());
+					auto *pDepthTex = static_cast<pragma::gui::WIDebugDepthTexture *>(hDepthTex.get());
 					pDepthTex->Setup(cam->GetNearZ(), cam->GetFarZ());
 				}
 			}));

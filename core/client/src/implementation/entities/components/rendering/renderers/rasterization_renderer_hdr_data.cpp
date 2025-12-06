@@ -523,7 +523,7 @@ static void debug_render_scene(pragma::NetworkState *state, pragma::BasePlayerCo
 
 		auto idx = 0u;
 		if(hdrInfo.sceneRenderTarget != nullptr) {
-			auto *pTexture = wgui.Create<WIDebugMSAATexture>(r);
+			auto *pTexture = wgui.Create<pragma::gui::WIDebugMSAATexture>(r);
 			pTexture->SetSize(size, size);
 			pTexture->SetX(size * idx++);
 			pTexture->SetTexture(hdrInfo.sceneRenderTarget->GetTexture());
@@ -532,7 +532,7 @@ static void debug_render_scene(pragma::NetworkState *state, pragma::BasePlayerCo
 			hTexture = pTexture->GetHandle();
 		}
 		if(hdrInfo.bloomBlurRenderTarget != nullptr) {
-			auto *pTexture = wgui.Create<WIDebugMSAATexture>(r);
+			auto *pTexture = wgui.Create<pragma::gui::WIDebugMSAATexture>(r);
 			pTexture->SetSize(size, size);
 			pTexture->SetX(size * idx++);
 			pTexture->SetTexture(hdrInfo.bloomBlurRenderTarget->GetTexture());
@@ -545,9 +545,9 @@ static void debug_render_scene(pragma::NetworkState *state, pragma::BasePlayerCo
 	});
 	dbg->AddCallback("PostRenderScene", FunctionCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>::Create([](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
 		if(hTexture.IsValid() == true)
-			static_cast<WIDebugMSAATexture *>(hTexture.get())->Update();
+			static_cast<pragma::gui::WIDebugMSAATexture *>(hTexture.get())->Update();
 		if(hBloomTexture.IsValid() == true)
-			static_cast<WIDebugMSAATexture *>(hBloomTexture.get())->Update();
+			static_cast<pragma::gui::WIDebugMSAATexture *>(hBloomTexture.get())->Update();
 	}));
 }
 namespace {

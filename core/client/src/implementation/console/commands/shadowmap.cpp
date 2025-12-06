@@ -62,7 +62,7 @@ void CMD_debug_light_shadowmap(pragma::NetworkState *nw, pragma::BasePlayerCompo
 		return;
 	if(pragma::get_cgame() == nullptr || argv.empty() || pRoot == nullptr)
 		return;
-	auto *pElSm = wgui.Create<WIDebugShadowMap>();
+	auto *pElSm = wgui.Create<pragma::gui::WIDebugShadowMap>();
 	if(pElSm == nullptr)
 		return;
 	auto size = 256u;

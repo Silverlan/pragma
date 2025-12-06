@@ -132,7 +132,7 @@ WIDropDownMenu *pragma::gui::WIMainMenuOptions::CreateDropDownMenu(std::string t
 	return menu;
 }
 
-WICheckbox *pragma::gui::WIMainMenuOptions::CreateCheckbox(std::string text)
+pragma::gui::WICheckbox *pragma::gui::WIMainMenuOptions::CreateCheckbox(std::string text)
 {
 	CreateLabel(text);
 	WIHandle hCheckBox = CreateChild<WICheckbox>();

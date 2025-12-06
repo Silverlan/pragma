@@ -13,7 +13,7 @@ export import pragma.gui;
 export import pragma.platform;
 export import pragma.string.unicode;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WIFrame : public WITransformable {
 	  public:
 		WIFrame();

@@ -9,22 +9,22 @@ import :gui.grid_panel;
 
 import :client_state;
 
-WIGridPanel::WIGridPanel() : WITable(), m_resizeMode(ResizeMode::FitToChildren), m_numColumns(0) {}
+pragma::gui::WIGridPanel::WIGridPanel() : WITable(), m_resizeMode(ResizeMode::FitToChildren), m_numColumns(0) {}
 
-void WIGridPanel::SetSize(int x, int y)
+void pragma::gui::WIGridPanel::SetSize(int x, int y)
 {
 	WITable::SetSize(x, y);
 	//auto &children = *GetChildren();
 }
 
-void WIGridPanel::FillRows(uint32_t count)
+void pragma::gui::WIGridPanel::FillRows(uint32_t count)
 {
 	auto numRows = GetRowCount();
 	for(auto i = numRows; i < count; ++i)
 		AddRow();
 }
 
-float WIGridPanel::UpdateRowHeights(float yOffset, float defHeight)
+float pragma::gui::WIGridPanel::UpdateRowHeights(float yOffset, float defHeight)
 {
 	if(m_resizeMode == ResizeMode::FitToChildren) {
 		auto w = GetWidth();
@@ -57,7 +57,7 @@ float WIGridPanel::UpdateRowHeights(float yOffset, float defHeight)
 	return WITable::UpdateRowHeights(yOffset, defHeight);
 }
 
-void WIGridPanel::DoUpdate()
+void pragma::gui::WIGridPanel::DoUpdate()
 {
 	switch(m_resizeMode) {
 	case ResizeMode::Uniform:
@@ -77,11 +77,11 @@ void WIGridPanel::DoUpdate()
 	WITable::DoUpdate();
 }
 
-WITableRow *WIGridPanel::AddRow() { return WITable::AddRow<WITableRow>(); }
+WITableRow *pragma::gui::WIGridPanel::AddRow() { return WITable::AddRow<WITableRow>(); }
 
-uint32_t WIGridPanel::GetColumnCount() const { return m_numColumns; }
+uint32_t pragma::gui::WIGridPanel::GetColumnCount() const { return m_numColumns; }
 
-WITableCell *WIGridPanel::AddItem(WIBase *el, uint32_t rowId, uint32_t colId)
+WITableCell *pragma::gui::WIGridPanel::AddItem(WIBase *el, uint32_t rowId, uint32_t colId)
 {
 	FillRows(rowId + 1);
 	auto *pRow = GetRow(rowId);

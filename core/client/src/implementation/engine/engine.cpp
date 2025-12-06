@@ -1216,15 +1216,15 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 void pragma::CEngine::RegisterUiElementTypes()
 {
 	auto &gui = WGUI::GetInstance();
-	gui.RegisterType<WICheckbox>("WICheckbox");
-	gui.RegisterType<WIChoiceList>("WIChoiceList");
-	gui.RegisterType<WICommandLineEntry>("WICommandLineEntry");
-	gui.RegisterType<WIConsole>("WIConsole");
-	gui.RegisterType<WIContainer>("WIContainer");
-	gui.RegisterType<WIDetachable>("WIDetachable");
-	gui.RegisterType<WIFPS>("WIFPS");
-	gui.RegisterType<WIFrame>("WIFrame");
-	gui.RegisterType<WIGridPanel>("WIGridPanel");
+	gui.RegisterType<pragma::gui::WICheckbox>("WICheckbox");
+	gui.RegisterType<pragma::gui::WIChoiceList>("WIChoiceList");
+	gui.RegisterType<pragma::gui::WICommandLineEntry>("WICommandLineEntry");
+	gui.RegisterType<pragma::gui::WIConsole>("WIConsole");
+	gui.RegisterType<pragma::gui::WIContainer>("WIContainer");
+	gui.RegisterType<pragma::gui::WIDetachable>("WIDetachable");
+	gui.RegisterType<pragma::gui::WIFPS>("WIFPS");
+	gui.RegisterType<pragma::gui::WIFrame>("WIFrame");
+	gui.RegisterType<pragma::gui::WIGridPanel>("WIGridPanel");
 	gui.RegisterType<WIIcon>("WIIcon");
 	gui.RegisterType<WIImageSlideShow>("WIImageSlideShow");
 	gui.RegisterType<WILineGraph>("WILineGraph");
@@ -1318,7 +1318,7 @@ void pragma::CEngine::RunLaunchCommands()
 }
 void pragma::CEngine::ClearConsole()
 {
-	auto *pConsole = WIConsole::GetConsole();
+	auto *pConsole = pragma::gui::WIConsole::GetConsole();
 	if(pConsole == nullptr) {
 		pragma::Engine::ClearConsole();
 		return;
@@ -1334,7 +1334,7 @@ void pragma::CEngine::OpenConsole()
 	default:
 		{
 			if(WGUI::IsOpen()) {
-				auto *console = WIConsole::Open();
+				auto *console = pragma::gui::WIConsole::Open();
 				if(console && m_consoleType == ConsoleType::GUIDetached && !console->IsExternallyOwned()) {
 					console->Update();
 					auto *frame = console->GetFrame();
@@ -1359,7 +1359,7 @@ void pragma::CEngine::CloseConsole()
 	default:
 		{
 			if(WGUI::IsOpen())
-				WIConsole::Close();
+				pragma::gui::WIConsole::Close();
 			break;
 		}
 	}
@@ -1379,7 +1379,7 @@ void pragma::CEngine::SetConsoleType(ConsoleType type)
 }
 pragma::CEngine::ConsoleType pragma::CEngine::GetConsoleType() const
 {
-	auto *pConsole = WIConsole::GetConsole();
+	auto *pConsole = pragma::gui::WIConsole::GetConsole();
 	auto *pFrame = pConsole ? pConsole->GetFrame() : nullptr;
 	if(pFrame && pFrame->IsVisible())
 		return pFrame->IsDetached() ? ConsoleType::GUIDetached : ConsoleType::GUI;
@@ -1392,7 +1392,7 @@ bool pragma::CEngine::IsConsoleOpen() const
 		return pragma::Engine::IsConsoleOpen();
 	default:
 		{
-			auto *pConsole = WIConsole::GetConsole();
+			auto *pConsole = pragma::gui::WIConsole::GetConsole();
 			auto *pFrame = pConsole ? pConsole->GetFrame() : nullptr;
 			return pFrame && pFrame->IsVisible();
 		}

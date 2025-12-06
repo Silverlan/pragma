@@ -12,7 +12,7 @@ export import pragma.gui;
 namespace pragma {
 	class JSValue;
 };
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WIChromiumPage {
 	  public:
 		WIChromiumPage(WIBase *parent);

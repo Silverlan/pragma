@@ -26,7 +26,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT WIServerBrowser : public WIFrame {
+	class DLLCLIENT WIServerBrowser : public pragma::gui::WIFrame {
 	  public:
 		WIServerBrowser();
 		virtual ~WIServerBrowser() override;

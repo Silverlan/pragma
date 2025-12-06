@@ -630,17 +630,17 @@ void Lua::WIArrow::register_class(luabind::class_<::WIArrow, luabind::bases<::WI
 	classDef.add_static_constant("DIRECTION_UP", 3);
 }
 
-void Lua::WICheckbox::register_class(luabind::class_<::WICheckbox, luabind::bases<::WIShape, ::WIBase>> &classDef)
+void Lua::WICheckbox::register_class(luabind::class_<pragma::gui::WICheckbox, luabind::bases<::WIShape, ::WIBase>> &classDef)
 {
-	classDef.def("SetChecked", &::WICheckbox::SetChecked);
-	classDef.def("IsChecked", &::WICheckbox::IsChecked);
-	classDef.def("Toggle", &::WICheckbox::Toggle);
+	classDef.def("SetChecked", &pragma::gui::WICheckbox::SetChecked);
+	classDef.def("IsChecked", &pragma::gui::WICheckbox::IsChecked);
+	classDef.def("Toggle", &pragma::gui::WICheckbox::Toggle);
 }
 
-void Lua::WIGridPanel::register_class(luabind::class_<::WIGridPanel, luabind::bases<::WITable, ::WIBase>> &classDef)
+void Lua::WIGridPanel::register_class(luabind::class_<pragma::gui::WIGridPanel, luabind::bases<::WITable, ::WIBase>> &classDef)
 {
-	classDef.def("AddItem", &::WIGridPanel::AddItem);
-	classDef.def("GetColumnCount", &::WIGridPanel::GetColumnCount);
+	classDef.def("AddItem", &pragma::gui::WIGridPanel::AddItem);
+	classDef.def("GetColumnCount", &pragma::gui::WIGridPanel::GetColumnCount);
 }
 
 void Lua::WITreeList::register_class(luabind::class_<::WITreeList, luabind::bases<::WITable, ::WIBase>> &classDef)
@@ -682,22 +682,22 @@ void Lua::WITreeListElement::register_class(luabind::class_<::WITreeListElement,
 	}));
 }
 
-void Lua::WIContainer::register_class(luabind::class_<::WIContainer, ::WIBase> &classDef)
+void Lua::WIContainer::register_class(luabind::class_<pragma::gui::WIContainer, ::WIBase> &classDef)
 {
-	classDef.def("SetPadding", static_cast<void (::WIContainer::*)(int32_t)>(&::WIContainer::SetPadding));
-	classDef.def("SetPadding", static_cast<void (::WIContainer::*)(int32_t, int32_t, int32_t, int32_t)>(&::WIContainer::SetPadding));
-	classDef.def("SetPaddingTop", &::WIContainer::SetPaddingTop);
-	classDef.def("SetPaddingRight", &::WIContainer::SetPaddingRight);
-	classDef.def("SetPaddingBottom", &::WIContainer::SetPaddingBottom);
-	classDef.def("SetPaddingLeft", &::WIContainer::SetPaddingLeft);
-	classDef.def("GetPadding", static_cast<const std::array<int32_t, 4> &(::WIContainer::*)() const>(&::WIContainer::GetPadding));
-	classDef.def("GetPaddingTop", &::WIContainer::GetPaddingTop);
-	classDef.def("GetPaddingRight", &::WIContainer::GetPaddingRight);
-	classDef.def("GetPaddingBottom", &::WIContainer::GetPaddingBottom);
-	classDef.def("GetPaddingLeft", &::WIContainer::GetPaddingLeft);
+	classDef.def("SetPadding", static_cast<void (pragma::gui::WIContainer::*)(int32_t)>(&pragma::gui::WIContainer::SetPadding));
+	classDef.def("SetPadding", static_cast<void (pragma::gui::WIContainer::*)(int32_t, int32_t, int32_t, int32_t)>(&pragma::gui::WIContainer::SetPadding));
+	classDef.def("SetPaddingTop", &pragma::gui::WIContainer::SetPaddingTop);
+	classDef.def("SetPaddingRight", &pragma::gui::WIContainer::SetPaddingRight);
+	classDef.def("SetPaddingBottom", &pragma::gui::WIContainer::SetPaddingBottom);
+	classDef.def("SetPaddingLeft", &pragma::gui::WIContainer::SetPaddingLeft);
+	classDef.def("GetPadding", static_cast<const std::array<int32_t, 4> &(pragma::gui::WIContainer::*)() const>(&pragma::gui::WIContainer::GetPadding));
+	classDef.def("GetPaddingTop", &pragma::gui::WIContainer::GetPaddingTop);
+	classDef.def("GetPaddingRight", &pragma::gui::WIContainer::GetPaddingRight);
+	classDef.def("GetPaddingBottom", &pragma::gui::WIContainer::GetPaddingBottom);
+	classDef.def("GetPaddingLeft", &pragma::gui::WIContainer::GetPaddingLeft);
 }
 
-void Lua::WITable::register_class(luabind::class_<::WITable, luabind::bases<::WIContainer, ::WIBase>> &classDef)
+void Lua::WITable::register_class(luabind::class_<::WITable, luabind::bases<pragma::gui::WIContainer, ::WIBase>> &classDef)
 {
 	classDef.def("GetRowHeight", &::WITable::GetRowHeight);
 	classDef.def("SetRowHeight", &::WITable::SetRowHeight);
@@ -750,7 +750,7 @@ void Lua::WITable::register_class(luabind::class_<::WITable, luabind::bases<::WI
 	classDef.add_static_constant("SELECTABLE_MODE_MULTI", umath::to_integral(::WITable::SelectableMode::Multi));
 }
 
-void Lua::WITableRow::register_class(luabind::class_<::WITableRow, luabind::bases<::WIContainer, ::WIBase>> &classDef)
+void Lua::WITableRow::register_class(luabind::class_<::WITableRow, luabind::bases<pragma::gui::WIContainer, ::WIBase>> &classDef)
 {
 	classDef.def("Select", &::WITableRow::Select);
 	classDef.def("Deselect", &::WITableRow::Deselect);
@@ -770,7 +770,7 @@ void Lua::WITableRow::register_class(luabind::class_<::WITableRow, luabind::base
 	}));
 }
 
-void Lua::WITableCell::register_class(luabind::class_<::WITableCell, luabind::bases<::WIContainer, ::WIBase>> &classDef)
+void Lua::WITableCell::register_class(luabind::class_<::WITableCell, luabind::bases<pragma::gui::WIContainer, ::WIBase>> &classDef)
 {
 	classDef.def("GetFirstElement", &::WITableCell::GetFirstElement);
 	classDef.def("GetColSpan", &::WITableCell::GetColSpan);
@@ -779,12 +779,12 @@ void Lua::WITableCell::register_class(luabind::class_<::WITableCell, luabind::ba
 	//classDef.def("SetRowSpan",&SetRowSpan);
 }
 
-void Lua::WIFrame::register_class(luabind::class_<::WIFrame, luabind::bases<::WITransformable, ::WIBase>> &classDef)
+void Lua::WIFrame::register_class(luabind::class_<pragma::gui::WIFrame, luabind::bases<::WITransformable, ::WIBase>> &classDef)
 {
-	classDef.def("SetTitle", &::WIFrame::SetTitle);
-	classDef.def("GetTitle", &::WIFrame::GetTitle);
-	classDef.def("SetCloseButtonEnabled", &::WIFrame::SetCloseButtonEnabled);
-	classDef.def("SetDetachButtonEnabled", &::WIFrame::SetDetachButtonEnabled);
+	classDef.def("SetTitle", &pragma::gui::WIFrame::SetTitle);
+	classDef.def("GetTitle", &pragma::gui::WIFrame::GetTitle);
+	classDef.def("SetCloseButtonEnabled", &pragma::gui::WIFrame::SetCloseButtonEnabled);
+	classDef.def("SetDetachButtonEnabled", &pragma::gui::WIFrame::SetDetachButtonEnabled);
 }
 
 void Lua::WIDropDownMenu::register_class(luabind::class_<::WIDropDownMenu, luabind::bases<::WITextEntry, ::WIBase>> &classDef)
@@ -1694,7 +1694,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, ::WIBase &panel, std::str
 			return CallbackReturnType::NoReturnValue;
 		});
 	}
-	else if(name == "onchange" && dynamic_cast<::WICheckbox *>(hPanel.get()) != nullptr) {
+	else if(name == "onchange" && dynamic_cast<pragma::gui::WICheckbox *>(hPanel.get()) != nullptr) {
 		hCallback = FunctionCallback<void, bool>::Create([l, hPanel, o](bool bChecked) mutable {
 			if(!hPanel.IsValid())
 				return ::util::EventReply::Unhandled;

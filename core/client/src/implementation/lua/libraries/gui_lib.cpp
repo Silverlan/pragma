@@ -114,7 +114,7 @@ static Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::
 	auto *pContainer = wgui.Create<::WIBase>(parent);
 	if(pContainer == nullptr)
 		return Lua::nil;
-	auto *pCheckbox = wgui.Create<::WICheckbox>(pContainer);
+	auto *pCheckbox = wgui.Create<pragma::gui::WICheckbox>(pContainer);
 	if(pCheckbox == nullptr) {
 		pContainer->Remove();
 		return Lua::nil;

@@ -14,8 +14,8 @@ import pragma.gui;
 
 #undef CreateWindow
 
-WIDetachable::DetachedWindow::~DetachedWindow() { Clear(); }
-void WIDetachable::DetachedWindow::Clear()
+pragma::gui::WIDetachable::DetachedWindow::~DetachedWindow() { Clear(); }
+void pragma::gui::WIDetachable::DetachedWindow::Clear()
 {
 	if(detachedBg.IsValid())
 		detachedBg.Remove();
@@ -25,18 +25,18 @@ void WIDetachable::DetachedWindow::Clear()
 		w->Close();
 }
 
-WIDetachable::WIDetachable() : WIBase {} {}
-WIDetachable::~WIDetachable() {}
+pragma::gui::WIDetachable::WIDetachable() : WIBase {} {}
+pragma::gui::WIDetachable::~WIDetachable() {}
 
-void WIDetachable::OnRemove()
+void pragma::gui::WIDetachable::OnRemove()
 {
 	Reattach();
 	WIBase::OnRemove();
 }
 
-bool WIDetachable::IsDetached() const { return m_detachedWindow != nullptr; }
+bool pragma::gui::WIDetachable::IsDetached() const { return m_detachedWindow != nullptr; }
 
-void WIDetachable::Detach()
+void pragma::gui::WIDetachable::Detach()
 {
 	// if(m_mode == Mode::SimplifiedOverlay)
 	// 	SetSimpleConsoleMode(false);
@@ -92,7 +92,7 @@ void WIDetachable::Detach()
 	CallCallbacks("OnDetached");
 	// m_mode = Mode::ExternalWindow;
 }
-void WIDetachable::Reattach()
+void pragma::gui::WIDetachable::Reattach()
 {
 	if(!m_detachedWindow)
 		return;

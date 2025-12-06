@@ -9,7 +9,7 @@ export module pragma.client:gui.choice_list;
 
 export import pragma.gui;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WIChoiceList : public WIBase {
 	  public:
 		struct Choice {

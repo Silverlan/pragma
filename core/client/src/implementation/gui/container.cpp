@@ -7,9 +7,9 @@ module pragma.client;
 
 import :gui.container;
 
-WIContainer::WIContainer() : WIBase(), m_padding {0, 0, 0, 0} {}
+pragma::gui::WIContainer::WIContainer() : WIBase(), m_padding {0, 0, 0, 0} {}
 
-void WIContainer::OnChildAdded(WIBase *child)
+void pragma::gui::WIContainer::OnChildAdded(WIBase *child)
 {
 	WIBase::OnChildAdded(child);
 	ScheduleUpdate();
@@ -23,7 +23,7 @@ void WIContainer::OnChildAdded(WIBase *child)
 		cb = child->AddCallback((i == 0) ? "SetPos" : "SetSize", FunctionCallback<void>::Create([this]() { ScheduleUpdate(); }));
 	}
 }
-void WIContainer::OnChildRemoved(WIBase *child)
+void pragma::gui::WIContainer::OnChildRemoved(WIBase *child)
 {
 	WIBase::OnChildRemoved(child);
 	ScheduleUpdate();
@@ -39,13 +39,13 @@ void WIContainer::OnChildRemoved(WIBase *child)
 	}
 	m_childCallbacks.erase(it);
 }
-void WIContainer::SetPadding(int32_t padding)
+void pragma::gui::WIContainer::SetPadding(int32_t padding)
 {
 	for(auto &v : m_padding)
 		v = padding;
 }
-void WIContainer::SetPadding(int32_t top, int32_t right, int32_t bottom, int32_t left) { m_padding = {top, right, bottom, left}; }
-void WIContainer::SetPadding(Padding paddingType, int32_t padding)
+void pragma::gui::WIContainer::SetPadding(int32_t top, int32_t right, int32_t bottom, int32_t left) { m_padding = {top, right, bottom, left}; }
+void pragma::gui::WIContainer::SetPadding(Padding paddingType, int32_t padding)
 {
 	switch(paddingType) {
 	case Padding::Top:
@@ -62,26 +62,26 @@ void WIContainer::SetPadding(Padding paddingType, int32_t padding)
 		break;
 	}
 }
-void WIContainer::SizeToContents(bool x, bool y)
+void pragma::gui::WIContainer::SizeToContents(bool x, bool y)
 {
 	WIBase::SizeToContents(x, y);
 	SetSize(GetWidth() + GetPaddingLeft() + GetPaddingRight(), GetHeight() + GetPaddingTop() + GetPaddingBottom());
 }
-void WIContainer::DoUpdate()
+void pragma::gui::WIContainer::DoUpdate()
 {
 	WIBase::DoUpdate();
 	SizeToContents();
 }
-void WIContainer::SetPaddingTop(int32_t top) { m_padding[0] = top; }
-void WIContainer::SetPaddingRight(int32_t right) { m_padding[1] = right; }
-void WIContainer::SetPaddingBottom(int32_t bottom) { m_padding[2] = bottom; }
-void WIContainer::SetPaddingLeft(int32_t left) { m_padding[3] = left; }
-const std::array<int32_t, 4> &WIContainer::GetPadding() const { return m_padding; }
-int32_t WIContainer::GetPaddingTop() const { return m_padding[0]; }
-int32_t WIContainer::GetPaddingRight() const { return m_padding[1]; }
-int32_t WIContainer::GetPaddingBottom() const { return m_padding[2]; }
-int32_t WIContainer::GetPaddingLeft() const { return m_padding[3]; }
-int32_t WIContainer::GetPadding(Padding paddingType) const
+void pragma::gui::WIContainer::SetPaddingTop(int32_t top) { m_padding[0] = top; }
+void pragma::gui::WIContainer::SetPaddingRight(int32_t right) { m_padding[1] = right; }
+void pragma::gui::WIContainer::SetPaddingBottom(int32_t bottom) { m_padding[2] = bottom; }
+void pragma::gui::WIContainer::SetPaddingLeft(int32_t left) { m_padding[3] = left; }
+const std::array<int32_t, 4> &pragma::gui::WIContainer::GetPadding() const { return m_padding; }
+int32_t pragma::gui::WIContainer::GetPaddingTop() const { return m_padding[0]; }
+int32_t pragma::gui::WIContainer::GetPaddingRight() const { return m_padding[1]; }
+int32_t pragma::gui::WIContainer::GetPaddingBottom() const { return m_padding[2]; }
+int32_t pragma::gui::WIContainer::GetPaddingLeft() const { return m_padding[3]; }
+int32_t pragma::gui::WIContainer::GetPadding(Padding paddingType) const
 {
 	switch(paddingType) {
 	case Padding::Top:

@@ -8,7 +8,7 @@ export module pragma.client:gui.fps;
 
 export import pragma.gui;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WIFPS : public WIBase {
 	  private:
 		WIHandle m_text;

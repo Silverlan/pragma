@@ -80,7 +80,7 @@ void WIMessageBox::SetTitle(const std::string &title)
 {
 	if(!m_hMessage.IsValid())
 		return;
-	static_cast<WIFrame *>(m_hMessage.get())->SetTitle(title);
+	static_cast<pragma::gui::WIFrame *>(m_hMessage.get())->SetTitle(title);
 }
 
 void WIMessageBox::__buttonCallback(WIHandle hMessageBox, WIMessageBox::Button button)
@@ -152,8 +152,8 @@ void WIMessageBox::Initialize()
 	pRect->SetColor(0.f, 0.f, 0.f, 0.8f);
 	pRect->SetAutoAlignToParent(true);
 
-	m_hMessage = CreateChild<WIFrame>();
-	auto *pMessage = m_hMessage.get<WIFrame>();
+	m_hMessage = CreateChild<pragma::gui::WIFrame>();
+	auto *pMessage = m_hMessage.get<pragma::gui::WIFrame>();
 	pMessage->SetWidth(512);
 	pMessage->SetCloseButtonEnabled(false);
 	auto hMessageBox = GetHandle();
@@ -163,7 +163,7 @@ void WIMessageBox::Initialize()
 		auto *pMessageBox = hMessageBox.get<WIMessageBox>();
 		if(!pMessageBox->m_hMessage.IsValid())
 			return;
-		auto *pMessage = pMessageBox->m_hMessage.get<WIFrame>();
+		auto *pMessage = pMessageBox->m_hMessage.get<pragma::gui::WIFrame>();
 		auto &buttons = pMessageBox->m_buttons;
 		Int32 xMargin = MARGIN_X;
 		auto wMessage = pMessage->GetWidth();
@@ -205,7 +205,7 @@ void WIMessageBox::SetSize(int x, int y)
 	WIBase::SetSize(x, y);
 
 	if(m_hMessage.IsValid()) {
-		auto *pMessage = m_hMessage.get<WIFrame>();
+		auto *pMessage = m_hMessage.get<pragma::gui::WIFrame>();
 		pMessage->SetPos(CInt32(CFloat(x) * 0.5f - CFloat(pMessage->GetWidth()) * 0.5f), CInt32(CFloat(y) * 0.5f - CFloat(pMessage->GetHeight()) * 0.5f));
 	}
 }
@@ -219,7 +219,7 @@ void WIMessageBox::SetText(const std::string &text)
 	if(!m_hMessage.IsValid())
 		return;
 	auto numButtons = m_buttons.size();
-	auto *pMessage = m_hMessage.get<WIFrame>();
+	auto *pMessage = m_hMessage.get<pragma::gui::WIFrame>();
 	pMessage->SetWidth(200 + CUInt32(numButtons) * 80);
 	auto h = pText->GetHeight();
 	pMessage->SetHeight(h + 120);

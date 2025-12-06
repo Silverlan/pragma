@@ -308,8 +308,8 @@ luabind::object WGUILuaInterface::CreateLuaObject(lua::State *l, WIBase &p)
 			return cast_to_type<WINumericEntry>(l, p);
 		else if(dynamic_cast<WIDropDownMenu *>(&p) != nullptr)
 			return cast_to_type<WIDropDownMenu>(l, p);
-		else if(dynamic_cast<WICommandLineEntry *>(&p) != nullptr)
-			return cast_to_type<WICommandLineEntry>(l, p);
+		else if(dynamic_cast<pragma::gui::WICommandLineEntry *>(&p) != nullptr)
+			return cast_to_type<pragma::gui::WICommandLineEntry>(l, p);
 		return cast_to_type<WITextEntry>(l, p);
 	}
 	else if(dynamic_cast<WIText *>(&p) != nullptr)
@@ -331,16 +331,16 @@ luabind::object WGUILuaInterface::CreateLuaObject(lua::State *l, WIBase &p)
 		}
 		else if(dynamic_cast<WIRoundedRect *>(&p) != nullptr)
 			return cast_to_type<WIRoundedRect>(l, p);
-		else if(dynamic_cast<WICheckbox *>(&p) != nullptr)
-			return cast_to_type<WICheckbox>(l, p);
+		else if(dynamic_cast<pragma::gui::WICheckbox *>(&p) != nullptr)
+			return cast_to_type<pragma::gui::WICheckbox>(l, p);
 		else if(dynamic_cast<WIArrow *>(&p) != nullptr)
 			return cast_to_type<WIArrow>(l, p);
 		return cast_to_type<WIShape>(l, p);
 	}
-	else if(dynamic_cast<WIContainer *>(&p) != nullptr) {
+	else if(dynamic_cast<pragma::gui::WIContainer *>(&p) != nullptr) {
 		if(dynamic_cast<WITable *>(&p) != nullptr) {
-			if(dynamic_cast<WIGridPanel *>(&p) != nullptr)
-				return cast_to_type<WIGridPanel>(l, p);
+			if(dynamic_cast<pragma::gui::WIGridPanel *>(&p) != nullptr)
+				return cast_to_type<pragma::gui::WIGridPanel>(l, p);
 			else if(dynamic_cast<WITreeList *>(&p) != nullptr)
 				return cast_to_type<WITreeList>(l, p);
 			return cast_to_type<WITable>(l, p);
@@ -352,7 +352,7 @@ luabind::object WGUILuaInterface::CreateLuaObject(lua::State *l, WIBase &p)
 		}
 		else if(dynamic_cast<WITableCell *>(&p) != nullptr)
 			return cast_to_type<WITableCell>(l, p);
-		return cast_to_type<WIContainer>(l, p);
+		return cast_to_type<pragma::gui::WIContainer>(l, p);
 	}
 	else if(dynamic_cast<WIScrollBar *>(&p) != nullptr)
 		return cast_to_type<WIScrollBar>(l, p);
@@ -364,11 +364,11 @@ luabind::object WGUILuaInterface::CreateLuaObject(lua::State *l, WIBase &p)
 		return cast_to_type<WILine>(l, p);
 	else if(dynamic_cast<WIScrollContainer *>(&p) != nullptr)
 		return cast_to_type<WIScrollContainer>(l, p);
-	else if(dynamic_cast<WIConsole *>(&p) != nullptr)
-		return cast_to_type<WIConsole>(l, p);
+	else if(dynamic_cast<pragma::gui::WIConsole *>(&p) != nullptr)
+		return cast_to_type<pragma::gui::WIConsole>(l, p);
 	else if(dynamic_cast<WITransformable *>(&p) != nullptr) {
-		if(dynamic_cast<WIFrame *>(&p) != nullptr)
-			return cast_to_type<WIFrame>(l, p);
+		if(dynamic_cast<pragma::gui::WIFrame *>(&p) != nullptr)
+			return cast_to_type<pragma::gui::WIFrame>(l, p);
 		return cast_to_type<WITransformable>(l, p);
 	}
 	else if(dynamic_cast<pragma::gui::WIDebugDepthTexture *>(&p) != nullptr)

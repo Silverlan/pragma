@@ -11,7 +11,7 @@ export import :gui.container;
 
 export {
 	class WITableRow;
-	class DLLCLIENT WITableCell : public WIContainer {
+	class DLLCLIENT WITableCell : public pragma::gui::WIContainer {
 	  private:
 		std::pair<int32_t, int32_t> m_span;
 		WITableRow *GetRow() const;
@@ -30,7 +30,7 @@ export {
 		int32_t GetColSpan() const;
 	};
 
-	class DLLCLIENT WITable : public WIContainer {
+	class DLLCLIENT WITable : public pragma::gui::WIContainer {
 	  public:
 		friend WITableRow;
 	  public:
@@ -120,7 +120,7 @@ export {
 	};
 
 	class WITableCell;
-	class DLLCLIENT WITableRow : public WIContainer {
+	class DLLCLIENT WITableRow : public pragma::gui::WIContainer {
 	  protected:
 		std::vector<WIHandle> m_cells;
 		bool m_bSelected;

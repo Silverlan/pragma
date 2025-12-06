@@ -966,7 +966,7 @@ static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerCompone
 	pElContainer->TrapFocus(true);
 	pElContainer->RequestFocus();
 
-	auto *pFrameBrdf = wgui.Create<WIFrame>(pElContainer);
+	auto *pFrameBrdf = wgui.Create<pragma::gui::WIFrame>(pElContainer);
 	pFrameBrdf->SetTitle("BRDF");
 	auto *pBrdf = wgui.Create<WITexturedRect>(pFrameBrdf);
 	pBrdf->SetSize(256, 256);
@@ -992,7 +992,7 @@ static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerCompone
 
 	///
 
-	auto *pFrameIrradiance = wgui.Create<WIFrame>(pElContainer);
+	auto *pFrameIrradiance = wgui.Create<pragma::gui::WIFrame>(pElContainer);
 	pFrameIrradiance->SetTitle("Irradiance");
 	pFrameIrradiance->SetX(pFrameBrdf->GetRight());
 	auto *pIrradiance = wgui.Create<WITexturedCubemap>(pFrameIrradiance);
@@ -1018,7 +1018,7 @@ static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerCompone
 
 	///
 
-	auto *pFramePrefilter = wgui.Create<WIFrame>(pElContainer);
+	auto *pFramePrefilter = wgui.Create<pragma::gui::WIFrame>(pElContainer);
 	pFramePrefilter->SetTitle("Prefilter");
 	pFramePrefilter->SetY(pFrameIrradiance->GetBottom());
 	auto *pPrefilter = wgui.Create<WITexturedCubemap>(pFramePrefilter);

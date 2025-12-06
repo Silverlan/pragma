@@ -13,18 +13,18 @@ import pragma.string.unicode;
 #define WIFRAME_DRAG_OFFSET_BORDER 5
 #define WIFRAME_RESIZE_OFFSET_BORDER 5
 
-WIFrame::WIFrame() : WITransformable() {}
-WIFrame::~WIFrame()
+pragma::gui::WIFrame::WIFrame() : WITransformable() {}
+pragma::gui::WIFrame::~WIFrame()
 {
 	if(m_resizeMode != ResizeMode::none)
 		WGUI::GetInstance().SetCursor(pragma::platform::Cursor::Shape::Arrow);
 }
 
-WIBase *WIFrame::GetContents() { return m_hContents.get(); }
+WIBase *pragma::gui::WIFrame::GetContents() { return m_hContents.get(); }
 
-void WIFrame::OnDetachButtonPressed() { Detach(); }
+void pragma::gui::WIFrame::OnDetachButtonPressed() { Detach(); }
 
-void WIFrame::Initialize()
+void pragma::gui::WIFrame::Initialize()
 {
 	SetDraggable(true);
 	SetResizable(true);
@@ -104,47 +104,47 @@ void WIFrame::Initialize()
 		}
 	}
 }
-util::EventReply WIFrame::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+util::EventReply pragma::gui::WIFrame::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	if(WITransformable::MouseCallback(button, state, mods) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	RequestFocus();
 	return util::EventReply::Handled;
 }
-void WIFrame::SetCloseButtonEnabled(bool b)
+void pragma::gui::WIFrame::SetCloseButtonEnabled(bool b)
 {
 	if(!m_hClose.IsValid())
 		return;
 	m_hClose->SetVisible(b);
 }
-bool WIFrame::IsDetached() const
+bool pragma::gui::WIFrame::IsDetached() const
 {
 	auto *detachable = dynamic_cast<const WIDetachable *>(m_hContents.get());
 	if(!detachable)
 		return false;
 	return detachable->IsDetached();
 }
-void WIFrame::Detach()
+void pragma::gui::WIFrame::Detach()
 {
 	auto *detachable = dynamic_cast<WIDetachable *>(m_hContents.get());
 	if(!detachable)
 		return;
 	detachable->Detach();
 }
-void WIFrame::Reattach()
+void pragma::gui::WIFrame::Reattach()
 {
 	auto *detachable = dynamic_cast<WIDetachable *>(m_hContents.get());
 	if(!detachable)
 		return;
 	detachable->Reattach();
 }
-void WIFrame::SetDetachButtonEnabled(bool b)
+void pragma::gui::WIFrame::SetDetachButtonEnabled(bool b)
 {
 	if(!m_hDetachButton.IsValid())
 		return;
 	m_hDetachButton->SetVisible(b);
 }
-void WIFrame::SetSize(int x, int y)
+void pragma::gui::WIFrame::SetSize(int x, int y)
 {
 	WITransformable::SetSize(x, y);
 	if(m_hMoveRect.IsValid())
@@ -167,7 +167,7 @@ void WIFrame::SetSize(int x, int y)
 	}
 }
 
-void WIFrame::SetTitle(std::string title)
+void pragma::gui::WIFrame::SetTitle(std::string title)
 {
 	if(!m_hTitle.IsValid())
 		return;
@@ -176,7 +176,7 @@ void WIFrame::SetTitle(std::string title)
 	pText->SizeToContents();
 	pText->SetVisible(!title.empty());
 }
-const pragma::string::Utf8String &WIFrame::GetTitle() const
+const pragma::string::Utf8String &pragma::gui::WIFrame::GetTitle() const
 {
 	if(!m_hTitle.IsValid()) {
 		static pragma::string::Utf8String emptyString {};

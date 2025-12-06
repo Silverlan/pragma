@@ -206,8 +206,8 @@ static void register_gui(Lua::Interface &lua)
 		  fIterateChildren(*p);
 		  return t;
 	  })),
-	  luabind::def("get_console", &WIConsole::GetConsole), luabind::def("open_console", &WIConsole::Open), luabind::def("close_console", &WIConsole::Close), luabind::def("is_console_open", static_cast<bool (*)(lua::State *)>([](lua::State *l) -> bool {
-		  auto *pConsole = WIConsole::GetConsole();
+	  luabind::def("get_console", &pragma::gui::WIConsole::GetConsole), luabind::def("open_console", &pragma::gui::WIConsole::Open), luabind::def("close_console", &pragma::gui::WIConsole::Close), luabind::def("is_console_open", static_cast<bool (*)(lua::State *)>([](lua::State *l) -> bool {
+		  auto *pConsole = pragma::gui::WIConsole::GetConsole();
 		  auto *pFrame = pConsole ? pConsole->GetFrame() : nullptr;
 		  return pFrame ? pFrame->IsVisible() : false;
 	  })),
@@ -362,7 +362,7 @@ static void register_gui(Lua::Interface &lua)
 	Lua::WIArrow::register_class(wiArrowClassDef);
 	guiMod[wiArrowClassDef];
 
-	auto wiCheckboxClassDef = luabind::class_<::WICheckbox, luabind::bases<::WIShape, ::WIBase>>("Checkbox");
+	auto wiCheckboxClassDef = luabind::class_<pragma::gui::WICheckbox, luabind::bases<::WIShape, ::WIBase>>("Checkbox");
 	Lua::WICheckbox::register_class(wiCheckboxClassDef);
 	guiMod[wiCheckboxClassDef];
 
@@ -423,23 +423,23 @@ static void register_gui(Lua::Interface &lua)
 	wiScrollContainerClassDef.def("ScrollToElementY", &WIScrollContainer::ScrollToElementY);
 	guiMod[wiScrollContainerClassDef];
 
-	auto wiContainerClassDef = luabind::class_<WIContainer, ::WIBase>("Container");
+	auto wiContainerClassDef = luabind::class_<pragma::gui::WIContainer, ::WIBase>("Container");
 	Lua::WIContainer::register_class(wiContainerClassDef);
 	guiMod[wiContainerClassDef];
 
-	auto wiTableClassDef = luabind::class_<WITable, luabind::bases<WIContainer, ::WIBase>>("Table");
+	auto wiTableClassDef = luabind::class_<WITable, luabind::bases<pragma::gui::WIContainer, ::WIBase>>("Table");
 	Lua::WITable::register_class(wiTableClassDef);
 
-	auto wiTableRowClassDef = luabind::class_<WITableRow, luabind::bases<WIContainer, ::WIBase>>("Row");
+	auto wiTableRowClassDef = luabind::class_<WITableRow, luabind::bases<pragma::gui::WIContainer, ::WIBase>>("Row");
 	Lua::WITableRow::register_class(wiTableRowClassDef);
 
-	auto wiTableCellClassDef = luabind::class_<WITableCell, luabind::bases<WIContainer, ::WIBase>>("Cell");
+	auto wiTableCellClassDef = luabind::class_<WITableCell, luabind::bases<pragma::gui::WIContainer, ::WIBase>>("Cell");
 	Lua::WITableCell::register_class(wiTableCellClassDef);
 	wiTableClassDef.scope[wiTableCellClassDef];
 	wiTableClassDef.scope[wiTableRowClassDef];
 	guiMod[wiTableClassDef];
 
-	auto wiGridPanelClassDef = luabind::class_<WIGridPanel, luabind::bases<WITable, ::WIBase>>("GridPanel");
+	auto wiGridPanelClassDef = luabind::class_<pragma::gui::WIGridPanel, luabind::bases<WITable, ::WIBase>>("GridPanel");
 	Lua::WIGridPanel::register_class(wiGridPanelClassDef);
 	guiMod[wiGridPanelClassDef];
 
@@ -451,7 +451,7 @@ static void register_gui(Lua::Interface &lua)
 	wiTreeListClassDef.scope[wiTreeListElementClassDef];
 	guiMod[wiTreeListClassDef];
 
-	auto wiFrameClassDef = luabind::class_<WIFrame, luabind::bases<WITransformable, ::WIBase>>("Frame");
+	auto wiFrameClassDef = luabind::class_<pragma::gui::WIFrame, luabind::bases<WITransformable, ::WIBase>>("Frame");
 	Lua::WIFrame::register_class(wiFrameClassDef);
 	guiMod[wiFrameClassDef];
 
@@ -464,9 +464,9 @@ static void register_gui(Lua::Interface &lua)
 	wiTextEntryClassDef.def("GetCaretElement", &WITextEntry::GetCaretElement);
 	guiMod[wiTextEntryClassDef];
 
-	auto wiCommandLineEntryClassDef = luabind::class_<WICommandLineEntry, luabind::bases<WITextEntry, ::WIBase>>("CommandLineEntry");
-	wiCommandLineEntryClassDef.def("SetAutoCompleteEntryLimit", &WICommandLineEntry::SetAutoCompleteEntryLimit);
-	wiCommandLineEntryClassDef.def("GetAutoCompleteEntryLimit", &WICommandLineEntry::GetAutoCompleteEntryLimit);
+	auto wiCommandLineEntryClassDef = luabind::class_<pragma::gui::WICommandLineEntry, luabind::bases<WITextEntry, ::WIBase>>("CommandLineEntry");
+	wiCommandLineEntryClassDef.def("SetAutoCompleteEntryLimit", &pragma::gui::WICommandLineEntry::SetAutoCompleteEntryLimit);
+	wiCommandLineEntryClassDef.def("GetAutoCompleteEntryLimit", &pragma::gui::WICommandLineEntry::GetAutoCompleteEntryLimit);
 	guiMod[wiCommandLineEntryClassDef];
 
 	auto wiOutlinedRectClassDef = luabind::class_<WIOutlinedRect, ::WIBase>("OutlinedRect");
@@ -520,18 +520,18 @@ static void register_gui(Lua::Interface &lua)
 	wiRootDef.def("GetAssociatedWindow", static_cast<prosper::Window *(::WIRoot::*)()>(&::WIRoot::GetWindow));
 	guiMod[wiRootDef];
 
-	auto wiConsoleClassDef = luabind::class_<WIConsole, ::WIBase>("Console");
-	wiConsoleClassDef.def("GetCommandLineEntryElement", &WIConsole::GetCommandLineEntryElement);
-	wiConsoleClassDef.def("GetTextLogElement", &WIConsole::GetTextLogElement);
-	wiConsoleClassDef.def("SetExternallyOwned", &WIConsole::SetExternallyOwned);
-	wiConsoleClassDef.def("IsExternallyOwned", &WIConsole::IsExternallyOwned);
-	wiConsoleClassDef.def("GetFrame", &WIConsole::GetFrame);
-	wiConsoleClassDef.def("GetText", +[](const ::WIConsole &console) { return console.GetText().cpp_str(); });
-	wiConsoleClassDef.def("SetText", &WIConsole::SetText);
-	wiConsoleClassDef.def("AppendText", &WIConsole::AppendText);
-	wiConsoleClassDef.def("Clear", &WIConsole::Clear);
-	wiConsoleClassDef.def("SetMaxLogLineCount", &WIConsole::SetMaxLogLineCount);
-	wiConsoleClassDef.def("GetMaxLogLineCount", &WIConsole::GetMaxLogLineCount);
+	auto wiConsoleClassDef = luabind::class_<pragma::gui::WIConsole, ::WIBase>("Console");
+	wiConsoleClassDef.def("GetCommandLineEntryElement", &pragma::gui::WIConsole::GetCommandLineEntryElement);
+	wiConsoleClassDef.def("GetTextLogElement", &pragma::gui::WIConsole::GetTextLogElement);
+	wiConsoleClassDef.def("SetExternallyOwned", &pragma::gui::WIConsole::SetExternallyOwned);
+	wiConsoleClassDef.def("IsExternallyOwned", &pragma::gui::WIConsole::IsExternallyOwned);
+	wiConsoleClassDef.def("GetFrame", &pragma::gui::WIConsole::GetFrame);
+	wiConsoleClassDef.def("GetText", +[](const pragma::gui::WIConsole &console) { return console.GetText().cpp_str(); });
+	wiConsoleClassDef.def("SetText", &pragma::gui::WIConsole::SetText);
+	wiConsoleClassDef.def("AppendText", &pragma::gui::WIConsole::AppendText);
+	wiConsoleClassDef.def("Clear", &pragma::gui::WIConsole::Clear);
+	wiConsoleClassDef.def("SetMaxLogLineCount", &pragma::gui::WIConsole::SetMaxLogLineCount);
+	wiConsoleClassDef.def("GetMaxLogLineCount", &pragma::gui::WIConsole::GetMaxLogLineCount);
 	guiMod[wiConsoleClassDef];
 
 	auto wiRoundedRectClassDef = luabind::class_<WIRoundedRect, luabind::bases<WIShape, ::WIBase>>("RoundedRect");

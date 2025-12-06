@@ -176,7 +176,7 @@ void pragma::ClientState::ShowFPSCounter(bool b)
 	if(b == true) {
 		if(m_hFps.IsValid())
 			return;
-		auto *pFps = WGUI::GetInstance().Create<WIFPS>();
+		auto *pFps = WGUI::GetInstance().Create<pragma::gui::WIFPS>();
 		if(pFps == nullptr)
 			return;
 		pFps->SetPos(10, 10);

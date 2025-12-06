@@ -19,7 +19,7 @@ import pragma.gui;
 import pragma.string.unicode;
 
 static WIHandle s_hConsole = {};
-WIConsole *WIConsole::Open()
+pragma::gui::WIConsole *pragma::gui::WIConsole::Open()
 {
 	if(s_hConsole.IsValid()) {
 		auto *pConsole = static_cast<WIConsole *>(s_hConsole.get());
@@ -83,7 +83,7 @@ WIConsole *WIConsole::Open()
 	    "\n");
 	return pConsole;
 }
-void WIConsole::Close()
+void pragma::gui::WIConsole::Close()
 {
 	if(s_hConsole.IsValid() == false)
 		return;
@@ -91,11 +91,11 @@ void WIConsole::Close()
 	if(pFrame)
 		pFrame->SetVisible(false);
 }
-WIConsole *WIConsole::GetConsole() { return static_cast<WIConsole *>(s_hConsole.get()); }
+pragma::gui::WIConsole *pragma::gui::WIConsole::GetConsole() { return static_cast<WIConsole *>(s_hConsole.get()); }
 
 /////////////
 
-void WIConsole::SetSimpleConsoleMode(bool simple, bool force)
+void pragma::gui::WIConsole::SetSimpleConsoleMode(bool simple, bool force)
 {
 	if(m_mode == Mode::ExternalWindow)
 		return;
@@ -138,7 +138,7 @@ void WIConsole::SetSimpleConsoleMode(bool simple, bool force)
 	m_mode = simple ? Mode::SimplifiedOverlay : Mode::Standard;
 }
 
-void WIConsole::Initialize()
+void pragma::gui::WIConsole::Initialize()
 {
 	WIBase::Initialize();
 
@@ -309,24 +309,24 @@ void WIConsole::Initialize()
 		m_cbMainMenuVisibility = pMainMenu->GetVisibilityProperty()->AddCallback([this](std::reference_wrapper<const bool> oldValue, std::reference_wrapper<const bool> visible) { UpdateConsoleMode(); });
 	}
 }
-void WIConsole::OnDescendantFocusGained(WIBase &el)
+void pragma::gui::WIConsole::OnDescendantFocusGained(WIBase &el)
 {
 	WIBase::OnDescendantFocusGained(el);
 	if(&el == m_hCommandEntry.get())
 		el.SetVisible(true);
 }
-void WIConsole::OnDescendantFocusKilled(WIBase &el)
+void pragma::gui::WIConsole::OnDescendantFocusKilled(WIBase &el)
 {
 	WIBase::OnDescendantFocusKilled(el);
 	if(&el == m_hCommandEntry.get())
 		el.SetVisible(m_mode != Mode::SimplifiedOverlay);
 }
-void WIConsole::RequestFocus()
+void pragma::gui::WIConsole::RequestFocus()
 {
 	if(m_hCommandEntry.IsValid())
 		m_hCommandEntry->RequestFocus();
 }
-void WIConsole::OnRemove()
+void pragma::gui::WIConsole::OnRemove()
 {
 	WIBase::OnRemove();
 	if(m_cbConsoleOutput.IsValid())
@@ -337,7 +337,7 @@ void WIConsole::OnRemove()
 		m_cbCommandEntryVisibility.Remove();
 	pragma::get_cengine()->SetRecordConsoleOutput(false);
 }
-void WIConsole::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void pragma::gui::WIConsole::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	WIBase::Think(drawCmd);
 	if(m_hLog.IsValid() == false)
@@ -373,11 +373,11 @@ void WIConsole::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &dra
 	m_pendingConsoleOutput = AppendText(text);
 }
 
-WICommandLineEntry *WIConsole::GetCommandLineEntryElement() { return static_cast<WICommandLineEntry *>(m_hCommandEntry.get()); }
-WITextEntry *WIConsole::GetTextLogElement() { return static_cast<WITextEntry *>(m_hLog.get()); }
+pragma::gui::WICommandLineEntry *pragma::gui::WIConsole::GetCommandLineEntryElement() { return static_cast<WICommandLineEntry *>(m_hCommandEntry.get()); }
+WITextEntry *pragma::gui::WIConsole::GetTextLogElement() { return static_cast<WITextEntry *>(m_hLog.get()); }
 const auto REF_WIDTH = 1'280u;
 const auto REF_HEIGHT = 1'024u;
-WISnapArea *WIConsole::CreateSnapTarget(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t xt, uint32_t yt, uint32_t wt, uint32_t ht)
+WISnapArea *pragma::gui::WIConsole::CreateSnapTarget(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t xt, uint32_t yt, uint32_t wt, uint32_t ht)
 {
 	auto *pFrame = GetFrame();
 	if(pFrame == nullptr)
@@ -397,7 +397,7 @@ WISnapArea *WIConsole::CreateSnapTarget(uint32_t x, uint32_t y, uint32_t w, uint
 	pFrame->AddSnapTarget(*pSnapTarget);
 	return pSnapTarget;
 }
-void WIConsole::SetExternallyOwned(bool externallyOwned)
+void pragma::gui::WIConsole::SetExternallyOwned(bool externallyOwned)
 {
 	m_mode = externallyOwned ? Mode::ExternalOwnership : Mode::Standard;
 	auto *frame = GetFrame();
@@ -409,14 +409,14 @@ void WIConsole::SetExternallyOwned(bool externallyOwned)
 	}
 	SetSimpleConsoleMode(false, true);
 }
-bool WIConsole::IsExternallyOwned() const { return m_mode == Mode::ExternalOwnership; }
-void WIConsole::UpdateConsoleMode()
+bool pragma::gui::WIConsole::IsExternallyOwned() const { return m_mode == Mode::ExternalOwnership; }
+void pragma::gui::WIConsole::UpdateConsoleMode()
 {
 	if(m_mode == Mode::ExternalOwnership)
 		return;
 	SetSimpleConsoleMode(pragma::get_client_state()->IsMainMenuOpen() == false);
 }
-void WIConsole::InitializeSnapAreas()
+void pragma::gui::WIConsole::InitializeSnapAreas()
 {
 	const auto size = 242u;
 	const auto sizeTrigger = 32u;
@@ -433,7 +433,7 @@ void WIConsole::InitializeSnapAreas()
 		size -sizeTrigger,0,sizeTrigger,REF_HEIGHT
 	);*/
 }
-void WIConsole::SetFrame(WIFrame &frame)
+void pragma::gui::WIConsole::SetFrame(WIFrame &frame)
 {
 	m_hFrame = frame.GetHandle();
 	InitializeSnapAreas();
@@ -445,9 +445,9 @@ void WIConsole::SetFrame(WIFrame &frame)
 	if(m_mode != Mode::ExternalWindow)
 		SetSimpleConsoleMode(m_mode == Mode::SimplifiedOverlay, true);
 }
-WIFrame *WIConsole::GetFrame() { return static_cast<WIFrame *>(m_hFrame.get()); }
+pragma::gui::WIFrame *pragma::gui::WIConsole::GetFrame() { return static_cast<WIFrame *>(m_hFrame.get()); }
 
-const pragma::string::Utf8String &WIConsole::GetText() const
+const pragma::string::Utf8String &pragma::gui::WIConsole::GetText() const
 {
 	static pragma::string::Utf8String s {};
 	if(m_hLog.IsValid()) {
@@ -461,7 +461,7 @@ const pragma::string::Utf8String &WIConsole::GetText() const
 	}
 	return s;
 }
-void WIConsole::SetText(const std::string &text)
+void pragma::gui::WIConsole::SetText(const std::string &text)
 {
 	if(m_hLog.IsValid() == false)
 		return;
@@ -486,7 +486,7 @@ void WIConsole::SetText(const std::string &text)
 	pLog->SetText(ltext);
 	pLog->SizeToContents();
 }
-std::string_view WIConsole::AppendText(const std::string &text)
+std::string_view pragma::gui::WIConsole::AppendText(const std::string &text)
 {
 	if(text.empty() || m_hLog.IsValid() == false)
 		return {};
@@ -526,6 +526,6 @@ std::string_view WIConsole::AppendText(const std::string &text)
 	pLog->SizeToContents();
 	return remaining;
 }
-void WIConsole::SetMaxLogLineCount(uint32_t count) { m_maxLogLineCount = count; }
-uint32_t WIConsole::GetMaxLogLineCount() const { return m_maxLogLineCount; }
-void WIConsole::Clear() { SetText(""); }
+void pragma::gui::WIConsole::SetMaxLogLineCount(uint32_t count) { m_maxLogLineCount = count; }
+uint32_t pragma::gui::WIConsole::GetMaxLogLineCount() const { return m_maxLogLineCount; }
+void pragma::gui::WIConsole::Clear() { SetText(""); }

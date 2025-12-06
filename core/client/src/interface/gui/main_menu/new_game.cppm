@@ -8,7 +8,7 @@ export module pragma.client:gui.main_menu_new_game;
 
 export import :gui.main_menu_base;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WIMainMenuNewGame : public WIMainMenuBase {
 	  protected:
 		WIHandle m_hMapList;

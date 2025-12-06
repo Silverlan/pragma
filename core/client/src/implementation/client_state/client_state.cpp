@@ -160,7 +160,7 @@ void pragma::ClientState::Initialize()
 	pragma::get_cengine()->LoadClientConfig();
 	InitializeGUILua();
 	auto &gui = WGUI::GetInstance();
-	m_hMainMenu = gui.Create<WIMainMenu>()->GetHandle();
+	m_hMainMenu = gui.Create<pragma::gui::WIMainMenu>()->GetHandle();
 
 	UpdateGameWorldShaderSettings();
 
@@ -274,30 +274,30 @@ void pragma::ClientState::InitializeGUILua()
 void pragma::ClientState::AddGUILuaWrapperFactory(const std::function<luabind::object(lua::State *, WIBase &)> &f) { m_guiLuaWrapperFactories.push_back(f); }
 std::vector<std::function<luabind::object(lua::State *, WIBase &)>> &pragma::ClientState::GetGUILuaWrapperFactories() { return m_guiLuaWrapperFactories; }
 
-WIMainMenu *pragma::ClientState::GetMainMenu()
+pragma::gui::WIMainMenu *pragma::ClientState::GetMainMenu()
 {
 	if(!m_hMainMenu.IsValid())
 		return nullptr;
-	return m_hMainMenu.get<WIMainMenu>();
+	return m_hMainMenu.get<pragma::gui::WIMainMenu>();
 }
 
 bool pragma::ClientState::IsMainMenuOpen()
 {
-	WIMainMenu *menu = GetMainMenu();
+	pragma::gui::WIMainMenu *menu = GetMainMenu();
 	if(menu == nullptr)
 		return false;
 	return menu->IsVisible();
 }
 void pragma::ClientState::CloseMainMenu()
 {
-	WIMainMenu *menu = GetMainMenu();
+	pragma::gui::WIMainMenu *menu = GetMainMenu();
 	if(menu == nullptr || !menu->IsVisible())
 		return;
 	menu->SetVisible(false);
 }
 void pragma::ClientState::OpenMainMenu()
 {
-	WIMainMenu *menu = GetMainMenu();
+	pragma::gui::WIMainMenu *menu = GetMainMenu();
 	if(menu == nullptr)
 		return;
 	auto &window = pragma::get_cengine()->GetWindow();
@@ -306,7 +306,7 @@ void pragma::ClientState::OpenMainMenu()
 }
 void pragma::ClientState::ToggleMainMenu()
 {
-	WIMainMenu *menu = GetMainMenu();
+	pragma::gui::WIMainMenu *menu = GetMainMenu();
 	if(menu == nullptr)
 		return;
 	if(menu->IsVisible()) {
@@ -498,7 +498,7 @@ void pragma::ClientState::EndGame()
 	NetworkState::EndGame();
 	m_conCommandIDs.clear();
 	if(m_hMainMenu.IsValid()) {
-		WIMainMenu *menu = m_hMainMenu.get<WIMainMenu>();
+		auto *menu = m_hMainMenu.get<pragma::gui::WIMainMenu>();
 		menu->SetNewGameMenu();
 	}
 }
@@ -623,7 +623,7 @@ void pragma::ClientState::StartNewGame(const std::string &gameMode)
 	//	RequestServerInfo(); // Deprecated; Now handled through NET_cl_map_ready
 	CloseMainMenu();
 	if(m_hMainMenu.IsValid()) {
-		WIMainMenu *menu = m_hMainMenu.get<WIMainMenu>();
+		auto *menu = m_hMainMenu.get<pragma::gui::WIMainMenu>();
 		menu->SetContinueMenu();
 	}
 }

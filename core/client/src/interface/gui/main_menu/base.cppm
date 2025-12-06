@@ -9,7 +9,7 @@ export module pragma.client:gui.main_menu_base;
 
 export import :gui.options_list;
 
-export {
+export namespace pragma::gui {
 	class WIMainMenuElement;
 	class DLLCLIENT WIMainMenuBase : public WIBase {
 	  public:

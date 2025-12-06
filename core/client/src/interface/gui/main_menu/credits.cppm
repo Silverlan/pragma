@@ -8,7 +8,7 @@ export module pragma.client:gui.main_menu_credits;
 
 export import :gui.main_menu_base;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WIMainMenuCredits : public WIMainMenuBase {
 	  public:
 		WIMainMenuCredits();

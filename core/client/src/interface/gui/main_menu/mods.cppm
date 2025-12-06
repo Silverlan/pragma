@@ -11,7 +11,7 @@ export import :core;
 export import :gui.chromium_page;
 export import :gui.main_menu_base;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WIMainMenuMods : public WIMainMenuBase, public WIChromiumPage {
 	  protected:
 		WIHandle m_hWeb;

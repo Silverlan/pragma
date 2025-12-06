@@ -10,7 +10,7 @@ export module pragma.client:gui.main_menu_options;
 import :gui.checkbox;
 export import :gui.main_menu_base;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WIMainMenuOptions : public WIMainMenuBase {
 	  public:
 		WIMainMenuOptions();

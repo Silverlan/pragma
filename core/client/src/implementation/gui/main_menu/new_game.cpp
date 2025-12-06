@@ -14,15 +14,15 @@ import :engine;
 import pragma.gui;
 import pragma.string.unicode;
 
-WIMainMenuNewGame::WIMainMenuNewGame() : WIMainMenuBase() {}
+pragma::gui::WIMainMenuNewGame::WIMainMenuNewGame() : WIMainMenuBase() {}
 
-WIMainMenuNewGame::~WIMainMenuNewGame()
+pragma::gui::WIMainMenuNewGame::~WIMainMenuNewGame()
 {
 	if(m_cbMapListReload.IsValid())
 		m_cbMapListReload.Remove();
 }
 
-void WIMainMenuNewGame::OnStartGame(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier)
+void pragma::gui::WIMainMenuNewGame::OnStartGame(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier)
 {
 	if(button != pragma::platform::MouseButton::Left || state != pragma::platform::KeyState::Press)
 		return;
@@ -59,7 +59,7 @@ void WIMainMenuNewGame::OnStartGame(pragma::platform::MouseButton button, pragma
 	pragma::get_cengine()->StartDefaultGame(map, maxPlayers <= 1);
 }
 
-void WIMainMenuNewGame::Initialize()
+void pragma::gui::WIMainMenuNewGame::Initialize()
 {
 	WIMainMenuBase::Initialize();
 	AddMenuItem(pragma::locale::get_text("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
@@ -73,7 +73,7 @@ void WIMainMenuNewGame::Initialize()
 	EnableThinking();
 }
 
-void WIMainMenuNewGame::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void pragma::gui::WIMainMenuNewGame::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	WIMainMenuBase::Think(drawCmd);
 	DisableThinking();
@@ -84,7 +84,7 @@ void WIMainMenuNewGame::Think(const std::shared_ptr<prosper::IPrimaryCommandBuff
 	ReloadMapList();
 }
 
-void WIMainMenuNewGame::InitializeOptionsList(WIOptionsList *pList)
+void pragma::gui::WIMainMenuNewGame::InitializeOptionsList(WIOptionsList *pList)
 {
 	auto *pRow = pList->AddRow();
 	pRow->SetValue(0, "");
@@ -104,7 +104,7 @@ void WIMainMenuNewGame::InitializeOptionsList(WIOptionsList *pList)
 	WIMainMenuBase::InitializeOptionsList(pList);
 }
 
-void WIMainMenuNewGame::ReloadMapList()
+void pragma::gui::WIMainMenuNewGame::ReloadMapList()
 {
 	if(m_hMapList.IsValid() == false)
 		return;
@@ -208,7 +208,7 @@ void WIMainMenuNewGame::ReloadMapList()
 	fAddMaps(files, Color {200, 0, 0, 255});
 }
 
-void WIMainMenuNewGame::InitializeGameSettings()
+void pragma::gui::WIMainMenuNewGame::InitializeGameSettings()
 {
 	auto *pList = InitializeOptionsList();
 	auto title = pragma::locale::get_text("game_settings");

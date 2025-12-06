@@ -9,7 +9,7 @@ export module pragma.client:gui.load_screen;
 export import :gui.main_menu_base;
 
 export {
-	class DLLCLIENT WILoadScreen : public WIMainMenuBase {
+	class DLLCLIENT WILoadScreen : public pragma::gui::WIMainMenuBase {
 	  private:
 		WIHandle m_hText;
 		WIHandle m_hProgress;

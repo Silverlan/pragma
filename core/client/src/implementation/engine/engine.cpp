@@ -1250,7 +1250,7 @@ void pragma::CEngine::RegisterUiElementTypes()
 	gui.RegisterType<pragma::gui::WIDebugMSAATexture>("WIDebugMSAATexture");
 	gui.RegisterType<pragma::gui::WIDebugShadowMap>("WIDebugShadowMap");
 	gui.RegisterType<pragma::gui::WIDebugSSAO>("WIDebugSSAO");
-	gui.RegisterType<WIMainMenuElement>("WIMainMenuElement");
+	gui.RegisterType<pragma::gui::WIMainMenuElement>("WIMainMenuElement");
 }
 
 const std::string &pragma::CEngine::GetDefaultFontSetName() const { return m_defaultFontSet; }

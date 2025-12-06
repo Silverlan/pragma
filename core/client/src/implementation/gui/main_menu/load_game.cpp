@@ -9,11 +9,11 @@ import :gui.main_menu_load_game;
 import :client_state;
 import :engine;
 
-WIMainMenuLoadGame::WIMainMenuLoadGame() : WIMainMenuBase() {}
+pragma::gui::WIMainMenuLoadGame::WIMainMenuLoadGame() : WIMainMenuBase() {}
 
-WIMainMenuLoadGame::~WIMainMenuLoadGame() {}
+pragma::gui::WIMainMenuLoadGame::~WIMainMenuLoadGame() {}
 
-void WIMainMenuLoadGame::Initialize()
+void pragma::gui::WIMainMenuLoadGame::Initialize()
 {
 	WIMainMenuBase::Initialize();
 	AddMenuItem(pragma::locale::get_text("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {

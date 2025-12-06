@@ -10,7 +10,7 @@ export module pragma.client:gui.main_menu;
 export import pragma.gui;
 export import pragma.shared;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WIMainMenu : public WIBase {
 	  public:
 		WIMainMenu();

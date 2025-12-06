@@ -126,7 +126,7 @@ export namespace pragma {
 		const pragma::rendering::GameWorldShaderSettings &GetGameWorldShaderSettings() const { return const_cast<ClientState *>(this)->GetGameWorldShaderSettings(); }
 		void UpdateGameWorldShaderSettings();
 
-		WIMainMenu *GetMainMenu();
+		gui::WIMainMenu *GetMainMenu();
 
 		lua::State *GetGUILuaState();
 		Lua::Interface &GetGUILuaInterface();

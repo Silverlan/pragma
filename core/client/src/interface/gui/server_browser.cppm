@@ -25,8 +25,10 @@ export {
 			std::unique_ptr<UDPMessageDispatcher> m_dispatcher;
 		};
 	};
+}
 
-	class DLLCLIENT WIServerBrowser : public pragma::gui::WIFrame {
+export namespace pragma::gui {
+	class DLLCLIENT WIServerBrowser : public WIFrame {
 	  public:
 		WIServerBrowser();
 		virtual ~WIServerBrowser() override;

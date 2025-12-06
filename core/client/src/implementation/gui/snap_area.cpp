@@ -10,9 +10,9 @@ import :gui.snap_area;
 import :client_state;
 import :engine;
 
-WISnapArea::WISnapArea() : WIBase() {}
+pragma::gui::WISnapArea::WISnapArea() : WIBase() {}
 
-void WISnapArea::Initialize()
+void pragma::gui::WISnapArea::Initialize()
 {
 	WIBase::Initialize();
 	SetSize(50, 50);
@@ -22,4 +22,4 @@ void WISnapArea::Initialize()
 	m_hTriggerArea = pTriggerArea->GetHandle();
 }
 
-WIBase *WISnapArea::GetTriggerArea() { return m_hTriggerArea.get(); }
+WIBase *pragma::gui::WISnapArea::GetTriggerArea() { return m_hTriggerArea.get(); }

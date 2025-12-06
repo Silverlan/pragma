@@ -72,7 +72,7 @@ export namespace pragma::gui {
 
 		void CreateLabel(std::string text);
 		WIDropDownMenu *CreateDropDownMenu(std::string text);
-		WICheckbox *CreateCheckbox(std::string text);
+		pragma::gui::WICheckbox *CreateCheckbox(std::string text);
 		void InitializeGeneralSettings();
 		void InitializeVideoSettings();
 		void InitializeAudioSettings();
@@ -82,7 +82,7 @@ export namespace pragma::gui {
 		void ShowVideoSettings();
 		void ShowAudioSettings();
 		void ShowControlSettings();
-		virtual void InitializeOptionsList(WIOptionsList *pList) override;
+		virtual void InitializeOptionsList(pragma::gui::WIOptionsList *pList) override;
 		virtual void OnVisibilityChanged(bool bVisible) override;
 		using WIMainMenuBase::InitializeOptionsList;
 

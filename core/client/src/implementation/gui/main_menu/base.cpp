@@ -192,7 +192,7 @@ void pragma::gui::WIMainMenuBase::RemoveMenuItem(int i)
 	UpdateElements();
 }
 void pragma::gui::WIMainMenuBase::AddMenuItem(std::string name, const CallbackHandle &onActivated) { AddMenuItem(CInt32(m_elements.size()), name, onActivated); }
-WIOptionsList *pragma::gui::WIMainMenuBase::InitializeOptionsList()
+pragma::gui::WIOptionsList *pragma::gui::WIMainMenuBase::InitializeOptionsList()
 {
 	m_hControlSettings = CreateChild<WIOptionsList>();
 	m_hControlSettings->SetName("options");

@@ -19,7 +19,7 @@ export namespace pragma::gui {
 		CallbackHandle m_cbMapListReload;
 		void OnStartGame(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods);
 		void InitializeGameSettings();
-		virtual void InitializeOptionsList(WIOptionsList *pList) override;
+		virtual void InitializeOptionsList(pragma::gui::WIOptionsList *pList) override;
 		using WIMainMenuBase::InitializeOptionsList;
 	  public:
 		WIMainMenuNewGame();

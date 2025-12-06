@@ -262,7 +262,7 @@ void pragma::ClientState::InitializeGUILua()
 		Lua::RunString(l,"print(\"Valid: \",testObjectCast:IsValid())","test");
 	}*/
 
-	WGUILuaInterface::Initialize();
+	pragma::gui::WGUILuaInterface::Initialize();
 
 	pragma::scripting::lua_core::execute_files_in_directory(GetGUILuaState(), "autorun/gui/");
 	if(g_autoExecScripts.has_value()) {
@@ -333,7 +333,7 @@ void pragma::ClientState::Close()
 	Lua::gui::clear_lua_callbacks(state);
 	auto *guiBaseEl = WGUI::GetInstance().GetBaseElement();
 	if(guiBaseEl != nullptr)
-		WGUILuaInterface::ClearGUILuaObjects(*guiBaseEl);
+		pragma::gui::WGUILuaInterface::ClearGUILuaObjects(*guiBaseEl);
 	auto identifier = m_luaGUI->GetIdentifier();
 	TerminateLuaModules(state);
 	m_luaGUI = nullptr;
@@ -498,7 +498,7 @@ void pragma::ClientState::EndGame()
 	NetworkState::EndGame();
 	m_conCommandIDs.clear();
 	if(m_hMainMenu.IsValid()) {
-		auto *menu = m_hMainMenu.get<pragma::gui::WIMainMenu>();
+		pragma::gui::WIMainMenu *menu = m_hMainMenu.get<pragma::gui::WIMainMenu>();
 		menu->SetNewGameMenu();
 	}
 }
@@ -623,7 +623,7 @@ void pragma::ClientState::StartNewGame(const std::string &gameMode)
 	//	RequestServerInfo(); // Deprecated; Now handled through NET_cl_map_ready
 	CloseMainMenu();
 	if(m_hMainMenu.IsValid()) {
-		auto *menu = m_hMainMenu.get<pragma::gui::WIMainMenu>();
+		pragma::gui::WIMainMenu *menu = m_hMainMenu.get<pragma::gui::WIMainMenu>();
 		menu->SetContinueMenu();
 	}
 }

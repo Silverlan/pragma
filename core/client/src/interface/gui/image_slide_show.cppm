@@ -9,7 +9,7 @@ export module pragma.client:gui.image_slide_show;
 
 export import pragma.gui;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WIImageSlideShow : public WIBase {
 	  private:
 		struct PreloadImage {

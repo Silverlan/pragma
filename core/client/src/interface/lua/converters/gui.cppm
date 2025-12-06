@@ -62,7 +62,7 @@ export namespace luabind {
 				lua::push_nil(L);
 			else {
 				auto &el = *x;
-				auto o = WGUILuaInterface::GetLuaObject(L, const_cast<std::remove_cvref_t<decltype(el)> &>(el));
+				auto o = pragma::gui::WGUILuaInterface::GetLuaObject(L, const_cast<std::remove_cvref_t<decltype(el)> &>(el));
 				o.push(L);
 			}
 		}
@@ -70,12 +70,12 @@ export namespace luabind {
 			if(!x)
 				lua::push_nil(L);
 			else {
-				auto o = WGUILuaInterface::GetLuaObject(L, *const_cast<T>(x));
+				auto o = pragma::gui::WGUILuaInterface::GetLuaObject(L, *const_cast<T>(x));
 				o.push(L);
 			}
 		}
 		else {
-			auto o = WGUILuaInterface::GetLuaObject(L, const_cast<T &>(x));
+			auto o = pragma::gui::WGUILuaInterface::GetLuaObject(L, const_cast<T &>(x));
 			o.push(L);
 		}
 	}

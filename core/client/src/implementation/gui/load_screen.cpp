@@ -11,11 +11,11 @@ import :gui.progress_bar;
 import :client_state;
 import :engine;
 
-WILoadScreen::WILoadScreen() : WIMainMenuBase() {}
+pragma::gui::WILoadScreen::WILoadScreen() : WIMainMenuBase() {}
 
-WILoadScreen::~WILoadScreen() {}
+pragma::gui::WILoadScreen::~WILoadScreen() {}
 
-void WILoadScreen::Initialize()
+void pragma::gui::WILoadScreen::Initialize()
 {
 	WIMainMenuBase::Initialize();
 	AddMenuItem(pragma::locale::get_text("cancel"), FunctionCallback<void, pragma::gui::WIMainMenuElement *>::Create([this](pragma::gui::WIMainMenuElement *) {
@@ -36,7 +36,7 @@ void WILoadScreen::Initialize()
 	pProgressBar->SetAutoCenterToParentX(true);
 }
 
-void WILoadScreen::SetSize(int x, int y)
+void pragma::gui::WILoadScreen::SetSize(int x, int y)
 {
 	WIMainMenuBase::SetSize(x, y);
 	auto yOffset = 0;

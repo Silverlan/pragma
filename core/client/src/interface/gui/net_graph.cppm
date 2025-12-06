@@ -8,7 +8,7 @@ export module pragma.client:gui.net_graph;
 
 export import :gui.line_graph;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WINetGraph : public WIBase {
 	  private:
 		struct DLLCLIENT NetData {

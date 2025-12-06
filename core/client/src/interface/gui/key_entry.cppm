@@ -9,7 +9,7 @@ export module pragma.client:gui.key_entry;
 
 export import pragma.gui;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WIKeyEntry : public WITextEntryBase {
 	  protected:
 		std::string m_previousKey;

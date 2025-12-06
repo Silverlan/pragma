@@ -977,7 +977,7 @@ static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerCompone
 
 	auto maxLod = brdfMap->GetImage().GetMipmapCount();
 	if(maxLod > 1) {
-		auto *pSlider = wgui.Create<WISlider>(pBrdf);
+		auto *pSlider = wgui.Create<pragma::gui::WISlider>(pBrdf);
 		pSlider->SetSize(pSlider->GetParent()->GetWidth(), 24);
 		pSlider->SetRange(0.f, maxLod, 0.01f);
 		pSlider->SetPostFix(" LOD");
@@ -995,7 +995,7 @@ static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerCompone
 	auto *pFrameIrradiance = wgui.Create<pragma::gui::WIFrame>(pElContainer);
 	pFrameIrradiance->SetTitle("Irradiance");
 	pFrameIrradiance->SetX(pFrameBrdf->GetRight());
-	auto *pIrradiance = wgui.Create<WITexturedCubemap>(pFrameIrradiance);
+	auto *pIrradiance = wgui.Create<pragma::gui::WITexturedCubemap>(pFrameIrradiance);
 	pIrradiance->SetY(24);
 	pIrradiance->SetTexture(*irradianceMap);
 	pFrameIrradiance->SizeToContents();
@@ -1003,7 +1003,7 @@ static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerCompone
 
 	maxLod = irradianceMap->GetImage().GetMipmapCount();
 	if(maxLod > 1) {
-		auto *pSlider = wgui.Create<WISlider>(pIrradiance);
+		auto *pSlider = wgui.Create<gui::WISlider>(pIrradiance);
 		pSlider->SetSize(pSlider->GetParent()->GetWidth(), 24);
 		pSlider->SetRange(0.f, maxLod, 0.01f);
 		pSlider->SetPostFix(" LOD");
@@ -1011,7 +1011,7 @@ static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerCompone
 		pSlider->AddCallback("OnChange", FunctionCallback<void, float, float>::Create([hIrradiance](float oldVal, float newVal) mutable {
 			if(hIrradiance.IsValid() == false)
 				return;
-			static_cast<WITexturedCubemap *>(hIrradiance.get())->SetLOD(newVal);
+			static_cast<pragma::gui::WITexturedCubemap *>(hIrradiance.get())->SetLOD(newVal);
 		}));
 		pSlider->SetAnchor(0.f, 0.f, 1.f, 0.f);
 	}
@@ -1021,7 +1021,7 @@ static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerCompone
 	auto *pFramePrefilter = wgui.Create<pragma::gui::WIFrame>(pElContainer);
 	pFramePrefilter->SetTitle("Prefilter");
 	pFramePrefilter->SetY(pFrameIrradiance->GetBottom());
-	auto *pPrefilter = wgui.Create<WITexturedCubemap>(pFramePrefilter);
+	auto *pPrefilter = wgui.Create<pragma::gui::WITexturedCubemap>(pFramePrefilter);
 	pPrefilter->SetY(24);
 	pPrefilter->SetTexture(*prefilterMap);
 	pFramePrefilter->SizeToContents();
@@ -1029,7 +1029,7 @@ static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerCompone
 
 	maxLod = prefilterMap->GetImage().GetMipmapCount();
 	if(maxLod > 1) {
-		auto *pSlider = wgui.Create<WISlider>(pPrefilter);
+		auto *pSlider = wgui.Create<pragma::gui::WISlider>(pPrefilter);
 		pSlider->SetSize(pSlider->GetParent()->GetWidth(), 24);
 		pSlider->SetRange(0.f, maxLod, 0.01f);
 		pSlider->SetPostFix(" LOD");
@@ -1037,7 +1037,7 @@ static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerCompone
 		pSlider->AddCallback("OnChange", FunctionCallback<void, float, float>::Create([hPrefilter](float oldVal, float newVal) mutable {
 			if(hPrefilter.IsValid() == false)
 				return;
-			static_cast<WITexturedCubemap *>(hPrefilter.get())->SetLOD(newVal);
+			static_cast<pragma::gui::WITexturedCubemap *>(hPrefilter.get())->SetLOD(newVal);
 		}));
 		pSlider->SetAnchor(0.f, 0.f, 1.f, 0.f);
 	}

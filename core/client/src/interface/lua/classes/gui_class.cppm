@@ -82,11 +82,11 @@ export namespace Lua {
 	};
 
 	namespace WIProgressBar {
-		DLLCLIENT void register_class(luabind::class_<::WIProgressBar, ::WIBase> &classDef);
+		DLLCLIENT void register_class(luabind::class_<pragma::gui::WIProgressBar, ::WIBase> &classDef);
 	};
 
 	namespace WISlider {
-		DLLCLIENT void register_class(luabind::class_<::WISlider, luabind::bases<::WIProgressBar, ::WIBase>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<pragma::gui::WISlider, luabind::bases<pragma::gui::WIProgressBar, ::WIBase>> &classDef);
 	};
 
 	namespace WIShape {
@@ -142,11 +142,11 @@ export namespace Lua {
 	};
 
 	namespace WIIcon {
-		DLLCLIENT void register_class(luabind::class_<::WIIcon, luabind::bases<::WITexturedShape, ::WIShape, ::WIBase>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<pragma::gui::WIIcon, luabind::bases<::WITexturedShape, ::WIShape, ::WIBase>> &classDef);
 	};
 
 	namespace WISilkIcon {
-		DLLCLIENT void register_class(luabind::class_<::WISilkIcon, luabind::bases<::WIIcon, ::WITexturedShape, ::WIShape, ::WIBase>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<pragma::gui::WISilkIcon, luabind::bases<pragma::gui::WIIcon, ::WITexturedShape, ::WIShape, ::WIBase>> &classDef);
 	};
 
 	namespace WIDropDownMenu {
@@ -162,20 +162,20 @@ export namespace Lua {
 	};
 
 	namespace WITransformable {
-		DLLCLIENT void register_class(luabind::class_<::WITransformable, ::WIBase> &classDef);
+		DLLCLIENT void register_class(luabind::class_<pragma::gui::WITransformable, ::WIBase> &classDef);
 	};
 
 	namespace WIGridPanel {
-		DLLCLIENT void register_class(luabind::class_<pragma::gui::WIGridPanel, luabind::bases<::WITable, ::WIBase>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<pragma::gui::WIGridPanel, luabind::bases<pragma::gui::WITable, ::WIBase>> &classDef);
 	};
 
 	namespace WITreeList {
-		DLLCLIENT void register_class(luabind::class_<::WITreeList, luabind::bases<::WITable, ::WIBase>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<pragma::gui::WITreeList, luabind::bases<pragma::gui::WITable, ::WIBase>> &classDef);
 	};
 
 	namespace WITreeListElement {
-		DLLCLIENT void register_class(luabind::class_<::WITreeListElement, luabind::bases<::WITableRow, ::WIBase>> &classDef);
-		DLLCLIENT luabind::tableT<::WITreeListElement> GetItems(lua::State *l, ::WITreeListElement &hElement);
+		DLLCLIENT void register_class(luabind::class_<pragma::gui::WITreeListElement, luabind::bases<pragma::gui::WITableRow, ::WIBase>> &classDef);
+		DLLCLIENT luabind::tableT<pragma::gui::WITreeListElement> GetItems(lua::State *l, pragma::gui::WITreeListElement &hElement);
 	};
 
 	namespace WIContainer {
@@ -183,21 +183,21 @@ export namespace Lua {
 	};
 
 	namespace WITable {
-		DLLCLIENT void register_class(luabind::class_<::WITable, luabind::bases<pragma::gui::WIContainer, ::WIBase>> &classDef);
-		DLLCLIENT luabind::tableT<::WITableRow> GetSelectedRows(lua::State *l, ::WITable &hTable);
-		DLLCLIENT luabind::tableT<::WITableRow> GetRows(lua::State *l, ::WITable &hTable);
+		DLLCLIENT void register_class(luabind::class_<pragma::gui::WITable, luabind::bases<pragma::gui::WIContainer, ::WIBase>> &classDef);
+		DLLCLIENT luabind::tableT<pragma::gui::WITableRow> GetSelectedRows(lua::State *l, pragma::gui::WITable &hTable);
+		DLLCLIENT luabind::tableT<pragma::gui::WITableRow> GetRows(lua::State *l, pragma::gui::WITable &hTable);
 	};
 
 	namespace WITableRow {
-		DLLCLIENT void register_class(luabind::class_<::WITableRow, luabind::bases<pragma::gui::WIContainer, ::WIBase>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<pragma::gui::WITableRow, luabind::bases<pragma::gui::WIContainer, ::WIBase>> &classDef);
 	};
 
 	namespace WITableCell {
-		DLLCLIENT void register_class(luabind::class_<::WITableCell, luabind::bases<pragma::gui::WIContainer, ::WIBase>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<pragma::gui::WITableCell, luabind::bases<pragma::gui::WIContainer, ::WIBase>> &classDef);
 	};
 
 	namespace WIFrame {
-		DLLCLIENT void register_class(luabind::class_<pragma::gui::WIFrame, luabind::bases<::WITransformable, ::WIBase>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<pragma::gui::WIFrame, luabind::bases<pragma::gui::WITransformable, ::WIBase>> &classDef);
 	};
 };
 

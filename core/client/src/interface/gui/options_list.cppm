@@ -11,7 +11,7 @@ export import :gui.choice_list;
 export import :gui.slider;
 export import :gui.table;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WIOptionsList : public WIBase {
 	  private:
 		WIHandle m_hTable;

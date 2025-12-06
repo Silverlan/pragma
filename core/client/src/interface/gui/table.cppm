@@ -9,7 +9,7 @@ export module pragma.client:gui.table;
 
 export import :gui.container;
 
-export {
+export namespace pragma::gui {
 	class WITableRow;
 	class DLLCLIENT WITableCell : public pragma::gui::WIContainer {
 	  private:

@@ -118,7 +118,7 @@ bool GUIDebugCursorManager::Initialize()
 						    auto *l = game->GetLuaState();
 						    luabind::object g = luabind::globals(l);
 						    // Assign UI element to global variable x
-						    g["x"] = WGUILuaInterface::GetLuaObject(l, *el);
+						    g["x"] = pragma::gui::WGUILuaInterface::GetLuaObject(l, *el);
 						    std::stringstream ss;
 						    el->Print(ss);
 						    Con::cout << "Assigned element '" << ss.str() << "' to global variable 'x'!" << Con::endl;
@@ -255,7 +255,7 @@ void GUIDebugCursorManager::SetTargetGUIElement(WIBase *optEl, bool clear)
 	auto *l = pragma::get_cgame()->GetLuaState();
 	if(l) {
 		// Assign element to global 'debug_ui_element' Lua variable
-		auto o = WGUILuaInterface::GetLuaObject(l, el);
+		auto o = pragma::gui::WGUILuaInterface::GetLuaObject(l, el);
 		if(o)
 			luabind::globals(l)["debug_ui_element"] = o;
 		else

@@ -18,7 +18,7 @@ static void initialize_element(::WIBase &p)
 {
 	auto data = p.GetUserData();
 	if(data != nullptr) {
-		auto wrapper = std::static_pointer_cast<WILuaHandleWrapper>(data);
+		auto wrapper = std::static_pointer_cast<pragma::gui::WILuaHandleWrapper>(data);
 		wrapper->lua = true;
 	}
 }
@@ -133,7 +133,7 @@ static Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::
 
 	pContainer->SizeToContents();
 
-	return Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>> {l, WGUILuaInterface::GetLuaObject(l, *pContainer), WGUILuaInterface::GetLuaObject(l, *pCheckbox), WGUILuaInterface::GetLuaObject(l, *pText)};
+	return Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>> {l, pragma::gui::WGUILuaInterface::GetLuaObject(l, *pContainer), pragma::gui::WGUILuaInterface::GetLuaObject(l, *pCheckbox), pragma::gui::WGUILuaInterface::GetLuaObject(l, *pText)};
 }
 Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>>> Lua::gui::create_checkbox(lua::State *l, const std::string &label, ::WIBase &parent) { return ::create_checkbox(l, label, &parent); }
 Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>>> Lua::gui::create_checkbox(lua::State *l, const std::string &label) { return ::create_checkbox(l, label, nullptr); }
@@ -187,7 +187,7 @@ void Lua::gui::register_element(const std::string &className, const Lua::classOb
 		  l,
 		  [&oFunc, el](lua::State *l) -> Lua::StatusCode {
 			  oFunc.push(l);
-			  auto o = WGUILuaInterface::GetLuaObject(l, *el);
+			  auto o = pragma::gui::WGUILuaInterface::GetLuaObject(l, *el);
 			  o.push(l);
 			  return Lua::StatusCode::Ok;
 		  },
@@ -231,7 +231,7 @@ void Lua::gui::register_element(const std::string &className, const Lua::classOb
 		  l,
 		  [condition, el](lua::State *l) -> Lua::StatusCode {
 			  condition.push(l);
-			  auto o = WGUILuaInterface::GetLuaObject(l, *el);
+			  auto o = pragma::gui::WGUILuaInterface::GetLuaObject(l, *el);
 			  o.push(l);
 			  return Lua::StatusCode::Ok;
 		  },
@@ -279,19 +279,19 @@ static bool register_skin(lua::State *l, const std::string &skin, const luabind:
 		return false;
 	}
 
-	auto s = std::make_unique<WILuaSkin>();
-	WILuaSkin::Settings settings;
+	auto s = std::make_unique<pragma::gui::WILuaSkin>();
+	pragma::gui::WILuaSkin::Settings settings;
 	settings.vars = vars;
 	settings.skin = skinData;
 	if(baseName)
-		settings.base = dynamic_cast<WILuaSkin *>(WGUI::GetInstance().GetSkin(*baseName));
+		settings.base = dynamic_cast<pragma::gui::WILuaSkin *>(WGUI::GetInstance().GetSkin(*baseName));
 	s->Initialize(l, settings);
 	WGUI::GetInstance().RegisterSkin(skin, std::move(s));
 	return true;
 }
 void Lua::gui::register_default_skin(const std::string &vars, const std::string &skinData)
 {
-	auto *skin = dynamic_cast<WILuaSkin *>(WGUI::GetInstance().GetSkin("default"));
+	auto *skin = dynamic_cast<pragma::gui::WILuaSkin *>(WGUI::GetInstance().GetSkin("default"));
 	if(!skin)
 		return;
 	auto *l = pragma::get_client_state()->GetGUILuaState();
@@ -313,7 +313,7 @@ void Lua::gui::register_default_skin(const std::string &vars, const std::string 
 	auto tSkinData = luabind::object {luabind::from_stack(l, -1)};
 	Lua::Pop(l);
 
-	WILuaSkin::Settings settings;
+	pragma::gui::WILuaSkin::Settings settings;
 	settings.vars = tVars;
 	settings.skin = tSkinData;
 	skin->MergeInto(l, settings);

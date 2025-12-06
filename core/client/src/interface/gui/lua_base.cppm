@@ -15,7 +15,7 @@ export import pragma.shared;
 
 #define LUAGUI_CALL_MEMBER(name, numargs, numret, args, ret)                                                                                                                                                                                                                                     \
 	{                                                                                                                                                                                                                                                                                            \
-		luabind::object *obj = WGUILuaInterface::GetLuaObject(m_stateLua, this);                                                                                                                                                                                                                 \
+		luabind::object *obj = pragma::gui::WGUILuaInterface::GetLuaObject(m_stateLua, this);                                                                                                                                                                                                                 \
 		obj->push(m_stateLua);                                                                                                                                                                                                                                                                   \
 		Lua::PushString(m_stateLua, name);                                                                                                                                                                                                                                                       \
 		Lua::GetTableValue(m_stateLua, -2);                                                                                                                                                                                                                                                      \
@@ -34,7 +34,7 @@ export import pragma.shared;
 		Lua::Pop(m_stateLua, 1);                                                                                                                                                                                                                                                                 \
 	}
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WILuaBase : public WIBase, public LuaObjectBase {
 	  public:
 		WILuaBase();
@@ -142,8 +142,8 @@ export {
 		};
 		std::unique_ptr<RenderData> m_renderData = nullptr;
 	};
+};
 
-	namespace pragma::LuaCore {
-		using WILuaBaseHolder = HandleHolder<WILuaBase>;
-	};
+export namespace pragma::LuaCore {
+	using WILuaBaseHolder = HandleHolder<pragma::gui::WILuaBase>;
 };

@@ -145,7 +145,7 @@ void pragma::networking::DefaultMasterServerQueryDispatcher::DoQueryServers(cons
 
 ///////////////
 
-WIServerBrowser::WIServerBrowser() : WIFrame(), m_bRefreshScheduled(false)
+pragma::gui::WIServerBrowser::WIServerBrowser() : WIFrame(), m_bRefreshScheduled(false)
 {
 	AddStyleClass("wiframe");
 	Refresh();
@@ -185,9 +185,9 @@ WIServerBrowser::WIServerBrowser() : WIFrame(), m_bRefreshScheduled(false)
 	m_msQueryDispatcher->SetEventCallbacks(eventCallbacks);
 }
 
-WIServerBrowser::~WIServerBrowser() { m_msQueryDispatcher = nullptr; }
+pragma::gui::WIServerBrowser::~WIServerBrowser() { m_msQueryDispatcher = nullptr; }
 
-void WIServerBrowser::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void pragma::gui::WIServerBrowser::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	if(m_msQueryDispatcher)
 		m_msQueryDispatcher->Poll();
@@ -196,7 +196,7 @@ void WIServerBrowser::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer
 	WIFrame::Think(drawCmd);
 }
 
-void WIServerBrowser::OnServerDoubleClick(unsigned int idx)
+void pragma::gui::WIServerBrowser::OnServerDoubleClick(unsigned int idx)
 {
 	if(idx >= m_servers.size())
 		return;
@@ -210,7 +210,7 @@ void WIServerBrowser::OnServerDoubleClick(unsigned int idx)
 	pragma::get_cengine()->Connect(svInfo.queryResult.ip, std::to_string(svInfo.queryResult.serverInfo.port));
 }
 
-void WIServerBrowser::DisplayMessage(std::string msg)
+void pragma::gui::WIServerBrowser::DisplayMessage(std::string msg)
 {
 	m_servers.clear();
 	WITable *t = m_hServerList.get<WITable>();
@@ -223,7 +223,7 @@ void WIServerBrowser::DisplayMessage(std::string msg)
 	row->SetValue(1, msg);
 }
 
-void WIServerBrowser::Initialize()
+void pragma::gui::WIServerBrowser::Initialize()
 {
 	WIFrame::Initialize();
 	EnableThinking();
@@ -305,7 +305,7 @@ void WIServerBrowser::Initialize()
 	SetMinSize(400, 300);
 }
 
-void WIServerBrowser::DoRefresh()
+void pragma::gui::WIServerBrowser::DoRefresh()
 {
 	m_bRefreshScheduled = false;
 	if(m_msQueryDispatcher) {
@@ -314,11 +314,11 @@ void WIServerBrowser::DoRefresh()
 	}
 }
 
-void WIServerBrowser::Refresh() { m_bRefreshScheduled = true; }
+void pragma::gui::WIServerBrowser::Refresh() { m_bRefreshScheduled = true; }
 
-void WIServerBrowser::SetSize(int x, int y) { WIFrame::SetSize(x, y); }
+void pragma::gui::WIServerBrowser::SetSize(int x, int y) { WIFrame::SetSize(x, y); }
 
-void WIServerBrowser::AddServer(const pragma::networking::MasterServerQueryResult &queryResult)
+void pragma::gui::WIServerBrowser::AddServer(const pragma::networking::MasterServerQueryResult &queryResult)
 {
 	if(!m_hServerList.IsValid())
 		return;

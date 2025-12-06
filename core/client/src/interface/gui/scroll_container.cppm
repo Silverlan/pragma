@@ -10,7 +10,7 @@ export module pragma.client:gui.scroll_container;
 
 export import pragma.gui;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WIScrollContainer : public WIBase {
 	  public:
 		enum class StateFlags : uint8_t { None = 0u, AutoStickToBottom = 1u, ContentsWidthFixed = AutoStickToBottom << 1u, ContentsHeightFixed = ContentsWidthFixed << 1u };
@@ -65,5 +65,7 @@ export {
 		static void OnChildReleased(WIBase *child);
 		static void OnChildSetSize(WIBase *child);
 	};
-	REGISTER_ENUM_FLAGS(WIScrollContainer::StateFlags)
+	using namespace umath::scoped_enum::bitwise;
 };
+
+export {REGISTER_ENUM_FLAGS(pragma::gui::WIScrollContainer::StateFlags)}

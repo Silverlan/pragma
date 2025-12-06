@@ -9,9 +9,9 @@ import :gui.scroll_container;
 
 import pragma.gui;
 
-WIScrollContainer::WIScrollContainer() : WIBase() { SetScrollInputEnabled(true); }
+pragma::gui::WIScrollContainer::WIScrollContainer() : WIBase() { SetScrollInputEnabled(true); }
 
-WIScrollContainer::~WIScrollContainer()
+pragma::gui::WIScrollContainer::~WIScrollContainer()
 {
 	if(m_hChildAdded.IsValid())
 		m_hChildAdded.Remove();
@@ -29,7 +29,7 @@ WIScrollContainer::~WIScrollContainer()
 	}
 }
 
-void WIScrollContainer::SizeToContents(bool x, bool y)
+void pragma::gui::WIScrollContainer::SizeToContents(bool x, bool y)
 {
 	if(m_hWrapper.IsValid() == false)
 		return;
@@ -38,7 +38,7 @@ void WIScrollContainer::SizeToContents(bool x, bool y)
 	SetSize(sz.x, sz.y);
 }
 
-int WIScrollContainer::GetContentWidth()
+int pragma::gui::WIScrollContainer::GetContentWidth()
 {
 	auto w = GetWidth();
 	if(m_hScrollBarV.IsValid() && m_hScrollBarV->IsVisible())
@@ -46,7 +46,7 @@ int WIScrollContainer::GetContentWidth()
 	return w;
 }
 
-int WIScrollContainer::GetContentHeight()
+int pragma::gui::WIScrollContainer::GetContentHeight()
 {
 	auto h = GetHeight();
 	if(m_hScrollBarH.IsValid() && m_hScrollBarH->IsVisible())
@@ -54,20 +54,20 @@ int WIScrollContainer::GetContentHeight()
 	return h;
 }
 
-Vector2i WIScrollContainer::GetContentSize()
+Vector2i pragma::gui::WIScrollContainer::GetContentSize()
 {
 	if(!m_hWrapper.IsValid())
 		return Vector2i(0, 0);
 	return Vector2i(GetContentWidth(), GetContentHeight());
 }
 
-WIBase *WIScrollContainer::GetWrapperElement() { return m_hWrapper.get(); }
-void WIScrollContainer::ScrollToElement(::WIBase &el)
+WIBase *pragma::gui::WIScrollContainer::GetWrapperElement() { return m_hWrapper.get(); }
+void pragma::gui::WIScrollContainer::ScrollToElement(::WIBase &el)
 {
 	ScrollToElementX(el);
 	ScrollToElementY(el);
 }
-void WIScrollContainer::ScrollToElementX(::WIBase &el)
+void pragma::gui::WIScrollContainer::ScrollToElementX(::WIBase &el)
 {
 	auto *elWrapper = GetWrapperElement();
 	auto *scrlBar = GetHorizontalScrollBar();
@@ -77,7 +77,7 @@ void WIScrollContainer::ScrollToElementX(::WIBase &el)
 	offset -= (GetWidth() + el.GetWidth()) / 2;
 	scrlBar->SetScrollOffset(offset);
 }
-void WIScrollContainer::ScrollToElementY(::WIBase &el)
+void pragma::gui::WIScrollContainer::ScrollToElementY(::WIBase &el)
 {
 	auto *elWrapper = GetWrapperElement();
 	auto *scrlBar = GetVerticalScrollBar();
@@ -88,28 +88,28 @@ void WIScrollContainer::ScrollToElementY(::WIBase &el)
 	scrlBar->SetScrollOffset(offset);
 }
 
-void WIScrollContainer::SetAutoStickToBottom(bool autoStick) { umath::set_flag(m_scFlags, StateFlags::AutoStickToBottom, autoStick); }
-bool WIScrollContainer::ShouldAutoStickToBottom() const { return umath::is_flag_set(m_scFlags, StateFlags::AutoStickToBottom); }
+void pragma::gui::WIScrollContainer::SetAutoStickToBottom(bool autoStick) { umath::set_flag(m_scFlags, StateFlags::AutoStickToBottom, autoStick); }
+bool pragma::gui::WIScrollContainer::ShouldAutoStickToBottom() const { return umath::is_flag_set(m_scFlags, StateFlags::AutoStickToBottom); }
 
-void WIScrollContainer::SetContentsWidthFixed(bool fixed) { umath::set_flag(m_scFlags, StateFlags::ContentsWidthFixed, fixed); }
-void WIScrollContainer::SetContentsHeightFixed(bool fixed) { umath::set_flag(m_scFlags, StateFlags::ContentsHeightFixed, fixed); }
-bool WIScrollContainer::IsContentsWidthFixed() const { return umath::is_flag_set(m_scFlags, StateFlags::ContentsWidthFixed); }
-bool WIScrollContainer::IsContentsHeightFixed() const { return umath::is_flag_set(m_scFlags, StateFlags::ContentsHeightFixed); }
+void pragma::gui::WIScrollContainer::SetContentsWidthFixed(bool fixed) { umath::set_flag(m_scFlags, StateFlags::ContentsWidthFixed, fixed); }
+void pragma::gui::WIScrollContainer::SetContentsHeightFixed(bool fixed) { umath::set_flag(m_scFlags, StateFlags::ContentsHeightFixed, fixed); }
+bool pragma::gui::WIScrollContainer::IsContentsWidthFixed() const { return umath::is_flag_set(m_scFlags, StateFlags::ContentsWidthFixed); }
+bool pragma::gui::WIScrollContainer::IsContentsHeightFixed() const { return umath::is_flag_set(m_scFlags, StateFlags::ContentsHeightFixed); }
 
-int WIScrollContainer::GetScrollBarWidthV()
+int pragma::gui::WIScrollContainer::GetScrollBarWidthV()
 {
 	if(!m_hScrollBarV.IsValid() || !m_hScrollBarV->IsVisible())
 		return 0;
 	return m_hScrollBarV->GetWidth();
 }
-int WIScrollContainer::GetScrollBarHeightH()
+int pragma::gui::WIScrollContainer::GetScrollBarHeightH()
 {
 	if(!m_hScrollBarH.IsValid() || !m_hScrollBarH->IsVisible())
 		return 0;
 	return m_hScrollBarH->GetHeight();
 }
 
-void WIScrollContainer::OnHScrollOffsetChanged(unsigned int offset)
+void pragma::gui::WIScrollContainer::OnHScrollOffsetChanged(unsigned int offset)
 {
 	if(!m_hWrapper.IsValid() || offset == CUInt32(m_lastOffset.x))
 		return;
@@ -117,7 +117,7 @@ void WIScrollContainer::OnHScrollOffsetChanged(unsigned int offset)
 	pWrapper->SetX(pWrapper->GetX() - (offset - m_lastOffset.x));
 	m_lastOffset.x = offset;
 }
-void WIScrollContainer::OnVScrollOffsetChanged(unsigned int offset)
+void pragma::gui::WIScrollContainer::OnVScrollOffsetChanged(unsigned int offset)
 {
 	if(!m_hWrapper.IsValid() || offset == CUInt32(m_lastOffset.y))
 		return;
@@ -126,7 +126,7 @@ void WIScrollContainer::OnVScrollOffsetChanged(unsigned int offset)
 	m_lastOffset.y = offset;
 }
 
-void WIScrollContainer::Initialize()
+void pragma::gui::WIScrollContainer::Initialize()
 {
 	WIBase::Initialize();
 	m_hScrollBarH = CreateChild<WIScrollBar>();
@@ -134,23 +134,23 @@ void WIScrollContainer::Initialize()
 	pScrollBarH->SetVisible(false);
 	pScrollBarH->SetZPos(1000);
 	pScrollBarH->AddStyleClass("scrollbar_horizontal");
-	pScrollBarH->AddCallback("OnScrollOffsetChanged", FunctionCallback<void, unsigned int>::Create(std::bind(&WIScrollContainer::OnHScrollOffsetChanged, this, std::placeholders::_1)));
+	pScrollBarH->AddCallback("OnScrollOffsetChanged", FunctionCallback<void, unsigned int>::Create(std::bind(&pragma::gui::WIScrollContainer::OnHScrollOffsetChanged, this, std::placeholders::_1)));
 
 	m_hScrollBarV = CreateChild<WIScrollBar>();
 	WIScrollBar *pScrollBarV = m_hScrollBarV.get<WIScrollBar>();
 	pScrollBarV->SetVisible(false);
 	pScrollBarV->SetZPos(1000);
 	pScrollBarH->AddStyleClass("scrollbar_vertical");
-	pScrollBarV->AddCallback("OnScrollOffsetChanged", FunctionCallback<void, unsigned int>::Create(std::bind(&WIScrollContainer::OnVScrollOffsetChanged, this, std::placeholders::_1)));
+	pScrollBarV->AddCallback("OnScrollOffsetChanged", FunctionCallback<void, unsigned int>::Create(std::bind(&pragma::gui::WIScrollContainer::OnVScrollOffsetChanged, this, std::placeholders::_1)));
 
 	m_hWrapper = CreateChild<WIBase>();
 	WIBase *pWrapper = m_hWrapper.get();
 
 	// pWrapper->SetAutoAlignToParent(true);
-	m_hChildAdded = pWrapper->AddCallback("OnChildAdded", FunctionCallback<void, WIBase *>::Create(std::bind(&WIScrollContainer::OnWrapperChildAdded, this, std::placeholders::_1)));
-	m_hChildRemoved = pWrapper->AddCallback("OnChildRemoved", FunctionCallback<void, WIBase *>::Create(std::bind(&WIScrollContainer::OnWrapperChildRemoved, this, std::placeholders::_1)));
+	m_hChildAdded = pWrapper->AddCallback("OnChildAdded", FunctionCallback<void, WIBase *>::Create(std::bind(&pragma::gui::WIScrollContainer::OnWrapperChildAdded, this, std::placeholders::_1)));
+	m_hChildRemoved = pWrapper->AddCallback("OnChildRemoved", FunctionCallback<void, WIBase *>::Create(std::bind(&pragma::gui::WIScrollContainer::OnWrapperChildRemoved, this, std::placeholders::_1)));
 }
-util::EventReply WIScrollContainer::ScrollCallback(Vector2 offset, bool offsetAsPixels)
+util::EventReply pragma::gui::WIScrollContainer::ScrollCallback(Vector2 offset, bool offsetAsPixels)
 {
 	if(WIBase::ScrollCallback(offset, offsetAsPixels) == util::EventReply::Handled)
 		return util::EventReply::Handled;
@@ -170,21 +170,21 @@ util::EventReply WIScrollContainer::ScrollCallback(Vector2 offset, bool offsetAs
 	}
 	return util::EventReply::Handled;
 }
-WIScrollBar *WIScrollContainer::GetHorizontalScrollBar() { return static_cast<WIScrollBar *>(m_hScrollBarH.get()); }
-WIScrollBar *WIScrollContainer::GetVerticalScrollBar() { return static_cast<WIScrollBar *>(m_hScrollBarV.get()); }
-void WIScrollContainer::SetSize(int x, int y)
+WIScrollBar *pragma::gui::WIScrollContainer::GetHorizontalScrollBar() { return static_cast<WIScrollBar *>(m_hScrollBarH.get()); }
+WIScrollBar *pragma::gui::WIScrollContainer::GetVerticalScrollBar() { return static_cast<WIScrollBar *>(m_hScrollBarV.get()); }
+void pragma::gui::WIScrollContainer::SetSize(int x, int y)
 {
 	WIBase::SetSize(x, y);
 	ScheduleUpdate();
 }
-void WIScrollContainer::OnChildReleased(WIBase *child)
+void pragma::gui::WIScrollContainer::OnChildReleased(WIBase *child)
 {
 	WIScrollContainer *parent = dynamic_cast<WIScrollContainer *>(child->GetParent());
 	if(parent == nullptr)
 		return;
 	parent->OnChildRemoved(child);
 }
-void WIScrollContainer::OnChildSetSize(WIBase *child)
+void pragma::gui::WIScrollContainer::OnChildSetSize(WIBase *child)
 {
 	WIBase *parentWrapper = child->GetParent();
 	if(parentWrapper == nullptr)
@@ -194,16 +194,16 @@ void WIScrollContainer::OnChildSetSize(WIBase *child)
 		return;
 	parent->ScheduleUpdate();
 }
-void WIScrollContainer::OnWrapperChildAdded(WIBase *child)
+void pragma::gui::WIScrollContainer::OnWrapperChildAdded(WIBase *child)
 {
 	std::unordered_map<WIBase *, std::vector<CallbackHandle>>::iterator it = m_childCallbackHandles.insert(std::unordered_map<WIBase *, std::vector<CallbackHandle>>::value_type(child, std::vector<CallbackHandle>())).first;
-	CallbackHandle hCallbackOnRemove = child->AddCallback("OnRemove", FunctionCallback<>::Create(std::bind(&WIScrollContainer::OnChildReleased, child)));
+	CallbackHandle hCallbackOnRemove = child->AddCallback("OnRemove", FunctionCallback<>::Create(std::bind(&pragma::gui::WIScrollContainer::OnChildReleased, child)));
 	it->second.push_back(hCallbackOnRemove);
-	CallbackHandle hCallbackSetSize = child->AddCallback("SetSize", FunctionCallback<>::Create(std::bind(&WIScrollContainer::OnChildSetSize, child)));
+	CallbackHandle hCallbackSetSize = child->AddCallback("SetSize", FunctionCallback<>::Create(std::bind(&pragma::gui::WIScrollContainer::OnChildSetSize, child)));
 	it->second.push_back(hCallbackSetSize);
 	Update();
 }
-void WIScrollContainer::OnWrapperChildRemoved(WIBase *child)
+void pragma::gui::WIScrollContainer::OnWrapperChildRemoved(WIBase *child)
 {
 	std::unordered_map<WIBase *, std::vector<CallbackHandle>>::iterator it = m_childCallbackHandles.find(child);
 	if(it != m_childCallbackHandles.end()) {
@@ -218,15 +218,15 @@ void WIScrollContainer::OnWrapperChildRemoved(WIBase *child)
 	}
 	Update();
 }
-void WIScrollContainer::OnChildAdded(WIBase *child)
+void pragma::gui::WIScrollContainer::OnChildAdded(WIBase *child)
 {
 	WIBase::OnChildAdded(child);
 	if(m_hWrapper.IsValid())
 		child->SetParent(m_hWrapper.get());
 }
-void WIScrollContainer::OnChildRemoved(WIBase *child) { WIBase::OnChildRemoved(child); }
+void pragma::gui::WIScrollContainer::OnChildRemoved(WIBase *child) { WIBase::OnChildRemoved(child); }
 
-void WIScrollContainer::ScrollToBottom()
+void pragma::gui::WIScrollContainer::ScrollToBottom()
 {
 	WIScrollBar *pScrollBar = m_hScrollBarV.get<WIScrollBar>();
 	if(pScrollBar == nullptr)
@@ -234,23 +234,23 @@ void WIScrollContainer::ScrollToBottom()
 	pScrollBar->SetScrollOffset(pScrollBar->GetElementCount());
 }
 
-void WIScrollContainer::SetScrollAmount(int32_t amX, int32_t amY)
+void pragma::gui::WIScrollContainer::SetScrollAmount(int32_t amX, int32_t amY)
 {
 	SetScrollAmountX(amX);
 	SetScrollAmountY(amY);
 }
-void WIScrollContainer::SetScrollAmountX(int32_t amX)
+void pragma::gui::WIScrollContainer::SetScrollAmountX(int32_t amX)
 {
 	m_scrollAmountX = amX;
 	ScheduleUpdate();
 }
-void WIScrollContainer::SetScrollAmountY(int32_t amY)
+void pragma::gui::WIScrollContainer::SetScrollAmountY(int32_t amY)
 {
 	m_scrollAmountY = amY;
 	ScheduleUpdate();
 }
 
-void WIScrollContainer::DoUpdate()
+void pragma::gui::WIScrollContainer::DoUpdate()
 {
 	if(m_hWrapper.IsValid()) {
 		WIBase *pWrapper = m_hWrapper.get();

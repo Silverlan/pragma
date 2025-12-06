@@ -8,11 +8,11 @@ module pragma.client;
 import :gui.image_slide_show;
 import :engine;
 
-WIImageSlideShow::PreloadImage::PreloadImage() : ready(false), loading(false), image(-1) {}
+pragma::gui::WIImageSlideShow::PreloadImage::PreloadImage() : ready(false), loading(false), image(-1) {}
 
-WIImageSlideShow::WIImageSlideShow() : WIBase(), m_currentImg(-1) {}
+pragma::gui::WIImageSlideShow::WIImageSlideShow() : WIBase(), m_currentImg(-1) {}
 
-void WIImageSlideShow::Initialize()
+void pragma::gui::WIImageSlideShow::Initialize()
 {
 	WIBase::Initialize();
 	EnableThinking();
@@ -24,7 +24,7 @@ void WIImageSlideShow::Initialize()
 	Update();
 }
 
-void WIImageSlideShow::SetColor(float r, float g, float b, float a)
+void pragma::gui::WIImageSlideShow::SetColor(float r, float g, float b, float a)
 {
 	WIBase::SetColor(r, g, b, a);
 	if(m_hImgNext.IsValid())
@@ -33,20 +33,20 @@ void WIImageSlideShow::SetColor(float r, float g, float b, float a)
 		m_hImgPrev->SetColor(r, g, b, a);
 }
 
-void WIImageSlideShow::DoUpdate()
+void pragma::gui::WIImageSlideShow::DoUpdate()
 {
 	WIBase::DoUpdate();
 	//InitializeBlur(GetWidth(),GetHeight());
 	//m_blurTexture.Initialize(*WGUI::GetContext(),m_texture,GetWidth(),GetHeight());
 }
 
-void WIImageSlideShow::SetSize(int x, int y)
+void pragma::gui::WIImageSlideShow::SetSize(int x, int y)
 {
 	WIBase::SetSize(x, y);
 	ScheduleUpdate();
 }
 
-void WIImageSlideShow::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void pragma::gui::WIImageSlideShow::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	WIBase::Think(drawCmd);
 	if(!IsVisible())
@@ -58,7 +58,7 @@ void WIImageSlideShow::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffe
 	}
 }
 
-void WIImageSlideShow::DisplayPreloadedImage()
+void pragma::gui::WIImageSlideShow::DisplayPreloadedImage()
 {
 	auto &wiImgPreload = m_imgPreload;
 	if(wiImgPreload.loading == true)
@@ -132,7 +132,7 @@ void WIImageSlideShow::DisplayPreloadedImage()
 	wiImgPreload.texture = nullptr;
 }
 
-void WIImageSlideShow::SetImages(const std::vector<std::string> &images)
+void pragma::gui::WIImageSlideShow::SetImages(const std::vector<std::string> &images)
 {
 	m_files = images;
 	if(m_files.empty() == false || m_hImgNext.IsValid() == false)
@@ -158,7 +158,7 @@ void WIImageSlideShow::SetImages(const std::vector<std::string> &images)
 		}
 	}
 }
-void WIImageSlideShow::PreloadNextImage(Int32 img)
+void pragma::gui::WIImageSlideShow::PreloadNextImage(Int32 img)
 {
 	auto &imgPreload = m_imgPreload;
 	if(imgPreload.loading == true)
@@ -185,7 +185,7 @@ void WIImageSlideShow::PreloadNextImage(Int32 img)
 	textureManager.PreloadAsset(f, std::move(loadInfo));
 }
 
-void WIImageSlideShow::DisplayNextImage()
+void pragma::gui::WIImageSlideShow::DisplayNextImage()
 {
 	auto img = m_currentImg + 1;
 	if(img >= m_files.size())
@@ -193,7 +193,7 @@ void WIImageSlideShow::DisplayNextImage()
 	PreloadNextImage(Int32(img));
 }
 
-void WIImageSlideShow::PreloadNextRandomShuffle()
+void pragma::gui::WIImageSlideShow::PreloadNextRandomShuffle()
 {
 	if(m_randomShuffle.empty()) {
 		m_randomShuffle.resize(m_files.size());

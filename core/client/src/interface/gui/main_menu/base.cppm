@@ -35,8 +35,8 @@ export namespace pragma::gui {
 		int m_selected;
 		WIHandle m_hControlSettings;
 		void OnGoBack(int button, int action, int mods);
-		virtual void InitializeOptionsList(WIOptionsList *pList);
-		WIOptionsList *InitializeOptionsList();
+		virtual void InitializeOptionsList(pragma::gui::WIOptionsList *pList);
+		pragma::gui::WIOptionsList *InitializeOptionsList();
 		virtual void DoUpdate() override;
 	};
 

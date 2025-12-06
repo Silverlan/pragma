@@ -183,7 +183,7 @@ static void register_gui(Lua::Interface &lua)
 		  for(auto &hEl : results) {
 			  if(hEl.IsValid() == false)
 				  continue;
-			  t[idx++] = WGUILuaInterface::GetLuaObject(l, *hEl.get());
+			  t[idx++] = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hEl.get());
 		  }
 		  return t;
 	  })),
@@ -196,7 +196,7 @@ static void register_gui(Lua::Interface &lua)
 		  std::function<void(WIBase &)> fIterateChildren = nullptr;
 		  fIterateChildren = [l, &fIterateChildren, &className, &t, &idx](WIBase &el) mutable {
 			  if(ustring::compare(el.GetClass(), className, false))
-				  t[idx++] = WGUILuaInterface::GetLuaObject(l, el);
+				  t[idx++] = pragma::gui::WGUILuaInterface::GetLuaObject(l, el);
 			  for(auto &hChild : *el.GetChildren()) {
 				  if(hChild.IsValid() == false)
 					  continue;
@@ -218,7 +218,7 @@ static void register_gui(Lua::Interface &lua)
 		  for(auto &hEl : els) {
 			  if(hEl.IsValid() == false)
 				  continue;
-			  auto o = WGUILuaInterface::GetLuaObject(l, const_cast<::WIBase &>(*hEl.get()));
+			  auto o = pragma::gui::WGUILuaInterface::GetLuaObject(l, const_cast<::WIBase &>(*hEl.get()));
 			  t[idx++] = o;
 		  }
 		  return t;
@@ -309,31 +309,31 @@ static void register_gui(Lua::Interface &lua)
 	guiMod[defDrawToTex];
 
 	// Custom Classes
-	auto wiBaseWIElement = luabind::class_<WILuaBase, luabind::bases<WIBase>, pragma::LuaCore::WILuaBaseHolder>("Base");
+	auto wiBaseWIElement = luabind::class_<pragma::gui::WILuaBase, luabind::bases<WIBase>, pragma::LuaCore::WILuaBaseHolder>("Base");
 	wiBaseWIElement.def(luabind::constructor<>());
-	wiBaseWIElement.def("OnInitialize", &WILuaBase::Lua_OnInitialize, &WILuaBase::default_OnInitialize);
-	wiBaseWIElement.def("OnThink", &WILuaBase::Lua_OnThink, &WILuaBase::default_OnThink);
-	wiBaseWIElement.def("OnInitialThink", &WILuaBase::Lua_OnFirstThink, &WILuaBase::default_OnFirstThink);
-	wiBaseWIElement.def("MouseCallback", &WILuaBase::Lua_MouseCallback, &WILuaBase::default_MouseCallback);
-	wiBaseWIElement.def("KeyboardCallback", &WILuaBase::Lua_KeyboardCallback, &WILuaBase::default_KeyboardCallback);
-	wiBaseWIElement.def("CharCallback", &WILuaBase::Lua_CharCallback, &WILuaBase::default_CharCallback);
-	wiBaseWIElement.def("ScrollCallback", &WILuaBase::Lua_ScrollCallback, &WILuaBase::default_ScrollCallback);
-	wiBaseWIElement.def("OnUpdate", &WILuaBase::Lua_OnUpdate, &WILuaBase::default_OnUpdate);
-	wiBaseWIElement.def("OnVisibilityChanged", &WILuaBase::Lua_OnSetVisible, &WILuaBase::default_OnSetVisible);
-	wiBaseWIElement.def("OnSizeChanged", &WILuaBase::Lua_OnSetSize, &WILuaBase::default_OnSetSize);
-	wiBaseWIElement.def("OnColorChanged", &WILuaBase::Lua_OnSetColor, &WILuaBase::default_OnSetColor);
-	wiBaseWIElement.def("OnAlphaChanged", &WILuaBase::Lua_OnSetAlpha, &WILuaBase::default_OnSetAlpha);
-	wiBaseWIElement.def("CheckPosInBounds", &WILuaBase::Lua_CheckPosInBounds, &WILuaBase::default_CheckPosInBounds);
-	wiBaseWIElement.def("OnDraw", &WILuaBase::Lua_Render, &WILuaBase::default_Render);
-	wiBaseWIElement.def("OnCursorEntered", &WILuaBase::Lua_OnCursorEntered, &WILuaBase::default_OnCursorEntered);
-	wiBaseWIElement.def("OnCursorExited", &WILuaBase::Lua_OnCursorExited, &WILuaBase::default_OnCursorExited);
-	wiBaseWIElement.def("OnFileDragEntered", &WILuaBase::Lua_OnFileDragEntered, &WILuaBase::default_OnFileDragEntered);
-	wiBaseWIElement.def("OnFileDragExited", &WILuaBase::Lua_OnFileDragExited, &WILuaBase::default_OnFileDragExited);
-	wiBaseWIElement.def("OnFilesDropped", &WILuaBase::Lua_OnFilesDropped, &WILuaBase::default_OnFilesDropped);
-	wiBaseWIElement.def("OnFocusGained", &WILuaBase::Lua_OnFocusGained, &WILuaBase::default_OnFocusGained);
-	wiBaseWIElement.def("OnFocusKilled", &WILuaBase::Lua_OnFocusKilled, &WILuaBase::default_OnFocusKilled);
-	wiBaseWIElement.def("OnRemove", &WILuaBase::Lua_OnRemove, &WILuaBase::default_OnRemove);
-	wiBaseWIElement.def("SetRenderCommandBuffer", &WILuaBase::SetRenderCommandBuffer);
+	wiBaseWIElement.def("OnInitialize", &pragma::gui::WILuaBase::Lua_OnInitialize, &pragma::gui::WILuaBase::default_OnInitialize);
+	wiBaseWIElement.def("OnThink", &pragma::gui::WILuaBase::Lua_OnThink, &pragma::gui::WILuaBase::default_OnThink);
+	wiBaseWIElement.def("OnInitialThink", &pragma::gui::WILuaBase::Lua_OnFirstThink, &pragma::gui::WILuaBase::default_OnFirstThink);
+	wiBaseWIElement.def("MouseCallback", &pragma::gui::WILuaBase::Lua_MouseCallback, &pragma::gui::WILuaBase::default_MouseCallback);
+	wiBaseWIElement.def("KeyboardCallback", &pragma::gui::WILuaBase::Lua_KeyboardCallback, &pragma::gui::WILuaBase::default_KeyboardCallback);
+	wiBaseWIElement.def("CharCallback", &pragma::gui::WILuaBase::Lua_CharCallback, &pragma::gui::WILuaBase::default_CharCallback);
+	wiBaseWIElement.def("ScrollCallback", &pragma::gui::WILuaBase::Lua_ScrollCallback, &pragma::gui::WILuaBase::default_ScrollCallback);
+	wiBaseWIElement.def("OnUpdate", &pragma::gui::WILuaBase::Lua_OnUpdate, &pragma::gui::WILuaBase::default_OnUpdate);
+	wiBaseWIElement.def("OnVisibilityChanged", &pragma::gui::WILuaBase::Lua_OnSetVisible, &pragma::gui::WILuaBase::default_OnSetVisible);
+	wiBaseWIElement.def("OnSizeChanged", &pragma::gui::WILuaBase::Lua_OnSetSize, &pragma::gui::WILuaBase::default_OnSetSize);
+	wiBaseWIElement.def("OnColorChanged", &pragma::gui::WILuaBase::Lua_OnSetColor, &pragma::gui::WILuaBase::default_OnSetColor);
+	wiBaseWIElement.def("OnAlphaChanged", &pragma::gui::WILuaBase::Lua_OnSetAlpha, &pragma::gui::WILuaBase::default_OnSetAlpha);
+	wiBaseWIElement.def("CheckPosInBounds", &pragma::gui::WILuaBase::Lua_CheckPosInBounds, &pragma::gui::WILuaBase::default_CheckPosInBounds);
+	wiBaseWIElement.def("OnDraw", &pragma::gui::WILuaBase::Lua_Render, &pragma::gui::WILuaBase::default_Render);
+	wiBaseWIElement.def("OnCursorEntered", &pragma::gui::WILuaBase::Lua_OnCursorEntered, &pragma::gui::WILuaBase::default_OnCursorEntered);
+	wiBaseWIElement.def("OnCursorExited", &pragma::gui::WILuaBase::Lua_OnCursorExited, &pragma::gui::WILuaBase::default_OnCursorExited);
+	wiBaseWIElement.def("OnFileDragEntered", &pragma::gui::WILuaBase::Lua_OnFileDragEntered, &pragma::gui::WILuaBase::default_OnFileDragEntered);
+	wiBaseWIElement.def("OnFileDragExited", &pragma::gui::WILuaBase::Lua_OnFileDragExited, &pragma::gui::WILuaBase::default_OnFileDragExited);
+	wiBaseWIElement.def("OnFilesDropped", &pragma::gui::WILuaBase::Lua_OnFilesDropped, &pragma::gui::WILuaBase::default_OnFilesDropped);
+	wiBaseWIElement.def("OnFocusGained", &pragma::gui::WILuaBase::Lua_OnFocusGained, &pragma::gui::WILuaBase::default_OnFocusGained);
+	wiBaseWIElement.def("OnFocusKilled", &pragma::gui::WILuaBase::Lua_OnFocusKilled, &pragma::gui::WILuaBase::default_OnFocusKilled);
+	wiBaseWIElement.def("OnRemove", &pragma::gui::WILuaBase::Lua_OnRemove, &pragma::gui::WILuaBase::default_OnRemove);
+	wiBaseWIElement.def("SetRenderCommandBuffer", &pragma::gui::WILuaBase::SetRenderCommandBuffer);
 	guiMod[wiBaseWIElement];
 	//
 
@@ -350,11 +350,11 @@ static void register_gui(Lua::Interface &lua)
 	Lua::WITexturedShape::register_class(wiTexturedShapeClassDef);
 	guiMod[wiTexturedShapeClassDef];
 
-	auto wiIconClassDef = luabind::class_<::WIIcon, luabind::bases<::WITexturedShape, ::WIShape, ::WIBase>>("Icon");
+	auto wiIconClassDef = luabind::class_<pragma::gui::WIIcon, luabind::bases<::WITexturedShape, ::WIShape, ::WIBase>>("Icon");
 	Lua::WIIcon::register_class(wiIconClassDef);
 	guiMod[wiIconClassDef];
 
-	auto wiSilkIconClassDef = luabind::class_<::WISilkIcon, luabind::bases<::WIIcon, ::WITexturedShape, ::WIShape, ::WIBase>>("SilkIcon");
+	auto wiSilkIconClassDef = luabind::class_<pragma::gui::WISilkIcon, luabind::bases<pragma::gui::WIIcon, ::WITexturedShape, ::WIShape, ::WIBase>>("SilkIcon");
 	Lua::WISilkIcon::register_class(wiSilkIconClassDef);
 	guiMod[wiSilkIconClassDef];
 
@@ -366,12 +366,12 @@ static void register_gui(Lua::Interface &lua)
 	Lua::WICheckbox::register_class(wiCheckboxClassDef);
 	guiMod[wiCheckboxClassDef];
 
-	auto wiTransformableClassDef = luabind::class_<WITransformable, ::WIBase>("Transformable");
+	auto wiTransformableClassDef = luabind::class_<pragma::gui::WITransformable, ::WIBase>("Transformable");
 	Lua::WITransformable::register_class(wiTransformableClassDef);
 	guiMod[wiTransformableClassDef];
 
-	auto wiSnapAreaClassDef = luabind::class_<WISnapArea, ::WIBase>("SnapArea");
-	wiSnapAreaClassDef.def("GetTriggerArea", &WISnapArea::GetTriggerArea);
+	auto wiSnapAreaClassDef = luabind::class_<pragma::gui::WISnapArea, ::WIBase>("SnapArea");
+	wiSnapAreaClassDef.def("GetTriggerArea", &pragma::gui::WISnapArea::GetTriggerArea);
 	guiMod[wiSnapAreaClassDef];
 
 	auto wiDebugDepthTextureClassDef = luabind::class_<pragma::gui::WIDebugDepthTexture, ::WIBase>("DebugDepthTexture");
@@ -392,7 +392,7 @@ static void register_gui(Lua::Interface &lua)
 	wiDebugSsaoClassDef.def("SetUseBlurredSSAOImage", &pragma::gui::WIDebugSSAO::SetUseBlurredSSAOImage);
 	guiMod[wiDebugSsaoClassDef];
 
-	auto wiProgressBarClassDef = luabind::class_<WIProgressBar, ::WIBase>("ProgressBar");
+	auto wiProgressBarClassDef = luabind::class_<pragma::gui::WIProgressBar, ::WIBase>("ProgressBar");
 	Lua::WIProgressBar::register_class(wiProgressBarClassDef);
 	guiMod[wiProgressBarClassDef];
 
@@ -401,57 +401,57 @@ static void register_gui(Lua::Interface &lua)
 	wiTooltipClassDef.def("GetText", +[](const WITooltip &elTooltip) { return elTooltip.GetText().cpp_str(); });
 	guiMod[wiTooltipClassDef];
 
-	auto wiSliderClassDef = luabind::class_<WISlider, luabind::bases<WIProgressBar, ::WIBase>>("Slider");
+	auto wiSliderClassDef = luabind::class_<pragma::gui::WISlider, luabind::bases<pragma::gui::WIProgressBar, ::WIBase>>("Slider");
 	Lua::WISlider::register_class(wiSliderClassDef);
 	guiMod[wiSliderClassDef];
 
-	auto wiScrollContainerClassDef = luabind::class_<WIScrollContainer, ::WIBase>("ScrollContainer");
-	wiScrollContainerClassDef.def("SetAutoStickToBottom", &WIScrollContainer::SetAutoStickToBottom);
-	wiScrollContainerClassDef.def("ShouldAutoStickToBottom", &WIScrollContainer::ShouldAutoStickToBottom);
-	wiScrollContainerClassDef.def("IsContentsWidthFixed", &WIScrollContainer::IsContentsWidthFixed);
-	wiScrollContainerClassDef.def("IsContentsHeightFixed", &WIScrollContainer::IsContentsHeightFixed);
-	wiScrollContainerClassDef.def("SetContentsWidthFixed", &WIScrollContainer::SetContentsWidthFixed);
-	wiScrollContainerClassDef.def("SetContentsHeightFixed", &WIScrollContainer::SetContentsHeightFixed);
-	wiScrollContainerClassDef.def("GetVerticalScrollBar", &WIScrollContainer::GetVerticalScrollBar);
-	wiScrollContainerClassDef.def("GetHorizontalScrollBar", &WIScrollContainer::GetHorizontalScrollBar);
-	wiScrollContainerClassDef.def("SetScrollAmount", &WIScrollContainer::SetScrollAmount);
-	wiScrollContainerClassDef.def("SetScrollAmountX", &WIScrollContainer::SetScrollAmountX);
-	wiScrollContainerClassDef.def("SetScrollAmountY", &WIScrollContainer::SetScrollAmountY);
-	wiScrollContainerClassDef.def("GetWrapperElement", &WIScrollContainer::GetWrapperElement);
-	wiScrollContainerClassDef.def("ScrollToElement", &WIScrollContainer::ScrollToElement);
-	wiScrollContainerClassDef.def("ScrollToElementX", &WIScrollContainer::ScrollToElementX);
-	wiScrollContainerClassDef.def("ScrollToElementY", &WIScrollContainer::ScrollToElementY);
+	auto wiScrollContainerClassDef = luabind::class_<pragma::gui::WIScrollContainer, ::WIBase>("ScrollContainer");
+	wiScrollContainerClassDef.def("SetAutoStickToBottom", &pragma::gui::WIScrollContainer::SetAutoStickToBottom);
+	wiScrollContainerClassDef.def("ShouldAutoStickToBottom", &pragma::gui::WIScrollContainer::ShouldAutoStickToBottom);
+	wiScrollContainerClassDef.def("IsContentsWidthFixed", &pragma::gui::WIScrollContainer::IsContentsWidthFixed);
+	wiScrollContainerClassDef.def("IsContentsHeightFixed", &pragma::gui::WIScrollContainer::IsContentsHeightFixed);
+	wiScrollContainerClassDef.def("SetContentsWidthFixed", &pragma::gui::WIScrollContainer::SetContentsWidthFixed);
+	wiScrollContainerClassDef.def("SetContentsHeightFixed", &pragma::gui::WIScrollContainer::SetContentsHeightFixed);
+	wiScrollContainerClassDef.def("GetVerticalScrollBar", &pragma::gui::WIScrollContainer::GetVerticalScrollBar);
+	wiScrollContainerClassDef.def("GetHorizontalScrollBar", &pragma::gui::WIScrollContainer::GetHorizontalScrollBar);
+	wiScrollContainerClassDef.def("SetScrollAmount", &pragma::gui::WIScrollContainer::SetScrollAmount);
+	wiScrollContainerClassDef.def("SetScrollAmountX", &pragma::gui::WIScrollContainer::SetScrollAmountX);
+	wiScrollContainerClassDef.def("SetScrollAmountY", &pragma::gui::WIScrollContainer::SetScrollAmountY);
+	wiScrollContainerClassDef.def("GetWrapperElement", &pragma::gui::WIScrollContainer::GetWrapperElement);
+	wiScrollContainerClassDef.def("ScrollToElement", &pragma::gui::WIScrollContainer::ScrollToElement);
+	wiScrollContainerClassDef.def("ScrollToElementX", &pragma::gui::WIScrollContainer::ScrollToElementX);
+	wiScrollContainerClassDef.def("ScrollToElementY", &pragma::gui::WIScrollContainer::ScrollToElementY);
 	guiMod[wiScrollContainerClassDef];
 
 	auto wiContainerClassDef = luabind::class_<pragma::gui::WIContainer, ::WIBase>("Container");
 	Lua::WIContainer::register_class(wiContainerClassDef);
 	guiMod[wiContainerClassDef];
 
-	auto wiTableClassDef = luabind::class_<WITable, luabind::bases<pragma::gui::WIContainer, ::WIBase>>("Table");
+	auto wiTableClassDef = luabind::class_<pragma::gui::WITable, luabind::bases<pragma::gui::WIContainer, ::WIBase>>("Table");
 	Lua::WITable::register_class(wiTableClassDef);
 
-	auto wiTableRowClassDef = luabind::class_<WITableRow, luabind::bases<pragma::gui::WIContainer, ::WIBase>>("Row");
+	auto wiTableRowClassDef = luabind::class_<pragma::gui::WITableRow, luabind::bases<pragma::gui::WIContainer, ::WIBase>>("Row");
 	Lua::WITableRow::register_class(wiTableRowClassDef);
 
-	auto wiTableCellClassDef = luabind::class_<WITableCell, luabind::bases<pragma::gui::WIContainer, ::WIBase>>("Cell");
+	auto wiTableCellClassDef = luabind::class_<pragma::gui::WITableCell, luabind::bases<pragma::gui::WIContainer, ::WIBase>>("Cell");
 	Lua::WITableCell::register_class(wiTableCellClassDef);
 	wiTableClassDef.scope[wiTableCellClassDef];
 	wiTableClassDef.scope[wiTableRowClassDef];
 	guiMod[wiTableClassDef];
 
-	auto wiGridPanelClassDef = luabind::class_<pragma::gui::WIGridPanel, luabind::bases<WITable, ::WIBase>>("GridPanel");
+	auto wiGridPanelClassDef = luabind::class_<pragma::gui::WIGridPanel, luabind::bases<pragma::gui::WITable, ::WIBase>>("GridPanel");
 	Lua::WIGridPanel::register_class(wiGridPanelClassDef);
 	guiMod[wiGridPanelClassDef];
 
-	auto wiTreeListClassDef = luabind::class_<WITreeList, luabind::bases<WITable, ::WIBase>>("TreeList");
+	auto wiTreeListClassDef = luabind::class_<pragma::gui::WITreeList, luabind::bases<pragma::gui::WITable, ::WIBase>>("TreeList");
 	Lua::WITreeList::register_class(wiTreeListClassDef);
 
-	auto wiTreeListElementClassDef = luabind::class_<WITreeListElement, luabind::bases<WITableRow, ::WIBase>>("Element");
+	auto wiTreeListElementClassDef = luabind::class_<pragma::gui::WITreeListElement, luabind::bases<pragma::gui::WITableRow, ::WIBase>>("Element");
 	Lua::WITreeListElement::register_class(wiTreeListElementClassDef);
 	wiTreeListClassDef.scope[wiTreeListElementClassDef];
 	guiMod[wiTreeListClassDef];
 
-	auto wiFrameClassDef = luabind::class_<pragma::gui::WIFrame, luabind::bases<WITransformable, ::WIBase>>("Frame");
+	auto wiFrameClassDef = luabind::class_<pragma::gui::WIFrame, luabind::bases<pragma::gui::WITransformable, ::WIBase>>("Frame");
 	Lua::WIFrame::register_class(wiFrameClassDef);
 	guiMod[wiFrameClassDef];
 

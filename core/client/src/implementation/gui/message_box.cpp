@@ -13,7 +13,7 @@ import pragma.gui;
 const Int32 MARGIN_X = 32;
 const Int32 MARGIN_Y = 50;
 
-WIMessageBox *WIMessageBox::Create(const std::string &text, const std::string &title, Button buttons, const std::function<void(WIMessageBox *, Button)> &callback)
+pragma::gui::WIMessageBox *pragma::gui::WIMessageBox::Create(const std::string &text, const std::string &title, Button buttons, const std::function<void(WIMessageBox *, Button)> &callback)
 {
 	auto *pMessageBox = WGUI::GetInstance().Create<WIMessageBox>();
 	if(pMessageBox == nullptr)
@@ -29,14 +29,14 @@ WIMessageBox *WIMessageBox::Create(const std::string &text, const std::string &t
 	return pMessageBox;
 }
 
-WIMessageBox *WIMessageBox::Create(const std::string &text, Button buttons, const std::function<void(WIMessageBox *, Button)> &callback) { return Create(text, "", buttons, callback); }
+pragma::gui::WIMessageBox *pragma::gui::WIMessageBox::Create(const std::string &text, Button buttons, const std::function<void(WIMessageBox *, Button)> &callback) { return Create(text, "", buttons, callback); }
 
 struct MessageBoxDesc {
 	std::string text;
 	std::string title;
-	WIMessageBox::Button buttons;
-	std::function<void(WIMessageBox *)> onShow;
-	std::function<void(WIMessageBox *, WIMessageBox::Button)> buttonCallback;
+	pragma::gui::WIMessageBox::Button buttons;
+	std::function<void(pragma::gui::WIMessageBox *)> onShow;
+	std::function<void(pragma::gui::WIMessageBox *, pragma::gui::WIMessageBox::Button)> buttonCallback;
 };
 static std::queue<MessageBoxDesc> s_messageBoxQueue;
 static WIHandle s_currentMessageBox;
@@ -46,7 +46,7 @@ static void show_next_message_box()
 		return;
 	auto &desc = s_messageBoxQueue.front();
 	auto onShow = desc.onShow;
-	auto *msgBox = WIMessageBox::Create(desc.text, desc.title, desc.buttons, desc.buttonCallback);
+	auto *msgBox = pragma::gui::WIMessageBox::Create(desc.text, desc.title, desc.buttons, desc.buttonCallback);
 	s_messageBoxQueue.pop();
 	if(msgBox == nullptr)
 		return;
@@ -54,7 +54,7 @@ static void show_next_message_box()
 		onShow(msgBox);
 	s_currentMessageBox = msgBox->GetHandle();
 }
-void WIMessageBox::ShowMessageBox(const std::string &text, const std::string &title, Button buttons, const std::function<void(WIMessageBox *)> &onShow, const std::function<void(WIMessageBox *, Button)> &buttonCallback)
+void pragma::gui::WIMessageBox::ShowMessageBox(const std::string &text, const std::string &title, Button buttons, const std::function<void(WIMessageBox *)> &onShow, const std::function<void(WIMessageBox *, Button)> &buttonCallback)
 {
 	MessageBoxDesc desc {};
 	desc.text = text;
@@ -67,23 +67,23 @@ void WIMessageBox::ShowMessageBox(const std::string &text, const std::string &ti
 		show_next_message_box();
 }
 
-WIMessageBox::WIMessageBox() : WIBase() {}
-WIMessageBox::~WIMessageBox() {}
+pragma::gui::WIMessageBox::WIMessageBox() : WIBase() {}
+pragma::gui::WIMessageBox::~WIMessageBox() {}
 
-void WIMessageBox::OnRemove()
+void pragma::gui::WIMessageBox::OnRemove()
 {
 	if(s_currentMessageBox.get() == this)
 		show_next_message_box();
 }
 
-void WIMessageBox::SetTitle(const std::string &title)
+void pragma::gui::WIMessageBox::SetTitle(const std::string &title)
 {
 	if(!m_hMessage.IsValid())
 		return;
 	static_cast<pragma::gui::WIFrame *>(m_hMessage.get())->SetTitle(title);
 }
 
-void WIMessageBox::__buttonCallback(WIHandle hMessageBox, WIMessageBox::Button button)
+void pragma::gui::WIMessageBox::__buttonCallback(WIHandle hMessageBox, pragma::gui::WIMessageBox::Button button)
 {
 	if(!hMessageBox.IsValid())
 		return;
@@ -92,12 +92,12 @@ void WIMessageBox::__buttonCallback(WIHandle hMessageBox, WIMessageBox::Button b
 		return;
 	pMessageBox->m_buttonCallback(pMessageBox, button);
 };
-WIButton *WIMessageBox::AddButton(const std::string &text, Button button)
+WIButton *pragma::gui::WIMessageBox::AddButton(const std::string &text, Button button)
 {
 	return nullptr; // TODO
 }
 
-void WIMessageBox::EnableButtons(Button buttons)
+void pragma::gui::WIMessageBox::EnableButtons(Button buttons)
 {
 	auto values = umath::get_power_of_2_values(CUInt64(buttons));
 	auto hMessageBox = GetHandle();
@@ -144,7 +144,7 @@ void WIMessageBox::EnableButtons(Button buttons)
 	}
 }
 
-void WIMessageBox::Initialize()
+void pragma::gui::WIMessageBox::Initialize()
 {
 	WIBase::Initialize();
 	m_hBg = CreateChild<WIRect>();
@@ -200,7 +200,7 @@ void WIMessageBox::Initialize()
 		}
 	}));
 }
-void WIMessageBox::SetSize(int x, int y)
+void pragma::gui::WIMessageBox::SetSize(int x, int y)
 {
 	WIBase::SetSize(x, y);
 
@@ -210,7 +210,7 @@ void WIMessageBox::SetSize(int x, int y)
 	}
 }
 
-void WIMessageBox::SetText(const std::string &text)
+void pragma::gui::WIMessageBox::SetText(const std::string &text)
 {
 	if(!m_hText.IsValid())
 		return;
@@ -228,10 +228,10 @@ void WIMessageBox::SetText(const std::string &text)
 	pMessage->SetMaxSize(800, 400);
 }
 
-void WIMessageBox::SetButtonCallback(const std::function<void(WIMessageBox *, Button)> &callback) { m_buttonCallback = callback; }
+void pragma::gui::WIMessageBox::SetButtonCallback(const std::function<void(WIMessageBox *, Button)> &callback) { m_buttonCallback = callback; }
 
-WIMessageBox::Button operator|=(const WIMessageBox::Button &a, const WIMessageBox::Button &b) { return static_cast<WIMessageBox::Button>(CInt32(a) | CInt32(b)); }
+pragma::gui::WIMessageBox::Button operator|=(const pragma::gui::WIMessageBox::Button &a, const pragma::gui::WIMessageBox::Button &b) { return static_cast<pragma::gui::WIMessageBox::Button>(CInt32(a) | CInt32(b)); }
 
-WIMessageBox::Button operator|(const WIMessageBox::Button &a, const WIMessageBox::Button &b) { return static_cast<WIMessageBox::Button>(CInt32(a) | CInt32(b)); }
+pragma::gui::WIMessageBox::Button operator|(const pragma::gui::WIMessageBox::Button &a, const pragma::gui::WIMessageBox::Button &b) { return static_cast<pragma::gui::WIMessageBox::Button>(CInt32(a) | CInt32(b)); }
 
-WIMessageBox::Button operator&(const WIMessageBox::Button &a, WIMessageBox::Button &b) { return static_cast<WIMessageBox::Button>(CInt32(a) & CInt32(b)); }
+pragma::gui::WIMessageBox::Button operator&(const pragma::gui::WIMessageBox::Button &a, pragma::gui::WIMessageBox::Button &b) { return static_cast<pragma::gui::WIMessageBox::Button>(CInt32(a) & CInt32(b)); }

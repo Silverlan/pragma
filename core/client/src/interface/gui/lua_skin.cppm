@@ -10,7 +10,7 @@ export module pragma.client:gui.lua_skin;
 export import pragma.lua;
 export import pragma.gui;
 
-export {
+export namespace pragma::gui {
 	struct DLLCLIENT WISkinClass {
 		WISkinClass(lua::State *l);
 		WISkinClass(const WISkinClass &) = delete;

@@ -10,7 +10,7 @@ export module pragma.client:gui.textured_cubemap;
 export import :rendering.cube_map_side;
 export import pragma.gui;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WITexturedCubemap : public WIBase {
 	  public:
 		WITexturedCubemap();

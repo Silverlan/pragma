@@ -8,7 +8,7 @@ export module pragma.client:gui.line_graph;
 
 export import pragma.gui;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WILineGraph : public WIBase {
 	  protected:
 		WIHandle m_hOutline;

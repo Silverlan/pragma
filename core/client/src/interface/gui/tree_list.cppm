@@ -8,7 +8,7 @@ export module pragma.client:gui.tree_list;
 
 export import :gui.table;
 
-export {
+export namespace pragma::gui {
 	class WITreeList;
 	class DLLCLIENT WITreeListElement : public WITableRow {
 	  public:

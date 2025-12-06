@@ -7,9 +7,9 @@ module pragma.client;
 
 import :gui.textured_cubemap;
 
-WITexturedCubemap::WITexturedCubemap() : WIBase {} {}
+pragma::gui::WITexturedCubemap::WITexturedCubemap() : WIBase {} {}
 
-void WITexturedCubemap::Initialize()
+void pragma::gui::WITexturedCubemap::Initialize()
 {
 	WIBase::Initialize();
 	SetSize(512, 384);
@@ -47,13 +47,13 @@ void WITexturedCubemap::Initialize()
 	}
 }
 
-void WITexturedCubemap::SetLOD(float lod)
+void pragma::gui::WITexturedCubemap::SetLOD(float lod)
 {
 	for(auto &hSide : m_hCubemapSides)
 		static_cast<WITexturedRect *>(hSide.get())->SetLOD(lod);
 }
 
-void WITexturedCubemap::SetTexture(prosper::Texture &tex)
+void pragma::gui::WITexturedCubemap::SetTexture(prosper::Texture &tex)
 {
 	if(tex.GetImage().IsCubemap() == false)
 		return;
@@ -65,4 +65,4 @@ void WITexturedCubemap::SetTexture(prosper::Texture &tex)
 		pEl->SetTexture(tex, faceIdx);
 	}
 }
-WITexturedRect *WITexturedCubemap::GetSideElement(CubeMapSide side) { return static_cast<WITexturedRect *>(m_hCubemapSides.at(umath::to_integral(side)).get()); }
+WITexturedRect *pragma::gui::WITexturedCubemap::GetSideElement(CubeMapSide side) { return static_cast<WITexturedRect *>(m_hCubemapSides.at(umath::to_integral(side)).get()); }

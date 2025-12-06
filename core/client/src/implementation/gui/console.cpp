@@ -377,7 +377,7 @@ pragma::gui::WICommandLineEntry *pragma::gui::WIConsole::GetCommandLineEntryElem
 WITextEntry *pragma::gui::WIConsole::GetTextLogElement() { return static_cast<WITextEntry *>(m_hLog.get()); }
 const auto REF_WIDTH = 1'280u;
 const auto REF_HEIGHT = 1'024u;
-WISnapArea *pragma::gui::WIConsole::CreateSnapTarget(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t xt, uint32_t yt, uint32_t wt, uint32_t ht)
+pragma::gui::WISnapArea *pragma::gui::WIConsole::CreateSnapTarget(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t xt, uint32_t yt, uint32_t wt, uint32_t ht)
 {
 	auto *pFrame = GetFrame();
 	if(pFrame == nullptr)

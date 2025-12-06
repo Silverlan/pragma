@@ -189,7 +189,7 @@ void pragma::gui::WIMainMenuOptions::ShowAudioSettings() { SetActiveMenu(m_hAudi
 void pragma::gui::WIMainMenuOptions::ShowControlSettings() { SetActiveMenu(m_hControlSettings); }
 
 static std::string sliderTranslator(float f) { return std::to_string(CInt32(f * 100.f)); }
-static void sliderInitializer(WISlider *pSlider)
+static void sliderInitializer(pragma::gui::WISlider *pSlider)
 {
 	pSlider->SetRange(0.f, 1.f, 0.01f);
 	pSlider->SetValueTranslator(sliderTranslator);

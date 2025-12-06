@@ -9,7 +9,7 @@ export module pragma.client:gui.progress_bar;
 
 export import pragma.gui;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WIProgressBar : public WIBase {
 	  public:
 		WIProgressBar();

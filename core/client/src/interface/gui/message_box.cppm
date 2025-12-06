@@ -8,7 +8,7 @@ export module pragma.client:gui.message_box;
 
 export import pragma.gui;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WIMessageBox : public WIBase {
 	  public:
 		enum class Button : Int32 { NONE = 0, APPLY = 1, CANCEL = 2, YES = 4, NO = 8, YESNO = 12, ACCEPT = 16, DECLINE = 32, OK = 64 };
@@ -35,8 +35,10 @@ export {
 		static WIMessageBox *Create(const std::string &text, const std::string &title = "", Button buttons = Button::NONE, const std::function<void(WIMessageBox *, Button)> &callback = nullptr);
 		static WIMessageBox *Create(const std::string &text, Button buttons, const std::function<void(WIMessageBox *, Button)> &callback = nullptr);
 	};
-
-	DLLCLIENT WIMessageBox::Button operator|(const WIMessageBox::Button &a, const WIMessageBox::Button &b);
-	DLLCLIENT WIMessageBox::Button operator|=(const WIMessageBox::Button &a, const WIMessageBox::Button &b);
-	DLLCLIENT WIMessageBox::Button operator&(const WIMessageBox::Button &a, const WIMessageBox::Button &b);
 };
+
+export {
+	DLLCLIENT pragma::gui::WIMessageBox::Button operator|(const pragma::gui::WIMessageBox::Button &a, const pragma::gui::WIMessageBox::Button &b);
+	DLLCLIENT pragma::gui::WIMessageBox::Button operator|=(const pragma::gui::WIMessageBox::Button &a, const pragma::gui::WIMessageBox::Button &b);
+	DLLCLIENT pragma::gui::WIMessageBox::Button operator&(const pragma::gui::WIMessageBox::Button &a, const pragma::gui::WIMessageBox::Button &b);
+}

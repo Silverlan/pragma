@@ -13,8 +13,8 @@ import pragma.string.unicode;
 
 static const uint32_t DATA_RECORD_BACKLOG = 30;
 
-WINetGraph::NetData::NetData() : lastUpdate(0) { Reset(); }
-void WINetGraph::NetData::Reset()
+pragma::gui::WINetGraph::NetData::NetData() : lastUpdate(0) { Reset(); }
+void pragma::gui::WINetGraph::NetData::Reset()
 {
 	auto *client = pragma::get_client_state();
 	if(client != nullptr)
@@ -28,17 +28,17 @@ void WINetGraph::NetData::Reset()
 	messages.clear();
 }
 
-WINetGraph::NetData::MessageInfo::MessageInfo(uint64_t _size) : size(_size), count(1) {}
+pragma::gui::WINetGraph::NetData::MessageInfo::MessageInfo(uint64_t _size) : size(_size), count(1) {}
 
 //////////////////////////////
 
-WINetGraph::WINetGraph() : WIBase(), m_graphOffset(0), m_dataSizeIdx(0)
+pragma::gui::WINetGraph::WINetGraph() : WIBase(), m_graphOffset(0), m_dataSizeIdx(0)
 {
 	m_netData.Reset();
 	m_dataSizes.resize(DATA_RECORD_BACKLOG, 0);
 }
 
-WINetGraph::~WINetGraph()
+pragma::gui::WINetGraph::~WINetGraph()
 {
 	if(m_cbThink.IsValid())
 		m_cbThink.Remove();
@@ -50,7 +50,7 @@ WINetGraph::~WINetGraph()
 		m_cbOnSendPacketTCP.Remove();
 }
 
-void WINetGraph::AddGraphValue(uint32_t sz)
+void pragma::gui::WINetGraph::AddGraphValue(uint32_t sz)
 {
 	if(!m_hPacketGraph.IsValid())
 		return;
@@ -60,7 +60,7 @@ void WINetGraph::AddGraphValue(uint32_t sz)
 		m_graphOffset = 0;
 }
 
-WIText *WINetGraph::CreateText(const std::string &text)
+WIText *pragma::gui::WINetGraph::CreateText(const std::string &text)
 {
 	auto &colText = colors::White;
 	auto &colShadow = colors::Black;
@@ -76,7 +76,7 @@ WIText *WINetGraph::CreateText(const std::string &text)
 	return pText;
 }
 
-void WINetGraph::Initialize()
+void pragma::gui::WINetGraph::Initialize()
 {
 	WIBase::Initialize();
 
@@ -218,7 +218,7 @@ void WINetGraph::Initialize()
 	}));
 }
 
-void WINetGraph::UpdateGraph()
+void pragma::gui::WINetGraph::UpdateGraph()
 {
 	if(m_hPacketGraph.IsValid())
 		m_hPacketGraph.get<WILineGraph>()->Update();
@@ -238,7 +238,7 @@ void WINetGraph::UpdateGraph()
 		m_hDataGraph.get<WILineGraph>()->Update();
 }
 
-void WINetGraph::SetSize(int x, int y)
+void pragma::gui::WINetGraph::SetSize(int x, int y)
 {
 	WIBase::SetSize(x, y);
 

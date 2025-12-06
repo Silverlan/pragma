@@ -77,11 +77,11 @@ void pragma::gui::WIGridPanel::DoUpdate()
 	WITable::DoUpdate();
 }
 
-WITableRow *pragma::gui::WIGridPanel::AddRow() { return WITable::AddRow<WITableRow>(); }
+pragma::gui::WITableRow *pragma::gui::WIGridPanel::AddRow() { return WITable::AddRow<WITableRow>(); }
 
 uint32_t pragma::gui::WIGridPanel::GetColumnCount() const { return m_numColumns; }
 
-WITableCell *pragma::gui::WIGridPanel::AddItem(WIBase *el, uint32_t rowId, uint32_t colId)
+pragma::gui::WITableCell *pragma::gui::WIGridPanel::AddItem(WIBase *el, uint32_t rowId, uint32_t colId)
 {
 	FillRows(rowId + 1);
 	auto *pRow = GetRow(rowId);

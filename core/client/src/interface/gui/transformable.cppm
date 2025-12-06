@@ -9,7 +9,7 @@ export module pragma.client:gui.transformable;
 
 export import :gui.snap_area;
 
-export {
+export namespace pragma::gui {
 	class DLLCLIENT WITransformable : public WIBase {
 	  public:
 		enum class StateFlags : uint8_t { None = 0u, Draggable = 1u, Resizable = Draggable << 1u, Dragging = Resizable << 1u, Resizing = Dragging << 1u, ResizeRatioLocked = Resizing << 1u, WasDragged = ResizeRatioLocked << 1u };
@@ -94,5 +94,7 @@ export {
 		void UpdateResizeRect();
 		void UpdateResizeRectPos();
 	};
-	REGISTER_ENUM_FLAGS(WITransformable::StateFlags)
+	using namespace umath::scoped_enum::bitwise;
 };
+
+export {REGISTER_ENUM_FLAGS(pragma::gui::WITransformable::StateFlags)}

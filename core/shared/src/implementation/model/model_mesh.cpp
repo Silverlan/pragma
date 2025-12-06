@@ -1243,7 +1243,7 @@ void pragma::model::create_sphere(pragma::ModelSubMesh &mesh, const SphereCreate
 	auto &meshVerts = mesh.GetVertices();
 	std::vector<Vector3> verts;
 	std::vector<uint16_t> triangles;
-	IcoSphere::Create(origin, radius, verts, triangles, recursionLevel);
+	pragma::math::IcoSphere::Create(origin, radius, verts, triangles, recursionLevel);
 	mesh.SetIndices(triangles);
 	meshVerts.reserve(verts.size());
 	for(auto &v : verts) {

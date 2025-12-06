@@ -6,4 +6,4 @@ module pragma.shared;
 
 import :math.delta_orientation;
 
-DeltaOrientation::DeltaOrientation(Quat porientation, double ptime, double pdelta) : orientation(porientation), time(ptime), delta(pdelta) {}
+pragma::math::DeltaOrientation::DeltaOrientation(Quat porientation, double ptime, double pdelta) : orientation(porientation), time(ptime), delta(pdelta) {}

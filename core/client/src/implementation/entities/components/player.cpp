@@ -390,7 +390,7 @@ void CPlayerComponent::OnTick(double tDelta)
 	BasePlayerComponent::OnTick(tDelta);
 
 	if(m_crouchViewOffset != nullptr) {
-		DeltaOffset &doffset = *m_crouchViewOffset;
+		pragma::math::DeltaOffset &doffset = *m_crouchViewOffset;
 		if(doffset.time <= 0)
 			m_crouchViewOffset = nullptr;
 		else {
@@ -407,7 +407,7 @@ void CPlayerComponent::OnTick(double tDelta)
 		}
 	}
 	if(m_upDirOffset != nullptr) {
-		DeltaTransform &dtrans = *m_upDirOffset;
+		pragma::math::DeltaTransform &dtrans = *m_upDirOffset;
 		if(dtrans.time <= 0)
 			m_upDirOffset = nullptr;
 		else {
@@ -431,14 +431,14 @@ void CPlayerComponent::OnCrouch()
 	Vector3 viewOffset {};
 	if(m_observableComponent)
 		viewOffset = m_observableComponent->GetViewOffset();
-	m_crouchViewOffset = std::make_unique<DeltaOffset>(Vector3(0, m_crouchEyeLevel - viewOffset.y, 0), 0.2f);
+	m_crouchViewOffset = std::make_unique<pragma::math::DeltaOffset>(Vector3(0, m_crouchEyeLevel - viewOffset.y, 0), 0.2f);
 }
 void CPlayerComponent::OnUnCrouch()
 {
 	Vector3 viewOffset {};
 	if(m_observableComponent)
 		viewOffset = m_observableComponent->GetViewOffset();
-	m_crouchViewOffset = std::make_unique<DeltaOffset>(Vector3(0, m_standEyeLevel - viewOffset.y, 0), 0.4f);
+	m_crouchViewOffset = std::make_unique<pragma::math::DeltaOffset>(Vector3(0, m_standEyeLevel - viewOffset.y, 0), 0.4f);
 }
 void CPlayerComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BasePlayerComponent)); }
 void CPlayerComponent::ReceiveData(NetPacket &packet)

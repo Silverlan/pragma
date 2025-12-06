@@ -26,11 +26,11 @@ float Lua::math::round(float f, float multiple) { return round_by_multiple(f, mu
 luabind::tableT<Vector3> Lua::math::calc_hermite_spline(lua::State *l, const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, uint32_t segmentCount, float curvature)
 {
 	std::vector<Vector3> curvePoints {};
-	::util::calc_hermite_spline(p0, p1, p2, p3, static_cast<uint32_t>(segmentCount), curvePoints, curvature);
+	pragma::math::calc_hermite_spline(p0, p1, p2, p3, static_cast<uint32_t>(segmentCount), curvePoints, curvature);
 	return Lua::vector_to_table(l, curvePoints);
 }
 
-Vector3 Lua::math::calc_hermite_spline_position(lua::State *l, const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, float s, float curvature) { return ::util::calc_hermite_spline_position(p0, p1, p2, p3, static_cast<float>(s), curvature); }
+Vector3 Lua::math::calc_hermite_spline_position(lua::State *l, const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, float s, float curvature) { return pragma::math::calc_hermite_spline_position(p0, p1, p2, p3, static_cast<float>(s), curvature); }
 
 bool Lua::math::is_in_range(double v, double min, double max) { return v >= min && v <= max; }
 
@@ -58,7 +58,7 @@ int Lua::math::solve_quartic(lua::State *l) { return solve_equation<5, 4>(l, &um
 luabind::optional<Vector3> Lua::math::calc_ballistic_velocity(lua::State *l, const Vector3 &start, const Vector3 &end, float angle, float gravity)
 {
 	Vector3 vel;
-	auto r = umath::calc_ballistic_velocity(start, end, angle, gravity, vel);
+	auto r = pragma::math::calc_ballistic_velocity(start, end, angle, gravity, vel);
 	if(r == false)
 		return nil;
 	return object {l, vel};
@@ -66,7 +66,7 @@ luabind::optional<Vector3> Lua::math::calc_ballistic_velocity(lua::State *l, con
 luabind::tableT<Vector3> Lua::math::solve_ballistic_arc(lua::State *l, const Vector3 &projPos, double projSpeed, const Vector3 &tgt, const Vector3 &targetVel, double gravity)
 {
 	std::array<Vector3, 2> s;
-	auto r = umath::solve_ballistic_arc(projPos, projSpeed, tgt, targetVel, gravity, s);
+	auto r = pragma::math::solve_ballistic_arc(projPos, projSpeed, tgt, targetVel, gravity, s);
 	luabind::tableT<Vector3> t = luabind::newtable(l);
 	for(auto i = decltype(r) {0}; i < r; ++i)
 		t[i + 1] = s[i];
@@ -75,7 +75,7 @@ luabind::tableT<Vector3> Lua::math::solve_ballistic_arc(lua::State *l, const Vec
 luabind::tableT<Vector3> Lua::math::solve_ballistic_arc(lua::State *l, const Vector3 &projPos, double projSpeed, const Vector3 &tgt, double gravity)
 {
 	std::array<Vector3, 2> s;
-	auto r = umath::solve_ballistic_arc(projPos, projSpeed, tgt, gravity, s);
+	auto r = pragma::math::solve_ballistic_arc(projPos, projSpeed, tgt, gravity, s);
 	luabind::tableT<Vector3> t = luabind::newtable(l);
 	for(auto i = decltype(r) {0}; i < r; ++i)
 		t[i + 1] = s[i];
@@ -86,7 +86,7 @@ luabind::optional<luabind::mult<Vector3, double, Vector3>> Lua::math::solve_ball
 	Vector3 fireVelocity;
 	auto gravity = 0.f;
 	Vector3 impactPoint;
-	auto r = umath::solve_ballistic_arc_lateral(projPos, lateralSpeed, tgt, targetVel, maxHeightOffset, fireVelocity, gravity, impactPoint);
+	auto r = pragma::math::solve_ballistic_arc_lateral(projPos, lateralSpeed, tgt, targetVel, maxHeightOffset, fireVelocity, gravity, impactPoint);
 	if(!r)
 		return nil;
 	return luabind::mult<Vector3, double, Vector3> {l, fireVelocity, gravity, impactPoint};
@@ -97,7 +97,7 @@ luabind::optional<luabind::mult<Vector3, double>> Lua::math::solve_ballistic_arc
 	Vector3 fireVelocity;
 	auto gravity = 0.f;
 	Vector3 impactPoint;
-	auto r = umath::solve_ballistic_arc_lateral(projPos, lateralSpeed, tgt, maxHeight, fireVelocity, gravity);
+	auto r = pragma::math::solve_ballistic_arc_lateral(projPos, lateralSpeed, tgt, maxHeight, fireVelocity, gravity);
 	if(!r)
 		return nil;
 	return luabind::mult<Vector3, double> {l, fireVelocity, gravity};
@@ -113,9 +113,9 @@ int Lua::math::abs_max(lua::State *l)
 	Lua::PushNumber(l, v);
 	return 1;
 }
-float Lua::math::ease_in(float t, umath::EaseType type) { return umath::ease_in(t, type); }
-float Lua::math::ease_out(float t, umath::EaseType type) { return umath::ease_out(t, type); }
-float Lua::math::ease_in_out(float t, umath::EaseType type) { return umath::ease_in_out(t, type); }
+float Lua::math::ease_in(float t, pragma::math::EaseType type) { return pragma::math::ease_in(t, type); }
+float Lua::math::ease_out(float t, pragma::math::EaseType type) { return pragma::math::ease_out(t, type); }
+float Lua::math::ease_in_out(float t, pragma::math::EaseType type) { return pragma::math::ease_in_out(t, type); }
 
 double Lua::math::calc_horizontal_fov(double focalLengthInMM, double width, double height) { return umath::rad_to_deg(::umath::calc_horizontal_fov(focalLengthInMM, width, height)); }
 double Lua::math::calc_vertical_fov(double focalLengthInMM, double width, double height) { return umath::rad_to_deg(::umath::calc_vertical_fov(focalLengthInMM, width, height)); }

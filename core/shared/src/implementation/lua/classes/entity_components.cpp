@@ -2598,8 +2598,8 @@ void pragma::LuaCore::base_env_camera_component::register_class(luabind::module_
 	def.def("GetFrustumNeighbors", static_cast<void (*)(lua::State *, pragma::BaseEnvCameraComponent &, int)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent, int planeID) {
 		if(planeID < 0 || planeID > 5)
 			return;
-		FrustumPlane neighborIDs[4];
-		hComponent.GetFrustumNeighbors(FrustumPlane(planeID), &neighborIDs[0]);
+		math::FrustumPlane neighborIDs[4];
+		hComponent.GetFrustumNeighbors(math::FrustumPlane(planeID), &neighborIDs[0]);
 		int table = Lua::CreateTable(l);
 		for(unsigned int i = 0; i < 4; i++) {
 			Lua::PushInt(l, i + 1);
@@ -2611,8 +2611,8 @@ void pragma::LuaCore::base_env_camera_component::register_class(luabind::module_
 		if(planeA < 0 || planeB < 0 || planeA > 5 || planeB > 5)
 			return;
 
-		FrustumPoint cornerPoints[2];
-		hComponent.GetFrustumPlaneCornerPoints(FrustumPlane(planeA), FrustumPlane(planeB), &cornerPoints[0]);
+		math::FrustumPoint cornerPoints[2];
+		hComponent.GetFrustumPlaneCornerPoints(math::FrustumPlane(planeA), math::FrustumPlane(planeB), &cornerPoints[0]);
 
 		Lua::PushInt(l, static_cast<int>(cornerPoints[0]));
 		Lua::PushInt(l, static_cast<int>(cornerPoints[1]));

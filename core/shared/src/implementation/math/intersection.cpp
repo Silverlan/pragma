@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :math.intersection;
 
-bool Intersection::LineMesh(const Vector3 &_start, const Vector3 &_dir, pragma::Model &mdl, LineMeshResult &r, bool precise, const std::vector<uint32_t> *bodyGroups, uint32_t lod, const Vector3 &origin, const Quat &rot)
+bool pragma::math::intersection::line_with_mesh(const Vector3 &_start, const Vector3 &_dir, pragma::Model &mdl, LineMeshResult &r, bool precise, const std::vector<uint32_t> *bodyGroups, uint32_t lod, const Vector3 &origin, const Quat &rot)
 {
 	auto start = _start;
 	auto dir = _dir;
@@ -21,7 +21,7 @@ bool Intersection::LineMesh(const Vector3 &_start, const Vector3 &_dir, pragma::
 		mdl.GetBodyGroupMeshes({}, lod, meshes);
 		for(auto i = decltype(meshes.size()) {0u}; i < meshes.size(); ++i) {
 			auto &mesh = meshes.at(i);
-			if(LineMesh(start, dir, *mesh, r, precise, nullptr, nullptr) == false)
+			if(line_with_mesh(start, dir, *mesh, r, precise, nullptr, nullptr) == false)
 				continue;
 			hasFoundBetterCandidate = true;
 			r.precise->meshGroup = mdl.GetMeshGroup(0);
@@ -38,7 +38,7 @@ bool Intersection::LineMesh(const Vector3 &_start, const Vector3 &_dir, pragma::
 		mdl.GetBodyGroupMeshes({outMeshGroupIdx}, lod, meshes);
 		for(auto i = decltype(meshes.size()) {0u}; i < meshes.size(); ++i) {
 			auto &mesh = meshes.at(i);
-			if(LineMesh(start, dir, *mesh, r, precise, nullptr, nullptr) == false)
+			if(line_with_mesh(start, dir, *mesh, r, precise, nullptr, nullptr) == false)
 				continue;
 			hasFoundBetterCandidate = true;
 			r.precise->meshGroupIndex = outMeshGroupIdx;
@@ -51,11 +51,11 @@ bool Intersection::LineMesh(const Vector3 &_start, const Vector3 &_dir, pragma::
 	}
 	return hasFoundBetterCandidate;
 }
-bool Intersection::LineMesh(const Vector3 &start, const Vector3 &dir, pragma::Model &mdl, LineMeshResult &r, bool precise, uint32_t lod, const Vector3 &origin, const Quat &rot) { return LineMesh(start, dir, mdl, r, precise, nullptr, lod, origin, rot); }
-bool Intersection::LineMesh(const Vector3 &start, const Vector3 &dir, pragma::Model &mdl, LineMeshResult &r, bool precise, const std::vector<uint32_t> &bodyGroups, const Vector3 &origin, const Quat &rot) { return LineMesh(start, dir, mdl, r, precise, &bodyGroups, 0, origin, rot); }
-bool Intersection::LineMesh(const Vector3 &start, const Vector3 &dir, pragma::Model &mdl, LineMeshResult &r, bool precise, const Vector3 &origin, const Quat &rot) { return LineMesh(start, dir, mdl, r, precise, 0, origin, rot); }
+bool pragma::math::intersection::line_with_mesh(const Vector3 &start, const Vector3 &dir, pragma::Model &mdl, LineMeshResult &r, bool precise, uint32_t lod, const Vector3 &origin, const Quat &rot) { return line_with_mesh(start, dir, mdl, r, precise, nullptr, lod, origin, rot); }
+bool pragma::math::intersection::line_with_mesh(const Vector3 &start, const Vector3 &dir, pragma::Model &mdl, LineMeshResult &r, bool precise, const std::vector<uint32_t> &bodyGroups, const Vector3 &origin, const Quat &rot) { return line_with_mesh(start, dir, mdl, r, precise, &bodyGroups, 0, origin, rot); }
+bool pragma::math::intersection::line_with_mesh(const Vector3 &start, const Vector3 &dir, pragma::Model &mdl, LineMeshResult &r, bool precise, const Vector3 &origin, const Quat &rot) { return line_with_mesh(start, dir, mdl, r, precise, 0, origin, rot); }
 
-bool Intersection::LineMesh(const Vector3 &_start, const Vector3 &_dir, ModelMesh &mesh, LineMeshResult &r, bool precise, const Vector3 *origin, const Quat *rot)
+bool pragma::math::intersection::line_with_mesh(const Vector3 &_start, const Vector3 &_dir, ModelMesh &mesh, LineMeshResult &r, bool precise, const Vector3 *origin, const Quat *rot)
 {
 	auto start = _start;
 	auto dir = _dir;
@@ -69,7 +69,7 @@ bool Intersection::LineMesh(const Vector3 &_start, const Vector3 &_dir, ModelMes
 	auto hasFoundBetterCandidate = false;
 	for(auto i = decltype(subMeshes.size()) {0u}; i < subMeshes.size(); ++i) {
 		auto &subMesh = subMeshes.at(i);
-		if(LineMesh(start, dir, *subMesh, r, precise, nullptr, nullptr) == false)
+		if(line_with_mesh(start, dir, *subMesh, r, precise, nullptr, nullptr) == false)
 			continue;
 		hasFoundBetterCandidate = true;
 		r.precise->subMeshIdx = i;
@@ -82,7 +82,7 @@ bool Intersection::LineMesh(const Vector3 &_start, const Vector3 &_dir, ModelMes
 
 static bool is_better_candidate(umath::intersection::Result oldResult, umath::intersection::Result newResult, float *tOld = nullptr, float *tNew = nullptr) { return newResult > oldResult || (tOld != nullptr && newResult == oldResult && tNew > tOld); }
 static bool is_better_candidate(umath::intersection::Result oldResult, umath::intersection::Result newResult, float tOld, float tNew) { return is_better_candidate(oldResult, newResult, &tOld, &tNew); }
-bool Intersection::LineMesh(const Vector3 &_start, const Vector3 &_dir, pragma::ModelSubMesh &subMesh, LineMeshResult &r, bool precise, const Vector3 *origin, const Quat *rot)
+bool pragma::math::intersection::line_with_mesh(const Vector3 &_start, const Vector3 &_dir, pragma::ModelSubMesh &subMesh, LineMeshResult &r, bool precise, const Vector3 *origin, const Quat *rot)
 {
 	if(subMesh.GetGeometryType() != pragma::ModelSubMesh::GeometryType::Triangles || subMesh.GetTriangleCount() == 0)
 		return false;

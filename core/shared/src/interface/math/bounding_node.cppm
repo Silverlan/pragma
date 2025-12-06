@@ -8,13 +8,15 @@ export module pragma.shared:math.bounding_node;
 
 export import pragma.math;
 
-export class DLLNETWORK BoundingNode {
-  protected:
-	Vector3 m_min = {};
-	Vector3 m_max = {};
-  public:
-	BoundingNode(const Vector3 &min, const Vector3 &max);
-	void GetBounds(Vector3 *min, Vector3 *max);
-	Vector3 &GetMin();
-	Vector3 &GetMax();
-};
+export namespace pragma::math {
+	class DLLNETWORK BoundingNode {
+	protected:
+		Vector3 m_min = {};
+		Vector3 m_max = {};
+	public:
+		BoundingNode(const Vector3 &min, const Vector3 &max);
+		void GetBounds(Vector3 *min, Vector3 *max);
+		Vector3 &GetMin();
+		Vector3 &GetMax();
+	};
+}

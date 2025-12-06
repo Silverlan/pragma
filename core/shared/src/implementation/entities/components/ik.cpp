@@ -58,7 +58,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 		IKJointInfo(uint32_t boneId) : boneId(boneId) {}
 		uint32_t boneId = std::numeric_limits<uint32_t>::max();
 		uint32_t jointId = std::numeric_limits<uint32_t>::max();
-		OrientedPoint referenceTransform = {};
+		math::OrientedPoint referenceTransform = {};
 
 		std::array<std::shared_ptr<Node>, 3> nodes = {};
 	};

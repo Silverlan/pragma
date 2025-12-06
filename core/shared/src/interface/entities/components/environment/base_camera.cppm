@@ -90,8 +90,8 @@ export {
 			void CreateFrustumKDop(const Vector2 &uvStart, const Vector2 &uvEnd, std::vector<umath::Plane> &kDop) const;
 
 			static void GetFrustumPoints(std::vector<Vector3> &outPoints, float neard, float fard, float fov, float ratio, const Vector3 &center, const Vector3 &viewDir, const Vector3 &viewUp);
-			static void GetFrustumNeighbors(FrustumPlane planeID, FrustumPlane *neighborIDs);
-			static void GetFrustumPlaneCornerPoints(FrustumPlane planeA, FrustumPlane planeB, FrustumPoint *cornerPoints);
+			static void GetFrustumNeighbors(math::FrustumPlane planeID, math::FrustumPlane *neighborIDs);
+			static void GetFrustumPlaneCornerPoints(math::FrustumPlane planeA, math::FrustumPlane planeB, math::FrustumPoint *cornerPoints);
 			static void CreateFrustumKDop(const std::vector<umath::Plane> &planes, const std::vector<Vector3> &points, const Vector3 &dir, std::vector<umath::Plane> *kDop);
 			static Mat4 CalcProjectionMatrix(umath::Radian fovRad, float aspectRatio, float nearZ, float farZ, const rendering::Tile *optTile = nullptr);
 			static void GetFrustumPlanes(const std::vector<Vector3> &points, std::vector<umath::Plane> &outPlanes);

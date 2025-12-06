@@ -220,5 +220,5 @@ void Lua::vector::calc_best_fitting_plane(luabind::table<> points, float ang, Ve
 	auto avg = calc_average(points);
 	auto mat = umat::create_from_axis_angle(avg, ang);
 
-	umath::calc_best_fitting_plane(mat, avg, outNormal, outDistance);
+	pragma::math::calc_best_fitting_plane(mat, avg, outNormal, outDistance);
 }

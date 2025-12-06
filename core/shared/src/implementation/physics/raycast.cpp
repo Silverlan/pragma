@@ -33,7 +33,7 @@ void pragma::physics::TraceResult::InitializeMeshes()
 	uvec::world_to_local(origin, rot, dir);
 	dir *= maxDist;
 
-	Intersection::LineMeshResult res {};
+	pragma::math::intersection::LineMeshResult res {};
 	for(auto &mesh : meshInfo->meshes) {
 		Vector3 min, max;
 		mesh->GetBounds(min, max);
@@ -46,7 +46,7 @@ void pragma::physics::TraceResult::InitializeMeshes()
 			subMesh->GetBounds(min, max);
 			if(!umath::intersection::point_in_aabb(startPosLocal, min, max) && (umath::intersection::line_aabb(startPosLocal, dir, min, max, &t) != umath::intersection::Result::Intersect || umath::abs(t) > (dist / maxDist)))
 				continue;
-			if(Intersection::LineMesh(startPosLocal, dir, *subMesh, res, true, nullptr, nullptr) == false || umath::abs(res.hitValue) > (dist / maxDist))
+			if(pragma::math::intersection::line_with_mesh(startPosLocal, dir, *subMesh, res, true, nullptr, nullptr) == false || umath::abs(res.hitValue) > (dist / maxDist))
 				continue;
 			meshInfo->mesh = mesh.get();
 			meshInfo->subMesh = subMesh.get();

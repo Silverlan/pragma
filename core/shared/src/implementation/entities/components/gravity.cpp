@@ -211,7 +211,7 @@ void GravityComponent::SetGravityScale(float scale) { BaseGravity::SetGravitySca
 bool GravityComponent::CalcBallisticVelocity(const Vector3 &origin, const Vector3 &destPos, float fireAngle, float maxSpeed, float spread, float maxPitch, float maxYaw, Vector3 &vel) const
 {
 	auto gravity = -GetGravityForce().y;
-	auto b = umath::calc_ballistic_velocity(origin, destPos, fireAngle, gravity, vel);
+	auto b = math::calc_ballistic_velocity(origin, destPos, fireAngle, gravity, vel);
 	if(b == false)
 		return false;
 

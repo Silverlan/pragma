@@ -1899,7 +1899,7 @@ void CMD_debug_aim_info(pragma::NetworkState *state, pragma::BasePlayerComponent
 	pragma::physics::TraceResult res {};
 	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
-	std::optional<Intersection::LineMeshResult> closestMesh {};
+	std::optional<pragma::math::intersection::LineMeshResult> closestMesh {};
 	pragma::ecs::BaseEntity *entClosest = nullptr;
 	for(auto *ent : entIt) {
 		if(ent == &entPl)

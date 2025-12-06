@@ -8,7 +8,7 @@ export module pragma.shared:math.ballistic;
 
 export import pragma.math;
 
-namespace umath {
+export namespace pragma::math {
 	DLLNETWORK Vector3 calc_ballistic_position(const Vector3 &start, const Vector3 &vel, float gravity, float t);
 	DLLNETWORK float calc_ballistic_range(float speed, float gravity, float initialHeight);
 	DLLNETWORK bool calc_ballistic_velocity(const Vector3 &start, const Vector3 &end, float angle, float gravity, Vector3 &vel);

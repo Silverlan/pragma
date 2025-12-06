@@ -282,7 +282,7 @@ bool Lua::game::raycast(lua::State *l, const pragma::physics::TraceData &data)
 	auto *dataFilter = data.GetFilter();
 	auto filter = (dataFilter != nullptr) ? std::shared_ptr<PhysClosestRayResultCallback>(new PhysClosestRayResultCallback(dataFilter->CreateClosestRayCallbackFilter(flags, group, mask, btOrigin, btEnd))) : nullptr;
 #endif
-	Intersection::LineMeshResult meshResult {};
+	pragma::math::intersection::LineMeshResult meshResult {};
 	for(auto *ent : *ents) {
 		if(ent == nullptr || ent->IsSpawned() == false)
 			continue;
@@ -294,7 +294,7 @@ bool Lua::game::raycast(lua::State *l, const pragma::physics::TraceData &data)
 		if(dataFilter != nullptr && filter->ShouldPass(ent, nullptr, nullptr) == false)
 			continue;
 #endif
-		Intersection::LineMesh(start, end - start, *hMdl, meshResult, true, pTrComponent->GetPosition(), pTrComponent->GetRotation());
+		pragma::math::intersection::line_with_mesh(start, end - start, *hMdl, meshResult, true, pTrComponent->GetPosition(), pTrComponent->GetRotation());
 	}
 #if 0
 	if(entClosest != nullptr)

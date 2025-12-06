@@ -353,8 +353,8 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 			    return 0;
 		    int exponent = static_cast<int>(std::log10(n));
 		    return static_cast<int>(std::pow(10, exponent));
-		}),luabind::def("smooth_step", umath::smooth_step<double>), luabind::def("smoother_step", umath::smoother_step<double>), luabind::def("calc_ballistic_range", umath::calc_ballistic_range),
-	  luabind::def("calc_ballistic_position", umath::calc_ballistic_position), luabind::def("calc_ballistic_angle_of_reach", umath::approach<double>), luabind::def("get_frustum_plane_center", umath::frustum::get_plane_center),
+		}),luabind::def("smooth_step", umath::smooth_step<double>), luabind::def("smoother_step", umath::smoother_step<double>), luabind::def("calc_ballistic_range", pragma::math::calc_ballistic_range),
+	  luabind::def("calc_ballistic_position", pragma::math::calc_ballistic_position), luabind::def("calc_ballistic_angle_of_reach", umath::approach<double>), luabind::def("get_frustum_plane_center", umath::frustum::get_plane_center),
 	  luabind::def(
 	    "calc_average_rotation",
 	    +[](lua::State *l, luabind::table<> t) -> Quat {
@@ -431,10 +431,10 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("vertical_fov_to_horizontal_fov", static_cast<double (*)(float, float)>([](float fovDeg, float widthOrAspectRatio) -> double { return Lua::math::vertical_fov_to_horizontal_fov(fovDeg, widthOrAspectRatio); })),
 	  luabind::def("diagonal_fov_to_vertical_fov", &Lua::math::diagonal_fov_to_vertical_fov),
 
-	  luabind::def("calc_ballistic_time_of_flight", static_cast<float (*)(const Vector3 &, float, float, float)>(&umath::calc_ballistic_time_of_flight)),
-	  luabind::def("calc_ballistic_time_of_flight", static_cast<float (*)(const Vector3 &, const Vector3 &, float)>(&umath::calc_ballistic_time_of_flight)),
-	  luabind::def("calc_ballistic_time_of_flight", static_cast<float (*)(const Vector3 &, const Vector3 &, float, float, float)>(&umath::calc_ballistic_time_of_flight)),
-	  luabind::def("calc_ballistic_time_of_flight", static_cast<float (*)(const Vector3 &, const Vector3 &, const Vector3 &, float)>(&umath::calc_ballistic_time_of_flight)),
+	  luabind::def("calc_ballistic_time_of_flight", static_cast<float (*)(const Vector3 &, float, float, float)>(&pragma::math::calc_ballistic_time_of_flight)),
+	  luabind::def("calc_ballistic_time_of_flight", static_cast<float (*)(const Vector3 &, const Vector3 &, float)>(&pragma::math::calc_ballistic_time_of_flight)),
+	  luabind::def("calc_ballistic_time_of_flight", static_cast<float (*)(const Vector3 &, const Vector3 &, float, float, float)>(&pragma::math::calc_ballistic_time_of_flight)),
+	  luabind::def("calc_ballistic_time_of_flight", static_cast<float (*)(const Vector3 &, const Vector3 &, const Vector3 &, float)>(&pragma::math::calc_ballistic_time_of_flight)),
 
 	  luabind::def("solve_ballistic_arc", static_cast<luabind::tableT<Vector3> (*)(lua::State *, const Vector3 &, double, const Vector3 &, const Vector3 &, double)>(&Lua::math::solve_ballistic_arc)),
 	  luabind::def("solve_ballistic_arc", static_cast<luabind::tableT<Vector3> (*)(lua::State *, const Vector3 &, double, const Vector3 &, double)>(&Lua::math::solve_ballistic_arc)),
@@ -489,17 +489,17 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "math",
 	  {
-	    {"EASE_TYPE_BACK", umath::to_integral(umath::EaseType::Back)},
-	    {"EASE_TYPE_BOUNCE", umath::to_integral(umath::EaseType::Bounce)},
-	    {"EASE_TYPE_CIRCULAR", umath::to_integral(umath::EaseType::Circular)},
-	    {"EASE_TYPE_CUBIC", umath::to_integral(umath::EaseType::Cubic)},
-	    {"EASE_TYPE_ELASTIC", umath::to_integral(umath::EaseType::Elastic)},
-	    {"EASE_TYPE_EXPONENTIAL", umath::to_integral(umath::EaseType::Exponential)},
-	    {"EASE_TYPE_LINEAR", umath::to_integral(umath::EaseType::Linear)},
-	    {"EASE_TYPE_QUADRATIC", umath::to_integral(umath::EaseType::Quadratic)},
-	    {"EASE_TYPE_QUARTIC", umath::to_integral(umath::EaseType::Quartic)},
-	    {"EASE_TYPE_QUINTIC", umath::to_integral(umath::EaseType::Quintic)},
-	    {"EASE_TYPE_SINE", umath::to_integral(umath::EaseType::Sine)},
+	    {"EASE_TYPE_BACK", umath::to_integral(pragma::math::EaseType::Back)},
+	    {"EASE_TYPE_BOUNCE", umath::to_integral(pragma::math::EaseType::Bounce)},
+	    {"EASE_TYPE_CIRCULAR", umath::to_integral(pragma::math::EaseType::Circular)},
+	    {"EASE_TYPE_CUBIC", umath::to_integral(pragma::math::EaseType::Cubic)},
+	    {"EASE_TYPE_ELASTIC", umath::to_integral(pragma::math::EaseType::Elastic)},
+	    {"EASE_TYPE_EXPONENTIAL", umath::to_integral(pragma::math::EaseType::Exponential)},
+	    {"EASE_TYPE_LINEAR", umath::to_integral(pragma::math::EaseType::Linear)},
+	    {"EASE_TYPE_QUADRATIC", umath::to_integral(pragma::math::EaseType::Quadratic)},
+	    {"EASE_TYPE_QUARTIC", umath::to_integral(pragma::math::EaseType::Quartic)},
+	    {"EASE_TYPE_QUINTIC", umath::to_integral(pragma::math::EaseType::Quintic)},
+	    {"EASE_TYPE_SINE", umath::to_integral(pragma::math::EaseType::Sine)},
 
 	    {"MAX_SINT8", std::numeric_limits<int8_t>::max()},
 	    {"MIN_SINT8", std::numeric_limits<int8_t>::lowest()},

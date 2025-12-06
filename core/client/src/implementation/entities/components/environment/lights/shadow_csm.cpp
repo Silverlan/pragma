@@ -170,10 +170,10 @@ void CShadowCSMComponent::UpdateFrustum(uint32_t splitId, pragma::CCameraCompone
 	cam.SetNearZ(zNear);
 	cam.SetFarZ(zFar);
 
-	auto &ftr = frustumSplit.points[static_cast<int>(FrustumPoint::FarTopRight)];
-	auto &fbl = frustumSplit.points[static_cast<int>(FrustumPoint::FarBottomLeft)];
-	auto &nbl = frustumSplit.points[static_cast<int>(FrustumPoint::NearBottomLeft)];
-	auto &ntr = frustumSplit.points[static_cast<int>(FrustumPoint::NearTopRight)];
+	auto &ftr = frustumSplit.points[static_cast<int>(pragma::math::FrustumPoint::FarTopRight)];
+	auto &fbl = frustumSplit.points[static_cast<int>(pragma::math::FrustumPoint::FarBottomLeft)];
+	auto &nbl = frustumSplit.points[static_cast<int>(pragma::math::FrustumPoint::NearBottomLeft)];
+	auto &ntr = frustumSplit.points[static_cast<int>(pragma::math::FrustumPoint::NearTopRight)];
 
 	std::vector<Vector3> trapezoid = {ftr, fbl, nbl, ntr};
 	auto &center = frustumSplit.center;

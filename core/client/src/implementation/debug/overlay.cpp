@@ -442,7 +442,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawMesh(const std::ve
 std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawSphere(const pragma::debug::DebugRenderInfo &renderInfo, float radius, uint32_t recursionLevel)
 {
 	std::vector<Vector3> verts;
-	IcoSphere::Create(Vector3 {0.f, 0.f, 0.f}, radius, verts, recursionLevel);
+	pragma::math::IcoSphere::Create(Vector3 {0.f, 0.f, 0.f}, radius, verts, recursionLevel);
 	auto r = DrawMesh(verts, renderInfo);
 	return r;
 }
@@ -497,7 +497,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawSpline(const std::
 		auto &p0 = (i > 0) ? path[i - 1] : p1;
 		auto &p2 = path[i + 1];
 		auto &p3 = (i < numPath - 2) ? path[i + 2] : p2;
-		util::calc_hermite_spline(p0, p1, p2, p3, segmentCount, splinePath, curvature);
+		pragma::math::calc_hermite_spline(p0, p1, p2, p3, segmentCount, splinePath, curvature);
 	}
 	return DrawPath(splinePath, renderInfo);
 }
@@ -539,44 +539,44 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawFrustum(const std:
 	// Near
 	r->AddObject(DrawMesh(
 	  {
-	    points.at(umath::to_integral(FrustumPoint::NearBottomLeft)),
-	    points.at(umath::to_integral(FrustumPoint::NearBottomRight)),
-	    points.at(umath::to_integral(FrustumPoint::NearTopRight)),
+	    points.at(umath::to_integral(pragma::math::FrustumPoint::NearBottomLeft)),
+	    points.at(umath::to_integral(pragma::math::FrustumPoint::NearBottomRight)),
+	    points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopRight)),
 
-	    points.at(umath::to_integral(FrustumPoint::NearTopRight)),
-	    points.at(umath::to_integral(FrustumPoint::NearTopLeft)),
-	    points.at(umath::to_integral(FrustumPoint::NearBottomLeft)),
+	    points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopRight)),
+	    points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopLeft)),
+	    points.at(umath::to_integral(pragma::math::FrustumPoint::NearBottomLeft)),
 	  },
 	  renderInfo));
 	// Far
 	col = Color(0, 255, 0, a);
-	r->AddObject(DrawMesh({points.at(umath::to_integral(FrustumPoint::FarBottomLeft)), points.at(umath::to_integral(FrustumPoint::FarTopLeft)), points.at(umath::to_integral(FrustumPoint::FarTopRight)),
+	r->AddObject(DrawMesh({points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarTopLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarTopRight)),
 
-	                        points.at(umath::to_integral(FrustumPoint::FarTopRight)), points.at(umath::to_integral(FrustumPoint::FarBottomRight)), points.at(umath::to_integral(FrustumPoint::FarBottomLeft))},
+	                        points.at(umath::to_integral(pragma::math::FrustumPoint::FarTopRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomLeft))},
 	  renderInfo));
 	// Left
 	col = Color(0, 0, 255, a);
-	r->AddObject(DrawMesh({points.at(umath::to_integral(FrustumPoint::FarBottomLeft)), points.at(umath::to_integral(FrustumPoint::NearBottomLeft)), points.at(umath::to_integral(FrustumPoint::NearTopLeft)),
+	r->AddObject(DrawMesh({points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::NearBottomLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopLeft)),
 
-	                        points.at(umath::to_integral(FrustumPoint::NearTopLeft)), points.at(umath::to_integral(FrustumPoint::FarTopLeft)), points.at(umath::to_integral(FrustumPoint::FarBottomLeft))},
+	                        points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarTopLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomLeft))},
 	  renderInfo));
 	// Right
 	col = Color(255, 255, 0, a);
-	r->AddObject(DrawMesh({points.at(umath::to_integral(FrustumPoint::FarBottomRight)), points.at(umath::to_integral(FrustumPoint::FarTopRight)), points.at(umath::to_integral(FrustumPoint::NearTopRight)),
+	r->AddObject(DrawMesh({points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarTopRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopRight)),
 
-	                        points.at(umath::to_integral(FrustumPoint::NearTopRight)), points.at(umath::to_integral(FrustumPoint::NearBottomRight)), points.at(umath::to_integral(FrustumPoint::FarBottomRight))},
+	                        points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::NearBottomRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomRight))},
 	  renderInfo));
 	// Top
 	col = Color(255, 0, 255, a);
-	r->AddObject(DrawMesh({points.at(umath::to_integral(FrustumPoint::NearTopLeft)), points.at(umath::to_integral(FrustumPoint::NearTopRight)), points.at(umath::to_integral(FrustumPoint::FarTopRight)),
+	r->AddObject(DrawMesh({points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarTopRight)),
 
-	                        points.at(umath::to_integral(FrustumPoint::FarTopRight)), points.at(umath::to_integral(FrustumPoint::FarTopLeft)), points.at(umath::to_integral(FrustumPoint::NearTopLeft))},
+	                        points.at(umath::to_integral(pragma::math::FrustumPoint::FarTopRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarTopLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopLeft))},
 	  renderInfo));
 	// Bottom
 	col = Color(0, 255, 255, a);
-	r->AddObject(DrawMesh({points.at(umath::to_integral(FrustumPoint::NearBottomLeft)), points.at(umath::to_integral(FrustumPoint::FarBottomLeft)), points.at(umath::to_integral(FrustumPoint::FarBottomRight)),
+	r->AddObject(DrawMesh({points.at(umath::to_integral(pragma::math::FrustumPoint::NearBottomLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomRight)),
 
-	                        points.at(umath::to_integral(FrustumPoint::FarBottomRight)), points.at(umath::to_integral(FrustumPoint::NearBottomRight)), points.at(umath::to_integral(FrustumPoint::NearBottomLeft))},
+	                        points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::NearBottomRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::NearBottomLeft))},
 	  renderInfo));
 	return r;
 }

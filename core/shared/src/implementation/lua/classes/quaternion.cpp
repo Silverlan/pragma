@@ -84,7 +84,7 @@ static luabind::mult<Quat, Vector2> approach_direction(lua::State *l, const Quat
   const EulerAngles *angOffset = nullptr)
 {
 	Vector2 resAm;
-	auto r = uquat::approach_direction(rot, up, targetDir, rotAmount, &resAm, pitchLimit, yawLimit, rotPivot, angOffset);
+	auto r = pragma::math::approach_direction(rot, up, targetDir, rotAmount, &resAm, pitchLimit, yawLimit, rotPivot, angOffset);
 	return {l, r, resAm};
 }
 luabind::mult<Quat, Vector2> Lua::Quaternion::ApproachDirection(lua::State *l, const Quat &rot, const Vector3 &up, const Vector3 &targetDir, const ::Vector2 &rotAmount, const ::Vector2 *pitchLimit, const ::Vector2 *yawLimit, const Quat *rotPivot, const EulerAngles *angOffset)

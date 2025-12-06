@@ -217,21 +217,21 @@ void CRenderComponent::UpdateAbsoluteRenderBounds()
 void CRenderComponent::UpdateAbsoluteSphereRenderBounds() { m_absoluteRenderSphere = CalcAbsoluteRenderSphere(); }
 void CRenderComponent::UpdateAbsoluteAABBRenderBounds() { m_absoluteRenderBounds = CalcAbsoluteRenderBounds(); }
 const bounding_volume::AABB &CRenderComponent::GetLocalRenderBounds() const { return m_localRenderBounds; }
-const Sphere &CRenderComponent::GetLocalRenderSphere() const { return m_localRenderSphere; }
+const pragma::math::Sphere &CRenderComponent::GetLocalRenderSphere() const { return m_localRenderSphere; }
 
 const bounding_volume::AABB &CRenderComponent::GetUpdatedAbsoluteRenderBounds() const
 {
 	const_cast<CRenderComponent *>(this)->UpdateAbsoluteRenderBounds();
 	return GetAbsoluteRenderBounds();
 }
-const Sphere &CRenderComponent::GetUpdatedAbsoluteRenderSphere() const
+const pragma::math::Sphere &CRenderComponent::GetUpdatedAbsoluteRenderSphere() const
 {
 	const_cast<CRenderComponent *>(this)->UpdateAbsoluteRenderBounds();
 	return GetAbsoluteRenderSphere();
 }
 
 const bounding_volume::AABB &CRenderComponent::GetAbsoluteRenderBounds() const { return m_absoluteRenderBounds; }
-const Sphere &CRenderComponent::GetAbsoluteRenderSphere() const { return m_absoluteRenderSphere; }
+const pragma::math::Sphere &CRenderComponent::GetAbsoluteRenderSphere() const { return m_absoluteRenderSphere; }
 
 bounding_volume::AABB CRenderComponent::CalcAbsoluteRenderBounds() const
 {
@@ -250,7 +250,7 @@ bounding_volume::AABB CRenderComponent::CalcAbsoluteRenderBounds() const
 	absBounds = absBounds.Transform(pose);
 	return absBounds;
 }
-Sphere CRenderComponent::CalcAbsoluteRenderSphere() const
+pragma::math::Sphere CRenderComponent::CalcAbsoluteRenderSphere() const
 {
 	auto r = m_localRenderSphere;
 
@@ -467,7 +467,7 @@ void CRenderComponent::UpdateRenderMeshes()
 #endif
 }
 void CRenderComponent::ReceiveData(NetPacket &packet) { m_renderFlags = packet->Read<decltype(m_renderFlags)>(); }
-std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersection(const Vector3 &start, const Vector3 &dir, bool precise) const
+std::optional<pragma::math::intersection::LineMeshResult> CRenderComponent::CalcRayIntersection(const Vector3 &start, const Vector3 &dir, bool precise) const
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("render_component_calc_ray_intersection");
@@ -504,12 +504,12 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 		auto res = intersectionHandlerC->IntersectionTest(lstart, n, umath::CoordinateSpace::Object, 0.f, d);
 		if(!res.has_value())
 			return {};
-		Intersection::LineMeshResult result {};
+		pragma::math::intersection::LineMeshResult result {};
 		result.hitPos = start + uvec::get_normal(dir) * res->distance;
 		result.hitValue = res->distance;
 		result.result = umath::intersection::Result::Intersect;
 		if(precise) {
-			result.precise = ::util::make_shared<Intersection::LineMeshResult::Precise>();
+			result.precise = ::util::make_shared<pragma::math::intersection::LineMeshResult::Precise>();
 			result.precise->subMesh = res->mesh;
 			result.precise->triIdx = res->primitiveIndex;
 			result.precise->u = res->u;
@@ -542,7 +542,7 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 			if(closestHitbox == nullptr)
 				return {};
 			if(precise == false) {
-				Intersection::LineMeshResult result {};
+				pragma::math::intersection::LineMeshResult result {};
 				result.hitPos = start + dir * closestHitboxDistance;
 				result.hitValue = closestHitboxDistance;
 				result.result = umath::intersection::Result::Intersect;
@@ -553,7 +553,7 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 		}
 	}
 
-	std::optional<Intersection::LineMeshResult> bestResult = {};
+	std::optional<pragma::math::intersection::LineMeshResult> bestResult = {};
 	for(auto &mesh : lodMeshes) {
 		Vector3 min, max;
 		mesh->GetBounds(min, max);
@@ -563,8 +563,8 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 			subMesh->GetBounds(min, max);
 			if(umath::intersection::line_aabb(lstart, n, min, max, &dIntersect) == umath::intersection::Result::NoIntersection || dIntersect > d)
 				continue;
-			Intersection::LineMeshResult result;
-			if(Intersection::LineMesh(lstart, ldir, *subMesh, result, true) == false)
+			pragma::math::intersection::LineMeshResult result;
+			if(pragma::math::intersection::line_with_mesh(lstart, ldir, *subMesh, result, true) == false)
 				continue;
 			// Confirm that this is the best result so far
 			if(bestResult.has_value() && result.hitValue > bestResult->hitValue)
@@ -970,7 +970,7 @@ void CEOnUpdateRenderBuffers::PushArguments(lua::State *l) {}
 
 /////////////////
 
-CEOnRenderBoundsChanged::CEOnRenderBoundsChanged(const Vector3 &min, const Vector3 &max, const Sphere &sphere) : min {min}, max {max}, sphere {sphere} {}
+CEOnRenderBoundsChanged::CEOnRenderBoundsChanged(const Vector3 &min, const Vector3 &max, const math::Sphere &sphere) : min {min}, max {max}, sphere {sphere} {}
 void CEOnRenderBoundsChanged::PushArguments(lua::State *l)
 {
 	Lua::Push<Vector3>(l, min);

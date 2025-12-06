@@ -1651,7 +1651,7 @@ void pragma::CGame::RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> 
 		auto *physEnv = GetPhysicsEnvironment();
 		auto *pVisualDebugger = physEnv ? physEnv->GetVisualDebugger() : nullptr;
 		if(pVisualDebugger)
-			static_cast<CPhysVisualDebugger &>(*pVisualDebugger).Render(drawCmd, cam);
+			static_cast<physics::CPhysVisualDebugger &>(*pVisualDebugger).Render(drawCmd, cam);
 	}
 	if(cvSvRenderPhysics->GetBool()) {
 		// Serverside physics (singleplayer only)
@@ -1660,7 +1660,7 @@ void pragma::CGame::RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> 
 		auto *physEnv = game ? game->GetPhysicsEnvironment() : nullptr;
 		auto *pVisualDebugger = physEnv ? physEnv->GetVisualDebugger() : nullptr;
 		if(pVisualDebugger)
-			static_cast<CPhysVisualDebugger &>(*pVisualDebugger).Render(drawCmd, cam);
+			static_cast<physics::CPhysVisualDebugger &>(*pVisualDebugger).Render(drawCmd, cam);
 	}
 }
 template DLLCLIENT void pragma::CGame::RenderDebugPhysics<pragma::CCameraComponent>(std::shared_ptr<prosper::ICommandBuffer> &, pragma::CCameraComponent &);

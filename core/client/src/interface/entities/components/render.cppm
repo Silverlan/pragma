@@ -94,17 +94,17 @@ export namespace pragma {
 		void SetLocalRenderBounds(Vector3 min, Vector3 max);
 
 		const bounding_volume::AABB &GetLocalRenderBounds() const;
-		const Sphere &GetLocalRenderSphere() const;
+		const math::Sphere &GetLocalRenderSphere() const;
 
 		const bounding_volume::AABB &GetAbsoluteRenderBounds() const;
-		const Sphere &GetAbsoluteRenderSphere() const;
+		const math::Sphere &GetAbsoluteRenderSphere() const;
 
 		// Note: These mustn't be called during rendering!
 		const bounding_volume::AABB &GetUpdatedAbsoluteRenderBounds() const;
-		const Sphere &GetUpdatedAbsoluteRenderSphere() const;
+		const math::Sphere &GetUpdatedAbsoluteRenderSphere() const;
 
 		bounding_volume::AABB CalcAbsoluteRenderBounds() const;
-		Sphere CalcAbsoluteRenderSphere() const;
+		math::Sphere CalcAbsoluteRenderSphere() const;
 
 		pragma::rendering::SceneRenderPass GetSceneRenderPass() const;
 		void SetSceneRenderPass(pragma::rendering::SceneRenderPass pass);
@@ -162,7 +162,7 @@ export namespace pragma {
 
 		void SetRenderBufferDirty();
 		void SetRenderBoundsDirty();
-		std::optional<Intersection::LineMeshResult> CalcRayIntersection(const Vector3 &start, const Vector3 &dir, bool precise = false) const;
+		std::optional<math::intersection::LineMeshResult> CalcRayIntersection(const Vector3 &start, const Vector3 &dir, bool precise = false) const;
 
 		bool IsInstantiable() const;
 		void SetInstaniationEnabled(bool enabled);
@@ -219,10 +219,10 @@ export namespace pragma {
 		mutable CLightMapReceiverComponent *m_lightMapReceiverComponent = nullptr;
 
 		bounding_volume::AABB m_localRenderBounds {};
-		Sphere m_localRenderSphere {};
+		math::Sphere m_localRenderSphere {};
 
 		bounding_volume::AABB m_absoluteRenderBounds {};
-		Sphere m_absoluteRenderSphere {};
+		math::Sphere m_absoluteRenderSphere {};
 
 		std::optional<Vector4> m_renderClipPlane {};
 		std::optional<Vector2> m_depthBias {};
@@ -281,11 +281,11 @@ export namespace pragma {
 	};
 
 	struct DLLCLIENT CEOnRenderBoundsChanged : public ComponentEvent {
-		CEOnRenderBoundsChanged(const Vector3 &min, const Vector3 &max, const Sphere &sphere);
+		CEOnRenderBoundsChanged(const Vector3 &min, const Vector3 &max, const math::Sphere &sphere);
 		virtual void PushArguments(lua::State *l) override;
 		const Vector3 &min;
 		const Vector3 &max;
-		const Sphere &sphere;
+		const math::Sphere &sphere;
 	};
 	using namespace umath::scoped_enum::bitwise;
 };

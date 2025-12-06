@@ -9,7 +9,7 @@ export module pragma.shared:math.pid_controller;
 export import std;
 
 export {
-	namespace util {
+	namespace pragma::math {
 		class DLLNETWORK PIDController {
 		  public:
 			PIDController() = default;
@@ -43,5 +43,5 @@ export {
 		};
 	};
 
-	DLLNETWORK std::ostream &operator<<(std::ostream &out, const util::PIDController &o);
+	DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::math::PIDController &o);
 };

@@ -942,18 +942,18 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	Lua::RegisterLibraryValues<umath::ScaledTransform>(lua.GetState(), "math.ScaledTransform", {std::pair<std::string, umath::ScaledTransform> {"IDENTITY", umath::ScaledTransform {}}});
 
 	// PID Controller
-	auto defPIDController = luabind::class_<util::PIDController>("PIDController");
+	auto defPIDController = luabind::class_<pragma::math::PIDController>("PIDController");
 	defPIDController.def(luabind::constructor<>());
 	defPIDController.def(luabind::constructor<float, float, float>());
 	defPIDController.def(luabind::constructor<float, float, float, float, float>());
-	defPIDController.def("SetProportionalTerm", &util::PIDController::SetProportionalTerm);
-	defPIDController.def("SetIntegralTerm", &util::PIDController::SetIntegralTerm);
-	defPIDController.def("SetDerivativeTerm", &util::PIDController::SetDerivativeTerm);
-	defPIDController.def("SetTerms", &util::PIDController::SetTerms);
-	defPIDController.def("GetProportionalTerm", &util::PIDController::GetProportionalTerm);
-	defPIDController.def("GetIntegralTerm", &util::PIDController::GetIntegralTerm);
-	defPIDController.def("GetDerivativeTerm", &util::PIDController::GetDerivativeTerm);
-	defPIDController.def("GetTerms", static_cast<void (*)(lua::State *, const util::PIDController &)>([](lua::State *l, const util::PIDController &pidController) {
+	defPIDController.def("SetProportionalTerm", &pragma::math::PIDController::SetProportionalTerm);
+	defPIDController.def("SetIntegralTerm", &pragma::math::PIDController::SetIntegralTerm);
+	defPIDController.def("SetDerivativeTerm", &pragma::math::PIDController::SetDerivativeTerm);
+	defPIDController.def("SetTerms", &pragma::math::PIDController::SetTerms);
+	defPIDController.def("GetProportionalTerm", &pragma::math::PIDController::GetProportionalTerm);
+	defPIDController.def("GetIntegralTerm", &pragma::math::PIDController::GetIntegralTerm);
+	defPIDController.def("GetDerivativeTerm", &pragma::math::PIDController::GetDerivativeTerm);
+	defPIDController.def("GetTerms", static_cast<void (*)(lua::State *, const pragma::math::PIDController &)>([](lua::State *l, const pragma::math::PIDController &pidController) {
 		auto p = 0.f;
 		auto i = 0.f;
 		auto d = 0.f;
@@ -962,17 +962,17 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		Lua::PushNumber(l, i);
 		Lua::PushNumber(l, d);
 	}));
-	defPIDController.def("SetRange", &util::PIDController::SetRange);
-	defPIDController.def("GetRange", static_cast<void (*)(lua::State *, const util::PIDController &)>([](lua::State *l, const util::PIDController &pidController) {
+	defPIDController.def("SetRange", &pragma::math::PIDController::SetRange);
+	defPIDController.def("GetRange", static_cast<void (*)(lua::State *, const pragma::math::PIDController &)>([](lua::State *l, const pragma::math::PIDController &pidController) {
 		auto range = pidController.GetRange();
 		Lua::PushNumber(l, range.first);
 		Lua::PushNumber(l, range.second);
 	}));
-	defPIDController.def("Calculate", &util::PIDController::Calculate);
-	defPIDController.def("Reset", &util::PIDController::Reset);
-	defPIDController.def("ClearRange", &util::PIDController::ClearRange);
-	defPIDController.def("SetMin", &util::PIDController::SetMin);
-	defPIDController.def("SetMax", &util::PIDController::SetMax);
+	defPIDController.def("Calculate", &pragma::math::PIDController::Calculate);
+	defPIDController.def("Reset", &pragma::math::PIDController::Reset);
+	defPIDController.def("ClearRange", &pragma::math::PIDController::ClearRange);
+	defPIDController.def("SetMin", &pragma::math::PIDController::SetMin);
+	defPIDController.def("SetMax", &pragma::math::PIDController::SetMax);
 	modMath[defPIDController];
 
 	// Noise

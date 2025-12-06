@@ -49,7 +49,7 @@ static void CVAR_CALLBACK_debug_physics_draw(pragma::NetworkState *, const pragm
 		physEnv->SetVisualDebugger(nullptr);
 		return;
 	}
-	auto visDebugger = std::make_unique<CPhysVisualDebugger>();
+	auto visDebugger = std::make_unique<pragma::physics::CPhysVisualDebugger>();
 	physEnv->SetVisualDebugger(std::move(visDebugger));
 	/*if(val == 0)
 	{

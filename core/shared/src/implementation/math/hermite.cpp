@@ -22,7 +22,7 @@ static void emit_curve_segment(float s, float sNext, const Vector3 &p1, const Ve
 	r2 = h2.x * p1 + h2.y * p2 + h2.z * t1 + h2.w * t2;
 }
 
-Vector3 util::calc_hermite_spline_position(const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, float s, float curvature)
+Vector3 pragma::math::calc_hermite_spline_position(const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, float s, float curvature)
 {
 	auto ct1 = curvature * (p2 - p0);
 	auto ct2 = curvature * (p3 - p1);
@@ -31,7 +31,7 @@ Vector3 util::calc_hermite_spline_position(const Vector3 &p0, const Vector3 &p1,
 	return h.x * p1 + h.y * p2 + h.z * ct1 + h.w * ct2;
 }
 
-void util::calc_hermite_spline(const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, uint32_t segmentCount, std::vector<Vector3> &curvePoints, float curvature)
+void pragma::math::calc_hermite_spline(const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, uint32_t segmentCount, std::vector<Vector3> &curvePoints, float curvature)
 {
 	auto ct1 = curvature * (p2 - p0);
 	auto ct2 = curvature * (p3 - p1);

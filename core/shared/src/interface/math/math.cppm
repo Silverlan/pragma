@@ -27,7 +27,6 @@ export import :math.print;
 export import :math.random;
 export import :math.seb;
 export import :math.sphere;
-export import :math.transform;
 export import :math.triangulate;
 
 export {

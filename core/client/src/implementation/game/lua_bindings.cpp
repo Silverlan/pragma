@@ -267,12 +267,12 @@ void pragma::CGame::RegisterLua()
 	Lua::RegisterLibraryEnums(GetLuaState(), "file", {{"SEARCH_RESOURCES", pragma::networking::FSYS_SEARCH_RESOURCES}});
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "geometry",
-	  {{"FrustumPlane_LEFT", umath::to_integral(FrustumPlane::Left)}, {"FrustumPlane_RIGHT", umath::to_integral(FrustumPlane::Right)}, {"FrustumPlane_TOP", umath::to_integral(FrustumPlane::Top)}, {"FrustumPlane_BOTTOM", umath::to_integral(FrustumPlane::Bottom)},
-	    {"FrustumPlane_NEAR", umath::to_integral(FrustumPlane::Near)}, {"FrustumPlane_FAR", umath::to_integral(FrustumPlane::Far)}, {"FrustumPlane_COUNT", umath::to_integral(FrustumPlane::Count)},
+	  {{"FrustumPlane_LEFT", umath::to_integral(pragma::math::FrustumPlane::Left)}, {"FrustumPlane_RIGHT", umath::to_integral(pragma::math::FrustumPlane::Right)}, {"FrustumPlane_TOP", umath::to_integral(pragma::math::FrustumPlane::Top)}, {"FrustumPlane_BOTTOM", umath::to_integral(pragma::math::FrustumPlane::Bottom)},
+	    {"FrustumPlane_NEAR", umath::to_integral(pragma::math::FrustumPlane::Near)}, {"FrustumPlane_FAR", umath::to_integral(pragma::math::FrustumPlane::Far)}, {"FrustumPlane_COUNT", umath::to_integral(pragma::math::FrustumPlane::Count)},
 
-	    {"FrustumPoint_FarBottomLeft", umath::to_integral(FrustumPoint::FarBottomLeft)}, {"FrustumPoint_FAR_TOP_LEFT", umath::to_integral(FrustumPoint::FarTopLeft)}, {"FrustumPoint_FAR_TOP_RIGHT", umath::to_integral(FrustumPoint::FarTopRight)},
-	    {"FrustumPoint_FAR_BOTTOM_RIGHT", umath::to_integral(FrustumPoint::FarBottomRight)}, {"FrustumPoint_NearBottomLeft", umath::to_integral(FrustumPoint::NearBottomLeft)}, {"FrustumPoint_NearTopLeft", umath::to_integral(FrustumPoint::NearTopLeft)},
-	    {"FrustumPoint_NearTopRight", umath::to_integral(FrustumPoint::NearTopRight)}, {"FrustumPoint_NearBottomRight", umath::to_integral(FrustumPoint::NearBottomRight)}});
+	    {"FrustumPoint_FarBottomLeft", umath::to_integral(pragma::math::FrustumPoint::FarBottomLeft)}, {"FrustumPoint_FAR_TOP_LEFT", umath::to_integral(pragma::math::FrustumPoint::FarTopLeft)}, {"FrustumPoint_FAR_TOP_RIGHT", umath::to_integral(pragma::math::FrustumPoint::FarTopRight)},
+	    {"FrustumPoint_FAR_BOTTOM_RIGHT", umath::to_integral(pragma::math::FrustumPoint::FarBottomRight)}, {"FrustumPoint_NearBottomLeft", umath::to_integral(pragma::math::FrustumPoint::NearBottomLeft)}, {"FrustumPoint_NearTopLeft", umath::to_integral(pragma::math::FrustumPoint::NearTopLeft)},
+	    {"FrustumPoint_NearTopRight", umath::to_integral(pragma::math::FrustumPoint::NearTopRight)}, {"FrustumPoint_NearBottomRight", umath::to_integral(pragma::math::FrustumPoint::NearBottomRight)}});
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "gui",
 	  {{"CURSOR_SHAPE_DEFAULT", umath::to_integral(pragma::platform::Cursor::Shape::Default)}, {"CURSOR_SHAPE_HIDDEN", umath::to_integral(pragma::platform::Cursor::Shape::Hidden)}, {"CURSOR_SHAPE_ARROW", umath::to_integral(pragma::platform::Cursor::Shape::Arrow)},

@@ -34,7 +34,7 @@ static uint32_t get_middle_point(uint32_t p1, uint32_t p2, std::vector<Vector3> 
 	middlePointIndexCache.insert(std::remove_reference_t<decltype(middlePointIndexCache)>::value_type(key, i));
 	return i;
 }
-void IcoSphere::Create(const Vector3 &origin, float radius, std::vector<Vector3> &verts, std::vector<uint16_t> &indices, uint32_t recursionLevel)
+void pragma::math::IcoSphere::Create(const Vector3 &origin, float radius, std::vector<Vector3> &verts, std::vector<uint16_t> &indices, uint32_t recursionLevel)
 {
 	auto t = (1.0 + sqrt(5.0)) / 2.0;
 	verts = {Vector3(-1, t, 0), Vector3(1, t, 0), Vector3(-1, -t, 0), Vector3(1, -t, 0),
@@ -143,7 +143,7 @@ void IcoSphere::Create(const Vector3 &origin, float radius, std::vector<Vector3>
 		v = origin + v * radius;
 }
 
-void IcoSphere::Create(const Vector3 &origin, float radius, std::vector<Vector3> &verts, uint32_t recursionLevel)
+void pragma::math::IcoSphere::Create(const Vector3 &origin, float radius, std::vector<Vector3> &verts, uint32_t recursionLevel)
 {
 	std::vector<Vector3> localVerts;
 	std::vector<uint16_t> indices;

@@ -175,7 +175,7 @@ static void calc_surface_plane(const pragma::physics::PhysWaterSurfaceSimulator 
 		auto mat = umat::calc_covariance_matrix(surfaceIntersectionPoints, avg);
 		auto oldPlane = waterPlaneRelObj;
 
-		umath::calc_best_fitting_plane(mat, avg, waterPlaneRelObj, waterPlaneDistRelObj);
+		pragma::math::calc_best_fitting_plane(mat, avg, waterPlaneRelObj, waterPlaneDistRelObj);
 
 		// Plane might be pointing in the wrong direction; Flip it if it is
 		if(umath::abs(uvec::dot(oldPlane, waterPlaneRelObj) - 1.0) > 1.0) {

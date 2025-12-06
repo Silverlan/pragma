@@ -57,7 +57,7 @@ static void update_vehicle(Vehicle_Car *vhc)
 
 enum Method { IK_JACOB_TRANS = 0, IK_PURE_PSEUDO, IK_DLS, IK_SDLS, IK_DLS_SVD };
 
-static void get_local_bone_position(const std::function<Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr, Vector3 *scale = nullptr)
+static void get_local_bone_position(const std::function<umath::Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr, Vector3 *scale = nullptr)
 {
 	std::function<void(std::shared_ptr<pragma::animation::Bone> &, Vector3 *, Quat *, Vector3 *)> apply;
 	apply = [fGetTransform, &apply, fscale](std::shared_ptr<pragma::animation::Bone> &bone, Vector3 *pos, Quat *rot, Vector3 *scale) {
@@ -65,8 +65,8 @@ static void get_local_bone_position(const std::function<Transform(uint32_t)> &fG
 		if(parent != nullptr)
 			apply(parent, pos, rot, scale);
 		auto tParent = fGetTransform(bone->ID);
-		auto &posParent = tParent.GetPosition();
-		auto &rotParent = tParent.GetOrientation();
+		auto &posParent = tParent.GetOrigin();
+		auto &rotParent = tParent.GetRotation();
 		auto inv = uquat::get_inverse(rotParent);
 		if(pos != nullptr) {
 			*pos -= posParent * fscale;
@@ -79,7 +79,7 @@ static void get_local_bone_position(const std::function<Transform(uint32_t)> &fG
 	if(parent != nullptr)
 		apply(parent, pos, rot, scale);
 }
-static void get_local_bone_position(const std::shared_ptr<pragma::Model> &mdl, const std::function<Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr,
+static void get_local_bone_position(const std::shared_ptr<pragma::Model> &mdl, const std::function<umath::Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr,
   Vector3 *scale = nullptr)
 {
 	get_local_bone_position(fGetTransform, bone, fscale, pos, rot, scale);

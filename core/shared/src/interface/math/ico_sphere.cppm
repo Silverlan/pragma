@@ -8,10 +8,12 @@ export module pragma.shared:math.ico_sphere;
 
 export import pragma.math;
 
-export class DLLNETWORK IcoSphere {
-  private:
-	IcoSphere() = delete;
-  public:
-	static void Create(const Vector3 &origin, float radius, std::vector<Vector3> &verts, std::vector<uint16_t> &indices, uint32_t recursionLevel = 1);
-	static void Create(const Vector3 &origin, float radius, std::vector<Vector3> &verts, uint32_t recursionLevel = 1);
-};
+export namespace pragma::math {
+	class DLLNETWORK IcoSphere {
+	private:
+		IcoSphere() = delete;
+	public:
+		static void Create(const Vector3 &origin, float radius, std::vector<Vector3> &verts, std::vector<uint16_t> &indices, uint32_t recursionLevel = 1);
+		static void Create(const Vector3 &origin, float radius, std::vector<Vector3> &verts, uint32_t recursionLevel = 1);
+	};
+}

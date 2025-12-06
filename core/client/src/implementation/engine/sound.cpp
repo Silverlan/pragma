@@ -8,10 +8,10 @@ module pragma.client;
 import :engine;
 import :audio;
 
-const al::ISoundSystem *CEngine::GetSoundSystem() const { return const_cast<CEngine *>(this)->GetSoundSystem(); }
-al::ISoundSystem *CEngine::GetSoundSystem() { return m_soundSystem.get(); }
+const al::ISoundSystem *pragma::CEngine::GetSoundSystem() const { return const_cast<CEngine *>(this)->GetSoundSystem(); }
+al::ISoundSystem *pragma::CEngine::GetSoundSystem() { return m_soundSystem.get(); }
 
-al::ISoundSystem *CEngine::InitializeSoundEngine()
+al::ISoundSystem *pragma::CEngine::InitializeSoundEngine()
 {
 	spdlog::info("Initializing sound engine...");
 
@@ -68,7 +68,7 @@ al::ISoundSystem *CEngine::InitializeSoundEngine()
 	return m_soundSystem.get();
 }
 
-al::PEffect CEngine::GetAuxEffect(const std::string &name)
+al::PEffect pragma::CEngine::GetAuxEffect(const std::string &name)
 {
 	auto lname = name;
 	ustring::to_lower(lname);
@@ -78,9 +78,9 @@ al::PEffect CEngine::GetAuxEffect(const std::string &name)
 	return it->second;
 }
 
-void CEngine::CloseSoundEngine() { m_soundSystem = nullptr; }
+void pragma::CEngine::CloseSoundEngine() { m_soundSystem = nullptr; }
 
-void CEngine::SetHRTFEnabled(bool b)
+void pragma::CEngine::SetHRTFEnabled(bool b)
 {
 	auto *soundSys = GetSoundSystem();
 	if(soundSys == nullptr)

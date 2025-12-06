@@ -37,7 +37,7 @@ import pragma.string.unicode;
 extern "C" {
 void DLLCLIENT RunCEngine(int argc, char *argv[])
 {
-	auto en = pragma::initialize_engine<CEngine>(argc, argv);
+	auto en = pragma::initialize_engine<pragma::CEngine>(argc, argv);
 	if(en == nullptr)
 		return;
 	en->Release(); // Has to be called before object is actually destroyed, to make sure weak_ptr references are still valid
@@ -46,13 +46,13 @@ void DLLCLIENT RunCEngine(int argc, char *argv[])
 }
 
 //__declspec(dllimport) std::vector<void*> _vkImgPtrs;
-decltype(CEngine::AXIS_PRESS_THRESHOLD) CEngine::AXIS_PRESS_THRESHOLD = 0.5f;
+decltype(pragma::CEngine::AXIS_PRESS_THRESHOLD) pragma::CEngine::AXIS_PRESS_THRESHOLD = 0.5f;
 // If set to true, each joystick axes will be split into a positive and a negative axis, which
 // can be bound individually
 static const auto SEPARATE_JOYSTICK_AXES = true;
 
-static CEngine *g_engine = nullptr;
-CEngine::CEngine(int argc, char *argv[])
+static pragma::CEngine *g_engine = nullptr;
+pragma::CEngine::CEngine(int argc, char *argv[])
     : pragma::Engine(argc, argv), pragma::RenderContext(), m_nearZ(pragma::baseEnvCameraComponent::DEFAULT_NEAR_Z), //10.0f), //0.1f
       m_farZ(pragma::baseEnvCameraComponent::DEFAULT_FAR_Z), m_fps(0), m_tFPSTime(0.f), m_tLastFrame(util::Clock::now()), m_tDeltaFrameTime(0), m_audioAPI {"fmod"}
 {
@@ -140,21 +140,21 @@ CEngine::CEngine(int argc, char *argv[])
 	}
 }
 
-void CEngine::Release()
+void pragma::CEngine::Release()
 {
 	Close();
 	pragma::Engine::Release();
 	pragma::RenderContext::Release();
 }
 
-pragma::debug::GPUProfiler &CEngine::GetGPUProfiler() const { return *m_gpuProfiler; }
-pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage> *CEngine::GetGPUProfilingStageManager() { return m_gpuProfilingStageManager.get(); }
-pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *CEngine::GetProfilingStageManager() { return m_cpuProfilingStageManager.get(); }
+pragma::debug::GPUProfiler &pragma::CEngine::GetGPUProfiler() const { return *m_gpuProfiler; }
+pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage> *pragma::CEngine::GetGPUProfilingStageManager() { return m_gpuProfilingStageManager.get(); }
+pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *pragma::CEngine::GetProfilingStageManager() { return m_cpuProfilingStageManager.get(); }
 
 static auto cvGPUProfiling = pragma::console::get_client_con_var("cl_gpu_timer_queries_enabled");
-bool CEngine::IsGPUProfilingEnabled() const { return cvGPUProfiling->GetBool(); }
+bool pragma::CEngine::IsGPUProfilingEnabled() const { return cvGPUProfiling->GetBool(); }
 
-void CEngine::DumpDebugInformation(uzip::ZIPFile &zip) const
+void pragma::CEngine::DumpDebugInformation(uzip::ZIPFile &zip) const
 {
 	pragma::Engine::DumpDebugInformation(zip);
 
@@ -244,7 +244,7 @@ void CEngine::DumpDebugInformation(uzip::ZIPFile &zip) const
 	}
 }
 
-void CEngine::SetRenderResolution(std::optional<Vector2i> resolution)
+void pragma::CEngine::SetRenderResolution(std::optional<Vector2i> resolution)
 {
 	if(m_renderResolution == resolution)
 		return;
@@ -253,27 +253,27 @@ void CEngine::SetRenderResolution(std::optional<Vector2i> resolution)
 	resolution = GetRenderResolution();
 	OnRenderResolutionChanged(resolution->x, resolution->y);
 }
-Vector2i CEngine::GetRenderResolution() const
+Vector2i pragma::CEngine::GetRenderResolution() const
 {
 	if(m_renderResolution.has_value())
 		return *m_renderResolution;
 	return GetRenderContext().GetWindow()->GetSize();
 }
 
-double CEngine::GetFPS() const { return m_fps; }
-double CEngine::GetFrameTime() const { return m_tFPSTime * 1'000.0; }
-Double CEngine::GetDeltaFrameTime() const { return util::clock::to_seconds(m_tDeltaFrameTime); }
+double pragma::CEngine::GetFPS() const { return m_fps; }
+double pragma::CEngine::GetFrameTime() const { return m_tFPSTime * 1'000.0; }
+Double pragma::CEngine::GetDeltaFrameTime() const { return util::clock::to_seconds(m_tDeltaFrameTime); }
 
 static auto cvFrameLimit = pragma::console::get_client_con_var("cl_max_fps");
-float CEngine::GetFPSLimit() const { return cvFrameLimit->GetFloat(); }
+float pragma::CEngine::GetFPSLimit() const { return cvFrameLimit->GetFloat(); }
 
-unsigned int CEngine::GetStereoSourceCount() { return 0; }
-unsigned int CEngine::GetMonoSourceCount() { return 0; }
-unsigned int CEngine::GetStereoSource(unsigned int idx) { return 0; }
-float CEngine::GetNearZ() { return m_nearZ; }
-float CEngine::GetFarZ() { return m_farZ; }
+unsigned int pragma::CEngine::GetStereoSourceCount() { return 0; }
+unsigned int pragma::CEngine::GetMonoSourceCount() { return 0; }
+unsigned int pragma::CEngine::GetStereoSource(unsigned int idx) { return 0; }
+float pragma::CEngine::GetNearZ() { return m_nearZ; }
+float pragma::CEngine::GetFarZ() { return m_farZ; }
 
-bool CEngine::IsClientConnected()
+bool pragma::CEngine::IsClientConnected()
 {
 	auto *cl = static_cast<pragma::ClientState *>(GetClientState());
 	if(cl == nullptr)
@@ -281,7 +281,7 @@ bool CEngine::IsClientConnected()
 	return cl->IsConnected();
 }
 
-void CEngine::EndGame()
+void pragma::CEngine::EndGame()
 {
 	Disconnect();
 	auto *cl = GetClientState();
@@ -290,7 +290,7 @@ void CEngine::EndGame()
 	pragma::Engine::EndGame();
 }
 
-void CEngine::Input(int key, pragma::platform::KeyState inputState, pragma::platform::KeyState pressState, pragma::platform::Modifier mods, float magnitude)
+void pragma::CEngine::Input(int key, pragma::platform::KeyState inputState, pragma::platform::KeyState pressState, pragma::platform::Modifier mods, float magnitude)
 {
 	if(inputState == pragma::platform::KeyState::Press || inputState == pragma::platform::KeyState::Release || inputState == pragma::platform::KeyState::Held) {
 		auto &inputLayer = GetEffectiveInputBindingLayer();
@@ -309,8 +309,8 @@ void CEngine::Input(int key, pragma::platform::KeyState inputState, pragma::plat
 			const_cast<KeyBind &>(it->second).Execute(inputState, pressState, mods, magnitude);
 	}
 }
-void CEngine::Input(int key, pragma::platform::KeyState state, pragma::platform::Modifier mods, float magnitude) { Input(key, state, state, mods, magnitude); }
-void CEngine::MouseInput(prosper::Window &window, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+void pragma::CEngine::Input(int key, pragma::platform::KeyState state, pragma::platform::Modifier mods, float magnitude) { Input(key, state, state, mods, magnitude); }
+void pragma::CEngine::MouseInput(prosper::Window &window, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	auto handled = false;
 	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>("OnMouseInput", handled, window, button, state, mods) == CallbackReturnType::HasReturnValue && handled == true)
@@ -325,7 +325,7 @@ void CEngine::MouseInput(prosper::Window &window, pragma::platform::MouseButton 
 		return;
 	Input(static_cast<int>(button), state);
 }
-void CEngine::GetMappedKeys(const std::string &cvarName, std::vector<pragma::platform::Key> &keys, uint32_t maxKeys)
+void pragma::CEngine::GetMappedKeys(const std::string &cvarName, std::vector<pragma::platform::Key> &keys, uint32_t maxKeys)
 {
 	if(maxKeys != std::numeric_limits<uint32_t>::max())
 		keys.reserve(maxKeys);
@@ -367,7 +367,7 @@ void CEngine::GetMappedKeys(const std::string &cvarName, std::vector<pragma::pla
 		}
 	}
 }
-void CEngine::JoystickButtonInput(prosper::Window &window, const pragma::platform::Joystick &joystick, uint32_t key, pragma::platform::KeyState state)
+void pragma::CEngine::JoystickButtonInput(prosper::Window &window, const pragma::platform::Joystick &joystick, uint32_t key, pragma::platform::KeyState state)
 {
 	auto handled = false;
 	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, std::reference_wrapper<const pragma::platform::Joystick>, uint32_t, pragma::platform::KeyState>("OnJoystickButtonInput", handled, window, joystick, key, state) == CallbackReturnType::HasReturnValue
@@ -375,7 +375,7 @@ void CEngine::JoystickButtonInput(prosper::Window &window, const pragma::platfor
 		return;
 	KeyboardInput(window, static_cast<pragma::platform::Key>(key), -1, state, {});
 }
-void CEngine::JoystickAxisInput(prosper::Window &window, const pragma::platform::Joystick &joystick, uint32_t axis, pragma::platform::Modifier mods, float newVal, float deltaVal)
+void pragma::CEngine::JoystickAxisInput(prosper::Window &window, const pragma::platform::Joystick &joystick, uint32_t axis, pragma::platform::Modifier mods, float newVal, float deltaVal)
 {
 	auto handled = false;
 	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, std::reference_wrapper<const pragma::platform::Joystick>, uint32_t, pragma::platform::Modifier, float, float>("OnJoystickAxisInput", handled, window, joystick, axis, mods, newVal, deltaVal)
@@ -403,14 +403,14 @@ void CEngine::JoystickAxisInput(prosper::Window &window, const pragma::platform:
 	KeyboardInput(window, key, -1, state, mods, newVal);
 }
 static auto cvAxisInputThreshold = pragma::console::get_client_con_var("cl_controller_axis_input_threshold");
-bool CEngine::IsValidAxisInput(float axisInput) const
+bool pragma::CEngine::IsValidAxisInput(float axisInput) const
 {
 	if(!pragma::get_client_state())
 		return false;
 	return (umath::abs(axisInput) > cvAxisInputThreshold->GetFloat()) ? true : false;
 }
 
-bool CEngine::GetInputButtonState(float axisInput, pragma::platform::Modifier mods, pragma::platform::KeyState &inOutState) const
+bool pragma::CEngine::GetInputButtonState(float axisInput, pragma::platform::Modifier mods, pragma::platform::KeyState &inOutState) const
 {
 	if(IsValidAxisInput(axisInput) == false) {
 		if((mods & pragma::platform::Modifier::AxisInput) != pragma::platform::Modifier::None) {
@@ -433,7 +433,7 @@ bool CEngine::GetInputButtonState(float axisInput, pragma::platform::Modifier mo
 	}
 	return true;
 }
-void CEngine::KeyboardInput(prosper::Window &window, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods, float magnitude)
+void pragma::CEngine::KeyboardInput(prosper::Window &window, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods, float magnitude)
 {
 	auto handled = false;
 	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier, float>("OnKeyboardInput", handled, window, key, scanCode, state, mods, magnitude) == CallbackReturnType::HasReturnValue
@@ -470,7 +470,7 @@ void CEngine::KeyboardInput(prosper::Window &window, pragma::platform::Key key, 
 		key = static_cast<pragma::platform::Key>(std::tolower(ikey));
 	Input(umath::to_integral(key), state, buttonState, mods, magnitude);
 }
-void CEngine::CharInput(prosper::Window &window, unsigned int c)
+void pragma::CEngine::CharInput(prosper::Window &window, unsigned int c)
 {
 	auto handled = false;
 	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, unsigned int>("OnCharInput", handled, window, c) == CallbackReturnType::HasReturnValue && handled == true)
@@ -483,7 +483,7 @@ void CEngine::CharInput(prosper::Window &window, unsigned int c)
 	if(client != nullptr && client->CharInput(c) == false)
 		return;
 }
-void CEngine::ScrollInput(prosper::Window &window, Vector2 offset)
+void pragma::CEngine::ScrollInput(prosper::Window &window, Vector2 offset)
 {
 	auto handled = false;
 	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, Vector2>("OnScrollInput", handled, window, offset) == CallbackReturnType::HasReturnValue && handled == true)
@@ -505,7 +505,7 @@ void CEngine::ScrollInput(prosper::Window &window, Vector2 offset)
 	}
 }
 
-void CEngine::OnWindowFocusChanged(prosper::Window &window, bool bFocused)
+void pragma::CEngine::OnWindowFocusChanged(prosper::Window &window, bool bFocused)
 {
 	umath::set_flag(m_stateFlags, StateFlags::WindowFocused, bFocused);
 	auto *client = pragma::get_client_state();
@@ -518,8 +518,8 @@ static std::unordered_map<std::string, std::string> g_droppedFiles;
 namespace pragma {
 	DLLCLIENT const std::unordered_map<std::string, std::string> &get_dropped_files() { return g_droppedFiles; }
 };
-const std::vector<CEngine::DroppedFile> &CEngine::GetDroppedFiles() const { return m_droppedFiles; }
-void CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::string> &files)
+const std::vector<pragma::CEngine::DroppedFile> &pragma::CEngine::GetDroppedFiles() const { return m_droppedFiles; }
+void pragma::CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::string> &files)
 {
 	auto *client = pragma::get_client_state();
 	if(client != nullptr)
@@ -570,7 +570,7 @@ void CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::string> &
 		return;
 	client->OnFilesDropped(files);
 }
-void CEngine::OnDragEnter(prosper::Window &window)
+void pragma::CEngine::OnDragEnter(prosper::Window &window)
 {
 	auto *client = pragma::get_client_state();
 	if(client != nullptr)
@@ -579,7 +579,7 @@ void CEngine::OnDragEnter(prosper::Window &window)
 		return;
 	client->OnDragEnter(window);
 }
-void CEngine::OnDragExit(prosper::Window &window)
+void pragma::CEngine::OnDragExit(prosper::Window &window)
 {
 	auto *client = pragma::get_client_state();
 	if(client != nullptr)
@@ -588,21 +588,21 @@ void CEngine::OnDragExit(prosper::Window &window)
 		return;
 	client->OnDragExit(window);
 }
-bool CEngine::OnWindowShouldClose(prosper::Window &window)
+bool pragma::CEngine::OnWindowShouldClose(prosper::Window &window)
 {
 	auto *client = pragma::get_client_state();
 	if(client != nullptr)
 		return true;
 	return client->OnWindowShouldClose(window);
 }
-void CEngine::OnPreedit(prosper::Window &window, const pragma::string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret)
+void pragma::CEngine::OnPreedit(prosper::Window &window, const pragma::string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret)
 {
 	auto *client = pragma::get_client_state();
 	if(client != nullptr)
 		return;
 	client->OnPreedit(window, preeditString, blockSizes, focusedBlock, caret);
 }
-void CEngine::OnIMEStatusChanged(prosper::Window &window, bool imeEnabled)
+void pragma::CEngine::OnIMEStatusChanged(prosper::Window &window, bool imeEnabled)
 {
 	auto *client = pragma::get_client_state();
 	if(client != nullptr)
@@ -610,9 +610,9 @@ void CEngine::OnIMEStatusChanged(prosper::Window &window, bool imeEnabled)
 	WGUI::GetInstance().HandleIMEStatusChanged(window, imeEnabled);
 	client->OnIMEStatusChanged(window, imeEnabled);
 }
-bool CEngine::IsWindowFocused() const { return umath::is_flag_set(m_stateFlags, StateFlags::WindowFocused); }
+bool pragma::CEngine::IsWindowFocused() const { return umath::is_flag_set(m_stateFlags, StateFlags::WindowFocused); }
 
-void CEngine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
+void pragma::CEngine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
 {
 	pragma::Engine::SetAssetMultiThreadedLoadingEnabled(enabled);
 	auto *cl = GetClientState();
@@ -637,11 +637,11 @@ extern bool g_windowless;
 extern bool g_cpuRendering;
 void register_game_shaders();
 
-bool CEngine::IsWindowless() const { return g_windowless; }
-bool CEngine::IsCPURenderingOnly() const { return g_cpuRendering; }
-bool CEngine::IsClosed() const { return umath::is_flag_set(m_stateFlags, StateFlags::CEClosed); }
+bool pragma::CEngine::IsWindowless() const { return g_windowless; }
+bool pragma::CEngine::IsCPURenderingOnly() const { return g_cpuRendering; }
+bool pragma::CEngine::IsClosed() const { return umath::is_flag_set(m_stateFlags, StateFlags::CEClosed); }
 
-void CEngine::HandleOpenGLFallback()
+void pragma::CEngine::HandleOpenGLFallback()
 {
 	if(ustring::compare(GetRenderAPI(), std::string {"opengl"}, false))
 		return;
@@ -662,7 +662,7 @@ void CEngine::HandleOpenGLFallback()
 
 std::optional<std::string> g_waylandLibdecorPlugin;
 extern bool g_cli;
-bool CEngine::Initialize(int argc, char *argv[])
+bool pragma::CEngine::Initialize(int argc, char *argv[])
 {
 	pragma::Engine::Initialize(argc, argv);
 	SetCLIOnly(g_cli);
@@ -1213,7 +1213,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 	return true;
 }
 
-void CEngine::RegisterUiElementTypes()
+void pragma::CEngine::RegisterUiElementTypes()
 {
 	auto &gui = WGUI::GetInstance();
 	gui.RegisterType<WICheckbox>("WICheckbox");
@@ -1253,19 +1253,19 @@ void CEngine::RegisterUiElementTypes()
 	gui.RegisterType<WIMainMenuElement>("WIMainMenuElement");
 }
 
-const std::string &CEngine::GetDefaultFontSetName() const { return m_defaultFontSet; }
-const FontSet &CEngine::GetDefaultFontSet() const
+const std::string &pragma::CEngine::GetDefaultFontSetName() const { return m_defaultFontSet; }
+const FontSet &pragma::CEngine::GetDefaultFontSet() const
 {
 	auto *fs = FindFontSet(m_defaultFontSet);
 	assert(fs != nullptr);
 	return *fs;
 }
-const FontSet *CEngine::FindFontSet(const std::string &name) const
+const FontSet *pragma::CEngine::FindFontSet(const std::string &name) const
 {
 	auto it = m_fontSets.find(name);
 	return (it != m_fontSets.end()) ? it->second.get() : nullptr;
 }
-void CEngine::LoadFontSets()
+void pragma::CEngine::LoadFontSets()
 {
 	std::vector<std::string> dirs;
 	filemanager::find_files("fonts/*", nullptr, &dirs);
@@ -1309,14 +1309,14 @@ void CEngine::LoadFontSets()
 		}
 	}
 }
-void CEngine::RunLaunchCommands()
+void pragma::CEngine::RunLaunchCommands()
 {
 	pragma::Engine::RunLaunchCommands();
 	auto *cl = GetClientState();
 	if(cl != nullptr)
 		SetHRTFEnabled(cl->GetConVarBool("cl_audio_hrtf_enabled"));
 }
-void CEngine::ClearConsole()
+void pragma::CEngine::ClearConsole()
 {
 	auto *pConsole = WIConsole::GetConsole();
 	if(pConsole == nullptr) {
@@ -1325,7 +1325,7 @@ void CEngine::ClearConsole()
 	}
 	pConsole->Clear();
 }
-void CEngine::OpenConsole()
+void pragma::CEngine::OpenConsole()
 {
 	switch(m_consoleType) {
 	case ConsoleType::Terminal:
@@ -1350,7 +1350,7 @@ void CEngine::OpenConsole()
 	umath::set_flag(m_stateFlags, StateFlags::ConsoleOpen, true);
 	// Engine::OpenConsole();
 }
-void CEngine::CloseConsole()
+void pragma::CEngine::CloseConsole()
 {
 	switch(m_consoleType) {
 	case ConsoleType::Terminal:
@@ -1367,7 +1367,7 @@ void CEngine::CloseConsole()
 	// Engine::CloseConsole();
 	umath::set_flag(m_stateFlags, StateFlags::ConsoleOpen, false);
 }
-void CEngine::SetConsoleType(ConsoleType type)
+void pragma::CEngine::SetConsoleType(ConsoleType type)
 {
 	if(type == m_consoleType)
 		return;
@@ -1377,7 +1377,7 @@ void CEngine::SetConsoleType(ConsoleType type)
 	if(isOpen)
 		OpenConsole();
 }
-CEngine::ConsoleType CEngine::GetConsoleType() const
+pragma::CEngine::ConsoleType pragma::CEngine::GetConsoleType() const
 {
 	auto *pConsole = WIConsole::GetConsole();
 	auto *pFrame = pConsole ? pConsole->GetFrame() : nullptr;
@@ -1385,7 +1385,7 @@ CEngine::ConsoleType CEngine::GetConsoleType() const
 		return pFrame->IsDetached() ? ConsoleType::GUIDetached : ConsoleType::GUI;
 	return pragma::Engine::GetConsoleType();
 }
-bool CEngine::IsConsoleOpen() const
+bool pragma::CEngine::IsConsoleOpen() const
 {
 	switch(m_consoleType) {
 	case ConsoleType::Terminal:
@@ -1399,13 +1399,13 @@ bool CEngine::IsConsoleOpen() const
 	}
 	return false;
 }
-CallbackHandle CEngine::AddGPUProfilingHandler(const std::function<void(bool)> &handler)
+CallbackHandle pragma::CEngine::AddGPUProfilingHandler(const std::function<void(bool)> &handler)
 {
 	auto hCb = FunctionCallback<void, bool>::Create(handler);
 	m_gpuProfileHandlers.push_back(hCb);
 	return hCb;
 }
-void CEngine::SetGPUProfilingEnabled(bool bEnabled)
+void pragma::CEngine::SetGPUProfilingEnabled(bool bEnabled)
 {
 	for(auto it = m_gpuProfileHandlers.begin(); it != m_gpuProfileHandlers.end();) {
 		auto &hCb = *it;
@@ -1418,7 +1418,7 @@ void CEngine::SetGPUProfilingEnabled(bool bEnabled)
 	}
 }
 
-std::shared_ptr<prosper::Window> CEngine::CreateWindow(prosper::WindowSettings &settings)
+std::shared_ptr<prosper::Window> pragma::CEngine::CreateWindow(prosper::WindowSettings &settings)
 {
 	if(settings.width == 0 || settings.height == 0)
 		return nullptr;
@@ -1446,7 +1446,7 @@ std::shared_ptr<prosper::Window> CEngine::CreateWindow(prosper::WindowSettings &
 	WGUI::GetInstance().AddBaseElement(pWindow);
 	return window;
 }
-void CEngine::InitializeWindowInputCallbacks(prosper::Window &window)
+void pragma::CEngine::InitializeWindowInputCallbacks(prosper::Window &window)
 {
 	window->SetKeyCallback([this, &window](pragma::platform::Window &glfwWindow, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) mutable { KeyboardInput(window, key, scanCode, state, mods); });
 	window->SetMouseButtonCallback([this, &window](pragma::platform::Window &glfwWindow, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) mutable { MouseInput(window, button, state, mods); });
@@ -1472,14 +1472,14 @@ void CEngine::InitializeWindowInputCallbacks(prosper::Window &window)
 	});
 	window->SetIMEStatusCallback([this, &window](pragma::platform::Window &glfwWindow) { OnIMEStatusChanged(window, glfwWindow.IsIMEEnabled()); });
 }
-void CEngine::OnWindowResized(prosper::Window &window, Vector2i size)
+void pragma::CEngine::OnWindowResized(prosper::Window &window, Vector2i size)
 {
 	m_stateFlags |= StateFlags::WindowSizeChanged;
 	m_tWindowResizeTime = util::Clock::now();
 }
 
 DLLCLIENT std::optional<std::string> g_customWindowIcon {};
-void CEngine::OnWindowInitialized()
+void pragma::CEngine::OnWindowInitialized()
 {
 	pragma::RenderContext::OnWindowInitialized();
 	auto &window = GetRenderContext().GetWindow();
@@ -1495,13 +1495,13 @@ void CEngine::OnWindowInitialized()
 		}
 	}
 }
-void CEngine::InitializeExternalArchiveManager() { util::initialize_external_archive_manager(GetClientState()); }
-bool CEngine::StartProfilingStage(const char *stage) { return m_cpuProfilingStageManager && m_cpuProfilingStageManager->StartProfilerStage(stage); }
-bool CEngine::StopProfilingStage() { return m_cpuProfilingStageManager && m_cpuProfilingStageManager->StopProfilerStage(); }
-bool CEngine::StartGPUProfilingStage(const char *stage) { return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StartProfilerStage(stage); }
-bool CEngine::StopGPUProfilingStage() { return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StopProfilerStage(); }
-bool CEngine::GetControllersEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::ControllersEnabled); }
-void CEngine::SetControllersEnabled(bool b)
+void pragma::CEngine::InitializeExternalArchiveManager() { util::initialize_external_archive_manager(GetClientState()); }
+bool pragma::CEngine::StartProfilingStage(const char *stage) { return m_cpuProfilingStageManager && m_cpuProfilingStageManager->StartProfilerStage(stage); }
+bool pragma::CEngine::StopProfilingStage() { return m_cpuProfilingStageManager && m_cpuProfilingStageManager->StopProfilerStage(); }
+bool pragma::CEngine::StartGPUProfilingStage(const char *stage) { return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StartProfilerStage(stage); }
+bool pragma::CEngine::StopGPUProfilingStage() { return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StopProfilerStage(); }
+bool pragma::CEngine::GetControllersEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::ControllersEnabled); }
+void pragma::CEngine::SetControllersEnabled(bool b)
 {
 	if(GetControllersEnabled() == b)
 		return;
@@ -1547,23 +1547,23 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_controller_enabled", +[](pragma::NetworkState *, const pragma::console::ConVar &, bool, bool newVal) { pragma::get_cengine()->SetControllersEnabled(newVal); });
 }
 
-float CEngine::GetRawJoystickAxisMagnitude() const { return m_rawInputJoystickMagnitude; }
+float pragma::CEngine::GetRawJoystickAxisMagnitude() const { return m_rawInputJoystickMagnitude; }
 
-std::unique_ptr<CEngine::ConVarInfoList> &CEngine::GetConVarConfig(pragma::NwStateType type)
+std::unique_ptr<pragma::CEngine::ConVarInfoList> &pragma::CEngine::GetConVarConfig(pragma::NwStateType type)
 {
 	if(type == pragma::NwStateType::Client)
 		return m_clConfig;
 	return pragma::Engine::GetConVarConfig(type);
 }
-pragma::Engine::StateInstance &CEngine::GetStateInstance(pragma::NetworkState &nw)
+pragma::Engine::StateInstance &pragma::CEngine::GetStateInstance(pragma::NetworkState &nw)
 {
 	if(m_clInstance->state.get() == &nw)
 		return *m_clInstance;
 	return pragma::Engine::GetStateInstance(nw);
 }
-pragma::Engine::StateInstance &CEngine::GetClientStateInstance() { return *m_clInstance; }
+pragma::Engine::StateInstance &pragma::CEngine::GetClientStateInstance() { return *m_clInstance; }
 
-::util::WeakHandle<prosper::Shader> CEngine::ReloadShader(const std::string &name)
+::util::WeakHandle<prosper::Shader> pragma::CEngine::ReloadShader(const std::string &name)
 {
 #ifdef _DEBUG
 	bReload = true;
@@ -1591,7 +1591,7 @@ pragma::Engine::StateInstance &CEngine::GetClientStateInstance() { return *m_clI
 #endif
 	return whShader;
 }
-void CEngine::ReloadShaderPipelines()
+void pragma::CEngine::ReloadShaderPipelines()
 {
 	GetRenderContext().WaitIdle();
 	spdlog::info("Reloading shaders");
@@ -1604,11 +1604,11 @@ void CEngine::ReloadShaderPipelines()
 	}
 }
 
-CEngine::~CEngine() { m_audioAPILib = nullptr; }
+pragma::CEngine::~CEngine() { m_audioAPILib = nullptr; }
 
-CEngine *pragma::get_cengine() { return g_engine; }
+pragma::CEngine *pragma::get_cengine() { return g_engine; }
 
-void CEngine::HandleLocalHostPlayerClientPacket(NetPacket &p)
+void pragma::CEngine::HandleLocalHostPlayerClientPacket(NetPacket &p)
 {
 	auto *client = GetClientState();
 	if(client == nullptr)
@@ -1619,7 +1619,7 @@ void CEngine::HandleLocalHostPlayerClientPacket(NetPacket &p)
 	cl->HandlePacket(p);
 }
 
-void CEngine::Connect(const std::string &ip, const std::string &port)
+void pragma::CEngine::Connect(const std::string &ip, const std::string &port)
 {
 	auto *cl = static_cast<pragma::ClientState *>(GetClientState());
 	if(cl == nullptr)
@@ -1638,7 +1638,7 @@ void CEngine::Connect(const std::string &ip, const std::string &port)
 	cl->Connect(ip, port);
 }
 
-void CEngine::Connect(uint64_t steamId)
+void pragma::CEngine::Connect(uint64_t steamId)
 {
 	auto *cl = static_cast<pragma::ClientState *>(GetClientState());
 	if(cl == nullptr)
@@ -1648,7 +1648,7 @@ void CEngine::Connect(uint64_t steamId)
 	cl->Connect(steamId);
 }
 
-void CEngine::Disconnect()
+void pragma::CEngine::Disconnect()
 {
 	auto *cl = static_cast<pragma::ClientState *>(GetClientState());
 	if(cl == nullptr)
@@ -1660,7 +1660,7 @@ void CEngine::Disconnect()
 	cl->OpenMainMenu();
 }
 
-bool CEngine::IsMultiPlayer() const
+bool pragma::CEngine::IsMultiPlayer() const
 {
 	if(pragma::Engine::IsMultiPlayer())
 		return true;
@@ -1671,7 +1671,7 @@ bool CEngine::IsMultiPlayer() const
 	return cl && typeid(*cl) != typeid(pragma::networking::LocalClient);
 }
 
-void CEngine::StartDefaultGame(const std::string &map, bool singlePlayer)
+void pragma::CEngine::StartDefaultGame(const std::string &map, bool singlePlayer)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("Load map " + map);
@@ -1684,9 +1684,9 @@ void CEngine::StartDefaultGame(const std::string &map, bool singlePlayer)
 #endif
 }
 
-void CEngine::StartDefaultGame(const std::string &map) { StartDefaultGame(map, true); }
+void pragma::CEngine::StartDefaultGame(const std::string &map) { StartDefaultGame(map, true); }
 
-Lua::Interface *CEngine::GetLuaInterface(lua::State *l)
+Lua::Interface *pragma::CEngine::GetLuaInterface(lua::State *l)
 {
 	auto *cl = static_cast<pragma::ClientState *>(GetClientState());
 	if(cl != nullptr) {
@@ -1699,7 +1699,7 @@ Lua::Interface *CEngine::GetLuaInterface(lua::State *l)
 	return pragma::Engine::GetLuaInterface(l);
 }
 
-bool CEngine::IsProgramInFocus() const
+bool pragma::CEngine::IsProgramInFocus() const
 {
 	for(auto &window : GetRenderContext().GetWindows()) {
 		if((*window)->IsInFocus())
@@ -1708,7 +1708,7 @@ bool CEngine::IsProgramInFocus() const
 	return false;
 }
 
-pragma::NetworkState *CEngine::GetNetworkState(lua::State *l)
+pragma::NetworkState *pragma::CEngine::GetNetworkState(lua::State *l)
 {
 	auto *cl = static_cast<pragma::ClientState *>(GetClientState());
 	if(cl == nullptr)
@@ -1718,9 +1718,9 @@ pragma::NetworkState *CEngine::GetNetworkState(lua::State *l)
 	return pragma::Engine::GetNetworkState(l);
 }
 
-void CEngine::Start() { pragma::Engine::Start(); }
+void pragma::CEngine::Start() { pragma::Engine::Start(); }
 
-void CEngine::Close()
+void pragma::CEngine::Close()
 {
 	if(umath::is_flag_set(m_stateFlags, StateFlags::CEClosed))
 		return;
@@ -1759,7 +1759,7 @@ void CEngine::Close()
 	pragma::Engine::Close();
 }
 
-void CEngine::OnClose()
+void pragma::CEngine::OnClose()
 {
 	pragma::RenderContext::OnClose();
 	// Clear all Vulkan resources before closing the context
@@ -1772,7 +1772,7 @@ void CEngine::OnClose()
 }
 
 static auto cvFpsDecayFactor = pragma::console::get_client_con_var("cl_fps_decay_factor");
-void CEngine::UpdateFPS(float t)
+void pragma::CEngine::UpdateFPS(float t)
 {
 	auto weightRatio = cvFpsDecayFactor->GetFloat();
 	m_tFPSTime = t * (1.0 - weightRatio) + m_tFPSTime * weightRatio;
@@ -1781,7 +1781,7 @@ void CEngine::UpdateFPS(float t)
 }
 
 static auto cvProfiling = pragma::console::get_engine_con_var("debug_profiling_enabled");
-void CEngine::DrawFrame()
+void pragma::CEngine::DrawFrame()
 {
 	auto primWindowCmd = GetWindow().GetDrawCommandBuffer();
 	auto perfTimers = umath::is_flag_set(m_stateFlags, StateFlags::EnableGpuPerformanceTimers);
@@ -1849,7 +1849,7 @@ void CEngine::DrawFrame()
 }
 
 static auto cvHideGui = pragma::console::get_client_con_var("debug_hide_gui");
-void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
+void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 {
 	auto perfTimers = umath::is_flag_set(m_stateFlags, StateFlags::EnableGpuPerformanceTimers);
 	auto drawGui = !cvHideGui->GetBool();
@@ -1945,10 +1945,10 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 	}
 }
 
-uint32_t CEngine::GetPerformanceTimerIndex(uint32_t swapchainIdx, GPUTimer timer) const { return swapchainIdx * umath::to_integral(GPUTimer::Count) + umath::to_integral(timer); }
-uint32_t CEngine::GetPerformanceTimerIndex(GPUTimer timer) const { return GetPerformanceTimerIndex(GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex(), timer); }
+uint32_t pragma::CEngine::GetPerformanceTimerIndex(uint32_t swapchainIdx, GPUTimer timer) const { return swapchainIdx * umath::to_integral(GPUTimer::Count) + umath::to_integral(timer); }
+uint32_t pragma::CEngine::GetPerformanceTimerIndex(GPUTimer timer) const { return GetPerformanceTimerIndex(GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex(), timer); }
 
-void CEngine::SetGpuPerformanceTimersEnabled(bool enabled)
+void pragma::CEngine::SetGpuPerformanceTimersEnabled(bool enabled)
 {
 	if(umath::is_flag_set(m_stateFlags, StateFlags::EnableGpuPerformanceTimers) == enabled)
 		return;
@@ -1974,14 +1974,14 @@ void CEngine::SetGpuPerformanceTimersEnabled(bool enabled)
 	for(auto &t : m_gpuTimers)
 		t = m_gpuTimerPool->CreateTimerQuery(prosper::PipelineStageFlags::TopOfPipeBit, prosper::PipelineStageFlags::BottomOfPipeBit);
 }
-std::chrono::nanoseconds CEngine::GetGpuExecutionTime(uint32_t swapchainIdx, GPUTimer timer) const
+std::chrono::nanoseconds pragma::CEngine::GetGpuExecutionTime(uint32_t swapchainIdx, GPUTimer timer) const
 {
 	if(umath::is_flag_set(m_stateFlags, StateFlags::EnableGpuPerformanceTimers) == false)
 		return std::chrono::nanoseconds {0};
 	return m_gpuExecTimes[GetPerformanceTimerIndex(swapchainIdx, timer)];
 }
 
-void CEngine::Think()
+void pragma::CEngine::Think()
 {
 	pragma::platform::poll_joystick_events();
 
@@ -2050,11 +2050,11 @@ void CEngine::Think()
 	GetRenderContext().CloseWindowsScheduledForClosing();
 }
 
-void CEngine::SetFixedFrameDeltaTimeInterpretation(std::optional<std::chrono::nanoseconds> frameDeltaTime) { m_fixedFrameDeltaTimeInterpretation = frameDeltaTime; }
-void CEngine::SetFixedFrameDeltaTimeInterpretationByFPS(uint16_t fps) { SetFixedFrameDeltaTimeInterpretation(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds {1}) / fps); }
-void CEngine::SetTickDeltaTimeTiedToFrameRate(bool tieToFrameRate) { umath::set_flag(m_stateFlags, StateFlags::TickDeltaTimeTiedToFrameRate, tieToFrameRate); }
+void pragma::CEngine::SetFixedFrameDeltaTimeInterpretation(std::optional<std::chrono::nanoseconds> frameDeltaTime) { m_fixedFrameDeltaTimeInterpretation = frameDeltaTime; }
+void pragma::CEngine::SetFixedFrameDeltaTimeInterpretationByFPS(uint16_t fps) { SetFixedFrameDeltaTimeInterpretation(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds {1}) / fps); }
+void pragma::CEngine::SetTickDeltaTimeTiedToFrameRate(bool tieToFrameRate) { umath::set_flag(m_stateFlags, StateFlags::TickDeltaTimeTiedToFrameRate, tieToFrameRate); }
 
-void CEngine::UpdateTickCount()
+void pragma::CEngine::UpdateTickCount()
 {
 	if(umath::is_flag_set(m_stateFlags, StateFlags::TickDeltaTimeTiedToFrameRate) == false) {
 		pragma::Engine::UpdateTickCount();
@@ -2063,7 +2063,7 @@ void CEngine::UpdateTickCount()
 	m_ctTick.UpdateByDelta(util::clock::to_seconds(m_tDeltaFrameTime));
 }
 
-void CEngine::Tick()
+void pragma::CEngine::Tick()
 {
 	if(umath::is_flag_set(m_stateFlags, StateFlags::WindowSizeChanged)) {
 		auto t = util::Clock::now();
@@ -2103,18 +2103,18 @@ void CEngine::Tick()
 	UpdateParallelJobs();
 }
 
-bool CEngine::IsServerOnly() { return false; }
+bool pragma::CEngine::IsServerOnly() { return false; }
 
-void CEngine::UseFullbrightShader(bool b) { umath::set_flag(m_stateFlags, StateFlags::Fullbright, b); }
+void pragma::CEngine::UseFullbrightShader(bool b) { umath::set_flag(m_stateFlags, StateFlags::Fullbright, b); }
 
-void CEngine::OnResolutionChanged(uint32_t width, uint32_t height)
+void pragma::CEngine::OnResolutionChanged(uint32_t width, uint32_t height)
 {
 	RenderContext::OnResolutionChanged(width, height);
 	if(m_renderResolution.has_value() == false)
 		OnRenderResolutionChanged(width, height);
 }
 
-void CEngine::OnRenderResolutionChanged(uint32_t width, uint32_t height)
+void pragma::CEngine::OnRenderResolutionChanged(uint32_t width, uint32_t height)
 {
 	GetRenderContext().GetWindow().ReloadStagingRenderTarget();
 	umath::set_flag(m_stateFlags, StateFlags::FirstFrame, true);
@@ -2133,7 +2133,7 @@ void CEngine::OnRenderResolutionChanged(uint32_t width, uint32_t height)
 	game->Resize(true);
 }
 
-uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
+uint32_t pragma::CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 {
 	if(type == pragma::asset::Type::Texture || type == pragma::asset::Type::Material || type == pragma::asset::Type::Model)
 		const_cast<CEngine *>(this)->GetRenderContext().WaitIdle();
@@ -2183,7 +2183,7 @@ uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 	return n;
 }
 
-CEngine::DroppedFile::DroppedFile(const std::string &rootPath, const std::string &_fullPath) : fullPath(_fullPath)
+pragma::CEngine::DroppedFile::DroppedFile(const std::string &rootPath, const std::string &_fullPath) : fullPath(_fullPath)
 {
 	auto path = util::Path::CreateFile(fullPath);
 	path.MakeRelative(rootPath);

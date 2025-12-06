@@ -784,11 +784,11 @@ namespace pragma {
 int Lua::game::Client::open_dropped_file(lua::State *l)
 {
 	auto &droppedFiles = pragma::get_cengine()->GetDroppedFiles();
-	const CEngine::DroppedFile *pf = nullptr;
+	const pragma::CEngine::DroppedFile *pf = nullptr;
 	std::optional<std::string> fullPath {};
 	if(Lua::IsString(l, 1)) {
 		auto *fileName = Lua::CheckString(l, 1);
-		auto it = std::find_if(droppedFiles.begin(), droppedFiles.end(), [&fileName](const CEngine::DroppedFile &f) { return (f.fileName == fileName) ? true : false; });
+		auto it = std::find_if(droppedFiles.begin(), droppedFiles.end(), [&fileName](const pragma::CEngine::DroppedFile &f) { return (f.fileName == fileName) ? true : false; });
 		if(it == droppedFiles.end()) {
 			auto &gDroppedFiles = pragma::get_dropped_files();
 			auto npath = ::util::Path::CreateFile(fileName).GetString();

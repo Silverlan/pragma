@@ -8,7 +8,7 @@ module pragma.client;
 import :engine;
 import pragma.string.unicode;
 
-void CEngine::SaveClientConfig()
+void pragma::CEngine::SaveClientConfig()
 {
 	FileManager::CreatePath("cfg");
 	std::string path = "cfg\\client.cfg";
@@ -20,7 +20,7 @@ void CEngine::SaveClientConfig()
 	WriteClientConfig(f);
 }
 
-void CEngine::WriteClientConfig(VFilePtrReal f)
+void pragma::CEngine::WriteClientConfig(VFilePtrReal f)
 {
 	f->WriteString("unbindall\n");
 	auto inputLayer = GetCoreInputBindingLayer();
@@ -70,20 +70,20 @@ void CEngine::WriteClientConfig(VFilePtrReal f)
 	}
 }
 
-void CEngine::LoadConfig()
+void pragma::CEngine::LoadConfig()
 {
 	pragma::Engine::LoadConfig();
 	PreloadConfig(pragma::NwStateType::Client, "client.cfg");
 }
 
-void CEngine::LoadClientConfig()
+void pragma::CEngine::LoadClientConfig()
 {
 	auto &cfg = GetConVarConfig(pragma::NwStateType::Client);
 	if(cfg)
 		ExecCommands(*cfg);
 }
 
-void CEngine::PreloadConfig(pragma::NwStateType type, const std::string &configName)
+void pragma::CEngine::PreloadConfig(pragma::NwStateType type, const std::string &configName)
 {
 	pragma::Engine::PreloadConfig(type, configName);
 	if(type != pragma::NwStateType::Client)

@@ -16,7 +16,7 @@ export import pragma.shared;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-export {
+export namespace pragma {
 	class DLLCLIENT CEngine : public pragma::Engine, public pragma::RenderContext {
 	  public:
 		CEngine(int argc, char *argv[]);
@@ -302,13 +302,12 @@ export {
 		void Input(int key, pragma::platform::KeyState inputState, pragma::platform::KeyState pressState, pragma::platform::Modifier mods, float magnitude = 1.f);
 		void UpdateFPS(float t);
 	};
-	REGISTER_ENUM_FLAGS(CEngine::StateFlags)
 
-	namespace pragma {
-		DLLCLIENT CEngine *get_cengine();
-	};
+	DLLCLIENT CEngine *get_cengine();
 };
 #pragma warning(pop)
+
+export {REGISTER_ENUM_FLAGS(pragma::CEngine::StateFlags)}
 
 namespace pragma {
 	void register_client_launch_parameters(LaunchParaMap &map);

@@ -9,7 +9,7 @@ import :client_state;
 import :entities.components;
 import :engine;
 
-pragma::console::ConConf *CEngine::GetConVar(const std::string &cv)
+pragma::console::ConConf *pragma::CEngine::GetConVar(const std::string &cv)
 {
 	auto *cvar = pragma::Engine::GetConVar(cv);
 	if(cvar != nullptr)
@@ -18,7 +18,7 @@ pragma::console::ConConf *CEngine::GetConVar(const std::string &cv)
 	return (stateCl != nullptr) ? stateCl->GetConVar(cv) : nullptr;
 }
 
-bool CEngine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(pragma::console::ConConf *, float &)> &callback)
+bool pragma::CEngine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(pragma::console::ConConf *, float &)> &callback)
 {
 	ustring::to_lower(cmd);
 	auto *stateCl = static_cast<pragma::ClientState *>(GetClientState());

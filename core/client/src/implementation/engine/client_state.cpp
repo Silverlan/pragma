@@ -8,7 +8,7 @@ module pragma.client;
 import :engine;
 import :client_state;
 
-pragma::ClientState *CEngine::OpenClientState()
+pragma::ClientState *pragma::CEngine::OpenClientState()
 {
 	CloseClientState();
 	m_clInstance->state = std::make_unique<pragma::ClientState>();
@@ -18,7 +18,7 @@ pragma::ClientState *CEngine::OpenClientState()
 	return static_cast<pragma::ClientState *>(cl);
 }
 
-void CEngine::CloseClientState()
+void pragma::CEngine::CloseClientState()
 {
 	auto *cl = GetClientState();
 	if(cl == nullptr)
@@ -30,7 +30,7 @@ void CEngine::CloseClientState()
 	m_clInstance->state = nullptr;
 }
 
-pragma::NetworkState *CEngine::GetClientState() const
+pragma::NetworkState *pragma::CEngine::GetClientState() const
 {
 	if(m_clInstance == nullptr)
 		return nullptr;

@@ -204,10 +204,10 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 				auto *l = pragma::get_cgame()->GetLuaState();
 				auto t = luabind::newtable(l);
 				auto tTimes = luabind::newtable(l);
-				tTimes["gui"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, CEngine::GPUTimer::GUI).count() / static_cast<long double>(1'000'000.0);
-				tTimes["scene"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, CEngine::GPUTimer::Scene).count() / static_cast<long double>(1'000'000.0);
-				tTimes["frame"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, CEngine::GPUTimer::Frame).count() / static_cast<long double>(1'000'000.0);
-				tTimes["present"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, CEngine::GPUTimer::Present).count() / static_cast<long double>(1'000'000.0);
+				tTimes["gui"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, pragma::CEngine::GPUTimer::GUI).count() / static_cast<long double>(1'000'000.0);
+				tTimes["scene"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, pragma::CEngine::GPUTimer::Scene).count() / static_cast<long double>(1'000'000.0);
+				tTimes["frame"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, pragma::CEngine::GPUTimer::Frame).count() / static_cast<long double>(1'000'000.0);
+				tTimes["present"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, pragma::CEngine::GPUTimer::Present).count() / static_cast<long double>(1'000'000.0);
 				t["numberOfScenes"] = frameStats.stats.size();
 				t["times"] = tTimes;
 				auto tStats = luabind::newtable(l);

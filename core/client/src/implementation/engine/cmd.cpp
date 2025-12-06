@@ -18,7 +18,7 @@ import :rendering.render_apis;
 
 DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool continuous);
 extern bool g_dumpRenderQueues;
-void CEngine::RegisterConsoleCommands()
+void pragma::CEngine::RegisterConsoleCommands()
 {
 	pragma::Engine::RegisterConsoleCommands();
 	auto &conVarMap = *pragma::console::client::get_convar_map();

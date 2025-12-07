@@ -13,18 +13,18 @@ import :client_state;
 #pragma optimize("", off)
 pragma::gui::WILuaSkin::WILuaSkin() : WISkin {}, m_lua(nullptr), m_rootClass(nullptr) {}
 
-void pragma::gui::WILuaSkin::Release(WIBase *el)
+void pragma::gui::WILuaSkin::Release(types::WIBase *el)
 {
 	WISkin::Release(el);
-	std::vector<WIBase *> els;
-	WIBase *parent = el;
+	std::vector<types::WIBase *> els;
+	types::WIBase *parent = el;
 	while(parent != nullptr) {
 		els.push_back(parent);
 		parent = parent->GetParent();
 	}
 	std::vector<WISkinClass *> classes = {&m_rootClass};
 	for(auto i = els.size() - 1; i != size_t(-1); i--) {
-		WIBase *el = els[i];
+		types::WIBase *el = els[i];
 		auto numClasses = classes.size();
 		for(size_t k = 0; k < numClasses; k++)
 			FindSkinClasses(el, classes[k]->classes, classes);
@@ -51,18 +51,18 @@ void pragma::gui::WILuaSkin::Release(WIBase *el)
 	}
 }
 
-void pragma::gui::WILuaSkin::Initialize(WIBase *el)
+void pragma::gui::WILuaSkin::Initialize(types::WIBase *el)
 {
 	WISkin::Initialize(el);
-	std::vector<WIBase *> els;
-	WIBase *parent = el;
+	std::vector<types::WIBase *> els;
+	types::WIBase *parent = el;
 	while(parent != nullptr) {
 		els.push_back(parent);
 		parent = parent->GetParent();
 	}
 	std::vector<WISkinClass *> classes = {&m_rootClass};
 	for(auto i = els.size() - 1; i != size_t(-1); i--) {
-		WIBase *el = els[i];
+		types::WIBase *el = els[i];
 		auto numClasses = classes.size();
 		for(size_t k = 0; k < numClasses; k++)
 			FindSkinClasses(el, classes[k]->classes, classes);
@@ -88,7 +88,7 @@ void pragma::gui::WILuaSkin::Initialize(WIBase *el)
 		}
 	}
 }
-void pragma::gui::WILuaSkin::FindSkinClasses(WIBase *el, std::unordered_map<std::string, std::unique_ptr<WISkinClass>> &classes, std::vector<WISkinClass *> &outClasses)
+void pragma::gui::WILuaSkin::FindSkinClasses(types::WIBase *el, std::unordered_map<std::string, std::unique_ptr<WISkinClass>> &classes, std::vector<WISkinClass *> &outClasses)
 {
 	//WISkinClass *cl = FindSkinClass(el->GetClass(),classes);
 	//if(cl != nullptr)

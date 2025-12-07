@@ -10,9 +10,9 @@ import :gui.command_line_entry;
 import pragma.gui;
 import pragma.string.unicode;
 
-pragma::gui::WICommandLineEntry::WICommandLineEntry() : WITextEntry() {}
+pragma::gui::types::WICommandLineEntry::WICommandLineEntry() : WITextEntry() {}
 
-void pragma::gui::WICommandLineEntry::Initialize()
+void pragma::gui::types::WICommandLineEntry::Initialize()
 {
 	WITextEntry::Initialize();
 	SetAutoCompleteEntryLimit(10);
@@ -73,7 +73,7 @@ void pragma::gui::WICommandLineEntry::Initialize()
 	}
 }
 
-void pragma::gui::WICommandLineEntry::OnTextEntered()
+void pragma::gui::types::WICommandLineEntry::OnTextEntered()
 {
 	WITextEntry::OnTextEntered();
 	auto text = GetText();
@@ -85,20 +85,20 @@ void pragma::gui::WICommandLineEntry::OnTextEntered()
 	RequestFocus();
 }
 
-void pragma::gui::WICommandLineEntry::OnFocusGained()
+void pragma::gui::types::WICommandLineEntry::OnFocusGained()
 {
 	WITextEntry::OnFocusGained();
 	InitializeAutoCompleteList();
 }
 
-void pragma::gui::WICommandLineEntry::OnFocusKilled()
+void pragma::gui::types::WICommandLineEntry::OnFocusKilled()
 {
 	WITextEntry::OnFocusKilled();
 	if(m_hAutoCompleteList.IsValid())
 		m_hAutoCompleteList->Remove();
 }
 
-void pragma::gui::WICommandLineEntry::InitializeAutoCompleteList()
+void pragma::gui::types::WICommandLineEntry::InitializeAutoCompleteList()
 {
 	auto *pText = GetTextElement();
 	if(pText == nullptr || m_bAutocompleteEnabled == false)
@@ -122,7 +122,7 @@ void pragma::gui::WICommandLineEntry::InitializeAutoCompleteList()
 	auto pos = GetAbsolutePos();
 	auto size = GetSize();
 	if(m_hAutoCompleteList.IsValid() == false) {
-		auto *pContextMenu = WGUI::GetInstance().Create<WIContextMenu>();
+		auto *pContextMenu = pragma::gui::WGUI::GetInstance().Create<WIContextMenu>();
 		pContextMenu->SetParentAndUpdateWindow(GetRootElement());
 		pContextMenu->SetZPos(100'000);
 		m_hAutoCompleteList = pContextMenu->GetHandle();
@@ -155,7 +155,7 @@ void pragma::gui::WICommandLineEntry::InitializeAutoCompleteList()
 		pContextMenu->SetY(pos.y - pContextMenu->GetHeight());
 	// pContextMenu->SetWidth(size.x);
 }
-void pragma::gui::WICommandLineEntry::SetAutocompleteEnabled(bool enabled)
+void pragma::gui::types::WICommandLineEntry::SetAutocompleteEnabled(bool enabled)
 {
 	m_bAutocompleteEnabled = enabled;
 	if(enabled) {
@@ -165,8 +165,8 @@ void pragma::gui::WICommandLineEntry::SetAutocompleteEnabled(bool enabled)
 	else if(m_hAutoCompleteList.IsValid())
 		m_hAutoCompleteList->Remove();
 }
-bool pragma::gui::WICommandLineEntry::IsAutocompleteEnabled() const { return m_bAutocompleteEnabled; }
-void pragma::gui::WICommandLineEntry::OnTextChanged(const pragma::string::Utf8String &text, bool changedByUser)
+bool pragma::gui::types::WICommandLineEntry::IsAutocompleteEnabled() const { return m_bAutocompleteEnabled; }
+void pragma::gui::types::WICommandLineEntry::OnTextChanged(const pragma::string::Utf8String &text, bool changedByUser)
 {
 	WITextEntry::OnTextChanged(text, changedByUser);
 	if(m_bSkipAutoComplete)
@@ -174,17 +174,17 @@ void pragma::gui::WICommandLineEntry::OnTextChanged(const pragma::string::Utf8St
 	InitializeAutoCompleteList();
 }
 
-void pragma::gui::WICommandLineEntry::SetAutoCompleteEntryLimit(uint32_t limit) { m_commandHistory.resize(limit); }
-uint32_t pragma::gui::WICommandLineEntry::GetAutoCompleteEntryLimit() const { return m_commandHistory.size(); }
-void pragma::gui::WICommandLineEntry::FindAutocompleteOptions(const std::string &cmd, std::vector<std::string> &args) const { m_fAutoCompleteHandler(cmd, args); }
-void pragma::gui::WICommandLineEntry::SetAutocompleteHandler(const std::function<void(const std::string &, std::vector<std::string> &)> &fAutoCompleteHandler) { m_fAutoCompleteHandler = fAutoCompleteHandler; }
-void pragma::gui::WICommandLineEntry::ClearCommandHistory()
+void pragma::gui::types::WICommandLineEntry::SetAutoCompleteEntryLimit(uint32_t limit) { m_commandHistory.resize(limit); }
+uint32_t pragma::gui::types::WICommandLineEntry::GetAutoCompleteEntryLimit() const { return m_commandHistory.size(); }
+void pragma::gui::types::WICommandLineEntry::FindAutocompleteOptions(const std::string &cmd, std::vector<std::string> &args) const { m_fAutoCompleteHandler(cmd, args); }
+void pragma::gui::types::WICommandLineEntry::SetAutocompleteHandler(const std::function<void(const std::string &, std::vector<std::string> &)> &fAutoCompleteHandler) { m_fAutoCompleteHandler = fAutoCompleteHandler; }
+void pragma::gui::types::WICommandLineEntry::ClearCommandHistory()
 {
 	m_commandHistory.clear();
 	m_commandHistoryCount = 0u;
 	m_nextCommandHistoryInsertPos = 0u;
 }
-void pragma::gui::WICommandLineEntry::AddCommandHistoryEntry(const std::string_view &entry)
+void pragma::gui::types::WICommandLineEntry::AddCommandHistoryEntry(const std::string_view &entry)
 {
 	m_commandHistory.at(m_nextCommandHistoryInsertPos) = std::string {entry};
 	m_nextCommandHistoryInsertPos = (m_nextCommandHistoryInsertPos + 1u) % m_commandHistory.size();

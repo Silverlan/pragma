@@ -8,11 +8,11 @@ export module pragma.client:gui.checkbox;
 
 export import pragma.gui;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WICheckbox : public WIRect {
 	  protected:
-		WIHandle m_hOutline;
-		WIHandle m_hTick;
+		pragma::gui::WIHandle m_hOutline;
+		pragma::gui::WIHandle m_hTick;
 		bool m_bChecked;
 	  public:
 		WICheckbox();

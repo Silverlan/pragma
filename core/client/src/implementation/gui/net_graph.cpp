@@ -13,8 +13,8 @@ import pragma.string.unicode;
 
 static const uint32_t DATA_RECORD_BACKLOG = 30;
 
-pragma::gui::WINetGraph::NetData::NetData() : lastUpdate(0) { Reset(); }
-void pragma::gui::WINetGraph::NetData::Reset()
+pragma::gui::types::WINetGraph::NetData::NetData() : lastUpdate(0) { Reset(); }
+void pragma::gui::types::WINetGraph::NetData::Reset()
 {
 	auto *client = pragma::get_client_state();
 	if(client != nullptr)
@@ -28,17 +28,17 @@ void pragma::gui::WINetGraph::NetData::Reset()
 	messages.clear();
 }
 
-pragma::gui::WINetGraph::NetData::MessageInfo::MessageInfo(uint64_t _size) : size(_size), count(1) {}
+pragma::gui::types::WINetGraph::NetData::MessageInfo::MessageInfo(uint64_t _size) : size(_size), count(1) {}
 
 //////////////////////////////
 
-pragma::gui::WINetGraph::WINetGraph() : WIBase(), m_graphOffset(0), m_dataSizeIdx(0)
+pragma::gui::types::WINetGraph::WINetGraph() : WIBase(), m_graphOffset(0), m_dataSizeIdx(0)
 {
 	m_netData.Reset();
 	m_dataSizes.resize(DATA_RECORD_BACKLOG, 0);
 }
 
-pragma::gui::WINetGraph::~WINetGraph()
+pragma::gui::types::WINetGraph::~WINetGraph()
 {
 	if(m_cbThink.IsValid())
 		m_cbThink.Remove();
@@ -50,7 +50,7 @@ pragma::gui::WINetGraph::~WINetGraph()
 		m_cbOnSendPacketTCP.Remove();
 }
 
-void pragma::gui::WINetGraph::AddGraphValue(uint32_t sz)
+void pragma::gui::types::WINetGraph::AddGraphValue(uint32_t sz)
 {
 	if(!m_hPacketGraph.IsValid())
 		return;
@@ -60,13 +60,13 @@ void pragma::gui::WINetGraph::AddGraphValue(uint32_t sz)
 		m_graphOffset = 0;
 }
 
-WIText *pragma::gui::WINetGraph::CreateText(const std::string &text)
+pragma::gui::types::WIText *pragma::gui::types::WINetGraph::CreateText(const std::string &text)
 {
 	auto &colText = colors::White;
 	auto &colShadow = colors::Black;
 	Vector2i shadowOffset {2.f, 2.f};
 
-	auto *pText = WGUI::GetInstance().Create<WIText>(this);
+	auto *pText = pragma::gui::WGUI::GetInstance().Create<WIText>(this);
 	pText->SetColor(colText);
 	pText->EnableShadow(true);
 	pText->SetShadowColor(colShadow);
@@ -76,16 +76,16 @@ WIText *pragma::gui::WINetGraph::CreateText(const std::string &text)
 	return pText;
 }
 
-void pragma::gui::WINetGraph::Initialize()
+void pragma::gui::types::WINetGraph::Initialize()
 {
 	WIBase::Initialize();
 
-	auto *pPacketGraph = WGUI::GetInstance().Create<WILineGraph>(this);
+	auto *pPacketGraph = pragma::gui::WGUI::GetInstance().Create<WILineGraph>(this);
 	pPacketGraph->SetSize(256, 90);
 	pPacketGraph->SetSegmentCount(100);
 	m_hPacketGraph = pPacketGraph->GetHandle();
 
-	auto *pDataGraph = WGUI::GetInstance().Create<WILineGraph>(this);
+	auto *pDataGraph = pragma::gui::WGUI::GetInstance().Create<WILineGraph>(this);
 	pDataGraph->SetSize(pPacketGraph->GetSize());
 	pDataGraph->SetSegmentCount(DATA_RECORD_BACKLOG);
 	m_hDataGraph = pDataGraph->GetHandle();
@@ -218,7 +218,7 @@ void pragma::gui::WINetGraph::Initialize()
 	}));
 }
 
-void pragma::gui::WINetGraph::UpdateGraph()
+void pragma::gui::types::WINetGraph::UpdateGraph()
 {
 	if(m_hPacketGraph.IsValid())
 		m_hPacketGraph.get<WILineGraph>()->Update();
@@ -238,7 +238,7 @@ void pragma::gui::WINetGraph::UpdateGraph()
 		m_hDataGraph.get<WILineGraph>()->Update();
 }
 
-void pragma::gui::WINetGraph::SetSize(int x, int y)
+void pragma::gui::types::WINetGraph::SetSize(int x, int y)
 {
 	WIBase::SetSize(x, y);
 

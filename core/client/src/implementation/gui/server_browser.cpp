@@ -145,7 +145,7 @@ void pragma::networking::DefaultMasterServerQueryDispatcher::DoQueryServers(cons
 
 ///////////////
 
-pragma::gui::WIServerBrowser::WIServerBrowser() : WIFrame(), m_bRefreshScheduled(false)
+pragma::gui::types::WIServerBrowser::WIServerBrowser() : WIFrame(), m_bRefreshScheduled(false)
 {
 	AddStyleClass("wiframe");
 	Refresh();
@@ -185,9 +185,9 @@ pragma::gui::WIServerBrowser::WIServerBrowser() : WIFrame(), m_bRefreshScheduled
 	m_msQueryDispatcher->SetEventCallbacks(eventCallbacks);
 }
 
-pragma::gui::WIServerBrowser::~WIServerBrowser() { m_msQueryDispatcher = nullptr; }
+pragma::gui::types::WIServerBrowser::~WIServerBrowser() { m_msQueryDispatcher = nullptr; }
 
-void pragma::gui::WIServerBrowser::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void pragma::gui::types::WIServerBrowser::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	if(m_msQueryDispatcher)
 		m_msQueryDispatcher->Poll();
@@ -196,7 +196,7 @@ void pragma::gui::WIServerBrowser::Think(const std::shared_ptr<prosper::IPrimary
 	WIFrame::Think(drawCmd);
 }
 
-void pragma::gui::WIServerBrowser::OnServerDoubleClick(unsigned int idx)
+void pragma::gui::types::WIServerBrowser::OnServerDoubleClick(unsigned int idx)
 {
 	if(idx >= m_servers.size())
 		return;
@@ -210,7 +210,7 @@ void pragma::gui::WIServerBrowser::OnServerDoubleClick(unsigned int idx)
 	pragma::get_cengine()->Connect(svInfo.queryResult.ip, std::to_string(svInfo.queryResult.serverInfo.port));
 }
 
-void pragma::gui::WIServerBrowser::DisplayMessage(std::string msg)
+void pragma::gui::types::WIServerBrowser::DisplayMessage(std::string msg)
 {
 	m_servers.clear();
 	WITable *t = m_hServerList.get<WITable>();
@@ -223,7 +223,7 @@ void pragma::gui::WIServerBrowser::DisplayMessage(std::string msg)
 	row->SetValue(1, msg);
 }
 
-void pragma::gui::WIServerBrowser::Initialize()
+void pragma::gui::types::WIServerBrowser::Initialize()
 {
 	WIFrame::Initialize();
 	EnableThinking();
@@ -233,7 +233,7 @@ void pragma::gui::WIServerBrowser::Initialize()
 	auto *contents = GetContents();
 	if(!contents)
 		return;
-	auto &wgui = WGUI::GetInstance();
+	auto &wgui = pragma::gui::WGUI::GetInstance();
 	m_hServerList = wgui.Create<WITable>(contents)->GetHandle();
 	WITable *t = m_hServerList.get<WITable>();
 	if(t != nullptr) {
@@ -305,7 +305,7 @@ void pragma::gui::WIServerBrowser::Initialize()
 	SetMinSize(400, 300);
 }
 
-void pragma::gui::WIServerBrowser::DoRefresh()
+void pragma::gui::types::WIServerBrowser::DoRefresh()
 {
 	m_bRefreshScheduled = false;
 	if(m_msQueryDispatcher) {
@@ -314,11 +314,11 @@ void pragma::gui::WIServerBrowser::DoRefresh()
 	}
 }
 
-void pragma::gui::WIServerBrowser::Refresh() { m_bRefreshScheduled = true; }
+void pragma::gui::types::WIServerBrowser::Refresh() { m_bRefreshScheduled = true; }
 
-void pragma::gui::WIServerBrowser::SetSize(int x, int y) { WIFrame::SetSize(x, y); }
+void pragma::gui::types::WIServerBrowser::SetSize(int x, int y) { WIFrame::SetSize(x, y); }
 
-void pragma::gui::WIServerBrowser::AddServer(const pragma::networking::MasterServerQueryResult &queryResult)
+void pragma::gui::types::WIServerBrowser::AddServer(const pragma::networking::MasterServerQueryResult &queryResult)
 {
 	if(!m_hServerList.IsValid())
 		return;
@@ -342,7 +342,7 @@ void pragma::gui::WIServerBrowser::AddServer(const pragma::networking::MasterSer
 			return CallbackReturnType::HasReturnValue;
 		}));
 		if(queryResult.serverInfo.passwordProtected == true) {
-			WISilkIcon *icon = WGUI::GetInstance().Create<WISilkIcon>();
+			WISilkIcon *icon = pragma::gui::WGUI::GetInstance().Create<WISilkIcon>();
 			if(icon != nullptr) {
 				icon->SetIcon("lock");
 				row->InsertElement(0, icon);

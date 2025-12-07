@@ -222,17 +222,17 @@ void CParticleRendererBlob::OnParticleSystemStarted()
 		    return false;
 	    }));
 	static auto dbg = std::make_unique<DebugGameGUI>([renderTex]() {
-		auto *b = WGUI::Create<WIRect>();
+		auto *b = pragma::gui::WGUI::Create<WIRect>();
 		b->SetColor(colors::White);
 		b->SetSize(512, 512);
 
-		auto *r = WGUI::Create<WITexturedRect>(b);
+		auto *r = pragma::gui::WGUI::Create<WITexturedRect>(b);
 		r->SetSize(512, 512);
 		r->SetTexture(renderTex);
 		return b->GetHandle(); //r->GetHandle();
 	});
 	static auto dbg2 = std::make_unique<DebugGameGUI>([depthTex]() {
-		auto r = WGUI::Create<WIDebugDepthTexture>();
+		auto r = pragma::gui::WGUI::Create<WIDebugDepthTexture>();
 		r->SetSize(512, 512);
 		r->SetX(512);
 		r->SetTexture(depthTex);

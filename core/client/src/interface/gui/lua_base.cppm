@@ -34,7 +34,7 @@ export import pragma.shared;
 		Lua::Pop(m_stateLua, 1);                                                                                                                                                                                                                                                                 \
 	}
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WILuaBase : public WIBase, public LuaObjectBase {
 	  public:
 		WILuaBase();
@@ -51,7 +51,7 @@ export namespace pragma::gui {
 		virtual void OnVisibilityChanged(bool bVisible) override;
 		virtual void SetColor(float r, float g, float b, float a = 1.f) override;
 		virtual void SetAlpha(float alpha) override;
-		virtual void Render(const wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const Mat4 &matDraw, const Vector2 &scale = {1.f, 1.f}, uint32_t testStencilLevel = 0u, wgui::StencilPipeline stencilPipeline = wgui::StencilPipeline::Test) override;
+		virtual void Render(const pragma::gui::DrawInfo &drawInfo, pragma::gui::DrawState &drawState, const Mat4 &matDraw, const Vector2 &scale = {1.f, 1.f}, uint32_t testStencilLevel = 0u, StencilPipeline stencilPipeline = StencilPipeline::Test) override;
 		virtual void OnCursorEntered() override;
 		virtual void OnCursorExited() override;
 		virtual void OnFileDragEntered() override;
@@ -103,8 +103,8 @@ export namespace pragma::gui {
 		bool Lua_CheckPosInBounds(const Vector2i &pos);
 		static bool default_CheckPosInBounds(lua::State *l, WILuaBase &hElement, const Vector2i &pos);
 
-		void Lua_Render(const ::wgui::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale);
-		static void default_Render(lua::State *l, WILuaBase &hElement, const ::wgui::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale);
+		void Lua_Render(const pragma::gui::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale);
+		static void default_Render(lua::State *l, WILuaBase &hElement, const pragma::gui::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale);
 
 		void Lua_OnCursorEntered();
 		static void default_OnCursorEntered(lua::State *l, WILuaBase &hElement);
@@ -145,5 +145,5 @@ export namespace pragma::gui {
 };
 
 export namespace pragma::LuaCore {
-	using WILuaBaseHolder = HandleHolder<pragma::gui::WILuaBase>;
+	using WILuaBaseHolder = HandleHolder<pragma::gui::types::WILuaBase>;
 };

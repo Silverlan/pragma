@@ -14,8 +14,8 @@ import pragma.gui;
 
 #undef CreateWindow
 
-pragma::gui::WIDetachable::DetachedWindow::~DetachedWindow() { Clear(); }
-void pragma::gui::WIDetachable::DetachedWindow::Clear()
+pragma::gui::types::WIDetachable::DetachedWindow::~DetachedWindow() { Clear(); }
+void pragma::gui::types::WIDetachable::DetachedWindow::Clear()
 {
 	if(detachedBg.IsValid())
 		detachedBg.Remove();
@@ -25,18 +25,18 @@ void pragma::gui::WIDetachable::DetachedWindow::Clear()
 		w->Close();
 }
 
-pragma::gui::WIDetachable::WIDetachable() : WIBase {} {}
-pragma::gui::WIDetachable::~WIDetachable() {}
+pragma::gui::types::WIDetachable::WIDetachable() : WIBase {} {}
+pragma::gui::types::WIDetachable::~WIDetachable() {}
 
-void pragma::gui::WIDetachable::OnRemove()
+void pragma::gui::types::WIDetachable::OnRemove()
 {
 	Reattach();
 	WIBase::OnRemove();
 }
 
-bool pragma::gui::WIDetachable::IsDetached() const { return m_detachedWindow != nullptr; }
+bool pragma::gui::types::WIDetachable::IsDetached() const { return m_detachedWindow != nullptr; }
 
-void pragma::gui::WIDetachable::Detach()
+void pragma::gui::types::WIDetachable::Detach()
 {
 	// if(m_mode == Mode::SimplifiedOverlay)
 	// 	SetSimpleConsoleMode(false);
@@ -66,12 +66,12 @@ void pragma::gui::WIDetachable::Detach()
 		GetAnchor(anchor[0], anchor[1], anchor[2], anchor[3]);
 	}
 	m_detachedWindow->window->AddCloseListener([this]() { Reattach(); });
-	auto *elBase = WGUI::GetInstance().GetBaseElement(m_detachedWindow->window.get());
+	auto *elBase = pragma::gui::WGUI::GetInstance().GetBaseElement(m_detachedWindow->window.get());
 	assert(elBase);
 	TrapFocus(false);
 	KillFocus();
 	if(elBase) {
-		auto *elBg = WGUI::GetInstance().Create<WIRect>(elBase);
+		auto *elBg = pragma::gui::WGUI::GetInstance().Create<WIRect>(elBase);
 		assert(elBg);
 		elBg->GetColorProperty()->Link(*frame->GetColorProperty());
 		elBg->SetSize(w, h);
@@ -92,7 +92,7 @@ void pragma::gui::WIDetachable::Detach()
 	CallCallbacks("OnDetached");
 	// m_mode = Mode::ExternalWindow;
 }
-void pragma::gui::WIDetachable::Reattach()
+void pragma::gui::types::WIDetachable::Reattach()
 {
 	if(!m_detachedWindow)
 		return;

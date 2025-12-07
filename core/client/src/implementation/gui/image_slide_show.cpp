@@ -8,11 +8,11 @@ module pragma.client;
 import :gui.image_slide_show;
 import :engine;
 
-pragma::gui::WIImageSlideShow::PreloadImage::PreloadImage() : ready(false), loading(false), image(-1) {}
+pragma::gui::types::WIImageSlideShow::PreloadImage::PreloadImage() : ready(false), loading(false), image(-1) {}
 
-pragma::gui::WIImageSlideShow::WIImageSlideShow() : WIBase(), m_currentImg(-1) {}
+pragma::gui::types::WIImageSlideShow::WIImageSlideShow() : WIBase(), m_currentImg(-1) {}
 
-void pragma::gui::WIImageSlideShow::Initialize()
+void pragma::gui::types::WIImageSlideShow::Initialize()
 {
 	WIBase::Initialize();
 	EnableThinking();
@@ -24,7 +24,7 @@ void pragma::gui::WIImageSlideShow::Initialize()
 	Update();
 }
 
-void pragma::gui::WIImageSlideShow::SetColor(float r, float g, float b, float a)
+void pragma::gui::types::WIImageSlideShow::SetColor(float r, float g, float b, float a)
 {
 	WIBase::SetColor(r, g, b, a);
 	if(m_hImgNext.IsValid())
@@ -33,20 +33,20 @@ void pragma::gui::WIImageSlideShow::SetColor(float r, float g, float b, float a)
 		m_hImgPrev->SetColor(r, g, b, a);
 }
 
-void pragma::gui::WIImageSlideShow::DoUpdate()
+void pragma::gui::types::WIImageSlideShow::DoUpdate()
 {
 	WIBase::DoUpdate();
 	//InitializeBlur(GetWidth(),GetHeight());
 	//m_blurTexture.Initialize(*WGUI::GetContext(),m_texture,GetWidth(),GetHeight());
 }
 
-void pragma::gui::WIImageSlideShow::SetSize(int x, int y)
+void pragma::gui::types::WIImageSlideShow::SetSize(int x, int y)
 {
 	WIBase::SetSize(x, y);
 	ScheduleUpdate();
 }
 
-void pragma::gui::WIImageSlideShow::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void pragma::gui::types::WIImageSlideShow::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	WIBase::Think(drawCmd);
 	if(!IsVisible())
@@ -58,7 +58,7 @@ void pragma::gui::WIImageSlideShow::Think(const std::shared_ptr<prosper::IPrimar
 	}
 }
 
-void pragma::gui::WIImageSlideShow::DisplayPreloadedImage()
+void pragma::gui::types::WIImageSlideShow::DisplayPreloadedImage()
 {
 	auto &wiImgPreload = m_imgPreload;
 	if(wiImgPreload.loading == true)
@@ -75,7 +75,7 @@ void pragma::gui::WIImageSlideShow::DisplayPreloadedImage()
 	auto &imgPreload = texPreload->GetImage();
 	auto lastTexture = (m_blurSet != nullptr) ? m_blurSet->GetFinalRenderTarget()->GetTexture().shared_from_this() : nullptr;
 
-	auto &context = WGUI::GetInstance().GetContext();
+	auto &context = pragma::gui::WGUI::GetInstance().GetContext();
 
 	auto extents = imgPreload.GetExtents();
 	prosper::util::ImageCreateInfo createInfo {};
@@ -132,7 +132,7 @@ void pragma::gui::WIImageSlideShow::DisplayPreloadedImage()
 	wiImgPreload.texture = nullptr;
 }
 
-void pragma::gui::WIImageSlideShow::SetImages(const std::vector<std::string> &images)
+void pragma::gui::types::WIImageSlideShow::SetImages(const std::vector<std::string> &images)
 {
 	m_files = images;
 	if(m_files.empty() == false || m_hImgNext.IsValid() == false)
@@ -158,7 +158,7 @@ void pragma::gui::WIImageSlideShow::SetImages(const std::vector<std::string> &im
 		}
 	}
 }
-void pragma::gui::WIImageSlideShow::PreloadNextImage(Int32 img)
+void pragma::gui::types::WIImageSlideShow::PreloadNextImage(Int32 img)
 {
 	auto &imgPreload = m_imgPreload;
 	if(imgPreload.loading == true)
@@ -168,7 +168,7 @@ void pragma::gui::WIImageSlideShow::PreloadNextImage(Int32 img)
 	imgPreload.ready = false;
 	imgPreload.image = img;
 
-	auto &wgui = WGUI::GetInstance();
+	auto &wgui = pragma::gui::WGUI::GetInstance();
 	auto &matManager = static_cast<msys::CMaterialManager &>(wgui.GetMaterialManager());
 	auto &textureManager = matManager.GetTextureManager();
 	auto hSlideShow = GetHandle();
@@ -185,7 +185,7 @@ void pragma::gui::WIImageSlideShow::PreloadNextImage(Int32 img)
 	textureManager.PreloadAsset(f, std::move(loadInfo));
 }
 
-void pragma::gui::WIImageSlideShow::DisplayNextImage()
+void pragma::gui::types::WIImageSlideShow::DisplayNextImage()
 {
 	auto img = m_currentImg + 1;
 	if(img >= m_files.size())
@@ -193,7 +193,7 @@ void pragma::gui::WIImageSlideShow::DisplayNextImage()
 	PreloadNextImage(Int32(img));
 }
 
-void pragma::gui::WIImageSlideShow::PreloadNextRandomShuffle()
+void pragma::gui::types::WIImageSlideShow::PreloadNextRandomShuffle()
 {
 	if(m_randomShuffle.empty()) {
 		m_randomShuffle.resize(m_files.size());

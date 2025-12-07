@@ -8,7 +8,7 @@ export module pragma.client:gui.tree_list;
 
 export import :gui.table;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class WITreeList;
 	class DLLCLIENT WITreeListElement : public WITableRow {
 	  public:
@@ -26,18 +26,18 @@ export namespace pragma::gui {
 		void Expand(bool bAll = false);
 		void Clear();
 		WIText *GetTextElement() const;
-		const std::vector<WIHandle> &GetItems() const;
+		const std::vector<pragma::gui::WIHandle> &GetItems() const;
 		WITreeListElement *AddItem(const std::string &text, const std::function<void(WITreeListElement &)> &fPopulate = nullptr);
 	  protected:
-		std::vector<WIHandle> m_items;
+		std::vector<pragma::gui::WIHandle> m_items;
 		bool m_bCollapsed;
 		std::function<void(WITreeListElement &)> m_fPopulate = nullptr;
 		uint32_t m_xOffset;
 		uint32_t m_depth;
-		WIHandle m_pTreeParent;
-		WIHandle m_pArrow;
-		WIHandle m_pList;
-		WIHandle m_hText = {};
+		pragma::gui::WIHandle m_pTreeParent;
+		pragma::gui::WIHandle m_pArrow;
+		pragma::gui::WIHandle m_pList;
+		pragma::gui::WIHandle m_hText = {};
 		WITreeListElement *GetLastItem() const;
 		void SetTextElement(WIText *pText);
 	};
@@ -45,7 +45,7 @@ export namespace pragma::gui {
 	class DLLCLIENT WITreeList : public WITable {
 	  protected:
 		virtual void DoUpdate() override;
-		WIHandle m_pRoot;
+		pragma::gui::WIHandle m_pRoot;
 	  public:
 		WITreeList();
 		virtual void Initialize() override;

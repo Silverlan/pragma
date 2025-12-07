@@ -9,7 +9,7 @@ export module pragma.client:gui.choice_list;
 
 export import pragma.gui;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIChoiceList : public WIBase {
 	  public:
 		struct Choice {
@@ -32,9 +32,9 @@ export namespace pragma::gui {
 		void SelectPrevious();
 		const Choice *GetSelectedChoice();
 	  private:
-		WIHandle m_text;
-		WIHandle m_buttonPrev;
-		WIHandle m_buttonNext;
+		pragma::gui::WIHandle m_text;
+		pragma::gui::WIHandle m_buttonPrev;
+		pragma::gui::WIHandle m_buttonNext;
 		std::vector<Choice> m_choices;
 		UInt m_selected;
 		void UpdateButtons();

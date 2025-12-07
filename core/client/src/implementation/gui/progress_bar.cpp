@@ -9,15 +9,15 @@ import :gui.progress_bar;
 
 import pragma.string.unicode;
 
-pragma::gui::WIProgressBar::WIProgressBar() : WIBase(), m_progress(::util::make_shared<util::FloatProperty>(0.f)), m_min(0.f), m_max(100.f), m_stepSize(1.f), m_numDecimals(0)
+pragma::gui::types::WIProgressBar::WIProgressBar() : WIBase(), m_progress(::util::make_shared<util::FloatProperty>(0.f)), m_min(0.f), m_max(100.f), m_stepSize(1.f), m_numDecimals(0)
 {
 	RegisterCallback<void, float, float>("OnChange");
 	RegisterCallback<bool, float, std::reference_wrapper<std::string>>("TranslateValue");
 }
 
-pragma::gui::WIProgressBar::~WIProgressBar() {}
+pragma::gui::types::WIProgressBar::~WIProgressBar() {}
 
-void pragma::gui::WIProgressBar::Initialize()
+void pragma::gui::types::WIProgressBar::Initialize()
 {
 	WIBase::Initialize();
 	SetSize(128, 32);
@@ -27,12 +27,12 @@ void pragma::gui::WIProgressBar::Initialize()
 	m_hProgress = CreateChild<WIRect>();
 	m_hProgress->GetColorProperty()->Link(*GetColorProperty());
 
-	m_hLabel2 = WGUI::GetInstance().Create<WIText>(m_hProgress.get())->GetHandle();
+	m_hLabel2 = pragma::gui::WGUI::GetInstance().Create<WIText>(m_hProgress.get())->GetHandle();
 	m_hLabel2->AddStyleClass("progressbar_label_overlay");
 	UpdateTextPosition();
 }
 
-void pragma::gui::WIProgressBar::SetLabelVisible(bool visible)
+void pragma::gui::types::WIProgressBar::SetLabelVisible(bool visible)
 {
 	if(m_hLabel.IsValid())
 		m_hLabel->SetVisible(visible);
@@ -40,7 +40,7 @@ void pragma::gui::WIProgressBar::SetLabelVisible(bool visible)
 		m_hLabel2->SetVisible(visible);
 }
 
-void pragma::gui::WIProgressBar::UpdateTextPosition()
+void pragma::gui::types::WIProgressBar::UpdateTextPosition()
 {
 	if(m_hLabel.IsValid() == false)
 		return;
@@ -51,9 +51,9 @@ void pragma::gui::WIProgressBar::UpdateTextPosition()
 		m_hLabel2->SetPos(x, y);
 }
 
-void pragma::gui::WIProgressBar::SetValueTranslator(const std::function<std::string(float)> &translator) { m_valueTranslator = translator; }
+void pragma::gui::types::WIProgressBar::SetValueTranslator(const std::function<std::string(float)> &translator) { m_valueTranslator = translator; }
 
-void pragma::gui::WIProgressBar::SetSize(int x, int y)
+void pragma::gui::types::WIProgressBar::SetSize(int x, int y)
 {
 	WIBase::SetSize(x, y);
 	if(m_hProgress.IsValid()) {
@@ -64,9 +64,9 @@ void pragma::gui::WIProgressBar::SetSize(int x, int y)
 	UpdateTextPosition();
 }
 
-float pragma::gui::WIProgressBar::GetProgress() const { return m_progress->GetValue(); }
-const util::PFloatProperty &pragma::gui::WIProgressBar::GetProgressProperty() const { return m_progress; }
-void pragma::gui::WIProgressBar::OnProgressChanged(float oldValue, float value)
+float pragma::gui::types::WIProgressBar::GetProgress() const { return m_progress->GetValue(); }
+const util::PFloatProperty &pragma::gui::types::WIProgressBar::GetProgressProperty() const { return m_progress; }
+void pragma::gui::types::WIProgressBar::OnProgressChanged(float oldValue, float value)
 {
 	auto w = GetWidth();
 	if(m_hProgress.IsValid()) {
@@ -76,7 +76,7 @@ void pragma::gui::WIProgressBar::OnProgressChanged(float oldValue, float value)
 	UpdateText();
 	CallCallbacks<void, float, float>("OnChange", oldValue, value);
 }
-void pragma::gui::WIProgressBar::SetProgress(float progress)
+void pragma::gui::types::WIProgressBar::SetProgress(float progress)
 {
 	progress = UpdateProgress(progress);
 	if(progress == *m_progress)
@@ -85,12 +85,12 @@ void pragma::gui::WIProgressBar::SetProgress(float progress)
 	*m_progress = progress;
 	OnProgressChanged(value, GetValue());
 }
-void pragma::gui::WIProgressBar::SetValue(float v)
+void pragma::gui::types::WIProgressBar::SetValue(float v)
 {
 	auto dt = m_max - m_min;
 	SetProgress((dt != 0.f) ? ((v - m_min) / dt) : 0.f);
 }
-void pragma::gui::WIProgressBar::SetRange(float min, float max, float stepSize, bool bEraseOptions)
+void pragma::gui::types::WIProgressBar::SetRange(float min, float max, float stepSize, bool bEraseOptions)
 {
 	m_min = min;
 	m_max = max;
@@ -99,9 +99,9 @@ void pragma::gui::WIProgressBar::SetRange(float min, float max, float stepSize, 
 	if(bEraseOptions == true)
 		m_options.clear();
 }
-void pragma::gui::WIProgressBar::SetRange(float min, float max, float stepSize) { SetRange(min, max, stepSize, true); }
-std::array<float, 3> pragma::gui::WIProgressBar::GetRange() const { return std::array<float, 3> {m_min, m_max, m_stepSize}; }
-float pragma::gui::WIProgressBar::UpdateProgress(float progress)
+void pragma::gui::types::WIProgressBar::SetRange(float min, float max, float stepSize) { SetRange(min, max, stepSize, true); }
+std::array<float, 3> pragma::gui::types::WIProgressBar::GetRange() const { return std::array<float, 3> {m_min, m_max, m_stepSize}; }
+float pragma::gui::types::WIProgressBar::UpdateProgress(float progress)
 {
 	if(progress < 0.f)
 		progress = 0.f;
@@ -114,14 +114,14 @@ float pragma::gui::WIProgressBar::UpdateProgress(float progress)
 	v -= std::remainderf(v, m_stepSize);
 	return (dt != 0.f) ? ((v - m_min) / dt) : 0.f;
 }
-void pragma::gui::WIProgressBar::UpdateOptions()
+void pragma::gui::types::WIProgressBar::UpdateOptions()
 {
 	auto max = m_options.size();
 	if(max > 0)
 		max--;
 	SetRange(0.f, CFloat(max), 1.f, false);
 }
-void pragma::gui::WIProgressBar::UpdateText()
+void pragma::gui::types::WIProgressBar::UpdateText()
 {
 	if(!m_hLabel.IsValid())
 		return;
@@ -149,21 +149,21 @@ void pragma::gui::WIProgressBar::UpdateText()
 	pLabel2->SizeToContents();
 	pLabel2->SetPos(pLabel->GetPos());
 }
-void pragma::gui::WIProgressBar::SetOptions(const std::vector<std::string> &options)
+void pragma::gui::types::WIProgressBar::SetOptions(const std::vector<std::string> &options)
 {
 	m_options = options;
 	UpdateOptions();
 }
-void pragma::gui::WIProgressBar::AddOption(const std::string &option)
+void pragma::gui::types::WIProgressBar::AddOption(const std::string &option)
 {
 	m_options.push_back(option);
 	UpdateOptions();
 }
-float pragma::gui::WIProgressBar::GetValue() const
+float pragma::gui::types::WIProgressBar::GetValue() const
 {
 	auto dt = m_max - m_min;
 	float val = (dt != 0.f) ? (m_min + *m_progress * dt) : 0.f;
 	return CFloat(umath::round(CDouble(val), m_numDecimals));
 }
-void pragma::gui::WIProgressBar::GetValue(std::string &str) { str = util::round_string(GetValue(), m_numDecimals); }
-void pragma::gui::WIProgressBar::SetPostFix(const std::string &postfix) { m_postfix = postfix; }
+void pragma::gui::types::WIProgressBar::GetValue(std::string &str) { str = util::round_string(GetValue(), m_numDecimals); }
+void pragma::gui::types::WIProgressBar::SetPostFix(const std::string &postfix) { m_postfix = postfix; }

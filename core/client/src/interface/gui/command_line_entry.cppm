@@ -8,7 +8,7 @@ export module pragma.client:gui.command_line_entry;
 
 export import pragma.gui;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WICommandLineEntry : public WITextEntry {
 	public:
 		WICommandLineEntry();
@@ -34,7 +34,7 @@ export namespace pragma::gui {
 		std::function<void(const std::string &, std::vector<std::string> &)> m_fAutoCompleteHandler = nullptr;
 		uint32_t m_commandHistoryCount = 0u;
 		uint32_t m_nextCommandHistoryInsertPos = 0u;
-		WIHandle m_hAutoCompleteList = {};
+		pragma::gui::WIHandle m_hAutoCompleteList = {};
 		bool m_bSkipAutoComplete = false;
 		bool m_bAutocompleteEnabled = true;
 	};

@@ -10,7 +10,7 @@ export module pragma.client:gui.textured_cubemap;
 export import :rendering.cube_map_side;
 export import pragma.gui;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WITexturedCubemap : public WIBase {
 	  public:
 		WITexturedCubemap();
@@ -19,6 +19,6 @@ export namespace pragma::gui {
 		WITexturedRect *GetSideElement(CubeMapSide side);
 		void SetLOD(float lod);
 	  protected:
-		std::array<WIHandle, 6> m_hCubemapSides = {};
+		std::array<pragma::gui::WIHandle, 6> m_hCubemapSides = {};
 	};
 };

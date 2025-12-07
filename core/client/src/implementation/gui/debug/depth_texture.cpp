@@ -10,26 +10,26 @@ import :engine;
 import :game;
 import :rendering.shaders;
 
-pragma::gui::WIDebugDepthTexture::WIDebugDepthTexture() : WIBase(), m_imageLayer(0)
+pragma::gui::types::WIDebugDepthTexture::WIDebugDepthTexture() : WIBase(), m_imageLayer(0)
 {
 	m_whDepthToRgbShader = pragma::get_cengine()->GetShader("debug_depth_to_rgb");
 	m_whCubeDepthToRgbShader = pragma::get_cengine()->GetShader("debug_cube_depth_to_rgb");
 	m_whCsmDepthToRgbShader = pragma::get_cengine()->GetShader("debug_csm_depth_to_rgb");
 }
 
-pragma::gui::WIDebugDepthTexture::~WIDebugDepthTexture()
+pragma::gui::types::WIDebugDepthTexture::~WIDebugDepthTexture()
 {
 	if(m_depthToRgbCallback.IsValid())
 		m_depthToRgbCallback.Remove();
 }
 
-void pragma::gui::WIDebugDepthTexture::SetTexture(prosper::Texture &texture, bool stencil)
+void pragma::gui::types::WIDebugDepthTexture::SetTexture(prosper::Texture &texture, bool stencil)
 {
 	SetTexture(texture, {prosper::PipelineStageFlags::LateFragmentTestsBit, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AccessFlags::DepthStencilAttachmentWriteBit},
 	  {prosper::PipelineStageFlags::EarlyFragmentTestsBit, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AccessFlags::DepthStencilAttachmentWriteBit}, 0u, stencil);
 }
 
-void pragma::gui::WIDebugDepthTexture::SetTexture(prosper::Texture &texture, prosper::util::BarrierImageLayout srcLayout, prosper::util::BarrierImageLayout dstLayout, uint32_t layerId, bool stencil)
+void pragma::gui::types::WIDebugDepthTexture::SetTexture(prosper::Texture &texture, prosper::util::BarrierImageLayout srcLayout, prosper::util::BarrierImageLayout dstLayout, uint32_t layerId, bool stencil)
 {
 	m_srcDepthTex = nullptr;
 
@@ -75,17 +75,17 @@ void pragma::gui::WIDebugDepthTexture::SetTexture(prosper::Texture &texture, pro
 	m_imageLayer = layerId;
 }
 
-void pragma::gui::WIDebugDepthTexture::UpdateResolvedTexture() {}
+void pragma::gui::types::WIDebugDepthTexture::UpdateResolvedTexture() {}
 
-void pragma::gui::WIDebugDepthTexture::SetShouldResolveImage(bool b) {}
+void pragma::gui::types::WIDebugDepthTexture::SetShouldResolveImage(bool b) {}
 
-void pragma::gui::WIDebugDepthTexture::Initialize()
+void pragma::gui::types::WIDebugDepthTexture::Initialize()
 {
 	m_hTextureRect = CreateChild<WITexturedRect>();
 	m_hTextureRect->SetAutoAlignToParent(true);
 }
 
-void pragma::gui::WIDebugDepthTexture::Setup(float nearZ, float farZ)
+void pragma::gui::types::WIDebugDepthTexture::Setup(float nearZ, float farZ)
 {
 	if(m_depthToRgbCallback.IsValid())
 		m_depthToRgbCallback.Remove();
@@ -131,10 +131,10 @@ void pragma::gui::WIDebugDepthTexture::Setup(float nearZ, float farZ)
 	}));
 }
 
-void pragma::gui::WIDebugDepthTexture::SetContrastFactor(float contrastFactor) { m_contrastFactor = contrastFactor; }
-float pragma::gui::WIDebugDepthTexture::GetContrastFactor() const { return m_contrastFactor; }
+void pragma::gui::types::WIDebugDepthTexture::SetContrastFactor(float contrastFactor) { m_contrastFactor = contrastFactor; }
+float pragma::gui::types::WIDebugDepthTexture::GetContrastFactor() const { return m_contrastFactor; }
 
-void pragma::gui::WIDebugDepthTexture::DoUpdate()
+void pragma::gui::types::WIDebugDepthTexture::DoUpdate()
 {
 	auto nearZ = pragma::baseEnvCameraComponent::DEFAULT_NEAR_Z;
 	auto farZ = pragma::baseEnvCameraComponent::DEFAULT_FAR_Z;

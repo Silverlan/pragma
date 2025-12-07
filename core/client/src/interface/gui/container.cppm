@@ -9,7 +9,7 @@ export module pragma.client:gui.container;
 
 export import pragma.gui;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIContainer : public WIBase {
 	public:
 		WIContainer();

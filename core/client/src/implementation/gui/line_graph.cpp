@@ -10,51 +10,51 @@ import :gui.line_graph;
 import :client_state;
 import :engine;
 
-pragma::gui::WILineGraph::WILineGraph() : WIBase() {}
+pragma::gui::types::WILineGraph::WILineGraph() : WIBase() {}
 
-void pragma::gui::WILineGraph::Initialize()
+void pragma::gui::types::WILineGraph::Initialize()
 {
 	WIBase::Initialize();
-	auto *pOutline = WGUI::GetInstance().Create<WIRect>(this);
+	auto *pOutline = pragma::gui::WGUI::GetInstance().Create<WIRect>(this);
 	m_hOutline = pOutline->GetHandle();
 	pOutline->SetColor(colors::White);
 	pOutline->SetHeight(1);
 	pOutline->SetAutoAlignToParent(true, false);
 }
 
-void pragma::gui::WILineGraph::SetSize(int x, int y)
+void pragma::gui::types::WILineGraph::SetSize(int x, int y)
 {
 	WIBase::SetSize(x, y);
 	if(m_hOutline.IsValid())
 		m_hOutline->SetY(y - 1);
 }
 
-void pragma::gui::WILineGraph::DoUpdate()
+void pragma::gui::types::WILineGraph::DoUpdate()
 {
 	WIBase::DoUpdate();
 	UpdateGraph();
 }
 
-void pragma::gui::WILineGraph::UpdateLines()
+void pragma::gui::types::WILineGraph::UpdateLines()
 {
 	auto numLines = m_lines.size();
 	auto numLinesNew = m_values.size();
 	m_lines.reserve(numLinesNew);
 	for(auto i = numLines; i < numLinesNew; ++i) {
-		auto *pLine = WGUI::GetInstance().Create<WILine>(this);
+		auto *pLine = pragma::gui::WGUI::GetInstance().Create<WILine>(this);
 		pLine->SetLineWidth(2);
 		m_lines.push_back(pLine->GetHandle());
 	}
 }
 
-void pragma::gui::WILineGraph::SetValue(uint32_t idx, float val)
+void pragma::gui::types::WILineGraph::SetValue(uint32_t idx, float val)
 {
 	if(idx >= GetSegmentCount())
 		SetSegmentCount(idx + 1);
 	m_values[idx] = val;
 }
 
-void pragma::gui::WILineGraph::SetSegmentCount(uint32_t count)
+void pragma::gui::types::WILineGraph::SetSegmentCount(uint32_t count)
 {
 	auto numValues = m_values.size();
 	if(count == numValues)
@@ -73,9 +73,9 @@ void pragma::gui::WILineGraph::SetSegmentCount(uint32_t count)
 	m_lines.resize(count);
 }
 
-uint32_t pragma::gui::WILineGraph::GetSegmentCount() const { return static_cast<uint32_t>(m_values.size()); }
+uint32_t pragma::gui::types::WILineGraph::GetSegmentCount() const { return static_cast<uint32_t>(m_values.size()); }
 
-void pragma::gui::WILineGraph::UpdateGraph()
+void pragma::gui::types::WILineGraph::UpdateGraph()
 {
 	auto &values = m_values;
 	if(values.empty())

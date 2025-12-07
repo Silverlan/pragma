@@ -11,15 +11,15 @@ import :gui.progress_bar;
 import :client_state;
 import :engine;
 
-pragma::gui::WILoadScreen::WILoadScreen() : WIMainMenuBase() {}
+pragma::gui::types::WILoadScreen::WILoadScreen() : WIMainMenuBase() {}
 
-pragma::gui::WILoadScreen::~WILoadScreen() {}
+pragma::gui::types::WILoadScreen::~WILoadScreen() {}
 
-void pragma::gui::WILoadScreen::Initialize()
+void pragma::gui::types::WILoadScreen::Initialize()
 {
 	WIMainMenuBase::Initialize();
-	AddMenuItem(pragma::locale::get_text("cancel"), FunctionCallback<void, pragma::gui::WIMainMenuElement *>::Create([this](pragma::gui::WIMainMenuElement *) {
-		auto *mainMenu = dynamic_cast<pragma::gui::WIMainMenu *>(GetParent());
+	AddMenuItem(pragma::locale::get_text("cancel"), FunctionCallback<void, pragma::gui::types::WIMainMenuElement *>::Create([this](pragma::gui::types::WIMainMenuElement *) {
+		auto *mainMenu = dynamic_cast<pragma::gui::types::WIMainMenu *>(GetParent());
 		if(mainMenu == nullptr)
 			return;
 		mainMenu->OpenMainMenu();
@@ -36,7 +36,7 @@ void pragma::gui::WILoadScreen::Initialize()
 	pProgressBar->SetAutoCenterToParentX(true);
 }
 
-void pragma::gui::WILoadScreen::SetSize(int x, int y)
+void pragma::gui::types::WILoadScreen::SetSize(int x, int y)
 {
 	WIMainMenuBase::SetSize(x, y);
 	auto yOffset = 0;

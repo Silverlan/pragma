@@ -128,7 +128,7 @@ void pragma::rendering::Prepass::EndRenderPass(const util::DrawSceneInfo &drawSc
 
 static void debug_prepass(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	auto &wgui = WGUI::GetInstance();
+	auto &wgui = pragma::gui::WGUI::GetInstance();
 	auto *pRoot = wgui.GetBaseElement();
 	if(pragma::get_cgame() == nullptr || argv.empty() || pRoot == nullptr)
 		return;
@@ -142,7 +142,7 @@ static void debug_prepass(pragma::NetworkState *state, pragma::BasePlayerCompone
 	}
 	if(pEl != nullptr)
 		return;
-	pEl = wgui.Create<WIBase>();
+	pEl = wgui.Create<pragma::gui::types::WIBase>();
 	if(pEl == nullptr)
 		return;
 	pEl->SetName(name);
@@ -158,7 +158,7 @@ static void debug_prepass(pragma::NetworkState *state, pragma::BasePlayerCompone
 	auto bExtended = prepass.IsExtended();
 	auto xOffset = 0u;
 	if(prepass.textureNormals != nullptr) {
-		auto *pNormals = wgui.Create<WITexturedRect>(pEl);
+		auto *pNormals = wgui.Create<pragma::gui::types::WITexturedRect>(pEl);
 		if(pNormals != nullptr) {
 			pNormals->SetX(xOffset);
 			pNormals->SetSize(256, 256);
@@ -167,7 +167,7 @@ static void debug_prepass(pragma::NetworkState *state, pragma::BasePlayerCompone
 			xOffset += 256;
 		}
 	}
-	auto *pPrepassDepth = wgui.Create<pragma::gui::WIDebugDepthTexture>(pEl);
+	auto *pPrepassDepth = wgui.Create<pragma::gui::types::WIDebugDepthTexture>(pEl);
 	if(pPrepassDepth != nullptr) {
 		pPrepassDepth->SetX(xOffset);
 		pPrepassDepth->SetSize(256, 256);

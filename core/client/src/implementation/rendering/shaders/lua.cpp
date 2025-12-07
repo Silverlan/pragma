@@ -168,15 +168,15 @@ void pragma::LuaShaderWrapperCompute::Lua_InitializeShaderResources() { static_c
 
 void pragma::LShaderCompute::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { static_cast<LuaShaderWrapperCompute *>(m_wrapper)->InitializeComputePipeline(pipelineInfo, pipelineIdx); }
 void pragma::LShaderCompute::InitializeShaderResources() { static_cast<LuaShaderWrapperCompute *>(m_wrapper)->InitializeShaderResources(); }
-pragma::LShaderGui::LShaderGui() : TLShaderBase<wgui::Shader>(pragma::get_cengine()->GetRenderContext(), "", "", "") { SetPipelineCount(umath::to_integral(wgui::StencilPipeline::Count) * 2); }
+pragma::LShaderGui::LShaderGui() : TLShaderBase<pragma::gui::shaders::Shader>(pragma::get_cengine()->GetRenderContext(), "", "", "") { SetPipelineCount(umath::to_integral(pragma::gui::StencilPipeline::Count) * 2); }
 void pragma::LShaderGui::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { static_cast<LuaShaderWrapperGUI *>(m_wrapper)->InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
 void pragma::LShaderGui::InitializeShaderResources() { static_cast<LuaShaderWrapperGUI *>(m_wrapper)->InitializeShaderResources(); }
 void pragma::LShaderGui::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { static_cast<LuaShaderWrapperGUI *>(m_wrapper)->InitializeRenderPass(outRenderPass, pipelineIdx); }
-bool pragma::LShaderGui::RecordBeginDraw(prosper::ShaderBindState &bindState, wgui::DrawState &drawState, uint32_t width, uint32_t height, wgui::StencilPipeline pipelineIdx, bool msaa, uint32_t testStencilLevel) const
+bool pragma::LShaderGui::RecordBeginDraw(prosper::ShaderBindState &bindState, pragma::gui::DrawState &drawState, uint32_t width, uint32_t height, pragma::gui::StencilPipeline pipelineIdx, bool msaa, uint32_t testStencilLevel) const
 {
-	return wgui::Shader::RecordBeginDraw(bindState, drawState, width, height, pipelineIdx, msaa) && RecordSetStencilReference(bindState, testStencilLevel);
+	return pragma::gui::shaders::Shader::RecordBeginDraw(bindState, drawState, width, height, pipelineIdx, msaa) && RecordSetStencilReference(bindState, testStencilLevel);
 }
-void pragma::LShaderGui::InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { wgui::Shader::InitializeRenderPass(outRenderPass, pipelineIdx); }
+void pragma::LShaderGui::InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { pragma::gui::shaders::Shader::InitializeRenderPass(outRenderPass, pipelineIdx); }
 pragma::LuaShaderWrapperGUI::LuaShaderWrapperGUI() {}
 
 void pragma::LuaShaderWrapperGUI::Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { static_cast<LShaderGui *>(m_shader)->BaseInitializeGfxPipeline(static_cast<prosper::GraphicsPipelineCreateInfo &>(pipelineInfo), pipelineIdx); }
@@ -185,11 +185,11 @@ void pragma::LuaShaderWrapperGUI::InitializeDefaultRenderPass(std::shared_ptr<pr
 
 /////////////////
 
-pragma::LShaderGuiTextured::LShaderGuiTextured() : TLShaderBase<wgui::ShaderTextured>(pragma::get_cengine()->GetRenderContext(), "", "", "") {}
+pragma::LShaderGuiTextured::LShaderGuiTextured() : TLShaderBase<pragma::gui::shaders::ShaderTextured>(pragma::get_cengine()->GetRenderContext(), "", "", "") {}
 void pragma::LShaderGuiTextured::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { static_cast<LuaShaderWrapperGUITextured *>(m_wrapper)->InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
 void pragma::LShaderGuiTextured::InitializeShaderResources() { static_cast<LuaShaderWrapperGUITextured *>(m_wrapper)->InitializeShaderResources(); }
 void pragma::LShaderGuiTextured::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { static_cast<LuaShaderWrapperGUITextured *>(m_wrapper)->InitializeRenderPass(outRenderPass, pipelineIdx); }
-void pragma::LShaderGuiTextured::InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { wgui::ShaderTextured::InitializeRenderPass(outRenderPass, pipelineIdx); }
+void pragma::LShaderGuiTextured::InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { pragma::gui::shaders::ShaderTextured::InitializeRenderPass(outRenderPass, pipelineIdx); }
 pragma::LuaShaderWrapperGUITextured::LuaShaderWrapperGUITextured() {}
 
 void pragma::LuaShaderWrapperGUITextured::Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { static_cast<LShaderGuiTextured *>(m_shader)->BaseInitializeGfxPipeline(static_cast<prosper::GraphicsPipelineCreateInfo &>(pipelineInfo), pipelineIdx); }

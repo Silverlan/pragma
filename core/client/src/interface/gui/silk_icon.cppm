@@ -9,7 +9,7 @@ export module pragma.client:gui.silk_icon;
 
 export import :gui.icon;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WISilkIcon : public WIIcon {
 	  public:
 		WISilkIcon();

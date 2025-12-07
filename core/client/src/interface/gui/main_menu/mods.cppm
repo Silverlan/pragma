@@ -11,10 +11,10 @@ export import :core;
 export import :gui.chromium_page;
 export import :gui.main_menu_base;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIMainMenuMods : public WIMainMenuBase, public WIChromiumPage {
 	  protected:
-		WIHandle m_hWeb;
+		pragma::gui::WIHandle m_hWeb;
 		std::shared_ptr<pragma::AddonInstallManager> m_addonInstallManager = nullptr;
 		virtual void OnVisibilityChanged(bool bVisible) override;
 		virtual void OnFirstEntered() override;

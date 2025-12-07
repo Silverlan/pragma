@@ -114,7 +114,7 @@ void CRendererPpMotionBlurComponent::ReloadVelocityTexture()
 	m_valid = true;
 
 #if MOTION_BLUR_DEBUG_ELEMENT_ENABLED == 1
-	auto *el = WGUI::GetInstance().Create<WITexturedRect>();
+	auto *el = pragma::gui::WGUI::GetInstance().Create<WITexturedRect>();
 	el->SetTexture(*tex);
 	el->SetSize(512, 512);
 	if(m_debugTex.IsValid())

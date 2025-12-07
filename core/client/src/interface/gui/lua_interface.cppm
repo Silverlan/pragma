@@ -16,17 +16,17 @@ export namespace pragma::gui {
 		static lua::State *m_guiLuaState;
 		static CallbackHandle m_cbGameStart;
 		static CallbackHandle m_cbLuaReleased;
-		static void OnGUIDestroy(WIBase &el);
-		static luabind::object CreateLuaObject(lua::State *l, WIBase &p);
+		static void OnGUIDestroy(Element &el);
+		static luabind::object CreateLuaObject(lua::State *l, Element &p);
 		static void OnGameStart();
 		static void OnGameLuaReleased(lua::State *lua);
-		static void ClearLuaObjects(WIBase *el);
+		static void ClearLuaObjects(Element *el);
 	public:
 		static void Initialize();
-		static luabind::object GetLuaObject(lua::State *l, WIBase &p);
-		static void InitializeGUIElement(WIBase &p);
+		static luabind::object GetLuaObject(lua::State *l, Element &p);
+		static void InitializeGUIElement(Element &p);
 		static void Clear();
 
-		static void ClearGUILuaObjects(WIBase &el);
+		static void ClearGUILuaObjects(Element &el);
 	};
 }

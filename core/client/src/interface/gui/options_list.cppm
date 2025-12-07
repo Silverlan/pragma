@@ -11,18 +11,18 @@ export import :gui.choice_list;
 export import :gui.slider;
 export import :gui.table;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIOptionsList : public WIBase {
 	  private:
-		WIHandle m_hTable;
-		WIHandle m_hHeaderRow;
+		pragma::gui::WIHandle m_hTable;
+		pragma::gui::WIHandle m_hHeaderRow;
 		uint32_t m_maxHeight = 512;
 		std::unordered_map<std::string, std::string> m_updateCvars;
 		std::unordered_map<std::string, pragma::platform::Key> m_keyBindingsAdd[2];
 		std::unordered_map<std::string, pragma::platform::Key> m_keyBindingsErase[2];
-		std::unordered_map<std::string, WIHandle> m_rows;
+		std::unordered_map<std::string, pragma::gui::WIHandle> m_rows;
 		template<class T>
-		pragma::gui::WIChoiceList *AddChoiceList(const std::string &name, T list, const std::string &cvarName, const std::function<void(pragma::gui::WIChoiceList *)> &initializer, const std::optional<std::string> &optRowIdent = {});
+		WIChoiceList *AddChoiceList(const std::string &name, T list, const std::string &cvarName, const std::function<void(WIChoiceList *)> &initializer, const std::optional<std::string> &optRowIdent = {});
 		template<class T>
 		WIDropDownMenu *AddDropDownMenu(const std::string &name, T list, const std::string &cvarName, const std::function<void(WIDropDownMenu *)> &initializer);
 		virtual void DoUpdate() override;
@@ -34,12 +34,12 @@ export namespace pragma::gui {
 		void SetMaxHeight(uint32_t h);
 		WITableRow *AddRow(const std::optional<std::string> &identifier = {});
 		WITableRow *AddHeaderRow();
-		pragma::gui::WICheckbox *AddToggleChoice(const std::string &name, const std::string &cvarName, const std::function<std::string(bool)> &translator, const std::function<bool(std::string)> &translator2 = nullptr);
-		pragma::gui::WICheckbox *AddToggleChoice(const std::string &name, const std::string &cvarName);
-		pragma::gui::WIChoiceList *AddChoiceList(const std::string &name, const std::string &cvarName = "");
-		pragma::gui::WIChoiceList *AddChoiceList(const std::string &name, const std::function<void(pragma::gui::WIChoiceList *)> &initializer, const std::string &cvarName = "");
-		pragma::gui::WIChoiceList *AddChoiceList(const std::string &name, const std::vector<std::string> &list, const std::string &cvarName = "");
-		pragma::gui::WIChoiceList *AddChoiceList(const std::string &name, const std::vector<std::pair<std::string, std::string>> &list, const std::string &cvarName = "", const std::optional<std::string> &optRowIdent = {});
+		WICheckbox *AddToggleChoice(const std::string &name, const std::string &cvarName, const std::function<std::string(bool)> &translator, const std::function<bool(std::string)> &translator2 = nullptr);
+		WICheckbox *AddToggleChoice(const std::string &name, const std::string &cvarName);
+		WIChoiceList *AddChoiceList(const std::string &name, const std::string &cvarName = "");
+		WIChoiceList *AddChoiceList(const std::string &name, const std::function<void(WIChoiceList *)> &initializer, const std::string &cvarName = "");
+		WIChoiceList *AddChoiceList(const std::string &name, const std::vector<std::string> &list, const std::string &cvarName = "");
+		WIChoiceList *AddChoiceList(const std::string &name, const std::vector<std::pair<std::string, std::string>> &list, const std::string &cvarName = "", const std::optional<std::string> &optRowIdent = {});
 		WIDropDownMenu *AddDropDownMenu(const std::string &name, const std::string &cvarName = "");
 		WIDropDownMenu *AddDropDownMenu(const std::string &name, const std::function<void(WIDropDownMenu *)> &initializer, const std::string &cvarName);
 		WIDropDownMenu *AddDropDownMenu(const std::string &name, const std::vector<std::string> &list, const std::string &cvarName);

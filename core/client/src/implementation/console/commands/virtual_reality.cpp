@@ -14,14 +14,14 @@ const std::string OPENVR_MODULE_PATH = "openvr/pr_openvr";
 
 static std::string lastMessage = "";
 static Color lastColor = colors::White;
-static WIHandle hHmdViewMessage = {};
-static WIHandle hHmdViewText = {};
+static pragma::gui::WIHandle hHmdViewMessage = {};
+static pragma::gui::WIHandle hHmdViewText = {};
 static void update_text()
 {
 	if(hHmdViewText.IsValid() == false || hHmdViewMessage.IsValid() == false)
 		return;
 	auto *pBg = hHmdViewMessage.get();
-	auto *pText = static_cast<WIText *>(hHmdViewText.get());
+	auto *pText = static_cast<pragma::gui::types::WIText *>(hHmdViewText.get());
 	pText->SetText(lastMessage);
 	pText->SetColor(lastColor);
 	pText->SizeToContents();
@@ -35,14 +35,14 @@ static void show_hmd_message(bool bInit = false)
 	}
 	if(hHmdViewMessage.IsValid() == true || bInit == false)
 		return;
-	auto &wgui = WGUI::GetInstance();
-	auto *bg = wgui.Create<WIRect>();
+	auto &wgui = pragma::gui::WGUI::GetInstance();
+	auto *bg = wgui.Create<pragma::gui::types::WIRect>();
 	bg->SetAutoAlignToParent(true);
 	bg->SetColor(colors::Black);
 	//bg->SetVisible(false);
 	hHmdViewMessage = bg->GetHandle();
 
-	auto *pText = wgui.Create<WIText>(bg);
+	auto *pText = wgui.Create<pragma::gui::types::WIText>(bg);
 	hHmdViewText = pText->GetHandle();
 
 	update_text();

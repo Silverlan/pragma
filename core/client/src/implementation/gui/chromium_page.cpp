@@ -14,9 +14,9 @@ import :gui.chromium_page;
 
 import :client_state;
 
-pragma::gui::WIChromiumPage::WIChromiumPage(WIBase *parent) : m_parent(parent) {}
+pragma::gui::types::WIChromiumPage::WIChromiumPage(WIBase *parent) : m_parent(parent) {}
 
-void pragma::gui::WIChromiumPage::OnVisibilityChanged(bool bVisible)
+void pragma::gui::types::WIChromiumPage::OnVisibilityChanged(bool bVisible)
 {
 	if(bVisible == true && m_bEntered == false) {
 		m_bEntered = true;
@@ -24,51 +24,51 @@ void pragma::gui::WIChromiumPage::OnVisibilityChanged(bool bVisible)
 	}
 }
 
-void pragma::gui::WIChromiumPage::SetInitialURL(const std::string &url) { m_initialURL = url; }
+void pragma::gui::types::WIChromiumPage::SetInitialURL(const std::string &url) { m_initialURL = url; }
 
-static void (*fLoadUrl)(WIBase *, const std::string &);
-static void (*fSetViewSize)(WIBase *, const Vector2i &);
-static void (*fSetTransparentBackground)(WIBase *, bool);
+static void (*fLoadUrl)(pragma::gui::types::WIBase *, const std::string &);
+static void (*fSetViewSize)(pragma::gui::types::WIBase *, const Vector2i &);
+static void (*fSetTransparentBackground)(pragma::gui::types::WIBase *, bool);
 static void (*fRegisterJavascriptFunction)(const std::string &, const std::function<std::unique_ptr<pragma::JSValue>(const std::vector<pragma::JSValue> &)>);
-static void (*fExecJavascript)(WIBase *, const std::string &);
+static void (*fExecJavascript)(pragma::gui::types::WIBase *, const std::string &);
 
-void pragma::gui::WIChromiumPage::LoadURL(const std::string &url)
+void pragma::gui::types::WIChromiumPage::LoadURL(const std::string &url)
 {
 	if(fLoadUrl == nullptr || m_hWeb.IsValid() == false)
 		return;
 	fLoadUrl(m_hWeb.get(), url);
 }
-void pragma::gui::WIChromiumPage::SetViewSize(const Vector2i &size)
+void pragma::gui::types::WIChromiumPage::SetViewSize(const Vector2i &size)
 {
 	if(fLoadUrl == nullptr || m_hWeb.IsValid() == false)
 		return;
 	fSetViewSize(m_hWeb.get(), size);
 }
-void pragma::gui::WIChromiumPage::SetTransparentBackground(bool b)
+void pragma::gui::types::WIChromiumPage::SetTransparentBackground(bool b)
 {
 	if(fLoadUrl == nullptr || m_hWeb.IsValid() == false)
 		return;
 	fSetTransparentBackground(m_hWeb.get(), b);
 }
-void pragma::gui::WIChromiumPage::RegisterJavascriptFunction(const std::string &name, const std::function<std::unique_ptr<pragma::JSValue>(const std::vector<pragma::JSValue> &)> &callback)
+void pragma::gui::types::WIChromiumPage::RegisterJavascriptFunction(const std::string &name, const std::function<std::unique_ptr<pragma::JSValue>(const std::vector<pragma::JSValue> &)> &callback)
 {
 	if(fLoadUrl == nullptr)
 		return;
 	fRegisterJavascriptFunction(name, callback);
 }
-void pragma::gui::WIChromiumPage::ExecJavascript(const std::string &js)
+void pragma::gui::types::WIChromiumPage::ExecJavascript(const std::string &js)
 {
 	if(fLoadUrl == nullptr || m_hWeb.IsValid() == false)
 		return;
 	fExecJavascript(m_hWeb.get(), js);
 }
 
-void pragma::gui::WIChromiumPage::OnFirstEntered()
+void pragma::gui::types::WIChromiumPage::OnFirstEntered()
 {
 	InitializeChromium();
 	if(fLoadUrl == nullptr)
 		return;
-	m_hWeb = WGUI::GetInstance().Create("WIWeb", m_parent)->GetHandle();
+	m_hWeb = pragma::gui::WGUI::GetInstance().Create("WIWeb", m_parent)->GetHandle();
 	if(m_hWeb.IsValid() == true) {
 		if(fSetViewSize != nullptr)
 			fSetViewSize(m_hWeb.get(), Vector2i(1024, 768));
@@ -81,11 +81,11 @@ void pragma::gui::WIChromiumPage::OnFirstEntered()
 	}
 }
 
-void pragma::gui::WIChromiumPage::InitializeWebView(WIBase *el) {}
+void pragma::gui::types::WIChromiumPage::InitializeWebView(WIBase *el) {}
 
-void pragma::gui::WIChromiumPage::InitializeJavascript() {}
+void pragma::gui::types::WIChromiumPage::InitializeJavascript() {}
 
-void pragma::gui::WIChromiumPage::InitializeChromium()
+void pragma::gui::types::WIChromiumPage::InitializeChromium()
 {
 	static auto chromiumInitialized = false;
 	if(chromiumInitialized == true)

@@ -46,10 +46,10 @@ void pragma::CGame::RegisterLua()
 	Lua::engine::register_library(GetLuaState());
 	auto modEngine = luabind::module_(GetLuaState(), "engine");
 	modEngine[(luabind::def("get_text_size", static_cast<Vector2i (*)(lua::State *, const std::string &, const std::string &)>(Lua::engine::get_text_size)),
-	  luabind::def("get_text_size", static_cast<Vector2i (*)(lua::State *, const std::string &, const FontInfo &)>(Lua::engine::get_text_size)),
+	  luabind::def("get_text_size", static_cast<Vector2i (*)(lua::State *, const std::string &, const pragma::gui::FontInfo &)>(Lua::engine::get_text_size)),
 
 	  luabind::def("get_truncated_text_length", static_cast<std::pair<size_t, size_t> (*)(lua::State *, const std::string &, const std::string &, uint32_t)>(Lua::engine::get_truncated_text_length)),
-	  luabind::def("get_truncated_text_length", static_cast<std::pair<size_t, size_t> (*)(lua::State *, const std::string &, const FontInfo &, uint32_t)>(Lua::engine::get_truncated_text_length)),
+	  luabind::def("get_truncated_text_length", static_cast<std::pair<size_t, size_t> (*)(lua::State *, const std::string &, const pragma::gui::FontInfo &, uint32_t)>(Lua::engine::get_truncated_text_length)),
 
 	  luabind::def("poll_console_output", Lua::engine::poll_console_output), luabind::def("library_exists", Lua::engine::LibraryExists), luabind::def("load_library", Lua::engine::LoadLibrary), luabind::def("unload_library", Lua::engine::UnloadLibrary),
 	  luabind::def("is_library_loaded", Lua::engine::IsLibraryLoaded), luabind::def("get_info", Lua::engine::get_info), luabind::def("get_user_data_dir", util::get_user_data_dir), luabind::def("get_resource_dirs", util::get_resource_dirs),

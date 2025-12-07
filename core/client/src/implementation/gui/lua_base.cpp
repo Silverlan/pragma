@@ -11,18 +11,18 @@ import :client_state;
 
 #undef DrawState
 
-pragma::gui::WILuaBase::WILuaBase() {}
+pragma::gui::types::WILuaBase::WILuaBase() {}
 
-pragma::gui::WILuaBase::~WILuaBase() {}
+pragma::gui::types::WILuaBase::~WILuaBase() {}
 
-void pragma::gui::WILuaBase::SetupLua(const luabind::object &o, std::string &className)
+void pragma::gui::types::WILuaBase::SetupLua(const luabind::object &o, std::string &className)
 {
 	m_class = className;
 	SetLuaObject(o);
 	SetUserData2(m_baseLuaObj);
 }
 
-void pragma::gui::WILuaBase::Initialize()
+void pragma::gui::types::WILuaBase::Initialize()
 {
 	auto hThis = GetHandle();
 	WIBase::Initialize();
@@ -31,13 +31,13 @@ void pragma::gui::WILuaBase::Initialize()
 	CallLuaMember("OnInitialize");
 }
 
-void pragma::gui::WILuaBase::OnSkinApplied()
+void pragma::gui::types::WILuaBase::OnSkinApplied()
 {
 	if(umath::is_flag_set(m_stateFlags, StateFlags::SkinCallbacksEnabled))
 		CallLuaMember("OnSkinApplied");
 }
 
-void pragma::gui::WILuaBase::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void pragma::gui::types::WILuaBase::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	auto hThis = GetHandle();
 	WIBase::Think(drawCmd);
@@ -46,7 +46,7 @@ void pragma::gui::WILuaBase::Think(const std::shared_ptr<prosper::IPrimaryComman
 	CallLuaMember("OnThink");
 }
 
-void pragma::gui::WILuaBase::OnFirstThink()
+void pragma::gui::types::WILuaBase::OnFirstThink()
 {
 	auto hThis = GetHandle();
 	WIBase::OnFirstThink();
@@ -55,7 +55,7 @@ void pragma::gui::WILuaBase::OnFirstThink()
 	CallLuaMember("OnFirstThink");
 }
 
-util::EventReply pragma::gui::WILuaBase::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+util::EventReply pragma::gui::types::WILuaBase::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	auto hThis = GetHandle();
 	if(WIBase::MouseCallback(button, state, mods) == util::EventReply::Handled)
@@ -66,7 +66,7 @@ util::EventReply pragma::gui::WILuaBase::MouseCallback(pragma::platform::MouseBu
 	CallLuaMember<uint32_t, int, int, int>("MouseCallback", &reply, static_cast<int>(button), static_cast<int>(state), static_cast<int>(mods));
 	return static_cast<util::EventReply>(reply);
 }
-util::EventReply pragma::gui::WILuaBase::KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+util::EventReply pragma::gui::types::WILuaBase::KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	auto hThis = GetHandle();
 	if(WIBase::KeyboardCallback(key, scanCode, state, mods) == util::EventReply::Handled)
@@ -77,7 +77,7 @@ util::EventReply pragma::gui::WILuaBase::KeyboardCallback(pragma::platform::Key 
 	CallLuaMember<uint32_t, int, int, int, int>("KeyboardCallback", &reply, static_cast<int>(key), scanCode, static_cast<int>(state), static_cast<int>(mods));
 	return static_cast<util::EventReply>(reply);
 }
-util::EventReply pragma::gui::WILuaBase::CharCallback(unsigned int c, pragma::platform::Modifier mods)
+util::EventReply pragma::gui::types::WILuaBase::CharCallback(unsigned int c, pragma::platform::Modifier mods)
 {
 	auto hThis = GetHandle();
 	if(WIBase::CharCallback(c) == util::EventReply::Handled)
@@ -88,7 +88,7 @@ util::EventReply pragma::gui::WILuaBase::CharCallback(unsigned int c, pragma::pl
 	CallLuaMember<uint32_t, unsigned int, uint32_t>("CharCallback", &reply, c, umath::to_integral(mods));
 	return static_cast<util::EventReply>(reply);
 }
-util::EventReply pragma::gui::WILuaBase::ScrollCallback(Vector2 offset, bool offsetAsPixels)
+util::EventReply pragma::gui::types::WILuaBase::ScrollCallback(Vector2 offset, bool offsetAsPixels)
 {
 	auto hThis = GetHandle();
 	if(WIBase::ScrollCallback(offset, offsetAsPixels) == util::EventReply::Handled)
@@ -100,7 +100,7 @@ util::EventReply pragma::gui::WILuaBase::ScrollCallback(Vector2 offset, bool off
 	return static_cast<util::EventReply>(reply);
 }
 
-void pragma::gui::WILuaBase::SetSize(int x, int y)
+void pragma::gui::types::WILuaBase::SetSize(int x, int y)
 {
 	if(x == GetWidth() && y == GetHeight())
 		return;
@@ -113,20 +113,20 @@ void pragma::gui::WILuaBase::SetSize(int x, int y)
 	if(newW == x && newH == y)
 		CallLuaMember<void, int, int>("OnSizeChanged", x, y);
 }
-void pragma::gui::WILuaBase::OnVisibilityChanged(bool bVisible)
+void pragma::gui::types::WILuaBase::OnVisibilityChanged(bool bVisible)
 {
 	// if(bVisible == *GetVisibilityProperty())
 	// 	return;
 	WIBase::OnVisibilityChanged(bVisible);
-	if(*GetVisibilityProperty() == bVisible) // See explanation in pragma::gui::WILuaBase::SetSize
+	if(*GetVisibilityProperty() == bVisible) // See explanation in pragma::gui::types::WILuaBase::SetSize
 		CallLuaMember<void, bool>("OnVisibilityChanged", bVisible);
 }
-void pragma::gui::WILuaBase::DoUpdate()
+void pragma::gui::types::WILuaBase::DoUpdate()
 {
 	WIBase::DoUpdate();
 	CallLuaMember<void>("OnUpdate");
 }
-void pragma::gui::WILuaBase::SetColor(float r, float g, float b, float a)
+void pragma::gui::types::WILuaBase::SetColor(float r, float g, float b, float a)
 {
 	auto newCol = Vector4 {r, g, b, a};
 	auto vCol = GetColor().ToVector4();
@@ -134,18 +134,18 @@ void pragma::gui::WILuaBase::SetColor(float r, float g, float b, float a)
 		return;
 	WIBase::SetColor(r, g, b, a);
 	vCol = GetColor().ToVector4();
-	if(uvec::cmp(vCol, newCol)) // See explanation in pragma::gui::WILuaBase::SetSize
+	if(uvec::cmp(vCol, newCol)) // See explanation in pragma::gui::types::WILuaBase::SetSize
 		CallLuaMember<void, float, float, float, float>("OnColorChanged", r, g, b, a);
 }
-void pragma::gui::WILuaBase::SetAlpha(float alpha)
+void pragma::gui::types::WILuaBase::SetAlpha(float alpha)
 {
 	if(umath::equals(alpha, GetAlpha()))
 		return;
 	WIBase::SetAlpha(alpha);
-	if(umath::equals(alpha, GetAlpha())) // See explanation in pragma::gui::WILuaBase::SetSize
+	if(umath::equals(alpha, GetAlpha())) // See explanation in pragma::gui::types::WILuaBase::SetSize
 		CallLuaMember<void, float>("OnAlphaChanged", alpha);
 }
-bool pragma::gui::WILuaBase::DoPosInBounds(const Vector2i &pos) const
+bool pragma::gui::types::WILuaBase::DoPosInBounds(const Vector2i &pos) const
 {
 	bool res = false;
 	auto r = const_cast<WILuaBase *>(this)->CallLuaMember<bool, Vector2i>("CheckPosInBounds", &res, pos);
@@ -154,7 +154,7 @@ bool pragma::gui::WILuaBase::DoPosInBounds(const Vector2i &pos) const
 	return WIBase::DoPosInBounds(pos);
 }
 
-void pragma::gui::WILuaBase::SetRenderCommandBuffer(const std::shared_ptr<prosper::util::PreparedCommandBuffer> &cmd)
+void pragma::gui::types::WILuaBase::SetRenderCommandBuffer(const std::shared_ptr<prosper::util::PreparedCommandBuffer> &cmd)
 {
 	if(!cmd) {
 		m_renderData = nullptr;
@@ -164,7 +164,7 @@ void pragma::gui::WILuaBase::SetRenderCommandBuffer(const std::shared_ptr<prospe
 	m_renderData->renderCommandBuffer = cmd;
 }
 
-void pragma::gui::WILuaBase::Render(const wgui::DrawInfo &drawInfo, wgui::DrawState &drawState, const Mat4 &matDraw, const Vector2 &scale, uint32_t testStencilLevel, wgui::StencilPipeline stencilPipeline)
+void pragma::gui::types::WILuaBase::Render(const DrawInfo &drawInfo, DrawState &drawState, const Mat4 &matDraw, const Vector2 &scale, uint32_t testStencilLevel, StencilPipeline stencilPipeline)
 {
 	WIBase::Render(drawInfo, drawState, matDraw, scale, testStencilLevel, stencilPipeline);
 	if(!m_renderData)
@@ -185,52 +185,52 @@ void pragma::gui::WILuaBase::Render(const wgui::DrawInfo &drawInfo, wgui::DrawSt
 		drawArgs.SetArgumentValue(ustring::string_switch::hash("h"), drawInfo.size.y);
 		drawArgs.SetArgumentValue(ustring::string_switch::hash("stencilPipeline"), umath::to_integral(stencilPipeline));
 		drawArgs.SetArgumentValue(ustring::string_switch::hash("testStencilLevel"), testStencilLevel);
-		drawArgs.SetArgumentValue(ustring::string_switch::hash("msaa"), umath::is_flag_set(drawInfo.flags, wgui::DrawInfo::Flags::Msaa));
+		drawArgs.SetArgumentValue(ustring::string_switch::hash("msaa"), umath::is_flag_set(drawInfo.flags, DrawInfo::Flags::Msaa));
 		drawArgs.SetArgumentValue(ustring::string_switch::hash("matDraw"), matDraw);
 		drawArgs.SetArgumentValue(ustring::string_switch::hash("scale"), scale);
-		drawArgs.SetArgumentValue(ustring::string_switch::hash("viewportSize"), wgui::ElementData::ToViewportSize(drawInfo.size));
+		drawArgs.SetArgumentValue(ustring::string_switch::hash("viewportSize"), ElementData::ToViewportSize(drawInfo.size));
 		m_renderData->userData.Set(ustring::string_switch::hash("guiDrawState"), drawState);
 		m_renderData->renderCommandBuffer->RecordCommands(*drawInfo.commandBuffer, drawArgs, m_renderData->userData);
 	}
 }
-void pragma::gui::WILuaBase::OnCursorEntered()
+void pragma::gui::types::WILuaBase::OnCursorEntered()
 {
 	WIBase::OnCursorEntered();
 	CallLuaMember("OnCursorEntered");
 }
-void pragma::gui::WILuaBase::OnCursorExited()
+void pragma::gui::types::WILuaBase::OnCursorExited()
 {
 	WIBase::OnCursorExited();
 	CallLuaMember("OnCursorExited");
 }
-void pragma::gui::WILuaBase::OnFileDragEntered()
+void pragma::gui::types::WILuaBase::OnFileDragEntered()
 {
 	WIBase::OnFileDragEntered();
 	CallLuaMember("OnFileDragEntered");
 }
-void pragma::gui::WILuaBase::OnFileDragExited()
+void pragma::gui::types::WILuaBase::OnFileDragExited()
 {
 	WIBase::OnFileDragExited();
 	CallLuaMember("OnFileDragExited");
 }
-util::EventReply pragma::gui::WILuaBase::OnFilesDropped(const std::vector<std::string> &files)
+util::EventReply pragma::gui::types::WILuaBase::OnFilesDropped(const std::vector<std::string> &files)
 {
 	WIBase::OnFilesDropped(files);
 	uint32_t reply = umath::to_integral(util::EventReply::Unhandled);
 	CallLuaMember<uint32_t, std::vector<std::string>>("OnFilesDropped", &reply, files);
 	return static_cast<util::EventReply>(reply);
 }
-void pragma::gui::WILuaBase::OnFocusGained()
+void pragma::gui::types::WILuaBase::OnFocusGained()
 {
 	WIBase::OnFocusGained();
 	CallLuaMember("OnFocusGained");
 }
-void pragma::gui::WILuaBase::OnFocusKilled()
+void pragma::gui::types::WILuaBase::OnFocusKilled()
 {
 	WIBase::OnFocusKilled();
 	CallLuaMember("OnFocusKilled");
 }
-void pragma::gui::WILuaBase::OnRemove()
+void pragma::gui::types::WILuaBase::OnRemove()
 {
 	WIBase::OnRemove();
 	CallLuaMember("OnRemove");
@@ -238,68 +238,68 @@ void pragma::gui::WILuaBase::OnRemove()
 
 ///////////////////////////////////////////
 
-void pragma::gui::WILuaBase::Lua_OnInitialize() {}
-void pragma::gui::WILuaBase::default_OnInitialize(lua::State *, WILuaBase &) {}
+void pragma::gui::types::WILuaBase::Lua_OnInitialize() {}
+void pragma::gui::types::WILuaBase::default_OnInitialize(lua::State *, WILuaBase &) {}
 
-void pragma::gui::WILuaBase::Lua_OnThink() {}
-void pragma::gui::WILuaBase::default_OnThink(lua::State *, WILuaBase &) {}
+void pragma::gui::types::WILuaBase::Lua_OnThink() {}
+void pragma::gui::types::WILuaBase::default_OnThink(lua::State *, WILuaBase &) {}
 
-void pragma::gui::WILuaBase::Lua_OnFirstThink() {}
-void pragma::gui::WILuaBase::default_OnFirstThink(lua::State *, WILuaBase &) {}
+void pragma::gui::types::WILuaBase::Lua_OnFirstThink() {}
+void pragma::gui::types::WILuaBase::default_OnFirstThink(lua::State *, WILuaBase &) {}
 
-void pragma::gui::WILuaBase::Lua_MouseCallback(int, int, int) {}
-void pragma::gui::WILuaBase::default_MouseCallback(lua::State *, WILuaBase &, int, int, int) {}
+void pragma::gui::types::WILuaBase::Lua_MouseCallback(int, int, int) {}
+void pragma::gui::types::WILuaBase::default_MouseCallback(lua::State *, WILuaBase &, int, int, int) {}
 
-void pragma::gui::WILuaBase::Lua_KeyboardCallback(int, int, int, int) {}
-void pragma::gui::WILuaBase::default_KeyboardCallback(lua::State *, WILuaBase &, int, int, int, int) {}
+void pragma::gui::types::WILuaBase::Lua_KeyboardCallback(int, int, int, int) {}
+void pragma::gui::types::WILuaBase::default_KeyboardCallback(lua::State *, WILuaBase &, int, int, int, int) {}
 
-void pragma::gui::WILuaBase::Lua_CharCallback(unsigned int, uint32_t) {}
-void pragma::gui::WILuaBase::default_CharCallback(lua::State *, WILuaBase &, unsigned int, uint32_t) {}
+void pragma::gui::types::WILuaBase::Lua_CharCallback(unsigned int, uint32_t) {}
+void pragma::gui::types::WILuaBase::default_CharCallback(lua::State *, WILuaBase &, unsigned int, uint32_t) {}
 
-void pragma::gui::WILuaBase::Lua_ScrollCallback(double, double) {}
-void pragma::gui::WILuaBase::default_ScrollCallback(lua::State *, WILuaBase &, double, double) {}
+void pragma::gui::types::WILuaBase::Lua_ScrollCallback(double, double) {}
+void pragma::gui::types::WILuaBase::default_ScrollCallback(lua::State *, WILuaBase &, double, double) {}
 
-void pragma::gui::WILuaBase::Lua_OnUpdate() {}
-void pragma::gui::WILuaBase::default_OnUpdate(lua::State *l, WILuaBase &hElement) {}
+void pragma::gui::types::WILuaBase::Lua_OnUpdate() {}
+void pragma::gui::types::WILuaBase::default_OnUpdate(lua::State *l, WILuaBase &hElement) {}
 
-void pragma::gui::WILuaBase::Lua_OnSetSize(int, int) {}
-void pragma::gui::WILuaBase::default_OnSetSize(lua::State *, WILuaBase &, int, int) {}
+void pragma::gui::types::WILuaBase::Lua_OnSetSize(int, int) {}
+void pragma::gui::types::WILuaBase::default_OnSetSize(lua::State *, WILuaBase &, int, int) {}
 
-void pragma::gui::WILuaBase::Lua_OnSetVisible(bool) {}
-void pragma::gui::WILuaBase::default_OnSetVisible(lua::State *, WILuaBase &, bool) {}
+void pragma::gui::types::WILuaBase::Lua_OnSetVisible(bool) {}
+void pragma::gui::types::WILuaBase::default_OnSetVisible(lua::State *, WILuaBase &, bool) {}
 
-void pragma::gui::WILuaBase::Lua_OnSetColor(float, float, float, float) {}
-void pragma::gui::WILuaBase::default_OnSetColor(lua::State *, WILuaBase &, float, float, float, float) {}
+void pragma::gui::types::WILuaBase::Lua_OnSetColor(float, float, float, float) {}
+void pragma::gui::types::WILuaBase::default_OnSetColor(lua::State *, WILuaBase &, float, float, float, float) {}
 
-void pragma::gui::WILuaBase::Lua_OnSetAlpha(float) {}
-void pragma::gui::WILuaBase::default_OnSetAlpha(lua::State *, WILuaBase &, float) {}
+void pragma::gui::types::WILuaBase::Lua_OnSetAlpha(float) {}
+void pragma::gui::types::WILuaBase::default_OnSetAlpha(lua::State *, WILuaBase &, float) {}
 
-void pragma::gui::WILuaBase::Lua_Render(const ::wgui::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale) {}
-void pragma::gui::WILuaBase::default_Render(lua::State *, WILuaBase &, const ::wgui::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale) {}
+void pragma::gui::types::WILuaBase::Lua_Render(const DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale) {}
+void pragma::gui::types::WILuaBase::default_Render(lua::State *, WILuaBase &, const DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale) {}
 
-void pragma::gui::WILuaBase::Lua_OnCursorEntered() {}
-void pragma::gui::WILuaBase::default_OnCursorEntered(lua::State *, WILuaBase &) {}
+void pragma::gui::types::WILuaBase::Lua_OnCursorEntered() {}
+void pragma::gui::types::WILuaBase::default_OnCursorEntered(lua::State *, WILuaBase &) {}
 
-void pragma::gui::WILuaBase::Lua_OnCursorExited() {}
-void pragma::gui::WILuaBase::default_OnCursorExited(lua::State *, WILuaBase &) {}
+void pragma::gui::types::WILuaBase::Lua_OnCursorExited() {}
+void pragma::gui::types::WILuaBase::default_OnCursorExited(lua::State *, WILuaBase &) {}
 
-void pragma::gui::WILuaBase::Lua_OnFileDragEntered() {}
-void pragma::gui::WILuaBase::default_OnFileDragEntered(lua::State *l, WILuaBase &hElement) {}
+void pragma::gui::types::WILuaBase::Lua_OnFileDragEntered() {}
+void pragma::gui::types::WILuaBase::default_OnFileDragEntered(lua::State *l, WILuaBase &hElement) {}
 
-void pragma::gui::WILuaBase::Lua_OnFileDragExited() {}
-void pragma::gui::WILuaBase::default_OnFileDragExited(lua::State *l, WILuaBase &hElement) {}
+void pragma::gui::types::WILuaBase::Lua_OnFileDragExited() {}
+void pragma::gui::types::WILuaBase::default_OnFileDragExited(lua::State *l, WILuaBase &hElement) {}
 
-void pragma::gui::WILuaBase::Lua_OnFilesDropped(const std::vector<std::string> &files) {}
-void pragma::gui::WILuaBase::default_OnFilesDropped(lua::State *l, WILuaBase &hElement, const std::vector<std::string> &files) {}
+void pragma::gui::types::WILuaBase::Lua_OnFilesDropped(const std::vector<std::string> &files) {}
+void pragma::gui::types::WILuaBase::default_OnFilesDropped(lua::State *l, WILuaBase &hElement, const std::vector<std::string> &files) {}
 
-void pragma::gui::WILuaBase::Lua_OnFocusGained() {}
-void pragma::gui::WILuaBase::default_OnFocusGained(lua::State *, WILuaBase &) {}
+void pragma::gui::types::WILuaBase::Lua_OnFocusGained() {}
+void pragma::gui::types::WILuaBase::default_OnFocusGained(lua::State *, WILuaBase &) {}
 
-void pragma::gui::WILuaBase::Lua_OnFocusKilled() {}
-void pragma::gui::WILuaBase::default_OnFocusKilled(lua::State *, WILuaBase &) {}
+void pragma::gui::types::WILuaBase::Lua_OnFocusKilled() {}
+void pragma::gui::types::WILuaBase::default_OnFocusKilled(lua::State *, WILuaBase &) {}
 
-void pragma::gui::WILuaBase::Lua_OnRemove() {}
-void pragma::gui::WILuaBase::default_OnRemove(lua::State *, WILuaBase &) {}
+void pragma::gui::types::WILuaBase::Lua_OnRemove() {}
+void pragma::gui::types::WILuaBase::default_OnRemove(lua::State *, WILuaBase &) {}
 
-bool pragma::gui::WILuaBase::Lua_CheckPosInBounds(const Vector2i &pos) { return WIBase::DoPosInBounds(pos); }
-bool pragma::gui::WILuaBase::default_CheckPosInBounds(lua::State *l, WILuaBase &hElement, const Vector2i &pos) { return hElement.WIBase::DoPosInBounds(pos); }
+bool pragma::gui::types::WILuaBase::Lua_CheckPosInBounds(const Vector2i &pos) { return WIBase::DoPosInBounds(pos); }
+bool pragma::gui::types::WILuaBase::default_CheckPosInBounds(lua::State *l, WILuaBase &hElement, const Vector2i &pos) { return hElement.WIBase::DoPosInBounds(pos); }

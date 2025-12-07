@@ -974,9 +974,9 @@ static void cvar_net_graph(bool val)
 		if(val == false)
 			return;
 		dbg = std::make_unique<DebugGameGUI>([]() {
-			auto &wgui = WGUI::GetInstance();
+			auto &wgui = pragma::gui::WGUI::GetInstance();
 			auto sz = wgui.GetContext().GetWindow()->GetSize();
-			auto el = wgui.Create<pragma::gui::WINetGraph>();
+			auto el = wgui.Create<pragma::gui::types::WINetGraph>();
 			el->SetSize(540, 180);
 			el->SetPos(sz.x - el->GetWidth(), 0);
 			return el->GetHandle();

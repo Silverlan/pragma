@@ -12,26 +12,26 @@ import :engine;
 import :entities.components;
 import :game;
 
-pragma::gui::WIDebugShadowMap::WIDebugShadowMap() : WIBase() {}
+pragma::gui::types::WIDebugShadowMap::WIDebugShadowMap() : WIBase() {}
 
-void pragma::gui::WIDebugShadowMap::SetContrastFactor(float contrastFactor)
+void pragma::gui::types::WIDebugShadowMap::SetContrastFactor(float contrastFactor)
 {
 	m_contrastFactor = contrastFactor;
 	for(auto &hEl : m_shadowMapImages) {
-		auto *el = dynamic_cast<pragma::gui::WIDebugDepthTexture *>(hEl.get());
+		auto *el = dynamic_cast<pragma::gui::types::WIDebugDepthTexture *>(hEl.get());
 		if(el == nullptr)
 			continue;
 		el->SetContrastFactor(contrastFactor);
 	}
 }
-void pragma::gui::WIDebugShadowMap::SetShadowMapType(pragma::rendering::ShadowMapType type) { m_shadowMapType = type; }
-float pragma::gui::WIDebugShadowMap::GetContrastFactor() const { return m_contrastFactor; }
+void pragma::gui::types::WIDebugShadowMap::SetShadowMapType(pragma::rendering::ShadowMapType type) { m_shadowMapType = type; }
+float pragma::gui::types::WIDebugShadowMap::GetContrastFactor() const { return m_contrastFactor; }
 
-void pragma::gui::WIDebugShadowMap::SetShadowMapSize(uint32_t w, uint32_t h) { m_shadowMapSize = {w, h}; }
+void pragma::gui::types::WIDebugShadowMap::SetShadowMapSize(uint32_t w, uint32_t h) { m_shadowMapSize = {w, h}; }
 
-void pragma::gui::WIDebugShadowMap::SetLightSource(pragma::CLightComponent &lightSource) { m_lightHandle = lightSource.GetHandle<pragma::CLightComponent>(); }
+void pragma::gui::types::WIDebugShadowMap::SetLightSource(pragma::CLightComponent &lightSource) { m_lightHandle = lightSource.GetHandle<pragma::CLightComponent>(); }
 
-void pragma::gui::WIDebugShadowMap::DoUpdate()
+void pragma::gui::types::WIDebugShadowMap::DoUpdate()
 {
 	WIBase::DoUpdate();
 	for(auto &hEl : m_shadowMapImages) {
@@ -62,12 +62,12 @@ void pragma::gui::WIDebugShadowMap::DoUpdate()
 	auto hLayer = m_shadowMapSize.y;
 	prosper::util::BarrierImageLayout barrierImageLayout {prosper::PipelineStageFlags::FragmentShaderBit, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::AccessFlags::ShaderReadBit};
 	auto pRadiusComponent = lightSource.GetEntity().GetComponent<pragma::CRadiusComponent>();
-	auto &wgui = WGUI::GetInstance();
+	auto &wgui = pragma::gui::WGUI::GetInstance();
 	switch(type) {
 	case pragma::LightType::Point:
 		{
 			for(auto i = decltype(numLayers) {0}; i < numLayers; ++i) {
-				auto *dt = wgui.Create<pragma::gui::WIDebugDepthTexture>(this);
+				auto *dt = wgui.Create<pragma::gui::types::WIDebugDepthTexture>(this);
 				dt->SetTexture(*depthTexture, barrierImageLayout, barrierImageLayout, i);
 				dt->SetSize(wLayer, hLayer);
 				if(i == static_cast<uint32_t>(CubeMapSide::Left))
@@ -91,7 +91,7 @@ void pragma::gui::WIDebugShadowMap::DoUpdate()
 		}
 	case pragma::LightType::Spot:
 		{
-			auto *dt = wgui.Create<pragma::gui::WIDebugDepthTexture>(this);
+			auto *dt = wgui.Create<pragma::gui::types::WIDebugDepthTexture>(this);
 			dt->SetTexture(*depthTexture, barrierImageLayout, barrierImageLayout);
 			dt->SetSize(wLayer, hLayer);
 			dt->Setup(1.f, pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
@@ -105,7 +105,7 @@ void pragma::gui::WIDebugShadowMap::DoUpdate()
 			wLayer *= 0.5f;
 			hLayer *= 0.5f;
 			for(auto i = decltype(numLayers) {0}; i < numLayers; ++i) {
-				auto *dt = wgui.Create<pragma::gui::WIDebugDepthTexture>(this);
+				auto *dt = wgui.Create<pragma::gui::types::WIDebugDepthTexture>(this);
 				dt->SetTexture(*depthTexture, barrierImageLayout, barrierImageLayout, i);
 				dt->SetSize(wLayer, hLayer);
 				dt->SetPos(i * wLayer, 0);
@@ -118,7 +118,7 @@ void pragma::gui::WIDebugShadowMap::DoUpdate()
 				auto &staticDepthTex = hShadowCsm->GetStaticPendingRenderTarget()->GetTexture();
 				auto &staticDepthImg = staticDepthTex.GetImage();
 				for(auto i = decltype(numLayers) {0}; i < numLayers; ++i) {
-					auto *dt = wgui.Create<pragma::gui::WIDebugDepthTexture>(this);
+					auto *dt = wgui.Create<pragma::gui::types::WIDebugDepthTexture>(this);
 					dt->SetTexture(staticDepthTex, barrierImageLayout, barrierImageLayout, i);
 					dt->SetSize(wLayer, hLayer);
 					dt->SetPos(i * wLayer, hLayer);

@@ -9,7 +9,7 @@ export module pragma.client:gui.debug_depth_texture;
 
 export import pragma.gui;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIDebugDepthTexture : public WIBase {
 	  public:
 		WIDebugDepthTexture();
@@ -27,7 +27,7 @@ export namespace pragma::gui {
 	  protected:
 		virtual void DoUpdate() override;
 		void UpdateResolvedTexture();
-		WIHandle m_hTextureRect;
+		pragma::gui::WIHandle m_hTextureRect;
 
 		util::WeakHandle<prosper::Shader> m_whDepthToRgbShader = {};
 		util::WeakHandle<prosper::Shader> m_whCubeDepthToRgbShader = {};

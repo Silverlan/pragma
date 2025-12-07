@@ -30,7 +30,7 @@ export namespace pragma::gui {
 			delete handle;
 		}
 		luabind::object *object;
-		WIHandle *handle;
+		pragma::gui::WIHandle *handle;
 		bool lua; // Has this been created through lua? This is used to clean up all lua-created GUI Elements when the game ends
 	};
 }

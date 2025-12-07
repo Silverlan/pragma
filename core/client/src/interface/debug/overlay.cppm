@@ -121,16 +121,16 @@ export namespace pragma::debug {
 		};
 		class DLLCLIENT TextObject : public BaseObject {
 		  protected:
-			mutable WIHandle m_hText;
+			mutable gui::WIHandle m_hText;
 			mutable std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupText = nullptr;
 			CallbackHandle m_hCbRender;
 		  public:
-			TextObject(WIText *elText);
+			TextObject(gui::types::WIText *elText);
 			virtual ~TextObject() override;
 			prosper::IDescriptorSet *GetTextDescriptorSet() const;
 			virtual ObjectType GetType() const override;
 			void Initialize(CallbackHandle &hCallback);
-			WIText *GetTextElement() const;
+			gui::types::WIText *GetTextElement() const;
 		};
 		std::shared_ptr<DebugRenderer::BaseObject> DrawPoints(const std::shared_ptr<prosper::IBuffer> &vertexBuffer, uint32_t vertexCount, const pragma::debug::DebugRenderInfo &renderInfo = {});
 		std::shared_ptr<DebugRenderer::BaseObject> DrawPoints(const std::vector<Vector3> &points, const pragma::debug::DebugRenderInfo &renderInfo = {});

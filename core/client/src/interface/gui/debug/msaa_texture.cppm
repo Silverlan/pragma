@@ -9,7 +9,7 @@ export module pragma.client:gui.debug_msaa_texture;
 
 export import pragma.gui;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIDebugMSAATexture : public WIBase {
 	  public:
 		WIDebugMSAATexture();
@@ -21,7 +21,7 @@ export namespace pragma::gui {
 	  protected:
 		virtual void DoUpdate() override;
 		void UpdateResolvedTexture();
-		WIHandle m_hTextureRect;
+		pragma::gui::WIHandle m_hTextureRect;
 
 		std::shared_ptr<prosper::Texture> m_msaaTexture = nullptr;
 		std::shared_ptr<prosper::Texture> m_resolvedTexture = nullptr;

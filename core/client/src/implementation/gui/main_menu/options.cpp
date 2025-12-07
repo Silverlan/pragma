@@ -22,15 +22,15 @@ import :rendering.render_apis;
 import pragma.pad;
 import pragma.string.unicode;
 
-pragma::gui::WIMainMenuOptions::WIMainMenuOptions() : WIMainMenuBase(), m_yOffset(128) {}
+pragma::gui::types::WIMainMenuOptions::WIMainMenuOptions() : WIMainMenuBase(), m_yOffset(128) {}
 
-pragma::gui::WIMainMenuOptions::~WIMainMenuOptions()
+pragma::gui::types::WIMainMenuOptions::~WIMainMenuOptions()
 {
 	if(m_joystickStateChanged.IsValid())
 		m_joystickStateChanged.Remove();
 }
 
-void pragma::gui::WIMainMenuOptions::ApplyWindowSize()
+void pragma::gui::types::WIMainMenuOptions::ApplyWindowSize()
 {
 	WIDropDownMenu *resMenu = static_cast<WIDropDownMenu *>(m_hResolutionList.get());
 	auto text = resMenu->GetText();
@@ -44,7 +44,7 @@ void pragma::gui::WIMainMenuOptions::ApplyWindowSize()
 	pragma::get_cengine()->GetWindow().SetResolution(Vector2i(w, h));
 }
 
-void pragma::gui::WIMainMenuOptions::ApplyOptions()
+void pragma::gui::types::WIMainMenuOptions::ApplyOptions()
 {
 	if(m_hActive.IsValid())
 		static_cast<WIOptionsList *>(m_hActive.get())->RunUpdateConVars();
@@ -81,12 +81,12 @@ void pragma::gui::WIMainMenuOptions::ApplyOptions()
 	}
 	//ApplyWindowSize();
 }
-void pragma::gui::WIMainMenuOptions::CloseMessageBox()
+void pragma::gui::types::WIMainMenuOptions::CloseMessageBox()
 {
 	if(m_hMessageBox.IsValid())
 		m_hMessageBox->Remove();
 }
-void pragma::gui::WIMainMenuOptions::Apply(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier)
+void pragma::gui::types::WIMainMenuOptions::Apply(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier)
 {
 	if(button != pragma::platform::MouseButton::Left || state != pragma::platform::KeyState::Press)
 		return;
@@ -102,7 +102,7 @@ void pragma::gui::WIMainMenuOptions::Apply(pragma::platform::MouseButton button,
 	m_hMessageBox = pMessageBox->GetHandle();*/
 }
 
-void pragma::gui::WIMainMenuOptions::ResetDefaults(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier)
+void pragma::gui::types::WIMainMenuOptions::ResetDefaults(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier)
 {
 	if(button != pragma::platform::MouseButton::Left || state != pragma::platform::KeyState::Press)
 		return;
@@ -111,9 +111,9 @@ void pragma::gui::WIMainMenuOptions::ResetDefaults(pragma::platform::MouseButton
 	m_hMessageBox = pMessageBox->GetHandle();
 }
 
-void pragma::gui::WIMainMenuOptions::CreateLabel(std::string text)
+void pragma::gui::types::WIMainMenuOptions::CreateLabel(std::string text)
 {
-	WIHandle hLabel = CreateChild<WIText>();
+	pragma::gui::WIHandle hLabel = CreateChild<WIText>();
 	WIText *t = static_cast<WIText *>(hLabel.get());
 	t->SetText(text);
 	t->SizeToContents();
@@ -121,10 +121,10 @@ void pragma::gui::WIMainMenuOptions::CreateLabel(std::string text)
 	t->SetColor(1.f, 1.f, 1.f, 1.f);
 }
 
-WIDropDownMenu *pragma::gui::WIMainMenuOptions::CreateDropDownMenu(std::string text)
+pragma::gui::types::WIDropDownMenu *pragma::gui::types::WIMainMenuOptions::CreateDropDownMenu(std::string text)
 {
 	CreateLabel(text);
-	WIHandle hDropDown = CreateChild<WIDropDownMenu>();
+	pragma::gui::WIHandle hDropDown = CreateChild<WIDropDownMenu>();
 	WIDropDownMenu *menu = static_cast<WIDropDownMenu *>(hDropDown.get());
 	menu->SetPos(Vector2i(256, m_yOffset));
 	menu->SetSize(200, 28);
@@ -132,10 +132,10 @@ WIDropDownMenu *pragma::gui::WIMainMenuOptions::CreateDropDownMenu(std::string t
 	return menu;
 }
 
-pragma::gui::WICheckbox *pragma::gui::WIMainMenuOptions::CreateCheckbox(std::string text)
+pragma::gui::types::WICheckbox *pragma::gui::types::WIMainMenuOptions::CreateCheckbox(std::string text)
 {
 	CreateLabel(text);
-	WIHandle hCheckBox = CreateChild<WICheckbox>();
+	pragma::gui::WIHandle hCheckBox = CreateChild<WICheckbox>();
 	WICheckbox *checkBox = static_cast<WICheckbox *>(hCheckBox.get());
 	checkBox->SetPos(Vector2i(256, m_yOffset));
 	m_yOffset += checkBox->GetHeight() + 20;
@@ -143,7 +143,7 @@ pragma::gui::WICheckbox *pragma::gui::WIMainMenuOptions::CreateCheckbox(std::str
 }
 
 static bool sortResolutions(pragma::platform::Monitor::VideoMode &a, pragma::platform::Monitor::VideoMode &b) { return ((a.width < b.width) || (a.width == b.width && a.height < b.height)) ? true : false; }
-void pragma::gui::WIMainMenuOptions::SetActiveMenu(WIHandle &hMenu)
+void pragma::gui::types::WIMainMenuOptions::SetActiveMenu(WIHandle &hMenu)
 {
 	if(hMenu.get() == m_hActive.get() && hMenu.IsValid())
 		return;
@@ -154,7 +154,7 @@ void pragma::gui::WIMainMenuOptions::SetActiveMenu(WIHandle &hMenu)
 	hMenu->SetVisible(true);
 	m_hActive = hMenu;
 }
-void pragma::gui::WIMainMenuOptions::Initialize()
+void pragma::gui::types::WIMainMenuOptions::Initialize()
 {
 	WIMainMenuBase::Initialize();
 	EnableThinking();
@@ -170,7 +170,7 @@ void pragma::gui::WIMainMenuOptions::Initialize()
 	}));
 }
 
-void pragma::gui::WIMainMenuOptions::OnVisibilityChanged(bool bVisible)
+void pragma::gui::types::WIMainMenuOptions::OnVisibilityChanged(bool bVisible)
 {
 	WIMainMenuBase::OnVisibilityChanged(bVisible);
 	if(bVisible == false || m_bInitialized == true)
@@ -183,23 +183,23 @@ void pragma::gui::WIMainMenuOptions::OnVisibilityChanged(bool bVisible)
 	InitializeControlSettings();
 }
 
-void pragma::gui::WIMainMenuOptions::ShowGeneralSettings() { SetActiveMenu(m_hGeneralSettings); }
-void pragma::gui::WIMainMenuOptions::ShowVideoSettings() { SetActiveMenu(m_hVideoSettings); }
-void pragma::gui::WIMainMenuOptions::ShowAudioSettings() { SetActiveMenu(m_hAudioSettings); }
-void pragma::gui::WIMainMenuOptions::ShowControlSettings() { SetActiveMenu(m_hControlSettings); }
+void pragma::gui::types::WIMainMenuOptions::ShowGeneralSettings() { SetActiveMenu(m_hGeneralSettings); }
+void pragma::gui::types::WIMainMenuOptions::ShowVideoSettings() { SetActiveMenu(m_hVideoSettings); }
+void pragma::gui::types::WIMainMenuOptions::ShowAudioSettings() { SetActiveMenu(m_hAudioSettings); }
+void pragma::gui::types::WIMainMenuOptions::ShowControlSettings() { SetActiveMenu(m_hControlSettings); }
 
 static std::string sliderTranslator(float f) { return std::to_string(CInt32(f * 100.f)); }
-static void sliderInitializer(pragma::gui::WISlider *pSlider)
+static void sliderInitializer(pragma::gui::types::WISlider *pSlider)
 {
 	pSlider->SetRange(0.f, 1.f, 0.01f);
 	pSlider->SetValueTranslator(sliderTranslator);
 	pSlider->SetPostFix("%");
 }
-void pragma::gui::WIMainMenuOptions::InitializeOptionsList(WIOptionsList *pList)
+void pragma::gui::types::WIMainMenuOptions::InitializeOptionsList(WIOptionsList *pList)
 {
 	pList->SetVisible(false);
 	auto *pRow = pList->AddRow();
-	auto &gui = WGUI::GetInstance();
+	auto &gui = pragma::gui::WGUI::GetInstance();
 	auto *buttonReset = gui.Create<WIButton>();
 	buttonReset->SetText(pragma::locale::get_text("reset_defaults"));
 	buttonReset->SizeToContents();
@@ -229,7 +229,7 @@ void pragma::gui::WIMainMenuOptions::InitializeOptionsList(WIOptionsList *pList)
 	pRow->InsertElement(1, buttonApply);
 	WIMainMenuBase::InitializeOptionsList(pList);
 }
-void pragma::gui::WIMainMenuOptions::InitializeGeneralSettings()
+void pragma::gui::types::WIMainMenuOptions::InitializeGeneralSettings()
 {
 	m_hGeneralSettings = CreateChild<WIOptionsList>();
 	m_hGeneralSettings->SetName("settings_general");
@@ -317,12 +317,12 @@ void pragma::gui::WIMainMenuOptions::InitializeGeneralSettings()
 
 	InitializeOptionsList(pList);
 }
-void pragma::gui::WIMainMenuOptions::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void pragma::gui::types::WIMainMenuOptions::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	WIMainMenuBase::Think(drawCmd);
 	UpdateMemoryUsage();
 }
-void pragma::gui::WIMainMenuOptions::UpdateMemoryUsage()
+void pragma::gui::types::WIMainMenuOptions::UpdateMemoryUsage()
 {
 	if(IsVisible() == false)
 		return;
@@ -341,7 +341,7 @@ void pragma::gui::WIMainMenuOptions::UpdateMemoryUsage()
 		pSlider->SetValue(allocatedMemory);*/ // PROSPER TODO
 	}
 
-	std::array<WIHandle, 3> luaMemUsageSliders = {m_hLuaMemoryUsageGUI, m_hLuaMemoryUsageClient, m_hLuaMemoryUsageServer};
+	std::array<pragma::gui::WIHandle, 3> luaMemUsageSliders = {m_hLuaMemoryUsageGUI, m_hLuaMemoryUsageClient, m_hLuaMemoryUsageServer};
 	auto *svState = pragma::get_cengine()->GetServerNetworkState();
 	auto *client = pragma::get_client_state();
 	std::array<lua::State *, 3> luaMemUsageStates = {client->GetGUILuaState(), client->GetLuaState(), (svState != nullptr) ? svState->GetLuaState() : nullptr};
@@ -355,7 +355,7 @@ void pragma::gui::WIMainMenuOptions::UpdateMemoryUsage()
 		pSlider->SetValue(allocatedMemory);
 	}
 }
-void pragma::gui::WIMainMenuOptions::InitializeVideoSettings()
+void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 {
 	m_hVideoSettings = CreateChild<WIOptionsList>();
 	m_hVideoSettings->SetName("settings_video");
@@ -568,7 +568,7 @@ void pragma::gui::WIMainMenuOptions::InitializeVideoSettings()
 	auto *resMenu = pList->AddDropDownMenu(
 	  pragma::locale::get_text("resolution"),
 	  [](WIDropDownMenu *pMenu) {
-		  auto &context = WGUI::GetInstance().GetContext();
+		  auto &context = pragma::gui::WGUI::GetInstance().GetContext();
 		  auto &window = context.GetWindow();
 		  auto *monitor = window->GetMonitor();
 		  auto primaryMonitor = pragma::platform::get_primary_monitor();
@@ -969,7 +969,7 @@ void pragma::gui::WIMainMenuOptions::InitializeVideoSettings()
 			SetActiveMenu(m_hVideoSettings);
 			m_hButtonApply->InjectMouseInput(pragma::platform::MouseButton::Left, pragma::platform::KeyState::Press, {});
 			m_hButtonApply->InjectMouseInput(pragma::platform::MouseButton::Left, pragma::platform::KeyState::Release, {});
-			WIHandle hMenu {};
+			pragma::gui::WIHandle hMenu {};
 			SetActiveMenu(hMenu);
 		}
 	}
@@ -997,7 +997,7 @@ void pragma::gui::WIMainMenuOptions::InitializeVideoSettings()
 		pList->GetRow("render_shadow_quality")->SetVisible(false);
 	}
 }
-void pragma::gui::WIMainMenuOptions::InitializeAudioSettings()
+void pragma::gui::types::WIMainMenuOptions::InitializeAudioSettings()
 {
 	m_hAudioSettings = CreateChild<WIOptionsList>();
 	m_hAudioSettings->SetName("settings_audio");
@@ -1096,7 +1096,7 @@ void pragma::gui::WIMainMenuOptions::InitializeAudioSettings()
 
 	InitializeOptionsList(pList);
 }
-void pragma::gui::WIMainMenuOptions::InitializeControlSettings()
+void pragma::gui::types::WIMainMenuOptions::InitializeControlSettings()
 {
 	m_hControlSettings = CreateChild<WIOptionsList>();
 	m_hControlSettings->SetName("settings_controls");
@@ -1134,7 +1134,7 @@ void pragma::gui::WIMainMenuOptions::InitializeControlSettings()
 	// Confine Mouse Cursor
 	//pList->AddToggleChoice(pragma::locale::get_text("confine_mouse_cursor")); // TODO
 	//
-	/*WIHandle m_hKeyBindings = WGUI::Create<WIKeyBindingList>(pList)->GetHandle();
+	/*WIHandle m_hKeyBindings = pragma::gui::WGUI::Create<WIKeyBindingList>(pList)->GetHandle();
 	WIKeyBindingList *t = m_hKeyBindings.get<WIKeyBindingList>();
 	t->SetPos(500,64);
 	t->SetSize(500,24 *t->GetRowCount());*/

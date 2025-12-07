@@ -345,7 +345,7 @@ static void util_convert_cubemap_equirect(std::vector<std::string> &argv, Conver
 
 	auto &vkTex = tex->GetVkTexture();
 	{
-		//auto el = WGUI::GetInstance().Create<WITexturedRect>();
+		//auto el = pragma::gui::WGUI::GetInstance().Create<WITexturedRect>();
 		//el->SetTexture(*vkTex,0);
 		//el->SetSize(512,512);
 		//return;

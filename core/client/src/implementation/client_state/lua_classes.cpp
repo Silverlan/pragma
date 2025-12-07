@@ -362,7 +362,7 @@ static void register_shader_graph(lua::State *l, luabind::module_ &modShader)
 void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 {
 	auto &modEngine = lua.RegisterLibrary("engine");
-	auto defFontInfo = luabind::class_<FontInfo>("FontInfo");
+	auto defFontInfo = luabind::class_<pragma::gui::FontInfo>("FontInfo");
 	modEngine[defFontInfo];
 
 	auto &modUtil = lua.RegisterLibrary("util");
@@ -768,7 +768,7 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 	}))];
 	modShader[defShaderGraphics];
 
-	auto defShaderGUITextured = luabind::class_<wgui::ShaderTextured, luabind::bases<prosper::ShaderGraphics, prosper::Shader>>("GUITextured");
+	auto defShaderGUITextured = luabind::class_<pragma::gui::shaders::ShaderTextured, luabind::bases<prosper::ShaderGraphics, prosper::Shader>>("GUITextured");
 	modShader[defShaderGUITextured];
 
 	auto defShaderScene = luabind::class_<pragma::ShaderScene, luabind::bases<prosper::ShaderGraphics, prosper::Shader>>("Scene3D");
@@ -1027,7 +1027,7 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 	auto defShaderGUIBase = luabind::class_<pragma::LuaShaderWrapperGUI, luabind::bases<pragma::LuaShaderWrapperGraphicsBase, pragma::LuaShaderWrapperBase>>("BaseGUI");
 	defShaderGUIBase.def(luabind::constructor<>());
 	defShaderGUIBase.def(
-	  "RecordBeginDraw", +[](pragma::LuaShaderWrapperGUI &shader, prosper::ShaderBindState &bindState, wgui::DrawState &drawState, uint32_t width, uint32_t height, wgui::StencilPipeline pipelineIdx, bool msaa, uint32_t testStencilLevel) -> bool {
+	  "RecordBeginDraw", +[](pragma::LuaShaderWrapperGUI &shader, prosper::ShaderBindState &bindState, pragma::gui::DrawState &drawState, uint32_t width, uint32_t height, pragma::gui::StencilPipeline pipelineIdx, bool msaa, uint32_t testStencilLevel) -> bool {
 		  return static_cast<pragma::LShaderGui *>(&shader.GetShader())->RecordBeginDraw(bindState, drawState, width, height, pipelineIdx, msaa, testStencilLevel);
 	  });
 	defShaderGUIBase.def(
@@ -1039,8 +1039,8 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 				    return false;
 			    auto &shader = *static_cast<pragma::LShaderGui *>(hShader.get());
 			    recordState.shaderBindState = std::make_unique<prosper::ShaderBindState>(recordState.commandBuffer);
-			    auto &drawState = recordState.userData.Get<wgui::DrawState>(ustring::string_switch::hash("guiDrawState"));
-			    return shader.RecordBeginDraw(*recordState.shaderBindState, drawState, recordState.GetArgument<uint32_t>(0), recordState.GetArgument<uint32_t>(1), static_cast<wgui::StencilPipeline>(recordState.GetArgument<std::underlying_type_t<wgui::StencilPipeline>>(2)),
+			    auto &drawState = recordState.userData.Get<pragma::gui::DrawState>(ustring::string_switch::hash("guiDrawState"));
+			    return shader.RecordBeginDraw(*recordState.shaderBindState, drawState, recordState.GetArgument<uint32_t>(0), recordState.GetArgument<uint32_t>(1), static_cast<pragma::gui::StencilPipeline>(recordState.GetArgument<std::underlying_type_t<pragma::gui::StencilPipeline>>(2)),
 			      recordState.GetArgument<bool>(3), recordState.GetArgument<uint32_t>(4));
 		    },
 		    util::make_vector<PcbArg>(PcbArg {"w"}, PcbArg {"h"}, PcbArg {"stencilPipeline"}, PcbArg {"msaa"}, PcbArg {"testStencilLevel"}));

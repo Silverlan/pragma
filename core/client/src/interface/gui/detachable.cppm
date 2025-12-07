@@ -8,7 +8,7 @@ export module pragma.client:gui.detachable;
 
 export import pragma.gui;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIDetachable : public WIBase {
 	public:
 		WIDetachable();
@@ -21,9 +21,9 @@ export namespace pragma::gui {
 		struct DetachedWindow {
 			~DetachedWindow();
 			void Clear();
-			WIHandle reattachElement {};
+			pragma::gui::WIHandle reattachElement {};
 			std::shared_ptr<prosper::Window> window;
-			WIHandle detachedBg {};
+			pragma::gui::WIHandle detachedBg {};
 			Vector2i origPos;
 			Vector2i origSize;
 			std::optional<std::array<float, 4>> origAnchor;

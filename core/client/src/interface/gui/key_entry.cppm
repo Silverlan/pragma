@@ -9,13 +9,13 @@ export module pragma.client:gui.key_entry;
 
 export import pragma.gui;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIKeyEntry : public WITextEntryBase {
 	  protected:
 		std::string m_previousKey;
 		pragma::platform::Key m_key;
 		bool m_bKeyPressed;
-		WIHandle m_hMouseTrap;
+		pragma::gui::WIHandle m_hMouseTrap;
 		virtual void OnTextChanged(const pragma::string::Utf8String &text, bool changedByUser) override;
 		void ApplyKey(pragma::platform::Key key);
 	  public:

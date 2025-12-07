@@ -8,13 +8,13 @@ export module pragma.client:gui.snap_area;
 
 export import pragma.gui;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WISnapArea : public WIBase {
 	public:
 		WISnapArea();
 		virtual void Initialize() override;
 		WIBase *GetTriggerArea();
 	private:
-		WIHandle m_hTriggerArea = {};
+		pragma::gui::WIHandle m_hTriggerArea = {};
 	};
 }

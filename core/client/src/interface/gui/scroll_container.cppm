@@ -10,7 +10,7 @@ export module pragma.client:gui.scroll_container;
 
 export import pragma.gui;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIScrollContainer : public WIBase {
 	  public:
 		enum class StateFlags : uint8_t { None = 0u, AutoStickToBottom = 1u, ContentsWidthFixed = AutoStickToBottom << 1u, ContentsHeightFixed = ContentsWidthFixed << 1u };
@@ -31,9 +31,9 @@ export namespace pragma::gui {
 		void SetScrollAmountX(int32_t amX);
 		void SetScrollAmountY(int32_t amY);
 		WIBase *GetWrapperElement();
-		void ScrollToElement(::WIBase &el);
-		void ScrollToElementX(::WIBase &el);
-		void ScrollToElementY(::WIBase &el);
+		void ScrollToElement(WIBase &el);
+		void ScrollToElementX(WIBase &el);
+		void ScrollToElementY(WIBase &el);
 
 		void ScrollToBottom();
 
@@ -47,9 +47,9 @@ export namespace pragma::gui {
 	  protected:
 		virtual void DoUpdate() override;
 		StateFlags m_scFlags = StateFlags::None;
-		WIHandle m_hScrollBarH = {};
-		WIHandle m_hScrollBarV = {};
-		WIHandle m_hWrapper = {};
+		pragma::gui::WIHandle m_hScrollBarH = {};
+		pragma::gui::WIHandle m_hScrollBarV = {};
+		pragma::gui::WIHandle m_hWrapper = {};
 		CallbackHandle m_hChildAdded = {};
 		CallbackHandle m_hChildRemoved = {};
 		Vector2i m_lastOffset = {};
@@ -68,4 +68,4 @@ export namespace pragma::gui {
 	using namespace umath::scoped_enum::bitwise;
 };
 
-export {REGISTER_ENUM_FLAGS(pragma::gui::WIScrollContainer::StateFlags)}
+export {REGISTER_ENUM_FLAGS(pragma::gui::types::WIScrollContainer::StateFlags)}

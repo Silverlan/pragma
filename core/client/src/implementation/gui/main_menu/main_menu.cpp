@@ -15,13 +15,13 @@ import :client_state;
 import :engine;
 import :game;
 
-pragma::gui::WIMainMenu::WIMainMenu() : WIBase(), m_menuType(0), m_tOpen(0.0)
+pragma::gui::types::WIMainMenu::WIMainMenu() : WIBase(), m_menuType(0), m_tOpen(0.0)
 {
 	SetKeyboardInputEnabled(true);
 	SetZPos(1000);
 }
 
-pragma::gui::WIMainMenu::~WIMainMenu()
+pragma::gui::types::WIMainMenu::~WIMainMenu()
 {
 	if(m_cbBlur.IsValid())
 		m_cbBlur.Remove();
@@ -42,14 +42,14 @@ pragma::gui::WIMainMenu::~WIMainMenu()
 		m_cbOnSteamworksShutdown.Remove();
 }
 
-util::EventReply pragma::gui::WIMainMenu::KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+util::EventReply pragma::gui::types::WIMainMenu::KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	if(!m_hActive.IsValid())
 		return util::EventReply::Handled;
 	return m_hActive->KeyboardCallback(key, scanCode, state, mods);
 }
 
-void pragma::gui::WIMainMenu::OnVisibilityChanged(bool bVisible)
+void pragma::gui::types::WIMainMenu::OnVisibilityChanged(bool bVisible)
 {
 	WIBase::OnVisibilityChanged(bVisible);
 	if(pragma::get_cgame() == nullptr)
@@ -72,7 +72,7 @@ void pragma::gui::WIMainMenu::OnVisibilityChanged(bool bVisible)
 		m_cbBlur.Remove();
 }
 
-void pragma::gui::WIMainMenu::PlayNextMenuTrack(bool newRound)
+void pragma::gui::types::WIMainMenu::PlayNextMenuTrack(bool newRound)
 {
 	if(m_menuSound != nullptr) {
 		m_menuSound->Stop();
@@ -108,7 +108,7 @@ void pragma::gui::WIMainMenu::PlayNextMenuTrack(bool newRound)
 }
 
 //#include "pragma/util/curl_query_handler.hpp"
-void pragma::gui::WIMainMenu::Initialize()
+void pragma::gui::types::WIMainMenu::Initialize()
 {
 	WIBase::Initialize();
 
@@ -311,7 +311,7 @@ void pragma::gui::WIMainMenu::Initialize()
 	SetAnchor(0.f, 0.f, 1.f, 1.f);
 }
 
-void pragma::gui::WIMainMenu::SetActiveMenu(WIHandle &hMenu)
+void pragma::gui::types::WIMainMenu::SetActiveMenu(WIHandle &hMenu)
 {
 	if(hMenu.get() == m_hActive.get() && hMenu.IsValid())
 		return;
@@ -326,15 +326,15 @@ void pragma::gui::WIMainMenu::SetActiveMenu(WIHandle &hMenu)
 	hMenu->RequestFocus();
 	m_hActive = hMenu;
 }
-void pragma::gui::WIMainMenu::OpenMainMenu() { SetActiveMenu(m_hMain); }
-void pragma::gui::WIMainMenu::OpenNewGameMenu() { SetActiveMenu(m_hNewGame); }
-void pragma::gui::WIMainMenu::OpenLoadGameMenu() { SetActiveMenu(m_hLoad); }
-void pragma::gui::WIMainMenu::OpenOptionsMenu() { SetActiveMenu(m_hOptions); }
-void pragma::gui::WIMainMenu::OpenModsMenu() { SetActiveMenu(m_hMods); }
+void pragma::gui::types::WIMainMenu::OpenMainMenu() { SetActiveMenu(m_hMain); }
+void pragma::gui::types::WIMainMenu::OpenNewGameMenu() { SetActiveMenu(m_hNewGame); }
+void pragma::gui::types::WIMainMenu::OpenLoadGameMenu() { SetActiveMenu(m_hLoad); }
+void pragma::gui::types::WIMainMenu::OpenOptionsMenu() { SetActiveMenu(m_hOptions); }
+void pragma::gui::types::WIMainMenu::OpenModsMenu() { SetActiveMenu(m_hMods); }
 
-void pragma::gui::WIMainMenu::OpenLoadScreen() { SetActiveMenu(m_hLoadScreen); }
+void pragma::gui::types::WIMainMenu::OpenLoadScreen() { SetActiveMenu(m_hLoadScreen); }
 
-void pragma::gui::WIMainMenu::OnFocusGained()
+void pragma::gui::types::WIMainMenu::OnFocusGained()
 {
 	if(!m_hActive.IsValid())
 		return;
@@ -342,7 +342,7 @@ void pragma::gui::WIMainMenu::OnFocusGained()
 	menu->RequestFocus();
 }
 
-void pragma::gui::WIMainMenu::OnFocusKilled()
+void pragma::gui::types::WIMainMenu::OnFocusKilled()
 {
 	if(!m_hActive.IsValid())
 		return;
@@ -350,7 +350,7 @@ void pragma::gui::WIMainMenu::OnFocusKilled()
 	menu->KillFocus(true);
 }
 
-void pragma::gui::WIMainMenu::SetContinueMenu()
+void pragma::gui::types::WIMainMenu::SetContinueMenu()
 {
 	if(m_menuType == 1 || !m_hMain.IsValid())
 		return;
@@ -360,7 +360,7 @@ void pragma::gui::WIMainMenu::SetContinueMenu()
 	menu->AddMenuItem(1, pragma::locale::get_text("menu_disconnect"), FunctionCallback<>::Create([]() { pragma::get_cengine()->EndGame(); }));
 }
 
-void pragma::gui::WIMainMenu::SetNewGameMenu()
+void pragma::gui::types::WIMainMenu::SetNewGameMenu()
 {
 	if(m_menuType == 0 || !m_hMain.IsValid())
 		return;
@@ -370,7 +370,7 @@ void pragma::gui::WIMainMenu::SetNewGameMenu()
 	menu->RemoveMenuItem(0);
 }
 
-void pragma::gui::WIMainMenu::SetSize(int x, int y)
+void pragma::gui::types::WIMainMenu::SetSize(int x, int y)
 {
 	WIBase::SetSize(x, y);
 	uint32_t logoYBottom = 50;

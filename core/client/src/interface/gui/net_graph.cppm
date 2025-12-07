@@ -8,7 +8,7 @@ export module pragma.client:gui.net_graph;
 
 export import :gui.line_graph;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WINetGraph : public WIBase {
 	  private:
 		struct DLLCLIENT NetData {
@@ -33,16 +33,16 @@ export namespace pragma::gui {
 		std::size_t m_dataSizeIdx;
 		uint32_t m_graphOffset;
 
-		WIHandle m_hPacketGraph;
-		WIHandle m_hDataGraph;
+		pragma::gui::WIHandle m_hPacketGraph;
+		pragma::gui::WIHandle m_hDataGraph;
 
-		WIHandle m_txtIncoming;
-		WIHandle m_txtOutgoing;
-		WIHandle m_txtUpdateRate;
-		WIHandle m_txtTickRate;
-		std::vector<WIHandle> m_txtMessages;
-		WIHandle m_hLatency;
-		WIHandle m_hLostPackets;
+		pragma::gui::WIHandle m_txtIncoming;
+		pragma::gui::WIHandle m_txtOutgoing;
+		pragma::gui::WIHandle m_txtUpdateRate;
+		pragma::gui::WIHandle m_txtTickRate;
+		std::vector<pragma::gui::WIHandle> m_txtMessages;
+		pragma::gui::WIHandle m_hLatency;
+		pragma::gui::WIHandle m_hLostPackets;
 		CallbackHandle m_cbThink;
 		CallbackHandle m_cbOnPacketReceive;
 		CallbackHandle m_cbOnSendPacketUDP;

@@ -14,13 +14,13 @@ class GUIDebugCursorManager {
 	GUIDebugCursorManager();
 	~GUIDebugCursorManager();
 	bool Initialize();
-	void SetTargetGUIElementOverride(WIBase *el);
+	void SetTargetGUIElementOverride(pragma::gui::types::WIBase *el);
   private:
-	static std::string GetElementInfo(WIBase &el);
+	static std::string GetElementInfo(pragma::gui::types::WIBase &el);
 	void Clear();
 	void OnThink();
-	bool ShouldPass(WIBase &el) const;
-	void SetTargetGUIElement(WIBase *optEl, bool clear);
+	bool ShouldPass(pragma::gui::types::WIBase &el) const;
+	void SetTargetGUIElement(pragma::gui::types::WIBase *optEl, bool clear);
 	void SetWindow(prosper::Window &window);
 
 	void SelectNextParentInHierarchy();
@@ -31,11 +31,11 @@ class GUIDebugCursorManager {
 	CallbackHandle m_cbMiddleMouse = {};
 	CallbackHandle m_cbOnClose = {};
 	std::weak_ptr<prosper::Window> m_curWindow {};
-	WIHandle m_hText = {};
-	WIHandle m_targetElementOverride;
-	std::array<WIHandle, 4> m_borderElements = {};
-	std::array<WIHandle, 4> m_borderElementsConstrained = {};
-	std::vector<WIHandle> m_cursorElementList = {}; // Last element is bottom-most element in hierarchy, all elements above are parents
+	pragma::gui::WIHandle m_hText = {};
+	pragma::gui::WIHandle m_targetElementOverride;
+	std::array<pragma::gui::WIHandle, 4> m_borderElements = {};
+	std::array<pragma::gui::WIHandle, 4> m_borderElementsConstrained = {};
+	std::vector<pragma::gui::WIHandle> m_cursorElementList = {}; // Last element is bottom-most element in hierarchy, all elements above are parents
 };
 
 GUIDebugCursorManager::GUIDebugCursorManager() {}
@@ -66,8 +66,8 @@ void GUIDebugCursorManager::Clear()
 
 bool GUIDebugCursorManager::Initialize()
 {
-	auto &gui = WGUI::GetInstance();
-	auto *pText = gui.Create<WIText>();
+	auto &gui = pragma::gui::WGUI::GetInstance();
+	auto *pText = gui.Create<pragma::gui::types::WIText>();
 	if(pText == nullptr)
 		return false;
 	m_hText = pText->GetHandle();
@@ -78,14 +78,14 @@ bool GUIDebugCursorManager::Initialize()
 	pText->SetColor(colors::Orange);
 
 	for(auto &hEl : m_borderElements) {
-		auto *el = WGUI::GetInstance().Create<WIRect>();
+		auto *el = pragma::gui::WGUI::GetInstance().Create<pragma::gui::types::WIRect>();
 		el->SetColor(colors::Red);
 		el->SetZPos(std::numeric_limits<int>::max());
 		el->SetVisible(false);
 		hEl = el->GetHandle();
 	}
 	for(auto &hEl : m_borderElementsConstrained) {
-		auto *el = WGUI::GetInstance().Create<WIRect>();
+		auto *el = pragma::gui::WGUI::GetInstance().Create<pragma::gui::types::WIRect>();
 		el->SetColor(colors::Aqua);
 		el->SetAlpha(0.75f);
 		el->SetZPos(std::numeric_limits<int>::max());
@@ -135,9 +135,9 @@ bool GUIDebugCursorManager::Initialize()
 	return true;
 }
 
-bool GUIDebugCursorManager::ShouldPass(WIBase &el) const
+bool GUIDebugCursorManager::ShouldPass(pragma::gui::types::WIBase &el) const
 {
-	if(el.IsVisible() == false || &el == m_hText.get() || el.IsDescendantOf(const_cast<WIBase *>(m_hText.get())))
+	if(el.IsVisible() == false || &el == m_hText.get() || el.IsDescendantOf(const_cast<pragma::gui::types::WIBase *>(m_hText.get())))
 		return false;
 	for(auto &hEl : m_borderElements) {
 		if(&el == hEl.get())
@@ -156,7 +156,7 @@ void GUIDebugCursorManager::SetWindow(prosper::Window &window)
 	if(m_curWindow.lock() == pwindow)
 		return;
 	m_curWindow = pwindow;
-	auto *elBase = WGUI::GetInstance().GetBaseElement(&window);
+	auto *elBase = pragma::gui::WGUI::GetInstance().GetBaseElement(&window);
 	if(!elBase)
 		return;
 	if(m_hText.IsValid())
@@ -174,7 +174,7 @@ void GUIDebugCursorManager::SetWindow(prosper::Window &window)
 	m_cursorElementList.clear();
 }
 
-std::string GUIDebugCursorManager::GetElementInfo(WIBase &el)
+std::string GUIDebugCursorManager::GetElementInfo(pragma::gui::types::WIBase &el)
 {
 	std::stringstream ss;
 	auto pos = el.GetAbsolutePos();
@@ -215,13 +215,13 @@ void GUIDebugCursorManager::SelectNextChildInHierarchy()
 	}
 }
 
-void GUIDebugCursorManager::SetTargetGUIElementOverride(WIBase *el)
+void GUIDebugCursorManager::SetTargetGUIElementOverride(pragma::gui::types::WIBase *el)
 {
-	m_targetElementOverride = el ? el->GetHandle() : WIHandle {};
+	m_targetElementOverride = el ? el->GetHandle() : pragma::gui::WIHandle {};
 	SetTargetGUIElement(el, true);
 }
 
-void GUIDebugCursorManager::SetTargetGUIElement(WIBase *optEl, bool clear)
+void GUIDebugCursorManager::SetTargetGUIElement(pragma::gui::types::WIBase *optEl, bool clear)
 {
 	auto dbgGUIVisible = (optEl != nullptr);
 	if(m_hText.IsValid())
@@ -246,7 +246,7 @@ void GUIDebugCursorManager::SetTargetGUIElement(WIBase *optEl, bool clear)
 		m_cursorElementList.clear();
 	m_cursorElementList.insert(m_cursorElementList.begin(), el.GetHandle());
 
-	auto *pText = static_cast<WIText *>(m_hText.get());
+	auto *pText = static_cast<pragma::gui::types::WIText *>(m_hText.get());
 	if(pText) {
 		pText->SetText(GetElementInfo(el));
 		Con::cout << pText->GetText().cpp_str() << Con::endl;
@@ -278,7 +278,7 @@ void GUIDebugCursorManager::SetTargetGUIElement(WIBase *optEl, bool clear)
 	constrainedSize.x = umath::max(constrainedSize.x, 0.f);
 	constrainedSize.y = umath::max(constrainedSize.y, 0.f);
 
-	auto fInitBorder = [](std::array<WIHandle, 4> &elements, const Vector2i &pos, const Vector2i &size) {
+	auto fInitBorder = [](std::array<pragma::gui::WIHandle, 4> &elements, const Vector2i &pos, const Vector2i &size) {
 		auto *top = elements.at(0).get();
 		auto *right = elements.at(1).get();
 		auto *bottom = elements.at(2).get();
@@ -321,12 +321,12 @@ void GUIDebugCursorManager::OnThink()
 {
 	if(m_hText.IsValid() == false)
 		return;
-	auto &gui = WGUI::GetInstance();
+	auto &gui = pragma::gui::WGUI::GetInstance();
 	auto *window = gui.FindWindowUnderCursor();
 	if(window)
 		SetWindow(*window);
-	auto *pText = static_cast<WIText *>(m_hText.get());
-	auto *pEl = gui.GetCursorGUIElement(nullptr, [this](WIBase *pEl) -> bool { return ShouldPass(*pEl); }, window);
+	auto *pText = static_cast<pragma::gui::types::WIText *>(m_hText.get());
+	auto *pEl = gui.GetCursorGUIElement(nullptr, [this](pragma::gui::types::WIBase *pEl) -> bool { return ShouldPass(*pEl); }, window);
 	if(!m_targetElementOverride.IsValid())
 		SetTargetGUIElement(pEl, true);
 
@@ -351,7 +351,7 @@ static void debug_gui_cursor(pragma::NetworkState *state, pragma::BasePlayerComp
 	}
 	if(!argv.empty()) {
 		auto &elName = argv.front();
-		auto *el = WGUI::GetInstance().FindByFilter([&elName](WIBase &el) -> bool { return ustring::compare(el.GetName(), elName, false); });
+		auto *el = pragma::gui::WGUI::GetInstance().FindByFilter([&elName](pragma::gui::types::WIBase &el) -> bool { return ustring::compare(el.GetName(), elName, false); });
 		if(!el) {
 			Con::cwar << "Unable to find element by name '" << elName << "'!" << Con::endl;
 			return;
@@ -365,13 +365,13 @@ namespace {
 
 static void debug_dump_font_glyph_map(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	auto &wgui = WGUI::GetInstance();
+	auto &wgui = pragma::gui::WGUI::GetInstance();
 	if(argv.empty()) {
 		Con::cwar << "No font specified!" << Con::endl;
 		return;
 	}
 	auto &fontName = argv.front();
-	auto font = FontManager::GetFont(fontName);
+	auto font = pragma::gui::FontManager::GetFont(fontName);
 	if(font == nullptr) {
 		Con::cwar << "No font by name '" << fontName << "' found!" << Con::endl;
 		return;
@@ -397,8 +397,8 @@ namespace {
 
 static void debug_font_glyph_map(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	auto &wgui = WGUI::GetInstance();
-	auto *el = static_cast<WITexturedRect *>(wgui.GetBaseElement()->FindDescendantByName("dbg_glyph_map"));
+	auto &wgui = pragma::gui::WGUI::GetInstance();
+	auto *el = static_cast<pragma::gui::types::WITexturedRect *>(wgui.GetBaseElement()->FindDescendantByName("dbg_glyph_map"));
 	if(el) {
 		el->RemoveSafely();
 		return;
@@ -408,7 +408,7 @@ static void debug_font_glyph_map(pragma::NetworkState *state, pragma::BasePlayer
 		return;
 	}
 	auto &fontName = argv.front();
-	auto font = FontManager::GetFont(fontName);
+	auto font = pragma::gui::FontManager::GetFont(fontName);
 	if(font == nullptr) {
 		Con::cwar << "No font by name '" << fontName << "' found!" << Con::endl;
 		return;
@@ -425,7 +425,7 @@ static void debug_font_glyph_map(pragma::NetworkState *state, pragma::BasePlayer
 	auto scale = 5.f;
 	w *= scale;
 	h *= scale;
-	el = wgui.Create<WITexturedRect>();
+	el = wgui.Create<pragma::gui::types::WITexturedRect>();
 	el->SetZPos(std::numeric_limits<int32_t>::max());
 	el->SetName("dbg_glyph_map");
 	el->SetTexture(*glyphMap);

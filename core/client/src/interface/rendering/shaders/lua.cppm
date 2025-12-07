@@ -260,15 +260,15 @@ export namespace pragma {
 	};
 
 	class LuaShaderWrapperGUI;
-	struct DLLCLIENT LShaderGui : public TLShaderBase<wgui::Shader> {
+	struct DLLCLIENT LShaderGui : public TLShaderBase<pragma::gui::shaders::Shader> {
 	  public:
-		using TBaseShader = wgui::Shader;
+		using TBaseShader = pragma::gui::shaders::Shader;
 		LShaderGui();
 
-		virtual void SetIdentifier(const std::string &identifier) override { wgui::Shader::SetIdentifier(identifier); }
-		virtual void SetPipelineCount(uint32_t count) override { wgui::Shader::SetPipelineCount(count); }
+		virtual void SetIdentifier(const std::string &identifier) override { pragma::gui::shaders::Shader::SetIdentifier(identifier); }
+		virtual void SetPipelineCount(uint32_t count) override { pragma::gui::shaders::Shader::SetPipelineCount(count); }
 
-		bool RecordBeginDraw(prosper::ShaderBindState &bindState, wgui::DrawState &drawState, uint32_t width, uint32_t height, wgui::StencilPipeline pipelineIdx, bool msaa, uint32_t testStencilLevel) const;
+		bool RecordBeginDraw(prosper::ShaderBindState &bindState, pragma::gui::DrawState &drawState, uint32_t width, uint32_t height, pragma::gui::StencilPipeline pipelineIdx, bool msaa, uint32_t testStencilLevel) const;
 	  protected:
 		friend LuaShaderWrapperGUI;
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { TBaseShader::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
@@ -293,13 +293,13 @@ export namespace pragma {
 	};
 
 	class LuaShaderWrapperGUITextured;
-	struct DLLCLIENT LShaderGuiTextured : public TLShaderBase<wgui::ShaderTextured> {
+	struct DLLCLIENT LShaderGuiTextured : public TLShaderBase<pragma::gui::shaders::ShaderTextured> {
 	  public:
-		using TBaseShader = wgui::ShaderTextured;
+		using TBaseShader = pragma::gui::shaders::ShaderTextured;
 		LShaderGuiTextured();
 
-		virtual void SetIdentifier(const std::string &identifier) override { wgui::ShaderTextured::SetIdentifier(identifier); }
-		virtual void SetPipelineCount(uint32_t count) override { wgui::ShaderTextured::SetPipelineCount(count); }
+		virtual void SetIdentifier(const std::string &identifier) override { pragma::gui::shaders::ShaderTextured::SetIdentifier(identifier); }
+		virtual void SetPipelineCount(uint32_t count) override { pragma::gui::shaders::ShaderTextured::SetPipelineCount(count); }
 	  protected:
 		friend LuaShaderWrapperGUITextured;
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { TBaseShader::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }

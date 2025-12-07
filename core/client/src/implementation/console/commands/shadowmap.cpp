@@ -9,7 +9,7 @@ module pragma.client;
 
 import :console.commands;
 
-static WIHandle hGUIShadowmap;
+static pragma::gui::WIHandle hGUIShadowmap;
 static int numShadowmapTargets = 0;
 static int shadowmapTargetIdx = -1;
 static int shadowmapWidth;
@@ -45,7 +45,7 @@ static bool get_shadow_map(pragma::NetworkState *nw, std::vector<std::string> &a
 
 void CMD_debug_light_shadowmap(pragma::NetworkState *nw, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
-	auto &wgui = WGUI::GetInstance();
+	auto &wgui = pragma::gui::WGUI::GetInstance();
 	auto *pRoot = wgui.GetBaseElement();
 	const std::string name = "debug_shadowmap";
 	auto *pEl = pRoot->FindDescendantByName(name);
@@ -62,7 +62,7 @@ void CMD_debug_light_shadowmap(pragma::NetworkState *nw, pragma::BasePlayerCompo
 		return;
 	if(pragma::get_cgame() == nullptr || argv.empty() || pRoot == nullptr)
 		return;
-	auto *pElSm = wgui.Create<pragma::gui::WIDebugShadowMap>();
+	auto *pElSm = wgui.Create<pragma::gui::types::WIDebugShadowMap>();
 	if(pElSm == nullptr)
 		return;
 	auto size = 256u;

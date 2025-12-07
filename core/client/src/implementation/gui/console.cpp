@@ -18,8 +18,8 @@ import :engine;
 import pragma.gui;
 import pragma.string.unicode;
 
-static WIHandle s_hConsole = {};
-pragma::gui::WIConsole *pragma::gui::WIConsole::Open()
+static pragma::gui::WIHandle s_hConsole = {};
+pragma::gui::types::WIConsole *pragma::gui::types::WIConsole::Open()
 {
 	if(s_hConsole.IsValid()) {
 		auto *pConsole = static_cast<WIConsole *>(s_hConsole.get());
@@ -30,7 +30,7 @@ pragma::gui::WIConsole *pragma::gui::WIConsole::Open()
 		pConsole->RequestFocus();
 		return pConsole;
 	}
-	auto &wgui = WGUI::GetInstance();
+	auto &wgui = pragma::gui::WGUI::GetInstance();
 	auto *pFrame = wgui.Create<WIFrame>();
 	pFrame->SetSize(512, 256);
 	pFrame->SetMinSize(160, 100);
@@ -83,7 +83,7 @@ pragma::gui::WIConsole *pragma::gui::WIConsole::Open()
 	    "\n");
 	return pConsole;
 }
-void pragma::gui::WIConsole::Close()
+void pragma::gui::types::WIConsole::Close()
 {
 	if(s_hConsole.IsValid() == false)
 		return;
@@ -91,11 +91,11 @@ void pragma::gui::WIConsole::Close()
 	if(pFrame)
 		pFrame->SetVisible(false);
 }
-pragma::gui::WIConsole *pragma::gui::WIConsole::GetConsole() { return static_cast<WIConsole *>(s_hConsole.get()); }
+pragma::gui::types::WIConsole *pragma::gui::types::WIConsole::GetConsole() { return static_cast<WIConsole *>(s_hConsole.get()); }
 
 /////////////
 
-void pragma::gui::WIConsole::SetSimpleConsoleMode(bool simple, bool force)
+void pragma::gui::types::WIConsole::SetSimpleConsoleMode(bool simple, bool force)
 {
 	if(m_mode == Mode::ExternalWindow)
 		return;
@@ -138,7 +138,7 @@ void pragma::gui::WIConsole::SetSimpleConsoleMode(bool simple, bool force)
 	m_mode = simple ? Mode::SimplifiedOverlay : Mode::Standard;
 }
 
-void pragma::gui::WIConsole::Initialize()
+void pragma::gui::types::WIConsole::Initialize()
 {
 	WIBase::Initialize();
 
@@ -148,7 +148,7 @@ void pragma::gui::WIConsole::Initialize()
 	settings.fontSize = 12;
 	FontManager::LoadFont("console", "dejavu/DejaVuSansMono", settings);
 
-	auto &wgui = WGUI::GetInstance();
+	auto &wgui = pragma::gui::WGUI::GetInstance();
 	auto *pLogBg = wgui.Create<WIRect>(this);
 	pLogBg->SetColor(Color {20, 20, 20, 255});
 	m_hLogBg = pLogBg->GetHandle();
@@ -309,24 +309,24 @@ void pragma::gui::WIConsole::Initialize()
 		m_cbMainMenuVisibility = pMainMenu->GetVisibilityProperty()->AddCallback([this](std::reference_wrapper<const bool> oldValue, std::reference_wrapper<const bool> visible) { UpdateConsoleMode(); });
 	}
 }
-void pragma::gui::WIConsole::OnDescendantFocusGained(WIBase &el)
+void pragma::gui::types::WIConsole::OnDescendantFocusGained(WIBase &el)
 {
 	WIBase::OnDescendantFocusGained(el);
 	if(&el == m_hCommandEntry.get())
 		el.SetVisible(true);
 }
-void pragma::gui::WIConsole::OnDescendantFocusKilled(WIBase &el)
+void pragma::gui::types::WIConsole::OnDescendantFocusKilled(WIBase &el)
 {
 	WIBase::OnDescendantFocusKilled(el);
 	if(&el == m_hCommandEntry.get())
 		el.SetVisible(m_mode != Mode::SimplifiedOverlay);
 }
-void pragma::gui::WIConsole::RequestFocus()
+void pragma::gui::types::WIConsole::RequestFocus()
 {
 	if(m_hCommandEntry.IsValid())
 		m_hCommandEntry->RequestFocus();
 }
-void pragma::gui::WIConsole::OnRemove()
+void pragma::gui::types::WIConsole::OnRemove()
 {
 	WIBase::OnRemove();
 	if(m_cbConsoleOutput.IsValid())
@@ -337,7 +337,7 @@ void pragma::gui::WIConsole::OnRemove()
 		m_cbCommandEntryVisibility.Remove();
 	pragma::get_cengine()->SetRecordConsoleOutput(false);
 }
-void pragma::gui::WIConsole::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void pragma::gui::types::WIConsole::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	WIBase::Think(drawCmd);
 	if(m_hLog.IsValid() == false)
@@ -373,16 +373,16 @@ void pragma::gui::WIConsole::Think(const std::shared_ptr<prosper::IPrimaryComman
 	m_pendingConsoleOutput = AppendText(text);
 }
 
-pragma::gui::WICommandLineEntry *pragma::gui::WIConsole::GetCommandLineEntryElement() { return static_cast<WICommandLineEntry *>(m_hCommandEntry.get()); }
-WITextEntry *pragma::gui::WIConsole::GetTextLogElement() { return static_cast<WITextEntry *>(m_hLog.get()); }
+pragma::gui::types::WICommandLineEntry *pragma::gui::types::WIConsole::GetCommandLineEntryElement() { return static_cast<WICommandLineEntry *>(m_hCommandEntry.get()); }
+pragma::gui::types::WITextEntry *pragma::gui::types::WIConsole::GetTextLogElement() { return static_cast<WITextEntry *>(m_hLog.get()); }
 const auto REF_WIDTH = 1'280u;
 const auto REF_HEIGHT = 1'024u;
-pragma::gui::WISnapArea *pragma::gui::WIConsole::CreateSnapTarget(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t xt, uint32_t yt, uint32_t wt, uint32_t ht)
+pragma::gui::types::WISnapArea *pragma::gui::types::WIConsole::CreateSnapTarget(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t xt, uint32_t yt, uint32_t wt, uint32_t ht)
 {
 	auto *pFrame = GetFrame();
 	if(pFrame == nullptr)
 		return nullptr;
-	auto *pSnapTarget = WGUI::GetInstance().Create<WISnapArea>();
+	auto *pSnapTarget = pragma::gui::WGUI::GetInstance().Create<WISnapArea>();
 	RemoveOnRemoval(pSnapTarget);
 	pSnapTarget->SetPos(x, y);
 	pSnapTarget->SetSize(w, h);
@@ -397,7 +397,7 @@ pragma::gui::WISnapArea *pragma::gui::WIConsole::CreateSnapTarget(uint32_t x, ui
 	pFrame->AddSnapTarget(*pSnapTarget);
 	return pSnapTarget;
 }
-void pragma::gui::WIConsole::SetExternallyOwned(bool externallyOwned)
+void pragma::gui::types::WIConsole::SetExternallyOwned(bool externallyOwned)
 {
 	m_mode = externallyOwned ? Mode::ExternalOwnership : Mode::Standard;
 	auto *frame = GetFrame();
@@ -409,14 +409,14 @@ void pragma::gui::WIConsole::SetExternallyOwned(bool externallyOwned)
 	}
 	SetSimpleConsoleMode(false, true);
 }
-bool pragma::gui::WIConsole::IsExternallyOwned() const { return m_mode == Mode::ExternalOwnership; }
-void pragma::gui::WIConsole::UpdateConsoleMode()
+bool pragma::gui::types::WIConsole::IsExternallyOwned() const { return m_mode == Mode::ExternalOwnership; }
+void pragma::gui::types::WIConsole::UpdateConsoleMode()
 {
 	if(m_mode == Mode::ExternalOwnership)
 		return;
 	SetSimpleConsoleMode(pragma::get_client_state()->IsMainMenuOpen() == false);
 }
-void pragma::gui::WIConsole::InitializeSnapAreas()
+void pragma::gui::types::WIConsole::InitializeSnapAreas()
 {
 	const auto size = 242u;
 	const auto sizeTrigger = 32u;
@@ -433,7 +433,7 @@ void pragma::gui::WIConsole::InitializeSnapAreas()
 		size -sizeTrigger,0,sizeTrigger,REF_HEIGHT
 	);*/
 }
-void pragma::gui::WIConsole::SetFrame(WIFrame &frame)
+void pragma::gui::types::WIConsole::SetFrame(WIFrame &frame)
 {
 	m_hFrame = frame.GetHandle();
 	InitializeSnapAreas();
@@ -445,9 +445,9 @@ void pragma::gui::WIConsole::SetFrame(WIFrame &frame)
 	if(m_mode != Mode::ExternalWindow)
 		SetSimpleConsoleMode(m_mode == Mode::SimplifiedOverlay, true);
 }
-pragma::gui::WIFrame *pragma::gui::WIConsole::GetFrame() { return static_cast<WIFrame *>(m_hFrame.get()); }
+pragma::gui::types::WIFrame *pragma::gui::types::WIConsole::GetFrame() { return static_cast<WIFrame *>(m_hFrame.get()); }
 
-const pragma::string::Utf8String &pragma::gui::WIConsole::GetText() const
+const pragma::string::Utf8String &pragma::gui::types::WIConsole::GetText() const
 {
 	static pragma::string::Utf8String s {};
 	if(m_hLog.IsValid()) {
@@ -461,7 +461,7 @@ const pragma::string::Utf8String &pragma::gui::WIConsole::GetText() const
 	}
 	return s;
 }
-void pragma::gui::WIConsole::SetText(const std::string &text)
+void pragma::gui::types::WIConsole::SetText(const std::string &text)
 {
 	if(m_hLog.IsValid() == false)
 		return;
@@ -486,7 +486,7 @@ void pragma::gui::WIConsole::SetText(const std::string &text)
 	pLog->SetText(ltext);
 	pLog->SizeToContents();
 }
-std::string_view pragma::gui::WIConsole::AppendText(const std::string &text)
+std::string_view pragma::gui::types::WIConsole::AppendText(const std::string &text)
 {
 	if(text.empty() || m_hLog.IsValid() == false)
 		return {};
@@ -526,6 +526,6 @@ std::string_view pragma::gui::WIConsole::AppendText(const std::string &text)
 	pLog->SizeToContents();
 	return remaining;
 }
-void pragma::gui::WIConsole::SetMaxLogLineCount(uint32_t count) { m_maxLogLineCount = count; }
-uint32_t pragma::gui::WIConsole::GetMaxLogLineCount() const { return m_maxLogLineCount; }
-void pragma::gui::WIConsole::Clear() { SetText(""); }
+void pragma::gui::types::WIConsole::SetMaxLogLineCount(uint32_t count) { m_maxLogLineCount = count; }
+uint32_t pragma::gui::types::WIConsole::GetMaxLogLineCount() const { return m_maxLogLineCount; }
+void pragma::gui::types::WIConsole::Clear() { SetText(""); }

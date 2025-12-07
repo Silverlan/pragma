@@ -49,7 +49,7 @@ export namespace pragma {
 		std::shared_ptr<prosper::IBuffer> m_motionBlurDataBuffer;
 		std::shared_ptr<prosper::RenderTarget> m_renderTarget;
 #if MOTION_BLUR_DEBUG_ELEMENT_ENABLED == 1
-		WIHandle m_debugTex;
+		pragma::gui::WIHandle m_debugTex;
 #endif
 		float m_motionBlurIntensityFactor = 4.f;
 		MotionBlurQuality m_motionBlurQuality = MotionBlurQuality::Low;

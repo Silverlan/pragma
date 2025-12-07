@@ -507,23 +507,23 @@ static void debug_render_scene(pragma::NetworkState *state, pragma::BasePlayerCo
 	auto size = 256u;
 	if(argv.empty() == false)
 		size = util::to_float(argv.front());
-	static WIHandle hTexture = {};
-	static WIHandle hBloomTexture = {};
+	static pragma::gui::WIHandle hTexture = {};
+	static pragma::gui::WIHandle hBloomTexture = {};
 	dbg = std::make_unique<DebugGameGUI>([size]() {
 		auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
 		auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
 		auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 
 		if(raster.expired())
-			return WIHandle {};
+			return pragma::gui::WIHandle {};
 		auto &hdrInfo = raster->GetHDRInfo();
 
-		auto &wgui = WGUI::GetInstance();
-		auto *r = wgui.Create<WIBase>();
+		auto &wgui = pragma::gui::WGUI::GetInstance();
+		auto *r = wgui.Create<pragma::gui::types::WIBase>();
 
 		auto idx = 0u;
 		if(hdrInfo.sceneRenderTarget != nullptr) {
-			auto *pTexture = wgui.Create<pragma::gui::WIDebugMSAATexture>(r);
+			auto *pTexture = wgui.Create<pragma::gui::types::WIDebugMSAATexture>(r);
 			pTexture->SetSize(size, size);
 			pTexture->SetX(size * idx++);
 			pTexture->SetTexture(hdrInfo.sceneRenderTarget->GetTexture());
@@ -532,7 +532,7 @@ static void debug_render_scene(pragma::NetworkState *state, pragma::BasePlayerCo
 			hTexture = pTexture->GetHandle();
 		}
 		if(hdrInfo.bloomBlurRenderTarget != nullptr) {
-			auto *pTexture = wgui.Create<pragma::gui::WIDebugMSAATexture>(r);
+			auto *pTexture = wgui.Create<pragma::gui::types::WIDebugMSAATexture>(r);
 			pTexture->SetSize(size, size);
 			pTexture->SetX(size * idx++);
 			pTexture->SetTexture(hdrInfo.bloomBlurRenderTarget->GetTexture());
@@ -545,9 +545,9 @@ static void debug_render_scene(pragma::NetworkState *state, pragma::BasePlayerCo
 	});
 	dbg->AddCallback("PostRenderScene", FunctionCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>::Create([](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
 		if(hTexture.IsValid() == true)
-			static_cast<pragma::gui::WIDebugMSAATexture *>(hTexture.get())->Update();
+			static_cast<pragma::gui::types::WIDebugMSAATexture *>(hTexture.get())->Update();
 		if(hBloomTexture.IsValid() == true)
-			static_cast<pragma::gui::WIDebugMSAATexture *>(hBloomTexture.get())->Update();
+			static_cast<pragma::gui::types::WIDebugMSAATexture *>(hBloomTexture.get())->Update();
 	}));
 }
 namespace {

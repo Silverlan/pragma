@@ -14,15 +14,15 @@ import :engine;
 import pragma.gui;
 import pragma.string.unicode;
 
-pragma::gui::WIMainMenuNewGame::WIMainMenuNewGame() : WIMainMenuBase() {}
+pragma::gui::types::WIMainMenuNewGame::WIMainMenuNewGame() : WIMainMenuBase() {}
 
-pragma::gui::WIMainMenuNewGame::~WIMainMenuNewGame()
+pragma::gui::types::WIMainMenuNewGame::~WIMainMenuNewGame()
 {
 	if(m_cbMapListReload.IsValid())
 		m_cbMapListReload.Remove();
 }
 
-void pragma::gui::WIMainMenuNewGame::OnStartGame(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier)
+void pragma::gui::types::WIMainMenuNewGame::OnStartGame(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier)
 {
 	if(button != pragma::platform::MouseButton::Left || state != pragma::platform::KeyState::Press)
 		return;
@@ -59,7 +59,7 @@ void pragma::gui::WIMainMenuNewGame::OnStartGame(pragma::platform::MouseButton b
 	pragma::get_cengine()->StartDefaultGame(map, maxPlayers <= 1);
 }
 
-void pragma::gui::WIMainMenuNewGame::Initialize()
+void pragma::gui::types::WIMainMenuNewGame::Initialize()
 {
 	WIMainMenuBase::Initialize();
 	AddMenuItem(pragma::locale::get_text("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
@@ -73,7 +73,7 @@ void pragma::gui::WIMainMenuNewGame::Initialize()
 	EnableThinking();
 }
 
-void pragma::gui::WIMainMenuNewGame::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void pragma::gui::types::WIMainMenuNewGame::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	WIMainMenuBase::Think(drawCmd);
 	DisableThinking();
@@ -84,12 +84,12 @@ void pragma::gui::WIMainMenuNewGame::Think(const std::shared_ptr<prosper::IPrima
 	ReloadMapList();
 }
 
-void pragma::gui::WIMainMenuNewGame::InitializeOptionsList(WIOptionsList *pList)
+void pragma::gui::types::WIMainMenuNewGame::InitializeOptionsList(WIOptionsList *pList)
 {
 	auto *pRow = pList->AddRow();
 	pRow->SetValue(0, "");
 
-	auto *buttonStart = WGUI::GetInstance().Create<WIButton>();
+	auto *buttonStart = pragma::gui::WGUI::GetInstance().Create<WIButton>();
 	buttonStart->SetText(pragma::locale::get_text("start_game"));
 	buttonStart->SizeToContents();
 	buttonStart->SetAutoCenterToParent(true);
@@ -104,7 +104,7 @@ void pragma::gui::WIMainMenuNewGame::InitializeOptionsList(WIOptionsList *pList)
 	WIMainMenuBase::InitializeOptionsList(pList);
 }
 
-void pragma::gui::WIMainMenuNewGame::ReloadMapList()
+void pragma::gui::types::WIMainMenuNewGame::ReloadMapList()
 {
 	if(m_hMapList.IsValid() == false)
 		return;
@@ -208,7 +208,7 @@ void pragma::gui::WIMainMenuNewGame::ReloadMapList()
 	fAddMaps(files, Color {200, 0, 0, 255});
 }
 
-void pragma::gui::WIMainMenuNewGame::InitializeGameSettings()
+void pragma::gui::types::WIMainMenuNewGame::InitializeGameSettings()
 {
 	auto *pList = InitializeOptionsList();
 	auto title = pragma::locale::get_text("game_settings");

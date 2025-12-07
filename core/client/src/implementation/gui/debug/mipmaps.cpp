@@ -9,11 +9,11 @@ import :gui.debug_mipmaps;
 
 import :engine;
 
-pragma::gui::WIDebugMipMaps::WIDebugMipMaps() : WIBase() {}
+pragma::gui::types::WIDebugMipMaps::WIDebugMipMaps() : WIBase() {}
 
-void pragma::gui::WIDebugMipMaps::Initialize() { WIBase::Initialize(); }
+void pragma::gui::types::WIDebugMipMaps::Initialize() { WIBase::Initialize(); }
 
-void pragma::gui::WIDebugMipMaps::SetTexture(const std::shared_ptr<prosper::Texture> &texture)
+void pragma::gui::types::WIDebugMipMaps::SetTexture(const std::shared_ptr<prosper::Texture> &texture)
 {
 	for(auto &hTex : m_hTextures) {
 		if(hTex.IsValid())
@@ -22,7 +22,7 @@ void pragma::gui::WIDebugMipMaps::SetTexture(const std::shared_ptr<prosper::Text
 	m_hTextures.clear();
 	m_textures.clear();
 
-	auto &wgui = WGUI::GetInstance();
+	auto &wgui = pragma::gui::WGUI::GetInstance();
 	auto &context = wgui.GetContext();
 
 	uint32_t width = 128;

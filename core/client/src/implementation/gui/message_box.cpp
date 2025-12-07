@@ -13,9 +13,9 @@ import pragma.gui;
 const Int32 MARGIN_X = 32;
 const Int32 MARGIN_Y = 50;
 
-pragma::gui::WIMessageBox *pragma::gui::WIMessageBox::Create(const std::string &text, const std::string &title, Button buttons, const std::function<void(WIMessageBox *, Button)> &callback)
+pragma::gui::types::WIMessageBox *pragma::gui::types::WIMessageBox::Create(const std::string &text, const std::string &title, Button buttons, const std::function<void(WIMessageBox *, Button)> &callback)
 {
-	auto *pMessageBox = WGUI::GetInstance().Create<WIMessageBox>();
+	auto *pMessageBox = pragma::gui::WGUI::GetInstance().Create<WIMessageBox>();
 	if(pMessageBox == nullptr)
 		return nullptr;
 	pMessageBox->SetTitle(title);
@@ -29,24 +29,24 @@ pragma::gui::WIMessageBox *pragma::gui::WIMessageBox::Create(const std::string &
 	return pMessageBox;
 }
 
-pragma::gui::WIMessageBox *pragma::gui::WIMessageBox::Create(const std::string &text, Button buttons, const std::function<void(WIMessageBox *, Button)> &callback) { return Create(text, "", buttons, callback); }
+pragma::gui::types::WIMessageBox *pragma::gui::types::WIMessageBox::Create(const std::string &text, Button buttons, const std::function<void(WIMessageBox *, Button)> &callback) { return Create(text, "", buttons, callback); }
 
 struct MessageBoxDesc {
 	std::string text;
 	std::string title;
-	pragma::gui::WIMessageBox::Button buttons;
-	std::function<void(pragma::gui::WIMessageBox *)> onShow;
-	std::function<void(pragma::gui::WIMessageBox *, pragma::gui::WIMessageBox::Button)> buttonCallback;
+	pragma::gui::types::WIMessageBox::Button buttons;
+	std::function<void(pragma::gui::types::WIMessageBox *)> onShow;
+	std::function<void(pragma::gui::types::WIMessageBox *, pragma::gui::types::WIMessageBox::Button)> buttonCallback;
 };
 static std::queue<MessageBoxDesc> s_messageBoxQueue;
-static WIHandle s_currentMessageBox;
+static pragma::gui::WIHandle s_currentMessageBox;
 static void show_next_message_box()
 {
 	if(s_messageBoxQueue.empty())
 		return;
 	auto &desc = s_messageBoxQueue.front();
 	auto onShow = desc.onShow;
-	auto *msgBox = pragma::gui::WIMessageBox::Create(desc.text, desc.title, desc.buttons, desc.buttonCallback);
+	auto *msgBox = pragma::gui::types::WIMessageBox::Create(desc.text, desc.title, desc.buttons, desc.buttonCallback);
 	s_messageBoxQueue.pop();
 	if(msgBox == nullptr)
 		return;
@@ -54,7 +54,7 @@ static void show_next_message_box()
 		onShow(msgBox);
 	s_currentMessageBox = msgBox->GetHandle();
 }
-void pragma::gui::WIMessageBox::ShowMessageBox(const std::string &text, const std::string &title, Button buttons, const std::function<void(WIMessageBox *)> &onShow, const std::function<void(WIMessageBox *, Button)> &buttonCallback)
+void pragma::gui::types::WIMessageBox::ShowMessageBox(const std::string &text, const std::string &title, Button buttons, const std::function<void(WIMessageBox *)> &onShow, const std::function<void(WIMessageBox *, Button)> &buttonCallback)
 {
 	MessageBoxDesc desc {};
 	desc.text = text;
@@ -67,23 +67,23 @@ void pragma::gui::WIMessageBox::ShowMessageBox(const std::string &text, const st
 		show_next_message_box();
 }
 
-pragma::gui::WIMessageBox::WIMessageBox() : WIBase() {}
-pragma::gui::WIMessageBox::~WIMessageBox() {}
+pragma::gui::types::WIMessageBox::WIMessageBox() : WIBase() {}
+pragma::gui::types::WIMessageBox::~WIMessageBox() {}
 
-void pragma::gui::WIMessageBox::OnRemove()
+void pragma::gui::types::WIMessageBox::OnRemove()
 {
 	if(s_currentMessageBox.get() == this)
 		show_next_message_box();
 }
 
-void pragma::gui::WIMessageBox::SetTitle(const std::string &title)
+void pragma::gui::types::WIMessageBox::SetTitle(const std::string &title)
 {
 	if(!m_hMessage.IsValid())
 		return;
-	static_cast<pragma::gui::WIFrame *>(m_hMessage.get())->SetTitle(title);
+	static_cast<pragma::gui::types::WIFrame *>(m_hMessage.get())->SetTitle(title);
 }
 
-void pragma::gui::WIMessageBox::__buttonCallback(WIHandle hMessageBox, pragma::gui::WIMessageBox::Button button)
+void pragma::gui::types::WIMessageBox::__buttonCallback(WIHandle hMessageBox, pragma::gui::types::WIMessageBox::Button button)
 {
 	if(!hMessageBox.IsValid())
 		return;
@@ -92,12 +92,12 @@ void pragma::gui::WIMessageBox::__buttonCallback(WIHandle hMessageBox, pragma::g
 		return;
 	pMessageBox->m_buttonCallback(pMessageBox, button);
 };
-WIButton *pragma::gui::WIMessageBox::AddButton(const std::string &text, Button button)
+pragma::gui::types::WIButton *pragma::gui::types::WIMessageBox::AddButton(const std::string &text, Button button)
 {
 	return nullptr; // TODO
 }
 
-void pragma::gui::WIMessageBox::EnableButtons(Button buttons)
+void pragma::gui::types::WIMessageBox::EnableButtons(Button buttons)
 {
 	auto values = umath::get_power_of_2_values(CUInt64(buttons));
 	auto hMessageBox = GetHandle();
@@ -144,7 +144,7 @@ void pragma::gui::WIMessageBox::EnableButtons(Button buttons)
 	}
 }
 
-void pragma::gui::WIMessageBox::Initialize()
+void pragma::gui::types::WIMessageBox::Initialize()
 {
 	WIBase::Initialize();
 	m_hBg = CreateChild<WIRect>();
@@ -152,8 +152,8 @@ void pragma::gui::WIMessageBox::Initialize()
 	pRect->SetColor(0.f, 0.f, 0.f, 0.8f);
 	pRect->SetAutoAlignToParent(true);
 
-	m_hMessage = CreateChild<pragma::gui::WIFrame>();
-	auto *pMessage = m_hMessage.get<pragma::gui::WIFrame>();
+	m_hMessage = CreateChild<pragma::gui::types::WIFrame>();
+	auto *pMessage = m_hMessage.get<pragma::gui::types::WIFrame>();
 	pMessage->SetWidth(512);
 	pMessage->SetCloseButtonEnabled(false);
 	auto hMessageBox = GetHandle();
@@ -163,7 +163,7 @@ void pragma::gui::WIMessageBox::Initialize()
 		auto *pMessageBox = hMessageBox.get<WIMessageBox>();
 		if(!pMessageBox->m_hMessage.IsValid())
 			return;
-		auto *pMessage = pMessageBox->m_hMessage.get<pragma::gui::WIFrame>();
+		auto *pMessage = pMessageBox->m_hMessage.get<pragma::gui::types::WIFrame>();
 		auto &buttons = pMessageBox->m_buttons;
 		Int32 xMargin = MARGIN_X;
 		auto wMessage = pMessage->GetWidth();
@@ -200,17 +200,17 @@ void pragma::gui::WIMessageBox::Initialize()
 		}
 	}));
 }
-void pragma::gui::WIMessageBox::SetSize(int x, int y)
+void pragma::gui::types::WIMessageBox::SetSize(int x, int y)
 {
 	WIBase::SetSize(x, y);
 
 	if(m_hMessage.IsValid()) {
-		auto *pMessage = m_hMessage.get<pragma::gui::WIFrame>();
+		auto *pMessage = m_hMessage.get<pragma::gui::types::WIFrame>();
 		pMessage->SetPos(CInt32(CFloat(x) * 0.5f - CFloat(pMessage->GetWidth()) * 0.5f), CInt32(CFloat(y) * 0.5f - CFloat(pMessage->GetHeight()) * 0.5f));
 	}
 }
 
-void pragma::gui::WIMessageBox::SetText(const std::string &text)
+void pragma::gui::types::WIMessageBox::SetText(const std::string &text)
 {
 	if(!m_hText.IsValid())
 		return;
@@ -219,7 +219,7 @@ void pragma::gui::WIMessageBox::SetText(const std::string &text)
 	if(!m_hMessage.IsValid())
 		return;
 	auto numButtons = m_buttons.size();
-	auto *pMessage = m_hMessage.get<pragma::gui::WIFrame>();
+	auto *pMessage = m_hMessage.get<pragma::gui::types::WIFrame>();
 	pMessage->SetWidth(200 + CUInt32(numButtons) * 80);
 	auto h = pText->GetHeight();
 	pMessage->SetHeight(h + 120);
@@ -228,10 +228,10 @@ void pragma::gui::WIMessageBox::SetText(const std::string &text)
 	pMessage->SetMaxSize(800, 400);
 }
 
-void pragma::gui::WIMessageBox::SetButtonCallback(const std::function<void(WIMessageBox *, Button)> &callback) { m_buttonCallback = callback; }
+void pragma::gui::types::WIMessageBox::SetButtonCallback(const std::function<void(WIMessageBox *, Button)> &callback) { m_buttonCallback = callback; }
 
-pragma::gui::WIMessageBox::Button operator|=(const pragma::gui::WIMessageBox::Button &a, const pragma::gui::WIMessageBox::Button &b) { return static_cast<pragma::gui::WIMessageBox::Button>(CInt32(a) | CInt32(b)); }
+pragma::gui::types::WIMessageBox::Button operator|=(const pragma::gui::types::WIMessageBox::Button &a, const pragma::gui::types::WIMessageBox::Button &b) { return static_cast<pragma::gui::types::WIMessageBox::Button>(CInt32(a) | CInt32(b)); }
 
-pragma::gui::WIMessageBox::Button operator|(const pragma::gui::WIMessageBox::Button &a, const pragma::gui::WIMessageBox::Button &b) { return static_cast<pragma::gui::WIMessageBox::Button>(CInt32(a) | CInt32(b)); }
+pragma::gui::types::WIMessageBox::Button operator|(const pragma::gui::types::WIMessageBox::Button &a, const pragma::gui::types::WIMessageBox::Button &b) { return static_cast<pragma::gui::types::WIMessageBox::Button>(CInt32(a) | CInt32(b)); }
 
-pragma::gui::WIMessageBox::Button operator&(const pragma::gui::WIMessageBox::Button &a, pragma::gui::WIMessageBox::Button &b) { return static_cast<pragma::gui::WIMessageBox::Button>(CInt32(a) & CInt32(b)); }
+pragma::gui::types::WIMessageBox::Button operator&(const pragma::gui::types::WIMessageBox::Button &a, pragma::gui::types::WIMessageBox::Button &b) { return static_cast<pragma::gui::types::WIMessageBox::Button>(CInt32(a) & CInt32(b)); }

@@ -307,21 +307,21 @@ export namespace pragma {
 		Float GetMaxHDRExposure() const;
 		void SetMaxHDRExposure(Float exposure);
 
-		WIBase *CreateGUIElement(std::string name, WIBase *parent = nullptr);
-		WIBase *CreateGUIElement(std::string name, WIHandle *hParent);
+		gui::Element *CreateGUIElement(std::string name, gui::Element *parent = nullptr);
+		gui::Element *CreateGUIElement(std::string name, gui::WIHandle *hParent);
 		template<class TElement>
-		TElement *CreateGUIElement(WIBase *parent = nullptr)
+		TElement *CreateGUIElement(gui::Element *parent = nullptr)
 		{
-			TElement *p = WGUI::GetInstance().Create<TElement>(parent);
+			TElement *p = gui::WGUI::GetInstance().Create<TElement>(parent);
 			if(p == nullptr)
 				return nullptr;
 			//InitializeGUIElement(p);
 			return p;
 		}
 		template<class TElement>
-		TElement *CreateGUIElement(WIHandle *hParent)
+		TElement *CreateGUIElement(gui::WIHandle *hParent)
 		{
-			WIBase *pParent = nullptr;
+			gui::Element *pParent = nullptr;
 			if(hParent != nullptr && hParent->IsValid())
 				pParent = hParent->get();
 			return CreateGUIElement<TElement>(pParent);
@@ -413,7 +413,7 @@ export namespace pragma {
 		virtual void InitializeLuaScriptWatcher() override;
 		virtual std::shared_ptr<pragma::EntityComponentManager> InitializeEntityComponentManager() override;
 	private:
-		std::queue<WIHandle> m_luaGUIObjects = {};
+		std::queue<pragma::gui::WIHandle> m_luaGUIObjects = {};
 		double m_tLastClientUpdate = 0.0;
 		std::array<bool, umath::to_integral(pragma::rendering::SceneRenderPass::Count)> m_renderModesEnabled;
 		CallbackHandle m_hCbDrawFrame = {};

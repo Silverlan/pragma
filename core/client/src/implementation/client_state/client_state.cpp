@@ -47,7 +47,7 @@ pragma::ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo
 	pragma::get_cengine()->InitializeAssetManager(*m_modelManager);
 	pragma::asset::update_extension_cache(pragma::asset::Type::Model);
 
-	auto &gui = WGUI::GetInstance();
+	auto &gui = pragma::gui::WGUI::GetInstance();
 	// gui.SetCreateCallback(WGUILuaInterface::InitializeGUIElement);
 	//CVarHandler::Initialize();
 	FileManager::AddCustomMountDirectory("downloads", static_cast<fsys::SearchFlags>(pragma::networking::FSYS_SEARCH_RESOURCES));
@@ -159,8 +159,8 @@ void pragma::ClientState::Initialize()
 
 	pragma::get_cengine()->LoadClientConfig();
 	InitializeGUILua();
-	auto &gui = WGUI::GetInstance();
-	m_hMainMenu = gui.Create<pragma::gui::WIMainMenu>()->GetHandle();
+	auto &gui = pragma::gui::WGUI::GetInstance();
+	m_hMainMenu = gui.Create<pragma::gui::types::WIMainMenu>()->GetHandle();
 
 	UpdateGameWorldShaderSettings();
 
@@ -176,7 +176,7 @@ void pragma::ClientState::ShowFPSCounter(bool b)
 	if(b == true) {
 		if(m_hFps.IsValid())
 			return;
-		auto *pFps = WGUI::GetInstance().Create<pragma::gui::WIFPS>();
+		auto *pFps = pragma::gui::WGUI::GetInstance().Create<pragma::gui::types::WIFPS>();
 		if(pFps == nullptr)
 			return;
 		pFps->SetPos(10, 10);
@@ -238,7 +238,7 @@ void pragma::ClientState::InitializeGUILua()
 		test_lua_policies(GetGUILuaState());
 
 		auto *l = m_luaGUI->GetState();
-		auto *el = WGUI::GetInstance().Create<WIRect>();
+		auto *el = pragma::gui::WGUI::GetInstance().Create<WIRect>();
 		auto hEl = el->GetHandle();
 		auto hElCast = util::weak_shared_handle_cast<WIBase,WIShape>(hEl);
 		auto o = luabind::object{l,hElCast};
@@ -271,33 +271,33 @@ void pragma::ClientState::InitializeGUILua()
 	}
 }
 
-void pragma::ClientState::AddGUILuaWrapperFactory(const std::function<luabind::object(lua::State *, WIBase &)> &f) { m_guiLuaWrapperFactories.push_back(f); }
-std::vector<std::function<luabind::object(lua::State *, WIBase &)>> &pragma::ClientState::GetGUILuaWrapperFactories() { return m_guiLuaWrapperFactories; }
+void pragma::ClientState::AddGUILuaWrapperFactory(const std::function<luabind::object(lua::State *, pragma::gui::types::WIBase &)> &f) { m_guiLuaWrapperFactories.push_back(f); }
+std::vector<std::function<luabind::object(lua::State *, pragma::gui::types::WIBase &)>> &pragma::ClientState::GetGUILuaWrapperFactories() { return m_guiLuaWrapperFactories; }
 
-pragma::gui::WIMainMenu *pragma::ClientState::GetMainMenu()
+pragma::gui::types::WIMainMenu *pragma::ClientState::GetMainMenu()
 {
 	if(!m_hMainMenu.IsValid())
 		return nullptr;
-	return m_hMainMenu.get<pragma::gui::WIMainMenu>();
+	return m_hMainMenu.get<pragma::gui::types::WIMainMenu>();
 }
 
 bool pragma::ClientState::IsMainMenuOpen()
 {
-	pragma::gui::WIMainMenu *menu = GetMainMenu();
+	pragma::gui::types::WIMainMenu *menu = GetMainMenu();
 	if(menu == nullptr)
 		return false;
 	return menu->IsVisible();
 }
 void pragma::ClientState::CloseMainMenu()
 {
-	pragma::gui::WIMainMenu *menu = GetMainMenu();
+	pragma::gui::types::WIMainMenu *menu = GetMainMenu();
 	if(menu == nullptr || !menu->IsVisible())
 		return;
 	menu->SetVisible(false);
 }
 void pragma::ClientState::OpenMainMenu()
 {
-	pragma::gui::WIMainMenu *menu = GetMainMenu();
+	pragma::gui::types::WIMainMenu *menu = GetMainMenu();
 	if(menu == nullptr)
 		return;
 	auto &window = pragma::get_cengine()->GetWindow();
@@ -306,7 +306,7 @@ void pragma::ClientState::OpenMainMenu()
 }
 void pragma::ClientState::ToggleMainMenu()
 {
-	pragma::gui::WIMainMenu *menu = GetMainMenu();
+	pragma::gui::types::WIMainMenu *menu = GetMainMenu();
 	if(menu == nullptr)
 		return;
 	if(menu->IsVisible()) {
@@ -331,7 +331,7 @@ void pragma::ClientState::Close()
 
 	auto *state = m_luaGUI->GetState();
 	Lua::gui::clear_lua_callbacks(state);
-	auto *guiBaseEl = WGUI::GetInstance().GetBaseElement();
+	auto *guiBaseEl = pragma::gui::WGUI::GetInstance().GetBaseElement();
 	if(guiBaseEl != nullptr)
 		pragma::gui::WGUILuaInterface::ClearGUILuaObjects(*guiBaseEl);
 	auto identifier = m_luaGUI->GetIdentifier();
@@ -498,7 +498,7 @@ void pragma::ClientState::EndGame()
 	NetworkState::EndGame();
 	m_conCommandIDs.clear();
 	if(m_hMainMenu.IsValid()) {
-		pragma::gui::WIMainMenu *menu = m_hMainMenu.get<pragma::gui::WIMainMenu>();
+		pragma::gui::types::WIMainMenu *menu = m_hMainMenu.get<pragma::gui::types::WIMainMenu>();
 		menu->SetNewGameMenu();
 	}
 }
@@ -623,7 +623,7 @@ void pragma::ClientState::StartNewGame(const std::string &gameMode)
 	//	RequestServerInfo(); // Deprecated; Now handled through NET_cl_map_ready
 	CloseMainMenu();
 	if(m_hMainMenu.IsValid()) {
-		pragma::gui::WIMainMenu *menu = m_hMainMenu.get<pragma::gui::WIMainMenu>();
+		pragma::gui::types::WIMainMenu *menu = m_hMainMenu.get<pragma::gui::types::WIMainMenu>();
 		menu->SetContinueMenu();
 	}
 }

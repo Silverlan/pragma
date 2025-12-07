@@ -13,11 +13,11 @@ import :client_state;
 import :engine;
 import :game;
 
-pragma::gui::WIDebugSSAO::WIDebugSSAO() : WITexturedRect() {}
+pragma::gui::types::WIDebugSSAO::WIDebugSSAO() : WITexturedRect() {}
 
-void pragma::gui::WIDebugSSAO::SetUseBlurredSSAOImage(bool b) { m_bUseBlurVariant = b; }
+void pragma::gui::types::WIDebugSSAO::SetUseBlurredSSAOImage(bool b) { m_bUseBlurVariant = b; }
 
-void pragma::gui::WIDebugSSAO::DoUpdate()
+void pragma::gui::types::WIDebugSSAO::DoUpdate()
 {
 	WITexturedRect::DoUpdate();
 	if(pragma::get_cgame() == nullptr)

@@ -108,7 +108,7 @@ pragma::CGame::CGame(pragma::NetworkState *state)
 	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender");
 	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PostRender");
 	RegisterCallback<void, CBaseEntity *>("UpdateEntityModel");
-	RegisterCallback<void, WIBase *, WIBase *>("OnGUIFocusChanged");
+	RegisterCallback<void, pragma::gui::types::WIBase *, pragma::gui::types::WIBase *>("OnGUIFocusChanged");
 
 	LoadAuxEffects("fx_generic.udm");
 	for(auto &rsnd : pragma::get_client_state()->GetSounds()) {
@@ -122,8 +122,8 @@ pragma::CGame::CGame(pragma::NetworkState *state)
 		csnd->SetPitchModifier(pragma::get_cgame()->GetTimeScale());
 	}));
 
-	WGUI::GetInstance().SetFocusCallback([this](WIBase *oldFocus, WIBase *newFocus) {
-		CallCallbacks<void, WIBase *, WIBase *>("OnGUIFocusChanged", oldFocus, newFocus);
+	pragma::gui::WGUI::GetInstance().SetFocusCallback([this](pragma::gui::types::WIBase *oldFocus, pragma::gui::types::WIBase *newFocus) {
+		CallCallbacks<void, pragma::gui::types::WIBase *, pragma::gui::types::WIBase *>("OnGUIFocusChanged", oldFocus, newFocus);
 
 		auto *l = GetLuaState();
 		if(l == nullptr)
@@ -133,8 +133,8 @@ pragma::CGame::CGame(pragma::NetworkState *state)
 		CallLuaCallbacks<void, luabind::object, luabind::object>("OnGUIFocusChanged", oOldFocus, oNewFocus);
 	});
 
-	WGUI::GetInstance().SetUiMouseButtonCallback([this](WIBase &el, pragma::platform::MouseButton mouseButton, pragma::platform::KeyState state, pragma::platform::Modifier mods) {
-		CallCallbacks<void, WIBase *, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>("OnGUIMouseButtonEvent", &el, mouseButton, state, mods);
+	pragma::gui::WGUI::GetInstance().SetUiMouseButtonCallback([this](pragma::gui::types::WIBase &el, pragma::platform::MouseButton mouseButton, pragma::platform::KeyState state, pragma::platform::Modifier mods) {
+		CallCallbacks<void, pragma::gui::types::WIBase *, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>("OnGUIMouseButtonEvent", &el, mouseButton, state, mods);
 
 		auto *l = GetLuaState();
 		if(l == nullptr)
@@ -142,8 +142,8 @@ pragma::CGame::CGame(pragma::NetworkState *state)
 		auto oEl = pragma::gui::WGUILuaInterface::GetLuaObject(l, el);
 		CallLuaCallbacks<void, luabind::object, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>("OnGUIMouseButtonEvent", oEl, mouseButton, state, mods);
 	});
-	WGUI::GetInstance().SetUiKeyboardCallback([this](WIBase &el, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) {
-		CallCallbacks<void, WIBase *, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier>("OnGUIKeyboardEvent", &el, key, scanCode, state, mods);
+	pragma::gui::WGUI::GetInstance().SetUiKeyboardCallback([this](pragma::gui::types::WIBase &el, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) {
+		CallCallbacks<void, pragma::gui::types::WIBase *, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier>("OnGUIKeyboardEvent", &el, key, scanCode, state, mods);
 
 		auto *l = GetLuaState();
 		if(l == nullptr)
@@ -151,8 +151,8 @@ pragma::CGame::CGame(pragma::NetworkState *state)
 		auto oEl = pragma::gui::WGUILuaInterface::GetLuaObject(l, el);
 		CallLuaCallbacks<void, luabind::object, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier>("OnGUIKeyboardEvent", oEl, key, scanCode, state, mods);
 	});
-	WGUI::GetInstance().SetUiCharCallback([this](WIBase &el, unsigned int c) {
-		CallCallbacks<void, WIBase *, unsigned int>("OnGUICharEvent", &el, c);
+	pragma::gui::WGUI::GetInstance().SetUiCharCallback([this](pragma::gui::types::WIBase &el, unsigned int c) {
+		CallCallbacks<void, pragma::gui::types::WIBase *, unsigned int>("OnGUICharEvent", &el, c);
 
 		auto *l = GetLuaState();
 		if(l == nullptr)
@@ -160,8 +160,8 @@ pragma::CGame::CGame(pragma::NetworkState *state)
 		auto oEl = pragma::gui::WGUILuaInterface::GetLuaObject(l, el);
 		CallLuaCallbacks<void, luabind::object, unsigned int>("OnGUICharEvent", oEl, c);
 	});
-	WGUI::GetInstance().SetUiScrollCallback([this](WIBase &el, Vector2 offset) {
-		CallCallbacks<void, WIBase *, Vector2>("OnGUIScrollEvent", &el, offset);
+	pragma::gui::WGUI::GetInstance().SetUiScrollCallback([this](pragma::gui::types::WIBase &el, Vector2 offset) {
+		CallCallbacks<void, pragma::gui::types::WIBase *, Vector2>("OnGUIScrollEvent", &el, offset);
 
 		auto *l = GetLuaState();
 		if(l == nullptr)
@@ -209,11 +209,11 @@ void pragma::CGame::OnRemove()
 	m_renderQueueWorkerManager = nullptr;
 	m_renderQueueBuilder = nullptr;
 	pragma::get_cengine()->GetRenderContext().WaitIdle();
-	WGUI::GetInstance().SetFocusCallback(nullptr);
-	WGUI::GetInstance().SetUiMouseButtonCallback(nullptr);
-	WGUI::GetInstance().SetUiKeyboardCallback(nullptr);
-	WGUI::GetInstance().SetUiCharCallback(nullptr);
-	WGUI::GetInstance().SetUiScrollCallback(nullptr);
+	pragma::gui::WGUI::GetInstance().SetFocusCallback(nullptr);
+	pragma::gui::WGUI::GetInstance().SetUiMouseButtonCallback(nullptr);
+	pragma::gui::WGUI::GetInstance().SetUiKeyboardCallback(nullptr);
+	pragma::gui::WGUI::GetInstance().SetUiCharCallback(nullptr);
+	pragma::gui::WGUI::GetInstance().SetUiScrollCallback(nullptr);
 	if(m_hCbDrawFrame.IsValid())
 		m_hCbDrawFrame.Remove();
 	if(m_cbGPUProfilingHandle.IsValid())
@@ -796,11 +796,11 @@ Vector4 &pragma::CGame::GetColorScale() { return m_colScale; }
 void pragma::CGame::SetAlphaScale(float a) { m_colScale.a = a; }
 float pragma::CGame::GetAlphaScale() { return m_colScale.a; }
 
-WIBase *pragma::CGame::CreateGUIElement(std::string className, WIBase *parent)
+pragma::gui::types::WIBase *pragma::CGame::CreateGUIElement(std::string className, pragma::gui::types::WIBase *parent)
 {
 	auto *o = m_luaGUIElements.GetClassObject(className);
-	auto &gui = WGUI::GetInstance();
-	WIBase *el = nullptr;
+	auto &gui = pragma::gui::WGUI::GetInstance();
+	pragma::gui::types::WIBase *el = nullptr;
 	if(o != nullptr) {
 		luabind::object r;
 #ifndef LUABIND_NO_EXCEPTIONS
@@ -811,13 +811,13 @@ WIBase *pragma::CGame::CreateGUIElement(std::string className, WIBase *parent)
 			// the WGUI library instead.
 			r = (*o)();
 
-			auto *elLua = luabind::object_cast<pragma::gui::WILuaBase *>(r);
+			auto *elLua = luabind::object_cast<pragma::gui::types::WILuaBase *>(r);
 			auto *holder = luabind::object_cast<pragma::LuaCore::WILuaBaseHolder *>(r);
 			if(elLua && holder) {
 				ustring::to_lower(className);
 				elLua->SetupLua(r, className);
-				WGUI::GetInstance().RegisterElement(*elLua, className, parent);
-				holder->SetHandle(util::weak_shared_handle_cast<WIBase, pragma::gui::WILuaBase>(elLua->GetHandle()));
+				pragma::gui::WGUI::GetInstance().RegisterElement(*elLua, className, parent);
+				holder->SetHandle(util::weak_shared_handle_cast<pragma::gui::types::WIBase, pragma::gui::types::WILuaBase>(elLua->GetHandle()));
 				el = elLua;
 			}
 			else {
@@ -925,10 +925,10 @@ template DLLCLIENT void pragma::CGame::CreateGiblet(const GibletCreateInfo &info
 
 void pragma::CGame::CreateGiblet(const GibletCreateInfo &info) { CreateGiblet<pragma::ecs::CParticleSystemComponent>(info, nullptr); }
 
-WIBase *pragma::CGame::CreateGUIElement(std::string name, WIHandle *hParent)
+pragma::gui::types::WIBase *pragma::CGame::CreateGUIElement(std::string name, pragma::gui::WIHandle *hParent)
 {
 	ustring::to_lower(name);
-	WIBase *pParent = nullptr;
+	pragma::gui::types::WIBase *pParent = nullptr;
 	if(hParent != nullptr && hParent->IsValid())
 		pParent = hParent->get();
 	return CreateGUIElement(name, pParent);

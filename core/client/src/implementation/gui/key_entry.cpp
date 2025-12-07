@@ -12,15 +12,15 @@ import :gui.key_entry;
 // Don't allow same key for 'key 1' and 'key 2'
 // Enable escape key (To undo binding)
 
-pragma::gui::WIKeyEntry::WIKeyEntry() : WITextEntryBase(), m_bKeyPressed(false), m_key(static_cast<pragma::platform::Key>(-1)) { RegisterCallback<void, pragma::platform::Key, pragma::platform::Key>("OnKeyChanged"); }
+pragma::gui::types::WIKeyEntry::WIKeyEntry() : WITextEntryBase(), m_bKeyPressed(false), m_key(static_cast<pragma::platform::Key>(-1)) { RegisterCallback<void, pragma::platform::Key, pragma::platform::Key>("OnKeyChanged"); }
 
-pragma::gui::WIKeyEntry::~WIKeyEntry()
+pragma::gui::types::WIKeyEntry::~WIKeyEntry()
 {
 	if(m_hMouseTrap.IsValid())
 		m_hMouseTrap->Remove();
 }
 
-void pragma::gui::WIKeyEntry::OnTextChanged(const pragma::string::Utf8String &text, bool changedByUser)
+void pragma::gui::types::WIKeyEntry::OnTextChanged(const pragma::string::Utf8String &text, bool changedByUser)
 {
 	WITextEntryBase::OnTextChanged(text, changedByUser);
 	if(!m_hText.IsValid())
@@ -33,7 +33,7 @@ void pragma::gui::WIKeyEntry::OnTextChanged(const pragma::string::Utf8String &te
 	t->CenterToParentY();
 }
 
-void pragma::gui::WIKeyEntry::Initialize()
+void pragma::gui::types::WIKeyEntry::Initialize()
 {
 	WITextEntryBase::Initialize();
 	SetHeight(24);
@@ -50,7 +50,7 @@ void pragma::gui::WIKeyEntry::Initialize()
 	ApplyKey(static_cast<pragma::platform::Key>(-1));
 }
 
-void pragma::gui::WIKeyEntry::SetSize(int x, int y)
+void pragma::gui::types::WIKeyEntry::SetSize(int x, int y)
 {
 	WITextEntryBase::SetSize(x, y);
 	if(!m_hText.IsValid())
@@ -59,7 +59,7 @@ void pragma::gui::WIKeyEntry::SetSize(int x, int y)
 	OnTextChanged(t->GetText(), false);
 }
 
-util::EventReply pragma::gui::WIKeyEntry::KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+util::EventReply pragma::gui::types::WIKeyEntry::KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	if(WIBase::KeyboardCallback(key, scanCode, state, mods) == util::EventReply::Handled)
 		return util::EventReply::Handled;
@@ -68,7 +68,7 @@ util::EventReply pragma::gui::WIKeyEntry::KeyboardCallback(pragma::platform::Key
 	ApplyKey(key);
 	return util::EventReply::Handled;
 }
-util::EventReply pragma::gui::WIKeyEntry::ScrollCallback(Vector2 offset, bool offsetAsPixels)
+util::EventReply pragma::gui::types::WIKeyEntry::ScrollCallback(Vector2 offset, bool offsetAsPixels)
 {
 	if(WIBase::ScrollCallback(offset, offsetAsPixels) == util::EventReply::Handled)
 		return util::EventReply::Handled;
@@ -78,14 +78,14 @@ util::EventReply pragma::gui::WIKeyEntry::ScrollCallback(Vector2 offset, bool of
 		ApplyKey(static_cast<pragma::platform::Key>(GLFW_CUSTOM_KEY_SCRL_DOWN));
 	return util::EventReply::Handled;
 }
-void pragma::gui::WIKeyEntry::SetKey(pragma::platform::Key key)
+void pragma::gui::types::WIKeyEntry::SetKey(pragma::platform::Key key)
 {
 	if(key == m_key)
 		return;
 	ApplyKey(key);
 }
-pragma::platform::Key pragma::gui::WIKeyEntry::GetKey() const { return m_key; }
-void pragma::gui::WIKeyEntry::ApplyKey(pragma::platform::Key key)
+pragma::platform::Key pragma::gui::types::WIKeyEntry::GetKey() const { return m_key; }
+void pragma::gui::types::WIKeyEntry::ApplyKey(pragma::platform::Key key)
 {
 	auto prevKey = m_key;
 	if(umath::to_integral(key) >= 'A' && umath::to_integral(key) <= 'Z')
@@ -102,15 +102,15 @@ void pragma::gui::WIKeyEntry::ApplyKey(pragma::platform::Key key)
 	KillFocus();
 	CallCallbacks<void, pragma::platform::Key, pragma::platform::Key>("OnKeyChanged", prevKey, key);
 }
-util::EventReply pragma::gui::WIKeyEntry::CharCallback(unsigned int c, pragma::platform::Modifier mods) { return WIBase::CharCallback(c, mods); }
-void pragma::gui::WIKeyEntry::OnFocusGained()
+util::EventReply pragma::gui::types::WIKeyEntry::CharCallback(unsigned int c, pragma::platform::Modifier mods) { return WIBase::CharCallback(c, mods); }
+void pragma::gui::types::WIKeyEntry::OnFocusGained()
 {
 	WITextEntryBase::OnFocusGained();
 	if(m_hMouseTrap.IsValid())
 		m_hMouseTrap->Remove();
 	m_previousKey = GetText().cpp_str();
 	SetText(pragma::locale::get_text("press_a_key"));
-	auto *pRect = WGUI::GetInstance().Create<WIBase>();
+	auto *pRect = pragma::gui::WGUI::GetInstance().Create<WIBase>();
 	m_hMouseTrap = pRect->GetHandle();
 	pRect->SetAutoAlignToParent(true);
 	pRect->SetZPos(10'000);
@@ -146,7 +146,7 @@ void pragma::gui::WIKeyEntry::OnFocusGained()
 	}));
 	m_bKeyPressed = false;
 }
-void pragma::gui::WIKeyEntry::OnFocusKilled()
+void pragma::gui::types::WIKeyEntry::OnFocusKilled()
 {
 	WITextEntryBase::OnFocusKilled();
 	if(m_bKeyPressed == false)

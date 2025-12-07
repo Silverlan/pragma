@@ -2008,7 +2008,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 		text += ")";
 	};
 
-	const auto fUpdateGraphicalGUI = [](pragma::debug::DebugBehaviorTreeNode &dbgTree, pragma::gui::WILuaBase &pElLua) {
+	const auto fUpdateGraphicalGUI = [](pragma::debug::DebugBehaviorTreeNode &dbgTree, pragma::gui::types::WILuaBase &pElLua) {
 		auto *l = pragma::get_cgame()->GetLuaState();
 		auto t = Lua::CreateTable(l);
 		std::function<void(pragma::debug::DebugBehaviorTreeNode &)> fPushNode = nullptr;
@@ -2080,7 +2080,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 	if(dbgAiSchedule != nullptr && bUseGraphicVisualization == true && (updateState == 0 || updateState == 1)) {
 		auto *pEl = dbgAiSchedule->GetGUIElement();
 		if(pEl != nullptr) {
-			auto *pElLua = static_cast<pragma::gui::WILuaBase *>(pEl);
+			auto *pElLua = static_cast<pragma::gui::types::WILuaBase *>(pEl);
 			auto *l = pragma::get_cgame()->GetLuaState();
 			auto o = pElLua->GetLuaObject();
 			o.push(l); /* 1 */
@@ -2142,8 +2142,8 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 		}
 		ent = hEnt->get();
 
-		std::function<void(NetPacket &, pragma::debug::DebugBehaviorTreeNode &, pragma::gui::WITreeListElement *)> fReadUpdates = nullptr;
-		fReadUpdates = [&fReadUpdates, bUseGraphicVisualization](NetPacket &p, pragma::debug::DebugBehaviorTreeNode &node, pragma::gui::WITreeListElement *pEl) {
+		std::function<void(NetPacket &, pragma::debug::DebugBehaviorTreeNode &, pragma::gui::types::WITreeListElement *)> fReadUpdates = nullptr;
+		fReadUpdates = [&fReadUpdates, bUseGraphicVisualization](NetPacket &p, pragma::debug::DebugBehaviorTreeNode &node, pragma::gui::types::WITreeListElement *pEl) {
 			if(bUseGraphicVisualization == false && pEl == nullptr)
 				return;
 			auto state = p->Read<pragma::debug::DebugBehaviorTreeNode::State>();
@@ -2171,7 +2171,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 						break;
 					auto &child = node.children[i];
 					auto &guiChild = guiChildren[i];
-					fReadUpdates(p, *child, const_cast<pragma::gui::WITreeListElement *>(static_cast<const pragma::gui::WITreeListElement *>(guiChild.get())));
+					fReadUpdates(p, *child, const_cast<pragma::gui::types::WITreeListElement *>(static_cast<const pragma::gui::types::WITreeListElement *>(guiChild.get())));
 				}
 			}
 			else {
@@ -2179,7 +2179,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 					fReadUpdates(p, *child, nullptr);
 			}
 		};
-		auto *pRoot = (bUseGraphicVisualization == false) ? static_cast<pragma::gui::WITreeList *>(pEl)->GetRootItem() : nullptr;
+		auto *pRoot = (bUseGraphicVisualization == false) ? static_cast<pragma::gui::types::WITreeList *>(pEl)->GetRootItem() : nullptr;
 		if(bUseGraphicVisualization == false && pRoot == nullptr)
 			return;
 		if(bUseGraphicVisualization == false) {
@@ -2187,25 +2187,25 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 				auto &children = pRoot->GetItems();
 				if(children.empty() || children.front().IsValid() == false)
 					return;
-				pRoot = const_cast<pragma::gui::WITreeListElement *>(static_cast<const pragma::gui::WITreeListElement *>(children.front().get()));
+				pRoot = const_cast<pragma::gui::types::WITreeListElement *>(static_cast<const pragma::gui::types::WITreeListElement *>(children.front().get()));
 			}
 		}
 
 		fReadUpdates(packet, *dbgTree, pRoot);
 		if(bUseGraphicVisualization == true)
-			fUpdateGraphicalGUI(*dbgTree, static_cast<pragma::gui::WILuaBase &>(*pEl));
+			fUpdateGraphicalGUI(*dbgTree, static_cast<pragma::gui::types::WILuaBase &>(*pEl));
 		return;
 	}
 
-	WIBase *pEl = nullptr;
+	pragma::gui::types::WIBase *pEl = nullptr;
 	if(bUseGraphicVisualization == false) {
-		auto *pTreeList = WGUI::GetInstance().Create<pragma::gui::WITreeList>();
+		auto *pTreeList = pragma::gui::WGUI::GetInstance().Create<pragma::gui::types::WITreeList>();
 		pEl = pTreeList;
 		if(pTreeList == nullptr)
 			return;
 		pTreeList->SetVisible(false);
-		std::function<void(const pragma::debug::DebugBehaviorTreeNode &, pragma::gui::WITreeListElement *)> fAddItems = nullptr;
-		fAddItems = [&fAddItems](const pragma::debug::DebugBehaviorTreeNode &node, pragma::gui::WITreeListElement *pEl) {
+		std::function<void(const pragma::debug::DebugBehaviorTreeNode &, pragma::gui::types::WITreeListElement *)> fAddItems = nullptr;
+		fAddItems = [&fAddItems](const pragma::debug::DebugBehaviorTreeNode &node, pragma::gui::types::WITreeListElement *pEl) {
 			Color col;
 			std::string text;
 			fGetStateInfo(node, col, text);
@@ -2226,7 +2226,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 		pTreeList->SetSize(1024, 1024); // TODO: Size to contents
 	}
 	else {
-		auto *pGraphics = dynamic_cast<pragma::gui::WILuaBase *>(pragma::get_cgame()->CreateGUIElement("WIDebugBehaviorTree"));
+		auto *pGraphics = dynamic_cast<pragma::gui::types::WILuaBase *>(pragma::get_cgame()->CreateGUIElement("WIDebugBehaviorTree"));
 		if(pGraphics == nullptr)
 			return;
 		fUpdateGraphicalGUI(*dbgTree, *pGraphics);

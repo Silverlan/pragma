@@ -203,7 +203,7 @@ void pragma::debug::DebugRenderer::WorldObject::UpdateColorBuffer()
 
 ///////////////////////////
 
-pragma::debug::DebugRenderer::TextObject::TextObject(WIText *elText) : BaseObject(), m_hText(elText->GetHandle()), m_hCbRender()
+pragma::debug::DebugRenderer::TextObject::TextObject(pragma::gui::types::WIText *elText) : BaseObject(), m_hText(elText->GetHandle()), m_hCbRender()
 {
 	elText->AddCallback("OnTextRendered", FunctionCallback<void, std::reference_wrapper<const std::shared_ptr<prosper::RenderTarget>>>::Create([this](std::reference_wrapper<const std::shared_ptr<prosper::RenderTarget>> rt) {
 		if(pragma::ShaderDebugTexture::DESCRIPTOR_SET_TEXTURE.IsValid() == false)
@@ -224,7 +224,7 @@ pragma::debug::DebugRenderer::TextObject::~TextObject()
 	if(m_hCbRender.IsValid())
 		m_hCbRender.Remove();
 }
-WIText *pragma::debug::DebugRenderer::TextObject::GetTextElement() const { return static_cast<WIText *>(m_hText.get()); }
+pragma::gui::types::WIText *pragma::debug::DebugRenderer::TextObject::GetTextElement() const { return static_cast<pragma::gui::types::WIText *>(m_hText.get()); }
 void pragma::debug::DebugRenderer::TextObject::Initialize(CallbackHandle &hCallback) { m_hCbRender = hCallback; }
 prosper::IDescriptorSet *pragma::debug::DebugRenderer::TextObject::GetTextDescriptorSet() const { return (m_descSetGroupText != nullptr) ? m_descSetGroupText->GetDescriptorSet() : nullptr; }
 pragma::debug::DebugRenderer::ObjectType pragma::debug::DebugRenderer::TextObject::GetType() const { return ObjectType::Text; }
@@ -319,9 +319,9 @@ std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> pragma::debug::DebugRe
 	auto *poutlineColor = renderInfo.outlineColor ? &*renderInfo.outlineColor : nullptr;
 	return draw_box(renderInfo.pose.GetOrigin() + center, start - center, end - center, renderInfo, poutlineColor);
 }
-static WIText *create_text_element(const std::string &text)
+static pragma::gui::types::WIText *create_text_element(const std::string &text)
 {
-	auto *el = static_cast<WIText *>(pragma::get_cgame()->CreateGUIElement("WIText"));
+	auto *el = static_cast<pragma::gui::types::WIText *>(pragma::get_cgame()->CreateGUIElement("WIText"));
 	if(el == nullptr)
 		return nullptr;
 	el->SetText(text);
@@ -330,7 +330,7 @@ static WIText *create_text_element(const std::string &text)
 	el->SetCacheEnabled(true);
 	return el;
 }
-static std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> draw_text(WIText *el, const Vector3 &pos, const Vector2 &worldSize, float duration)
+static std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> draw_text(pragma::gui::types::WIText *el, const Vector3 &pos, const Vector2 &worldSize, float duration)
 {
 	auto &sz = el->GetSize();
 	if(sz.x <= 0 || sz.y <= 0)
@@ -345,7 +345,7 @@ static std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> draw_text(WITex
 		auto *cam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
 		if(!hEl.IsValid() || cam == nullptr)
 			return;
-		auto *el = static_cast<const WIText *>(hEl.get());
+		auto *el = static_cast<const pragma::gui::types::WIText *>(hEl.get());
 		auto rot = cam->GetEntity().GetRotation();
 		ptrO->SetRotation(rot);
 

@@ -264,7 +264,7 @@ static void debug_render_depth_buffer(pragma::NetworkState *state, pragma::BaseP
 			auto sceneC = hEnt.get()->GetComponent<pragma::CSceneComponent>();
 			if(sceneC.expired()) {
 				Con::cwar << "Scene not found!" << Con::endl;
-				return WIHandle {};
+				return pragma::gui::WIHandle {};
 			}
 			scene = sceneC.get();
 		}
@@ -273,10 +273,10 @@ static void debug_render_depth_buffer(pragma::NetworkState *state, pragma::BaseP
 		auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
 		auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 		if(raster.expired())
-			return WIHandle {};
-		auto &wgui = WGUI::GetInstance();
+			return pragma::gui::WIHandle {};
+		auto &wgui = pragma::gui::WGUI::GetInstance();
 
-		auto r = wgui.Create<pragma::gui::WIDebugDepthTexture>();
+		auto r = wgui.Create<pragma::gui::types::WIDebugDepthTexture>();
 		r->SetTexture(*raster->GetPrepass().textureDepth, {prosper::PipelineStageFlags::LateFragmentTestsBit, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AccessFlags::DepthStencilAttachmentWriteBit},
 		  {prosper::PipelineStageFlags::EarlyFragmentTestsBit, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AccessFlags::DepthStencilAttachmentWriteBit});
 		r->SetShouldResolveImage(true);
@@ -289,7 +289,7 @@ static void debug_render_depth_buffer(pragma::NetworkState *state, pragma::BaseP
 		auto *el = d->GetGUIElement();
 		if(el == nullptr)
 			return;
-		static_cast<pragma::gui::WIDebugDepthTexture *>(el)->Update();
+		static_cast<pragma::gui::types::WIDebugDepthTexture *>(el)->Update();
 	}));
 }
 namespace {

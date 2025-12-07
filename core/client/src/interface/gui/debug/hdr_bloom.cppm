@@ -9,7 +9,7 @@ export module pragma.client:gui.debug_hdr_bloom;
 
 export import pragma.gui;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIDebugHDRBloom : public WITexturedRect {
 	  public:
 		WIDebugHDRBloom();

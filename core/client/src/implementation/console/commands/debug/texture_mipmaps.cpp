@@ -13,14 +13,14 @@ static void debug_font(pragma::NetworkState *, pragma::BasePlayerComponent *, st
 {
 	if(argv.empty()) {
 		Con::cout << "Available fonts:" << Con::endl;
-		auto &fonts = FontManager::GetFonts();
+		auto &fonts = pragma::gui::FontManager::GetFonts();
 		for(auto &pair : fonts)
 			Con::cout << pair.first << Con::endl;
 		Con::cout << Con::endl;
 		return;
 	}
 	auto &fontName = argv.front();
-	auto font = FontManager::GetFont(fontName);
+	auto font = pragma::gui::FontManager::GetFont(fontName);
 	if(font == nullptr) {
 		Con::cout << "No font by that name found!" << Con::endl;
 		return;
@@ -45,8 +45,8 @@ static void debug_font(pragma::NetworkState *, pragma::BasePlayerComponent *, st
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
 	if(dbg == nullptr) {
 		dbg = std::make_unique<DebugGameGUI>([glyphMap, width, height]() {
-			auto &wgui = WGUI::GetInstance();
-			auto *r = wgui.Create<pragma::gui::WIDebugMipMaps>();
+			auto &wgui = pragma::gui::WGUI::GetInstance();
+			auto *r = wgui.Create<pragma::gui::types::WIDebugMipMaps>();
 			r->SetSize(width, height);
 			r->SetTexture(glyphMap);
 			r->Update();
@@ -100,8 +100,8 @@ static void debug_texture_mipmaps(pragma::NetworkState *, pragma::BasePlayerComp
 		if(type != msys::TextureType::Invalid)
 			Con::cout << "File image type: " << magic_enum::enum_name(type) << Con::endl;
 		dbg = std::make_unique<DebugGameGUI>([vkTexture]() {
-			auto &wgui = WGUI::GetInstance();
-			auto *r = wgui.Create<pragma::gui::WIDebugMipMaps>();
+			auto &wgui = pragma::gui::WGUI::GetInstance();
+			auto *r = wgui.Create<pragma::gui::types::WIDebugMipMaps>();
 			r->SetTexture(vkTexture);
 			r->Update();
 			return r->GetHandle();

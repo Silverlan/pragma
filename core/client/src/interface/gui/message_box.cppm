@@ -8,17 +8,17 @@ export module pragma.client:gui.message_box;
 
 export import pragma.gui;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIMessageBox : public WIBase {
 	  public:
 		enum class Button : Int32 { NONE = 0, APPLY = 1, CANCEL = 2, YES = 4, NO = 8, YESNO = 12, ACCEPT = 16, DECLINE = 32, OK = 64 };
 	  private:
 		static void __buttonCallback(WIHandle hMessageBox, WIMessageBox::Button button);
 	  protected:
-		WIHandle m_hBg;
-		WIHandle m_hMessage;
-		WIHandle m_hText;
-		std::vector<WIHandle> m_buttons;
+		pragma::gui::WIHandle m_hBg;
+		pragma::gui::WIHandle m_hMessage;
+		pragma::gui::WIHandle m_hText;
+		std::vector<pragma::gui::WIHandle> m_buttons;
 		std::function<void(WIMessageBox *, Button)> m_buttonCallback;
 		WIButton *AddButton(const std::string &text, Button button);
 		virtual void OnRemove() override;
@@ -38,7 +38,7 @@ export namespace pragma::gui {
 };
 
 export {
-	DLLCLIENT pragma::gui::WIMessageBox::Button operator|(const pragma::gui::WIMessageBox::Button &a, const pragma::gui::WIMessageBox::Button &b);
-	DLLCLIENT pragma::gui::WIMessageBox::Button operator|=(const pragma::gui::WIMessageBox::Button &a, const pragma::gui::WIMessageBox::Button &b);
-	DLLCLIENT pragma::gui::WIMessageBox::Button operator&(const pragma::gui::WIMessageBox::Button &a, const pragma::gui::WIMessageBox::Button &b);
+	DLLCLIENT pragma::gui::types::WIMessageBox::Button operator|(const pragma::gui::types::WIMessageBox::Button &a, const pragma::gui::types::WIMessageBox::Button &b);
+	DLLCLIENT pragma::gui::types::WIMessageBox::Button operator|=(const pragma::gui::types::WIMessageBox::Button &a, const pragma::gui::types::WIMessageBox::Button &b);
+	DLLCLIENT pragma::gui::types::WIMessageBox::Button operator&(const pragma::gui::types::WIMessageBox::Button &a, const pragma::gui::types::WIMessageBox::Button &b);
 }

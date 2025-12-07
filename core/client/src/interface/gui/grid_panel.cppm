@@ -8,7 +8,7 @@ export module pragma.client:gui.grid_panel;
 
 export import :gui.table;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIGridPanel : public WITable {
 	public:
 		enum class DLLCLIENT ResizeMode { FitToChildren = 0, Uniform };

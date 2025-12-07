@@ -10,7 +10,7 @@ export module pragma.client:gui.console;
 export import :gui.command_line_entry;
 export import :gui.frame;
 
-export namespace pragma::gui {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIConsole : public WIBase {
 	public:
 		static WIConsole *Open();
@@ -54,11 +54,11 @@ export namespace pragma::gui {
 		uint32_t m_maxLogLineCount = 1'000u;
 		// Console output which hasn't been finished with a new-line character yet
 		std::string m_pendingConsoleOutput = {};
-		WIHandle m_hFrame = {};
-		WIHandle m_hLog = {};
-		WIHandle m_hLogBg = {};
-		WIHandle m_hCommandEntry = {};
-		WIHandle m_hTopSnapArea = {};
+		pragma::gui::WIHandle m_hFrame = {};
+		pragma::gui::WIHandle m_hLog = {};
+		pragma::gui::WIHandle m_hLogBg = {};
+		pragma::gui::WIHandle m_hCommandEntry = {};
+		pragma::gui::WIHandle m_hTopSnapArea = {};
 		CallbackHandle m_cbConsoleOutput = {};
 		CallbackHandle m_cbMainMenuVisibility = {};
 		CallbackHandle m_cbCommandEntryVisibility = {};

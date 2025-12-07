@@ -10,17 +10,17 @@ import :gui.choice_list;
 import pragma.gui;
 import pragma.string.unicode;
 
-pragma::gui::WIChoiceList::WIChoiceList() : WIBase(), m_selected(UInt(-1)) { RegisterCallback<void, uint32_t, std::reference_wrapper<std::string>>("OnSelect"); }
+pragma::gui::types::WIChoiceList::WIChoiceList() : WIBase(), m_selected(UInt(-1)) { RegisterCallback<void, uint32_t, std::reference_wrapper<std::string>>("OnSelect"); }
 
-pragma::gui::WIChoiceList::~WIChoiceList() {}
+pragma::gui::types::WIChoiceList::~WIChoiceList() {}
 
-void pragma::gui::WIChoiceList::Initialize()
+void pragma::gui::types::WIChoiceList::Initialize()
 {
 	WIBase::Initialize();
 	m_text = CreateChild<WIText>();
 	m_text->SetAutoCenterToParent(true);
 	m_buttonPrev = CreateChild<WIButton>();
-	WIHandle hChoiceList = GetHandle();
+	pragma::gui::WIHandle hChoiceList = GetHandle();
 	auto *buttonPrev = static_cast<WIButton *>(m_buttonPrev.get());
 	buttonPrev->SetText("<");
 	buttonPrev->AddCallback("OnPressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hChoiceList](util::EventReply *reply) mutable -> CallbackReturnType {
@@ -43,7 +43,7 @@ void pragma::gui::WIChoiceList::Initialize()
 	}));
 }
 
-void pragma::gui::WIChoiceList::UpdateButtons()
+void pragma::gui::types::WIChoiceList::UpdateButtons()
 {
 	if(m_buttonPrev.IsValid())
 		m_buttonPrev->SetVisible((m_selected > 0) ? true : false);
@@ -51,7 +51,7 @@ void pragma::gui::WIChoiceList::UpdateButtons()
 		m_buttonNext->SetVisible((m_selected < (m_choices.size() - 1)) ? true : false);
 }
 
-void pragma::gui::WIChoiceList::SetSize(int x, int y)
+void pragma::gui::types::WIChoiceList::SetSize(int x, int y)
 {
 	WIBase::SetSize(x, y);
 	if(m_buttonPrev.IsValid()) {
@@ -65,7 +65,7 @@ void pragma::gui::WIChoiceList::SetSize(int x, int y)
 	}
 }
 
-void pragma::gui::WIChoiceList::SetChoices(const std::vector<std::string> &choices)
+void pragma::gui::types::WIChoiceList::SetChoices(const std::vector<std::string> &choices)
 {
 	UInt idx = 0;
 	for(auto it = choices.begin(); it != choices.end(); ++it) {
@@ -73,22 +73,22 @@ void pragma::gui::WIChoiceList::SetChoices(const std::vector<std::string> &choic
 		idx++;
 	}
 }
-void pragma::gui::WIChoiceList::SetChoices(const std::vector<std::pair<std::string, std::string>> &choices)
+void pragma::gui::types::WIChoiceList::SetChoices(const std::vector<std::pair<std::string, std::string>> &choices)
 {
 	for(auto &pair : choices)
 		AddChoice(pair.second, pair.first);
 }
-void pragma::gui::WIChoiceList::AddChoice(const std::string &choice, const std::string &val)
+void pragma::gui::types::WIChoiceList::AddChoice(const std::string &choice, const std::string &val)
 {
 	m_choices.push_back(Choice(choice, val));
 	if(m_choices.size() == 1)
 		SelectChoice(0);
 	UpdateButtons();
 }
-void pragma::gui::WIChoiceList::AddChoice(const std::string &choice) { AddChoice(choice, std::to_string(m_choices.size())); }
-uint32_t pragma::gui::WIChoiceList::GetChoiceCount() const { return static_cast<uint32_t>(m_choices.size()); }
+void pragma::gui::types::WIChoiceList::AddChoice(const std::string &choice) { AddChoice(choice, std::to_string(m_choices.size())); }
+uint32_t pragma::gui::types::WIChoiceList::GetChoiceCount() const { return static_cast<uint32_t>(m_choices.size()); }
 
-void pragma::gui::WIChoiceList::SelectChoice(UInt ichoice)
+void pragma::gui::types::WIChoiceList::SelectChoice(UInt ichoice)
 {
 	if(ichoice >= m_choices.size())
 		return;
@@ -104,7 +104,7 @@ void pragma::gui::WIChoiceList::SelectChoice(UInt ichoice)
 	CallCallbacks<void, uint32_t, std::reference_wrapper<std::string>>("OnSelect", ichoice, std::ref(choice.value));
 }
 
-void pragma::gui::WIChoiceList::SelectChoice(const std::string &choiceName)
+void pragma::gui::types::WIChoiceList::SelectChoice(const std::string &choiceName)
 {
 	UInt i = 0;
 	for(auto it = m_choices.begin(); it != m_choices.end(); ++it, ++i) {
@@ -116,19 +116,19 @@ void pragma::gui::WIChoiceList::SelectChoice(const std::string &choiceName)
 	}
 }
 
-void pragma::gui::WIChoiceList::SelectNext()
+void pragma::gui::types::WIChoiceList::SelectNext()
 {
 	if(m_selected >= m_choices.size() - 1)
 		return;
 	SelectChoice(m_selected + 1);
 }
-void pragma::gui::WIChoiceList::SelectPrevious()
+void pragma::gui::types::WIChoiceList::SelectPrevious()
 {
 	if(m_selected == 0)
 		return;
 	SelectChoice(m_selected - 1);
 }
-const pragma::gui::WIChoiceList::Choice *pragma::gui::WIChoiceList::GetSelectedChoice()
+const pragma::gui::types::WIChoiceList::Choice *pragma::gui::types::WIChoiceList::GetSelectedChoice()
 {
 	if(m_selected >= m_choices.size())
 		return nullptr;

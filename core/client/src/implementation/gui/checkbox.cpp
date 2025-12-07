@@ -10,11 +10,11 @@ import :gui.silk_icon;
 
 import :client_state;
 
-pragma::gui::WICheckbox::WICheckbox() : WIRect(), m_bChecked(false) { RegisterCallback<void, bool>("OnChange"); }
+pragma::gui::types::WICheckbox::WICheckbox() : WIRect(), m_bChecked(false) { RegisterCallback<void, bool>("OnChange"); }
 
-pragma::gui::WICheckbox::~WICheckbox() {}
+pragma::gui::types::WICheckbox::~WICheckbox() {}
 
-void pragma::gui::WICheckbox::Initialize()
+void pragma::gui::types::WICheckbox::Initialize()
 {
 	WIRect::Initialize();
 
@@ -32,16 +32,16 @@ void pragma::gui::WICheckbox::Initialize()
 	SetSize(18, 18);
 	SetMouseInputEnabled(true);
 }
-void pragma::gui::WICheckbox::SetChecked(bool bChecked)
+void pragma::gui::types::WICheckbox::SetChecked(bool bChecked)
 {
 	m_bChecked = bChecked;
 	if(m_hTick.IsValid())
 		m_hTick->SetVisible(bChecked);
 	CallCallbacks<void, bool>("OnChange", bChecked);
 }
-bool pragma::gui::WICheckbox::IsChecked() { return m_bChecked; }
-void pragma::gui::WICheckbox::Toggle() { SetChecked(!m_bChecked); }
-util::EventReply pragma::gui::WICheckbox::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+bool pragma::gui::types::WICheckbox::IsChecked() { return m_bChecked; }
+void pragma::gui::types::WICheckbox::Toggle() { SetChecked(!m_bChecked); }
+util::EventReply pragma::gui::types::WICheckbox::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	if(WIRect::MouseCallback(button, state, mods) == util::EventReply::Handled)
 		return util::EventReply::Handled;
@@ -49,7 +49,7 @@ util::EventReply pragma::gui::WICheckbox::MouseCallback(pragma::platform::MouseB
 		Toggle();
 	return util::EventReply::Handled;
 }
-void pragma::gui::WICheckbox::SetSize(int x, int y)
+void pragma::gui::types::WICheckbox::SetSize(int x, int y)
 {
 	WIRect::SetSize(x, y);
 	if(m_hOutline.IsValid()) {

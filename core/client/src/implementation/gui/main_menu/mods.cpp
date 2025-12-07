@@ -20,13 +20,13 @@ import :engine;
 
 /////////////////////////
 
-pragma::gui::WIMainMenuMods::DownloadInfo::DownloadInfo(const std::string &_uniqueId) : uniqueId(_uniqueId), downloadProgress(::util::make_shared<std::atomic<float>>(0.f)) {}
+pragma::gui::types::WIMainMenuMods::DownloadInfo::DownloadInfo(const std::string &_uniqueId) : uniqueId(_uniqueId), downloadProgress(::util::make_shared<std::atomic<float>>(0.f)) {}
 
 /////////////////////////
 
-pragma::gui::WIMainMenuMods::WIMainMenuMods() : WIMainMenuBase(), WIChromiumPage(this) {}
+pragma::gui::types::WIMainMenuMods::WIMainMenuMods() : WIMainMenuBase(), WIChromiumPage(this) {}
 
-pragma::gui::WIMainMenuMods::~WIMainMenuMods()
+pragma::gui::types::WIMainMenuMods::~WIMainMenuMods()
 {
 	if(m_addonInstallManager != nullptr) {
 		m_addonInstallManager->CancelDownload();
@@ -34,7 +34,7 @@ pragma::gui::WIMainMenuMods::~WIMainMenuMods()
 	}
 }
 
-void pragma::gui::WIMainMenuMods::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void pragma::gui::types::WIMainMenuMods::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	WIBase::Think(drawCmd);
 	if(IsVisible() == true) {
@@ -51,7 +51,7 @@ void pragma::gui::WIMainMenuMods::Think(const std::shared_ptr<prosper::IPrimaryC
 	}
 }
 
-bool pragma::gui::WIMainMenuMods::SetAddonSubscription(const std::shared_ptr<pragma::AddonInfo> &addon, bool bSubscribe)
+bool pragma::gui::types::WIMainMenuMods::SetAddonSubscription(const std::shared_ptr<pragma::AddonInfo> &addon, bool bSubscribe)
 {
 	m_downloadMutex.lock();
 	auto &uniqueId = addon->GetUniqueId();
@@ -77,9 +77,9 @@ bool pragma::gui::WIMainMenuMods::SetAddonSubscription(const std::shared_ptr<pra
 	return true;
 }
 
-bool pragma::gui::WIMainMenuMods::SetAddonSubscription(const std::string &uniqueId, bool bSubscribe) { return SetAddonSubscription(::util::make_shared<pragma::AddonInfo>("", util::Version(0, 0, 0), uniqueId), bSubscribe); }
+bool pragma::gui::types::WIMainMenuMods::SetAddonSubscription(const std::string &uniqueId, bool bSubscribe) { return SetAddonSubscription(::util::make_shared<pragma::AddonInfo>("", util::Version(0, 0, 0), uniqueId), bSubscribe); }
 
-void pragma::gui::WIMainMenuMods::OnFirstEntered()
+void pragma::gui::types::WIMainMenuMods::OnFirstEntered()
 {
 	auto lan = pragma::locale::get_language();
 	if(lan != "de")
@@ -102,20 +102,20 @@ void pragma::gui::WIMainMenuMods::OnFirstEntered()
 	WIChromiumPage::OnFirstEntered();
 }
 
-void pragma::gui::WIMainMenuMods::InitializeWebView(WIBase *el)
+void pragma::gui::types::WIMainMenuMods::InitializeWebView(WIBase *el)
 {
 	WIChromiumPage::InitializeWebView(el);
 	el->SetSize(1024, 768);
 	el->SetPos(100, 200);
 }
 
-void pragma::gui::WIMainMenuMods::OnVisibilityChanged(bool bVisible)
+void pragma::gui::types::WIMainMenuMods::OnVisibilityChanged(bool bVisible)
 {
 	WIBase::OnVisibilityChanged(bVisible);
 	WIChromiumPage::OnVisibilityChanged(bVisible);
 }
 
-void pragma::gui::WIMainMenuMods::InitializeJavascript()
+void pragma::gui::types::WIMainMenuMods::InitializeJavascript()
 {
 	WIChromiumPage::InitializeJavascript();
 #ifdef PRAGMA_CHROMIUM_ENABLED
@@ -147,7 +147,7 @@ void pragma::gui::WIMainMenuMods::InitializeJavascript()
 #endif
 }
 
-void pragma::gui::WIMainMenuMods::Initialize()
+void pragma::gui::types::WIMainMenuMods::Initialize()
 {
 	WIMainMenuBase::Initialize();
 	EnableThinking();

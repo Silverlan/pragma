@@ -10,19 +10,19 @@ import :gui.progress_bar;
 
 import pragma.gui;
 
-pragma::gui::WISlider::WISlider() : WIProgressBar(), m_bMoveSlider(false) { SetMouseInputEnabled(true); }
+pragma::gui::types::WISlider::WISlider() : WIProgressBar(), m_bMoveSlider(false) { SetMouseInputEnabled(true); }
 
-pragma::gui::WISlider::~WISlider() {}
+pragma::gui::types::WISlider::~WISlider() {}
 
-void pragma::gui::WISlider::Initialize()
+void pragma::gui::types::WISlider::Initialize()
 {
 	WIProgressBar::Initialize();
 	EnableThinking();
 }
 
-void pragma::gui::WISlider::SetSize(int x, int y) { WIProgressBar::SetSize(x, y); }
+void pragma::gui::types::WISlider::SetSize(int x, int y) { WIProgressBar::SetSize(x, y); }
 
-void pragma::gui::WISlider::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void pragma::gui::types::WISlider::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	WIProgressBar::Think(drawCmd);
 	if(m_bMoveSlider == false)
@@ -34,9 +34,9 @@ void pragma::gui::WISlider::Think(const std::shared_ptr<prosper::IPrimaryCommand
 	SetProgress(v);
 }
 
-bool pragma::gui::WISlider::IsBeingDragged() const { return m_bMoveSlider; }
+bool pragma::gui::types::WISlider::IsBeingDragged() const { return m_bMoveSlider; }
 
-util::EventReply pragma::gui::WISlider::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+util::EventReply pragma::gui::types::WISlider::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	if(WIProgressBar::MouseCallback(button, state, mods) == util::EventReply::Handled)
 		return util::EventReply::Handled;

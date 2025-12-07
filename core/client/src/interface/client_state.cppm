@@ -77,14 +77,14 @@ export namespace pragma {
 		float m_volMaster;
 		std::unordered_map<pragma::audio::ALSoundType, float> m_volTypes;
 
-		WIHandle m_hMainMenu;
-		WIHandle m_hFps;
+		pragma::gui::WIHandle m_hMainMenu;
+		pragma::gui::WIHandle m_hFps;
 		pragma::rendering::GameWorldShaderSettings m_worldShaderSettings {};
 		LastConnectionInfo m_lastConnection {};
 	  protected:
 		std::shared_ptr<Lua::Interface> m_luaGUI = nullptr;
 		void InitializeGUILua();
-		std::vector<std::function<luabind::object(lua::State *, WIBase &)>> m_guiLuaWrapperFactories;
+		std::vector<std::function<luabind::object(lua::State *, pragma::gui::types::WIBase &)>> m_guiLuaWrapperFactories;
 
 		virtual void InitializeResourceManager() override;
 		void StartResourceTransfer();
@@ -113,8 +113,8 @@ export namespace pragma {
 		virtual void Close() override;
 		virtual console::ConVarMap *GetConVarMap() override;
 		bool IsConnected() const;
-		void AddGUILuaWrapperFactory(const std::function<luabind::object(lua::State *, WIBase &)> &f);
-		std::vector<std::function<luabind::object(lua::State *, WIBase &)>> &GetGUILuaWrapperFactories();
+		void AddGUILuaWrapperFactory(const std::function<luabind::object(lua::State *, pragma::gui::types::WIBase &)> &f);
+		std::vector<std::function<luabind::object(lua::State *, pragma::gui::types::WIBase &)>> &GetGUILuaWrapperFactories();
 		virtual msys::MaterialManager &GetMaterialManager() override;
 		virtual pragma::ModelSubMesh *CreateSubMesh() const override;
 		virtual ModelMesh *CreateMesh() const override;
@@ -126,7 +126,7 @@ export namespace pragma {
 		const pragma::rendering::GameWorldShaderSettings &GetGameWorldShaderSettings() const { return const_cast<ClientState *>(this)->GetGameWorldShaderSettings(); }
 		void UpdateGameWorldShaderSettings();
 
-		gui::WIMainMenu *GetMainMenu();
+		gui::types::WIMainMenu *GetMainMenu();
 
 		lua::State *GetGUILuaState();
 		Lua::Interface &GetGUILuaInterface();

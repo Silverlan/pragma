@@ -318,7 +318,7 @@ void pragma::CEngine::MouseInput(prosper::Window &window, pragma::platform::Mous
 	auto *client = pragma::get_client_state();
 	if(client != nullptr && client->RawMouseInput(button, state, mods) == false)
 		return;
-	if(WGUI::GetInstance().HandleMouseInput(window, button, state, mods))
+	if(pragma::gui::WGUI::GetInstance().HandleMouseInput(window, button, state, mods))
 		return;
 	button = static_cast<pragma::platform::MouseButton>(umath::to_integral(button) + umath::to_integral(pragma::platform::Key::Last));
 	if(client != nullptr && client->MouseInput(button, state, mods) == false)
@@ -460,7 +460,7 @@ void pragma::CEngine::KeyboardInput(prosper::Window &window, pragma::platform::K
 	auto buttonState = state;
 	auto bValidButtonInput = GetInputButtonState(magnitude, mods, buttonState);
 	if(bValidButtonInput == true) {
-		if(WGUI::GetInstance().HandleKeyboardInput(window, key, scanCode, buttonState, mods))
+		if(pragma::gui::WGUI::GetInstance().HandleKeyboardInput(window, key, scanCode, buttonState, mods))
 			return;
 	}
 	if(client != nullptr && client->KeyboardInput(key, scanCode, state, mods, magnitude) == false)
@@ -478,7 +478,7 @@ void pragma::CEngine::CharInput(prosper::Window &window, unsigned int c)
 	auto *client = pragma::get_client_state();
 	if(client != nullptr && client->RawCharInput(c) == false)
 		return;
-	if(WGUI::GetInstance().HandleCharInput(window, c))
+	if(pragma::gui::WGUI::GetInstance().HandleCharInput(window, c))
 		return;
 	if(client != nullptr && client->CharInput(c) == false)
 		return;
@@ -491,7 +491,7 @@ void pragma::CEngine::ScrollInput(prosper::Window &window, Vector2 offset)
 	auto *client = pragma::get_client_state();
 	if(client != nullptr && client->RawScrollInput(offset) == false)
 		return;
-	if(WGUI::GetInstance().HandleScrollInput(window, offset))
+	if(pragma::gui::WGUI::GetInstance().HandleScrollInput(window, offset))
 		return;
 	if(client != nullptr && client->ScrollInput(offset) == false)
 		return;
@@ -566,7 +566,7 @@ void pragma::CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::s
 	droppedFileNames.reserve(m_droppedFiles.size());
 	for(auto &f : m_droppedFiles)
 		droppedFileNames.push_back(f.fileName);
-	if(WGUI::GetInstance().HandleFileDrop(window, droppedFileNames))
+	if(pragma::gui::WGUI::GetInstance().HandleFileDrop(window, droppedFileNames))
 		return;
 	client->OnFilesDropped(files);
 }
@@ -575,7 +575,7 @@ void pragma::CEngine::OnDragEnter(prosper::Window &window)
 	auto *client = pragma::get_client_state();
 	if(client != nullptr)
 		return;
-	if(WGUI::GetInstance().HandleFileDragEnter(window))
+	if(pragma::gui::WGUI::GetInstance().HandleFileDragEnter(window))
 		return;
 	client->OnDragEnter(window);
 }
@@ -584,7 +584,7 @@ void pragma::CEngine::OnDragExit(prosper::Window &window)
 	auto *client = pragma::get_client_state();
 	if(client != nullptr)
 		return;
-	if(WGUI::GetInstance().HandleFileDragExit(window))
+	if(pragma::gui::WGUI::GetInstance().HandleFileDragExit(window))
 		return;
 	client->OnDragExit(window);
 }
@@ -607,7 +607,7 @@ void pragma::CEngine::OnIMEStatusChanged(prosper::Window &window, bool imeEnable
 	auto *client = pragma::get_client_state();
 	if(client != nullptr)
 		return;
-	WGUI::GetInstance().HandleIMEStatusChanged(window, imeEnabled);
+	pragma::gui::WGUI::GetInstance().HandleIMEStatusChanged(window, imeEnabled);
 	client->OnIMEStatusChanged(window, imeEnabled);
 }
 bool pragma::CEngine::IsWindowFocused() const { return umath::is_flag_set(m_stateFlags, StateFlags::WindowFocused); }
@@ -997,7 +997,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	}
 
 	auto &fontSet = GetDefaultFontSet();
-	auto &gui = WGUI::Open(GetRenderContext(), matManager);
+	auto &gui = pragma::gui::WGUI::Open(GetRenderContext(), matManager);
 	RegisterUiElementTypes();
 	gui.SetMaterialLoadHandler([this](const std::string &path) -> msys::Material * { return GetClientState()->LoadMaterial(path); });
 	auto *fontData = fontSet.FindFontFileCandidate(pragma::FontSetFlag::Sans | pragma::FontSetFlag::Bold);
@@ -1007,16 +1007,16 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		return false;
 	}
 	auto r = gui.Initialize(GetRenderResolution(), fontData->fileName, {"source-han-sans/SourceHanSans-VF.ttf"});
-	if(r != WGUI::ResultCode::Ok) {
+	if(r != pragma::gui::WGUI::ResultCode::Ok) {
 		Con::cerr << "Unable to initialize GUI library: ";
 		switch(r) {
-		case WGUI::ResultCode::UnableToInitializeFontManager:
+		case pragma::gui::WGUI::ResultCode::UnableToInitializeFontManager:
 			Con::cerr << "Error initializing font manager!";
 			break;
-		case WGUI::ResultCode::ErrorInitializingShaders:
+		case pragma::gui::WGUI::ResultCode::ErrorInitializingShaders:
 			Con::cerr << "Error initializing shaders!";
 			break;
-		case WGUI::ResultCode::FontNotFound:
+		case pragma::gui::WGUI::ResultCode::FontNotFound:
 			Con::cerr << "Font not found!";
 			break;
 		default:
@@ -1026,7 +1026,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		fail();
 		return false;
 	}
-	WIContextMenu::SetKeyBindHandler(
+	pragma::gui::types::WIContextMenu::SetKeyBindHandler(
 	  [this](pragma::platform::Key key, const std::string &cmd) -> std::string {
 		  std::string keyStr;
 		  auto b = KeyToText(umath::to_integral(key), &keyStr);
@@ -1048,7 +1048,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		  KeyToText(umath::to_integral(keys.front()), &strKey);
 		  return strKey;
 	  });
-	WITextTagLink::set_link_handler([this](const std::string &arg) {
+	pragma::gui::WITextTagLink::set_link_handler([this](const std::string &arg) {
 		std::vector<std::string> args {};
 		ustring::explode_whitespace(arg, args);
 		if(args.empty())
@@ -1215,42 +1215,42 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 
 void pragma::CEngine::RegisterUiElementTypes()
 {
-	auto &gui = WGUI::GetInstance();
-	gui.RegisterType<pragma::gui::WICheckbox>("WICheckbox");
-	gui.RegisterType<pragma::gui::WIChoiceList>("WIChoiceList");
-	gui.RegisterType<pragma::gui::WICommandLineEntry>("WICommandLineEntry");
-	gui.RegisterType<pragma::gui::WIConsole>("WIConsole");
-	gui.RegisterType<pragma::gui::WIContainer>("WIContainer");
-	gui.RegisterType<pragma::gui::WIDetachable>("WIDetachable");
-	gui.RegisterType<pragma::gui::WIFPS>("WIFPS");
-	gui.RegisterType<pragma::gui::WIFrame>("WIFrame");
-	gui.RegisterType<pragma::gui::WIGridPanel>("WIGridPanel");
-	gui.RegisterType<pragma::gui::WIIcon>("WIIcon");
-	gui.RegisterType<pragma::gui::WIImageSlideShow>("WIImageSlideShow");
-	gui.RegisterType<pragma::gui::WILineGraph>("WILineGraph");
-	gui.RegisterType<pragma::gui::WIMessageBox>("WIMessageBox");
-	gui.RegisterType<pragma::gui::WINetGraph>("WINetGraph");
-	gui.RegisterType<pragma::gui::WIOptionsList>("WIOptionsList");
-	gui.RegisterType<pragma::gui::WIProgressBar>("WIProgressBar");
-	gui.RegisterType<pragma::gui::WIScrollContainer>("WIScrollContainer");
-	gui.RegisterType<pragma::gui::WIServerBrowser>("WIServerBrowser");
-	gui.RegisterType<pragma::gui::WISilkIcon>("WISilkIcon");
-	gui.RegisterType<pragma::gui::WISlider>("WISlider");
-	gui.RegisterType<pragma::gui::WISnapArea>("WISnapArea");
-	gui.RegisterType<pragma::gui::WITable>("WITable");
-	gui.RegisterType<pragma::gui::WITableRow>("WITableRow");
-	gui.RegisterType<pragma::gui::WITableCell>("WITableCell");
-	gui.RegisterType<pragma::gui::WITexturedCubemap>("WITexturedCubemap");
-	gui.RegisterType<pragma::gui::WITransformable>("WITransformable");
-	gui.RegisterType<pragma::gui::WITreeList>("WITreeList");
-	gui.RegisterType<pragma::gui::WITreeListElement>("WITreeListElement");
-	gui.RegisterType<pragma::gui::WIDebugDepthTexture>("WIDebugDepthTexture");
-	gui.RegisterType<pragma::gui::WIDebugHDRBloom>("WIDebugHDRBloom");
-	gui.RegisterType<pragma::gui::WIDebugMipMaps>("WIDebugMipMaps");
-	gui.RegisterType<pragma::gui::WIDebugMSAATexture>("WIDebugMSAATexture");
-	gui.RegisterType<pragma::gui::WIDebugShadowMap>("WIDebugShadowMap");
-	gui.RegisterType<pragma::gui::WIDebugSSAO>("WIDebugSSAO");
-	gui.RegisterType<pragma::gui::WIMainMenuElement>("WIMainMenuElement");
+	auto &gui = pragma::gui::WGUI::GetInstance();
+	gui.RegisterType<pragma::gui::types::WICheckbox>("WICheckbox");
+	gui.RegisterType<pragma::gui::types::WIChoiceList>("WIChoiceList");
+	gui.RegisterType<pragma::gui::types::WICommandLineEntry>("WICommandLineEntry");
+	gui.RegisterType<pragma::gui::types::WIConsole>("WIConsole");
+	gui.RegisterType<pragma::gui::types::WIContainer>("WIContainer");
+	gui.RegisterType<pragma::gui::types::WIDetachable>("WIDetachable");
+	gui.RegisterType<pragma::gui::types::WIFPS>("WIFPS");
+	gui.RegisterType<pragma::gui::types::WIFrame>("WIFrame");
+	gui.RegisterType<pragma::gui::types::WIGridPanel>("WIGridPanel");
+	gui.RegisterType<pragma::gui::types::WIIcon>("WIIcon");
+	gui.RegisterType<pragma::gui::types::WIImageSlideShow>("WIImageSlideShow");
+	gui.RegisterType<pragma::gui::types::WILineGraph>("WILineGraph");
+	gui.RegisterType<pragma::gui::types::WIMessageBox>("WIMessageBox");
+	gui.RegisterType<pragma::gui::types::WINetGraph>("WINetGraph");
+	gui.RegisterType<pragma::gui::types::WIOptionsList>("WIOptionsList");
+	gui.RegisterType<pragma::gui::types::WIProgressBar>("WIProgressBar");
+	gui.RegisterType<pragma::gui::types::WIScrollContainer>("WIScrollContainer");
+	gui.RegisterType<pragma::gui::types::WIServerBrowser>("WIServerBrowser");
+	gui.RegisterType<pragma::gui::types::WISilkIcon>("WISilkIcon");
+	gui.RegisterType<pragma::gui::types::WISlider>("WISlider");
+	gui.RegisterType<pragma::gui::types::WISnapArea>("WISnapArea");
+	gui.RegisterType<pragma::gui::types::WITable>("WITable");
+	gui.RegisterType<pragma::gui::types::WITableRow>("WITableRow");
+	gui.RegisterType<pragma::gui::types::WITableCell>("WITableCell");
+	gui.RegisterType<pragma::gui::types::WITexturedCubemap>("WITexturedCubemap");
+	gui.RegisterType<pragma::gui::types::WITransformable>("WITransformable");
+	gui.RegisterType<pragma::gui::types::WITreeList>("WITreeList");
+	gui.RegisterType<pragma::gui::types::WITreeListElement>("WITreeListElement");
+	gui.RegisterType<pragma::gui::types::WIDebugDepthTexture>("WIDebugDepthTexture");
+	gui.RegisterType<pragma::gui::types::WIDebugHDRBloom>("WIDebugHDRBloom");
+	gui.RegisterType<pragma::gui::types::WIDebugMipMaps>("WIDebugMipMaps");
+	gui.RegisterType<pragma::gui::types::WIDebugMSAATexture>("WIDebugMSAATexture");
+	gui.RegisterType<pragma::gui::types::WIDebugShadowMap>("WIDebugShadowMap");
+	gui.RegisterType<pragma::gui::types::WIDebugSSAO>("WIDebugSSAO");
+	gui.RegisterType<pragma::gui::types::WIMainMenuElement>("WIMainMenuElement");
 }
 
 const std::string &pragma::CEngine::GetDefaultFontSetName() const { return m_defaultFontSet; }
@@ -1318,7 +1318,7 @@ void pragma::CEngine::RunLaunchCommands()
 }
 void pragma::CEngine::ClearConsole()
 {
-	auto *pConsole = pragma::gui::WIConsole::GetConsole();
+	auto *pConsole = pragma::gui::types::WIConsole::GetConsole();
 	if(pConsole == nullptr) {
 		pragma::Engine::ClearConsole();
 		return;
@@ -1333,8 +1333,8 @@ void pragma::CEngine::OpenConsole()
 		break;
 	default:
 		{
-			if(WGUI::IsOpen()) {
-				auto *console = pragma::gui::WIConsole::Open();
+			if(pragma::gui::WGUI::IsOpen()) {
+				auto *console = pragma::gui::types::WIConsole::Open();
 				if(console && m_consoleType == ConsoleType::GUIDetached && !console->IsExternallyOwned()) {
 					console->Update();
 					auto *frame = console->GetFrame();
@@ -1358,8 +1358,8 @@ void pragma::CEngine::CloseConsole()
 		break;
 	default:
 		{
-			if(WGUI::IsOpen())
-				pragma::gui::WIConsole::Close();
+			if(pragma::gui::WGUI::IsOpen())
+				pragma::gui::types::WIConsole::Close();
 			break;
 		}
 	}
@@ -1379,7 +1379,7 @@ void pragma::CEngine::SetConsoleType(ConsoleType type)
 }
 pragma::CEngine::ConsoleType pragma::CEngine::GetConsoleType() const
 {
-	auto *pConsole = pragma::gui::WIConsole::GetConsole();
+	auto *pConsole = pragma::gui::types::WIConsole::GetConsole();
 	auto *pFrame = pConsole ? pConsole->GetFrame() : nullptr;
 	if(pFrame && pFrame->IsVisible())
 		return pFrame->IsDetached() ? ConsoleType::GUIDetached : ConsoleType::GUI;
@@ -1392,7 +1392,7 @@ bool pragma::CEngine::IsConsoleOpen() const
 		return pragma::Engine::IsConsoleOpen();
 	default:
 		{
-			auto *pConsole = pragma::gui::WIConsole::GetConsole();
+			auto *pConsole = pragma::gui::types::WIConsole::GetConsole();
 			auto *pFrame = pConsole ? pConsole->GetFrame() : nullptr;
 			return pFrame && pFrame->IsVisible();
 		}
@@ -1438,12 +1438,12 @@ std::shared_ptr<prosper::Window> pragma::CEngine::CreateWindow(prosper::WindowSe
 	pWindow->GetStagingRenderTarget(); // This will initialize the staging target immediately
 	(*pWindow)->SetWindowSizeCallback([pWindow](pragma::platform::Window &window, Vector2i size) {
 		pWindow->ReloadStagingRenderTarget();
-		auto *el = ::WGUI::GetInstance().GetBaseElement(pWindow);
+		auto *el = pragma::gui::WGUI::GetInstance().GetBaseElement(pWindow);
 		if(el)
 			el->SetSize(size);
 	});
 	InitializeWindowInputCallbacks(*pWindow);
-	WGUI::GetInstance().AddBaseElement(pWindow);
+	pragma::gui::WGUI::GetInstance().AddBaseElement(pWindow);
 	return window;
 }
 void pragma::CEngine::InitializeWindowInputCallbacks(prosper::Window &window)
@@ -1747,12 +1747,12 @@ void pragma::CEngine::Close()
 	};
 	closeSecondaryWindows();
 
-	WGUI::GetInstance().ClearSkins(); // Should be cleared before lua states are closed
+	pragma::gui::WGUI::GetInstance().ClearSkins(); // Should be cleared before lua states are closed
 	CloseClientState();
 	m_auxEffects.clear();
 	CloseSoundEngine(); // Has to be closed after client state (since clientstate may still have some references at this point)
 	m_clInstance = nullptr;
-	WGUI::Close(); // Has to be closed after client state
+	pragma::gui::WGUI::Close(); // Has to be closed after client state
 	pragma::RenderContext::Release();
 	g_engine = nullptr;
 
@@ -1810,7 +1810,7 @@ void pragma::CEngine::DrawFrame()
 #endif
 
 	StartProfilingStage("GUILogic");
-	auto &gui = WGUI::GetInstance();
+	auto &gui = pragma::gui::WGUI::GetInstance();
 	gui.Think(primWindowCmd);
 	StopProfilingStage(); // GUILogic
 
@@ -1859,7 +1859,7 @@ void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 		StartProfilingStage("RecordGUI");
 		StartProfilingStage("GUI");
 
-		WGUI::GetInstance().BeginDraw();
+		pragma::gui::WGUI::GetInstance().BeginDraw();
 		CallCallbacks<void>("PreRecordGUI");
 		if(pragma::get_cgame() != nullptr)
 			pragma::get_cgame()->PreGUIRecord();
@@ -1871,7 +1871,7 @@ void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 			auto &swapCmdGroup = window->GetSwapCommandBufferGroup();
 			swapCmdGroup.StartRecording(windowRt->GetRenderPass(), windowRt->GetFramebuffer());
 			swapCmdGroup.Record([this, window](prosper::ISecondaryCommandBuffer &drawCmd) {
-				auto &gui = WGUI::GetInstance();
+				auto &gui = pragma::gui::WGUI::GetInstance();
 				StartProfilingStage("DrawGUI");
 				gui.Draw(*window, drawCmd);
 				StopProfilingStage();
@@ -1940,7 +1940,7 @@ void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 		CallCallbacks<void>("PostDrawGUI");
 		if(pragma::get_cgame() != nullptr)
 			pragma::get_cgame()->PostGUIDraw();
-		WGUI::GetInstance().EndDraw();
+		pragma::gui::WGUI::GetInstance().EndDraw();
 		StopProfilingStage(); // ExecuteGUIDrawCalls
 	}
 }
@@ -2119,7 +2119,7 @@ void pragma::CEngine::OnRenderResolutionChanged(uint32_t width, uint32_t height)
 	GetRenderContext().GetWindow().ReloadStagingRenderTarget();
 	umath::set_flag(m_stateFlags, StateFlags::FirstFrame, true);
 
-	auto &wgui = WGUI::GetInstance();
+	auto &wgui = pragma::gui::WGUI::GetInstance();
 	auto *baseEl = wgui.GetBaseElement();
 	if(baseEl != nullptr)
 		baseEl->SetSize(width, height);
@@ -2219,7 +2219,7 @@ namespace {
 		  auto *client = static_cast<pragma::ClientState *>(pragma::get_cengine()->GetClientState());
 		  if(client != nullptr)
 			  return;
-		  auto &wgui = WGUI::GetInstance();
+		  auto &wgui = pragma::gui::WGUI::GetInstance();
 		  auto *el = wgui.GetBaseElement();
 		  if(el == nullptr)
 			  return;

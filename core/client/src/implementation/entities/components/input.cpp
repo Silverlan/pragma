@@ -19,9 +19,9 @@ void CInputComponent::UpdateMouseMovementDeltaValues()
 {
 	auto xDelta = 0.f;
 	auto yDelta = 0.f;
-	auto *window = WGUI::GetInstance().FindFocusedWindow();
+	auto *window = gui::WGUI::GetInstance().FindFocusedWindow();
 	if(window && window->IsValid()) {
-		auto *focusedElement = WGUI::GetInstance().GetFocusedElement(window);
+		auto *focusedElement = gui::WGUI::GetInstance().GetFocusedElement(window);
 		if(!focusedElement) {
 			auto size = (*window)->GetSize();
 			auto w = size.x;

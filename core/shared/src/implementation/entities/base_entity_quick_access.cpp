@@ -367,7 +367,7 @@ pragma::Activity pragma::ecs::BaseEntity::GetActivity() const
 	return animC.valid() ? animC->GetActivity() : pragma::Activity::Invalid;
 }
 
-void pragma::ecs::BaseEntity::TakeDamage(DamageInfo &info)
+void pragma::ecs::BaseEntity::TakeDamage(game::DamageInfo &info)
 {
 	auto *dmgC = static_cast<pragma::DamageableComponent *>(AddNetworkedComponent("damageable").get());
 	if(dmgC == nullptr)

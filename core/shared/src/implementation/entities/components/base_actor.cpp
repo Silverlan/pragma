@@ -197,7 +197,7 @@ void BaseActorComponent::Ragdolize()
 		return;
 }
 
-void BaseActorComponent::OnDeath(DamageInfo *dmgInfo)
+void BaseActorComponent::OnDeath(game::DamageInfo *dmgInfo)
 {
 	auto evOnDeath = CEOnCharacterKilled {dmgInfo};
 	if(BroadcastEvent(baseActorComponent::EVENT_ON_DEATH, evOnDeath) == util::EventReply::Handled)
@@ -206,7 +206,7 @@ void BaseActorComponent::OnDeath(DamageInfo *dmgInfo)
 	Ragdolize();
 }
 
-void BaseActorComponent::Kill(DamageInfo *dmgInfo)
+void BaseActorComponent::Kill(game::DamageInfo *dmgInfo)
 {
 	if(!IsAlive())
 		return;
@@ -340,11 +340,11 @@ void BaseActorComponent::OnPhysicsDestroyed()
 
 ///////////////
 
-CEOnCharacterKilled::CEOnCharacterKilled(DamageInfo *damageInfo) : damageInfo(damageInfo) {}
+CEOnCharacterKilled::CEOnCharacterKilled(game::DamageInfo *damageInfo) : damageInfo(damageInfo) {}
 void CEOnCharacterKilled::PushArguments(lua::State *l)
 {
 	if(damageInfo != nullptr)
-		Lua::Push<DamageInfo *>(l, damageInfo);
+		Lua::Push<game::DamageInfo *>(l, damageInfo);
 	else
 		Lua::PushNil(l);
 }

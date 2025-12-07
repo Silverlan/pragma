@@ -24,7 +24,7 @@ pragma::NetworkState::NetworkState() : util::CallbackHandler(), CVarHandler()
 	m_tDelta = 0;
 	if(STATE_COUNT == 0) {
 		AddonSystem::MountAddons();
-		GameModeManager::Initialize();
+		game::GameModeManager::Initialize();
 	}
 	STATE_COUNT++;
 

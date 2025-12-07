@@ -210,7 +210,7 @@ void pragma::ClientState::HandleReceiveGameInfo(NetPacket &packet)
 		}
 	}
 	//
-	GameModeManager::Initialize();
+	game::GameModeManager::Initialize();
 	//if(IsConnected())
 	if(IsGameActive() == false)
 		StartNewGame(GetConVarString("sv_gamemode"));

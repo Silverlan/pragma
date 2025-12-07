@@ -33,10 +33,10 @@ void SFlammableComponent::ApplyIgnitionDamage()
 	if(pTrComponent == nullptr || pDamageableComponent.expired())
 		return;
 	auto pos = ent.GetCenter();
-	DamageInfo info {};
+	game::DamageInfo info {};
 	info.SetAttacker(m_igniteInfo.hAttacker.get());
 	info.SetInflictor(m_igniteInfo.hInflictor.get());
-	info.SetDamageType(DAMAGETYPE::IGNITE);
+	info.SetDamageType(DamageType::Ignite);
 	info.SetHitPosition(pos);
 	info.SetSource(pos);
 	info.SetDamage(5);

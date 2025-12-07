@@ -7,7 +7,7 @@ export module pragma.shared:game.savegame;
 export import :types;
 
 export {
-	namespace pragma {
+	namespace pragma::game {
 		namespace savegame {
 			constexpr uint32_t FORMAT_VERSION = 1u;
 			constexpr auto PSAV_IDENTIFIER = "PSAV";

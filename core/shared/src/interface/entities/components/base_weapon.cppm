@@ -86,7 +86,7 @@ export namespace pragma {
 		void UpdateTickPolicy();
 		bool CanPrimaryAttack() const;
 		bool CanSecondaryAttack() const;
-		virtual void OnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin = nullptr);
+		virtual void OnFireBullets(const game::BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin = nullptr);
 		virtual void OnPhysicsInitialized();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 

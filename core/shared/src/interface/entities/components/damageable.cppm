@@ -20,14 +20,14 @@ export namespace pragma {
 		virtual void Initialize() override;
 
 		// Called right before the entity is about to take damage
-		virtual void OnTakeDamage(DamageInfo &info);
+		virtual void OnTakeDamage(game::DamageInfo &info);
 
-		virtual void TakeDamage(DamageInfo &info);
+		virtual void TakeDamage(game::DamageInfo &info);
 		virtual void InitializeLuaObject(lua::State *l) override;
 	};
 	struct DLLNETWORK CEOnTakeDamage : public ComponentEvent {
-		CEOnTakeDamage(DamageInfo &damageInfo);
+		CEOnTakeDamage(game::DamageInfo &damageInfo);
 		virtual void PushArguments(lua::State *l) override;
-		DamageInfo &damageInfo;
+		game::DamageInfo &damageInfo;
 	};
 };

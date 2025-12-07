@@ -1488,7 +1488,7 @@ void pragma::Game::RegisterLuaClasses()
 	  static_cast<void (*)(lua::State *, util::SplashDamageInfo &, const Vector3 &, float)>([](lua::State *l, util::SplashDamageInfo &splashDamageInfo, const Vector3 &coneDirection, float coneAngle) { splashDamageInfo.cone = {{coneDirection, coneAngle}}; }));
 	defSplashDamageInfo.def("SetCallback", static_cast<void (*)(lua::State *, util::SplashDamageInfo &, luabind::object)>([](lua::State *l, util::SplashDamageInfo &splashDamageInfo, luabind::object oCallback) {
 		Lua::CheckFunction(l, 2);
-		splashDamageInfo.callback = [l, oCallback](pragma::ecs::BaseEntity *ent, DamageInfo &dmgInfo) -> bool {
+		splashDamageInfo.callback = [l, oCallback](pragma::ecs::BaseEntity *ent, game::DamageInfo &dmgInfo) -> bool {
 			auto r = Lua::CallFunction(
 			  l,
 			  [ent, &dmgInfo, &oCallback](lua::State *l) -> Lua::StatusCode {
@@ -1497,7 +1497,7 @@ void pragma::Game::RegisterLuaClasses()
 					  ent->GetLuaObject().push(l);
 				  else
 					  Lua::PushNil(l);
-				  Lua::Push<DamageInfo *>(l, &dmgInfo);
+				  Lua::Push<game::DamageInfo *>(l, &dmgInfo);
 				  return Lua::StatusCode::Ok;
 			  },
 			  1);
@@ -1904,30 +1904,30 @@ void pragma::Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 
 	Lua::register_bullet_info(gameMod);
 
-	auto classDefDamageInfo = luabind::class_<DamageInfo>("DamageInfo");
+	auto classDefDamageInfo = luabind::class_<game::DamageInfo>("DamageInfo");
 	classDefDamageInfo.def(luabind::constructor<>());
 	classDefDamageInfo.def(luabind::tostring(luabind::self));
-	classDefDamageInfo.def("SetDamage", &::DamageInfo::SetDamage);
-	classDefDamageInfo.def("AddDamage", &::DamageInfo::AddDamage);
-	classDefDamageInfo.def("ScaleDamage", &::DamageInfo::ScaleDamage);
-	classDefDamageInfo.def("GetDamage", &::DamageInfo::GetDamage);
-	classDefDamageInfo.def("GetAttacker", &::DamageInfo::GetAttacker);
-	classDefDamageInfo.def("SetAttacker", static_cast<void (::DamageInfo::*)(const pragma::ecs::BaseEntity *)>(&::DamageInfo::SetAttacker));
-	classDefDamageInfo.def("GetInflictor", &::DamageInfo::GetInflictor);
-	classDefDamageInfo.def("SetInflictor", static_cast<void (::DamageInfo::*)(const pragma::ecs::BaseEntity *)>(&::DamageInfo::SetInflictor));
-	classDefDamageInfo.def("GetDamageTypes", &::DamageInfo::GetDamageTypes);
-	classDefDamageInfo.def("SetDamageType", &::DamageInfo::SetDamageType);
-	classDefDamageInfo.def("AddDamageType", &::DamageInfo::AddDamageType);
-	classDefDamageInfo.def("RemoveDamageType", &::DamageInfo::RemoveDamageType);
-	classDefDamageInfo.def("IsDamageType", &::DamageInfo::IsDamageType);
-	classDefDamageInfo.def("SetSource", &::DamageInfo::SetSource);
-	classDefDamageInfo.def("GetSource", &::DamageInfo::GetSource, luabind::copy_policy<0> {});
-	classDefDamageInfo.def("SetHitPosition", &::DamageInfo::SetHitPosition);
-	classDefDamageInfo.def("GetHitPosition", &::DamageInfo::GetHitPosition, luabind::copy_policy<0> {});
-	classDefDamageInfo.def("SetForce", &::DamageInfo::SetForce);
-	classDefDamageInfo.def("GetForce", &::DamageInfo::GetForce, luabind::copy_policy<0> {});
-	classDefDamageInfo.def("GetHitGroup", &::DamageInfo::GetHitGroup);
-	classDefDamageInfo.def("SetHitGroup", &::DamageInfo::SetHitGroup);
+	classDefDamageInfo.def("SetDamage", &game::DamageInfo::SetDamage);
+	classDefDamageInfo.def("AddDamage", &game::DamageInfo::AddDamage);
+	classDefDamageInfo.def("ScaleDamage", &game::DamageInfo::ScaleDamage);
+	classDefDamageInfo.def("GetDamage", &game::DamageInfo::GetDamage);
+	classDefDamageInfo.def("GetAttacker", &game::DamageInfo::GetAttacker);
+	classDefDamageInfo.def("SetAttacker", static_cast<void (game::DamageInfo::*)(const pragma::ecs::BaseEntity *)>(&game::DamageInfo::SetAttacker));
+	classDefDamageInfo.def("GetInflictor", &game::DamageInfo::GetInflictor);
+	classDefDamageInfo.def("SetInflictor", static_cast<void (game::DamageInfo::*)(const pragma::ecs::BaseEntity *)>(&game::DamageInfo::SetInflictor));
+	classDefDamageInfo.def("GetDamageTypes", &game::DamageInfo::GetDamageTypes);
+	classDefDamageInfo.def("SetDamageType", &game::DamageInfo::SetDamageType);
+	classDefDamageInfo.def("AddDamageType", &game::DamageInfo::AddDamageType);
+	classDefDamageInfo.def("RemoveDamageType", &game::DamageInfo::RemoveDamageType);
+	classDefDamageInfo.def("IsDamageType", &game::DamageInfo::IsDamageType);
+	classDefDamageInfo.def("SetSource", &game::DamageInfo::SetSource);
+	classDefDamageInfo.def("GetSource", &game::DamageInfo::GetSource, luabind::copy_policy<0> {});
+	classDefDamageInfo.def("SetHitPosition", &game::DamageInfo::SetHitPosition);
+	classDefDamageInfo.def("GetHitPosition", &game::DamageInfo::GetHitPosition, luabind::copy_policy<0> {});
+	classDefDamageInfo.def("SetForce", &game::DamageInfo::SetForce);
+	classDefDamageInfo.def("GetForce", &game::DamageInfo::GetForce, luabind::copy_policy<0> {});
+	classDefDamageInfo.def("GetHitGroup", &game::DamageInfo::GetHitGroup);
+	classDefDamageInfo.def("SetHitGroup", &game::DamageInfo::SetHitGroup);
 	gameMod[classDefDamageInfo];
 }
 

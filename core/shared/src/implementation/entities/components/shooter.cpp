@@ -37,7 +37,7 @@ void BaseShooterComponent::ReceiveBulletEvent(NetPacket &packet, pragma::BasePla
 		m_nextBullet->source = pl->GetEntity().GetHandle();
 }
 
-std::vector<Vector3> BaseShooterComponent::GetBulletDestinations(const Vector3 &origin, const Vector3 &dir, const BulletInfo &bulletInfo)
+std::vector<Vector3> BaseShooterComponent::GetBulletDestinations(const Vector3 &origin, const Vector3 &dir, const game::BulletInfo &bulletInfo)
 {
 	std::vector<Vector3> destPositions;
 	destPositions.reserve(bulletInfo.bulletCount);
@@ -51,7 +51,7 @@ std::vector<Vector3> BaseShooterComponent::GetBulletDestinations(const Vector3 &
 	return destPositions;
 }
 
-void BaseShooterComponent::OnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin)
+void BaseShooterComponent::OnFireBullets(const game::BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin)
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(pTrComponent) {
@@ -65,9 +65,9 @@ void BaseShooterComponent::OnFireBullets(const BulletInfo &bulletInfo, Vector3 &
 	BroadcastEvent(baseShooterComponent::EVENT_ON_FIRE_BULLETS, evData);
 }
 
-pragma::physics::RayCastHitType BaseShooterComponent::OnBulletHit(const BulletInfo &bulletInfo, const pragma::physics::TraceData &data, pragma::physics::PhysObj &phys, physics::ICollisionObject &col) { return pragma::physics::RayCastHitType::Block; }
+pragma::physics::RayCastHitType BaseShooterComponent::OnBulletHit(const game::BulletInfo &bulletInfo, const pragma::physics::TraceData &data, pragma::physics::PhysObj &phys, physics::ICollisionObject &col) { return pragma::physics::RayCastHitType::Block; }
 
-void BaseShooterComponent::GetBulletTraceData(const BulletInfo &bulletInfo, pragma::physics::TraceData &data) const
+void BaseShooterComponent::GetBulletTraceData(const game::BulletInfo &bulletInfo, pragma::physics::TraceData &data) const
 {
 	auto *attacker = bulletInfo.hAttacker.get();
 	auto *inflictor = bulletInfo.hInflictor.get();
@@ -95,10 +95,10 @@ void BaseShooterComponent::GetBulletTraceData(const BulletInfo &bulletInfo, prag
 
 //////////////
 
-events::CEOnFireBullets::CEOnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin) : bulletInfo {bulletInfo}, bulletOrigin {bulletOrigin}, bulletDir {bulletDir}, effectsOrigin {effectsOrigin} {}
+events::CEOnFireBullets::CEOnFireBullets(const game::BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin) : bulletInfo {bulletInfo}, bulletOrigin {bulletOrigin}, bulletDir {bulletDir}, effectsOrigin {effectsOrigin} {}
 void events::CEOnFireBullets::PushArguments(lua::State *l)
 {
-	Lua::Push<BulletInfo *>(l, &const_cast<BulletInfo &>(bulletInfo));
+	Lua::Push<game::BulletInfo *>(l, &const_cast<game::BulletInfo &>(bulletInfo));
 	Lua::Push<Vector3>(l, bulletOrigin);
 	Lua::Push<Vector3>(l, bulletDir);
 	if(effectsOrigin != nullptr)
@@ -119,10 +119,10 @@ void events::CEOnFireBullets::HandleReturnValues(lua::State *l)
 
 //////////////
 
-events::CEOnBulletsFired::CEOnBulletsFired(const BulletInfo &bulletInfo, const std::vector<pragma::physics::TraceResult> &hitTargets) : bulletInfo {bulletInfo}, hitTargets {hitTargets} {}
+events::CEOnBulletsFired::CEOnBulletsFired(const game::BulletInfo &bulletInfo, const std::vector<pragma::physics::TraceResult> &hitTargets) : bulletInfo {bulletInfo}, hitTargets {hitTargets} {}
 void events::CEOnBulletsFired::PushArguments(lua::State *l)
 {
-	Lua::Push<BulletInfo *>(l, &const_cast<BulletInfo &>(bulletInfo));
+	Lua::Push<game::BulletInfo *>(l, &const_cast<game::BulletInfo &>(bulletInfo));
 
 	auto t = Lua::CreateTable(l);
 	for(auto i = decltype(hitTargets.size()) {0}; i < hitTargets.size(); ++i) {

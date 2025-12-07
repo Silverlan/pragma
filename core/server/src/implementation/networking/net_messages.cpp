@@ -473,11 +473,11 @@ void NET_sv_HURTME(pragma::networking::IServerClient &session, NetPacket packet)
 	if(pDamageableComponent.expired())
 		return;
 	auto dmg = packet->Read<uint16_t>();
-	DamageInfo dmgInfo {};
+	pragma::game::DamageInfo dmgInfo {};
 	dmgInfo.SetDamage(dmg);
 	dmgInfo.SetAttacker(&ent);
 	dmgInfo.SetInflictor(&ent);
-	dmgInfo.SetDamageType(DAMAGETYPE::CRUSH);
+	dmgInfo.SetDamageType(DamageType::Crush);
 	pDamageableComponent->TakeDamage(dmgInfo);
 }
 

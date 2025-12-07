@@ -221,8 +221,8 @@ export namespace pragma {
 		virtual Float GetRestitutionScale() const override;
 
 		template<typename TCPPM>
-		TCPPM *CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius = bulletInfo::DEFAULT_TRACER_RADIUS, const Color &col = bulletInfo::DEFAULT_TRACER_COLOR, float length = bulletInfo::DEFAULT_TRACER_LENGTH, float speed = bulletInfo::DEFAULT_TRACER_SPEED,
-		  const std::string &material = std::string {bulletInfo::DEFAULT_TRACER_MATERIAL}, float bloomScale = bulletInfo::DEFAULT_TRACER_BLOOM);
+		TCPPM *CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius = pragma::game::bulletInfo::DEFAULT_TRACER_RADIUS, const Color &col = pragma::game::bulletInfo::DEFAULT_TRACER_COLOR, float length = pragma::game::bulletInfo::DEFAULT_TRACER_LENGTH, float speed = pragma::game::bulletInfo::DEFAULT_TRACER_SPEED,
+		  const std::string &material = std::string {pragma::game::bulletInfo::DEFAULT_TRACER_MATERIAL}, float bloomScale = pragma::game::bulletInfo::DEFAULT_TRACER_BLOOM);
 
 		virtual bool IsPhysicsSimulationEnabled() const override;
 

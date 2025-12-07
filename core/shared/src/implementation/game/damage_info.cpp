@@ -6,31 +6,31 @@ module pragma.shared;
 
 import :game.damage_info;
 
-pragma::physics::HitGroup DamageInfo::GetHitGroup() const { return m_hitGroup; }
-void DamageInfo::SetHitGroup(pragma::physics::HitGroup hitGroup) { m_hitGroup = hitGroup; }
-void DamageInfo::SetDamage(unsigned short dmg) { m_damage = dmg; }
-void DamageInfo::AddDamage(unsigned short dmg)
+pragma::physics::HitGroup pragma::game::DamageInfo::GetHitGroup() const { return m_hitGroup; }
+void pragma::game::DamageInfo::SetHitGroup(pragma::physics::HitGroup hitGroup) { m_hitGroup = hitGroup; }
+void pragma::game::DamageInfo::SetDamage(unsigned short dmg) { m_damage = dmg; }
+void pragma::game::DamageInfo::AddDamage(unsigned short dmg)
 {
 	if(static_cast<unsigned int>(m_damage) + static_cast<unsigned int>(dmg) > std::numeric_limits<unsigned short>::max())
 		m_damage = std::numeric_limits<unsigned short>::max();
 	else
 		m_damage += dmg;
 }
-void DamageInfo::ScaleDamage(float scale) { m_damage = umath::limit<UInt16>(UInt32(Float(m_damage) * scale)); }
-unsigned short DamageInfo::GetDamage() { return m_damage; }
-pragma::ecs::BaseEntity *DamageInfo::GetAttacker()
+void pragma::game::DamageInfo::ScaleDamage(float scale) { m_damage = umath::limit<UInt16>(UInt32(Float(m_damage) * scale)); }
+unsigned short pragma::game::DamageInfo::GetDamage() { return m_damage; }
+pragma::ecs::BaseEntity *pragma::game::DamageInfo::GetAttacker()
 {
 	if(!m_attacker.valid())
 		return nullptr;
 	return m_attacker.get();
 }
-pragma::ecs::BaseEntity *DamageInfo::GetInflictor()
+pragma::ecs::BaseEntity *pragma::game::DamageInfo::GetInflictor()
 {
 	if(!m_inflictor.valid())
 		return nullptr;
 	return m_inflictor.get();
 }
-void DamageInfo::SetAttacker(const pragma::ecs::BaseEntity *ent)
+void pragma::game::DamageInfo::SetAttacker(const pragma::ecs::BaseEntity *ent)
 {
 	if(m_attacker.valid())
 		m_attacker = EntityHandle();
@@ -38,8 +38,8 @@ void DamageInfo::SetAttacker(const pragma::ecs::BaseEntity *ent)
 		return;
 	m_attacker = ent->GetHandle();
 }
-void DamageInfo::SetAttacker(const EntityHandle &hnd) { SetAttacker(hnd.get()); }
-void DamageInfo::SetInflictor(const pragma::ecs::BaseEntity *ent)
+void pragma::game::DamageInfo::SetAttacker(const EntityHandle &hnd) { SetAttacker(hnd.get()); }
+void pragma::game::DamageInfo::SetInflictor(const pragma::ecs::BaseEntity *ent)
 {
 	if(m_inflictor.valid())
 		m_inflictor = EntityHandle();
@@ -47,22 +47,22 @@ void DamageInfo::SetInflictor(const pragma::ecs::BaseEntity *ent)
 		return;
 	m_inflictor = ent->GetHandle();
 }
-void DamageInfo::SetInflictor(const EntityHandle &hnd) { SetInflictor(hnd.get()); }
-unsigned int DamageInfo::GetDamageTypes() { return m_types; }
-void DamageInfo::SetDamageType(DAMAGETYPE type) { m_types = type; }
-void DamageInfo::AddDamageType(DAMAGETYPE type) { m_types |= type; }
-void DamageInfo::RemoveDamageType(DAMAGETYPE type) { m_types &= ~type; }
-bool DamageInfo::IsDamageType(DAMAGETYPE type) { return (m_types & UInt32(type)) == UInt32(type) ? true : false; }
-void DamageInfo::SetSource(const Vector3 &origin) { m_source = origin; }
-Vector3 &DamageInfo::GetSource() { return m_source; }
-void DamageInfo::SetHitPosition(const Vector3 &pos) { m_hitPosition = pos; }
-Vector3 &DamageInfo::GetHitPosition() { return m_hitPosition; }
-void DamageInfo::SetForce(const Vector3 &force) { m_force = force; }
-Vector3 &DamageInfo::GetForce() { return m_force; }
+void pragma::game::DamageInfo::SetInflictor(const EntityHandle &hnd) { SetInflictor(hnd.get()); }
+unsigned int pragma::game::DamageInfo::GetDamageTypes() { return m_types; }
+void pragma::game::DamageInfo::SetDamageType(DamageType type) { m_types = type; }
+void pragma::game::DamageInfo::AddDamageType(DamageType type) { m_types |= type; }
+void pragma::game::DamageInfo::RemoveDamageType(DamageType type) { m_types &= ~type; }
+bool pragma::game::DamageInfo::IsDamageType(DamageType type) { return (m_types & UInt32(type)) == UInt32(type) ? true : false; }
+void pragma::game::DamageInfo::SetSource(const Vector3 &origin) { m_source = origin; }
+Vector3 &pragma::game::DamageInfo::GetSource() { return m_source; }
+void pragma::game::DamageInfo::SetHitPosition(const Vector3 &pos) { m_hitPosition = pos; }
+Vector3 &pragma::game::DamageInfo::GetHitPosition() { return m_hitPosition; }
+void pragma::game::DamageInfo::SetForce(const Vector3 &force) { m_force = force; }
+Vector3 &pragma::game::DamageInfo::GetForce() { return m_force; }
 
-std::ostream &operator<<(std::ostream &out, const DamageInfo &po)
+std::ostream &pragma::game::operator<<(std::ostream &out, const pragma::game::DamageInfo &po)
 {
-	auto &o = const_cast<DamageInfo &>(po);
+	auto &o = const_cast<pragma::game::DamageInfo &>(po);
 	out << "DamageInfo";
 	out << "[Dmg:" << o.GetDamage() << "]";
 

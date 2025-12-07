@@ -216,7 +216,7 @@ void pragma::gui::WIMainMenuNewGame::InitializeGameSettings()
 	pList->SetTitle(title);
 
 	// Game Mode
-	auto &gameModes = GameModeManager::GetGameModes();
+	auto &gameModes = game::GameModeManager::GetGameModes();
 	std::unordered_map<std::string, std::string> gameModeOptions;
 	for(auto it = gameModes.begin(); it != gameModes.end(); ++it) {
 		auto &info = it->second;
@@ -225,7 +225,7 @@ void pragma::gui::WIMainMenuNewGame::InitializeGameSettings()
 	auto *pGameMode = pList->AddDropDownMenu(pragma::locale::get_text("gamemode"), gameModeOptions, "sv_gamemode");
 	pGameMode->AddCallback("OnValueChanged", FunctionCallback<void>::Create([pGameMode, this]() {
 		auto val = pGameMode->GetOptionValue(pGameMode->GetSelectedOption());
-		auto &gameModes = GameModeManager::GetGameModes();
+		auto &gameModes = game::GameModeManager::GetGameModes();
 		auto it = gameModes.find(val);
 		if(it == gameModes.end())
 			return;

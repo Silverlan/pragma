@@ -2069,7 +2069,7 @@ void pragma::LuaCore::base_observable_component::register_class(luabind::module_
 namespace Lua::Shooter {
 	void FireBullets(lua::State *l, pragma::ecs::BaseShooterComponent &hEnt, const luabind::object &, bool bHitReport, bool bMaster)
 	{
-		auto &bulletInfo = Lua::Check<BulletInfo>(l, 2);
+		auto &bulletInfo = Lua::Check<pragma::game::BulletInfo>(l, 2);
 
 		std::vector<pragma::physics::TraceResult> results;
 		hEnt.FireBullets(bulletInfo, results, bMaster);

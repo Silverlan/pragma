@@ -124,7 +124,7 @@ bool pragma::AnimationDriverComponent::ApplyDriver()
 		auto componentId = m_drivenObject.GetComponentId();
 		auto uuid = m_drivenObject.GetUuid();
 		if(componentId != INVALID_COMPONENT_ID && uuid.has_value())
-			m_driver = std::make_unique<ValueDriver>(componentId, *m_drivenObject, m_descriptor, *uuid);
+			m_driver = std::make_unique<game::ValueDriver>(componentId, *m_drivenObject, m_descriptor, *uuid);
 	}
 	if(!m_driver)
 		return false;
@@ -136,9 +136,9 @@ bool pragma::AnimationDriverComponent::ApplyDriver()
 	}
 	auto *l = GetLuaState();
 	auto res = m_driver->Apply(*ent);
-	if(res != pragma::ValueDriver::Result::Success)
+	if(res != pragma::game::ValueDriver::Result::Success)
 		spdlog::trace("Execution of animation driver '{}' failed with result code {}!", GetEntity().ToString(), magic_enum::enum_name(res));
-	return res == pragma::ValueDriver::Result::Success;
+	return res == pragma::game::ValueDriver::Result::Success;
 }
 
 void pragma::AnimationDriverComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

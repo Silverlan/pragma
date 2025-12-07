@@ -36,6 +36,10 @@ export {
 			class EntityIterator;
 		}
 
+		namespace game {
+			class DamageInfo;
+		}
+
 		class BaseTransformComponent;
 		class BasePhysicsComponent;
 		class BaseModelComponent;
@@ -64,6 +68,5 @@ export {
 			enum class RayCastHitType : uint8_t;
 		}
 	}
-	class DamageInfo;
 	class ModelMesh;
 }

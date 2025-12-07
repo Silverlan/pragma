@@ -9,7 +9,7 @@ import pragma.filesystem;
 
 using namespace pragma;
 
-bool savegame::save(pragma::Game &game, const std::string &fileName, std::string &outErr)
+bool pragma::game::savegame::save(pragma::Game &game, const std::string &fileName, std::string &outErr)
 {
 	auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(), "wb");
 	if(f == nullptr) {
@@ -43,7 +43,7 @@ bool savegame::save(pragma::Game &game, const std::string &fileName, std::string
 	}
 	return udmData->Save(f);
 }
-bool savegame::load(pragma::Game &game, const std::string &fileName, std::string &outErr)
+bool pragma::game::savegame::load(pragma::Game &game, const std::string &fileName, std::string &outErr)
 {
 	auto udmData = util::load_udm_asset(fileName, &outErr);
 	if(udmData == nullptr)

@@ -380,7 +380,7 @@ bool pragma::SGame::InitializeGameMode()
 
 CacheInfo *pragma::SGame::GetLuaCacheInfo() { return m_luaCache.get(); }
 
-void pragma::SGame::CreateExplosion(const Vector3 &origin, Float radius, DamageInfo &dmg, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback)
+void pragma::SGame::CreateExplosion(const Vector3 &origin, Float radius, game::DamageInfo &dmg, const std::function<bool(pragma::ecs::BaseEntity *, game::DamageInfo &)> &callback)
 {
 	SplashDamage(origin, radius, dmg, callback);
 
@@ -389,17 +389,17 @@ void pragma::SGame::CreateExplosion(const Vector3 &origin, Float radius, DamageI
 	p->Write<float>(radius);
 	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CREATE_EXPLOSION, p, pragma::networking::Protocol::SlowReliable);
 }
-void pragma::SGame::CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback)
+void pragma::SGame::CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor, const std::function<bool(pragma::ecs::BaseEntity *, game::DamageInfo &)> &callback)
 {
-	DamageInfo info;
+	game::DamageInfo info;
 	info.SetForce(Vector3(force, 0.f, 0.f));
 	info.SetAttacker(attacker);
 	info.SetInflictor(inflictor);
 	info.SetDamage(CUInt16(damage));
-	info.SetDamageType(DAMAGETYPE::EXPLOSION);
+	info.SetDamageType(DamageType::Explosion);
 	CreateExplosion(origin, radius, info, callback);
 }
-void pragma::SGame::CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force, const EntityHandle &attacker, const EntityHandle &inflictor, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback)
+void pragma::SGame::CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force, const EntityHandle &attacker, const EntityHandle &inflictor, const std::function<bool(pragma::ecs::BaseEntity *, game::DamageInfo &)> &callback)
 {
 	CreateExplosion(origin, radius, damage, force, const_cast<pragma::ecs::BaseEntity *>(attacker.get()), const_cast<pragma::ecs::BaseEntity *>(inflictor.get()), callback);
 }

@@ -434,7 +434,7 @@ void pragma::Engine::RegisterConsoleCommands()
 		  auto path = "savegames/" + util::get_date_time("%Y-%m-%d_%H-%M-%S") + ".psav_b";
 		  FileManager::CreatePath(ufile::get_path_from_filename(path).c_str());
 		  std::string err;
-		  auto result = pragma::savegame::save(*game, path, err);
+		  auto result = pragma::game::savegame::save(*game, path, err);
 		  if(result == false)
 			  Con::cwar << "Cannot create savegame: " << err << Con::endl;
 		  else
@@ -462,7 +462,7 @@ void pragma::Engine::RegisterConsoleCommands()
 			  path += ".psav";
 		  FileManager::CreatePath(ufile::get_path_from_filename(path).c_str());
 		  std::string err;
-		  auto result = pragma::savegame::load(*game, path, err);
+		  auto result = pragma::game::savegame::load(*game, path, err);
 		  if(result == false)
 			  Con::cwar << "Cannot load savegame: " << err << Con::endl;
 	  },

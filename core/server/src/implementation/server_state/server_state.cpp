@@ -115,7 +115,7 @@ void pragma::ServerState::InitializeGameServer(bool singlePlayerLocalGame)
 			if(hLib) {
 				auto *game = static_cast<SGame *>(GetGameState());
 				auto *gameMode = game ? game->GetGameMode() : nullptr;
-				GameModeInfo;
+				game::GameModeInfo;
 				pragma::networking::GameServerInfo serverInfo {};
 				serverInfo.port = port;
 				serverInfo.gameName = pragma::engine_info::get_name();

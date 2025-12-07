@@ -23,22 +23,22 @@ Bool ecs::SShooterComponent::ReceiveNetEvent(pragma::BasePlayerComponent &pl, pr
 	return true;
 }
 void ecs::SShooterComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void ecs::SShooterComponent::FireBullets(const BulletInfo &bulletInfo, const std::function<bool(DamageInfo &, pragma::ecs::BaseEntity *)> &fCallback, std::vector<pragma::physics::TraceResult> &outHitTargets, bool bMaster)
+void ecs::SShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, const std::function<bool(game::DamageInfo &, pragma::ecs::BaseEntity *)> &fCallback, std::vector<pragma::physics::TraceResult> &outHitTargets, bool bMaster)
 {
-	DamageInfo dmg;
+	game::DamageInfo dmg;
 	dmg.SetAttacker(bulletInfo.hAttacker.valid() ? bulletInfo.hAttacker.get() : &GetEntity());
 	dmg.SetInflictor(bulletInfo.hInflictor.valid() ? bulletInfo.hInflictor.get() : &GetEntity());
-	dmg.SetDamageType(DAMAGETYPE::BULLET);
+	dmg.SetDamageType(DamageType::Bullet);
 
 	auto bCustomForce = (isnan(bulletInfo.force) == false) ? true : false;
 	if(bCustomForce == true)
 		dmg.SetForce(Vector3(bulletInfo.force, 0, 0));
 
-	auto bCustomDamageType = (bulletInfo.damageType != util::declvalue(&BulletInfo::damageType)) ? true : false;
+	auto bCustomDamageType = (bulletInfo.damageType != util::declvalue(&game::BulletInfo::damageType)) ? true : false;
 	if(bCustomDamageType == true)
 		dmg.SetDamageType(bulletInfo.damageType);
 
-	auto bCustomDamage = (bulletInfo.damage != util::declvalue(&BulletInfo::damage)) ? true : false;
+	auto bCustomDamage = (bulletInfo.damage != util::declvalue(&game::BulletInfo::damage)) ? true : false;
 	if(bCustomDamage == true)
 		dmg.SetDamage(static_cast<uint16_t>(bulletInfo.damage));
 
@@ -55,9 +55,9 @@ void ecs::SShooterComponent::FireBullets(const BulletInfo &bulletInfo, const std
 	}
 	FireBullets(bulletInfo, dmg, outHitTargets, fCallback, bMaster);
 }
-void ecs::SShooterComponent::FireBullets(const BulletInfo &bulletInfo, std::vector<pragma::physics::TraceResult> &results, bool bMaster) { FireBullets(bulletInfo, nullptr, results, bMaster); }
+void ecs::SShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, std::vector<pragma::physics::TraceResult> &results, bool bMaster) { FireBullets(bulletInfo, nullptr, results, bMaster); }
 
-void ecs::SShooterComponent::FireBullets(const BulletInfo &bulletInfo, DamageInfo &dmgInfo, std::vector<pragma::physics::TraceResult> &outHitTargets, const std::function<bool(DamageInfo &, pragma::ecs::BaseEntity *)> &fCallback, bool bMaster)
+void ecs::SShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, game::DamageInfo &dmgInfo, std::vector<pragma::physics::TraceResult> &outHitTargets, const std::function<bool(game::DamageInfo &, pragma::ecs::BaseEntity *)> &fCallback, bool bMaster)
 {
 	pragma::BasePlayerComponent *pl = nullptr;
 	if(bMaster == false) {

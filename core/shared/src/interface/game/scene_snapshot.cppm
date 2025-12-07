@@ -10,7 +10,7 @@ export import :types;
 export import pragma.materialsystem;
 
 export {
-	namespace pragma {
+	namespace pragma::game {
 		class DLLNETWORK SceneSnapshot : public std::enable_shared_from_this<SceneSnapshot> {
 		  public:
 			struct DLLNETWORK CreateInfo {

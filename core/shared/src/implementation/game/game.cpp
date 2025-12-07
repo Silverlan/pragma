@@ -139,7 +139,7 @@ pragma::Game::Game(pragma::NetworkState *state)
 	m_mapInfo.md5 = "";
 	m_luaNetMessageIndex.push_back("invalid");
 	m_luaEnts = std::make_unique<LuaEntityManager>();
-	m_ammoTypes = std::make_unique<AmmoTypeManager>();
+	m_ammoTypes = std::make_unique<pragma::game::AmmoTypeManager>();
 
 	RegisterCallback<void>("Tick");
 	RegisterCallback<void>("Think");
@@ -153,11 +153,11 @@ pragma::Game::Game(pragma::NetworkState *state)
 	RegisterCallback<void>("PostPhysicsSimulate");
 
 	RegisterCallback<void, pragma::ecs::BaseEntity *, uint16_t, uint16_t>("OnEntityHealthChanged");
-	RegisterCallback<void, pragma::ecs::BaseEntity *, std::reference_wrapper<DamageInfo>>("OnEntityTakeDamage");
-	RegisterCallback<void, pragma::ecs::BaseEntity *, std::reference_wrapper<DamageInfo>, uint16_t, uint16_t>("OnEntityTakenDamage");
-	RegisterCallback<void, pragma::BaseAIComponent *, DamageInfo *>("OnNPCDeath");
+	RegisterCallback<void, pragma::ecs::BaseEntity *, std::reference_wrapper<pragma::game::DamageInfo>>("OnEntityTakeDamage");
+	RegisterCallback<void, pragma::ecs::BaseEntity *, std::reference_wrapper<pragma::game::DamageInfo>, uint16_t, uint16_t>("OnEntityTakenDamage");
+	RegisterCallback<void, pragma::BaseAIComponent *, pragma::game::DamageInfo *>("OnNPCDeath");
 
-	RegisterCallback<void, pragma::BasePlayerComponent *, DamageInfo *>("OnPlayerDeath");
+	RegisterCallback<void, pragma::BasePlayerComponent *, pragma::game::DamageInfo *>("OnPlayerDeath");
 	RegisterCallback<void, pragma::BasePlayerComponent *>("OnPlayerSpawned");
 
 	RegisterCallbackWithOptionalReturn<bool, pragma::ActionInputControllerComponent *, pragma::Action, bool>("OnActionInput");
@@ -267,11 +267,11 @@ LuaEntityManager &pragma::Game::GetLuaEntityManager() { return *m_luaEnts.get();
 
 pragma::AnimationUpdateManager &pragma::Game::GetAnimationUpdateManager() { return *m_animUpdateManager; }
 
-const GameModeInfo *pragma::Game::GetGameMode() const { return const_cast<pragma::Game *>(this)->GetGameMode(); }
-GameModeInfo *pragma::Game::GetGameMode() { return m_gameMode; }
+const pragma::game::GameModeInfo *pragma::Game::GetGameMode() const { return const_cast<pragma::Game *>(this)->GetGameMode(); }
+pragma::game::GameModeInfo *pragma::Game::GetGameMode() { return m_gameMode; }
 void pragma::Game::SetGameMode(const std::string &gameMode)
 {
-	auto *info = GameModeManager::GetGameModeInfo(gameMode);
+	auto *info = pragma::game::GameModeManager::GetGameModeInfo(gameMode);
 	m_gameMode = info;
 
 	if(info) {

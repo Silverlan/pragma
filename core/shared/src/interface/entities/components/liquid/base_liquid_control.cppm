@@ -66,7 +66,7 @@ export {
 				float friction;
 				Vector3 hitNormalLocal;
 			};
-			virtual bool OnBulletHit(const BulletInfo &bulletInfo, const physics::TraceData &data, physics::PhysObj *phys, physics::ICollisionObject *col, const LocalRayResult &result);
+			virtual bool OnBulletHit(const game::BulletInfo &bulletInfo, const physics::TraceData &data, physics::PhysObj *phys, physics::ICollisionObject *col, const LocalRayResult &result);
 			void SetSurfaceMaterial(const std::string &mat);
 			void SetSurfaceMaterial(const physics::SurfaceMaterial *mat);
 			Vector3 m_liquidVelocity;

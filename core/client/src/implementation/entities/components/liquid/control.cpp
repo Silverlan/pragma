@@ -33,7 +33,7 @@ Bool CLiquidControlComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPac
 	return true;
 }
 
-bool CLiquidControlComponent::OnBulletHit(const BulletInfo &bulletInfo, const pragma::physics::TraceData &data, pragma::physics::PhysObj *phys, pragma::physics::ICollisionObject *col, const LocalRayResult &result)
+bool CLiquidControlComponent::OnBulletHit(const game::BulletInfo &bulletInfo, const pragma::physics::TraceData &data, pragma::physics::PhysObj *phys, pragma::physics::ICollisionObject *col, const LocalRayResult &result)
 {
 	auto srcOrigin = data.GetSourceOrigin();
 	auto dir = data.GetDirection();

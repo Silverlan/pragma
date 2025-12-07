@@ -164,9 +164,9 @@ export namespace pragma {
 
 		void SpawnPlayer(pragma::BasePlayerComponent &pl);
 
-		void CreateExplosion(const Vector3 &origin, Float radius, DamageInfo &dmg, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback = nullptr);
-		void CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force = 0.f, pragma::ecs::BaseEntity *attacker = nullptr, pragma::ecs::BaseEntity *inflictor = nullptr, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback = nullptr);
-		void CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force = 0.f, const EntityHandle &attacker = EntityHandle(), const EntityHandle &inflictor = EntityHandle(), const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback = nullptr);
+		void CreateExplosion(const Vector3 &origin, Float radius, pragma::game::DamageInfo &dmg, const std::function<bool(pragma::ecs::BaseEntity *, pragma::game::DamageInfo &)> &callback = nullptr);
+		void CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force = 0.f, pragma::ecs::BaseEntity *attacker = nullptr, pragma::ecs::BaseEntity *inflictor = nullptr, const std::function<bool(pragma::ecs::BaseEntity *, pragma::game::DamageInfo &)> &callback = nullptr);
+		void CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force = 0.f, const EntityHandle &attacker = EntityHandle(), const EntityHandle &inflictor = EntityHandle(), const std::function<bool(pragma::ecs::BaseEntity *, pragma::game::DamageInfo &)> &callback = nullptr);
 
 		void WriteEntityData(NetPacket &packet, SBaseEntity **ents, uint32_t entCount, pragma::networking::ClientRecipientFilter &rp);
 	};

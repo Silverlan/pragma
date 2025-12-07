@@ -13,9 +13,9 @@ import :physics.object;
 
 export namespace pragma {
 	struct DLLNETWORK CEOnCharacterKilled : public ComponentEvent {
-		CEOnCharacterKilled(DamageInfo *damageInfo);
+		CEOnCharacterKilled(game::DamageInfo *damageInfo);
 		virtual void PushArguments(lua::State *l) override;
-		DamageInfo *damageInfo;
+		game::DamageInfo *damageInfo;
 	};
 	namespace baseActorComponent {
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_KILLED;
@@ -27,7 +27,7 @@ export namespace pragma {
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;
-		virtual void Kill(DamageInfo *dmgInfo = nullptr);
+		virtual void Kill(game::DamageInfo *dmgInfo = nullptr);
 		virtual void Respawn();
 		virtual void SetFrozen(bool b);
 		bool IsFrozen() const;
@@ -66,7 +66,7 @@ export namespace pragma {
 		virtual void OnPhysicsInitialized();
 		virtual void OnPhysicsDestroyed();
 		virtual void PhysicsUpdate(double tDelta);
-		virtual void OnDeath(DamageInfo *dmgInfo);
+		virtual void OnDeath(game::DamageInfo *dmgInfo);
 		void UpdateHitboxPhysics();
 		void UpdateMoveController();
 		void InitializeMoveController();

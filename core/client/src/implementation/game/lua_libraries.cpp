@@ -251,7 +251,7 @@ void pragma::CGame::RegisterLuaLibraries()
 	utilMod[svgImageInfoDef];
 
 	utilMod[(luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::calc_world_direction_from_2d_coordinates), luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::Client::calc_world_direction_from_2d_coordinates),
-	  luabind::def("create_particle_tracer", Lua::util::Client::create_particle_tracer), luabind::def("create_muzzle_flash", Lua::util::Client::create_muzzle_flash), luabind::def("fire_bullets", static_cast<luabind::object (*)(lua::State *, BulletInfo &)>(Lua::util::fire_bullets)),
+	  luabind::def("create_particle_tracer", Lua::util::Client::create_particle_tracer), luabind::def("create_muzzle_flash", Lua::util::Client::create_muzzle_flash), luabind::def("fire_bullets", static_cast<luabind::object (*)(lua::State *, game::BulletInfo &)>(Lua::util::fire_bullets)),
 	  luabind::def("save_image", static_cast<bool (*)(lua::State *, uimg::ImageBuffer &, std::string, uimg::TextureInfo &, bool)>(save_image)),
 	  luabind::def("save_image", static_cast<bool (*)(lua::State *, uimg::ImageBuffer &, std::string, uimg::TextureInfo &, bool)>(save_image), luabind::default_parameter_policy<5, false> {}),
 	  luabind::def(

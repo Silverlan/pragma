@@ -119,7 +119,7 @@ void BaseLiquidControlComponent::CreateSplash(const Vector3 &origin, float radiu
 	BroadcastEvent(baseLiquidControlComponent::EVENT_ON_SPLASH, CEOnSplash {splashInfo});
 }
 
-bool BaseLiquidControlComponent::OnBulletHit(const BulletInfo &bulletInfo, const pragma::physics::TraceData &data, pragma::physics::PhysObj *phys, pragma::physics::ICollisionObject *col, const LocalRayResult &result)
+bool BaseLiquidControlComponent::OnBulletHit(const game::BulletInfo &bulletInfo, const pragma::physics::TraceData &data, pragma::physics::PhysObj *phys, pragma::physics::ICollisionObject *col, const LocalRayResult &result)
 {
 	/*if(m_physSurfaceSim != nullptr)
 	{

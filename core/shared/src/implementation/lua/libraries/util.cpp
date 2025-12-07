@@ -772,9 +772,9 @@ bool Lua::util::is_table(luabind::argument arg) { return static_cast<Lua::Type>(
 bool Lua::util::is_table() { return false; }
 std::string Lua::util::date_time(const std::string &format) { return pragma::Engine::Get()->GetDate(format); }
 std::string Lua::util::date_time() { return pragma::Engine::Get()->GetDate(); }
-luabind::object Lua::util::fire_bullets(lua::State *l, BulletInfo &bulletInfo, bool hitReport, const std::function<void(DamageInfo &, pragma::physics::TraceData &, pragma::physics::TraceResult &, uint32_t &)> &f)
+luabind::object Lua::util::fire_bullets(lua::State *l, pragma::game::BulletInfo &bulletInfo, bool hitReport, const std::function<void(pragma::game::DamageInfo &, pragma::physics::TraceData &, pragma::physics::TraceResult &, uint32_t &)> &f)
 {
-	DamageInfo dmg;
+	pragma::game::DamageInfo dmg;
 	dmg.SetDamage(umath::min(CUInt16(bulletInfo.damage), CUInt16(std::numeric_limits<UInt16>::max())));
 	dmg.SetDamageType(bulletInfo.damageType);
 	dmg.SetSource(bulletInfo.effectOrigin);
@@ -856,8 +856,8 @@ luabind::object Lua::util::fire_bullets(lua::State *l, BulletInfo &bulletInfo, b
 	}
 	return t;
 }
-luabind::object Lua::util::fire_bullets(lua::State *l, BulletInfo &bulletInfo, bool hitReport) { return fire_bullets(l, bulletInfo, hitReport, nullptr); }
-luabind::object Lua::util::fire_bullets(lua::State *l, BulletInfo &bulletInfo) { return fire_bullets(l, bulletInfo, false, nullptr); }
+luabind::object Lua::util::fire_bullets(lua::State *l, pragma::game::BulletInfo &bulletInfo, bool hitReport) { return fire_bullets(l, bulletInfo, hitReport, nullptr); }
+luabind::object Lua::util::fire_bullets(lua::State *l, pragma::game::BulletInfo &bulletInfo) { return fire_bullets(l, bulletInfo, false, nullptr); }
 static luabind::object register_class(lua::State *l, const std::string &pclassName, uint32_t idxBaseClassStart, const luabind::table<> *baseTable = nullptr)
 {
 	auto className = pclassName;
@@ -1023,7 +1023,7 @@ void Lua::util::splash_damage(lua::State *l, const ::util::SplashDamageInfo &spl
 		auto coneAngle = 1.f - (splashDamageInfo.cone->second / 180.f) * 2.f;
 		auto &forward = splashDamageInfo.cone->first;
 		auto posEnd = splashDamageInfo.origin + forward * static_cast<float>(splashDamageInfo.radius);
-		callback = [&splashDamageInfo, posEnd, forward, coneAngle](pragma::ecs::BaseEntity *ent, DamageInfo &dmgInfo) -> bool {
+		callback = [&splashDamageInfo, posEnd, forward, coneAngle](pragma::ecs::BaseEntity *ent, pragma::game::DamageInfo &dmgInfo) -> bool {
 			Vector3 min {};
 			Vector3 max {};
 			auto pPhysComponent = ent->GetPhysicsComponent();
@@ -1044,7 +1044,7 @@ void Lua::util::splash_damage(lua::State *l, const ::util::SplashDamageInfo &spl
 			return true;
 		};
 	}
-	game->SplashDamage(splashDamageInfo.origin, splashDamageInfo.radius, const_cast<DamageInfo &>(splashDamageInfo.damageInfo), splashDamageInfo.callback);
+	game->SplashDamage(splashDamageInfo.origin, splashDamageInfo.radius, const_cast<pragma::game::DamageInfo &>(splashDamageInfo.damageInfo), splashDamageInfo.callback);
 }
 luabind::object Lua::util::register_class(lua::State *l, const luabind::table<> &t, const std::string &className) { return ::register_class(l, className, 3, &t); }
 luabind::object Lua::util::register_class(lua::State *l, const luabind::table<> &t, const std::string &className, const luabind::object &oBase0) { return ::register_class(l, className, oBase0, 3, &t); }

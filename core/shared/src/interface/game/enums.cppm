@@ -17,7 +17,7 @@ export {
 
 	enum class TimerType : uint8_t { CurTime = 0, RealTime, ServerTime };
 
-	enum DAMAGETYPE : uint32_t { GENERIC = 0, EXPLOSION = 1, BULLET = 2, BASH = 32, CRUSH = 64, SLASH = 128, ELECTRICITY = 256, ENERGY = 512, FIRE = 1024, PLASMA = 2048, IGNITE = FIRE | 4096 };
+	enum DamageType : uint32_t { Generic = 0, Explosion = 1, Bullet = 2, Bash = 32, Crush = 64, Slash = 128, Electricity = 256, Energy = 512, Fire = 1024, Plasma = 2048, Ignite = Fire | 4096 };
 
 	namespace pragma {
 		enum class GameLimits : uint32_t {

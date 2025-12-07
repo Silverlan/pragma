@@ -55,8 +55,8 @@ export namespace pragma {
 		std::optional<ComponentMemberIndex> FindComponentMember(ComponentId componentId, const std::string &memberName);
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 		pragma::EntityUComponentMemberRef m_drivenObject;
-		std::unique_ptr<ValueDriver> m_driver;
-		ValueDriverDescriptor m_descriptor;
+		std::unique_ptr<game::ValueDriver> m_driver;
+		game::ValueDriverDescriptor m_descriptor;
 		bool m_driverDirty = true;
 		udm::PProperty m_parameters;
 	};

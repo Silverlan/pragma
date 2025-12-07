@@ -415,7 +415,7 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 	else if(eventId == pragma::baseActorComponent::EVENT_ON_KILLED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &pDamageInfo = Lua::Check<DamageInfo>(l, -1);
+		auto &pDamageInfo = Lua::Check<pragma::game::DamageInfo>(l, -1);
 		Lua::Pop(l, 1);
 		pragma::CEOnCharacterKilled evData {&pDamageInfo};
 		if(bInject)
@@ -545,7 +545,7 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 	else if(eventId == pragma::damageableComponent::EVENT_ON_TAKE_DAMAGE) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &damageInfo = Lua::Check<DamageInfo>(l, -1);
+		auto &damageInfo = Lua::Check<pragma::game::DamageInfo>(l, -1);
 		Lua::Pop(l, 1);
 		pragma::CEOnTakeDamage evData {damageInfo};
 		if(bInject)
@@ -601,7 +601,7 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 	else if(eventId == pragma::baseHealthComponent::EVENT_ON_TAKEN_DAMAGE) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &damageInfo = Lua::Check<DamageInfo>(l, -1);
+		auto &damageInfo = Lua::Check<pragma::game::DamageInfo>(l, -1);
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 2);

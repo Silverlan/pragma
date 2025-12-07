@@ -87,7 +87,7 @@ void Lua::game::clear_callbacks(lua::State *l, const std::string &identifier)
 		return;
 	callbacks->clear();
 }
-bool Lua::game::register_ammo_type(lua::State *l, const std::string &name, int32_t damage, float force, DAMAGETYPE damageType)
+bool Lua::game::register_ammo_type(lua::State *l, const std::string &name, int32_t damage, float force, DamageType damageType)
 {
 	auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = nw->GetGameState();
@@ -331,9 +331,6 @@ bool Lua::game::raycast(lua::State *l, const pragma::physics::TraceData &data)
 	return false;
 }
 
-#ifdef __linux__
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, pragma::ValueDriverDescriptor);
-#endif
 void Lua::game::register_shared_functions(lua::State *l, luabind::module_ &modGame)
 {
 	modGame[(luabind::def("add_callback", Lua::game::add_callback),
@@ -371,15 +368,15 @@ void Lua::game::register_shared_functions(lua::State *l, luabind::module_ &modGa
 	  luabind::def("is_map_loaded", Lua::game::is_map_loaded), luabind::def("get_map_name", Lua::game::get_map_name), luabind::def("is_game_initialized", &pragma::Game::IsGameInitialized), luabind::def("is_game_ready", &pragma::Game::IsGameReady),
 	  luabind::def("is_map_initialized", &pragma::Game::IsMapInitialized), luabind::def("get_game_state_flags", Lua::game::get_game_state_flags), luabind::def("update_animations", +[](pragma::Game &game, float dt) { game.UpdateAnimations(dt); }))];
 
-	auto classDefDescriptor = pragma::LuaCore::register_class<pragma::ValueDriverDescriptor>(l, "ValueDriverDescriptor");
+	auto classDefDescriptor = pragma::LuaCore::register_class<pragma::game::ValueDriverDescriptor>(l, "ValueDriverDescriptor");
 	classDefDescriptor->def(luabind::constructor<lua::State *, std::string, std::unordered_map<std::string, std::string>, std::unordered_map<std::string, ::udm::PProperty>>());
 	classDefDescriptor->def(luabind::constructor<lua::State *, std::string, std::unordered_map<std::string, std::string>>());
 	classDefDescriptor->def(luabind::constructor<lua::State *, std::string>());
-	classDefDescriptor->property("expression", static_cast<std::string (*)(lua::State *, pragma::ValueDriverDescriptor &)>([](lua::State *l, pragma::ValueDriverDescriptor &descriptor) -> std::string { return descriptor.GetExpression(); }),
-	  static_cast<void (*)(lua::State *, pragma::ValueDriverDescriptor &, const std::string &)>([](lua::State *l, pragma::ValueDriverDescriptor &descriptor, const std::string &expr) { descriptor.SetExpression(expr); }));
-	classDefDescriptor->def("AddReference", &pragma::ValueDriverDescriptor::AddReference);
-	classDefDescriptor->def("AddConstant", static_cast<void (*)(pragma::ValueDriverDescriptor &, const std::string &, ::udm::PProperty)>([](pragma::ValueDriverDescriptor &descriptor, const std::string &name, ::udm::PProperty prop) { descriptor.AddConstant(name, prop); }));
-	classDefDescriptor->def("AddConstant", static_cast<void (*)(pragma::ValueDriverDescriptor &, const std::string &, const Lua::classObject &)>([](pragma::ValueDriverDescriptor &descriptor, const std::string &name, const Lua::classObject &udmType) {
+	classDefDescriptor->property("expression", static_cast<std::string (*)(lua::State *, pragma::game::ValueDriverDescriptor &)>([](lua::State *l, pragma::game::ValueDriverDescriptor &descriptor) -> std::string { return descriptor.GetExpression(); }),
+	  static_cast<void (*)(lua::State *, pragma::game::ValueDriverDescriptor &, const std::string &)>([](lua::State *l, pragma::game::ValueDriverDescriptor &descriptor, const std::string &expr) { descriptor.SetExpression(expr); }));
+	classDefDescriptor->def("AddReference", &pragma::game::ValueDriverDescriptor::AddReference);
+	classDefDescriptor->def("AddConstant", static_cast<void (*)(pragma::game::ValueDriverDescriptor &, const std::string &, ::udm::PProperty)>([](pragma::game::ValueDriverDescriptor &descriptor, const std::string &name, ::udm::PProperty prop) { descriptor.AddConstant(name, prop); }));
+	classDefDescriptor->def("AddConstant", static_cast<void (*)(pragma::game::ValueDriverDescriptor &, const std::string &, const Lua::classObject &)>([](pragma::game::ValueDriverDescriptor &descriptor, const std::string &name, const Lua::classObject &udmType) {
 		for(auto type : ::udm::GENERIC_TYPES) {
 			auto r = ::udm::visit<false, true, false>(type, [&udmType, &descriptor, &name](auto tag) mutable -> bool {
 				using T = typename decltype(tag)::type;
@@ -395,7 +392,7 @@ void Lua::game::register_shared_functions(lua::State *l, luabind::module_ &modGa
 				break;
 		}
 	}));
-	classDefDescriptor->def("GetConstants", &pragma::ValueDriverDescriptor::GetConstants);
-	classDefDescriptor->def("GetReferences", &pragma::ValueDriverDescriptor::GetReferences);
+	classDefDescriptor->def("GetConstants", &pragma::game::ValueDriverDescriptor::GetConstants);
+	classDefDescriptor->def("GetReferences", &pragma::game::ValueDriverDescriptor::GetReferences);
 	modGame[*classDefDescriptor];
 }

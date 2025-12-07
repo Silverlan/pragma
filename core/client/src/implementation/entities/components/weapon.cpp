@@ -207,7 +207,7 @@ void CWeaponComponent::SetViewModel(const std::string &mdl)
 }
 const std::optional<std::string> &CWeaponComponent::GetViewModelName() const { return m_viewModel; }
 
-void CWeaponComponent::OnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin)
+void CWeaponComponent::OnFireBullets(const game::BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin)
 {
 	BaseWeaponComponent::OnFireBullets(bulletInfo, bulletOrigin, bulletDir, effectsOrigin);
 	auto *owner = m_whOwnerComponent.valid() ? m_whOwnerComponent->GetOwner() : nullptr;

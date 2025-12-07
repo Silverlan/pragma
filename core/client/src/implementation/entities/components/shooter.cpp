@@ -14,7 +14,7 @@ using namespace pragma;
 
 using namespace ecs::baseShooterComponent;
 void ecs::CShooterComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void ecs::CShooterComponent::FireBullets(const BulletInfo &bulletInfo, const Vector3 &origin, const Vector3 &effectsOrigins, const std::vector<Vector3> &destPositions, bool bTransmitToServer, std::vector<pragma::physics::TraceResult> &outHitTargets)
+void ecs::CShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, const Vector3 &origin, const Vector3 &effectsOrigins, const std::vector<Vector3> &destPositions, bool bTransmitToServer, std::vector<pragma::physics::TraceResult> &outHitTargets)
 {
 	auto *physEnv = pragma::get_cgame()->GetPhysicsEnvironment();
 	if(physEnv == nullptr)
@@ -97,7 +97,7 @@ void ecs::CShooterComponent::FireBullets(const BulletInfo &bulletInfo, const Vec
 	BroadcastEvent(EVENT_ON_BULLETS_FIRED, evData);
 }
 
-void ecs::CShooterComponent::FireBullets(const BulletInfo &bulletInfo, std::vector<pragma::physics::TraceResult> &outHitTargets, bool bMaster)
+void ecs::CShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, std::vector<pragma::physics::TraceResult> &outHitTargets, bool bMaster)
 {
 	Vector3 origin {};
 	Vector3 dir {};

@@ -123,9 +123,9 @@ export {
 			unsigned char GetPlayerCount();
 			unsigned int GetEntityCount();
 			virtual void SpawnEntity(pragma::ecs::BaseEntity *ent);
-			void SplashDamage(const Vector3 &origin, Float radius, DamageInfo &dmg, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback = nullptr);
-			void SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force = 0.f, pragma::ecs::BaseEntity *attacker = nullptr, pragma::ecs::BaseEntity *inflictor = nullptr, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback = nullptr);
-			void SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force = 0.f, const EntityHandle &attacker = EntityHandle(), const EntityHandle &inflictor = EntityHandle(), const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback = nullptr);
+			void SplashDamage(const Vector3 &origin, Float radius, game::DamageInfo &dmg, const std::function<bool(pragma::ecs::BaseEntity *, game::DamageInfo &)> &callback = nullptr);
+			void SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force = 0.f, pragma::ecs::BaseEntity *attacker = nullptr, pragma::ecs::BaseEntity *inflictor = nullptr, const std::function<bool(pragma::ecs::BaseEntity *, game::DamageInfo &)> &callback = nullptr);
+			void SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force = 0.f, const EntityHandle &attacker = EntityHandle(), const EntityHandle &inflictor = EntityHandle(), const std::function<bool(pragma::ecs::BaseEntity *, game::DamageInfo &)> &callback = nullptr);
 
 			Bool Overlap(const pragma::physics::TraceData &data, std::vector<pragma::physics::TraceResult> *optOutResults) const;
 			Bool RayCast(const pragma::physics::TraceData &data, std::vector<pragma::physics::TraceResult> *optOutResults) const;
@@ -149,12 +149,12 @@ export {
 			// Called when map and gamemode has been fully loaded and the game can start proper
 			virtual void OnGameReady();
 			bool LoadNavMesh(bool bReload = false);
-			AmmoTypeManager &GetAmmoTypeManager();
-			Bool RegisterAmmoType(const std::string &name, Int32 damage = 10, Float force = 200.f, DAMAGETYPE dmgType = DAMAGETYPE::BULLET, AmmoType **ammoOut = nullptr);
-			AmmoType *GetAmmoType(const std::string &name, UInt32 *ammoId = nullptr);
-			AmmoType *GetAmmoType(UInt32 ammoId);
-			const GameModeInfo *GetGameMode() const;
-			GameModeInfo *GetGameMode();
+			game::AmmoTypeManager &GetAmmoTypeManager();
+			Bool RegisterAmmoType(const std::string &name, Int32 damage = 10, Float force = 200.f, DamageType dmgType = DamageType::Bullet, game::AmmoType **ammoOut = nullptr);
+			game::AmmoType *GetAmmoType(const std::string &name, UInt32 *ammoId = nullptr);
+			game::AmmoType *GetAmmoType(UInt32 ammoId);
+			const game::GameModeInfo *GetGameMode() const;
+			game::GameModeInfo *GetGameMode();
 			void SetGameMode(const std::string &gameMode);
 			pragma::ecs::BaseEntity *GetGameModeEntity();
 			pragma::ecs::BaseEntity *GetGameEntity();
@@ -334,13 +334,13 @@ export {
 			float m_tPhysDeltaRemainder = 0.f;
 			Vector3 m_gravity = {0, -600, 0};
 			std::vector<util::TWeakSharedHandle<pragma::BaseWorldComponent>> m_worldComponents {};
-			GameModeInfo *m_gameMode = nullptr;
+			game::GameModeInfo *m_gameMode = nullptr;
 			EntityHandle m_entGamemode;
 			EntityHandle m_entGame;
 			CallbackHandle m_cbProfilingHandle = {};
 			std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>> m_profilingStageManager;
 			std::shared_ptr<pragma::nav::Mesh> m_navMesh = nullptr;
-			std::unique_ptr<AmmoTypeManager> m_ammoTypes = nullptr;
+			std::unique_ptr<game::AmmoTypeManager> m_ammoTypes = nullptr;
 			std::unique_ptr<LuaEntityManager> m_luaEnts = nullptr;
 			std::shared_ptr<pragma::EntityComponentManager> m_componentManager = nullptr;
 

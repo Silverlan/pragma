@@ -10,7 +10,7 @@ import :entities.components.character;
 
 using namespace pragma;
 
-void SAIComponent::OnTakenDamage(DamageInfo &info, unsigned short oldHealth, unsigned short newHealth)
+void SAIComponent::OnTakenDamage(game::DamageInfo &info, unsigned short oldHealth, unsigned short newHealth)
 {
 	auto charComponent = GetEntity().GetCharacterComponent();
 	if(charComponent.valid() && charComponent->IsAlive() == false)
@@ -37,17 +37,17 @@ void SAIComponent::OnTakenDamage(DamageInfo &info, unsigned short oldHealth, uns
 		charComponent->Kill(&info);
 }
 
-void SAIComponent::OnKilled(DamageInfo *damageInfo)
+void SAIComponent::OnKilled(game::DamageInfo *damageInfo)
 {
 	auto *nw = GetEntity().GetNetworkState();
 	auto *game = nw->GetGameState();
-	game->CallCallbacks<void, pragma::BaseAIComponent *, DamageInfo *>("OnNPCDeath", this, damageInfo);
+	game->CallCallbacks<void, pragma::BaseAIComponent *, game::DamageInfo *>("OnNPCDeath", this, damageInfo);
 	auto charComponent = GetEntity().GetCharacterComponent();
 	if(charComponent.valid())
 		charComponent->RemoveWeapons();
 }
 
-void SAIComponent::OnTakeDamage(DamageInfo &info)
+void SAIComponent::OnTakeDamage(game::DamageInfo &info)
 {
 	auto *charComponent = static_cast<pragma::SCharacterComponent *>(GetEntity().GetCharacterComponent().get());
 	if(charComponent != nullptr && charComponent->GetGodMode() == true)

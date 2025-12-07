@@ -408,7 +408,7 @@ void SPlayerComponent::SetSprintSpeed(float speed)
 	}
 }
 void SPlayerComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BasePlayerComponent)); }
-void SPlayerComponent::OnTakeDamage(DamageInfo &info)
+void SPlayerComponent::OnTakeDamage(game::DamageInfo &info)
 {
 	auto &ent = GetEntity();
 	auto *charComponent = static_cast<pragma::SCharacterComponent *>(ent.GetCharacterComponent().get());

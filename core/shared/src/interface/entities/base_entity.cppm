@@ -199,7 +199,7 @@ export {
 			int32_t GetAnimation() const;
 			pragma::Activity GetActivity() const;
 
-			void TakeDamage(DamageInfo &info);
+			void TakeDamage(game::DamageInfo &info);
 			//
 
 			// Returns true if this entity is local to the current network state (i.e. clientside/serverside only)

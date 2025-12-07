@@ -300,11 +300,11 @@ export {
 			virtual void OnLookTargetChanged() override;
 			virtual bool IsObstruction(const pragma::ecs::BaseEntity &ent) const override;
 			virtual void UpdateMovementProperties(MovementComponent &movementC) override;
-			void OnTakenDamage(DamageInfo &info, unsigned short oldHealth, unsigned short newHealth);
-			void OnTakeDamage(DamageInfo &info);
+			void OnTakenDamage(game::DamageInfo &info, unsigned short oldHealth, unsigned short newHealth);
+			void OnTakeDamage(game::DamageInfo &info);
 			void MaintainAnimationMovement(const Vector3 &disp);
 			bool OnInput(std::string input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, const std::string &data);
-			void OnKilled(DamageInfo *damageInfo = nullptr);
+			void OnKilled(game::DamageInfo *damageInfo = nullptr);
 			bool HasCharacterNoTargetEnabled(const pragma::ecs::BaseEntity &ent) const;
 
 			// Animation

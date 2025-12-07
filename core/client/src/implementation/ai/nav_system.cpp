@@ -34,7 +34,7 @@ void pragma::nav::CMesh::UpdateDebugPath(Vector3 &start, Vector3 &end)
 		res->GetNode(i, pathPoint, nextPoint);
 		lineVerts.push_back(pathPoint + lineOffset);
 	}
-	m_dbgNavPath = DebugRenderer::DrawLines(lineVerts, colors::Yellow);
+	m_dbgNavPath = debug::DebugRenderer::DrawLines(lineVerts, colors::Yellow);
 
 	m_numPath = static_cast<uint32_t>(lineVerts.size());
 }
@@ -42,9 +42,9 @@ void pragma::nav::CMesh::UpdateDebugPath(Vector3 &start, Vector3 &end)
 void pragma::nav::CMesh::UpdateDepthPathTargets()
 {
 	if(m_dbgPathStart != nullptr)
-		m_dbgPointLines[0] = DebugRenderer::DrawLine(*m_dbgPathStart, *m_dbgPathStart + Vector3(0.f, 32.f, 0.f), colors::Magenta);
+		m_dbgPointLines[0] = debug::DebugRenderer::DrawLine(*m_dbgPathStart, *m_dbgPathStart + Vector3(0.f, 32.f, 0.f), colors::Magenta);
 	if(m_dbgPathEnd != nullptr)
-		m_dbgPointLines[0] = DebugRenderer::DrawLine(*m_dbgPathEnd, *m_dbgPathEnd + Vector3(0.f, 32.f, 0.f), colors::Magenta);
+		m_dbgPointLines[0] = debug::DebugRenderer::DrawLine(*m_dbgPathEnd, *m_dbgPathEnd + Vector3(0.f, 32.f, 0.f), colors::Magenta);
 }
 
 void pragma::nav::CMesh::SetDebugPathStart(Vector3 &start)
@@ -191,7 +191,7 @@ void pragma::nav::CMesh::ShowNavMeshes(bool b)
 	}*/
 	auto col = colors::Aqua;
 	col.a = 32;
-	m_dbgNavMesh = DebugRenderer::DrawMesh(triangleVerts, {col, colors::Maroon});
+	m_dbgNavMesh = debug::DebugRenderer::DrawMesh(triangleVerts, {col, colors::Maroon});
 }
 
 void pragma::nav::CMesh::Clear()

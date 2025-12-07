@@ -59,7 +59,7 @@ export namespace pragma {
 		bool m_bAuthed;
 		std::vector<InputAction> m_keyStack;
 		void InitializeFlashlight();
-		void OnTakeDamage(DamageInfo &info);
+		void OnTakeDamage(game::DamageInfo &info);
 		void OnSetSlopeLimit(float limit);
 		void OnSetStepOffset(float offset);
 		virtual void Initialize() override;

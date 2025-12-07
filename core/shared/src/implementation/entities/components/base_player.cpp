@@ -12,7 +12,7 @@ using namespace pragma;
 
 void BasePlayerComponent::SetStandHeight(float height) { m_standHeight = height; }
 void BasePlayerComponent::SetCrouchHeight(float height) { m_crouchHeight = height; }
-void BasePlayerComponent::OnTakenDamage(DamageInfo &info, unsigned short oldHealth, unsigned short newHealth)
+void BasePlayerComponent::OnTakenDamage(game::DamageInfo &info, unsigned short oldHealth, unsigned short newHealth)
 {
 	if(oldHealth == 0 || newHealth != 0)
 		return;
@@ -20,7 +20,7 @@ void BasePlayerComponent::OnTakenDamage(DamageInfo &info, unsigned short oldHeal
 	if(charComponent.valid())
 		charComponent->Kill(&info);
 }
-void BasePlayerComponent::OnKilled(DamageInfo *dmgInfo)
+void BasePlayerComponent::OnKilled(game::DamageInfo *dmgInfo)
 {
 	auto observerC = GetEntity().FindComponent("observer");
 	if(observerC.valid())
@@ -29,7 +29,7 @@ void BasePlayerComponent::OnKilled(DamageInfo *dmgInfo)
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
 
-	game->CallCallbacks<void, BasePlayerComponent *, DamageInfo *>("OnPlayerDeath", this, dmgInfo);
+	game->CallCallbacks<void, BasePlayerComponent *, game::DamageInfo *>("OnPlayerDeath", this, dmgInfo);
 	for(auto *gmC : game->GetGamemodeComponents())
 		gmC->OnPlayerDeath(*this, dmgInfo);
 

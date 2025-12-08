@@ -47,20 +47,20 @@ ShadowRenderer::ShadowRenderer()
 
 	m_octreeCallbacks.meshCallback = [this](const std::shared_ptr<pragma::geometry::ModelMesh> &mesh) {
 		auto *ent = m_currentEntity;
-		if(m_lightSourceData.light->ShouldPass(*ent, *static_cast<CModelMesh *>(mesh.get()), m_currentRenderFlags) == false)
+		if(m_lightSourceData.light->ShouldPass(*ent, *static_cast<pragma::geometry::CModelMesh *>(mesh.get()), m_currentRenderFlags) == false)
 			return;
 		for(auto &subMesh : mesh->GetSubMeshes()) {
-			if(m_lightSourceData.light->ShouldPass(*m_currentModel, *static_cast<CModelSubMesh *>(subMesh.get())) == false)
+			if(m_lightSourceData.light->ShouldPass(*m_currentModel, *static_cast<pragma::geometry::CModelSubMesh *>(subMesh.get())) == false)
 				continue;
 			auto matIdx = m_currentModel->GetMaterialIndex(*subMesh);
 			auto *mat = matIdx.has_value() ? m_currentModel->GetMaterial(*matIdx) : nullptr;
 			if(mat == nullptr || mat->GetShaderIdentifier() == "nodraw") // TODO: Do this properly
 				continue;
-			m_octreeCallbacks.subMeshCallback(*m_currentModel, *static_cast<CModelSubMesh *>(subMesh.get()), m_currentRenderFlags);
+			m_octreeCallbacks.subMeshCallback(*m_currentModel, *static_cast<pragma::geometry::CModelSubMesh *>(subMesh.get()), m_currentRenderFlags);
 		}
 	};
 
-	m_octreeCallbacks.subMeshCallback = [this](const pragma::asset::Model &mdl, const CModelSubMesh &subMesh, uint32_t renderFlags) {
+	m_octreeCallbacks.subMeshCallback = [this](const pragma::asset::Model &mdl, const pragma::geometry::CModelSubMesh &subMesh, uint32_t renderFlags) {
 		auto matIdx = mdl.GetMaterialIndex(subMesh);
 		auto *mat = matIdx.has_value() ? const_cast<pragma::asset::Model &>(mdl).GetMaterial(*matIdx) : nullptr;
 		m_shadowCasters.push_back({});
@@ -122,17 +122,17 @@ void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimary
 		  if(mdlComponent) {
 			  auto mdl = mdlComponent->GetModel();
 			  for(auto &mesh : static_cast<pragma::CModelComponent &>(*mdlComponent).GetLODMeshes()) {
-				  if(light.ShouldPass(*ent, *static_cast<CModelMesh *>(mesh.get()), renderFlags) == false)
+				  if(light.ShouldPass(*ent, *static_cast<pragma::geometry::CModelMesh *>(mesh.get()), renderFlags) == false)
 					  continue;
-				  //meshCallback(static_cast<CModelMesh*>(mesh.get()),renderFlags);
+				  //meshCallback(static_cast<pragma::geometry::CModelMesh*>(mesh.get()),renderFlags);
 				  for(auto &subMesh : mesh->GetSubMeshes()) {
-					  if(light.ShouldPass(*mdl, *static_cast<CModelSubMesh *>(subMesh.get())) == false)
+					  if(light.ShouldPass(*mdl, *static_cast<pragma::geometry::CModelSubMesh *>(subMesh.get())) == false)
 						  continue;
 					  auto matIdx = mdl->GetMaterialIndex(*subMesh);
 					  auto *mat = matIdx.has_value() ? mdl->GetMaterial(*matIdx) : nullptr;
 					  if(mat == nullptr || mat->GetShaderIdentifier() == "nodraw") // TODO
 						  continue;
-					  m_octreeCallbacks.subMeshCallback(*mdl, *static_cast<CModelSubMesh *>(subMesh.get()), renderFlags);
+					  m_octreeCallbacks.subMeshCallback(*mdl, *static_cast<pragma::geometry::CModelSubMesh *>(subMesh.get()), renderFlags);
 				  }
 			  }
 		  }
@@ -224,7 +224,7 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(std::shared_ptr<
 						auto &shaderTranslucent = static_cast<pragma::ShaderShadowTransparent&>(shader);
 						if(info.material == prevMat || shaderTranslucent.BindMaterial(static_cast<msys::CMaterial&>(*info.material)) == true)
 						{
-							shaderTranslucent.Draw(*const_cast<CModelSubMesh*>(info.mesh));
+							shaderTranslucent.Draw(*const_cast<pragma::geometry::CModelSubMesh*>(info.mesh));
 							prevMat = info.material;
 						}
 					}
@@ -232,7 +232,7 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(std::shared_ptr<
 						hasTranslucents = true;
 				}
 				else if(bTranslucent == false)
-					shader.Draw(*const_cast<CModelSubMesh*>(info.mesh));
+					shader.Draw(*const_cast<pragma::geometry::CModelSubMesh*>(info.mesh));
 			}
 		}
 	}

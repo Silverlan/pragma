@@ -48,13 +48,13 @@ export namespace pragma::rendering {
 
 		msys::CMaterial *GetMaterial() const;
 		CBaseEntity *GetEntity() const;
-		CModelSubMesh *GetMesh() const;
+		pragma::geometry::CModelSubMesh *GetMesh() const;
 		prosper::ShaderGraphics *GetShader(uint32_t &outPipelineIndex) const;
 
 		msys::MaterialIndex material;
 		prosper::PipelineID pipelineId = std::numeric_limits<prosper::PipelineID>::max();
 		EntityIndex entity;
-		pragma::RenderMeshIndex mesh;
+		pragma::rendering::RenderMeshIndex mesh;
 		SortingKey sortingKey;
 		bool translucentKey;
 

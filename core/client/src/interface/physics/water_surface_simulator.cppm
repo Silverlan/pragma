@@ -13,7 +13,7 @@ export namespace pragma::physics {
 	class DLLCLIENT CPhysWaterSurfaceSimulator : public PhysWaterSurfaceSimulator {
 	public:
 		CPhysWaterSurfaceSimulator(Vector2 aabbMin, Vector2 aabbMax, float originY, uint32_t spacing, float stiffness = 0.1f, float propagation = 100.f);
-		void Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, CModelSubMesh &mesh);
+		void Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::geometry::CModelSubMesh &mesh);
 		const std::vector<uint16_t> &GetTriangleIndices() const;
 		virtual void Simulate(double dt) override;
 		const std::shared_ptr<prosper::IBuffer> &GetParticleBuffer() const;

@@ -90,7 +90,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 			for(auto &mesh : lodMeshes)
 			{
 				auto meshRenderFlags = 0u;
-				if(pLightComponent->ShouldPass(static_cast<CBaseEntity&>(*ent),*static_cast<CModelMesh*>(mesh.get()),meshRenderFlags) == false)
+				if(pLightComponent->ShouldPass(static_cast<CBaseEntity&>(*ent),*static_cast<pragma::geometry::CModelMesh*>(mesh.get()),meshRenderFlags) == false)
 					continue;
 				for(auto &subMesh : mesh->GetSubMeshes())
 				{
@@ -102,7 +102,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 						m_shadowCasters.reserve(m_shadowCasters.size() +100);
 					m_shadowCasters.push_back({});
 					auto &info = m_shadowCasters.back();
-					info.mesh = static_cast<CModelSubMesh*>(subMesh.get());
+					info.mesh = static_cast<pragma::geometry::CModelSubMesh*>(subMesh.get());
 					info.renderFlags = meshRenderFlags;
 					info.material = mat;
 				}
@@ -177,7 +177,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 								auto &shaderTranslucent = static_cast<pragma::ShaderShadowCSMTransparent&>(shader);
 								if(info.material == prevMat || shaderTranslucent.RecordBindMaterial(static_cast<msys::CMaterial &>(*info.material)) == true)
 								{
-									shaderTranslucent.RecordDraw(*const_cast<CModelSubMesh *>(info.mesh));
+									shaderTranslucent.RecordDraw(*const_cast<pragma::geometry::CModelSubMesh *>(info.mesh));
 									prevMat = info.material;
 								}
 							}
@@ -185,7 +185,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 								bRetTranslucent = true;
 						}
 						else if(bTranslucent == false)
-							shader.RecordDraw(*const_cast<CModelSubMesh *>(info.mesh));
+							shader.RecordDraw(*const_cast<pragma::geometry::CModelSubMesh *>(info.mesh));
 					}
 				}
 				return bRetTranslucent;

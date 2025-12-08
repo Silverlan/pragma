@@ -17,6 +17,6 @@ export namespace pragma::debug {
 		std::function<bool(pragma::ShaderGameWorld &)> shaderFilter = nullptr;
 		std::function<bool(msys::CMaterial &)> materialFilter = nullptr;
 		std::function<bool(CBaseEntity &, msys::CMaterial &)> entityFilter = nullptr;
-		std::function<bool(CBaseEntity &, msys::CMaterial *, CModelSubMesh &, pragma::RenderMeshIndex)> meshFilter = nullptr;
+		std::function<bool(CBaseEntity &, msys::CMaterial *, pragma::geometry::CModelSubMesh &, pragma::rendering::RenderMeshIndex)> meshFilter = nullptr;
 	};
 }

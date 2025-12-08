@@ -196,7 +196,7 @@ void CLightMapComponent::UpdateLightmapUvBuffers()
 					uvSet = cache->FindLightmapUvs(ent->GetUuid(), subMesh->GetUuid());
 				else
 					uvSet = subMesh->GetUVSet("lightmap");
-				auto bufIdx = lightMapReceiverC->FindBufferIndex(static_cast<CModelSubMesh &>(*subMesh));
+				auto bufIdx = lightMapReceiverC->FindBufferIndex(static_cast<pragma::geometry::CModelSubMesh &>(*subMesh));
 				if(uvSet == nullptr || bufIdx.has_value() == false)
 					continue;
 				uvBuffers.at(*bufIdx)->Write(0, uvSet->size() * sizeof(uvSet->front()), uvSet->data());

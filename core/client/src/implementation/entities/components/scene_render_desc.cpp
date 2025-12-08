@@ -166,7 +166,7 @@ bool SceneRenderDesc::ShouldCull(pragma::CRenderComponent &renderC, const std::f
 	auto &aabb = renderC.GetAbsoluteRenderBounds();
 	return fShouldCull(aabb.min, aabb.max);
 }
-bool SceneRenderDesc::ShouldCull(pragma::CRenderComponent &renderC, pragma::RenderMeshIndex meshIdx, const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull)
+bool SceneRenderDesc::ShouldCull(pragma::CRenderComponent &renderC, pragma::rendering::RenderMeshIndex meshIdx, const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull)
 {
 	auto &renderMeshes = renderC.GetRenderMeshes();
 	if(meshIdx >= renderMeshes.size())
@@ -310,7 +310,7 @@ namespace {
 	auto _ = pragma::console::client::register_variable_listener<bool>("debug_occlusion_culling_freeze_camera", &cmd_debug_occlusion_culling_freeze_camera);
 }
 
-bool SceneRenderDesc::IsWorldMeshVisible(uint32_t worldRenderQueueIndex, pragma::RenderMeshIndex meshIdx) const
+bool SceneRenderDesc::IsWorldMeshVisible(uint32_t worldRenderQueueIndex, pragma::rendering::RenderMeshIndex meshIdx) const
 {
 	if(worldRenderQueueIndex >= m_worldMeshVisibility.size())
 		return false;

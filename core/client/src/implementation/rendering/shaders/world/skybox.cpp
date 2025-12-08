@@ -26,7 +26,7 @@ ShaderSkybox::ShaderSkybox(prosper::IPrContext &context, const std::string &iden
 	m_shaderMaterialName = "skybox";
 }
 
-bool ShaderSkybox::GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const
+bool ShaderSkybox::GetRenderBufferTargets(pragma::geometry::CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const
 {
 	auto &sceneMesh = mesh.GetSceneMesh();
 	if(sceneMesh == nullptr)

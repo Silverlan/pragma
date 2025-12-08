@@ -343,7 +343,7 @@ void CAnimatedComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &mo
 		  auto &v = subMesh->GetVertices()[vertexId];
 		  pos = v.position;
 		  n = v.normal;
-		  auto b = hAnim.GetLocalVertexPosition(static_cast<CModelSubMesh &>(*subMesh), vertexId, pos, n);
+		  auto b = hAnim.GetLocalVertexPosition(static_cast<pragma::geometry::CModelSubMesh &>(*subMesh), vertexId, pos, n);
 		  if(b == false)
 			  return {};
 		  return pos;

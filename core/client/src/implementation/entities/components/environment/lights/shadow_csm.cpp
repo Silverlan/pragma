@@ -334,12 +334,12 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 						{
 							uint32_t renderFlags = 0;
 							auto mesh = ptrMesh.lock();
-							if(info.bAlreadyPassed == true || pLightComponent->ShouldPass(*ent,*static_cast<CModelMesh*>(mesh.get()),renderFlags) == true && (renderFlags &layerFlag) != 0)
+							if(info.bAlreadyPassed == true || pLightComponent->ShouldPass(*ent,*static_cast<pragma::geometry::CModelMesh*>(mesh.get()),renderFlags) == true && (renderFlags &layerFlag) != 0)
 							{
 								for(auto &subMesh : mesh->GetSubMeshes())
 								{
 									uint32_t renderFlags = 0;
-									auto &cSubMesh = *static_cast<CModelSubMesh*>(subMesh.get());
+									auto &cSubMesh = *static_cast<pragma::geometry::CModelSubMesh*>(subMesh.get());
 									if(pLightComponent->ShouldPass(*mdl,cSubMesh) == true)
 									{
 										auto matIdx = mdl->GetMaterialIndex(cSubMesh);
@@ -394,7 +394,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 								auto &wpSubMesh = meshInfo.subMeshes.front();
 								if(wpSubMesh.expired() == false)
 								{
-									auto *cSubMesh = static_cast<CModelSubMesh*>(wpSubMesh.lock().get());
+									auto *cSubMesh = static_cast<pragma::geometry::CModelSubMesh*>(wpSubMesh.lock().get());
 									auto matIdx = mdl->GetMaterialIndex(*cSubMesh);
 									auto *mat = matIdx.has_value() ? mdl->GetMaterial(*matIdx) : nullptr;
 									if(mat != nullptr)

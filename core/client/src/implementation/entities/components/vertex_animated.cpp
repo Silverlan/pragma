@@ -99,7 +99,7 @@ void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 		m_vertexAnimationBufferData.resize(m_maxVertexAnimations);
 	}
 
-	auto &vertAnimBuffer = static_cast<CModel &>(*mdl).GetVertexAnimationBuffer();
+	auto &vertAnimBuffer = static_cast<asset::CModel &>(*mdl).GetVertexAnimationBuffer();
 	ds->SetBindingStorageBuffer(*m_vertexAnimationBuffer, umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData));
 	ds->SetBindingStorageBuffer(*vertAnimBuffer, umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::VertexAnimations));
 	ds->Update();
@@ -184,16 +184,16 @@ void CVertexAnimatedComponent::UpdateVertexAnimationDataMT()
 
 			uint64_t srcFrameOffset = 0ull;
 			uint64_t dstFrameOffset = 0ull;
-			if(static_cast<CModel &>(*mdl).GetVertexAnimationBufferFrameOffset(vaId, static_cast<CModelSubMesh &>(*subMesh), frameId, srcFrameOffset) == false
-			  || static_cast<CModel &>(*mdl).GetVertexAnimationBufferFrameOffset(vaId, static_cast<CModelSubMesh &>(*subMesh), nextFrameId, dstFrameOffset) == false)
+			if(static_cast<pragma::asset::CModel &>(*mdl).GetVertexAnimationBufferFrameOffset(vaId, static_cast<pragma::geometry::CModelSubMesh &>(*subMesh), frameId, srcFrameOffset) == false
+			  || static_cast<pragma::asset::CModel &>(*mdl).GetVertexAnimationBufferFrameOffset(vaId, static_cast<pragma::geometry::CModelSubMesh &>(*subMesh), nextFrameId, dstFrameOffset) == false)
 				continue;
 			if(srcFrameOffset > std::numeric_limits<uint32_t>::max() || dstFrameOffset > std::numeric_limits<uint32_t>::max())
 				continue;
 			++m_activeVertexAnimations;
 
-			auto it = data.find(static_cast<CModelSubMesh *>(subMesh));
+			auto it = data.find(static_cast<pragma::geometry::CModelSubMesh *>(subMesh));
 			if(it == data.end())
-				it = data.insert(std::make_pair(static_cast<CModelSubMesh *>(subMesh), std::vector<VertexAnimationData> {})).first;
+				it = data.insert(std::make_pair(static_cast<pragma::geometry::CModelSubMesh *>(subMesh), std::vector<VertexAnimationData> {})).first;
 			it->second.push_back({});
 			auto &vaData = it->second.back();
 			vaData.srcFrameOffset = srcFrameOffset;
@@ -243,7 +243,7 @@ void CVertexAnimatedComponent::UpdateVertexAnimationBuffer(const std::shared_ptr
 	}
 }
 
-bool CVertexAnimatedComponent::GetVertexAnimationBufferMeshOffset(CModelSubMesh &mesh, uint32_t &offset, uint32_t &animCount) const
+bool CVertexAnimatedComponent::GetVertexAnimationBufferMeshOffset(pragma::geometry::CModelSubMesh &mesh, uint32_t &offset, uint32_t &animCount) const
 {
 	auto it = m_vertexAnimationMeshBufferOffsets.find(&mesh);
 	if(it == m_vertexAnimationMeshBufferOffsets.end())
@@ -309,7 +309,7 @@ void CVertexAnimatedComponent::RegisterLuaBindings(lua::State *l, luabind::modul
 	    [](lua::State *l, pragma::CVertexAnimatedComponent &hAnim, std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh) -> Lua::opt<luabind::mult<uint32_t, uint32_t>> {
 		    uint32_t offset;
 		    uint32_t animCount;
-		    auto b = hAnim.GetVertexAnimationBufferMeshOffset(static_cast<CModelSubMesh &>(*subMesh), offset, animCount);
+		    auto b = hAnim.GetVertexAnimationBufferMeshOffset(static_cast<pragma::geometry::CModelSubMesh &>(*subMesh), offset, animCount);
 		    if(b == false)
 			    return luabind::object {};
 		    return luabind::mult<uint32_t, uint32_t> {l, offset, animCount};
@@ -318,7 +318,7 @@ void CVertexAnimatedComponent::RegisterLuaBindings(lua::State *l, luabind::modul
 	  static_cast<Lua::opt<luabind::mult<Vector3, Vector3>> (*)(lua::State *, pragma::CVertexAnimatedComponent &, std::shared_ptr<pragma::geometry::ModelSubMesh> &, uint32_t)>(
 	    [](lua::State *l, pragma::CVertexAnimatedComponent &hAnim, std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh, uint32_t vertexId) -> Lua::opt<luabind::mult<Vector3, Vector3>> {
 		    Vector3 pos, n;
-		    auto b = hAnim.GetLocalVertexPosition(static_cast<CModelSubMesh &>(*subMesh), vertexId, pos, &n);
+		    auto b = hAnim.GetLocalVertexPosition(static_cast<pragma::geometry::CModelSubMesh &>(*subMesh), vertexId, pos, &n);
 		    if(b == false)
 			    return luabind::object {};
 		    return luabind::mult<Vector3, Vector3> {l, pos, n};

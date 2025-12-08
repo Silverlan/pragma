@@ -62,7 +62,7 @@ void Lua::Model::Client::SetMaterial(lua::State *l, pragma::asset::Model &mdl, u
 }
 void Lua::Model::Client::GetVertexAnimationBuffer(lua::State *l, pragma::asset::Model &mdl)
 {
-	auto &buf = static_cast<CModel &>(mdl).GetVertexAnimationBuffer();
+	auto &buf = static_cast<pragma::asset::CModel &>(mdl).GetVertexAnimationBuffer();
 	if(buf == nullptr)
 		return;
 	Lua::Push(l, buf);

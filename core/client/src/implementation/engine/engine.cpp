@@ -1767,7 +1767,7 @@ void pragma::CEngine::OnClose()
 
 	pragma::CRenderComponent::ClearBuffers();
 	pragma::CLightComponent::ClearBuffers();
-	CModelSubMesh::ClearBuffers();
+	pragma::geometry::CModelSubMesh::ClearBuffers();
 	pragma::ecs::CParticleSystemComponent::ClearBuffers();
 }
 

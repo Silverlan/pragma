@@ -204,7 +204,7 @@ void CParticleRendererModel::RecordRender(prosper::ICommandBuffer &drawCmd, prag
 			{
 				for(auto &subMesh : mesh->GetSubMeshes())
 				{
-					auto *cSubMesh = static_cast<CModelSubMesh*>(subMesh.get());
+					auto *cSubMesh = static_cast<pragma::geometry::CModelSubMesh*>(subMesh.get());
 					auto texId = mdl.GetMaterialIndex(*cSubMesh);
 					auto *mat = matPt;
 					if(mat == nullptr && texGroup != nullptr && texId.has_value() && *texId < texGroup->textures.size())
@@ -216,7 +216,7 @@ void CParticleRendererModel::RecordRender(prosper::ICommandBuffer &drawCmd, prag
 					if(mat == nullptr)
 						continue;
 					shader->BindMaterial(static_cast<msys::CMaterial&>(*mat));
-					shader->Draw(*static_cast<CModelSubMesh*>(subMesh.get()),bAnimated ? 1u : instanceCount,instanceIdx); // TODO: Bloom?
+					shader->Draw(*static_cast<pragma::geometry::CModelSubMesh*>(subMesh.get()),bAnimated ? 1u : instanceCount,instanceIdx); // TODO: Bloom?
 				}
 			}
 		}
@@ -251,7 +251,7 @@ void CParticleRendererModel::RecordRenderShadow(prosper::ICommandBuffer &drawCmd
 	{
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
-			auto *cSubMesh = static_cast<CModelSubMesh*>(subMesh.get());
+			auto *cSubMesh = static_cast<pragma::geometry::CModelSubMesh*>(subMesh.get());
 			shader.DrawTest(cSubMesh,instanceCount);
 		}
 	}

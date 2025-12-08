@@ -131,7 +131,7 @@ void CLightComponent::DestroyShadowBuffer(bool freeBuffer)
 
 bool CLightComponent::ShouldRender() { return true; }
 
-bool CLightComponent::ShouldPass(const pragma::asset::Model &mdl, const CModelSubMesh &mesh)
+bool CLightComponent::ShouldPass(const pragma::asset::Model &mdl, const pragma::geometry::CModelSubMesh &mesh)
 {
 	auto &materials = mdl.GetMaterials();
 	auto texId = mdl.GetMaterialIndex(mesh);
@@ -157,7 +157,7 @@ bool CLightComponent::ShouldPass(const CBaseEntity &ent, uint32_t &renderFlags)
 		return evData.shouldPass;
 	return true;
 }
-bool CLightComponent::ShouldPass(const CBaseEntity &ent, const CModelMesh &mesh, uint32_t &renderFlags)
+bool CLightComponent::ShouldPass(const CBaseEntity &ent, const pragma::geometry::CModelMesh &mesh, uint32_t &renderFlags)
 {
 	if(ShouldCastShadows() == false)
 		return false;
@@ -224,7 +224,7 @@ bool CLightComponent::IsInRange(const CBaseEntity &ent) const
 	auto radius = pRadiusComponent->GetRadius();
 	return (uvec::distance(pos + sphere.pos, origin) <= (radius + sphere.radius)) ? true : false;
 }
-bool CLightComponent::IsInRange(const CBaseEntity &ent, const CModelMesh &mesh) const
+bool CLightComponent::IsInRange(const CBaseEntity &ent, const pragma::geometry::CModelMesh &mesh) const
 {
 	auto pRadiusComponent = GetEntity().GetComponent<CRadiusComponent>();
 	auto pTrComponent = ent.GetTransformComponent();
@@ -754,12 +754,12 @@ void CEShouldPassEntity::PushArguments(lua::State *l) {}
 
 /////////////////
 
-CEShouldPassMesh::CEShouldPassMesh(const pragma::asset::Model &model, const CModelSubMesh &mesh) : model {model}, mesh {mesh} {}
+CEShouldPassMesh::CEShouldPassMesh(const pragma::asset::Model &model, const pragma::geometry::CModelSubMesh &mesh) : model {model}, mesh {mesh} {}
 void CEShouldPassMesh::PushArguments(lua::State *l) {}
 
 /////////////////
 
-CEShouldPassEntityMesh::CEShouldPassEntityMesh(const CBaseEntity &entity, const CModelMesh &mesh, uint32_t &renderFlags) : entity {entity}, mesh {mesh}, renderFlags {renderFlags} {}
+CEShouldPassEntityMesh::CEShouldPassEntityMesh(const CBaseEntity &entity, const pragma::geometry::CModelMesh &mesh, uint32_t &renderFlags) : entity {entity}, mesh {mesh}, renderFlags {renderFlags} {}
 void CEShouldPassEntityMesh::PushArguments(lua::State *l) {}
 
 /////////////////

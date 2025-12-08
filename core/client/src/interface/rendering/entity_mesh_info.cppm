@@ -19,6 +19,6 @@ export class DLLCLIENT EntityMeshInfo {
 	EntityMeshInfo(EntityMeshInfo &&) = default;
 	EntityMeshInfo &operator=(const EntityMeshInfo &other) = delete;
 	CBaseEntity *entity;
-	std::vector<CModelSubMesh *> meshes;
+	std::vector<pragma::geometry::CModelSubMesh *> meshes;
 };
 #pragma warning(pop)

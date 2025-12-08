@@ -847,26 +847,26 @@ bool CRenderComponent::ShouldDrawShadow() const
 	return m_renderBuffer && umath::is_flag_set(m_stateFlags, StateFlags::ShouldDrawShadow) && !umath::is_flag_set(m_stateFlags, StateFlags::DisableShadows) && GetCastShadows();
 }
 
-RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod)
+pragma::rendering::RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod)
 {
 	auto *pMdlComponent = GetModelComponent();
 	if(!pMdlComponent) {
-		static RenderMeshGroup meshes {};
+		static rendering::RenderMeshGroup meshes {};
 		return meshes;
 	}
 	return static_cast<pragma::CModelComponent &>(*pMdlComponent).GetLodRenderMeshGroup(lod);
 }
-const RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod) const { return const_cast<CRenderComponent *>(this)->GetLodRenderMeshGroup(lod); }
-RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod)
+const pragma::rendering::RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod) const { return const_cast<CRenderComponent *>(this)->GetLodRenderMeshGroup(lod); }
+pragma::rendering::RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod)
 {
 	auto *pMdlComponent = GetModelComponent();
 	if(!pMdlComponent) {
-		static RenderMeshGroup meshes {};
+		static rendering::RenderMeshGroup meshes {};
 		return meshes;
 	}
 	return static_cast<pragma::CModelComponent &>(*pMdlComponent).GetLodMeshGroup(lod);
 }
-const RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod) const { return const_cast<CRenderComponent *>(this)->GetLodMeshGroup(lod); }
+const pragma::rendering::RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod) const { return const_cast<CRenderComponent *>(this)->GetLodMeshGroup(lod); }
 const std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &CRenderComponent::GetRenderMeshes() const { return const_cast<CRenderComponent *>(this)->GetRenderMeshes(); }
 std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &CRenderComponent::GetRenderMeshes()
 {

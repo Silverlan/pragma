@@ -66,7 +66,7 @@ void ShaderPPLightCone::InitializeRenderPass(std::shared_ptr<prosper::IRenderPas
 	rpCreateInfo.subPasses.push_back(prosper::util::RenderPassCreateInfo::SubPass {std::vector<std::size_t> {0ull, 1ull}, true});
 	CreateCachedRenderPass<ShaderPPLightCone>(rpCreateInfo, outRenderPass, pipelineIdx);
 }
-bool ShaderPPLightCone::RecordDraw(prosper::ShaderBindState &bindState, const CModelSubMesh &mesh, prosper::IDescriptorSet &descSetTex, prosper::IDescriptorSet &descSetDepth, prosper::IDescriptorSet &descSetInstance, prosper::IDescriptorSet &descSetCam) const
+bool ShaderPPLightCone::RecordDraw(prosper::ShaderBindState &bindState, const pragma::geometry::CModelSubMesh &mesh, prosper::IDescriptorSet &descSetTex, prosper::IDescriptorSet &descSetDepth, prosper::IDescriptorSet &descSetInstance, prosper::IDescriptorSet &descSetCam) const
 {
 	auto &vkMesh = mesh.GetSceneMesh();
 	if(!vkMesh)

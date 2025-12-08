@@ -81,7 +81,7 @@ void CLiquidComponent::SetupWater()
 	}
 	if(waterMaterialIds.empty() == true)
 		return;
-	std::vector<CModelSubMesh*> waterSurfaces;
+	std::vector<pragma::geometry::CModelSubMesh*> waterSurfaces;
 	for(auto meshId : mdl->GetBaseMeshes())
 	{
 		auto meshGroup = mdl->GetMeshGroup(meshId);
@@ -91,7 +91,7 @@ void CLiquidComponent::SetupWater()
 		{
 			for(auto &subMesh : mesh->GetSubMeshes())
 			{
-				auto *cSubMesh = static_cast<CModelSubMesh*>(subMesh.get());
+				auto *cSubMesh = static_cast<pragma::geometry::CModelSubMesh*>(subMesh.get());
 				auto texId = cSubMesh->GetTexture();
 				auto it = waterMaterialIds.find(texId);
 				if(it != waterMaterialIds.end())
@@ -111,7 +111,7 @@ void CLiquidComponent::SetupWater()
 	auto &mats = mdl->GetMaterials();
 	if(!mesh)
 		return;
-	auto *meshSurface = static_cast<CModelSubMesh *>(mesh);
+	auto *meshSurface = static_cast<pragma::geometry::CModelSubMesh *>(mesh);
 	auto matIdx = mdl->GetMaterialIndex(*meshSurface);
 	auto *mat = matIdx.has_value() ? static_cast<msys::CMaterial *>(mats.at(*matIdx).get()) : nullptr;
 	Vector3 min, max;

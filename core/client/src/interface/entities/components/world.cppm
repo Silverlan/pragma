@@ -25,7 +25,7 @@ export namespace pragma {
 		virtual void OnTick(double tDelta) override;
 
 		const rendering::RenderQueue *GetClusterRenderQueue(util::BSPTree::ClusterIndex clusterIndex, bool translucent = false) const;
-		void SetBSPTree(const std::shared_ptr<util::BSPTree> &bspTree, const std::vector<std::vector<RenderMeshIndex>> &meshesPerCluster);
+		void SetBSPTree(const std::shared_ptr<util::BSPTree> &bspTree, const std::vector<std::vector<rendering::RenderMeshIndex>> &meshesPerCluster);
 		const std::shared_ptr<util::BSPTree> &GetBSPTree() const;
 		void RebuildRenderQueues();
 	  protected:
@@ -41,7 +41,7 @@ export namespace pragma {
 		std::shared_ptr<::CHC> m_chcController;
 
 		std::shared_ptr<util::BSPTree> m_bspTree = nullptr;
-		std::vector<std::vector<RenderMeshIndex>> m_meshesPerCluster;
+		std::vector<std::vector<rendering::RenderMeshIndex>> m_meshesPerCluster;
 
 		bool m_renderQueuesDirty = false;
 	};

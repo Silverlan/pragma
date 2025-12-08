@@ -247,9 +247,9 @@ void CLightDirectionalComponent::RenderStaticWorldGeometry()
 		{
 			for(auto &subMesh : mesh->GetSubMeshes())
 			{
-				if(CLightBase::ShouldPass(model,*static_cast<CModelSubMesh*>(subMesh.get())) == false)
+				if(CLightBase::ShouldPass(model,*static_cast<pragma::geometry::CModelSubMesh*>(subMesh.get())) == false)
 					continue;
-				info.meshes.push_back(static_cast<CModelSubMesh*>(subMesh.get()));
+				info.meshes.push_back(static_cast<pragma::geometry::CModelSubMesh*>(subMesh.get()));
 			}
 		}
 	}

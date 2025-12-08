@@ -47,7 +47,7 @@ export class DLLCLIENT SceneRenderDesc {
 	static bool ShouldConsiderEntity(CBaseEntity &ent, const pragma::CSceneComponent &scene, RenderFlags renderFlags, pragma::rendering::RenderMask renderMask);
 	static bool ShouldCull(CBaseEntity &ent, const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull);
 	static bool ShouldCull(pragma::CRenderComponent &renderC, const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull);
-	static bool ShouldCull(pragma::CRenderComponent &renderC, pragma::RenderMeshIndex meshIdx, const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull);
+	static bool ShouldCull(pragma::CRenderComponent &renderC, pragma::rendering::RenderMeshIndex meshIdx, const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull);
 	static bool ShouldCull(const Vector3 &min, const Vector3 &max, const std::vector<umath::Plane> &frustumPlanes);
 	static uint32_t GetActiveRenderQueueThreadCount();
 	static bool AssertRenderQueueThreadInactive();
@@ -58,7 +58,7 @@ export class DLLCLIENT SceneRenderDesc {
 	void BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo, const std::function<void()> &fBuildAdditionalQueues);
 	void BuildRenderQueueInstanceLists(pragma::rendering::RenderQueue &renderQueue);
 
-	bool IsWorldMeshVisible(uint32_t worldRenderQueueIndex, pragma::RenderMeshIndex meshIdx) const;
+	bool IsWorldMeshVisible(uint32_t worldRenderQueueIndex, pragma::rendering::RenderMeshIndex meshIdx) const;
 
 	void WaitForWorldRenderQueues() const;
 

@@ -548,7 +548,7 @@ void pragma::CGame::Initialize()
 	materialManager.SetShaderHandler(&shader_handler);
 	pragma::CRenderComponent::InitializeBuffers();
 	pragma::CLightComponent::InitializeBuffers();
-	CModelSubMesh::InitializeBuffers();
+	pragma::geometry::CModelSubMesh::InitializeBuffers();
 	pragma::ecs::CParticleSystemComponent::InitializeBuffers();
 
 	InitShaders();
@@ -1092,8 +1092,8 @@ const util::WeakHandle<prosper::Shader> &pragma::CGame::GetGameShader(GameShader
 
 LuaCallbackHandler &pragma::CGame::GetInputCallbackHandler() { return m_inputCallbackHandler; }
 
-std::shared_ptr<pragma::geometry::ModelMesh> pragma::CGame::CreateModelMesh() const { return ::util::make_shared<CModelMesh>(); }
-std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::CGame::CreateModelSubMesh() const { return ::util::make_shared<CModelSubMesh>(); }
+std::shared_ptr<pragma::geometry::ModelMesh> pragma::CGame::CreateModelMesh() const { return ::util::make_shared<pragma::geometry::CModelMesh>(); }
+std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::CGame::CreateModelSubMesh() const { return ::util::make_shared<pragma::geometry::CModelSubMesh>(); }
 
 Float pragma::CGame::GetHDRExposure() const
 {

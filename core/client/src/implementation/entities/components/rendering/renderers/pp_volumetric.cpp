@@ -122,7 +122,7 @@ void CRendererPpVolumetricComponent::DoRenderEffect(const util::DrawSceneInfo &d
 
 				auto &renderMeshes = mdlC->GetRenderMeshes();
 				for(auto &mesh : renderMeshes) {
-					auto &cmesh = static_cast<CModelSubMesh &>(*mesh);
+					auto &cmesh = static_cast<pragma::geometry::CModelSubMesh &>(*mesh);
 
 					// TODO: We only have to bind the instance and camera descriptor sets once per entity and not for every mesh
 					shaderLightCone.RecordDraw(bindState, cmesh, *hdrInfo.dsgHDRPostProcessing->GetDescriptorSet(), *hdrInfo.dsgDepthPostProcessing->GetDescriptorSet(), *dsInstance, *dsCam);

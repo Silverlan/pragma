@@ -19,7 +19,7 @@ namespace Shader
 		ParticleModelShadow();
 		void BindInstanceDescriptorSet(Vulkan::CommandBufferObject *cmdBuffer,const Vulkan::DescriptorSetObject *descSetInstance,const Mat4 &depthMvp);
 		bool BeginDrawTest(Vulkan::BufferObject *particleBuffer,Vulkan::BufferObject *rotBuffer,Vulkan::CommandBufferObject *cmdBuffer,CLightBase *light,uint32_t w,uint32_t h);
-		void DrawTest(CModelSubMesh *mesh,uint32_t instanceCount);
+		void DrawTest(pragma::geometry::CModelSubMesh *mesh,uint32_t instanceCount);
 		enum class DLLCLIENT Location : uint32_t
 		{
 			Xyzs = umath::to_integral(Shadow::Location::Vertex) +1,

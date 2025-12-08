@@ -148,7 +148,7 @@ decltype(ShaderEntity::DESCRIPTOR_SET_INSTANCE) ShaderEntity::DESCRIPTOR_SET_INS
 };
 ShaderEntity::ShaderEntity(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderSceneLit(context, identifier, vsShader, fsShader, gsShader) {}
 
-bool ShaderEntity::GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const
+bool ShaderEntity::GetRenderBufferTargets(pragma::geometry::CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const
 {
 	auto &sceneMesh = mesh.GetSceneMesh();
 	if(sceneMesh == nullptr)
@@ -170,7 +170,7 @@ bool ShaderEntity::GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipeline
 	outOffsets = {0ull, vertWeights.size() * sizeof(vertWeights.front()), 0ull};
 	return true;
 }
-std::shared_ptr<prosper::IRenderBuffer> ShaderEntity::CreateRenderBuffer(CModelSubMesh &mesh, uint32_t pipelineIdx) const
+std::shared_ptr<prosper::IRenderBuffer> ShaderEntity::CreateRenderBuffer(pragma::geometry::CModelSubMesh &mesh, uint32_t pipelineIdx) const
 {
 	std::vector<prosper::IBuffer *> buffers;
 	std::vector<prosper::DeviceSize> offsets;

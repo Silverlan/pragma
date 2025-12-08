@@ -83,10 +83,10 @@ export namespace pragma {
 		std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &GetLODMeshes();
 		const std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &GetLODMeshes() const;
 
-		RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod);
-		const RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod) const;
-		RenderMeshGroup &GetLodMeshGroup(uint32_t lod);
-		const RenderMeshGroup &GetLodMeshGroup(uint32_t lod) const;
+		rendering::RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod);
+		const rendering::RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod) const;
+		rendering::RenderMeshGroup &GetLodMeshGroup(uint32_t lod);
+		const rendering::RenderMeshGroup &GetLodMeshGroup(uint32_t lod) const;
 
 		uint64_t GetLastRenderFrame() const;
 		void SetLastRenderFrame(unsigned long long &t);

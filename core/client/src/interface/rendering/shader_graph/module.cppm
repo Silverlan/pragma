@@ -24,7 +24,7 @@ export namespace pragma::rendering {
 		virtual void InitializeShaderResources() {}
 		virtual void InitializeGfxPipelineDescriptorSets() = 0;
 		virtual void GetShaderPreprocessorDefinitions(std::unordered_map<std::string, std::string> &outDefinitions, std::string &outPrefixCode) {}
-		virtual void UpdateRenderFlags(CModelSubMesh &mesh, ShaderGameWorld::SceneFlags &inOutFlags) {}
+		virtual void UpdateRenderFlags(pragma::geometry::CModelSubMesh &mesh, ShaderGameWorld::SceneFlags &inOutFlags) {}
 		virtual void RecordBindScene(ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const = 0;
 		virtual void RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const {}
 		virtual void RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, msys::CMaterial &mat) const {}

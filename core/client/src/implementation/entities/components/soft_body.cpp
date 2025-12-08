@@ -33,7 +33,7 @@ bool CSoftBodyComponent::InitializeSoftBodyData()
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
 			subMesh->Update(pragma::asset::ModelUpdateFlags::UpdateBuffers);
-			auto &vkMesh = static_cast<CModelSubMesh&>(*subMesh).GetSceneMesh();
+			auto &vkMesh = static_cast<pragma::geometry::CModelSubMesh&>(*subMesh).GetSceneMesh();
 			if(vkMesh == nullptr)
 				continue;
 			auto &verts = subMesh->GetVertices();
@@ -74,13 +74,13 @@ void CSoftBodyComponent::UpdateSoftBodyGeometry()
 	if(phys == nullptr || !phys->IsSoftBody())
 		return;
 	auto *physSoftBody = static_cast<SoftBodyPhysObj*>(phys);
-	std::unordered_map<CModelSubMesh*,std::vector<PhysSoftBody*>> softBodies;
+	std::unordered_map<pragma::geometry::CModelSubMesh*,std::vector<PhysSoftBody*>> softBodies;
 	for(auto &hObj : physSoftBody->GetCollisionObjects())
 	{
 		if(hObj.IsValid() == false || hObj->IsSoftBody() == false)
 			continue;
 		auto &softBody = *static_cast<PhysSoftBody*>(hObj.get());
-		auto *mesh = static_cast<CModelSubMesh*>(softBody.GetSubMesh());
+		auto *mesh = static_cast<pragma::geometry::CModelSubMesh*>(softBody.GetSubMesh());
 		if(mesh == nullptr)
 			continue;
 		auto it = softBodies.find(mesh);

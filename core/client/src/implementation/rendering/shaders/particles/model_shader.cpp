@@ -85,10 +85,10 @@ bool ShaderParticleModel::RecordParticleBuffers(prosper::ShaderBindState &bindSt
 	return RecordBindVertexBuffers(bindState, {&particleBuffer, &rotBuffer, &animStartBuffer}, VERTEX_BINDING_PARTICLE.GetBindingIndex());
 }
 
-bool ShaderParticleModel::Draw(CModelSubMesh &mesh, uint32_t numInstances, uint32_t firstInstance)
+bool ShaderParticleModel::Draw(pragma::geometry::CModelSubMesh &mesh, uint32_t numInstances, uint32_t firstInstance)
 {
 #if 0
-	return ShaderGameWorldLightingPass::Draw(mesh,{},*CSceneComponent::GetEntityInstanceIndexBuffer()->GetZeroIndexBuffer(),[this,numInstances,firstInstance](CModelSubMesh &mesh) {
+	return ShaderGameWorldLightingPass::Draw(mesh,{},*CSceneComponent::GetEntityInstanceIndexBuffer()->GetZeroIndexBuffer(),[this,numInstances,firstInstance](pragma::geometry::CModelSubMesh &mesh) {
 		return RecordDrawIndexed(mesh.GetTriangleVertexCount(),numInstances,0u,firstInstance);
 	},true);
 #endif

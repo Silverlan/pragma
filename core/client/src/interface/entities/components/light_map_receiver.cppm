@@ -30,7 +30,7 @@ export namespace pragma {
 		void UpdateLightMapUvData();
 		const std::unordered_map<MeshIdx, std::vector<Vector2>> &GetMeshLightMapUvData() const;
 		void AssignBufferIndex(MeshIdx meshIdx, BufferIdx bufIdx);
-		std::optional<BufferIdx> FindBufferIndex(CModelSubMesh &mesh) const;
+		std::optional<BufferIdx> FindBufferIndex(pragma::geometry::CModelSubMesh &mesh) const;
 		std::optional<BufferIdx> GetBufferIndex(RenderMeshIndex meshIdx) const;
 
 		void UpdateMeshLightmapUvBuffers(CLightMapComponent &lightMapC);
@@ -45,8 +45,8 @@ export namespace pragma {
 		std::shared_ptr<LightmapDataCache> m_lightmapDataCache;
 		std::unordered_map<MeshIdx, std::vector<Vector2>> m_uvDataPerMesh {};
 		std::unordered_map<MeshIdx, std::shared_ptr<pragma::geometry::ModelSubMesh>> m_meshes {};
-		std::unordered_map<CModelSubMesh *, MeshIdx> m_meshToMeshIdx {};
-		std::unordered_map<CModelSubMesh *, BufferIdx> m_meshToBufIdx {};
+		std::unordered_map<pragma::geometry::CModelSubMesh *, MeshIdx> m_meshToMeshIdx {};
+		std::unordered_map<pragma::geometry::CModelSubMesh *, BufferIdx> m_meshToBufIdx {};
 
 		// Matches the render meshes from the model component (for faster lookup)
 		std::vector<BufferIdx> m_meshBufferIndices;

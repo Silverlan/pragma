@@ -211,7 +211,7 @@ void pragma::physics::CPhysWaterSurfaceSimulator::Simulate(double dt)
 
 const std::vector<uint16_t> &pragma::physics::CPhysWaterSurfaceSimulator::GetTriangleIndices() const { return m_triangleIndices; }
 
-void pragma::physics::CPhysWaterSurfaceSimulator::Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, CModelSubMesh &mesh)
+void pragma::physics::CPhysWaterSurfaceSimulator::Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::geometry::CModelSubMesh &mesh)
 {
 	// TODO
 	auto &verts = mesh.GetVertices();

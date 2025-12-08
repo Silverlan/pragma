@@ -171,7 +171,7 @@ export {
 		std::vector<EntityHandle> entities;
 		std::vector<msys::MaterialHandle> materials;
 		std::vector<util::WeakHandle<prosper::Shader>> shaders;
-		std::vector<std::shared_ptr<const CModelSubMesh>> meshes;
+		std::vector<std::shared_ptr<const pragma::geometry::CModelSubMesh>> meshes;
 
 		std::unordered_set<EntityIndex> instancedEntities;
 

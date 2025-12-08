@@ -91,7 +91,7 @@ void CWorldComponent::ReloadCHCController()
 	m_chcController = ::util::make_shared<CHC>(*cam);
 	m_chcController->Reset(m_meshTree);*/ // prosper TODO
 }
-void CWorldComponent::SetBSPTree(const std::shared_ptr<::util::BSPTree> &bspTree, const std::vector<std::vector<RenderMeshIndex>> &meshesPerCluster)
+void CWorldComponent::SetBSPTree(const std::shared_ptr<::util::BSPTree> &bspTree, const std::vector<std::vector<rendering::RenderMeshIndex>> &meshesPerCluster)
 {
 	m_bspTree = bspTree;
 	m_meshesPerCluster = meshesPerCluster;

@@ -44,10 +44,10 @@ bool CRaytracingComponent::InitializeBuffers()
 	ds.SetBindingStorageBuffer(*s_entityMeshInfoBuffer, umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::SubMeshInfos));
 	ds.SetBindingStorageBuffer(*CRenderComponent::GetInstanceBuffer(), umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::EntityInstanceData));
 	ds.SetBindingStorageBuffer(*pragma::get_instance_bone_buffer(), umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::BoneMatrices));
-	ds.SetBindingStorageBuffer(*CModelSubMesh::GetGlobalVertexBuffer(), umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::VertexBuffer));
-	ds.SetBindingStorageBuffer(*CModelSubMesh::GetGlobalIndexBuffer(), umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::IndexBuffer));
-	ds.SetBindingStorageBuffer(*CModelSubMesh::GetGlobalVertexWeightBuffer(), umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::VertexWeightBuffer));
-	ds.SetBindingStorageBuffer(*CModelSubMesh::GetGlobalAlphaBuffer(), umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::AlphaBuffer));
+	ds.SetBindingStorageBuffer(*geometry::CModelSubMesh::GetGlobalVertexBuffer(), umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::VertexBuffer));
+	ds.SetBindingStorageBuffer(*geometry::CModelSubMesh::GetGlobalIndexBuffer(), umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::IndexBuffer));
+	ds.SetBindingStorageBuffer(*geometry::CModelSubMesh::GetGlobalVertexWeightBuffer(), umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::VertexWeightBuffer));
+	ds.SetBindingStorageBuffer(*geometry::CModelSubMesh::GetGlobalAlphaBuffer(), umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::AlphaBuffer));
 
 	s_allResourcesInitialized = s_entityMeshInfoBuffer && s_materialDescriptorArrayManager && s_gameSceneDsg;
 	return s_allResourcesInitialized;
@@ -116,7 +116,7 @@ void CRaytracingComponent::InitializeModelRaytracingBuffers()
 	mdl->GetBodyGroupMeshes(bodyGroups, 0, lodMeshes);
 	for(auto &mesh : lodMeshes) {
 		for(auto &subMesh : mesh->GetSubMeshes()) {
-			auto &cSubMesh = static_cast<CModelSubMesh &>(*subMesh);
+			auto &cSubMesh = static_cast<pragma::geometry::CModelSubMesh &>(*subMesh);
 			auto &vkMesh = cSubMesh.GetSceneMesh();
 			if(vkMesh == nullptr)
 				continue;
@@ -128,10 +128,10 @@ void CRaytracingComponent::InitializeModelRaytracingBuffers()
 
 			SubMeshRenderInfoBufferData subMeshBufferData {};
 
-			static_assert((sizeof(CModelSubMesh::VertexType) % sizeof(Vector4)) == 0, "Invalid base alignment for Vertex structure!");
+			static_assert((sizeof(pragma::geometry::CModelSubMesh::VertexType) % sizeof(Vector4)) == 0, "Invalid base alignment for Vertex structure!");
 			auto &vertexBuffer = vkMesh->GetVertexBuffer();
 			if(vertexBuffer)
-				subMeshBufferData.vertexBufferStartIndex = vertexBuffer->GetStartOffset() / sizeof(CModelSubMesh::VertexType);
+				subMeshBufferData.vertexBufferStartIndex = vertexBuffer->GetStartOffset() / sizeof(pragma::geometry::CModelSubMesh::VertexType);
 
 			auto &indexBuffer = vkMesh->GetIndexBuffer();
 			if(indexBuffer)
@@ -139,7 +139,7 @@ void CRaytracingComponent::InitializeModelRaytracingBuffers()
 
 			auto &vertexWeightBuffer = vkMesh->GetVertexWeightBuffer();
 			if(vertexWeightBuffer)
-				subMeshBufferData.vertexWeightBufferIndex = vertexWeightBuffer->GetStartOffset() / sizeof(CModelSubMesh::VertexWeightType);
+				subMeshBufferData.vertexWeightBufferIndex = vertexWeightBuffer->GetStartOffset() / sizeof(pragma::geometry::CModelSubMesh::VertexWeightType);
 
 			if(matArrayIndex.has_value())
 				subMeshBufferData.materialArrayIndex = *matArrayIndex;

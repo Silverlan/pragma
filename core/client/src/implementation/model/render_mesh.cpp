@@ -9,12 +9,10 @@ import :model.render_mesh;
 
 import :engine;
 
-using namespace pragma;
-
-SceneMesh::SceneMesh() : m_vertexBuffer(nullptr), m_vertexWeightBuffer(nullptr), m_alphaBuffer(nullptr), m_indexBuffer(nullptr), m_indexType {pragma::geometry::IndexType::UInt16} {}
-SceneMesh::SceneMesh(const SceneMesh &other) : m_renderBuffers {other.m_renderBuffers}, m_vertexBuffer {other.m_vertexBuffer}, m_vertexWeightBuffer {other.m_vertexWeightBuffer}, m_alphaBuffer {other.m_alphaBuffer}, m_indexBuffer {other.m_indexBuffer}, m_indexType {other.m_indexType} {}
-SceneMesh::~SceneMesh() {}
-SceneMesh &SceneMesh::operator=(const SceneMesh &other)
+pragma::rendering::SceneMesh::SceneMesh() : m_vertexBuffer(nullptr), m_vertexWeightBuffer(nullptr), m_alphaBuffer(nullptr), m_indexBuffer(nullptr), m_indexType {pragma::geometry::IndexType::UInt16} {}
+pragma::rendering::SceneMesh::SceneMesh(const SceneMesh &other) : m_renderBuffers {other.m_renderBuffers}, m_vertexBuffer {other.m_vertexBuffer}, m_vertexWeightBuffer {other.m_vertexWeightBuffer}, m_alphaBuffer {other.m_alphaBuffer}, m_indexBuffer {other.m_indexBuffer}, m_indexType {other.m_indexType} {}
+pragma::rendering::SceneMesh::~SceneMesh() {}
+pragma::rendering::SceneMesh &pragma::rendering::SceneMesh::operator=(const SceneMesh &other)
 {
 	m_renderBuffers = other.m_renderBuffers;
 	m_vertexBuffer = other.m_vertexBuffer;
@@ -23,33 +21,33 @@ SceneMesh &SceneMesh::operator=(const SceneMesh &other)
 	m_indexBuffer = other.m_indexBuffer;
 	return *this;
 }
-const std::shared_ptr<prosper::IBuffer> &SceneMesh::GetVertexBuffer() const { return m_vertexBuffer; }
-const std::shared_ptr<prosper::IBuffer> &SceneMesh::GetVertexWeightBuffer() const { return m_vertexWeightBuffer; }
-const std::shared_ptr<prosper::IBuffer> &SceneMesh::GetAlphaBuffer() const { return m_alphaBuffer; }
-const std::shared_ptr<prosper::IBuffer> &SceneMesh::GetIndexBuffer() const { return m_indexBuffer; }
+const std::shared_ptr<prosper::IBuffer> &pragma::rendering::SceneMesh::GetVertexBuffer() const { return m_vertexBuffer; }
+const std::shared_ptr<prosper::IBuffer> &pragma::rendering::SceneMesh::GetVertexWeightBuffer() const { return m_vertexWeightBuffer; }
+const std::shared_ptr<prosper::IBuffer> &pragma::rendering::SceneMesh::GetAlphaBuffer() const { return m_alphaBuffer; }
+const std::shared_ptr<prosper::IBuffer> &pragma::rendering::SceneMesh::GetIndexBuffer() const { return m_indexBuffer; }
 
-void SceneMesh::SetVertexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer)
+void pragma::rendering::SceneMesh::SetVertexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer)
 {
 	m_vertexBuffer = buffer;
 	SetDirty();
 }
-void SceneMesh::SetVertexWeightBuffer(const std::shared_ptr<prosper::IBuffer> &buffer)
+void pragma::rendering::SceneMesh::SetVertexWeightBuffer(const std::shared_ptr<prosper::IBuffer> &buffer)
 {
 	m_vertexWeightBuffer = buffer;
 	SetDirty();
 }
-void SceneMesh::SetAlphaBuffer(const std::shared_ptr<prosper::IBuffer> &buffer)
+void pragma::rendering::SceneMesh::SetAlphaBuffer(const std::shared_ptr<prosper::IBuffer> &buffer)
 {
 	m_alphaBuffer = buffer;
 	SetDirty();
 }
-void SceneMesh::SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer, pragma::geometry::IndexType indexType)
+void pragma::rendering::SceneMesh::SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer, pragma::geometry::IndexType indexType)
 {
 	m_indexBuffer = buffer;
 	SetDirty();
 	m_indexType = indexType;
 }
-void SceneMesh::ClearBuffers()
+void pragma::rendering::SceneMesh::ClearBuffers()
 {
 	m_vertexBuffer = nullptr;
 	m_vertexWeightBuffer = nullptr;
@@ -58,8 +56,8 @@ void SceneMesh::ClearBuffers()
 	m_renderBuffers.clear();
 }
 
-void SceneMesh::SetDirty() { m_renderBuffers.clear(); }
-const std::shared_ptr<prosper::IRenderBuffer> &SceneMesh::GetRenderBuffer(CModelSubMesh &mesh, pragma::ShaderEntity &shader, uint32_t pipelineIdx)
+void pragma::rendering::SceneMesh::SetDirty() { m_renderBuffers.clear(); }
+const std::shared_ptr<prosper::IRenderBuffer> &pragma::rendering::SceneMesh::GetRenderBuffer(pragma::geometry::CModelSubMesh &mesh, pragma::ShaderEntity &shader, uint32_t pipelineIdx)
 {
 	prosper::PipelineID pipelineId;
 	if(shader.GetPipelineId(pipelineId, pipelineIdx) == false) {

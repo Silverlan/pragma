@@ -80,7 +80,7 @@ export {
 
 			void SetBlinkingEnabled(bool enabled);
 			bool IsBlinkingEnabled() const;
-			bool FindEyeballIndex(CModelSubMesh &subMesh, uint32_t &outEyeballIndex) const;
+			bool FindEyeballIndex(pragma::geometry::CModelSubMesh &subMesh, uint32_t &outEyeballIndex) const;
 			bool FindEyeballIndex(uint32_t skinMatIdx, uint32_t &outEyeballIndex) const;
 
 			void SetLocalViewTargetFactor(float f);

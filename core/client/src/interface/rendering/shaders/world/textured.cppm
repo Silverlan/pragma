@@ -132,7 +132,7 @@ export namespace pragma {
 		ShaderGameWorldLightingPass(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader = "");
 		virtual ~ShaderGameWorldLightingPass() override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(msys::CMaterial &mat) override;
-		virtual bool GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const override;
+		virtual bool GetRenderBufferTargets(pragma::geometry::CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const override;
 		virtual uint32_t GetSceneDescriptorSetIndex() const override;
 		bool RecordPushSceneConstants(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const Vector4 &drawOrigin) const;
 
@@ -161,7 +161,7 @@ export namespace pragma {
 		GameShaderSpecializationConstantFlag GetStaticSpecializationConstantFlags(GameShaderSpecialization specialization) const;
 		virtual void OnPipelinesInitialized() override;
 		virtual void ApplyMaterialFlags(msys::CMaterial &mat, rendering::shader_material::MaterialFlags &outFlags) const;
-		virtual void UpdateRenderFlags(CModelSubMesh &mesh, SceneFlags &inOutFlags);
+		virtual void UpdateRenderFlags(pragma::geometry::CModelSubMesh &mesh, SceneFlags &inOutFlags);
 		virtual void GetShaderPreprocessorDefinitions(std::unordered_map<std::string, std::string> &outDefinitions, std::string &outPrefixCode) override;
 		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(msys::CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo);
 		bool InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, msys::CMaterial &mat, const pragma::rendering::ShaderInputData &matData);

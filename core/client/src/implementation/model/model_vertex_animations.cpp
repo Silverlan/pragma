@@ -10,7 +10,7 @@ import :model;
 
 import :engine;
 
-void CModel::UpdateVertexAnimationBuffer()
+void pragma::asset::CModel::UpdateVertexAnimationBuffer()
 {
 	m_frameIndices.clear();
 	auto &vertexAnimations = GetVertexAnimations();
@@ -88,8 +88,8 @@ void CModel::UpdateVertexAnimationBuffer()
 		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_vertexAnimationBuffer);
 	m_vertexAnimationBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, vertexAnimData.data());
 }
-const std::shared_ptr<prosper::IBuffer> &CModel::GetVertexAnimationBuffer() const { return m_vertexAnimationBuffer; }
-bool CModel::GetVertexAnimationBufferFrameOffset(uint32_t vaIdx, CModelSubMesh &subMesh, uint32_t frameId, uint64_t &offset) const
+const std::shared_ptr<prosper::IBuffer> &pragma::asset::CModel::GetVertexAnimationBuffer() const { return m_vertexAnimationBuffer; }
+bool pragma::asset::CModel::GetVertexAnimationBufferFrameOffset(uint32_t vaIdx, pragma::geometry::CModelSubMesh &subMesh, uint32_t frameId, uint64_t &offset) const
 {
 	if(vaIdx >= m_frameIndices.size())
 		return false;

@@ -33,7 +33,7 @@ export namespace pragma::rendering {
 		bool RecordBindEntity(CBaseEntity &ent);
 		bool RecordBindMaterial(msys::CMaterial &mat);
 		bool RecordBindLight(CLightComponent &light, uint32_t layerId);
-		bool RecordDraw(CModelSubMesh &mesh, pragma::RenderMeshIndex meshIdx, const pragma::rendering::RenderQueue::InstanceSet *instanceSet = nullptr);
+		bool RecordDraw(pragma::geometry::CModelSubMesh &mesh, pragma::rendering::RenderMeshIndex meshIdx, const pragma::rendering::RenderQueue::InstanceSet *instanceSet = nullptr);
 
 		void SetStats(RenderPassStats *stats) { m_stats = stats; }
 		void SetDrawOrigin(const Vector4 &drawOrigin);
@@ -99,7 +99,7 @@ export namespace pragma::rendering {
 		bool BindMaterial(msys::CMaterial &mat);
 		virtual bool BindEntity(CBaseEntity &ent);
 		void SetDepthBias(float d, float delta);
-		bool Render(CModelSubMesh &mesh, pragma::RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet = nullptr);
+		bool Render(pragma::geometry::CModelSubMesh &mesh, pragma::rendering::RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet = nullptr);
 		pragma::ShaderGameWorld *GetCurrentShader();
 		void UnbindShader();
 		void SetCountNonOpaqueMaterialsOnly(bool b);

@@ -37,7 +37,7 @@ export namespace pragma {
 
 		ShaderParticleModel(prosper::IPrContext &context, const std::string &identifier);
 		bool RecordParticleBuffers(prosper::ShaderBindState &bindState, prosper::IBuffer &particleBuffer, prosper::IBuffer &rotBuffer, prosper::IBuffer &animStartBuffer);
-		bool Draw(CModelSubMesh &mesh, uint32_t numInstances, uint32_t firstInstance = 0u);
+		bool Draw(pragma::geometry::CModelSubMesh &mesh, uint32_t numInstances, uint32_t firstInstance = 0u);
 		bool RecordParticleSystem(prosper::ShaderBindState &bindState, pragma::ecs::CParticleSystemComponent &pSys) const;
 
 		bool RecordBeginDraw(prosper::ShaderBindState &bindState, const Vector4 &clipPlane, pragma::ecs::CParticleSystemComponent &pSys, const Vector4 &drawOrigin = {0.f, 0.f, 0.f, 1.f},

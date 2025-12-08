@@ -21,7 +21,7 @@ ShaderGraph::ShaderGraph(prosper::IPrContext &context, const std::shared_ptr<pra
 
 ShaderGraph::~ShaderGraph() {}
 
-void ShaderGraph::UpdateRenderFlags(CModelSubMesh &mesh, SceneFlags &inOutFlags)
+void ShaderGraph::UpdateRenderFlags(pragma::geometry::CModelSubMesh &mesh, SceneFlags &inOutFlags)
 {
 	ShaderGameWorldLightingPass::UpdateRenderFlags(mesh, inOutFlags);
 	for(auto &mod : m_modules)

@@ -171,7 +171,7 @@ void ModelLoadManager::Update()
 		auto &packet = query->packet;
 
 		auto group = mdl->AddMeshGroup("reference");
-		auto mesh = ::util::make_shared<CModelMesh>();
+		auto mesh = ::util::make_shared<pragma::geometry::CModelMesh>();
 
 		auto type = packet->Read<uint8_t>();
 		auto numMeshes = packet->Read<uint32_t>();
@@ -179,7 +179,7 @@ void ModelLoadManager::Update()
 		Con::ccl << "[ResourceManager] Received " << numMeshes << " meshes" << Con::endl;
 		//#endif
 		for(auto i = decltype(numMeshes) {0}; i < numMeshes; ++i) {
-			auto subMesh = ::util::make_shared<CModelSubMesh>();
+			auto subMesh = ::util::make_shared<pragma::geometry::CModelSubMesh>();
 			auto colMesh = pragma::physics::CollisionMesh::Create(pragma::get_cgame());
 
 			Vector3 origin {};

@@ -934,7 +934,7 @@ int Lua::game::Client::set_debug_render_filter(lua::State *l)
 	}
 	if(t["meshFilter"]) {
 		auto meshFilter = luabind::object {t["meshFilter"]};
-		filter->meshFilter = [meshFilter](CBaseEntity &ent, msys::CMaterial *mat, CModelSubMesh &mesh, pragma::RenderMeshIndex meshIdx) mutable -> bool {
+		filter->meshFilter = [meshFilter](CBaseEntity &ent, msys::CMaterial *mat, pragma::geometry::CModelSubMesh &mesh, pragma::rendering::RenderMeshIndex meshIdx) mutable -> bool {
 			auto &oEnt = ent.GetLuaObject();
 			auto r = meshFilter(oEnt, mat ? static_cast<msys::Material *>(mat) : nullptr, mesh.shared_from_this(), meshIdx);
 			return luabind::object_cast<bool>(r);

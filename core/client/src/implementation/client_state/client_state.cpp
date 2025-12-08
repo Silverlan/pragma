@@ -634,8 +634,8 @@ bool pragma::ClientState::IsMultiPlayer() const { return pragma::get_cengine()->
 bool pragma::ClientState::IsSinglePlayer() const { return pragma::get_cengine()->IsSinglePlayer(); }
 
 msys::MaterialManager &pragma::ClientState::GetMaterialManager() { return *pragma::get_cengine()->GetClientStateInstance().materialManager; }
-pragma::geometry::ModelSubMesh *pragma::ClientState::CreateSubMesh() const { return new CModelSubMesh; }
-pragma::geometry::ModelMesh *pragma::ClientState::CreateMesh() const { return new CModelMesh; }
+pragma::geometry::ModelSubMesh *pragma::ClientState::CreateSubMesh() const { return new pragma::geometry::CModelSubMesh; }
+pragma::geometry::ModelMesh *pragma::ClientState::CreateMesh() const { return new pragma::geometry::CModelMesh; }
 
 static auto cvMatStreaming = pragma::console::get_client_con_var("cl_material_streaming_enabled");
 msys::Material *pragma::ClientState::LoadMaterial(const std::string &path, bool precache, bool bReload)

@@ -459,7 +459,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 						{
 							test->BindSceneCamera(scene, static_cast<pragma::CRasterizationRendererComponent &>(*scene.GetRenderer<pragma::CRendererComponent>()), false);
 							auto instanceBuffer = CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer();
-							//test->Draw(static_cast<CModelSubMesh&>(*mesh),0u,*instanceBuffer);
+							//test->Draw(static_cast<pragma::geometry::CModelSubMesh&>(*mesh),0u,*instanceBuffer);
 							test->DrawTest(*dbgBuffer, *instBuffer, vertCount);
 							//test->DrawTest(*dbgBuffer,vertCount);
 							test->EndDraw();
@@ -491,7 +491,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 					test->BindMaterial();
 					test->BindSceneCamera(scene,static_cast<pragma::CRasterizationRendererComponent&>(*scene.GetRenderer<pragma::CRendererComponent>()),false);
 					auto instanceBuffer = CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer();
-					test->Draw(static_cast<CModelSubMesh&>(*subMesh),0u,*instanceBuffer);
+					test->Draw(static_cast<pragma::geometry::CModelSubMesh&>(*subMesh),0u,*instanceBuffer);
 					//test->DrawTest(*dbgBuffer,vertCount);
 					test->EndDraw();
 				}*/

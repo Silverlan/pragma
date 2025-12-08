@@ -363,7 +363,7 @@ void CHC::Render(CHCNode *cNode)
 	for(unsigned int i=0;i<meshes.size();i++)
 	{
 		NodeMeshInfo *info = meshes[i];
-		m_renderMeshes.push_back(pragma::OcclusionMeshInfo(info->GetEntity(),static_cast<CModelMesh*>(info->GetMesh())));
+		m_renderMeshes.push_back(pragma::OcclusionMeshInfo(info->GetEntity(),static_cast<pragma::geometry::CModelMesh*>(info->GetMesh())));
 	}*/ // TODO
 }
 

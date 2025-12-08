@@ -152,8 +152,8 @@ void CModelComponent::ReloadRenderBufferList(bool immediate)
 		umath::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired);
 }
 
-void CModelComponent::SetLightmapUvBuffer(const CModelSubMesh &mesh, const std::shared_ptr<prosper::IBuffer> &buffer) { m_lightmapUvBuffers[&mesh] = buffer; }
-std::shared_ptr<prosper::IBuffer> CModelComponent::GetLightmapUvBuffer(const CModelSubMesh &mesh) const
+void CModelComponent::SetLightmapUvBuffer(const pragma::geometry::CModelSubMesh &mesh, const std::shared_ptr<prosper::IBuffer> &buffer) { m_lightmapUvBuffers[&mesh] = buffer; }
+std::shared_ptr<prosper::IBuffer> CModelComponent::GetLightmapUvBuffer(const pragma::geometry::CModelSubMesh &mesh) const
 {
 	auto it = m_lightmapUvBuffers.find(&mesh);
 	return (it != m_lightmapUvBuffers.end()) ? it->second : nullptr;
@@ -164,7 +164,7 @@ void CModelComponent::SetDepthPrepassEnabled(bool enabled) { umath::set_flag(m_s
 
 void CModelComponent::SetRenderBufferData(const std::vector<rendering::RenderBufferData> &renderBufferData) { m_lodMeshRenderBufferData = renderBufferData; }
 
-void CModelComponent::AddRenderMesh(CModelSubMesh &mesh, msys::CMaterial &mat, pragma::rendering::RenderBufferData::StateFlags stateFlags)
+void CModelComponent::AddRenderMesh(pragma::geometry::CModelSubMesh &mesh, msys::CMaterial &mat, pragma::rendering::RenderBufferData::StateFlags stateFlags)
 {
 	if(m_lodRenderMeshGroups.empty())
 		return;
@@ -210,7 +210,7 @@ void CModelComponent::UpdateRenderBufferList()
 	auto depthPrepassEnabled = IsDepthPrepassEnabled();
 	pragma::get_cengine()->GetRenderContext().GetPipelineLoader().Flush();
 	for(auto i = decltype(m_lodRenderMeshes.size()) {0u}; i < m_lodRenderMeshes.size(); ++i) {
-		auto &mesh = static_cast<CModelSubMesh &>(*m_lodRenderMeshes[i]);
+		auto &mesh = static_cast<pragma::geometry::CModelSubMesh &>(*m_lodRenderMeshes[i]);
 		auto *mat = GetRenderMaterial(mesh.GetSkinTextureIndex());
 		std::shared_ptr<prosper::IRenderBuffer> renderBuffer = nullptr;
 		auto *shader = mat ? dynamic_cast<pragma::ShaderGameWorldLightingPass *>(mat->GetPrimaryShader()) : nullptr;
@@ -391,10 +391,10 @@ const std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &CModelComponent
 std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &CModelComponent::GetRenderMeshes() { return m_lodRenderMeshes; }
 const std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &CModelComponent::GetRenderMeshes() const { return const_cast<CModelComponent *>(this)->GetRenderMeshes(); }
 
-RenderMeshGroup &CModelComponent::GetLodMeshGroup(uint32_t lod)
+pragma::rendering::RenderMeshGroup &CModelComponent::GetLodMeshGroup(uint32_t lod)
 {
 	if(m_lod == std::numeric_limits<uint32_t>::max()) {
-		static RenderMeshGroup emptyGroup {};
+		static rendering::RenderMeshGroup emptyGroup {};
 		return emptyGroup; // TODO: This should only be returned as const!
 	}
 	UpdateRenderMeshes();
@@ -402,23 +402,23 @@ RenderMeshGroup &CModelComponent::GetLodMeshGroup(uint32_t lod)
 	assert(lod < m_lodMeshGroups.size());
 	return m_lodMeshGroups[lod];
 }
-const RenderMeshGroup &CModelComponent::GetLodMeshGroup(uint32_t lod) const { return const_cast<CModelComponent *>(this)->GetLodMeshGroup(lod); }
-RenderMeshGroup &CModelComponent::GetLodRenderMeshGroup(uint32_t lod)
+const pragma::rendering::RenderMeshGroup &CModelComponent::GetLodMeshGroup(uint32_t lod) const { return const_cast<CModelComponent *>(this)->GetLodMeshGroup(lod); }
+pragma::rendering::RenderMeshGroup &CModelComponent::GetLodRenderMeshGroup(uint32_t lod)
 {
 	if(m_lod == std::numeric_limits<uint32_t>::max()) {
-		static RenderMeshGroup emptyGroup {};
+		static rendering::RenderMeshGroup emptyGroup {};
 		return emptyGroup; // TODO: This should only be returned as const!
 	}
 	UpdateRenderMeshes();
 	lod = umath::min(lod, static_cast<uint32_t>(m_lodRenderMeshGroups.size() - 1));
 	assert(lod < m_lodRenderMeshGroups.size());
 	if(lod >= m_lodRenderMeshGroups.size()) {
-		static RenderMeshGroup emptyGroup {};
+		static rendering::RenderMeshGroup emptyGroup {};
 		return emptyGroup; // TODO: This should only be returned as const!
 	}
 	return m_lodRenderMeshGroups[lod];
 }
-const RenderMeshGroup &CModelComponent::GetLodRenderMeshGroup(uint32_t lod) const { return const_cast<CModelComponent *>(this)->GetLodRenderMeshGroup(lod); }
+const pragma::rendering::RenderMeshGroup &CModelComponent::GetLodRenderMeshGroup(uint32_t lod) const { return const_cast<CModelComponent *>(this)->GetLodRenderMeshGroup(lod); }
 
 void CModelComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {

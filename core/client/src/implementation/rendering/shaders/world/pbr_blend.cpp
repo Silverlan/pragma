@@ -23,7 +23,7 @@ void ShaderPBRBlend::InitializeGfxPipelineVertexAttributes()
 	AddVertexAttribute(VERTEX_ATTRIBUTE_ALPHA);
 }
 void ShaderPBRBlend::InitializeGfxPipelinePushConstantRanges() { AttachPushConstantRange(0u, sizeof(ShaderGameWorldLightingPass::PushConstants) + sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit); }
-bool ShaderPBRBlend::GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const
+bool ShaderPBRBlend::GetRenderBufferTargets(pragma::geometry::CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const
 {
 	if(ShaderPBR::GetRenderBufferTargets(mesh, pipelineIdx, outBuffers, outOffsets, outIndexBufferInfo) == false)
 		return false;
@@ -33,7 +33,7 @@ bool ShaderPBRBlend::GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipeli
 	outOffsets.push_back(0ull);
 	return true;
 }
-bool ShaderPBRBlend::OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor, CModelSubMesh &mesh) const
+bool ShaderPBRBlend::OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor, pragma::geometry::CModelSubMesh &mesh) const
 {
 	PushConstants pushConstants {};
 	pushConstants.alphaCount = mesh.GetAlphaCount();

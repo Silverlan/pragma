@@ -14,7 +14,7 @@ export namespace pragma {
 	class CLightComponent;
 	struct ShadowRenderInfo {
 		const CBaseEntity *entity = nullptr;
-		const CModelSubMesh *mesh = nullptr;
+		const pragma::geometry::CModelSubMesh *mesh = nullptr;
 		uint32_t renderFlags = 0;
 		msys::Material *material = nullptr;
 	};
@@ -32,7 +32,7 @@ export namespace pragma {
 			std::function<bool(const OcclusionOctree<std::shared_ptr<pragma::geometry::ModelMesh>>::Node &)> nodeCallback;
 			std::function<void(const CBaseEntity &, uint32_t)> entityCallback;
 			std::function<void(const std::shared_ptr<pragma::geometry::ModelMesh> &)> meshCallback;
-			std::function<void(const pragma::asset::Model &, const CModelSubMesh &, uint32_t)> subMeshCallback;
+			std::function<void(const pragma::asset::Model &, const pragma::geometry::CModelSubMesh &, uint32_t)> subMeshCallback;
 		};
 		struct LightSourceData {
 			std::shared_ptr<prosper::IPrimaryCommandBuffer> drawCmd;

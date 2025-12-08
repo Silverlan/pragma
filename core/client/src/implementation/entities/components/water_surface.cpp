@@ -61,7 +61,7 @@ void CWaterSurfaceComponent::UpdateSurfaceMesh()
 	auto drawCmd = pragma::get_cgame()->GetCurrentDrawCommandBuffer();
 	if(drawCmd == nullptr)
 		return;
-	auto *cmesh = static_cast<CModelSubMesh *>(m_waterSurfaceMesh.lock().get());
+	auto *cmesh = static_cast<pragma::geometry::CModelSubMesh *>(m_waterSurfaceMesh.lock().get());
 	sim->Draw(drawCmd, *cmesh);
 }
 
@@ -80,7 +80,7 @@ msys::CMaterial *CWaterSurfaceComponent::GetWaterMaterial() const
 	                //return (pFuncWaterComponent != nullptr) ? pFuncWaterComponent->GetWaterMaterial() : nullptr;
 }
 
-CModelSubMesh *CWaterSurfaceComponent::GetWaterSurfaceMesh() const
+pragma::geometry::CModelSubMesh *CWaterSurfaceComponent::GetWaterSurfaceMesh() const
 {
 	if(m_waterSurfaceMesh.expired() == true)
 		return nullptr;
@@ -111,7 +111,7 @@ void CWaterSurfaceComponent::InitializeSurface()
 	auto mdl = pragma::get_cgame()->CreateModel();
 	auto meshGroup = mdl->GetMeshGroup(0);
 
-	auto subMesh = ::util::make_shared<CModelSubMesh>();
+	auto subMesh = ::util::make_shared<pragma::geometry::CModelSubMesh>();
 	// Initialize surface
 	auto &verts = subMesh->GetVertices();
 	subMesh->SetIndexType(pragma::geometry::IndexType::UInt16);
@@ -134,7 +134,7 @@ void CWaterSurfaceComponent::InitializeSurface()
 	}
 	subMesh->SetSkinTextureIndex(0);
 
-	auto mesh = ::util::make_shared<CModelMesh>();
+	auto mesh = ::util::make_shared<pragma::geometry::CModelMesh>();
 	mesh->AddSubMesh(subMesh);
 	meshGroup->AddMesh(mesh);
 	mdl->Update(pragma::asset::ModelUpdateFlags::All); // TODO: Don't update vertex and index buffers

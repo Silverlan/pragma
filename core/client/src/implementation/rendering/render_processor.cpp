@@ -513,7 +513,7 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(CBaseEntity &ent)
 
 pragma::ShaderGameWorld *pragma::rendering::BaseRenderProcessor::GetCurrentShader() { return umath::is_flag_set(m_stateFlags, StateFlags::ShaderBound) ? m_shaderScene : nullptr; }
 
-bool pragma::rendering::BaseRenderProcessor::Render(CModelSubMesh &mesh, pragma::RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet)
+bool pragma::rendering::BaseRenderProcessor::Render(pragma::geometry::CModelSubMesh &mesh, pragma::rendering::RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet)
 {
 	if(umath::is_flag_set(m_stateFlags, StateFlags::EntityBound) == false || m_curRenderC == nullptr)
 		return false;
@@ -560,7 +560,7 @@ bool pragma::rendering::BaseRenderProcessor::Render(CModelSubMesh &mesh, pragma:
 		m_stats->numDrawnMeshes += instanceCount;
 		m_stats->numDrawnVertices += mesh.GetVertexCount() *instanceCount;
 		m_stats->numDrawnTrianges += mesh.GetTriangleCount() *instanceCount;
-		m_stats->meshes.push_back(std::static_pointer_cast<CModelSubMesh>(mesh.shared_from_this()));
+		m_stats->meshes.push_back(std::static_pointer_cast<pragma::geometry::CModelSubMesh>(mesh.shared_from_this()));
 
 		++m_stats->numDrawCalls;
 	}
@@ -743,7 +743,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 		}
 		if(optStats)
 			ttmp = std::chrono::steady_clock::now();
-		auto &mesh = static_cast<CModelSubMesh &>(*m_curEntityMeshList->at(item.mesh));
+		auto &mesh = static_cast<pragma::geometry::CModelSubMesh &>(*m_curEntityMeshList->at(item.mesh));
 		if(BaseRenderProcessor::Render(mesh, item.mesh, curInstanceSet))
 			++numShaderInvocations;
 		if(optStats)

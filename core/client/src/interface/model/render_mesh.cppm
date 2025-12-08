@@ -10,8 +10,10 @@ export module pragma.client:model.render_mesh;
 export import :rendering.shaders.scene;
 export import pragma.shared;
 
-export class CModelSubMesh;
-export namespace pragma {
+export namespace pragma::geometry {
+	class CModelSubMesh;
+}
+export namespace pragma::rendering {
 	class DLLCLIENT SceneMesh {
 	  public:
 		SceneMesh();
@@ -28,7 +30,7 @@ export namespace pragma {
 		void SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer, pragma::geometry::IndexType indexType);
 		void ClearBuffers();
 
-		const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(CModelSubMesh &mesh, pragma::ShaderEntity &shader, uint32_t pipelineIdx = 0u);
+		const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(pragma::geometry::CModelSubMesh &mesh, pragma::ShaderEntity &shader, uint32_t pipelineIdx = 0u);
 	  private:
 		void SetDirty();
 		std::vector<std::pair<prosper::PipelineID, std::shared_ptr<prosper::IRenderBuffer>>> m_renderBuffers;

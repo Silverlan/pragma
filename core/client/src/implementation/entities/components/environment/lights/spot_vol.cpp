@@ -111,7 +111,7 @@ bool CLightSpotVolComponent::UpdateMeshData()
 		m_subMeshes.clear();
 		m_subMeshes.reserve(coneSegments.size());
 		for(auto &segData : coneSegments) {
-			auto subMesh = ::util::make_shared<CModelSubMesh>();
+			auto subMesh = ::util::make_shared<pragma::geometry::CModelSubMesh>();
 			subMesh->SetIndexCount(segData.indices.size());
 			subMesh->GetVertices().resize(segData.verts.size());
 			subMesh->SetSkinTextureIndex(0);
@@ -209,7 +209,7 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 	Lua::Material::Client::InitializeShaderData(nullptr, cmat, false);
 	m_material = mat->GetHandle();
 
-	auto mesh = ::util::make_shared<CModelMesh>();
+	auto mesh = ::util::make_shared<pragma::geometry::CModelMesh>();
 	for(auto &subMesh : m_subMeshes)
 		mesh->AddSubMesh(subMesh);
 	group->AddMesh(mesh);

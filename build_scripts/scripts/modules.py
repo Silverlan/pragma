@@ -8,6 +8,6 @@ curDir = os.getcwd()
 
 modules_dir = curDir +"/modules"
 os.chdir(modules_dir)
-get_gh_submodule("interfaces",          "Silverlan/pragma_interfaces",  "b6a15e112de4d3549b2d8591b8e3614feccd2c0f")
+get_gh_submodule("interfaces",          "Silverlan/pragma_interfaces",  "bf5b81c8c5ae8fff6394dbc52906e793b1b50c43")
 
 os.chdir(curDir)

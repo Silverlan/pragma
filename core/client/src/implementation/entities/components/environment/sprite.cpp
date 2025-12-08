@@ -45,7 +45,7 @@ void CSpriteComponent::UpdateColor()
 		m_hParticle->SetColorFactor(colorFactor);
 }
 
-void CSpriteComponent::SetOrientationType(pragma::ecs::ParticleOrientationType orientationType) { m_orientationType = orientationType; }
+void CSpriteComponent::SetOrientationType(pragma::pts::ParticleOrientationType orientationType) { m_orientationType = orientationType; }
 
 util::EventReply CSpriteComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {

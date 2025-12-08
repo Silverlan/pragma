@@ -71,7 +71,7 @@ bool ParticleBlobShadow::BeginDraw(Vulkan::CommandBufferObject *cmdBuffer,const 
 	return true;
 }
 
-void ParticleBlobShadow::Draw(CParticleSystem *particle,const Vulkan::Buffer &adjacentBlobBuffer,CLightBase *light,uint32_t layerId)
+void ParticleBlobShadow::Draw(pragma::pts::CParticleSystem *particle,const Vulkan::Buffer &adjacentBlobBuffer,CLightBase *light,uint32_t layerId)
 {
 	auto &context = *m_context.get();
 	auto &drawCmd = context.GetDrawCmd();
@@ -111,6 +111,6 @@ void ParticleBlobShadow::Draw(CParticleSystem *particle,const Vulkan::Buffer &ad
 		adjacentBlobBuffer
 	};
 	drawCmd->BindVertexBuffer(buffers);
-	drawCmd->Draw(CParticleSystem::VERTEX_COUNT,particle->GetRenderParticleCount());
+	drawCmd->Draw(pragma::pts::CParticleSystem::VERTEX_COUNT,particle->GetRenderParticleCount());
 }
 #endif

@@ -80,7 +80,7 @@ pragma::CGame::CGame(pragma::NetworkState *state)
 	g_game = this;
 
 	m_luaShaderManager = ::util::make_shared<pragma::LuaShaderManager>();
-	m_luaParticleModifierManager = ::util::make_shared<pragma::LuaParticleModifierManager>();
+	m_luaParticleModifierManager = ::util::make_shared<pragma::pts::LuaParticleModifierManager>();
 
 	umath::set_flag(m_stateFlags, StateFlags::PrepassShaderPipelineReloadRequired, false);
 	umath::set_flag(m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired, false);

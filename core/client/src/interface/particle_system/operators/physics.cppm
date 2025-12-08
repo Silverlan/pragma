@@ -11,7 +11,7 @@ export import :particle_system.modifier;
 export namespace pragma::ecs {
 	class CParticleSystemComponent;
 }
-export {
+export namespace pragma::pts {
 	class DLLCLIENT CParticleOperatorPhysics : public CParticleOperator {
 	  protected:
 		float m_mass = 0.f;
@@ -26,12 +26,12 @@ export {
 	  public:
 		CParticleOperatorPhysics() = default;
 		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void OnParticleCreated(CParticle &particle) override;
+		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override;
 		virtual void OnParticleSystemStarted() override;
-		virtual void OnParticleDestroyed(CParticle &particle) override;
+		virtual void OnParticleDestroyed(pragma::pts::CParticle &particle) override;
 		virtual void OnParticleSystemStopped() override;
-		virtual void PreSimulate(CParticle &particle, double) override;
-		virtual void PostSimulate(CParticle &particle, double) override;
+		virtual void PreSimulate(pragma::pts::CParticle &particle, double) override;
+		virtual void PostSimulate(pragma::pts::CParticle &particle, double) override;
 	};
 
 	class DLLCLIENT CParticleOperatorPhysicsSphere : public CParticleOperatorPhysics {
@@ -66,7 +66,7 @@ export {
 	  public:
 		CParticleOperatorPhysicsModel() = default;
 		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void OnParticleCreated(CParticle &particle) override;
+		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override;
 	  protected:
 		std::shared_ptr<pragma::asset::Model> m_model = nullptr;
 		virtual std::shared_ptr<pragma::physics::IShape> CreateShape() override;

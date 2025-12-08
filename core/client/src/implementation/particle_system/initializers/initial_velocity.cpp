@@ -9,7 +9,7 @@ import :particle_system.initializer_initial_velocity;
 
 import :client_state;
 
-void CParticleInitializerInitialVelocity::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleInitializerInitialVelocity::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
@@ -34,7 +34,7 @@ void CParticleInitializerInitialVelocity::Initialize(pragma::BaseEnvParticleSyst
 			m_velocityMax = uvec::create(it->second);
 	}
 }
-void CParticleInitializerInitialVelocity::OnParticleCreated(CParticle &particle)
+void pragma::pts::CParticleInitializerInitialVelocity::OnParticleCreated(pragma::pts::CParticle &particle)
 {
 	auto dir = m_direction;
 	if(uvec::length_sqr(m_spreadMax - m_spreadMin) > 0.001f) {
@@ -45,4 +45,4 @@ void CParticleInitializerInitialVelocity::OnParticleCreated(CParticle &particle)
 	vel += uvec::get_random_spread(m_velocityMin, m_velocityMax);
 	particle.SetVelocity(vel);
 }
-float CParticleInitializerInitialVelocity::GetSpeed() const { return m_speed; }
+float pragma::pts::CParticleInitializerInitialVelocity::GetSpeed() const { return m_speed; }

@@ -16,15 +16,15 @@ bool ecs::CParticleSystemComponent::Save(VFilePtrReal &f, const std::vector<ecs:
 			return false;
 	}
 
-	std::unordered_map<std::string, CParticleSystemData> particles;
+	std::unordered_map<std::string, asset::ParticleSystemData> particles;
 	for(auto *ps : particleSystems) {
-		CParticleSystemData data {};
+		asset::ParticleSystemData data {};
 		ps->ToParticleSystemData(data);
 		particles[ps->GetParticleSystemName()] = std::move(data);
 	}
 	return pragma::asset::save_particle_system(f, particles);
 }
-void ecs::CParticleSystemComponent::ToParticleSystemData(CParticleSystemData &outData)
+void ecs::CParticleSystemComponent::ToParticleSystemData(asset::ParticleSystemData &outData)
 {
 	auto fToDataModifier = [](auto &modifiers, auto &outModifiers) {
 		outModifiers.reserve(modifiers.size());

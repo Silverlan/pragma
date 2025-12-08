@@ -75,7 +75,7 @@ bool ShaderParticleModel::RecordParticleSystem(prosper::ShaderBindState &bindSta
 	auto r = RecordBindDescriptorSet(bindState, descSet, DESCRIPTOR_SET_ANIMATION.setIndex);
 	if(r == false)
 		return r;
-	PushConstants pushConstants {umath::to_integral(GetRenderFlags(pSys, ecs::ParticleRenderFlags::None)), // TODO: Use correct particle render flags
+	PushConstants pushConstants {umath::to_integral(GetRenderFlags(pSys, pts::ParticleRenderFlags::None)), // TODO: Use correct particle render flags
 	  umath::to_integral(pSys.GetAlphaMode())};
 	return RecordPushConstants(bindState, sizeof(pushConstants), &pushConstants, sizeof(ShaderGameWorldLightingPass::PushConstants));
 }

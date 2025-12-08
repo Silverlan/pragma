@@ -12,32 +12,34 @@ export import :particle_system.modifier;
 export namespace pragma::ecs {
 	class CParticleSystemComponent;
 }
-export class DLLCLIENT CParticleRendererBeam : public CParticleRenderer {
-  public:
-	CParticleRendererBeam() = default;
-	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-	virtual void RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ecs::ParticleRenderFlags renderFlags) override;
-	virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId = 0) override;
-	virtual void OnParticleSystemStopped() override;
-	virtual void PostSimulate(double tDelta) override;
-	virtual std::pair<Vector3, Vector3> GetRenderBounds() const override;
-	virtual pragma::ShaderParticleBase *GetShader() const override;
-  private:
+export namespace pragma::pts {
+	class DLLCLIENT CParticleRendererBeam : public CParticleRenderer {
+	public:
+		CParticleRendererBeam() = default;
+		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::pts::ParticleRenderFlags renderFlags) override;
+		virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId = 0) override;
+		virtual void OnParticleSystemStopped() override;
+		virtual void PostSimulate(double tDelta) override;
+		virtual std::pair<Vector3, Vector3> GetRenderBounds() const override;
+		virtual pragma::ShaderParticleBase *GetShader() const override;
+	private:
 #pragma pack(push, 1)
-	struct DLLCLIENT Node {
-		Node(const Vector3 &o, const Color &c);
-		Vector3 origin = {};
-		Vector4 color = {};
-	};
+		struct DLLCLIENT Node {
+			Node(const Vector3 &o, const Color &c);
+			Vector3 origin = {};
+			Vector4 color = {};
+		};
 #pragma pack(pop)
-	std::shared_ptr<prosper::IBuffer> m_vertexBuffer = nullptr;
-	std::shared_ptr<prosper::IBuffer> m_indexBuffer = nullptr;
-	uint32_t m_startNode = 0u;
-	uint32_t m_endNode = 0u;
-	uint32_t m_nodeCount = 0u;
-	std::vector<Node> m_nodeOrigins;
-	uint32_t m_indexCount = 0u;
-	util::WeakHandle<prosper::Shader> m_shader = {};
-	float m_curvature = 1.f;
-	void UpdateNodes();
-};
+		std::shared_ptr<prosper::IBuffer> m_vertexBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_indexBuffer = nullptr;
+		uint32_t m_startNode = 0u;
+		uint32_t m_endNode = 0u;
+		uint32_t m_nodeCount = 0u;
+		std::vector<Node> m_nodeOrigins;
+		uint32_t m_indexCount = 0u;
+		util::WeakHandle<prosper::Shader> m_shader = {};
+		float m_curvature = 1.f;
+		void UpdateNodes();
+	};
+}

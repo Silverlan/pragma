@@ -7,15 +7,15 @@ module pragma.client;
 
 import :particle_system.particle;
 
-void CParticleSystemBaseKeyValues::RecordKeyValues(const std::unordered_map<std::string, std::string> &values) { m_keyValues = std::make_unique<std::unordered_map<std::string, std::string>>(values); }
-bool CParticleSystemBaseKeyValues::IsRecordingKeyValues() const { return m_keyValues != nullptr; }
-const std::unordered_map<std::string, std::string> *CParticleSystemBaseKeyValues::GetKeyValues() const { return m_keyValues.get(); }
+void pragma::pts::CParticleSystemBaseKeyValues::RecordKeyValues(const std::unordered_map<std::string, std::string> &values) { m_keyValues = std::make_unique<std::unordered_map<std::string, std::string>>(values); }
+bool pragma::pts::CParticleSystemBaseKeyValues::IsRecordingKeyValues() const { return m_keyValues != nullptr; }
+const std::unordered_map<std::string, std::string> *pragma::pts::CParticleSystemBaseKeyValues::GetKeyValues() const { return m_keyValues.get(); }
 
-CParticle::CParticle() : m_index(0) { Reset(0.f); }
+pragma::pts::CParticle::CParticle() : m_index(0) { Reset(0.f); }
 
-CParticle::~CParticle() {}
+pragma::pts::CParticle::~CParticle() {}
 
-void CParticle::Reset(float t)
+void pragma::pts::CParticle::Reset(float t)
 {
 	m_radius = 0;
 	m_length = 0.f;
@@ -56,24 +56,24 @@ void CParticle::Reset(float t)
 	m_initialFrameOffset = 0.f;
 }
 
-uint32_t CParticle::GetSeed() const { return m_seed; }
-void CParticle::Die()
+uint32_t pragma::pts::CParticle::GetSeed() const { return m_seed; }
+void pragma::pts::CParticle::Die()
 {
 	m_bDying = true;
 	m_tDeath = m_tAlive;
 }
-void CParticle::Resurrect()
+void pragma::pts::CParticle::Resurrect()
 {
 	m_bDying = false;
 	m_tDeath = 0.f;
 }
-bool CParticle::IsDying() const { return m_bDying; }
-float CParticle::GetDeathTime() const { return m_tDeath; }
-float CParticle::GetLifeSpan() const { return GetTimeAlive() + GetLife(); }
-const Quat &CParticle::GetWorldRotation() const { return m_rot; }
-void CParticle::SetWorldRotation(const Quat &rot) { m_rot = rot; }
-const Vector3 &CParticle::GetOrigin() const { return m_origin; }
-void CParticle::SetOrigin(const Vector3 &origin) { m_origin = origin; }
+bool pragma::pts::CParticle::IsDying() const { return m_bDying; }
+float pragma::pts::CParticle::GetDeathTime() const { return m_tDeath; }
+float pragma::pts::CParticle::GetLifeSpan() const { return GetTimeAlive() + GetLife(); }
+const Quat &pragma::pts::CParticle::GetWorldRotation() const { return m_rot; }
+void pragma::pts::CParticle::SetWorldRotation(const Quat &rot) { m_rot = rot; }
+const Vector3 &pragma::pts::CParticle::GetOrigin() const { return m_origin; }
+void pragma::pts::CParticle::SetOrigin(const Vector3 &origin) { m_origin = origin; }
 
 /*enum class FieldId : uint8_t
 {
@@ -84,7 +84,7 @@ void CParticle::SetOrigin(const Vector3 &origin) { m_origin = origin; }
 
 	Invalid = std::numeric_limits<uint8_t>::max()
 };*/
-const char *CParticle::field_id_to_name(FieldId id)
+const char *pragma::pts::CParticle::field_id_to_name(FieldId id)
 {
 	switch(id) {
 	case FieldId::Pos:
@@ -114,10 +114,10 @@ const char *CParticle::field_id_to_name(FieldId id)
 	case FieldId::Life:
 		return "life";
 	}
-	static_assert(umath::to_integral(CParticle::FieldId::Count) == 13);
+	static_assert(umath::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
 	return "invalid";
 }
-CParticle::FieldId CParticle::name_to_field_id(const std::string &fieldName)
+pragma::pts::CParticle::FieldId pragma::pts::CParticle::name_to_field_id(const std::string &fieldName)
 {
 	if(ustring::compare<std::string>(fieldName, "pos", false))
 		return FieldId::Pos;
@@ -148,7 +148,7 @@ CParticle::FieldId CParticle::name_to_field_id(const std::string &fieldName)
 	static_assert(umath::to_integral(FieldId::Count) == 13);
 	return FieldId::Invalid;
 }
-void CParticle::SetField(FieldId fieldId, float value)
+void pragma::pts::CParticle::SetField(FieldId fieldId, float value)
 {
 	switch(fieldId) {
 	case FieldId::Rot:
@@ -176,9 +176,9 @@ void CParticle::SetField(FieldId fieldId, float value)
 		m_color.a = value;
 		break;
 	}
-	static_assert(umath::to_integral(CParticle::FieldId::Count) == 13);
+	static_assert(umath::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
 }
-void CParticle::SetField(FieldId fieldId, const Vector4 &value)
+void pragma::pts::CParticle::SetField(FieldId fieldId, const Vector4 &value)
 {
 	switch(fieldId) {
 	case FieldId::Pos:
@@ -199,9 +199,9 @@ void CParticle::SetField(FieldId fieldId, const Vector4 &value)
 		m_color.b = value.b;
 		break;
 	}
-	static_assert(umath::to_integral(CParticle::FieldId::Count) == 13);
+	static_assert(umath::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
 }
-bool CParticle::GetField(FieldId fieldId, float &outValue) const
+bool pragma::pts::CParticle::GetField(FieldId fieldId, float &outValue) const
 {
 	switch(fieldId) {
 	case FieldId::Rot:
@@ -231,10 +231,10 @@ bool CParticle::GetField(FieldId fieldId, float &outValue) const
 	default:
 		return false;
 	}
-	static_assert(umath::to_integral(CParticle::FieldId::Count) == 13);
+	static_assert(umath::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
 	return true;
 }
-bool CParticle::GetField(FieldId fieldId, Vector4 &outValue) const
+bool pragma::pts::CParticle::GetField(FieldId fieldId, Vector4 &outValue) const
 {
 	switch(fieldId) {
 	case FieldId::Pos:
@@ -255,30 +255,30 @@ bool CParticle::GetField(FieldId fieldId, Vector4 &outValue) const
 	default:
 		return false;
 	}
-	static_assert(umath::to_integral(CParticle::FieldId::Count) == 13);
+	static_assert(umath::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
 	return true;
 }
 
-void CParticle::SetSequence(uint32_t sequence) { m_sequence = sequence; }
-uint32_t CParticle::GetSequence() const { return m_sequence; }
-float CParticle::GetFrameOffset() const { return m_frameOffset; }
-void CParticle::SetFrameOffset(float offset) { m_frameOffset = offset; }
-void CParticle::SetIndex(uint32_t idx) { m_index = idx; }
-uint32_t CParticle::GetIndex() const { return m_index; }
-bool CParticle::IsAlive() const { return m_bIsAlive; }
-void CParticle::SetAlive(bool b) { m_bIsAlive = b; }
-bool CParticle::ShouldDraw() const { return (GetLife() > 0.f && GetRadius() > 0.f && m_color.a > 0) ? true : false; }
-float CParticle::GetRotation() const { return m_rotation; }
-void CParticle::SetRotation(float rotation) { m_rotation = rotation; }
-float CParticle::GetRotationYaw() const { return m_rotationYaw; }
-void CParticle::SetRotationYaw(float yaw) { m_rotationYaw = yaw; }
-float CParticle::GetTimeAlive() const { return m_tAlive; }
-void CParticle::SetTimeAlive(float alive) { m_tAlive = alive; }
-float CParticle::GetTimeCreated() const { return m_tCreated; }
-void CParticle::SetTimeCreated(float time) { m_tCreated = time; }
+void pragma::pts::CParticle::SetSequence(uint32_t sequence) { m_sequence = sequence; }
+uint32_t pragma::pts::CParticle::GetSequence() const { return m_sequence; }
+float pragma::pts::CParticle::GetFrameOffset() const { return m_frameOffset; }
+void pragma::pts::CParticle::SetFrameOffset(float offset) { m_frameOffset = offset; }
+void pragma::pts::CParticle::SetIndex(uint32_t idx) { m_index = idx; }
+uint32_t pragma::pts::CParticle::GetIndex() const { return m_index; }
+bool pragma::pts::CParticle::IsAlive() const { return m_bIsAlive; }
+void pragma::pts::CParticle::SetAlive(bool b) { m_bIsAlive = b; }
+bool pragma::pts::CParticle::ShouldDraw() const { return (GetLife() > 0.f && GetRadius() > 0.f && m_color.a > 0) ? true : false; }
+float pragma::pts::CParticle::GetRotation() const { return m_rotation; }
+void pragma::pts::CParticle::SetRotation(float rotation) { m_rotation = rotation; }
+float pragma::pts::CParticle::GetRotationYaw() const { return m_rotationYaw; }
+void pragma::pts::CParticle::SetRotationYaw(float yaw) { m_rotationYaw = yaw; }
+float pragma::pts::CParticle::GetTimeAlive() const { return m_tAlive; }
+void pragma::pts::CParticle::SetTimeAlive(float alive) { m_tAlive = alive; }
+float pragma::pts::CParticle::GetTimeCreated() const { return m_tCreated; }
+void pragma::pts::CParticle::SetTimeCreated(float time) { m_tCreated = time; }
 
-void CParticle::SetPrevPos(const Vector3 &prevPos) { m_prevPos = prevPos; }
-void CParticle::PopulateInitialValues()
+void pragma::pts::CParticle::SetPrevPos(const Vector3 &prevPos) { m_prevPos = prevPos; }
+void pragma::pts::CParticle::PopulateInitialValues()
 {
 	m_initialRadius = m_radius;
 	m_initialLength = m_length;
@@ -288,34 +288,34 @@ void CParticle::PopulateInitialValues()
 	m_initialFrameOffset = m_frameOffset;
 }
 
-const Vector3 &CParticle::GetPrevPos() const { return m_prevPos; }
-float CParticle::GetInitialRadius() const { return m_initialRadius; }
-float CParticle::GetInitialLength() const { return m_initialLength; }
-float CParticle::GetInitialRotation() const { return m_initialRotation; }
-float CParticle::GetInitialLife() const { return m_initialLife; }
-const Vector4 &CParticle::GetInitialColor() const { return m_initialColor; }
-float CParticle::GetInitialFrameOffset() const { return m_initialFrameOffset; }
+const Vector3 &pragma::pts::CParticle::GetPrevPos() const { return m_prevPos; }
+float pragma::pts::CParticle::GetInitialRadius() const { return m_initialRadius; }
+float pragma::pts::CParticle::GetInitialLength() const { return m_initialLength; }
+float pragma::pts::CParticle::GetInitialRotation() const { return m_initialRotation; }
+float pragma::pts::CParticle::GetInitialLife() const { return m_initialLife; }
+const Vector4 &pragma::pts::CParticle::GetInitialColor() const { return m_initialColor; }
+float pragma::pts::CParticle::GetInitialFrameOffset() const { return m_initialFrameOffset; }
 
-const Vector3 &CParticle::GetPosition() const { return m_pos; }
-const Vector3 &CParticle::GetVelocity() const { return m_velocity; }
-const Vector3 &CParticle::GetAngularVelocity() const { return m_angularVelocity; }
-float CParticle::GetLife() const { return m_tLife; }
-void CParticle::SetLife(float life) { m_tLife = life; }
-void CParticle::SetColor(const Vector4 &col) { m_color = col; }
-void CParticle::SetColor(const Color &col) { SetColor(col.ToVector4()); }
-const Vector4 &CParticle::GetColor() const { return m_color; }
-Vector4 &CParticle::GetColor() { return m_color; }
-void CParticle::SetPosition(const Vector3 &pos) { m_pos = pos; }
-void CParticle::SetVelocity(const Vector3 &vel) { m_velocity = vel; }
-void CParticle::SetAngularVelocity(const Vector3 &vel) { m_angularVelocity = vel; }
-void CParticle::SetRadius(float size) { m_radius = size; }
-void CParticle::SetLength(float length)
+const Vector3 &pragma::pts::CParticle::GetPosition() const { return m_pos; }
+const Vector3 &pragma::pts::CParticle::GetVelocity() const { return m_velocity; }
+const Vector3 &pragma::pts::CParticle::GetAngularVelocity() const { return m_angularVelocity; }
+float pragma::pts::CParticle::GetLife() const { return m_tLife; }
+void pragma::pts::CParticle::SetLife(float life) { m_tLife = life; }
+void pragma::pts::CParticle::SetColor(const Vector4 &col) { m_color = col; }
+void pragma::pts::CParticle::SetColor(const Color &col) { SetColor(col.ToVector4()); }
+const Vector4 &pragma::pts::CParticle::GetColor() const { return m_color; }
+Vector4 &pragma::pts::CParticle::GetColor() { return m_color; }
+void pragma::pts::CParticle::SetPosition(const Vector3 &pos) { m_pos = pos; }
+void pragma::pts::CParticle::SetVelocity(const Vector3 &vel) { m_velocity = vel; }
+void pragma::pts::CParticle::SetAngularVelocity(const Vector3 &vel) { m_angularVelocity = vel; }
+void pragma::pts::CParticle::SetRadius(float size) { m_radius = size; }
+void pragma::pts::CParticle::SetLength(float length)
 {
 	m_length = length;
 	m_bHasLength = true;
 }
-float CParticle::GetRadius() const { return m_radius; }
-float CParticle::GetLength() const { return m_bHasLength ? m_length : m_radius; }
-float CParticle::GetExtent() const { return umath::sqrt(umath::pow2(m_radius) * 2.f); }
-void CParticle::SetCameraDistance(float dist) { m_camDist = dist; }
-float CParticle::GetCameraDistance() const { return m_camDist; }
+float pragma::pts::CParticle::GetRadius() const { return m_radius; }
+float pragma::pts::CParticle::GetLength() const { return m_bHasLength ? m_length : m_radius; }
+float pragma::pts::CParticle::GetExtent() const { return umath::sqrt(umath::pow2(m_radius) * 2.f); }
+void pragma::pts::CParticle::SetCameraDistance(float dist) { m_camDist = dist; }
+float pragma::pts::CParticle::GetCameraDistance() const { return m_camDist; }

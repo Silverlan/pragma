@@ -9,7 +9,7 @@ import :particle_system.initializer_initial_angular_velocity;
 
 import :client_state;
 
-void CParticleInitializerInitialAngularVelocity::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleInitializerInitialAngularVelocity::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto &pair : values) {
@@ -39,7 +39,7 @@ void CParticleInitializerInitialAngularVelocity::Initialize(pragma::BaseEnvParti
 		}
 	}
 }
-void CParticleInitializerInitialAngularVelocity::OnParticleCreated(CParticle &particle)
+void pragma::pts::CParticleInitializerInitialAngularVelocity::OnParticleCreated(pragma::pts::CParticle &particle)
 {
 	if(m_randomVelocity != nullptr) {
 		auto vel = Vector3(umath::random(m_randomVelocity->minVelocity.x, m_randomVelocity->maxVelocity.x), umath::random(m_randomVelocity->minVelocity.y, m_randomVelocity->maxVelocity.y), umath::random(m_randomVelocity->minVelocity.z, m_randomVelocity->maxVelocity.z));

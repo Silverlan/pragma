@@ -146,7 +146,7 @@ static void to_cache_name(std::string &fname)
 }
 static std::unordered_map<std::string, std::vector<std::string>> s_particleFileToSystems {};
 const std::vector<std::string> &ecs::CParticleSystemComponent::GetPrecachedParticleSystemFiles() { return s_precached; }
-const std::unordered_map<std::string, std::unique_ptr<CParticleSystemData>> &ecs::CParticleSystemComponent::GetCachedParticleSystemData() { return s_particleData; }
+const std::unordered_map<std::string, std::unique_ptr<pragma::asset::ParticleSystemData>> &ecs::CParticleSystemComponent::GetCachedParticleSystemData() { return s_particleData; }
 std::optional<std::string> ecs::CParticleSystemComponent::FindParticleSystemFile(const std::string ptName)
 {
 	for(auto &pair : s_particleFileToSystems) {
@@ -211,7 +211,7 @@ bool ecs::CParticleSystemComponent::Precache(std::string fname, bool bReload)
 	for(auto udmDef : udmParticleSystemDefinitions.ElIt()) {
 		auto name = std::string {udmDef.key};
 		ptSystemNames.push_back(name);
-		auto data = std::make_unique<CParticleSystemData>();
+		auto data = std::make_unique<pragma::asset::ParticleSystemData>();
 		auto result = ecs::CParticleSystemComponent::LoadFromAssetData(*data, udm::AssetData {udmDef.property}, err);
 		if(result == false)
 			return false;
@@ -250,7 +250,7 @@ bool ecs::CParticleSystemComponent::PrecacheLegacy(std::string fname, bool bRelo
 		if(bReload == true || s_particleData.find(name) == s_particleData.end()) {
 			f->Seek(offset);
 
-			auto data = std::make_unique<CParticleSystemData>();
+			auto data = std::make_unique<pragma::asset::ParticleSystemData>();
 			auto numSettings = f->Read<uint32_t>();
 			auto &settings = data->settings;
 			for(auto i = decltype(numSettings) {0}; i < numSettings; ++i) {
@@ -260,12 +260,12 @@ bool ecs::CParticleSystemComponent::PrecacheLegacy(std::string fname, bool bRelo
 				if(key == "material")
 					pragma::get_client_state()->LoadMaterial(val.c_str());
 			}
-			std::array<std::vector<CParticleModifierData> *, 3> params = {&data->initializers, &data->operators, &data->renderers};
+			std::array<std::vector<pragma::asset::ParticleModifierData> *, 3> params = {&data->initializers, &data->operators, &data->renderers};
 			for(int32_t i = 0; i < 3; ++i) {
 				auto num = f->Read<uint32_t>();
 				for(auto j = decltype(num) {0}; j < num; ++j) {
 					auto identifier = f->ReadString();
-					auto modData = CParticleModifierData {identifier};
+					auto modData = asset::ParticleModifierData {identifier};
 					auto numKeyValues = f->Read<uint32_t>();
 					for(auto k = decltype(numKeyValues) {0}; k < numKeyValues; ++k) {
 						auto key = f->ReadString();
@@ -290,8 +290,8 @@ bool ecs::CParticleSystemComponent::PrecacheLegacy(std::string fname, bool bRelo
 	return true;
 }
 
-const std::vector<CParticle> &ecs::CParticleSystemComponent::GetParticles() const { return m_particles; }
-CParticle *ecs::CParticleSystemComponent::GetParticle(size_t idx)
+const std::vector<pragma::pts::CParticle> &ecs::CParticleSystemComponent::GetParticles() const { return m_particles; }
+pragma::pts::CParticle *ecs::CParticleSystemComponent::GetParticle(size_t idx)
 {
 	if(idx >= GetMaxParticleCount())
 		return nullptr;
@@ -406,7 +406,7 @@ const auto PARTICLE_ANIM_BUFFER_INSTANCE_SIZE = sizeof(Vector2) * 2;
 	else if(ustring::compare<std::string>(key, "sort_particles"))
 		umath::set_flag(m_flags, Flags::SortParticles, ::util::to_boolean(value));
 	else if(ustring::compare<std::string>(key, "orientation_type"))
-		m_orientationType = static_cast<ParticleOrientationType>(::util::to_int(value));
+		m_orientationType = static_cast<pts::ParticleOrientationType>(::util::to_int(value));
 	else if(ustring::compare<std::string>(key, "color"))
 		m_initialColor = Color(value);
 	else if(ustring::compare<std::string>(key, "loop"))
@@ -591,12 +591,12 @@ std::optional<umath::Transform> ecs::CParticleSystemComponent::GetControlPointPo
 	return pose;
 }
 
-const std::vector<std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)>> &ecs::CParticleSystemComponent::GetInitializers() const { return const_cast<ecs::CParticleSystemComponent *>(this)->GetInitializers(); }
-const std::vector<std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)>> &ecs::CParticleSystemComponent::GetOperators() const { return const_cast<ecs::CParticleSystemComponent *>(this)->GetOperators(); }
-const std::vector<std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)>> &ecs::CParticleSystemComponent::GetRenderers() const { return const_cast<ecs::CParticleSystemComponent *>(this)->GetRenderers(); }
-std::vector<std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)>> &ecs::CParticleSystemComponent::GetInitializers() { return m_initializers; }
-std::vector<std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)>> &ecs::CParticleSystemComponent::GetOperators() { return m_operators; }
-std::vector<std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)>> &ecs::CParticleSystemComponent::GetRenderers() { return m_renderers; }
+const std::vector<std::unique_ptr<pragma::pts::CParticleInitializer, void (*)(pragma::pts::CParticleInitializer *)>> &ecs::CParticleSystemComponent::GetInitializers() const { return const_cast<ecs::CParticleSystemComponent *>(this)->GetInitializers(); }
+const std::vector<std::unique_ptr<pragma::pts::CParticleOperator, void (*)(pragma::pts::CParticleOperator *)>> &ecs::CParticleSystemComponent::GetOperators() const { return const_cast<ecs::CParticleSystemComponent *>(this)->GetOperators(); }
+const std::vector<std::unique_ptr<pragma::pts::CParticleRenderer, void (*)(pragma::pts::CParticleRenderer *)>> &ecs::CParticleSystemComponent::GetRenderers() const { return const_cast<ecs::CParticleSystemComponent *>(this)->GetRenderers(); }
+std::vector<std::unique_ptr<pragma::pts::CParticleInitializer, void (*)(pragma::pts::CParticleInitializer *)>> &ecs::CParticleSystemComponent::GetInitializers() { return m_initializers; }
+std::vector<std::unique_ptr<pragma::pts::CParticleOperator, void (*)(pragma::pts::CParticleOperator *)>> &ecs::CParticleSystemComponent::GetOperators() { return m_operators; }
+std::vector<std::unique_ptr<pragma::pts::CParticleRenderer, void (*)(pragma::pts::CParticleRenderer *)>> &ecs::CParticleSystemComponent::GetRenderers() { return m_renderers; }
 
 void ecs::CParticleSystemComponent::SetContinuous(bool b)
 {
@@ -737,8 +737,8 @@ std::pair<Vector3, Vector3> ecs::CParticleSystemComponent::CalcRenderBounds() co
 	return bounds;
 }
 
-ecs::ParticleOrientationType ecs::CParticleSystemComponent::GetOrientationType() const { return m_orientationType; }
-void ecs::CParticleSystemComponent::SetOrientationType(ParticleOrientationType type) { m_orientationType = type; }
+pts::ParticleOrientationType ecs::CParticleSystemComponent::GetOrientationType() const { return m_orientationType; }
+void ecs::CParticleSystemComponent::SetOrientationType(pts::ParticleOrientationType type) { m_orientationType = type; }
 
 void ecs::CParticleSystemComponent::SetRadius(float r)
 {
@@ -757,10 +757,10 @@ void ecs::CParticleSystemComponent::SetMaterial(msys::Material *mat) { m_materia
 void ecs::CParticleSystemComponent::SetMaterial(const char *mat) { SetMaterial(pragma::get_client_state()->LoadMaterial(mat)); }
 msys::Material *ecs::CParticleSystemComponent::GetMaterial() const { return const_cast<msys::Material *>(m_material.get()); }
 
-CParticleInitializer *ecs::CParticleSystemComponent::AddInitializer(std::string identifier, const std::unordered_map<std::string, std::string> &values)
+pragma::pts::CParticleInitializer *ecs::CParticleSystemComponent::AddInitializer(std::string identifier, const std::unordered_map<std::string, std::string> &values)
 {
 	ustring::to_lower(identifier);
-	auto *map = GetParticleModifierMap();
+	auto *map = pragma::pts::GetParticleModifierMap();
 	auto factory = map->FindInitializer(identifier);
 	if(factory == nullptr) {
 		Con::cwar << "Attempted to create unknown particle initializer '" << identifier << "'! Ignoring..." << Con::endl;
@@ -774,10 +774,10 @@ CParticleInitializer *ecs::CParticleSystemComponent::AddInitializer(std::string 
 	m_initializers.push_back(std::move(initializer));
 	return m_initializers.back().get();
 }
-CParticleOperator *ecs::CParticleSystemComponent::AddOperator(std::string identifier, const std::unordered_map<std::string, std::string> &values)
+pragma::pts::CParticleOperator *ecs::CParticleSystemComponent::AddOperator(std::string identifier, const std::unordered_map<std::string, std::string> &values)
 {
 	ustring::to_lower(identifier);
-	auto *map = GetParticleModifierMap();
+	auto *map = pragma::pts::GetParticleModifierMap();
 	auto factory = map->FindOperator(identifier);
 	if(factory == nullptr) {
 		Con::cwar << "Attempted to create unknown particle operator '" << identifier << "'! Ignoring..." << Con::endl;
@@ -791,10 +791,10 @@ CParticleOperator *ecs::CParticleSystemComponent::AddOperator(std::string identi
 	m_operators.push_back(std::move(op));
 	return m_operators.back().get();
 }
-CParticleRenderer *ecs::CParticleSystemComponent::AddRenderer(std::string identifier, const std::unordered_map<std::string, std::string> &values)
+pragma::pts::CParticleRenderer *ecs::CParticleSystemComponent::AddRenderer(std::string identifier, const std::unordered_map<std::string, std::string> &values)
 {
 	ustring::to_lower(identifier);
-	auto *map = GetParticleModifierMap();
+	auto *map = pragma::pts::GetParticleModifierMap();
 	auto factory = map->FindRenderer(identifier);
 	if(factory == nullptr) {
 		Con::cwar << "Attempted to create unknown particle renderer '" << identifier << "'! Ignoring..." << Con::endl;
@@ -811,21 +811,21 @@ CParticleRenderer *ecs::CParticleSystemComponent::AddRenderer(std::string identi
 
 void ecs::CParticleSystemComponent::RemoveInitializer(const std::string &name)
 {
-	auto it = std::find_if(m_initializers.begin(), m_initializers.end(), [&name](const std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)> &initializer) { return ustring::compare(initializer->GetName(), name, false); });
+	auto it = std::find_if(m_initializers.begin(), m_initializers.end(), [&name](const std::unique_ptr<pragma::pts::CParticleInitializer, void (*)(pragma::pts::CParticleInitializer *)> &initializer) { return ustring::compare(initializer->GetName(), name, false); });
 	if(it == m_initializers.end())
 		return;
 	m_initializers.erase(it);
 }
 void ecs::CParticleSystemComponent::RemoveOperator(const std::string &name)
 {
-	auto it = std::find_if(m_operators.begin(), m_operators.end(), [&name](const std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)> &initializer) { return ustring::compare(initializer->GetName(), name, false); });
+	auto it = std::find_if(m_operators.begin(), m_operators.end(), [&name](const std::unique_ptr<pragma::pts::CParticleOperator, void (*)(pragma::pts::CParticleOperator *)> &initializer) { return ustring::compare(initializer->GetName(), name, false); });
 	if(it == m_operators.end())
 		return;
 	m_operators.erase(it);
 }
 void ecs::CParticleSystemComponent::RemoveRenderer(const std::string &name)
 {
-	auto it = std::find_if(m_renderers.begin(), m_renderers.end(), [&name](const std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)> &initializer) { return ustring::compare(initializer->GetName(), name, false); });
+	auto it = std::find_if(m_renderers.begin(), m_renderers.end(), [&name](const std::unique_ptr<pragma::pts::CParticleRenderer, void (*)(pragma::pts::CParticleRenderer *)> &initializer) { return ustring::compare(initializer->GetName(), name, false); });
 	if(it == m_renderers.end())
 		return;
 	m_renderers.erase(it);
@@ -987,9 +987,9 @@ void ecs::CParticleSystemComponent::Start()
 	}
 	//
 
-	std::sort(m_initializers.begin(), m_initializers.end(), [](const std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)> &a, const std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)> &b) { return a->GetPriority() > b->GetPriority(); });
-	std::sort(m_operators.begin(), m_operators.end(), [](const std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)> &a, const std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)> &b) { return a->GetPriority() > b->GetPriority(); });
-	std::sort(m_renderers.begin(), m_renderers.end(), [](const std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)> &a, const std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)> &b) { return a->GetPriority() > b->GetPriority(); });
+	std::sort(m_initializers.begin(), m_initializers.end(), [](const std::unique_ptr<pragma::pts::CParticleInitializer, void (*)(pragma::pts::CParticleInitializer *)> &a, const std::unique_ptr<pragma::pts::CParticleInitializer, void (*)(pragma::pts::CParticleInitializer *)> &b) { return a->GetPriority() > b->GetPriority(); });
+	std::sort(m_operators.begin(), m_operators.end(), [](const std::unique_ptr<pragma::pts::CParticleOperator, void (*)(pragma::pts::CParticleOperator *)> &a, const std::unique_ptr<pragma::pts::CParticleOperator, void (*)(pragma::pts::CParticleOperator *)> &b) { return a->GetPriority() > b->GetPriority(); });
+	std::sort(m_renderers.begin(), m_renderers.end(), [](const std::unique_ptr<pragma::pts::CParticleRenderer, void (*)(pragma::pts::CParticleRenderer *)> &a, const std::unique_ptr<pragma::pts::CParticleRenderer, void (*)(pragma::pts::CParticleRenderer *)> &b) { return a->GetPriority() > b->GetPriority(); });
 
 	//
 	for(auto &init : m_initializers)
@@ -1298,9 +1298,9 @@ void ecs::CParticleSystemComponent::ResumeEmission()
 }
 void ecs::CParticleSystemComponent::SetAlwaysSimulate(bool b) { umath::set_flag(m_flags, Flags::AlwaysSimulate, b); }
 
-void ecs::CParticleSystemComponent::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, ecs::ParticleRenderFlags renderFlags)
+void ecs::CParticleSystemComponent::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pts::ParticleRenderFlags renderFlags)
 {
-	if(umath::is_flag_set(renderFlags, ecs::ParticleRenderFlags::Bloom) && IsBloomEnabled() == false)
+	if(umath::is_flag_set(renderFlags, pts::ParticleRenderFlags::Bloom) && IsBloomEnabled() == false)
 		return;
 	m_tLastEmission = pragma::get_cgame()->RealTime();
 	if(IsActiveOrPaused() == false) {
@@ -1340,7 +1340,7 @@ void ecs::CParticleSystemComponent::RecordRenderShadow(prosper::ICommandBuffer &
 		r->RecordRenderShadow(drawCmd, scene, renderer, *light, layerId);
 }
 
-CParticle &ecs::CParticleSystemComponent::CreateParticle(uint32_t idx, float timeCreated, float timeAlive)
+pragma::pts::CParticle &ecs::CParticleSystemComponent::CreateParticle(uint32_t idx, float timeCreated, float timeAlive)
 {
 	auto &particle = m_particles[idx];
 	if(particle.IsAlive())
@@ -1750,7 +1750,7 @@ void ecs::CParticleSystemComponent::SortParticles()
 	std::sort(m_sortedParticleIndices.begin(), m_sortedParticleIndices.end(), [this](std::size_t idx0, std::size_t idx1) { return m_particles[idx0] < m_particles[idx1]; });
 }
 
-void ecs::CParticleSystemComponent::OnParticleDestroyed(CParticle &particle)
+void ecs::CParticleSystemComponent::OnParticleDestroyed(pragma::pts::CParticle &particle)
 {
 	for(auto &init : m_initializers)
 		init->OnParticleDestroyed(particle);

@@ -129,7 +129,7 @@ void ShaderParticleAnimatedSprites::InitializeGfxPipeline(prosper::GraphicsPipel
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 }
 
-bool ShaderParticleAnimatedSprites::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps, ecs::ParticleOrientationType orientationType, ecs::ParticleRenderFlags renderFlags)
+bool ShaderParticleAnimatedSprites::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps, pts::ParticleOrientationType orientationType, pts::ParticleRenderFlags renderFlags)
 {
 	PushConstants pushConstants {};
 	pushConstants.camBias = 0.f;

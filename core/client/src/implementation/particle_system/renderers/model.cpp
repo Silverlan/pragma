@@ -12,11 +12,11 @@ import :entities.components;
 import :game;
 import :rendering.shaders;
 
-decltype(CParticleRendererModel::s_rendererCount) CParticleRendererModel::s_rendererCount = 0;
+decltype(pragma::pts::CParticleRendererModel::s_rendererCount) pragma::pts::CParticleRendererModel::s_rendererCount = 0;
 static std::shared_ptr<prosper::IBuffer> s_instanceBuffer = nullptr;
 static std::shared_ptr<prosper::IBuffer> s_instanceBufferAnimated = nullptr;
 static std::shared_ptr<prosper::IDescriptorSetGroup> s_instanceDescSetGroup = nullptr;
-void CParticleRendererModel::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleRendererModel::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleRenderer::Initialize(pSystem, values);
 	m_rotationalBuffer.Initialize(pSystem);
@@ -85,7 +85,7 @@ void CParticleRendererModel::Initialize(pragma::BaseEnvParticleSystemComponent &
 	}
 }
 
-CParticleRendererModel::~CParticleRendererModel()
+pragma::pts::CParticleRendererModel::~CParticleRendererModel()
 {
 	if(--s_rendererCount == 0) {
 		s_instanceDescSetGroup = nullptr;
@@ -94,16 +94,16 @@ CParticleRendererModel::~CParticleRendererModel()
 	}
 }
 
-pragma::ShaderParticleBase *CParticleRendererModel::GetShader() const { return static_cast<pragma::ShaderParticleModel *>(m_shader.get()); }
+pragma::ShaderParticleBase *pragma::pts::CParticleRendererModel::GetShader() const { return static_cast<pragma::ShaderParticleModel *>(m_shader.get()); }
 
-CParticleRendererModel::ParticleModelComponent &CParticleRendererModel::GetParticleComponent(uint32_t particleIdx)
+pragma::pts::CParticleRendererModel::ParticleModelComponent &pragma::pts::CParticleRendererModel::GetParticleComponent(uint32_t particleIdx)
 {
 	if(particleIdx >= m_particleComponents.size())
 		return m_particleComponents.front();
 	return m_particleComponents.at(particleIdx);
 }
 
-void CParticleRendererModel::OnParticleCreated(CParticle &particle)
+void pragma::pts::CParticleRendererModel::OnParticleCreated(pragma::pts::CParticle &particle)
 {
 	CParticleRenderer::OnParticleCreated(particle);
 	if(m_animation.empty())
@@ -112,9 +112,9 @@ void CParticleRendererModel::OnParticleCreated(CParticle &particle)
 	ptComponent.animatedComponent->PlayAnimation(m_animation, pragma::FPlayAnim::Reset);
 }
 
-bool CParticleRendererModel::IsAnimated() const { return m_animation.empty() == false; }
+bool pragma::pts::CParticleRendererModel::IsAnimated() const { return m_animation.empty() == false; }
 
-void CParticleRendererModel::PostSimulate(double tDelta)
+void pragma::pts::CParticleRendererModel::PostSimulate(double tDelta)
 {
 	CParticleRenderer::PostSimulate(tDelta);
 	if(m_particleComponents.front().animatedComponent.expired() || m_shader.expired() || s_instanceDescSetGroup == nullptr)
@@ -137,7 +137,7 @@ void CParticleRendererModel::PostSimulate(double tDelta)
 	}
 }
 
-bool CParticleRendererModel::Update()
+bool pragma::pts::CParticleRendererModel::Update()
 {
 	auto *cam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
 	if(m_rotationalBuffer.Update() == false || cam == nullptr)
@@ -161,7 +161,7 @@ bool CParticleRendererModel::Update()
 	return bSuccessful;
 }
 
-void CParticleRendererModel::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ecs::ParticleRenderFlags renderFlags)
+void pragma::pts::CParticleRendererModel::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::pts::ParticleRenderFlags renderFlags)
 {
 #if 0
 	if(m_shader.expired())
@@ -225,7 +225,7 @@ void CParticleRendererModel::RecordRender(prosper::ICommandBuffer &drawCmd, prag
 #endif
 }
 
-void CParticleRendererModel::RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId)
+void pragma::pts::CParticleRendererModel::RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId)
 {
 	/*if(s_instanceDescSet == nullptr)
 		return;

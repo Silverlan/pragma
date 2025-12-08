@@ -9,24 +9,26 @@ export module pragma.client:particle_system.operator_cylindrical_vortex;
 
 export import :particle_system.operator_world_base;
 
-export class DLLCLIENT CParticleOperatorCylindricalVortex : public CParticleOperatorWorldBase {
-  public:
-	CParticleOperatorCylindricalVortex() = default;
-	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
-	virtual void Simulate(double tDelta) override;
-  private:
-	Vector3 m_vAxis = {0.f, 1.f, 0.f};
-	float m_fStrength = 2.f;
-	float m_fDivergence = 0.f;
+export namespace pragma::pts {
+	class DLLCLIENT CParticleOperatorCylindricalVortex : public CParticleOperatorWorldBase {
+	public:
+		CParticleOperatorCylindricalVortex() = default;
+		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Simulate(pragma::pts::CParticle &particle, double tDelta, float strength) override;
+		virtual void Simulate(double tDelta) override;
+	private:
+		Vector3 m_vAxis = {0.f, 1.f, 0.f};
+		float m_fStrength = 2.f;
+		float m_fDivergence = 0.f;
 
-	float m_dtStrength = 0.f;
-	Vector3 m_dtOrigin = {};
-	Vector3 m_dtAxis = {};
-	Quat m_dtRotation = uquat::identity();
-};
+		float m_dtStrength = 0.f;
+		Vector3 m_dtOrigin = {};
+		Vector3 m_dtAxis = {};
+		Quat m_dtRotation = uquat::identity();
+	};
+}
 
-void CParticleOperatorCylindricalVortex::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleOperatorCylindricalVortex::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperatorWorldBase::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
@@ -40,7 +42,7 @@ void CParticleOperatorCylindricalVortex::Initialize(pragma::BaseEnvParticleSyste
 			m_fDivergence = util::to_float(it->second);
 	}
 }
-void CParticleOperatorCylindricalVortex::Simulate(double tDelta)
+void pragma::pts::CParticleOperatorCylindricalVortex::Simulate(double tDelta)
 {
 	CParticleOperatorWorldBase::Simulate(tDelta);
 	m_dtStrength = m_fStrength * tDelta;
@@ -53,7 +55,7 @@ void CParticleOperatorCylindricalVortex::Simulate(double tDelta)
 	// find divergence rotation
 	m_dtRotation = uquat::create(m_dtAxis, -m_fDivergence);
 }
-void CParticleOperatorCylindricalVortex::Simulate(CParticle &particle, double tDelta, float strength)
+void pragma::pts::CParticleOperatorCylindricalVortex::Simulate(pragma::pts::CParticle &particle, double tDelta, float strength)
 {
 	CParticleOperatorWorldBase::Simulate(particle, tDelta, strength);
 	// cross product of vortex axis and relative position is direction

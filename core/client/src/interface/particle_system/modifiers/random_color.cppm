@@ -10,14 +10,14 @@ export module pragma.client:particle_system.modifier_random_color;
 
 import :particle_system.modifier_random_variable;
 
-export {
+export namespace pragma::pts {
 	class DLLCLIENT CParticleModifierComponentRandomColor {
 	  public:
 		enum class ComponentFlags : uint8_t { None = 0, Red = 1u, Green = Red << 1, Blue = Green << 1, Alpha = Blue << 1, RGBA = Red | Green | Blue | Alpha };
 		CParticleModifierComponentRandomColor() = default;
 		CParticleModifierComponentRandomColor(const std::string &suffix, const std::unordered_map<std::string, std::string> &values);
 		void Initialize(const std::string &suffix, const std::unordered_map<std::string, std::string> &values);
-		Color GetValue(CParticle &p) const;
+		Color GetValue(pragma::pts::CParticle &p) const;
 		bool IsSet() const;
 		bool IsSet(ComponentFlags components) const;
 		ComponentFlags GetComponentFlags() const;
@@ -27,12 +27,12 @@ export {
 		CParticleModifierComponentRandomVariable<std::uniform_int_distribution<int16_t>, int16_t> m_blue;
 		CParticleModifierComponentRandomVariable<std::uniform_int_distribution<int16_t>, int16_t> m_alpha;
 	};
-	REGISTER_ENUM_FLAGS(CParticleModifierComponentRandomColor::ComponentFlags)
 };
+export {REGISTER_ENUM_FLAGS(pragma::pts::CParticleModifierComponentRandomColor::ComponentFlags)}
 
-CParticleModifierComponentRandomColor::CParticleModifierComponentRandomColor(const std::string &suffix, const std::unordered_map<std::string, std::string> &values) { Initialize(suffix, values); }
+pragma::pts::CParticleModifierComponentRandomColor::CParticleModifierComponentRandomColor(const std::string &suffix, const std::unordered_map<std::string, std::string> &values) { Initialize(suffix, values); }
 
-void CParticleModifierComponentRandomColor::Initialize(const std::string &suffix, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleModifierComponentRandomColor::Initialize(const std::string &suffix, const std::unordered_map<std::string, std::string> &values)
 {
 	auto strSuffix = suffix.empty() ? suffix : ("_" + suffix);
 	auto idColor = "color" + strSuffix;
@@ -91,17 +91,17 @@ void CParticleModifierComponentRandomColor::Initialize(const std::string &suffix
 	}
 }
 
-Color CParticleModifierComponentRandomColor::GetValue(CParticle &p) const { return Color(m_red.GetValue(p), m_green.GetValue(p), m_blue.GetValue(p), m_alpha.GetValue(p)); }
+Color pragma::pts::CParticleModifierComponentRandomColor::GetValue(pragma::pts::CParticle &p) const { return Color(m_red.GetValue(p), m_green.GetValue(p), m_blue.GetValue(p), m_alpha.GetValue(p)); }
 
-bool CParticleModifierComponentRandomColor::IsSet() const { return m_red.IsSet() || m_green.IsSet() || m_blue.IsSet() || m_alpha.IsSet(); }
+bool pragma::pts::CParticleModifierComponentRandomColor::IsSet() const { return m_red.IsSet() || m_green.IsSet() || m_blue.IsSet() || m_alpha.IsSet(); }
 
-bool CParticleModifierComponentRandomColor::IsSet(ComponentFlags components) const
+bool pragma::pts::CParticleModifierComponentRandomColor::IsSet(ComponentFlags components) const
 {
 	return ((components & ComponentFlags::Red) != ComponentFlags::None && m_red.IsSet()) || ((components & ComponentFlags::Green) != ComponentFlags::None && m_green.IsSet()) || ((components & ComponentFlags::Blue) != ComponentFlags::None && m_blue.IsSet())
 	  || ((components & ComponentFlags::Alpha) != ComponentFlags::None && m_alpha.IsSet());
 }
 
-CParticleModifierComponentRandomColor::ComponentFlags CParticleModifierComponentRandomColor::GetComponentFlags() const
+pragma::pts::CParticleModifierComponentRandomColor::ComponentFlags pragma::pts::CParticleModifierComponentRandomColor::GetComponentFlags() const
 {
 	auto componentFlags = ComponentFlags::None;
 	if(m_red.IsSet())

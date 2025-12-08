@@ -31,7 +31,7 @@ export namespace pragma {
 
 		ShaderParticleBlob(prosper::IPrContext &context, const std::string &identifier);
 		virtual uint32_t GetSceneDescriptorSetIndex() const override;
-		bool RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps, ecs::ParticleOrientationType orientationType, ecs::ParticleRenderFlags renderFlags,
+		bool RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps, pts::ParticleOrientationType orientationType, pts::ParticleRenderFlags renderFlags,
 		  prosper::IBuffer &blobIndexBuffer, prosper::IDescriptorSet &dsParticles, uint32_t particleBufferOffset);
 		virtual bool RecordBindScene(prosper::ICommandBuffer &cmd, const prosper::IShaderPipelineLayout &layout, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
 		  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsShadows) const override;

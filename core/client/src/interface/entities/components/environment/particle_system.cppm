@@ -24,15 +24,15 @@ export namespace pragma::ecs {
 		std::vector<uint64_t> particleSystemOffsets {};
 	};
 	DLLCLIENT std::unordered_map<std::string, std::string> get_particle_key_values(lua::State *l, const luabind::map<std::string, void> &keyValues);
-	class DLLCLIENT CParticleSystemComponent final : public BaseEnvParticleSystemComponent, public CBaseNetComponent, public CParticleSystemBaseKeyValues {
+	class DLLCLIENT CParticleSystemComponent final : public BaseEnvParticleSystemComponent, public CBaseNetComponent, public pts::CParticleSystemBaseKeyValues {
 	  public:
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		static const uint32_t PARTICLE_DATA_SIZE;
 		static const uint32_t VERTEX_COUNT;
-		static bool Save(const std::string &fileName, const std::vector<CParticleSystemComponent *> &particleSystems);
-		static bool Save(VFilePtrReal &f, const std::vector<CParticleSystemComponent *> &particleSystems);
-		static bool Save(const std::vector<CParticleSystemComponent *> &particleSystems, udm::AssetData &outData, std::string &outErr);
+		static bool Save(const std::string &fileName, const std::vector<pragma::ecs::CParticleSystemComponent *> &particleSystems);
+		static bool Save(VFilePtrReal &f, const std::vector<pragma::ecs::CParticleSystemComponent *> &particleSystems);
+		static bool Save(const std::vector<pragma::ecs::CParticleSystemComponent *> &particleSystems, udm::AssetData &outData, std::string &outErr);
 		static bool IsParticleFilePrecached(const std::string &fname);
 		static void InitializeBuffers();
 		static void ClearBuffers();
@@ -43,7 +43,7 @@ export namespace pragma::ecs {
 		static bool InitializeFromAssetData(const std::string &ptName, const ::udm::LinkedPropertyWrapper &udm, std::string &outErr);
 		static const std::vector<std::string> &GetPrecachedParticleSystemFiles();
 		static std::optional<std::string> FindParticleSystemFile(const std::string ptName);
-		static const std::unordered_map<std::string, std::unique_ptr<CParticleSystemData>> &GetCachedParticleSystemData();
+		static const std::unordered_map<std::string, std::unique_ptr<pragma::asset::ParticleSystemData>> &GetCachedParticleSystemData();
 		static void ClearCache();
 		static const std::shared_ptr<prosper::IDynamicResizableBuffer> &GetGlobalParticleBuffer();
 		static const std::shared_ptr<prosper::IDynamicResizableBuffer> &GetGlobalAnimationStartBuffer();
@@ -51,7 +51,7 @@ export namespace pragma::ecs {
 
 		static CParticleSystemComponent *Create(const std::string &fname, CParticleSystemComponent *parent = nullptr, bool bRecordKeyValues = false, bool bAutoSpawn = true);
 		static CParticleSystemComponent *Create(const std::unordered_map<std::string, std::string> &values, CParticleSystemComponent *parent = nullptr, bool bRecordKeyValues = false, bool bAutoSpawn = true);
-		static CParticleSystemComponent *Create(CParticleSystemComponent *parent = nullptr, bool bAutoSpawn = true);
+		static CParticleSystemComponent *Create(pragma::ecs::CParticleSystemComponent *parent = nullptr, bool bAutoSpawn = true);
 		static std::shared_ptr<pragma::asset::Model> GenerateModel(pragma::Game &game, const std::vector<const CParticleSystemComponent *> &particleSystems);
 
 		enum class Flags : uint32_t {
@@ -81,7 +81,7 @@ export namespace pragma::ecs {
 		};
 
 		struct DLLCLIENT ChildData {
-			::util::WeakHandle<CParticleSystemComponent> child {};
+			::util::WeakHandle<pragma::ecs::CParticleSystemComponent> child {};
 			float delay = 0.f;
 		};
 
@@ -118,18 +118,18 @@ export namespace pragma::ecs {
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void OnEntitySpawn() override;
 		virtual void SetParticleFile(const std::string &fileName) override;
-		void ToParticleSystemData(CParticleSystemData &outData);
-		static bool LoadFromAssetData(CParticleSystemData &ptData, const udm::AssetData &data, std::string &outErr);
-		static bool LoadFromAssetData(CParticleSystemData &ptData, const ::udm::LinkedPropertyWrapper &data, std::string &outErr);
+		void ToParticleSystemData(asset::ParticleSystemData &outData);
+		static bool LoadFromAssetData(asset::ParticleSystemData &ptData, const udm::AssetData &data, std::string &outErr);
+		static bool LoadFromAssetData(asset::ParticleSystemData &ptData, const ::udm::LinkedPropertyWrapper &data, std::string &outErr);
 
 		// Particle
 		// Returns the buffer index for the specified particle. Only particles which are alive have a valid buffer index!
 		std::size_t TranslateParticleIndex(std::size_t particleIdx) const;
 		// Translates a buffer index to a particle index
 		std::size_t TranslateBufferIndex(std::size_t bufferIdx) const;
-		CParticleInitializer *AddInitializer(std::string identifier, const std::unordered_map<std::string, std::string> &values);
-		CParticleOperator *AddOperator(std::string identifier, const std::unordered_map<std::string, std::string> &values);
-		CParticleRenderer *AddRenderer(std::string identifier, const std::unordered_map<std::string, std::string> &values);
+		pts::CParticleInitializer *AddInitializer(std::string identifier, const std::unordered_map<std::string, std::string> &values);
+		pts::CParticleOperator *AddOperator(std::string identifier, const std::unordered_map<std::string, std::string> &values);
+		pts::CParticleRenderer *AddRenderer(std::string identifier, const std::unordered_map<std::string, std::string> &values);
 		void RemoveInitializer(const std::string &name);
 		void RemoveOperator(const std::string &name);
 		void RemoveRenderer(const std::string &name);
@@ -146,8 +146,8 @@ export namespace pragma::ecs {
 		void SetMaterial(msys::Material *mat);
 		void SetMaterial(const char *mat);
 		msys::Material *GetMaterial() const;
-		ParticleOrientationType GetOrientationType() const;
-		void SetOrientationType(ParticleOrientationType type);
+		pts::ParticleOrientationType GetOrientationType() const;
+		void SetOrientationType(pts::ParticleOrientationType type);
 		void SetNodeTarget(uint32_t node, CBaseEntity *ent);
 		void SetNodeTarget(uint32_t node, const Vector3 &pos);
 		uint32_t GetNodeCount() const;
@@ -220,14 +220,14 @@ export namespace pragma::ecs {
 		void SetColorFactor(const Vector4 &colorFactor);
 
 		void Simulate(double tDelta);
-		void RecordRender(prosper::ICommandBuffer &drawCmd, CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, ParticleRenderFlags renderFlags);
+		void RecordRender(prosper::ICommandBuffer &drawCmd, CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pts::ParticleRenderFlags renderFlags);
 		void RecordRenderShadow(prosper::ICommandBuffer &drawCmd, CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent *light, uint32_t layerId = 0);
 		uint32_t GetParticleCount() const;
 		// Same as m_numParticles, minus particles with a radius of 0, alpha of 0 or similar (Invisible particles)
 		uint32_t GetRenderParticleCount() const;
 		uint32_t GetMaxParticleCount() const;
-		const std::vector<CParticle> &GetParticles() const;
-		CParticle *GetParticle(size_t idx);
+		const std::vector<pts::CParticle> &GetParticles() const;
+		pts::CParticle *GetParticle(size_t idx);
 		void Start();
 		void Stop();
 		void Die(float maxRemainingLifetime = 5.f);
@@ -235,13 +235,13 @@ export namespace pragma::ecs {
 		bool IsActive() const;
 		bool IsActiveOrPaused() const;
 		bool IsEmissionPaused() const;
-		void SetParent(CParticleSystemComponent *particle);
+		void SetParent(pragma::ecs::CParticleSystemComponent *particle);
 		const std::vector<ChildData> &GetChildren() const;
 		std::vector<ChildData> &GetChildren();
-		void AddChild(CParticleSystemComponent &particle, float delay = 0.f);
+		void AddChild(pragma::ecs::CParticleSystemComponent &particle, float delay = 0.f);
 		CParticleSystemComponent *AddChild(const std::string &name);
-		void RemoveChild(CParticleSystemComponent *particle);
-		bool HasChild(CParticleSystemComponent &particle);
+		void RemoveChild(pragma::ecs::CParticleSystemComponent *particle);
+		bool HasChild(pragma::ecs::CParticleSystemComponent &particle);
 		const CParticleSystemComponent *GetParent() const;
 		CParticleSystemComponent *GetParent();
 
@@ -250,7 +250,7 @@ export namespace pragma::ecs {
 
 		bool SetupParticleSystem(std::string fname, CParticleSystemComponent *parent = nullptr, bool bRecordKeyValues = false);
 		bool SetupParticleSystem(const std::unordered_map<std::string, std::string> &values, CParticleSystemComponent *parent = nullptr, bool bRecordKeyValues = false);
-		bool SetupParticleSystem(CParticleSystemComponent *parent = nullptr);
+		bool SetupParticleSystem(pragma::ecs::CParticleSystemComponent *parent = nullptr);
 
 		const std::shared_ptr<prosper::IBuffer> &GetParticleBuffer() const;
 		const std::shared_ptr<prosper::IBuffer> &GetParticleAnimationBuffer() const;
@@ -300,12 +300,12 @@ export namespace pragma::ecs {
 		std::optional<umath::Transform> GetPrevControlPointPose(ControlPointIndex idx, float *optOutTimestamp = nullptr) const;
 		std::optional<umath::Transform> GetControlPointPose(ControlPointIndex idx, float t) const;
 
-		const std::vector<std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)>> &GetInitializers() const;
-		const std::vector<std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)>> &GetOperators() const;
-		const std::vector<std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)>> &GetRenderers() const;
-		std::vector<std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)>> &GetInitializers();
-		std::vector<std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)>> &GetOperators();
-		std::vector<std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)>> &GetRenderers();
+		const std::vector<std::unique_ptr<pts::CParticleInitializer, void (*)(pts::CParticleInitializer *)>> &GetInitializers() const;
+		const std::vector<std::unique_ptr<pts::CParticleOperator, void (*)(pts::CParticleOperator *)>> &GetOperators() const;
+		const std::vector<std::unique_ptr<pts::CParticleRenderer, void (*)(pts::CParticleRenderer *)>> &GetRenderers() const;
+		std::vector<std::unique_ptr<pts::CParticleInitializer, void (*)(pts::CParticleInitializer *)>> &GetInitializers();
+		std::vector<std::unique_ptr<pts::CParticleOperator, void (*)(pts::CParticleOperator *)>> &GetOperators();
+		std::vector<std::unique_ptr<pts::CParticleRenderer, void (*)(pts::CParticleRenderer *)>> &GetRenderers();
 
 		SpriteSheetAnimation *GetSpriteSheetAnimation();
 		const SpriteSheetAnimation *GetSpriteSheetAnimation() const;
@@ -324,7 +324,7 @@ export namespace pragma::ecs {
 
 		virtual void CreateParticle();
 	  private:
-		static std::unordered_map<std::string, std::unique_ptr<CParticleSystemData>> s_particleData;
+		static std::unordered_map<std::string, std::unique_ptr<pragma::asset::ParticleSystemData>> s_particleData;
 		static std::vector<std::string> s_precached;
 		ControlPoint &InitializeControlPoint(ControlPointIndex idx);
 
@@ -337,9 +337,9 @@ export namespace pragma::ecs {
 		};
 		enum class State : uint32_t { Initial = 0u, Active, Complete, Paused };
 		std::vector<ChildData> m_childSystems;
-		::util::WeakHandle<CParticleSystemComponent> m_hParent = {};
+		::util::WeakHandle<pragma::ecs::CParticleSystemComponent> m_hParent = {};
 		std::vector<Node> m_nodes;
-		std::vector<CParticle> m_particles;
+		std::vector<pts::CParticle> m_particles;
 		std::vector<std::size_t> m_sortedParticleIndices;
 		std::vector<std::size_t> m_particleIndicesToBufferIndices;
 		std::vector<std::size_t> m_bufferIndicesToParticleIndices;
@@ -368,9 +368,9 @@ export namespace pragma::ecs {
 		float m_lifeTime = std::numeric_limits<float>::max();
 		float m_simulationTime = 0.f;
 		pragma::rendering::ParticleAlphaMode m_alphaMode = pragma::rendering::ParticleAlphaMode::Additive;
-		std::vector<std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)>> m_initializers;
-		std::vector<std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)>> m_operators;
-		std::vector<std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)>> m_renderers;
+		std::vector<std::unique_ptr<pts::CParticleInitializer, void (*)(pts::CParticleInitializer *)>> m_initializers;
+		std::vector<std::unique_ptr<pts::CParticleOperator, void (*)(pts::CParticleOperator *)>> m_operators;
+		std::vector<std::unique_ptr<pts::CParticleRenderer, void (*)(pts::CParticleRenderer *)>> m_renderers;
 
 		std::vector<ControlPoint> m_controlPoints {};
 		std::vector<ControlPoint> m_controlPointsPrev {};
@@ -381,7 +381,7 @@ export namespace pragma::ecs {
 		double m_tStartTime = 0.0;
 		float m_radius = 0.f;
 		float m_extent = 0.f;
-		ParticleOrientationType m_orientationType = ParticleOrientationType::Aligned;
+		pts::ParticleOrientationType m_orientationType = pts::ParticleOrientationType::Aligned;
 
 		std::shared_ptr<prosper::IBuffer> m_bufParticles = nullptr;
 		std::shared_ptr<prosper::IBuffer> m_bufParticleAnimData = nullptr;
@@ -400,14 +400,14 @@ export namespace pragma::ecs {
 		float m_worldScale = 1.f;
 
 		void SortParticles();
-		CParticle &CreateParticle(uint32_t idx, float timeCreated, float timeAlive);
+		pts::CParticle &CreateParticle(uint32_t idx, float timeCreated, float timeAlive);
 		uint32_t CreateParticles(uint32_t count, double tSimDelta, float tStart, float tDtPerParticle);
-		void OnParticleDestroyed(CParticle &particle);
+		void OnParticleDestroyed(pts::CParticle &particle);
 		void OnComplete();
 	};
 };
 export {REGISTER_ENUM_FLAGS(pragma::ecs::CParticleSystemComponent::Flags)}
-export {REGISTER_ENUM_FLAGS(pragma::ecs::ParticleRenderFlags)}
+export {REGISTER_ENUM_FLAGS(pragma::pts::ParticleRenderFlags)}
 export {
 	namespace pragma::ecs {
 		class DLLCLIENT CEnvParticleSystem : public pragma::ecs::CBaseEntity {

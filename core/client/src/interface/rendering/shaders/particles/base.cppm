@@ -22,7 +22,7 @@ export namespace pragma {
 		static uint32_t PIPELINE_COUNT;
 
 		ShaderParticleBase() = default;
-		RenderFlags GetRenderFlags(const ecs::CParticleSystemComponent &particle, ecs::ParticleRenderFlags ptRenderFlags) const;
+		RenderFlags GetRenderFlags(const ecs::CParticleSystemComponent &particle, pts::ParticleRenderFlags ptRenderFlags) const;
 		static uint32_t GetDepthPipelineIndex();
 	  protected:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_ANIMATION;

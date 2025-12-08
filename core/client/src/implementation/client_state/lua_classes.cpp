@@ -1063,7 +1063,7 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 	defShaderParticleBase.add_static_constant("PUSH_CONSTANTS_USER_DATA_OFFSET", sizeof(pragma::ShaderParticle2DBase::PushConstants));
 	defShaderParticleBase.def(
 	  "RecordBeginDraw", +[](lua::State *l, pragma::LuaShaderWrapperParticle2D &shader, prosper::ShaderBindState &bindState, pragma::ecs::CParticleSystemComponent &ps, uint32_t renderFlags) {
-		  return static_cast<pragma::LShaderParticle2D *>(&shader.GetShader())->RecordBeginDraw(bindState, ps, static_cast<pragma::ecs::ParticleRenderFlags>(renderFlags));
+		  return static_cast<pragma::LShaderParticle2D *>(&shader.GetShader())->RecordBeginDraw(bindState, ps, static_cast<pragma::pts::ParticleRenderFlags>(renderFlags));
 	  });
 
 	modShader[defShaderParticleBase];

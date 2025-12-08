@@ -7,7 +7,7 @@ module pragma.client;
 
 import :particle_system.initializer_position;
 
-void CParticleInitializerPositionRandomBox::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleInitializerPositionRandomBox::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
@@ -23,7 +23,7 @@ void CParticleInitializerPositionRandomBox::Initialize(pragma::BaseEnvParticleSy
 			m_bOnSides = util::to_boolean(it->second);
 	}
 }
-void CParticleInitializerPositionRandomBox::OnParticleCreated(CParticle &particle)
+void pragma::pts::CParticleInitializerPositionRandomBox::OnParticleCreated(pragma::pts::CParticle &particle)
 {
 	if(m_bOnSides == true) {
 		// Find a random position on one of the sides of the box
@@ -40,7 +40,7 @@ void CParticleInitializerPositionRandomBox::OnParticleCreated(CParticle &particl
 
 //////////////////////////////
 
-void CParticleInitializerPositionRandomSphere::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleInitializerPositionRandomSphere::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
@@ -56,7 +56,7 @@ void CParticleInitializerPositionRandomSphere::Initialize(pragma::BaseEnvParticl
 			m_origin = uvec::create(it->second);
 	}
 }
-void CParticleInitializerPositionRandomSphere::OnParticleCreated(CParticle &particle)
+void pragma::pts::CParticleInitializerPositionRandomSphere::OnParticleCreated(pragma::pts::CParticle &particle)
 {
 	float offset = m_distMax - m_distMin;
 	float r = m_distMin + sqrtf(umath::random(0.f, offset * offset));
@@ -82,7 +82,7 @@ void CParticleInitializerPositionRandomSphere::OnParticleCreated(CParticle &part
 
 //////////////////////////////
 
-void CParticleInitializerPositionRandomCircle::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleInitializerPositionRandomCircle::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto &pair : values) {
@@ -98,7 +98,7 @@ void CParticleInitializerPositionRandomCircle::Initialize(pragma::BaseEnvParticl
 			m_origin = uvec::create(pair.second);
 	}
 }
-void CParticleInitializerPositionRandomCircle::OnParticleCreated(CParticle &particle)
+void pragma::pts::CParticleInitializerPositionRandomCircle::OnParticleCreated(pragma::pts::CParticle &particle)
 {
 	auto offset = m_fMaxDist - m_fMinDist;
 	auto r = m_fMinDist + sqrtf(umath::random(0.f, offset * offset));

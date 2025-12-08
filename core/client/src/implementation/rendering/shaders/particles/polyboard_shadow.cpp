@@ -30,7 +30,7 @@ void ParticlePolyboardShadow::InitializePipelineLayout(const Vulkan::Context &co
 	pushConstants.push_back({prosper::ShaderStageFlags::FragmentBit,24,1});
 }
 
-void ParticlePolyboardShadow::Draw(CParticleSystem *particle,const Vulkan::Buffer &vertexBuffer,const Vulkan::Buffer &indexBuffer,uint32_t indexCount,float radius,float curvature,CLightBase *light,uint32_t layerId)
+void ParticlePolyboardShadow::Draw(pragma::pts::CParticleSystem *particle,const Vulkan::Buffer &vertexBuffer,const Vulkan::Buffer &indexBuffer,uint32_t indexCount,float radius,float curvature,CLightBase *light,uint32_t layerId)
 {
 	auto *mat = particle->GetMaterial();
 	auto &descTexture = static_cast<msys::CMaterial*>(mat)->GetDescriptorSet();

@@ -198,7 +198,7 @@ void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 }
 static auto cvParticleQuality = pragma::console::get_client_con_var("cl_render_particle_quality");
 uint32_t ShaderParticleBase::GetDepthPipelineIndex() { return GetParticlePipelineCount() - 1; }
-ShaderParticleBase::RenderFlags ShaderParticleBase::GetRenderFlags(const pragma::ecs::CParticleSystemComponent &particle, pragma::ecs::ParticleRenderFlags ptRenderFlags) const
+ShaderParticleBase::RenderFlags ShaderParticleBase::GetRenderFlags(const pragma::ecs::CParticleSystemComponent &particle, pragma::pts::ParticleRenderFlags ptRenderFlags) const
 {
 	auto renderFlags = (particle.IsAnimated() == true) ? RenderFlags::Animated : RenderFlags::None;
 	if(cvParticleQuality->GetInt() <= 1)
@@ -210,7 +210,7 @@ ShaderParticleBase::RenderFlags ShaderParticleBase::GetRenderFlags(const pragma:
 	if(particle.GetEffectiveAlphaMode() == pragma::rendering::ParticleAlphaMode::AdditiveByColor)
 		renderFlags |= RenderFlags::AdditiveBlendByColor;
 
-	if(umath::is_flag_set(ptRenderFlags, ecs::ParticleRenderFlags::DepthOnly))
+	if(umath::is_flag_set(ptRenderFlags, pts::ParticleRenderFlags::DepthOnly))
 		renderFlags |= RenderFlags::DepthPass;
 	return renderFlags;
 }

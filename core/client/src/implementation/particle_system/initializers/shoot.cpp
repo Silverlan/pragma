@@ -7,7 +7,7 @@ module pragma.client;
 
 import :particle_system.initializer_shoot;
 
-void CParticleInitializerShootCone::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleInitializerShootCone::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	m_fMinAngle.Initialize("angle_min", values);
@@ -19,7 +19,7 @@ void CParticleInitializerShootCone::Initialize(pragma::BaseEnvParticleSystemComp
 			m_vDirection = uvec::create(pair.second);
 	}
 }
-void CParticleInitializerShootCone::OnParticleCreated(CParticle &particle)
+void pragma::pts::CParticleInitializerShootCone::OnParticleCreated(pragma::pts::CParticle &particle)
 {
 	auto rot = glm::gtx::rotation(Vector3(0.f, 1.f, 0.f), m_vDirection);
 
@@ -36,7 +36,7 @@ void CParticleInitializerShootCone::OnParticleCreated(CParticle &particle)
 
 /////////////////////////
 
-void CParticleInitializerShootOutward::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleInitializerShootOutward::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto &pair : values) {
@@ -46,7 +46,7 @@ void CParticleInitializerShootOutward::Initialize(pragma::BaseEnvParticleSystemC
 			m_vBias = uvec::create(pair.second);
 	}
 }
-void CParticleInitializerShootOutward::OnParticleCreated(CParticle &particle)
+void pragma::pts::CParticleInitializerShootOutward::OnParticleCreated(pragma::pts::CParticle &particle)
 {
 	auto vel = GetParticleSystem().PointToParticleSpace(Vector3 {}, true);
 	vel = particle.GetPosition() - vel;

@@ -12,16 +12,18 @@ export import :particle_system.modifier;
 export namespace pragma::ecs {
 	class CParticleSystemComponent;
 }
-export class DLLCLIENT CParticleOperatorAngularAcceleration : public CParticleOperator {
-  public:
-	CParticleOperatorAngularAcceleration() = default;
-	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
-  private:
-	Vector3 m_vAcceleration = {};
-};
+export namespace pragma::pts {
+	class DLLCLIENT CParticleOperatorAngularAcceleration : public CParticleOperator {
+	public:
+		CParticleOperatorAngularAcceleration() = default;
+		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Simulate(pragma::pts::CParticle &particle, double tDelta, float strength) override;
+	private:
+		Vector3 m_vAcceleration = {};
+	};
+}
 
-void CParticleOperatorAngularAcceleration::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleOperatorAngularAcceleration::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto &pair : values) {
@@ -31,7 +33,7 @@ void CParticleOperatorAngularAcceleration::Initialize(pragma::BaseEnvParticleSys
 			m_vAcceleration = uvec::create(pair.second);
 	}
 }
-void CParticleOperatorAngularAcceleration::Simulate(CParticle &particle, double tDelta, float strength)
+void pragma::pts::CParticleOperatorAngularAcceleration::Simulate(pragma::pts::CParticle &particle, double tDelta, float strength)
 {
 	CParticleOperator::Simulate(particle, tDelta, strength);
 	particle.SetAngularVelocity(particle.GetAngularVelocity() + m_vAcceleration * static_cast<float>(tDelta));

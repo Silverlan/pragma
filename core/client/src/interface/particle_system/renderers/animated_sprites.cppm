@@ -9,13 +9,15 @@ export module pragma.client:particle_system.renderer_animated_sprites;
 
 export import :particle_system.modifier;
 
-export class DLLCLIENT CParticleRendererAnimatedSprites : public CParticleRenderer {
-  public:
-	CParticleRendererAnimatedSprites() = default;
-	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-	virtual void RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ecs::ParticleRenderFlags renderFlags) override;
-	virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId = 0) override;
-	virtual pragma::ShaderParticleBase *GetShader() const override;
-  private:
-	::util::WeakHandle<prosper::Shader> m_shader = {};
-};
+export namespace pragma::pts {
+	class DLLCLIENT CParticleRendererAnimatedSprites : public CParticleRenderer {
+	public:
+		CParticleRendererAnimatedSprites() = default;
+		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::pts::ParticleRenderFlags renderFlags) override;
+		virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId = 0) override;
+		virtual pragma::ShaderParticleBase *GetShader() const override;
+	private:
+		::util::WeakHandle<prosper::Shader> m_shader = {};
+	};
+}

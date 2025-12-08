@@ -74,13 +74,13 @@ export namespace pragma {
 #pragma pack(pop)
 
 		ShaderParticle2DBase(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader = "");
-		virtual bool RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps, ecs::ParticleOrientationType orientationType, ecs::ParticleRenderFlags renderFlags);
-		std::optional<uint32_t> RecordBeginDraw(prosper::ShaderBindState &bindState, ecs::CParticleSystemComponent &pSys, ecs::ParticleRenderFlags renderFlags, RecordFlags recordFlags = RecordFlags::RenderPassTargetAsViewportAndScissor);
+		virtual bool RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps, pts::ParticleOrientationType orientationType, pts::ParticleRenderFlags renderFlags);
+		std::optional<uint32_t> RecordBeginDraw(prosper::ShaderBindState &bindState, ecs::CParticleSystemComponent &pSys, pts::ParticleRenderFlags renderFlags, RecordFlags recordFlags = RecordFlags::RenderPassTargetAsViewportAndScissor);
 		virtual bool RecordBindScene(prosper::ICommandBuffer &cmd, const prosper::IShaderPipelineLayout &layout, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
 		  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsShadows) const;
 		virtual uint32_t GetSceneDescriptorSetIndex() const;
 
-		void GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, ecs::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const msys::Material *material = nullptr, float camNearZ = 0.f,
+		void GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, pts::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const msys::Material *material = nullptr, float camNearZ = 0.f,
 		  float camFarZ = 0.f) const;
 
 		Vector3 CalcVertexPosition(const pragma::ecs::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t absVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const;
@@ -103,7 +103,7 @@ export namespace pragma {
 		void RegisterDefaultGfxPipelinePushConstantRanges();
 		void RegisterDefaultGfxPipelineDescriptorSetGroups();
 
-		void GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, ecs::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const msys::Material *material = nullptr,
+		void GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, pts::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const msys::Material *material = nullptr,
 		  const pragma::BaseEnvCameraComponent *cam = nullptr) const;
 		virtual void GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const msys::Material *material = nullptr, const pragma::BaseEnvCameraComponent *cam = nullptr) const;
 	};

@@ -21,9 +21,9 @@ void pragma::CRasterizationRendererComponent::RecordRenderParticleSystems(prospe
 	if((depthOnly && bloom) || drawSceneInfo.scene.expired())
 		return;
 	auto &scene = *drawSceneInfo.scene;
-	auto renderFlags = ecs::ParticleRenderFlags::None;
-	umath::set_flag(renderFlags, ecs::ParticleRenderFlags::DepthOnly, depthOnly || depthPass);
-	umath::set_flag(renderFlags, ecs::ParticleRenderFlags::Bloom, bloom);
+	auto renderFlags = pts::ParticleRenderFlags::None;
+	umath::set_flag(renderFlags, pts::ParticleRenderFlags::DepthOnly, depthOnly || depthPass);
+	umath::set_flag(renderFlags, pts::ParticleRenderFlags::Bloom, bloom);
 	for(auto *particle : particles) {
 		if(particle != nullptr && particle->IsActive() == true && particle->GetSceneRenderPass() == renderMode && particle->GetParent() == nullptr) {
 			if(bloom && !particle->IsBloomEnabled())

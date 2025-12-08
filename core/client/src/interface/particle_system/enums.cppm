@@ -7,7 +7,7 @@ export module pragma.client:particle_system.enums;
 
 export import std.compat;
 
-export namespace pragma::ecs {
+export namespace pragma::pts {
 	enum class ParticleRenderFlags : uint32_t { None = 0u, Bloom = 1u, DepthOnly = Bloom << 1u };
 	enum class ParticleOrientationType : uint8_t {
 		Aligned = 0,

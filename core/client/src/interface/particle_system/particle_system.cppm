@@ -52,3 +52,7 @@ export import :particle_system.renderer_model;
 export import :particle_system.renderer_rotational_buffer;
 export import :particle_system.renderer_sprite;
 export import :particle_system.renderer_sprite_trail;
+
+export namespace pragma {
+    namespace particle_system = pts;
+}

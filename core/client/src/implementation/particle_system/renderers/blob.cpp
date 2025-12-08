@@ -15,13 +15,13 @@ import :entities.components;
 import :game;
 import :gui;
 
-decltype(CParticleRendererBlob::s_bShowNeighborLinks) CParticleRendererBlob::s_bShowNeighborLinks = false;
-decltype(CParticleRendererBlob::s_dsParticles) CParticleRendererBlob::s_dsParticles = nullptr;
-decltype(CParticleRendererBlob::s_activeBlobRendererCount) CParticleRendererBlob::s_activeBlobRendererCount = 0;
-decltype(CParticleRendererBlob::s_shader) CParticleRendererBlob::s_shader = nullptr;
-decltype(CParticleRendererBlob::s_shadowShader) CParticleRendererBlob::s_shadowShader = nullptr;
+decltype(pragma::pts::CParticleRendererBlob::s_bShowNeighborLinks) pragma::pts::CParticleRendererBlob::s_bShowNeighborLinks = false;
+decltype(pragma::pts::CParticleRendererBlob::s_dsParticles) pragma::pts::CParticleRendererBlob::s_dsParticles = nullptr;
+decltype(pragma::pts::CParticleRendererBlob::s_activeBlobRendererCount) pragma::pts::CParticleRendererBlob::s_activeBlobRendererCount = 0;
+decltype(pragma::pts::CParticleRendererBlob::s_shader) pragma::pts::CParticleRendererBlob::s_shader = nullptr;
+decltype(pragma::pts::CParticleRendererBlob::s_shadowShader) pragma::pts::CParticleRendererBlob::s_shadowShader = nullptr;
 
-void CParticleRendererBlob::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleRendererBlob::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleRenderer::Initialize(pSystem, values);
 	auto bHasShininess = false;
@@ -46,9 +46,9 @@ void CParticleRendererBlob::Initialize(pragma::BaseEnvParticleSystemComponent &p
 		m_specularColor.w = shininess;
 }
 
-CParticleRendererBlob::~CParticleRendererBlob() { ShowDebugNeighborLinks(false); }
+pragma::pts::CParticleRendererBlob::~CParticleRendererBlob() { ShowDebugNeighborLinks(false); }
 
-pragma::ShaderParticleBase *CParticleRendererBlob::GetShader() const
+pragma::ShaderParticleBase *pragma::pts::CParticleRendererBlob::GetShader() const
 {
 	if(!s_shader) {
 		auto hShader = pragma::get_cengine()->GetShader("particle_blob");
@@ -58,7 +58,7 @@ pragma::ShaderParticleBase *CParticleRendererBlob::GetShader() const
 	return s_shader;
 }
 
-void CParticleRendererBlob::ShowDebugNeighborLinks(bool b)
+void pragma::pts::CParticleRendererBlob::ShowDebugNeighborLinks(bool b)
 {
 	if(b == false) {
 		m_dbgNeighborLinks.clear();
@@ -71,7 +71,7 @@ void CParticleRendererBlob::ShowDebugNeighborLinks(bool b)
 	}
 }
 
-void CParticleRendererBlob::UpdateDebugNeighborLinks()
+void pragma::pts::CParticleRendererBlob::UpdateDebugNeighborLinks()
 {
 	if(s_bShowNeighborLinks == false) {
 		if(!m_dbgNeighborLinks.empty())
@@ -142,9 +142,9 @@ void CParticleRendererBlob::UpdateDebugNeighborLinks()
 	}
 }
 
-void CParticleRendererBlob::SetShowNeighborLinks(bool b) { s_bShowNeighborLinks = b; }
+void pragma::pts::CParticleRendererBlob::SetShowNeighborLinks(bool b) { s_bShowNeighborLinks = b; }
 
-void CParticleRendererBlob::OnParticleSystemStarted()
+void pragma::pts::CParticleRendererBlob::OnParticleSystemStarted()
 {
 	auto &context = pragma::get_cengine()->GetRenderContext();
 	if(s_activeBlobRendererCount++ == 0) {
@@ -258,11 +258,11 @@ namespace {
 			  return;
 		  if(pragma::get_cgame() == nullptr)
 			  return;
-		  CParticleRendererBlob::SetShowNeighborLinks(val);
+		  pragma::pts::CParticleRendererBlob::SetShowNeighborLinks(val);
 	  });
 };
 
-void CParticleRendererBlob::OnParticleSystemStopped()
+void pragma::pts::CParticleRendererBlob::OnParticleSystemStopped()
 {
 	if(--s_activeBlobRendererCount == 0) // Release the descriptor set when it's not needed anymore
 	{
@@ -274,7 +274,7 @@ void CParticleRendererBlob::OnParticleSystemStopped()
 	m_adjacentBlobBuffer = nullptr;
 }
 
-void CParticleRendererBlob::SortParticleLinks()
+void pragma::pts::CParticleRendererBlob::SortParticleLinks()
 {
 	for(auto &cLinks : m_particleLinks) {
 		auto &links = cLinks.links;
@@ -298,7 +298,7 @@ void CParticleRendererBlob::SortParticleLinks()
 	}
 }
 
-void CParticleRendererBlob::OnParticleDestroyed(CParticle &particle)
+void pragma::pts::CParticleRendererBlob::OnParticleDestroyed(pragma::pts::CParticle &particle)
 {
 	CParticleRenderer::OnParticleDestroyed(particle);
 	auto particleIdx = particle.GetIndex();
@@ -318,7 +318,7 @@ void CParticleRendererBlob::OnParticleDestroyed(CParticle &particle)
 	SortParticleLinks();
 }
 
-void CParticleRendererBlob::UpdateAdjacentParticles(prosper::ICommandBuffer &cmd, prosper::IBuffer &blobIndexBuffer)
+void pragma::pts::CParticleRendererBlob::UpdateAdjacentParticles(prosper::ICommandBuffer &cmd, prosper::IBuffer &blobIndexBuffer)
 {
 	auto frameId = pragma::get_cengine()->GetRenderContext().GetLastFrameId();
 	if(m_lastFrame == frameId)
@@ -453,13 +453,13 @@ void CParticleRendererBlob::UpdateAdjacentParticles(prosper::ICommandBuffer &cmd
 	UpdateDebugNeighborLinks();
 }
 
-void CParticleRendererBlob::PreRender(prosper::ICommandBuffer &cmd)
+void pragma::pts::CParticleRendererBlob::PreRender(prosper::ICommandBuffer &cmd)
 {
 	CParticleRenderer::PreRender(cmd);
 	auto &blobIndexBuffer = *m_adjacentBlobBuffer;
 	UpdateAdjacentParticles(cmd, blobIndexBuffer);
 }
-void CParticleRendererBlob::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ecs::ParticleRenderFlags renderFlags)
+void pragma::pts::CParticleRendererBlob::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::pts::ParticleRenderFlags renderFlags)
 {
 	auto *shader = static_cast<pragma::ShaderParticleBlob *>(GetShader());
 	prosper::ShaderBindState bindState {drawCmd};
@@ -481,7 +481,7 @@ void CParticleRendererBlob::RecordRender(prosper::ICommandBuffer &drawCmd, pragm
 	shader->RecordEndDraw(bindState);
 }
 
-void CParticleRendererBlob::RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId)
+void pragma::pts::CParticleRendererBlob::RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId)
 {
 	/*auto &shader = *s_shadowShader;
 	auto &context = pragma::get_cengine()->GetRenderContext();

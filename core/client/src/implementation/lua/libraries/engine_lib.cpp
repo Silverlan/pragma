@@ -403,14 +403,14 @@ int Lua::engine::save_particle_system(lua::State *l)
 		}
 	}
 
-	std::unordered_map<std::string, CParticleSystemData> particles;
+	std::unordered_map<std::string, pragma::asset::ParticleSystemData> particles;
 	Lua::PushValue(l, 2);
 	int tparticles = 2;
 	Lua::PushNil(l);
 	while(Lua::GetNextPair(l, tparticles) != 0) {
 		if(Lua::IsTable(l, -1)) {
 			Lua::PushValue(l, -2);
-			CParticleSystemData data {};
+			pragma::asset::ParticleSystemData data {};
 			std::string particle = Lua::ToString(l, -3);
 			Lua::RemoveValue(l, -3);
 			Lua::PushValue(l, -2);
@@ -437,8 +437,8 @@ int Lua::engine::save_particle_system(lua::State *l)
 							std::string opType = Lua::CheckString(l, -1);
 							Lua::Pop(l, 1);
 
-							std::vector<CParticleModifierData> modData;
-							modData.push_back(CParticleModifierData {opType});
+							std::vector<pragma::asset::ParticleModifierData> modData;
+							modData.push_back(pragma::asset::ParticleModifierData {opType});
 							int dataIdx = 0;
 							char dataType = -1;
 							Lua::PushNil(l);
@@ -459,7 +459,7 @@ int Lua::engine::save_particle_system(lua::State *l)
 								else if(dataType != 1) {
 									dataType = 0;
 									if(dataIdx > 0)
-										modData.push_back(CParticleModifierData {opType});
+										modData.push_back(pragma::asset::ParticleModifierData {opType});
 									dataIdx++;
 									int tModSubSettings = Lua::GetStackTop(l);
 									Lua::PushNil(l);
@@ -503,7 +503,7 @@ int Lua::engine::save_particle_system(lua::State *l)
 							Lua::CheckTable(l, -1);
 							auto tChild = Lua::GetStackTop(l);
 
-							CParticleChildData childData {};
+							pragma::asset::ParticleChildData childData {};
 
 							Lua::PushString(l, "childName");
 							Lua::GetTableValue(l, tChild);

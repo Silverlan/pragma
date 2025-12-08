@@ -9,7 +9,9 @@ export module pragma.client:entities.components.child;
 export import :entities.components.entity;
 
 export namespace pragma {
-	class CParticleSystemComponent;
+	namespace ecs {
+		class CParticleSystemComponent;
+	}
 	class DLLCLIENT CChildComponent final : public BaseChildComponent, public CBaseNetComponent {
 	  public:
 		CChildComponent(pragma::ecs::BaseEntity &ent) : BaseChildComponent(ent) {}

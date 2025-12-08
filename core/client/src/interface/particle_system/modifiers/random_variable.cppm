@@ -10,7 +10,7 @@ export module pragma.client:particle_system.modifier_random_variable;
 export import :particle_system.particle;
 export import pragma.shared;
 
-export {
+export namespace pragma::pts {
 	template<class TUniformDis, typename T>
 	class DLLCLIENT CParticleModifierComponentRandomVariable {
 	  public:
@@ -18,9 +18,9 @@ export {
 		CParticleModifierComponentRandomVariable(const std::string &identifier, const std::unordered_map<std::string, std::string> &values);
 		void Initialize(const std::string &identifier, const std::unordered_map<std::string, std::string> &values);
 		template<typename U = T>
-		typename std::enable_if<std::is_integral<T>::value, U>::type GetValue(CParticle &p) const;
+		typename std::enable_if<std::is_integral<T>::value, U>::type GetValue(pragma::pts::CParticle &p) const;
 		template<typename U = T>
-		typename std::enable_if<std::is_floating_point<T>::value, U>::type GetValue(CParticle &p) const;
+		typename std::enable_if<std::is_floating_point<T>::value, U>::type GetValue(pragma::pts::CParticle &p) const;
 
 		void SetRange(T min, T max);
 		void SetRange(T val);
@@ -37,12 +37,12 @@ export {
 };
 
 template<class TUniformDis, typename T>
-CParticleModifierComponentRandomVariable<TUniformDis, T>::CParticleModifierComponentRandomVariable(const std::string &identifier, const std::unordered_map<std::string, std::string> &values)
+pragma::pts::CParticleModifierComponentRandomVariable<TUniformDis, T>::CParticleModifierComponentRandomVariable(const std::string &identifier, const std::unordered_map<std::string, std::string> &values)
 {
 	Initialize(identifier, values);
 }
 template<class TUniformDis, typename T>
-void CParticleModifierComponentRandomVariable<TUniformDis, T>::Initialize(const std::string &identifier, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleModifierComponentRandomVariable<TUniformDis, T>::Initialize(const std::string &identifier, const std::unordered_map<std::string, std::string> &values)
 {
 	auto it = values.find(identifier);
 	if(it != values.end()) {
@@ -58,57 +58,57 @@ void CParticleModifierComponentRandomVariable<TUniformDis, T>::Initialize(const 
 }
 template<class TUniformDis, typename T>
 template<typename U>
-typename std::enable_if<std::is_integral<T>::value, U>::type CParticleModifierComponentRandomVariable<TUniformDis, T>::GetValue(CParticle &p) const
+typename std::enable_if<std::is_integral<T>::value, U>::type pragma::pts::CParticleModifierComponentRandomVariable<TUniformDis, T>::GetValue(pragma::pts::CParticle &p) const
 {
 	return p.PseudoRandomInt(m_value, m_iSeed);
 }
 template<class TUniformDis, typename T>
 template<typename U>
-typename std::enable_if<std::is_floating_point<T>::value, U>::type CParticleModifierComponentRandomVariable<TUniformDis, T>::GetValue(CParticle &p) const
+typename std::enable_if<std::is_floating_point<T>::value, U>::type pragma::pts::CParticleModifierComponentRandomVariable<TUniformDis, T>::GetValue(pragma::pts::CParticle &p) const
 {
 	return p.PseudoRandomReal(m_value, m_iSeed);
 }
 template<class TUniformDis, typename T>
-bool CParticleModifierComponentRandomVariable<TUniformDis, T>::IsSet() const
+bool pragma::pts::CParticleModifierComponentRandomVariable<TUniformDis, T>::IsSet() const
 {
 	return m_bIsSet;
 }
 
 template<class TUniformDis, typename T>
-void CParticleModifierComponentRandomVariable<TUniformDis, T>::SetRange(T min, T max)
+void pragma::pts::CParticleModifierComponentRandomVariable<TUniformDis, T>::SetRange(T min, T max)
 {
 	m_value = TUniformDis(min, max);
 	m_bIsSet = true;
 }
 
 template<class TUniformDis, typename T>
-void CParticleModifierComponentRandomVariable<TUniformDis, T>::SetRange(T val)
+void pragma::pts::CParticleModifierComponentRandomVariable<TUniformDis, T>::SetRange(T val)
 {
 	SetRange(val, val);
 }
 
 template<class TUniformDis, typename T>
-void CParticleModifierComponentRandomVariable<TUniformDis, T>::SetMin(T val)
+void pragma::pts::CParticleModifierComponentRandomVariable<TUniformDis, T>::SetMin(T val)
 {
 	m_value = TUniformDis(val, m_value.max());
 	m_bIsSet = true;
 }
 
 template<class TUniformDis, typename T>
-void CParticleModifierComponentRandomVariable<TUniformDis, T>::SetMax(T val)
+void pragma::pts::CParticleModifierComponentRandomVariable<TUniformDis, T>::SetMax(T val)
 {
 	m_value = TUniformDis(m_value.min(), val);
 	m_bIsSet = true;
 }
 
 template<class TUniformDis, typename T>
-T CParticleModifierComponentRandomVariable<TUniformDis, T>::GetMin() const
+T pragma::pts::CParticleModifierComponentRandomVariable<TUniformDis, T>::GetMin() const
 {
 	return m_value.min();
 }
 
 template<class TUniformDis, typename T>
-T CParticleModifierComponentRandomVariable<TUniformDis, T>::GetMax() const
+T pragma::pts::CParticleModifierComponentRandomVariable<TUniformDis, T>::GetMax() const
 {
 	return m_value.max();
 }

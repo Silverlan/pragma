@@ -118,13 +118,13 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b, bool bForceReload
 	subsequentRenderPass = pragma::get_cengine()->GetRenderContext().CreateRenderPass(rpInfo);
 }
 
-prosper::RenderTarget &pragma::rendering::Prepass::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *optRenderPass, bool secondaryCommandBuffers)
+prosper::RenderTarget &pragma::rendering::Prepass::BeginRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *optRenderPass, bool secondaryCommandBuffers)
 {
 	// prosper TODO: Barriers for imgDepth and imgNormals
 	drawSceneInfo.commandBuffer->RecordBeginRenderPass(*renderTarget, m_clearValues, secondaryCommandBuffers ? prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers : prosper::IPrimaryCommandBuffer::RenderPassFlags::None, optRenderPass);
 	return *renderTarget;
 }
-void pragma::rendering::Prepass::EndRenderPass(const util::DrawSceneInfo &drawSceneInfo) { drawSceneInfo.commandBuffer->RecordEndRenderPass(); }
+void pragma::rendering::Prepass::EndRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo) { drawSceneInfo.commandBuffer->RecordEndRenderPass(); }
 
 static void debug_prepass(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {

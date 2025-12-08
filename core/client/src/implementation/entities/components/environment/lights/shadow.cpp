@@ -167,7 +167,7 @@ bool CShadowComponent::HasRenderTarget() const { return m_hRt.valid(); }
 
 bool CShadowComponent::ShouldUpdateLayer(uint32_t) const { return true; }
 
-void CShadowComponent::RenderShadows(const util::DrawSceneInfo &drawSceneInfo)
+void CShadowComponent::RenderShadows(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(m_lightShadowRenderer == nullptr)
 		return;
@@ -237,7 +237,7 @@ void LightShadowRenderer::UpdateSceneCallbacks()
 
 static auto cvLodBias = pragma::console::get_client_con_var("cl_render_shadow_lod_bias");
 static auto cvInstancingEnabled = pragma::console::get_client_con_var("render_instancing_enabled");
-void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
+void LightShadowRenderer::BuildRenderQueues(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(m_hLight.expired())
 		return;
@@ -312,7 +312,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 					  continue;
 				  bspLeafNodes.push_back(node);
 
-				  if(umath::is_flag_set(drawSceneInfo.renderFlags, RenderFlags::Static) == false)
+				  if(umath::is_flag_set(drawSceneInfo.renderFlags, rendering::RenderFlags::Static) == false)
 					  continue;
 
 				  auto *renderC = static_cast<pragma::ecs::CBaseEntity &>(worldC->GetEntity()).GetRenderComponent();
@@ -352,7 +352,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			  if(culler) {
 				  auto &dynOctree = culler->GetOcclusionOctree();
 				  SceneRenderDesc::CollectRenderMeshesFromOctree(rasterizer, drawSceneInfo.renderFlags, drawSceneInfo.clipPlane.has_value(), dynOctree, scene, *hCam, vp, renderMask, fGetRenderQueue, fShouldCull, nullptr, nullptr, lodBias,
-				    [](ecs::CBaseEntity &ent, const pragma::CSceneComponent &, RenderFlags) -> bool { return ent.GetRenderComponent()->ShouldDrawShadow(); });
+				    [](ecs::CBaseEntity &ent, const pragma::CSceneComponent &, rendering::RenderFlags) -> bool { return ent.GetRenderComponent()->ShouldDrawShadow(); });
 			  }
 		  }
 	  },
@@ -374,7 +374,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 					  renderQueue->sortedItemIndices = mainRenderQueue->sortedItemIndices;
 				  }
 
-				  auto &planes = lightPointC->GetFrustumPlanes(static_cast<CubeMapSide>(i));
+				  auto &planes = lightPointC->GetFrustumPlanes(static_cast<rendering::CubeMapSide>(i));
 				  auto fShouldCull = [&planes](const Vector3 &min, const Vector3 &max) -> bool { return umath::intersection::aabb_in_plane_mesh(min, max, planes.begin(), planes.end()) == umath::intersection::Intersect::Outside; };
 				  for(auto it = renderQueue->queue.begin(); it != renderQueue->queue.end();) {
 					  auto &item = *it;
@@ -419,7 +419,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 bool LightShadowRenderer::DoesRenderQueueRequireBuilding() const { return m_requiresRenderQueueUpdate; }
 bool LightShadowRenderer::IsRenderQueueComplete() const { return !m_requiresRenderQueueUpdate && m_renderQueuesComplete; }
 
-void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
+void LightShadowRenderer::Render(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(m_renderState == RenderState::NoRenderRequired || m_hLight.expired())
 		return;
@@ -465,11 +465,11 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 	drawCmd->RecordImageBarrier(img, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::DepthStencilAttachmentOptimal);
 
 	for(auto layerId = decltype(numLayers) {0}; layerId < numLayers; ++layerId)
-		CSceneComponent::UpdateRenderBuffers(drawCmd, *m_renderQueues.at(layerId), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::ShadowPass) : nullptr);
+		CSceneComponent::UpdateRenderBuffers(drawCmd, *m_renderQueues.at(layerId), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::ShadowPass) : nullptr);
 
 	auto pipeline = m_hLight->AreMorphTargetsInShadowsEnabled() ? ShaderShadow::Pipeline::WithMorphTargetAnimations : ShaderShadow::Pipeline::Default;
 
-	util::RenderPassDrawInfo rpDrawInfo {drawSceneInfo, *drawSceneInfo.commandBuffer};
+	pragma::rendering::RenderPassDrawInfo rpDrawInfo {drawSceneInfo, *drawSceneInfo.commandBuffer};
 	rendering::DepthStageRenderProcessor shadowRenderProcessor {rpDrawInfo, {}};
 	for(auto layerId = decltype(numLayers) {0}; layerId < numLayers; ++layerId) {
 		auto *framebuffer = shadowC->GetFramebuffer(layerId);
@@ -480,7 +480,7 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 
 		if(shadowRenderProcessor.BindShader(*shader, umath::to_integral(pipeline))) {
 			shadowRenderProcessor.BindLight(*m_hLight, layerId);
-			shadowRenderProcessor.Render(*m_renderQueues.at(layerId), pragma::rendering::RenderPass::Shadow, drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::ShadowPass) : nullptr);
+			shadowRenderProcessor.Render(*m_renderQueues.at(layerId), pragma::rendering::RenderPass::Shadow, drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::ShadowPass) : nullptr);
 
 			// TODO: Translucent render pass ?
 			shadowRenderProcessor.UnbindShader();

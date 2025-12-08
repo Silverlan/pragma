@@ -29,7 +29,7 @@ export {
 			virtual void OnEntitySpawn() override;
 		  protected:
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
-			WorldEnvironment::Fog &GetFog();
+			rendering::WorldEnvironment::Fog &GetFog();
 		};
 	};
 

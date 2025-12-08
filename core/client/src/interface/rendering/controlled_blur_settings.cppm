@@ -10,7 +10,7 @@ export module pragma.client:rendering.controlled_blur_settings;
 export import :rendering.bloom_pipeline_info;
 export import pragma.prosper;
 
-export namespace pragma {
+export namespace pragma::rendering {
 	struct DLLCLIENT ControlledBlurSettings {
 	  public:
 		static constexpr uint32_t MAX_BLUR_RADIUS = 14;
@@ -34,8 +34,8 @@ export namespace pragma {
 	  private:
 		uint32_t m_radius = DEFAULT_RADIUS;
 		double m_sigma = DEFAULT_SIGMA;
-		std::shared_ptr<BloomPipelineInfo> m_bloomPipelineInfoH = nullptr;
-		std::shared_ptr<BloomPipelineInfo> m_bloomPipelineInfoV = nullptr;
+		std::shared_ptr<pragma::rendering::BloomPipelineInfo> m_bloomPipelineInfoH = nullptr;
+		std::shared_ptr<pragma::rendering::BloomPipelineInfo> m_bloomPipelineInfoV = nullptr;
 		int32_t m_blurAmount = -1;
 		bool m_pipelineDirty = false;
 	};

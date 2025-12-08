@@ -17,7 +17,7 @@ export import pragma.shared;
 #pragma warning(push)
 #pragma warning(disable : 4251)
 export namespace pragma {
-	class DLLCLIENT CEngine : public pragma::Engine, public pragma::RenderContext {
+	class DLLCLIENT CEngine : public pragma::Engine, public rendering::RenderContext {
 	  public:
 		CEngine(int argc, char *argv[]);
 		virtual ~CEngine() override;
@@ -55,7 +55,7 @@ export namespace pragma {
 			std::string fileName;
 		};
 
-		using pragma::RenderContext::DrawFrame;
+		using rendering::RenderContext::DrawFrame;
 		virtual void SetAssetMultiThreadedLoadingEnabled(bool enabled) override;
 
 		virtual bool IsProgramInFocus() const override;

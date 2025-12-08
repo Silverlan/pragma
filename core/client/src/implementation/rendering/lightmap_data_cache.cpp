@@ -6,9 +6,8 @@ module;
 module pragma.client;
 
 import :rendering.lightmap_data_cache;
-using namespace pragma;
 
-size_t LightmapDataCache::CalcPoseHash(const umath::Transform &pose)
+size_t pragma::rendering::LightmapDataCache::CalcPoseHash(const umath::Transform &pose)
 {
 	auto ang = pose.GetAngles();
 	auto &pos = pose.GetOrigin();
@@ -27,7 +26,7 @@ size_t LightmapDataCache::CalcPoseHash(const umath::Transform &pose)
 	return hash;
 }
 
-std::string LightmapDataCache::GetCacheFileName(const std::string &path)
+std::string pragma::rendering::LightmapDataCache::GetCacheFileName(const std::string &path)
 {
 	auto fpath = path;
 	std::string ext;
@@ -40,7 +39,7 @@ std::string LightmapDataCache::GetCacheFileName(const std::string &path)
 	return fpath;
 }
 
-bool LightmapDataCache::Load(const std::string &path, LightmapDataCache &outCache, std::string &outErr)
+bool pragma::rendering::LightmapDataCache::Load(const std::string &path, pragma::rendering::LightmapDataCache &outCache, std::string &outErr)
 {
 	auto fpath = GetCacheFileName(path);
 	std::shared_ptr<udm::Data> udmData = nullptr;
@@ -54,7 +53,7 @@ bool LightmapDataCache::Load(const std::string &path, LightmapDataCache &outCach
 	return outCache.LoadFromAssetData(udmData->GetAssetData(), outErr);
 }
 
-bool LightmapDataCache::SaveAs(const std::string &path, std::string &outErr) const
+bool pragma::rendering::LightmapDataCache::SaveAs(const std::string &path, std::string &outErr) const
 {
 	auto udmData = udm::Data::Create(PLMD_IDENTIFIER, PLMD_VERSION);
 	auto res = Save(udmData->GetAssetData(), outErr);
@@ -68,7 +67,7 @@ bool LightmapDataCache::SaveAs(const std::string &path, std::string &outErr) con
 	return true;
 }
 
-bool LightmapDataCache::Save(udm::AssetDataArg outData, std::string &outErr) const
+bool pragma::rendering::LightmapDataCache::Save(udm::AssetDataArg outData, std::string &outErr) const
 {
 	outData.SetAssetType(PLMD_IDENTIFIER);
 	outData.SetAssetVersion(PLMD_VERSION);
@@ -87,7 +86,7 @@ bool LightmapDataCache::Save(udm::AssetDataArg outData, std::string &outErr) con
 	}
 	return true;
 }
-bool LightmapDataCache::LoadFromAssetData(const udm::AssetData &data, std::string &outErr)
+bool pragma::rendering::LightmapDataCache::LoadFromAssetData(const udm::AssetData &data, std::string &outErr)
 {
 	if(data.GetAssetType() != PLMD_IDENTIFIER) {
 		outErr = "Incorrect format!";
@@ -124,7 +123,7 @@ bool LightmapDataCache::LoadFromAssetData(const udm::AssetData &data, std::strin
 	}
 	return true;
 }
-const std::vector<Vector2> *LightmapDataCache::FindLightmapUvs(const util::Uuid &entUuid, const util::Uuid &meshUuid) const
+const std::vector<Vector2> *pragma::rendering::LightmapDataCache::FindLightmapUvs(const util::Uuid &entUuid, const util::Uuid &meshUuid) const
 {
 	auto it = cacheData.find(LmUuid {entUuid});
 	if(it == cacheData.end())
@@ -135,7 +134,7 @@ const std::vector<Vector2> *LightmapDataCache::FindLightmapUvs(const util::Uuid 
 		return nullptr;
 	return &itInst->second.uvs;
 }
-void LightmapDataCache::AddInstanceData(const util::Uuid &entUuid, const std::string &model, const umath::Transform &pose, const util::Uuid &meshUuid, std::vector<Vector2> &&uvs)
+void pragma::rendering::LightmapDataCache::AddInstanceData(const util::Uuid &entUuid, const std::string &model, const umath::Transform &pose, const util::Uuid &meshUuid, std::vector<Vector2> &&uvs)
 {
 	LmUuid lmEntUuid {entUuid};
 	auto it = cacheData.find(lmEntUuid);

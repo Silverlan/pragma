@@ -16,8 +16,8 @@ export namespace pragma {
 		LightShadowRenderer(CLightComponent &l);
 		~LightShadowRenderer();
 
-		void BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo);
-		void Render(const util::DrawSceneInfo &drawSceneInfo);
+		void BuildRenderQueues(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void Render(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 		bool DoesRenderQueueRequireBuilding() const;
 		bool IsRenderQueueComplete() const;
 
@@ -68,7 +68,7 @@ export namespace pragma {
 		LightShadowRenderer &GetRenderer();
 		const LightShadowRenderer &GetRenderer() const;
 
-		void RenderShadows(const util::DrawSceneInfo &drawSceneInfo);
+		void RenderShadows(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 	  protected:
 		void DestroyTextures();
 		bool m_bDirty = true;

@@ -20,8 +20,8 @@ export namespace pragma {
 		virtual uint32_t GetPostProcessingWeight() const = 0;
 		virtual PostProcessingEffectData::Flags GetFlags() const;
 	  protected:
-		void RenderEffect(const util::DrawSceneInfo &drawSceneInfo);
-		virtual void DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo) = 0;
+		void RenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		virtual void DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo) = 0;
 		pragma::ComponentHandle<CRasterizationRendererComponent> m_renderer {};
 		CallbackHandle m_cbEffect;
 	};

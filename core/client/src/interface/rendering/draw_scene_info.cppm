@@ -19,7 +19,7 @@ export {
 		}
 	};
 };
-export namespace util {
+export namespace pragma::rendering {
 	struct DLLCLIENT DrawSceneInfo {
 		enum class Flags : uint8_t {
 			None = 0u,
@@ -66,4 +66,4 @@ export namespace util {
 	};
 	using namespace umath::scoped_enum::bitwise;
 };
-export {REGISTER_ENUM_FLAGS(util::DrawSceneInfo::Flags)}
+export {REGISTER_ENUM_FLAGS(pragma::rendering::DrawSceneInfo::Flags)}

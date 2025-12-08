@@ -107,7 +107,7 @@ std::optional<uint32_t> ShaderParticle2DBase::RecordBeginDraw(prosper::ShaderBin
 		pipelineIdx = GetDepthPipelineIndex();
 	else {
 		auto alphaMode = GetRenderAlphaMode(pSys);
-		pipelineIdx = /*umath::to_integral(pipeline) *umath::to_integral(ParticleAlphaMode::Count) +*/ umath::to_integral(alphaMode);
+		pipelineIdx = /*umath::to_integral(pipeline) *umath::to_integral(pragma::rendering::ParticleAlphaMode::Count) +*/ umath::to_integral(alphaMode);
 	}
 	if(!ShaderSceneLit::RecordBeginDraw(bindState, pipelineIdx, recordFlags))
 		return {};

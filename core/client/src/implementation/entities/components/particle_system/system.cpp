@@ -913,7 +913,7 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua::State *l, luabind::
 	defCParticleSystem.def("GetAlphaMode", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, umath::to_integral(hComponent.GetAlphaMode())); }));
 	defCParticleSystem.def("GetEffectiveAlphaMode", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, umath::to_integral(hComponent.GetEffectiveAlphaMode())); }));
 	defCParticleSystem.def("SetAlphaMode",
-	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t alphaMode) { hComponent.SetAlphaMode(static_cast<pragma::ParticleAlphaMode>(alphaMode)); }));
+	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t alphaMode) { hComponent.SetAlphaMode(static_cast<pragma::rendering::ParticleAlphaMode>(alphaMode)); }));
 	defCParticleSystem.def("GetEmissionRate", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, hComponent.GetEmissionRate()); }));
 	defCParticleSystem.def("SetEmissionRate", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t emissionRate) { hComponent.SetEmissionRate(emissionRate); }));
 	defCParticleSystem.def("SetNextParticleEmissionCount", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t count) { hComponent.SetNextParticleEmissionCount(count); }));
@@ -1060,13 +1060,13 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua::State *l, luabind::
 	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_WORLD", umath::to_integral(pragma::ecs::ParticleOrientationType::World));
 	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_BILLBOARD", umath::to_integral(pragma::ecs::ParticleOrientationType::Billboard));
 
-	defCParticleSystem.add_static_constant("ALPHA_MODE_ADDITIVE", umath::to_integral(pragma::ParticleAlphaMode::Additive));
-	defCParticleSystem.add_static_constant("ALPHA_MODE_ADDITIVE_BY_COLOR", umath::to_integral(pragma::ParticleAlphaMode::AdditiveByColor));
-	defCParticleSystem.add_static_constant("ALPHA_MODE_OPAQUE", umath::to_integral(pragma::ParticleAlphaMode::Opaque));
-	defCParticleSystem.add_static_constant("ALPHA_MODE_MASKED", umath::to_integral(pragma::ParticleAlphaMode::Masked));
-	defCParticleSystem.add_static_constant("ALPHA_MODE_TRANSLUCENT", umath::to_integral(pragma::ParticleAlphaMode::Translucent));
-	defCParticleSystem.add_static_constant("ALPHA_MODE_PREMULTIPLIED", umath::to_integral(pragma::ParticleAlphaMode::Premultiplied));
-	defCParticleSystem.add_static_constant("ALPHA_MODE_COUNT", umath::to_integral(pragma::ParticleAlphaMode::Count));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_ADDITIVE", umath::to_integral(pragma::rendering::ParticleAlphaMode::Additive));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_ADDITIVE_BY_COLOR", umath::to_integral(pragma::rendering::ParticleAlphaMode::AdditiveByColor));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_OPAQUE", umath::to_integral(pragma::rendering::ParticleAlphaMode::Opaque));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_MASKED", umath::to_integral(pragma::rendering::ParticleAlphaMode::Masked));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_TRANSLUCENT", umath::to_integral(pragma::rendering::ParticleAlphaMode::Translucent));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_PREMULTIPLIED", umath::to_integral(pragma::rendering::ParticleAlphaMode::Premultiplied));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_COUNT", umath::to_integral(pragma::rendering::ParticleAlphaMode::Count));
 	register_particle_class(defCParticleSystem);
 	register_modifier_class(defCParticleSystem);
 	defCParticleSystem.scope[luabind::def("find_particle_system_file", static_cast<void (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &ptSystemName) {

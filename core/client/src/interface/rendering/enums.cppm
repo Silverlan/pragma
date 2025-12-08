@@ -10,16 +10,13 @@ export module pragma.client:rendering.enums;
 
 export import pragma.math;
 
-export {
+export namespace pragma::rendering {
 	enum class ShadowType : uint8_t { None = 0, StaticOnly = 1, Full = StaticOnly | 2 };
-	REGISTER_ENUM_FLAGS(ShadowType)
 
-	namespace pragma::rendering {
-		DLLCLIENT bool VERBOSE_RENDER_OUTPUT_ENABLED = false;
+	DLLCLIENT bool VERBOSE_RENDER_OUTPUT_ENABLED = false;
 
-		enum class ShadowMapType : uint8_t { Static = 0, Dynamic };
-		using namespace umath::scoped_enum::bitwise;
-	};
+	enum class ShadowMapType : uint8_t { Static = 0, Dynamic };
+	using namespace umath::scoped_enum::bitwise;
 
 	enum class RenderFlags : uint32_t {
 		None = 0,
@@ -39,26 +36,26 @@ export {
 		HDR = Reflection << 1,
 		ParticleDepth = HDR << 1
 	};
-	REGISTER_ENUM_FLAGS(RenderFlags)
 
-	namespace pragma::rendering {
-		enum class SceneRenderPass : uint8_t { None = 0, World, View, Sky, Count };
+	enum class SceneRenderPass : uint8_t { None = 0, World, View, Sky, Count };
 
-		enum class RenderMask : uint64_t { None = 0u };
-		using RenderGroup = RenderMask;
-	};
-	REGISTER_ENUM_FLAGS(pragma::rendering::RenderMask)
+	enum class RenderMask : uint64_t { None = 0u };
+	using RenderGroup = RenderMask;
 
-	namespace pragma::rendering {
-		enum class AntiAliasing : uint8_t { None = 0u, MSAA, FXAA };
-		enum class ToneMapping : uint32_t { None = 0u, GammaCorrection, Reinhard, HejilRichard, Uncharted, Aces, GranTurismo };
-	};
+	enum class AntiAliasing : uint8_t { None = 0u, MSAA, FXAA };
+	enum class ToneMapping : uint32_t { None = 0u, GammaCorrection, Reinhard, HejilRichard, Uncharted, Aces, GranTurismo };
 
 	DLLCLIENT int GetMaxMSAASampleCount();
 	DLLCLIENT unsigned char ClampMSAASampleCount(unsigned int *samples);
 };
 
-export namespace pragma {
+export {
+	REGISTER_ENUM_FLAGS(pragma::rendering::ShadowType)
+	REGISTER_ENUM_FLAGS(pragma::rendering::RenderFlags)
+	REGISTER_ENUM_FLAGS(pragma::rendering::RenderMask)
+}
+
+export namespace pragma::rendering {
 	enum class ParticleAlphaMode : uint32_t {
 		Additive = 0u,
 		AdditiveByColor,
@@ -70,5 +67,5 @@ export namespace pragma {
 
 		Count
 	};
-	DLLCLIENT bool premultiply_alpha(Vector4 &color, pragma::ParticleAlphaMode alphaMode);
+	DLLCLIENT bool premultiply_alpha(Vector4 &color, pragma::rendering::ParticleAlphaMode alphaMode);
 };

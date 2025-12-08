@@ -164,9 +164,9 @@ export namespace pragma::ecs {
 		bool IsRendererBufferUpdateRequired() const;
 		CallbackHandle AddRenderCallback(const std::function<void(void)> &cb);
 		void AddRenderCallback(const CallbackHandle &hCb);
-		pragma::ParticleAlphaMode GetAlphaMode() const;
-		pragma::ParticleAlphaMode GetEffectiveAlphaMode() const;
-		void SetAlphaMode(pragma::ParticleAlphaMode alphaMode);
+		pragma::rendering::ParticleAlphaMode GetAlphaMode() const;
+		pragma::rendering::ParticleAlphaMode GetEffectiveAlphaMode() const;
+		void SetAlphaMode(pragma::rendering::ParticleAlphaMode alphaMode);
 		void SetTextureScrollingEnabled(bool b);
 		bool IsTextureScrollingEnabled() const;
 
@@ -367,7 +367,7 @@ export namespace pragma::ecs {
 		Vector3 m_origin = {};
 		float m_lifeTime = std::numeric_limits<float>::max();
 		float m_simulationTime = 0.f;
-		pragma::ParticleAlphaMode m_alphaMode = pragma::ParticleAlphaMode::Additive;
+		pragma::rendering::ParticleAlphaMode m_alphaMode = pragma::rendering::ParticleAlphaMode::Additive;
 		std::vector<std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)>> m_initializers;
 		std::vector<std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)>> m_operators;
 		std::vector<std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)>> m_renderers;

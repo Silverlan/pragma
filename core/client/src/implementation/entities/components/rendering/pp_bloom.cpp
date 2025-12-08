@@ -23,7 +23,7 @@ void CRendererPpBloomComponent::RegisterMembers(pragma::EntityComponentManager &
 	{
 		auto memberInfo = create_component_member_info<T, TBlurRadius, static_cast<void (T::*)(TBlurRadius)>(&T::SetBlurRadius), static_cast<TBlurRadius (T::*)() const>(&T::GetBlurRadius)>("blurRadius", ShaderPPBloomBlurBase::DEFAULT_RADIUS);
 		memberInfo.SetMin(0);
-		memberInfo.SetMax(ControlledBlurSettings::MAX_BLUR_RADIUS);
+		memberInfo.SetMax(rendering::ControlledBlurSettings::MAX_BLUR_RADIUS);
 		registerMember(std::move(memberInfo));
 	}
 
@@ -31,7 +31,7 @@ void CRendererPpBloomComponent::RegisterMembers(pragma::EntityComponentManager &
 	{
 		auto memberInfo = create_component_member_info<T, TBlurSigma, static_cast<void (T::*)(TBlurSigma)>(&T::SetBlurSigma), static_cast<TBlurSigma (T::*)() const>(&T::GetBlurSigma)>("blurSigma", ShaderPPBloomBlurBase::DEFAULT_SIGMA);
 		memberInfo.SetMin(0);
-		memberInfo.SetMax(ControlledBlurSettings::MAX_BLUR_SIGMA);
+		memberInfo.SetMax(rendering::ControlledBlurSettings::MAX_BLUR_SIGMA);
 		registerMember(std::move(memberInfo));
 	}
 
@@ -61,14 +61,14 @@ void CRendererPpBloomComponent::SetBloomThreshold(float threshold)
 		rasterC->SetBloomThreshold(threshold);
 }
 float CRendererPpBloomComponent::GetBloomThreshold() const { return m_bloomThreshold; }
-void CRendererPpBloomComponent::DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo)
+void CRendererPpBloomComponent::DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.renderStats)
-		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuBloom, *drawSceneInfo.commandBuffer);
+		(*drawSceneInfo.renderStats)->BeginGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuBloom, *drawSceneInfo.commandBuffer);
 
 	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
 		if(drawSceneInfo.renderStats)
-			(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuBloom, *drawSceneInfo.commandBuffer);
+			(*drawSceneInfo.renderStats)->EndGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuBloom, *drawSceneInfo.commandBuffer);
 	}};
 
 	if(cvBloomEnabled->GetBool() == false)

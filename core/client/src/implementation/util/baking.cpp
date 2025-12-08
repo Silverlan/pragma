@@ -179,12 +179,12 @@ static std::shared_ptr<uimg::ImageBuffer> generate_sh_normal_map(const std::vect
 }
 
 util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directional_lightmap_atlas(const std::vector<::pragma::CLightComponent *> &lights, const std::vector<pragma::geometry::ModelSubMesh *> meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
-  uint32_t height, ::pragma::LightmapDataCache *optLightmapDataCache)
+  uint32_t height, ::pragma::rendering::LightmapDataCache *optLightmapDataCache)
 {
 	class LightmapBakeJob : public util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> {
 	  public:
 		LightmapBakeJob(uint32_t width, uint32_t height, std::vector<LightSource> &&lights, std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &&meshes, std::vector<std::string> &&meshEntityUuids, std::vector<umath::ScaledTransform> &&meshEntityPoses,
-		  const std::shared_ptr<::pragma::LightmapDataCache> &lmdCache)
+		  const std::shared_ptr<::pragma::rendering::LightmapDataCache> &lmdCache)
 		    : m_width {width}, m_height {height}, m_lightData {std::move(lights)}, m_meshes {std::move(meshes)}, m_meshEntityUuids {std::move(meshEntityUuids)}, m_lightmapDataCache {lmdCache}, m_meshEntityPoses {std::move(meshEntityPoses)}
 		{
 			AddThread([this]() {
@@ -257,7 +257,7 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directi
 		std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> m_meshes;
 		std::vector<std::string> m_meshEntityUuids;
 		std::vector<umath::ScaledTransform> m_meshEntityPoses;
-		std::shared_ptr<::pragma::LightmapDataCache> m_lightmapDataCache;
+		std::shared_ptr<::pragma::rendering::LightmapDataCache> m_lightmapDataCache;
 		std::shared_ptr<uimg::ImageBuffer> m_imgBuffer;
 	};
 

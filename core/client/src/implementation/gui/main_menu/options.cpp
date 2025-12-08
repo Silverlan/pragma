@@ -701,7 +701,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 	//
 	// Anti-Aliasing
 	std::vector<std::pair<std::string, std::string>> aaChoices;
-	auto maxSamples = GetMaxMSAASampleCount();
+	auto maxSamples = rendering::GetMaxMSAASampleCount();
 	aaChoices.push_back(std::make_pair("off", pragma::locale::get_text("off")));
 	aaChoices.push_back(std::make_pair("fxaa", "FXAA"));
 	int samples = 2;

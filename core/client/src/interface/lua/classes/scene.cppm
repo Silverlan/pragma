@@ -42,8 +42,8 @@ export namespace pragma::scripting::lua_core::bindings {
 		defRaster.def("GetPrepassDepthTexture", +[](lua::State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::Texture> { return renderer.GetPrepass().textureDepth; });
 		defRaster.def("GetPrepassNormalTexture", +[](lua::State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::Texture> { return renderer.GetPrepass().textureNormals; });
 		defRaster.def("GetRenderTarget", +[](lua::State *l, pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::RenderTarget> { return renderer.GetHDRInfo().sceneRenderTarget; });
-		defRaster.def("BeginRenderPass", +[](lua::State *l, pragma::CRasterizationRendererComponent &renderer, const ::util::DrawSceneInfo &drawSceneInfo) -> bool { return renderer.BeginRenderPass(drawSceneInfo); });
-		defRaster.def("BeginRenderPass", +[](lua::State *l, pragma::CRasterizationRendererComponent &renderer, const ::util::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass &rp) -> bool { return renderer.BeginRenderPass(drawSceneInfo, &rp); });
+		defRaster.def("BeginRenderPass", +[](lua::State *l, pragma::CRasterizationRendererComponent &renderer, const ::pragma::rendering::DrawSceneInfo &drawSceneInfo) -> bool { return renderer.BeginRenderPass(drawSceneInfo); });
+		defRaster.def("BeginRenderPass", +[](lua::State *l, pragma::CRasterizationRendererComponent &renderer, const ::pragma::rendering::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass &rp) -> bool { return renderer.BeginRenderPass(drawSceneInfo, &rp); });
 		defRaster.def("EndRenderPass", &pragma::CRasterizationRendererComponent::EndRenderPass);
 		defRaster.def("GetPrepassShader", &pragma::CRasterizationRendererComponent::GetPrepassShader);
 		defRaster.def("SetShaderOverride", &pragma::CRasterizationRendererComponent::SetShaderOverride);
@@ -75,7 +75,7 @@ export namespace pragma::scripting::lua_core::bindings {
 				return;
 			Lua::Push(l,rt);
 			}));
-		defRaster.def("BlitStagingRenderTargetToMainRenderTarget",static_cast<void(*)(lua::State*,pragma::CRasterizationRendererComponent&,const util::DrawSceneInfo&)>([](lua::State *l,pragma::CRasterizationRendererComponent &renderer,const util::DrawSceneInfo &drawSceneInfo) {
+		defRaster.def("BlitStagingRenderTargetToMainRenderTarget",static_cast<void(*)(lua::State*,pragma::CRasterizationRendererComponent&,const pragma::rendering::DrawSceneInfo&)>([](lua::State *l,pragma::CRasterizationRendererComponent &renderer,const pragma::rendering::DrawSceneInfo &drawSceneInfo) {
 			
 			renderer.GetHDRInfo().BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
 		}));

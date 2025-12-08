@@ -18,6 +18,6 @@ export namespace pragma {
 		virtual uint32_t GetPostProcessingWeight() const override { return umath::to_integral(CRendererComponent::StandardPostProcessingWeight::Fxaa); }
 		virtual PostProcessingEffectData::Flags GetFlags() const override { return PostProcessingEffectData::Flags::ToneMapped; }
 	  private:
-		virtual void DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo) override;
+		virtual void DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo) override;
 	};
 };

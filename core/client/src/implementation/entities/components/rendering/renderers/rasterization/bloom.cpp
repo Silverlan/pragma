@@ -12,7 +12,7 @@ import :game;
 
 using namespace pragma::rendering;
 
-void pragma::CRasterizationRendererComponent::RenderGlowObjects(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::RenderGlowObjects(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 #if 0
 	auto &glowInfo = GetGlowInfo();

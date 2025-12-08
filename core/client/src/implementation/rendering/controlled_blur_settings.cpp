@@ -20,40 +20,40 @@ static void init_shaders()
 		g_bloomBlurV = pragma::get_cengine()->GetShader("pp_bloom_blur_v");
 }
 
-pragma::ControlledBlurSettings::ControlledBlurSettings() { init_shaders(); }
-void pragma::ControlledBlurSettings::SetRadius(uint32_t radius)
+pragma::rendering::ControlledBlurSettings::ControlledBlurSettings() { init_shaders(); }
+void pragma::rendering::ControlledBlurSettings::SetRadius(uint32_t radius)
 {
 	radius = umath::clamp(radius, 0u, MAX_BLUR_RADIUS);
 	m_radius = radius;
 	SetShaderPipelineDirty();
 }
-void pragma::ControlledBlurSettings::SetSigma(double sigma)
+void pragma::rendering::ControlledBlurSettings::SetSigma(double sigma)
 {
 	sigma = umath::clamp(sigma, 0.0, MAX_BLUR_SIGMA);
 	m_sigma = sigma;
 	SetShaderPipelineDirty();
 }
-uint32_t pragma::ControlledBlurSettings::GetRadius() const { return m_radius; }
-double pragma::ControlledBlurSettings::GetSigma() const { return m_sigma; }
+uint32_t pragma::rendering::ControlledBlurSettings::GetRadius() const { return m_radius; }
+double pragma::rendering::ControlledBlurSettings::GetSigma() const { return m_sigma; }
 
-void pragma::ControlledBlurSettings::SetBlurAmount(int32_t blurAmount) { m_blurAmount = blurAmount; }
-int32_t pragma::ControlledBlurSettings::GetBlurAmount() const { return m_blurAmount; }
+void pragma::rendering::ControlledBlurSettings::SetBlurAmount(int32_t blurAmount) { m_blurAmount = blurAmount; }
+int32_t pragma::rendering::ControlledBlurSettings::GetBlurAmount() const { return m_blurAmount; }
 
-bool pragma::ControlledBlurSettings::IsValid() const
+bool pragma::rendering::ControlledBlurSettings::IsValid() const
 {
 	if(!m_bloomPipelineInfoH || !m_bloomPipelineInfoH->pipelineIdx || !m_bloomPipelineInfoV || !m_bloomPipelineInfoV->pipelineIdx)
 		return false;
 	return true;
 }
 
-void pragma::ControlledBlurSettings::SetShaderPipelineDirty()
+void pragma::rendering::ControlledBlurSettings::SetShaderPipelineDirty()
 {
 	m_pipelineDirty = true;
 	m_bloomPipelineInfoH = nullptr;
 	m_bloomPipelineInfoV = nullptr;
 }
 
-void pragma::ControlledBlurSettings::UpdateShaderPipelines()
+void pragma::rendering::ControlledBlurSettings::UpdateShaderPipelines()
 {
 	pragma::get_cengine()->GetRenderContext().WaitIdle(true);
 	init_shaders();
@@ -68,7 +68,7 @@ void pragma::ControlledBlurSettings::UpdateShaderPipelines()
 }
 
 static auto cvBloomAmount = pragma::console::get_client_con_var("render_bloom_amount");
-void pragma::ControlledBlurSettings::RecordBlur(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmd, prosper::BlurSet &blurSet)
+void pragma::rendering::ControlledBlurSettings::RecordBlur(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmd, prosper::BlurSet &blurSet)
 {
 	static auto blurSize = 5.f;
 	static int32_t kernelSize = 9u;

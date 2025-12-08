@@ -91,22 +91,22 @@ pragma::CGame::CGame(pragma::NetworkState *state)
 
 	RegisterCallback<void, pragma::CGame *>("OnGameEnd");
 	RegisterCallback<void, pragma::CLightDirectionalComponent *, pragma::CLightDirectionalComponent *>("OnEnvironmentLightSourceChanged");
-	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>("Render");
-	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes");
-	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>("UpdateRenderBuffers");
+	RegisterCallback<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>("Render");
+	RegisterCallback<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>("PreRenderScenes");
+	RegisterCallback<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>("UpdateRenderBuffers");
 	RegisterCallback<void>("OnRenderScenes");
-	RegisterCallbackWithOptionalReturn<bool, std::reference_wrapper<const util::DrawSceneInfo>>("DrawScene");
+	RegisterCallbackWithOptionalReturn<bool, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>("DrawScene");
 	RegisterCallback<void>("PostRenderScenes");
-	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing");
-	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>("OnPreRender");
-	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<pragma::rendering::DepthStageRenderProcessor>>("RenderPrepass");
-	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScene");
-	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>("PostRenderScene");
+	RegisterCallback<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>("RenderPostProcessing");
+	RegisterCallback<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>("OnPreRender");
+	RegisterCallback<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>, std::reference_wrapper<pragma::rendering::DepthStageRenderProcessor>>("RenderPrepass");
+	RegisterCallback<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>("PreRenderScene");
+	RegisterCallback<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>("PostRenderScene");
 	RegisterCallback<void, pragma::CPlayerComponent *>("OnLocalPlayerSpawned");
 	RegisterCallback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>, std::reference_wrapper<Quat>>("CalcView");
 	RegisterCallback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>>("CalcViewOffset");
-	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender");
-	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PostRender");
+	RegisterCallback<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender");
+	RegisterCallback<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PostRender");
 	RegisterCallback<void, ecs::CBaseEntity *>("UpdateEntityModel");
 	RegisterCallback<void, pragma::gui::types::WIBase *, pragma::gui::types::WIBase *>("OnGUIFocusChanged");
 
@@ -397,10 +397,10 @@ pragma::NetEventId pragma::CGame::SetupNetEvent(const std::string &name)
 
 std::shared_ptr<pragma::nav::Mesh> pragma::CGame::LoadNavMesh(const std::string &fname) { return pragma::nav::CMesh::Load(*this, fname); }
 
-WorldEnvironment &pragma::CGame::GetWorldEnvironment() { return *m_worldEnvironment; }
-const WorldEnvironment &pragma::CGame::GetWorldEnvironment() const { return const_cast<pragma::CGame *>(this)->GetWorldEnvironment(); }
+pragma::rendering::WorldEnvironment &pragma::CGame::GetWorldEnvironment() { return *m_worldEnvironment; }
+const pragma::rendering::WorldEnvironment &pragma::CGame::GetWorldEnvironment() const { return const_cast<pragma::CGame *>(this)->GetWorldEnvironment(); }
 
-void pragma::CGame::InitializeWorldEnvironment() { m_worldEnvironment = WorldEnvironment::Create(); }
+void pragma::CGame::InitializeWorldEnvironment() { m_worldEnvironment = rendering::WorldEnvironment::Create(); }
 
 void pragma::CGame::SetRenderClipPlane(const Vector4 &clipPlane) { m_clipPlane = clipPlane; }
 const Vector4 &pragma::CGame::GetRenderClipPlane() const { return m_clipPlane; }
@@ -724,9 +724,9 @@ void pragma::CGame::PostGUIRecord() { CallLuaCallbacks<void>("PostGUIRecord"); }
 void pragma::CGame::SetDefaultGameRenderEnabled(bool enabled) { m_defaultGameRenderEnabled = enabled; }
 bool pragma::CGame::IsDefaultGameRenderEnabled() const { return m_defaultGameRenderEnabled; }
 uint32_t pragma::CGame::GetNumberOfScenesQueuedForRendering() const { return m_sceneRenderQueue.size(); }
-util::DrawSceneInfo *pragma::CGame::GetQueuedSceneRenderInfo(uint32_t i) { return (i < m_sceneRenderQueue.size()) ? &m_sceneRenderQueue[i] : nullptr; }
-void pragma::CGame::QueueForRendering(const util::DrawSceneInfo &drawSceneInfo) { m_sceneRenderQueue.push_back(drawSceneInfo); }
-const std::vector<util::DrawSceneInfo> &pragma::CGame::GetQueuedRenderScenes() const { return m_sceneRenderQueue; }
+pragma::rendering::DrawSceneInfo *pragma::CGame::GetQueuedSceneRenderInfo(uint32_t i) { return (i < m_sceneRenderQueue.size()) ? &m_sceneRenderQueue[i] : nullptr; }
+void pragma::CGame::QueueForRendering(const pragma::rendering::DrawSceneInfo &drawSceneInfo) { m_sceneRenderQueue.push_back(drawSceneInfo); }
+const std::vector<pragma::rendering::DrawSceneInfo> &pragma::CGame::GetQueuedRenderScenes() const { return m_sceneRenderQueue; }
 template<typename TCPPM>
 void pragma::CGame::SetRenderScene(TCPPM &scene)
 {
@@ -993,7 +993,7 @@ uint32_t pragma::CGame::GetMSAASampleCount()
 {
 	auto bMsaaEnabled = static_cast<pragma::rendering::AntiAliasing>(cvAntiAliasing->GetInt()) == pragma::rendering::AntiAliasing::MSAA;
 	unsigned int numSamples = bMsaaEnabled ? umath::pow(2, cvMsaaSamples->GetInt()) : 0;
-	ClampMSAASampleCount(&numSamples);
+	rendering::ClampMSAASampleCount(&numSamples);
 	return numSamples;
 }
 void pragma::CGame::ReloadRenderFrameBuffer()

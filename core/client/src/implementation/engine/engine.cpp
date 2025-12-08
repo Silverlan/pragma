@@ -53,7 +53,7 @@ static const auto SEPARATE_JOYSTICK_AXES = true;
 
 static pragma::CEngine *g_engine = nullptr;
 pragma::CEngine::CEngine(int argc, char *argv[])
-    : pragma::Engine(argc, argv), pragma::RenderContext(), m_nearZ(pragma::baseEnvCameraComponent::DEFAULT_NEAR_Z), //10.0f), //0.1f
+    : pragma::Engine(argc, argv), rendering::RenderContext(), m_nearZ(pragma::baseEnvCameraComponent::DEFAULT_NEAR_Z), //10.0f), //0.1f
       m_farZ(pragma::baseEnvCameraComponent::DEFAULT_FAR_Z), m_fps(0), m_tFPSTime(0.f), m_tLastFrame(util::Clock::now()), m_tDeltaFrameTime(0), m_audioAPI {"fmod"}
 {
 	g_engine = this;
@@ -144,7 +144,7 @@ void pragma::CEngine::Release()
 {
 	Close();
 	pragma::Engine::Release();
-	pragma::RenderContext::Release();
+	rendering::RenderContext::Release();
 }
 
 pragma::debug::GPUProfiler &pragma::CEngine::GetGPUProfiler() const { return *m_gpuProfiler; }
@@ -1481,7 +1481,7 @@ void pragma::CEngine::OnWindowResized(prosper::Window &window, Vector2i size)
 DLLCLIENT std::optional<std::string> g_customWindowIcon {};
 void pragma::CEngine::OnWindowInitialized()
 {
-	pragma::RenderContext::OnWindowInitialized();
+	pragma::rendering::RenderContext::OnWindowInitialized();
 	auto &window = GetRenderContext().GetWindow();
 	InitializeWindowInputCallbacks(window);
 	window->SetWindowSizeCallback([this, &window](pragma::platform::Window &glfwWindow, Vector2i size) mutable { OnWindowResized(window, size); });
@@ -1753,7 +1753,7 @@ void pragma::CEngine::Close()
 	CloseSoundEngine(); // Has to be closed after client state (since clientstate may still have some references at this point)
 	m_clInstance = nullptr;
 	pragma::gui::WGUI::Close(); // Has to be closed after client state
-	pragma::RenderContext::Release();
+	pragma::rendering::RenderContext::Release();
 	g_engine = nullptr;
 
 	pragma::Engine::Close();
@@ -1761,7 +1761,7 @@ void pragma::CEngine::Close()
 
 void pragma::CEngine::OnClose()
 {
-	pragma::RenderContext::OnClose();
+	pragma::rendering::RenderContext::OnClose();
 	// Clear all Vulkan resources before closing the context
 	m_gpuProfiler = {};
 
@@ -1898,7 +1898,7 @@ void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 			auto idx = GetPerformanceTimerIndex(GPUTimer::Scene);
 			m_gpuTimers[idx]->Begin(*drawCmd);
 		}
-		util::DrawSceneInfo drawSceneInfo {};
+		pragma::rendering::DrawSceneInfo drawSceneInfo {};
 		drawSceneInfo.commandBuffer = drawCmd;
 		cl->Render(drawSceneInfo, rt);
 		if(perfTimers) {
@@ -2019,7 +2019,7 @@ void pragma::CEngine::Think()
 
 	StartProfilingStage("DrawFrame");
 
-	pragma::RenderContext::DrawFrame();
+	pragma::rendering::RenderContext::DrawFrame();
 	CallCallbacks("Draw");
 	StopProfilingStage();            // DrawFrame
 	pragma::platform::poll_events(); // Needs to be called AFTER rendering!

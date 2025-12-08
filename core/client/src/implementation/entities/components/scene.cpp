@@ -39,7 +39,7 @@ void CSceneComponent::RegisterEvents(pragma::EntityComponentManager &componentMa
 static std::shared_ptr<rendering::EntityInstanceIndexBuffer> g_entityInstanceIndexBuffer = nullptr;
 const std::shared_ptr<rendering::EntityInstanceIndexBuffer> &CSceneComponent::GetEntityInstanceIndexBuffer() { return g_entityInstanceIndexBuffer; }
 
-void CSceneComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, const rendering::RenderQueue &renderQueue, RenderPassStats *optStats)
+void CSceneComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, const rendering::RenderQueue &renderQueue, rendering::RenderPassStats *optStats)
 {
 	renderQueue.WaitForCompletion(optStats);
 	CSceneComponent::GetEntityInstanceIndexBuffer()->UpdateBufferData(renderQueue);
@@ -67,7 +67,7 @@ void CSceneComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimar
 			continue;
 		}
 		if(optStats && umath::is_flag_set(renderC->GetStateFlags(), CRenderComponent::StateFlags::RenderBufferDirty))
-			(*optStats)->Increment(RenderPassStats::Counter::EntityBufferUpdates);
+			(*optStats)->Increment(rendering::RenderPassStats::Counter::EntityBufferUpdates);
 		auto *animC = renderC->GetAnimatedComponent();
 		if(animC && animC->AreSkeletonUpdateCallbacksEnabled())
 			animC->UpdateBoneMatricesMT();
@@ -335,7 +335,7 @@ void CSceneComponent::UpdateBuffers(std::shared_ptr<prosper::IPrimaryCommandBuff
 	if(m_renderer.valid())
 		static_cast<pragma::CRendererComponent *>(m_renderer.get())->UpdateRendererBuffer(drawCmd);
 }
-void CSceneComponent::RecordRenderCommandBuffers(const util::DrawSceneInfo &drawSceneInfo)
+void CSceneComponent::RecordRenderCommandBuffers(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	auto *renderer = GetRenderer<pragma::CRendererComponent>();
 	if(renderer == nullptr)
@@ -404,7 +404,7 @@ void CSceneComponent::SetExclusionRenderMask(::pragma::rendering::RenderMask ren
 void CSceneComponent::SetInclusionRenderMask(::pragma::rendering::RenderMask renderMask) { m_inclusionRenderMask = renderMask; }
 ::pragma::rendering::RenderMask CSceneComponent::GetInclusionRenderMask() const { return m_inclusionRenderMask; }
 
-void CSceneComponent::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
+void CSceneComponent::BuildRenderQueues(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	pragma::CEDrawSceneInfo evData {drawSceneInfo};
 	GetSceneRenderDesc().BuildRenderQueues(drawSceneInfo, [this, &drawSceneInfo, &evData]() {
@@ -425,8 +425,8 @@ void CSceneComponent::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 	});
 }
 
-WorldEnvironment *CSceneComponent::GetWorldEnvironment() const { return m_worldEnvironment.get(); }
-void CSceneComponent::SetWorldEnvironment(WorldEnvironment &env)
+pragma::rendering::WorldEnvironment *CSceneComponent::GetWorldEnvironment() const { return m_worldEnvironment.get(); }
+void CSceneComponent::SetWorldEnvironment(rendering::WorldEnvironment &env)
 {
 	ClearWorldEnvironment();
 
@@ -633,8 +633,8 @@ void CSceneComponent::SetActiveCamera()
 
 /////////////////
 
-CEDrawSceneInfo::CEDrawSceneInfo(const util::DrawSceneInfo &drawSceneInfo) : drawSceneInfo {drawSceneInfo} {}
-void CEDrawSceneInfo::PushArguments(lua::State *l) { Lua::Push<const util::DrawSceneInfo *>(l, &drawSceneInfo); }
+CEDrawSceneInfo::CEDrawSceneInfo(const pragma::rendering::DrawSceneInfo &drawSceneInfo) : drawSceneInfo {drawSceneInfo} {}
+void CEDrawSceneInfo::PushArguments(lua::State *l) { Lua::Push<const pragma::rendering::DrawSceneInfo *>(l, &drawSceneInfo); }
 
 ////////
 

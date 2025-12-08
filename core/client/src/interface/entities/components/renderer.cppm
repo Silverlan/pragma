@@ -44,17 +44,17 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 
-		void RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo);
-		void Render(const util::DrawSceneInfo &drawSceneInfo);
+		void RecordCommandBuffers(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void Render(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 
-		CallbackHandle AddPostProcessingEffect(const std::string &name, const std::function<void(const util::DrawSceneInfo &)> &render, uint32_t weight, const std::function<PostProcessingEffectData::Flags()> &fGetFlags = nullptr);
+		CallbackHandle AddPostProcessingEffect(const std::string &name, const std::function<void(const pragma::rendering::DrawSceneInfo &)> &render, uint32_t weight, const std::function<PostProcessingEffectData::Flags()> &fGetFlags = nullptr);
 		void RemovePostProcessingEffect(const std::string &name);
 		const std::vector<PostProcessingEffectData> &GetPostProcessingEffects() const;
 
 		bool ReloadRenderTarget(pragma::CSceneComponent &scene, uint32_t width, uint32_t height);
 
 		void EndRendering();
-		void BeginRendering(const util::DrawSceneInfo &drawSceneInfo);
+		void BeginRendering(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 		bool ReloadBloomRenderTarget(uint32_t width);
 
 		prosper::Texture *GetSceneTexture();
@@ -93,9 +93,9 @@ export namespace pragma {
 	};
 
 	struct DLLCLIENT CEBeginRendering : public ComponentEvent {
-		CEBeginRendering(const util::DrawSceneInfo &drawSceneInfo);
+		CEBeginRendering(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 		virtual void PushArguments(lua::State *l) override;
-		const util::DrawSceneInfo &drawSceneInfo;
+		const pragma::rendering::DrawSceneInfo &drawSceneInfo;
 	};
 
 	struct DLLCLIENT CEUpdateCameraData : public ComponentEvent {
@@ -114,9 +114,9 @@ export namespace pragma {
 	};
 
 	struct DLLCLIENT CERender : public ComponentEvent {
-		CERender(const util::DrawSceneInfo &drawSceneInfo);
+		CERender(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 		virtual void PushArguments(lua::State *l) override;
-		const util::DrawSceneInfo &drawSceneInfo;
+		const pragma::rendering::DrawSceneInfo &drawSceneInfo;
 	};
 
 	struct DLLCLIENT CEOnRenderTargetReloaded : public ComponentEvent {

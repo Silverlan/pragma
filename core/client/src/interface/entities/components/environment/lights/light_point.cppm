@@ -18,7 +18,7 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		const std::array<std::vector<umath::Plane>, 6u> &GetFrustumPlanes() const;
-		const std::vector<umath::Plane> &GetFrustumPlanes(CubeMapSide side) const;
+		const std::vector<umath::Plane> &GetFrustumPlanes(rendering::CubeMapSide side) const;
 	  protected:
 		void UpdateProjectionMatrix();
 		void UpdateFrustumPlanes();

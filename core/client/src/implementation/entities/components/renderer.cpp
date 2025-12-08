@@ -72,12 +72,12 @@ void CRendererComponent::UpdateCameraData(pragma::CSceneComponent &scene, pragma
 	InvokeEventCallbacks(cRendererComponent::EVENT_UPDATE_CAMERA_DATA, evData);
 }
 
-void CRendererComponent::RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo)
+void CRendererComponent::RecordCommandBuffers(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	pragma::CEDrawSceneInfo evData {drawSceneInfo};
 	InvokeEventCallbacks(cRendererComponent::EVENT_RECORD_COMMAND_BUFFERS, evData);
 }
-void CRendererComponent::Render(const util::DrawSceneInfo &drawSceneInfo)
+void CRendererComponent::Render(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	BeginRendering(drawSceneInfo);
 	pragma::CERender evData {drawSceneInfo};
@@ -128,9 +128,9 @@ bool CRendererComponent::ReloadBloomRenderTarget(uint32_t width)
 	return evData.resultSuccess;
 }
 
-CallbackHandle CRendererComponent::AddPostProcessingEffect(const std::string &name, const std::function<void(const util::DrawSceneInfo &)> &render, uint32_t weight, const std::function<PostProcessingEffectData::Flags()> &fGetFlags)
+CallbackHandle CRendererComponent::AddPostProcessingEffect(const std::string &name, const std::function<void(const pragma::rendering::DrawSceneInfo &)> &render, uint32_t weight, const std::function<PostProcessingEffectData::Flags()> &fGetFlags)
 {
-	auto cb = FunctionCallback<void, const util::DrawSceneInfo &>::Create(render);
+	auto cb = FunctionCallback<void, const pragma::rendering::DrawSceneInfo &>::Create(render);
 	PostProcessingEffectData effectData {};
 	effectData.name = name;
 	effectData.render = cb;
@@ -158,7 +158,7 @@ void CRendererComponent::RemovePostProcessingEffect(const std::string &name)
 const std::vector<PostProcessingEffectData> &CRendererComponent::GetPostProcessingEffects() const { return m_postProcessingEffects; }
 
 void CRendererComponent::EndRendering() { InvokeEventCallbacks(cRendererComponent::EVENT_END_RENDERING); }
-void CRendererComponent::BeginRendering(const util::DrawSceneInfo &drawSceneInfo)
+void CRendererComponent::BeginRendering(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	const_cast<pragma::CSceneComponent *>(drawSceneInfo.scene.get())->UpdateBuffers(drawSceneInfo.commandBuffer);
 	InvokeEventCallbacks(cRendererComponent::EVENT_BEGIN_RENDERING);
@@ -183,8 +183,8 @@ void CEReloadRenderTarget::HandleReturnValues(lua::State *l)
 
 ////////////
 
-CEBeginRendering::CEBeginRendering(const util::DrawSceneInfo &drawSceneInfo) : ComponentEvent {}, drawSceneInfo {drawSceneInfo} {}
-void CEBeginRendering::PushArguments(lua::State *l) { Lua::Push<const util::DrawSceneInfo *>(l, &drawSceneInfo); }
+CEBeginRendering::CEBeginRendering(const pragma::rendering::DrawSceneInfo &drawSceneInfo) : ComponentEvent {}, drawSceneInfo {drawSceneInfo} {}
+void CEBeginRendering::PushArguments(lua::State *l) { Lua::Push<const pragma::rendering::DrawSceneInfo *>(l, &drawSceneInfo); }
 
 ////////////
 
@@ -210,8 +210,8 @@ void CEGetSceneTexture::HandleReturnValues(lua::State *l)
 
 ////////////
 
-CERender::CERender(const util::DrawSceneInfo &drawSceneInfo) : drawSceneInfo {drawSceneInfo} {}
-void CERender::PushArguments(lua::State *l) { Lua::Push<const util::DrawSceneInfo *>(l, &drawSceneInfo); }
+CERender::CERender(const pragma::rendering::DrawSceneInfo &drawSceneInfo) : drawSceneInfo {drawSceneInfo} {}
+void CERender::PushArguments(lua::State *l) { Lua::Push<const pragma::rendering::DrawSceneInfo *>(l, &drawSceneInfo); }
 
 ////////////
 

@@ -13,7 +13,7 @@ import :model;
 using namespace pragma;
 
 void CLightMapReceiverComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) { using T = CLightMapReceiverComponent; }
-void CLightMapReceiverComponent::SetupLightMapUvData(ecs::CBaseEntity &ent, LightmapDataCache *cache)
+void CLightMapReceiverComponent::SetupLightMapUvData(ecs::CBaseEntity &ent, rendering::LightmapDataCache *cache)
 {
 	auto mdl = ent.GetModel();
 	if(!mdl) {
@@ -74,8 +74,8 @@ void CLightMapReceiverComponent::UpdateLightMapUvData()
 	}
 	UpdateRenderMeshBufferList();
 }
-const LightmapDataCache *CLightMapReceiverComponent::GetLightmapDataCache() const { return m_lightmapDataCache.get(); }
-void CLightMapReceiverComponent::SetLightmapDataCache(LightmapDataCache *cache) { m_lightmapDataCache = cache ? cache->shared_from_this() : nullptr; }
+const pragma::rendering::LightmapDataCache *CLightMapReceiverComponent::GetLightmapDataCache() const { return m_lightmapDataCache.get(); }
+void CLightMapReceiverComponent::SetLightmapDataCache(rendering::LightmapDataCache *cache) { m_lightmapDataCache = cache ? cache->shared_from_this() : nullptr; }
 const std::vector<Vector2> *CLightMapReceiverComponent::FindLightmapUvSet(pragma::geometry::ModelSubMesh &mesh) const
 {
 	auto *cache = GetLightmapDataCache();

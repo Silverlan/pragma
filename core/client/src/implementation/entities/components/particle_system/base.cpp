@@ -441,17 +441,17 @@ const auto PARTICLE_ANIM_BUFFER_INSTANCE_SIZE = sizeof(Vector2) * 2;
 		auto alphaMode = value;
 		ustring::to_lower(alphaMode);
 		if(alphaMode == "additive_by_color" || alphaMode == "additive_full")
-			m_alphaMode = pragma::ParticleAlphaMode::AdditiveByColor;
+			m_alphaMode = pragma::rendering::ParticleAlphaMode::AdditiveByColor;
 		else if(alphaMode == "opaque")
-			m_alphaMode = pragma::ParticleAlphaMode::Opaque;
+			m_alphaMode = pragma::rendering::ParticleAlphaMode::Opaque;
 		else if(alphaMode == "masked")
-			m_alphaMode = pragma::ParticleAlphaMode::Masked;
+			m_alphaMode = pragma::rendering::ParticleAlphaMode::Masked;
 		else if(alphaMode == "translucent")
-			m_alphaMode = pragma::ParticleAlphaMode::Translucent;
+			m_alphaMode = pragma::rendering::ParticleAlphaMode::Translucent;
 		else if(alphaMode == "additive")
-			m_alphaMode = pragma::ParticleAlphaMode::Additive;
+			m_alphaMode = pragma::rendering::ParticleAlphaMode::Additive;
 		else if(alphaMode == "custom")
-			m_alphaMode = pragma::ParticleAlphaMode::Custom;
+			m_alphaMode = pragma::rendering::ParticleAlphaMode::Custom;
 	}
 	else if(ustring::compare<std::string>(key, "premultiply_alpha"))
 		SetAlphaPremultiplied(::util::to_boolean(value));
@@ -460,7 +460,7 @@ const auto PARTICLE_ANIM_BUFFER_INSTANCE_SIZE = sizeof(Vector2) * 2;
 		m_particleRot = uquat::create(ang);
 	}
 	else if(ustring::compare<std::string>(key, "black_to_alpha"))
-		m_alphaMode = pragma::ParticleAlphaMode::AdditiveByColor;
+		m_alphaMode = pragma::rendering::ParticleAlphaMode::AdditiveByColor;
 	else if(ustring::compare<std::string>(key, "move_with_emitter"))
 		umath::set_flag(m_flags, Flags::MoveWithEmitter, ::util::to_boolean(value));
 	else if(ustring::compare<std::string>(key, "rotate_with_emitter"))
@@ -1267,20 +1267,20 @@ CallbackHandle ecs::CParticleSystemComponent::AddRenderCallback(const std::funct
 	return hCb;
 }
 void ecs::CParticleSystemComponent::AddRenderCallback(const CallbackHandle &hCb) { m_renderCallbacks.push_back(hCb); }
-pragma::ParticleAlphaMode ecs::CParticleSystemComponent::GetAlphaMode() const { return m_alphaMode; }
-pragma::ParticleAlphaMode ecs::CParticleSystemComponent::GetEffectiveAlphaMode() const
+pragma::rendering::ParticleAlphaMode ecs::CParticleSystemComponent::GetAlphaMode() const { return m_alphaMode; }
+pragma::rendering::ParticleAlphaMode ecs::CParticleSystemComponent::GetEffectiveAlphaMode() const
 {
 	auto alphaMode = GetAlphaMode();
-	if(alphaMode != ParticleAlphaMode::Additive)
+	if(alphaMode != rendering::ParticleAlphaMode::Additive)
 		return alphaMode;
 	auto *mat = GetMaterial();
 	if(mat) {
 		if(mat->GetProperty("additive", false))
-			alphaMode = ParticleAlphaMode::AdditiveByColor;
+			alphaMode = rendering::ParticleAlphaMode::AdditiveByColor;
 	}
 	return alphaMode;
 }
-void ecs::CParticleSystemComponent::SetAlphaMode(pragma::ParticleAlphaMode alphaMode) { m_alphaMode = alphaMode; }
+void ecs::CParticleSystemComponent::SetAlphaMode(pragma::rendering::ParticleAlphaMode alphaMode) { m_alphaMode = alphaMode; }
 void ecs::CParticleSystemComponent::SetTextureScrollingEnabled(bool b) { umath::set_flag(m_flags, Flags::TextureScrollingEnabled, b); }
 bool ecs::CParticleSystemComponent::IsTextureScrollingEnabled() const { return umath::is_flag_set(m_flags, Flags::TextureScrollingEnabled); }
 
@@ -1652,7 +1652,7 @@ void ecs::CParticleSystemComponent::Simulate(double tDelta)
 			auto &prevPos = p.GetPrevPos();
 			auto &vCol = p.GetColor();
 			if(umath::is_flag_set(m_flags, Flags::PremultiplyAlpha))
-				pragma::premultiply_alpha(vCol, alphaMode);
+				pragma::rendering::premultiply_alpha(vCol, alphaMode);
 			auto &col = data.color;
 			col = {static_cast<uint16_t>(vCol.x * 255.f), static_cast<uint16_t>(vCol.y * 255.f), static_cast<uint16_t>(vCol.z * 255.f), static_cast<uint16_t>(vCol.a * 255.f)};
 

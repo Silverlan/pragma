@@ -26,7 +26,7 @@ export namespace Lua {
 			DLLCLIENT std::string get_clipboard_string();
 			DLLCLIENT void set_clipboard_string(const std::string &str);
 			DLLCLIENT ::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_directional_lightmap_atlas(const std::vector<pragma::CLightComponent *> &lights, const std::vector<pragma::geometry::ModelSubMesh *> &meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
-			  uint32_t height, ::pragma::LightmapDataCache *optLightmapDataCache = nullptr);
+			  uint32_t height, pragma::rendering::LightmapDataCache *optLightmapDataCache = nullptr);
 		};
 	};
 };

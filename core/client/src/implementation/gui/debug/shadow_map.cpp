@@ -70,15 +70,15 @@ void pragma::gui::types::WIDebugShadowMap::DoUpdate()
 				auto *dt = wgui.Create<pragma::gui::types::WIDebugDepthTexture>(this);
 				dt->SetTexture(*depthTexture, barrierImageLayout, barrierImageLayout, i);
 				dt->SetSize(wLayer, hLayer);
-				if(i == static_cast<uint32_t>(CubeMapSide::Left))
+				if(i == static_cast<uint32_t>(rendering::CubeMapSide::Left))
 					dt->SetPos(0, hLayer); // Left
-				else if(i == static_cast<uint32_t>(CubeMapSide::Right))
+				else if(i == static_cast<uint32_t>(rendering::CubeMapSide::Right))
 					dt->SetPos(wLayer * 2, hLayer); // Right
-				else if(i == static_cast<uint32_t>(CubeMapSide::Top))
+				else if(i == static_cast<uint32_t>(rendering::CubeMapSide::Top))
 					dt->SetPos(wLayer, 0); // Up
-				else if(i == static_cast<uint32_t>(CubeMapSide::Bottom))
+				else if(i == static_cast<uint32_t>(rendering::CubeMapSide::Bottom))
 					dt->SetPos(wLayer, hLayer * 2); // Down
-				else if(i == static_cast<uint32_t>(CubeMapSide::Front))
+				else if(i == static_cast<uint32_t>(rendering::CubeMapSide::Front))
 					dt->SetPos(wLayer, hLayer); // Front
 				else
 					dt->SetPos(wLayer * 3, hLayer); // Back

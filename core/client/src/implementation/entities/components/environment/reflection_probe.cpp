@@ -631,7 +631,7 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector
 		scene->UpdateBuffers(drawCmd); // TODO: Remove this?
 
 		// TODO: FRender::Reflection is required to flip the winding order, but why is this needed in the first place?
-		util::DrawSceneInfo drawSceneInfo {};
+		pragma::rendering::DrawSceneInfo drawSceneInfo {};
 		drawSceneInfo.commandBuffer = drawCmd;
 		drawSceneInfo.outputImage = img;
 		drawSceneInfo.renderFlags = (FRender::All | FRender::HDR | FRender::Reflection) &~(FRender::View | FRender::Dynamic);

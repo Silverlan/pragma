@@ -352,7 +352,7 @@ void pragma::CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  scene.UpdateBuffers(pCmdBuffer);
 	  });
 	defCScene.def(
-	  "GetWorldEnvironment", +[](lua::State *l, pragma::CSceneComponent &scene) -> std::shared_ptr<WorldEnvironment> {
+	  "GetWorldEnvironment", +[](lua::State *l, pragma::CSceneComponent &scene) -> std::shared_ptr<rendering::WorldEnvironment> {
 		  auto *worldEnv = scene.GetWorldEnvironment();
 		  if(worldEnv == nullptr)
 			  return nullptr;
@@ -466,9 +466,9 @@ void pragma::CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCLight.def("SetAddToGameScene", static_cast<void (*)(lua::State *, pragma::CLightComponent &, bool)>([](lua::State *l, pragma::CLightComponent &hComponent, bool b) { hComponent.SetStateFlag(pragma::CLightComponent::StateFlags::AddToGameScene, b); }));
 	defCLight.def("SetMorphTargetsInShadowsEnabled", &pragma::CLightComponent::SetMorphTargetsInShadowsEnabled);
 	defCLight.def("AreMorphTargetsInShadowsEnabled", &pragma::CLightComponent::AreMorphTargetsInShadowsEnabled);
-	defCLight.add_static_constant("SHADOW_TYPE_NONE", umath::to_integral(ShadowType::None));
-	defCLight.add_static_constant("SHADOW_TYPE_STATIC_ONLY", umath::to_integral(ShadowType::StaticOnly));
-	defCLight.add_static_constant("SHADOW_TYPE_FULL", umath::to_integral(ShadowType::Full));
+	defCLight.add_static_constant("SHADOW_TYPE_NONE", umath::to_integral(rendering::ShadowType::None));
+	defCLight.add_static_constant("SHADOW_TYPE_STATIC_ONLY", umath::to_integral(rendering::ShadowType::StaticOnly));
+	defCLight.add_static_constant("SHADOW_TYPE_FULL", umath::to_integral(rendering::ShadowType::Full));
 
 	defCLight.add_static_constant("EVENT_SHOULD_PASS_ENTITY", pragma::cLightComponent::EVENT_SHOULD_PASS_ENTITY);
 	defCLight.add_static_constant("EVENT_SHOULD_PASS_ENTITY_MESH", pragma::cLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH);

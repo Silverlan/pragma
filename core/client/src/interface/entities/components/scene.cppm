@@ -36,15 +36,15 @@ export class DLLCLIENT SceneRenderDesc {
 	};
 	using WorldMeshVisibility = std::vector<bool>;
 	// Note: All arguments have to be thread safe for the duration of the render (except vp)
-	static void AddRenderMeshesToRenderQueue(pragma::CRasterizationRendererComponent *optRasterizationRenderer, RenderFlags renderFlags, pragma::CRenderComponent &renderC, const std::function<pragma::rendering::RenderQueue *(pragma::rendering::SceneRenderPass, bool)> &getRenderQueue,
+	static void AddRenderMeshesToRenderQueue(pragma::CRasterizationRendererComponent *optRasterizationRenderer, pragma::rendering::RenderFlags renderFlags, pragma::CRenderComponent &renderC, const std::function<pragma::rendering::RenderQueue *(pragma::rendering::SceneRenderPass, bool)> &getRenderQueue,
 	  const pragma::CSceneComponent &scene, const pragma::CCameraComponent &cam, const Mat4 &vp, const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull, int32_t lodBias = 0,
 	  const std::function<void(pragma::rendering::RenderQueue &, const pragma::rendering::RenderQueueItem &)> &fOptInsertItemToQueue = nullptr, pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags = static_cast<pragma::GameShaderSpecializationConstantFlag>(0));
 	// Note: All arguments have to be thread safe for the duration of the render (except vp)
-	static void CollectRenderMeshesFromOctree(pragma::CRasterizationRendererComponent *optRasterizationRenderer, RenderFlags renderFlags, bool enableClipping, const OcclusionOctree<pragma::ecs::CBaseEntity *> &tree, const pragma::CSceneComponent &scene, const pragma::CCameraComponent &cam,
+	static void CollectRenderMeshesFromOctree(pragma::CRasterizationRendererComponent *optRasterizationRenderer, pragma::rendering::RenderFlags renderFlags, bool enableClipping, const OcclusionOctree<pragma::ecs::CBaseEntity *> &tree, const pragma::CSceneComponent &scene, const pragma::CCameraComponent &cam,
 	  const Mat4 &vp, pragma::rendering::RenderMask renderMask, const std::function<pragma::rendering::RenderQueue *(pragma::rendering::SceneRenderPass, bool)> &getRenderQueue, const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull,
-	  const std::vector<util::BSPTree *> *bspTrees = nullptr, const std::vector<util::BSPTree::Node *> *bspLeafNodes = nullptr, int32_t lodBias = 0, const std::function<bool(pragma::ecs::CBaseEntity &, const pragma::CSceneComponent &, RenderFlags)> &shouldConsiderEntity = nullptr,
+	  const std::vector<util::BSPTree *> *bspTrees = nullptr, const std::vector<util::BSPTree::Node *> *bspLeafNodes = nullptr, int32_t lodBias = 0, const std::function<bool(pragma::ecs::CBaseEntity &, const pragma::CSceneComponent &, pragma::rendering::RenderFlags)> &shouldConsiderEntity = nullptr,
 	  pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags = static_cast<pragma::GameShaderSpecializationConstantFlag>(0));
-	static bool ShouldConsiderEntity(pragma::ecs::CBaseEntity &ent, const pragma::CSceneComponent &scene, RenderFlags renderFlags, pragma::rendering::RenderMask renderMask);
+	static bool ShouldConsiderEntity(pragma::ecs::CBaseEntity &ent, const pragma::CSceneComponent &scene, pragma::rendering::RenderFlags renderFlags, pragma::rendering::RenderMask renderMask);
 	static bool ShouldCull(pragma::ecs::CBaseEntity &ent, const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull);
 	static bool ShouldCull(pragma::CRenderComponent &renderC, const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull);
 	static bool ShouldCull(pragma::CRenderComponent &renderC, pragma::rendering::RenderMeshIndex meshIdx, const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull);
@@ -55,7 +55,7 @@ export class DLLCLIENT SceneRenderDesc {
 	SceneRenderDesc(pragma::CSceneComponent &scene);
 	~SceneRenderDesc();
 
-	void BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo, const std::function<void()> &fBuildAdditionalQueues);
+	void BuildRenderQueues(const pragma::rendering::DrawSceneInfo &drawSceneInfo, const std::function<void()> &fBuildAdditionalQueues);
 	void BuildRenderQueueInstanceLists(pragma::rendering::RenderQueue &renderQueue);
 
 	bool IsWorldMeshVisible(uint32_t worldRenderQueueIndex, pragma::rendering::RenderMeshIndex meshIdx) const;
@@ -67,9 +67,9 @@ export class DLLCLIENT SceneRenderDesc {
 	const pragma::rendering::RenderQueue *GetRenderQueue(pragma::rendering::SceneRenderPass renderMode, bool translucent) const;
 	const std::vector<std::shared_ptr<const pragma::rendering::RenderQueue>> &GetWorldRenderQueues() const;
   private:
-	void AddRenderMeshesToRenderQueue(pragma::CRasterizationRendererComponent *optRasterizationRenderer, RenderFlags renderFlags, pragma::CRenderComponent &renderC, const pragma::CSceneComponent &scene, const pragma::CCameraComponent &cam, const Mat4 &vp,
+	void AddRenderMeshesToRenderQueue(pragma::CRasterizationRendererComponent *optRasterizationRenderer, pragma::rendering::RenderFlags renderFlags, pragma::CRenderComponent &renderC, const pragma::CSceneComponent &scene, const pragma::CCameraComponent &cam, const Mat4 &vp,
 	  const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull, pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags = static_cast<pragma::GameShaderSpecializationConstantFlag>(0));
-	void CollectRenderMeshesFromOctree(pragma::CRasterizationRendererComponent *optRasterizationRenderer, RenderFlags renderFlags, bool enableClipping, const OcclusionOctree<pragma::ecs::CBaseEntity *> &tree, const pragma::CSceneComponent &scene, const pragma::CCameraComponent &cam, const Mat4 &vp,
+	void CollectRenderMeshesFromOctree(pragma::CRasterizationRendererComponent *optRasterizationRenderer, pragma::rendering::RenderFlags renderFlags, bool enableClipping, const OcclusionOctree<pragma::ecs::CBaseEntity *> &tree, const pragma::CSceneComponent &scene, const pragma::CCameraComponent &cam, const Mat4 &vp,
 	  pragma::rendering::RenderMask renderMask, const std::vector<umath::Plane> &frustumPlanes, const std::vector<util::BSPTree *> *bspTrees = nullptr, const std::vector<util::BSPTree::Node *> *bspLeafNodes = nullptr);
 
 	std::vector<WorldMeshVisibility> m_worldMeshVisibility;
@@ -109,7 +109,7 @@ export namespace pragma {
 		static SceneFlags GetSceneFlag(SceneIndex sceneIndex);
 		static SceneIndex GetSceneIndex(SceneFlags flag);
 		static const std::shared_ptr<rendering::EntityInstanceIndexBuffer> &GetEntityInstanceIndexBuffer();
-		static void UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, const rendering::RenderQueue &renderQueue, RenderPassStats *optStats = nullptr);
+		static void UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, const rendering::RenderQueue &renderQueue, pragma::rendering::RenderPassStats *optStats = nullptr);
 
 		CSceneComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
@@ -150,8 +150,8 @@ export namespace pragma {
 		prosper::IDescriptorSet *GetViewCameraDescriptorSet() const;
 		const std::shared_ptr<prosper::IDescriptorSetGroup> &GetFogDescriptorSetGroup() const;
 
-		WorldEnvironment *GetWorldEnvironment() const;
-		void SetWorldEnvironment(WorldEnvironment &env);
+		pragma::rendering::WorldEnvironment *GetWorldEnvironment() const;
+		void SetWorldEnvironment(pragma::rendering::WorldEnvironment &env);
 		void ClearWorldEnvironment();
 
 		void LinkWorldEnvironment(CSceneComponent &other);
@@ -183,12 +183,12 @@ export namespace pragma {
 		CSceneComponent *GetParentScene();
 		const CSceneComponent *GetParentScene() const { return const_cast<CSceneComponent *>(this)->GetParentScene(); }
 
-		void BuildRenderQueues(const ::util::DrawSceneInfo &drawSceneInfo);
+		void BuildRenderQueues(const ::pragma::rendering::DrawSceneInfo &drawSceneInfo);
 
 		const std::vector<ComponentHandle<pragma::CLightComponent>> &GetPreviouslyVisibleShadowedLights() const { return m_previouslyVisibleShadowedLights; }
 		void SwapPreviouslyVisibleLights(std::vector<ComponentHandle<pragma::CLightComponent>> &&components) { std::swap(m_previouslyVisibleShadowedLights, components); }
 
-		void RecordRenderCommandBuffers(const ::util::DrawSceneInfo &drawSceneInfo);
+		void RecordRenderCommandBuffers(const ::pragma::rendering::DrawSceneInfo &drawSceneInfo);
 		void UpdateRenderData();
 	  private:
 		void InitializeShadowDescriptorSet();
@@ -228,7 +228,7 @@ export namespace pragma {
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_fogDescSetGroup = nullptr;
 
 		mutable std::vector<CallbackHandle> m_envCallbacks;
-		mutable std::shared_ptr<WorldEnvironment> m_worldEnvironment;
+		mutable std::shared_ptr<pragma::rendering::WorldEnvironment> m_worldEnvironment;
 		CallbackHandle m_cbFogCallback = {};
 		CallbackHandle m_cbLink {};
 
@@ -250,9 +250,9 @@ export namespace pragma {
 	// Events
 
 	struct DLLCLIENT CEDrawSceneInfo : public ComponentEvent {
-		CEDrawSceneInfo(const ::util::DrawSceneInfo &drawSceneInfo);
+		CEDrawSceneInfo(const ::pragma::rendering::DrawSceneInfo &drawSceneInfo);
 		virtual void PushArguments(lua::State *l) override;
-		const ::util::DrawSceneInfo &drawSceneInfo;
+		const ::pragma::rendering::DrawSceneInfo &drawSceneInfo;
 	};
 	using namespace umath::scoped_enum::bitwise;
 };

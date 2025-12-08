@@ -285,7 +285,7 @@ static void debug_render_depth_buffer(pragma::NetworkState *state, pragma::BaseP
 		return r->GetHandle();
 	});
 	auto *d = dbg.get();
-	dbg->AddCallback("PostRenderScene", FunctionCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>::Create([d](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
+	dbg->AddCallback("PostRenderScene", FunctionCallback<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>::Create([d](std::reference_wrapper<const pragma::rendering::DrawSceneInfo> drawSceneInfo) {
 		auto *el = d->GetGUIElement();
 		if(el == nullptr)
 			return;
@@ -304,7 +304,7 @@ static auto cvDrawTranslucent = pragma::console::get_client_con_var("render_draw
 static auto cvClearScene = pragma::console::get_client_con_var("render_clear_scene");
 static auto cvClearSceneColor = pragma::console::get_client_con_var("render_clear_scene_color");
 static auto cvParticleQuality = pragma::console::get_client_con_var("cl_render_particle_quality");
-void pragma::CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
+void pragma::CGame::RenderScenes(pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 #ifdef PRAGMA_ENABLE_SHADER_DEBUG_PRINT
 	GetGlobalRenderSettingsBufferData().EvaluateDebugPrint();
@@ -313,7 +313,7 @@ void pragma::CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	auto &inputDataManager = GetGlobalShaderInputDataManager();
 	inputDataManager.UpdateBufferData(*drawSceneInfo.commandBuffer);
 
-	CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("UpdateRenderBuffers", std::ref(drawSceneInfo));
+	CallCallbacks<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>("UpdateRenderBuffers", std::ref(drawSceneInfo));
 
 	StartProfilingStage("RenderScenes");
 	util::ScopeGuard sg {[this]() {
@@ -373,12 +373,12 @@ void pragma::CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		return;
 	}
 	StartProfilingStage("PreRenderScenesCallbacks");
-	CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes", std::ref(drawSceneInfo));
-	CallLuaCallbacks<void, util::DrawSceneInfo *>("PreRenderScenes", &drawSceneInfo);
+	CallCallbacks<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>("PreRenderScenes", std::ref(drawSceneInfo));
+	CallLuaCallbacks<void, pragma::rendering::DrawSceneInfo *>("PreRenderScenes", &drawSceneInfo);
 	StopProfilingStage(); // PreRenderScenesCallbacks
 
 	StartProfilingStage("RenderScenesCallbacks");
-	CallLuaCallbacks<void, util::DrawSceneInfo *>("RenderScenes", &drawSceneInfo);
+	CallLuaCallbacks<void, pragma::rendering::DrawSceneInfo *>("RenderScenes", &drawSceneInfo);
 	StopProfilingStage(); // RenderScenesCallbacks
 
 	if(IsDefaultGameRenderEnabled()) {
@@ -427,7 +427,7 @@ void pragma::CGame::GetPrimaryCameraRenderMask(::pragma::rendering::RenderMask &
 	}
 }
 
-static void debug_dump_render_queues(const util::DrawSceneInfo &drawSceneInfo)
+static void debug_dump_render_queues(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	std::stringstream ss;
 	ss << "Scene Info:\n";
@@ -513,7 +513,7 @@ static void debug_dump_render_queues(const util::DrawSceneInfo &drawSceneInfo)
 
 	Con::cout << ss.str() << Con::endl;
 }
-static void debug_dump_render_queues(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
+static void debug_dump_render_queues(const std::vector<pragma::rendering::DrawSceneInfo> &drawSceneInfos)
 {
 	Con::cout << "Dumping render queues..." << Con::endl;
 	uint32_t i = 0;
@@ -524,16 +524,16 @@ static void debug_dump_render_queues(const std::vector<util::DrawSceneInfo> &dra
 }
 
 bool g_dumpRenderQueues = false;
-void pragma::CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
+void pragma::CGame::RenderScenes(const std::vector<pragma::rendering::DrawSceneInfo> &drawSceneInfos)
 {
 	if(cvDrawScene->GetBool() == false)
 		return;
 	auto drawWorld = cvDrawWorld->GetInt();
 
-	std::function<void(const std::vector<util::DrawSceneInfo> &)> buildRenderQueues = nullptr;
-	buildRenderQueues = [&buildRenderQueues, drawWorld](const std::vector<util::DrawSceneInfo> &drawSceneInfos) {
+	std::function<void(const std::vector<pragma::rendering::DrawSceneInfo> &)> buildRenderQueues = nullptr;
+	buildRenderQueues = [&buildRenderQueues, drawWorld](const std::vector<pragma::rendering::DrawSceneInfo> &drawSceneInfos) {
 		for(auto &cdrawSceneInfo : drawSceneInfos) {
-			auto &drawSceneInfo = const_cast<util::DrawSceneInfo &>(cdrawSceneInfo);
+			auto &drawSceneInfo = const_cast<pragma::rendering::DrawSceneInfo &>(cdrawSceneInfo);
 			if(drawSceneInfo.scene.expired())
 				continue;
 
@@ -543,19 +543,19 @@ void pragma::CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSce
 			}
 
 			if(drawWorld == 2)
-				drawSceneInfo.renderFlags &= ~(RenderFlags::Shadows);
+				drawSceneInfo.renderFlags &= ~(rendering::RenderFlags::Shadows);
 			else if(drawWorld == 0)
-				drawSceneInfo.renderFlags &= ~(RenderFlags::Shadows | RenderFlags::View | RenderFlags::World | RenderFlags::Skybox);
+				drawSceneInfo.renderFlags &= ~(rendering::RenderFlags::Shadows | rendering::RenderFlags::View | rendering::RenderFlags::World | rendering::RenderFlags::Skybox);
 
 			if(cvDrawStatic->GetBool() == false)
-				drawSceneInfo.renderFlags &= ~RenderFlags::Static;
+				drawSceneInfo.renderFlags &= ~rendering::RenderFlags::Static;
 			if(cvDrawDynamic->GetBool() == false)
-				drawSceneInfo.renderFlags &= ~RenderFlags::Dynamic;
+				drawSceneInfo.renderFlags &= ~rendering::RenderFlags::Dynamic;
 			if(cvDrawTranslucent->GetBool() == false)
-				drawSceneInfo.renderFlags &= ~RenderFlags::Translucent;
+				drawSceneInfo.renderFlags &= ~rendering::RenderFlags::Translucent;
 
 			if(cvParticleQuality->GetInt() <= 0)
-				drawSceneInfo.renderFlags &= ~RenderFlags::Particles;
+				drawSceneInfo.renderFlags &= ~rendering::RenderFlags::Particles;
 
 			if(drawSceneInfo.commandBuffer == nullptr)
 				drawSceneInfo.commandBuffer = pragma::get_cengine()->GetRenderContext().GetWindow().GetDrawCommandBuffer();
@@ -563,11 +563,11 @@ void pragma::CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSce
 			auto &renderFlags = drawSceneInfo.renderFlags;
 			auto drawWorld = cvDrawWorld->GetBool();
 			if(drawWorld == false)
-				umath::set_flag(renderFlags, RenderFlags::World, false);
+				umath::set_flag(renderFlags, rendering::RenderFlags::World, false);
 
 			auto *pl = pragma::get_cgame()->GetLocalPlayer();
 			if(pl == nullptr || pl->IsInFirstPersonMode() == false)
-				umath::set_flag(renderFlags, RenderFlags::View, false);
+				umath::set_flag(renderFlags, rendering::RenderFlags::View, false);
 
 			drawSceneInfo.scene->BuildRenderQueues(drawSceneInfo);
 		}
@@ -590,11 +590,11 @@ void pragma::CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSce
 	// Initiate the command buffer build threads for all queued scenes.
 	// If we have multiple scenes to render (e.g. left eye and right eye for VR),
 	// the command buffers can all be built in parallel.
-	std::function<void(const std::vector<util::DrawSceneInfo> &)> buildCommandBuffers = nullptr;
-	buildCommandBuffers = [&buildCommandBuffers, drawWorld](const std::vector<util::DrawSceneInfo> &drawSceneInfos) {
+	std::function<void(const std::vector<pragma::rendering::DrawSceneInfo> &)> buildCommandBuffers = nullptr;
+	buildCommandBuffers = [&buildCommandBuffers, drawWorld](const std::vector<pragma::rendering::DrawSceneInfo> &drawSceneInfos) {
 		for(auto &cdrawSceneInfo : drawSceneInfos) {
-			auto &drawSceneInfo = const_cast<util::DrawSceneInfo &>(cdrawSceneInfo);
-			if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags, util::DrawSceneInfo::Flags::DisableRender))
+			auto &drawSceneInfo = const_cast<pragma::rendering::DrawSceneInfo &>(cdrawSceneInfo);
+			if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisableRender))
 				continue;
 			if(drawSceneInfo.subPasses) {
 				// This scene has sub-scenes we have to consider first!
@@ -606,11 +606,11 @@ void pragma::CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSce
 	buildCommandBuffers(drawSceneInfos);
 
 	// Render the scenes
-	std::function<void(const std::vector<util::DrawSceneInfo> &)> renderScenes = nullptr;
-	renderScenes = [this, &renderScenes, drawWorld](const std::vector<util::DrawSceneInfo> &drawSceneInfos) {
+	std::function<void(const std::vector<pragma::rendering::DrawSceneInfo> &)> renderScenes = nullptr;
+	renderScenes = [this, &renderScenes, drawWorld](const std::vector<pragma::rendering::DrawSceneInfo> &drawSceneInfos) {
 		for(auto &cdrawSceneInfo : drawSceneInfos) {
-			auto &drawSceneInfo = const_cast<util::DrawSceneInfo &>(cdrawSceneInfo);
-			if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags, util::DrawSceneInfo::Flags::DisableRender))
+			auto &drawSceneInfo = const_cast<pragma::rendering::DrawSceneInfo &>(cdrawSceneInfo);
+			if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisableRender))
 				continue;
 
 			if(drawSceneInfo.subPasses) {
@@ -650,14 +650,14 @@ void pragma::CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSce
 			m_bMainRenderPass = false;
 
 			auto bSkipScene = CallCallbacksWithOptionalReturn<
-				bool,std::reference_wrapper<const util::DrawSceneInfo>
+				bool,std::reference_wrapper<const pragma::rendering::DrawSceneInfo>
 			>("DrawScene",ret,std::ref(drawSceneInfo)) == CallbackReturnType::HasReturnValue;
 			m_bMainRenderPass = true;
 			if(bSkipScene == true && ret == true)
 				return;
 			m_bMainRenderPass = false;
 			if(CallLuaCallbacks<
-				bool,std::reference_wrapper<const util::DrawSceneInfo>
+				bool,std::reference_wrapper<const pragma::rendering::DrawSceneInfo>
 			>("DrawScene",&bSkipScene,std::ref(drawSceneInfo)) == CallbackReturnType::HasReturnValue && bSkipScene == true)
 			{
 				CallCallbacks("PostRenderScenes");

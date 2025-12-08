@@ -280,8 +280,8 @@ export namespace pragma {
 		const TCPPM *GetScene() const;
 		template<typename TCPPM>
 		TCPPM *GetScene();
-		const WorldEnvironment &GetWorldEnvironment() const;
-		WorldEnvironment &GetWorldEnvironment();
+		const rendering::WorldEnvironment &GetWorldEnvironment() const;
+		rendering::WorldEnvironment &GetWorldEnvironment();
 
 		virtual float GetTimeScale() override;
 		virtual void SetTimeScale(float t) override;
@@ -294,8 +294,8 @@ export namespace pragma {
 		TCPPM *GetViewBody();
 		void ReloadRenderFrameBuffer();
 
-		void RenderScenes(util::DrawSceneInfo &drawSceneInfo);
-		void RenderScene(const util::DrawSceneInfo &drawSceneInfo);
+		void RenderScenes(pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void RenderScene(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 
 		// GUI
 		void PreGUIDraw();
@@ -361,9 +361,9 @@ export namespace pragma {
 		bool IsDefaultGameRenderEnabled() const;
 
 		uint32_t GetNumberOfScenesQueuedForRendering() const;
-		util::DrawSceneInfo *GetQueuedSceneRenderInfo(uint32_t i);
-		void QueueForRendering(const util::DrawSceneInfo &drawSceneInfo);
-		void RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos);
+		pragma::rendering::DrawSceneInfo *GetQueuedSceneRenderInfo(uint32_t i);
+		void QueueForRendering(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void RenderScenes(const std::vector<pragma::rendering::DrawSceneInfo> &drawSceneInfos);
 		template<typename TCPPM>
 		void SetRenderScene(TCPPM &scene);
 		void ResetRenderScene();
@@ -392,7 +392,7 @@ export namespace pragma {
 		void OnGameWorldShaderSettingsChanged(const pragma::rendering::GameWorldShaderSettings &newSettings, const pragma::rendering::GameWorldShaderSettings &oldSettings);
 
 		// For internal use only!
-		const std::vector<util::DrawSceneInfo> &GetQueuedRenderScenes() const;
+		const std::vector<pragma::rendering::DrawSceneInfo> &GetQueuedRenderScenes() const;
 	protected:
 		virtual void RegisterLuaEntityComponents(luabind::module_ &gameMod) override;
 		virtual void OnMapLoaded() override;
@@ -470,7 +470,7 @@ export namespace pragma {
 
 		// Render
 		bool m_defaultGameRenderEnabled = true;
-		std::vector<util::DrawSceneInfo> m_sceneRenderQueue {};
+		std::vector<pragma::rendering::DrawSceneInfo> m_sceneRenderQueue {};
 		std::shared_ptr<pragma::rendering::RenderQueueBuilder> m_renderQueueBuilder = nullptr;
 		std::shared_ptr<pragma::rendering::RenderQueueWorkerManager> m_renderQueueWorkerManager = nullptr;
 		std::unique_ptr<pragma::rendering::GlobalShaderInputDataManager> m_globalShaderInputDataManager;
@@ -489,7 +489,7 @@ export namespace pragma {
 
 		// Scene
 		util::TWeakSharedHandle<pragma::BaseEntityComponent> m_scene = util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
-		std::shared_ptr<WorldEnvironment> m_worldEnvironment = nullptr;
+		std::shared_ptr<rendering::WorldEnvironment> m_worldEnvironment = nullptr;
 
 		void OnEnvironmentLightSourceChanged(pragma::BaseEnvLightDirectionalComponent *oldSource, pragma::BaseEnvLightDirectionalComponent *newSource);
 

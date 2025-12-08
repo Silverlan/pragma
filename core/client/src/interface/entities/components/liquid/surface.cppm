@@ -53,7 +53,7 @@ export namespace pragma {
 	  private:
 		virtual void OnEntitySpawn() override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
-		void RenderPostProcessingOverlay(const util::DrawSceneInfo &drawSceneInfo);
+		void RenderPostProcessingOverlay(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 		void InitializeRenderData();
 		void InitializeRenderer(pragma::CRendererComponent &component);
 

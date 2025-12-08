@@ -57,8 +57,8 @@ pragma::ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo
 	RegisterCallback<void, msys::CMaterial *>("OnMaterialLoaded");
 
 	RegisterCallback<void>("Draw");
-	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender");
-	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PostRender");
+	RegisterCallback<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender");
+	RegisterCallback<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PostRender");
 	RegisterCallback<void, std::reference_wrapper<NetPacket>>("OnReceivePacket");
 	RegisterCallback<void, std::reference_wrapper<NetPacket>>("OnSendPacketTCP");
 	RegisterCallback<void, std::reference_wrapper<NetPacket>>("OnSendPacketUDP");
@@ -422,7 +422,7 @@ pragma::console::ConVar *pragma::ClientState::SetConVar(std::string scmd, std::s
 	return cvar;
 }
 
-void pragma::ClientState::Draw(util::DrawSceneInfo &drawSceneInfo) //const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd); // prosper TODO
+void pragma::ClientState::Draw(pragma::rendering::DrawSceneInfo &drawSceneInfo) //const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd); // prosper TODO
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("draw_game_scenes");
@@ -445,24 +445,24 @@ void pragma::ClientState::Draw(util::DrawSceneInfo &drawSceneInfo) //const Vulka
 #endif
 }
 
-void pragma::ClientState::Render(util::DrawSceneInfo &drawSceneInfo, std::shared_ptr<prosper::RenderTarget> &rt)
+void pragma::ClientState::Render(pragma::rendering::DrawSceneInfo &drawSceneInfo, std::shared_ptr<prosper::RenderTarget> &rt)
 {
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	drawSceneInfo.outputImage = rt->GetTexture().GetImage().shared_from_this();
-	CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender", std::ref(drawSceneInfo), std::ref(rt));
+	CallCallbacks<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender", std::ref(drawSceneInfo), std::ref(rt));
 	if(m_game != nullptr) {
 		auto &context = pragma::get_cengine()->GetRenderContext();
 		context.GetPipelineLoader().Flush(); // Make sure all shaders have been loaded and initialized
 
-		m_game->CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender", std::ref(drawSceneInfo), std::ref(rt));
+		m_game->CallCallbacks<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender", std::ref(drawSceneInfo), std::ref(rt));
 		m_game->CallLuaCallbacks("PreRender");
 	}
 	Draw(drawSceneInfo);
 	if(m_game != nullptr) {
-		m_game->CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PostRender", std::ref(drawSceneInfo), std::ref(rt));
+		m_game->CallCallbacks<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PostRender", std::ref(drawSceneInfo), std::ref(rt));
 		m_game->CallLuaCallbacks("PostRender");
 	}
-	CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PostRender", std::ref(drawSceneInfo), std::ref(rt));
+	CallCallbacks<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PostRender", std::ref(drawSceneInfo), std::ref(rt));
 }
 
 void pragma::ClientState::Think()

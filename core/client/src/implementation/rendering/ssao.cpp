@@ -14,7 +14,7 @@ import :game;
 import :gui;
 import :rendering.shaders;
 
-bool SSAOInfo::Initialize(prosper::IPrContext &context, uint32_t width, uint32_t height, prosper::SampleCountFlags samples, const std::shared_ptr<prosper::Texture> &texNorm, const std::shared_ptr<prosper::Texture> &texDepth)
+bool pragma::rendering::SSAOInfo::Initialize(prosper::IPrContext &context, uint32_t width, uint32_t height, prosper::SampleCountFlags samples, const std::shared_ptr<prosper::Texture> &texNorm, const std::shared_ptr<prosper::Texture> &texDepth)
 {
 	if(pragma::ShaderSSAO::DESCRIPTOR_SET_PREPASS.IsValid() == false || pragma::shaderSSAOBlur::DESCRIPTOR_SET_TEXTURE.IsValid() == false)
 		return false;
@@ -51,7 +51,7 @@ bool SSAOInfo::Initialize(prosper::IPrContext &context, uint32_t width, uint32_t
 	return true;
 }
 
-void SSAOInfo::Clear()
+void pragma::rendering::SSAOInfo::Clear()
 {
 	renderTarget = nullptr;
 	renderTargetBlur = nullptr;
@@ -59,8 +59,8 @@ void SSAOInfo::Clear()
 	descSetGroupOcclusion = nullptr;
 }
 
-prosper::Shader *SSAOInfo::GetSSAOShader() const { return shader.get(); }
-prosper::Shader *SSAOInfo::GetSSAOBlurShader() const { return shaderBlur.get(); }
+prosper::Shader *pragma::rendering::SSAOInfo::GetSSAOShader() const { return shader.get(); }
+prosper::Shader *pragma::rendering::SSAOInfo::GetSSAOBlurShader() const { return shaderBlur.get(); }
 
 static void debug_ssao(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {

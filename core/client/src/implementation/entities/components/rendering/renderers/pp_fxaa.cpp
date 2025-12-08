@@ -18,14 +18,14 @@ static auto cvFxaaSubPixelAliasingRemoval = pragma::console::get_client_con_var(
 static auto cvFxaaEdgeThreshold = pragma::console::get_client_con_var("cl_render_fxaa_edge_threshold");
 static auto cvFxaaMinEdgeThreshold = pragma::console::get_client_con_var("cl_render_fxaa_min_edge_threshold");
 CRendererPpFxaaComponent::CRendererPpFxaaComponent(pragma::ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
-void CRendererPpFxaaComponent::DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo)
+void CRendererPpFxaaComponent::DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.renderStats)
-		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuFxaa, *drawSceneInfo.commandBuffer);
+		(*drawSceneInfo.renderStats)->BeginGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuFxaa, *drawSceneInfo.commandBuffer);
 
 	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
 		if(drawSceneInfo.renderStats)
-			(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuFxaa, *drawSceneInfo.commandBuffer);
+			(*drawSceneInfo.renderStats)->EndGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuFxaa, *drawSceneInfo.commandBuffer);
 	}};
 
 	if(static_cast<pragma::rendering::AntiAliasing>(cvAntiAliasing->GetInt()) != pragma::rendering::AntiAliasing::FXAA || m_renderer.expired())

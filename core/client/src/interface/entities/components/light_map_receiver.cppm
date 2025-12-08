@@ -18,7 +18,7 @@ export namespace pragma {
 	class DLLCLIENT CLightMapReceiverComponent final : public BaseEntityComponent {
 	  public:
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
-		static void SetupLightMapUvData(ecs::CBaseEntity &ent, LightmapDataCache *cache = nullptr);
+		static void SetupLightMapUvData(ecs::CBaseEntity &ent, rendering::LightmapDataCache *cache = nullptr);
 		enum class StateFlags : uint8_t { None = 0, IsModelBakedWithLightMaps = 1u, RenderMeshBufferIndexTableDirty = IsModelBakedWithLightMaps << 1u };
 		using MeshIdx = uint32_t;
 		using BufferIdx = uint32_t;
@@ -35,14 +35,14 @@ export namespace pragma {
 
 		void UpdateMeshLightmapUvBuffers(CLightMapComponent &lightMapC);
 
-		const LightmapDataCache *GetLightmapDataCache() const;
-		void SetLightmapDataCache(LightmapDataCache *cache);
+		const rendering::LightmapDataCache *GetLightmapDataCache() const;
+		void SetLightmapDataCache(rendering::LightmapDataCache *cache);
 	  protected:
 		const std::vector<Vector2> *FindLightmapUvSet(pragma::geometry::ModelSubMesh &mesh) const;
 		void UpdateModelMeshes();
 		void UpdateRenderMeshBufferList();
 
-		std::shared_ptr<LightmapDataCache> m_lightmapDataCache;
+		std::shared_ptr<rendering::LightmapDataCache> m_lightmapDataCache;
 		std::unordered_map<MeshIdx, std::vector<Vector2>> m_uvDataPerMesh {};
 		std::unordered_map<MeshIdx, std::shared_ptr<pragma::geometry::ModelSubMesh>> m_meshes {};
 		std::unordered_map<pragma::geometry::CModelSubMesh *, MeshIdx> m_meshToMeshIdx {};

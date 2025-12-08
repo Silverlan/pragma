@@ -20,7 +20,7 @@ void CRendererPpBaseComponent::Initialize()
 	auto rendererC = GetEntity().GetComponent<CRendererComponent>();
 	if(rendererC.expired())
 		return;
-	m_cbEffect = rendererC->AddPostProcessingEffect(GetIdentifier(), [this](const util::DrawSceneInfo &drawSceneInfo) { RenderEffect(drawSceneInfo); }, GetPostProcessingWeight(), [this]() { return GetFlags(); });
+	m_cbEffect = rendererC->AddPostProcessingEffect(GetIdentifier(), [this](const pragma::rendering::DrawSceneInfo &drawSceneInfo) { RenderEffect(drawSceneInfo); }, GetPostProcessingWeight(), [this]() { return GetFlags(); });
 }
 void CRendererPpBaseComponent::OnRemove()
 {
@@ -31,7 +31,7 @@ void CRendererPpBaseComponent::OnRemove()
 }
 void CRendererPpBaseComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 pragma::PostProcessingEffectData::Flags CRendererPpBaseComponent::GetFlags() const { return PostProcessingEffectData::Flags::None; }
-void CRendererPpBaseComponent::RenderEffect(const util::DrawSceneInfo &drawSceneInfo)
+void CRendererPpBaseComponent::RenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired() || m_renderer.expired())
 		return;

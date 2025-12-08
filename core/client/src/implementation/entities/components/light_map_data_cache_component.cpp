@@ -23,7 +23,7 @@ void CLightMapDataCacheComponent::RegisterMembers(pragma::EntityComponentManager
 		auto memberInfo = create_component_member_info<T, TDataCache, static_cast<void (T::*)(const TDataCache &)>(&T::SetLightMapDataCachePath), static_cast<const TDataCache &(T::*)() const>(&T::GetLightMapDataCachePath)>("lightmapDataCache", "", AttributeSpecializationType::File);
 		memberInfo.SetSpecializationType(pragma::AttributeSpecializationType::File);
 		auto &metaData = memberInfo.AddMetaData();
-		metaData["extensions"] = std::vector<std::string> {pragma::LightmapDataCache::FORMAT_MODEL_BINARY, pragma::LightmapDataCache::FORMAT_MODEL_ASCII};
+		metaData["extensions"] = std::vector<std::string> {pragma::rendering::LightmapDataCache::FORMAT_MODEL_BINARY, pragma::rendering::LightmapDataCache::FORMAT_MODEL_ASCII};
 		metaData["stripRootPath"] = false;
 		metaData["stripExtension"] = false;
 		registerMember(std::move(memberInfo));
@@ -40,7 +40,7 @@ void CLightMapDataCacheComponent::SetLightMapDataCachePath(const std::string &ca
 	SetTickPolicy(pragma::TickPolicy::Always);
 }
 const std::string &CLightMapDataCacheComponent::GetLightMapDataCachePath() const { return m_lightmapDataCacheFile; }
-const std::shared_ptr<LightmapDataCache> &CLightMapDataCacheComponent::GetLightMapDataCache() const { return m_lightmapDataCache; }
+const std::shared_ptr<pragma::rendering::LightmapDataCache> &CLightMapDataCacheComponent::GetLightMapDataCache() const { return m_lightmapDataCache; }
 
 void CLightMapDataCacheComponent::OnTick(double dt)
 {
@@ -104,9 +104,9 @@ void CLightMapDataCacheComponent::InitializeUvBuffers()
 void CLightMapDataCacheComponent::ReloadCache()
 {
 	CLightMapComponent::LOGGER.info("Reloading lightmap data cache from cache file '{}'...", m_lightmapDataCacheFile);
-	m_lightmapDataCache = ::util::make_shared<LightmapDataCache>();
+	m_lightmapDataCache = ::util::make_shared<rendering::LightmapDataCache>();
 	std::string err;
-	if(!LightmapDataCache::Load(m_lightmapDataCacheFile, *m_lightmapDataCache, err))
+	if(!rendering::LightmapDataCache::Load(m_lightmapDataCacheFile, *m_lightmapDataCache, err))
 		m_lightmapDataCache = nullptr;
 
 	if(!m_lightmapDataCache) {

@@ -33,8 +33,8 @@ export namespace pragma {
 		virtual void OnTick(double dt) override;
 	  private:
 		void SetPipelineDirty();
-		virtual void DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo) override;
-		ControlledBlurSettings m_controlledBlurSettings;
+		virtual void DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo) override;
+		rendering::ControlledBlurSettings m_controlledBlurSettings;
 		float m_bloomThreshold = 1.f;
 	};
 };

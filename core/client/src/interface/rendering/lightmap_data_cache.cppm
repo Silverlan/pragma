@@ -9,7 +9,7 @@ export module pragma.client:rendering.lightmap_data_cache;
 
 export import pragma.udm;
 
-export namespace pragma {
+export namespace pragma::rendering {
 	struct DLLCLIENT LmUuid {
 		util::Uuid uuid;
 		bool operator==(const LmUuid &other) const { return uuid == other.uuid; }
@@ -17,8 +17,8 @@ export namespace pragma {
 };
 export namespace std {
 	template<>
-	struct hash<pragma::LmUuid> {
-		std::size_t operator()(const pragma::LmUuid &k) const
+	struct hash<pragma::rendering::LmUuid> {
+		std::size_t operator()(const pragma::rendering::LmUuid &k) const
 		{
 			using std::hash;
 			using std::size_t;
@@ -32,7 +32,7 @@ export namespace std {
 	};
 }
 
-export namespace pragma {
+export namespace pragma::rendering {
 	struct DLLCLIENT LightmapDataCache : public std::enable_shared_from_this<LightmapDataCache> {
 		static constexpr auto PLMD_IDENTIFIER = "PLMD";
 		static constexpr udm::Version PLMD_VERSION = 1;

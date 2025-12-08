@@ -880,21 +880,21 @@ int Lua::game::Client::set_action_input(lua::State *l)
 }
 int Lua::game::Client::update_render_buffers(lua::State *l)
 {
-	auto &drawSceneInfo = Lua::Check<const ::util::DrawSceneInfo>(l, 1);
+	auto &drawSceneInfo = Lua::Check<const ::pragma::rendering::DrawSceneInfo>(l, 1);
 	auto &renderQueue = Lua::Check<const pragma::rendering::RenderQueue>(l, 2);
 	pragma::CSceneComponent::UpdateRenderBuffers(drawSceneInfo.commandBuffer, renderQueue);
 	return 0;
 }
 int Lua::game::Client::render_scenes(lua::State *l)
 {
-	std::vector<::util::DrawSceneInfo> scenes {};
+	std::vector<::pragma::rendering::DrawSceneInfo> scenes {};
 	auto n = Lua::GetObjectLength(l, 1);
 	scenes.reserve(n);
 
 	auto t = luabind::object {luabind::from_stack(l, 1)};
 	for(luabind::iterator i {t}, end; i != end; ++i) {
 		auto val = *i;
-		auto *drawSceneInfo = luabind::object_cast<::util::DrawSceneInfo *>(val);
+		auto *drawSceneInfo = luabind::object_cast<::pragma::rendering::DrawSceneInfo *>(val);
 		scenes.push_back(*drawSceneInfo);
 	}
 	pragma::get_cgame()->RenderScenes(scenes);
@@ -945,7 +945,7 @@ int Lua::game::Client::set_debug_render_filter(lua::State *l)
 }
 int Lua::game::Client::queue_scene_for_rendering(lua::State *l)
 {
-	auto &drawSceneInfo = Lua::Check<::util::DrawSceneInfo>(l, 1);
+	auto &drawSceneInfo = Lua::Check<::pragma::rendering::DrawSceneInfo>(l, 1);
 	pragma::get_cgame()->QueueForRendering(drawSceneInfo);
 #if 0
 	auto scene = drawSceneInfo.scene.valid() ? drawSceneInfo.scene.get() : pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
@@ -988,7 +988,7 @@ int Lua::game::Client::get_queued_render_scenes(lua::State *l)
 	auto t = luabind::newtable(l);
 	int32_t i = 1;
 	for(auto &renderScene : renderScenes)
-		t[i++] = const_cast<::util::DrawSceneInfo &>(renderScene);
+		t[i++] = const_cast<::pragma::rendering::DrawSceneInfo &>(renderScene);
 	t.push(l);
 	return 1;
 }

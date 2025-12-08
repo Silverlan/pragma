@@ -6,24 +6,24 @@ module;
 module pragma.client;
 
 import :rendering.world_environment;
-std::shared_ptr<WorldEnvironment> WorldEnvironment::Create() { return std::shared_ptr<WorldEnvironment>(new WorldEnvironment()); }
+std::shared_ptr<pragma::rendering::WorldEnvironment> pragma::rendering::WorldEnvironment::Create() { return std::shared_ptr<WorldEnvironment>(new WorldEnvironment()); }
 
-WorldEnvironment::WorldEnvironment()
+pragma::rendering::WorldEnvironment::WorldEnvironment()
 {
 	m_shaderQuality = ::util::make_shared<util::Int32Property>(int32_t {0});
 	m_bUnlit = ::util::make_shared<util::BoolProperty>(bool {false});
 	m_shadowResolution = ::util::make_shared<util::UInt32Property>(uint32_t {0});
 }
-int32_t WorldEnvironment::GetShaderQuality() const { return *m_shaderQuality; }
-void WorldEnvironment::SetShaderQuality(int32_t quality) { *m_shaderQuality = quality; }
-const std::shared_ptr<util::Int32Property> &WorldEnvironment::GetShaderQualityProperty() const { return m_shaderQuality; }
+int32_t pragma::rendering::WorldEnvironment::GetShaderQuality() const { return *m_shaderQuality; }
+void pragma::rendering::WorldEnvironment::SetShaderQuality(int32_t quality) { *m_shaderQuality = quality; }
+const std::shared_ptr<util::Int32Property> &pragma::rendering::WorldEnvironment::GetShaderQualityProperty() const { return m_shaderQuality; }
 
-bool WorldEnvironment::IsUnlit() const { return *m_bUnlit; }
-void WorldEnvironment::SetUnlit(bool b) { *m_bUnlit = b; }
-const std::shared_ptr<util::BoolProperty> &WorldEnvironment::GetUnlitProperty() const { return m_bUnlit; }
+bool pragma::rendering::WorldEnvironment::IsUnlit() const { return *m_bUnlit; }
+void pragma::rendering::WorldEnvironment::SetUnlit(bool b) { *m_bUnlit = b; }
+const std::shared_ptr<util::BoolProperty> &pragma::rendering::WorldEnvironment::GetUnlitProperty() const { return m_bUnlit; }
 
-uint32_t WorldEnvironment::GetShadowResolution() const { return *m_shadowResolution; }
-void WorldEnvironment::SetShadowResolution(uint32_t resolution) { *m_shadowResolution = resolution; }
-const std::shared_ptr<util::UInt32Property> &WorldEnvironment::GetShadowResolutionProperty() const { return m_shadowResolution; }
+uint32_t pragma::rendering::WorldEnvironment::GetShadowResolution() const { return *m_shadowResolution; }
+void pragma::rendering::WorldEnvironment::SetShadowResolution(uint32_t resolution) { *m_shadowResolution = resolution; }
+const std::shared_ptr<util::UInt32Property> &pragma::rendering::WorldEnvironment::GetShadowResolutionProperty() const { return m_shadowResolution; }
 
-WorldEnvironment::Fog &WorldEnvironment::GetFogSettings() { return m_fog; }
+pragma::rendering::WorldEnvironment::Fog &pragma::rendering::WorldEnvironment::GetFogSettings() { return m_fog; }

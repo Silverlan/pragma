@@ -63,7 +63,7 @@ void CRendererPpVolumetricComponent::Initialize()
 	if(GetEntity().IsSpawned())
 		ReloadRenderTarget();
 }
-void CRendererPpVolumetricComponent::DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo)
+void CRendererPpVolumetricComponent::DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired() || m_renderer.expired() || g_shader.expired() || !m_renderTarget)
 		return;

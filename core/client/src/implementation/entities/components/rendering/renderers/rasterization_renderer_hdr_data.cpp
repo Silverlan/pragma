@@ -140,7 +140,7 @@ HDRData::~HDRData()
 	context.KeepResourceAliveUntilPresentationComplete(forwardPlusInstance.GetVisLightIndexBuffer());
 }
 
-bool HDRData::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *customRenderPass, bool secondaryCommandBuffers)
+bool HDRData::BeginRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *customRenderPass, bool secondaryCommandBuffers)
 {
 	auto &rt = GetRenderTarget(drawSceneInfo);
 	return drawSceneInfo.commandBuffer->RecordBeginRenderPass(rt,
@@ -150,7 +150,7 @@ bool HDRData::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo, prosper:
 	  },
 	  secondaryCommandBuffers ? prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers : prosper::IPrimaryCommandBuffer::RenderPassFlags::None, customRenderPass);
 }
-bool HDRData::EndRenderPass(const util::DrawSceneInfo &drawSceneInfo) { return drawSceneInfo.commandBuffer->RecordEndRenderPass(); }
+bool HDRData::EndRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo) { return drawSceneInfo.commandBuffer->RecordEndRenderPass(); }
 
 prosper::util::SamplerCreateInfo HDRData::GetSamplerCreateInfo()
 {
@@ -362,7 +362,7 @@ bool HDRData::ReloadBloomRenderTarget(uint32_t width)
 	return true;
 }
 
-bool HDRData::ResolveRenderPass(const util::DrawSceneInfo &drawSceneInfo) { return EndRenderPass(drawSceneInfo) && BeginRenderPass(drawSceneInfo, rpPostParticle.get()); }
+bool HDRData::ResolveRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo) { return EndRenderPass(drawSceneInfo) && BeginRenderPass(drawSceneInfo, rpPostParticle.get()); }
 
 bool HDRData::InitializeDescriptorSets()
 {
@@ -376,7 +376,7 @@ bool HDRData::InitializeDescriptorSets()
 	return true;
 }
 
-bool HDRData::BlitMainDepthBufferToSamplableDepthBuffer(const util::DrawSceneInfo &drawSceneInfo, std::function<void(prosper::ICommandBuffer &)> &fTransitionSampleImgToTransferDst)
+bool HDRData::BlitMainDepthBufferToSamplableDepthBuffer(const pragma::rendering::DrawSceneInfo &drawSceneInfo, std::function<void(prosper::ICommandBuffer &)> &fTransitionSampleImgToTransferDst)
 {
 #if 0
 	auto &srcDepthTex = *prepass.textureDepth;
@@ -402,9 +402,9 @@ bool HDRData::BlitMainDepthBufferToSamplableDepthBuffer(const util::DrawSceneInf
 	return false;
 }
 
-prosper::RenderTarget &HDRData::GetRenderTarget(const util::DrawSceneInfo &drawSceneInfo) { return drawSceneInfo.renderTarget ? *drawSceneInfo.renderTarget : *sceneRenderTarget; }
+prosper::RenderTarget &HDRData::GetRenderTarget(const pragma::rendering::DrawSceneInfo &drawSceneInfo) { return drawSceneInfo.renderTarget ? *drawSceneInfo.renderTarget : *sceneRenderTarget; }
 
-bool HDRData::BlitStagingRenderTargetToMainRenderTarget(const util::DrawSceneInfo &drawSceneInfo, prosper::ImageLayout srcHdrLayout, prosper::ImageLayout dstHdrLayout)
+bool HDRData::BlitStagingRenderTargetToMainRenderTarget(const pragma::rendering::DrawSceneInfo &drawSceneInfo, prosper::ImageLayout srcHdrLayout, prosper::ImageLayout dstHdrLayout)
 {
 	auto &rt = GetRenderTarget(drawSceneInfo);
 	auto &hdrTex = rt.GetTexture();
@@ -543,7 +543,7 @@ static void debug_render_scene(pragma::NetworkState *state, pragma::BasePlayerCo
 		r->SetSize(size * idx, size);
 		return r->GetHandle();
 	});
-	dbg->AddCallback("PostRenderScene", FunctionCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>::Create([](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
+	dbg->AddCallback("PostRenderScene", FunctionCallback<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>::Create([](std::reference_wrapper<const pragma::rendering::DrawSceneInfo> drawSceneInfo) {
 		if(hTexture.IsValid() == true)
 			static_cast<pragma::gui::types::WIDebugMSAATexture *>(hTexture.get())->Update();
 		if(hBloomTexture.IsValid() == true)

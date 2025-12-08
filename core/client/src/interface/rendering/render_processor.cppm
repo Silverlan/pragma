@@ -89,7 +89,7 @@ export namespace pragma::rendering {
 			CountNonOpaqueMaterialsOnly = EntityBound << 1u
 		};
 		enum class CameraType : uint8_t { World = 0, View };
-		BaseRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin);
+		BaseRenderProcessor(const pragma::rendering::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin);
 		~BaseRenderProcessor();
 		void SetCameraType(CameraType camType);
 		void Set3DSky(bool enabled);
@@ -105,7 +105,7 @@ export namespace pragma::rendering {
 		void SetCountNonOpaqueMaterialsOnly(bool b);
 		prosper::Extent2D GetExtents() const;
 		void RecordViewport();
-		const util::RenderPassDrawInfo &GetRenderPassDrawInfo() const { return m_drawSceneInfo; }
+		const pragma::rendering::RenderPassDrawInfo &GetRenderPassDrawInfo() const { return m_drawSceneInfo; }
 	  protected:
 		uint32_t Render(const pragma::rendering::RenderQueue &renderQueue, RenderPass pass, RenderPassStats *optStats = nullptr, std::optional<uint32_t> worldRenderQueueIndex = {});
 		bool BindInstanceSet(pragma::ShaderGameWorld &shaderScene, const RenderQueue::InstanceSet *instanceSet = nullptr);
@@ -132,7 +132,7 @@ export namespace pragma::rendering {
 		uint32_t TranslateBasePipelineIndexToPassPipelineIndex(prosper::Shader &shader, uint32_t pipelineIdx, PassType passType) const;
 
 		CameraType m_camType = CameraType::World;
-		const util::RenderPassDrawInfo &m_drawSceneInfo;
+		const pragma::rendering::RenderPassDrawInfo &m_drawSceneInfo;
 		Vector4 m_drawOrigin;
 		std::optional<Vector2> m_depthBias {};
 		RenderPassStats *m_stats = nullptr;
@@ -143,7 +143,7 @@ export namespace pragma::rendering {
 
 	class DLLCLIENT DepthStageRenderProcessor : public pragma::rendering::BaseRenderProcessor {
 	  public:
-		DepthStageRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin);
+		DepthStageRenderProcessor(const pragma::rendering::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin);
 		uint32_t Render(const pragma::rendering::RenderQueue &renderQueue, RenderPass renderPass, RenderPassStats *optStats = nullptr, std::optional<uint32_t> worldRenderQueueIndex = {});
 		void BindLight(CLightComponent &light, uint32_t layerId);
 	};

@@ -10,6 +10,6 @@ export import :rendering.world_environment;
 
 export namespace Lua {
 	namespace WorldEnvironment {
-		DLLCLIENT void register_class(luabind::class_<::WorldEnvironment> &classDef);
+		DLLCLIENT void register_class(luabind::class_<pragma::rendering::WorldEnvironment> &classDef);
 	};
 };

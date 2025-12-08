@@ -22,7 +22,7 @@ static CallbackHandle g_updateRenderBuffersCallback = {};
 CMaterialPropertyOverrideComponent::CMaterialPropertyOverrideComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent)
 {
 	if(g_components.empty()) {
-		g_updateRenderBuffersCallback = GetGame().AddCallback("UpdateRenderBuffers", FunctionCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>::Create([](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
+		g_updateRenderBuffersCallback = GetGame().AddCallback("UpdateRenderBuffers", FunctionCallback<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>::Create([](std::reference_wrapper<const pragma::rendering::DrawSceneInfo> drawSceneInfo) {
 			for(auto *c : g_components)
 				c->UpdateRenderBuffers(*drawSceneInfo.get().commandBuffer);
 		}));

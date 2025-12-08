@@ -108,8 +108,8 @@ export namespace pragma {
 		virtual pragma::NwStateType GetType() const override;
 		virtual void Think() override;
 		virtual void Tick() override;
-		void Draw(util::DrawSceneInfo &drawSceneInfo);
-		void Render(util::DrawSceneInfo &drawSceneInfo, std::shared_ptr<prosper::RenderTarget> &rt);
+		void Draw(pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void Render(pragma::rendering::DrawSceneInfo &drawSceneInfo, std::shared_ptr<prosper::RenderTarget> &rt);
 		virtual void Close() override;
 		virtual console::ConVarMap *GetConVarMap() override;
 		bool IsConnected() const;

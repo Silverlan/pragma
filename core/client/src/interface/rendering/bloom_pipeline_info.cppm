@@ -7,7 +7,7 @@ export module pragma.client:rendering.bloom_pipeline_info;
 
 export import std.compat;
 
-export namespace pragma {
+export namespace pragma::rendering {
 	struct BloomPipelineInfo {
 		BloomPipelineInfo() = delete;
 		BloomPipelineInfo(uint32_t radius, double sigma);

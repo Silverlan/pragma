@@ -17,16 +17,16 @@ static auto cvToneMapping = pragma::console::get_client_con_var("cl_render_tone_
 CRendererPpToneMappingComponent::CRendererPpToneMappingComponent(pragma::ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
 PostProcessingEffectData::Flags CRendererPpToneMappingComponent::GetFlags() const { return m_applyToHdrImage ? PostProcessingEffectData::Flags::None : PostProcessingEffectData::Flags::ToneMapped; }
 void CRendererPpToneMappingComponent::SetApplyToHdrImage(bool applyToHdrImage) { m_applyToHdrImage = applyToHdrImage; }
-void CRendererPpToneMappingComponent::DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo)
+void CRendererPpToneMappingComponent::DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.renderStats)
-		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuToneMapping, *drawSceneInfo.commandBuffer);
+		(*drawSceneInfo.renderStats)->BeginGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuToneMapping, *drawSceneInfo.commandBuffer);
 	pragma::get_cgame()->StartGPUProfilingStage("PostProcessingHDR");
 
 	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
 		pragma::get_cgame()->StopGPUProfilingStage(); // PostProcessingHDR
 		if(drawSceneInfo.renderStats)
-			(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuToneMapping, *drawSceneInfo.commandBuffer);
+			(*drawSceneInfo.renderStats)->EndGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuToneMapping, *drawSceneInfo.commandBuffer);
 	}};
 
 	auto hShaderTonemapping = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::PPTonemapping);
@@ -72,7 +72,7 @@ void CRendererPpToneMappingComponent::DoRenderEffect(const util::DrawSceneInfo &
 				}
 			}
 
-			shaderPPHdr.RecordDraw(bindState, descSetHdrResolve, toneMapping, m_renderer->GetHDRExposure(), bloomAdditiveScale, umath::is_flag_set(drawSceneInfo.flags, util::DrawSceneInfo::Flags::FlipVertically));
+			shaderPPHdr.RecordDraw(bindState, descSetHdrResolve, toneMapping, m_renderer->GetHDRExposure(), bloomAdditiveScale, umath::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::FlipVertically));
 			shaderPPHdr.RecordEndDraw(bindState);
 		}
 		drawCmd->RecordEndRenderPass();

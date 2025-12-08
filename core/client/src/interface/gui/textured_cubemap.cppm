@@ -16,7 +16,7 @@ export namespace pragma::gui::types {
 		WITexturedCubemap();
 		virtual void Initialize() override;
 		void SetTexture(prosper::Texture &tex);
-		WITexturedRect *GetSideElement(CubeMapSide side);
+		WITexturedRect *GetSideElement(pragma::rendering::CubeMapSide side);
 		void SetLOD(float lod);
 	  protected:
 		std::array<pragma::gui::WIHandle, 6> m_hCubemapSides = {};

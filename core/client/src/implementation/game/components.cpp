@@ -13,7 +13,7 @@ import :entities.components;
 void pragma::CGame::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
 {
 	pragma::Game::InitializeEntityComponents(componentManager);
-	CBaseEntity::RegisterEvents(componentManager);
+	ecs::CBaseEntity::RegisterEvents(componentManager);
 	constexpr auto hideInEditor = pragma::ComponentRegInfo::Flags::HideInEditor;
 	componentManager.RegisterComponentType<pragma::CAIComponent>("ai", {"ai", hideInEditor});
 	componentManager.RegisterComponentType<pragma::CCharacterComponent>("character", {"gameplay", hideInEditor});

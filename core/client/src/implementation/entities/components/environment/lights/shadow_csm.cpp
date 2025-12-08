@@ -315,7 +315,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 						it = meshesInfo.entityMeshes.erase(it);
 						continue;
 					}
-					auto *ent = static_cast<CBaseEntity*>(info.hEntity.get());
+					auto *ent = static_cast<pragma::ecs::CBaseEntity*>(info.hEntity.get());
 					auto &mdlComponent = ent->GetRenderComponent()->GetModelComponent();
 					auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 					if(mdl == nullptr)
@@ -381,7 +381,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 						{
 							if(meshInfo.hEntity.IsValid() == false)
 								continue;
-							auto *ent = static_cast<CBaseEntity*>(meshInfo.hEntity.get());
+							auto *ent = static_cast<pragma::ecs::CBaseEntity*>(meshInfo.hEntity.get());
 							if(ent != prevEntity)
 							{
 								shaderCsmTransparent->BindEntity(*ent,GetViewProjectionMatrix(layer));
@@ -434,8 +434,8 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 		for(auto *ent : entIt)
 		{
-			auto pRenderComponent = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
-			if(ent->IsInert() == false || static_cast<CBaseEntity*>(ent)->IsInScene(*shadowScene) == false || pRenderComponent->ShouldDrawShadow(camPos) == false)
+			auto pRenderComponent = static_cast<pragma::ecs::CBaseEntity*>(ent)->GetRenderComponent();
+			if(ent->IsInert() == false || static_cast<pragma::ecs::CBaseEntity*>(ent)->IsInScene(*shadowScene) == false || pRenderComponent->ShouldDrawShadow(camPos) == false)
 				continue;
 			if(ent->IsWorld())
 			{
@@ -443,7 +443,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 				continue;
 			}
 			uint32_t renderFlags = 0;
-			if(pLightComponent->ShouldPass(static_cast<CBaseEntity&>(*ent),renderFlags) == true)
+			if(pLightComponent->ShouldPass(static_cast<pragma::ecs::CBaseEntity&>(*ent),renderFlags) == true)
 			{
 				auto &info = meshes.entityMeshes.at(i++);
 				info.hEntity = ent->GetHandle();

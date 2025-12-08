@@ -16,16 +16,16 @@ export import :rendering.light_data;
 
 export namespace pragma {
 	struct DLLCLIENT CEShouldPassEntity : public ComponentEvent {
-		CEShouldPassEntity(const CBaseEntity &entity, uint32_t &renderFlags);
+		CEShouldPassEntity(const ecs::CBaseEntity &entity, uint32_t &renderFlags);
 		virtual void PushArguments(lua::State *l) override;
-		const CBaseEntity &entity;
+		const ecs::CBaseEntity &entity;
 		uint32_t &renderFlags;
 		bool shouldPass = true;
 	};
 	struct DLLCLIENT CEShouldPassEntityMesh : public ComponentEvent {
-		CEShouldPassEntityMesh(const CBaseEntity &ent, const pragma::geometry::CModelMesh &mesh, uint32_t &renderFlags);
+		CEShouldPassEntityMesh(const ecs::CBaseEntity &ent, const pragma::geometry::CModelMesh &mesh, uint32_t &renderFlags);
 		virtual void PushArguments(lua::State *l) override;
-		const CBaseEntity &entity;
+		const ecs::CBaseEntity &entity;
 		const pragma::geometry::CModelMesh &mesh;
 		uint32_t &renderFlags;
 		bool shouldPass = true;
@@ -117,8 +117,8 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual void OnTick(double dt) override;
 		bool ShouldUpdateRenderPass(rendering::ShadowMapType smType) const;
-		virtual bool ShouldPass(const CBaseEntity &ent, uint32_t &renderFlags);
-		virtual bool ShouldPass(const CBaseEntity &ent, const pragma::geometry::CModelMesh &mesh, uint32_t &renderFlags);
+		virtual bool ShouldPass(const pragma::ecs::CBaseEntity &ent, uint32_t &renderFlags);
+		virtual bool ShouldPass(const pragma::ecs::CBaseEntity &ent, const pragma::geometry::CModelMesh &mesh, uint32_t &renderFlags);
 		virtual bool ShouldPass(const pragma::asset::Model &mdl, const pragma::geometry::CModelSubMesh &mesh);
 		template<typename TCPPM>
 		pragma::ComponentHandle<TCPPM> GetShadowMap(rendering::ShadowMapType type) const;
@@ -134,9 +134,9 @@ export namespace pragma {
 		bool ShouldCastShadows() const;
 		bool ShouldCastDynamicShadows() const;
 		bool ShouldCastStaticShadows() const;
-		bool IsInRange(const CBaseEntity &ent) const;
-		bool IsInRange(const CBaseEntity &ent, const pragma::geometry::CModelMesh &mesh) const;
-		bool IsInCone(const CBaseEntity &ent, const Vector3 &dir, float angle) const;
+		bool IsInRange(const pragma::ecs::CBaseEntity &ent) const;
+		bool IsInRange(const pragma::ecs::CBaseEntity &ent, const pragma::geometry::CModelMesh &mesh) const;
+		bool IsInCone(const pragma::ecs::CBaseEntity &ent, const Vector3 &dir, float angle) const;
 
 		// A shadowed light source may only be assigned to one scene / one scene slot
 		CSceneComponent *FindShadowScene() const;
@@ -220,7 +220,7 @@ export {
 	REGISTER_ENUM_FLAGS(pragma::CLightComponent::StateFlags)
 };
 
-export class DLLCLIENT CEnvLight : public CBaseEntity {
+export class DLLCLIENT CEnvLight : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };

@@ -28,7 +28,7 @@ pragma::CPlayerComponent *pragma::CGame::GetLocalPlayer()
 	return m_plLocal.get();
 }
 
-CBaseEntity *pragma::CGame::CreateEntity(std::string classname)
+pragma::ecs::CBaseEntity *pragma::CGame::CreateEntity(std::string classname)
 {
 	if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
 		return nullptr;
@@ -37,7 +37,7 @@ CBaseEntity *pragma::CGame::CreateEntity(std::string classname)
 	debug::get_domain().BeginTask("create_entity");
 	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
-	CBaseEntity *entlua = CreateLuaEntity(classname);
+	pragma::ecs::CBaseEntity *entlua = CreateLuaEntity(classname);
 	if(entlua != nullptr)
 		return entlua;
 	auto factory = client_entities::ClientEntityRegistry::Instance().FindFactory(classname);
@@ -62,7 +62,7 @@ void pragma::CGame::RemoveEntity(pragma::ecs::BaseEntity *ent)
 	ent->SetStateFlag(pragma::ecs::BaseEntity::StateFlags::Removed);
 	if(ent->IsPlayer())
 		m_numPlayers--;
-	unsigned int cIdx = static_cast<CBaseEntity *>(ent)->GetClientIndex();
+	unsigned int cIdx = static_cast<pragma::ecs::CBaseEntity *>(ent)->GetClientIndex();
 	unsigned int idx = ent->GetIndex();
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("remove_entity");
@@ -91,7 +91,7 @@ void pragma::CGame::RemoveEntity(pragma::ecs::BaseEntity *ent)
 	m_numEnts--;
 }
 
-void pragma::CGame::UpdateEntityModel(CBaseEntity *ent) { CallCallbacks<void, CBaseEntity *>("UpdateEntityModel", ent); }
+void pragma::CGame::UpdateEntityModel(ecs::CBaseEntity *ent) { CallCallbacks<void, ecs::CBaseEntity *>("UpdateEntityModel", ent); }
 
 void pragma::CGame::SpawnEntity(pragma::ecs::BaseEntity *ent)
 {
@@ -99,35 +99,35 @@ void pragma::CGame::SpawnEntity(pragma::ecs::BaseEntity *ent)
 	CallCallbacks<void, pragma::ecs::BaseEntity *>("OnEntitySpawned", ent);
 }
 
-void pragma::CGame::GetEntities(std::vector<CBaseEntity *> **ents) { *ents = &m_ents; }
+void pragma::CGame::GetEntities(std::vector<pragma::ecs::CBaseEntity *> **ents) { *ents = &m_ents; }
 void pragma::CGame::GetEntities(std::vector<pragma::ecs::BaseEntity *> **ents) { *ents = &m_baseEnts; }
-void pragma::CGame::GetSharedEntities(std::vector<CBaseEntity *> **ents) { *ents = &m_shEnts; }
+void pragma::CGame::GetSharedEntities(std::vector<pragma::ecs::CBaseEntity *> **ents) { *ents = &m_shEnts; }
 void pragma::CGame::GetSharedEntities(std::vector<pragma::ecs::BaseEntity *> **ents) { *ents = &m_shBaseEnts; }
 
-CBaseEntity *pragma::CGame::GetEntity(unsigned int idx)
+pragma::ecs::CBaseEntity *pragma::CGame::GetEntity(unsigned int idx)
 {
 	if(idx >= m_shEnts.size())
 		return nullptr;
 	return m_shEnts[idx];
 }
 
-CBaseEntity *pragma::CGame::GetEntityByLocalIndex(uint32_t idx) { return GetEntityByClientIndex(idx); }
+pragma::ecs::CBaseEntity *pragma::CGame::GetEntityByLocalIndex(uint32_t idx) { return GetEntityByClientIndex(idx); }
 
-CBaseEntity *pragma::CGame::GetEntityByClientIndex(unsigned int idx)
+pragma::ecs::CBaseEntity *pragma::CGame::GetEntityByClientIndex(unsigned int idx)
 {
 	if(idx >= m_ents.size())
 		return nullptr;
 	return m_ents[idx];
 }
 
-CBaseEntity *pragma::CGame::CreateLuaEntity(std::string classname, unsigned int idx, bool bLoadIfNotExists)
+pragma::ecs::CBaseEntity *pragma::CGame::CreateLuaEntity(std::string classname, unsigned int idx, bool bLoadIfNotExists)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("create_lua_entity");
 	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 	luabind::object oClass {};
-	auto *ent = static_cast<CBaseEntity *>(pragma::Game::CreateLuaEntity<CLuaEntity, pragma::LuaCore::HandleHolder<CLuaEntity>>(classname, oClass, bLoadIfNotExists));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::Game::CreateLuaEntity<CLuaEntity, pragma::LuaCore::HandleHolder<CLuaEntity>>(classname, oClass, bLoadIfNotExists));
 	if(ent == nullptr)
 		return nullptr;
 	SetupEntity(ent, idx);
@@ -140,7 +140,7 @@ CBaseEntity *pragma::CGame::CreateLuaEntity(std::string classname, unsigned int 
 	return ent;
 }
 
-CBaseEntity *pragma::CGame::CreateLuaEntity(std::string classname, bool bLoadIfNotExists) { return CreateLuaEntity(classname, GetFreeEntityIndex(), bLoadIfNotExists); }
+pragma::ecs::CBaseEntity *pragma::CGame::CreateLuaEntity(std::string classname, bool bLoadIfNotExists) { return CreateLuaEntity(classname, GetFreeEntityIndex(), bLoadIfNotExists); }
 
 void pragma::CGame::SetupEntity(pragma::ecs::BaseEntity *ent, unsigned int idx)
 {
@@ -170,7 +170,7 @@ void pragma::CGame::SetupEntity(pragma::ecs::BaseEntity *ent, unsigned int idx)
 		m_baseEnts.push_back(nullptr);
 		clIdx = CUInt32(m_ents.size()) - 1;
 	}
-	auto *cEnt = static_cast<CBaseEntity *>(ent);
+	auto *cEnt = static_cast<pragma::ecs::CBaseEntity *>(ent);
 	auto *scene = GetScene<pragma::CSceneComponent>();
 	if(scene)
 		cEnt->AddToScene(*scene); // Add to default scene automatically

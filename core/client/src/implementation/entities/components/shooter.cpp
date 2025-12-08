@@ -91,7 +91,7 @@ void ecs::CShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, con
 		}
 	}
 	if(bTransmitToServer == true)
-		static_cast<CBaseEntity &>(GetEntity()).SendNetEventUDP(m_netEvFireBullets, p);
+		static_cast<pragma::ecs::CBaseEntity &>(GetEntity()).SendNetEventUDP(m_netEvFireBullets, p);
 
 	events::CEOnBulletsFired evData {bulletInfo, outHitTargets};
 	BroadcastEvent(EVENT_ON_BULLETS_FIRED, evData);

@@ -23,7 +23,7 @@ using namespace pragma;
 class DLLCLIENT VelocityStageRenderProcessor : public pragma::rendering::DepthStageRenderProcessor {
   public:
 	VelocityStageRenderProcessor(pragma::ShaderVelocityBuffer &shaderVelocity, const util::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin, const pragma::MotionBlurTemporalData &motionBlurData, prosper::IDescriptorSet &dsMotionData, prosper::IDescriptorSet &dsBoneGeneric);
-	virtual bool BindEntity(CBaseEntity &ent) override;
+	virtual bool BindEntity(pragma::ecs::CBaseEntity &ent) override;
 	virtual bool BindShader(prosper::Shader &shader, uint32_t pipelineIdx = 0u) override;
   private:
 	pragma::ShaderVelocityBuffer &m_shaderVelocity;
@@ -43,7 +43,7 @@ bool VelocityStageRenderProcessor::BindShader(prosper::Shader &shader, uint32_t 
 	auto &cmd = m_shaderProcessor.GetCommandBuffer();
 	return cmd.RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, m_shaderProcessor.GetCurrentPipelineLayout(), pragma::ShaderVelocityBuffer::DESCRIPTOR_SET_MOTION_BLUR.setIndex, m_dsMotionData);
 }
-bool VelocityStageRenderProcessor::BindEntity(CBaseEntity &ent)
+bool VelocityStageRenderProcessor::BindEntity(ecs::CBaseEntity &ent)
 {
 	auto res = pragma::rendering::DepthStageRenderProcessor::BindEntity(ent);
 	if(res == false)
@@ -236,7 +236,7 @@ void CRendererPpMotionBlurComponent::DoUpdatePoses(const CMotionBlurDataComponen
 	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 	for(auto *ent : entIt) {
-		auto &r = *static_cast<CBaseEntity *>(ent)->GetRenderComponent();
+		auto &r = *static_cast<pragma::ecs::CBaseEntity *>(ent)->GetRenderComponent();
 		auto curPose = r.GetTransformationMatrix();
 		auto it = motionBlurData.curModelMatrices.find(ent);
 

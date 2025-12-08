@@ -9,7 +9,7 @@ export module pragma.client:networking.util;
 
 export import :entities.base_entity;
 
-export namespace nwm {
-	DLLCLIENT CBaseEntity *read_unique_entity(NetPacket &packet);
+export namespace pragma::networking {
+	DLLCLIENT ecs::CBaseEntity *read_unique_entity(NetPacket &packet);
 	DLLCLIENT CallbackHandle read_unique_entity(NetPacket &packet, const std::function<void(pragma::ecs::BaseEntity *)> &onCreated);
 };

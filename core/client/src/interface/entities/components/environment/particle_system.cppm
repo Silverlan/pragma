@@ -410,7 +410,7 @@ export {REGISTER_ENUM_FLAGS(pragma::ecs::CParticleSystemComponent::Flags)}
 export {REGISTER_ENUM_FLAGS(pragma::ecs::ParticleRenderFlags)}
 export {
 	namespace pragma::ecs {
-		class DLLCLIENT CEnvParticleSystem : public CBaseEntity {
+		class DLLCLIENT CEnvParticleSystem : public pragma::ecs::CBaseEntity {
 		  public:
 			virtual void Initialize() override;
 		};

@@ -34,7 +34,7 @@ export namespace pragma {
 	};
 };
 
-export class DLLCLIENT CWaterSurface : public CBaseEntity {
+export class DLLCLIENT CWaterSurface : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };

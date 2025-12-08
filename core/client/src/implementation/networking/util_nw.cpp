@@ -7,7 +7,7 @@ module pragma.client;
 
 import :networking.util;
 
-static CBaseEntity *read_unique_entity(NetPacket &packet, const std::function<void(pragma::ecs::BaseEntity *)> &onCreated = nullptr, CallbackHandle *hCallback = nullptr)
+static pragma::ecs::CBaseEntity *read_unique_entity(NetPacket &packet, const std::function<void(pragma::ecs::BaseEntity *)> &onCreated = nullptr, CallbackHandle *hCallback = nullptr)
 {
 	if(pragma::get_cgame() == nullptr)
 		return nullptr;
@@ -20,7 +20,7 @@ static CBaseEntity *read_unique_entity(NetPacket &packet, const std::function<vo
 		if(ent != nullptr && ent->IsSpawned() == true && ent->GetUuid() == uuid) {
 			if(onCreated != nullptr)
 				onCreated(ent);
-			return static_cast<CBaseEntity *>(ent);
+			return static_cast<pragma::ecs::CBaseEntity *>(ent);
 		}
 	}
 	if(onCreated == nullptr)
@@ -38,10 +38,10 @@ static CBaseEntity *read_unique_entity(NetPacket &packet, const std::function<vo
 	*hCallback = pragma::get_cgame()->AddCallback("OnEntitySpawned", cb); // Data is received after entity has been created, and before it has been spawned
 	return nullptr;
 }
-CallbackHandle nwm::read_unique_entity(NetPacket &packet, const std::function<void(pragma::ecs::BaseEntity *)> &onCreated)
+CallbackHandle pragma::networking::read_unique_entity(NetPacket &packet, const std::function<void(pragma::ecs::BaseEntity *)> &onCreated)
 {
 	CallbackHandle r;
 	::read_unique_entity(packet, onCreated, &r);
 	return r;
 }
-CBaseEntity *nwm::read_unique_entity(NetPacket &packet) { return ::read_unique_entity(packet); }
+pragma::ecs::CBaseEntity *pragma::networking::read_unique_entity(NetPacket &packet) { return ::read_unique_entity(packet); }

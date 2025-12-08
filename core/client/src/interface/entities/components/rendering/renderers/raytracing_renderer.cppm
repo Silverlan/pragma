@@ -20,7 +20,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CRaytracingRenderer : public CBaseEntity {
+	class DLLCLIENT CRaytracingRenderer : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

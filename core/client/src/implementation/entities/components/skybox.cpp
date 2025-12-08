@@ -18,7 +18,7 @@ using namespace pragma;
 void CSkyboxComponent::Initialize()
 {
 	BaseSkyboxComponent::Initialize();
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	auto pRenderComponent = ent.GetComponent<pragma::CRenderComponent>();
 	if(pRenderComponent.valid()) {
 		pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::Sky);

@@ -13,7 +13,7 @@ using namespace pragma;
 void CFuncPhysicsComponent::Initialize()
 {
 	BaseFuncPhysicsComponent::Initialize();
-	auto pRenderComponent = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
+	auto pRenderComponent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 	if(pRenderComponent)
 		pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::World);
 }

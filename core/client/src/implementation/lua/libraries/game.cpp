@@ -640,7 +640,7 @@ int Lua::game::Client::test(lua::State *l)
 										entIt.AttachFilter<EntityIteratorFilterClass>("prop_dynamic");
 										auto it = entIt.begin();
 										auto *ent = (it != entIt.end()) ? *it : nullptr;
-										static_cast<choreography::Event*>(ev.get())->SetActor(*static_cast<CBaseEntity*>(ent));
+										static_cast<choreography::Event*>(ev.get())->SetActor(*static_cast<pragma::ecs::CBaseEntity*>(ent));
 									}
 								}
 								else if(child->parameters.at(0) == "flexanimation")
@@ -714,7 +714,7 @@ int Lua::game::Client::test(lua::State *l)
 										auto it = entIt.begin();
 										auto *ent = (it != entIt.end()) ? *it : nullptr;
 
-										static_cast<choreography::Event*>(ev.get())->SetActor(*static_cast<CBaseEntity*>(ent));
+										static_cast<choreography::Event*>(ev.get())->SetActor(*static_cast<pragma::ecs::CBaseEntity*>(ent));
 										for(auto &pair : values)
 											static_cast<choreography::FacialFlexEvent*>(ev.get())->SetFlexControllerValues(pair.first,pair.second.values,(pair.second.stereo == true) ? &pair.second.lrDistribution : nullptr);
 									}
@@ -926,7 +926,7 @@ int Lua::game::Client::set_debug_render_filter(lua::State *l)
 	}
 	if(t["entityFilter"]) {
 		auto entityFilter = luabind::object {t["entityFilter"]};
-		filter->entityFilter = [entityFilter](CBaseEntity &ent, msys::CMaterial &mat) mutable -> bool {
+		filter->entityFilter = [entityFilter](pragma::ecs::CBaseEntity &ent, msys::CMaterial &mat) mutable -> bool {
 			auto &oEnt = ent.GetLuaObject();
 			auto r = entityFilter(oEnt, static_cast<msys::Material *>(&mat));
 			return luabind::object_cast<bool>(r);
@@ -934,7 +934,7 @@ int Lua::game::Client::set_debug_render_filter(lua::State *l)
 	}
 	if(t["meshFilter"]) {
 		auto meshFilter = luabind::object {t["meshFilter"]};
-		filter->meshFilter = [meshFilter](CBaseEntity &ent, msys::CMaterial *mat, pragma::geometry::CModelSubMesh &mesh, pragma::rendering::RenderMeshIndex meshIdx) mutable -> bool {
+		filter->meshFilter = [meshFilter](pragma::ecs::CBaseEntity &ent, msys::CMaterial *mat, pragma::geometry::CModelSubMesh &mesh, pragma::rendering::RenderMeshIndex meshIdx) mutable -> bool {
 			auto &oEnt = ent.GetLuaObject();
 			auto r = meshFilter(oEnt, mat ? static_cast<msys::Material *>(mat) : nullptr, mesh.shared_from_this(), meshIdx);
 			return luabind::object_cast<bool>(r);

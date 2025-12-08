@@ -70,7 +70,7 @@ void CObserverComponent::DoSetObserverMode(ObserverMode mode) { BaseObserverComp
 void CObserverComponent::SetObserverMode(ObserverMode mode)
 {
 	BaseObserverComponent::SetObserverMode(mode);
-	auto *renderC = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
+	auto *renderC = static_cast<pragma::ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 	if(renderC)
 		renderC->UpdateShouldDrawState();
 }

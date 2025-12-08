@@ -17,7 +17,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CPointTarget : public CBaseEntity {
+	class DLLCLIENT CPointTarget : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

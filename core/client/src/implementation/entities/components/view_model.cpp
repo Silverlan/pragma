@@ -52,7 +52,7 @@ void CViewModelComponent::Initialize()
 			wepC->UpdateDeployState();
 	});
 
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	ent.AddComponent<pragma::CTransformComponent>();
 	ent.AddComponent<pragma::LogicComponent>(); // Logic component is needed for animations
 	auto pRenderComponent = ent.AddComponent<pragma::CRenderComponent>();

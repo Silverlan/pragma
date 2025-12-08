@@ -18,17 +18,17 @@ export namespace pragma {
 		virtual void OnRemove() override;
 		virtual void OnEntitySpawn() override;
 
-		OcclusionOctree<CBaseEntity *> &GetOcclusionOctree();
-		const OcclusionOctree<CBaseEntity *> &GetOcclusionOctree() const;
+		OcclusionOctree<ecs::CBaseEntity *> &GetOcclusionOctree();
+		const OcclusionOctree<ecs::CBaseEntity *> &GetOcclusionOctree() const;
 
-		void AddEntity(CBaseEntity &ent);
+		void AddEntity(ecs::CBaseEntity &ent);
 	  private:
-		std::shared_ptr<OcclusionOctree<CBaseEntity *>> m_occlusionOctree = nullptr;
-		std::unordered_map<CBaseEntity *, std::vector<CallbackHandle>> m_callbacks {};
+		std::shared_ptr<OcclusionOctree<ecs::CBaseEntity *>> m_occlusionOctree = nullptr;
+		std::unordered_map<ecs::CBaseEntity *, std::vector<CallbackHandle>> m_callbacks {};
 	};
 };
 
-export class DLLCLIENT COcclusionCuller : public CBaseEntity {
+export class DLLCLIENT COcclusionCuller : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };

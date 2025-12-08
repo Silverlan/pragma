@@ -30,7 +30,7 @@ export namespace pragma::rendering {
 	  public:
 		ShaderProcessor(prosper::ICommandBuffer &cmdBuffer, PassType passType) : m_cmdBuffer {cmdBuffer}, m_passType {passType} {}
 		bool RecordBindShader(const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, bool view, ShaderGameWorld::SceneFlags sceneFlags, pragma::ShaderGameWorld &shader, uint32_t pipelineIdx = 0u);
-		bool RecordBindEntity(CBaseEntity &ent);
+		bool RecordBindEntity(ecs::CBaseEntity &ent);
 		bool RecordBindMaterial(msys::CMaterial &mat);
 		bool RecordBindLight(CLightComponent &light, uint32_t layerId);
 		bool RecordDraw(pragma::geometry::CModelSubMesh &mesh, pragma::rendering::RenderMeshIndex meshIdx, const pragma::rendering::RenderQueue::InstanceSet *instanceSet = nullptr);
@@ -41,7 +41,7 @@ export namespace pragma::rendering {
 
 		inline prosper::ICommandBuffer &GetCommandBuffer() const { return m_cmdBuffer; }
 		inline prosper::IShaderPipelineLayout &GetCurrentPipelineLayout() const { return *m_currentPipelineLayout; }
-		CBaseEntity &GetCurrentEntity() const;
+		ecs::CBaseEntity &GetCurrentEntity() const;
 		const pragma::CSceneComponent &GetCurrentScene() const;
 		PassType GetPassType() const { return m_passType; }
 	  private:
@@ -97,7 +97,7 @@ export namespace pragma::rendering {
 		bool BindShader(prosper::PipelineID pipelineId);
 		virtual bool BindShader(prosper::Shader &shader, uint32_t pipelineIdx = 0u);
 		bool BindMaterial(msys::CMaterial &mat);
-		virtual bool BindEntity(CBaseEntity &ent);
+		virtual bool BindEntity(ecs::CBaseEntity &ent);
 		void SetDepthBias(float d, float delta);
 		bool Render(pragma::geometry::CModelSubMesh &mesh, pragma::rendering::RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet = nullptr);
 		pragma::ShaderGameWorld *GetCurrentShader();
@@ -120,7 +120,7 @@ export namespace pragma::rendering {
 		prosper::PipelineID m_curPipeline = std::numeric_limits<prosper::PipelineID>::max();
 		pragma::ShaderGameWorld *m_shaderScene = nullptr;
 		msys::CMaterial *m_curMaterial = nullptr;
-		CBaseEntity *m_curEntity = nullptr;
+		ecs::CBaseEntity *m_curEntity = nullptr;
 		pragma::CRenderComponent *m_curRenderC = nullptr;
 		std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> *m_curEntityMeshList = nullptr;
 		const RenderQueue::InstanceSet *m_curInstanceSet = nullptr;

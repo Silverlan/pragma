@@ -13,7 +13,7 @@ import :rendering.shaders;
 export namespace pragma {
 	class CLightComponent;
 	struct ShadowRenderInfo {
-		const CBaseEntity *entity = nullptr;
+		const ecs::CBaseEntity *entity = nullptr;
 		const pragma::geometry::CModelSubMesh *mesh = nullptr;
 		uint32_t renderFlags = 0;
 		msys::Material *material = nullptr;
@@ -30,7 +30,7 @@ export namespace pragma {
 	  private:
 		struct OctreeCallbacks {
 			std::function<bool(const OcclusionOctree<std::shared_ptr<pragma::geometry::ModelMesh>>::Node &)> nodeCallback;
-			std::function<void(const CBaseEntity &, uint32_t)> entityCallback;
+			std::function<void(const ecs::CBaseEntity &, uint32_t)> entityCallback;
 			std::function<void(const std::shared_ptr<pragma::geometry::ModelMesh> &)> meshCallback;
 			std::function<void(const pragma::asset::Model &, const pragma::geometry::CModelSubMesh &, uint32_t)> subMeshCallback;
 		};
@@ -60,7 +60,7 @@ export namespace pragma {
 		util::WeakHandle<prosper::Shader> m_shaderCSMTransparent = {};
 
 		// Current entity when iterating entity meshes in an octree
-		const CBaseEntity *m_currentEntity = nullptr;
+		const ecs::CBaseEntity *m_currentEntity = nullptr;
 		pragma::asset::Model *m_currentModel = nullptr;
 		uint32_t m_currentRenderFlags = 0;
 	};
@@ -110,7 +110,7 @@ export namespace pragma {
 };
 export {REGISTER_ENUM_FLAGS(pragma::ShadowRenderer::RenderResultFlags)}
 
-export class DLLCLIENT CShadowManager : public CBaseEntity {
+export class DLLCLIENT CShadowManager : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };

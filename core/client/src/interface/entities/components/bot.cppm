@@ -21,7 +21,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CBot : public CBaseEntity {
+	class DLLCLIENT CBot : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

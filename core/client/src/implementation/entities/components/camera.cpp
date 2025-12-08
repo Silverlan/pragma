@@ -42,7 +42,7 @@ void CCameraComponent::UpdateState()
 	auto toggleC = GetEntity().GetComponent<CToggleComponent>();
 	if(toggleC.expired() || toggleC->IsTurnedOn()) {
 		auto *renderScene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
-		if(renderScene && static_cast<CBaseEntity &>(GetEntity()).IsInScene(*renderScene))
+		if(renderScene && static_cast<ecs::CBaseEntity &>(GetEntity()).IsInScene(*renderScene))
 			renderScene->SetActiveCamera(*this);
 		return;
 	}
@@ -54,7 +54,7 @@ void CCameraComponent::UpdateState()
 			entIt.AttachFilter<TEntityIteratorFilterComponent<CCameraComponent>>();
 			for(auto *ent : entIt) {
 				auto toggleC = ent->GetComponent<CToggleComponent>();
-				if((toggleC.valid() && toggleC->IsTurnedOn() == false) || static_cast<CBaseEntity *>(ent)->IsInScene(*renderScene) == false)
+				if((toggleC.valid() && toggleC->IsTurnedOn() == false) || static_cast<ecs::CBaseEntity *>(ent)->IsInScene(*renderScene) == false)
 					continue;
 				auto camC = ent->GetComponent<CCameraComponent>();
 				renderScene->SetActiveCamera(*camC);

@@ -10,7 +10,7 @@ export import :entities.components.lights.shadow_csm;
 export import :math.mvp_bias;
 
 export namespace pragma {
-	class DLLCLIENT CLightDirectionalComponent final : public BaseEnvLightDirectionalComponent, public CBaseNetComponent, public MVPBias<1> {
+	class DLLCLIENT CLightDirectionalComponent final : public BaseEnvLightDirectionalComponent, public CBaseNetComponent, public math::MVPBias<1> {
 	  public:
 		CLightDirectionalComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
@@ -41,7 +41,7 @@ export namespace pragma {
 	};
 };
 
-export class DLLCLIENT CEnvLightDirectional : public CBaseEntity {
+export class DLLCLIENT CEnvLightDirectional : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };

@@ -13,14 +13,14 @@ using namespace pragma;
 void CBrushComponent::Initialize()
 {
 	BaseFuncBrushComponent::Initialize();
-	auto pRenderComponent = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
+	auto pRenderComponent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 	if(pRenderComponent)
 		pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::World);
 }
 void CBrushComponent::OnEntitySpawn()
 {
 	BaseFuncBrushComponent::OnEntitySpawn();
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	if(m_kvSolid) {
 		auto pPhysComponent = ent.GetPhysicsComponent();
 		if(pPhysComponent != nullptr)

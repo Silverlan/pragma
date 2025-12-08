@@ -121,7 +121,7 @@ void pragma::rendering::ShaderProcessor::UpdateClipPlane()
 		m_boundClipPlane = clipPlane;
 	}
 }
-bool pragma::rendering::ShaderProcessor::RecordBindEntity(CBaseEntity &ent)
+bool pragma::rendering::ShaderProcessor::RecordBindEntity(pragma::ecs::CBaseEntity &ent)
 {
 	auto *renderC = ent.GetRenderComponent();
 	assert(renderC);
@@ -248,5 +248,5 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(pragma::geometry::CModelSubM
 	}
 	return m_curShader->OnRecordDrawMesh(*this, mesh) && m_cmdBuffer.RecordDrawIndexed(mesh.GetIndexCount(), instanceCount);
 }
-CBaseEntity &pragma::rendering::ShaderProcessor::GetCurrentEntity() const { return static_cast<CBaseEntity &>(m_modelC->GetEntity()); }
+pragma::ecs::CBaseEntity &pragma::rendering::ShaderProcessor::GetCurrentEntity() const { return static_cast<pragma::ecs::CBaseEntity &>(m_modelC->GetEntity()); }
 const pragma::CSceneComponent &pragma::rendering::ShaderProcessor::GetCurrentScene() const { return *m_sceneC; }

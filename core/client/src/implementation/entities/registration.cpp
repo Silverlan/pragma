@@ -76,7 +76,7 @@ void client_entities::register_entities()
 	register_entity<CEntDebugCone>("debug_cone");
 	register_entity<CEntDebugCylinder>("debug_cylinder");
 	register_entity<CEntDebugPlane>("debug_plane");
-	register_entity<CBaseEntity>("entity");
+	register_entity<pragma::ecs::CBaseEntity>("entity");
 	register_entity<CEnvCamera>("env_camera");
 	register_entity<CEnvDecal>("env_decal");
 	register_entity<CEnvExplosion>("env_explosion");

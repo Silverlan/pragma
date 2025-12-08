@@ -148,7 +148,7 @@ bool CLightComponent::ShouldPass(const pragma::asset::Model &mdl, const pragma::
 
 void CLightComponent::InitializeLight(BaseEntityComponent &component) { CBaseLightComponent::InitializeLight(component); }
 
-bool CLightComponent::ShouldPass(const CBaseEntity &ent, uint32_t &renderFlags)
+bool CLightComponent::ShouldPass(const ecs::CBaseEntity &ent, uint32_t &renderFlags)
 {
 	if(ShouldCastShadows() == false)
 		return false;
@@ -157,7 +157,7 @@ bool CLightComponent::ShouldPass(const CBaseEntity &ent, uint32_t &renderFlags)
 		return evData.shouldPass;
 	return true;
 }
-bool CLightComponent::ShouldPass(const CBaseEntity &ent, const pragma::geometry::CModelMesh &mesh, uint32_t &renderFlags)
+bool CLightComponent::ShouldPass(const ecs::CBaseEntity &ent, const pragma::geometry::CModelMesh &mesh, uint32_t &renderFlags)
 {
 	if(ShouldCastShadows() == false)
 		return false;
@@ -168,7 +168,7 @@ bool CLightComponent::ShouldPass(const CBaseEntity &ent, const pragma::geometry:
 
 CSceneComponent *CLightComponent::FindShadowScene() const
 {
-	auto sceneFlags = static_cast<const CBaseEntity &>(GetEntity()).GetSceneFlags();
+	auto sceneFlags = static_cast<const ecs::CBaseEntity &>(GetEntity()).GetSceneFlags();
 	// A shadowed light source should always only be assigned to one scene slot, so
 	// we'll just pick whichever is the first
 	auto lowestBit = static_cast<int32_t>(sceneFlags) & -static_cast<int32_t>(sceneFlags);
@@ -182,7 +182,7 @@ TCPPM *CLightComponent::FindShadowOcclusionCuller() const
 }
 template COcclusionCullerComponent *CLightComponent::FindShadowOcclusionCuller() const;
 
-bool CLightComponent::IsInCone(const CBaseEntity &ent, const Vector3 &dir, float angle) const
+bool CLightComponent::IsInCone(const ecs::CBaseEntity &ent, const Vector3 &dir, float angle) const
 {
 	auto pRenderComponent = ent.GetRenderComponent();
 	auto pTrComponent = ent.GetTransformComponent();
@@ -210,7 +210,7 @@ void CLightComponent::UpdateLightIntensity()
 		return;
 	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, intensity), m_bufferData.intensity);
 }
-bool CLightComponent::IsInRange(const CBaseEntity &ent) const
+bool CLightComponent::IsInRange(const ecs::CBaseEntity &ent) const
 {
 	auto pRadiusComponent = GetEntity().GetComponent<CRadiusComponent>();
 	auto pRenderComponent = ent.GetRenderComponent();
@@ -224,7 +224,7 @@ bool CLightComponent::IsInRange(const CBaseEntity &ent) const
 	auto radius = pRadiusComponent->GetRadius();
 	return (uvec::distance(pos + sphere.pos, origin) <= (radius + sphere.radius)) ? true : false;
 }
-bool CLightComponent::IsInRange(const CBaseEntity &ent, const pragma::geometry::CModelMesh &mesh) const
+bool CLightComponent::IsInRange(const ecs::CBaseEntity &ent, const pragma::geometry::CModelMesh &mesh) const
 {
 	auto pRadiusComponent = GetEntity().GetComponent<CRadiusComponent>();
 	auto pTrComponent = ent.GetTransformComponent();
@@ -367,7 +367,7 @@ void CLightComponent::Initialize()
 {
 	CBaseLightComponent::Initialize();
 
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	ent.AddComponent<CShadowComponent>();
 
 	BindEventUnhandled(baseToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<ComponentEvent> evData) {
@@ -394,7 +394,7 @@ void CLightComponent::Initialize()
 		SetNextTick(pragma::get_cgame()->CurTime() + 30.f);
 	});
 	BindEventUnhandled(cBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
-		m_bufferData.sceneFlags = static_cast<CBaseEntity &>(GetEntity()).GetSceneFlags();
+		m_bufferData.sceneFlags = static_cast<pragma::ecs::CBaseEntity &>(GetEntity()).GetSceneFlags();
 		if(m_renderBuffer != nullptr)
 			pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, sceneFlags), m_bufferData.sceneFlags);
 	});
@@ -749,7 +749,7 @@ namespace {
 
 /////////////////
 
-CEShouldPassEntity::CEShouldPassEntity(const CBaseEntity &entity, uint32_t &renderFlags) : entity {entity}, renderFlags {renderFlags} {}
+CEShouldPassEntity::CEShouldPassEntity(const ecs::CBaseEntity &entity, uint32_t &renderFlags) : entity {entity}, renderFlags {renderFlags} {}
 void CEShouldPassEntity::PushArguments(lua::State *l) {}
 
 /////////////////
@@ -759,7 +759,7 @@ void CEShouldPassMesh::PushArguments(lua::State *l) {}
 
 /////////////////
 
-CEShouldPassEntityMesh::CEShouldPassEntityMesh(const CBaseEntity &entity, const pragma::geometry::CModelMesh &mesh, uint32_t &renderFlags) : entity {entity}, mesh {mesh}, renderFlags {renderFlags} {}
+CEShouldPassEntityMesh::CEShouldPassEntityMesh(const ecs::CBaseEntity &entity, const pragma::geometry::CModelMesh &mesh, uint32_t &renderFlags) : entity {entity}, mesh {mesh}, renderFlags {renderFlags} {}
 void CEShouldPassEntityMesh::PushArguments(lua::State *l) {}
 
 /////////////////

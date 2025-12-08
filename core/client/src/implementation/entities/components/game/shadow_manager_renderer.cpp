@@ -25,7 +25,7 @@ ShadowRenderer::ShadowRenderer()
 		return umath::intersection::aabb_sphere(bounds.first, bounds.second, m_lightSourceData.position, m_lightSourceData.radius);
 	};
 
-	m_octreeCallbacks.entityCallback = [this](const CBaseEntity &ent, uint32_t renderFlags) {
+	m_octreeCallbacks.entityCallback = [this](const ecs::CBaseEntity &ent, uint32_t renderFlags) {
 		m_currentEntity = &ent;
 		m_currentModel = ent.GetModel().get();
 		m_currentRenderFlags = renderFlags;
@@ -79,7 +79,7 @@ void ShadowRenderer::UpdateWorldShadowCasters(std::shared_ptr<prosper::IPrimaryC
 	auto *pWorld = pragma::get_cgame()->GetWorld();
 	if(pWorld == nullptr)
 		return;
-	auto &entWorld = static_cast<CBaseEntity &>(pWorld->GetEntity());
+	auto &entWorld = static_cast<pragma::ecs::CBaseEntity &>(pWorld->GetEntity());
 	if(entWorld.IsInScene(*scene) == false)
 		return;
 	auto &mdl = entWorld.GetModel();
@@ -106,11 +106,11 @@ void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimary
 	auto &octree = culler->GetOcclusionOctree();
 	// Iterate all entities in the scene and populate m_shadowCasters
 	octree.IterateObjects(
-	  [this](const OcclusionOctree<CBaseEntity *>::Node &node) -> bool {
+	  [this](const OcclusionOctree<ecs::CBaseEntity *>::Node &node) -> bool {
 		  auto &bounds = node.GetWorldBounds();
 		  return umath::intersection::aabb_sphere(bounds.first, bounds.second, m_lightSourceData.position, m_lightSourceData.radius);
 	  },
-	  [this, &light, &drawCmd, scene](const CBaseEntity *ent) {
+	  [this, &light, &drawCmd, scene](const ecs::CBaseEntity *ent) {
 		  auto pRenderComponent = ent->GetRenderComponent();
 		  if(!pRenderComponent || ent->IsInScene(*scene) == false || pRenderComponent->ShouldDrawShadow() == false || ent->IsWorld() == true)
 			  return;
@@ -213,7 +213,7 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(std::shared_ptr<
 			{
 				bProcessMeshes = ((info.renderFlags &layerFlag) != 0) ? true : false;
 				if(bProcessMeshes == true)
-					shader.BindEntity(*const_cast<CBaseEntity*>(info.entity),depthMVP);
+					shader.BindEntity(*const_cast<pragma::ecs::CBaseEntity*>(info.entity),depthMVP);
 			}
 			if(info.mesh != nullptr && bProcessMeshes == true)
 			{

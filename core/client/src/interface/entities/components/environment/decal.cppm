@@ -68,7 +68,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CEnvDecal : public CBaseEntity {
+	class DLLCLIENT CEnvDecal : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

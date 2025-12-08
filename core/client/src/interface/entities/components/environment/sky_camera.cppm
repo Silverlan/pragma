@@ -47,7 +47,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CSkyCamera : public CBaseEntity {
+	class DLLCLIENT CSkyCamera : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

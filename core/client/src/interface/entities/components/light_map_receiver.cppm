@@ -18,7 +18,7 @@ export namespace pragma {
 	class DLLCLIENT CLightMapReceiverComponent final : public BaseEntityComponent {
 	  public:
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
-		static void SetupLightMapUvData(CBaseEntity &ent, LightmapDataCache *cache = nullptr);
+		static void SetupLightMapUvData(ecs::CBaseEntity &ent, LightmapDataCache *cache = nullptr);
 		enum class StateFlags : uint8_t { None = 0, IsModelBakedWithLightMaps = 1u, RenderMeshBufferIndexTableDirty = IsModelBakedWithLightMaps << 1u };
 		using MeshIdx = uint32_t;
 		using BufferIdx = uint32_t;

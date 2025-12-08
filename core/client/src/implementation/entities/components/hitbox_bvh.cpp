@@ -317,7 +317,7 @@ static void draw_mesh(const pragma::bvh::MeshBvhTree &bvhTree, const umath::Scal
 
 bool CHitboxBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3 &max, IntersectionInfo *outIntersectionInfo) const
 {
-	auto &ent = static_cast<const CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<const ecs::CBaseEntity &>(GetEntity());
 	auto *renderC = ent.GetRenderComponent();
 	if(!renderC)
 		return false;
@@ -402,7 +402,7 @@ bool CHitboxBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3
 }
 bool CHitboxBvhComponent::IntersectionTestKDop(const std::vector<umath::Plane> &planes, IntersectionInfo *outIntersectionInfo) const
 {
-	auto &ent = static_cast<const CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<const ecs::CBaseEntity &>(GetEntity());
 	auto *renderC = ent.GetRenderComponent();
 	if(!renderC)
 		return false;
@@ -508,7 +508,7 @@ bool CHitboxBvhComponent::UpdateHitboxMeshCache() const
 
 bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, HitInfo &outHitInfo, const bvh::DebugDrawInfo *debugDrawInfo) const
 {
-	auto &ent = static_cast<const CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<const ecs::CBaseEntity &>(GetEntity());
 	auto *renderC = ent.GetRenderComponent();
 	if(!renderC)
 		return false;

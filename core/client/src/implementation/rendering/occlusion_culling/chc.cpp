@@ -175,7 +175,7 @@ void CHC::DebugRender()
 		auto &info = m_renderMeshes[i];
 		if(info.hEntity.IsValid())
 		{
-			CBaseEntity *ent = static_cast<CBaseEntity*>(info.hEntity.get());
+			CBaseEntity *ent = static_cast<pragma::ecs::CBaseEntity*>(info.hEntity.get());
 			Vector3 &origin = ent->GetPosition();
 			Vector3 min;
 			Vector3 max;

@@ -13,7 +13,7 @@ import :model;
 using namespace pragma;
 
 void CLightMapReceiverComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) { using T = CLightMapReceiverComponent; }
-void CLightMapReceiverComponent::SetupLightMapUvData(CBaseEntity &ent, LightmapDataCache *cache)
+void CLightMapReceiverComponent::SetupLightMapUvData(ecs::CBaseEntity &ent, LightmapDataCache *cache)
 {
 	auto mdl = ent.GetModel();
 	if(!mdl) {

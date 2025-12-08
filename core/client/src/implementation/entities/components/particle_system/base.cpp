@@ -542,11 +542,11 @@ void ecs::CParticleSystemComponent::SetControlPointPose(ControlPointIndex idx, c
 	}
 }
 
-CBaseEntity *ecs::CParticleSystemComponent::GetControlPointEntity(ControlPointIndex idx) const
+pragma::ecs::CBaseEntity *ecs::CParticleSystemComponent::GetControlPointEntity(ControlPointIndex idx) const
 {
 	if(idx >= m_controlPoints.size())
 		return nullptr;
-	return static_cast<CBaseEntity *>(const_cast<pragma::ecs::BaseEntity *>(m_controlPoints.at(idx).hEntity.get()));
+	return static_cast<pragma::ecs::CBaseEntity *>(const_cast<pragma::ecs::BaseEntity *>(m_controlPoints.at(idx).hEntity.get()));
 }
 std::optional<umath::Transform> ecs::CParticleSystemComponent::GetControlPointPose(ControlPointIndex idx, float *optOutTimestamp) const
 {
@@ -919,7 +919,7 @@ void ecs::CParticleSystemComponent::AddChild(ecs::CParticleSystemComponent &part
 	uint32_t cpIdx = 0;
 	for(auto &cp : m_controlPoints) {
 		if(cp.hEntity.valid())
-			particle.SetControlPointEntity(cpIdx, static_cast<CBaseEntity &>(*cp.hEntity.get()));
+			particle.SetControlPointEntity(cpIdx, static_cast<pragma::ecs::CBaseEntity &>(*cp.hEntity.get()));
 		particle.SetControlPointPose(cpIdx, cp.pose);
 		++cpIdx;
 	}
@@ -1250,14 +1250,14 @@ Vector3 ecs::CParticleSystemComponent::GetNodePosition(uint32_t node) const
 	auto pTrComponent = m_nodes[node].hEntity.get()->GetTransformComponent();
 	return pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
 }
-CBaseEntity *ecs::CParticleSystemComponent::GetNodeTarget(uint32_t node) const
+pragma::ecs::CBaseEntity *ecs::CParticleSystemComponent::GetNodeTarget(uint32_t node) const
 {
 	if(node == 0)
 		return nullptr;
 	--node;
 	if(node >= m_nodes.size())
 		return nullptr;
-	return static_cast<CBaseEntity *>(const_cast<pragma::ecs::BaseEntity *>(m_nodes[node].hEntity.get()));
+	return static_cast<pragma::ecs::CBaseEntity *>(const_cast<pragma::ecs::BaseEntity *>(m_nodes[node].hEntity.get()));
 }
 
 CallbackHandle ecs::CParticleSystemComponent::AddRenderCallback(const std::function<void(void)> &cb)

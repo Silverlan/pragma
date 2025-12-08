@@ -25,7 +25,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CBaseProp : public CBaseEntity {
+	class DLLCLIENT CBaseProp : public pragma::ecs::CBaseEntity {
 	  protected:
 	};
 };

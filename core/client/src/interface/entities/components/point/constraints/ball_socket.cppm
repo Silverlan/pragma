@@ -20,7 +20,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CPointConstraintBallSocket : public CBaseEntity {
+	class DLLCLIENT CPointConstraintBallSocket : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

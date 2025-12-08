@@ -78,7 +78,7 @@ export namespace pragma {
 	};
 };
 
-export class DLLCLIENT CUtilPBRConverter : public CBaseEntity {
+export class DLLCLIENT CUtilPBRConverter : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };

@@ -102,7 +102,7 @@ void CWorldComponent::ReloadMeshCache()
 {
 	m_meshTree = nullptr;
 	m_chcController = nullptr;
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
 		return;
@@ -293,10 +293,10 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 					continue;
 				if(mat->GetAlphaMode() == AlphaMode::Blend || shader->IsTranslucentPipeline(pipelineIdx)) {
 					clusterRenderTranslucentQueue = clusterRenderTranslucentQueue ? clusterRenderTranslucentQueue : pragma::rendering::RenderQueue::Create("world_translucent_cluster_" + std::to_string(clusterIdx));
-					clusterRenderTranslucentQueue->Add(static_cast<CBaseEntity &>(GetEntity()), subMeshIdx, *mat, pipelineId);
+					clusterRenderTranslucentQueue->Add(static_cast<pragma::ecs::CBaseEntity &>(GetEntity()), subMeshIdx, *mat, pipelineId);
 					continue;
 				}
-				clusterRenderQueue->Add(static_cast<CBaseEntity &>(GetEntity()), subMeshIdx, *mat, pipelineId);
+				clusterRenderQueue->Add(static_cast<pragma::ecs::CBaseEntity &>(GetEntity()), subMeshIdx, *mat, pipelineId);
 			}
 			clusterRenderTranslucentQueues[clusterIdx] = clusterRenderTranslucentQueue;
 			clusterRenderQueue->Sort();
@@ -314,7 +314,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 
 void CWorldComponent::UpdateRenderMeshes()
 {
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	auto mdl = ent.GetModel();
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(mdl == nullptr || !pRenderComponent)

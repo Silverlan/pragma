@@ -15,7 +15,6 @@ export import :rendering.enums;
 import :rendering.entity_instance_data;
 export import :rendering.model_render_buffer_data;
 
-export class CBaseEntity;
 export namespace pragma {
 	class CCameraComponent;
 	class CSceneComponent;
@@ -24,6 +23,9 @@ export namespace pragma {
 	class CAnimatedComponent;
 	class CLightMapReceiverComponent;
 	class CWorldComponent;
+	namespace ecs {
+		class CBaseEntity;
+	}
 };
 export namespace pragma {
 	namespace cRenderComponent {

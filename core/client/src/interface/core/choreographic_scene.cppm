@@ -12,8 +12,8 @@ export namespace choreography {
 	class Event : public uts::Event {
 	  public:
 		virtual ~Event() override;
-		CBaseEntity *GetActor() const;
-		void SetActor(CBaseEntity &actor);
+		pragma::ecs::CBaseEntity *GetActor() const;
+		void SetActor(pragma::ecs::CBaseEntity &actor);
 		void ClearActor();
 	  protected:
 		Event(uts::Channel &channel);

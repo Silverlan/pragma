@@ -33,6 +33,6 @@ export namespace pragma {
 	};
 };
 
-export class DLLCLIENT CEnvLightSpotVol : public CBaseEntity {
+export class DLLCLIENT CEnvLightSpotVol : public pragma::ecs::CBaseEntity {
 	virtual void Initialize() override;
 };

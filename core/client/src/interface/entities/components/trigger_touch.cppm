@@ -18,7 +18,7 @@ export namespace pragma {
 	};
 };
 
-export class DLLCLIENT CTriggerTouch : public CBaseEntity {
+export class DLLCLIENT CTriggerTouch : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };

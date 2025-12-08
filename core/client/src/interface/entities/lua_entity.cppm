@@ -9,7 +9,7 @@ export module pragma.client:entities.lua;
 export import :entities.base_entity;
 
 export {
-	class DLLCLIENT CLuaEntity : public CBaseEntity {
+	class DLLCLIENT CLuaEntity : public pragma::ecs::CBaseEntity {
 	  public:
 		CLuaEntity();
 		virtual void Initialize() override;

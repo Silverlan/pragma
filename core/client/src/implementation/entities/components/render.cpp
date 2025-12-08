@@ -201,7 +201,7 @@ void CRenderComponent::OnEntitySpawn()
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::COcclusionCullerComponent>>();
 	for(auto *ent : entIt) {
 		auto occlusionCullerC = ent->GetComponent<pragma::COcclusionCullerComponent>();
-		occlusionCullerC->AddEntity(static_cast<CBaseEntity &>(GetEntity()));
+		occlusionCullerC->AddEntity(static_cast<pragma::ecs::CBaseEntity &>(GetEntity()));
 	}
 
 	InitializeRenderBuffers();
@@ -453,7 +453,7 @@ void CRenderComponent::SetLastRenderFrame(unsigned long long &t) { m_lastRender 
 
 void CRenderComponent::UpdateRenderMeshes()
 {
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	if(!ent.IsSpawned())
 		return;
 	pragma::get_cgame()->UpdateEntityModel(&ent);
@@ -653,7 +653,7 @@ void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene, const CC
 
 	UpdateAbsoluteRenderBounds();
 
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	auto *mdlC = GetModelComponent();
 	if(mdlC)
 		mdlC->UpdateLOD(scene, cam, vp); // TODO: Don't update this every frame for every entity!
@@ -889,7 +889,7 @@ std::vector<rendering::RenderBufferData> &CRenderComponent::GetRenderBufferData(
 const std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &CRenderComponent::GetLODMeshes() const { return const_cast<CRenderComponent *>(this)->GetLODMeshes(); }
 std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &CRenderComponent::GetLODMeshes()
 {
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	auto pSoftBodyComponent = ent.GetComponent<pragma::CSoftBodyComponent>();
 	if(pSoftBodyComponent.valid()) {
 		static std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> meshes {};

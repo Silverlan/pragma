@@ -47,8 +47,10 @@ export namespace pragma {
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-export class CBaseEntity;
 export namespace pragma {
+	namespace ecs {
+		class CBaseEntity;
+	}
 	class DLLCLIENT CGame : public Game {
 	public:
 		CGame(pragma::NetworkState *state);
@@ -166,11 +168,11 @@ export namespace pragma {
 		virtual double &ServerTime() override;
 		void SetServerTime(double t);
 		// Entities
-		virtual CBaseEntity *CreateLuaEntity(std::string classname, bool bLoadIfNotExists = false) override;
-		CBaseEntity *CreateLuaEntity(std::string classname, unsigned int idx, bool bLoadIfNotExists = false);
-		virtual CBaseEntity *GetEntity(unsigned int idx) override;
-		virtual CBaseEntity *GetEntityByLocalIndex(uint32_t idx) override;
-		CBaseEntity *GetEntityByClientIndex(unsigned int idx);
+		virtual ecs::CBaseEntity *CreateLuaEntity(std::string classname, bool bLoadIfNotExists = false) override;
+		ecs::CBaseEntity *CreateLuaEntity(std::string classname, unsigned int idx, bool bLoadIfNotExists = false);
+		virtual ecs::CBaseEntity *GetEntity(unsigned int idx) override;
+		virtual ecs::CBaseEntity *GetEntityByLocalIndex(uint32_t idx) override;
+		ecs::CBaseEntity *GetEntityByClientIndex(unsigned int idx);
 		virtual void GetPlayers(std::vector<pragma::ecs::BaseEntity *> *ents) override;
 		virtual void GetNPCs(std::vector<pragma::ecs::BaseEntity *> *ents) override;
 		virtual void GetWeapons(std::vector<pragma::ecs::BaseEntity *> *ents) override;
@@ -185,7 +187,7 @@ export namespace pragma {
 		TCPPM *GetGameComponent();
 		template<typename TCPPM>
 		const TCPPM *GetGameComponent() const;
-		virtual CBaseEntity *CreateEntity(std::string classname) override;
+		virtual ecs::CBaseEntity *CreateEntity(std::string classname) override;
 		template<class T>
 		T *CreateEntity()
 		{
@@ -209,9 +211,9 @@ export namespace pragma {
 		void GetPrimaryCameraRenderMask(::pragma::rendering::RenderMask &inclusionMask, ::pragma::rendering::RenderMask &exclusionMask) const;
 		void SetLocalPlayer(pragma::CPlayerComponent *pl);
 		virtual void SpawnEntity(pragma::ecs::BaseEntity *ent) override;
-		void GetEntities(std::vector<CBaseEntity *> **ents);
+		void GetEntities(std::vector<ecs::CBaseEntity *> **ents);
 		virtual void GetEntities(std::vector<pragma::ecs::BaseEntity *> **ents) override;
-		void GetSharedEntities(std::vector<CBaseEntity *> **ents);
+		void GetSharedEntities(std::vector<ecs::CBaseEntity *> **ents);
 		void GetSharedEntities(std::vector<pragma::ecs::BaseEntity *> **ents);
 
 		// Sockets
@@ -285,7 +287,7 @@ export namespace pragma {
 		virtual void SetTimeScale(float t) override;
 		void RequestResource(const std::string &fileName);
 
-		void UpdateEntityModel(CBaseEntity *ent);
+		void UpdateEntityModel(ecs::CBaseEntity *ent);
 		template<typename TCPPM>
 		TCPPM *GetViewModel();
 		template<typename TCPPM>
@@ -502,9 +504,9 @@ export namespace pragma {
 
 		// Entities
 		pragma::ComponentHandle<pragma::BaseEntityComponent> m_gameComponent;
-		std::vector<CBaseEntity *> m_ents;
-		std::vector<CBaseEntity *> m_shEnts;
-		std::vector<CBaseEntity *> m_entsOccluded;
+		std::vector<ecs::CBaseEntity *> m_ents;
+		std::vector<ecs::CBaseEntity *> m_shEnts;
+		std::vector<ecs::CBaseEntity *> m_entsOccluded;
 		std::vector<pragma::ecs::BaseEntity *> m_shBaseEnts;
 		util::TWeakSharedHandle<pragma::BaseEnvLightDirectionalComponent> m_hEnvLight = util::TWeakSharedHandle<pragma::BaseEnvLightDirectionalComponent> {};
 		util::TWeakSharedHandle<pragma::BaseEntityComponent> m_listener = util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
@@ -519,7 +521,7 @@ export namespace pragma {
 		virtual std::shared_ptr<pragma::nav::Mesh> LoadNavMesh(const std::string &fname) override;
 
 		// Entities
-		void GetOccludedEntities(std::vector<CBaseEntity *> &entsOccluded);
+		void GetOccludedEntities(std::vector<ecs::CBaseEntity *> &entsOccluded);
 
 		virtual void InitializeEntityComponents(pragma::EntityComponentManager &componentManager) override;
 		void InitializeWorldEnvironment();

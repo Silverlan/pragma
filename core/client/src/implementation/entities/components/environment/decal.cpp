@@ -237,7 +237,7 @@ void CDecalComponent::Initialize()
 	BaseEnvDecalComponent::Initialize();
 	auto renderC = GetEntity().AddComponent<pragma::CRenderComponent>();
 	renderC->SetCastShadows(false);
-	/*auto &ent = static_cast<CBaseEntity&>(GetEntity());
+	/*auto &ent = static_cast<pragma::ecs::CBaseEntity&>(GetEntity());
 	auto pSpriteComponent = ent.AddComponent<pragma::CSpriteComponent>();
 	if(pSpriteComponent.valid())
 		pSpriteComponent->SetOrientationType(pragma::ecs::ParticleOrientationType::World);*/
@@ -359,7 +359,7 @@ bool CDecalComponent::ApplyDecal()
 	auto *mat = pragma::get_client_state()->LoadMaterial(GetMaterial());
 	if(mat == nullptr)
 		return false;
-	std::vector<CBaseEntity *> targetEnts {};
+	std::vector<ecs::CBaseEntity *> targetEnts {};
 
 	auto projector = GetProjector();
 	auto projectorAABB = projector.GetAABB();

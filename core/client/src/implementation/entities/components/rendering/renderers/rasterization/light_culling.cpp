@@ -60,7 +60,7 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawS
 						continue;
 					auto shadowIdx = i * numBits + j;
 					auto *l = pragma::CLightComponent::GetLightByShadowBufferIndex(shadowIdx);
-					if(l == nullptr || static_cast<CBaseEntity &>(l->GetEntity()).IsInScene(scene) == false)
+					if(l == nullptr || static_cast<pragma::ecs::CBaseEntity &>(l->GetEntity()).IsInScene(scene) == false)
 						continue;
 					m_visLightSources.push_back(l);
 

@@ -64,7 +64,7 @@ int Lua::util::Client::create_muzzle_flash(lua::State *l)
 		auto *pt = pragma::ecs::CParticleSystemComponent::Create(particleName);
 		if(pt == nullptr)
 			return 0;
-		auto pRenderComponent = static_cast<CBaseEntity *>(&ent)->GetRenderComponent();
+		auto pRenderComponent = static_cast<pragma::ecs::CBaseEntity *>(&ent)->GetRenderComponent();
 		if(pRenderComponent)
 			pt->SetSceneRenderPass(pRenderComponent->GetSceneRenderPass());
 		pt->GetEntity().SetKeyValue("transform_with_emitter", "1");

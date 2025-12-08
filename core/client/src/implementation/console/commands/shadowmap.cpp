@@ -24,7 +24,7 @@ static bool get_shadow_map(pragma::NetworkState *nw, std::vector<std::string> &a
 	auto ents = pragma::console::find_named_targets(nw, argv.front());
 	if(ents.empty())
 		return false;
-	auto *ent = static_cast<CBaseEntity *>(ents.front());
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(ents.front());
 	auto *pLightComponent = static_cast<pragma::CLightComponent *>(ent->FindComponent("light").get());
 	if(pLightComponent == nullptr) {
 		Con::cwar << "Entity '" << ent->GetClass() << "'(" << argv.front() << ") is not a light!" << Con::endl;

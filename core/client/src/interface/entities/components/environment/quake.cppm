@@ -26,7 +26,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CEnvQuake : public CBaseEntity {
+	class DLLCLIENT CEnvQuake : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

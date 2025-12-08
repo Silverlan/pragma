@@ -40,7 +40,7 @@ export namespace pragma {
 	};
 };
 
-export class DLLCLIENT CEnvSprite : public CBaseEntity {
+export class DLLCLIENT CEnvSprite : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };

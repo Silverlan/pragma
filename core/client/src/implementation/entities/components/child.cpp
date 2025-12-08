@@ -30,7 +30,7 @@ bool CChildComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &pac
 void CChildComponent::ReceiveData(NetPacket &packet)
 {
 	auto hThis = GetHandle();
-	nwm::read_unique_entity(packet, [this, hThis](pragma::ecs::BaseEntity *ent) {
+	pragma::networking::read_unique_entity(packet, [this, hThis](pragma::ecs::BaseEntity *ent) {
 		if(hThis.expired())
 			return;
 		if(ent)

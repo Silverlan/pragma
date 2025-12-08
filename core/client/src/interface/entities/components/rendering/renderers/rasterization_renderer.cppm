@@ -389,7 +389,7 @@ export {
 	REGISTER_ENUM_FLAGS(pragma::CRasterizationRendererComponent::StateFlags)
 	REGISTER_ENUM_FLAGS(pragma::RendererData::Flags)
 
-	class DLLCLIENT CRasterizationRenderer : public CBaseEntity {
+	class DLLCLIENT CRasterizationRenderer : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

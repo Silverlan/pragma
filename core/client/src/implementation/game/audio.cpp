@@ -205,7 +205,7 @@ void pragma::CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cac
 				};
 				auto *pWorld = GetWorld();
 				if(pWorld != nullptr)
-					fAddEntityMeshes(&static_cast<CBaseEntity &>(pWorld->GetEntity()));
+					fAddEntityMeshes(&static_cast<pragma::ecs::CBaseEntity &>(pWorld->GetEntity()));
 
 				pragma::ecs::EntityIterator entIt {*this};
 				entIt.AttachFilter<EntityIteratorFilterClass>("func_brush");

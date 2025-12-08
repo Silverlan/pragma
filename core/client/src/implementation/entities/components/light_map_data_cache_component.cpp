@@ -63,7 +63,7 @@ void CLightMapDataCacheComponent::InitializeUvBuffers()
 		auto it = entIt.begin();
 		if(it == entIt.end())
 			continue;
-		pragma::CLightMapReceiverComponent::SetupLightMapUvData(static_cast<CBaseEntity &>(**it), m_lightmapDataCache.get());
+		pragma::CLightMapReceiverComponent::SetupLightMapUvData(static_cast<pragma::ecs::CBaseEntity &>(**it), m_lightmapDataCache.get());
 		++numInitialized;
 	}
 

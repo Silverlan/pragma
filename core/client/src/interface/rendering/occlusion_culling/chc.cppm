@@ -19,7 +19,7 @@ export {
 };
 
 struct DLLCLIENT CHCMeshInfo {
-	CHCMeshInfo(CBaseEntity &ent, pragma::geometry::CModelMesh &mesh);
+	CHCMeshInfo(pragma::ecs::CBaseEntity &ent, pragma::geometry::CModelMesh &mesh);
 	pragma::geometry::CModelMesh *mesh;
 	EntityHandle hEntity;
 };

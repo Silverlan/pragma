@@ -48,7 +48,7 @@ export namespace pragma {
 };
 #pragma warning(pop)
 
-export class DLLCLIENT CWorld : public CBaseEntity {
+export class DLLCLIENT CWorld : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };

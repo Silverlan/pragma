@@ -22,7 +22,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CFuncBrush : public CBaseEntity {
+	class DLLCLIENT CFuncBrush : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

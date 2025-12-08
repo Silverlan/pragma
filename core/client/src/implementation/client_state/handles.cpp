@@ -143,8 +143,8 @@ void pragma::ClientState::LoadLuaCache(std::string cache, unsigned int cacheSize
 #endif
 }
 
-extern CBaseEntity *NET_cl_ENT_CREATE(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false);
-extern CBaseEntity *NET_cl_ENT_CREATE_LUA(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false);
+extern pragma::ecs::CBaseEntity *NET_cl_ENT_CREATE(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false);
+extern pragma::ecs::CBaseEntity *NET_cl_ENT_CREATE_LUA(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false);
 
 void pragma::ClientState::ReadEntityData(NetPacket &packet)
 {
@@ -153,7 +153,7 @@ void pragma::ClientState::ReadEntityData(NetPacket &packet)
 	ents.reserve(numEnts);
 	for(unsigned int i = 0; i < numEnts; i++) {
 		auto bScripted = packet->Read<Bool>();
-		CBaseEntity *ent = nullptr;
+		ecs::CBaseEntity *ent = nullptr;
 		if(bScripted == false)
 			ent = NET_cl_ENT_CREATE(packet, false, true);
 		else {

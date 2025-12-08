@@ -17,7 +17,7 @@ import :game;
 import :util;
 import pragma.shared;
 
-void CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
+void pragma::ecs::CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 {
 	pragma::ecs::BaseEntity::OnComponentAdded(component);
 	auto typeIndex = std::type_index(typeid(component));
@@ -38,17 +38,17 @@ void CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 	else if(typeid(component) == typeid(pragma::ecs::CompositeComponent)) {
 		static_cast<pragma::ecs::CompositeComponent &>(component).AddEventCallback(pragma::ecs::compositeComponent::EVENT_ON_ENTITY_ADDED, [this](std::reference_wrapper<pragma::ComponentEvent> e) -> util::EventReply {
 			auto &evData = static_cast<pragma::ecs::events::CECompositeEntityChanged &>(e.get());
-			static_cast<CBaseEntity &>(evData.ent).GetSceneFlagsProperty()->Link(*GetSceneFlagsProperty()); // TODO: This skips the EVENT_ON_SCENE_FLAGS_CHANGED event
+			static_cast<pragma::ecs::CBaseEntity &>(evData.ent).GetSceneFlagsProperty()->Link(*GetSceneFlagsProperty()); // TODO: This skips the EVENT_ON_SCENE_FLAGS_CHANGED event
 			return util::EventReply::Unhandled;
 		});
 		static_cast<pragma::ecs::CompositeComponent &>(component).AddEventCallback(pragma::ecs::compositeComponent::EVENT_ON_ENTITY_REMOVED, [this](std::reference_wrapper<pragma::ComponentEvent> e) -> util::EventReply {
 			auto &evData = static_cast<pragma::ecs::events::CECompositeEntityChanged &>(e.get());
-			static_cast<CBaseEntity &>(evData.ent).GetSceneFlagsProperty()->Unlink(); // TODO: This skips the EVENT_ON_SCENE_FLAGS_CHANGED event
+			static_cast<pragma::ecs::CBaseEntity &>(evData.ent).GetSceneFlagsProperty()->Unlink(); // TODO: This skips the EVENT_ON_SCENE_FLAGS_CHANGED event
 			return util::EventReply::Unhandled;
 		});
 	}
 }
-void CBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
+void pragma::ecs::CBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 {
 	pragma::ecs::BaseEntity::OnComponentRemoved(component);
 	if(typeid(component) == typeid(pragma::CWorldComponent))
@@ -66,17 +66,17 @@ void CBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 	else if(typeid(component) == typeid(pragma::CChildComponent))
 		m_childComponent = nullptr;
 }
-pragma::CRenderComponent *CBaseEntity::GetRenderComponent() const { return m_renderComponent; }
-void CBaseEntity::InitializeLuaObject(lua::State *lua) { pragma::BaseLuaHandle::InitializeLuaObject<CBaseEntity>(lua); }
+pragma::CRenderComponent *pragma::ecs::CBaseEntity::GetRenderComponent() const { return m_renderComponent; }
+void pragma::ecs::CBaseEntity::InitializeLuaObject(lua::State *lua) { pragma::BaseLuaHandle::InitializeLuaObject<pragma::ecs::CBaseEntity>(lua); }
 
 //////////////////////////////////
 
 pragma::ComponentEventId cBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED = pragma::INVALID_COMPONENT_ID;
-void CBaseEntity::RegisterEvents(pragma::EntityComponentManager &componentManager) { cBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED = componentManager.RegisterEvent("ON_SCENE_FLAGS_CHANGED", typeid(pragma::ecs::BaseEntity), pragma::ComponentEventInfo::Type::Broadcast); }
+void pragma::ecs::CBaseEntity::RegisterEvents(pragma::EntityComponentManager &componentManager) { cBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED = componentManager.RegisterEvent("ON_SCENE_FLAGS_CHANGED", typeid(pragma::ecs::BaseEntity), pragma::ComponentEventInfo::Type::Broadcast); }
 
-CBaseEntity::CBaseEntity() : pragma::ecs::BaseEntity(), m_sceneFlags {util::UInt32Property::Create(0)} {}
+pragma::ecs::CBaseEntity::CBaseEntity() : pragma::ecs::BaseEntity(), m_sceneFlags {util::UInt32Property::Create(0)} {}
 
-pragma::ecs::BaseEntity *CBaseEntity::GetServersideEntity() const
+pragma::ecs::BaseEntity *pragma::ecs::CBaseEntity::GetServersideEntity() const
 {
 	if(IsClientsideOnly() == true)
 		return nullptr;
@@ -94,25 +94,25 @@ static uint64_t get_scene_flag(const pragma::CSceneComponent &scene)
 	auto index = scene.GetSceneIndex();
 	return 1 << index;
 }
-const util::PUInt32Property &CBaseEntity::GetSceneFlagsProperty() const { return m_sceneFlags; }
-uint32_t CBaseEntity::GetSceneFlags() const { return *m_sceneFlags; }
-void CBaseEntity::AddToScene(pragma::CSceneComponent &scene)
+const util::PUInt32Property &pragma::ecs::CBaseEntity::GetSceneFlagsProperty() const { return m_sceneFlags; }
+uint32_t pragma::ecs::CBaseEntity::GetSceneFlags() const { return *m_sceneFlags; }
+void pragma::ecs::CBaseEntity::AddToScene(pragma::CSceneComponent &scene)
 {
 	*m_sceneFlags = **m_sceneFlags | get_scene_flag(scene);
 	BroadcastEvent(cBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED);
 }
-void CBaseEntity::RemoveFromScene(pragma::CSceneComponent &scene)
+void pragma::ecs::CBaseEntity::RemoveFromScene(pragma::CSceneComponent &scene)
 {
 	*m_sceneFlags = **m_sceneFlags & ~get_scene_flag(scene);
 	BroadcastEvent(cBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED);
 }
-void CBaseEntity::RemoveFromAllScenes()
+void pragma::ecs::CBaseEntity::RemoveFromAllScenes()
 {
 	*m_sceneFlags = 0;
 	BroadcastEvent(cBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED);
 }
-bool CBaseEntity::IsInScene(const pragma::CSceneComponent &scene) const { return (**m_sceneFlags & get_scene_flag(scene)) != 0; }
-std::vector<pragma::CSceneComponent *> CBaseEntity::GetScenes() const
+bool pragma::ecs::CBaseEntity::IsInScene(const pragma::CSceneComponent &scene) const { return (**m_sceneFlags & get_scene_flag(scene)) != 0; }
+std::vector<pragma::CSceneComponent *> pragma::ecs::CBaseEntity::GetScenes() const
 {
 	std::vector<pragma::CSceneComponent *> scenes {};
 	auto numScenes = sizeof(pragma::CSceneComponent::SceneFlags) * 8;
@@ -129,16 +129,16 @@ std::vector<pragma::CSceneComponent *> CBaseEntity::GetScenes() const
 	return scenes;
 }
 
-void CBaseEntity::Construct(unsigned int idx, unsigned int clientIdx)
+void pragma::ecs::CBaseEntity::Construct(unsigned int idx, unsigned int clientIdx)
 {
 	m_clientIdx = clientIdx;
 	pragma::ecs::BaseEntity::Construct(idx);
 }
 
-unsigned int CBaseEntity::GetClientIndex() { return m_clientIdx; }
-uint32_t CBaseEntity::GetLocalIndex() const { return const_cast<CBaseEntity *>(this)->GetClientIndex(); }
+unsigned int pragma::ecs::CBaseEntity::GetClientIndex() { return m_clientIdx; }
+uint32_t pragma::ecs::CBaseEntity::GetLocalIndex() const { return const_cast<pragma::ecs::CBaseEntity *>(this)->GetClientIndex(); }
 
-void CBaseEntity::Initialize()
+void pragma::ecs::CBaseEntity::Initialize()
 {
 	pragma::ecs::BaseEntity::Initialize();
 	auto className = client_entities::ClientEntityRegistry::Instance().GetClassName(typeid(*this));
@@ -146,13 +146,13 @@ void CBaseEntity::Initialize()
 	m_className = pragma::ents::register_class_name(strClassName);
 }
 
-void CBaseEntity::DoSpawn()
+void pragma::ecs::CBaseEntity::DoSpawn()
 {
 	pragma::ecs::BaseEntity::DoSpawn();
 	pragma::get_cgame()->SpawnEntity(this);
 }
 
-Bool CBaseEntity::ReceiveNetEvent(UInt32 eventId, NetPacket &p)
+Bool pragma::ecs::CBaseEntity::ReceiveNetEvent(UInt32 eventId, NetPacket &p)
 {
 	for(auto &pComponent : GetComponents()) {
 		auto *pNetComponent = dynamic_cast<pragma::CBaseNetComponent *>(pComponent.get());
@@ -165,7 +165,7 @@ Bool CBaseEntity::ReceiveNetEvent(UInt32 eventId, NetPacket &p)
 	return false;
 }
 
-void CBaseEntity::ReceiveData(NetPacket &packet)
+void pragma::ecs::CBaseEntity::ReceiveData(NetPacket &packet)
 {
 	m_spawnFlags = packet->Read<uint32_t>();
 	SetUuid(packet->Read<util::Uuid>());
@@ -213,9 +213,9 @@ void CBaseEntity::ReceiveData(NetPacket &packet)
 	}
 }
 
-void CBaseEntity::ReceiveSnapshotData(NetPacket &) {}
+void pragma::ecs::CBaseEntity::ReceiveSnapshotData(NetPacket &) {}
 
-void CBaseEntity::OnRemove()
+void pragma::ecs::CBaseEntity::OnRemove()
 {
 	auto mdlComponent = GetModelComponent();
 	if(mdlComponent)
@@ -223,7 +223,7 @@ void CBaseEntity::OnRemove()
 	pragma::ecs::BaseEntity::OnRemove();
 }
 
-void CBaseEntity::Remove()
+void pragma::ecs::CBaseEntity::Remove()
 {
 	if(umath::is_flag_set(GetStateFlags(), pragma::ecs::BaseEntity::StateFlags::Removed))
 		return;
@@ -233,20 +233,20 @@ void CBaseEntity::Remove()
 	game->RemoveEntity(this);
 }
 
-pragma::NetworkState *CBaseEntity::GetNetworkState() const { return pragma::get_client_state(); }
+pragma::NetworkState *pragma::ecs::CBaseEntity::GetNetworkState() const { return pragma::get_client_state(); }
 
-bool CBaseEntity::IsClientsideOnly() const { return (GetIndex() == 0) ? true : false; }
+bool pragma::ecs::CBaseEntity::IsClientsideOnly() const { return (GetIndex() == 0) ? true : false; }
 
-bool CBaseEntity::IsNetworkLocal() const { return IsClientsideOnly(); }
+bool pragma::ecs::CBaseEntity::IsNetworkLocal() const { return IsClientsideOnly(); }
 
-void CBaseEntity::SendNetEventTCP(UInt32 eventId) const
+void pragma::ecs::CBaseEntity::SendNetEventTCP(UInt32 eventId) const
 {
 	if(IsClientsideOnly() || !IsSpawned())
 		return;
 	NetPacket p;
 	SendNetEventTCP(eventId, p);
 }
-void CBaseEntity::SendNetEventTCP(UInt32 eventId, NetPacket &data) const
+void pragma::ecs::CBaseEntity::SendNetEventTCP(UInt32 eventId, NetPacket &data) const
 {
 	if(IsClientsideOnly() || !IsSpawned())
 		return;
@@ -259,14 +259,14 @@ void CBaseEntity::SendNetEventTCP(UInt32 eventId, NetPacket &data) const
 	data->Write<UInt32>(eventId);
 	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::ENT_EVENT, data, pragma::networking::Protocol::SlowReliable);
 }
-void CBaseEntity::SendNetEventUDP(UInt32 eventId) const
+void pragma::ecs::CBaseEntity::SendNetEventUDP(UInt32 eventId) const
 {
 	if(IsClientsideOnly() || !IsSpawned())
 		return;
 	NetPacket p;
 	SendNetEventUDP(eventId, p);
 }
-void CBaseEntity::SendNetEventUDP(UInt32 eventId, NetPacket &data) const
+void pragma::ecs::CBaseEntity::SendNetEventUDP(UInt32 eventId, NetPacket &data) const
 {
 	if(IsClientsideOnly() || !IsSpawned())
 		return;
@@ -280,53 +280,53 @@ void CBaseEntity::SendNetEventUDP(UInt32 eventId, NetPacket &data) const
 	data->Write<UInt32>(eventId);
 	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::ENT_EVENT, data, pragma::networking::Protocol::FastUnreliable);
 }
-pragma::ComponentHandle<pragma::BaseAnimatedComponent> CBaseEntity::GetAnimatedComponent() const
+pragma::ComponentHandle<pragma::BaseAnimatedComponent> pragma::ecs::CBaseEntity::GetAnimatedComponent() const
 {
 	auto pComponent = GetComponent<pragma::CAnimatedComponent>();
 	return pComponent.valid() ? pComponent->GetHandle<pragma::BaseAnimatedComponent>() : pragma::ComponentHandle<pragma::BaseAnimatedComponent> {};
 }
-pragma::ComponentHandle<pragma::BaseWeaponComponent> CBaseEntity::GetWeaponComponent() const
+pragma::ComponentHandle<pragma::BaseWeaponComponent> pragma::ecs::CBaseEntity::GetWeaponComponent() const
 {
 	auto pComponent = GetComponent<pragma::CWeaponComponent>();
 	return pComponent.valid() ? pComponent->GetHandle<pragma::BaseWeaponComponent>() : pragma::ComponentHandle<pragma::BaseWeaponComponent> {};
 }
-pragma::ComponentHandle<pragma::BaseVehicleComponent> CBaseEntity::GetVehicleComponent() const
+pragma::ComponentHandle<pragma::BaseVehicleComponent> pragma::ecs::CBaseEntity::GetVehicleComponent() const
 {
 	auto pComponent = GetComponent<pragma::CVehicleComponent>();
 	return pComponent.valid() ? pComponent->GetHandle<pragma::BaseVehicleComponent>() : pragma::ComponentHandle<pragma::BaseVehicleComponent> {};
 }
-pragma::ComponentHandle<pragma::BaseAIComponent> CBaseEntity::GetAIComponent() const
+pragma::ComponentHandle<pragma::BaseAIComponent> pragma::ecs::CBaseEntity::GetAIComponent() const
 {
 	auto pComponent = GetComponent<pragma::CAIComponent>();
 	return pComponent.valid() ? pComponent->GetHandle<pragma::BaseAIComponent>() : pragma::ComponentHandle<pragma::BaseAIComponent> {};
 }
-pragma::ComponentHandle<pragma::BaseCharacterComponent> CBaseEntity::GetCharacterComponent() const
+pragma::ComponentHandle<pragma::BaseCharacterComponent> pragma::ecs::CBaseEntity::GetCharacterComponent() const
 {
 	auto pComponent = GetComponent<pragma::CCharacterComponent>();
 	return pComponent.valid() ? pComponent->GetHandle<pragma::BaseCharacterComponent>() : pragma::ComponentHandle<pragma::BaseCharacterComponent> {};
 }
-pragma::ComponentHandle<pragma::BasePlayerComponent> CBaseEntity::GetPlayerComponent() const
+pragma::ComponentHandle<pragma::BasePlayerComponent> pragma::ecs::CBaseEntity::GetPlayerComponent() const
 {
 	auto pComponent = GetComponent<pragma::CPlayerComponent>();
 	return pComponent.valid() ? pComponent->GetHandle<pragma::BasePlayerComponent>() : pragma::ComponentHandle<pragma::BasePlayerComponent> {};
 }
-pragma::ComponentHandle<pragma::BaseTimeScaleComponent> CBaseEntity::GetTimeScaleComponent() const
+pragma::ComponentHandle<pragma::BaseTimeScaleComponent> pragma::ecs::CBaseEntity::GetTimeScaleComponent() const
 {
 	auto pComponent = GetComponent<pragma::CTimeScaleComponent>();
 	return pComponent.valid() ? pComponent->GetHandle<pragma::BaseTimeScaleComponent>() : pragma::ComponentHandle<pragma::BaseTimeScaleComponent> {};
 }
-pragma::ComponentHandle<pragma::BaseNameComponent> CBaseEntity::GetNameComponent() const
+pragma::ComponentHandle<pragma::BaseNameComponent> pragma::ecs::CBaseEntity::GetNameComponent() const
 {
 	auto pComponent = GetComponent<pragma::CNameComponent>();
 	return pComponent.valid() ? pComponent->GetHandle<pragma::BaseNameComponent>() : pragma::ComponentHandle<pragma::BaseNameComponent> {};
 }
-bool CBaseEntity::IsCharacter() const { return HasComponent<pragma::CCharacterComponent>(); }
-bool CBaseEntity::IsPlayer() const { return HasComponent<pragma::CPlayerComponent>(); }
-bool CBaseEntity::IsWeapon() const { return HasComponent<pragma::CWeaponComponent>(); }
-bool CBaseEntity::IsVehicle() const { return HasComponent<pragma::CVehicleComponent>(); }
-bool CBaseEntity::IsNPC() const { return HasComponent<pragma::CAIComponent>(); }
+bool pragma::ecs::CBaseEntity::IsCharacter() const { return HasComponent<pragma::CCharacterComponent>(); }
+bool pragma::ecs::CBaseEntity::IsPlayer() const { return HasComponent<pragma::CPlayerComponent>(); }
+bool pragma::ecs::CBaseEntity::IsWeapon() const { return HasComponent<pragma::CWeaponComponent>(); }
+bool pragma::ecs::CBaseEntity::IsVehicle() const { return HasComponent<pragma::CVehicleComponent>(); }
+bool pragma::ecs::CBaseEntity::IsNPC() const { return HasComponent<pragma::CAIComponent>(); }
 
-const bounding_volume::AABB &CBaseEntity::GetLocalRenderBounds() const
+const bounding_volume::AABB &pragma::ecs::CBaseEntity::GetLocalRenderBounds() const
 {
 	auto *renderC = GetRenderComponent();
 	if(renderC == nullptr) {
@@ -335,7 +335,7 @@ const bounding_volume::AABB &CBaseEntity::GetLocalRenderBounds() const
 	}
 	return renderC->GetLocalRenderBounds();
 }
-const bounding_volume::AABB &CBaseEntity::GetAbsoluteRenderBounds(bool updateBounds) const
+const bounding_volume::AABB &pragma::ecs::CBaseEntity::GetAbsoluteRenderBounds(bool updateBounds) const
 {
 	auto *renderC = GetRenderComponent();
 	if(renderC == nullptr) {
@@ -345,7 +345,7 @@ const bounding_volume::AABB &CBaseEntity::GetAbsoluteRenderBounds(bool updateBou
 	return updateBounds ? renderC->GetUpdatedAbsoluteRenderBounds() : renderC->GetAbsoluteRenderBounds();
 }
 
-void CBaseEntity::AddChild(CBaseEntity &ent)
+void pragma::ecs::CBaseEntity::AddChild(CBaseEntity &ent)
 {
 	RemoveEntityOnRemoval(&ent);
 	ent.m_sceneFlags->Link(*m_sceneFlags);

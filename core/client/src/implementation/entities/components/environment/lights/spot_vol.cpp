@@ -160,7 +160,7 @@ void CLightSpotVolComponent::ReceiveData(NetPacket &packet)
 {
 	m_coneStartOffset = packet->Read<float>();
 	auto hEnt = GetHandle();
-	nwm::read_unique_entity(packet, [this, hEnt](pragma::ecs::BaseEntity *ent) {
+	pragma::networking::read_unique_entity(packet, [this, hEnt](pragma::ecs::BaseEntity *ent) {
 		if(hEnt.expired())
 			return;
 		if(ent != nullptr)
@@ -175,12 +175,12 @@ util::EventReply CLightSpotVolComponent::HandleEvent(ComponentEventId eventId, C
 	if(BaseEnvLightSpotVolComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON) {
-		auto pRenderComponent = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
+		auto pRenderComponent = static_cast<ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 		if(pRenderComponent)
 			pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::World);
 	}
 	else if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF) {
-		auto pRenderComponent = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
+		auto pRenderComponent = static_cast<ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 		if(pRenderComponent)
 			pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::None);
 	}

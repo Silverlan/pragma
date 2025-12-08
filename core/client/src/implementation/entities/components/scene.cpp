@@ -48,7 +48,7 @@ void CSceneComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimar
 		if(item.entity == curEntity)
 			continue;
 		curEntity = item.entity;
-		auto *ent = static_cast<CBaseEntity *>(pragma::get_cgame()->GetEntityByLocalIndex(item.entity));
+		auto *ent = static_cast<ecs::CBaseEntity *>(pragma::get_cgame()->GetEntityByLocalIndex(item.entity));
 		assert(ent);
 		if(!ent) {
 			// TODO: This should be unreachable, but there are cases where the entity does
@@ -132,7 +132,7 @@ void CSceneComponent::OnRemove()
 		g_scenes.at(sceneIndex) = nullptr;
 
 		// Clear all entities from this scene
-		std::vector<CBaseEntity *> *ents;
+		std::vector<pragma::ecs::CBaseEntity *> *ents;
 		pragma::get_cgame()->GetEntities(&ents);
 		for(auto *ent : *ents) {
 			if(ent == nullptr)
@@ -179,7 +179,7 @@ void CSceneComponent::Link(const CSceneComponent &other, bool linkCamera)
 
 	auto *occlusionCuller = const_cast<CSceneComponent &>(other).FindOcclusionCuller<COcclusionCullerComponent>();
 	if(occlusionCuller)
-		static_cast<CBaseEntity &>(occlusionCuller->GetEntity()).AddToScene(*this);
+		static_cast<pragma::ecs::CBaseEntity &>(occlusionCuller->GetEntity()).AddToScene(*this);
 
 	auto *worldEnv = other.GetWorldEnvironment();
 	if(worldEnv)
@@ -279,7 +279,7 @@ TCPPM *CSceneComponent::FindOcclusionCuller()
 {
 	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::COcclusionCullerComponent>>();
-	entIt.AttachFilter<EntityIteratorFilterUser>([this](pragma::ecs::BaseEntity &ent, std::size_t index) -> bool { return static_cast<CBaseEntity &>(ent).IsInScene(*this); });
+	entIt.AttachFilter<EntityIteratorFilterUser>([this](pragma::ecs::BaseEntity &ent, std::size_t index) -> bool { return static_cast<pragma::ecs::CBaseEntity &>(ent).IsInScene(*this); });
 	auto it = entIt.begin();
 	auto *ent = (it != entIt.end()) ? *it : nullptr;
 	return ent ? ent->GetComponent<pragma::COcclusionCullerComponent>().get() : nullptr;

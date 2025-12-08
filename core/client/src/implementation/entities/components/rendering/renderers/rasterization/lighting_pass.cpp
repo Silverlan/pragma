@@ -455,7 +455,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 				if(shader.valid()) {
 					if(g_dbgMode == 0) {
 						auto *test = static_cast<pragma::ShaderTest *>(shader.get());
-						if(test->BeginDraw(pcmd, {})) // && test->BindEntity(static_cast<CBaseEntity&>(*ent)))
+						if(test->BeginDraw(pcmd, {})) // && test->BindEntity(static_cast<pragma::ecs::CBaseEntity&>(*ent)))
 						{
 							test->BindSceneCamera(scene, static_cast<pragma::CRasterizationRendererComponent &>(*scene.GetRenderer<pragma::CRendererComponent>()), false);
 							auto instanceBuffer = CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer();
@@ -483,7 +483,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 					else if(g_dbgMode == 2) {
 						/*auto shader = pragma::get_cengine()->GetShader("pbr");
 				auto *test = static_cast<pragma::ShaderPBR*>(shader.get());
-				if(test->BeginDraw(drawCmd,{}) && test->BindEntity(static_cast<CBaseEntity&>(*ent)))
+				if(test->BeginDraw(drawCmd,{}) && test->BindEntity(static_cast<pragma::ecs::CBaseEntity&>(*ent)))
 				{
 					test->BindScene();
 					test->BindEntity();

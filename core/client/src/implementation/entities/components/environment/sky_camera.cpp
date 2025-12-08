@@ -62,7 +62,7 @@ void CSkyCameraComponent::BuildSkyMeshRenderQueues(const pragma::CSceneComponent
 	std::vector<util::BSPTree *> trees;
 	trees.reserve(entItWorld.GetCount());
 	for(auto *entWorld : entItWorld) {
-		if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<CBaseEntity *>(entWorld), scene, renderFlags, renderMask) == false)
+		if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<ecs::CBaseEntity *>(entWorld), scene, renderFlags, renderMask) == false)
 			continue;
 		auto worldC = entWorld->GetComponent<pragma::CWorldComponent>();
 		auto &bspTree = worldC->GetBSPTree();
@@ -146,7 +146,7 @@ void CSkyCameraComponent::UpdateToggleState()
 void CSkyCameraComponent::UpdateScenes()
 {
 	m_sceneData.clear();
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	auto scenes = ent.GetScenes();
 	for(auto *scene : scenes) {
 		auto idx = scene->GetSceneIndex();

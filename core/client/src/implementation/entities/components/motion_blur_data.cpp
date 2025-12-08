@@ -52,7 +52,7 @@ void CMotionBlurDataComponent::UpdateEntityPoses()
 	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 	for(auto *ent : entIt) {
-		auto &r = *static_cast<CBaseEntity *>(ent)->GetRenderComponent();
+		auto &r = *static_cast<ecs::CBaseEntity *>(ent)->GetRenderComponent();
 		auto curPose = r.GetTransformationMatrix();
 		auto it = m_motionBlurData.curModelMatrices.find(ent);
 

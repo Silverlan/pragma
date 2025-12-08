@@ -33,7 +33,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CEnvFogController : public CBaseEntity {
+	class DLLCLIENT CEnvFogController : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

@@ -1359,7 +1359,7 @@ void pragma::CGame::RegisterLuaClasses()
 	defDrawSceneInfo.def("AddSubPass", &::util::DrawSceneInfo::AddSubPass);
 	defDrawSceneInfo.def("SetEntityRenderFilter", static_cast<void (*)(lua::State *, util::DrawSceneInfo &, luabind::object)>([](lua::State *l, util::DrawSceneInfo &drawSceneInfo, luabind::object f) {
 		Lua::CheckFunction(l, 2);
-		drawSceneInfo.renderFilter = [f, l](CBaseEntity &ent) -> bool {
+		drawSceneInfo.renderFilter = [f, l](ecs::CBaseEntity &ent) -> bool {
 			auto r = Lua::CallFunction(
 			  l,
 			  [&f, &ent](lua::State *l) {
@@ -1378,7 +1378,7 @@ void pragma::CGame::RegisterLuaClasses()
 	}));
 	defDrawSceneInfo.def("SetEntityPrepassFilter", static_cast<void (*)(lua::State *, util::DrawSceneInfo &, luabind::object)>([](lua::State *l, util::DrawSceneInfo &drawSceneInfo, luabind::object f) {
 		Lua::CheckFunction(l, 2);
-		drawSceneInfo.prepassFilter = [f, l](CBaseEntity &ent) -> bool {
+		drawSceneInfo.prepassFilter = [f, l](ecs::CBaseEntity &ent) -> bool {
 			auto r = Lua::CallFunction(
 			  l,
 			  [&f, &ent](lua::State *l) {

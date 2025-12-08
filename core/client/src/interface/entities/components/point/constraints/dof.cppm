@@ -20,7 +20,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CPointConstraintDoF : public CBaseEntity {
+	class DLLCLIENT CPointConstraintDoF : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

@@ -107,7 +107,7 @@ void CVehicleComponent::ClearDriver()
 			pragma::get_cgame()->EnableRenderMode(pragma::rendering::SceneRenderPass::View);
 			auto *vb = pragma::get_cgame()->GetViewBody<pragma::CViewBodyComponent>();
 			if(vb != nullptr) {
-				auto pRenderComponent = static_cast<CBaseEntity &>(vb->GetEntity()).GetRenderComponent();
+				auto pRenderComponent = static_cast<pragma::ecs::CBaseEntity &>(vb->GetEntity()).GetRenderComponent();
 				if(pRenderComponent)
 					pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::View);
 			}
@@ -135,7 +135,7 @@ void CVehicleComponent::SetDriver(pragma::ecs::BaseEntity *ent)
 	pragma::get_cgame()->DisableRenderMode(pragma::rendering::SceneRenderPass::View);
 	auto *vb = pragma::get_cgame()->GetViewBody<pragma::CViewBodyComponent>();
 	if(vb != nullptr) {
-		auto pRenderComponent = static_cast<CBaseEntity &>(vb->GetEntity()).GetRenderComponent();
+		auto pRenderComponent = static_cast<pragma::ecs::CBaseEntity &>(vb->GetEntity()).GetRenderComponent();
 		if(pRenderComponent)
 			pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::None);
 	}

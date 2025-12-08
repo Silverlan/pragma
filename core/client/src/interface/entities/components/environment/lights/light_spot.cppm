@@ -11,7 +11,7 @@ export import :entities.components.entity;
 export import :math.mvp_bias;
 
 export namespace pragma {
-	class DLLCLIENT CLightSpotComponent final : public BaseEnvLightSpotComponent, public CBaseNetComponent, public MVPBias<1> {
+	class DLLCLIENT CLightSpotComponent final : public BaseEnvLightSpotComponent, public CBaseNetComponent, public math::MVPBias<1> {
 	  public:
 		CLightSpotComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
@@ -33,7 +33,7 @@ export namespace pragma {
 	};
 };
 
-export class DLLCLIENT CEnvLightSpot : public CBaseEntity {
+export class DLLCLIENT CEnvLightSpot : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };

@@ -107,7 +107,7 @@ pragma::CGame::CGame(pragma::NetworkState *state)
 	RegisterCallback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>>("CalcViewOffset");
 	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender");
 	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PostRender");
-	RegisterCallback<void, CBaseEntity *>("UpdateEntityModel");
+	RegisterCallback<void, ecs::CBaseEntity *>("UpdateEntityModel");
 	RegisterCallback<void, pragma::gui::types::WIBase *, pragma::gui::types::WIBase *>("OnGUIFocusChanged");
 
 	LoadAuxEffects("fx_generic.udm");
@@ -1181,7 +1181,7 @@ void pragma::CGame::InitializeMapEntities(pragma::asset::WorldData &worldData, s
 
 		auto &mdl = ent.GetModel();
 		if(mdl == nullptr) {
-			auto pRenderComponent = static_cast<CBaseEntity &>(ent).GetRenderComponent();
+			auto pRenderComponent = static_cast<pragma::ecs::CBaseEntity &>(ent).GetRenderComponent();
 			if(pRenderComponent) {
 				Vector3 min {};
 				Vector3 max {};
@@ -1223,7 +1223,7 @@ void pragma::CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 		pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::MapComponent>>();
 		for(auto *ent : entIt)
-			pragma::CLightMapReceiverComponent::SetupLightMapUvData(static_cast<CBaseEntity &>(*ent));
+			pragma::CLightMapReceiverComponent::SetupLightMapUvData(static_cast<pragma::ecs::CBaseEntity &>(*ent));
 
 		// Generate lightmap uv buffers for all entities
 		if(worldData.IsLegacyLightMapEnabled()) {
@@ -1429,7 +1429,7 @@ void pragma::CGame::ReceiveSnapshot(NetPacket &packet)
 	const auto maxCorrectionDistance = umath::pow2(10.f);
 	unsigned int numEnts = packet->Read<unsigned int>();
 	for(unsigned int i = 0; i < numEnts; i++) {
-		CBaseEntity *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+		ecs::CBaseEntity *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 		Vector3 pos = networking::read_vector(packet);
 		Vector3 vel = networking::read_vector(packet);
 		Vector3 angVel = networking::read_vector(packet);

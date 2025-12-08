@@ -53,7 +53,7 @@ void CModelComponent::UpdateBaseShaderSpecializationFlags()
 {
 	auto clipPlane = false;
 	auto depthBias = false;
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	auto *renderC = ent.GetRenderComponent();
 	if(renderC != nullptr) {
 		clipPlane = renderC->GetRenderClipPlane();

@@ -235,7 +235,7 @@ void CPlayerComponent::Initialize()
 	});
 	BindEventUnhandled(cRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnUpdateMatrices(static_cast<CEOnUpdateRenderMatrices &>(evData.get()).transformation); });
 
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
@@ -381,7 +381,7 @@ bool CPlayerComponent::ShouldDraw() const
 
 bool CPlayerComponent::ShouldDrawShadow() const
 {
-	auto pRenderComponent = static_cast<const CBaseEntity &>(GetEntity()).GetRenderComponent();
+	auto pRenderComponent = static_cast<const ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 	return pRenderComponent ? pRenderComponent->GetCastShadows() : false;
 }
 
@@ -445,7 +445,7 @@ void CPlayerComponent::ReceiveData(NetPacket &packet)
 {
 	m_timeConnected = packet->Read<double>();
 	auto hThis = GetHandle();
-	nwm::read_unique_entity(packet, [hThis, this](pragma::ecs::BaseEntity *ent) {
+	pragma::networking::read_unique_entity(packet, [hThis, this](pragma::ecs::BaseEntity *ent) {
 		if(ent == nullptr || hThis.expired())
 			return;
 		m_entFlashlight = ent->GetHandle();

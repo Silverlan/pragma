@@ -18,7 +18,7 @@ export namespace pragma {
 	};
 };
 
-export class DLLCLIENT CEnvSoundDspEqualizer : public CBaseEntity {
+export class DLLCLIENT CEnvSoundDspEqualizer : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };

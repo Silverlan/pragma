@@ -27,7 +27,7 @@ export namespace pragma {
 	};
 };
 
-export class DLLCLIENT CViewModel : public CBaseEntity {
+export class DLLCLIENT CViewModel : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };

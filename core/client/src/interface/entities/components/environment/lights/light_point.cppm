@@ -12,7 +12,7 @@ export import :rendering.cube_map_side;
 export import :math.mvp_bias;
 
 export namespace pragma {
-	class DLLCLIENT CLightPointComponent final : public BaseEnvLightPointComponent, public MVPBias<6> {
+	class DLLCLIENT CLightPointComponent final : public BaseEnvLightPointComponent, public math::MVPBias<6> {
 	  public:
 		CLightPointComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
@@ -32,7 +32,7 @@ export namespace pragma {
 	};
 };
 
-export class DLLCLIENT CEnvLightPoint : public CBaseEntity {
+export class DLLCLIENT CEnvLightPoint : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };

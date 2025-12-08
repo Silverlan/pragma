@@ -418,7 +418,7 @@ void NET_cl_SND_CREATE(NetPacket packet)
 	as->SetDirectFilter({gain, gainHF, gainLF});
 
 	std::weak_ptr<pragma::audio::ALSound> wpSnd = as;
-	nwm::read_unique_entity(packet, [wpSnd](pragma::ecs::BaseEntity *ent) {
+	pragma::networking::read_unique_entity(packet, [wpSnd](pragma::ecs::BaseEntity *ent) {
 		if(ent == nullptr || wpSnd.expired())
 			return;
 		wpSnd.lock()->SetSource(ent);
@@ -718,7 +718,7 @@ void NET_cl_SND_EV(NetPacket packet)
 	}
 }
 
-CBaseEntity *NET_cl_ENT_CREATE(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false)
+pragma::ecs::CBaseEntity *NET_cl_ENT_CREATE(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false)
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
@@ -732,7 +732,7 @@ CBaseEntity *NET_cl_ENT_CREATE(NetPacket &packet, bool bSpawn, bool bIgnoreMapIn
 	}
 	unsigned int idx = packet->Read<unsigned int>();
 	unsigned int mapIdx = packet->Read<unsigned int>();
-	CBaseEntity *ent = (*factory)(client, idx);
+	pragma::ecs::CBaseEntity *ent = (*factory)(client, idx);
 	ent->ReceiveData(packet);
 	if(mapIdx == 0) {
 		if(bSpawn)
@@ -757,13 +757,13 @@ void NET_cl_ENT_REMOVE(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	ent->Remove();
 }
 
-CBaseEntity *NET_cl_ENT_CREATE_LUA(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false)
+pragma::ecs::CBaseEntity *NET_cl_ENT_CREATE_LUA(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false)
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
@@ -773,7 +773,7 @@ CBaseEntity *NET_cl_ENT_CREATE_LUA(NetPacket &packet, bool bSpawn, bool bIgnoreM
 	std::string classname = packet->ReadString();
 	unsigned int idx = packet->Read<unsigned int>();
 	unsigned int mapIdx = packet->Read<unsigned int>();
-	CBaseEntity *ent = game->CreateLuaEntity(classname, idx, true);
+	pragma::ecs::CBaseEntity *ent = game->CreateLuaEntity(classname, idx, true);
 	if(ent == nullptr) {
 		Con::cwar << "Attempted to create unregistered entity '" << classname << "'!" << Con::endl;
 		return nullptr;
@@ -901,14 +901,14 @@ void NET_cl_ENT_SOUND(NetPacket packet)
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	unsigned int sndID = packet->Read<unsigned int>();
 	std::shared_ptr<pragma::audio::ALSound> snd = client->GetSoundByIndex(sndID);
 	if(snd == nullptr)
 		return;
-	CBaseEntity *cent = static_cast<CBaseEntity *>(ent);
+	pragma::ecs::CBaseEntity *cent = static_cast<pragma::ecs::CBaseEntity *>(ent);
 	auto pSoundEmitterComponent = cent->GetComponent<pragma::CSoundEmitterComponent>();
 	if(pSoundEmitterComponent.valid())
 		pSoundEmitterComponent->AddSound(snd);
@@ -918,7 +918,7 @@ void NET_cl_ENT_SETUNLIT(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pRenderComponent = ent->GetRenderComponent();
@@ -932,7 +932,7 @@ void NET_cl_ENT_SETCASTSHADOWS(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pRenderComponent = ent->GetRenderComponent();
@@ -946,7 +946,7 @@ void NET_cl_ENT_SETHEALTH(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pHealthComponent = ent->GetComponent<pragma::CHealthComponent>();
@@ -960,7 +960,7 @@ void NET_cl_ENT_SETNAME(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pNameComponent = ent->GetComponent<pragma::CNameComponent>();
@@ -974,11 +974,11 @@ void NET_cl_ENT_MODEL(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	std::string mdl = packet->ReadString();
-	CBaseEntity *cent = static_cast<CBaseEntity *>(ent);
+	pragma::ecs::CBaseEntity *cent = static_cast<pragma::ecs::CBaseEntity *>(ent);
 	auto mdlComponent = cent->GetModelComponent();
 	if(mdlComponent)
 		mdlComponent->SetModel(mdl.c_str());
@@ -988,7 +988,7 @@ void NET_cl_ENT_SKIN(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	unsigned int skin = packet->Read<unsigned int>();
@@ -1001,7 +1001,7 @@ void NET_cl_ENT_ANIM_PLAY(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	int anim = packet->Read<int>();
@@ -1014,7 +1014,7 @@ void NET_cl_ENT_ANIM_GESTURE_PLAY(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	int slot = packet->Read<int>();
@@ -1028,7 +1028,7 @@ void NET_cl_ENT_ANIM_GESTURE_STOP(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	int slot = packet->Read<int>();
@@ -1041,7 +1041,7 @@ void NET_cl_ENT_SETPARENT(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	pragma::ecs::BaseEntity *parent = pragma::networking::read_entity(packet);
@@ -1064,7 +1064,7 @@ void NET_cl_ENT_SETPARENTMODE(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto flags = packet->Read<pragma::FAttachmentMode>();
@@ -1077,7 +1077,7 @@ void NET_cl_ENT_PHYS_INIT(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
@@ -1091,7 +1091,7 @@ void NET_cl_ENT_PHYS_DESTROY(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
@@ -1105,7 +1105,7 @@ void NET_cl_ENT_EVENT(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	packet->SetOffset(packet->GetDataSize() - sizeof(UInt32) - sizeof(unsigned int));
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto eventId = packet->Read<UInt32>();
@@ -1122,7 +1122,7 @@ void NET_cl_ENT_MOVETYPE(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
@@ -1136,7 +1136,7 @@ void NET_cl_PL_TOGGLE_NOCLIP(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto bNoclip = packet->Read<bool>();
@@ -1158,7 +1158,7 @@ void NET_cl_ENT_COLLISIONTYPE(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
@@ -1172,7 +1172,7 @@ void NET_cl_ENT_EYEOFFSET(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pTrComponent = ent->GetTransformComponent();
@@ -1762,12 +1762,12 @@ struct NavDebugInfo {
 	std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> dbgSpline;
 	std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> dbgNode;
 };
-static std::unordered_map<const CBaseEntity *, NavDebugInfo> s_aiNavDebugObjects {};
+static std::unordered_map<const pragma::ecs::CBaseEntity *, NavDebugInfo> s_aiNavDebugObjects {};
 void NET_cl_DEBUG_AI_NAVIGATION(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *npc = static_cast<CBaseEntity *>(pragma::networking::read_entity(packet));
+	auto *npc = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(npc == nullptr)
 		return;
 	std::vector<Vector3> points;
@@ -1789,7 +1789,7 @@ void NET_cl_DEBUG_AI_NAVIGATION(NetPacket packet)
 	auto pGenericComponent = npc->GetComponent<pragma::CGenericComponent>();
 	if(pGenericComponent.valid()) {
 		pGenericComponent->BindEventUnhandled(pragma::ecs::baseEntity::EVENT_ON_REMOVE, [pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) {
-			auto it = s_aiNavDebugObjects.find(static_cast<const CBaseEntity *>(&pGenericComponent->GetEntity()));
+			auto it = s_aiNavDebugObjects.find(static_cast<const pragma::ecs::CBaseEntity *>(&pGenericComponent->GetEntity()));
 			if(it == s_aiNavDebugObjects.end())
 				return;
 			s_aiNavDebugObjects.erase(it);

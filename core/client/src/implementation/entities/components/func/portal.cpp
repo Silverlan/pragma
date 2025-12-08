@@ -14,7 +14,7 @@ using namespace pragma;
 void CFuncPortalComponent::Initialize()
 {
 	BaseFuncPortalComponent::Initialize();
-	auto pRenderComponent = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
+	auto pRenderComponent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 	if(pRenderComponent)
 		pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::World);
 }

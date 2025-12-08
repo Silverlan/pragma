@@ -44,7 +44,7 @@ void CLiquidComponent::Initialize()
 void CLiquidComponent::OnEntitySpawn()
 {
 	BaseFuncLiquidComponent::OnEntitySpawn();
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	//auto pPhysComponent = ent.GetPhysicsComponent();
 	//if(pPhysComponent != nullptr)
 	//	pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Static);

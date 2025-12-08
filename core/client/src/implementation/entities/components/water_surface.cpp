@@ -32,7 +32,7 @@ void CWaterSurfaceComponent::Initialize()
 	//		UpdateSurfaceMesh();
 	//});
 
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(pRenderComponent)
 		pRenderComponent->SetCastShadows(false);
@@ -44,7 +44,7 @@ void CWaterSurfaceComponent::UpdateSurfaceMesh()
 {
 	if(m_hFuncWater.expired() || m_waterSurfaceMesh.expired() == true)
 		return;
-	auto *entWater = static_cast<CBaseEntity *>(&m_hFuncWater->GetEntity());
+	auto *entWater = static_cast<pragma::ecs::CBaseEntity *>(&m_hFuncWater->GetEntity());
 	auto *svEntWater = entWater->GetServersideEntity();
 	pragma::physics::CPhysWaterSurfaceSimulator *sim = nullptr;
 	if(svEntWater != nullptr) {

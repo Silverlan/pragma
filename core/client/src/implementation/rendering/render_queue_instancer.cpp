@@ -56,7 +56,7 @@ void rendering::RenderQueueInstancer::ProcessInstantiableList(uint32_t endIndex,
 	std::vector<pragma::RenderBufferIndex> renderBufferIndices {};
 	renderBufferIndices.reserve(numInstantiableEntities);
 	for(auto i = decltype(sortedInstantiableEntityIndices.size()) {0u}; i < sortedInstantiableEntityIndices.size(); ++i) {
-		auto renderBufferIndex = static_cast<CBaseEntity *>(pragma::get_cgame()->GetEntityByLocalIndex(m_instantiableEntityList[i]))->GetRenderComponent()->GetRenderBufferIndex();
+		auto renderBufferIndex = static_cast<pragma::ecs::CBaseEntity *>(pragma::get_cgame()->GetEntityByLocalIndex(m_instantiableEntityList[i]))->GetRenderComponent()->GetRenderBufferIndex();
 		renderBufferIndices.push_back(*renderBufferIndex);
 
 		// Note: Hash has to be in the right order for frame coherence, which is not necessarily the same order as the queue (since the entity index
@@ -105,7 +105,7 @@ util::Hash rendering::RenderQueueInstancer::CalcNextEntityHash(uint32_t &outNumM
 	util::Hash hash = 0;
 	auto entity = m_renderQueue.queue[sortedItemIndices[m_curIndex].first].entity;
 	entIndex = entity;
-	auto &renderMeshes = static_cast<CBaseEntity &>(*pragma::get_cgame()->GetEntityByLocalIndex(entIndex)).GetRenderComponent()->GetRenderMeshes();
+	auto &renderMeshes = static_cast<pragma::ecs::CBaseEntity &>(*pragma::get_cgame()->GetEntityByLocalIndex(entIndex)).GetRenderComponent()->GetRenderMeshes();
 	outNumMeshes = 0;
 	while(m_curIndex < sortedItemIndices.size()) {
 		auto &sortKey = sortedItemIndices[m_curIndex];

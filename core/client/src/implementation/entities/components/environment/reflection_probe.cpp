@@ -290,7 +290,7 @@ prosper::IDescriptorSet *CReflectionProbeComponent::FindDescriptorSetForClosestP
 	auto dClosest = std::numeric_limits<float>::max();
 	pragma::ecs::BaseEntity *entClosest = nullptr;
 	for(auto *ent : entIt) {
-		if(static_cast<CBaseEntity *>(ent)->IsInScene(scene) == false)
+		if(static_cast<ecs::CBaseEntity *>(ent)->IsInScene(scene) == false)
 			continue;
 		auto posEnt = ent->GetPosition();
 		auto d = uvec::distance_sqr(origin, posEnt);

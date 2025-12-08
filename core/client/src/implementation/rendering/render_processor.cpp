@@ -85,9 +85,9 @@ static void print_pass_stats(const RenderPassStats &stats, bool full)
 		Con::cout << hShader->GetIdentifier() << Con::endl;
 	}
 
-	std::unordered_set<CBaseEntity *> uniqueEntities;
+	std::unordered_set<pragma::ecs::CBaseEntity *> uniqueEntities;
 	for(auto &entData : entities)
-		uniqueEntities.insert(static_cast<CBaseEntity *>(entData.hEntity.get()));
+		uniqueEntities.insert(static_cast<pragma::ecs::CBaseEntity *>(entData.hEntity.get()));
 
 	Con::cout << "\nUnique meshes: " << stats.meshes.size() << Con::endl;
 	auto n = umath::to_integral(RenderPassStats::Counter::Count);
@@ -452,7 +452,7 @@ bool pragma::rendering::BaseRenderProcessor::BindMaterial(msys::CMaterial &mat)
 	m_curMaterialIndex = mat.GetIndex();
 	return true;
 }
-bool pragma::rendering::BaseRenderProcessor::BindEntity(CBaseEntity &ent)
+bool pragma::rendering::BaseRenderProcessor::BindEntity(pragma::ecs::CBaseEntity &ent)
 {
 	if(&ent == m_curEntity)
 		return umath::is_flag_set(m_stateFlags, StateFlags::EntityBound);
@@ -720,7 +720,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 				}
 				// TODO: If we're instancing, there's technically no need to bind
 				// the entity (except for resetting the clip plane, etc.)
-				BindEntity(static_cast<CBaseEntity &>(*ent));
+				BindEntity(static_cast<pragma::ecs::CBaseEntity &>(*ent));
 				if(m_stats && umath::is_flag_set(m_stateFlags, StateFlags::EntityBound)) {
 					if(item.instanceSetIndex == RenderQueueItem::UNIQUE)
 						(*m_stats)->Increment(RenderPassStats::Counter::EntitiesWithoutInstancing);

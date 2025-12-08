@@ -840,7 +840,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 					auto mva = va.AddMeshFrame(*mesh, *subMesh);
 					mva->SetVertexCount(numVerts);
 					if(normBufData)
-						mva->SetFlagEnabled(pragma::MeshVertexFrame::Flags::HasNormals);
+						mva->SetFlagEnabled(pragma::animation::MeshVertexFrame::Flags::HasNormals);
 					for(auto i = decltype(posAccessor.count) {0u}; i < posAccessor.count; ++i) {
 						auto pos = TransformPos(posBufData.GetIndexedValue<Vector3>(i));
 						mva->SetVertexPosition(i, pos);

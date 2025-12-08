@@ -163,7 +163,7 @@ void CVertexAnimatedComponent::UpdateVertexAnimationDataMT()
 		auto frameId = flex.GetFrameIndex();
 		//auto *ma = flex.GetMeshVertexAnimation();
 		//auto *fr = flex.GetMeshVertexFrame();
-		auto it = std::find_if(vertAnims.begin(), vertAnims.end(), [va](const std::shared_ptr<VertexAnimation> &vaOther) { return vaOther.get() == va; });
+		auto it = std::find_if(vertAnims.begin(), vertAnims.end(), [va](const std::shared_ptr<pragma::animation::VertexAnimation> &vaOther) { return vaOther.get() == va; });
 		if(it == vertAnims.end())
 			continue;
 		auto vaId = it - vertAnims.begin();
@@ -226,7 +226,7 @@ endLoop:
 		bufferOffset += pair.second.size();
 	}
 	m_vertexAnimationBufferDataCount = bufferOffset;
-	//auto bufferData = std::vector<VertexAnimationData>{};
+	//auto bufferData = std::vector<pragma::rendering::VertexAnimationData>{};
 	//bufferData.reserve(m_activeVertexAnimations);
 }
 

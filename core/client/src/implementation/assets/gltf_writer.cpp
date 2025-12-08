@@ -117,7 +117,7 @@ void pragma::asset::GLTFWriter::WriteMorphTargets(pragma::geometry::ModelSubMesh
 
 			auto numVerts = morphSet.frame->GetVertexCount();
 
-			auto hasNormals = morphSet.frame->IsFlagEnabled(pragma::MeshVertexFrame::Flags::HasNormals);
+			auto hasNormals = morphSet.frame->IsFlagEnabled(pragma::animation::MeshVertexFrame::Flags::HasNormals);
 			uint32_t numAttributes = 1;
 			if(hasNormals)
 				++numAttributes;

@@ -402,7 +402,7 @@ bool FbxImporter::LoadMeshes(std::string &outErr)
 		struct BlendShapeData {
 			std::vector<Vector3> posDeltas;
 			std::vector<Vector3> normDeltas;
-			std::shared_ptr<VertexAnimation> va;
+			std::shared_ptr<pragma::animation::VertexAnimation> va;
 		};
 		std::vector<BlendShapeData> blendShapeData;
 		auto *blendShape = fbxMesh.getBlendShape();
@@ -566,7 +566,7 @@ bool FbxImporter::LoadMeshes(std::string &outErr)
 				mva->SetVertexCount(numVerts);
 				auto hasNormals = !shapeData.normDeltas.empty();
 				if(hasNormals)
-					mva->SetFlagEnabled(pragma::MeshVertexFrame::Flags::HasNormals);
+					mva->SetFlagEnabled(pragma::animation::MeshVertexFrame::Flags::HasNormals);
 
 				for(size_t i = 0; i < shapeData.posDeltas.size(); ++i) {
 					auto it = fbxIndexToPragmaIndex.find(i);

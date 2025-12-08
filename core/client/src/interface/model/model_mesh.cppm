@@ -30,7 +30,7 @@ export namespace pragma::geometry {
 		static const std::shared_ptr<prosper::IDynamicResizableBuffer> &GetGlobalIndexBuffer();
 		const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(pragma::ShaderEntity &shader, uint32_t pipelineIdx = 0u);
 
-		using VertexType = VertexBufferData;
+		using VertexType = rendering::VertexBufferData;
 		using VertexWeightType = umath::VertexWeight;
 		using AlphaType = Vector2;
 	private:

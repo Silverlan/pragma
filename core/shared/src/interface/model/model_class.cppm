@@ -341,14 +341,14 @@ export {
 			void RemoveBone(pragma::animation::BoneId boneId);
 
 			// Vertex animations
-			const std::vector<std::shared_ptr<VertexAnimation>> &GetVertexAnimations() const;
-			std::vector<std::shared_ptr<VertexAnimation>> &GetVertexAnimations();
-			const std::shared_ptr<VertexAnimation> *GetVertexAnimation(uint32_t vaIdx) const;
+			const std::vector<std::shared_ptr<pragma::animation::VertexAnimation>> &GetVertexAnimations() const;
+			std::vector<std::shared_ptr<pragma::animation::VertexAnimation>> &GetVertexAnimations();
+			const std::shared_ptr<pragma::animation::VertexAnimation> *GetVertexAnimation(uint32_t vaIdx) const;
 			bool GetVertexAnimationId(const std::string &name, uint32_t &id) const;
-			std::shared_ptr<VertexAnimation> *GetVertexAnimation(uint32_t vaIdx);
-			const std::shared_ptr<VertexAnimation> *GetVertexAnimation(const std::string &name) const;
-			std::shared_ptr<VertexAnimation> *GetVertexAnimation(const std::string &name);
-			std::shared_ptr<VertexAnimation> AddVertexAnimation(const std::string &name);
+			std::shared_ptr<pragma::animation::VertexAnimation> *GetVertexAnimation(uint32_t vaIdx);
+			const std::shared_ptr<pragma::animation::VertexAnimation> *GetVertexAnimation(const std::string &name) const;
+			std::shared_ptr<pragma::animation::VertexAnimation> *GetVertexAnimation(const std::string &name);
+			std::shared_ptr<pragma::animation::VertexAnimation> AddVertexAnimation(const std::string &name);
 			void RemoveVertexAnimation(const std::string &name);
 
 			// Flex controllers
@@ -587,9 +587,9 @@ export {
 			void LoadMaterials(bool precache, bool bReload);
 			bool FindMaterial(const std::string &texture, std::string &matPath, bool importIfNotFound) const;
 
-			virtual std::shared_ptr<VertexAnimation> CreateVertexAnimation(const std::string &name) const;
-			std::vector<std::shared_ptr<VertexAnimation>>::const_iterator FindVertexAnimation(const std::string &name) const;
-			std::vector<std::shared_ptr<VertexAnimation>>::iterator FindVertexAnimation(const std::string &name);
+			virtual std::shared_ptr<pragma::animation::VertexAnimation> CreateVertexAnimation(const std::string &name) const;
+			std::vector<std::shared_ptr<pragma::animation::VertexAnimation>>::const_iterator FindVertexAnimation(const std::string &name) const;
+			std::vector<std::shared_ptr<pragma::animation::VertexAnimation>>::iterator FindVertexAnimation(const std::string &name);
 
 			std::vector<animation::FlexController>::const_iterator FindFlexController(const std::string &name) const;
 			std::vector<animation::FlexController>::iterator FindFlexController(const std::string &name);
@@ -622,7 +622,7 @@ export {
 			std::shared_ptr<Frame> m_reference = nullptr;
 			std::string m_name;
 			std::vector<std::shared_ptr<pragma::animation::Animation>> m_animations;
-			std::vector<std::shared_ptr<VertexAnimation>> m_vertexAnimations;
+			std::vector<std::shared_ptr<pragma::animation::VertexAnimation>> m_vertexAnimations;
 			std::unordered_map<std::string, unsigned int> m_animationIDs;
 			std::shared_ptr<pragma::animation::Skeleton> m_skeleton = nullptr;
 			std::shared_ptr<pragma::animation::MetaRig> m_metaRig = nullptr;

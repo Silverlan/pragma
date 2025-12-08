@@ -18,7 +18,7 @@ decltype(ShaderPPLightCone::DESCRIPTOR_SET_DEPTH_BUFFER) ShaderPPLightCone::DESC
 decltype(ShaderPPLightCone::DESCRIPTOR_SET_SCENE) ShaderPPLightCone::DESCRIPTOR_SET_SCENE = {&ShaderEntity::DESCRIPTOR_SET_SCENE};
 decltype(ShaderPPLightCone::DESCRIPTOR_SET_INSTANCE) ShaderPPLightCone::DESCRIPTOR_SET_INSTANCE = {&ShaderEntity::DESCRIPTOR_SET_INSTANCE};
 
-decltype(ShaderPPLightCone::VERTEX_BINDING_VERTEX) ShaderPPLightCone::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex, sizeof(VertexBufferData)};
+decltype(ShaderPPLightCone::VERTEX_BINDING_VERTEX) ShaderPPLightCone::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex, sizeof(pragma::rendering::VertexBufferData)};
 decltype(ShaderPPLightCone::VERTEX_ATTRIBUTE_POSITION) ShaderPPLightCone::VERTEX_ATTRIBUTE_POSITION = {ShaderEntity::VERTEX_ATTRIBUTE_POSITION, VERTEX_BINDING_VERTEX};
 decltype(ShaderPPLightCone::VERTEX_ATTRIBUTE_NORMAL) ShaderPPLightCone::VERTEX_ATTRIBUTE_NORMAL = {ShaderEntity::VERTEX_ATTRIBUTE_NORMAL, VERTEX_BINDING_VERTEX};
 

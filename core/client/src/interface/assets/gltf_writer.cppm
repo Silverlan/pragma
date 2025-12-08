@@ -97,7 +97,7 @@ export namespace pragma::asset {
 
 		struct MorphSet {
 			std::string name;
-			pragma::MeshVertexFrame *frame = nullptr;
+			pragma::animation::MeshVertexFrame *frame = nullptr;
 			uint32_t flexId = std::numeric_limits<uint32_t>::max();
 		};
 

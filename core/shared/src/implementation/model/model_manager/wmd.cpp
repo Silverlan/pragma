@@ -750,9 +750,9 @@ void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version, pra
 					uint64_t endOfFrameOffset = 0;
 					if(version >= 32)
 						endOfFrameOffset = m_file->Read<uint64_t>();
-					auto flags = pragma::MeshVertexFrame::Flags::None;
+					auto flags = pragma::animation::MeshVertexFrame::Flags::None;
 					if(version >= 25)
-						flags = m_file->Read<pragma::MeshVertexFrame::Flags>();
+						flags = m_file->Read<pragma::animation::MeshVertexFrame::Flags>();
 
 					if(version >= 32) {
 						if(subMesh == nullptr) {
@@ -798,7 +798,7 @@ void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version, pra
 								auto idx = m_file->Read<uint16_t>();
 								auto v = m_file->Read<std::array<uint16_t, 3>>();
 								meshFrame->SetVertexPosition(idx, v);
-								if(umath::is_flag_set(flags, pragma::MeshVertexFrame::Flags::HasDeltaValues)) {
+								if(umath::is_flag_set(flags, pragma::animation::MeshVertexFrame::Flags::HasDeltaValues)) {
 									auto deltaVal = m_file->Read<uint16_t>();
 									meshFrame->SetDeltaValue(idx, deltaVal);
 								}
@@ -807,7 +807,7 @@ void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version, pra
 						else {
 							Con::cwar << "Invalid mesh reference in vertex animation '" << name << "'! Skipping..." << Con::endl;
 							auto szPerVertex = sizeof(uint16_t) * 3;
-							if(umath::is_flag_set(flags, pragma::MeshVertexFrame::Flags::HasDeltaValues))
+							if(umath::is_flag_set(flags, pragma::animation::MeshVertexFrame::Flags::HasDeltaValues))
 								szPerVertex += sizeof(uint16_t);
 							m_file->Seek(m_file->Tell() + numUsedVerts * szPerVertex);
 						}

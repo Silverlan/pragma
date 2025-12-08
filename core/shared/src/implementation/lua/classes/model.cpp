@@ -737,10 +737,10 @@ void Lua::Model::register_class(lua::State *l, luabind::class_<pragma::asset::Mo
 		auto anim = flex.GetVertexAnimation() ? flex.GetVertexAnimation()->shared_from_this() : nullptr;
 		if(anim == nullptr)
 			return;
-		Lua::Push<std::shared_ptr<::VertexAnimation>>(l, anim);
+		Lua::Push<std::shared_ptr<pragma::animation::VertexAnimation>>(l, anim);
 	}));
-	classDefFlex.def("SetVertexAnimation", static_cast<void (*)(lua::State *, pragma::animation::Flex &, ::VertexAnimation &, uint32_t)>([](lua::State *l, pragma::animation::Flex &flex, ::VertexAnimation &anim, uint32_t frameIndex) { flex.SetVertexAnimation(anim, frameIndex); }));
-	classDefFlex.def("SetVertexAnimation", static_cast<void (*)(lua::State *, pragma::animation::Flex &, ::VertexAnimation &)>([](lua::State *l, pragma::animation::Flex &flex, ::VertexAnimation &anim) { flex.SetVertexAnimation(anim); }));
+	classDefFlex.def("SetVertexAnimation", static_cast<void (*)(lua::State *, pragma::animation::Flex &, pragma::animation::VertexAnimation &, uint32_t)>([](lua::State *l, pragma::animation::Flex &flex, pragma::animation::VertexAnimation &anim, uint32_t frameIndex) { flex.SetVertexAnimation(anim, frameIndex); }));
+	classDefFlex.def("SetVertexAnimation", static_cast<void (*)(lua::State *, pragma::animation::Flex &, pragma::animation::VertexAnimation &)>([](lua::State *l, pragma::animation::Flex &flex, pragma::animation::VertexAnimation &anim) { flex.SetVertexAnimation(anim); }));
 	classDefFlex.add_static_constant("OP_NONE", umath::to_integral(pragma::animation::Flex::Operation::Type::None));
 	classDefFlex.add_static_constant("OP_CONST", umath::to_integral(pragma::animation::Flex::Operation::Type::Const));
 	classDefFlex.add_static_constant("OP_FETCH", umath::to_integral(pragma::animation::Flex::Operation::Type::Fetch));
@@ -1235,34 +1235,34 @@ void Lua::Model::register_class(lua::State *l, luabind::class_<pragma::asset::Mo
 	classDef.scope[classDefFlexAnim];
 
 	// Vertex Animation
-	auto classDefVertexAnimation = luabind::class_<::VertexAnimation>("VertexAnimation")
-	                                 .def("Rotate", static_cast<void (*)(lua::State *, ::VertexAnimation &, const Quat &)>([](lua::State *l, ::VertexAnimation &vertAnim, const Quat &rot) { vertAnim.Rotate(rot); }))
+	auto classDefVertexAnimation = luabind::class_<pragma::animation::VertexAnimation>("VertexAnimation")
+	                                 .def("Rotate", static_cast<void (*)(lua::State *, pragma::animation::VertexAnimation &, const Quat &)>([](lua::State *l, pragma::animation::VertexAnimation &vertAnim, const Quat &rot) { vertAnim.Rotate(rot); }))
 	                                 .def("GetMeshAnimations", &Lua::VertexAnimation::GetMeshAnimations)
 	                                 .def("GetName", &Lua::VertexAnimation::GetName);
 
-	auto classDefMeshVertexFrame = luabind::class_<pragma::MeshVertexFrame>("Frame")
-	                                 .def("Rotate", static_cast<void (*)(lua::State *, pragma::MeshVertexFrame &, const Quat &)>([](lua::State *l, pragma::MeshVertexFrame &meshVertFrame, const Quat &rot) { meshVertFrame.Rotate(rot); }))
+	auto classDefMeshVertexFrame = luabind::class_<pragma::animation::MeshVertexFrame>("Frame")
+	                                 .def("Rotate", static_cast<void (*)(lua::State *, pragma::animation::MeshVertexFrame &, const Quat &)>([](lua::State *l, pragma::animation::MeshVertexFrame &meshVertFrame, const Quat &rot) { meshVertFrame.Rotate(rot); }))
 	                                 .def("GetVertices", &Lua::MeshVertexFrame::GetVertices)
 	                                 .def("SetVertexCount", &Lua::MeshVertexFrame::SetVertexCount)
 	                                 .def("SetVertexPosition", &Lua::MeshVertexFrame::SetVertexPosition)
 	                                 .def("GetVertexPosition", &Lua::MeshVertexFrame::GetVertexPosition)
 	                                 .def("SetVertexNormal", &Lua::MeshVertexFrame::SetVertexNormal)
 	                                 .def("GetVertexNormal", &Lua::MeshVertexFrame::GetVertexNormal)
-	                                 .def("GetVertexCount", static_cast<void (*)(lua::State *, pragma::MeshVertexFrame &)>([](lua::State *l, pragma::MeshVertexFrame &meshVertFrame) { Lua::PushInt(l, meshVertFrame.GetVertexCount()); }))
-	                                 .def("GetFlags", static_cast<void (*)(lua::State *, pragma::MeshVertexFrame &)>([](lua::State *l, pragma::MeshVertexFrame &meshVertFrame) { Lua::PushInt(l, umath::to_integral(meshVertFrame.GetFlags())); }))
-	                                 .def("SetFlags", static_cast<void (*)(lua::State *, pragma::MeshVertexFrame &, uint32_t)>([](lua::State *l, pragma::MeshVertexFrame &meshVertFrame, uint32_t flags) { meshVertFrame.SetFlags(static_cast<pragma::MeshVertexFrame::Flags>(flags)); }))
-	                                 .def("SetDeltaValue", static_cast<void (*)(lua::State *, pragma::MeshVertexFrame &, uint32_t, float)>([](lua::State *l, pragma::MeshVertexFrame &meshVertFrame, uint32_t vertId, float value) { meshVertFrame.SetDeltaValue(vertId, value); }))
-	                                 .def("GetDeltaValue", static_cast<void (*)(lua::State *, pragma::MeshVertexFrame &, uint32_t)>([](lua::State *l, pragma::MeshVertexFrame &meshVertFrame, uint32_t vertId) {
+	                                 .def("GetVertexCount", static_cast<void (*)(lua::State *, pragma::animation::MeshVertexFrame &)>([](lua::State *l, pragma::animation::MeshVertexFrame &meshVertFrame) { Lua::PushInt(l, meshVertFrame.GetVertexCount()); }))
+	                                 .def("GetFlags", static_cast<void (*)(lua::State *, pragma::animation::MeshVertexFrame &)>([](lua::State *l, pragma::animation::MeshVertexFrame &meshVertFrame) { Lua::PushInt(l, umath::to_integral(meshVertFrame.GetFlags())); }))
+	                                 .def("SetFlags", static_cast<void (*)(lua::State *, pragma::animation::MeshVertexFrame &, uint32_t)>([](lua::State *l, pragma::animation::MeshVertexFrame &meshVertFrame, uint32_t flags) { meshVertFrame.SetFlags(static_cast<pragma::animation::MeshVertexFrame::Flags>(flags)); }))
+	                                 .def("SetDeltaValue", static_cast<void (*)(lua::State *, pragma::animation::MeshVertexFrame &, uint32_t, float)>([](lua::State *l, pragma::animation::MeshVertexFrame &meshVertFrame, uint32_t vertId, float value) { meshVertFrame.SetDeltaValue(vertId, value); }))
+	                                 .def("GetDeltaValue", static_cast<void (*)(lua::State *, pragma::animation::MeshVertexFrame &, uint32_t)>([](lua::State *l, pragma::animation::MeshVertexFrame &meshVertFrame, uint32_t vertId) {
 		                                 float value;
 		                                 if(meshVertFrame.GetDeltaValue(vertId, value) == false)
 			                                 return;
 		                                 Lua::PushNumber(l, value);
 	                                 }));
-	classDefMeshVertexFrame.add_static_constant("FLAG_NONE", umath::to_integral(pragma::MeshVertexFrame::Flags::None));
-	classDefMeshVertexFrame.add_static_constant("FLAG_BIT_HAS_DELTA_VALUES", umath::to_integral(pragma::MeshVertexFrame::Flags::HasDeltaValues));
+	classDefMeshVertexFrame.add_static_constant("FLAG_NONE", umath::to_integral(pragma::animation::MeshVertexFrame::Flags::None));
+	classDefMeshVertexFrame.add_static_constant("FLAG_BIT_HAS_DELTA_VALUES", umath::to_integral(pragma::animation::MeshVertexFrame::Flags::HasDeltaValues));
 
-	auto classDefMeshVertexAnimation = luabind::class_<::MeshVertexAnimation>("MeshAnimation")
-	                                     .def("Rotate", static_cast<void (*)(lua::State *, ::MeshVertexAnimation &, const Quat &)>([](lua::State *l, ::MeshVertexAnimation &meshVertAnim, const Quat &rot) { meshVertAnim.Rotate(rot); }))
+	auto classDefMeshVertexAnimation = luabind::class_<pragma::animation::MeshVertexAnimation>("MeshAnimation")
+	                                     .def("Rotate", static_cast<void (*)(lua::State *, pragma::animation::MeshVertexAnimation &, const Quat &)>([](lua::State *l, pragma::animation::MeshVertexAnimation &meshVertAnim, const Quat &rot) { meshVertAnim.Rotate(rot); }))
 	                                     .def("GetFrames", &Lua::MeshVertexAnimation::GetFrames)
 	                                     .def("GetMesh", &Lua::MeshVertexAnimation::GetMesh);
 	classDefMeshVertexAnimation.scope[classDefMeshVertexFrame];
@@ -2526,7 +2526,7 @@ void Lua::Model::GetVertexAnimations(lua::State *l, pragma::asset::Model &mdl)
 	auto animIdx = 1u;
 	for(auto &anim : vertexAnims) {
 		Lua::PushInt(l, animIdx++);
-		Lua::Push<std::shared_ptr<::VertexAnimation>>(l, anim);
+		Lua::Push<std::shared_ptr<pragma::animation::VertexAnimation>>(l, anim);
 		Lua::SetTableValue(l, t);
 	}
 }
@@ -2535,12 +2535,12 @@ void Lua::Model::GetVertexAnimation(lua::State *l, pragma::asset::Model &mdl, co
 	auto *anim = mdl.GetVertexAnimation(name);
 	if(anim == nullptr)
 		return;
-	Lua::Push<std::shared_ptr<::VertexAnimation>>(l, *anim);
+	Lua::Push<std::shared_ptr<pragma::animation::VertexAnimation>>(l, *anim);
 }
 void Lua::Model::AddVertexAnimation(lua::State *l, pragma::asset::Model &mdl, const std::string &name)
 {
 	auto anim = mdl.AddVertexAnimation(name);
-	Lua::Push<std::shared_ptr<::VertexAnimation>>(l, anim);
+	Lua::Push<std::shared_ptr<pragma::animation::VertexAnimation>>(l, anim);
 }
 void Lua::Model::RemoveVertexAnimation(lua::State *l, pragma::asset::Model &mdl, const std::string &name) { mdl.RemoveVertexAnimation(name); }
 static void get_body_group_meshes(lua::State *l, pragma::asset::Model &mdl, const std::vector<uint32_t> &bodyGroupIds, uint32_t lod)

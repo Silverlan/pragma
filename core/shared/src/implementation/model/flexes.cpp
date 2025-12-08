@@ -46,7 +46,7 @@ const std::vector<pragma::animation::Flex::Operation> &pragma::animation::Flex::
 std::vector<pragma::animation::Flex::Operation> &pragma::animation::Flex::GetOperations() { return m_operations; }
 
 uint32_t pragma::animation::Flex::GetFrameIndex() const { return m_frameIndex; }
-VertexAnimation *pragma::animation::Flex::GetVertexAnimation() const { return m_vertexAnim.lock().get(); }
+pragma::animation::VertexAnimation *pragma::animation::Flex::GetVertexAnimation() const { return m_vertexAnim.lock().get(); }
 void pragma::animation::Flex::SetVertexAnimation(VertexAnimation &anim, uint32_t frameIndex)
 {
 	m_vertexAnim = anim.shared_from_this();

@@ -514,31 +514,31 @@ void Lua::Frame::GetBonePose(lua::State *l, ::Frame &frame, uint32_t boneId)
 	Lua::Push(l, pose);
 }
 ///////////////////////////////////////
-void Lua::VertexAnimation::GetMeshAnimations(lua::State *l, ::VertexAnimation &anim)
+void Lua::VertexAnimation::GetMeshAnimations(lua::State *l, pragma::animation::VertexAnimation &anim)
 {
 	auto &meshAnims = anim.GetMeshAnimations();
 	auto t = Lua::CreateTable(l);
 	auto meshAnimIdx = 1u;
 	for(auto meshAnim : meshAnims) {
 		Lua::PushInt(l, meshAnimIdx++);
-		Lua::Push<std::shared_ptr<::MeshVertexAnimation>>(l, meshAnim);
+		Lua::Push<std::shared_ptr<pragma::animation::MeshVertexAnimation>>(l, meshAnim);
 		Lua::SetTableValue(l, t);
 	}
 }
-void Lua::VertexAnimation::GetName(lua::State *l, ::VertexAnimation &anim) { Lua::PushString(l, anim.GetName()); }
+void Lua::VertexAnimation::GetName(lua::State *l, pragma::animation::VertexAnimation &anim) { Lua::PushString(l, anim.GetName()); }
 ///////////////////////////////////////
-void Lua::MeshVertexAnimation::GetFrames(lua::State *l, ::MeshVertexAnimation &anim)
+void Lua::MeshVertexAnimation::GetFrames(lua::State *l, pragma::animation::MeshVertexAnimation &anim)
 {
 	auto &frames = anim.GetFrames();
 	auto t = Lua::CreateTable(l);
 	auto frameIdx = 1u;
 	for(auto &frame : frames) {
 		Lua::PushInt(l, frameIdx++);
-		Lua::Push<std::shared_ptr<pragma::MeshVertexFrame>>(l, frame);
+		Lua::Push<std::shared_ptr<pragma::animation::MeshVertexFrame>>(l, frame);
 		Lua::SetTableValue(l, t);
 	}
 }
-void Lua::MeshVertexAnimation::GetMesh(lua::State *l, ::MeshVertexAnimation &anim)
+void Lua::MeshVertexAnimation::GetMesh(lua::State *l, pragma::animation::MeshVertexAnimation &anim)
 {
 	auto *mesh = anim.GetMesh();
 	auto *subMesh = anim.GetSubMesh();
@@ -548,7 +548,7 @@ void Lua::MeshVertexAnimation::GetMesh(lua::State *l, ::MeshVertexAnimation &ani
 	Lua::Push<std::shared_ptr<pragma::geometry::ModelSubMesh>>(l, subMesh->shared_from_this());
 }
 ///////////////////////////////////////
-void Lua::MeshVertexFrame::GetVertices(lua::State *l, pragma::MeshVertexFrame &frame)
+void Lua::MeshVertexFrame::GetVertices(lua::State *l, pragma::animation::MeshVertexFrame &frame)
 {
 	auto &verts = frame.GetVertices();
 	auto t = Lua::CreateTable(l);
@@ -559,17 +559,17 @@ void Lua::MeshVertexFrame::GetVertices(lua::State *l, pragma::MeshVertexFrame &f
 		Lua::SetTableValue(l, t);
 	}
 }
-void Lua::MeshVertexFrame::SetVertexCount(lua::State *l, pragma::MeshVertexFrame &frame, uint32_t numVerts) { frame.SetVertexCount(numVerts); }
-void Lua::MeshVertexFrame::SetVertexPosition(lua::State *l, pragma::MeshVertexFrame &frame, uint32_t vertIdx, const Vector3 &pos) { frame.SetVertexPosition(vertIdx, pos); }
-void Lua::MeshVertexFrame::GetVertexPosition(lua::State *l, pragma::MeshVertexFrame &frame, uint32_t vertIdx)
+void Lua::MeshVertexFrame::SetVertexCount(lua::State *l, pragma::animation::MeshVertexFrame &frame, uint32_t numVerts) { frame.SetVertexCount(numVerts); }
+void Lua::MeshVertexFrame::SetVertexPosition(lua::State *l, pragma::animation::MeshVertexFrame &frame, uint32_t vertIdx, const Vector3 &pos) { frame.SetVertexPosition(vertIdx, pos); }
+void Lua::MeshVertexFrame::GetVertexPosition(lua::State *l, pragma::animation::MeshVertexFrame &frame, uint32_t vertIdx)
 {
 	Vector3 pos {};
 	if(frame.GetVertexPosition(vertIdx, pos) == false)
 		return;
 	Lua::Push<Vector3>(l, pos);
 }
-void Lua::MeshVertexFrame::SetVertexNormal(lua::State *l, pragma::MeshVertexFrame &frame, uint32_t vertIdx, const Vector3 &n) { frame.SetVertexNormal(vertIdx, n); }
-void Lua::MeshVertexFrame::GetVertexNormal(lua::State *l, pragma::MeshVertexFrame &frame, uint32_t vertIdx)
+void Lua::MeshVertexFrame::SetVertexNormal(lua::State *l, pragma::animation::MeshVertexFrame &frame, uint32_t vertIdx, const Vector3 &n) { frame.SetVertexNormal(vertIdx, n); }
+void Lua::MeshVertexFrame::GetVertexNormal(lua::State *l, pragma::animation::MeshVertexFrame &frame, uint32_t vertIdx)
 {
 	Vector3 n {};
 	if(frame.GetVertexPosition(vertIdx, n) == false)

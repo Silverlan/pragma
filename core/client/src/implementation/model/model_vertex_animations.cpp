@@ -51,7 +51,7 @@ void pragma::asset::CModel::UpdateVertexAnimationBuffer()
 				meshFrameOffsets.at(frameIdx++) = offset;
 				auto &verts = meshFrame->GetVertices();
 				auto &normals = meshFrame->GetNormals();
-				auto hasNormals = meshFrame->IsFlagEnabled(pragma::MeshVertexFrame::Flags::HasNormals);
+				auto hasNormals = meshFrame->IsFlagEnabled(pragma::animation::MeshVertexFrame::Flags::HasNormals);
 				std::vector<std::array<int32_t, 4>> vertexData {};
 				vertexData.reserve(verts.size());
 				uint32_t vertIdx = 0;

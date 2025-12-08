@@ -79,19 +79,19 @@ export namespace Lua {
 		DLLNETWORK void GetBonePose(lua::State *, ::Frame &frame, uint32_t boneId);
 	};
 	namespace VertexAnimation {
-		DLLNETWORK void GetMeshAnimations(lua::State *l, ::VertexAnimation &anim);
-		DLLNETWORK void GetName(lua::State *l, ::VertexAnimation &anim);
+		DLLNETWORK void GetMeshAnimations(lua::State *l, pragma::animation::VertexAnimation &anim);
+		DLLNETWORK void GetName(lua::State *l, pragma::animation::VertexAnimation &anim);
 	};
 	namespace MeshVertexAnimation {
-		DLLNETWORK void GetFrames(lua::State *l, ::MeshVertexAnimation &anim);
-		DLLNETWORK void GetMesh(lua::State *l, ::MeshVertexAnimation &anim);
+		DLLNETWORK void GetFrames(lua::State *l, pragma::animation::MeshVertexAnimation &anim);
+		DLLNETWORK void GetMesh(lua::State *l, pragma::animation::MeshVertexAnimation &anim);
 	};
 	namespace MeshVertexFrame {
-		DLLNETWORK void GetVertices(lua::State *l, ::pragma::MeshVertexFrame &frame);
-		DLLNETWORK void SetVertexCount(lua::State *l, ::pragma::MeshVertexFrame &frame, uint32_t numVerts);
-		DLLNETWORK void SetVertexPosition(lua::State *l, ::pragma::MeshVertexFrame &frame, uint32_t vertIdx, const Vector3 &pos);
-		DLLNETWORK void GetVertexPosition(lua::State *l, ::pragma::MeshVertexFrame &frame, uint32_t vertIdx);
-		DLLNETWORK void SetVertexNormal(lua::State *l, ::pragma::MeshVertexFrame &frame, uint32_t vertIdx, const Vector3 &n);
-		DLLNETWORK void GetVertexNormal(lua::State *l, ::pragma::MeshVertexFrame &frame, uint32_t vertIdx);
+		DLLNETWORK void GetVertices(lua::State *l, pragma::animation::MeshVertexFrame &frame);
+		DLLNETWORK void SetVertexCount(lua::State *l, pragma::animation::MeshVertexFrame &frame, uint32_t numVerts);
+		DLLNETWORK void SetVertexPosition(lua::State *l, pragma::animation::MeshVertexFrame &frame, uint32_t vertIdx, const Vector3 &pos);
+		DLLNETWORK void GetVertexPosition(lua::State *l, pragma::animation::MeshVertexFrame &frame, uint32_t vertIdx);
+		DLLNETWORK void SetVertexNormal(lua::State *l, pragma::animation::MeshVertexFrame &frame, uint32_t vertIdx, const Vector3 &n);
+		DLLNETWORK void GetVertexNormal(lua::State *l, pragma::animation::MeshVertexFrame &frame, uint32_t vertIdx);
 	};
 };

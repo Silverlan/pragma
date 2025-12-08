@@ -155,7 +155,7 @@ std::shared_ptr<pragma::asset::Model> pragma::asset::Model::Copy(pragma::Game *g
 	}
 	if((copyFlags & CopyFlags::CopyVertexAnimationsBit) != CopyFlags::None) {
 		for(auto &vertexAnim : mdl->m_vertexAnimations) {
-			vertexAnim = VertexAnimation::Create(*vertexAnim);
+			vertexAnim = pragma::animation::VertexAnimation::Create(*vertexAnim);
 			for(auto &meshAnim : vertexAnim->GetMeshAnimations()) {
 				auto *mesh = meshAnim->GetMesh();
 				auto *subMesh = meshAnim->GetSubMesh();
@@ -555,7 +555,7 @@ bool pragma::asset::Model::LoadFromAssetData(pragma::Game &game, const udm::Asse
 		morphAnims.resize(numMorphTargetAnims);
 		for(auto udmMorphTargetAnim : udmMorphTargetAnims.ElIt()) {
 			udmMorphTargetAnim.property["index"](idx);
-			morphAnims[idx] = VertexAnimation::Load(*this, udm::AssetData {udmMorphTargetAnim.property}, outErr);
+			morphAnims[idx] = pragma::animation::VertexAnimation::Load(*this, udm::AssetData {udmMorphTargetAnim.property}, outErr);
 			if(morphAnims[idx] == nullptr) {
 				outErr = "Failed to load vertex animation " + std::string {udmMorphTargetAnim.key} + ": " + outErr;
 				return false;
@@ -1566,7 +1566,7 @@ bool pragma::asset::Model::SaveLegacy(pragma::Game *game, const std::string &nam
 					auto flags = frame->GetFlags();
 					auto offsetToEndOfFrameOffset = f->Tell();
 					f->Write<uint64_t>(0ull);
-					f->Write<pragma::MeshVertexFrame::Flags>(flags);
+					f->Write<pragma::animation::MeshVertexFrame::Flags>(flags);
 
 					struct Attribute {
 						Attribute(const std::string &name, const std::vector<std::array<uint16_t, 4>> &vertexData) : name {name}, vertexData {vertexData} {}
@@ -1575,7 +1575,7 @@ bool pragma::asset::Model::SaveLegacy(pragma::Game *game, const std::string &nam
 					};
 					std::vector<Attribute> attributes {};
 					attributes.push_back({"position", frame->GetVertices()});
-					if(umath::is_flag_set(flags, pragma::MeshVertexFrame::Flags::HasNormals))
+					if(umath::is_flag_set(flags, pragma::animation::MeshVertexFrame::Flags::HasNormals))
 						attributes.push_back({"normal", frame->GetNormals()});
 					std::set<uint16_t> usedVertIndices {};
 					for(auto &attr : attributes) {

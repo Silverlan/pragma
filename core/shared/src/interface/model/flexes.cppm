@@ -95,7 +95,7 @@ export namespace pragma::animation {
 	  private:
 		std::vector<Operation> m_operations;
 		std::string m_name;
-		mutable std::weak_ptr<VertexAnimation> m_vertexAnim = {};
+		mutable std::weak_ptr<pragma::animation::VertexAnimation> m_vertexAnim = {};
 		uint32_t m_frameIndex = 0;
 	};
 };

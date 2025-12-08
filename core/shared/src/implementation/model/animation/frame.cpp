@@ -180,7 +180,7 @@ void Frame::Scale(const Vector3 &scale)
 }
 void Frame::Mirror(pragma::Axis axis)
 {
-	auto transform = pragma::model::get_mirror_transform_vector(axis);
+	auto transform = pragma::asset::get_mirror_transform_vector(axis);
 	for(auto &t : m_bones) {
 		t.SetOrigin(t.GetOrigin() * transform);
 		auto &rot = t.GetRotation();
@@ -213,13 +213,13 @@ const umath::Transform *Frame::GetBoneTransform(uint32_t idx) const { return con
 void Frame::Validate()
 {
 	for(auto &pose : GetBoneTransforms()) {
-		pragma::model::validate_value(pose.GetOrigin());
-		pragma::model::validate_value(pose.GetRotation());
+		pragma::asset::validate_value(pose.GetOrigin());
+		pragma::asset::validate_value(pose.GetRotation());
 	}
 	for(auto &scale : GetBoneScales())
-		pragma::model::validate_value(scale);
+		pragma::asset::validate_value(scale);
 	for(auto &w : GetFlexFrameData().flexControllerWeights)
-		pragma::model::validate_value(w);
+		pragma::asset::validate_value(w);
 }
 bool Frame::GetBonePose(uint32_t boneId, umath::ScaledTransform &outTransform) const
 {
@@ -337,7 +337,7 @@ bool Frame::GetBoneMatrix(unsigned int boneID, Mat4 *mat)
 	return true;
 }
 bool Frame::HasScaleTransforms() const { return !m_scales.empty(); }
-std::pair<Vector3, Vector3> Frame::CalcRenderBounds(const pragma::animation::Animation &anim, const pragma::Model &mdl) const
+std::pair<Vector3, Vector3> Frame::CalcRenderBounds(const pragma::animation::Animation &anim, const pragma::asset::Model &mdl) const
 {
 	auto *t = const_cast<Frame *>(this);
 	auto transforms = m_bones;

@@ -15,7 +15,7 @@ export namespace pragma::bvh {
 		using BoneName = std::string;
 		struct DLLCLIENT BoneMeshInfo {
 			std::string meshUuid;
-			std::shared_ptr<pragma::ModelSubMesh> subMesh;
+			std::shared_ptr<pragma::geometry::ModelSubMesh> subMesh;
 			std::vector<uint32_t> usedTris;
 			std::unique_ptr<pragma::bvh::MeshBvhTree> meshBvhTree {};
 
@@ -24,13 +24,13 @@ export namespace pragma::bvh {
 		};
 
 		HitboxMeshBvhBuildTask(BS::light_thread_pool &threadPool);
-		bool Build(pragma::Model &mdl);
+		bool Build(pragma::asset::Model &mdl);
 		const std::unordered_map<BoneName, std::vector<std::shared_ptr<BoneMeshInfo>>> &GetResult() const { return m_boneMeshMap; }
 	  private:
-		bool Build(pragma::Model &mdl, pragma::animation::BoneId boneId, const physics::Hitbox &hitbox, const LODInfo &lodInfo);
-		void Serialize(pragma::Model &mdl);
-		void BuildHitboxMesh(pragma::Model &mdl, pragma::ModelSubMesh &subMesh);
-		void BuildMeshBvh(pragma::Model &mdl, pragma::ModelSubMesh &subMesh);
+		bool Build(pragma::asset::Model &mdl, pragma::animation::BoneId boneId, const physics::Hitbox &hitbox, const asset::LODInfo &lodInfo);
+		void Serialize(pragma::asset::Model &mdl);
+		void BuildHitboxMesh(pragma::asset::Model &mdl, pragma::geometry::ModelSubMesh &subMesh);
+		void BuildMeshBvh(pragma::asset::Model &mdl, pragma::geometry::ModelSubMesh &subMesh);
 
 		BS::light_thread_pool &m_threadPool;
 		std::unordered_map<BoneName, std::vector<std::shared_ptr<BoneMeshInfo>>> m_boneMeshMap;
@@ -39,7 +39,7 @@ export namespace pragma::bvh {
 	class DLLCLIENT HitboxMeshBvhBuilder {
 	  public:
 		HitboxMeshBvhBuilder();
-		HitboxMeshBvhBuildTask BuildModel(pragma::Model &mdl);
+		HitboxMeshBvhBuildTask BuildModel(pragma::asset::Model &mdl);
 		BS::light_thread_pool &GetThreadPool() { return m_threadPool; }
 	  private:
 		BS::light_thread_pool m_threadPool;

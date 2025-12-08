@@ -18,7 +18,7 @@ export {
 		}
 		class DLLNETWORK BoneMergeComponent final : public BaseEntityComponent {
 		  public:
-			static bool can_merge(const pragma::Model &mdl, const pragma::Model &mdlParent, bool includeRootBones = false);
+			static bool can_merge(const pragma::asset::Model &mdl, const pragma::asset::Model &mdlParent, bool includeRootBones = false);
 
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);

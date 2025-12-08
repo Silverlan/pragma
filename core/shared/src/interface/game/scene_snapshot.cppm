@@ -36,7 +36,7 @@ export {
 			SceneSnapshot &operator=(const SceneSnapshot &) = delete;
 
 			void MergeMeshesByMaterial();
-			void AddModel(pragma::Model &mdl, uint32_t skin = 0u);
+			void AddModel(pragma::asset::Model &mdl, uint32_t skin = 0u);
 			const std::vector<std::shared_ptr<Mesh>> &GetMeshes() const;
 			std::vector<std::shared_ptr<Mesh>> &GetMeshes();
 			const std::vector<std::shared_ptr<Object>> &GetObjects() const;

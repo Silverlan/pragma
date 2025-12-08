@@ -219,7 +219,7 @@ void CBaseEntity::OnRemove()
 {
 	auto mdlComponent = GetModelComponent();
 	if(mdlComponent)
-		mdlComponent->SetModel(std::shared_ptr<pragma::Model>(nullptr)); // Make sure to clear all clientside model mesh references
+		mdlComponent->SetModel(std::shared_ptr<pragma::asset::Model>(nullptr)); // Make sure to clear all clientside model mesh references
 	pragma::ecs::BaseEntity::OnRemove();
 }
 

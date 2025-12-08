@@ -89,10 +89,10 @@ export namespace pragma::asset {
 
 	struct DLLNETWORK ModelAssetWrapper : public IAssetWrapper {
 		virtual Type GetType() const override { return Type::Model; }
-		void SetModel(pragma::Model &model);
-		pragma::Model *GetModel() const;
+		void SetModel(pragma::asset::Model &model);
+		pragma::asset::Model *GetModel() const;
 	  private:
-		std::shared_ptr<pragma::Model> m_model = nullptr;
+		std::shared_ptr<pragma::asset::Model> m_model = nullptr;
 	};
 
 	struct DLLNETWORK MaterialAssetWrapper : public IAssetWrapper {

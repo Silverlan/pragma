@@ -36,7 +36,7 @@ static bool get_line_mesh_result(lua::State *l, const pragma::math::intersection
 	return true;
 }
 
-void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
+void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::geometry::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
 {
 	auto &origin = meshPose.GetOrigin();
 	auto &rot = meshPose.GetRotation();
@@ -45,7 +45,7 @@ void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vec
 	get_line_mesh_result(l, res, precise, r0, r1);
 }
 
-void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, ::ModelMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
+void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::geometry::ModelMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
 {
 	auto &origin = meshPose.GetOrigin();
 	auto &rot = meshPose.GetRotation();
@@ -57,7 +57,7 @@ void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vec
 		r1["subMeshIdx"] = res.precise->subMeshIdx;
 }
 
-void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
+void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::asset::Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
 {
 	pragma::math::intersection::LineMeshResult res {};
 	pragma::math::intersection::line_with_mesh(rayStart, rayDir, mdl, res, precise, nullptr, lod, meshPose.GetOrigin(), meshPose.GetRotation());
@@ -70,7 +70,7 @@ void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vec
 	}
 }
 
-void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, luabind::table<> tBodyGroups, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
+void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::asset::Model &mdl, luabind::table<> tBodyGroups, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
 {
 	auto bodyGroups = Lua::table_to_vector<uint32_t>(l, tBodyGroups, 4);
 	pragma::math::intersection::LineMeshResult res {};

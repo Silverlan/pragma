@@ -55,7 +55,7 @@ export namespace pragma::rendering::cycles {
 		const std::vector<pragma::ecs::BaseEntity *> *entityList = nullptr;
 	};
 	util::ParallelJob<uimg::ImageLayerSet> render_image(pragma::ClientState &client, const SceneInfo &sceneInfo, const RenderImageInfo &renderImageInfo);
-	util::ParallelJob<uimg::ImageLayerSet> bake_ambient_occlusion(pragma::ClientState &client, const SceneInfo &sceneInfo, pragma::Model &mdl, uint32_t materialIndex);
+	util::ParallelJob<uimg::ImageLayerSet> bake_ambient_occlusion(pragma::ClientState &client, const SceneInfo &sceneInfo, pragma::asset::Model &mdl, uint32_t materialIndex);
 	util::ParallelJob<uimg::ImageLayerSet> bake_ambient_occlusion(pragma::ClientState &client, const SceneInfo &sceneInfo, pragma::ecs::BaseEntity &ent, uint32_t materialIndex);
 	util::ParallelJob<uimg::ImageLayerSet> bake_lightmaps(pragma::ClientState &client, const SceneInfo &sceneInfo);
 	using namespace umath::scoped_enum::bitwise;

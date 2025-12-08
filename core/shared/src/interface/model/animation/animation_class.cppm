@@ -56,7 +56,7 @@ export {
 			static std::shared_ptr<Animation> Load(const udm::AssetData &data, std::string &outErr, const pragma::animation::Skeleton *optSkeleton = nullptr, const Frame *optReference = nullptr);
 			const std::pair<Vector3, Vector3> &GetRenderBounds() const;
 			void SetRenderBounds(const Vector3 &min, const Vector3 &max);
-			void CalcRenderBounds(pragma::Model &mdl);
+			void CalcRenderBounds(pragma::asset::Model &mdl);
 			pragma::Activity GetActivity() const;
 			void SetActivity(pragma::Activity activity);
 			unsigned char GetActivityWeight() const;

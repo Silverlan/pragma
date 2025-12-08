@@ -49,9 +49,9 @@ export namespace pragma {
 		void UpdateBoneMatricesMT();
 		void UpdateBoneBuffer(prosper::IPrimaryCommandBuffer &commandBuffer, bool flagAsDirty = false);
 		void InitializeBoneBuffer();
-		std::optional<Mat4> GetVertexTransformMatrix(const pragma::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 *optOutNormalOffset = nullptr, float *optOutDelta = nullptr) const;
-		virtual std::optional<Mat4> GetVertexTransformMatrix(const pragma::ModelSubMesh &subMesh, uint32_t vertexId) const override;
-		virtual bool GetVertexTransformMatrix(const pragma::ModelSubMesh &subMesh, uint32_t vertexId, umath::ScaledTransform &outPose) const override;
+		std::optional<Mat4> GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 *optOutNormalOffset = nullptr, float *optOutDelta = nullptr) const;
+		virtual std::optional<Mat4> GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId) const override;
+		virtual bool GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, umath::ScaledTransform &outPose) const override;
 
 		uint32_t OnSkeletonUpdated();
 		bool MaintainAnimations(double dt) override;
@@ -60,8 +60,8 @@ export namespace pragma {
 		bool AreSkeletonUpdateCallbacksEnabled() const;
 		void SetBoneBufferDirty();
 	  protected:
-		virtual void OnModelChanged(const std::shared_ptr<pragma::Model> &mdl) override;
-		virtual void ResetAnimation(const std::shared_ptr<pragma::Model> &mdl) override;
+		virtual void OnModelChanged(const std::shared_ptr<pragma::asset::Model> &mdl) override;
+		virtual void ResetAnimation(const std::shared_ptr<pragma::asset::Model> &mdl) override;
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	  private:
 		std::shared_ptr<prosper::IBuffer> m_boneBuffer = nullptr;

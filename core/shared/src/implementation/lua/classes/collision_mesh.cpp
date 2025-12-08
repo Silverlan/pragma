@@ -136,9 +136,9 @@ void Lua::CollisionMesh::GetSoftBodyMesh(lua::State *l, ::pragma::physics::Colli
 	auto *subMesh = mesh.GetSoftBodyMesh();
 	if(subMesh == nullptr)
 		return;
-	Lua::Push<std::shared_ptr<pragma::ModelSubMesh>>(l, subMesh->shared_from_this());
+	Lua::Push<std::shared_ptr<pragma::geometry::ModelSubMesh>>(l, subMesh->shared_from_this());
 }
-void Lua::CollisionMesh::SetSoftBodyMesh(lua::State *l, ::pragma::physics::CollisionMesh &mesh, const std::shared_ptr<pragma::ModelSubMesh> &subMesh) { mesh.SetSoftBodyMesh(*subMesh); }
+void Lua::CollisionMesh::SetSoftBodyMesh(lua::State *l, ::pragma::physics::CollisionMesh &mesh, const std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh) { mesh.SetSoftBodyMesh(*subMesh); }
 void Lua::CollisionMesh::GetSoftBodyInfo(lua::State *l, ::pragma::physics::CollisionMesh &mesh)
 {
 	auto *sbInfo = mesh.GetSoftBodyInfo();

@@ -11,7 +11,7 @@ import :engine;
 
 using namespace pragma;
 
-SceneMesh::SceneMesh() : m_vertexBuffer(nullptr), m_vertexWeightBuffer(nullptr), m_alphaBuffer(nullptr), m_indexBuffer(nullptr), m_indexType {pragma::model::IndexType::UInt16} {}
+SceneMesh::SceneMesh() : m_vertexBuffer(nullptr), m_vertexWeightBuffer(nullptr), m_alphaBuffer(nullptr), m_indexBuffer(nullptr), m_indexType {pragma::geometry::IndexType::UInt16} {}
 SceneMesh::SceneMesh(const SceneMesh &other) : m_renderBuffers {other.m_renderBuffers}, m_vertexBuffer {other.m_vertexBuffer}, m_vertexWeightBuffer {other.m_vertexWeightBuffer}, m_alphaBuffer {other.m_alphaBuffer}, m_indexBuffer {other.m_indexBuffer}, m_indexType {other.m_indexType} {}
 SceneMesh::~SceneMesh() {}
 SceneMesh &SceneMesh::operator=(const SceneMesh &other)
@@ -43,7 +43,7 @@ void SceneMesh::SetAlphaBuffer(const std::shared_ptr<prosper::IBuffer> &buffer)
 	m_alphaBuffer = buffer;
 	SetDirty();
 }
-void SceneMesh::SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer, pragma::model::IndexType indexType)
+void SceneMesh::SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer, pragma::geometry::IndexType indexType)
 {
 	m_indexBuffer = buffer;
 	SetDirty();

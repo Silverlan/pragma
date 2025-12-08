@@ -80,7 +80,7 @@ bool CFlexComponent::HasFlexWeightOverride(uint32_t flexId) const
 	return m_flexOverrides.at(flexId).has_value();
 }
 
-void CFlexComponent::UpdateEyeFlexes(Eyeball &eyeball, uint32_t eyeballIdx)
+void CFlexComponent::UpdateEyeFlexes(asset::Eyeball &eyeball, uint32_t eyeballIdx)
 {
 	// TODO: Move this code to eye component
 	auto eyeC = GetEntity().GetComponent<CEyeComponent>();
@@ -136,7 +136,7 @@ void CFlexComponent::UpdateEyeFlexes()
 		UpdateEyeFlexes(eyeballs.at(eyeballIdx), eyeballIdx);
 }
 
-void CFlexComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &mdl)
+void CFlexComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &mdl)
 {
 	m_flexControllers.clear();
 	m_flexWeights.clear();

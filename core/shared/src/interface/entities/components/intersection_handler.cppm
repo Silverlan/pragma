@@ -10,9 +10,11 @@ export import :entities.components.base;
 
 export {
 	namespace pragma {
-		class ModelSubMesh;
+		namespace geometry {
+			class ModelSubMesh;
+		}
 		struct DLLNETWORK HitInfo {
-			std::shared_ptr<pragma::ModelSubMesh> mesh;
+			std::shared_ptr<pragma::geometry::ModelSubMesh> mesh;
 			EntityHandle entity;
 			size_t primitiveIndex;
 			float distance;
@@ -28,7 +30,7 @@ export {
 
 		struct DLLNETWORK MeshIntersectionInfo : public IntersectionInfo {
 			struct DLLNETWORK MeshInfo {
-				pragma::ModelSubMesh *mesh = nullptr;
+				pragma::geometry::ModelSubMesh *mesh = nullptr;
 				pragma::ecs::BaseEntity *entity = nullptr;
 			};
 			std::vector<MeshInfo> meshInfos;

@@ -14,7 +14,7 @@ import :game;
 
 using namespace pragma;
 
-void CPBRConverterComponent::UpdateMetalness(pragma::Model &mdl, msys::CMaterial &mat)
+void CPBRConverterComponent::UpdateMetalness(pragma::asset::Model &mdl, msys::CMaterial &mat)
 {
 	// Material has no surface material. To find out whether it is a metal material,
 	// we'll try to find a collision mesh near the visual mesh that uses this material
@@ -55,7 +55,7 @@ void CPBRConverterComponent::UpdateMetalness(pragma::Model &mdl, msys::CMaterial
 	// Then calculate the average metalness of all found collision meshes
 	// via the collision mesh surface material
 	std::vector<pragma::physics::CollisionMesh *> matColMeshes {};
-	std::vector<std::shared_ptr<ModelMesh>> lodMeshes {};
+	std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> lodMeshes {};
 	std::vector<uint32_t> bodyGroups {};
 	bodyGroups.resize(mdl.GetBodyGroupCount());
 	mdl.GetBodyGroupMeshes(bodyGroups, 0, lodMeshes);
@@ -174,7 +174,7 @@ void CPBRConverterComponent::UpdateMetalness(pragma::Model &mdl, msys::CMaterial
 		pragma::get_client_state()->LoadMaterial(mat.GetName(), nullptr, true, true); // Reload material immediately
 }
 
-void CPBRConverterComponent::UpdateMetalness(pragma::Model &mdl)
+void CPBRConverterComponent::UpdateMetalness(pragma::asset::Model &mdl)
 {
 	ConvertMaterialsToPBR(mdl);
 	for(auto hMat : mdl.GetMaterials()) {

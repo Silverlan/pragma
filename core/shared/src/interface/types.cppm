@@ -13,9 +13,6 @@ export {
 		struct ComponentMemberInfo;
 		class Engine;
 		class Game;
-		class Model;
-		class ModelMeshGroup;
-		class ModelSubMesh;
 		class PanimaComponent;
 		class NetworkState;
 
@@ -25,10 +22,17 @@ export {
 
 		namespace asset {
 			class ModelManager;
+			class Model;
+			class ModelMeshGroup;
 		}
 
 		namespace animation {
 			class Animation;
+		}
+
+		namespace geometry {
+			class ModelSubMesh;
+			class ModelMesh;
 		}
 
 		namespace ecs {
@@ -68,5 +72,4 @@ export {
 			enum class RayCastHitType : uint8_t;
 		}
 	}
-	class ModelMesh;
 }

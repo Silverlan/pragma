@@ -118,7 +118,7 @@ void BaseSurfaceComponent::Clear()
 	m_mesh = {};
 	SetPlane({{0.f, 1.f, 0.f}, 0.f});
 }
-pragma::ModelSubMesh *BaseSurfaceComponent::GetMesh() { return m_mesh.lock().get(); }
+pragma::geometry::ModelSubMesh *BaseSurfaceComponent::GetMesh() { return m_mesh.lock().get(); }
 Vector3 BaseSurfaceComponent::ProjectToSurface(const Vector3 &pos) const
 {
 	Vector3 n;
@@ -126,7 +126,7 @@ Vector3 BaseSurfaceComponent::ProjectToSurface(const Vector3 &pos) const
 	GetPlaneWs(n, d);
 	return uvec::project_to_plane(pos, n, d);
 }
-std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssignMesh(const std::function<int32_t(ModelMesh &, pragma::ModelSubMesh &, msys::Material &, const std::string &)> &filter)
+std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssignMesh(const std::function<int32_t(pragma::geometry::ModelMesh &, pragma::geometry::ModelSubMesh &, msys::Material &, const std::string &)> &filter)
 {
 	auto &ent = GetEntity();
 	auto &hMdl = ent.GetModel();
@@ -135,7 +135,7 @@ std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssig
 	msys::Material *mat = nullptr;
 	auto dir = Vector3(0.f, 1.f, 0.f); // TODO
 	auto &mats = hMdl->GetMaterials();
-	std::vector<std::shared_ptr<ModelMesh>> meshes;
+	std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> meshes;
 	hMdl->GetBodyGroupMeshes({}, 0, meshes);
 	auto minDot = std::numeric_limits<float>::max();
 	uint32_t highestPriority = 0;

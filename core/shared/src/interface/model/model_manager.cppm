@@ -15,7 +15,7 @@ export namespace pragma::asset {
 		virtual bool Load() override;
 		virtual bool Finalize() override;
 
-		std::shared_ptr<pragma::Model> model = nullptr;
+		std::shared_ptr<pragma::asset::Model> model = nullptr;
 		std::string identifier;
 		std::string formatExtension;
 	};
@@ -32,7 +32,7 @@ export namespace pragma::asset {
 	  public:
 		IModelFormatHandler(util::IAssetManager &assetManager);
 		virtual bool LoadData(ModelProcessor &processor, ModelLoadInfo &info);
-		std::shared_ptr<pragma::Model> model = nullptr;
+		std::shared_ptr<pragma::asset::Model> model = nullptr;
 	};
 	class DLLNETWORK PmdlFormatHandler : public IModelFormatHandler {
 	  public:
@@ -44,19 +44,19 @@ export namespace pragma::asset {
 		WmdFormatHandler(util::IAssetManager &assetManager);
 		virtual bool LoadData(ModelProcessor &processor, ModelLoadInfo &info) override;
 	  private:
-		void LoadBones(unsigned short version, unsigned int numBones, pragma::Model &mdl);
-		void LoadAttachments(pragma::Model &mdl);
-		void LoadObjectAttachments(pragma::Model &mdl);
-		void LoadHitboxes(uint16_t version, pragma::Model &mdl);
-		void LoadMeshes(unsigned short version, pragma::Model &mdl, const std::function<std::shared_ptr<ModelMesh>()> &meshFactory, const std::function<std::shared_ptr<pragma::ModelSubMesh>()> &subMeshFactory);
-		void LoadLODData(unsigned short version, pragma::Model &mdl);
-		void LoadBodygroups(pragma::Model &mdl);
-		void LoadJoints(pragma::Model &mdl);
-		void LoadSoftBodyData(pragma::Model &mdl, pragma::physics::CollisionMesh &colMesh);
-		void LoadCollisionMeshes(pragma::Game *game, unsigned short version, pragma::Model &mdl, physics::SurfaceMaterial *smDefault = nullptr);
-		void LoadBlendControllers(pragma::Model &mdl);
-		void LoadIKControllers(uint16_t version, pragma::Model &mdl);
-		void LoadAnimations(unsigned short version, pragma::Model &mdl);
+		void LoadBones(unsigned short version, unsigned int numBones, pragma::asset::Model &mdl);
+		void LoadAttachments(pragma::asset::Model &mdl);
+		void LoadObjectAttachments(pragma::asset::Model &mdl);
+		void LoadHitboxes(uint16_t version, pragma::asset::Model &mdl);
+		void LoadMeshes(unsigned short version, pragma::asset::Model &mdl, const std::function<std::shared_ptr<pragma::geometry::ModelMesh>()> &meshFactory, const std::function<std::shared_ptr<pragma::geometry::ModelSubMesh>()> &subMeshFactory);
+		void LoadLODData(unsigned short version, pragma::asset::Model &mdl);
+		void LoadBodygroups(pragma::asset::Model &mdl);
+		void LoadJoints(pragma::asset::Model &mdl);
+		void LoadSoftBodyData(pragma::asset::Model &mdl, pragma::physics::CollisionMesh &colMesh);
+		void LoadCollisionMeshes(pragma::Game *game, unsigned short version, pragma::asset::Model &mdl, physics::SurfaceMaterial *smDefault = nullptr);
+		void LoadBlendControllers(pragma::asset::Model &mdl);
+		void LoadIKControllers(uint16_t version, pragma::asset::Model &mdl);
+		void LoadAnimations(unsigned short version, pragma::asset::Model &mdl);
 		void LoadChildBones(const pragma::animation::Skeleton &skeleton, std::shared_ptr<pragma::animation::Bone> bone);
 		bool m_bStatic;
 		pragma::Game *m_gameState = nullptr;
@@ -107,21 +107,21 @@ export namespace pragma::asset {
 		virtual bool Import(const std::string &outputPath, std::string &outFilePath) override;
 	};
 
-	class DLLNETWORK ModelManager : public util::TFileAssetManager<pragma::Model, ModelLoadInfo> {
+	class DLLNETWORK ModelManager : public util::TFileAssetManager<pragma::asset::Model, ModelLoadInfo> {
 	  public:
 		ModelManager(pragma::NetworkState &nw);
 		virtual ~ModelManager() = default;
 
 		using util::IAssetManager::FlagForRemoval;
-		void FlagForRemoval(const pragma::Model &mdl, bool flag = true);
+		void FlagForRemoval(const pragma::asset::Model &mdl, bool flag = true);
 
-		std::shared_ptr<pragma::Model> CreateModel(const std::string &name = "", bool bAddReference = true, bool addToCache = false);
+		std::shared_ptr<pragma::asset::Model> CreateModel(const std::string &name = "", bool bAddReference = true, bool addToCache = false);
 		//virtual std::shared_ptr<Model> LoadModel(const std::string &mdlName,bool bReload=false,bool *outIsNewModel=nullptr);
 		NetworkState &GetNetworkState() { return m_nw; }
 
-		virtual std::shared_ptr<pragma::Model> CreateModel(uint32_t numBones, const std::string &mdlName);
-		virtual std::shared_ptr<ModelMesh> CreateMesh();
-		virtual std::shared_ptr<pragma::ModelSubMesh> CreateSubMesh();
+		virtual std::shared_ptr<pragma::asset::Model> CreateModel(uint32_t numBones, const std::string &mdlName);
+		virtual std::shared_ptr<pragma::geometry::ModelMesh> CreateMesh();
+		virtual std::shared_ptr<pragma::geometry::ModelSubMesh> CreateSubMesh();
 	  protected:
 		virtual void InitializeProcessor(util::IAssetProcessor &processor) override;
 		virtual util::AssetObject InitializeAsset(const util::Asset &asset, const util::AssetLoadJob &job) override;

@@ -132,7 +132,7 @@ bool CModelComponent::IsWeighted() const
 
 uint32_t CModelComponent::GetLOD() const { return m_lod; }
 
-void CModelComponent::GetBaseModelMeshes(std::vector<std::shared_ptr<ModelMesh>> &outMeshes, uint32_t lod) const
+void CModelComponent::GetBaseModelMeshes(std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &outMeshes, uint32_t lod) const
 {
 	auto &mdl = GetModel();
 	if(mdl == nullptr)
@@ -386,10 +386,10 @@ void CModelComponent::UpdateLOD(const CSceneComponent &scene, const CCameraCompo
 	UpdateLOD(lod);
 }
 
-std::vector<std::shared_ptr<ModelMesh>> &CModelComponent::GetLODMeshes() { return m_lodMeshes; }
-const std::vector<std::shared_ptr<ModelMesh>> &CModelComponent::GetLODMeshes() const { return const_cast<CModelComponent *>(this)->GetLODMeshes(); }
-std::vector<std::shared_ptr<pragma::ModelSubMesh>> &CModelComponent::GetRenderMeshes() { return m_lodRenderMeshes; }
-const std::vector<std::shared_ptr<pragma::ModelSubMesh>> &CModelComponent::GetRenderMeshes() const { return const_cast<CModelComponent *>(this)->GetRenderMeshes(); }
+std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &CModelComponent::GetLODMeshes() { return m_lodMeshes; }
+const std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &CModelComponent::GetLODMeshes() const { return const_cast<CModelComponent *>(this)->GetLODMeshes(); }
+std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &CModelComponent::GetRenderMeshes() { return m_lodRenderMeshes; }
+const std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &CModelComponent::GetRenderMeshes() const { return const_cast<CModelComponent *>(this)->GetRenderMeshes(); }
 
 RenderMeshGroup &CModelComponent::GetLodMeshGroup(uint32_t lod)
 {
@@ -472,7 +472,7 @@ bool CModelComponent::SetBodyGroup(UInt32 groupId, UInt32 id)
 
 void CModelComponent::SetRenderMeshesDirty() { umath::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired); }
 
-void CModelComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &model)
+void CModelComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &model)
 {
 	auto &ent = GetEntity();
 	auto pRenderComponent = ent.GetComponent<CRenderComponent>();
@@ -537,7 +537,7 @@ void CModelComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEn
 	defCModel.def("GetRenderBufferData", +[](pragma::CModelComponent &c) -> std::vector<pragma::rendering::RenderBufferData> { return c.GetRenderBufferData(); });
 	defCModel.def("AddRenderMesh", &pragma::CModelComponent::AddRenderMesh);
 	defCModel.def("AddRenderMesh", &pragma::CModelComponent::AddRenderMesh, luabind::default_parameter_policy<4, pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass> {});
-	defCModel.def("GetRenderMeshes", +[](pragma::CModelComponent &c) -> std::vector<std::shared_ptr<pragma::ModelSubMesh>> { return c.GetRenderMeshes(); });
+	defCModel.def("GetRenderMeshes", +[](pragma::CModelComponent &c) -> std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> { return c.GetRenderMeshes(); });
 	defCModel.def("GetBaseShaderSpecializationFlags", &pragma::CModelComponent::GetBaseShaderSpecializationFlags);
 	defCModel.def("SetBaseShaderSpecializationFlags", &pragma::CModelComponent::SetBaseShaderSpecializationFlags);
 	defCModel.def("SetBaseShaderSpecializationFlag", &pragma::CModelComponent::SetBaseShaderSpecializationFlag);

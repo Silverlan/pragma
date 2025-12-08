@@ -22,7 +22,7 @@ export namespace util {
 	DLLNETWORK void set_mounted_game_priority(const std::string &game, int32_t priority);
 
 	DLLNETWORK bool port_nif_model(pragma::NetworkState *nw, const std::string &path, std::string mdlName);
-	DLLNETWORK bool port_hl2_smd(pragma::NetworkState &nw, pragma::Model &mdl, VFilePtr &f, const std::string &animName, bool isCollisionMesh, std::vector<std::string> &outTextures);
+	DLLNETWORK bool port_hl2_smd(pragma::NetworkState &nw, pragma::asset::Model &mdl, VFilePtr &f, const std::string &animName, bool isCollisionMesh, std::vector<std::string> &outTextures);
 	DLLNETWORK bool port_hl2_model(pragma::NetworkState *nw, const std::string &path, std::string mdlName);
 	DLLNETWORK bool port_source2_model(pragma::NetworkState *nw, const std::string &path, std::string mdlName);
 	DLLNETWORK bool port_hl2_particle(pragma::NetworkState *nw, const std::string &path);

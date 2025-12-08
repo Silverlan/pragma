@@ -32,7 +32,7 @@ bool CSoftBodyComponent::InitializeSoftBodyData()
 	{
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
-			subMesh->Update(pragma::model::ModelUpdateFlags::UpdateBuffers);
+			subMesh->Update(pragma::asset::ModelUpdateFlags::UpdateBuffers);
 			auto &vkMesh = static_cast<CModelSubMesh&>(*subMesh).GetSceneMesh();
 			if(vkMesh == nullptr)
 				continue;

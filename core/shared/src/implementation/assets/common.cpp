@@ -337,8 +337,8 @@ bool pragma::asset::is_loaded(pragma::NetworkState &nw, const std::string &name,
 
 /////////////
 
-void pragma::asset::ModelAssetWrapper::SetModel(pragma::Model &model) { m_model = model.shared_from_this(); }
-pragma::Model *pragma::asset::ModelAssetWrapper::GetModel() const { return m_model.get(); }
+void pragma::asset::ModelAssetWrapper::SetModel(pragma::asset::Model &model) { m_model = model.shared_from_this(); }
+pragma::asset::Model *pragma::asset::ModelAssetWrapper::GetModel() const { return m_model.get(); }
 
 void pragma::asset::MaterialAssetWrapper::SetMaterial(msys::Material &mat) { m_material = mat.GetHandle(); }
 msys::Material *pragma::asset::MaterialAssetWrapper::GetMaterial() const { return const_cast<msys::Material *>(m_material.get()); }

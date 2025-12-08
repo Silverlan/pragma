@@ -18,7 +18,7 @@ void pragma::game::SceneSnapshot::AddMaterial(msys::Material &mat)
 	m_materials.push_back(mat.GetHandle());
 }
 
-void pragma::game::SceneSnapshot::AddModel(pragma::Model &mdl, uint32_t skin)
+void pragma::game::SceneSnapshot::AddModel(pragma::asset::Model &mdl, uint32_t skin)
 {
 	for(auto &meshGroup : mdl.GetMeshGroups()) {
 		for(auto &mesh : meshGroup->GetMeshes()) {

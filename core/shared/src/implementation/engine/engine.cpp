@@ -361,7 +361,7 @@ static uint32_t clear_assets(pragma::NetworkState *state, pragma::asset::Type ty
 			else {
 				auto &cache = mdlManager.GetCache();
 
-				std::unordered_map<pragma::Model *, std::string> oldCache;
+				std::unordered_map<pragma::asset::Model *, std::string> oldCache;
 				for(auto &pair : cache) {
 					auto asset = mdlManager.GetAsset(pair.second);
 					if(!asset)
@@ -371,7 +371,7 @@ static uint32_t clear_assets(pragma::NetworkState *state, pragma::asset::Type ty
 
 				n = mdlManager.ClearUnused();
 
-				std::unordered_map<pragma::Model *, std::string> newCache;
+				std::unordered_map<pragma::asset::Model *, std::string> newCache;
 				for(auto &pair : cache) {
 					auto asset = mdlManager.GetAsset(pair.second);
 					if(!asset)

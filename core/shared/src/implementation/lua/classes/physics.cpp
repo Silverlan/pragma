@@ -344,17 +344,17 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefRayCastResult.def_readonly("position", &pragma::physics::TraceResult::position);
 	classDefRayCastResult.def_readonly("startPosition", &pragma::physics::TraceResult::startPosition);
 	classDefRayCastResult.property("colObj", static_cast<pragma::physics::ICollisionObject *(*)(lua::State *, pragma::physics::TraceResult &)>([](lua::State *l, pragma::physics::TraceResult &tr) -> pragma::physics::ICollisionObject * { return tr.collisionObj.Get(); }));
-	classDefRayCastResult.property("mesh", static_cast<std::shared_ptr<::ModelMesh> (*)(lua::State *, pragma::physics::TraceResult &)>([](lua::State *l, pragma::physics::TraceResult &tr) -> std::shared_ptr<::ModelMesh> {
-		::ModelMesh *mesh = nullptr;
-		pragma::ModelSubMesh *subMesh = nullptr;
+	classDefRayCastResult.property("mesh", static_cast<std::shared_ptr<pragma::geometry::ModelMesh> (*)(lua::State *, pragma::physics::TraceResult &)>([](lua::State *l, pragma::physics::TraceResult &tr) -> std::shared_ptr<pragma::geometry::ModelMesh> {
+		pragma::geometry::ModelMesh *mesh = nullptr;
+		pragma::geometry::ModelSubMesh *subMesh = nullptr;
 		tr.GetMeshes(&mesh, &subMesh);
 		if(mesh == nullptr)
 			return nullptr;
 		return mesh->shared_from_this();
 	}));
-	classDefRayCastResult.property("subMesh", static_cast<std::shared_ptr<pragma::ModelSubMesh> (*)(lua::State *, pragma::physics::TraceResult &)>([](lua::State *l, pragma::physics::TraceResult &tr) -> std::shared_ptr<pragma::ModelSubMesh> {
-		::ModelMesh *mesh = nullptr;
-		pragma::ModelSubMesh *subMesh = nullptr;
+	classDefRayCastResult.property("subMesh", static_cast<std::shared_ptr<pragma::geometry::ModelSubMesh> (*)(lua::State *, pragma::physics::TraceResult &)>([](lua::State *l, pragma::physics::TraceResult &tr) -> std::shared_ptr<pragma::geometry::ModelSubMesh> {
+		pragma::geometry::ModelMesh *mesh = nullptr;
+		pragma::geometry::ModelSubMesh *subMesh = nullptr;
 		tr.GetMeshes(&mesh, &subMesh);
 		if(subMesh == nullptr)
 			return nullptr;

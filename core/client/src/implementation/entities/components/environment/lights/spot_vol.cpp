@@ -136,7 +136,7 @@ bool CLightSpotVolComponent::UpdateMeshData()
 				throw std::runtime_error {"Volumetric mesh index data size mismatch!"};
 			memcpy(indexData, segData.indices.data(), util::size_of_container(segData.indices));
 		});
-		subMesh->Update(pragma::model::ModelUpdateFlags::UpdateVertexBuffer | pragma::model::ModelUpdateFlags::UpdateIndexBuffer);
+		subMesh->Update(pragma::asset::ModelUpdateFlags::UpdateVertexBuffer | pragma::asset::ModelUpdateFlags::UpdateIndexBuffer);
 		++idx;
 	}
 	return newMeshes;
@@ -215,7 +215,7 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 	group->AddMesh(mesh);
 	mdl->AddMaterial(0, mat.get());
 
-	mdl->Update(pragma::model::ModelUpdateFlags::All);
+	mdl->Update(pragma::asset::ModelUpdateFlags::All);
 	mdlComponent->SetModel(mdl);
 	mdlComponent->SetDepthPrepassEnabled(false);
 	m_model = mdl;

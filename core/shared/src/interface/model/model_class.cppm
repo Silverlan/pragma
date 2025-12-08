@@ -28,127 +28,129 @@ export {
 #pragma warning(disable : 4251)
 	namespace pragma {
 		class NetworkState;
-		class DLLNETWORK ModelMeshGroup : public std::enable_shared_from_this<pragma::ModelMeshGroup> {
-		  public:
-			static constexpr std::uint32_t layout_version = 1;
+		namespace asset {
+			class DLLNETWORK ModelMeshGroup : public std::enable_shared_from_this<ModelMeshGroup> {
+			public:
+				static constexpr std::uint32_t layout_version = 1;
 
-			static std::shared_ptr<pragma::ModelMeshGroup> Create(const std::string &name);
-			static std::shared_ptr<pragma::ModelMeshGroup> Create(const pragma::ModelMeshGroup &other);
-			bool operator==(const pragma::ModelMeshGroup &other) const;
-			bool operator!=(const pragma::ModelMeshGroup &other) const;
-			uint32_t GetMeshCount() const;
-			const std::string &GetName() const;
-			std::vector<std::shared_ptr<ModelMesh>> &GetMeshes();
-			void AddMesh(const std::shared_ptr<ModelMesh> &mesh);
+				static std::shared_ptr<pragma::asset::ModelMeshGroup> Create(const std::string &name);
+				static std::shared_ptr<pragma::asset::ModelMeshGroup> Create(const pragma::asset::ModelMeshGroup &other);
+				bool operator==(const pragma::asset::ModelMeshGroup &other) const;
+				bool operator!=(const pragma::asset::ModelMeshGroup &other) const;
+				uint32_t GetMeshCount() const;
+				const std::string &GetName() const;
+				std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &GetMeshes();
+				void AddMesh(const std::shared_ptr<pragma::geometry::ModelMesh> &mesh);
 
-			bool IsEqual(const pragma::ModelMeshGroup &other) const;
-		  private:
-			ModelMeshGroup(const std::string &name);
-			std::string m_name;
-			std::vector<std::shared_ptr<ModelMesh>> m_meshes;
-		};
+				bool IsEqual(const pragma::asset::ModelMeshGroup &other) const;
+			private:
+				ModelMeshGroup(const std::string &name);
+				std::string m_name;
+				std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> m_meshes;
+			};
+		}
 	}
 
-	struct DLLNETWORK LODInfo {
-		unsigned int lod;
-		std::unordered_map<unsigned int, unsigned int> meshReplacements;
-		float distance = 0.f;
+	namespace pragma::asset {
+		struct DLLNETWORK LODInfo {
+			unsigned int lod;
+			std::unordered_map<unsigned int, unsigned int> meshReplacements;
+			float distance = 0.f;
 
-		bool operator==(const LODInfo &other) const { return lod == other.lod && meshReplacements == other.meshReplacements && umath::abs(distance - other.distance) < 0.001f; }
-		bool operator!=(const LODInfo &other) const { return !operator==(other); }
-	};
+			bool operator==(const LODInfo &other) const { return lod == other.lod && meshReplacements == other.meshReplacements && umath::abs(distance - other.distance) < 0.001f; }
+			bool operator!=(const LODInfo &other) const { return !operator==(other); }
+		};
 
-	struct DLLNETWORK BlendController {
-		std::string name;
-		int min;
-		int max;
-		bool loop;
+		struct DLLNETWORK BlendController {
+			std::string name;
+			int min;
+			int max;
+			bool loop;
 
-		bool operator==(const BlendController &other) const { return name == other.name && min == other.min && max == other.max && loop == other.loop; }
-		bool operator!=(const BlendController &other) const { return !operator==(other); }
-	};
+			bool operator==(const BlendController &other) const { return name == other.name && min == other.min && max == other.max && loop == other.loop; }
+			bool operator!=(const BlendController &other) const { return !operator==(other); }
+		};
 
-	struct DLLNETWORK Attachment {
-		Attachment() = default;
-		std::string name;
-		unsigned int bone = 0u;
-		Vector3 offset = {};
-		EulerAngles angles = {};
+		struct DLLNETWORK Attachment {
+			Attachment() = default;
+			std::string name;
+			unsigned int bone = 0u;
+			Vector3 offset = {};
+			EulerAngles angles = {};
 
-		bool operator==(const Attachment &other) const { return name == other.name && bone == other.bone && uvec::distance_sqr(offset, other.offset) < 0.001f && uvec::distance_sqr(Vector3 {angles.p, angles.y, angles.r}, Vector3 {other.angles.p, other.angles.y, other.angles.r}) < 0.001f; }
-		bool operator!=(const Attachment &other) const { return !operator==(other); }
-	};
+			bool operator==(const Attachment &other) const { return name == other.name && bone == other.bone && uvec::distance_sqr(offset, other.offset) < 0.001f && uvec::distance_sqr(Vector3 {angles.p, angles.y, angles.r}, Vector3 {other.angles.p, other.angles.y, other.angles.r}) < 0.001f; }
+			bool operator!=(const Attachment &other) const { return !operator==(other); }
+		};
 
-	struct DLLNETWORK ObjectAttachment {
-		enum class Type : uint32_t { Model = 0u, ParticleSystem, Count };
-		Type type = Type::Model;
-		std::string attachment;
-		std::string name;
-		std::unordered_map<std::string, std::string> keyValues;
+		struct DLLNETWORK ObjectAttachment {
+			enum class Type : uint32_t { Model = 0u, ParticleSystem, Count };
+			Type type = Type::Model;
+			std::string attachment;
+			std::string name;
+			std::unordered_map<std::string, std::string> keyValues;
 
-		bool operator==(const ObjectAttachment &other) const { return type == other.type && attachment == other.attachment && name == other.name && keyValues == other.keyValues; }
-		bool operator!=(const ObjectAttachment &other) const { return !operator==(other); }
-	};
+			bool operator==(const ObjectAttachment &other) const { return type == other.type && attachment == other.attachment && name == other.name && keyValues == other.keyValues; }
+			bool operator!=(const ObjectAttachment &other) const { return !operator==(other); }
+		};
 
-	struct DLLNETWORK TextureGroup {
-		std::vector<unsigned int> textures;
+		struct DLLNETWORK TextureGroup {
+			std::vector<unsigned int> textures;
 
-		bool operator==(const TextureGroup &other) const { return textures == other.textures; }
-		bool operator!=(const TextureGroup &other) const { return !operator==(other); }
-	};
+			bool operator==(const TextureGroup &other) const { return textures == other.textures; }
+			bool operator!=(const TextureGroup &other) const { return !operator==(other); }
+		};
 
-	struct DLLNETWORK BodyGroup {
-		BodyGroup(const std::string &n) : name(n) {}
-		BodyGroup() {}
-		std::string name;
-		std::vector<unsigned int> meshGroups;
+		struct DLLNETWORK BodyGroup {
+			BodyGroup(const std::string &n) : name(n) {}
+			BodyGroup() {}
+			std::string name;
+			std::vector<unsigned int> meshGroups;
 
-		bool operator==(const BodyGroup &other) const { return name == other.name && meshGroups == other.meshGroups; }
-		bool operator!=(const BodyGroup &other) const { return !operator==(other); }
-	};
+			bool operator==(const BodyGroup &other) const { return name == other.name && meshGroups == other.meshGroups; }
+			bool operator!=(const BodyGroup &other) const { return !operator==(other); }
+		};
 
-#pragma pack(push, 1)
-	struct DLLNETWORK Eyeball {
-		static constexpr std::uint32_t layout_version = 1;
-
-		std::string name = "";
-		int32_t boneIndex = -1;
-		Vector3 origin = {};
-		float zOffset = 0.f;
-		float radius = 0.f;
-		Vector3 up = {};
-		Vector3 forward = {};
-		int32_t irisMaterialIndex = -1;
-		float maxDilationFactor = 1.f;
-		float irisUvRadius = 0.2f;
-
-		float irisScale = 0.f;
-		struct LidFlexDesc {
+	#pragma pack(push, 1)
+		struct DLLNETWORK Eyeball {
 			static constexpr std::uint32_t layout_version = 1;
 
-			int32_t lidFlexIndex = -1;
-			int32_t raiserFlexIndex = -1;
-			int32_t neutralFlexIndex = -1;
-			int32_t lowererFlexIndex = -1;
+			std::string name = "";
+			int32_t boneIndex = -1;
+			Vector3 origin = {};
+			float zOffset = 0.f;
+			float radius = 0.f;
+			Vector3 up = {};
+			Vector3 forward = {};
+			int32_t irisMaterialIndex = -1;
+			float maxDilationFactor = 1.f;
+			float irisUvRadius = 0.2f;
 
-			umath::Radian raiserValue = 0.f;
-			umath::Radian neutralValue = 0.f;
-			umath::Radian lowererValue = 0.f;
+			float irisScale = 0.f;
+			struct LidFlexDesc {
+				static constexpr std::uint32_t layout_version = 1;
 
-			bool operator==(const LidFlexDesc &other) const;
-			bool operator!=(const LidFlexDesc &other) const { return !operator==(other); }
+				int32_t lidFlexIndex = -1;
+				int32_t raiserFlexIndex = -1;
+				int32_t neutralFlexIndex = -1;
+				int32_t lowererFlexIndex = -1;
+
+				umath::Radian raiserValue = 0.f;
+				umath::Radian neutralValue = 0.f;
+				umath::Radian lowererValue = 0.f;
+
+				bool operator==(const LidFlexDesc &other) const;
+				bool operator!=(const LidFlexDesc &other) const { return !operator==(other); }
+			};
+			LidFlexDesc upperLid {};
+			LidFlexDesc lowerLid {};
+
+			bool operator==(const Eyeball &other) const;
+			bool operator!=(const Eyeball &other) const { return !operator==(other); }
 		};
-		LidFlexDesc upperLid {};
-		LidFlexDesc lowerLid {};
+	#pragma pack(pop)
 
-		bool operator==(const Eyeball &other) const;
-		bool operator!=(const Eyeball &other) const { return !operator==(other); }
-	};
-#pragma pack(pop)
+		constexpr auto MODEL_NO_MESH = std::numeric_limits<uint32_t>::max();
 
-	constexpr auto MODEL_NO_MESH = std::numeric_limits<uint32_t>::max();
-
-	namespace pragma::model {
 		template<typename T>
 		void validate_value(const T &v)
 		{
@@ -168,10 +170,8 @@ export {
 			}
 		}
 		Vector3 get_mirror_transform_vector(pragma::Axis axis);
-	};
 
-	namespace pragma {
-		class DLLNETWORK Model : public std::enable_shared_from_this<pragma::Model> {
+		class DLLNETWORK Model : public std::enable_shared_from_this<pragma::asset::Model> {
 		  public:
 			static constexpr std::uint32_t layout_version = 1;
 
@@ -227,19 +227,19 @@ export {
 		  public:
 			static constexpr auto PMDL_IDENTIFIER = "PMDL";
 			static constexpr udm::Version PMDL_VERSION = 1;
-			static bool Load(pragma::Model &mdl, pragma::NetworkState &nw, const udm::AssetData &data, std::string &outErr);
+			static bool Load(pragma::asset::Model &mdl, pragma::NetworkState &nw, const udm::AssetData &data, std::string &outErr);
 			template<class TModel>
-			static std::shared_ptr<pragma::Model> Create(pragma::NetworkState *nw, uint32_t numBones, const std::string &name = "")
+			static std::shared_ptr<pragma::asset::Model> Create(pragma::NetworkState *nw, uint32_t numBones, const std::string &name = "")
 			{
-				return std::shared_ptr<pragma::Model> {new TModel {nw, numBones, name}};
+				return std::shared_ptr<pragma::asset::Model> {new TModel {nw, numBones, name}};
 			}
 			template<class TModel>
-			static std::shared_ptr<pragma::Model> Create(const pragma::Model &other)
+			static std::shared_ptr<pragma::asset::Model> Create(const pragma::asset::Model &other)
 			{
-				return std::shared_ptr<pragma::Model> {new TModel {other}};
+				return std::shared_ptr<pragma::asset::Model> {new TModel {other}};
 			}
 			template<class TModel>
-			static std::shared_ptr<pragma::Model> Load(pragma::NetworkState &nw, const udm::AssetData &data, std::string &outErr)
+			static std::shared_ptr<pragma::asset::Model> Load(pragma::NetworkState &nw, const udm::AssetData &data, std::string &outErr)
 			{
 				auto mdl = Create<TModel>(&nw, 0u);
 				if(Load(*mdl, nw, data, outErr) == false)
@@ -260,16 +260,16 @@ export {
 				All = (Meshes << 1) - 1
 			};
 
-			bool IsEqual(const pragma::Model &other) const;
-			bool operator==(const pragma::Model &other) const;
-			bool operator!=(const pragma::Model &other) const;
-			pragma::Model &operator=(const pragma::Model &other);
+			bool IsEqual(const pragma::asset::Model &other) const;
+			bool operator==(const pragma::asset::Model &other) const;
+			bool operator!=(const pragma::asset::Model &other) const;
+			pragma::asset::Model &operator=(const pragma::asset::Model &other);
 			virtual ~Model();
 			bool Save(pragma::Game &game, udm::AssetDataArg outData, std::string &outErr);
 			bool Save(pragma::Game &game, const std::string &fileName, std::string &outErr);
 			bool Save(pragma::Game &game, std::string &outErr);
 			bool SaveLegacy(pragma::Game *game, const std::string &name, const std::string &rootPath = "") const;
-			std::shared_ptr<pragma::Model> Copy(pragma::Game *game, CopyFlags copyFlags = CopyFlags::ShallowCopy) const;
+			std::shared_ptr<pragma::asset::Model> Copy(pragma::Game *game, CopyFlags copyFlags = CopyFlags::ShallowCopy) const;
 			bool FindMaterial(const std::string &texture, std::string &matPath) const;
 			bool GenerateLowLevelLODs(pragma::Game &game);
 			bool GenerateCollisionMeshes(bool convex, float mass, const std::optional<std::string> &surfaceMaterial = {});
@@ -277,23 +277,23 @@ export {
 			Vector3 GetOrigin() const;
 			const Vector3 &GetEyeOffset() const;
 			void SetEyeOffset(const Vector3 &offset);
-			virtual void AddMesh(const std::string &meshGroup, const std::shared_ptr<ModelMesh> &mesh);
+			virtual void AddMesh(const std::string &meshGroup, const std::shared_ptr<pragma::geometry::ModelMesh> &mesh);
 			bool IsValid() const;
 			CallbackHandle CallOnMaterialsLoaded(const std::function<void(void)> &f);
-			void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, std::vector<std::shared_ptr<ModelMesh>> &outMeshes) const;
-			void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, uint32_t lod, std::vector<std::shared_ptr<ModelMesh>> &outMeshes) const;
-			void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, std::vector<std::shared_ptr<pragma::ModelSubMesh>> &outMeshes) const;
-			void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, uint32_t lod, std::vector<std::shared_ptr<pragma::ModelSubMesh>> &outMeshes) const;
+			void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &outMeshes) const;
+			void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, uint32_t lod, std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &outMeshes) const;
+			void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &outMeshes) const;
+			void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, uint32_t lod, std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &outMeshes) const;
 			// Returns all existing meshes in this model (Including LOD meshes)
-			std::vector<std::shared_ptr<ModelMesh>> *GetMeshes(const std::string &meshGroup);
-			std::shared_ptr<pragma::ModelMeshGroup> GetMeshGroup(const std::string &meshGroup);
-			std::shared_ptr<pragma::ModelMeshGroup> AddMeshGroup(const std::string &meshGroup, uint32_t &meshGroupId);
-			std::shared_ptr<pragma::ModelMeshGroup> AddMeshGroup(const std::string &meshGroup);
+			std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> *GetMeshes(const std::string &meshGroup);
+			std::shared_ptr<pragma::asset::ModelMeshGroup> GetMeshGroup(const std::string &meshGroup);
+			std::shared_ptr<pragma::asset::ModelMeshGroup> AddMeshGroup(const std::string &meshGroup, uint32_t &meshGroupId);
+			std::shared_ptr<pragma::asset::ModelMeshGroup> AddMeshGroup(const std::string &meshGroup);
 			bool GetMeshGroupId(const std::string &meshGroup, uint32_t &groupId) const;
-			std::shared_ptr<pragma::ModelMeshGroup> GetMeshGroup(uint32_t groupId);
-			void AddMeshGroup(std::shared_ptr<pragma::ModelMeshGroup> &meshGroup);
-			std::vector<std::shared_ptr<pragma::ModelMeshGroup>> &GetMeshGroups();
-			const std::vector<std::shared_ptr<pragma::ModelMeshGroup>> &GetMeshGroups() const;
+			std::shared_ptr<pragma::asset::ModelMeshGroup> GetMeshGroup(uint32_t groupId);
+			void AddMeshGroup(std::shared_ptr<pragma::asset::ModelMeshGroup> &meshGroup);
+			std::vector<std::shared_ptr<pragma::asset::ModelMeshGroup>> &GetMeshGroups();
+			const std::vector<std::shared_ptr<pragma::asset::ModelMeshGroup>> &GetMeshGroups() const;
 			std::vector<std::shared_ptr<pragma::physics::CollisionMesh>> &GetCollisionMeshes();
 			const std::vector<std::shared_ptr<pragma::physics::CollisionMesh>> &GetCollisionMeshes() const;
 			void AddCollisionMesh(const std::shared_ptr<pragma::physics::CollisionMesh> &mesh);
@@ -306,12 +306,12 @@ export {
 			bool TranslateLODMeshes(uint32_t lod, std::vector<uint32_t> &meshIds);
 			// Returns true if the bodygroup exists and sets 'outMeshId' to the mesh Id. If the bodygroup mesh is none/blank, 'outMeshId' will be (unsigned int)(-1)
 			bool GetMesh(uint32_t bodyGroupId, uint32_t groupId, uint32_t &outMeshId);
-			ModelMesh *GetMesh(uint32_t meshGroupIdx, uint32_t meshIdx);
-			const ModelMesh *GetMesh(uint32_t meshGroupIdx, uint32_t meshIdx) const { return const_cast<pragma::Model *>(this)->GetMesh(meshGroupIdx, meshIdx); }
-			pragma::ModelSubMesh *GetSubMesh(uint32_t meshGroupIdx, uint32_t meshIdx, uint32_t subMeshIdx);
-			const pragma::ModelSubMesh *GetSubMesh(uint32_t meshGroupIdx, uint32_t meshIdx, uint32_t subMeshIdx) const { return const_cast<pragma::Model *>(this)->GetSubMesh(meshGroupIdx, meshIdx, subMeshIdx); }
-			void GetMeshes(const std::vector<uint32_t> &meshIds, std::vector<std::shared_ptr<ModelMesh>> &outMeshes);
-			void GetSubMeshes(const std::vector<uint32_t> &meshIds, std::vector<std::shared_ptr<pragma::ModelSubMesh>> &outMeshes);
+			geometry::ModelMesh *GetMesh(uint32_t meshGroupIdx, uint32_t meshIdx);
+			const geometry::ModelMesh *GetMesh(uint32_t meshGroupIdx, uint32_t meshIdx) const { return const_cast<pragma::asset::Model *>(this)->GetMesh(meshGroupIdx, meshIdx); }
+			pragma::geometry::ModelSubMesh *GetSubMesh(uint32_t meshGroupIdx, uint32_t meshIdx, uint32_t subMeshIdx);
+			const pragma::geometry::ModelSubMesh *GetSubMesh(uint32_t meshGroupIdx, uint32_t meshIdx, uint32_t subMeshIdx) const { return const_cast<pragma::asset::Model *>(this)->GetSubMesh(meshGroupIdx, meshIdx, subMeshIdx); }
+			void GetMeshes(const std::vector<uint32_t> &meshIds, std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &outMeshes);
+			void GetSubMeshes(const std::vector<uint32_t> &meshIds, std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &outMeshes);
 			//void GetWeights(std::vector<VertexWeight*> **weights);
 			static void ClearCache();
 			const std::string &GetName() const;
@@ -329,14 +329,14 @@ export {
 			const std::vector<std::shared_ptr<pragma::animation::Animation>> &GetAnimations() const;
 			std::vector<std::shared_ptr<pragma::animation::Animation>> &GetAnimations();
 			std::unordered_map<std::string, unsigned int> &GetAnimationNames() { return m_animationIDs; }
-			const std::unordered_map<std::string, unsigned int> &GetAnimationNames() const { return const_cast<pragma::Model *>(this)->GetAnimationNames(); }
+			const std::unordered_map<std::string, unsigned int> &GetAnimationNames() const { return const_cast<pragma::asset::Model *>(this)->GetAnimationNames(); }
 			bool GetAnimationName(uint32_t animId, std::string &name) const;
 			std::string GetAnimationName(uint32_t animId) const;
 			uint32_t GetAnimationCount() const;
 			bool HasVertexWeights() const;
 			std::optional<float> CalcFlexWeight(uint32_t flexId, const std::function<std::optional<float>(uint32_t)> &fFetchFlexControllerWeight, const std::function<std::optional<float>(uint32_t)> &fFetchFlexWeight) const;
-			virtual std::shared_ptr<ModelMesh> CreateMesh() const;
-			virtual std::shared_ptr<pragma::ModelSubMesh> CreateSubMesh() const;
+			virtual std::shared_ptr<pragma::geometry::ModelMesh> CreateMesh() const;
+			virtual std::shared_ptr<pragma::geometry::ModelSubMesh> CreateSubMesh() const;
 			float CalcBoneLength(pragma::animation::BoneId boneId) const;
 			void RemoveBone(pragma::animation::BoneId boneId);
 
@@ -352,28 +352,28 @@ export {
 			void RemoveVertexAnimation(const std::string &name);
 
 			// Flex controllers
-			const std::vector<FlexController> &GetFlexControllers() const;
+			const std::vector<animation::FlexController> &GetFlexControllers() const;
 			bool GetFlexControllerId(const std::string &name, uint32_t &id) const;
-			std::vector<FlexController> &GetFlexControllers();
-			const FlexController *GetFlexController(uint32_t id) const;
-			FlexController *GetFlexController(uint32_t id);
-			const FlexController *GetFlexController(const std::string &name) const;
-			FlexController *GetFlexController(const std::string &name);
-			FlexController &AddFlexController(const std::string &name);
+			std::vector<animation::FlexController> &GetFlexControllers();
+			const animation::FlexController *GetFlexController(uint32_t id) const;
+			animation::FlexController *GetFlexController(uint32_t id);
+			const animation::FlexController *GetFlexController(const std::string &name) const;
+			animation::FlexController *GetFlexController(const std::string &name);
+			animation::FlexController &AddFlexController(const std::string &name);
 			void RemoveFlexController(uint32_t id);
 			void RemoveFlexController(const std::string &name);
 			uint32_t GetFlexControllerCount() const;
 			const std::string *GetFlexControllerName(uint32_t id) const;
 
 			// Flexes
-			const std::vector<Flex> &GetFlexes() const;
+			const std::vector<animation::Flex> &GetFlexes() const;
 			bool GetFlexId(const std::string &name, uint32_t &id) const;
-			std::vector<Flex> &GetFlexes();
-			const Flex *GetFlex(uint32_t id) const;
-			Flex *GetFlex(uint32_t id);
-			const Flex *GetFlex(const std::string &name) const;
-			Flex *GetFlex(const std::string &name);
-			Flex &AddFlex(const std::string &name);
+			std::vector<animation::Flex> &GetFlexes();
+			const animation::Flex *GetFlex(uint32_t id) const;
+			animation::Flex *GetFlex(uint32_t id);
+			const animation::Flex *GetFlex(const std::string &name) const;
+			animation::Flex *GetFlex(const std::string &name);
+			animation::Flex &AddFlex(const std::string &name);
 			void RemoveFlex(uint32_t id);
 			void RemoveFlex(const std::string &name);
 			uint32_t GetFlexCount() const;
@@ -395,7 +395,7 @@ export {
 			const PhonemeMap &GetPhonemeMap() const;
 			PhonemeMap &GetPhonemeMap();
 
-			bool FindSubMeshIndex(const pragma::ModelMeshGroup *optMeshGroup, const ModelMesh *optMesh, const pragma::ModelSubMesh *optSubMesh, uint32_t &outGroupIdx, uint32_t &outMeshIdx, uint32_t &outSubMeshIdx) const;
+			bool FindSubMeshIndex(const pragma::asset::ModelMeshGroup *optMeshGroup, const geometry::ModelMesh *optMesh, const pragma::geometry::ModelSubMesh *optSubMesh, uint32_t &outGroupIdx, uint32_t &outMeshIdx, uint32_t &outSubMeshIdx) const;
 
 			const pragma::animation::Skeleton &GetSkeleton() const;
 			pragma::animation::Skeleton &GetSkeleton();
@@ -427,7 +427,7 @@ export {
 			bool IntersectAABB(Vector3 &min, Vector3 &max);
 			void CalculateRenderBounds();
 			void CalculateCollisionBounds();
-			virtual void Update(pragma::model::ModelUpdateFlags flags = pragma::model::ModelUpdateFlags::AllData);
+			virtual void Update(pragma::asset::ModelUpdateFlags flags = pragma::asset::ModelUpdateFlags::AllData);
 			void GetCollisionBounds(Vector3 &min, Vector3 &max) const;
 			void GetRenderBounds(Vector3 &min, Vector3 &max) const;
 			void SetCollisionBounds(const Vector3 &min, const Vector3 &max);
@@ -466,9 +466,9 @@ export {
 			bool RemoveObjectAttachment(uint32_t idx);
 
 			int32_t LookupBone(const std::string &name) const;
-			void Merge(const pragma::Model &other, MergeFlags flags = MergeFlags::All);
+			void Merge(const pragma::asset::Model &other, MergeFlags flags = MergeFlags::All);
 
-			std::optional<uint32_t> AssignDistinctMaterial(const pragma::ModelMeshGroup &group, const ModelMesh &mesh, pragma::ModelSubMesh &subMesh);
+			std::optional<uint32_t> AssignDistinctMaterial(const pragma::asset::ModelMeshGroup &group, const geometry::ModelMesh &mesh, pragma::geometry::ModelSubMesh &subMesh);
 
 			// Hitboxes
 			void AddHitbox(uint32_t boneId, pragma::physics::HitGroup group, const Vector3 &min, const Vector3 &max);
@@ -520,7 +520,7 @@ export {
 			void AddTexturePath(const std::string &path);
 			void RemoveTexturePath(uint32_t idx);
 			void SetTexturePaths(const std::vector<std::string> &paths);
-			std::optional<uint32_t> GetMaterialIndex(const pragma::ModelSubMesh &mesh, uint32_t skinId = 0) const;
+			std::optional<uint32_t> GetMaterialIndex(const pragma::geometry::ModelSubMesh &mesh, uint32_t skinId = 0) const;
 			void SetReference(std::shared_ptr<Frame> frame);
 			const Frame &GetReference() const;
 			Frame &GetReference();
@@ -557,20 +557,20 @@ export {
 
 			udm::PropertyWrapper GetExtensionData() const;
 
-			util::WeakHandle<const pragma::Model> GetHandle() const;
-			util::WeakHandle<pragma::Model> GetHandle();
+			util::WeakHandle<const pragma::asset::Model> GetHandle() const;
+			util::WeakHandle<pragma::asset::Model> GetHandle();
 
 			void RemoveUnusedMaterialReferences();
-			void ClipAgainstPlane(const Vector3 &n, double d, pragma::Model &mdlA, pragma::Model &mdlB, const std::vector<Mat4> *boneMatrices = nullptr);
+			void ClipAgainstPlane(const Vector3 &n, double d, pragma::asset::Model &mdlA, pragma::asset::Model &mdlB, const std::vector<Mat4> *boneMatrices = nullptr);
 
 			std::vector<std::shared_ptr<FlexAnimation>> &GetFlexAnimations() { return m_flexAnimations; }
-			const std::vector<std::shared_ptr<FlexAnimation>> &GetFlexAnimations() const { return const_cast<pragma::Model *>(this)->GetFlexAnimations(); }
+			const std::vector<std::shared_ptr<FlexAnimation>> &GetFlexAnimations() const { return const_cast<pragma::asset::Model *>(this)->GetFlexAnimations(); }
 			std::vector<std::string> &GetFlexAnimationNames() { return m_flexAnimationNames; }
-			const std::vector<std::string> &GetFlexAnimationNames() const { return const_cast<pragma::Model *>(this)->GetFlexAnimationNames(); }
+			const std::vector<std::string> &GetFlexAnimationNames() const { return const_cast<pragma::asset::Model *>(this)->GetFlexAnimationNames(); }
 			std::optional<uint32_t> LookupFlexAnimation(const std::string &name) const;
 			uint32_t AddFlexAnimation(const std::string &name, FlexAnimation &anim);
 			FlexAnimation *GetFlexAnimation(uint32_t idx);
-			const FlexAnimation *GetFlexAnimation(uint32_t idx) const { return const_cast<pragma::Model *>(this)->GetFlexAnimation(idx); }
+			const FlexAnimation *GetFlexAnimation(uint32_t idx) const { return const_cast<pragma::asset::Model *>(this)->GetFlexAnimation(idx); }
 			const std::string *GetFlexAnimationName(uint32_t idx) const;
 
 			std::optional<umath::ScaledTransform> GetReferenceBonePose(pragma::animation::BoneId boneId) const;
@@ -579,7 +579,7 @@ export {
 			static Quat GetTwistAxisRotationOffset(pragma::SignedAxis axis);
 		  protected:
 			Model(pragma::NetworkState *nw, uint32_t numBones, const std::string &name = "");
-			Model(const pragma::Model &other);
+			Model(const pragma::asset::Model &other);
 			bool LoadFromAssetData(pragma::Game &game, const udm::AssetData &data, std::string &outErr);
 			virtual void OnMaterialMissing(const std::string &matName);
 			void AddLoadingMaterial(msys::Material &mat, std::optional<uint32_t> index = {});
@@ -591,14 +591,14 @@ export {
 			std::vector<std::shared_ptr<VertexAnimation>>::const_iterator FindVertexAnimation(const std::string &name) const;
 			std::vector<std::shared_ptr<VertexAnimation>>::iterator FindVertexAnimation(const std::string &name);
 
-			std::vector<FlexController>::const_iterator FindFlexController(const std::string &name) const;
-			std::vector<FlexController>::iterator FindFlexController(const std::string &name);
+			std::vector<animation::FlexController>::const_iterator FindFlexController(const std::string &name) const;
+			std::vector<animation::FlexController>::iterator FindFlexController(const std::string &name);
 
 			std::vector<std::shared_ptr<IKController>>::const_iterator FindIKController(const std::string &name) const;
 			std::vector<std::shared_ptr<IKController>>::iterator FindIKController(const std::string &name);
 
-			std::vector<Flex>::const_iterator FindFlex(const std::string &name) const;
-			std::vector<Flex>::iterator FindFlex(const std::string &name);
+			std::vector<animation::Flex>::const_iterator FindFlex(const std::string &name) const;
+			std::vector<animation::Flex>::iterator FindFlex(const std::string &name);
 		  private:
 			void Construct();
 			udm::PProperty m_extensions = nullptr;
@@ -613,12 +613,12 @@ export {
 			umath::Degree m_maxEyeDeflection = 30.f;
 			PhonemeMap m_phonemeMap = {};
 			std::vector<BlendController> m_blendControllers;
-			std::vector<std::shared_ptr<pragma::ModelMeshGroup>> m_meshGroups;
+			std::vector<std::shared_ptr<pragma::asset::ModelMeshGroup>> m_meshGroups;
 			std::vector<BodyGroup> m_bodyGroups;
 			std::unordered_map<uint32_t, pragma::physics::Hitbox> m_hitboxes;
 			std::vector<Eyeball> m_eyeballs;
 			//std::vector<std::vector<VertexWeight>*> m_weights;
-			static std::unordered_map<std::string, std::shared_ptr<pragma::Model>> m_models;
+			static std::unordered_map<std::string, std::shared_ptr<pragma::asset::Model>> m_models;
 			std::shared_ptr<Frame> m_reference = nullptr;
 			std::string m_name;
 			std::vector<std::shared_ptr<pragma::animation::Animation>> m_animations;
@@ -627,8 +627,8 @@ export {
 			std::shared_ptr<pragma::animation::Skeleton> m_skeleton = nullptr;
 			std::shared_ptr<pragma::animation::MetaRig> m_metaRig = nullptr;
 
-			std::vector<FlexController> m_flexControllers;
-			std::vector<Flex> m_flexes;
+			std::vector<animation::FlexController> m_flexControllers;
+			std::vector<animation::Flex> m_flexes;
 
 			std::vector<std::shared_ptr<IKController>> m_ikControllers;
 
@@ -657,10 +657,10 @@ export {
 
 		using namespace umath::scoped_enum::bitwise;
 	}
-	REGISTER_ENUM_FLAGS(pragma::Model::CopyFlags)
-	REGISTER_ENUM_FLAGS(pragma::Model::MergeFlags)
-	REGISTER_ENUM_FLAGS(pragma::Model::Flags)
-	REGISTER_ENUM_FLAGS(pragma::Model::StateFlags)
+	REGISTER_ENUM_FLAGS(pragma::asset::Model::CopyFlags)
+	REGISTER_ENUM_FLAGS(pragma::asset::Model::MergeFlags)
+	REGISTER_ENUM_FLAGS(pragma::asset::Model::Flags)
+	REGISTER_ENUM_FLAGS(pragma::asset::Model::StateFlags)
 
 #pragma warning(pop)
 };

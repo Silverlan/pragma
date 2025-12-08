@@ -232,7 +232,7 @@ static bool load_image(tinygltf::Image *image, const int imageIdx, std::string *
 }
 
 struct OutputData {
-	std::shared_ptr<pragma::Model> model;
+	std::shared_ptr<pragma::asset::Model> model;
 	std::vector<std::string> models;
 	std::string mapName;
 };
@@ -347,7 +347,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 
 	auto TransformPos = [scale](const Vector3 &v) -> Vector3 { return v * scale; };
 
-	auto mdl = std::shared_ptr<pragma::Model> {pragma::get_cgame()->CreateModel(false)};
+	auto mdl = std::shared_ptr<pragma::asset::Model> {pragma::get_cgame()->CreateModel(false)};
 	mdl->GetBaseMeshes() = {0u};
 
 	// Materials
@@ -589,12 +589,12 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		std::string name;
 		umath::ScaledTransform pose;
 	};
-	std::unordered_map<pragma::ModelMeshGroup *, std::vector<InstanceInfo>> meshInstances;
+	std::unordered_map<pragma::asset::ModelMeshGroup *, std::vector<InstanceInfo>> meshInstances;
 	for(uint32_t meshIdx = 0; auto &gltfMesh : gltfMeshes) {
 		auto mesh = pragma::get_cgame()->CreateModelMesh();
 		std::string name;
 		auto &nodeMeshData = meshToNodes[meshIdx];
-		std::shared_ptr<pragma::ModelMeshGroup> firstMeshGroup = nullptr;
+		std::shared_ptr<pragma::asset::ModelMeshGroup> firstMeshGroup = nullptr;
 		for(auto nodeIdx = decltype(nodeMeshData.size()) {0u}; nodeIdx < nodeMeshData.size(); ++nodeIdx) {
 			auto &nodeData = nodeMeshData[nodeIdx];
 			auto pose = nodeData.pose;
@@ -644,7 +644,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 				switch(idxAccessor.componentType) {
 				case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
 					{
-						subMesh->SetIndexType(pragma::model::IndexType::UInt16);
+						subMesh->SetIndexType(pragma::geometry::IndexType::UInt16);
 						subMesh->SetIndexCount(numIndices);
 						auto &indexData = subMesh->GetIndexData();
 						memcpy(indexData.data(), srcIndexData, indexData.size());
@@ -652,7 +652,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 					}
 				case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
 					{
-						subMesh->SetIndexType(pragma::model::IndexType::UInt16);
+						subMesh->SetIndexType(pragma::geometry::IndexType::UInt16);
 						subMesh->SetIndexCount(numIndices);
 						subMesh->VisitIndices([srcIndexData](auto *indexData, uint32_t numIndices) {
 							for(auto i = decltype(numIndices) {0u}; i < numIndices; ++i)
@@ -662,7 +662,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 					}
 				case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
 					{
-						subMesh->SetIndexType(pragma::model::IndexType::UInt32);
+						subMesh->SetIndexType(pragma::geometry::IndexType::UInt32);
 						subMesh->SetIndexCount(numIndices);
 						auto &indexData = subMesh->GetIndexData();
 						memcpy(indexData.data(), srcIndexData, indexData.size());
@@ -829,7 +829,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 						auto &operations = flex.GetOperations();
 						operations.push_back({});
 						auto &op = flex.GetOperations().back();
-						op.type = Flex::Operation::Type::Fetch;
+						op.type = pragma::animation::Flex::Operation::Type::Fetch;
 						op.d.index = fcId;
 					}
 					uint32_t flexId;
@@ -1143,7 +1143,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 	}
 #endif
 
-	mdl->Update(pragma::model::ModelUpdateFlags::All);
+	mdl->Update(pragma::asset::ModelUpdateFlags::All);
 
 	OutputData outputData {};
 	auto relFileName = outputPath + mdlName;
@@ -1316,14 +1316,14 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 	outputData.model = mdl;
 	return outputData;
 }
-std::shared_ptr<pragma::Model> pragma::asset::import_model(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
+std::shared_ptr<pragma::asset::Model> pragma::asset::import_model(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
 {
 	auto data = ::import_model(&f, "", outErrMsg, outputPath, !importAsSingleModel);
 	if(!data)
 		return nullptr;
 	return data->model;
 }
-std::shared_ptr<pragma::Model> pragma::asset::import_model(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
+std::shared_ptr<pragma::asset::Model> pragma::asset::import_model(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
 {
 	auto data = ::import_model(nullptr, fileName, outErrMsg, outputPath, !importAsSingleModel);
 	if(!data)
@@ -1633,8 +1633,8 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 	return true;
 }
 
-bool pragma::asset::export_model(pragma::Model &mdl, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName, std::string *optOutPath) { return GLTFWriter::Export(mdl, exportInfo, outErrMsg, modelName, optOutPath); }
-bool pragma::asset::export_animation(pragma::Model &mdl, const std::string &animName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName) { return GLTFWriter::Export(mdl, animName, exportInfo, outErrMsg, modelName); }
+bool pragma::asset::export_model(pragma::asset::Model &mdl, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName, std::string *optOutPath) { return GLTFWriter::Export(mdl, exportInfo, outErrMsg, modelName, optOutPath); }
+bool pragma::asset::export_animation(pragma::asset::Model &mdl, const std::string &animName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName) { return GLTFWriter::Export(mdl, animName, exportInfo, outErrMsg, modelName); }
 bool pragma::asset::export_texture(uimg::ImageBuffer &imgBuf, ModelExportInfo::ImageFormat imageFormat, const std::string &outputPath, std::string &outErrMsg, bool normalMap, bool srgb, uimg::TextureInfo::AlphaMode alphaMode, std::string *optOutOutputPath)
 {
 	std::string inOutPath = std::string {EXPORT_PATH} + outputPath;
@@ -1771,7 +1771,7 @@ class ModelAOWorker : public util::ParallelWorker<pragma::asset::ModelAOWorkerRe
 	std::vector<util::ParallelJob<uimg::ImageLayerSet>> m_matAoJobs {};
 	pragma::asset::ModelAOWorkerResult m_result {};
 };
-std::optional<util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pragma::asset::generate_ambient_occlusion(pragma::Model &mdl, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples, pragma::rendering::cycles::SceneInfo::DeviceType aoDevice)
+std::optional<util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pragma::asset::generate_ambient_occlusion(pragma::asset::Model &mdl, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples, pragma::rendering::cycles::SceneInfo::DeviceType aoDevice)
 {
 	std::vector<util::ParallelJob<uimg::ImageLayerSet>> aoJobs {};
 	std::unordered_set<std::string> builtRMAs {};
@@ -1833,7 +1833,7 @@ static bool save_ambient_occlusion(msys::Material &mat, std::string rmaPath, T &
 	return true;
 }
 
-pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::Model &mdl, msys::Material &mat, util::ParallelJob<uimg::ImageLayerSet> &outJob, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples,
+pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::asset::Model &mdl, msys::Material &mat, util::ParallelJob<uimg::ImageLayerSet> &outJob, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples,
   pragma::rendering::cycles::SceneInfo::DeviceType aoDevice)
 {
 	// TODO: There really is no good way to determine whether the material has a ambient occlusion map or not.

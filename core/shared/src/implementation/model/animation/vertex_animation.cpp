@@ -113,7 +113,7 @@ void pragma::MeshVertexFrame::Scale(const Vector3 &scale)
 }
 void pragma::MeshVertexFrame::Mirror(pragma::Axis axis)
 {
-	auto transform = pragma::model::get_mirror_transform_vector(axis);
+	auto transform = pragma::asset::get_mirror_transform_vector(axis);
 	auto numVerts = GetVertexCount();
 	for(auto i = decltype(numVerts) {0u}; i < numVerts; ++i) {
 		Vector3 pos;
@@ -174,9 +174,9 @@ MeshVertexAnimation::MeshVertexAnimation(const MeshVertexAnimation &other) : std
 		m_frames.push_back(::util::make_shared<pragma::MeshVertexFrame>(*frame));
 	static_assert(sizeof(MeshVertexAnimation) == 72, "Update this function when making changes to this class!");
 }
-ModelMesh *MeshVertexAnimation::GetMesh() const { return m_wpMesh.lock().get(); }
-pragma::ModelSubMesh *MeshVertexAnimation::GetSubMesh() const { return m_wpSubMesh.lock().get(); }
-void MeshVertexAnimation::SetMesh(ModelMesh &mesh, pragma::ModelSubMesh &subMesh)
+pragma::geometry::ModelMesh *MeshVertexAnimation::GetMesh() const { return m_wpMesh.lock().get(); }
+pragma::geometry::ModelSubMesh *MeshVertexAnimation::GetSubMesh() const { return m_wpSubMesh.lock().get(); }
+void MeshVertexAnimation::SetMesh(pragma::geometry::ModelMesh &mesh, pragma::geometry::ModelSubMesh &subMesh)
 {
 	m_wpMesh = mesh.shared_from_this();
 	m_wpSubMesh = subMesh.shared_from_this();
@@ -247,14 +247,14 @@ bool VertexAnimation::operator==(const VertexAnimation &other) const
 	return true;
 }
 
-std::shared_ptr<VertexAnimation> VertexAnimation::Load(pragma::Model &mdl, const udm::AssetData &data, std::string &outErr)
+std::shared_ptr<VertexAnimation> VertexAnimation::Load(pragma::asset::Model &mdl, const udm::AssetData &data, std::string &outErr)
 {
 	auto morphAnim = VertexAnimation::Create();
 	if(morphAnim->LoadFromAssetData(mdl, data, outErr) == false)
 		return nullptr;
 	return morphAnim;
 }
-bool VertexAnimation::Save(pragma::Model &mdl, udm::AssetDataArg outData, std::string &outErr)
+bool VertexAnimation::Save(pragma::asset::Model &mdl, udm::AssetDataArg outData, std::string &outErr)
 {
 	outData.SetAssetType(PMORPHANI_IDENTIFIER);
 	outData.SetAssetVersion(FORMAT_VERSION);
@@ -338,7 +338,7 @@ bool VertexAnimation::Save(pragma::Model &mdl, udm::AssetDataArg outData, std::s
 	}
 	return true;
 }
-bool VertexAnimation::LoadFromAssetData(pragma::Model &mdl, const udm::AssetData &data, std::string &outErr)
+bool VertexAnimation::LoadFromAssetData(pragma::asset::Model &mdl, const udm::AssetData &data, std::string &outErr)
 {
 	if(data.GetAssetType() != PMORPHANI_IDENTIFIER) {
 		outErr = "Incorrect format!";
@@ -432,7 +432,7 @@ bool VertexAnimation::LoadFromAssetData(pragma::Model &mdl, const udm::AssetData
 	return true;
 }
 
-bool VertexAnimation::GetMeshAnimationId(pragma::ModelSubMesh &subMesh, uint32_t &id) const
+bool VertexAnimation::GetMeshAnimationId(pragma::geometry::ModelSubMesh &subMesh, uint32_t &id) const
 {
 	auto it = std::find_if(m_meshAnims.begin(), m_meshAnims.end(), [&subMesh](const std::shared_ptr<MeshVertexAnimation> &anim) { return (anim->GetSubMesh() == &subMesh) ? true : false; });
 	if(it == m_meshAnims.end())
@@ -440,8 +440,8 @@ bool VertexAnimation::GetMeshAnimationId(pragma::ModelSubMesh &subMesh, uint32_t
 	id = it - m_meshAnims.begin();
 	return true;
 }
-const MeshVertexAnimation *VertexAnimation::GetMeshAnimation(pragma::ModelSubMesh &subMesh) const { return const_cast<VertexAnimation *>(this)->GetMeshAnimation(subMesh); }
-MeshVertexAnimation *VertexAnimation::GetMeshAnimation(pragma::ModelSubMesh &subMesh)
+const MeshVertexAnimation *VertexAnimation::GetMeshAnimation(pragma::geometry::ModelSubMesh &subMesh) const { return const_cast<VertexAnimation *>(this)->GetMeshAnimation(subMesh); }
+MeshVertexAnimation *VertexAnimation::GetMeshAnimation(pragma::geometry::ModelSubMesh &subMesh)
 {
 	auto frameId = 0u;
 	if(GetMeshAnimationId(subMesh, frameId) == false)
@@ -449,7 +449,7 @@ MeshVertexAnimation *VertexAnimation::GetMeshAnimation(pragma::ModelSubMesh &sub
 	return m_meshAnims.at(frameId).get();
 }
 
-std::shared_ptr<pragma::MeshVertexFrame> VertexAnimation::AddMeshFrame(ModelMesh &mesh, pragma::ModelSubMesh &subMesh)
+std::shared_ptr<pragma::MeshVertexFrame> VertexAnimation::AddMeshFrame(pragma::geometry::ModelMesh &mesh, pragma::geometry::ModelSubMesh &subMesh)
 {
 	auto *anim = GetMeshAnimation(subMesh);
 	if(anim == nullptr) {
@@ -461,8 +461,8 @@ std::shared_ptr<pragma::MeshVertexFrame> VertexAnimation::AddMeshFrame(ModelMesh
 	return anim->AddFrame();
 }
 
-const pragma::MeshVertexFrame *VertexAnimation::GetMeshFrame(pragma::ModelSubMesh &subMesh, uint32_t frameId) const { return const_cast<VertexAnimation *>(this)->GetMeshFrame(subMesh, frameId); }
-pragma::MeshVertexFrame *VertexAnimation::GetMeshFrame(pragma::ModelSubMesh &subMesh, uint32_t frameId)
+const pragma::MeshVertexFrame *VertexAnimation::GetMeshFrame(pragma::geometry::ModelSubMesh &subMesh, uint32_t frameId) const { return const_cast<VertexAnimation *>(this)->GetMeshFrame(subMesh, frameId); }
+pragma::MeshVertexFrame *VertexAnimation::GetMeshFrame(pragma::geometry::ModelSubMesh &subMesh, uint32_t frameId)
 {
 	auto animId = 0u;
 	if(GetMeshAnimationId(subMesh, animId) == false)

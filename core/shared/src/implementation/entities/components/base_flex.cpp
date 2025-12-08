@@ -47,7 +47,7 @@ void BaseFlexComponent::Initialize()
 }
 void BaseFlexComponent::SetFlexControllerUpdateListenersEnabled(bool enabled) { umath::set_flag(m_stateFlags, StateFlags::EnableFlexControllerUpdateListeners, enabled); }
 bool BaseFlexComponent::AreFlexControllerUpdateListenersEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::EnableFlexControllerUpdateListeners); }
-void BaseFlexComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &model)
+void BaseFlexComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &model)
 {
 	util::ScopeGuard sg {[this]() { OnMembersChanged(); }};
 	ClearMembers();

@@ -25,14 +25,14 @@ export {
 				// Returns the number of shapes that have been added
 				uint32_t AddShape(pragma::physics::IShape &shape, const umath::Transform &localPose = {}, BoneId boneId = -1);
 				void SetModelMeshBoneMapping(MeshIndex modelMeshIndex, BoneId boneIndex);
-				void SetModel(pragma::Model &model);
-				pragma::Model *GetModel() const;
+				void SetModel(pragma::asset::Model &model);
+				pragma::asset::Model *GetModel() const;
 				const std::unordered_map<BoneId, std::vector<ShapeInfo>> &GetShapes() const;
 				const std::unordered_map<MeshIndex, BoneId> &GetModelMeshBoneMappings() const;
 			  private:
 				std::unordered_map<BoneId, std::vector<ShapeInfo>> m_shapes = {};
 				std::unordered_map<MeshIndex, BoneId> m_modelMeshIndexToShapeIndex = {};
-				util::WeakHandle<pragma::Model> m_model = {};
+				util::WeakHandle<pragma::asset::Model> m_model = {};
 			};
 		};
 		struct DLLNETWORK CEPhysicsUpdateData : public ComponentEvent {

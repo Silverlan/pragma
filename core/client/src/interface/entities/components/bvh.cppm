@@ -20,7 +20,7 @@ export namespace pragma {
 
 	class DLLCLIENT CBvhComponent final : public BaseBvhComponent {
 	  public:
-		static bool ShouldConsiderMesh(const pragma::ModelSubMesh &mesh, const rendering::RenderBufferData &bufferData);
+		static bool ShouldConsiderMesh(const pragma::geometry::ModelSubMesh &mesh, const rendering::RenderBufferData &bufferData);
 		CBvhComponent(pragma::ecs::BaseEntity &ent) : BaseBvhComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua::State *l) override;

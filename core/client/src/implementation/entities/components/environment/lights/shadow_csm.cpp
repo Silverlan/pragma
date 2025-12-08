@@ -465,10 +465,10 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 			auto meshTree = pWorldComponent.valid() ? pWorldComponent->GetMeshTree() : nullptr;
 			if(meshTree != nullptr)
 			{
-				meshTree->IterateObjects([layer,&light](const OcclusionOctree<std::shared_ptr<ModelMesh>>::Node &node) -> bool {
+				meshTree->IterateObjects([layer,&light](const OcclusionOctree<std::shared_ptr<pragma::geometry::ModelMesh>>::Node &node) -> bool {
 					auto &bounds = node.GetWorldBounds();
 					return light.ShouldPass(layer,bounds.first,bounds.second);
-					},[layer,&light,&info](const std::shared_ptr<ModelMesh> &mesh) {
+					},[layer,&light,&info](const std::shared_ptr<pragma::geometry::ModelMesh> &mesh) {
 						Vector3 min,max;
 						mesh->GetBounds(min,max);
 						if(light.ShouldPass(layer,min,max) == false)

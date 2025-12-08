@@ -58,17 +58,17 @@ export {
 
 			Vector3 &GetGravity();
 			void SetGravity(Vector3 &gravity);
-			std::shared_ptr<pragma::Model> CreateModel(const std::string &mdl) const;
-			std::shared_ptr<pragma::Model> CreateModel(bool bAddReference = true) const;
-			std::shared_ptr<pragma::Model> LoadModel(const std::string &mdl, bool bReload = false);
+			std::shared_ptr<pragma::asset::Model> CreateModel(const std::string &mdl) const;
+			std::shared_ptr<pragma::asset::Model> CreateModel(bool bAddReference = true) const;
+			std::shared_ptr<pragma::asset::Model> LoadModel(const std::string &mdl, bool bReload = false);
 			bool PrecacheModel(const std::string &mdl);
 			bool RunLua(const std::string &lua, const std::string &chunkName);
 			LuaDirectoryWatcherManager &GetLuaScriptWatcher();
 			ResourceWatcherManager &GetResourceWatcher();
 			void ReloadGameModeScripts();
 
-			virtual std::shared_ptr<ModelMesh> CreateModelMesh() const = 0;
-			virtual std::shared_ptr<pragma::ModelSubMesh> CreateModelSubMesh() const = 0;
+			virtual std::shared_ptr<pragma::geometry::ModelMesh> CreateModelMesh() const = 0;
+			virtual std::shared_ptr<pragma::geometry::ModelSubMesh> CreateModelSubMesh() const = 0;
 
 			virtual void GetRegisteredEntities(std::vector<std::string> &classes, std::vector<std::string> &luaClasses) const = 0;
 			void ScheduleEntityForRemoval(pragma::ecs::BaseEntity &ent);

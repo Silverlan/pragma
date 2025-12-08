@@ -113,7 +113,7 @@ void CAnimatedBvhComponent::RebuildTemporaryBvhData()
 	Clear();
 
 	CBvhComponent::BvhBuildInfo buildInfo {};
-	buildInfo.shouldConsiderMesh = [mdlC](const pragma::ModelSubMesh &mesh, uint32_t meshIdx) -> bool { return CBvhComponent::ShouldConsiderMesh(mesh, *mdlC->GetRenderBufferData(meshIdx)); };
+	buildInfo.shouldConsiderMesh = [mdlC](const pragma::geometry::ModelSubMesh &mesh, uint32_t meshIdx) -> bool { return CBvhComponent::ShouldConsiderMesh(mesh, *mdlC->GetRenderBufferData(meshIdx)); };
 	m_tmpBvhData = BaseBvhComponent::RebuildBvh(renderMeshes, &buildInfo, nullptr, &GetEntity());
 }
 

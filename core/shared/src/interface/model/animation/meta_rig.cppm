@@ -232,7 +232,7 @@ export {
 
 			bool Save(const Skeleton &skeleton, const udm::AssetData &outData, std::string &outErr) const;
 			float GetReferenceScale() const;
-			void DebugPrint(const pragma::Model &mdl);
+			void DebugPrint(const pragma::asset::Model &mdl);
 			const MetaRigBone *GetBone(pragma::animation::MetaRigBoneType type) const;
 			const MetaRigBlendShape *GetBlendShape(pragma::animation::BlendShape blendShape) const;
 			std::optional<pragma::animation::MetaRigBoneType> FindMetaBoneType(pragma::animation::BoneId boneId) const;

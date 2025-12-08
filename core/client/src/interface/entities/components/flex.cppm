@@ -57,9 +57,9 @@ export namespace pragma {
 		void MaintainFlexAnimations(float dt);
 		bool UpdateFlexWeight(uint32_t flexId, float &val, bool storeInCache = true);
 		void UpdateEyeFlexes();
-		void UpdateEyeFlexes(Eyeball &eyeball, uint32_t eyeballIdx);
+		void UpdateEyeFlexes(asset::Eyeball &eyeball, uint32_t eyeballIdx);
 		void UpdateFlexControllers(float dt);
-		void OnModelChanged(const std::shared_ptr<pragma::Model> &mdl);
+		void OnModelChanged(const std::shared_ptr<pragma::asset::Model> &mdl);
 
 		// Flex controllers
 		struct FlexControllerInfo {

@@ -362,7 +362,7 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 	else if(eventId == pragma::baseModelComponent::EVENT_ON_MODEL_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &model = Lua::Check<std::shared_ptr<pragma::Model>>(l, -1);
+		auto &model = Lua::Check<std::shared_ptr<pragma::asset::Model>>(l, -1);
 		Lua::Pop(l, 1);
 
 		pragma::CEOnModelChanged evData {model};
@@ -403,7 +403,7 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 	else if(eventId == pragma::baseModelComponent::EVENT_ON_MODEL_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto model = Lua::Check<std::shared_ptr<pragma::Model>>(l, -1);
+		auto model = Lua::Check<std::shared_ptr<pragma::asset::Model>>(l, -1);
 		Lua::Pop(l, 1);
 
 		pragma::CEOnModelChanged evData {model};

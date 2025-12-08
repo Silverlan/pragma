@@ -35,8 +35,8 @@ export namespace Lua {
 		DLLNETWORK void GetEventCount(lua::State *l, pragma::animation::Animation &anim, uint32_t frameId);
 		DLLNETWORK void GetEventCount(lua::State *l, pragma::animation::Animation &anim);
 		DLLNETWORK void GetBlendController(lua::State *l, pragma::animation::Animation &anim);
-		DLLNETWORK void CalcRenderBounds(lua::State *l, pragma::animation::Animation &anim, const std::shared_ptr<pragma::Model> &mdl);
-		DLLNETWORK void GetRenderBounds(lua::State *l, pragma::animation::Animation &anim, const std::shared_ptr<pragma::Model> &mdl);
+		DLLNETWORK void CalcRenderBounds(lua::State *l, pragma::animation::Animation &anim, const std::shared_ptr<pragma::asset::Model> &mdl);
+		DLLNETWORK void GetRenderBounds(lua::State *l, pragma::animation::Animation &anim, const std::shared_ptr<pragma::asset::Model> &mdl);
 		DLLNETWORK void RemoveEvent(lua::State *l, pragma::animation::Animation &anim, uint32_t frameId, uint32_t idx);
 		DLLNETWORK void SetEventData(lua::State *l, pragma::animation::Animation &anim, uint32_t frameId, uint32_t idx, uint32_t type, luabind::object tArgs);
 		DLLNETWORK void SetEventType(lua::State *l, pragma::animation::Animation &anim, uint32_t frameId, uint32_t idx, uint32_t type);
@@ -59,7 +59,7 @@ export namespace Lua {
 		DLLNETWORK void Globalize(lua::State *l, ::Frame &frame, pragma::animation::Animation &anim, pragma::animation::Skeleton *skeleton);
 		DLLNETWORK void Localize(lua::State *l, ::Frame &frame, pragma::animation::Skeleton *skeleton);
 		DLLNETWORK void Globalize(lua::State *l, ::Frame &frame, pragma::animation::Skeleton *skeleton);
-		DLLNETWORK void CalcRenderBounds(lua::State *l, ::Frame &frame, pragma::animation::Animation &anim, const std::shared_ptr<pragma::Model> &mdl);
+		DLLNETWORK void CalcRenderBounds(lua::State *l, ::Frame &frame, pragma::animation::Animation &anim, const std::shared_ptr<pragma::asset::Model> &mdl);
 		DLLNETWORK void Rotate(lua::State *l, ::Frame &frame, pragma::animation::Animation &anim, pragma::animation::Skeleton *skeleton, const Quat &rot);
 		DLLNETWORK void Translate(lua::State *l, ::Frame &frame, pragma::animation::Animation &anim, pragma::animation::Skeleton *skeleton, const Vector3 &t);
 		DLLNETWORK void Scale(lua::State *l, ::Frame &frame, const Vector3 &scale);

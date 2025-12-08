@@ -114,7 +114,7 @@ void CWaterSurfaceComponent::InitializeSurface()
 	auto subMesh = ::util::make_shared<CModelSubMesh>();
 	// Initialize surface
 	auto &verts = subMesh->GetVertices();
-	subMesh->SetIndexType(pragma::model::IndexType::UInt16);
+	subMesh->SetIndexType(pragma::geometry::IndexType::UInt16);
 	subMesh->SetIndices(simTriangles);
 
 	sim.LockParticleHeights();
@@ -137,7 +137,7 @@ void CWaterSurfaceComponent::InitializeSurface()
 	auto mesh = ::util::make_shared<CModelMesh>();
 	mesh->AddSubMesh(subMesh);
 	meshGroup->AddMesh(mesh);
-	mdl->Update(pragma::model::ModelUpdateFlags::All); // TODO: Don't update vertex and index buffers
+	mdl->Update(pragma::asset::ModelUpdateFlags::All); // TODO: Don't update vertex and index buffers
 	auto mdlComponent = GetEntity().GetModelComponent();
 	if(mdlComponent)
 		mdlComponent->SetModel(mdl);
@@ -155,7 +155,7 @@ void CWaterSurfaceComponent::InitializeSurface()
 
 	auto &vkMesh = subMesh->GetSceneMesh();
 	vkMesh->SetVertexBuffer(vertBuffer); //sim.GetPositionBuffer());
-	vkMesh->SetIndexBuffer(indexBuffer, pragma::model::IndexType::UInt16);
+	vkMesh->SetIndexBuffer(indexBuffer, pragma::geometry::IndexType::UInt16);
 	//
 
 	m_waterSurfaceMesh = subMesh;

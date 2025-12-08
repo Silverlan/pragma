@@ -91,8 +91,8 @@ export namespace pragma {
 		virtual bool IsSinglePlayer() const = 0;
 		bool CheatsEnabled() const;
 		virtual msys::MaterialManager &GetMaterialManager() = 0;
-		virtual pragma::ModelSubMesh *CreateSubMesh() const = 0;
-		virtual ModelMesh *CreateMesh() const = 0;
+		virtual geometry::ModelSubMesh *CreateSubMesh() const = 0;
+		virtual geometry::ModelMesh *CreateMesh() const = 0;
 		virtual util::FileAssetManager *GetAssetManager(pragma::asset::Type type);
 
 		void TranslateConsoleCommand(std::string &cmd);

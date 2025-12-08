@@ -20,7 +20,7 @@ export namespace pragma {
 	}
 	class DLLNETWORK BaseBvhComponent : public BaseEntityComponent {
 	  public:
-		static bool ShouldConsiderMesh(const pragma::ModelSubMesh &mesh);
+		static bool ShouldConsiderMesh(const pragma::geometry::ModelSubMesh &mesh);
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;
@@ -54,9 +54,9 @@ export namespace pragma {
 		struct DLLNETWORK BvhBuildInfo {
 			const std::vector<umath::ScaledTransform> *poses = nullptr;
 			std::function<bool()> isCancelled = nullptr;
-			std::function<bool(const pragma::ModelSubMesh &, uint32_t)> shouldConsiderMesh = nullptr;
+			std::function<bool(const pragma::geometry::ModelSubMesh &, uint32_t)> shouldConsiderMesh = nullptr;
 		};
-		static std::shared_ptr<pragma::bvh::MeshBvhTree> RebuildBvh(const std::vector<std::shared_ptr<pragma::ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo = nullptr, std::vector<size_t> *optOutMeshIndices = nullptr, pragma::ecs::BaseEntity *ent = nullptr);
+		static std::shared_ptr<pragma::bvh::MeshBvhTree> RebuildBvh(const std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo = nullptr, std::vector<size_t> *optOutMeshIndices = nullptr, pragma::ecs::BaseEntity *ent = nullptr);
 		std::shared_ptr<bvh::MeshBvhTree> SetBvhData(std::shared_ptr<bvh::MeshBvhTree> &bvhData);
 		bool HasBvhData() const;
 	  protected:

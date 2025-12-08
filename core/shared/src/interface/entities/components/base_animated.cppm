@@ -220,11 +220,11 @@ export {
 			void UpdateAnimations(double dt);
 			bool MaintainGestures(double dt);
 
-			virtual bool GetVertexTransformMatrix(const pragma::ModelSubMesh &subMesh, uint32_t vertexId, umath::ScaledTransform &outPose) const;
-			virtual std::optional<Mat4> GetVertexTransformMatrix(const pragma::ModelSubMesh &subMesh, uint32_t vertexId) const;
-			virtual bool GetLocalVertexPosition(const pragma::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 &pos, const std::optional<Vector3> &vertexOffset = {}) const;
+			virtual bool GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, umath::ScaledTransform &outPose) const;
+			virtual std::optional<Mat4> GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId) const;
+			virtual bool GetLocalVertexPosition(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 &pos, const std::optional<Vector3> &vertexOffset = {}) const;
 			bool GetVertexPosition(uint32_t meshGroupId, uint32_t meshId, uint32_t subMeshId, uint32_t vertexId, Vector3 &pos) const;
-			bool GetVertexPosition(const pragma::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 &pos) const;
+			bool GetVertexPosition(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 &pos) const;
 
 			void SetBindPose(const Frame &frame);
 			const Frame *GetBindPose() const;
@@ -237,9 +237,9 @@ export {
 		  protected:
 			BaseAnimatedComponent(pragma::ecs::BaseEntity &ent);
 			virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
-			virtual void OnModelChanged(const std::shared_ptr<pragma::Model> &mdl);
+			virtual void OnModelChanged(const std::shared_ptr<pragma::asset::Model> &mdl);
 			virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
-			virtual void ResetAnimation(const std::shared_ptr<pragma::Model> &mdl);
+			virtual void ResetAnimation(const std::shared_ptr<pragma::asset::Model> &mdl);
 
 			struct DLLNETWORK AnimationBlendInfo {
 				float scale = 0.f;

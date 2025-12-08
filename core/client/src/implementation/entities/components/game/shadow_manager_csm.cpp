@@ -95,7 +95,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 				for(auto &subMesh : mesh->GetSubMeshes())
 				{
 					auto matIdx = mdl->GetMaterialIndex(*subMesh);
-					auto *mat = matIdx.has_value() ? const_cast<pragma::Model&>(*mdl).GetMaterial(*matIdx) : nullptr;
+					auto *mat = matIdx.has_value() ? const_cast<pragma::asset::Model&>(*mdl).GetMaterial(*matIdx) : nullptr;
 					if(mat == nullptr || mat->GetShaderIdentifier() == "nodraw") // TODO
 						continue;
 					if(m_shadowCasters.size() == m_shadowCasters.capacity())

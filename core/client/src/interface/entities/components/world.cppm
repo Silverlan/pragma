@@ -19,7 +19,7 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 		void ReloadMeshCache();
-		std::shared_ptr<OcclusionOctree<std::shared_ptr<ModelMesh>>> GetMeshTree() const;
+		std::shared_ptr<OcclusionOctree<std::shared_ptr<pragma::geometry::ModelMesh>>> GetMeshTree() const;
 		std::shared_ptr<::CHC> GetCHCController() const;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnTick(double tDelta) override;
@@ -37,7 +37,7 @@ export namespace pragma {
 		std::vector<std::shared_ptr<rendering::RenderQueue>> m_clusterRenderQueues;
 		std::vector<std::shared_ptr<rendering::RenderQueue>> m_clusterRenderTranslucentQueues;
 		std::unordered_map<uint32_t, bool> m_lodBaseMeshIds;
-		std::shared_ptr<OcclusionOctree<std::shared_ptr<ModelMesh>>> m_meshTree;
+		std::shared_ptr<OcclusionOctree<std::shared_ptr<pragma::geometry::ModelMesh>>> m_meshTree;
 		std::shared_ptr<::CHC> m_chcController;
 
 		std::shared_ptr<util::BSPTree> m_bspTree = nullptr;

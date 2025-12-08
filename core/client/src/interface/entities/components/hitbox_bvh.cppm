@@ -30,7 +30,7 @@ export namespace pragma {
 		struct DLLCLIENT MeshHitboxBvhCache {
 			using TriangleIndex = uint32_t;
 			std::shared_ptr<pragma::bvh::MeshBvhTree> bvhTree;
-			std::shared_ptr<pragma::ModelSubMesh> mesh;
+			std::shared_ptr<pragma::geometry::ModelSubMesh> mesh;
 			std::vector<TriangleIndex> bvhTriToOriginalTri;
 		};
 		struct DLLCLIENT BoneHitboxBvhCache {
@@ -48,10 +48,10 @@ export namespace pragma {
 			HitboxBvhCache(pragma::Game &game);
 			~HitboxBvhCache();
 			ModelHitboxBvhCache *GetModelCache(const ModelName &mdlName);
-			std::shared_future<void> GenerateModelCache(const ModelName &mdlName, pragma::Model &mdl);
+			std::shared_future<void> GenerateModelCache(const ModelName &mdlName, pragma::asset::Model &mdl);
 		  private:
-			void PrepareModel(pragma::Model &mdl);
-			void InitializeModelHitboxBvhCache(pragma::Model &mdl, const HitboxMeshBvhBuildTask &buildTask, ModelHitboxBvhCache &mdlHbBvhCache);
+			void PrepareModel(pragma::asset::Model &mdl);
+			void InitializeModelHitboxBvhCache(pragma::asset::Model &mdl, const HitboxMeshBvhBuildTask &buildTask, ModelHitboxBvhCache &mdlHbBvhCache);
 			std::unordered_map<ModelName, std::shared_ptr<ModelHitboxBvhCache>> m_modelBvhCache;
 			pragma::Game &m_game;
 			pragma::bvh::HitboxMeshBvhBuilder m_builder;

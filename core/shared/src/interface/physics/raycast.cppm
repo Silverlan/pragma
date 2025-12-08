@@ -68,9 +68,9 @@ export namespace pragma::physics {
 
 	struct DLLNETWORK TraceResult {
 		struct DLLNETWORK MeshInfo {
-			std::vector<std::shared_ptr<ModelMesh>> meshes;
-			ModelMesh *mesh = nullptr;
-			pragma::ModelSubMesh *subMesh = nullptr;
+			std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> meshes;
+			geometry::ModelMesh *mesh = nullptr;
+			geometry::ModelSubMesh *subMesh = nullptr;
 		};
 		TraceResult() {}
 		TraceResult(const pragma::physics::TraceData &data);
@@ -89,7 +89,7 @@ export namespace pragma::physics {
 
 		std::shared_ptr<MeshInfo> meshInfo = nullptr;
 
-		void GetMeshes(ModelMesh **mesh, pragma::ModelSubMesh **subMesh);
+		void GetMeshes(pragma::geometry::ModelMesh **mesh, pragma::geometry::ModelSubMesh **subMesh);
 		msys::Material *GetMaterial();
 		bool GetMaterial(std::string &mat);
 	  private:

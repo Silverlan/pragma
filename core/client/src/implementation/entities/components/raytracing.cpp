@@ -110,7 +110,7 @@ void CRaytracingComponent::InitializeModelRaytracingBuffers()
 		// 	break;
 	}
 
-	std::vector<std::shared_ptr<ModelMesh>> lodMeshes {};
+	std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> lodMeshes {};
 	std::vector<uint32_t> bodyGroups {};
 	bodyGroups.resize(mdl->GetBodyGroupCount());
 	mdl->GetBodyGroupMeshes(bodyGroups, 0, lodMeshes);
@@ -135,7 +135,7 @@ void CRaytracingComponent::InitializeModelRaytracingBuffers()
 
 			auto &indexBuffer = vkMesh->GetIndexBuffer();
 			if(indexBuffer)
-				subMeshBufferData.indexBufferStartIndex = indexBuffer->GetStartOffset() / sizeof(pragma::model::IndexType);
+				subMeshBufferData.indexBufferStartIndex = indexBuffer->GetStartOffset() / sizeof(pragma::geometry::IndexType);
 
 			auto &vertexWeightBuffer = vkMesh->GetVertexWeightBuffer();
 			if(vertexWeightBuffer)

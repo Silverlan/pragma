@@ -967,12 +967,12 @@ void pragma::LuaCore::register_entity_component_classes(lua::State *l, luabind::
 	defBvh.def("DebugDraw", &pragma::BaseBvhComponent::DebugDraw);
 	defBvh.def("DebugDrawBvhTree", &pragma::BaseBvhComponent::DebugDrawBvhTree);
 	defBvh.def(
-	  "FindPrimitiveMeshInfo", +[](lua::State *l, const pragma::BaseBvhComponent &bvhC, size_t primIdx) -> std::optional<std::pair<EntityHandle, std::shared_ptr<pragma::ModelSubMesh>>> {
+	  "FindPrimitiveMeshInfo", +[](lua::State *l, const pragma::BaseBvhComponent &bvhC, size_t primIdx) -> std::optional<std::pair<EntityHandle, std::shared_ptr<pragma::geometry::ModelSubMesh>>> {
 		  auto *range = bvhC.FindPrimitiveMeshInfo(primIdx);
 		  if(!range)
-			  return std::optional<std::pair<EntityHandle, std::shared_ptr<pragma::ModelSubMesh>>> {};
+			  return std::optional<std::pair<EntityHandle, std::shared_ptr<pragma::geometry::ModelSubMesh>>> {};
 		  auto *ent = range->entity ? range->entity : &bvhC.GetEntity();
-		  return std::pair<EntityHandle, std::shared_ptr<pragma::ModelSubMesh>> {ent->GetHandle(), range->mesh};
+		  return std::pair<EntityHandle, std::shared_ptr<pragma::geometry::ModelSubMesh>> {ent->GetHandle(), range->mesh};
 	  });
 
 	/*auto defBvhIntersectionInfo = luabind::class_<pragma::BvhIntersectionInfo>("IntersectionInfo");
@@ -1468,9 +1468,9 @@ void pragma::LuaCore::base_animated_component::register_class(luabind::module_ &
 		  });
 	  }));
 
-	def.def("GetVertexTransformMatrix", static_cast<std::optional<Mat4> (pragma::BaseAnimatedComponent::*)(const pragma::ModelSubMesh &, uint32_t) const>(&pragma::BaseAnimatedComponent::GetVertexTransformMatrix));
+	def.def("GetVertexTransformMatrix", static_cast<std::optional<Mat4> (pragma::BaseAnimatedComponent::*)(const pragma::geometry::ModelSubMesh &, uint32_t) const>(&pragma::BaseAnimatedComponent::GetVertexTransformMatrix));
 	def.def(
-	  "GetLocalVertexPosition", +[](lua::State *l, pragma::BaseAnimatedComponent &hEnt, pragma::ModelSubMesh &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
+	  "GetLocalVertexPosition", +[](lua::State *l, pragma::BaseAnimatedComponent &hEnt, pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
 		  Vector3 pos, n;
 		  if(vertexId >= subMesh.GetVertexCount())
 			  return {};
@@ -1499,8 +1499,8 @@ void pragma::LuaCore::base_animated_component::register_class(luabind::module_ &
 		  return pos;
 	  });
 	def.def("GetVertexPosition",
-	  static_cast<std::optional<Vector3> (*)(lua::State *, pragma::BaseAnimatedComponent &, const std::shared_ptr<pragma::ModelSubMesh> &, uint32_t)>(
-	    [](lua::State *l, pragma::BaseAnimatedComponent &hEnt, const std::shared_ptr<pragma::ModelSubMesh> &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
+	  static_cast<std::optional<Vector3> (*)(lua::State *, pragma::BaseAnimatedComponent &, const std::shared_ptr<pragma::geometry::ModelSubMesh> &, uint32_t)>(
+	    [](lua::State *l, pragma::BaseAnimatedComponent &hEnt, const std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
 		    Vector3 pos;
 		    if(vertexId >= subMesh->GetVertexCount())
 			    return {};
@@ -2428,11 +2428,11 @@ void pragma::LuaCore::base_color_component::register_class(luabind::module_ &mod
 	def.add_static_constant("EVENT_ON_COLOR_CHANGED", pragma::baseColorComponent::EVENT_ON_COLOR_CHANGED);
 }
 
-static std::optional<std::tuple<std::shared_ptr<ModelMesh>, std::shared_ptr<pragma::ModelSubMesh>, msys::Material *>> FindAndAssignSurfaceMesh(pragma::BaseSurfaceComponent &c, luabind::object oFilter)
+static std::optional<std::tuple<std::shared_ptr<pragma::geometry::ModelMesh>, std::shared_ptr<pragma::geometry::ModelSubMesh>, msys::Material *>> FindAndAssignSurfaceMesh(pragma::BaseSurfaceComponent &c, luabind::object oFilter)
 {
-	std::function<int32_t(ModelMesh &, pragma::ModelSubMesh &, msys::Material &, const std::string &)> filter = nullptr;
+	std::function<int32_t(pragma::geometry::ModelMesh &, pragma::geometry::ModelSubMesh &, msys::Material &, const std::string &)> filter = nullptr;
 	if(oFilter) {
-		filter = [&oFilter](ModelMesh &mesh, pragma::ModelSubMesh &subMesh, msys::Material &mat, const std::string &shader) -> int32_t {
+		filter = [&oFilter](pragma::geometry::ModelMesh &mesh, pragma::geometry::ModelSubMesh &subMesh, msys::Material &mat, const std::string &shader) -> int32_t {
 			auto res = oFilter(&mat, shader);
 			return luabind::object_cast<int32_t>(res);
 		};
@@ -2440,7 +2440,7 @@ static std::optional<std::tuple<std::shared_ptr<ModelMesh>, std::shared_ptr<prag
 	auto res = c.FindAndAssignMesh(filter);
 	if(!res.has_value())
 		return {};
-	return std::tuple<std::shared_ptr<ModelMesh>, std::shared_ptr<pragma::ModelSubMesh>, msys::Material *> {res->mesh->shared_from_this(), res->subMesh->shared_from_this(), res->material};
+	return std::tuple<std::shared_ptr<pragma::geometry::ModelMesh>, std::shared_ptr<pragma::geometry::ModelSubMesh>, msys::Material *> {res->mesh->shared_from_this(), res->subMesh->shared_from_this(), res->material};
 }
 
 void pragma::LuaCore::base_surface_component::register_class(luabind::module_ &mod)
@@ -2465,9 +2465,9 @@ void pragma::LuaCore::base_surface_component::register_class(luabind::module_ &m
 		  auto r = c.CalcLineSurfaceIntersection(lineOrigin, lineDir, &t);
 		  return std::pair<bool, double> {r, t};
 	  });
-	def.def("GetMesh", static_cast<pragma::ModelSubMesh *(pragma::BaseSurfaceComponent::*)()>(&pragma::BaseSurfaceComponent::GetMesh), luabind::shared_from_this_policy<0> {});
-	def.def("FindAndAssignSurfaceMesh", +[](pragma::BaseSurfaceComponent &c, luabind::object oFilter) -> std::optional<std::tuple<std::shared_ptr<ModelMesh>, std::shared_ptr<pragma::ModelSubMesh>, msys::Material *>> { return FindAndAssignSurfaceMesh(c, oFilter); });
-	def.def("FindAndAssignSurfaceMesh", +[](pragma::BaseSurfaceComponent &c) -> std::optional<std::tuple<std::shared_ptr<ModelMesh>, std::shared_ptr<pragma::ModelSubMesh>, msys::Material *>> { return FindAndAssignSurfaceMesh(c, Lua::nil); });
+	def.def("GetMesh", static_cast<pragma::geometry::ModelSubMesh *(pragma::BaseSurfaceComponent::*)()>(&pragma::BaseSurfaceComponent::GetMesh), luabind::shared_from_this_policy<0> {});
+	def.def("FindAndAssignSurfaceMesh", +[](pragma::BaseSurfaceComponent &c, luabind::object oFilter) -> std::optional<std::tuple<std::shared_ptr<pragma::geometry::ModelMesh>, std::shared_ptr<pragma::geometry::ModelSubMesh>, msys::Material *>> { return FindAndAssignSurfaceMesh(c, oFilter); });
+	def.def("FindAndAssignSurfaceMesh", +[](pragma::BaseSurfaceComponent &c) -> std::optional<std::tuple<std::shared_ptr<pragma::geometry::ModelMesh>, std::shared_ptr<pragma::geometry::ModelSubMesh>, msys::Material *>> { return FindAndAssignSurfaceMesh(c, Lua::nil); });
 	def.add_static_constant("EVENT_ON_SURFACE_PLANE_CHANGED", pragma::baseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED);
 }
 
@@ -3361,9 +3361,9 @@ void pragma::LuaCore::base_model_component::register_class(luabind::module_ &mod
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseModelComponent>("BaseModelComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
-	def.def("SetModel", static_cast<void (*)(lua::State *, pragma::BaseModelComponent &)>([](lua::State *l, pragma::BaseModelComponent &hModel) { hModel.SetModel(std::shared_ptr<pragma::Model> {nullptr}); }));
+	def.def("SetModel", static_cast<void (*)(lua::State *, pragma::BaseModelComponent &)>([](lua::State *l, pragma::BaseModelComponent &hModel) { hModel.SetModel(std::shared_ptr<pragma::asset::Model> {nullptr}); }));
 	def.def("SetModel", static_cast<void (pragma::BaseModelComponent::*)(const std::string &)>(&pragma::BaseModelComponent::SetModel));
-	def.def("SetModel", static_cast<void (pragma::BaseModelComponent::*)(const std::shared_ptr<pragma::Model> &)>(&pragma::BaseModelComponent::SetModel));
+	def.def("SetModel", static_cast<void (pragma::BaseModelComponent::*)(const std::shared_ptr<pragma::asset::Model> &)>(&pragma::BaseModelComponent::SetModel));
 	def.def("SetSkin", &pragma::BaseModelComponent::SetSkin);
 	def.def("GetSkin", &pragma::BaseModelComponent::GetSkin);
 	def.def("GetSkinProperty", &pragma::BaseModelComponent::GetSkinProperty);
@@ -3373,7 +3373,7 @@ void pragma::LuaCore::base_model_component::register_class(luabind::module_ &mod
 			return;
 		hModel.SetSkin(umath::random(0, umath::max(mdl->GetTextureGroups().size(), static_cast<size_t>(1)) - 1));
 	}));
-	def.def("GetModel", static_cast<luabind::optional<pragma::Model> (*)(lua::State *, pragma::BaseModelComponent &)>([](lua::State *l, pragma::BaseModelComponent &hModel) -> luabind::optional<pragma::Model> {
+	def.def("GetModel", static_cast<luabind::optional<pragma::asset::Model> (*)(lua::State *, pragma::BaseModelComponent &)>([](lua::State *l, pragma::BaseModelComponent &hModel) -> luabind::optional<pragma::asset::Model> {
 		auto mdl = hModel.GetModel();
 		if(mdl == nullptr)
 			return Lua::nil;

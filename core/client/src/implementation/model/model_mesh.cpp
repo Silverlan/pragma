@@ -16,10 +16,10 @@ static constexpr uint64_t GLOBAL_MESH_VERTEX_WEIGHT_BUFFER_SIZE = MEGABYTE * 32;
 static constexpr uint64_t GLOBAL_MESH_ALPHA_BUFFER_SIZE = MEGABYTE * 16;         // 131'072 instances per MiB
 static constexpr uint64_t GLOBAL_MESH_INDEX_BUFFER_SIZE = MEGABYTE * 32;         // 524'288 instances per MiB
 
-CModelMesh::CModelMesh() : ModelMesh() {}
-std::shared_ptr<ModelMesh> CModelMesh::Copy() const { return ::util::make_shared<CModelMesh>(*this); }
+CModelMesh::CModelMesh() : pragma::geometry::ModelMesh() {}
+std::shared_ptr<pragma::geometry::ModelMesh> CModelMesh::Copy() const { return ::util::make_shared<CModelMesh>(*this); }
 
-void CModelMesh::AddSubMesh(const std::shared_ptr<pragma::ModelSubMesh> &subMesh)
+void CModelMesh::AddSubMesh(const std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh)
 {
 	assert(typeid(*subMesh.get()) == typeid(CModelSubMesh));
 	AddSubMesh(std::dynamic_pointer_cast<CModelSubMesh>(subMesh));
@@ -34,17 +34,17 @@ static std::shared_ptr<prosper::IDynamicResizableBuffer> s_vertexBuffer = nullpt
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_vertexWeightBuffer = nullptr;
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_alphaBuffer = nullptr;
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_indexBuffer = nullptr;
-CModelSubMesh::CModelSubMesh() : pragma::ModelSubMesh(), m_sceneMesh(::util::make_shared<pragma::SceneMesh>()) {}
+CModelSubMesh::CModelSubMesh() : pragma::geometry::ModelSubMesh(), m_sceneMesh(::util::make_shared<pragma::SceneMesh>()) {}
 
-CModelSubMesh::CModelSubMesh(const CModelSubMesh &other) : pragma::ModelSubMesh(other), m_sceneMesh(::util::make_shared<pragma::SceneMesh>(*other.m_sceneMesh)) {}
+CModelSubMesh::CModelSubMesh(const CModelSubMesh &other) : pragma::geometry::ModelSubMesh(other), m_sceneMesh(::util::make_shared<pragma::SceneMesh>(*other.m_sceneMesh)) {}
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalVertexBuffer() { return s_vertexBuffer; }
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalVertexWeightBuffer() { return s_vertexWeightBuffer; }
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalAlphaBuffer() { return s_alphaBuffer; }
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalIndexBuffer() { return s_indexBuffer; }
-std::shared_ptr<pragma::ModelSubMesh> CModelSubMesh::Copy(bool fullCopy) const
+std::shared_ptr<pragma::geometry::ModelSubMesh> CModelSubMesh::Copy(bool fullCopy) const
 {
 	auto cpy = ::util::make_shared<CModelSubMesh>(*this);
-	pragma::ModelSubMesh::Copy(*cpy, fullCopy);
+	pragma::geometry::ModelSubMesh::Copy(*cpy, fullCopy);
 	return cpy;
 }
 
@@ -137,23 +137,23 @@ void CModelSubMesh::UpdateVertexBuffer()
 
 void CModelSubMesh::Centralize(const Vector3 &origin)
 {
-	pragma::ModelSubMesh::Centralize(origin);
+	pragma::geometry::ModelSubMesh::Centralize(origin);
 	UpdateVertexBuffer();
 }
 
-void CModelSubMesh::Update(pragma::model::ModelUpdateFlags flags)
+void CModelSubMesh::Update(pragma::asset::ModelUpdateFlags flags)
 {
-	pragma::ModelSubMesh::Update(flags);
+	pragma::geometry::ModelSubMesh::Update(flags);
 	auto bHasAlphas = (GetAlphaCount() > 0) ? true : false;
 	auto bAnimated = !m_vertexWeights->empty() ? true : false;
 
-	if((flags & pragma::model::ModelUpdateFlags::CalculateTangents) != pragma::model::ModelUpdateFlags::None)
+	if((flags & pragma::asset::ModelUpdateFlags::CalculateTangents) != pragma::asset::ModelUpdateFlags::None)
 		ComputeTangentBasis();
 
 	//auto &renderState = pragma::get_cengine()->GetRenderContext();
 	//auto &context = pragma::get_cengine()->GetRenderContext();
 
-	if((flags & pragma::model::ModelUpdateFlags::UpdateIndexBuffer) != pragma::model::ModelUpdateFlags::None) {
+	if((flags & pragma::asset::ModelUpdateFlags::UpdateIndexBuffer) != pragma::asset::ModelUpdateFlags::None) {
 		auto &indexData = GetIndexData();
 		auto &indexBuffer = m_sceneMesh->GetIndexBuffer();
 		auto newBuffer = true;
@@ -165,12 +165,12 @@ void CModelSubMesh::Update(pragma::model::ModelUpdateFlags flags)
 			}
 		}
 		if(newBuffer) {
-			m_sceneMesh->SetIndexBuffer(nullptr, pragma::model::IndexType::UInt16); // Clear the old index buffer
+			m_sceneMesh->SetIndexBuffer(nullptr, pragma::geometry::IndexType::UInt16); // Clear the old index buffer
 			auto indexBuffer = s_indexBuffer->AllocateBuffer(indexData.size(), size_of_index(GetIndexType()), indexData.data());
 			m_sceneMesh->SetIndexBuffer(std::move(indexBuffer), GetIndexType());
 		}
 	}
-	if((flags & pragma::model::ModelUpdateFlags::UpdateVertexBuffer) != pragma::model::ModelUpdateFlags::None)
+	if((flags & pragma::asset::ModelUpdateFlags::UpdateVertexBuffer) != pragma::asset::ModelUpdateFlags::None)
 		UpdateVertexBuffer();
 
 	// Alpha buffer!
@@ -179,7 +179,7 @@ void CModelSubMesh::Update(pragma::model::ModelUpdateFlags flags)
 	//m_biTangents.resize(m_vertices.size());
 	//assert(m_biTangents.size() == m_vertices.size());
 
-	if(bAnimated == true && (flags & pragma::model::ModelUpdateFlags::UpdateWeightBuffer) != pragma::model::ModelUpdateFlags::None) {
+	if(bAnimated == true && (flags & pragma::asset::ModelUpdateFlags::UpdateWeightBuffer) != pragma::asset::ModelUpdateFlags::None) {
 		if(m_extendedVertexWeights->empty()) {
 			auto weightBuffer = s_vertexWeightBuffer->AllocateBuffer(m_vertexWeights->size() * sizeof(VertexWeightType), m_vertexWeights->data());
 			m_sceneMesh->SetVertexWeightBuffer(std::move(weightBuffer));
@@ -196,7 +196,7 @@ void CModelSubMesh::Update(pragma::model::ModelUpdateFlags flags)
 		}
 	}
 
-	if(bHasAlphas == true && (flags & pragma::model::ModelUpdateFlags::UpdateAlphaBuffer) != pragma::model::ModelUpdateFlags::None) {
+	if(bHasAlphas == true && (flags & pragma::asset::ModelUpdateFlags::UpdateAlphaBuffer) != pragma::asset::ModelUpdateFlags::None) {
 		auto alphaBuffer = s_alphaBuffer->AllocateBuffer(m_alphas->size() * sizeof(AlphaType), m_alphas->data());
 		m_sceneMesh->SetAlphaBuffer(std::move(alphaBuffer));
 	}

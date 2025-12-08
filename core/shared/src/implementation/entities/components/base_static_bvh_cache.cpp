@@ -45,7 +45,7 @@ bool BaseStaticBvhCacheComponent::IntersectionTest(const Vector3 &origin, const 
 	return BaseBvhComponent::IntersectionTest(origin, dir, minDist, maxDist, outHitInfo);
 }
 
-void BaseStaticBvhCacheComponent::Build(std::vector<std::shared_ptr<pragma::ModelSubMesh>> &&meshes, std::vector<pragma::ecs::BaseEntity *> &&meshToEntity, std::vector<umath::ScaledTransform> &&meshPoses)
+void BaseStaticBvhCacheComponent::Build(std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &&meshes, std::vector<pragma::ecs::BaseEntity *> &&meshToEntity, std::vector<umath::ScaledTransform> &&meshPoses)
 {
 	LOGGER.info("Building new static BVH cache...");
 	m_bvhInitialized = true;

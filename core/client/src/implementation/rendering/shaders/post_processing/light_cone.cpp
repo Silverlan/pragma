@@ -75,7 +75,7 @@ bool ShaderPPLightCone::RecordDraw(prosper::ShaderBindState &bindState, const CM
 	auto &indexBuf = vkMesh->GetIndexBuffer();
 	if(!vertexBuf || !indexBuf)
 		return false;
-	auto indexType = (mesh.GetIndexType() == pragma::model::IndexType::UInt16) ? prosper::IndexType::UInt16 : prosper::IndexType::UInt32;
+	auto indexType = (mesh.GetIndexType() == pragma::geometry::IndexType::UInt16) ? prosper::IndexType::UInt16 : prosper::IndexType::UInt32;
 	return RecordBindVertexBuffer(bindState, *vertexBuf) && RecordBindIndexBuffer(bindState, *indexBuf, indexType) && RecordBindDescriptorSets(bindState, {&descSetDepth}, DESCRIPTOR_SET_DEPTH_BUFFER.setIndex)
 	  && RecordBindDescriptorSet(bindState, descSetTex, DESCRIPTOR_SET_TEXTURE.setIndex) && RecordBindDescriptorSet(bindState, descSetInstance, DESCRIPTOR_SET_INSTANCE.setIndex) && RecordBindDescriptorSet(bindState, descSetCam, DESCRIPTOR_SET_SCENE.setIndex)
 	  && ShaderGraphics::RecordDrawIndexed(bindState, mesh.GetIndexCount());

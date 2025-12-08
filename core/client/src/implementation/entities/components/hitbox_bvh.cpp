@@ -36,7 +36,7 @@ pragma::bvh::ModelHitboxBvhCache *pragma::bvh::HitboxBvhCache::GetModelCache(con
 	auto it = m_modelBvhCache.find(normName);
 	return (it != m_modelBvhCache.end() && it->second->complete) ? it->second.get() : nullptr;
 }
-void pragma::bvh::HitboxBvhCache::PrepareModel(pragma::Model &mdl)
+void pragma::bvh::HitboxBvhCache::PrepareModel(pragma::asset::Model &mdl)
 {
 	auto t = std::chrono::steady_clock::now();
 	auto savingRequired = false;
@@ -50,7 +50,7 @@ void pragma::bvh::HitboxBvhCache::PrepareModel(pragma::Model &mdl)
 			LOGGER.warn("Failed to save model '{}': {}", mdl.GetName(), err);
 	}
 }
-void pragma::bvh::HitboxBvhCache::InitializeModelHitboxBvhCache(pragma::Model &mdl, const HitboxMeshBvhBuildTask &buildTask, ModelHitboxBvhCache &mdlHbBvhCache)
+void pragma::bvh::HitboxBvhCache::InitializeModelHitboxBvhCache(pragma::asset::Model &mdl, const HitboxMeshBvhBuildTask &buildTask, ModelHitboxBvhCache &mdlHbBvhCache)
 {
 	auto &skeleton = mdl.GetSkeleton();
 	auto &boneCaches = mdlHbBvhCache.boneCache;
@@ -73,7 +73,7 @@ void pragma::bvh::HitboxBvhCache::InitializeModelHitboxBvhCache(pragma::Model &m
 		}
 	}
 }
-std::shared_future<void> pragma::bvh::HitboxBvhCache::GenerateModelCache(const ModelName &mdlName, pragma::Model &mdl)
+std::shared_future<void> pragma::bvh::HitboxBvhCache::GenerateModelCache(const ModelName &mdlName, pragma::asset::Model &mdl)
 {
 	auto normName = pragma::asset::get_normalized_path(mdlName, pragma::asset::Type::Model);
 	auto it = m_modelBvhCache.find(normName);
@@ -278,7 +278,7 @@ void CHitboxBvhComponent::InitializeHitboxMeshBvhs()
 	if(numLods == 0)
 		return;
 	auto &lastLod = mdl->GetLODs().back();
-	std::vector<std::shared_ptr<pragma::ModelSubMesh>> lodMeshes;
+	std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> lodMeshes;
 	mdl->GetBodyGroupMeshes(mdlC->GetBodyGroups(), lastLod.lod, lodMeshes);
 
 	std::unordered_set<std::string> renderMeshUuids;

@@ -56,7 +56,7 @@ int Lua::import::import_wad(lua::State *l)
 int Lua::import::import_wrci(lua::State *l)
 {
 	auto &f = Lua::Check<LFile>(l, 1);
-	auto &mdl = Lua::Check<pragma::Model>(l, 2);
+	auto &mdl = Lua::Check<pragma::asset::Model>(l, 2);
 	std::array<uint8_t, 4> header;
 	f.Read(header.data(), header.size() * sizeof(header.front()));
 	if(header.at(0) != 'W' || header.at(1) != 'R' || header.at(2) != 'C' || header.at(3) != 'I') {
@@ -109,7 +109,7 @@ int Lua::import::import_wrci(lua::State *l)
 			tris.push_back(idx2);
 		}
 		mdl.AddCollisionMesh(colMesh);
-		colMesh->Update(pragma::model::ModelUpdateFlags::All);
+		colMesh->Update(pragma::asset::ModelUpdateFlags::All);
 	}
 	mdl.Update();
 	Lua::PushBool(l, true);
@@ -118,7 +118,7 @@ int Lua::import::import_wrci(lua::State *l)
 int Lua::import::import_wrmi(lua::State *l)
 {
 	auto &f = Lua::Check<LFile>(l, 1);
-	auto &mdl = Lua::Check<pragma::Model>(l, 2);
+	auto &mdl = Lua::Check<pragma::asset::Model>(l, 2);
 	std::array<uint8_t, 4> header;
 	f.Read(header.data(), header.size() * sizeof(header.front()));
 	if(header.at(0) != 'W' || header.at(1) != 'R' || header.at(2) != 'M' || header.at(3) != 'I') {
@@ -175,7 +175,7 @@ int Lua::import::import_wrmi(lua::State *l)
 		fReadChildBones(bone);
 	}
 	auto *nw = pragma::Engine::Get()->GetNetworkState(l);
-	auto mesh = std::shared_ptr<::ModelMesh>(nw->CreateMesh());
+	auto mesh = std::shared_ptr<pragma::geometry::ModelMesh>(nw->CreateMesh());
 	meshGroup->AddMesh(mesh);
 	auto numMeshes = f.Read<uint32_t>();
 	auto &meta = mdl.GetMetaInfo();
@@ -219,7 +219,7 @@ int Lua::import::import_wrmi(lua::State *l)
 
 		auto numMaps = f.Read<uint32_t>();
 		for(auto j = decltype(numMaps) {0}; j < numMaps; ++j) {
-			auto subMesh = std::shared_ptr<pragma::ModelSubMesh>(nw->CreateSubMesh());
+			auto subMesh = std::shared_ptr<pragma::geometry::ModelSubMesh>(nw->CreateSubMesh());
 			auto &meshVerts = subMesh->GetVertices();
 			auto &meshWeights = subMesh->GetVertexWeights();
 			auto map = f.ReadString();
@@ -258,7 +258,7 @@ int Lua::import::import_wrmi(lua::State *l)
 			mesh->AddSubMesh(subMesh);
 		}
 	}
-	mdl.Update(pragma::model::ModelUpdateFlags::All);
+	mdl.Update(pragma::asset::ModelUpdateFlags::All);
 	mdl.GenerateBindPoseMatrices();
 	Lua::PushBool(l, true);
 	return 1;
@@ -278,7 +278,7 @@ int Lua::import::import_smd(lua::State *l)
 		Lua::PushBool(l, false);
 		return 1;
 	}
-	auto &mdl = Lua::Check<pragma::Model>(l, 2);
+	auto &mdl = Lua::Check<pragma::asset::Model>(l, 2);
 	std::string animName = Lua::CheckString(l, 3);
 	auto isCollisionMesh = false;
 	if(Lua::IsSet(l, 4))
@@ -329,7 +329,7 @@ int Lua::import::import_model_asset(lua::State *l)
 	for(auto &subMesh : subMeshes)
 	{
 		Lua::PushInt(l,idx++);
-		Lua::Push<std::shared_ptr<pragma::ModelSubMesh>>(l,subMesh);
+		Lua::Push<std::shared_ptr<pragma::geometry::ModelSubMesh>>(l,subMesh);
 		Lua::SetTableValue(l,t);
 	}
 

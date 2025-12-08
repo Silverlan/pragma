@@ -26,8 +26,8 @@ uint32_t pragma::physics::PhysObjCreateInfo::AddShape(pragma::physics::IShape &s
 	return 1;
 }
 void pragma::physics::PhysObjCreateInfo::SetModelMeshBoneMapping(MeshIndex modelMeshIndex, BoneId boneIndex) { m_modelMeshIndexToShapeIndex[modelMeshIndex] = boneIndex; }
-void pragma::physics::PhysObjCreateInfo::SetModel(pragma::Model &model) { m_model = model.GetHandle(); }
-pragma::Model *pragma::physics::PhysObjCreateInfo::GetModel() const { return m_model.get(); }
+void pragma::physics::PhysObjCreateInfo::SetModel(pragma::asset::Model &model) { m_model = model.GetHandle(); }
+pragma::asset::Model *pragma::physics::PhysObjCreateInfo::GetModel() const { return m_model.get(); }
 const std::unordered_map<pragma::physics::PhysObjCreateInfo::BoneId, std::vector<pragma::physics::PhysObjCreateInfo::ShapeInfo>> &pragma::physics::PhysObjCreateInfo::GetShapes() const { return m_shapes; }
 const std::unordered_map<pragma::physics::PhysObjCreateInfo::MeshIndex, pragma::physics::PhysObjCreateInfo::BoneId> &pragma::physics::PhysObjCreateInfo::GetModelMeshBoneMappings() const { return m_modelMeshIndexToShapeIndex; }
 
@@ -635,7 +635,7 @@ pragma::physics::PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physic
 			auto mdlComponent = GetEntity().GetModelComponent();
 			auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 			if(hMdl != nullptr) {
-				pragma::Model *mdl = hMdl.get();
+				pragma::asset::Model *mdl = hMdl.get();
 				auto &meshes = mdl->GetCollisionMeshes();
 				if(!meshes.empty())
 					return InitializeModelPhysics(flags).get();

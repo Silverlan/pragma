@@ -9,14 +9,16 @@ export module pragma.shared:entities.components.base_soft_body;
 export import :entities.components.base;
 
 export {
-	class ModelMesh;
 	namespace pragma {
+		namespace geometry {
+			class ModelMesh;
+		}
 		class DLLNETWORK BaseSoftBodyComponent : public BaseEntityComponent {
 		  public:
 			// Soft-body physics
 			struct SoftBodyData {
 				// Copies of the model's meshes
-				std::vector<std::shared_ptr<ModelMesh>> meshes = {};
+				std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> meshes = {};
 			};
 			using BaseEntityComponent::BaseEntityComponent;
 			virtual void Initialize() override;

@@ -29,7 +29,7 @@ luabind::object Lua::game::Server::load_model(lua::State *l, const std::string &
 }
 int Lua::game::Server::create_model(lua::State *l)
 {
-	std::shared_ptr<pragma::Model> mdl = nullptr;
+	std::shared_ptr<pragma::asset::Model> mdl = nullptr;
 	if(!Lua::IsSet(l, 1))
 		mdl = pragma::SGame::Get()->CreateModel();
 	else {

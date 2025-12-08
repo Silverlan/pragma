@@ -131,7 +131,7 @@ void CLightComponent::DestroyShadowBuffer(bool freeBuffer)
 
 bool CLightComponent::ShouldRender() { return true; }
 
-bool CLightComponent::ShouldPass(const pragma::Model &mdl, const CModelSubMesh &mesh)
+bool CLightComponent::ShouldPass(const pragma::asset::Model &mdl, const CModelSubMesh &mesh)
 {
 	auto &materials = mdl.GetMaterials();
 	auto texId = mdl.GetMaterialIndex(mesh);
@@ -754,7 +754,7 @@ void CEShouldPassEntity::PushArguments(lua::State *l) {}
 
 /////////////////
 
-CEShouldPassMesh::CEShouldPassMesh(const pragma::Model &model, const CModelSubMesh &mesh) : model {model}, mesh {mesh} {}
+CEShouldPassMesh::CEShouldPassMesh(const pragma::asset::Model &model, const CModelSubMesh &mesh) : model {model}, mesh {mesh} {}
 void CEShouldPassMesh::PushArguments(lua::State *l) {}
 
 /////////////////

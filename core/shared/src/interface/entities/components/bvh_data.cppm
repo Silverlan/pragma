@@ -22,7 +22,7 @@ export namespace pragma::bvh {
 
 	struct DLLNETWORK MeshRange {
 		pragma::ecs::BaseEntity *entity = nullptr;
-		std::shared_ptr<pragma::ModelSubMesh> mesh;
+		std::shared_ptr<pragma::geometry::ModelSubMesh> mesh;
 		size_t start;
 		size_t end;
 		bool operator<(const MeshRange &other) const { return start < other.start; }
@@ -30,9 +30,9 @@ export namespace pragma::bvh {
 
 	struct DLLNETWORK MeshIntersectionRange {
 		MeshIntersectionRange(const MeshRange &range) : entity {range.entity}, mesh {range.mesh.get()}, start {range.start}, end {range.end} {}
-		MeshIntersectionRange(pragma::ModelSubMesh &mesh, size_t start, size_t end) : mesh {&mesh}, start {start}, end {end} {}
+		MeshIntersectionRange(pragma::geometry::ModelSubMesh &mesh, size_t start, size_t end) : mesh {&mesh}, start {start}, end {end} {}
 		pragma::ecs::BaseEntity *entity = nullptr;
-		pragma::ModelSubMesh *mesh = nullptr;
+		pragma::geometry::ModelSubMesh *mesh = nullptr;
 		size_t start;
 		size_t end;
 		bool operator<(const MeshRange &other) const { return start < other.start; }
@@ -106,9 +106,9 @@ export namespace pragma::bvh {
 	DLLNETWORK Ray get_ray(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist);
 	DLLNETWORK const ::pragma::bvh::Vec &to_bvh_vector(const Vector3 &v);
 	DLLNETWORK const Vector3 &from_bvh_vector(const ::pragma::bvh::Vec &v);
-	DLLNETWORK bool is_mesh_bvh_compatible(const pragma::ModelSubMesh &mesh);
+	DLLNETWORK bool is_mesh_bvh_compatible(const pragma::geometry::ModelSubMesh &mesh);
 
-	DLLNETWORK std::unordered_map<std::string, std::shared_ptr<pragma::ModelSubMesh>> get_uuid_mesh_map(pragma::Model &mdl);
+	DLLNETWORK std::unordered_map<std::string, std::shared_ptr<pragma::geometry::ModelSubMesh>> get_uuid_mesh_map(pragma::asset::Model &mdl);
 
 	namespace debug {
 		Color DEFAULT_NODE_COLOR = Color {0, 255, 0, 64};

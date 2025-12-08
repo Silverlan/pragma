@@ -17,13 +17,13 @@ export namespace luabind {
 
 	template<typename T>
 	    requires(std::is_same_v<util::base_type<T>, CModel>)
-	struct default_converter<T> : cast_converter<T, copy_qualifiers_t<T, pragma::Model>> {};
+	struct default_converter<T> : cast_converter<T, copy_qualifiers_t<T, pragma::asset::Model>> {};
 
 	template<typename T>
 	    requires(std::is_same_v<util::base_type<T>, CModelMesh>)
-	struct default_converter<T> : cast_converter<T, copy_qualifiers_t<T, ModelMesh>> {};
+	struct default_converter<T> : cast_converter<T, copy_qualifiers_t<T, pragma::geometry::ModelMesh>> {};
 
 	template<typename T>
 	    requires(std::is_same_v<util::base_type<T>, CModelSubMesh>)
-	struct default_converter<T> : cast_converter<T, copy_qualifiers_t<T, pragma::ModelSubMesh>> {};
+	struct default_converter<T> : cast_converter<T, copy_qualifiers_t<T, pragma::geometry::ModelSubMesh>> {};
 };

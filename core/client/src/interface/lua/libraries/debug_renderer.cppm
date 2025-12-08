@@ -19,7 +19,7 @@ export namespace Lua {
 			DLLCLIENT std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> DrawLine(const Vector3 &start, const Vector3 &end);
 			DLLCLIENT std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> DrawBox(const Vector3 &start, const Vector3 &end, const pragma::debug::DebugRenderInfo &renderInfo);
 			DLLCLIENT std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> DrawMeshes(const std::vector<Vector3> &verts, const pragma::debug::DebugRenderInfo &renderInfo);
-			DLLCLIENT std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> DrawMesh(const pragma::ModelSubMesh &mesh, const pragma::debug::DebugRenderInfo &renderInfo);
+			DLLCLIENT std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> DrawMesh(const pragma::geometry::ModelSubMesh &mesh, const pragma::debug::DebugRenderInfo &renderInfo);
 			DLLCLIENT std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> DrawSphere(float radius, const pragma::debug::DebugRenderInfo &renderInfo, uint32_t recursionLevel = 1);
 			DLLCLIENT std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> DrawTruncatedCone(float startRadius, const Vector3 &dir, float dist, float endRadius, const pragma::debug::DebugRenderInfo &renderInfo, uint32_t segmentCount = 12);
 			DLLCLIENT std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> DrawCylinder(float radius, const Vector3 &dir, float dist, const pragma::debug::DebugRenderInfo &renderInfo, uint32_t segmentCount = 12);

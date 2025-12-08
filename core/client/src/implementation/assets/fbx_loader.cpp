@@ -260,7 +260,7 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 
 std::optional<std::string> FbxImporter::Finalize(std::string &outErr)
 {
-	m_model->Update(pragma::model::ModelUpdateFlags::All);
+	m_model->Update(pragma::asset::ModelUpdateFlags::All);
 	std::string mdlPath = m_mdlName;
 	auto fullMdlPath = util::FilePath(::util::CONVERT_PATH, pragma::asset::get_asset_root_directory(pragma::asset::Type::Model), m_outputPath, mdlPath);
 	if(!m_model->Save(*pragma::get_cgame(), fullMdlPath.GetString(), outErr)) {
@@ -444,7 +444,7 @@ bool FbxImporter::LoadMeshes(std::string &outErr)
 					auto &operations = flex.GetOperations();
 					operations.push_back({});
 					auto &op = flex.GetOperations().back();
-					op.type = Flex::Operation::Type::Fetch;
+					op.type = pragma::animation::Flex::Operation::Type::Fetch;
 					op.d.index = fcId;
 				}
 				uint32_t flexId;

@@ -1518,45 +1518,45 @@ void pragma::Game::RegisterLuaLibraries()
 	  luabind::def("line_with_obb", static_cast<luabind::object (*)(lua::State *, const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &)>([](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, const Vector3 &min, const Vector3 &max) {
 		  return Lua::intersect::line_obb(l, rayStart, rayDir, min, max);
 	  })),
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::ModelSubMesh &, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
+	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::geometry::ModelSubMesh &, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
 	  luabind::def("line_with_mesh",
-	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::ModelSubMesh &, luabind::object &, luabind::object &, bool)>(
-	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1, precise); }),
+	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::geometry::ModelSubMesh &, luabind::object &, luabind::object &, bool)>(
+	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::geometry::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1, precise); }),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
 	  luabind::def("line_with_mesh",
-	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::ModelSubMesh &, luabind::object &, luabind::object &)>(
-	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1); }),
+	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::geometry::ModelSubMesh &, luabind::object &, luabind::object &)>(
+	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::geometry::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1); }),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, ModelMesh &, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
+	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::geometry::ModelMesh &, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
 	  luabind::def("line_with_mesh",
-	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, ModelMesh &, luabind::object &, luabind::object &, bool)>(
-	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, ModelMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1, precise); }),
+	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::geometry::ModelMesh &, luabind::object &, luabind::object &, bool)>(
+	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::geometry::ModelMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1, precise); }),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, ModelMesh &, luabind::object &, luabind::object &)>([](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, ModelMesh &mesh, luabind::object &r0, luabind::object &r1) {
+	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::geometry::ModelMesh &, luabind::object &, luabind::object &)>([](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::geometry::ModelMesh &mesh, luabind::object &r0, luabind::object &r1) {
 		  return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1);
 	  }),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::Model &, uint32_t, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
+	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::asset::Model &, uint32_t, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
 	  luabind::def("line_with_mesh",
-	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::Model &, uint32_t, luabind::object &, luabind::object &, bool)>(
-	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, lod, r0, r1, precise); }),
+	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::asset::Model &, uint32_t, luabind::object &, luabind::object &, bool)>(
+	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::asset::Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, lod, r0, r1, precise); }),
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
 	  luabind::def("line_with_mesh",
-	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::Model &, uint32_t, luabind::object &, luabind::object &)>(
-	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, lod, r0, r1); }),
+	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::asset::Model &, uint32_t, luabind::object &, luabind::object &)>(
+	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::asset::Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, lod, r0, r1); }),
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::Model &, luabind::table<>, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
-	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
-	  luabind::def("line_with_mesh",
-	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::Model &, luabind::table<>, luabind::object &, luabind::object &, bool)>(
-	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, luabind::table<> bodyGroups, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, bodyGroups, r0, r1, precise); }),
+	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::asset::Model &, luabind::table<>, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
 	  luabind::def("line_with_mesh",
-	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::Model &, luabind::table<>, luabind::object &, luabind::object &)>(
-	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, luabind::table<> bodyGroups, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, bodyGroups, r0, r1); }),
+	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::asset::Model &, luabind::table<>, luabind::object &, luabind::object &, bool)>(
+	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::asset::Model &mdl, luabind::table<> bodyGroups, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, bodyGroups, r0, r1, precise); }),
+	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
+	  luabind::def("line_with_mesh",
+	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::asset::Model &, luabind::table<>, luabind::object &, luabind::object &)>(
+	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::asset::Model &mdl, luabind::table<> bodyGroups, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, bodyGroups, r0, r1); }),
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
 	  luabind::def("line_with_plane", Lua::intersect::line_plane),
 	  luabind::def("point_in_aabb", static_cast<bool (*)(const Vector3 &, const Vector3 &, const Vector3 &)>([](const Vector3 &vec, const Vector3 &min, const Vector3 &max) { return umath::intersection::vector_in_bounds(vec, min, max); })),

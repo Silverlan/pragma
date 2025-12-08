@@ -12,7 +12,9 @@ export import :model.animation.enums;
 
 export {
 	namespace pragma {
-		class Model;
+		namespace asset {
+			class Model;
+		}
 		namespace baseFlexComponent {
 			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_FLEX_CONTROLLER_CHANGED;
 		}
@@ -51,7 +53,7 @@ export {
 
 			virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 		  protected:
-			void OnModelChanged(const std::shared_ptr<pragma::Model> &model);
+			void OnModelChanged(const std::shared_ptr<pragma::asset::Model> &model);
 			virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
 			BaseFlexComponent(pragma::ecs::BaseEntity &ent);
 			float m_flexControllerScale = 1.f;

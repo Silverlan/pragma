@@ -35,7 +35,7 @@ bool ShaderSkybox::GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipeline
 	if(indexBuffer) {
 		outIndexBufferInfo = prosper::IndexBufferInfo {};
 		outIndexBufferInfo->buffer = indexBuffer;
-		outIndexBufferInfo->indexType = (mesh.GetIndexType() == pragma::model::IndexType::UInt16) ? prosper::IndexType::UInt16 : prosper::IndexType::UInt32;
+		outIndexBufferInfo->indexType = (mesh.GetIndexType() == pragma::geometry::IndexType::UInt16) ? prosper::IndexType::UInt16 : prosper::IndexType::UInt32;
 		outIndexBufferInfo->offset = 0;
 	}
 

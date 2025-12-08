@@ -320,8 +320,8 @@ void Lua::Entity::register_class(luabind::class_<::pragma::ecs::BaseEntity> &cla
 	classDef.def("GetName", &::pragma::ecs::BaseEntity::GetName);
 	classDef.def("SetName", &::pragma::ecs::BaseEntity::SetName);
 	classDef.def("SetModel", static_cast<void (::pragma::ecs::BaseEntity::*)(const std::string &)>(&::pragma::ecs::BaseEntity::SetModel));
-	classDef.def("SetModel", static_cast<void (::pragma::ecs::BaseEntity::*)(const std::shared_ptr<pragma::Model> &)>(&::pragma::ecs::BaseEntity::SetModel));
-	classDef.def("ClearModel", static_cast<void (*)(::pragma::ecs::BaseEntity &)>([](::pragma::ecs::BaseEntity &ent) { ent.SetModel(std::shared_ptr<pragma::Model> {nullptr}); }));
+	classDef.def("SetModel", static_cast<void (::pragma::ecs::BaseEntity::*)(const std::shared_ptr<pragma::asset::Model> &)>(&::pragma::ecs::BaseEntity::SetModel));
+	classDef.def("ClearModel", static_cast<void (*)(::pragma::ecs::BaseEntity &)>([](::pragma::ecs::BaseEntity &ent) { ent.SetModel(std::shared_ptr<pragma::asset::Model> {nullptr}); }));
 	classDef.def("GetModel", &::pragma::ecs::BaseEntity::GetModel);
 	classDef.def("GetModelName", &::pragma::ecs::BaseEntity::GetModelName);
 	classDef.def("GetAttachmentPose", &::pragma::ecs::BaseEntity::GetAttachmentPose);

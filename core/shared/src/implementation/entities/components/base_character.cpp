@@ -223,7 +223,7 @@ void BaseCharacterComponent::SetViewOrientation(const Quat &orientation)
 		float pitchDelta = umath::get_angle_difference(angView.p, angCur.p);
 		if(m_pitchController != -1)
 			animComponent->SetBlendController(m_pitchController, pitchDelta);
-		BlendController *yaw = hMdl->GetBlendController(m_yawController);
+		auto *yaw = hMdl->GetBlendController(m_yawController);
 		if(yaw != nullptr) {
 			float yawDelta = umath::get_angle_difference(angView.y, angCur.y);
 			if(yawDelta >= yaw->min && yawDelta <= yaw->max) {

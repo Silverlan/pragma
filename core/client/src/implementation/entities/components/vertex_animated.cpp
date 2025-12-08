@@ -252,7 +252,7 @@ bool CVertexAnimatedComponent::GetVertexAnimationBufferMeshOffset(CModelSubMesh 
 	animCount = it->second.second;
 	return true;
 }
-bool CVertexAnimatedComponent::GetLocalVertexPosition(const pragma::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 &pos, Vector3 *optOutNormal, float *optOutDelta) const
+bool CVertexAnimatedComponent::GetLocalVertexPosition(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 &pos, Vector3 *optOutNormal, float *optOutDelta) const
 {
 	pos = {};
 	if(optOutNormal)
@@ -269,7 +269,7 @@ bool CVertexAnimatedComponent::GetLocalVertexPosition(const pragma::ModelSubMesh
 		if(animSlot.mesh.expired() || animSlot.mesh.lock().get() != &subMesh || animSlot.vertexAnimationId >= vaAnims.size())
 			continue;
 		auto &vaAnim = vaAnims.at(animSlot.vertexAnimationId);
-		auto *ma = vaAnim->GetMeshAnimation(const_cast<pragma::ModelSubMesh &>(subMesh));
+		auto *ma = vaAnim->GetMeshAnimation(const_cast<pragma::geometry::ModelSubMesh &>(subMesh));
 		if(ma == nullptr)
 			continue;
 		auto *frame = ma->GetFrame(animSlot.frameId);
@@ -305,8 +305,8 @@ void CVertexAnimatedComponent::RegisterLuaBindings(lua::State *l, luabind::modul
 	}));
 	defCVertexAnimated.def("GetVertexAnimationBuffer", &pragma::CVertexAnimatedComponent::GetVertexAnimationBuffer);
 	defCVertexAnimated.def("GetVertexAnimationBufferMeshOffset",
-	  static_cast<Lua::opt<luabind::mult<uint32_t, uint32_t>> (*)(lua::State *, pragma::CVertexAnimatedComponent &, std::shared_ptr<pragma::ModelSubMesh> &)>(
-	    [](lua::State *l, pragma::CVertexAnimatedComponent &hAnim, std::shared_ptr<pragma::ModelSubMesh> &subMesh) -> Lua::opt<luabind::mult<uint32_t, uint32_t>> {
+	  static_cast<Lua::opt<luabind::mult<uint32_t, uint32_t>> (*)(lua::State *, pragma::CVertexAnimatedComponent &, std::shared_ptr<pragma::geometry::ModelSubMesh> &)>(
+	    [](lua::State *l, pragma::CVertexAnimatedComponent &hAnim, std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh) -> Lua::opt<luabind::mult<uint32_t, uint32_t>> {
 		    uint32_t offset;
 		    uint32_t animCount;
 		    auto b = hAnim.GetVertexAnimationBufferMeshOffset(static_cast<CModelSubMesh &>(*subMesh), offset, animCount);
@@ -315,8 +315,8 @@ void CVertexAnimatedComponent::RegisterLuaBindings(lua::State *l, luabind::modul
 		    return luabind::mult<uint32_t, uint32_t> {l, offset, animCount};
 	    }));
 	defCVertexAnimated.def("GetLocalVertexPosition",
-	  static_cast<Lua::opt<luabind::mult<Vector3, Vector3>> (*)(lua::State *, pragma::CVertexAnimatedComponent &, std::shared_ptr<pragma::ModelSubMesh> &, uint32_t)>(
-	    [](lua::State *l, pragma::CVertexAnimatedComponent &hAnim, std::shared_ptr<pragma::ModelSubMesh> &subMesh, uint32_t vertexId) -> Lua::opt<luabind::mult<Vector3, Vector3>> {
+	  static_cast<Lua::opt<luabind::mult<Vector3, Vector3>> (*)(lua::State *, pragma::CVertexAnimatedComponent &, std::shared_ptr<pragma::geometry::ModelSubMesh> &, uint32_t)>(
+	    [](lua::State *l, pragma::CVertexAnimatedComponent &hAnim, std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh, uint32_t vertexId) -> Lua::opt<luabind::mult<Vector3, Vector3>> {
 		    Vector3 pos, n;
 		    auto b = hAnim.GetLocalVertexPosition(static_cast<CModelSubMesh &>(*subMesh), vertexId, pos, &n);
 		    if(b == false)

@@ -22,7 +22,7 @@ export {
 
 	class DLLCLIENT CResourceWatcherManager : public ResourceWatcherManager {
 	  protected:
-		virtual void OnMaterialReloaded(const std::string &path, const std::unordered_set<pragma::Model *> &modelMap) override;
+		virtual void OnMaterialReloaded(const std::string &path, const std::unordered_set<pragma::asset::Model *> &modelMap) override;
 		virtual void OnResourceChanged(const util::Path &rootPath, const util::Path &path, const std::string &ext) override;
 		virtual void ReloadTexture(const std::string &path) override;
 		virtual void GetWatchPaths(std::vector<std::string> &paths) override;

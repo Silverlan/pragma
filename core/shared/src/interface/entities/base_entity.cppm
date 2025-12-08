@@ -133,8 +133,8 @@ export {
 			void SetName(const std::string &name);
 
 			void SetModel(const std::string &mdl);
-			void SetModel(const std::shared_ptr<pragma::Model> &mdl);
-			const std::shared_ptr<pragma::Model> &GetModel() const;
+			void SetModel(const std::shared_ptr<pragma::asset::Model> &mdl);
+			const std::shared_ptr<pragma::asset::Model> &GetModel() const;
 			std::string GetModelName() const;
 			std::optional<umath::Transform> GetAttachmentPose(uint32_t attId) const;
 			uint32_t GetSkin() const;

@@ -29,12 +29,12 @@ bool pragma::asset::GLTFWriter::Export(const SceneDesc &sceneDesc, const std::st
 	return writer.Export(outErrMsg, outputFileName, optOutPath);
 }
 
-bool pragma::asset::GLTFWriter::Export(pragma::Model &model, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &outputFileName, std::string *optOutPath)
+bool pragma::asset::GLTFWriter::Export(pragma::asset::Model &model, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &outputFileName, std::string *optOutPath)
 {
 	auto fileName = outputFileName.has_value() ? *outputFileName : model.GetName();
 	return Export({{model}}, fileName, exportInfo, outErrMsg, optOutPath);
 }
-bool pragma::asset::GLTFWriter::Export(pragma::Model &model, const std::string &animName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &outputFileName, std::string *optOutPath)
+bool pragma::asset::GLTFWriter::Export(pragma::asset::Model &model, const std::string &animName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &outputFileName, std::string *optOutPath)
 {
 	auto fileName = outputFileName.has_value() ? *outputFileName : model.GetName();
 	return Export({{model}}, fileName, animName, exportInfo, outErrMsg, optOutPath);
@@ -55,7 +55,7 @@ uint32_t pragma::asset::GLTFWriter::AddAccessor(const std::string &name, int com
 	return m_gltfMdl.accessors.size() - 1;
 };
 
-void pragma::asset::GLTFWriter::InitializeMorphSets(pragma::Model &mdl)
+void pragma::asset::GLTFWriter::InitializeMorphSets(pragma::asset::Model &mdl)
 {
 	auto &flexes = mdl.GetFlexes();
 	for(auto flexId = decltype(flexes.size()) {0u}; flexId < flexes.size(); ++flexId) {
@@ -91,21 +91,21 @@ void pragma::asset::GLTFWriter::InitializeMorphSets(pragma::Model &mdl)
 	}
 }
 
-bool pragma::asset::GLTFWriter::IsSkinned(pragma::Model &mdl) const
+bool pragma::asset::GLTFWriter::IsSkinned(pragma::asset::Model &mdl) const
 {
 	if(ShouldExportMeshes() == false)
 		return false;
 	auto &skeleton = mdl.GetSkeleton();
 	return (skeleton.GetBoneCount() > 1 && m_exportInfo.exportSkinnedMeshData);
 }
-bool pragma::asset::GLTFWriter::IsAnimated(pragma::Model &mdl) const
+bool pragma::asset::GLTFWriter::IsAnimated(pragma::asset::Model &mdl) const
 {
 	auto &anims = mdl.GetAnimations();
 	auto &skeleton = mdl.GetSkeleton();
 	return (skeleton.GetBoneCount() > 1 && anims.empty() == false && (m_exportInfo.exportAnimations || m_animName.has_value()));
 }
 bool pragma::asset::GLTFWriter::ShouldExportMeshes() const { return m_animName.has_value() == false; }
-void pragma::asset::GLTFWriter::WriteMorphTargets(pragma::ModelSubMesh &mesh, tinygltf::Mesh &gltfMesh, tinygltf::Primitive &primitive, const std::vector<uint32_t> &nodeIndices)
+void pragma::asset::GLTFWriter::WriteMorphTargets(pragma::geometry::ModelSubMesh &mesh, tinygltf::Mesh &gltfMesh, tinygltf::Primitive &primitive, const std::vector<uint32_t> &nodeIndices)
 {
 	auto itMorphSets = m_meshMorphSets.find(&mesh);
 	if(itMorphSets != m_meshMorphSets.end()) {
@@ -175,17 +175,17 @@ void pragma::asset::GLTFWriter::MergeSplitMeshes(ExportMeshList &meshList)
 {
 	if(m_exportInfo.verbose)
 		Con::cout << "Merging meshes by materials..." << Con::endl;
-	std::unordered_map<uint32_t, std::vector<std::shared_ptr<pragma::ModelSubMesh>>> groupedMeshes {};
+	std::unordered_map<uint32_t, std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>>> groupedMeshes {};
 	for(auto &mesh : meshList) {
 		auto texIdx = mesh->GetSkinTextureIndex();
 		auto it = groupedMeshes.find(texIdx);
 		if(it == groupedMeshes.end())
-			it = groupedMeshes.insert(std::make_pair(texIdx, std::vector<std::shared_ptr<pragma::ModelSubMesh>> {})).first;
+			it = groupedMeshes.insert(std::make_pair(texIdx, std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> {})).first;
 		it->second.push_back(mesh);
 	}
 
 	uint32_t numMerged = 0;
-	std::vector<std::shared_ptr<pragma::ModelSubMesh>> mergedMeshes {};
+	std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> mergedMeshes {};
 	mergedMeshes.reserve(groupedMeshes.size());
 	for(auto &pair : groupedMeshes) {
 		auto &meshes = pair.second;
@@ -218,7 +218,7 @@ void pragma::asset::GLTFWriter::GenerateUniqueModelExportList()
 			it = m_uniqueModelExportList.end() - 1;
 			auto &exportData = m_uniqueModelExportList.back();
 
-			std::vector<std::shared_ptr<ModelMesh>> meshList {};
+			std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> meshList {};
 			meshList.reserve(mdlDesc.model.GetMeshCount());
 
 			std::vector<uint32_t> bodyGroups {};
@@ -562,13 +562,13 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 
 			auto geometryType = mesh->GetGeometryType();
 			switch(geometryType) {
-			case pragma::ModelSubMesh::GeometryType::Triangles:
+			case pragma::geometry::ModelSubMesh::GeometryType::Triangles:
 				primitive.mode = TINYGLTF_MODE_TRIANGLES;
 				break;
-			case pragma::ModelSubMesh::GeometryType::Lines:
+			case pragma::geometry::ModelSubMesh::GeometryType::Lines:
 				primitive.mode = TINYGLTF_MODE_LINE;
 				break;
-			case pragma::ModelSubMesh::GeometryType::Points:
+			case pragma::geometry::ModelSubMesh::GeometryType::Points:
 				primitive.mode = TINYGLTF_MODE_POINTS;
 				break;
 			}
@@ -1016,7 +1016,7 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 	}
 }
 
-void pragma::asset::GLTFWriter::WriteAnimations(pragma::Model &mdl)
+void pragma::asset::GLTFWriter::WriteAnimations(pragma::asset::Model &mdl)
 {
 	if(m_exportInfo.verbose)
 		Con::cout << "Initializing GLTF animations..." << Con::endl;
@@ -1281,7 +1281,7 @@ void pragma::asset::GLTFWriter::WriteAnimations(pragma::Model &mdl)
 	}
 }
 
-void pragma::asset::GLTFWriter::GenerateAO(pragma::Model &mdl)
+void pragma::asset::GLTFWriter::GenerateAO(pragma::asset::Model &mdl)
 {
 	if(m_exportInfo.verbose)
 		Con::cout << "Generating ambient occlusion maps..." << Con::endl;

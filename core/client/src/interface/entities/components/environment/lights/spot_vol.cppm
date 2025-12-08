@@ -28,7 +28,7 @@ export namespace pragma {
 		void InitializeVolumetricLight();
 		virtual bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		std::vector<std::shared_ptr<CModelSubMesh>> m_subMeshes;
-		std::shared_ptr<pragma::Model> m_model;
+		std::shared_ptr<pragma::asset::Model> m_model;
 		msys::MaterialHandle m_material;
 	};
 };

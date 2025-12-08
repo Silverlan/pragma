@@ -262,12 +262,12 @@ void Lua::Animation::GetBlendController(lua::State *l, pragma::animation::Animat
 		return;
 	push_blend_controller(l, *bc);
 }
-void Lua::Animation::CalcRenderBounds(lua::State *l, pragma::animation::Animation &anim, const std::shared_ptr<pragma::Model> &mdl)
+void Lua::Animation::CalcRenderBounds(lua::State *l, pragma::animation::Animation &anim, const std::shared_ptr<pragma::asset::Model> &mdl)
 {
 	anim.CalcRenderBounds(*mdl);
 	GetRenderBounds(l, anim, mdl);
 }
-void Lua::Animation::GetRenderBounds(lua::State *l, pragma::animation::Animation &anim, const std::shared_ptr<pragma::Model> &)
+void Lua::Animation::GetRenderBounds(lua::State *l, pragma::animation::Animation &anim, const std::shared_ptr<pragma::asset::Model> &)
 {
 	auto &bounds = anim.GetRenderBounds();
 	Lua::Push<Vector3>(l, bounds.first);
@@ -396,7 +396,7 @@ void Lua::Frame::Localize(lua::State *, ::Frame &frame, pragma::animation::Anima
 void Lua::Frame::Globalize(lua::State *, ::Frame &frame, pragma::animation::Animation &anim, pragma::animation::Skeleton *skeleton) { frame.Globalize(anim, *skeleton); }
 void Lua::Frame::Localize(lua::State *, ::Frame &frame, pragma::animation::Skeleton *skeleton) { frame.Localize(*skeleton); }
 void Lua::Frame::Globalize(lua::State *, ::Frame &frame, pragma::animation::Skeleton *skeleton) { frame.Globalize(*skeleton); }
-void Lua::Frame::CalcRenderBounds(lua::State *l, ::Frame &frame, pragma::animation::Animation &anim, const std::shared_ptr<pragma::Model> &mdl)
+void Lua::Frame::CalcRenderBounds(lua::State *l, ::Frame &frame, pragma::animation::Animation &anim, const std::shared_ptr<pragma::asset::Model> &mdl)
 {
 	auto renderBounds = frame.CalcRenderBounds(anim, *mdl);
 	Lua::Push<Vector3>(l, renderBounds.first);
@@ -544,8 +544,8 @@ void Lua::MeshVertexAnimation::GetMesh(lua::State *l, ::MeshVertexAnimation &ani
 	auto *subMesh = anim.GetSubMesh();
 	if(mesh == nullptr || subMesh == nullptr)
 		return;
-	Lua::Push<std::shared_ptr<::ModelMesh>>(l, mesh->shared_from_this());
-	Lua::Push<std::shared_ptr<pragma::ModelSubMesh>>(l, subMesh->shared_from_this());
+	Lua::Push<std::shared_ptr<pragma::geometry::ModelMesh>>(l, mesh->shared_from_this());
+	Lua::Push<std::shared_ptr<pragma::geometry::ModelSubMesh>>(l, subMesh->shared_from_this());
 }
 ///////////////////////////////////////
 void Lua::MeshVertexFrame::GetVertices(lua::State *l, pragma::MeshVertexFrame &frame)

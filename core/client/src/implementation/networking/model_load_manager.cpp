@@ -16,7 +16,7 @@ ModelLoadManager &ModelLoadManager::Initialize()
 	return *s_manager;
 }
 
-void ModelLoadManager::AddQuery(const NetPacket &packet, const std::shared_ptr<pragma::Model> &mdl, const std::string &fileName)
+void ModelLoadManager::AddQuery(const NetPacket &packet, const std::shared_ptr<pragma::asset::Model> &mdl, const std::string &fileName)
 {
 	auto query = std::shared_ptr<ModelLoadQuery>(new ModelLoadQuery());
 	query->packet = packet;
@@ -257,7 +257,7 @@ void ModelLoadManager::Update()
 			mdl->AddCollisionMesh(colMesh);
 		}
 		group->AddMesh(mesh);
-		mdl->Update(pragma::model::ModelUpdateFlags::All);
+		mdl->Update(pragma::asset::ModelUpdateFlags::All);
 
 		m_completeMutex.lock();
 		m_completeQueries.push(query);

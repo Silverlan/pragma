@@ -10,7 +10,7 @@ import :physics.collision_mesh;
 
 std::shared_ptr<pragma::physics::CollisionMesh> pragma::physics::CollisionMesh::Create(pragma::Game *game) { return std::shared_ptr<pragma::physics::CollisionMesh>(new pragma::physics::CollisionMesh(game)); }
 std::shared_ptr<pragma::physics::CollisionMesh> pragma::physics::CollisionMesh::Create(const pragma::physics::CollisionMesh &other) { return std::shared_ptr<pragma::physics::CollisionMesh>(new pragma::physics::CollisionMesh(other)); }
-std::shared_ptr<pragma::physics::CollisionMesh> pragma::physics::CollisionMesh::Load(pragma::Game &game, pragma::Model &mdl, const udm::AssetData &data, std::string &outErr)
+std::shared_ptr<pragma::physics::CollisionMesh> pragma::physics::CollisionMesh::Load(pragma::Game &game, pragma::asset::Model &mdl, const udm::AssetData &data, std::string &outErr)
 {
 	auto mesh = Create(&game);
 	auto result = mesh->LoadFromAssetData(game, mdl, data, outErr);
@@ -116,7 +116,7 @@ void pragma::physics::CollisionMesh::Scale(const Vector3 &scale)
 }
 void pragma::physics::CollisionMesh::Mirror(pragma::Axis axis)
 {
-	auto transform = pragma::model::get_mirror_transform_vector(axis);
+	auto transform = pragma::asset::get_mirror_transform_vector(axis);
 	for(auto &v : m_vertices)
 		v *= transform;
 	for(size_t i = 0; i < m_triangles.size(); i += 3)
@@ -238,14 +238,14 @@ void pragma::physics::CollisionMesh::Validate()
 {
 	Vector3 min, max;
 	GetAABB(&min, &max);
-	pragma::model::validate_value(min);
-	pragma::model::validate_value(max);
-	pragma::model::validate_value(GetCenterOfMass());
-	pragma::model::validate_value(GetMass());
-	pragma::model::validate_value(GetOrigin());
-	pragma::model::validate_value(GetVolume());
+	pragma::asset::validate_value(min);
+	pragma::asset::validate_value(max);
+	pragma::asset::validate_value(GetCenterOfMass());
+	pragma::asset::validate_value(GetMass());
+	pragma::asset::validate_value(GetOrigin());
+	pragma::asset::validate_value(GetVolume());
 	for(auto &v : GetVertices())
-		pragma::model::validate_value(v);
+		pragma::asset::validate_value(v);
 }
 void pragma::physics::CollisionMesh::CalculateBounds()
 {
@@ -259,11 +259,11 @@ void pragma::physics::CollisionMesh::CalculateBounds()
 		uvec::max(&m_max, m_vertices[i]);
 	}
 }
-void pragma::physics::CollisionMesh::Update(pragma::model::ModelUpdateFlags flags)
+void pragma::physics::CollisionMesh::Update(pragma::asset::ModelUpdateFlags flags)
 {
-	if((flags & pragma::model::ModelUpdateFlags::UpdateBounds) != pragma::model::ModelUpdateFlags::None)
+	if((flags & pragma::asset::ModelUpdateFlags::UpdateBounds) != pragma::asset::ModelUpdateFlags::None)
 		CalculateBounds();
-	if((flags & pragma::model::ModelUpdateFlags::InitializeCollisionShapes) != pragma::model::ModelUpdateFlags::None)
+	if((flags & pragma::asset::ModelUpdateFlags::InitializeCollisionShapes) != pragma::asset::ModelUpdateFlags::None)
 		UpdateShape(); // TODO: Surface materials?
 }
 void pragma::physics::CollisionMesh::Centralize()
@@ -317,13 +317,13 @@ void pragma::physics::CollisionMesh::SetSoftBody(bool b)
 	m_softBodyInfo = ::util::make_shared<SoftBodyInfo>();
 }
 bool pragma::physics::CollisionMesh::IsSoftBody() const { return m_softBodyInfo != nullptr; }
-pragma::ModelSubMesh *pragma::physics::CollisionMesh::GetSoftBodyMesh() const
+pragma::geometry::ModelSubMesh *pragma::physics::CollisionMesh::GetSoftBodyMesh() const
 {
 	if(m_softBodyInfo == nullptr || m_softBodyInfo->subMesh.expired())
 		return nullptr;
 	return m_softBodyInfo->subMesh.lock().get();
 }
-void pragma::physics::CollisionMesh::SetSoftBodyMesh(pragma::ModelSubMesh &mesh)
+void pragma::physics::CollisionMesh::SetSoftBodyMesh(pragma::geometry::ModelSubMesh &mesh)
 {
 	if(m_softBodyInfo == nullptr)
 		return;
@@ -368,7 +368,7 @@ std::vector<pragma::physics::CollisionMesh::SoftBodyAnchor> *pragma::physics::Co
 		return nullptr;
 	return &m_softBodyInfo->anchors;
 }
-bool pragma::physics::CollisionMesh::Save(pragma::Game &game, pragma::Model &mdl, udm::AssetDataArg outData, std::string &outErr)
+bool pragma::physics::CollisionMesh::Save(pragma::Game &game, pragma::asset::Model &mdl, udm::AssetDataArg outData, std::string &outErr)
 {
 	outData.SetAssetType(PCOL_IDENTIFIER);
 	outData.SetAssetVersion(PCOL_VERSION);
@@ -406,7 +406,7 @@ bool pragma::physics::CollisionMesh::Save(pragma::Game &game, pragma::Model &mdl
 	auto meshGroupId = std::numeric_limits<uint32_t>::max();
 	auto meshId = std::numeric_limits<uint32_t>::max();
 	auto subMeshId = std::numeric_limits<uint32_t>::max();
-	pragma::ModelSubMesh *subMesh = nullptr;
+	pragma::geometry::ModelSubMesh *subMesh = nullptr;
 	auto foundSoftBodyMesh = false;
 	if(softBody)
 		softBody = mdl.FindSubMeshIndex(nullptr, nullptr, sbMesh, meshGroupId, meshId, subMeshId);
@@ -461,7 +461,7 @@ bool pragma::physics::CollisionMesh::Save(pragma::Game &game, pragma::Model &mdl
 	}
 	return true;
 }
-bool pragma::physics::CollisionMesh::LoadFromAssetData(pragma::Game &game, pragma::Model &mdl, const udm::AssetData &data, std::string &outErr)
+bool pragma::physics::CollisionMesh::LoadFromAssetData(pragma::Game &game, pragma::asset::Model &mdl, const udm::AssetData &data, std::string &outErr)
 {
 	if(data.GetAssetType() != PCOL_IDENTIFIER) {
 		outErr = "Incorrect format!";

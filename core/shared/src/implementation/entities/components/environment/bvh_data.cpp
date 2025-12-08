@@ -14,7 +14,7 @@ static_assert(sizeof(Vector3) == sizeof(::pragma::bvh::Vec));
 
 const ::pragma::bvh::Vec &pragma::bvh::to_bvh_vector(const Vector3 &v) { return reinterpret_cast<const ::pragma::bvh::Vec &>(v); }
 const Vector3 &pragma::bvh::from_bvh_vector(const ::pragma::bvh::Vec &v) { return reinterpret_cast<const Vector3 &>(v); }
-bool pragma::bvh::is_mesh_bvh_compatible(const pragma::ModelSubMesh &mesh) { return mesh.GetGeometryType() == pragma::ModelSubMesh::GeometryType::Triangles; }
+bool pragma::bvh::is_mesh_bvh_compatible(const pragma::geometry::ModelSubMesh &mesh) { return mesh.GetGeometryType() == pragma::geometry::ModelSubMesh::GeometryType::Triangles; }
 
 pragma::bvh::Primitive pragma::bvh::create_triangle(const Vector3 &a, const Vector3 &b, const Vector3 &c) { return pragma::bvh::Primitive {to_bvh_vector(a), to_bvh_vector(b), to_bvh_vector(c)}; }
 
@@ -326,9 +326,9 @@ bool pragma::bvh::MeshBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir
 
 pragma::bvh::Ray pragma::bvh::get_ray(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) { return Ray {to_bvh_vector(origin), to_bvh_vector(dir), minDist, maxDist}; }
 
-std::unordered_map<std::string, std::shared_ptr<pragma::ModelSubMesh>> pragma::bvh::get_uuid_mesh_map(pragma::Model &mdl)
+std::unordered_map<std::string, std::shared_ptr<pragma::geometry::ModelSubMesh>> pragma::bvh::get_uuid_mesh_map(pragma::asset::Model &mdl)
 {
-	std::unordered_map<std::string, std::shared_ptr<pragma::ModelSubMesh>> mdlMeshes;
+	std::unordered_map<std::string, std::shared_ptr<pragma::geometry::ModelSubMesh>> mdlMeshes;
 	for(auto &mg : mdl.GetMeshGroups()) {
 		for(auto &m : mg->GetMeshes()) {
 			for(auto &sm : m->GetSubMeshes()) {

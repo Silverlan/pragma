@@ -90,8 +90,8 @@ bool pragma::asset::WmdFormatHandler::LoadData(ModelProcessor &processor, ModelL
 		Con::cwar << "Incompatible model format version " << ver << "!" << Con::endl;
 		return false;
 	}
-	auto flags = f.Read<pragma::Model::Flags>();
-	m_bStatic = umath::is_flag_set(flags, pragma::Model::Flags::Static);
+	auto flags = f.Read<pragma::asset::Model::Flags>();
+	m_bStatic = umath::is_flag_set(flags, pragma::asset::Model::Flags::Static);
 
 	Vector3 eyeOffset {};
 	if(ver > 0x0007)
@@ -203,7 +203,7 @@ bool pragma::asset::WmdFormatHandler::LoadData(ModelProcessor &processor, ModelL
 	return true;
 }
 
-void pragma::asset::WmdFormatHandler::LoadBones(unsigned short version, unsigned int numBones, pragma::Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadBones(unsigned short version, unsigned int numBones, pragma::asset::Model &mdl)
 {
 	auto &skeleton = mdl.GetSkeleton();
 	auto reference = pragma::animation::Animation::Create();
@@ -276,7 +276,7 @@ void pragma::asset::WmdFormatHandler::LoadBones(unsigned short version, unsigned
 	mdl.GenerateBindPoseMatrices();
 }
 
-void pragma::asset::WmdFormatHandler::LoadHitboxes(uint16_t version, pragma::Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadHitboxes(uint16_t version, pragma::asset::Model &mdl)
 {
 	if(version <= 0x0004) // Hitboxes aren't supported until version 0x0005
 		return;
@@ -290,7 +290,7 @@ void pragma::asset::WmdFormatHandler::LoadHitboxes(uint16_t version, pragma::Mod
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadObjectAttachments(pragma::Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadObjectAttachments(pragma::asset::Model &mdl)
 {
 	auto numObjectAttachments = m_file->Read<uint32_t>();
 	mdl.GetObjectAttachments().reserve(numObjectAttachments);
@@ -310,7 +310,7 @@ void pragma::asset::WmdFormatHandler::LoadObjectAttachments(pragma::Model &mdl)
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadAttachments(pragma::Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadAttachments(pragma::asset::Model &mdl)
 {
 	unsigned int numAttachments = m_file->Read<unsigned int>();
 	for(unsigned int i = 0; i < numAttachments; i++) {
@@ -340,7 +340,7 @@ static void clamp_bounds(Vector3 &min, Vector3 &max, unsigned short version)
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadMeshes(unsigned short version, pragma::Model &mdl, const std::function<std::shared_ptr<ModelMesh>()> &meshFactory, const std::function<std::shared_ptr<pragma::ModelSubMesh>()> &subMeshFactory)
+void pragma::asset::WmdFormatHandler::LoadMeshes(unsigned short version, pragma::asset::Model &mdl, const std::function<std::shared_ptr<pragma::geometry::ModelMesh>()> &meshFactory, const std::function<std::shared_ptr<pragma::geometry::ModelSubMesh>()> &subMeshFactory)
 {
 	Vector3 renderMin, renderMax;
 	for(char i = 0; i < 3; i++)
@@ -460,7 +460,7 @@ void pragma::asset::WmdFormatHandler::LoadMeshes(unsigned short version, pragma:
 					subMesh->SetSkinTextureIndex(texId);
 
 					if(version >= 27) {
-						auto geometryType = m_file->Read<pragma::ModelSubMesh::GeometryType>();
+						auto geometryType = m_file->Read<pragma::geometry::ModelSubMesh::GeometryType>();
 						subMesh->SetGeometryType(geometryType);
 					}
 
@@ -534,7 +534,7 @@ void pragma::asset::WmdFormatHandler::LoadMeshes(unsigned short version, pragma:
 					uint32_t numIndices = m_file->Read<uint32_t>();
 					if(version < 30)
 						numIndices *= 3;
-					subMesh->SetIndexType(pragma::model::IndexType::UInt16);
+					subMesh->SetIndexType(pragma::geometry::IndexType::UInt16);
 					subMesh->SetIndexCount(numIndices);
 					auto &indexData = subMesh->GetIndexData();
 					m_file->Read(indexData.data(), indexData.size());
@@ -558,7 +558,7 @@ void pragma::asset::WmdFormatHandler::LoadMeshes(unsigned short version, pragma:
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadCollisionMeshes(pragma::Game *game, unsigned short version, pragma::Model &mdl, physics::SurfaceMaterial *smDefault)
+void pragma::asset::WmdFormatHandler::LoadCollisionMeshes(pragma::Game *game, unsigned short version, pragma::asset::Model &mdl, physics::SurfaceMaterial *smDefault)
 {
 	if(smDefault == nullptr)
 		smDefault = m_gameState->GetSurfaceMaterial(0);
@@ -670,7 +670,7 @@ void pragma::asset::WmdFormatHandler::LoadCollisionMeshes(pragma::Game *game, un
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadBlendControllers(pragma::Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadBlendControllers(pragma::asset::Model &mdl)
 {
 	unsigned short numControllers = m_file->Read<unsigned short>();
 	for(unsigned short i = 0; i < numControllers; i++) {
@@ -682,7 +682,7 @@ void pragma::asset::WmdFormatHandler::LoadBlendControllers(pragma::Model &mdl)
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadIKControllers(uint16_t version, pragma::Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadIKControllers(uint16_t version, pragma::asset::Model &mdl)
 {
 	if(version < 0x0016)
 		return;
@@ -705,7 +705,7 @@ void pragma::asset::WmdFormatHandler::LoadIKControllers(uint16_t version, pragma
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version, pragma::Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version, pragma::asset::Model &mdl)
 {
 	unsigned int numAnimations = m_file->Read<unsigned int>();
 	for(unsigned int i = 0; i < numAnimations; i++) {
@@ -738,8 +738,8 @@ void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version, pra
 
 				auto meshGroup = mdl.GetMeshGroup(meshGroupId);
 				auto &meshes = meshGroup->GetMeshes();
-				std::shared_ptr<ModelMesh> mesh = (meshId < meshes.size()) ? meshes.at(meshId) : nullptr;
-				std::shared_ptr<pragma::ModelSubMesh> subMesh = nullptr;
+				std::shared_ptr<pragma::geometry::ModelMesh> mesh = (meshId < meshes.size()) ? meshes.at(meshId) : nullptr;
+				std::shared_ptr<pragma::geometry::ModelSubMesh> subMesh = nullptr;
 				if(mesh != nullptr) {
 					auto &subMeshes = mesh->GetSubMeshes();
 					if(subMeshId < subMeshes.size())
@@ -831,7 +831,7 @@ void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version, pra
 		auto &flexes = mdl.GetFlexes();
 		for(auto i = decltype(numFlexes) {0}; i < numFlexes; ++i) {
 			auto name = m_file->ReadString();
-			flexes.push_back(Flex {name});
+			flexes.push_back(pragma::animation::Flex {name});
 			auto &flex = flexes.back();
 
 			auto vaIdx = m_file->Read<uint32_t>();
@@ -852,7 +852,7 @@ void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version, pra
 			for(auto j = decltype(numOps) {0}; j < numOps; ++j) {
 				ops.push_back({});
 				auto &op = ops.back();
-				op.type = static_cast<Flex::Operation::Type>(m_file->Read<uint32_t>());
+				op.type = static_cast<pragma::animation::Flex::Operation::Type>(m_file->Read<uint32_t>());
 				op.d.value = m_file->Read<float>();
 			}
 		}
@@ -903,7 +903,7 @@ void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version, pra
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadLODData(unsigned short version, pragma::Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadLODData(unsigned short version, pragma::asset::Model &mdl)
 {
 	if(version >= 0x0004) {
 		auto numLods = m_file->Read<unsigned char>();
@@ -1006,7 +1006,7 @@ void pragma::asset::WmdFormatHandler::LoadChildBones(const pragma::animation::Sk
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadSoftBodyData(pragma::Model &mdl, pragma::physics::CollisionMesh &colMesh)
+void pragma::asset::WmdFormatHandler::LoadSoftBodyData(pragma::asset::Model &mdl, pragma::physics::CollisionMesh &colMesh)
 {
 	auto meshGroupId = m_file->Read<uint32_t>();
 	auto meshId = m_file->Read<uint32_t>();
@@ -1053,7 +1053,7 @@ void pragma::asset::WmdFormatHandler::LoadSoftBodyData(pragma::Model &mdl, pragm
 		colMesh.SetSoftBody(false);
 }
 
-void pragma::asset::WmdFormatHandler::LoadJoints(pragma::Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadJoints(pragma::asset::Model &mdl)
 {
 	auto numJoints = m_file->Read<uint32_t>();
 	for(auto i = decltype(numJoints) {0u}; i < numJoints; ++i) {
@@ -1071,7 +1071,7 @@ void pragma::asset::WmdFormatHandler::LoadJoints(pragma::Model &mdl)
 	}
 }
 
-void pragma::asset::WmdFormatHandler::LoadBodygroups(pragma::Model &mdl)
+void pragma::asset::WmdFormatHandler::LoadBodygroups(pragma::asset::Model &mdl)
 {
 	auto numBodygroups = m_file->Read<unsigned short>();
 	for(unsigned short i = 0; i < numBodygroups; i++) {

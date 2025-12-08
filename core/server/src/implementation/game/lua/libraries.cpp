@@ -46,7 +46,7 @@ void pragma::SGame::RegisterLuaLibraries()
 		            auto asset = manager->LoadAsset(ufile::get_file_from_filename(*fileName), std::move(fp), ext, std::move(loadInfo));
 		            switch(type) {
 		            case pragma::asset::Type::Model:
-			            return luabind::object {l, std::static_pointer_cast<pragma::Model>(asset)};
+			            return luabind::object {l, std::static_pointer_cast<pragma::asset::Model>(asset)};
 		            case pragma::asset::Type::Material:
 			            return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
 		            }
@@ -62,7 +62,7 @@ void pragma::SGame::RegisterLuaLibraries()
 		    auto asset = manager->LoadAsset(name);
 		    switch(type) {
 		    case pragma::asset::Type::Model:
-			    return luabind::object {l, std::static_pointer_cast<pragma::Model>(asset)};
+			    return luabind::object {l, std::static_pointer_cast<pragma::asset::Model>(asset)};
 		    case pragma::asset::Type::Material:
 			    return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
 		    }
@@ -76,7 +76,7 @@ void pragma::SGame::RegisterLuaLibraries()
 		    auto asset = manager->ReloadAsset(name);
 		    switch(type) {
 		    case pragma::asset::Type::Model:
-			    return luabind::object {l, std::static_pointer_cast<pragma::Model>(asset)};
+			    return luabind::object {l, std::static_pointer_cast<pragma::asset::Model>(asset)};
 		    case pragma::asset::Type::Material:
 			    return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
 		    }

@@ -17,7 +17,7 @@ export namespace pragma {
 			std::vector<Vector3> transformedVerts;
 		};
 		AnimationBvhData animationBvhData;
-		std::vector<std::shared_ptr<pragma::ModelSubMesh>> renderMeshes;
+		std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> renderMeshes;
 		std::vector<uint16_t> renderMeshIndices;
 		std::vector<MeshData> meshData;
 		std::vector<bvh::Primitive> transformedTris;

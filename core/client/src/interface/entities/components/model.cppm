@@ -64,10 +64,10 @@ export namespace pragma {
 		uint32_t GetLOD() const;
 		void UpdateLOD(const CSceneComponent &scene, const CCameraComponent &cam, const Mat4 &vp);
 
-		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes();
-		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes() const;
-		std::vector<std::shared_ptr<pragma::ModelSubMesh>> &GetRenderMeshes();
-		const std::vector<std::shared_ptr<pragma::ModelSubMesh>> &GetRenderMeshes() const;
+		std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &GetLODMeshes();
+		const std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &GetLODMeshes() const;
+		std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &GetRenderMeshes();
+		const std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &GetRenderMeshes() const;
 		const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(uint32_t idx) const;
 		const rendering::RenderBufferData *GetRenderBufferData(uint32_t idx) const;
 		pragma::GameShaderSpecializationConstantFlag GetPipelineSpecializationFlags(uint32_t idx) const;
@@ -88,7 +88,7 @@ export namespace pragma {
 		void SetAutoLodEnabled(bool enabled);
 		bool IsAutoLodEnabled() const;
 
-		void GetBaseModelMeshes(std::vector<std::shared_ptr<ModelMesh>> &outMeshes, uint32_t lod = 0) const;
+		void GetBaseModelMeshes(std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &outMeshes, uint32_t lod = 0) const;
 		void SetRenderMeshesDirty();
 
 		GameShaderSpecializationConstantFlag GetBaseShaderSpecializationFlags() const { return m_baseShaderSpecializationConstantFlags; }
@@ -118,7 +118,7 @@ export namespace pragma {
 		void SetLOD(uint32_t lod);
 	  protected:
 		void UpdateBaseShaderSpecializationFlags();
-		virtual void OnModelChanged(const std::shared_ptr<pragma::Model> &model) override;
+		virtual void OnModelChanged(const std::shared_ptr<pragma::asset::Model> &model) override;
 
 		std::unordered_map<const CModelSubMesh *, std::shared_ptr<prosper::IBuffer>> m_lightmapUvBuffers {};
 		uint32_t m_lod = 0u;
@@ -126,8 +126,8 @@ export namespace pragma {
 		float m_lastLodCamDistance = 0.f;
 		StateFlags m_stateFlags = StateFlags::None;
 		std::vector<rendering::RenderBufferData> m_lodMeshRenderBufferData;
-		std::vector<std::shared_ptr<ModelMesh>> m_lodMeshes;
-		std::vector<std::shared_ptr<pragma::ModelSubMesh>> m_lodRenderMeshes;
+		std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> m_lodMeshes;
+		std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> m_lodRenderMeshes;
 		pragma::GameShaderSpecializationConstantFlag m_baseShaderSpecializationConstantFlags;
 		pragma::GameShaderSpecializationConstantFlag m_staticShaderSpecializationConstantFlags;
 

@@ -497,8 +497,8 @@ export namespace pragma {
 		void Lua_OnBindMaterial(msys::Material &mat);
 		static void Lua_default_OnBindMaterial(lua::State *l, LuaShaderWrapperTextured3D &shader, msys::Material &mat) { shader.Lua_OnBindMaterial(mat); }
 
-		int32_t Lua_OnDraw(pragma::ModelSubMesh &mesh);
-		static int32_t Lua_default_OnDraw(lua::State *l, LuaShaderWrapperTextured3D &shader, pragma::ModelSubMesh &mesh) { return shader.Lua_OnDraw(mesh); }
+		int32_t Lua_OnDraw(pragma::geometry::ModelSubMesh &mesh);
+		static int32_t Lua_default_OnDraw(lua::State *l, LuaShaderWrapperTextured3D &shader, pragma::geometry::ModelSubMesh &mesh) { return shader.Lua_OnDraw(mesh); }
 
 		void Lua_OnBindEntity(EntityHandle &hEnt);
 		static void Lua_default_OnBindEntity(lua::State *l, LuaShaderWrapperTextured3D &shader, EntityHandle &hEnt) { shader.Lua_OnBindEntity(hEnt); }
@@ -572,8 +572,8 @@ export namespace pragma {
 		void Lua_OnBindMaterial(msys::Material &mat);
 		static void Lua_default_OnBindMaterial(lua::State *l, LuaShaderWrapperPbr &shader, msys::Material &mat) { shader.Lua_OnBindMaterial(mat); }
 
-		int32_t Lua_OnDraw(pragma::ModelSubMesh &mesh);
-		static int32_t Lua_default_OnDraw(lua::State *l, LuaShaderWrapperPbr &shader, pragma::ModelSubMesh &mesh) { return shader.Lua_OnDraw(mesh); }
+		int32_t Lua_OnDraw(pragma::geometry::ModelSubMesh &mesh);
+		static int32_t Lua_default_OnDraw(lua::State *l, LuaShaderWrapperPbr &shader, pragma::geometry::ModelSubMesh &mesh) { return shader.Lua_OnDraw(mesh); }
 
 		void Lua_OnBindEntity(EntityHandle &hEnt);
 		static void Lua_default_OnBindEntity(lua::State *l, LuaShaderWrapperPbr &shader, EntityHandle &hEnt) { shader.Lua_OnBindEntity(hEnt); }

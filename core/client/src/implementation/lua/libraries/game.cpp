@@ -79,7 +79,7 @@ static void get_local_bone_position(const std::function<umath::Transform(uint32_
 	if(parent != nullptr)
 		apply(parent, pos, rot, scale);
 }
-static void get_local_bone_position(const std::shared_ptr<pragma::Model> &mdl, const std::function<umath::Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr,
+static void get_local_bone_position(const std::shared_ptr<pragma::asset::Model> &mdl, const std::function<umath::Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr,
   Vector3 *scale = nullptr)
 {
 	get_local_bone_position(fGetTransform, bone, fscale, pos, rot, scale);
@@ -845,7 +845,7 @@ int Lua::game::Client::load_model(lua::State *l)
 }
 int Lua::game::Client::create_model(lua::State *l)
 {
-	std::shared_ptr<pragma::Model> mdl = nullptr;
+	std::shared_ptr<pragma::asset::Model> mdl = nullptr;
 	if(!Lua::IsSet(l, 1))
 		mdl = pragma::get_cgame()->CreateModel();
 	else {

@@ -867,12 +867,12 @@ RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod)
 	return static_cast<pragma::CModelComponent &>(*pMdlComponent).GetLodMeshGroup(lod);
 }
 const RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod) const { return const_cast<CRenderComponent *>(this)->GetLodMeshGroup(lod); }
-const std::vector<std::shared_ptr<pragma::ModelSubMesh>> &CRenderComponent::GetRenderMeshes() const { return const_cast<CRenderComponent *>(this)->GetRenderMeshes(); }
-std::vector<std::shared_ptr<pragma::ModelSubMesh>> &CRenderComponent::GetRenderMeshes()
+const std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &CRenderComponent::GetRenderMeshes() const { return const_cast<CRenderComponent *>(this)->GetRenderMeshes(); }
+std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &CRenderComponent::GetRenderMeshes()
 {
 	auto *pMdlComponent = GetModelComponent();
 	if(!pMdlComponent) {
-		static std::vector<std::shared_ptr<pragma::ModelSubMesh>> meshes {};
+		static std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> meshes {};
 		return meshes;
 	}
 	return static_cast<pragma::CModelComponent &>(*pMdlComponent).GetRenderMeshes();
@@ -886,13 +886,13 @@ std::vector<rendering::RenderBufferData> &CRenderComponent::GetRenderBufferData(
 	}
 	return static_cast<pragma::CModelComponent &>(*pMdlComponent).GetRenderBufferData();
 }
-const std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes() const { return const_cast<CRenderComponent *>(this)->GetLODMeshes(); }
-std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes()
+const std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &CRenderComponent::GetLODMeshes() const { return const_cast<CRenderComponent *>(this)->GetLODMeshes(); }
+std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &CRenderComponent::GetLODMeshes()
 {
 	auto &ent = static_cast<CBaseEntity &>(GetEntity());
 	auto pSoftBodyComponent = ent.GetComponent<pragma::CSoftBodyComponent>();
 	if(pSoftBodyComponent.valid()) {
-		static std::vector<std::shared_ptr<ModelMesh>> meshes {};
+		static std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> meshes {};
 		return meshes;
 		// TODO
 		//auto *pSoftBodyData = pSoftBodyComponent->GetSoftBodyData();
@@ -901,7 +901,7 @@ std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes()
 	}
 	auto *pMdlComponent = GetModelComponent();
 	if(!pMdlComponent) {
-		static std::vector<std::shared_ptr<ModelMesh>> meshes {};
+		static std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> meshes {};
 		return meshes;
 	}
 	return static_cast<pragma::CModelComponent &>(*pMdlComponent).GetLODMeshes();

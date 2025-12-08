@@ -20,7 +20,7 @@ export {
 		}
 		class DLLNETWORK FlexMergeComponent final : public BaseEntityComponent {
 		  public:
-			static bool can_merge(const pragma::Model &mdl, const pragma::Model &mdlParent);
+			static bool can_merge(const pragma::asset::Model &mdl, const pragma::asset::Model &mdlParent);
 
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);

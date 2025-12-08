@@ -169,7 +169,7 @@ pragma::Game::Game(pragma::NetworkState *state)
 	RegisterCallback<void>("OnPreLoadMap");
 	RegisterCallback<void>("OnGameReady");
 	RegisterCallback<void, pragma::audio::ALSound *>("OnSoundCreated");
-	RegisterCallback<void, std::reference_wrapper<std::shared_ptr<pragma::Model>>>("OnModelLoaded");
+	RegisterCallback<void, std::reference_wrapper<std::shared_ptr<pragma::asset::Model>>>("OnModelLoaded");
 
 	RegisterCallback<void>("EndGame");
 
@@ -830,8 +830,8 @@ void pragma::Game::InitializeMapEntities(pragma::asset::WorldData &worldData, st
 	}
 }
 
-std::shared_ptr<pragma::Model> pragma::Game::CreateModel(const std::string &mdl) const { return m_stateNetwork->GetModelManager().CreateModel(mdl); }
-std::shared_ptr<pragma::Model> pragma::Game::CreateModel(bool bAddReference) const { return m_stateNetwork->GetModelManager().CreateModel("", bAddReference); }
+std::shared_ptr<pragma::asset::Model> pragma::Game::CreateModel(const std::string &mdl) const { return m_stateNetwork->GetModelManager().CreateModel(mdl); }
+std::shared_ptr<pragma::asset::Model> pragma::Game::CreateModel(bool bAddReference) const { return m_stateNetwork->GetModelManager().CreateModel("", bAddReference); }
 bool pragma::Game::PrecacheModel(const std::string &mdl)
 {
 	spdlog::info("Precaching model '{}'...", mdl);
@@ -841,13 +841,13 @@ bool pragma::Game::PrecacheModel(const std::string &mdl)
 	auto loadInfo = std::make_unique<pragma::asset::ModelLoadInfo>();
 	loadInfo->onLoaded = [this](util::Asset &asset) {
 		auto mdl = pragma::asset::ModelManager::GetAssetObject(asset);
-		CallCallbacks<void, std::reference_wrapper<std::shared_ptr<pragma::Model>>>("OnModelLoaded", mdl);
-		CallLuaCallbacks<void, std::shared_ptr<pragma::Model>>("OnModelLoaded", mdl);
+		CallCallbacks<void, std::reference_wrapper<std::shared_ptr<pragma::asset::Model>>>("OnModelLoaded", mdl);
+		CallLuaCallbacks<void, std::shared_ptr<pragma::asset::Model>>("OnModelLoaded", mdl);
 	};
 	auto r = GetNetworkState()->GetModelManager().PreloadAsset(mdl, std::move(loadInfo));
 	return r;
 }
-std::shared_ptr<pragma::Model> pragma::Game::LoadModel(const std::string &mdl, bool bReload)
+std::shared_ptr<pragma::asset::Model> pragma::Game::LoadModel(const std::string &mdl, bool bReload)
 {
 	if(mdl.empty())
 		return nullptr;
@@ -863,8 +863,8 @@ std::shared_ptr<pragma::Model> pragma::Game::LoadModel(const std::string &mdl, b
 	util::FileAssetManager::PreloadResult result;
 	auto r = bReload ? mdlMananger.ReloadAsset(mdl, nullptr, &result) : mdlMananger.LoadAsset(mdl, nullptr, &result);
 	if(r != nullptr) {
-		CallCallbacks<void, std::reference_wrapper<std::shared_ptr<pragma::Model>>>("OnModelLoaded", r);
-		CallLuaCallbacks<void, std::shared_ptr<pragma::Model>>("OnModelLoaded", r);
+		CallCallbacks<void, std::reference_wrapper<std::shared_ptr<pragma::asset::Model>>>("OnModelLoaded", r);
+		CallLuaCallbacks<void, std::shared_ptr<pragma::asset::Model>>("OnModelLoaded", r);
 	}
 	else {
 		std::string errMsg = result.errorMessage ? *result.errorMessage : "Unknown error";

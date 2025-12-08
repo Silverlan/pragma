@@ -203,7 +203,7 @@ void pragma::CEyeComponent::UpdateEyeMaterialData()
 		mat->GetProperty("iris_uv_clamp_range", &config.irisUvClampRange);
 	}
 }
-void pragma::CEyeComponent::UpdateEyeballMT(const Eyeball &eyeball, uint32_t eyeballIndex)
+void pragma::CEyeComponent::UpdateEyeballMT(const asset::Eyeball &eyeball, uint32_t eyeballIndex)
 {
 	if(eyeballIndex >= m_eyeballData.size() || m_animC.expired())
 		return;

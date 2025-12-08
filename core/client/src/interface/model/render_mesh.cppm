@@ -25,7 +25,7 @@ export namespace pragma {
 		void SetVertexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
 		void SetVertexWeightBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
 		void SetAlphaBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
-		void SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer, pragma::model::IndexType indexType);
+		void SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer, pragma::geometry::IndexType indexType);
 		void ClearBuffers();
 
 		const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(CModelSubMesh &mesh, pragma::ShaderEntity &shader, uint32_t pipelineIdx = 0u);
@@ -38,6 +38,6 @@ export namespace pragma {
 		std::shared_ptr<prosper::IBuffer> m_alphaBuffer = nullptr;
 		std::shared_ptr<prosper::IBuffer> m_indexBuffer = nullptr;
 		std::mutex m_renderBufferMutex;
-		pragma::model::IndexType m_indexType;
+		pragma::geometry::IndexType m_indexType;
 	};
 };

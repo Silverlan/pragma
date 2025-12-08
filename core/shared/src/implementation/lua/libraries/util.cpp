@@ -381,7 +381,7 @@ void Lua::util::register_shared_generic(lua::State *l, luabind::module_ &mod)
 	  luabind::def("world_space_direction_to_screen_space", Lua::util::world_space_direction_to_screen_space), luabind::def("calc_screen_space_distance_to_world_space_position", Lua::util::calc_screenspace_distance_to_worldspace_position),
 	  luabind::def("depth_to_distance", Lua::util::depth_to_distance), luabind::def("generate_hair_file", &generate_hair_file),
 	  luabind::def(
-	    "generate_hair_data", +[](float hairPerArea, const pragma::ModelSubMesh &mesh) {
+	    "generate_hair_data", +[](float hairPerArea, const pragma::geometry::ModelSubMesh &mesh) {
 		    struct MeshInterface : public ::util::HairGenerator::MeshInterface {
 			    virtual uint32_t GetTriangleCount() const override { return getTriangleCount(); }
 			    virtual uint32_t GetVertexCount() const override { return getVertexCount(); }

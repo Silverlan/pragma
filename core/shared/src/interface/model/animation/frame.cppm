@@ -50,7 +50,7 @@ export {
 
 		uint32_t GetBoneCount() const;
 		void SetBoneCount(uint32_t numBones);
-		std::pair<Vector3, Vector3> CalcRenderBounds(const pragma::animation::Animation &anim, const pragma::Model &mdl) const;
+		std::pair<Vector3, Vector3> CalcRenderBounds(const pragma::animation::Animation &anim, const pragma::asset::Model &mdl) const;
 		void Rotate(const Quat &rot);
 		void Translate(const Vector3 &t);
 		void Rotate(const pragma::animation::Skeleton &skeleton, const Quat &rot);

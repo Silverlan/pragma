@@ -116,8 +116,8 @@ export namespace pragma {
 		void AddGUILuaWrapperFactory(const std::function<luabind::object(lua::State *, pragma::gui::types::WIBase &)> &f);
 		std::vector<std::function<luabind::object(lua::State *, pragma::gui::types::WIBase &)>> &GetGUILuaWrapperFactories();
 		virtual msys::MaterialManager &GetMaterialManager() override;
-		virtual pragma::ModelSubMesh *CreateSubMesh() const override;
-		virtual ModelMesh *CreateMesh() const override;
+		virtual pragma::geometry::ModelSubMesh *CreateSubMesh() const override;
+		virtual pragma::geometry::ModelMesh *CreateMesh() const override;
 		virtual util::FileAssetManager *GetAssetManager(pragma::asset::Type type) override;
 		virtual void Initialize() override;
 		virtual std::string GetMessagePrefix() const override;

@@ -250,7 +250,7 @@ void BaseAIComponent::OnEntitySpawn()
 	m_obstruction.sweepFilter = std::make_unique<physics::MultiEntityRayCastFilterCallback>(std::move(filterEnts));
 }
 
-void BaseAIComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &model)
+void BaseAIComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &model)
 {
 	m_seqIdle = -1;
 	auto *pObservableComponent = static_cast<pragma::BaseObservableComponent *>(GetEntity().FindComponent("observable").get());

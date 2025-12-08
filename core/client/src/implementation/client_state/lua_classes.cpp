@@ -1424,11 +1424,11 @@ void pragma::CGame::RegisterLuaClasses()
 	    [](lua::State *l, pragma::rendering::LightingStageRenderProcessor &processor, const pragma::rendering::RenderQueue &renderQueue) { processor.Render(renderQueue); }));
 	modGame[defLightingStageRenderProcessor];
 
-	auto modelMeshClassDef = luabind::class_<ModelMesh>("Mesh");
+	auto modelMeshClassDef = luabind::class_<pragma::geometry::ModelMesh>("Mesh");
 	Lua::ModelMesh::register_class(modelMeshClassDef);
 	modelMeshClassDef.scope[luabind::def("Create", &Lua::ModelMesh::Client::Create)];
 
-	auto subModelMeshClassDef = luabind::class_<pragma::ModelSubMesh>("Sub");
+	auto subModelMeshClassDef = luabind::class_<pragma::geometry::ModelSubMesh>("Sub");
 	Lua::ModelSubMesh::register_class(subModelMeshClassDef);
 	subModelMeshClassDef.def("GetTangents", &Lua::ModelSubMesh::Client::GetTangents);
 	subModelMeshClassDef.def("GetBiTangents", &Lua::ModelSubMesh::Client::GetBiTangents);
@@ -1437,10 +1437,10 @@ void pragma::CGame::RegisterLuaClasses()
 	subModelMeshClassDef.def("GetAlphaBuffer", &Lua::ModelSubMesh::Client::GetAlphaBuffer);
 	subModelMeshClassDef.def("GetIndexBuffer", &Lua::ModelSubMesh::Client::GetIndexBuffer);
 	subModelMeshClassDef.def("GetSceneMesh", &Lua::ModelSubMesh::Client::GetVkMesh);
-	subModelMeshClassDef.def("GetExtensionData", &pragma::ModelSubMesh::GetExtensionData);
+	subModelMeshClassDef.def("GetExtensionData", &pragma::geometry::ModelSubMesh::GetExtensionData);
 	subModelMeshClassDef.scope[luabind::def("create", &Lua::ModelSubMesh::Client::Create)];
 
-	auto modelClassDef = luabind::class_<pragma::Model>("Model");
+	auto modelClassDef = luabind::class_<pragma::asset::Model>("Model");
 
 	auto defMdlExportInfo = luabind::class_<pragma::asset::ModelExportInfo>("ExportInfo");
 	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_PNG", umath::to_integral(pragma::asset::ModelExportInfo::ImageFormat::PNG));
@@ -1489,33 +1489,33 @@ void pragma::CGame::RegisterLuaClasses()
 
 	Lua::Model::register_class(GetLuaState(), modelClassDef, modelMeshClassDef, subModelMeshClassDef);
 	modelClassDef.scope[luabind::def(
-	  "create_quad", +[](pragma::Game &game, const pragma::model::QuadCreateInfo &createInfo) -> std::shared_ptr<pragma::Model> {
-		  auto mesh = pragma::model::create_quad(game, createInfo);
+	  "create_quad", +[](pragma::Game &game, const pragma::geometry::QuadCreateInfo &createInfo) -> std::shared_ptr<pragma::asset::Model> {
+		  auto mesh = pragma::geometry::create_quad(game, createInfo);
 		  return Lua::Model::Client::create_generic_model(game, *mesh);
 	  })];
 	modelClassDef.scope[luabind::def(
-	  "create_sphere", +[](pragma::Game &game, const pragma::model::SphereCreateInfo &createInfo) -> std::shared_ptr<pragma::Model> {
-		  auto mesh = pragma::model::create_sphere(game, createInfo);
+	  "create_sphere", +[](pragma::Game &game, const pragma::geometry::SphereCreateInfo &createInfo) -> std::shared_ptr<pragma::asset::Model> {
+		  auto mesh = pragma::geometry::create_sphere(game, createInfo);
 		  return Lua::Model::Client::create_generic_model(game, *mesh);
 	  })];
 	modelClassDef.scope[luabind::def(
-	  "create_cylinder", +[](pragma::Game &game, const pragma::model::CylinderCreateInfo &createInfo) -> std::shared_ptr<pragma::Model> {
-		  auto mesh = pragma::model::create_cylinder(game, createInfo);
+	  "create_cylinder", +[](pragma::Game &game, const pragma::geometry::CylinderCreateInfo &createInfo) -> std::shared_ptr<pragma::asset::Model> {
+		  auto mesh = pragma::geometry::create_cylinder(game, createInfo);
 		  return Lua::Model::Client::create_generic_model(game, *mesh);
 	  })];
 	modelClassDef.scope[luabind::def(
-	  "create_cone", +[](pragma::Game &game, const pragma::model::ConeCreateInfo &createInfo) -> std::shared_ptr<pragma::Model> {
-		  auto mesh = pragma::model::create_cone(game, createInfo);
+	  "create_cone", +[](pragma::Game &game, const pragma::geometry::ConeCreateInfo &createInfo) -> std::shared_ptr<pragma::asset::Model> {
+		  auto mesh = pragma::geometry::create_cone(game, createInfo);
 		  return Lua::Model::Client::create_generic_model(game, *mesh);
 	  })];
 	modelClassDef.scope[luabind::def(
-	  "create_circle", +[](pragma::Game &game, const pragma::model::CircleCreateInfo &createInfo) -> std::shared_ptr<pragma::Model> {
-		  auto mesh = pragma::model::create_circle(game, createInfo);
+	  "create_circle", +[](pragma::Game &game, const pragma::geometry::CircleCreateInfo &createInfo) -> std::shared_ptr<pragma::asset::Model> {
+		  auto mesh = pragma::geometry::create_circle(game, createInfo);
 		  return Lua::Model::Client::create_generic_model(game, *mesh);
 	  })];
 	modelClassDef.scope[luabind::def(
-	  "create_ring", +[](pragma::Game &game, const pragma::model::RingCreateInfo &createInfo) -> std::shared_ptr<pragma::Model> {
-		  auto mesh = pragma::model::create_ring(game, createInfo);
+	  "create_ring", +[](pragma::Game &game, const pragma::geometry::RingCreateInfo &createInfo) -> std::shared_ptr<pragma::asset::Model> {
+		  auto mesh = pragma::geometry::create_ring(game, createInfo);
 		  return Lua::Model::Client::create_generic_model(game, *mesh);
 	  })];
 	modelClassDef.def("AddMaterial", &Lua::Model::Client::AddMaterial);

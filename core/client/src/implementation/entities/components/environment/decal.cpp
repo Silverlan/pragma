@@ -108,7 +108,7 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas, s
 	for(auto &meshData : meshDatas) {
 		auto effectivePose = GetPose().GetInverse() * meshData.pose;
 		for(auto *subMesh : meshData.subMeshes) {
-			if(subMesh->GetGeometryType() != pragma::ModelSubMesh::GeometryType::Triangles)
+			if(subMesh->GetGeometryType() != pragma::geometry::ModelSubMesh::GeometryType::Triangles)
 				continue;
 			auto &verts = subMesh->GetVertices();
 
@@ -340,7 +340,7 @@ bool CDecalComponent::ApplyDecal(DecalProjector &projector, const std::vector<De
 	meshGroup->AddMesh(mesh);
 	mdl->AddMaterial(0, mat);
 
-	mdl->Update(pragma::model::ModelUpdateFlags::All | pragma::model::ModelUpdateFlags::UpdateChildren);
+	mdl->Update(pragma::asset::ModelUpdateFlags::All | pragma::asset::ModelUpdateFlags::UpdateChildren);
 
 	//decalRenderC->SetDepthBias(-1'000.f,0.f,-2.f);
 	// TODO
@@ -371,7 +371,7 @@ bool CDecalComponent::ApplyDecal()
 
 	pragma::PrimitiveIntersectionInfo bvhIntersectInfo {};
 	std::vector<DecalProjector::MeshData> meshDatas {};
-	std::unordered_set<pragma::ModelSubMesh *> coveredMeshes;
+	std::unordered_set<pragma::geometry::ModelSubMesh *> coveredMeshes;
 	auto findIntersectionMeshes = [&projectorAABB, &bvhIntersectInfo, &meshDatas, &coveredMeshes](const pragma::BaseBvhComponent &bvhC) {
 		if(!bvhC.IntersectionTestAabb(projectorAABB.first, projectorAABB.second, bvhIntersectInfo)) {
 			bvhIntersectInfo.primitives.clear();

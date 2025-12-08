@@ -54,7 +54,7 @@ void pragma::physics::TraceResult::InitializeMeshes()
 	}
 }
 
-void pragma::physics::TraceResult::GetMeshes(ModelMesh **outMesh, pragma::ModelSubMesh **outSubMesh)
+void pragma::physics::TraceResult::GetMeshes(pragma::geometry::ModelMesh **outMesh, pragma::geometry::ModelSubMesh **outSubMesh)
 {
 	InitializeMeshes();
 	*outMesh = meshInfo->mesh;
@@ -67,8 +67,8 @@ msys::Material *pragma::physics::TraceResult::GetMaterial()
 	auto &hMdl = entity->GetModel();
 	if(hMdl == nullptr)
 		return nullptr;
-	ModelMesh *mesh = nullptr;
-	pragma::ModelSubMesh *subMesh = nullptr;
+	pragma::geometry::ModelMesh *mesh = nullptr;
+	pragma::geometry::ModelSubMesh *subMesh = nullptr;
 	GetMeshes(&mesh, &subMesh);
 	if(mesh == nullptr || subMesh == nullptr)
 		return nullptr;
@@ -85,8 +85,8 @@ bool pragma::physics::TraceResult::GetMaterial(std::string &mat)
 	auto &hMdl = entity->GetModel();
 	if(hMdl == nullptr)
 		return false;
-	ModelMesh *mesh = nullptr;
-	pragma::ModelSubMesh *subMesh = nullptr;
+	pragma::geometry::ModelMesh *mesh = nullptr;
+	pragma::geometry::ModelSubMesh *subMesh = nullptr;
 	GetMeshes(&mesh, &subMesh);
 	if(mesh == nullptr || subMesh == nullptr)
 		return false;

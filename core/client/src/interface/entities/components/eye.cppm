@@ -91,9 +91,9 @@ export {
 			void UpdateEyeballsMT();
 		  protected:
 			void UpdateBlinkMT();
-			void OnModelChanged(const std::shared_ptr<pragma::Model> &mdl);
+			void OnModelChanged(const std::shared_ptr<pragma::asset::Model> &mdl);
 			Vector3 ClampViewTarget(const Vector3 &viewTarget) const;
-			void UpdateEyeballMT(const Eyeball &eyeball, uint32_t eyeballIndex);
+			void UpdateEyeballMT(const asset::Eyeball &eyeball, uint32_t eyeballIndex);
 			void UpdateEyeMaterialData();
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		  private:

@@ -148,8 +148,8 @@ void pragma::SGame::SetUp()
 	entGame->Spawn();
 }
 
-std::shared_ptr<ModelMesh> pragma::SGame::CreateModelMesh() const { return ::util::make_shared<ModelMesh>(); }
-std::shared_ptr<pragma::ModelSubMesh> pragma::SGame::CreateModelSubMesh() const { return ::util::make_shared<pragma::ModelSubMesh>(); }
+std::shared_ptr<pragma::geometry::ModelMesh> pragma::SGame::CreateModelMesh() const { return ::util::make_shared<pragma::geometry::ModelMesh>(); }
+std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::SGame::CreateModelSubMesh() const { return ::util::make_shared<pragma::geometry::ModelSubMesh>(); }
 
 bool pragma::SGame::LoadMap(const std::string &map, const Vector3 &origin, std::vector<EntityHandle> *entities)
 {

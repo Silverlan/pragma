@@ -20,7 +20,7 @@ struct CyclesModuleInterface {
 	}
 	void (*render_image)(const pragma::rendering::cycles::SceneInfo &sceneInfo, const pragma::rendering::cycles::RenderImageInfo &renderImageInfo, const std::function<bool(pragma::ecs::BaseEntity &)> &entFilter, util::ParallelJob<uimg::ImageLayerSet> &outJob) = nullptr;
 
-	void (*bake_ao)(const pragma::rendering::cycles::SceneInfo &sceneInfo, pragma::Model &mdl, uint32_t materialIndex, util::ParallelJob<uimg::ImageLayerSet> &outJob) = nullptr;
+	void (*bake_ao)(const pragma::rendering::cycles::SceneInfo &sceneInfo, pragma::asset::Model &mdl, uint32_t materialIndex, util::ParallelJob<uimg::ImageLayerSet> &outJob) = nullptr;
 	void (*bake_ao_ent)(const pragma::rendering::cycles::SceneInfo &sceneInfo, pragma::ecs::BaseEntity &ent, uint32_t materialIndex, util::ParallelJob<uimg::ImageLayerSet> &outJob) = nullptr;
 	void (*bake_lightmaps)(const pragma::rendering::cycles::SceneInfo &sceneInfo, util::ParallelJob<uimg::ImageLayerSet> &outJob) = nullptr;
 
@@ -72,7 +72,7 @@ util::ParallelJob<uimg::ImageLayerSet> cycles::bake_ambient_occlusion(pragma::Cl
 		return {};
 	return job;
 }
-util::ParallelJob<uimg::ImageLayerSet> cycles::bake_ambient_occlusion(pragma::ClientState &client, const SceneInfo &sceneInfo, pragma::Model &mdl, uint32_t materialIndex)
+util::ParallelJob<uimg::ImageLayerSet> cycles::bake_ambient_occlusion(pragma::ClientState &client, const SceneInfo &sceneInfo, pragma::asset::Model &mdl, uint32_t materialIndex)
 {
 	auto cyclesInterface = initialize_library(client);
 	if(cyclesInterface.has_value() == false)

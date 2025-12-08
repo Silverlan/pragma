@@ -33,7 +33,7 @@ export namespace pragma {
 		void UpdateVertexAnimationBuffer(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 		const std::shared_ptr<prosper::IBuffer> &GetVertexAnimationBuffer() const;
 		bool GetVertexAnimationBufferMeshOffset(CModelSubMesh &mesh, uint32_t &offset, uint32_t &animCount) const;
-		bool GetLocalVertexPosition(const pragma::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 &pos, Vector3 *optOutNormal = nullptr, float *optOutDelta = nullptr) const;
+		bool GetLocalVertexPosition(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 &pos, Vector3 *optOutNormal = nullptr, float *optOutDelta = nullptr) const;
 		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
 		// Vertex animations
@@ -46,7 +46,7 @@ export namespace pragma {
 			uint32_t vertexAnimationId = std::numeric_limits<uint32_t>::max();
 			uint32_t frameId = std::numeric_limits<uint32_t>::max();
 			uint32_t nextFrameId = std::numeric_limits<uint32_t>::max();
-			std::weak_ptr<pragma::ModelSubMesh> mesh = {};
+			std::weak_ptr<pragma::geometry::ModelSubMesh> mesh = {};
 			float blend = 0.f;
 		};
 		std::vector<VertexAnimationSlot> m_vertexAnimationSlots {};

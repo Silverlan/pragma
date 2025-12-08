@@ -101,8 +101,8 @@ namespace pragma {
 		ServerState();
 		virtual ~ServerState() override;
 		virtual msys::MaterialManager &GetMaterialManager() override;
-		virtual pragma::ModelSubMesh *CreateSubMesh() const override;
-		virtual ModelMesh *CreateMesh() const override;
+		virtual pragma::geometry::ModelSubMesh *CreateSubMesh() const override;
+		virtual pragma::geometry::ModelMesh *CreateMesh() const override;
 		virtual bool IsServer() const override;
 		virtual console::ConVarMap *GetConVarMap() override;
 		pragma::networking::ServerMessageMap *GetNetMessageMap();

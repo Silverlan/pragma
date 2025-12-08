@@ -76,12 +76,12 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual ~CRenderComponent() override;
 
-		std::vector<std::shared_ptr<pragma::ModelSubMesh>> &GetRenderMeshes();
-		const std::vector<std::shared_ptr<pragma::ModelSubMesh>> &GetRenderMeshes() const;
+		std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &GetRenderMeshes();
+		const std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &GetRenderMeshes() const;
 		std::vector<rendering::RenderBufferData> &GetRenderBufferData();
 		const std::vector<rendering::RenderBufferData> &GetRenderBufferData() const { return const_cast<CRenderComponent *>(this)->GetRenderBufferData(); }
-		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes();
-		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes() const;
+		std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &GetLODMeshes();
+		const std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &GetLODMeshes() const;
 
 		RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod);
 		const RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod) const;

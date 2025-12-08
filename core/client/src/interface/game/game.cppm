@@ -127,8 +127,8 @@ export namespace pragma {
 		void CreateGiblet(const GibletCreateInfo &info, TCPPM **particle);
 		virtual pragma::BaseEntityComponent *CreateLuaEntityComponent(pragma::ecs::BaseEntity &ent, std::string classname) override;
 		virtual void CreateGiblet(const GibletCreateInfo &info) override;
-		virtual std::shared_ptr<ModelMesh> CreateModelMesh() const override;
-		virtual std::shared_ptr<pragma::ModelSubMesh> CreateModelSubMesh() const override;
+		virtual std::shared_ptr<pragma::geometry::ModelMesh> CreateModelMesh() const override;
+		virtual std::shared_ptr<pragma::geometry::ModelSubMesh> CreateModelSubMesh() const override;
 		virtual void GetRegisteredEntities(std::vector<std::string> &classes, std::vector<std::string> &luaClasses) const override;
 
 		bool StartGPUProfilingStage(const char *stage);

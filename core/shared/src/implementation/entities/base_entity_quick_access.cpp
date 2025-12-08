@@ -50,17 +50,17 @@ void pragma::ecs::BaseEntity::SetModel(const std::string &mdl)
 		return;
 	mdlC->SetModel(mdl);
 }
-void pragma::ecs::BaseEntity::SetModel(const std::shared_ptr<pragma::Model> &mdl)
+void pragma::ecs::BaseEntity::SetModel(const std::shared_ptr<pragma::asset::Model> &mdl)
 {
 	auto *mdlC = static_cast<pragma::BaseModelComponent *>(AddNetworkedComponent("model").get());
 	if(mdlC == nullptr)
 		return;
 	mdlC->SetModel(mdl);
 }
-const std::shared_ptr<pragma::Model> &pragma::ecs::BaseEntity::GetModel() const
+const std::shared_ptr<pragma::asset::Model> &pragma::ecs::BaseEntity::GetModel() const
 {
 	auto mdlC = GetModelComponent();
-	static std::shared_ptr<pragma::Model> nptr = nullptr;
+	static std::shared_ptr<pragma::asset::Model> nptr = nullptr;
 	return mdlC ? mdlC->GetModel() : nptr;
 }
 std::string pragma::ecs::BaseEntity::GetModelName() const

@@ -20,7 +20,7 @@ ShadowRenderer::ShadowRenderer()
 	m_shaderCSM = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::ShadowCSM);
 	m_shaderCSMTransparent = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::ShadowCSMTransparent);
 
-	m_octreeCallbacks.nodeCallback = [this](const OcclusionOctree<std::shared_ptr<ModelMesh>>::Node &node) -> bool {
+	m_octreeCallbacks.nodeCallback = [this](const OcclusionOctree<std::shared_ptr<pragma::geometry::ModelMesh>>::Node &node) -> bool {
 		auto &bounds = node.GetWorldBounds();
 		return umath::intersection::aabb_sphere(bounds.first, bounds.second, m_lightSourceData.position, m_lightSourceData.radius);
 	};
@@ -45,7 +45,7 @@ ShadowRenderer::ShadowRenderer()
 		}
 	};
 
-	m_octreeCallbacks.meshCallback = [this](const std::shared_ptr<ModelMesh> &mesh) {
+	m_octreeCallbacks.meshCallback = [this](const std::shared_ptr<pragma::geometry::ModelMesh> &mesh) {
 		auto *ent = m_currentEntity;
 		if(m_lightSourceData.light->ShouldPass(*ent, *static_cast<CModelMesh *>(mesh.get()), m_currentRenderFlags) == false)
 			return;
@@ -60,9 +60,9 @@ ShadowRenderer::ShadowRenderer()
 		}
 	};
 
-	m_octreeCallbacks.subMeshCallback = [this](const pragma::Model &mdl, const CModelSubMesh &subMesh, uint32_t renderFlags) {
+	m_octreeCallbacks.subMeshCallback = [this](const pragma::asset::Model &mdl, const CModelSubMesh &subMesh, uint32_t renderFlags) {
 		auto matIdx = mdl.GetMaterialIndex(subMesh);
-		auto *mat = matIdx.has_value() ? const_cast<pragma::Model &>(mdl).GetMaterial(*matIdx) : nullptr;
+		auto *mat = matIdx.has_value() ? const_cast<pragma::asset::Model &>(mdl).GetMaterial(*matIdx) : nullptr;
 		m_shadowCasters.push_back({});
 		auto &info = m_shadowCasters.back();
 		info.mesh = &subMesh;

@@ -211,15 +211,15 @@ void pragma::SGame::RegisterLuaClasses()
 	}));
 	modGame[materialClassDef];
 
-	auto modelMeshClassDef = luabind::class_<::ModelMesh>("Mesh");
+	auto modelMeshClassDef = luabind::class_<pragma::geometry::ModelMesh>("Mesh");
 	Lua::ModelMesh::register_class(modelMeshClassDef);
 	modelMeshClassDef.scope[luabind::def("Create", &Lua::ModelMesh::Server::Create)];
 
-	auto subModelMeshClassDef = luabind::class_<pragma::ModelSubMesh>("Sub");
+	auto subModelMeshClassDef = luabind::class_<pragma::geometry::ModelSubMesh>("Sub");
 	Lua::ModelSubMesh::register_class(subModelMeshClassDef);
 	subModelMeshClassDef.scope[luabind::def("create", &Lua::ModelSubMesh::Server::Create)];
 
-	auto modelClassDef = luabind::class_<pragma::Model>("Model");
+	auto modelClassDef = luabind::class_<pragma::asset::Model>("Model");
 	Lua::Model::register_class(GetLuaState(), modelClassDef, modelMeshClassDef, subModelMeshClassDef);
 	modelClassDef.def("AddMaterial", &Lua::Model::Server::AddMaterial);
 	modelClassDef.def("SetMaterial", &Lua::Model::Server::SetMaterial);

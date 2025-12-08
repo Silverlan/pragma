@@ -18,7 +18,7 @@ export {
 			DLLNETWORK void PrecacheModel_sv(lua::State *l, const std::string &mdlName);
 			DLLNETWORK void LoadSoundScripts(lua::State *l, const std::string &fileName, bool precache);
 			DLLNETWORK void LoadSoundScripts(lua::State *l, const std::string &fileName);
-			DLLNETWORK std::shared_ptr<pragma::Model> get_model(lua::State *l, const std::string &mdlName);
+			DLLNETWORK std::shared_ptr<pragma::asset::Model> get_model(lua::State *l, const std::string &mdlName);
 			DLLNETWORK var<bool, std::string> LoadLibrary(lua::State *l, const std::string &path);
 			DLLNETWORK bool UnloadLibrary(lua::State *l, const std::string &path);
 			DLLNETWORK bool IsLibraryLoaded(pragma::NetworkState &nw, const std::string &path);

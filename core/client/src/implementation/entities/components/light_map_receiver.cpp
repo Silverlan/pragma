@@ -76,7 +76,7 @@ void CLightMapReceiverComponent::UpdateLightMapUvData()
 }
 const LightmapDataCache *CLightMapReceiverComponent::GetLightmapDataCache() const { return m_lightmapDataCache.get(); }
 void CLightMapReceiverComponent::SetLightmapDataCache(LightmapDataCache *cache) { m_lightmapDataCache = cache ? cache->shared_from_this() : nullptr; }
-const std::vector<Vector2> *CLightMapReceiverComponent::FindLightmapUvSet(pragma::ModelSubMesh &mesh) const
+const std::vector<Vector2> *CLightMapReceiverComponent::FindLightmapUvSet(pragma::geometry::ModelSubMesh &mesh) const
 {
 	auto *cache = GetLightmapDataCache();
 	if(cache)
@@ -146,7 +146,7 @@ void CLightMapReceiverComponent::UpdateModelMeshes()
 	m_meshToBufIdx.clear();
 	m_meshToMeshIdx.clear();
 	uint32_t subMeshIdx = 0u;
-	std::vector<std::shared_ptr<ModelMesh>> meshes;
+	std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> meshes;
 	mdlC->GetBaseModelMeshes(meshes);
 	for(auto &mesh : meshes) {
 		for(auto &subMesh : mesh->GetSubMeshes()) {
@@ -200,7 +200,7 @@ void CLightMapReceiverComponent::UpdateMeshLightmapUvBuffers(CLightMapComponent 
 		return;
 	}
 	uint32_t subMeshIdx = 0u;
-	std::vector<std::shared_ptr<ModelMesh>> meshes;
+	std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> meshes;
 	mdlC->GetBaseModelMeshes(meshes);
 	for(auto &mesh : meshes) {
 		for(auto &subMesh : mesh->GetSubMeshes()) {

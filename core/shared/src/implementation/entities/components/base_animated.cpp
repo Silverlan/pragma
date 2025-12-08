@@ -126,7 +126,7 @@ void BaseAnimatedComponent::UpdateAnimations(double dt)
 	MaintainAnimations(dt * (pTimeScaleComponent.valid() ? pTimeScaleComponent->GetEffectiveTimeScale() : 1.f));
 }
 
-void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<pragma::Model> &mdl)
+void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<pragma::asset::Model> &mdl)
 {
 	m_animSlots.clear();
 	m_baseAnim = {};
@@ -139,9 +139,9 @@ void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<pragma::Model> 
 	if(mdl == nullptr || mdl->HasVertexWeights() == false)
 		return;
 	m_bindPose = mdl->GetReference().shared_from_this();
-	std::vector<BlendController> &blendControllers = mdl->GetBlendControllers();
+	std::vector<asset::BlendController> &blendControllers = mdl->GetBlendControllers();
 	for(unsigned int i = 0; i < blendControllers.size(); i++) {
-		BlendController &blend = blendControllers[i];
+		auto &blend = blendControllers[i];
 		int val;
 		if(blend.max < 0)
 			val = blend.max;
@@ -204,7 +204,7 @@ std::optional<ComponentMemberIndex> BaseAnimatedComponent::DoGetMemberIndex(cons
 	return std::optional<ComponentMemberIndex> {};
 }
 
-void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &mdl)
+void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &mdl)
 {
 	ResetAnimation(mdl);
 	BroadcastEvent(baseAnimatedComponent::EVENT_ON_ANIMATION_RESET);
@@ -381,7 +381,7 @@ void BaseAnimatedComponent::SetBlendController(unsigned int controller, float va
 	auto it = m_blendControllers.find(controller);
 	if(it == m_blendControllers.end())
 		return;
-	BlendController *blend = hModel->GetBlendController(it->first);
+	auto *blend = hModel->GetBlendController(it->first);
 	if(blend == nullptr)
 		return;
 	//if(it->second != val)

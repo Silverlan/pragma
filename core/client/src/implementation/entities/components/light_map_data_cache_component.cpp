@@ -113,7 +113,7 @@ void CLightMapDataCacheComponent::ReloadCache()
 		CLightMapComponent::LOGGER.error("Failed to load lightmap data cache: {}", err);
 		return;
 	}
-	std::unordered_map<std::string, std::shared_ptr<pragma::Model>> cachedModels;
+	std::unordered_map<std::string, std::shared_ptr<pragma::asset::Model>> cachedModels;
 	for(auto &pair : m_lightmapDataCache->cacheData) {
 		pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 		entIt.AttachFilter<EntityIteratorFilterUuid>(pair.first.uuid);
@@ -160,7 +160,7 @@ void CLightMapDataCacheComponent::ReloadCache()
 		else
 			hasLightmapData = (itCache->second != nullptr);
 
-		std::shared_ptr<pragma::Model> lmModel = nullptr;
+		std::shared_ptr<pragma::asset::Model> lmModel = nullptr;
 		if(itCache != cachedModels.end())
 			lmModel = itCache->second;
 		else if(!hasLightmapData) {
@@ -168,7 +168,7 @@ void CLightMapDataCacheComponent::ReloadCache()
 			cachedModels[mdlName] = nullptr;
 		}
 		else {
-			auto cpy = mdl->Copy(GetEntity().GetNetworkState()->GetGameState(), pragma::Model::CopyFlags::CopyMeshesBit | pragma::Model::CopyFlags::CopyUniqueIdsBit | pragma::Model::CopyFlags::CopyVertexData);
+			auto cpy = mdl->Copy(GetEntity().GetNetworkState()->GetGameState(), pragma::asset::Model::CopyFlags::CopyMeshesBit | pragma::asset::Model::CopyFlags::CopyUniqueIdsBit | pragma::asset::Model::CopyFlags::CopyVertexData);
 			for(auto &mg : cpy->GetMeshGroups()) {
 				for(auto &mesh : mg->GetMeshes()) {
 					auto &subMeshes = mesh->GetSubMeshes();
@@ -226,7 +226,7 @@ void CLightMapDataCacheComponent::ReloadCache()
 					}
 				}
 			}
-			cpy->Update(pragma::model::ModelUpdateFlags::UpdatePrimitiveCounts | pragma::model::ModelUpdateFlags::UpdateBuffers | pragma::model::ModelUpdateFlags::UpdateChildren);
+			cpy->Update(pragma::asset::ModelUpdateFlags::UpdatePrimitiveCounts | pragma::asset::ModelUpdateFlags::UpdateBuffers | pragma::asset::ModelUpdateFlags::UpdateChildren);
 			cachedModels[cpy->GetName()] = cpy;
 			lmModel = cpy;
 		}

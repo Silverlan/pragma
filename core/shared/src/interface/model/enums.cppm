@@ -9,8 +9,10 @@ export module pragma.shared:model.enums;
 import pragma.math;
 
 export {
-	namespace pragma::model {
+	namespace pragma::geometry {
 		enum class IndexType : uint8_t { UInt16 = 0u, UInt32 };
+	}
+	namespace pragma::asset {
 		enum class ModelUpdateFlags : uint32_t {
 			None = 0,
 			UpdateBounds = 1,
@@ -31,5 +33,5 @@ export {
 		};
 		using namespace umath::scoped_enum::bitwise;
 	};
-	REGISTER_ENUM_FLAGS(pragma::model::ModelUpdateFlags)
+	REGISTER_ENUM_FLAGS(pragma::asset::ModelUpdateFlags)
 };

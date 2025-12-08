@@ -33,9 +33,9 @@ std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Cl
 }
 std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawBox(const ::Vector3 &start, const ::Vector3 &end, const pragma::debug::DebugRenderInfo &renderInfo) { return get_dbg_object(::pragma::debug::DebugRenderer::DrawBox(start, end, renderInfo), renderInfo.duration); }
 std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawMeshes(const std::vector<::Vector3> &verts, const pragma::debug::DebugRenderInfo &renderInfo) { return get_dbg_object(::pragma::debug::DebugRenderer::DrawMesh(verts, renderInfo), renderInfo.duration); }
-std::shared_ptr<::pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawMesh(const pragma::ModelSubMesh &mesh, const pragma::debug::DebugRenderInfo &renderInfo)
+std::shared_ptr<::pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawMesh(const pragma::geometry::ModelSubMesh &mesh, const pragma::debug::DebugRenderInfo &renderInfo)
 {
-	if(mesh.GetGeometryType() != pragma::ModelSubMesh::GeometryType::Triangles)
+	if(mesh.GetGeometryType() != pragma::geometry::ModelSubMesh::GeometryType::Triangles)
 		return nullptr;
 	std::vector<::Vector3> dbgVerts;
 	auto &verts = mesh.GetVertices();

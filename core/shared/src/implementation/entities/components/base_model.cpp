@@ -255,7 +255,7 @@ void BaseModelComponent::SetModel(const std::string &mdl)
 
 	if(mdl.empty() == true) {
 		if(m_model)
-			SetModel(std::shared_ptr<pragma::Model> {});
+			SetModel(std::shared_ptr<pragma::asset::Model> {});
 		return;
 	}
 
@@ -271,7 +271,7 @@ void BaseModelComponent::SetModel(const std::string &mdl)
 		model = game->LoadModel("error");
 		if(model == nullptr) {
 			if(GetModel() == prevMdl) // Model might have been changed during TModelLoader::Load-call in single player (on the client)
-				SetModel(std::shared_ptr<pragma::Model>(nullptr));
+				SetModel(std::shared_ptr<pragma::asset::Model>(nullptr));
 			return;
 		}
 	}
@@ -287,7 +287,7 @@ void BaseModelComponent::OnModelMaterialsLoaded()
 	m_bMaterialsLoaded = true;
 	BroadcastEvent(baseModelComponent::EVENT_ON_MODEL_MATERIALS_LOADED);
 }
-const std::shared_ptr<pragma::Model> &BaseModelComponent::GetModel() const { return m_model; }
+const std::shared_ptr<pragma::asset::Model> &BaseModelComponent::GetModel() const { return m_model; }
 unsigned int BaseModelComponent::GetSkin() const { return *m_skin; }
 const std::shared_ptr<util::UInt32Property> &BaseModelComponent::GetSkinProperty() const { return m_skin; }
 void BaseModelComponent::SetSkin(unsigned int skin)
@@ -303,7 +303,7 @@ void BaseModelComponent::SetSkin(unsigned int skin)
 	BroadcastEvent(baseModelComponent::EVENT_ON_SKIN_CHANGED, evData);
 }
 
-void BaseModelComponent::SetModel(const std::shared_ptr<pragma::Model> &mdl)
+void BaseModelComponent::SetModel(const std::shared_ptr<pragma::asset::Model> &mdl)
 {
 	ClearMembers();
 
@@ -358,7 +358,7 @@ void BaseModelComponent::SetModel(const std::shared_ptr<pragma::Model> &mdl)
 	OnModelChanged(mdl);
 }
 
-void BaseModelComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &model)
+void BaseModelComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &model)
 {
 	CEOnModelChanged evData {model};
 	BroadcastEvent(baseModelComponent::EVENT_ON_MODEL_CHANGED, evData);
@@ -517,5 +517,5 @@ void CEOnSkinChanged::PushArguments(lua::State *l) { Lua::PushInt(l, skinId); }
 
 ///////////////
 
-CEOnModelChanged::CEOnModelChanged(const std::shared_ptr<pragma::Model> &model) : model {model} {}
-void CEOnModelChanged::PushArguments(lua::State *l) { Lua::Push<std::shared_ptr<pragma::Model>>(l, model); }
+CEOnModelChanged::CEOnModelChanged(const std::shared_ptr<pragma::asset::Model> &model) : model {model} {}
+void CEOnModelChanged::PushArguments(lua::State *l) { Lua::Push<std::shared_ptr<pragma::asset::Model>>(l, model); }

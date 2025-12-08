@@ -86,7 +86,7 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 	texManager.LoadAsset(path, std::move(loadInfo));
 }
 
-void CResourceWatcherManager::OnMaterialReloaded(const std::string &path, const std::unordered_set<pragma::Model *> &modelMap)
+void CResourceWatcherManager::OnMaterialReloaded(const std::string &path, const std::unordered_set<pragma::asset::Model *> &modelMap)
 {
 	ResourceWatcherManager::OnMaterialReloaded(path, modelMap);
 	if(pragma::get_cgame() == nullptr)

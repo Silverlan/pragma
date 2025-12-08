@@ -119,9 +119,9 @@ void CAnimatedComponent::ReceiveData(NetPacket &packet)
 	SetCycle(cycle);
 }
 
-bool CAnimatedComponent::GetVertexTransformMatrix(const pragma::ModelSubMesh &subMesh, uint32_t vertexId, umath::ScaledTransform &outPose) const { return BaseAnimatedComponent::GetVertexTransformMatrix(subMesh, vertexId, outPose); }
-std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const pragma::ModelSubMesh &subMesh, uint32_t vertexId) const { return GetVertexTransformMatrix(subMesh, vertexId, nullptr, nullptr); }
-std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const pragma::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 *optOutNormalOffset, float *optOutDelta) const
+bool CAnimatedComponent::GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, umath::ScaledTransform &outPose) const { return BaseAnimatedComponent::GetVertexTransformMatrix(subMesh, vertexId, outPose); }
+std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId) const { return GetVertexTransformMatrix(subMesh, vertexId, nullptr, nullptr); }
+std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 *optOutNormalOffset, float *optOutDelta) const
 {
 	if(optOutNormalOffset)
 		*optOutNormalOffset = {};
@@ -137,11 +137,11 @@ std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const pragma::M
 	return *t * glm::gtc::translate(umat::identity(), vertexOffset); // TODO: Confirm order!
 }
 
-void CAnimatedComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &mdl) { BaseAnimatedComponent::OnModelChanged(mdl); }
+void CAnimatedComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &mdl) { BaseAnimatedComponent::OnModelChanged(mdl); }
 
 bool CAnimatedComponent::HasBones() const { return !m_boneMatrices.empty(); }
 
-void CAnimatedComponent::ResetAnimation(const std::shared_ptr<pragma::Model> &mdl)
+void CAnimatedComponent::ResetAnimation(const std::shared_ptr<pragma::asset::Model> &mdl)
 {
 	BaseAnimatedComponent::ResetAnimation(mdl);
 	m_boneMatrices.clear();
@@ -155,10 +155,10 @@ void CAnimatedComponent::ResetAnimation(const std::shared_ptr<pragma::Model> &md
 	auto &ent = GetEntity();
 	for(auto &objAttachment : mdl->GetObjectAttachments()) {
 		switch(objAttachment.type) {
-		case ObjectAttachment::Type::Model:
+		case asset::ObjectAttachment::Type::Model:
 			spdlog::warn("Unsupported object attachment type '{}' for model '{}'!", magic_enum::enum_name(objAttachment.type), mdl->GetName());
 			break;
-		case ObjectAttachment::Type::ParticleSystem:
+		case asset::ObjectAttachment::Type::ParticleSystem:
 			auto itParticleFile = objAttachment.keyValues.find("particle_file");
 			if(itParticleFile != objAttachment.keyValues.end())
 				pragma::ecs::CParticleSystemComponent::Precache(itParticleFile->second);
@@ -336,7 +336,7 @@ void CAnimatedComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &mo
 		mats.at(boneIndex) = m;
 	}));
 	defCAnimated.def("GetLocalVertexPosition",
-	  static_cast<std::optional<Vector3> (*)(lua::State *, pragma::CAnimatedComponent &, std::shared_ptr<pragma::ModelSubMesh> &, uint32_t)>([](lua::State *l, pragma::CAnimatedComponent &hAnim, std::shared_ptr<pragma::ModelSubMesh> &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
+	  static_cast<std::optional<Vector3> (*)(lua::State *, pragma::CAnimatedComponent &, std::shared_ptr<pragma::geometry::ModelSubMesh> &, uint32_t)>([](lua::State *l, pragma::CAnimatedComponent &hAnim, std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
 		  Vector3 pos, n;
 		  if(vertexId >= subMesh->GetVertexCount())
 			  return {};

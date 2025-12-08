@@ -54,7 +54,7 @@ void Lua::engine::PrecacheModel_sv(lua::State *l, const std::string &mdlName)
 	);*/
 }
 
-std::shared_ptr<pragma::Model> Lua::engine::get_model(lua::State *l, const std::string &mdlName)
+std::shared_ptr<pragma::asset::Model> Lua::engine::get_model(lua::State *l, const std::string &mdlName)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();

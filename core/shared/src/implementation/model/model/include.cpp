@@ -33,7 +33,7 @@ static void add_frame(Frame &frame, const Frame &frameToAdd)
 	}
 }
 
-void pragma::Model::Merge(const pragma::Model &other, MergeFlags flags)
+void pragma::asset::Model::Merge(const pragma::asset::Model &other, MergeFlags flags)
 {
 	spdlog::info("Merging model '{}' into '{}'...", other.GetName(), GetName());
 	std::vector<std::size_t> boneTranslations; // 'other' bone Id to 'this' bone Id
@@ -94,7 +94,7 @@ void pragma::Model::Merge(const pragma::Model &other, MergeFlags flags)
 
 			// Do the same for the reference animation
 			auto animReference = GetAnimation(LookupAnimation("reference"));
-			auto animReferenceOther = const_cast<pragma::Model &>(other).GetAnimation(other.LookupAnimation("reference"));
+			auto animReferenceOther = const_cast<pragma::asset::Model &>(other).GetAnimation(other.LookupAnimation("reference"));
 			if(animReference && animReference->GetFrameCount() == 1 && animReferenceOther && animReferenceOther->GetFrameCount() == 1) {
 				auto frameRef = animReference->GetFrame(0);
 				auto frameRefOther = animReferenceOther->GetFrame(0);
@@ -325,7 +325,7 @@ void pragma::Model::Merge(const pragma::Model &other, MergeFlags flags)
 		auto &baseMeshes = GetBaseMeshes();
 		for(auto i = decltype(meshGroupsOther.size()) {0}; i < meshGroupsOther.size(); ++i) {
 			auto &groupOther = meshGroupsOther.at(i);
-			std::shared_ptr<pragma::ModelMeshGroup> group = nullptr;
+			std::shared_ptr<pragma::asset::ModelMeshGroup> group = nullptr;
 			if(i >= meshGroups.size())
 				group = AddMeshGroup(groupOther->GetName());
 			else

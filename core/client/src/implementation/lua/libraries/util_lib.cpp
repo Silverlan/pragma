@@ -163,7 +163,7 @@ int Lua::util::Client::import_model(lua::State *l)
 	if(Lua::IsSet(l, 3))
 		importAsSingleModel = Lua::CheckBool(l, 3);
 	std::string errMsg;
-	std::shared_ptr<pragma::Model> mdl = nullptr;
+	std::shared_ptr<pragma::asset::Model> mdl = nullptr;
 	if(f) {
 		mdl = pragma::asset::import_model(*f, errMsg, outputPath, importAsSingleModel);
 	}
@@ -286,7 +286,7 @@ int Lua::util::Client::export_material(lua::State *l)
 std::string Lua::util::Client::get_clipboard_string() { return pragma::get_cengine()->GetWindow()->GetClipboardString(); }
 void Lua::util::Client::set_clipboard_string(const std::string &str) { pragma::get_cengine()->GetWindow()->SetClipboardString(str); }
 
-::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> Lua::util::Client::bake_directional_lightmap_atlas(const std::vector<pragma::CLightComponent *> &lights, const std::vector<pragma::ModelSubMesh *> &meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
+::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> Lua::util::Client::bake_directional_lightmap_atlas(const std::vector<pragma::CLightComponent *> &lights, const std::vector<pragma::geometry::ModelSubMesh *> &meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
   uint32_t height, ::pragma::LightmapDataCache *optLightmapDataCache)
 {
 	return ::util::baking::bake_directional_lightmap_atlas(lights, meshes, entities, width, height, optLightmapDataCache);

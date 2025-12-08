@@ -51,7 +51,7 @@ void CPBRConverterComponent::OnRemove()
 	}
 }
 
-void CPBRConverterComponent::ConvertMaterialsToPBR(pragma::Model &mdl)
+void CPBRConverterComponent::ConvertMaterialsToPBR(pragma::asset::Model &mdl)
 {
 	for(auto hMat : mdl.GetMaterials()) {
 		if(!hMat)
@@ -63,7 +63,7 @@ void CPBRConverterComponent::ConvertMaterialsToPBR(pragma::Model &mdl)
 	}
 }
 
-void CPBRConverterComponent::GenerateAmbientOcclusionMaps(pragma::Model &mdl, uint32_t w, uint32_t h, uint32_t samples, bool rebuild) { ScheduleModelUpdate(mdl, false, AmbientOcclusionInfo {w, h, samples, rebuild}); }
+void CPBRConverterComponent::GenerateAmbientOcclusionMaps(pragma::asset::Model &mdl, uint32_t w, uint32_t h, uint32_t samples, bool rebuild) { ScheduleModelUpdate(mdl, false, AmbientOcclusionInfo {w, h, samples, rebuild}); }
 
 void CPBRConverterComponent::GenerateAmbientOcclusionMaps(pragma::ecs::BaseEntity &ent, uint32_t w, uint32_t h, uint32_t samples, bool rebuild)
 {
@@ -73,7 +73,7 @@ void CPBRConverterComponent::GenerateAmbientOcclusionMaps(pragma::ecs::BaseEntit
 	ScheduleModelUpdate(*mdl, false, AmbientOcclusionInfo {w, h, samples, rebuild}, &ent);
 }
 
-void CPBRConverterComponent::UpdateModel(pragma::Model &mdl, ModelUpdateInfo &updateInfo, pragma::ecs::BaseEntity *optEnt)
+void CPBRConverterComponent::UpdateModel(pragma::asset::Model &mdl, ModelUpdateInfo &updateInfo, pragma::ecs::BaseEntity *optEnt)
 {
 	if(updateInfo.updateMetalness)
 		UpdateMetalness(mdl);
@@ -86,7 +86,7 @@ void CPBRConverterComponent::UpdateModel(pragma::Model &mdl, ModelUpdateInfo &up
 		m_scheduledModelUpdates.erase(it);
 }
 
-void CPBRConverterComponent::ScheduleModelUpdate(pragma::Model &mdl, bool updateMetalness, std::optional<AmbientOcclusionInfo> updateAOInfo, pragma::ecs::BaseEntity *optEnt)
+void CPBRConverterComponent::ScheduleModelUpdate(pragma::asset::Model &mdl, bool updateMetalness, std::optional<AmbientOcclusionInfo> updateAOInfo, pragma::ecs::BaseEntity *optEnt)
 {
 	auto itUpdateInfo = m_scheduledModelUpdates.find(&mdl);
 	if(itUpdateInfo == m_scheduledModelUpdates.end())
@@ -107,7 +107,7 @@ void CPBRConverterComponent::OnEntitySpawn()
 	BaseEntityComponent::OnEntitySpawn();
 
 	auto *client = pragma::get_client_state();
-	m_cbOnModelLoaded = pragma::get_cgame()->AddCallback("OnModelLoaded", FunctionCallback<void, std::reference_wrapper<std::shared_ptr<pragma::Model>>>::Create([this](std::reference_wrapper<std::shared_ptr<pragma::Model>> mdl) { ScheduleModelUpdate(*mdl.get(), true); }));
+	m_cbOnModelLoaded = pragma::get_cgame()->AddCallback("OnModelLoaded", FunctionCallback<void, std::reference_wrapper<std::shared_ptr<pragma::asset::Model>>>::Create([this](std::reference_wrapper<std::shared_ptr<pragma::asset::Model>> mdl) { ScheduleModelUpdate(*mdl.get(), true); }));
 	m_cbOnMaterialLoaded = client->AddCallback("OnMaterialLoaded", FunctionCallback<void, msys::CMaterial *>::Create([this](msys::CMaterial *mat) {
 		if(ShouldConvertMaterial(*mat) == false)
 			return;

@@ -121,7 +121,7 @@ void ecs::CParticleSystemComponent::Clear()
 	umath::set_flag(m_flags, Flags::Setup, false);
 }
 
-std::shared_ptr<pragma::Model> ecs::CParticleSystemComponent::GenerateModel(pragma::Game &game, const std::vector<const ecs::CParticleSystemComponent *> &particleSystems)
+std::shared_ptr<pragma::asset::Model> ecs::CParticleSystemComponent::GenerateModel(pragma::Game &game, const std::vector<const ecs::CParticleSystemComponent *> &particleSystems)
 {
 	auto *cam = static_cast<pragma::CGame &>(game).GetRenderCamera<pragma::CCameraComponent>();
 	if(cam == nullptr)
@@ -218,7 +218,7 @@ std::shared_ptr<pragma::Model> ecs::CParticleSystemComponent::GenerateModel(prag
 	}
 	return mdl;
 }
-std::shared_ptr<pragma::Model> ecs::CParticleSystemComponent::GenerateModel() const
+std::shared_ptr<pragma::asset::Model> ecs::CParticleSystemComponent::GenerateModel() const
 {
 	auto &game = static_cast<pragma::CGame &>(*GetEntity().GetNetworkState()->GetGameState());
 	std::vector<const ecs::CParticleSystemComponent *> particleSystems {};

@@ -78,7 +78,7 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 			auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 			return nw->GetModelManager().ClearFlagged();
 		})),
-		luabind::def("flag_model_for_cache_removal",static_cast<void(*)(lua::State*,pragma::Model&)>([](lua::State *l,pragma::Model &mdl) {
+		luabind::def("flag_model_for_cache_removal",static_cast<void(*)(lua::State*,pragma::asset::Model&)>([](lua::State *l,pragma::asset::Model &mdl) {
 			auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 			nw->GetModelManager().FlagForRemoval(mdl);
 		})),

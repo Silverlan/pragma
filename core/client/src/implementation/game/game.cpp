@@ -1092,8 +1092,8 @@ const util::WeakHandle<prosper::Shader> &pragma::CGame::GetGameShader(GameShader
 
 LuaCallbackHandler &pragma::CGame::GetInputCallbackHandler() { return m_inputCallbackHandler; }
 
-std::shared_ptr<ModelMesh> pragma::CGame::CreateModelMesh() const { return ::util::make_shared<CModelMesh>(); }
-std::shared_ptr<pragma::ModelSubMesh> pragma::CGame::CreateModelSubMesh() const { return ::util::make_shared<CModelSubMesh>(); }
+std::shared_ptr<pragma::geometry::ModelMesh> pragma::CGame::CreateModelMesh() const { return ::util::make_shared<CModelMesh>(); }
+std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::CGame::CreateModelSubMesh() const { return ::util::make_shared<CModelSubMesh>(); }
 
 Float pragma::CGame::GetHDRExposure() const
 {

@@ -434,8 +434,8 @@ msys::Material *pragma::ServerState::LoadMaterial(const std::string &path, bool 
 }
 
 msys::MaterialManager &pragma::ServerState::GetMaterialManager() { return *pragma::Engine::Get()->GetServerStateInstance().materialManager; }
-pragma::ModelSubMesh *pragma::ServerState::CreateSubMesh() const { return new pragma::ModelSubMesh; }
-ModelMesh *pragma::ServerState::CreateMesh() const { return new ModelMesh; }
+pragma::geometry::ModelSubMesh *pragma::ServerState::CreateSubMesh() const { return new pragma::geometry::ModelSubMesh; }
+pragma::geometry::ModelMesh *pragma::ServerState::CreateMesh() const { return new pragma::geometry::ModelMesh; }
 
 namespace {
 	auto _ = pragma::console::server::register_variable_listener<int>(

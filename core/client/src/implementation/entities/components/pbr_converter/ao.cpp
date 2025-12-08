@@ -13,7 +13,7 @@ import :engine;
 
 using namespace pragma;
 
-PBRAOBakeJob::PBRAOBakeJob(pragma::Model &mdl, msys::Material &mat) : hModel {mdl.GetHandle()}, hMaterial {mat.GetHandle()} {}
+PBRAOBakeJob::PBRAOBakeJob(pragma::asset::Model &mdl, msys::Material &mat) : hModel {mdl.GetHandle()}, hMaterial {mat.GetHandle()} {}
 
 void CPBRConverterComponent::ProcessQueue()
 {
@@ -67,7 +67,7 @@ void CPBRConverterComponent::ProcessQueue()
 	pragma::get_cengine()->AddParallelJob(item.job, "Ambient Occlusion");
 }
 
-void CPBRConverterComponent::UpdateAmbientOcclusion(pragma::Model &mdl, const AmbientOcclusionInfo &aoInfo, pragma::ecs::BaseEntity *optEnt)
+void CPBRConverterComponent::UpdateAmbientOcclusion(pragma::asset::Model &mdl, const AmbientOcclusionInfo &aoInfo, pragma::ecs::BaseEntity *optEnt)
 {
 	ConvertMaterialsToPBR(mdl);
 
@@ -94,7 +94,7 @@ void CPBRConverterComponent::UpdateAmbientOcclusion(pragma::Model &mdl, const Am
 	}
 	SetTickPolicy(TickPolicy::Always);
 }
-void CPBRConverterComponent::WriteAOMap(pragma::Model &mdl, msys::CMaterial &mat, uimg::ImageBuffer &imgBuffer, uint32_t w, uint32_t h) const
+void CPBRConverterComponent::WriteAOMap(pragma::asset::Model &mdl, msys::CMaterial &mat, uimg::ImageBuffer &imgBuffer, uint32_t w, uint32_t h) const
 {
 	Con::cout << "Ambient occlusion map has been generated for material '" << mat.GetName() << "' of model '" << mdl.GetName() << "'! Combining with RMA map..." << Con::endl;
 

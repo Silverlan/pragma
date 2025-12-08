@@ -105,7 +105,7 @@ export {
 			AnimationManagerData *FindAnimationManagerData(panima::AnimationManager &manager);
 			void InitializeAnimationChannelValueSubmitters();
 			void InitializeAnimationChannelValueSubmitters(AnimationManagerData &amData);
-			void ResetAnimation(const std::shared_ptr<pragma::Model> &mdl);
+			void ResetAnimation(const std::shared_ptr<pragma::asset::Model> &mdl);
 			util::PFloatProperty m_playbackRate = nullptr;
 			std::vector<std::shared_ptr<AnimationManagerData>> m_animationManagers;
 			std::unordered_map<const char *, PropertyFlags> m_propertyFlags;

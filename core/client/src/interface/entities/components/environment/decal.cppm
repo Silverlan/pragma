@@ -15,7 +15,7 @@ export {
 		class DLLCLIENT DecalProjector {
 		  public:
 			struct DLLCLIENT MeshData {
-				std::vector<pragma::ModelSubMesh *> subMeshes {};
+				std::vector<pragma::geometry::ModelSubMesh *> subMeshes {};
 				umath::ScaledTransform pose = {};
 			};
 			DecalProjector(const Vector3 &pos, const Quat &rot, float size);

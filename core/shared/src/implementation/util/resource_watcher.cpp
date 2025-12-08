@@ -71,7 +71,7 @@ void ResourceWatcherManager::ReloadMaterial(const std::string &path)
 			ufile::remove_extension_from_filename(fname);
 			auto &mdlManager = m_networkState->GetModelManager();
 			auto &models = mdlManager.GetCache();
-			std::unordered_set<pragma::Model *> modelMap;
+			std::unordered_set<pragma::asset::Model *> modelMap;
 			for(auto &pair : models) {
 				auto asset = mdlManager.GetAsset(pair.second);
 				if(!asset)
@@ -163,7 +163,7 @@ void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const
 #if RESOURCE_WATCHER_VERBOSE > 0
 							Con::cout << "[ResourceWatcher] Reloading model for entity " << ent->GetClass() << "..." << Con::endl;
 #endif
-							mdlComponent->SetModel(std::shared_ptr<pragma::Model>(nullptr));
+							mdlComponent->SetModel(std::shared_ptr<pragma::asset::Model>(nullptr));
 							mdlComponent->SetModel(strPath);
 						}
 					}

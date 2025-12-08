@@ -12,14 +12,14 @@ export import :model.vertex_buffer_data;
 export import :rendering.shaders.scene;
 export import pragma.shared;
 
-export class DLLCLIENT CModelSubMesh : public pragma::ModelSubMesh {
+export class DLLCLIENT CModelSubMesh : public pragma::geometry::ModelSubMesh {
   public:
 	CModelSubMesh();
 	CModelSubMesh(const CModelSubMesh &other);
 	const std::shared_ptr<pragma::SceneMesh> &GetSceneMesh() const;
-	virtual void Update(pragma::model::ModelUpdateFlags flags = pragma::model::ModelUpdateFlags::AllData) override;
+	virtual void Update(pragma::asset::ModelUpdateFlags flags = pragma::asset::ModelUpdateFlags::AllData) override;
 	virtual void Centralize(const Vector3 &origin) override;
-	virtual std::shared_ptr<pragma::ModelSubMesh> Copy(bool fullCopy = false) const override;
+	virtual std::shared_ptr<pragma::geometry::ModelSubMesh> Copy(bool fullCopy = false) const override;
 	static void InitializeBuffers();
 	static void ClearBuffers();
 
@@ -37,11 +37,11 @@ export class DLLCLIENT CModelSubMesh : public pragma::ModelSubMesh {
 	void UpdateVertexBuffer();
 };
 
-export class DLLCLIENT CModelMesh : public ModelMesh {
+export class DLLCLIENT CModelMesh : public pragma::geometry::ModelMesh {
   private:
-	virtual void AddSubMesh(const std::shared_ptr<pragma::ModelSubMesh> &subMesh) override;
+	virtual void AddSubMesh(const std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh) override;
   public:
 	CModelMesh();
 	void AddSubMesh(const std::shared_ptr<CModelSubMesh> &subMesh);
-	virtual std::shared_ptr<ModelMesh> Copy() const override;
+	virtual std::shared_ptr<pragma::geometry::ModelMesh> Copy() const override;
 };

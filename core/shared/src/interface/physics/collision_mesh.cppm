@@ -40,7 +40,7 @@ export {
 			//void PhysSoftBody::AppendAnchor(uint32_t nodeId,PhysRigidBody &body,const Vector3 &localPivot,bool bDisableCollision,float influence)
 			struct DLLNETWORK SoftBodyInfo {
 				SoftBodyInfo();
-				std::weak_ptr<pragma::ModelSubMesh> subMesh = {};
+				std::weak_ptr<pragma::geometry::ModelSubMesh> subMesh = {};
 				std::vector<uint32_t> triangles; // Triangles of sub-mesh to use of soft-body physics
 				std::shared_ptr<PhysSoftBodyInfo> info = nullptr;
 				std::vector<SoftBodyAnchor> anchors;
@@ -66,11 +66,11 @@ export {
 			double m_volume = 0.0;
 			util::Uuid m_uuid;
 			void ClipAgainstPlane(const Vector3 &n, double d, pragma::physics::CollisionMesh &clippedMesh);
-			bool LoadFromAssetData(pragma::Game &game, pragma::Model &mdl, const udm::AssetData &data, std::string &outErr);
+			bool LoadFromAssetData(pragma::Game &game, pragma::asset::Model &mdl, const udm::AssetData &data, std::string &outErr);
 		  public:
 			static std::shared_ptr<pragma::physics::CollisionMesh> Create(pragma::Game *game);
 			static std::shared_ptr<pragma::physics::CollisionMesh> Create(const pragma::physics::CollisionMesh &other);
-			static std::shared_ptr<pragma::physics::CollisionMesh> Load(pragma::Game &game, pragma::Model &mdl, const udm::AssetData &data, std::string &outErr);
+			static std::shared_ptr<pragma::physics::CollisionMesh> Load(pragma::Game &game, pragma::asset::Model &mdl, const udm::AssetData &data, std::string &outErr);
 			std::shared_ptr<pragma::physics::IShape> CreateShape(const Vector3 &scale = {1.f, 1.f, 1.f}) const;
 			void SetBoneParent(int boneID);
 			int GetBoneParent() const;
@@ -94,7 +94,7 @@ export {
 			int GetSurfaceMaterial() const;
 			void SetMass(float mass);
 			float GetMass() const;
-			void Update(pragma::model::ModelUpdateFlags flags = pragma::model::ModelUpdateFlags::AllData);
+			void Update(pragma::asset::ModelUpdateFlags flags = pragma::asset::ModelUpdateFlags::AllData);
 			void AddVertex(const Vector3 &v);
 			void Rotate(const Quat &rot);
 			void Translate(const Vector3 &t);
@@ -118,8 +118,8 @@ export {
 
 			void SetSoftBody(bool b);
 			bool IsSoftBody() const;
-			pragma::ModelSubMesh *GetSoftBodyMesh() const;
-			void SetSoftBodyMesh(pragma::ModelSubMesh &mesh);
+			pragma::geometry::ModelSubMesh *GetSoftBodyMesh() const;
+			void SetSoftBodyMesh(pragma::geometry::ModelSubMesh &mesh);
 			const std::vector<uint32_t> *GetSoftBodyTriangles() const;
 			std::vector<uint32_t> *GetSoftBodyTriangles();
 			PhysSoftBodyInfo *GetSoftBodyInfo() const;
@@ -129,7 +129,7 @@ export {
 			const std::vector<SoftBodyAnchor> *GetSoftBodyAnchors() const;
 			std::vector<SoftBodyAnchor> *GetSoftBodyAnchors();
 
-			bool Save(pragma::Game &game, pragma::Model &mdl, udm::AssetDataArg outData, std::string &outErr);
+			bool Save(pragma::Game &game, pragma::asset::Model &mdl, udm::AssetDataArg outData, std::string &outErr);
 		};
 		using namespace umath::scoped_enum::bitwise;
 	}
